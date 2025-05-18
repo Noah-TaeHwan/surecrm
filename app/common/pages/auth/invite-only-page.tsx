@@ -132,12 +132,22 @@ export default function InviteOnlyPage() {
 
         <CardFooter className="flex justify-center flex-col items-center">
           <Separator className="my-4" />
-          <div className="text-center">
+          <div className="text-center text-sm text-slate-600 dark:text-slate-400">
+            <span>이미 계정이 있으신가요? </span>
             <Link
               to="/login"
+              className="font-medium text-slate-900 hover:text-slate-700 dark:text-slate-300 dark:hover:text-slate-200"
+            >
+              로그인하기
+            </Link>
+          </div>
+          <div>
+            {' '}
+            <Link
+              to="/terms"
               className="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-300"
             >
-              이미 계정이 있으신가요? 로그인하기
+              이용약관 및 개인정보처리방침
             </Link>
           </div>
         </CardFooter>

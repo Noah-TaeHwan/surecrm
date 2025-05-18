@@ -1,4 +1,4 @@
-import { Link } from 'react-router';
+import { Link, type MetaFunction } from 'react-router';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -45,10 +45,11 @@ export interface Route {
   ActionArgs: {
     request: Request;
   };
-  MetaFunction: () => {
-    title: string;
+  MetaFunction: () => Array<{
+    title?: string;
     description?: string;
-  };
+    [key: string]: any;
+  }>;
 }
 
 export function loader({ request }: Route['LoaderArgs']) {
@@ -65,12 +66,14 @@ export function action({ request }: Route['ActionArgs']) {
   };
 }
 
-export function meta(): ReturnType<Route['MetaFunction']> {
-  return {
-    title: '비밀번호 찾기 - SureCRM',
-    description: '계정 비밀번호를 재설정합니다',
-  };
-}
+export const meta: MetaFunction = () => {
+  return [
+    {
+      title: '비밀번호 찾기 - SureCRM',
+      description: '계정 비밀번호를 재설정합니다',
+    },
+  ];
+};
 
 export default function RecoverPage({
   loaderData,
@@ -89,7 +92,7 @@ export default function RecoverPage({
   }
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-50">
+    <div className="flex justify-center items-center min-h-screen bg-background">
       <div className="w-full max-w-md p-4">
         <Card>
           <CardHeader className="space-y-1 text-center">
@@ -101,7 +104,7 @@ export default function RecoverPage({
 
           <CardContent>
             {actionData?.success && (
-              <div className="bg-green-50 p-4 rounded-md mb-4 text-green-800">
+              <div className="bg-green-100 dark:bg-green-900 p-4 rounded-md mb-4 text-green-800 dark:text-green-300">
                 {actionData.message}
               </div>
             )}
@@ -138,7 +141,7 @@ export default function RecoverPage({
           </CardContent>
 
           <CardFooter className="flex flex-col space-y-2">
-            <div className="text-sm text-center text-gray-500">
+            <div className="text-sm text-center text-muted-foreground">
               <Link to="/login" className="text-primary hover:underline">
                 로그인 페이지로 돌아가기
               </Link>

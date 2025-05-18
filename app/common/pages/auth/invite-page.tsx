@@ -27,6 +27,7 @@ import {
   AlertDescription,
   AlertTitle,
 } from '~/common/components/ui/alert';
+import { Separator } from '~/common/components/ui/separator';
 
 // 인터페이스 정의
 interface LoaderData {
@@ -270,7 +271,7 @@ export default function InvitePage({ loaderData }: { loaderData: LoaderData }) {
           </Form>
         </CardContent>
 
-        <CardFooter className="flex justify-center">
+        <CardFooter className="flex justify-center flex-col items-center">
           <div className="text-center text-sm text-slate-600 dark:text-slate-400">
             <span>이미 계정이 있으신가요? </span>
             <Link
@@ -278,6 +279,14 @@ export default function InvitePage({ loaderData }: { loaderData: LoaderData }) {
               className="font-medium text-slate-900 hover:text-slate-700 dark:text-slate-300 dark:hover:text-slate-200"
             >
               로그인하기
+            </Link>
+          </div>
+          <div>
+            <Link
+              to="/terms"
+              className="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-300"
+            >
+              이용약관 및 개인정보처리방침
             </Link>
           </div>
         </CardFooter>
