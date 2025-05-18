@@ -1,8 +1,11 @@
 import { type RouteConfig, index, route } from '@react-router/dev/routes';
 
 export default [
+  // 랜딩 페이지
+  index('common/pages/landing-page.tsx'),
+
   // 대시보드
-  index('common/pages/home-page.tsx'),
+  route('dashboard', 'common/pages/dashboard-page.tsx'),
 
   // 인증 관련 페이지
   route('login', 'common/pages/auth/login-page.tsx'),
