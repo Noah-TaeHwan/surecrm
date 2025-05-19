@@ -100,7 +100,10 @@ export function Header({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => console.log('로그아웃')}>
+            <DropdownMenuItem
+              className="cursor-pointer"
+              onClick={() => console.log('로그아웃')}
+            >
               <LogOut className="mr-2 h-4 w-4" />
               <span>로그아웃</span>
             </DropdownMenuItem>

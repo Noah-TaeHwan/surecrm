@@ -19,7 +19,9 @@ export function LandingLayout({
     <div className="min-h-screen flex flex-col">
       <header className="py-4 md:py-6 px-4 md:px-8 border-b">
         <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-xl md:text-2xl font-bold">SureCRM</h1>
+          <h1 className="text-xl md:text-2xl font-bold">
+            <Link to="/">SureCRM</Link>
+          </h1>
 
           {/* 모바일 메뉴 버튼 */}
           <Button
