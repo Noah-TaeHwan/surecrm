@@ -10,9 +10,13 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { cn } from '~/lib/utils';
+import { Button } from '~/common/components/ui/button';
+import { ScrollArea } from '~/common/components/ui/scroll-area';
+import { Separator } from '~/common/components/ui/separator';
 
 interface SidebarProps {
   className?: string;
+  onClose?: () => void;
 }
 
 interface NavItem {
@@ -21,7 +25,7 @@ interface NavItem {
   icon: React.ReactNode;
 }
 
-export function Sidebar({ className }: SidebarProps) {
+export function Sidebar({ className, onClose }: SidebarProps) {
   const location = useLocation();
 
   const navItems: NavItem[] = [
@@ -42,17 +46,17 @@ export function Sidebar({ className }: SidebarProps) {
     },
     {
       label: '고객 관리',
-      href: '/customers',
+      href: '/clients',
       icon: <Users className="h-5 w-5" />,
     },
     {
       label: '미팅 일정',
-      href: '/meetings',
+      href: '/calendar',
       icon: <Calendar className="h-5 w-5" />,
     },
     {
       label: '초대장 관리',
-      href: '/invites',
+      href: '/invitations',
       icon: <Mail className="h-5 w-5" />,
     },
     {
@@ -65,47 +69,66 @@ export function Sidebar({ className }: SidebarProps) {
   return (
     <div
       className={cn(
-        'w-64 h-full flex flex-col bg-white dark:bg-slate-900',
+        'flex flex-col h-full bg-sidebar border-r border-sidebar-border w-64',
         className
       )}
     >
-      <div className="p-4 border-b border-slate-200 dark:border-slate-800">
-        <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">
+      <div className="p-4 border-b border-sidebar-border">
+        <Link
+          to="/dashboard"
+          className="text-xl font-bold text-sidebar-foreground"
+        >
           SureCRM
-        </h1>
+        </Link>
       </div>
 
-      <nav className="flex-1 overflow-y-auto p-2">
-        <ul className="space-y-1">
-          {navItems.map((item) => (
-            <li key={item.href}>
-              <Link
-                to={item.href}
-                className={cn(
-                  'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
-                  location.pathname === item.href
-                    ? 'bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-slate-100'
-                    : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100'
-                )}
-              >
-                {item.icon}
-                <span>{item.label}</span>
-                <ChevronRight
-                  className={cn(
-                    'ml-auto h-4 w-4 transition-transform',
-                    location.pathname === item.href
-                      ? 'rotate-90 text-slate-500'
-                      : 'text-slate-400'
-                  )}
-                />
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </nav>
+      <ScrollArea className="flex-1">
+        <nav className="p-2">
+          <ul className="space-y-1">
+            {navItems.map((item) => {
+              const isActive = location.pathname === item.href;
+              return (
+                <li key={item.href}>
+                  <Button
+                    asChild
+                    variant={isActive ? 'secondary' : 'ghost'}
+                    className={cn(
+                      'w-full justify-start',
+                      isActive
+                        ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                        : 'text-sidebar-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/50'
+                    )}
+                    onClick={() => {
+                      // 모바일 환경에서 네비게이션 항목 클릭 시 사이드바 닫기
+                      if (onClose && window.innerWidth < 1024) {
+                        onClose();
+                      }
+                    }}
+                  >
+                    <Link to={item.href} className="flex items-center gap-3">
+                      {item.icon}
+                      <span className="font-medium">{item.label}</span>
+                      <ChevronRight
+                        className={cn(
+                          'ml-auto h-4 w-4 transition-transform',
+                          isActive
+                            ? 'rotate-90 text-sidebar-accent-foreground/70'
+                            : 'text-sidebar-foreground/50'
+                        )}
+                      />
+                    </Link>
+                  </Button>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+      </ScrollArea>
 
-      <div className="p-4 border-t border-slate-200 dark:border-slate-800 text-center">
-        <p className="text-xs text-slate-500 dark:text-slate-400">버전 0.1.0</p>
+      <Separator className="bg-sidebar-border" />
+
+      <div className="p-4 text-center">
+        <p className="text-xs text-sidebar-foreground/60">버전 0.1.0</p>
       </div>
     </div>
   );

@@ -1,87 +1,111 @@
 import { Link } from 'react-router';
-import { Bell, User, LogOut, Settings } from 'lucide-react';
+import { Bell, User, LogOut, Settings, Menu } from 'lucide-react';
 import { cn } from '~/lib/utils';
+import { Button } from '~/common/components/ui/button';
+import { Avatar, AvatarFallback } from '~/common/components/ui/avatar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '~/common/components/ui/dropdown-menu';
+import { Badge } from '~/common/components/ui/badge';
 
 interface HeaderProps {
   title?: string;
   className?: string;
+  showMenuButton?: boolean;
+  onMenuButtonClick?: () => void;
 }
 
-export function Header({ title = '대시보드', className }: HeaderProps) {
+export function Header({
+  title = '대시보드',
+  className,
+  showMenuButton = false,
+  onMenuButtonClick,
+}: HeaderProps) {
   return (
     <header
       className={cn(
-        'h-16 px-6 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center justify-between',
+        'h-14 md:h-16 px-4 md:px-6 border-b border-border bg-background flex items-center justify-between',
         className
       )}
     >
-      {/* 페이지 제목 */}
-      <h1 className="text-lg font-medium text-slate-900 dark:text-slate-100">
-        {title}
-      </h1>
+      <div className="flex items-center gap-3">
+        {/* 모바일 메뉴 버튼 */}
+        {showMenuButton && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onMenuButtonClick}
+            className="lg:hidden"
+          >
+            <Menu className="h-5 w-5" />
+            <span className="sr-only">메뉴 열기</span>
+          </Button>
+        )}
+
+        {/* 페이지 제목 */}
+        <h1 className="text-base md:text-lg font-medium text-foreground truncate">
+          {title}
+        </h1>
+      </div>
 
       {/* 헤더 우측 요소들 */}
-      <div className="flex items-center space-x-4">
-        {/* 알림 아이콘 */}
-        <button
-          type="button"
-          className="relative p-2 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800"
-        >
-          <span className="sr-only">알림</span>
-          <Bell className="h-5 w-5" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
-        </button>
-
-        {/* 사용자 프로필 드롭다운 (간소화됨) */}
-        <div className="relative group">
-          <button
-            type="button"
-            className="flex items-center space-x-2 p-2 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800"
-          >
-            <span className="sr-only">프로필 메뉴</span>
-            <div className="w-8 h-8 bg-slate-300 dark:bg-slate-700 rounded-full flex items-center justify-center text-white">
-              <User className="h-4 w-4" />
-            </div>
-          </button>
-
-          {/* 드롭다운 메뉴 */}
-          <div className="absolute right-0 mt-2 w-48 py-1 bg-white dark:bg-slate-900 rounded-md shadow-lg border border-slate-200 dark:border-slate-800 invisible group-hover:visible z-10">
-            <div className="px-4 py-3 text-sm text-slate-900 dark:text-slate-100 border-b border-slate-200 dark:border-slate-800">
-              <div>홍길동</div>
-              <div className="font-medium truncate">user@example.com</div>
-            </div>
-
-            <Link
-              to="/profile"
-              className="block px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 w-full text-left"
-            >
-              <div className="flex items-center">
-                <User className="mr-2 h-4 w-4" />
-                프로필
-              </div>
-            </Link>
-
-            <Link
-              to="/settings"
-              className="block px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 w-full text-left"
-            >
-              <div className="flex items-center">
-                <Settings className="mr-2 h-4 w-4" />
-                설정
-              </div>
-            </Link>
-
-            <button
-              className="block px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 w-full text-left"
-              onClick={() => console.log('로그아웃')}
-            >
-              <div className="flex items-center">
-                <LogOut className="mr-2 h-4 w-4" />
-                로그아웃
-              </div>
-            </button>
-          </div>
+      <div className="flex items-center space-x-2 md:space-x-4">
+        {/* 알림 아이콘 - 모바일에서는 선택적으로 숨김 */}
+        <div className="hidden sm:block">
+          <Button variant="ghost" size="icon" className="relative">
+            <Bell className="h-5 w-5" />
+            <Badge className="absolute top-0.5 right-0.5 w-2 h-2 p-0 bg-destructive" />
+            <span className="sr-only">알림</span>
+          </Button>
         </div>
+
+        {/* 사용자 프로필 드롭다운 */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="rounded-full">
+              <Avatar className="h-8 w-8">
+                <AvatarFallback className="text-xs">홍</AvatarFallback>
+              </Avatar>
+              <span className="sr-only">프로필 메뉴</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-56" align="end">
+            <DropdownMenuLabel>
+              <div className="flex flex-col space-y-1">
+                <p className="text-sm font-medium">홍길동</p>
+                <p className="text-xs text-muted-foreground">
+                  user@example.com
+                </p>
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuGroup>
+              <DropdownMenuItem asChild>
+                <Link to="/profile" className="cursor-pointer">
+                  <User className="mr-2 h-4 w-4" />
+                  <span>프로필</span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/settings" className="cursor-pointer">
+                  <Settings className="mr-2 h-4 w-4" />
+                  <span>설정</span>
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => console.log('로그아웃')}>
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>로그아웃</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </header>
   );

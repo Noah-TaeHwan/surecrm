@@ -92,7 +92,7 @@ export default function LandingPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  옵시디언 스타일 그래프 뷰로 고객 소개 관계를 시각적으로
+                  마인드맵 스타일 그래프 뷰로 고객 소개 관계를 시각적으로
                   파악하고 핵심 소개자를 쉽게 발견하세요.
                 </p>
               </CardContent>
