@@ -1,4 +1,4 @@
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { Button } from '../components/ui/button';
 import {
   Card,
@@ -23,6 +23,12 @@ export function meta() {
 }
 
 export default function TermsPage() {
+  const navigate = useNavigate();
+
+  const handleGoBack = () => {
+    navigate(-1);
+  };
+
   return (
     <div className="container px-4 py-12 mx-auto max-w-5xl">
       <div className="flex flex-col items-center mb-8">
@@ -165,10 +171,8 @@ export default function TermsPage() {
       </Card>
 
       <div className="flex justify-center mt-8">
-        <Button asChild variant="outline">
-          <Link to="/" className="px-6">
-            홈으로 돌아가기
-          </Link>
+        <Button variant="outline" onClick={handleGoBack} className="px-6">
+          이전 페이지로 돌아가기
         </Button>
       </div>
     </div>

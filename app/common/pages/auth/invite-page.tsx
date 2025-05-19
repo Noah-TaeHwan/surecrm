@@ -133,7 +133,7 @@ export default function InvitePage({ loaderData }: { loaderData: LoaderData }) {
   if (!loaderData.isValid) {
     return (
       <AuthLayout>
-        <Card className="w-full border-none shadow-none">
+        <Card className="w-full bg-transparent border-none shadow-none">
           <CardContent className="pt-6">
             <Alert variant="destructive">
               <AlertTitle>유효하지 않은 초대 코드</AlertTitle>
@@ -156,7 +156,7 @@ export default function InvitePage({ loaderData }: { loaderData: LoaderData }) {
 
   return (
     <AuthLayout>
-      <Card className="w-full border-none shadow-none">
+      <Card className="w-full bg-transparent border-none shadow-none">
         <CardHeader className="space-y-1 pb-2">
           <Alert className="mb-4 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800">
             <AlertDescription className="flex justify-center items-center">

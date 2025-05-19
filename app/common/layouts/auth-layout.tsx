@@ -1,5 +1,12 @@
+'use client';
+
 import { Link } from 'react-router';
 import { Card } from '~/common/components/ui/card';
+import { BorderBeam } from '~/common/components/ui/border-beam';
+import { DotPattern } from '~/common/components/ui/dot-pattern';
+import { FlickeringGrid } from '~/common/components/magicui/flickering-grid';
+import { AnimatedGridPattern } from '~/common/components/magicui/animated-grid-pattern';
+import { cn } from '~/lib/utils';
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -13,28 +20,68 @@ export function AuthLayout({
   showLogo = true,
 }: AuthLayoutProps) {
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-slate-50 dark:bg-slate-950 p-4">
-      <div className="w-full max-w-md space-y-6 md:space-y-8">
-        {showLogo && (
-          <div className="text-center">
-            <Link to="/" className="inline-block">
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-                {title}
-              </h1>
-            </Link>
-            <p className="mt-2 text-xs sm:text-sm text-slate-600 dark:text-slate-400 px-4 sm:px-0">
-              보험 영업의 소개 네트워크와 영업 파이프라인 관리
-            </p>
-          </div>
-        )}
+    <div className="min-h-screen flex flex-col justify-center items-center relative overflow-hidden bg-gradient-to-br from-background to-background/90 p-4">
+      {/* 배경 애니메이션 - 도트 패턴 */}
+      <DotPattern
+        className="absolute inset-0 w-full h-full opacity-15 text-primary/30 pointer-events-none"
+        width={30}
+        height={30}
+        radius={1}
+      />
 
-        <div className="bg-white dark:bg-slate-900 p-5 sm:p-8 rounded-lg shadow-sm border border-slate-200 dark:border-slate-800">
+      {/* 배경 애니메이션 - 깜빡이는 그리드 */}
+      <FlickeringGrid
+        className="absolute inset-0 z-0 pointer-events-none [mask-image:radial-gradient(70%_70%_at_center,white,transparent)]"
+        squareSize={2}
+        gridGap={20}
+        color="var(--primary)"
+        maxOpacity={0.08}
+        flickerChance={0.03}
+      />
+
+      {/* 배경 애니메이션 - 애니메이티드 그리드 패턴 */}
+      <AnimatedGridPattern
+        className="absolute inset-0 z-0 opacity-20 text-accent/30 pointer-events-none [mask-image:radial-gradient(80%_80%_at_center,white,transparent)]"
+        width={45}
+        height={45}
+        numSquares={30}
+        maxOpacity={0.3}
+        duration={6}
+      />
+
+      {showLogo && (
+        <div className="text-center mb-4 relative z-20">
+          <Link
+            to="/"
+            className="inline-block cursor-pointer relative z-20 hover:opacity-80 transition-opacity"
+          >
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
+              {title}
+            </h1>
+          </Link>
+          <p className="mt-2 text-xs sm:text-sm text-muted-foreground px-4 sm:px-0">
+            보험 영업의 소개 네트워크와 영업 파이프라인 관리
+          </p>
+        </div>
+      )}
+
+      <div className="w-full max-w-md relative z-10">
+        <Card className="relative overflow-hidden backdrop-blur-sm bg-card/80 dark:bg-card/40 p-8 border border-border shadow-lg">
+          <BorderBeam
+            size={100}
+            colorFrom="var(--primary)"
+            colorTo="var(--accent)"
+            duration={12}
+          />
+
           {children}
-        </div>
 
-        <div className="text-center text-xs text-slate-500 dark:text-slate-500">
-          &copy; {new Date().getFullYear()} SureCRM. All rights reserved.
-        </div>
+          <div className="text-center text-xs text-muted-foreground mt-6">
+            &copy; {new Date().getFullYear()} SureCRM. All rights reserved.
+          </div>
+        </Card>
+
+        <div className="absolute -bottom-6 -right-6 -z-10 w-full h-full rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 blur-xl opacity-30" />
       </div>
     </div>
   );

@@ -116,7 +116,7 @@ export default function LoginPage({ loaderData, actionData }: ComponentProps) {
 
   return (
     <AuthLayout>
-      <Card className="w-full border-none shadow-none">
+      <Card className="w-full bg-transparent border-none shadow-none">
         <CardHeader className="space-y-1 pb-2 flex flex-col items-center">
           <CardTitle className="text-2xl font-bold text-slate-900 dark:text-slate-100">
             로그인

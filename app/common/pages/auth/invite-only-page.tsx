@@ -57,7 +57,7 @@ export default function InviteOnlyPage() {
 
   return (
     <AuthLayout>
-      <Card className="w-full border-none shadow-none">
+      <Card className="w-full bg-transparent border-none shadow-none">
         <CardHeader className="space-y-1 pb-2 text-center">
           <CardTitle className="text-2xl font-bold text-slate-900 dark:text-slate-100">
             초대 전용 서비스
@@ -68,35 +68,7 @@ export default function InviteOnlyPage() {
         </CardHeader>
 
         <CardContent className="pb-2">
-          <Card className="bg-slate-50 dark:bg-slate-800/50 border-none mb-6">
-            <CardContent className="p-4">
-              <h3 className="font-medium text-slate-900 dark:text-slate-100 mb-3">
-                SureCRM의 주요 특징
-              </h3>
-              <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
-                <li className="flex items-start">
-                  <span className="mr-2">•</span>
-                  <span>
-                    소개 네트워크 시각화: 고객 소개의 연결 관계를 한눈에 파악
-                  </span>
-                </li>
-                <li className="flex items-start">
-                  <span className="mr-2">•</span>
-                  <span>영업 파이프라인 관리: 영업 과정을 효율적으로 추적</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="mr-2">•</span>
-                  <span>고객 관리: 보험 고객의 정보와 계약 이력 관리</span>
-                </li>
-              </ul>
-            </CardContent>
-          </Card>
-
           <div className="py-4 space-y-4">
-            <h3 className="font-medium text-center text-slate-900 dark:text-slate-100">
-              초대 코드가 있으신가요?
-            </h3>
-
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}

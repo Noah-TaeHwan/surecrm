@@ -17,7 +17,7 @@ export function LandingLayout({
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="py-4 md:py-6 px-4 md:px-8 border-b">
+      <header className="py-4 md:py-6 px-4 md:px-8 fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b transition-all duration-200">
         <div className="container mx-auto flex justify-between items-center">
           <h1 className="text-xl md:text-2xl font-bold">
             <Link to="/">SureCRM</Link>
@@ -66,6 +66,9 @@ export function LandingLayout({
           </nav>
         </SheetContent>
       </Sheet>
+
+      {/* 헤더 높이만큼 여백 추가 */}
+      <div className="h-[72px] md:h-[88px]"></div>
 
       <main className="flex-1">{children}</main>
 

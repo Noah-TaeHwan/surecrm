@@ -76,7 +76,7 @@ export function Sidebar({ className, onClose }: SidebarProps) {
       <div className="p-4 border-b border-sidebar-border">
         <Link
           to="/dashboard"
-          className="text-xl font-bold text-sidebar-foreground"
+          className="text-xl font-bold text-sidebar-foreground flex justify-center"
         >
           SureCRM
         </Link>
@@ -84,7 +84,7 @@ export function Sidebar({ className, onClose }: SidebarProps) {
 
       <ScrollArea className="flex-1">
         <nav className="p-2">
-          <ul className="space-y-1">
+          <ul className="space-y-2">
             {navItems.map((item) => {
               const isActive = location.pathname === item.href;
               return (
@@ -93,7 +93,7 @@ export function Sidebar({ className, onClose }: SidebarProps) {
                     asChild
                     variant={isActive ? 'secondary' : 'ghost'}
                     className={cn(
-                      'w-full justify-start',
+                      'w-full justify-start h-12',
                       isActive
                         ? 'bg-sidebar-accent text-sidebar-accent-foreground'
                         : 'text-sidebar-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/50'
