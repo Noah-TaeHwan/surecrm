@@ -315,6 +315,10 @@ export default function NetworkDetailPanel({
               <Users className="mr-2 h-4 w-4" />
               파이프라인으로 보기
             </Button>
+            <Button variant="outline" className="w-full">
+              <UserRound className="mr-2 h-4 w-4" />
+              고객 상세 정보
+            </Button>
           </div>
         </div>
       </div>

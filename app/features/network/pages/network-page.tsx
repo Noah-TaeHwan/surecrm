@@ -445,6 +445,16 @@ export default function NetworkPage() {
         ).length,
         connectionCount: filteredData.links.length,
       });
+
+      // 검색어가 있고 필터링 결과 노드가 있으면 첫 번째 노드 자동 선택
+      if (query.trim() !== '' && filteredData.nodes.length > 0) {
+        // 필터링된 첫 번째 노드 선택
+        const firstMatchNode = filteredData.nodes[0];
+        setSelectedNode(firstMatchNode.id);
+      } else if (query.trim() === '') {
+        // 검색어가 비어있으면 선택 해제
+        setSelectedNode(null);
+      }
     },
     [networkData, filterSettings, calculateFilteredData]
   );

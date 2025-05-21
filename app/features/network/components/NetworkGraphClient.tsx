@@ -152,6 +152,7 @@ export default function NetworkGraphClient({
     initAttempted: false,
     showDebug: false,
     highlightedNodeId: externalHighlightedNodeId,
+    searchResults: [] as string[], // 검색 결과에 해당하는 노드 ID 배열 추가
     nodeTransitionInProgress: false, // 노드 전환 중인지 추적
   });
 
@@ -211,25 +212,34 @@ export default function NetworkGraphClient({
     // 검색어 필터링
     if (searchQuery && searchQuery.trim()) {
       const normalizedQuery = searchQuery.trim().toLowerCase();
-      filteredNodes = filteredNodes.filter((node) =>
+
+      // 검색어와 일치하는 노드 찾기 - 모든 노드 중에서 찾기 (필터링된 노드가 아닌)
+      const searchMatchNodes = data.nodes.filter((node) =>
         node.name.toLowerCase().includes(normalizedQuery)
       );
 
-      // 일치하는 첫 번째 노드 하이라이트
-      const firstMatchNode = filteredNodes.find((node) =>
-        node.name.toLowerCase().includes(normalizedQuery)
-      );
+      // 검색어와 일치하는 노드들의 ID 배열
+      const searchMatchNodeIds = searchMatchNodes.map((node) => node.id);
 
-      if (firstMatchNode) {
+      // 중요: 이제 필터링하지 않고 전체 노드를 표시하면서 검색 결과만 하이라이트
+      // filteredNodes = searchMatchNodes; <- 이 코드 제거
+
+      // 첫 번째 노드를 메인 하이라이트로, 전체 검색 결과를 searchResults에 저장
+      if (searchMatchNodes.length > 0) {
         setGraphState((prev) => ({
           ...prev,
-          highlightedNodeId: firstMatchNode.id,
+          highlightedNodeId: searchMatchNodes[0].id,
+          searchResults: searchMatchNodeIds,
         }));
       }
     } else {
-      // 검색어가 없을 때 내부 하이라이트 상태만 초기화 (외부 상태는 유지)
+      // 검색어가 없을 때 상태 초기화 (외부 상태 유지)
       if (!externalHighlightedNodeId) {
-        setGraphState((prev) => ({ ...prev, highlightedNodeId: null }));
+        setGraphState((prev) => ({
+          ...prev,
+          highlightedNodeId: null,
+          searchResults: [],
+        }));
       }
     }
 
@@ -1100,6 +1110,11 @@ export default function NetworkGraphClient({
     return false;
   }
 
+  // 노드가 검색 결과에 포함되는지 확인하는 헬퍼 함수
+  function isNodeInSearchResults(nodeId: string): boolean {
+    return graphState.searchResults.includes(nodeId);
+  }
+
   return (
     <div className="h-full w-full relative flex items-center justify-center">
       {graphState.showDebug && (
@@ -1670,14 +1685,14 @@ export default function NetworkGraphClient({
             const fontSize = 16 / globalScale;
             ctx.font = `600 ${fontSize}px 'Inter', 'Helvetica Neue', sans-serif`;
 
-            // 하이라이트 관련 노드인지 확인 (하이라이트된 노드 또는 연결된 노드)
+            // 하이라이트 관련 노드인지 확인
             const isHighlightNode = node.id === graphState.highlightedNodeId;
-
-            // 헬퍼 함수를 사용하여 연결된 노드인지 확인 (filteredData.links 사용)
+            const isSearchResultNode = isNodeInSearchResults(node.id);
             const isConnectedNode = isNodeConnectedToHighlight(node.id);
 
-            // 하이라이트된 노드이거나 연결된 노드인 경우
-            const isHighlightRelated = isHighlightNode || isConnectedNode;
+            // 하이라이트 관련 노드 여부 (주 하이라이트, 검색 결과, 연결된 노드)
+            const isHighlightRelated =
+              isHighlightNode || isConnectedNode || isSearchResultNode;
 
             // 노드 크기 (하이라이트 관련 노드는 더 크게)
             let nodeSize;
@@ -1704,14 +1719,16 @@ export default function NetworkGraphClient({
               if (node.stage === '계약 완료') baseColor = '#9b59b6';
             }
 
-            // 하이라이트 관련 상태에 따른 투명도 설정 - 완전히 개선된 로직
-            if (graphState.highlightedNodeId) {
-              // 하이라이트된 노드 또는 연결된 노드인 경우
-              if (isHighlightNode || isConnectedNode) {
-                // 완전 불투명 (100% 선명하게)
+            // 하이라이트 관련 상태에 따른 투명도 설정
+            if (
+              graphState.highlightedNodeId ||
+              graphState.searchResults.length > 0
+            ) {
+              // 하이라이트 관련 노드는 완전 불투명하게
+              if (isHighlightRelated) {
                 ctx.globalAlpha = 1.0;
               } else {
-                // 관련 없는 노드는 더 잘 보이게 투명도 조정 (0.2 -> 0.35로 증가)
+                // 관련 없는 노드는 흐리게
                 ctx.globalAlpha = 0.35;
               }
             } else {
@@ -1720,7 +1737,11 @@ export default function NetworkGraphClient({
             }
 
             // 외부 발광 효과 (하이라이트 관련 노드만)
-            if (isHighlightRelated || !graphState.highlightedNodeId) {
+            if (
+              isHighlightRelated ||
+              (!graphState.highlightedNodeId &&
+                graphState.searchResults.length === 0)
+            ) {
               ctx.beginPath();
               ctx.arc(node.x, node.y, nodeSize + 4, 0, 2 * Math.PI);
               ctx.fillStyle = `${baseColor}33`; // 약한 투명도
@@ -1731,7 +1752,7 @@ export default function NetworkGraphClient({
             ctx.beginPath();
             ctx.arc(node.x, node.y, nodeSize, 0, 2 * Math.PI);
 
-            // 하이라이트된 노드 강조 효과
+            // 하이라이트된 주요 노드 (첫 번째 검색 결과)
             if (isHighlightNode) {
               // 펄싱 효과 (깜빡이는 애니메이션) - 더 은은하게
               const pulseFactor = Math.sin(animationTime * 0.1) * 0.2 + 0.8; // 0~1 사이 펄싱 값 (더 은은하게)
@@ -1785,14 +1806,54 @@ export default function NetworkGraphClient({
               })`;
               ctx.lineWidth = 1 / globalScale;
               ctx.stroke();
+
+              // 기본 색상 채우기
+              ctx.fillStyle = baseColor;
+              ctx.fill();
             }
-            // 연결된 노드 강조 효과 (효과 제거)
+            // 검색 결과 노드 (첫 번째 제외)
+            else if (isSearchResultNode) {
+              // 검색 결과 노드 효과 (주황색 테두리)
+              ctx.shadowColor = 'rgba(255, 140, 0, 0.5)';
+              ctx.shadowBlur = 8;
+              ctx.shadowOffsetX = 0;
+              ctx.shadowOffsetY = 0;
+
+              // 테두리 효과
+              ctx.strokeStyle = 'rgba(255, 140, 0, 0.8)';
+              ctx.lineWidth = 2 / globalScale;
+              ctx.stroke();
+
+              // 기본 색상 채우기
+              ctx.fillStyle = baseColor;
+              ctx.fill();
+            }
+            // 연결된 노드 강조 효과
             else if (isConnectedNode) {
-              // 발광 효과와 테두리 펄싱 효과 제거
               // 단순한 테두리만 추가
               ctx.strokeStyle = 'rgba(100, 150, 230, 0.8)';
               ctx.lineWidth = 2 / globalScale;
               ctx.stroke();
+
+              // 기본 색상 채우기
+              ctx.fillStyle = baseColor;
+              ctx.fill();
+            } else {
+              // 일반 노드 스타일링
+              // 기본 그림자 효과
+              if (
+                !graphState.highlightedNodeId &&
+                graphState.searchResults.length === 0
+              ) {
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+                ctx.shadowBlur = 5;
+                ctx.shadowOffsetX = 2;
+                ctx.shadowOffsetY = 2;
+              }
+
+              // 기본 색상 채우기
+              ctx.fillStyle = baseColor;
+              ctx.fill();
             }
 
             // 기본 그림자 효과 (하이라이트 관련 노드만)
@@ -1806,8 +1867,11 @@ export default function NetworkGraphClient({
               }
             }
 
-            ctx.fillStyle = baseColor;
-            ctx.fill();
+            // 일반 노드만 여기서 색상 채우기 (연결된 노드는 이미 위에서 채웠음)
+            if (!isConnectedNode) {
+              ctx.fillStyle = baseColor;
+              ctx.fill();
+            }
 
             // 그림자 비활성화
             ctx.shadowColor = 'transparent';
