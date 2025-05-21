@@ -327,10 +327,40 @@ export default function NetworkPage() {
         );
       }
 
-      // 핵심 소개자만 보기
+      // 핵심 소개자 필터링 - 변경된 로직
       if (filters.showInfluencersOnly) {
-        filteredNodes = filteredNodes.filter(
+        // 모든 영향력 있는 사용자 노드와 그들과 직접 연결된 노드들을 식별합니다
+        const influencersAndConnections = new Set<string>();
+
+        // 우선 모든 영향력 있는 사용자(influencer) 식별
+        const influencers = data.nodes.filter(
           (node) => node.group === 'influencer'
+        );
+        influencers.forEach((influencer) =>
+          influencersAndConnections.add(influencer.id)
+        );
+
+        // 각 영향력 있는 사용자와 직접 연결된 모든 노드를 추가
+        data.links.forEach((link: NetworkLink) => {
+          const sourceId =
+            typeof link.source === 'string' ? link.source : link.source.id;
+          const targetId =
+            typeof link.target === 'string' ? link.target : link.target.id;
+
+          // 소스가 influencer인 경우 타겟 노드 추가
+          if (influencers.some((inf) => inf.id === sourceId)) {
+            influencersAndConnections.add(targetId);
+          }
+
+          // 타겟이 influencer인 경우 소스 노드 추가
+          if (influencers.some((inf) => inf.id === targetId)) {
+            influencersAndConnections.add(sourceId);
+          }
+        });
+
+        // 핵심 소개자와 그들의 연결 노드만 남김
+        filteredNodes = filteredNodes.filter((node) =>
+          influencersAndConnections.has(node.id)
         );
       }
 
@@ -557,8 +587,8 @@ export default function NetworkPage() {
   return (
     <MainLayout title="소개 네트워크">
       <div className="flex flex-col lg:flex-row h-full overflow-hidden">
-        {/* 필터 사이드바 - 모바일에서는 좁게, 데스크톱에서는 충분한 너비 */}
-        <div className="lg:w-1/4 w-full shrink-0 max-h-screen overflow-y-auto">
+        {/* 필터 사이드바 - 모바일에서는 독립 버튼, 데스크톱에서는 적정 너비 */}
+        <div className="lg:w-[280px] w-auto shrink-0">
           <NetworkSidebar
             filters={filterSettings}
             onFilterChange={handleFilterChange}
@@ -566,7 +596,7 @@ export default function NetworkPage() {
           />
         </div>
 
-        {/* 메인 콘텐츠 영역 */}
+        {/* 메인 콘텐츠 영역 - 더 넓은 공간 차지 */}
         <div className="flex-1 flex flex-col overflow-hidden">
           <Card className="m-2 lg:m-4 flex-1 overflow-hidden flex flex-col">
             <CardHeader className="pb-0">
@@ -587,9 +617,9 @@ export default function NetworkPage() {
           </Card>
         </div>
 
-        {/* 고객 상세 정보 패널 (선택된 노드가 있을 때만 표시) */}
+        {/* 고객 상세 정보 패널 (선택된 노드가 있을 때만 표시) - 좀 더 좁게 조정 */}
         {selectedNode && (
-          <div className="lg:w-1/4 w-full shrink-0 max-h-screen overflow-y-auto">
+          <div className="lg:w-[320px] w-full shrink-0 max-h-screen overflow-y-auto">
             <NetworkDetailPanel
               nodeId={selectedNode}
               data={networkData}

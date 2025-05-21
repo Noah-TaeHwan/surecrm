@@ -202,10 +202,40 @@ export default function NetworkGraphClient({
       );
     }
 
-    // 핵심 소개자만 필터링
+    // 핵심 소개자 필터링 - 핵심 소개자와 연결된 노드 모두 표시
     if (filters.showInfluencersOnly) {
-      filteredNodes = filteredNodes.filter(
+      // 모든 영향력 있는 사용자 노드와 그들과 직접 연결된 노드들을 식별합니다
+      const influencersAndConnections = new Set<string>();
+
+      // 우선 모든 영향력 있는 사용자(influencer) 식별
+      const influencers = data.nodes.filter(
         (node) => node.group === 'influencer'
+      );
+      influencers.forEach((influencer) =>
+        influencersAndConnections.add(influencer.id)
+      );
+
+      // 각 영향력 있는 사용자와 직접 연결된 모든 노드를 추가
+      data.links.forEach((link) => {
+        const sourceId =
+          typeof link.source === 'string' ? link.source : link.source.id;
+        const targetId =
+          typeof link.target === 'string' ? link.target : link.target.id;
+
+        // 소스가 influencer인 경우 타겟 노드 추가
+        if (influencers.some((inf) => inf.id === sourceId)) {
+          influencersAndConnections.add(targetId);
+        }
+
+        // 타겟이 influencer인 경우 소스 노드 추가
+        if (influencers.some((inf) => inf.id === targetId)) {
+          influencersAndConnections.add(sourceId);
+        }
+      });
+
+      // 핵심 소개자와 그들의 연결 노드만 남김
+      filteredNodes = filteredNodes.filter((node) =>
+        influencersAndConnections.has(node.id)
       );
     }
 
