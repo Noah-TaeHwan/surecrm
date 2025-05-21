@@ -1,3 +1,5 @@
+'use client';
+
 import { Link } from 'react-router';
 import { Bell, User, LogOut, Settings, Menu } from 'lucide-react';
 import { cn } from '~/lib/utils';

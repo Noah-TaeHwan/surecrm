@@ -1,3 +1,5 @@
+'use client';
+
 import { Link, useLocation } from 'react-router';
 import {
   LayoutDashboard,
@@ -76,6 +78,11 @@ export function Sidebar({ className, onClose }: SidebarProps) {
       <div className="p-4 border-b border-sidebar-border">
         <Link
           to="/dashboard"
+          onClick={(e) => {
+            if (onClose && window.innerWidth < 1024) {
+              onClose();
+            }
+          }}
           className="text-xl font-bold text-sidebar-foreground flex justify-center"
         >
           SureCRM
@@ -98,24 +105,29 @@ export function Sidebar({ className, onClose }: SidebarProps) {
                         ? 'bg-sidebar-accent text-sidebar-accent-foreground'
                         : 'text-sidebar-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/50'
                     )}
-                    onClick={() => {
-                      // 모바일 환경에서 네비게이션 항목 클릭 시 사이드바 닫기
-                      if (onClose && window.innerWidth < 1024) {
-                        onClose();
-                      }
-                    }}
                   >
-                    <Link to={item.href} className="flex items-center gap-3">
+                    <Link
+                      to={item.href}
+                      className="flex items-center gap-3"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        window.location.href = item.href;
+
+                        if (onClose && window.innerWidth < 1024) {
+                          onClose();
+                        }
+                      }}
+                    >
                       {item.icon}
                       <span className="font-medium">{item.label}</span>
-                      <ChevronRight
+                      {/* <ChevronRight
                         className={cn(
                           'ml-auto h-4 w-4 transition-transform',
                           isActive
                             ? 'rotate-90 text-sidebar-accent-foreground/70'
                             : 'text-sidebar-foreground/50'
                         )}
-                      />
+                      /> */}
                     </Link>
                   </Button>
                 </li>

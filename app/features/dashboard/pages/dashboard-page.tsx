@@ -264,7 +264,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
                       className="flex justify-between items-center border-b pb-2 last:border-0 last:pb-0"
                     >
                       <div>
-                        <p className="font-medium">{influencer.name}</p>
+                        <p className="font-medium mb-2">{influencer.name}</p>
                         <p className="text-xs text-muted-foreground">
                           소개 {influencer.referrals}건 / 전환율{' '}
                           {(influencer.conversionRate * 100).toFixed(0)}%

@@ -1,0 +1,323 @@
+import { Button } from '~/common/components/ui/button';
+import { Separator } from '~/common/components/ui/separator';
+import { Badge } from '~/common/components/ui/badge';
+import {
+  X,
+  Phone,
+  Mail,
+  Calendar,
+  ChevronRight,
+  Users,
+  UserRound,
+  ArrowUpRight,
+  Star,
+} from 'lucide-react';
+import { useMemo } from 'react';
+
+interface NetworkNode {
+  id: string;
+  name: string;
+  group?: string;
+  importance?: number;
+  stage?: string;
+  referredBy?: string;
+}
+
+interface NetworkLink {
+  source: string | NetworkNode;
+  target: string | NetworkNode;
+  value: number;
+}
+
+interface NetworkData {
+  nodes: NetworkNode[];
+  links: NetworkLink[];
+}
+
+interface NetworkDetailPanelProps {
+  nodeId: string;
+  data: NetworkData;
+  onClose: () => void;
+  onNodeSelect?: (nodeId: string) => void;
+}
+
+export default function NetworkDetailPanel({
+  nodeId,
+  data,
+  onClose,
+  onNodeSelect,
+}: NetworkDetailPanelProps) {
+  // 선택된 노드 정보
+  const selectedNode = useMemo(() => {
+    return data.nodes.find((node) => node.id === nodeId);
+  }, [data.nodes, nodeId]);
+
+  // 소개한 사람들 (이 노드가 소스인 링크들의 타겟)
+  const referredNodes = useMemo(() => {
+    if (!selectedNode) return [];
+
+    const referredLinks = data.links.filter((link) => {
+      const sourceId =
+        typeof link.source === 'string'
+          ? link.source
+          : (link.source as NetworkNode).id;
+      return sourceId === nodeId;
+    });
+
+    return referredLinks
+      .map((link) => {
+        const targetId =
+          typeof link.target === 'string'
+            ? link.target
+            : (link.target as NetworkNode).id;
+        return data.nodes.find((node) => node.id === targetId);
+      })
+      .filter(Boolean) as NetworkNode[];
+  }, [data, nodeId, selectedNode]);
+
+  // 소개받은 사람 (이 노드가 타겟인 링크들의 소스)
+  const referredByNode = useMemo(() => {
+    if (!selectedNode) return null;
+
+    const referredByLink = data.links.find((link) => {
+      const targetId =
+        typeof link.target === 'string'
+          ? link.target
+          : (link.target as NetworkNode).id;
+      return targetId === nodeId;
+    });
+
+    if (!referredByLink) return null;
+
+    const sourceId =
+      typeof referredByLink.source === 'string'
+        ? referredByLink.source
+        : (referredByLink.source as NetworkNode).id;
+
+    return data.nodes.find((node) => node.id === sourceId);
+  }, [data, nodeId, selectedNode]);
+
+  if (!selectedNode) return null;
+
+  // 영업 단계별 배지 색상
+  const getStageBadgeColor = (stage: string | undefined) => {
+    if (!stage) return 'default';
+
+    const stageColorMap: Record<string, string> = {
+      '첫 상담': 'blue',
+      '니즈 분석': 'green',
+      '상품 설명': 'yellow',
+      '계약 검토': 'red',
+      '계약 완료': 'purple',
+    };
+
+    return stageColorMap[stage] || 'default';
+  };
+
+  // 중요도 별 표시
+  const renderImportance = (importance: number | undefined) => {
+    if (!importance) return null;
+
+    return (
+      <div className="flex">
+        {Array.from({ length: 5 }).map((_, index) => (
+          <span
+            key={index}
+            className={`text-lg ${
+              index < importance ? 'text-yellow-400' : 'text-gray-300'
+            }`}
+          >
+            ★
+          </span>
+        ))}
+      </div>
+    );
+  };
+
+  // 다른 고객 노드를 선택하는 함수
+  const handleNodeSelect = (id: string) => {
+    // 현재 선택된 노드와 동일하면 무시
+    if (id === nodeId) return;
+
+    // 클릭 효과를 위한 시각적 피드백
+    const btn = document.activeElement as HTMLElement;
+    if (btn) btn.blur();
+
+    // 사이드바가 바뀌는 것을 좀 더 명확히 보여주기 위한 시각적 표시
+    // 예: 사이드바에 일시적인 로딩 효과나 전환 효과를 추가할 수도 있음
+
+    // 노드 선택 및 이동
+    if (onNodeSelect) {
+      console.log(`고객 정보가 ${id}로 변경됩니다`);
+      onNodeSelect(id);
+    }
+  };
+
+  return (
+    <div className="w-80 border-l h-full bg-background overflow-y-auto">
+      <div className="p-6 space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold">고객 정보</h2>
+          <Button variant="ghost" size="icon" onClick={onClose}>
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <h3 className="text-2xl font-bold">{selectedNode.name}</h3>
+            <div className="flex items-center space-x-2">
+              <Badge variant={getStageBadgeColor(selectedNode.stage) as any}>
+                {selectedNode.stage || '단계 미설정'}
+              </Badge>
+              {renderImportance(selectedNode.importance)}
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* 연락처 정보 (더미 데이터) */}
+          <div className="space-y-3">
+            <div className="flex items-center text-muted-foreground">
+              <Phone className="mr-2 h-4 w-4" />
+              <span>010-1234-5678</span>
+            </div>
+            <div className="flex items-center text-muted-foreground">
+              <Mail className="mr-2 h-4 w-4" />
+              <span>{selectedNode.name.replace(/\s+/g, '')}@example.com</span>
+            </div>
+            <div className="flex items-center text-muted-foreground">
+              <Calendar className="mr-2 h-4 w-4" />
+              <span>다음 미팅: 5월 25일 14:00</span>
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* 소개자 정보 */}
+          {referredByNode && (
+            <div className="space-y-1.5">
+              <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+                <UserRound className="h-3.5 w-3.5 text-blue-500" />
+                <span>소개자</span>
+              </h3>
+              <div
+                className="group p-2.5 border border-border bg-card hover:bg-accent/5 rounded-md transition-colors cursor-pointer flex items-center"
+                onClick={() => handleNodeSelect(referredByNode.id)}
+              >
+                <div className="w-1 self-stretch bg-blue-500/40 rounded-full mr-2.5"></div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium text-card-foreground truncate">
+                    {referredByNode.name}
+                  </div>
+                  <div className="mt-0.5 flex items-center gap-3 text-xs text-muted-foreground">
+                    <span>{referredByNode.stage || '단계 미설정'}</span>
+                    {referredByNode.importance && (
+                      <span className="flex">
+                        {Array.from({ length: referredByNode.importance }).map(
+                          (_, i) => (
+                            <Star
+                              key={i}
+                              className="h-2.5 w-2.5 text-blue-500/60"
+                            />
+                          )
+                        )}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 w-6 p-0 rounded-full text-muted-foreground opacity-60 group-hover:opacity-100"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleNodeSelect(referredByNode.id);
+                  }}
+                >
+                  <ArrowUpRight className="h-3.5 w-3.5" />
+                  <span className="sr-only">보기</span>
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* 소개한 사람들 */}
+          {referredNodes.length > 0 && (
+            <div className="space-y-1.5 mt-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+                  <Users className="h-3.5 w-3.5 text-orange-500" />
+                  <span>소개한 고객</span>
+                </h3>
+                <Badge
+                  variant="outline"
+                  className="text-xs px-1.5 py-0 h-4 font-normal"
+                >
+                  {referredNodes.length}명
+                </Badge>
+              </div>
+              <div className="space-y-1.5">
+                {referredNodes.map((node) => (
+                  <div
+                    key={node.id}
+                    className="group p-2.5 border border-border bg-card hover:bg-accent/5 rounded-md transition-colors cursor-pointer flex items-center"
+                    onClick={() => handleNodeSelect(node.id)}
+                  >
+                    <div className="w-1 self-stretch bg-orange-500/40 rounded-full mr-2.5"></div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-card-foreground truncate">
+                        {node.name}
+                      </div>
+                      <div className="mt-0.5 flex items-center gap-3 text-xs text-muted-foreground">
+                        <span>{node.stage || '단계 미설정'}</span>
+                        {node.importance && (
+                          <span className="flex">
+                            {Array.from({ length: node.importance }).map(
+                              (_, i) => (
+                                <Star
+                                  key={i}
+                                  className="h-2.5 w-2.5 text-orange-500/60"
+                                />
+                              )
+                            )}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0 rounded-full text-muted-foreground opacity-60 group-hover:opacity-100"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleNodeSelect(node.id);
+                      }}
+                    >
+                      <ArrowUpRight className="h-3.5 w-3.5" />
+                      <span className="sr-only">보기</span>
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <Separator />
+
+          {/* 빠른 액션 버튼 */}
+          <div className="space-y-3">
+            <Button className="w-full">
+              <Calendar className="mr-2 h-4 w-4" />
+              미팅 예약
+            </Button>
+            <Button variant="outline" className="w-full">
+              <Users className="mr-2 h-4 w-4" />
+              파이프라인으로 보기
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
