@@ -633,7 +633,7 @@ export default function NetworkSidebar({
 
   // 데스크톱 뷰에서는 사이드바 형태로 표시
   return (
-    <div className="hidden md:flex h-full border-r bg-background overflow-hidden flex flex-col">
+    <div className="hidden md:flex h-full border-r bg-background overflow-hidden flex-col">
       <div className="p-4 flex-1 overflow-hidden flex flex-col h-full">
         <FilterContent />
       </div>
