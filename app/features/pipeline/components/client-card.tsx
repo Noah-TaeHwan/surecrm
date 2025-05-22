@@ -124,9 +124,9 @@ export function ClientCard({
       }`}
     >
       <CardHeader className="pb-2 flex flex-row justify-between items-start">
-        <div className="space-y-1">
+        <div className="space-y-2">
           <div className="flex items-center">
-            <h3 className="font-medium text-sm">{name}</h3>
+            <h3 className="font-medium text-lg">{name}</h3>
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -147,7 +147,7 @@ export function ClientCard({
               </Tooltip>
             </TooltipProvider>
           </div>
-          <div className="flex items-center text-xs text-muted-foreground">
+          <div className="flex items-center text-sm text-muted-foreground">
             <Phone className="h-3 w-3 mr-1" />
             <span>{phone}</span>
           </div>
@@ -162,17 +162,17 @@ export function ClientCard({
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>고객 관리</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
+            <DropdownMenuItem asChild className="cursor-pointer">
               <Link to={`/clients/${id}`}>상세 정보</Link>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild>
+            <DropdownMenuItem asChild className="cursor-pointer">
               <Link to={`/clients/edit/${id}`}>정보 수정</Link>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild>
+            <DropdownMenuItem asChild className="cursor-pointer">
               <Link to={`/calendar?client=${id}`}>미팅 예약</Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-red-600">
+            <DropdownMenuItem className="text-red-600 cursor-pointer">
               <Trash className="h-4 w-4 mr-2" />
               삭제
             </DropdownMenuItem>
@@ -181,9 +181,9 @@ export function ClientCard({
       </CardHeader>
 
       <CardContent className="pb-2 text-xs">
-        <div className="flex items-center mb-2">
+        <div className="flex items-center mb-6">
           <span
-            className={`text-xs px-2 py-0.5 rounded-full font-medium ${getImportanceBadgeColor(
+            className={`text-sm px-2 py-0.5 rounded-full font-medium ${getImportanceBadgeColor(
               importance
             )}`}
           >
@@ -192,7 +192,7 @@ export function ClientCard({
         </div>
 
         {referredBy && (
-          <div className="flex items-center text-muted-foreground mb-2">
+          <div className="text-sm flex items-center text-muted-foreground mb-2">
             <Users className="h-3 w-3 mr-1 flex-shrink-0" />
             <span className="truncate">
               소개자: <span className="font-medium">{referredBy.name}</span>
@@ -201,7 +201,7 @@ export function ClientCard({
         )}
 
         {nextMeeting && (
-          <div className="flex items-start text-muted-foreground mb-2">
+          <div className="text-sm flex items-start text-muted-foreground mb-2">
             <Calendar className="h-3 w-3 mr-1 mt-0.5 flex-shrink-0" />
             <div>
               <div className="font-medium">{nextMeeting.type}</div>
@@ -215,14 +215,14 @@ export function ClientCard({
         )}
 
         {lastContactDate && (
-          <div className="flex items-center text-muted-foreground mb-2">
+          <div className="text-sm flex items-center text-muted-foreground mb-2">
             <Clock className="h-3 w-3 mr-1 flex-shrink-0" />
             <span>마지막 연락: {formatDate(lastContactDate)}</span>
           </div>
         )}
 
         {note && (
-          <div className="mb-2 text-muted-foreground text-xs line-clamp-2">
+          <div className="mb-2 text-muted-foreground text-sm line-clamp-2">
             {note}
           </div>
         )}
@@ -230,7 +230,7 @@ export function ClientCard({
         {tags && tags.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-2">
             {tags.map((tag, index) => (
-              <Badge key={index} variant="secondary" className="text-xs">
+              <Badge key={index} variant="secondary" className="text-sm">
                 <Tag className="h-2.5 w-2.5 mr-1" />
                 {tag}
               </Badge>
@@ -240,7 +240,7 @@ export function ClientCard({
       </CardContent>
 
       <CardFooter className="pt-0 pb-2 justify-between">
-        <div className="flex items-center text-xs text-muted-foreground">
+        <div className="text-sm flex items-center text-muted-foreground">
           <User className="h-3 w-3 mr-1" />
           <span className="truncate">#{id.split('-')[1]}</span>
         </div>

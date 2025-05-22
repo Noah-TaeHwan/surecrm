@@ -3,19 +3,17 @@ import { MainLayout } from '~/common/layouts/main-layout';
 import { useState } from 'react';
 import { PipelineBoard } from '~/features/pipeline/components/pipeline-board';
 import { PipelineFilters } from '~/features/pipeline/components/pipeline-filters';
+import { AddClientModal } from '~/features/pipeline/components/add-client-modal';
 import { Plus, Search, SlidersHorizontal } from 'lucide-react';
 import { Button } from '~/common/components/ui/button';
 import { Input } from '~/common/components/ui/input';
 import type { Client } from './+types/pipeline-page';
 import { Separator } from '~/common/components/ui/separator';
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '~/common/components/ui/sheet';
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from '~/common/components/ui/dropdown-menu';
 
 export function meta({ data, params }: Route.MetaArgs) {
   return [
@@ -154,6 +152,8 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
   const [selectedImportance, setSelectedImportance] = useState<
     'all' | 'high' | 'medium' | 'low'
   >('all');
+  const [addClientOpen, setAddClientOpen] = useState(false);
+  const [selectedStageId, setSelectedStageId] = useState<string>('');
 
   // 필터링된 고객 목록
   const filteredClients = clients.filter((client) => {
@@ -195,6 +195,30 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
     );
   };
 
+  // 새 고객 추가 처리 함수
+  const handleAddClient = (client: {
+    name: string;
+    phone: string;
+    email?: string;
+    stageId: string;
+    importance: 'high' | 'medium' | 'low';
+    referrerId?: string;
+    note?: string;
+  }) => {
+    // 실제 구현에서는 여기서 API 호출을 통해 DB에 새 고객을 추가합니다
+    console.log('Add new client:', client);
+
+    // 성공적으로 추가 후 모달 닫기
+    setAddClientOpen(false);
+    setSelectedStageId(''); // 단계 선택 초기화
+  };
+
+  // 특정 단계에 고객 추가 함수
+  const handleAddClientToStage = (stageId: string) => {
+    setSelectedStageId(stageId);
+    setAddClientOpen(true);
+  };
+
   // 필터가 적용되었는지 확인
   const isFilterActive =
     selectedReferrerId !== null || selectedImportance !== 'all';
@@ -219,9 +243,9 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
           </div>
 
           <div className="flex items-center gap-3">
-            {/* 필터 사이드 패널 */}
-            <Sheet>
-              <SheetTrigger asChild>
+            {/* 필터 드롭다운 메뉴 */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
                 <Button
                   variant={isFilterActive ? 'default' : 'outline'}
                   className="flex items-center gap-2"
@@ -229,15 +253,14 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
                   <SlidersHorizontal className="h-4 w-4" />
                   <span>필터 {isFilterActive ? '적용됨' : ''}</span>
                 </Button>
-              </SheetTrigger>
-              <SheetContent className="sm:max-w-md">
-                <SheetHeader>
-                  <SheetTitle>파이프라인 필터</SheetTitle>
-                  <SheetDescription>
-                    원하는 조건으로 고객을 필터링하세요
-                  </SheetDescription>
-                </SheetHeader>
-                <div className="py-6">
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className="w-[320px] p-4 bg-background"
+                align="end"
+                sideOffset={4}
+              >
+                <div className="space-y-4">
+                  <h3 className="font-medium">필터 설정</h3>
                   <PipelineFilters
                     referrers={referrers}
                     selectedReferrerId={selectedReferrerId}
@@ -246,12 +269,18 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
                     onImportanceChange={setSelectedImportance}
                   />
                 </div>
-              </SheetContent>
-            </Sheet>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             <Separator orientation="vertical" className="h-6" />
 
-            <Button className="flex items-center gap-2">
+            <Button
+              className="flex items-center gap-2"
+              onClick={() => {
+                setSelectedStageId('');
+                setAddClientOpen(true);
+              }}
+            >
               <Plus className="h-4 w-4" />
               <span>고객 추가</span>
             </Button>
@@ -314,6 +343,17 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
           stages={stages}
           clients={filteredClients as Client[]}
           onClientMove={handleClientMove}
+          onAddClientToStage={handleAddClientToStage}
+        />
+
+        {/* 고객 추가 모달 */}
+        <AddClientModal
+          open={addClientOpen}
+          onOpenChange={setAddClientOpen}
+          stages={stages}
+          referrers={referrers}
+          initialStageId={selectedStageId}
+          onAddClient={handleAddClient}
         />
       </div>
     </MainLayout>

@@ -12,12 +12,14 @@ interface PipelineBoardProps {
     sourceStageId: string,
     destinationStageId: string
   ) => void;
+  onAddClientToStage?: (stageId: string) => void;
 }
 
 export function PipelineBoard({
   stages,
   clients,
   onClientMove,
+  onAddClientToStage,
 }: PipelineBoardProps) {
   const [draggedClientId, setDraggedClientId] = useState<string | null>(null);
   const dragSourceStageId = useRef<string | null>(null);
@@ -146,6 +148,7 @@ export function PipelineBoard({
               variant="ghost"
               size="sm"
               className="h-8 w-8 p-0 text-muted-foreground"
+              onClick={() => onAddClientToStage?.(stage.id)}
             >
               <Plus className="h-4 w-4" />
             </Button>
@@ -172,7 +175,12 @@ export function PipelineBoard({
             ) : (
               <div className="flex flex-col items-center justify-center h-32 border border-dashed rounded-lg text-muted-foreground text-sm">
                 <p>이 단계에 고객이 없습니다</p>
-                <Button variant="ghost" size="sm" className="mt-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="mt-2"
+                  onClick={() => onAddClientToStage?.(stage.id)}
+                >
                   <Plus className="h-4 w-4 mr-1" />
                   고객 추가
                 </Button>
