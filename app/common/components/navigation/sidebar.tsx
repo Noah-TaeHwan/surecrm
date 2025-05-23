@@ -12,6 +12,7 @@ import {
   ChevronRight,
   Sparkles,
   UserPlus,
+  FileText,
 } from 'lucide-react';
 import { cn } from '~/lib/utils';
 import { Button } from '~/common/components/ui/button';
@@ -71,6 +72,11 @@ export function Sidebar({ className, onClose }: SidebarProps) {
       label: '초대장 관리',
       href: '/invitations',
       icon: <Mail className="h-5 w-5" />,
+    },
+    {
+      label: '보고서',
+      href: '/reports',
+      icon: <FileText className="h-5 w-5" />,
     },
     {
       label: '설정',

@@ -48,26 +48,21 @@ export function InvitationCard({
       </CardHeader>
       <CardContent className="space-y-4">
         {invitation.status === 'used' && invitation.invitee ? (
-          <div className="flex items-center gap-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+          <div className="flex items-center gap-3 p-3 bg-muted/30 border border-border rounded-lg">
             <Avatar>
-              <AvatarFallback className="bg-green-100">
+              <AvatarFallback className="bg-muted">
                 {invitation.invitee.name[0]}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1">
-              <div className="font-medium text-green-900">
+              <div className="font-medium">
                 {invitation.invitee.name}님이 가입했습니다
               </div>
-              <div className="text-sm text-green-700">
+              <div className="text-sm text-muted-foreground">
                 {invitation.invitee.joinedAt} 가입
               </div>
             </div>
-            <Badge
-              variant="secondary"
-              className="bg-green-100 text-green-800 border-green-200"
-            >
-              성공
-            </Badge>
+            <Badge variant="secondary">성공</Badge>
           </div>
         ) : (
           <div className="space-y-3">
@@ -94,7 +89,7 @@ export function InvitationCard({
                 </Button>
               </div>
             </div>
-            <div className="text-sm text-muted-foreground bg-blue-50 p-3 rounded-lg border border-blue-200">
+            <div className="text-sm text-muted-foreground bg-muted/30 p-3 rounded-lg border border-border">
               💡 <strong>팁:</strong> 링크를 복사해서 카카오톡, 이메일, 문자로
               동료에게 전송하세요. 보험설계사 동료들에게 SureCRM의 소개 네트워크
               기능을 소개해보세요!

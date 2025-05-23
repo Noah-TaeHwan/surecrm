@@ -12,26 +12,35 @@ export function InvitedColleagues({ usedInvitations }: InvitedColleaguesProps) {
     <div className="space-y-4">
       <h3 className="text-lg font-medium">내가 초대한 동료들</h3>
       <Card>
-        <CardContent className="p-4">
-          <div className="space-y-3">
-            {usedInvitations.map((invitation) =>
+        <CardContent className="p-6">
+          <div className="space-y-4">
+            {usedInvitations.map((invitation, index) =>
               invitation.invitee ? (
-                <div
-                  key={invitation.id}
-                  className="flex items-center gap-3 p-3 border rounded-lg"
-                >
-                  <Avatar>
-                    <AvatarFallback>
-                      {invitation.invitee.name[0]}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <div className="font-medium">{invitation.invitee.name}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {invitation.invitee.joinedAt} 가입
+                <div key={invitation.id}>
+                  <div className="flex items-center gap-4">
+                    <Avatar className="h-12 w-12">
+                      <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                        {invitation.invitee.name[0]}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-semibold truncate">
+                          {invitation.invitee.name}
+                        </h4>
+                        <Badge variant="secondary" className="text-xs">
+                          활성
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {invitation.invitee.joinedAt} 가입 · 초대장 #
+                        {invitation.id}
+                      </p>
                     </div>
                   </div>
-                  <Badge variant="secondary">활성 사용자</Badge>
+                  {index < usedInvitations.length - 1 && (
+                    <div className="mt-4 border-b border-border"></div>
+                  )}
                 </div>
               ) : null
             )}

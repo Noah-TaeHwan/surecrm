@@ -33,7 +33,7 @@ export function ReferralDepthIndicator({ depth }: ReferralDepthIndicatorProps) {
             </span>
           </div>
         </TooltipTrigger>
-        <TooltipContent>
+        <TooltipContent className="bg-background text-foreground">
           <p>{depth === 0 ? '직접 개발한 고객' : `${depth}차 소개 고객`}</p>
         </TooltipContent>
       </Tooltip>
