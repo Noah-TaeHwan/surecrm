@@ -28,6 +28,7 @@ import {
   DotsHorizontalIcon,
   TrashIcon,
   Share1Icon,
+  PersonIcon,
 } from '@radix-ui/react-icons';
 import type { TeamMemberListProps } from './types';
 
@@ -35,6 +36,7 @@ export function TeamMemberList({
   members,
   onRemoveMember,
   onResendInvite,
+  onViewMember,
 }: TeamMemberListProps) {
   const statusBadgeVariant: Record<
     string,
@@ -99,7 +101,12 @@ export function TeamMemberList({
                       <AvatarFallback>{member.name[0]}</AvatarFallback>
                     </Avatar>
                     <div>
-                      <div className="font-medium">{member.name}</div>
+                      <button
+                        onClick={() => onViewMember(member)}
+                        className="font-medium text-sm hover:text-primary cursor-pointer transition-colors"
+                      >
+                        {member.name}
+                      </button>
                       <div className="text-sm text-muted-foreground">
                         {member.email}
                       </div>
@@ -146,6 +153,10 @@ export function TeamMemberList({
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>작업</DropdownMenuLabel>
                       <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => onViewMember(member)}>
+                        <PersonIcon className="mr-2 h-4 w-4" />
+                        팀원 정보 보기
+                      </DropdownMenuItem>
                       {member.status === 'pending' && (
                         <DropdownMenuItem
                           onClick={() => onResendInvite(member.id)}

@@ -1,10 +1,12 @@
 import type { Route } from '.react-router/types/app/features/team/pages/+types/team-page';
+import { useState } from 'react';
 import { MainLayout } from '~/common/layouts/main-layout';
 
 // 컴포넌트 imports
 import { TeamStatsCards } from '../components/team-stats-cards';
 import { InviteMember } from '../components/invite-member';
 import { TeamMemberList } from '../components/team-member-list';
+import { TeamMemberProfile } from '../components/team-member-profile';
 
 // 타입 imports
 import type { TeamMember, TeamStats } from '../components/types';
@@ -16,6 +18,9 @@ export function loader({ request }: Route.LoaderArgs) {
       id: '1',
       name: '김영희',
       email: 'kim@surecrm.com',
+      phone: '010-1234-5678',
+      company: 'ABC보험',
+      position: '팀장',
       role: 'admin',
       status: 'active',
       joinedAt: '2023-01-15',
@@ -27,6 +32,9 @@ export function loader({ request }: Route.LoaderArgs) {
       id: '2',
       name: '박철수',
       email: 'park@surecrm.com',
+      phone: '010-2345-6789',
+      company: 'ABC보험',
+      position: '선임',
       role: 'manager',
       status: 'active',
       joinedAt: '2023-03-20',
@@ -38,6 +46,9 @@ export function loader({ request }: Route.LoaderArgs) {
       id: '3',
       name: '이민수',
       email: 'lee@surecrm.com',
+      phone: '010-3456-7890',
+      company: 'ABC보험',
+      position: '설계사',
       role: 'member',
       status: 'active',
       joinedAt: '2023-06-10',
@@ -84,6 +95,7 @@ export default function TeamPage({
   actionData,
 }: Route.ComponentProps) {
   const { teamMembers, teamStats } = loaderData;
+  const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
 
   // 팀원 초대
   const handleInvite = (email: string, role: string, message?: string) => {
@@ -101,6 +113,11 @@ export default function TeamPage({
   const handleResendInvite = (memberId: string) => {
     console.log('초대 재발송:', memberId);
     // TODO: API 호출
+  };
+
+  // 팀원 정보 보기
+  const handleViewMember = (member: TeamMember) => {
+    setSelectedMember(member);
   };
 
   return (
@@ -122,7 +139,17 @@ export default function TeamPage({
           members={teamMembers}
           onRemoveMember={handleRemoveMember}
           onResendInvite={handleResendInvite}
+          onViewMember={handleViewMember}
         />
+
+        {/* 팀원 프로필 다이얼로그 */}
+        {selectedMember && (
+          <TeamMemberProfile
+            member={selectedMember}
+            isOpen={!!selectedMember}
+            onClose={() => setSelectedMember(null)}
+          />
+        )}
       </div>
     </MainLayout>
   );

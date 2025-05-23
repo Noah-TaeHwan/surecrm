@@ -9,6 +9,9 @@ export interface TeamMember {
   lastSeen?: string;
   clients: number;
   conversions: number;
+  phone?: string;
+  company?: string;
+  position?: string;
 }
 
 export interface TeamStats {
@@ -22,6 +25,7 @@ export interface TeamMemberListProps {
   members: TeamMember[];
   onRemoveMember: (memberId: string) => void;
   onResendInvite: (memberId: string) => void;
+  onViewMember: (member: TeamMember) => void;
 }
 
 export interface TeamStatsCardsProps {
@@ -30,4 +34,10 @@ export interface TeamStatsCardsProps {
 
 export interface InviteMemberProps {
   onInvite: (email: string, role: string, message?: string) => void;
+}
+
+export interface TeamMemberProfileProps {
+  member: TeamMember;
+  isOpen: boolean;
+  onClose: () => void;
 }
