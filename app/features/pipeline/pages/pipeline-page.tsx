@@ -378,9 +378,9 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
     <MainLayout title="영업 파이프라인">
       <div className="space-y-6">
         {/* 전체 상단 영역 - sticky로 고정 */}
-        <div className="sticky top-0 z-20 bg-background border-b border-border pb-6">
+        <div className="sticky -top-8 z-20 bg-background border-b border-border pb-6">
           {/* 필터 및 검색 섹션 */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-6 pt-6">
             <div className="flex w-full max-w-sm items-center space-x-2">
               <Input
                 type="search"

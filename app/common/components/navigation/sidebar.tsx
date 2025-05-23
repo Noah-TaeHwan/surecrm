@@ -98,7 +98,7 @@ export function Sidebar({ className, onClose }: SidebarProps) {
               onClose();
             }
           }}
-          className="text-xl font-bold text-sidebar-foreground flex justify-center"
+          className="text-xl font-bold text-sidebar-foreground flex justify-center cursor-pointer"
         >
           SureCRM
         </Link>
@@ -115,7 +115,7 @@ export function Sidebar({ className, onClose }: SidebarProps) {
                     asChild
                     variant={isActive ? 'secondary' : 'ghost'}
                     className={cn(
-                      'w-full justify-start h-12',
+                      'w-full justify-start h-12 cursor-pointer',
                       isActive
                         ? 'bg-sidebar-accent text-sidebar-accent-foreground'
                         : 'text-sidebar-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/50'
@@ -123,7 +123,7 @@ export function Sidebar({ className, onClose }: SidebarProps) {
                   >
                     <Link
                       to={item.href}
-                      className="flex items-center gap-3"
+                      className="flex items-center gap-3 cursor-pointer"
                       onClick={(e) => {
                         e.preventDefault();
                         window.location.href = item.href;
