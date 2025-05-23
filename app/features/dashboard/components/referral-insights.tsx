@@ -246,29 +246,6 @@ export function ReferralInsights({
             </div>
           </div>
 
-          {/* 네트워크 시각화 미니 프리뷰 */}
-          <div className="p-4 bg-muted/10 border border-border/30 rounded-lg">
-            <div className="text-center">
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <div className="w-3 h-3 bg-primary rounded-full"></div>
-                <div className="w-6 h-0.5 bg-muted-foreground/30"></div>
-                <div className="w-2 h-2 bg-muted-foreground rounded-full"></div>
-                <div className="w-4 h-0.5 bg-muted-foreground/30"></div>
-                <div className="w-2 h-2 bg-muted-foreground rounded-full"></div>
-              </div>
-              <div className="flex items-center justify-center gap-2 mb-3">
-                <div className="w-2 h-2 bg-muted-foreground rounded-full"></div>
-                <div className="w-4 h-0.5 bg-muted-foreground/30"></div>
-                <div className="w-3 h-3 bg-primary rounded-full"></div>
-                <div className="w-4 h-0.5 bg-muted-foreground/30"></div>
-                <div className="w-2 h-2 bg-muted-foreground rounded-full"></div>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                소개 네트워크 연결 구조
-              </p>
-            </div>
-          </div>
-
           {/* 인사이트 */}
           <div className="p-3 bg-muted/20 border border-border/30 rounded-lg">
             <div className="flex items-start gap-2">
