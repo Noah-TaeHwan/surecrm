@@ -148,6 +148,7 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -165,7 +166,7 @@
   [tabindex]:not([tabindex="-1"]),
   [onclick],
   [data-clickable="true"],
-  /* Shadcn UI 컴포넌트들 */
+  /* Shadcn UI 컴포넌트들 - 기존 Radix 기반 */
   [data-radix-dropdown-menu-trigger],
   [data-radix-dialog-trigger],
   [data-radix-popover-trigger],
@@ -177,12 +178,81 @@
   [data-radix-checkbox-root],
   [data-radix-radio-group-item],
   [data-radix-slider-thumb],
+  [data-radix-menubar-trigger],
+  [data-radix-navigation-menu-trigger],
+  [data-radix-toast-action],
+  [data-radix-toast-close],
+  [data-radix-context-menu-trigger],
+  [data-radix-hover-card-trigger],
+  [data-radix-tooltip-trigger],
+  /* Shadcn UI 컴포넌트들 - 최신 data-slot 기반 */
+  [data-slot="button"],
+  [data-slot="toggle"],
+  [data-slot="tabs-trigger"],
+  [data-slot="accordion-trigger"],
+  [data-slot="dropdown-menu-trigger"],
+  [data-slot="select-trigger"],
+  [data-slot="dialog-trigger"],
+  [data-slot="popover-trigger"],
+  [data-slot="menubar-trigger"],
+  [data-slot="navigation-menu-trigger"],
+  [data-slot="context-menu-trigger"],
+  [data-slot="hover-card-trigger"],
+  [data-slot="tooltip-trigger"],
+  [data-slot="calendar-cell"],
+  [data-slot="pagination-link"],
+  [data-slot="pagination-previous"],
+  [data-slot="pagination-next"],
+  [data-slot="badge"][href],
+  [data-slot="avatar"],
+  [data-slot="card"][onclick],
+  [data-slot="card-header"][onclick],
+  /* ShadCN 특정 클래스들 */
+  .toggle,
+  .toggle[data-state],
+  .dropdown-menu-trigger,
+  .select-trigger,
+  .tabs-trigger,
+  .accordion-trigger,
+  .dialog-trigger,
+  .popover-trigger,
+  .menubar-trigger,
+  .navigation-menu-trigger,
+  .context-menu-trigger,
+  .hover-card-trigger,
+  .tooltip-trigger,
+  .calendar-cell,
+  .pagination-link,
+  .pagination-previous,
+  .pagination-next,
   /* 클릭 가능한 행이나 카드들 */
   .cursor-pointer,
   /* 호버 효과가 있는 행이나 카드 등 */
   .hover\\:bg-gray-50,
   .hover\\:bg-muted,
-  .hover\\:bg-accent {
+  .hover\\:bg-accent,
+  .hover\\:bg-accent\\/50,
+  .hover\\:bg-primary,
+  .hover\\:bg-primary\\/90,
+  .hover\\:bg-secondary,
+  .hover\\:bg-destructive\\/90,
+  /* 일반적인 호버 효과가 있는 요소들 */
+  [class*="hover:bg-"],
+  [class*="hover:text-"],
+  [class*="hover:border-"],
+  [class*="hover:opacity-"],
+  /* 추가 인터랙티브 요소들 */
+  [role="menuitem"],
+  [role="option"],
+  [role="tab"],
+  [role="switch"],
+  [role="checkbox"],
+  [role="radio"],
+  [role="slider"],
+  [role="button"],
+  [role="link"],
+  [aria-expanded],
+  [aria-haspopup] {
     @apply cursor-pointer;
   }
 

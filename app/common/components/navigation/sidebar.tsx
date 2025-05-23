@@ -10,6 +10,7 @@ import {
   Mail,
   Settings,
   ChevronRight,
+  Sparkles,
 } from 'lucide-react';
 import { cn } from '~/lib/utils';
 import { Button } from '~/common/components/ui/button';
@@ -40,6 +41,11 @@ export function Sidebar({ className, onClose }: SidebarProps) {
       label: '소개 네트워크',
       href: '/network',
       icon: <Network className="h-5 w-5" />,
+    },
+    {
+      label: '핵심 소개자',
+      href: '/influencers',
+      icon: <Sparkles className="h-5 w-5" />,
     },
     {
       label: '영업 파이프라인',

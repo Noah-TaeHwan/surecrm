@@ -40,6 +40,7 @@ export default [
   // 보고서 및 설정
   route('reports', 'features/reports/pages/reports-page.tsx'),
   route('settings', 'features/settings/pages/settings-page.tsx'),
+  route('notifications', 'features/notifications/pages/notifications-page.tsx'),
 
   // .well-known 경로 처리 (Chrome DevTools 등)
   route('.well-known/*', 'common/pages/well-known-fallback.tsx'),

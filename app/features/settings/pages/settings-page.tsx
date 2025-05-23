@@ -50,11 +50,12 @@ import {
   CalendarIcon,
   DownloadIcon,
 } from '@radix-ui/react-icons';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { MainLayout } from '~/common/layouts/main-layout';
+import { useSearchParams } from 'react-router';
 
 // 프로필 폼 스키마
 const profileSchema = z.object({
@@ -177,7 +178,11 @@ export default function SettingsPage({
     systemSettings,
   } = loaderData;
 
-  const [activeTab, setActiveTab] = useState('profile');
+  // React Router의 useSearchParams 훅 사용
+  const [searchParams] = useSearchParams();
+  const initialTab = searchParams.get('tab') || 'profile';
+
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [isEditing, setIsEditing] = useState(false);
 
   // 프로필 폼
