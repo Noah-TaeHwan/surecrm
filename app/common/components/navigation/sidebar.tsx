@@ -11,6 +11,7 @@ import {
   Settings,
   ChevronRight,
   Sparkles,
+  UserPlus,
 } from 'lucide-react';
 import { cn } from '~/lib/utils';
 import { Button } from '~/common/components/ui/button';
@@ -55,6 +56,11 @@ export function Sidebar({ className, onClose }: SidebarProps) {
       label: '고객 관리',
       href: '/clients',
       icon: <Users className="h-5 w-5" />,
+    },
+    {
+      label: '나의 팀',
+      href: '/team',
+      icon: <UserPlus className="h-5 w-5" />,
     },
     {
       label: '일정 관리',
