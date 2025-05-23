@@ -1,4 +1,10 @@
-import { useState, useCallback, useEffect } from 'react';
+import {
+  useState,
+  useCallback,
+  useEffect,
+  useRef,
+  useLayoutEffect,
+} from 'react';
 import { Separator } from '~/common/components/ui/separator';
 import { Badge } from '~/common/components/ui/badge';
 import { Button } from '~/common/components/ui/button';
@@ -77,6 +83,12 @@ export default function NetworkSidebar({
   // CSS 로딩 상태 추가
   const [cssLoaded, setCssLoaded] = useState(false);
 
+  // 스크롤 위치 저장을 위한 ref 추가
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const scrollPositionRef = useRef<number>(0);
+  // 필터 변경 중인지 추적하는 상태 추가
+  const [isFilterChanging, setIsFilterChanging] = useState(false);
+
   // 컴포넌트가 마운트된 후 CSS가 로드되었다고 표시
   useEffect(() => {
     // 약간의 지연을 두고 CSS가 로드되었다고 표시 (더 안전하게)
@@ -87,29 +99,57 @@ export default function NetworkSidebar({
     return () => clearTimeout(timer);
   }, []);
 
+  // 필터 변경 후 스크롤 위치 즉시 복원
+  useLayoutEffect(() => {
+    if (scrollAreaRef.current && scrollPositionRef.current > 0) {
+      const scrollContainer = scrollAreaRef.current.querySelector(
+        '[data-radix-scroll-area-viewport]'
+      ) as HTMLElement;
+      if (scrollContainer) {
+        scrollContainer.scrollTop = scrollPositionRef.current;
+      }
+    }
+  });
+
+  // 스크롤 위치 저장
+  const saveScrollPosition = useCallback(() => {
+    if (scrollAreaRef.current) {
+      const scrollContainer = scrollAreaRef.current.querySelector(
+        '[data-radix-scroll-area-viewport]'
+      ) as HTMLElement;
+      if (scrollContainer) {
+        scrollPositionRef.current = scrollContainer.scrollTop;
+      }
+    }
+  }, []);
+
   const handleStageFilterChange = useCallback(
     (value: string) => {
+      saveScrollPosition();
       onFilterChange({ ...filters, stageFilter: value });
     },
-    [filters, onFilterChange]
+    [filters, onFilterChange, saveScrollPosition]
   );
 
   const handleDepthFilterChange = useCallback(
     (value: string) => {
+      saveScrollPosition();
       onFilterChange({ ...filters, depthFilter: value });
     },
-    [filters, onFilterChange]
+    [filters, onFilterChange, saveScrollPosition]
   );
 
   const handleImportanceFilterChange = useCallback(
     (value: number) => {
+      saveScrollPosition();
       onFilterChange({ ...filters, importanceFilter: value });
     },
-    [filters, onFilterChange]
+    [filters, onFilterChange, saveScrollPosition]
   );
 
   const handleInfluencersToggle = useCallback(
     (checked: boolean) => {
+      saveScrollPosition();
       if (checked) {
         onFilterChange({
           ...filters,
@@ -120,17 +160,18 @@ export default function NetworkSidebar({
         onFilterChange({ ...filters, showInfluencersOnly: checked });
       }
     },
-    [filters, onFilterChange]
+    [filters, onFilterChange, saveScrollPosition]
   );
 
   const handleResetFilters = useCallback(() => {
+    saveScrollPosition();
     onFilterChange({
       stageFilter: 'all',
       depthFilter: 'all',
       importanceFilter: 0,
       showInfluencersOnly: false,
     });
-  }, [onFilterChange]);
+  }, [onFilterChange, saveScrollPosition]);
 
   // 현재 적용된 필터 수 계산
   const activeFilterCount = [
@@ -207,7 +248,10 @@ export default function NetworkSidebar({
             variant="ghost"
             size="icon"
             className="h-5 w-5 p-0 ml-1 opacity-60 group-hover:opacity-100"
-            onClick={() => handleStageFilterChange('all')}
+            onClick={() => {
+              saveScrollPosition();
+              handleStageFilterChange('all');
+            }}
           >
             <X size={14} />
           </Button>
@@ -229,7 +273,10 @@ export default function NetworkSidebar({
             variant="ghost"
             size="icon"
             className="h-5 w-5 p-0 ml-1 opacity-60 group-hover:opacity-100"
-            onClick={() => handleDepthFilterChange('all')}
+            onClick={() => {
+              saveScrollPosition();
+              handleDepthFilterChange('all');
+            }}
           >
             <X size={14} />
           </Button>
@@ -260,7 +307,10 @@ export default function NetworkSidebar({
             variant="ghost"
             size="icon"
             className="h-5 w-5 p-0 ml-1 opacity-60 group-hover:opacity-100"
-            onClick={() => handleImportanceFilterChange(0)}
+            onClick={() => {
+              saveScrollPosition();
+              handleImportanceFilterChange(0);
+            }}
           >
             <X size={14} />
           </Button>
@@ -281,7 +331,10 @@ export default function NetworkSidebar({
             variant="ghost"
             size="icon"
             className="h-5 w-5 p-0 ml-1 opacity-60 group-hover:opacity-100"
-            onClick={() => handleInfluencersToggle(false)}
+            onClick={() => {
+              saveScrollPosition();
+              handleInfluencersToggle(false);
+            }}
           >
             <X size={14} />
           </Button>
@@ -358,14 +411,17 @@ export default function NetworkSidebar({
         </div>
       )}
 
-      {/* 스크롤바 초기 숨김을 위한 스타일 추가 */}
+      {/* 스크롤바 초기 숨김을 위한 스타일 추가 + ref 추가 */}
       <div
         className={cn(
           'flex-1 pr-3 h-full',
           cssLoaded ? 'overflow-visible' : 'overflow-hidden'
         )}
       >
-        <ScrollArea className={cn('h-full w-full', !cssLoaded && 'opacity-0')}>
+        <ScrollArea
+          ref={scrollAreaRef}
+          className={cn('h-full w-full', !cssLoaded && 'opacity-0')}
+        >
           <div className="space-y-3 py-2 pb-6">
             {/* 네트워크 현황 */}
             <div className="rounded-lg border">

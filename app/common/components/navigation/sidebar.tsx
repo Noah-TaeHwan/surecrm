@@ -14,7 +14,6 @@ import {
 } from 'lucide-react';
 import { cn } from '~/lib/utils';
 import { Button } from '~/common/components/ui/button';
-import { ScrollArea } from '~/common/components/ui/scroll-area';
 import { Separator } from '~/common/components/ui/separator';
 
 interface SidebarProps {
@@ -105,8 +104,8 @@ export function Sidebar({ className, onClose }: SidebarProps) {
         </Link>
       </div>
 
-      <ScrollArea className="flex-1">
-        <nav className="p-2">
+      <div className="flex-1 overflow-y-auto p-4">
+        <nav>
           <ul className="space-y-2">
             {navItems.map((item) => {
               const isActive = isActiveRoute(item.href);
@@ -136,14 +135,6 @@ export function Sidebar({ className, onClose }: SidebarProps) {
                     >
                       {item.icon}
                       <span className="font-medium">{item.label}</span>
-                      {/* <ChevronRight
-                        className={cn(
-                          'ml-auto h-4 w-4 transition-transform',
-                          isActive
-                            ? 'rotate-90 text-sidebar-accent-foreground/70'
-                            : 'text-sidebar-foreground/50'
-                        )}
-                      /> */}
                     </Link>
                   </Button>
                 </li>
@@ -151,7 +142,7 @@ export function Sidebar({ className, onClose }: SidebarProps) {
             })}
           </ul>
         </nav>
-      </ScrollArea>
+      </div>
 
       <Separator className="bg-sidebar-border" />
 

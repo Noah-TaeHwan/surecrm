@@ -1,6 +1,163 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
+/* 🚀 SCROLLBAR OVERRIDE - 최우선 적용 */
+/* Firefox */
+* {
+  scrollbar-width: thin !important;
+  scrollbar-color: #6b7280 transparent !important;
+}
+
+/* Webkit browsers (Chrome, Safari, Edge) */
+*::-webkit-scrollbar {
+  width: 14px !important;
+  height: 14px !important;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent !important;
+  border-radius: 8px !important;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #6b7280 !important;
+  border-radius: 8px !important;
+  border: 3px solid transparent !important;
+  background-clip: content-box !important;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #4b5563 !important;
+}
+
+/* Dark mode scrollbar */
+.dark *::-webkit-scrollbar-thumb {
+  background: #374151 !important;
+}
+
+.dark *::-webkit-scrollbar-thumb:hover {
+  background: #4b5563 !important;
+}
+
+/* 🎯 LAYOUT SHIFT PREVENTION - 심플하게 */
+html {
+  overflow-y: scroll !important;
+  scrollbar-gutter: stable !important;
+}
+
+/* 🚫 MODAL/DROPDOWN LAYOUT SHIFT FIX */
+/* body에 overflow: hidden이 적용되어도 스크롤바 공간 유지 */
+body {
+  overflow-y: scroll !important;
+  scrollbar-gutter: stable !important;
+}
+
+/* 🔥 SUPER STRONG LAYOUT SHIFT PREVENTION */
+/* 모든 상황에서 스크롤바 공간 강제 확보 */
+html,
+body {
+  overflow-y: scroll !important;
+  scrollbar-gutter: stable !important;
+  width: 100vw !important;
+  max-width: 100% !important;
+}
+
+/* 🛡️ ULTIMATE RADIX UI OVERRIDE */
+/* Radix UI가 body에 적용하는 모든 스타일 완전 무효화 */
+body,
+body[style],
+body.overflow-hidden,
+body[style*='overflow'],
+body[data-scroll-locked],
+body[data-radix-scroll-area-viewport],
+body[data-scroll-locked='true'],
+body[data-radix-portal],
+html:has([data-radix-dialog-overlay]) body,
+html:has([data-radix-dropdown-menu-content]) body,
+html:has([data-radix-select-content]) body,
+html:has([data-radix-popover-content]) body,
+html:has([data-state='open']) body {
+  overflow-y: scroll !important;
+  scrollbar-gutter: stable !important;
+  padding-right: 0 !important;
+  margin-right: 0 !important;
+  width: 100vw !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* 모든 Radix 컴포넌트 관련 body 상태 무효화 */
+body:has([data-radix-dialog-overlay]),
+body:has([data-radix-dropdown-menu-content]),
+body:has([data-radix-select-content]),
+body:has([data-radix-popover-content]),
+body:has([data-radix-tooltip-content]),
+body:has([data-state='open']) {
+  overflow-y: scroll !important;
+  scrollbar-gutter: stable !important;
+  padding-right: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* 🔧 PORTALS AND OVERLAYS HANDLING */
+/* 포털과 오버레이도 스크롤바에 영향 주지 않게 */
+[data-radix-portal],
+[data-radix-dialog-overlay],
+[data-radix-dropdown-menu-content],
+[data-radix-select-content],
+[data-radix-popover-content] {
+  width: calc(100vw - 17px) !important; /* 스크롤바 너비 고려 */
+  max-width: calc(100vw - 17px) !important;
+}
+
+/* 메인 컨테이너도 안정화 */
+#root,
+[data-reactroot],
+.App,
+main {
+  width: 100% !important;
+  max-width: none !important;
+  overflow-x: hidden !important;
+}
+
+/* 🛡️ EMERGENCY LAYOUT LOCK */
+/* 레이아웃 시프트 응급 방지 클래스 */
+.layout-lock,
+.layout-lock body,
+.layout-lock html {
+  overflow-y: scroll !important;
+  scrollbar-gutter: stable !important;
+  width: 100vw !important;
+  max-width: 100% !important;
+  padding-right: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* 🔧 SIDEBAR BUTTON STABILIZATION */
+/* 사이드바 네비게이션 버튼들 크기 고정 */
+nav button,
+nav [role='button'] {
+  min-height: 3rem !important;
+  height: 3rem !important;
+  transition: background-color 0.15s ease, color 0.15s ease !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* 활성/비활성 상태 변경 시에도 크기 유지 */
+nav button[data-state],
+nav .bg-sidebar-accent {
+  min-height: 3rem !important;
+  height: 3rem !important;
+  padding: 0.5rem 0.75rem !important;
+}
+
+/* Link 내부 요소들도 안정화 */
+nav button a {
+  min-height: 2rem !important;
+  padding: 0 !important;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme {
@@ -228,14 +385,14 @@
   /* 클릭 가능한 행이나 카드들 */
   .cursor-pointer,
   /* 호버 효과가 있는 행이나 카드 등 */
-  .hover\\:bg-gray-50,
-  .hover\\:bg-muted,
-  .hover\\:bg-accent,
-  .hover\\:bg-accent\\/50,
-  .hover\\:bg-primary,
-  .hover\\:bg-primary\\/90,
-  .hover\\:bg-secondary,
-  .hover\\:bg-destructive\\/90,
+  .hover\:bg-gray-50,
+  .hover\:bg-muted,
+  .hover\:bg-accent,
+  .hover\:bg-accent\/50,
+  .hover\:bg-primary,
+  .hover\:bg-primary\/90,
+  .hover\:bg-secondary,
+  .hover\:bg-destructive\/90,
   /* 일반적인 호버 효과가 있는 요소들 */
   [class*="hover:bg-"],
   [class*="hover:text-"],
