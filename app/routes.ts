@@ -41,7 +41,12 @@ export default [
   route('reports', 'features/reports/pages/reports-page.tsx'),
   route('settings', 'features/settings/pages/settings-page.tsx'),
 
+  // .well-known 경로 처리 (Chrome DevTools 등)
+  route('.well-known/*', 'common/pages/well-known-fallback.tsx'),
+
   // 기타 페이지
-  route('404', 'common/pages/error/not-found-page.tsx'),
   route('terms', 'common/pages/terms-page.tsx'),
+
+  // Catch-all 라우트 (모든 일치하지 않는 경로를 404 페이지로 처리)
+  route('*', 'common/pages/error/not-found-page.tsx'),
 ] satisfies RouteConfig;

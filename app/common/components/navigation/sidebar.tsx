@@ -52,7 +52,7 @@ export function Sidebar({ className, onClose }: SidebarProps) {
       icon: <Users className="h-5 w-5" />,
     },
     {
-      label: '미팅 일정',
+      label: '일정 관리',
       href: '/calendar',
       icon: <Calendar className="h-5 w-5" />,
     },
@@ -67,6 +67,16 @@ export function Sidebar({ className, onClose }: SidebarProps) {
       icon: <Settings className="h-5 w-5" />,
     },
   ];
+
+  // 하위 경로도 포함하여 활성 상태를 확인하는 함수
+  const isActiveRoute = (href: string) => {
+    if (href === '/dashboard') {
+      // 대시보드는 정확히 일치하거나 루트 경로일 때만 활성
+      return location.pathname === href || location.pathname === '/';
+    }
+    // 다른 메뉴들은 해당 경로로 시작하면 활성
+    return location.pathname.startsWith(href);
+  };
 
   return (
     <div
@@ -93,7 +103,7 @@ export function Sidebar({ className, onClose }: SidebarProps) {
         <nav className="p-2">
           <ul className="space-y-2">
             {navItems.map((item) => {
-              const isActive = location.pathname === item.href;
+              const isActive = isActiveRoute(item.href);
               return (
                 <li key={item.href}>
                   <Button

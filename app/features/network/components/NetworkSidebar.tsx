@@ -607,7 +607,7 @@ export default function NetworkSidebar({
             </Accordion>
 
             {/* 추가 여백 - 줄임 */}
-            <div className="h-4" aria-hidden="true"></div>
+            <div className="h-16" aria-hidden="true"></div>
           </div>
         </ScrollArea>
       </div>

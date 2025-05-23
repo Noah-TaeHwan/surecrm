@@ -151,6 +151,78 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* 클릭 가능한 요소들에 자동으로 cursor-pointer 적용 */
+  button,
+  [role="button"],
+  [type="button"],
+  [type="submit"],
+  [type="reset"],
+  a,
+  label[for],
+  label:has(input),
+  select,
+  [tabindex]:not([tabindex="-1"]),
+  [onclick],
+  [data-clickable="true"],
+  /* Shadcn UI 컴포넌트들 */
+  [data-radix-dropdown-menu-trigger],
+  [data-radix-dialog-trigger],
+  [data-radix-popover-trigger],
+  [data-radix-select-trigger],
+  [data-radix-accordion-trigger],
+  [data-radix-tabs-trigger],
+  [data-radix-switch-root],
+  [data-radix-switch-thumb],
+  [data-radix-checkbox-root],
+  [data-radix-radio-group-item],
+  [data-radix-slider-thumb],
+  /* 클릭 가능한 행이나 카드들 */
+  .cursor-pointer,
+  /* 호버 효과가 있는 행이나 카드 등 */
+  .hover\\:bg-gray-50,
+  .hover\\:bg-muted,
+  .hover\\:bg-accent {
+    @apply cursor-pointer;
+  }
+
+  /* 비활성화된 요소들은 cursor-pointer 제거 */
+  button:disabled,
+  [disabled],
+  [aria-disabled='true'] {
+    @apply cursor-not-allowed;
+  }
+
+  /* 텍스트 선택 가능한 요소들 */
+  input[type='text'],
+  input[type='email'],
+  input[type='password'],
+  input[type='search'],
+  input[type='tel'],
+  input[type='url'],
+  textarea {
+    @apply cursor-text;
+  }
+
+  /* 추가 커서 유틸리티 클래스들 */
+  .cursor-grab:active {
+    @apply cursor-grabbing;
+  }
+
+  /* 로딩 상태의 요소들 */
+  .loading {
+    @apply cursor-wait;
+  }
+
+  /* 드래그 가능한 요소들 */
+  [draggable='true'] {
+    @apply cursor-grab;
+  }
+
+  /* 리사이즈 가능한 요소들 */
+  .resize {
+    @apply cursor-col-resize;
+  }
 }
 
 @keyframes shimmer {
