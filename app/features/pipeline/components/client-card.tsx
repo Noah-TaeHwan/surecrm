@@ -15,29 +15,35 @@ import {
   DropdownMenuTrigger,
 } from '~/common/components/ui/dropdown-menu';
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '~/common/components/ui/tooltip';
-import {
   Calendar,
   Clock,
-  Edit,
   MoreVertical,
   Phone,
   Tag,
   Trash,
-  User,
   Users,
+  Briefcase,
+  Shield,
+  Car,
+  Baby,
+  Heart,
+  Home,
+  ExternalLink,
 } from 'lucide-react';
 import { Link } from 'react-router';
+import type { InsuranceInfo } from '~/features/pipeline/types';
 
 interface ClientCardProps {
   id: string;
   name: string;
   phone: string;
   email?: string;
+  address?: string;
+  occupation?: string;
+  telecomProvider?: string;
+  height?: number;
+  weight?: number;
+  hasDrivingLicense?: boolean;
   referredBy?: {
     id: string;
     name: string;
@@ -51,6 +57,8 @@ interface ClientCardProps {
   };
   note?: string;
   tags?: string[];
+  insuranceInfo?: InsuranceInfo[];
+  profileImageUrl?: string;
   isDragging?: boolean;
 }
 
@@ -58,192 +66,324 @@ export function ClientCard({
   id,
   name,
   phone,
-  email,
+  occupation,
   referredBy,
   importance,
   lastContactDate,
   nextMeeting,
   note,
   tags,
+  insuranceInfo,
   isDragging,
 }: ClientCardProps) {
-  const getImportanceColor = (importance: string) => {
+  const getImportanceConfig = (importance: string) => {
     switch (importance) {
       case 'high':
-        return 'border-l-red-500';
+        return {
+          borderColor: 'border-l-red-500',
+          badgeColor: 'bg-red-50 text-red-700 border-red-200',
+          dotColor: 'bg-red-500',
+          label: '높음',
+        };
       case 'medium':
-        return 'border-l-yellow-500';
+        return {
+          borderColor: 'border-l-amber-500',
+          badgeColor: 'bg-amber-50 text-amber-700 border-amber-200',
+          dotColor: 'bg-amber-500',
+          label: '중간',
+        };
       case 'low':
-        return 'border-l-blue-500';
+        return {
+          borderColor: 'border-l-blue-500',
+          badgeColor: 'bg-blue-50 text-blue-700 border-blue-200',
+          dotColor: 'bg-blue-500',
+          label: '낮음',
+        };
       default:
-        return 'border-l-transparent';
+        return {
+          borderColor: 'border-l-border',
+          badgeColor: 'bg-muted text-muted-foreground border-border',
+          dotColor: 'bg-muted-foreground',
+          label: '',
+        };
     }
   };
 
-  const getImportanceLabel = (importance: string) => {
-    switch (importance) {
-      case 'high':
-        return '높음';
-      case 'medium':
-        return '중간';
-      case 'low':
-        return '낮음';
+  const getInsuranceIcon = (type: string) => {
+    switch (type) {
+      case 'auto':
+        return <Car className="h-3 w-3" />;
+      case 'prenatal':
+        return <Baby className="h-3 w-3" />;
+      case 'health':
+        return <Heart className="h-3 w-3" />;
+      case 'property':
+        return <Home className="h-3 w-3" />;
       default:
-        return '';
+        return <Shield className="h-3 w-3" />;
     }
   };
 
-  const getImportanceBadgeColor = (importance: string) => {
-    switch (importance) {
-      case 'high':
-        return 'bg-red-100 text-red-800 border-red-200';
-      case 'medium':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'low':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
+  const getInsuranceLabel = (type: string) => {
+    switch (type) {
+      case 'auto':
+        return '자동차';
+      case 'prenatal':
+        return '태아';
+      case 'health':
+        return '건강';
+      case 'life':
+        return '생명';
+      case 'property':
+        return '재산';
       default:
-        return '';
+        return '기타';
     }
   };
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
+    const now = new Date();
+    const diffDays = Math.ceil(
+      (date.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+    );
+
+    if (diffDays === 0) return '오늘';
+    if (diffDays === 1) return '내일';
+    if (diffDays > 0 && diffDays <= 7) return `${diffDays}일 후`;
+
     return new Intl.DateTimeFormat('ko-KR', {
-      year: 'numeric',
-      month: 'long',
+      month: 'short',
       day: 'numeric',
     }).format(date);
   };
 
+  const formatLastContact = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffDays = Math.floor(
+      (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24)
+    );
+
+    if (diffDays === 0) return '오늘';
+    if (diffDays === 1) return '어제';
+    if (diffDays <= 7) return `${diffDays}일 전`;
+    if (diffDays <= 30) return `${Math.floor(diffDays / 7)}주 전`;
+
+    return `${Math.floor(diffDays / 30)}개월 전`;
+  };
+
+  const importanceConfig = getImportanceConfig(importance);
+
   return (
     <Card
-      className={`relative border-l-4 ${getImportanceColor(
-        importance
-      )} shadow-sm hover:shadow transition-all ${
-        isDragging ? 'shadow-md opacity-90' : ''
-      }`}
+      className={`relative border-l-4 ${
+        importanceConfig.borderColor
+      } hover:shadow-md transition-all duration-200 ${
+        isDragging ? 'shadow-lg opacity-75 transform rotate-1' : ''
+      } bg-card border-border`}
     >
-      <CardHeader className="pb-2 flex flex-row justify-between items-start">
-        <div className="space-y-2">
-          <div className="flex items-center">
-            <h3 className="font-medium text-lg">{name}</h3>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6 ml-1 text-muted-foreground"
-                    asChild
-                  >
-                    <Link to={`/clients/${id}`}>
-                      <Edit className="h-3.5 w-3.5" />
-                    </Link>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>상세 정보 보기</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+      {/* 카드 헤더 - 고객 기본 정보 */}
+      <CardHeader className="pb-3">
+        <div className="flex items-start justify-between">
+          <div className="flex-1 min-w-0 space-y-2">
+            <div className="flex items-center space-x-2">
+              <h3 className="font-semibold text-base truncate text-foreground">
+                {name}
+              </h3>
+              <div
+                className={`w-2 h-2 rounded-full ${importanceConfig.dotColor} flex-shrink-0`}
+              />
+            </div>
+
+            <div className="flex items-center text-sm text-muted-foreground">
+              <Phone className="h-3 w-3 mr-1.5 flex-shrink-0" />
+              <span className="truncate">{phone}</span>
+            </div>
+
+            {/* 소개자 정보 */}
+            {referredBy && (
+              <div className="flex items-center text-xs text-muted-foreground bg-muted px-2 py-1 rounded-md">
+                <Users className="h-3 w-3 mr-1" />
+                <span className="truncate">소개: {referredBy.name}</span>
+              </div>
+            )}
           </div>
-          <div className="flex items-center text-sm text-muted-foreground">
-            <Phone className="h-3 w-3 mr-1" />
-            <span>{phone}</span>
+
+          <div className="flex items-start space-x-1 flex-shrink-0">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6 text-muted-foreground hover:text-foreground"
+              asChild
+            >
+              <Link to={`/clients/${id}`}>
+                <ExternalLink className="h-3 w-3" />
+              </Link>
+            </Button>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 text-muted-foreground hover:text-foreground transition-colors duration-200 bg-transparent border-0 rounded-md focus:ring-2 focus:ring-ring focus:ring-offset-0 focus:outline-none disabled:pointer-events-none disabled:opacity-50"
+                  style={{
+                    // FOUC 방지를 위한 명시적 스타일
+                    appearance: 'none',
+                    WebkitAppearance: 'none',
+                    MozAppearance: 'none',
+                    background: 'transparent',
+                    border: '0',
+                    padding: '0.25rem',
+                    fontSize: '0',
+                    lineHeight: '1',
+                  }}
+                >
+                  <MoreVertical className="h-3 w-3" />
+                  <span className="sr-only">메뉴 열기</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="min-w-[160px]">
+                <DropdownMenuLabel>고객 관리</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link to={`/clients/${id}`}>상세 정보</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to={`/clients/edit/${id}`}>정보 수정</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to={`/calendar?client=${id}`}>미팅 예약</Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="text-destructive">
+                  <Trash className="h-4 w-4 mr-2" />
+                  삭제
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <MoreVertical className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>고객 관리</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild className="cursor-pointer">
-              <Link to={`/clients/${id}`}>상세 정보</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild className="cursor-pointer">
-              <Link to={`/clients/edit/${id}`}>정보 수정</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild className="cursor-pointer">
-              <Link to={`/calendar?client=${id}`}>미팅 예약</Link>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-red-600 cursor-pointer">
-              <Trash className="h-4 w-4 mr-2" />
-              삭제
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
       </CardHeader>
 
-      <CardContent className="pb-2 text-xs">
-        <div className="flex items-center mb-6">
-          <span
-            className={`text-sm px-2 py-0.5 rounded-full font-medium ${getImportanceBadgeColor(
-              importance
-            )}`}
-          >
-            중요도: {getImportanceLabel(importance)}
-          </span>
-        </div>
-
-        {referredBy && (
-          <div className="text-sm flex items-center text-muted-foreground mb-2">
-            <Users className="h-3 w-3 mr-1 flex-shrink-0" />
-            <span className="truncate">
-              소개자: <span className="font-medium">{referredBy.name}</span>
-            </span>
-          </div>
-        )}
-
+      {/* 카드 콘텐츠 - 핵심 영업 정보 */}
+      <CardContent className="pb-3 space-y-3">
+        {/* 다음 미팅 - 심플하게 표시 */}
         {nextMeeting && (
-          <div className="text-sm flex items-start text-muted-foreground mb-2">
-            <Calendar className="h-3 w-3 mr-1 mt-0.5 flex-shrink-0" />
-            <div>
-              <div className="font-medium">{nextMeeting.type}</div>
-              <div className="flex items-center">
-                <span>
-                  {formatDate(nextMeeting.date)} {nextMeeting.time}
-                </span>
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+            <div className="flex items-center space-x-2">
+              <Calendar className="h-4 w-4 text-blue-600 flex-shrink-0" />
+              <div>
+                <div className="text-blue-700 text-sm font-medium">
+                  다음 미팅
+                </div>
+                <div className="text-blue-600 text-xs flex items-center space-x-1">
+                  <span>{formatDate(nextMeeting.date)}</span>
+                  <span>•</span>
+                  <span>{nextMeeting.time}</span>
+                </div>
               </div>
             </div>
           </div>
         )}
 
-        {lastContactDate && (
-          <div className="text-sm flex items-center text-muted-foreground mb-2">
-            <Clock className="h-3 w-3 mr-1 flex-shrink-0" />
-            <span>마지막 연락: {formatDate(lastContactDate)}</span>
+        {/* 직업 정보 */}
+        {occupation && (
+          <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+            <Briefcase className="h-3 w-3 flex-shrink-0" />
+            <span className="truncate">{occupation}</span>
           </div>
         )}
 
-        {note && (
-          <div className="mb-2 text-muted-foreground text-sm line-clamp-2">
-            {note}
+        {/* 보험 정보 - 간결하게 */}
+        {insuranceInfo && insuranceInfo.length > 0 && (
+          <div className="space-y-2">
+            <div className="text-xs font-medium text-muted-foreground">
+              관심 보험
+            </div>
+            <div className="flex flex-wrap gap-1">
+              {insuranceInfo.slice(0, 3).map((insurance) => (
+                <Badge
+                  key={insurance.id}
+                  variant="outline"
+                  className="text-xs h-6 flex items-center bg-muted border-border"
+                >
+                  {getInsuranceIcon(insurance.type)}
+                  <span className="ml-1.5">
+                    {getInsuranceLabel(insurance.type)}
+                  </span>
+                </Badge>
+              ))}
+              {insuranceInfo.length > 3 && (
+                <Badge
+                  variant="outline"
+                  className="text-xs h-6 bg-muted border-border"
+                >
+                  +{insuranceInfo.length - 3}
+                </Badge>
+              )}
+            </div>
           </div>
         )}
 
+        {/* 태그 - 최대 2개만 표시 */}
         {tags && tags.length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-2">
-            {tags.map((tag, index) => (
-              <Badge key={index} variant="secondary" className="text-sm">
+          <div className="flex flex-wrap gap-1">
+            {tags.slice(0, 2).map((tag, index) => (
+              <Badge
+                key={index}
+                variant="secondary"
+                className="text-xs h-5 bg-accent text-accent-foreground"
+              >
                 <Tag className="h-2.5 w-2.5 mr-1" />
                 {tag}
               </Badge>
             ))}
+            {tags.length > 2 && (
+              <Badge
+                variant="secondary"
+                className="text-xs h-5 bg-muted text-muted-foreground"
+              >
+                +{tags.length - 2}
+              </Badge>
+            )}
+          </div>
+        )}
+
+        {/* 메모 */}
+        {note && (
+          <div className="text-sm text-muted-foreground bg-muted p-2 rounded border-l-2 border-border">
+            {note}
           </div>
         )}
       </CardContent>
 
-      <CardFooter className="pt-0 pb-2 justify-between">
-        <div className="text-sm flex items-center text-muted-foreground">
-          <User className="h-3 w-3 mr-1" />
-          <span className="truncate">#{id.split('-')[1]}</span>
+      {/* 카드 푸터 - 상태 정보 */}
+      <CardFooter className="pt-0 pb-3 flex items-center justify-between">
+        <div className="flex items-center space-x-3">
+          <span
+            className={`text-xs px-2 py-1 rounded-full font-medium border ${importanceConfig.badgeColor}`}
+          >
+            {importanceConfig.label}
+          </span>
+
+          {lastContactDate && !nextMeeting && (
+            <div className="flex items-center text-xs text-muted-foreground">
+              <Clock className="h-3 w-3 mr-1" />
+              <span>{formatLastContact(lastContactDate)}</span>
+            </div>
+          )}
         </div>
+
+        {nextMeeting && (
+          <Badge
+            variant="outline"
+            className="text-xs h-5 bg-green-50 border-green-300 text-green-700"
+          >
+            미팅 예정
+          </Badge>
+        )}
       </CardFooter>
     </Card>
   );

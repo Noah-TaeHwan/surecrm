@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '~/common/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Plus, Users } from 'lucide-react';
 import { ClientCard } from './client-card';
-import type { PipelineStage, Client } from '../pages/+types/pipeline-page';
+import type { PipelineStage, Client } from '~/features/pipeline/types';
 
 interface PipelineBoardProps {
   stages: PipelineStage[];
@@ -53,12 +53,6 @@ export function PipelineBoard({
     dragSourceStageId.current = stageId;
     e.dataTransfer.setData('text/plain', clientId);
     e.dataTransfer.effectAllowed = 'move';
-
-    // 필요한 경우 드래그 이미지 설정
-    // const dragElement = document.getElementById(`client-card-${clientId}`);
-    // if (dragElement) {
-    //   e.dataTransfer.setDragImage(dragElement, 20, 20);
-    // }
   };
 
   // 드래그 오버 핸들러 (드롭 영역에 들어왔을 때)
@@ -69,14 +63,26 @@ export function PipelineBoard({
     e.preventDefault();
     e.stopPropagation();
     e.dataTransfer.dropEffect = 'move';
-    setDraggingOver(stageId);
+
+    // 같은 단계로의 드롭은 허용하지 않음
+    if (dragSourceStageId.current !== stageId) {
+      setDraggingOver(stageId);
+    }
   };
 
   // 드래그 리브 핸들러 (드롭 영역에서 나갈 때)
   const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    setDraggingOver(null);
+
+    // 자식 요소로 이동하는 경우 드래그 오버 상태를 유지
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX;
+    const y = e.clientY;
+
+    if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+      setDraggingOver(null);
+    }
   };
 
   // 드롭 핸들러
@@ -118,77 +124,99 @@ export function PipelineBoard({
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 overflow-x-auto min-h-[calc(100vh-230px)]">
-      {stages.map((stage) => (
-        <div
-          key={stage.id}
-          className={`flex flex-col h-full min-w-[280px] ${
-            draggingOver === stage.id ? 'ring-2 ring-primary/50 rounded-lg' : ''
-          }`}
-          onDragOver={(e) => handleDragOver(e, stage.id)}
-          onDragLeave={handleDragLeave}
-          onDrop={(e) => handleDrop(e, stage.id)}
-        >
-          {/* 단계 헤더 */}
-          <div
-            className="flex justify-between items-center p-2 rounded-t-lg mb-2"
-            style={{ backgroundColor: `${stage.color}20` }}
-          >
-            <div className="flex items-center gap-2">
-              <div
-                className="w-3 h-3 rounded-full"
-                style={{ backgroundColor: stage.color }}
-              ></div>
-              <h3 className="font-medium text-sm">{stage.name}</h3>
-              <span className="text-xs text-muted-foreground">
-                ({clientsByStage[stage.id]?.length || 0})
-              </span>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0 text-muted-foreground"
-              onClick={() => onAddClientToStage?.(stage.id)}
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
-          </div>
+    <div className="w-full">
+      {/* 칸반보드 컨텐츠 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+        {stages.map((stage) => {
+          const isDragTarget = draggingOver === stage.id;
+          const canDrop =
+            draggedClientId && dragSourceStageId.current !== stage.id;
 
-          {/* 고객 카드 컨테이너 */}
-          <div className="bg-muted/30 p-2 rounded-lg flex-1 overflow-y-auto space-y-2">
-            {clientsByStage[stage.id]?.length > 0 ? (
-              clientsByStage[stage.id].map((client) => (
-                <div
-                  key={client.id}
-                  id={`client-card-${client.id}`}
-                  draggable
-                  onDragStart={(e) => handleDragStart(e, client.id, stage.id)}
-                  onDragEnd={handleDragEnd}
-                  className="cursor-grab active:cursor-grabbing"
-                >
-                  <ClientCard
-                    {...client}
-                    isDragging={client.id === draggedClientId}
-                  />
-                </div>
-              ))
-            ) : (
-              <div className="flex flex-col items-center justify-center h-32 border border-dashed rounded-lg text-muted-foreground text-sm">
-                <p>이 단계에 고객이 없습니다</p>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="mt-2"
-                  onClick={() => onAddClientToStage?.(stage.id)}
-                >
-                  <Plus className="h-4 w-4 mr-1" />
-                  고객 추가
-                </Button>
+          return (
+            <div
+              key={stage.id}
+              className={`min-w-[300px] transition-all duration-200 ${
+                isDragTarget && canDrop
+                  ? 'transform scale-[1.02] drop-shadow-lg'
+                  : ''
+              }`}
+              onDragOver={(e) => handleDragOver(e, stage.id)}
+              onDragLeave={handleDragLeave}
+              onDrop={(e) => handleDrop(e, stage.id)}
+            >
+              {/* 고객 카드 컨테이너 */}
+              <div
+                className={`space-y-3 p-1 transition-all duration-200 ${
+                  isDragTarget && canDrop
+                    ? 'bg-accent/20 border-2 border-dashed border-accent rounded-lg p-3'
+                    : ''
+                }`}
+              >
+                {clientsByStage[stage.id]?.length > 0 ? (
+                  clientsByStage[stage.id].map((client) => (
+                    <div
+                      key={client.id}
+                      id={`client-card-${client.id}`}
+                      draggable
+                      onDragStart={(e) =>
+                        handleDragStart(e, client.id, stage.id)
+                      }
+                      onDragEnd={handleDragEnd}
+                      className={`transition-all duration-200 ${
+                        client.id === draggedClientId
+                          ? 'cursor-grabbing opacity-50 transform rotate-1 scale-95'
+                          : 'cursor-grab hover:transform hover:scale-[1.02]'
+                      }`}
+                    >
+                      <ClientCard
+                        {...client}
+                        isDragging={client.id === draggedClientId}
+                      />
+                    </div>
+                  ))
+                ) : (
+                  <div
+                    className={`flex flex-col items-center justify-center h-40 border-2 border-dashed rounded-lg transition-all duration-200 ${
+                      isDragTarget && canDrop
+                        ? 'border-primary bg-primary/5 text-primary'
+                        : 'border-border text-muted-foreground hover:border-border/60 hover:bg-muted/20'
+                    }`}
+                  >
+                    {isDragTarget && canDrop ? (
+                      <>
+                        <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-3">
+                          <Plus className="h-6 w-6 text-primary" />
+                        </div>
+                        <p className="text-sm font-medium">
+                          여기에 고객을 놓으세요
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-3">
+                          <Users className="h-6 w-6 text-muted-foreground" />
+                        </div>
+                        <p className="text-sm text-muted-foreground mb-2">
+                          이 단계에 고객이 없습니다
+                        </p>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-xs"
+                          onClick={() => onAddClientToStage?.(stage.id)}
+                        >
+                          <Plus className="h-3 w-3 mr-1" />
+                          고객 추가
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        </div>
-      ))}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
