@@ -58,9 +58,9 @@ export function WarpBackground({
             r="50"
             fill="url(#warpBackgroundGradient)"
             animate={{
-              r: ['35%', '50%'],
-              cx: ['35%', '65%'],
-              cy: ['35%', '65%'],
+              r: [35, 50],
+              cx: [35, 65],
+              cy: [35, 65],
             }}
             transition={{
               duration: speed * 1.2,
@@ -75,9 +75,9 @@ export function WarpBackground({
             r="50"
             fill="url(#warpBackgroundGradient)"
             animate={{
-              r: ['45%', '30%'],
-              cx: ['65%', '35%'],
-              cy: ['45%', '55%'],
+              r: [45, 30],
+              cx: [65, 35],
+              cy: [45, 55],
             }}
             transition={{
               duration: speed,
@@ -92,9 +92,9 @@ export function WarpBackground({
             r="50"
             fill="url(#warpBackgroundGradient)"
             animate={{
-              r: ['25%', '40%'],
-              cx: ['45%', '55%'],
-              cy: ['65%', '35%'],
+              r: [25, 40],
+              cx: [45, 55],
+              cy: [65, 35],
             }}
             transition={{
               duration: speed * 0.8,

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { cn } from '../../../lib/utils';
 
 interface Particle {
@@ -31,9 +31,10 @@ export function Particles({
   speed = 1,
 }: ParticlesProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [particles, setParticles] = useState<Particle[]>([]);
+  const particlesRef = useRef<Particle[]>([]);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const animationFrameId = useRef<number | null>(null);
+  const isAnimating = useRef(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -54,13 +55,13 @@ export function Particles({
       if (animationFrameId.current !== null) {
         cancelAnimationFrame(animationFrameId.current);
       }
+      isAnimating.current = false;
     };
   }, []);
 
-  useEffect(() => {
+  const initializeParticles = useCallback(() => {
     if (dimensions.width === 0 || dimensions.height === 0) return;
 
-    // Initialize particles
     const newParticles: Particle[] = [];
     for (let i = 0; i < quantity; i++) {
       newParticles.push({
@@ -73,20 +74,24 @@ export function Particles({
         opacity: Math.random() * 0.5 + 0.3,
       });
     }
-    setParticles(newParticles);
+    particlesRef.current = newParticles;
   }, [dimensions, quantity, color, minSize, maxSize, speed]);
 
-  useEffect(() => {
+  const animate = useCallback(() => {
     const canvas = canvasRef.current;
-    if (!canvas || particles.length === 0) return;
+    if (!canvas || isAnimating.current) return;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const animate = () => {
+    isAnimating.current = true;
+
+    const animateFrame = () => {
+      if (!isAnimating.current) return;
+
       ctx.clearRect(0, 0, dimensions.width, dimensions.height);
 
-      const updatedParticles = particles.map((particle) => {
+      particlesRef.current = particlesRef.current.map((particle) => {
         // Draw particle
         ctx.beginPath();
         ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
@@ -116,18 +121,32 @@ export function Particles({
         };
       });
 
-      setParticles(updatedParticles);
-      animationFrameId.current = requestAnimationFrame(animate);
+      animationFrameId.current = requestAnimationFrame(animateFrame);
     };
 
-    animate();
+    animateFrame();
+  }, [dimensions]);
+
+  useEffect(() => {
+    initializeParticles();
+  }, [initializeParticles]);
+
+  useEffect(() => {
+    if (
+      particlesRef.current.length > 0 &&
+      dimensions.width > 0 &&
+      dimensions.height > 0
+    ) {
+      animate();
+    }
 
     return () => {
+      isAnimating.current = false;
       if (animationFrameId.current !== null) {
         cancelAnimationFrame(animationFrameId.current);
       }
     };
-  }, [particles, dimensions]);
+  }, [animate, dimensions]);
 
   return <canvas ref={canvasRef} className={cn('w-full h-full', className)} />;
 }

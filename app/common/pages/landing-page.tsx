@@ -44,13 +44,16 @@ import {
   FileText,
   Globe as GlobeIcon,
   MessageSquare,
+  TrendingUp,
 } from 'lucide-react';
 import { WarpBackground } from '~/common/components/ui/warp-background';
 import { MagicCard } from '~/common/components/ui/magic-card';
 import { TextReveal } from '~/common/components/ui/text-reveal';
 import { ScrollProgress } from '~/common/components/ui/scroll-progress';
 import { FloatingNavbar } from '~/common/components/ui/floating-navbar';
-import { Globe } from '~/common/components/ui/globe';
+import { FlickeringGrid } from '~/common/components/magicui/flickering-grid';
+import { AnimatedGridPattern } from '~/common/components/magicui/animated-grid-pattern';
+import { AuroraText } from '~/common/components/ui/aurora-text';
 
 export default function LandingPage() {
   const navItems = [
@@ -137,8 +140,18 @@ export default function LandingPage() {
       </section>
 
       {/* 주요 특징 섹션 */}
-      <section id="features" className="relative py-20 overflow-hidden">
-        <WarpBackground className="absolute inset-0 opacity-10" />
+      <section
+        id="features"
+        className="relative py-20 overflow-hidden bg-muted/30"
+      >
+        <FlickeringGrid
+          className="absolute inset-0 opacity-10"
+          squareSize={4}
+          gridGap={6}
+          color="#6B7280"
+          maxOpacity={0.3}
+          flickerChance={0.1}
+        />
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center mb-16 max-w-2xl mx-auto">
             <Badge
@@ -207,13 +220,14 @@ export default function LandingPage() {
       </section>
 
       {/* 활용 사례 탭 섹션 */}
-      <section id="use-cases" className="py-20 relative">
+      <section id="use-cases" className="py-20 relative bg-background">
         <DotPattern
-          className="absolute inset-0 opacity-20 pointer-events-none"
-          width={30}
-          height={30}
-          radius={1}
-          color="rgba(var(--primary-rgb), 0.4)"
+          className="absolute inset-0 opacity-15 pointer-events-none"
+          width={28}
+          height={28}
+          gap={12}
+          radius={1.2}
+          color="rgba(var(--primary-rgb), 0.25)"
         />
 
         <div className="container mx-auto px-4 relative">
@@ -225,11 +239,12 @@ export default function LandingPage() {
               활용 사례
             </Badge>
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              <span className="text-primary">어떻게</span>{' '}
               <SparklesText
                 sparklesCount={8}
-                colors={{ first: '#4F46E5', second: '#9333EA' }}
+                colors={{ first: '#F4731F', second: '#A73F03' }}
               >
-                어떻게 활용할 수 있나요?
+                활용할 수 있나요?
               </SparklesText>
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
@@ -237,134 +252,323 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <Tabs defaultValue="network" className="max-w-4xl mx-auto">
-            <TabsList className="grid grid-cols-3 mb-8 p-0 w-full max-w-md mx-auto rounded-full">
-              <TabsTrigger value="network" className="rounded-full">
-                소개 관계 시각화
+          <Tabs defaultValue="network" className="max-w-5xl mx-auto">
+            <TabsList className="grid grid-cols-3 mb-12 p-1 w-full max-w-lg mx-auto rounded-2xl bg-muted/20 backdrop-blur-sm">
+              <TabsTrigger
+                value="network"
+                className="rounded-xl py-3 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300"
+              >
+                <GlobeIcon className="w-4 h-4 mr-2" />
+                관계 시각화
               </TabsTrigger>
-              <TabsTrigger value="pipeline" className="rounded-full">
+              <TabsTrigger
+                value="pipeline"
+                className="rounded-xl py-3 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300"
+              >
+                <TrendingUp className="w-4 h-4 mr-2" />
                 영업 관리
               </TabsTrigger>
-              <TabsTrigger value="data" className="rounded-full">
-                데이터 분석
+              <TabsTrigger
+                value="data"
+                className="rounded-xl py-3 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300"
+              >
+                <BarChart2 className="w-4 h-4 mr-2" />
+                분석
               </TabsTrigger>
             </TabsList>
 
-            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-1">
+            <div className="relative">
               <TabsContent value="network" className="mt-0">
-                <MagicCard className="w-full p-0 overflow-hidden">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-8">
-                    <div className="space-y-4">
-                      <h3 className="text-2xl font-semibold">
-                        소개 관계를 한눈에
-                      </h3>
-                      <ul className="space-y-3">
-                        <CheckItem>
-                          마인드맵 스타일의 상호작용 가능한 그래프 뷰
-                        </CheckItem>
-                        <CheckItem>
-                          핵심 소개자를 중심으로 한 영향력 분석
-                        </CheckItem>
-                        <CheckItem>소개 경로 추적으로 관계 맥락 파악</CheckItem>
-                      </ul>
-                    </div>
-                    <div className="bg-muted rounded-lg flex items-center justify-center p-6 min-h-[360px]">
-                      <div className="w-full h-full flex flex-col items-center justify-center">
-                        <div className="text-center w-full">
-                          <div className="text-primary font-medium text-lg mb-4">
-                            네트워크 그래프 시각화
+                <BlurFade delay={0.2} inView>
+                  <div className="group relative overflow-hidden rounded-3xl bg-card/80 border border-border/60 backdrop-blur-sm hover:shadow-xl hover:shadow-primary/10 transition-all duration-500">
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    <div className="relative p-12">
+                      <div className="flex flex-col lg:flex-row items-center gap-12">
+                        <div className="flex-1 space-y-8">
+                          <div className="space-y-6">
+                            <div className="flex items-center gap-4">
+                              <div className="w-16 h-16 bg-gradient-to-br from-primary/80 to-primary rounded-2xl flex items-center justify-center shadow-lg">
+                                <GlobeIcon className="w-8 h-8 text-white" />
+                              </div>
+                              <div>
+                                <Badge
+                                  variant="secondary"
+                                  className="mb-2 bg-primary/10 text-primary border-primary/20"
+                                >
+                                  네트워크
+                                </Badge>
+                                <h3 className="text-2xl font-bold">
+                                  소개 관계 시각화
+                                </h3>
+                              </div>
+                            </div>
+                            <p className="text-lg text-muted-foreground leading-relaxed">
+                              고객 간의 복잡한 소개 관계를 직관적인 그래프로
+                              표현하여 핵심 소개자를 한눈에 파악할 수 있습니다.
+                            </p>
                           </div>
-                          <div className="h-[240px] w-full mx-auto mb-4 rounded-lg bg-background/40 flex items-center justify-center border border-border/40 relative overflow-hidden">
-                            <GlobeIcon className="w-16 h-16 text-primary/40" />
-                            <div className="absolute text-xs text-muted-foreground">
-                              서비스 스크린샷 영역
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                                  <Check className="w-4 h-4 text-primary" />
+                                </div>
+                                <span className="font-medium">
+                                  시각적 네트워크 표시
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                                  <Check className="w-4 h-4 text-primary" />
+                                </div>
+                                <span className="font-medium">
+                                  핵심 소개자 발견
+                                </span>
+                              </div>
+                            </div>
+                            <div className="space-y-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                                  <Check className="w-4 h-4 text-primary" />
+                                </div>
+                                <span className="font-medium">
+                                  소개 패턴 분석
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                                  <Check className="w-4 h-4 text-primary" />
+                                </div>
+                                <span className="font-medium">
+                                  관계 깊이 파악
+                                </span>
+                              </div>
                             </div>
                           </div>
-                          <div className="text-muted-foreground max-w-md mx-auto">
-                            실제 서비스에서는 고객 간의 소개 관계를 시각화한
-                            인터랙티브 네트워크 그래프를 확인할 수 있습니다.
+                        </div>
+
+                        <div className="flex-1">
+                          <div className="relative">
+                            <div className="w-full h-80 bg-gradient-to-br from-muted/30 to-muted/50 rounded-2xl border border-border/40 flex items-center justify-center overflow-hidden">
+                              <div className="relative w-full h-full flex items-center justify-center">
+                                <div className="absolute inset-0">
+                                  <DotPattern
+                                    className="opacity-30"
+                                    width={16}
+                                    height={16}
+                                    gap={4}
+                                    radius={1}
+                                    color="var(--primary)"
+                                  />
+                                </div>
+                                <div className="relative z-10 text-center">
+                                  <GlobeIcon className="w-16 h-16 text-primary mx-auto mb-4" />
+                                  <p className="text-primary font-medium">
+                                    네트워크 시각화 프리뷰
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </MagicCard>
+                </BlurFade>
               </TabsContent>
 
               <TabsContent value="pipeline" className="mt-0">
-                <MagicCard className="w-full p-0 overflow-hidden">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-8">
-                    <div className="space-y-4">
-                      <h3 className="text-2xl font-semibold">
-                        효율적인 영업 관리
-                      </h3>
-                      <ul className="space-y-3">
-                        <CheckItem>
-                          보험설계사에 최적화된 영업 단계 관리
-                        </CheckItem>
-                        <CheckItem>
-                          드래그 앤 드롭으로 쉽게 고객 상태 업데이트
-                        </CheckItem>
-                        <CheckItem>단계별 통계 및 전환율 자동 계산</CheckItem>
-                      </ul>
-                    </div>
-                    <div className="bg-muted rounded-lg flex items-center justify-center p-6 min-h-[360px]">
-                      <div className="w-full h-full flex flex-col items-center justify-center">
-                        <div className="text-center w-full">
-                          <div className="text-primary font-medium text-lg mb-4">
-                            칸반보드 파이프라인
+                <BlurFade delay={0.2} inView>
+                  <div className="group relative overflow-hidden rounded-3xl bg-card/80 border border-border/60 backdrop-blur-sm hover:shadow-xl hover:shadow-primary/10 transition-all duration-500">
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    <div className="relative p-12">
+                      <div className="flex flex-col lg:flex-row items-center gap-12">
+                        <div className="flex-1 space-y-8">
+                          <div className="space-y-6">
+                            <div className="flex items-center gap-4">
+                              <div className="w-16 h-16 bg-gradient-to-br from-primary/80 to-primary rounded-2xl flex items-center justify-center shadow-lg">
+                                <TrendingUp className="w-8 h-8 text-white" />
+                              </div>
+                              <div>
+                                <Badge
+                                  variant="secondary"
+                                  className="mb-2 bg-primary/10 text-primary border-primary/20"
+                                >
+                                  영업
+                                </Badge>
+                                <h3 className="text-2xl font-bold">
+                                  영업 단계 관리
+                                </h3>
+                              </div>
+                            </div>
+                            <p className="text-lg text-muted-foreground leading-relaxed">
+                              고객을 영업 단계별로 체계적으로 분류하고 관리하여
+                              효율적인 영업 프로세스를 구축할 수 있습니다.
+                            </p>
                           </div>
-                          <div className="h-[240px] w-full mx-auto mb-4 rounded-lg bg-background/40 flex items-center justify-center border border-border/40 relative overflow-hidden">
-                            <BarChart2 className="w-16 h-16 text-primary/40" />
-                            <div className="absolute text-xs text-muted-foreground">
-                              서비스 스크린샷 영역
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                                  <Check className="w-4 h-4 text-primary" />
+                                </div>
+                                <span className="font-medium">
+                                  단계별 고객 분류
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                                  <Check className="w-4 h-4 text-primary" />
+                                </div>
+                                <span className="font-medium">
+                                  진행 상황 추적
+                                </span>
+                              </div>
+                            </div>
+                            <div className="space-y-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                                  <Check className="w-4 h-4 text-primary" />
+                                </div>
+                                <span className="font-medium">전환율 개선</span>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                                  <Check className="w-4 h-4 text-primary" />
+                                </div>
+                                <span className="font-medium">
+                                  업무 효율 향상
+                                </span>
+                              </div>
                             </div>
                           </div>
-                          <div className="text-muted-foreground max-w-md mx-auto">
-                            실제 서비스에서는 영업 단계별로 고객을 관리할 수
-                            있는 직관적인 칸반보드 인터페이스를 제공합니다.
+                        </div>
+
+                        <div className="flex-1">
+                          <div className="relative">
+                            <div className="w-full h-80 bg-gradient-to-br from-muted/30 to-muted/50 rounded-2xl border border-border/40 flex items-center justify-center overflow-hidden">
+                              <div className="relative w-full h-full flex items-center justify-center">
+                                <div className="absolute inset-0">
+                                  <FlickeringGrid
+                                    className="opacity-20"
+                                    squareSize={3}
+                                    gridGap={8}
+                                    color="var(--primary)"
+                                    maxOpacity={0.3}
+                                    flickerChance={0.1}
+                                  />
+                                </div>
+                                <div className="relative z-10 text-center">
+                                  <TrendingUp className="w-16 h-16 text-primary mx-auto mb-4" />
+                                  <p className="text-primary font-medium">
+                                    영업 파이프라인 프리뷰
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </MagicCard>
+                </BlurFade>
               </TabsContent>
 
               <TabsContent value="data" className="mt-0">
-                <MagicCard className="w-full p-0 overflow-hidden">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-8">
-                    <div className="space-y-4">
-                      <h3 className="text-2xl font-semibold">
-                        데이터 기반 의사결정
-                      </h3>
-                      <ul className="space-y-3">
-                        <CheckItem>소개 패턴 및 성공률 분석</CheckItem>
-                        <CheckItem>잠재적 핵심 소개자 예측 및 발굴</CheckItem>
-                        <CheckItem>맞춤형 보고서로 영업 전략 최적화</CheckItem>
-                      </ul>
-                    </div>
-                    <div className="bg-muted rounded-lg flex items-center justify-center p-6 min-h-[360px]">
-                      <div className="w-full h-full flex flex-col items-center justify-center">
-                        <div className="text-center w-full">
-                          <div className="text-primary font-medium text-lg mb-4">
-                            데이터 분석 대시보드
+                <BlurFade delay={0.2} inView>
+                  <div className="group relative overflow-hidden rounded-3xl bg-card/80 border border-border/60 backdrop-blur-sm hover:shadow-xl hover:shadow-primary/10 transition-all duration-500">
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    <div className="relative p-12">
+                      <div className="flex flex-col lg:flex-row items-center gap-12">
+                        <div className="flex-1 space-y-8">
+                          <div className="space-y-6">
+                            <div className="flex items-center gap-4">
+                              <div className="w-16 h-16 bg-gradient-to-br from-primary/80 to-primary rounded-2xl flex items-center justify-center shadow-lg">
+                                <BarChart2 className="w-8 h-8 text-white" />
+                              </div>
+                              <div>
+                                <Badge
+                                  variant="secondary"
+                                  className="mb-2 bg-primary/10 text-primary border-primary/20"
+                                >
+                                  분석
+                                </Badge>
+                                <h3 className="text-2xl font-bold">
+                                  데이터 인사이트
+                                </h3>
+                              </div>
+                            </div>
+                            <p className="text-lg text-muted-foreground leading-relaxed">
+                              소개 현황과 영업 성과를 직관적인 차트와 통계로
+                              확인하여 데이터 기반 의사결정을 지원합니다.
+                            </p>
                           </div>
-                          <div className="h-[240px] w-full mx-auto mb-4 rounded-lg bg-background/40 flex items-center justify-center border border-border/40 relative overflow-hidden">
-                            <FileText className="w-16 h-16 text-primary/40" />
-                            <div className="absolute text-xs text-muted-foreground">
-                              서비스 스크린샷 영역
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                                  <Check className="w-4 h-4 text-primary" />
+                                </div>
+                                <span className="font-medium">
+                                  월별 성과 추적
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                                  <Check className="w-4 h-4 text-primary" />
+                                </div>
+                                <span className="font-medium">
+                                  핵심 지표 요약
+                                </span>
+                              </div>
+                            </div>
+                            <div className="space-y-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                                  <Check className="w-4 h-4 text-primary" />
+                                </div>
+                                <span className="font-medium">트렌드 분석</span>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                                  <Check className="w-4 h-4 text-primary" />
+                                </div>
+                                <span className="font-medium">성과 비교</span>
+                              </div>
                             </div>
                           </div>
-                          <div className="text-muted-foreground max-w-md mx-auto">
-                            실제 서비스에서는 소개 패턴과 영업 성과를 분석하는
-                            다양한 차트와 통계 정보를 확인할 수 있습니다.
+                        </div>
+
+                        <div className="flex-1">
+                          <div className="relative">
+                            <div className="w-full h-80 bg-gradient-to-br from-muted/30 to-muted/50 rounded-2xl border border-border/40 flex items-center justify-center overflow-hidden">
+                              <div className="relative w-full h-full flex items-center justify-center">
+                                <div className="absolute inset-0">
+                                  <AnimatedGridPattern
+                                    className="opacity-20"
+                                    numSquares={20}
+                                    maxOpacity={0.2}
+                                    duration={3}
+                                    repeatDelay={1}
+                                  />
+                                </div>
+                                <div className="relative z-10 text-center">
+                                  <BarChart2 className="w-16 h-16 text-primary mx-auto mb-4" />
+                                  <p className="text-primary font-medium">
+                                    분석 대시보드 프리뷰
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </MagicCard>
+                </BlurFade>
               </TabsContent>
             </div>
           </Tabs>
@@ -374,9 +578,17 @@ export default function LandingPage() {
       {/* 테스티모니얼 섹션 */}
       <section
         id="testimonials"
-        className="py-32 bg-muted/30 overflow-visible min-h-[600px]"
+        className="py-32 bg-muted/30 overflow-visible min-h-[600px] relative"
       >
-        <div className="container mx-auto px-4">
+        <DotPattern
+          className="absolute inset-0 opacity-30 pointer-events-none"
+          width={32}
+          height={32}
+          gap={8}
+          radius={1.5}
+          color="rgba(var(--primary-rgb), 0.3)"
+        />
+        <div className="container mx-auto px-4 relative z-10">
           <div className="text-center mb-16">
             <Badge
               variant="outline"
@@ -384,7 +596,9 @@ export default function LandingPage() {
             >
               신뢰할 수 있는 솔루션
             </Badge>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">사용자 후기</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              <AnimatedGradientText>사용자 후기</AnimatedGradientText>
+            </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto mb-8">
               SureCRM을 사용하는 보험설계사들의 실제 경험을 들어보세요.
             </p>
@@ -420,8 +634,15 @@ export default function LandingPage() {
       </section>
 
       {/* FAQ 섹션 */}
-      <section id="faq" className="py-20">
-        <div className="container mx-auto px-4">
+      <section id="faq" className="py-20 relative">
+        <AnimatedGridPattern
+          className="absolute inset-0 opacity-20 pointer-events-none [mask-image:radial-gradient(500px_circle_at_center,white,transparent)]"
+          numSquares={25}
+          maxOpacity={0.15}
+          duration={3}
+          repeatDelay={1}
+        />
+        <div className="container mx-auto px-4 relative z-10">
           <div className="text-center mb-16">
             <Badge
               variant="outline"
@@ -430,7 +651,9 @@ export default function LandingPage() {
               자주 묻는 질문
             </Badge>
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              궁금한 점이 있으신가요?
+              <AuroraText color="orange" speed={12} intensity={0.4}>
+                궁금한 점이 있으신가요?
+              </AuroraText>
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               SureCRM에 대해 궁금한 점을 확인하세요.
@@ -470,8 +693,19 @@ export default function LandingPage() {
       </section>
 
       {/* CTA 섹션 */}
-      <section className="py-20 bg-gradient-to-br from-primary/10 to-purple-500/10">
-        <div className="container mx-auto px-4">
+      <section className="relative py-20 overflow-hidden">
+        {/* 배경 애니메이션 추가 */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-purple-500/10" />
+        <AnimatedGridPattern
+          className="absolute inset-0 opacity-5 pointer-events-none"
+          numSquares={30}
+          maxOpacity={0.1}
+          duration={4}
+          repeatDelay={2}
+        />
+        <WarpBackground className="absolute inset-0 opacity-5" />
+
+        <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl mx-auto text-center rounded-3xl bg-white/5 backdrop-blur-sm p-12 border border-white/10">
             <Badge
               variant="outline"
@@ -480,7 +714,10 @@ export default function LandingPage() {
               지금 시작하세요
             </Badge>
             <h2 className="text-3xl md:text-4xl font-bold mb-6">
-              성공적인 소개 네트워크 관리의 시작
+              <span className="bg-gradient-to-r from-primary via-orange-500 to-amber-500 bg-clip-text text-transparent">
+                성공적인 소개 네트워크 관리
+              </span>
+              의 시작
             </h2>
             <p className="text-lg text-muted-foreground mb-8 max-w-xl mx-auto">
               소개 네트워크의 힘을 극대화하고 영업 성과를 높일 준비가 되셨나요?
@@ -512,7 +749,7 @@ function FeatureCard({
   description: string;
 }) {
   return (
-    <div className="relative h-full p-6 bg-background/80 backdrop-blur-sm rounded-xl">
+    <div className="relative h-full p-6 bg-background/90 backdrop-blur-sm rounded-xl border border-border/40 shadow-sm hover:shadow-md transition-all duration-300">
       <div className="rounded-full bg-primary/10 w-12 h-12 flex items-center justify-center mb-4">
         {icon}
       </div>
@@ -549,24 +786,20 @@ function TestimonialCard({
   initial: string;
 }) {
   return (
-    <Card className="max-w-md mx-4 border-0 bg-white/5 backdrop-blur-sm">
-      <CardHeader>
-        <div className="flex items-center gap-4">
-          <Avatar className="border-2 border-primary/20">
-            <AvatarFallback className="bg-primary/10 text-primary">
-              {initial}
-            </AvatarFallback>
-          </Avatar>
-          <div>
-            <CardTitle className="text-base">{name}</CardTitle>
-            <CardDescription>{role}</CardDescription>
-          </div>
+    <MagicCard className="w-full h-full p-6 border-0 bg-white/5 backdrop-blur-sm">
+      <div className="flex items-center gap-4 mb-4">
+        <Avatar className="border-2 border-primary/20">
+          <AvatarFallback className="bg-primary/10 text-primary">
+            {initial}
+          </AvatarFallback>
+        </Avatar>
+        <div>
+          <h4 className="text-base font-semibold">{name}</h4>
+          <p className="text-sm text-muted-foreground">{role}</p>
         </div>
-      </CardHeader>
-      <CardContent>
-        <p className="italic text-muted-foreground">{quote}</p>
-      </CardContent>
-    </Card>
+      </div>
+      <p className="italic text-muted-foreground leading-relaxed">{quote}</p>
+    </MagicCard>
   );
 }
 
