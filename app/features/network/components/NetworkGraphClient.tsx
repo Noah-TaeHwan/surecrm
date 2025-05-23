@@ -184,7 +184,7 @@ export default function NetworkGraphClient({
     }));
   }, [externalHighlightedNodeId]);
 
-  // 필터링된 데이터 계산
+  // 필터링된 데이터 계산 - 메모이제이션 강화
   const filteredData = useMemo(() => {
     let filteredNodes = [...data.nodes];
 
@@ -343,9 +343,17 @@ export default function NetworkGraphClient({
       nodes: filteredNodes,
       links: filteredLinks,
     };
-  }, [data, filters, searchQuery, externalHighlightedNodeId]);
+  }, [data, filters, searchQuery]); // externalHighlightedNodeId 제거
 
-  // 그래프 초기화 - 간소화된 단일 useEffect
+  // 초기 그래프 데이터 캐시 - 전체 데이터로 한 번만 초기화
+  const initialGraphData = useMemo(() => {
+    return {
+      nodes: [...data.nodes], // 전체 노드
+      links: [...data.links], // 전체 링크
+    };
+  }, [data]);
+
+  // 그래프 초기화 - 한 번만 실행되도록 최적화
   useEffect(() => {
     if (!graphState.mounted || !isBrowser || !graphComponent) return;
     if (graphState.initialized) return;
@@ -366,21 +374,21 @@ export default function NetworkGraphClient({
       if (!graphRef.current || graphState.initialized) return;
 
       try {
-        // 노드를 더 넓게 분산 배치하기 위한 고급 레이아웃 알고리즘
-        const nodePositions = new Map();
-
-        // 그래프 크기 계산 (노드 수에 비례하여 더 넓은 공간 확보)
-        const nodeCount = filteredData.nodes.length;
+        // 전체 데이터로 초기화 - 필터링 데이터가 아닌
+        const nodeCount = initialGraphData.nodes.length;
         // 노드 수에 따라 더 넓은 반경으로 계산 (크게 증가)
         const baseRadius = Math.max(1200, Math.sqrt(nodeCount) * 250);
 
         // 소개자(influencer) 노드와 일반 노드 분리
-        const influencers = filteredData.nodes.filter(
+        const influencers = initialGraphData.nodes.filter(
           (n) => n.group === 'influencer'
         );
-        const clients = filteredData.nodes.filter(
+        const clients = initialGraphData.nodes.filter(
           (n) => n.group !== 'influencer'
         );
+
+        // 노드를 더 넓게 분산 배치하기 위한 고급 레이아웃 알고리즘
+        const nodePositions = new Map();
 
         // 소개자 노드를 중심 근처에 원형으로 배치 (더 넓게)
         if (influencers.length > 0) {
@@ -421,7 +429,7 @@ export default function NetworkGraphClient({
 
         // 동일한 단계(stage)의 노드들은 서로 가까이 배치하도록 조정 (약하게)
         const stageGroups = new Map();
-        filteredData.nodes.forEach((node) => {
+        initialGraphData.nodes.forEach((node) => {
           if (node.stage && node.group !== 'influencer') {
             if (!stageGroups.has(node.stage)) {
               stageGroups.set(node.stage, []);
@@ -463,7 +471,7 @@ export default function NetworkGraphClient({
         });
 
         // 최종 노드 위치 적용
-        filteredData.nodes.forEach((node) => {
+        initialGraphData.nodes.forEach((node) => {
           const pos = nodePositions.get(node.id);
           if (pos) {
             node.x = pos.x;
@@ -477,13 +485,13 @@ export default function NetworkGraphClient({
           let hasMovement = false;
 
           // 모든 노드 쌍을 확인하여 겹침 방지
-          for (let i = 0; i < filteredData.nodes.length; i++) {
-            const nodeA = filteredData.nodes[i];
+          for (let i = 0; i < initialGraphData.nodes.length; i++) {
+            const nodeA = initialGraphData.nodes[i];
             const posA = nodePositions.get(nodeA.id);
             if (!posA) continue;
 
-            for (let j = i + 1; j < filteredData.nodes.length; j++) {
-              const nodeB = filteredData.nodes[j];
+            for (let j = i + 1; j < initialGraphData.nodes.length; j++) {
+              const nodeB = initialGraphData.nodes[j];
               const posB = nodePositions.get(nodeB.id);
               if (!posB) continue;
 
@@ -528,7 +536,7 @@ export default function NetworkGraphClient({
           }
 
           // 충돌 조정 후 노드 위치 업데이트
-          filteredData.nodes.forEach((node) => {
+          initialGraphData.nodes.forEach((node) => {
             const pos = nodePositions.get(node.id);
             if (pos) {
               node.x = pos.x;
@@ -648,428 +656,115 @@ export default function NetworkGraphClient({
     graphRef,
     graphState.mounted,
     graphState.initialized,
-    filteredData.nodes.length,
-    filteredData.nodes,
+    initialGraphData, // 전체 데이터 의존성
     graphComponent,
   ]);
 
-  // 그래프 설정 변경 시 효과 (필터 변경 등) - 부드러운 전환 개선
+  // 필터링 기반 노드 가시성 관리 - 그래프 재로드 없이 처리
+  useEffect(() => {
+    if (!graphState.mounted || !graphRef.current || !graphState.initialized)
+      return;
+
+    try {
+      // 필터링된 노드 ID 셋
+      const filteredNodeIds = new Set(filteredData.nodes.map((n) => n.id));
+
+      // 현재 그래프 데이터 가져오기
+      const currentGraphData = safeGraphData();
+
+      if (currentGraphData && currentGraphData.nodes) {
+        // 모든 노드의 가시성 업데이트 (재로드 없이)
+        currentGraphData.nodes.forEach((node: any) => {
+          // 필터링 결과에 따라 노드 투명도 조정
+          const isVisible = filteredNodeIds.has(node.id);
+          node._filtered = !isVisible; // 필터링 마커 추가
+        });
+
+        // 링크 가시성도 업데이트
+        const filteredLinkSet = new Set(
+          filteredData.links.map((link) => {
+            const sourceId =
+              typeof link.source === 'string' ? link.source : link.source.id;
+            const targetId =
+              typeof link.target === 'string' ? link.target : link.target.id;
+            return `${sourceId}-${targetId}`;
+          })
+        );
+
+        if (currentGraphData.links) {
+          currentGraphData.links.forEach((link: any) => {
+            const sourceId =
+              typeof link.source === 'object' ? link.source.id : link.source;
+            const targetId =
+              typeof link.target === 'object' ? link.target.id : link.target;
+            const linkKey = `${sourceId}-${targetId}`;
+            link._filtered = !filteredLinkSet.has(linkKey);
+          });
+        }
+
+        // 부드러운 전환을 위해 그래프 다시 그리기 (데이터 변경 없이)
+        if (typeof graphRef.current.refresh === 'function') {
+          graphRef.current.refresh();
+        }
+      }
+    } catch (err) {
+      console.error('필터링 업데이트 오류:', err);
+    }
+  }, [filteredData, graphState.initialized, graphState.mounted]);
+
+  // 그래프 설정 변경 시 효과 (필터 변경 등) - 간소화하여 재로드 방지
   useEffect(() => {
     if (!graphState.mounted || !graphRef.current) return;
 
-    // 필터 변경 시 부드러운 전환을 위한 함수
-    const applyFilterChange = debounce(() => {
+    // 하이라이트나 검색 결과가 변경되었을 때만 부드러운 카메라 이동 처리
+    if (graphState.highlightedNodeId && graphState.initialized) {
       try {
-        // 노드 배치 유지를 위해 이전 위치 캐싱
-        const prevPositions = new Map();
+        // 하이라이트된 노드 찾기
+        const currentGraphData = safeGraphData();
+        if (!currentGraphData || !currentGraphData.nodes) return;
 
-        // 현재 그래프에서 노드 위치 저장
-        if (
-          graphRef.current &&
-          typeof graphRef.current.graphData === 'function'
-        ) {
-          const currentData = safeGraphData();
-          if (currentData && currentData.nodes) {
-            currentData.nodes.forEach(
-              (node: { id: string; x?: number; y?: number }) => {
-                if (node.id && node.x !== undefined && node.y !== undefined) {
-                  prevPositions.set(node.id, { x: node.x, y: node.y });
-                }
-              }
-            );
-          }
-        }
+        const targetNode = currentGraphData.nodes.find(
+          (node: any) => node.id === graphState.highlightedNodeId
+        );
+        if (!targetNode) return;
 
-        // 필터링된 데이터의 노드에 이전 위치 적용 (가능한 경우)
-        filteredData.nodes.forEach((node) => {
-          const prevPos = prevPositions.get(node.id);
-          if (prevPos) {
-            node.x = prevPos.x;
-            node.y = prevPos.y;
-          }
-        });
+        // 연결된 노드들 찾기
+        const connectedNodes: any[] = [];
+        if (currentGraphData.links) {
+          currentGraphData.links.forEach((link: any) => {
+            const sourceId =
+              typeof link.source === 'object' ? link.source.id : link.source;
+            const targetId =
+              typeof link.target === 'object' ? link.target.id : link.target;
 
-        // 노드 수가 크게 변경되었는지 확인 (완전히 다른 구성인 경우 재배치)
-        const prevNodeCount = prevPositions.size;
-        const currentNodeCount = filteredData.nodes.length;
-        const nodeCountDiff = Math.abs(prevNodeCount - currentNodeCount);
-        const significantChange = nodeCountDiff > prevNodeCount * 0.3; // 30% 이상 차이나면 큰 변화로 간주
-
-        // 하이라이트된 노드 위치 저장 (있으면)
-        let highlightNodePosition = null;
-        if (graphState.highlightedNodeId) {
-          const highlightNode = filteredData.nodes.find(
-            (node) => node.id === graphState.highlightedNodeId
-          );
-          if (
-            highlightNode &&
-            highlightNode.x !== undefined &&
-            highlightNode.y !== undefined
-          ) {
-            highlightNodePosition = { x: highlightNode.x, y: highlightNode.y };
-          }
-        }
-
-        // 변화가 크거나 매우 적은 노드만 있을 때는 새로운 최적 레이아웃 적용
-        if (significantChange || filteredData.nodes.length < 5) {
-          // 노드 수에 비례하여 더 넓은 공간 확보 (새 레이아웃)
-          const nodeCount = filteredData.nodes.length;
-          const baseRadius = Math.max(600, Math.sqrt(nodeCount) * 150);
-
-          // 소개자(influencer) 노드와 일반 노드 분리
-          const influencers = filteredData.nodes.filter(
-            (n) => n.group === 'influencer'
-          );
-          const clients = filteredData.nodes.filter(
-            (n) => n.group !== 'influencer'
-          );
-
-          // 소개자 노드를 중심 근처에 원형으로 배치
-          influencers.forEach((node, idx) => {
-            const angle = (idx / Math.max(1, influencers.length)) * 2 * Math.PI;
-            const radius = baseRadius * 0.25;
-            node.x = Math.cos(angle) * radius;
-            node.y = Math.sin(angle) * radius;
-          });
-
-          // 일반 노드는 소개자를 둘러싸도록 배치 (넓게 분산)
-          clients.forEach((node, idx) => {
-            const importance = node.importance || 1;
-            const radiusFactor = 1 - ((importance - 1) / 5) * 0.2;
-
-            // 골든 앵글 사용으로 더 균등한 분포
-            const goldenAngle = Math.PI * (3 - Math.sqrt(5));
-            const angle = idx * goldenAngle;
-            const radius = baseRadius * radiusFactor;
-
-            // 약간의 랜덤성 추가
-            const jitter = baseRadius * 0.3;
-            const jitterX = (Math.random() - 0.5) * jitter;
-            const jitterY = (Math.random() - 0.5) * jitter;
-
-            node.x = Math.cos(angle) * radius + jitterX;
-            node.y = Math.sin(angle) * radius + jitterY;
-          });
-        } else {
-          // 새로 추가된 노드 위치 계산
-          const newNodeIds = filteredData.nodes
-            .filter((node) => !prevPositions.has(node.id))
-            .map((node) => node.id);
-
-          if (newNodeIds.length > 0) {
-            // 기존 노드 위치의 중심점 계산 (가중치 부여)
-            let centerX = 0,
-              centerY = 0;
-            let totalWeight = 0;
-
-            // 중요도에 따라 가중치 부여하여 중심점 계산
-            filteredData.nodes
-              .filter((node) => prevPositions.has(node.id))
-              .forEach((node) => {
-                const importance = node.importance || 1;
-                const weight = importance;
-                totalWeight += weight;
-
-                const pos = prevPositions.get(node.id);
-                if (pos) {
-                  centerX += pos.x * weight;
-                  centerY += pos.y * weight;
-                }
-              });
-
-            if (totalWeight > 0) {
-              centerX /= totalWeight;
-              centerY /= totalWeight;
-            }
-
-            // 새 노드를 중심점 주변에 골든앵글로 배치 (더 균등하게)
-            const goldenAngle = Math.PI * (3 - Math.sqrt(5));
-            newNodeIds.forEach((nodeId, idx) => {
-              const node = filteredData.nodes.find((n) => n.id === nodeId);
-              if (node) {
-                const angle = idx * goldenAngle;
-                // 더 넓게 분산
-                const radius = 300 + Math.random() * 100;
-                // 지터 추가로 자연스럽게
-                const jitterX = (Math.random() - 0.5) * 80;
-                const jitterY = (Math.random() - 0.5) * 80;
-
-                node.x = centerX + Math.cos(angle) * radius + jitterX;
-                node.y = centerY + Math.sin(angle) * radius + jitterY;
-              }
-            });
-          }
-        }
-
-        // 충돌 방지를 위한 추가 처리 (반복 횟수 증가)
-        for (let iter = 0; iter < 15; iter++) {
-          const moved = new Set();
-
-          // 모든 노드 쌍을 확인하여 겹침 방지
-          for (let i = 0; i < filteredData.nodes.length; i++) {
-            const nodeA = filteredData.nodes[i];
-            if (!nodeA.x || !nodeA.y) continue;
-
-            for (let j = i + 1; j < filteredData.nodes.length; j++) {
-              const nodeB = filteredData.nodes[j];
-              if (!nodeB.x || !nodeB.y) continue;
-
-              // 두 노드 간 거리 계산
-              const dx = nodeB.x - nodeA.x;
-              const dy = nodeB.y - nodeA.y;
-              const distance = Math.sqrt(dx * dx + dy * dy);
-
-              // 노드 크기 기반 최소 거리 (중요도 고려) - 여백 증가
-              const minDistance =
-                ((nodeA.group === 'influencer' ? 50 : 40) *
-                  (nodeA.importance || 1)) /
-                  1.8 +
-                ((nodeB.group === 'influencer' ? 50 : 40) *
-                  (nodeB.importance || 1)) /
-                  1.8;
-
-              // 너무 가까우면 서로 밀어내기
-              if (distance < minDistance && distance > 0) {
-                const moveFactor = ((minDistance - distance) / distance) * 0.8;
-                const moveX = dx * moveFactor;
-                const moveY = dy * moveFactor;
-
-                // 이미 이동된 노드는 덜 이동
-                if (!moved.has(nodeA.id)) {
-                  nodeA.x -= moveX / 2;
-                  nodeA.y -= moveY / 2;
-                  moved.add(nodeA.id);
-                }
-
-                if (!moved.has(nodeB.id)) {
-                  nodeB.x += moveX / 2;
-                  nodeB.y += moveY / 2;
-                  moved.add(nodeB.id);
-                }
-              }
-            }
-          }
-        }
-
-        // 자연스러운 레이아웃을 위한 세밀한 힘 조정 (더 넓게 펼쳐지도록)
-        if (typeof graphRef.current.d3Force === 'function') {
-          // 반발력 대폭 증가 (노드들이 서로 멀어지도록)
-          const chargeForce = graphRef.current.d3Force('charge');
-          if (chargeForce && typeof chargeForce.strength === 'function') {
-            chargeForce.strength(-350); // 반발력 대폭 증가
-          }
-
-          // 링크 거리와 강도 조정 (더 길고 느슨하게)
-          const linkForce = graphRef.current.d3Force('link');
-          if (linkForce) {
-            if (typeof linkForce.distance === 'function') {
-              // 필터링된 노드 수에 따라 동적 조정
-              const dynamicDistance = Math.min(
-                350,
-                180 + filteredData.nodes.length * 1.5
+            if (sourceId === graphState.highlightedNodeId) {
+              const connectedNode = currentGraphData.nodes.find(
+                (n: any) => n.id === targetId
               );
-              linkForce.distance(dynamicDistance);
-            }
-            if (typeof linkForce.strength === 'function') {
-              linkForce.strength(0.08); // 연결 강도 약화
-            }
-          }
-
-          // 중심 당김 거의 제거
-          const centerForce = graphRef.current.d3Force('center');
-          if (centerForce && typeof centerForce.strength === 'function') {
-            centerForce.strength(0.005); // 중심 당김 최소화
-          }
-
-          // X-Y 균형 거의 제거 (자연스러운 분산 우선)
-          const forceX = d3.forceX();
-          forceX.strength(0.005);
-          graphRef.current.d3Force('x', forceX);
-
-          const forceY = d3.forceY();
-          forceY.strength(0.005);
-          graphRef.current.d3Force('y', forceY);
-
-          // 충돌 방지 최대화 (겹침 완전 방지)
-          const forceCollide = d3
-            .forceCollide()
-            .radius((node: any) => {
-              // 충돌 반경 대폭 증가 (충분한 여백)
-              const size = node.group === 'influencer' ? 65 : 50;
-              return (size * (node.importance || 1)) / 2 + 20; // 추가 여백
-            })
-            .strength(1.0); // 충돌 방지 최대화
-          graphRef.current.d3Force('collide', forceCollide);
-        }
-
-        // 오프스크린에서 사전 시뮬레이션 실행 - 화면에 표시되기 전에 안정화
-        if (
-          graphRef.current._simulation &&
-          typeof graphRef.current._simulation.tick === 'function'
-        ) {
-          try {
-            // 수동으로 시뮬레이션 틱 여러 번 진행 (충분한 반복으로 안정화)
-            for (let i = 0; i < 200; i++) {
-              // 반복 횟수 증가
-              graphRef.current._simulation.tick();
-            }
-          } catch (e) {
-            // 필터 변경 시 수동 틱 진행 실패 (오류 무시)
-          }
-        }
-
-        // 알파 목표 즉시 0으로 설정하여 추가 시뮬레이션 최소화
-        if (
-          graphRef.current._simulation &&
-          typeof graphRef.current._simulation.alphaTarget === 'function'
-        ) {
-          graphRef.current._simulation.alphaTarget(0).alphaDecay(0.2); // 빠른 안정화
-        }
-
-        // 하이라이트된 노드가 있으면 해당 노드로 부드럽게 이동 (줌 없이)
-        if (highlightNodePosition && graphState.highlightedNodeId) {
-          setTimeout(() => {
-            if (
-              graphRef.current &&
-              typeof graphRef.current.centerAt === 'function'
-            ) {
-              // 줌 없이 중심점으로만 이동
-              graphRef.current.centerAt(
-                highlightNodePosition.x,
-                highlightNodePosition.y,
-                1000
+              if (connectedNode) connectedNodes.push(connectedNode);
+            } else if (targetId === graphState.highlightedNodeId) {
+              const connectedNode = currentGraphData.nodes.find(
+                (n: any) => n.id === sourceId
               );
+              if (connectedNode) connectedNodes.push(connectedNode);
             }
-          }, 50);
-        } else {
-          // 전체 그래프가 화면에 보이게 부드럽게 조정
-          setTimeout(() => {
-            if (
-              graphRef.current &&
-              typeof graphRef.current.zoomToFit === 'function'
-            ) {
-              // 부드러운 전환 효과 (더 긴 시간, 더 넓은 여백)
-              graphRef.current.zoomToFit(1500, 100); // 더 넓은 여백으로 조정
-            }
-          }, 50);
+          });
         }
-      } catch (err) {
-        console.error('그래프 업데이트 오류:', err);
-      }
-    }, 150); // 디바운스 시간 단축으로 더 빠른 반응성
 
-    applyFilterChange();
-
-    return () => {
-      // 클린업 함수
-    };
-  }, [
-    filters,
-    graphRef,
-    graphState.mounted,
-    graphState.highlightedNodeId,
-    filteredData.nodes,
-  ]);
-
-  // 외부 하이라이트 노드 ID가 변경될 때 해당 노드로 부드럽게 이동하는 로직 개선
-  useEffect(() => {
-    if (
-      !graphRef.current ||
-      !externalHighlightedNodeId ||
-      !graphState.initialized
-    )
-      return;
-
-    // 내부 하이라이트 상태 업데이트
-    setGraphState((prev) => ({
-      ...prev,
-      highlightedNodeId: externalHighlightedNodeId,
-      nodeTransitionInProgress: true,
-    }));
-
-    try {
-      // 하이라이트된 노드 찾기
-      const targetNode = filteredData.nodes.find(
-        (node) => node.id === externalHighlightedNodeId
-      );
-      if (!targetNode) {
-        setGraphState((prev) => ({ ...prev, nodeTransitionInProgress: false }));
-        return;
-      }
-
-      // 연결된 노드들 찾기 - 더 정확한 방법
-      const connectedNodes: any[] = [];
-      const allConnectedNodeIds = new Set<string>();
-
-      // 현재 그래프 데이터에서 연결 정보 가져오기
-      filteredData.links.forEach((link) => {
-        const sourceId =
-          typeof link.source === 'object' ? link.source.id : link.source;
-        const targetId =
-          typeof link.target === 'object' ? link.target.id : link.target;
-
-        // 하이라이트된 노드와 연결된 모든 노드 ID 수집
-        if (sourceId === externalHighlightedNodeId) {
-          allConnectedNodeIds.add(targetId);
-        } else if (targetId === externalHighlightedNodeId) {
-          allConnectedNodeIds.add(sourceId);
-        }
-      });
-
-      // 연결된 노드 객체들 수집
-      allConnectedNodeIds.forEach((nodeId) => {
-        const connectedNode = filteredData.nodes.find((n) => n.id === nodeId);
-        if (connectedNode) {
-          connectedNodes.push(connectedNode);
-        }
-      });
-
-      // 현재 그래프 데이터에서 실제 노드 위치 정보 가져오기
-      const currentGraphData = safeGraphData();
-      const currentTargetNode = currentGraphData.nodes?.find(
-        (n: any) => n.id === externalHighlightedNodeId
-      );
-      const currentConnectedNodes = connectedNodes
-        .map((cn) => currentGraphData.nodes?.find((n: any) => n.id === cn.id))
-        .filter(Boolean);
-
-      if (!currentTargetNode) {
-        setGraphState((prev) => ({ ...prev, nodeTransitionInProgress: false }));
-        return;
-      }
-
-      // 타겟 노드 위치
-      const targetX = currentTargetNode.x || 0;
-      const targetY = currentTargetNode.y || 0;
-
-      if (typeof targetX !== 'number' || typeof targetY !== 'number') {
-        setGraphState((prev) => ({ ...prev, nodeTransitionInProgress: false }));
-        return;
-      }
-
-      // 개선된 애니메이션 로직 - 줌 없이 중심점 이동만
-      if (typeof graphRef.current.centerAt === 'function') {
-        // 모든 관련 노드들의 위치 수집 (하이라이트 노드 + 연결된 노드들)
-        const allRelevantNodes = [currentTargetNode, ...currentConnectedNodes];
+        // 타겟 노드와 연결된 노드들의 바운딩 박스 계산
+        const allRelevantNodes = [targetNode, ...connectedNodes];
         const validNodes = allRelevantNodes.filter(
           (node) =>
             node && typeof node.x === 'number' && typeof node.y === 'number'
         );
 
-        if (validNodes.length === 0) {
-          setGraphState((prev) => ({
-            ...prev,
-            nodeTransitionInProgress: false,
-          }));
-          return;
-        }
+        if (validNodes.length === 0) return;
 
-        // 바운딩 박스 계산 - 더 정확하게
+        // 바운딩 박스 계산
         let minX = Infinity,
           maxX = -Infinity,
           minY = Infinity,
           maxY = -Infinity;
-
         validNodes.forEach((node: any) => {
           minX = Math.min(minX, node.x);
           maxX = Math.max(maxX, node.x);
@@ -1081,38 +776,18 @@ export default function NetworkGraphClient({
         const centerX = (minX + maxX) / 2;
         const centerY = (minY + maxY) / 2;
 
-        console.log(
-          `외부 하이라이트: ${externalHighlightedNodeId}, 연결된 노드: ${connectedNodes.length}개`
-        );
-
-        // 줌 없이 중심점으로만 이동
-        graphRef.current.centerAt(centerX, centerY, 1200, () => {
-          // 애니메이션 완료
-          setTimeout(() => {
-            setGraphState((prev) => ({
-              ...prev,
-              nodeTransitionInProgress: false,
-            }));
-          }, 200);
-        });
-      } else {
-        setGraphState((prev) => ({
-          ...prev,
-          nodeTransitionInProgress: false,
-        }));
+        // 줌 없이 중심점으로만 부드럽게 이동
+        if (typeof graphRef.current.centerAt === 'function') {
+          graphRef.current.centerAt(centerX, centerY, 1000);
+        }
+      } catch (err) {
+        console.error('하이라이트 이동 오류:', err);
       }
-    } catch (err) {
-      console.error('외부 노드 선택 시 이동 오류:', err);
-      setGraphState((prev) => ({
-        ...prev,
-        nodeTransitionInProgress: false,
-      }));
     }
   }, [
-    externalHighlightedNodeId,
-    filteredData.nodes,
-    filteredData.links,
+    graphState.highlightedNodeId,
     graphState.initialized,
+    graphState.mounted,
   ]);
 
   // 렌더링 실패 시 대체 UI 표시
@@ -1192,7 +867,7 @@ export default function NetworkGraphClient({
 
       <GraphComponent
         ref={graphRef}
-        graphData={filteredData}
+        graphData={initialGraphData} // 전체 데이터 사용 (필터링 데이터 대신)
         nodeId="id"
         nodeLabel="name"
         nodeAutoColorBy="group"
@@ -1642,6 +1317,9 @@ export default function NetworkGraphClient({
             const fontSize = 16 / globalScale;
             ctx.font = `600 ${fontSize}px 'Inter', 'Helvetica Neue', sans-serif`;
 
+            // 필터링 상태 확인
+            const isFiltered = node._filtered === true;
+
             // 하이라이트 관련 노드인지 확인
             const isHighlightNode = node.id === graphState.highlightedNodeId;
             const isSearchResultNode = isNodeInSearchResults(node.id);
@@ -1676,8 +1354,11 @@ export default function NetworkGraphClient({
               if (node.stage === '계약 완료') baseColor = '#9b59b6';
             }
 
-            // 하이라이트 관련 상태에 따른 투명도 설정
-            if (
+            // 투명도 설정 - 필터링된 노드와 하이라이트 관련 상태 모두 고려
+            if (isFiltered) {
+              // 필터링된 노드는 매우 투명하게
+              ctx.globalAlpha = 0.15;
+            } else if (
               graphState.highlightedNodeId ||
               graphState.searchResults.length > 0
             ) {
@@ -1693,11 +1374,12 @@ export default function NetworkGraphClient({
               ctx.globalAlpha = 1.0;
             }
 
-            // 외부 발광 효과 (하이라이트 관련 노드만)
+            // 외부 발광 효과 (하이라이트 관련 노드만, 필터링되지 않은 경우에만)
             if (
-              isHighlightRelated ||
-              (!graphState.highlightedNodeId &&
-                graphState.searchResults.length === 0)
+              !isFiltered &&
+              (isHighlightRelated ||
+                (!graphState.highlightedNodeId &&
+                  graphState.searchResults.length === 0))
             ) {
               ctx.beginPath();
               ctx.arc(node.x, node.y, nodeSize + 4, 0, 2 * Math.PI);
@@ -1709,8 +1391,8 @@ export default function NetworkGraphClient({
             ctx.beginPath();
             ctx.arc(node.x, node.y, nodeSize, 0, 2 * Math.PI);
 
-            // 하이라이트된 주요 노드 (첫 번째 검색 결과)
-            if (isHighlightNode) {
+            // 하이라이트된 주요 노드 (첫 번째 검색 결과) - 필터링되지 않은 경우에만
+            if (isHighlightNode && !isFiltered) {
               // 펄싱 효과 개선 - 좀 더 눈에 띄게 하되 은은하게
               const pulseFactor = Math.sin(animationTime * 0.12) * 0.35 + 0.75; // 펄스 강도 증가
               const secondaryPulse =
@@ -1801,8 +1483,8 @@ export default function NetworkGraphClient({
               ctx.fillStyle = baseColor;
               ctx.fill();
             }
-            // 검색 결과 노드 (첫 번째 제외)
-            else if (isSearchResultNode) {
+            // 검색 결과 노드 (첫 번째 제외) - 필터링되지 않은 경우에만
+            else if (isSearchResultNode && !isFiltered) {
               // 검색 결과 노드 효과 (주황색 테두리)
               ctx.shadowColor = 'rgba(255, 140, 0, 0.5)';
               ctx.shadowBlur = 8;
@@ -1818,8 +1500,8 @@ export default function NetworkGraphClient({
               ctx.fillStyle = baseColor;
               ctx.fill();
             }
-            // 연결된 노드 강조 효과
-            else if (isConnectedNode) {
+            // 연결된 노드 강조 효과 - 필터링되지 않은 경우에만
+            else if (isConnectedNode && !isFiltered) {
               // 단순한 테두리만 추가
               ctx.strokeStyle = 'rgba(100, 150, 230, 0.8)';
               ctx.lineWidth = 2 / globalScale;
@@ -1830,8 +1512,9 @@ export default function NetworkGraphClient({
               ctx.fill();
             } else {
               // 일반 노드 스타일링
-              // 기본 그림자 효과
+              // 기본 그림자 효과 - 필터링되지 않은 경우에만
               if (
+                !isFiltered &&
                 !graphState.highlightedNodeId &&
                 graphState.searchResults.length === 0
               ) {
@@ -1846,8 +1529,11 @@ export default function NetworkGraphClient({
               ctx.fill();
             }
 
-            // 기본 그림자 효과 (하이라이트 관련 노드만)
-            if (isHighlightRelated || !graphState.highlightedNodeId) {
+            // 기본 그림자 효과 (하이라이트 관련 노드만, 필터링되지 않은 경우에만)
+            if (
+              !isFiltered &&
+              (isHighlightRelated || !graphState.highlightedNodeId)
+            ) {
               if (!isConnectedNode) {
                 // 이미 그림자 효과가 있는 연결 노드는 제외
                 ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
@@ -1867,35 +1553,40 @@ export default function NetworkGraphClient({
             ctx.shadowColor = 'transparent';
 
             // 노드 내부에 텍스트 그리기 - 더 깔끔하고 가독성 높게
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillStyle = 'white';
+            // 필터링된 노드의 텍스트는 표시하지 않거나 매우 흐리게
+            if (!isFiltered || ctx.globalAlpha > 0.3) {
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'middle';
+              ctx.fillStyle = 'white';
 
-            // 텍스트 크기 노드 크기에 비례하여 더 크게 조정
-            // 최소 폰트 사이즈 증가 (작은 노드에서도 텍스트 잘 보이게)
-            const baseFontSize = Math.max(16, nodeSize * 1.2);
-            const textSize =
-              Math.min(22, Math.max(14, baseFontSize)) / globalScale;
-            ctx.font = `600 ${textSize}px 'Inter', 'Helvetica Neue', sans-serif`;
+              // 텍스트 크기 노드 크기에 비례하여 더 크게 조정
+              // 최소 폰트 사이즈 증가 (작은 노드에서도 텍스트 잘 보이게)
+              const baseFontSize = Math.max(16, nodeSize * 1.2);
+              const textSize =
+                Math.min(22, Math.max(14, baseFontSize)) / globalScale;
+              ctx.font = `600 ${textSize}px 'Inter', 'Helvetica Neue', sans-serif`;
 
-            // 최소한의 그림자만 적용 (가독성 위해)
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
-            ctx.shadowBlur = 3;
-            ctx.shadowOffsetX = 0;
-            ctx.shadowOffsetY = 0;
+              // 최소한의 그림자만 적용 (가독성 위해) - 필터링된 경우 제외
+              if (!isFiltered) {
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+                ctx.shadowBlur = 3;
+                ctx.shadowOffsetX = 0;
+                ctx.shadowOffsetY = 0;
+              }
 
-            // 라벨 텍스트가 길면 줄이기 (길이 제한 증가)
-            let displayLabel = label;
-            if (label.length > 8) {
-              displayLabel = label.substring(0, 6) + '..';
+              // 라벨 텍스트가 길면 줄이기 (길이 제한 증가)
+              let displayLabel = label;
+              if (label.length > 8) {
+                displayLabel = label.substring(0, 6) + '..';
+              }
+
+              // 텍스트 노드 안에 깔끔하게 그리기 (테두리 없이)
+              ctx.fillText(displayLabel, node.x, node.y);
+
+              // 그림자 비활성화
+              ctx.shadowColor = 'transparent';
+              ctx.shadowBlur = 0;
             }
-
-            // 텍스트 노드 안에 깔끔하게 그리기 (테두리 없이)
-            ctx.fillText(displayLabel, node.x, node.y);
-
-            // 그림자 비활성화
-            ctx.shadowColor = 'transparent';
-            ctx.shadowBlur = 0;
           } catch (err) {
             console.error('노드 렌더링 오류:', err);
           }

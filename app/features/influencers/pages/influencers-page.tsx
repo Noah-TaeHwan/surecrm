@@ -201,7 +201,6 @@ export default function InfluencersPage({ loaderData }: Route.ComponentProps) {
           {/* 헤더 */}
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">핵심 소개자</h1>
               <p className="text-muted-foreground">
                 소개 네트워크의 핵심 인물들을 분석하고 관계를 관리하세요
               </p>
@@ -238,7 +237,7 @@ export default function InfluencersPage({ loaderData }: Route.ComponentProps) {
             onValueChange={setActiveTab}
             className="space-y-4 w-full"
           >
-            <TabsList>
+            <TabsList className="h-full">
               <TabsTrigger value="ranking">소개자 랭킹</TabsTrigger>
               <TabsTrigger value="analysis">영향력 분석</TabsTrigger>
               <TabsTrigger value="gratitude">감사 관리</TabsTrigger>

@@ -420,7 +420,14 @@ export default function NetworkSidebar({
       >
         <ScrollArea
           ref={scrollAreaRef}
-          className={cn('h-full w-full', !cssLoaded && 'opacity-0')}
+          className={cn(
+            'h-full w-full network-sidebar-scroll',
+            !cssLoaded && 'opacity-0'
+          )}
+          style={{
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+          }}
         >
           <div className="space-y-3 py-2 pb-6">
             {/* 네트워크 현황 */}

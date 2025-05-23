@@ -341,14 +341,14 @@ export default function CalendarPage({ loaderData }: Route.ComponentProps) {
               <DialogTrigger asChild>
                 <Button>
                   <PlusIcon className="mr-2 h-4 w-4" />
-                  미팅 추가
+                  미팅 예약
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-2xl">
                 <DialogHeader>
-                  <DialogTitle>새 미팅 추가</DialogTitle>
+                  <DialogTitle>새 미팅 예약</DialogTitle>
                   <DialogDescription>
-                    고객과의 미팅 일정을 추가하세요
+                    고객과의 미팅 일정을 예약합니다.
                   </DialogDescription>
                 </DialogHeader>
 
@@ -587,7 +587,7 @@ export default function CalendarPage({ loaderData }: Route.ComponentProps) {
                       >
                         취소
                       </Button>
-                      <Button type="submit">미팅 추가</Button>
+                      <Button type="submit">미팅 예약</Button>
                     </DialogFooter>
                   </form>
                 </Form>

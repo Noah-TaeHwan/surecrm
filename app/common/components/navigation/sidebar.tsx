@@ -83,6 +83,12 @@ export function Sidebar({ className, onClose }: SidebarProps) {
     return location.pathname.startsWith(href);
   };
 
+  const handleNavigation = (href: string) => {
+    if (onClose && window.innerWidth < 1024) {
+      onClose();
+    }
+  };
+
   return (
     <div
       className={cn(
@@ -93,12 +99,9 @@ export function Sidebar({ className, onClose }: SidebarProps) {
       <div className="p-4 border-b border-sidebar-border">
         <Link
           to="/dashboard"
-          onClick={(e) => {
-            if (onClose && window.innerWidth < 1024) {
-              onClose();
-            }
-          }}
-          className="text-xl font-bold text-sidebar-foreground flex justify-center cursor-pointer"
+          onClick={() => handleNavigation('/dashboard')}
+          className="text-xl font-bold text-sidebar-foreground flex justify-center cursor-pointer hover:text-sidebar-primary transition-colors"
+          style={{ cursor: 'pointer' }}
         >
           SureCRM
         </Link>
@@ -120,18 +123,13 @@ export function Sidebar({ className, onClose }: SidebarProps) {
                         ? 'bg-sidebar-accent text-sidebar-accent-foreground'
                         : 'text-sidebar-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/50'
                     )}
+                    style={{ cursor: 'pointer' }}
                   >
                     <Link
                       to={item.href}
-                      className="flex items-center gap-3 cursor-pointer"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        window.location.href = item.href;
-
-                        if (onClose && window.innerWidth < 1024) {
-                          onClose();
-                        }
-                      }}
+                      className="flex items-center gap-3 cursor-pointer w-full"
+                      onClick={() => handleNavigation(item.href)}
+                      style={{ cursor: 'pointer' }}
                     >
                       {item.icon}
                       <span className="font-medium">{item.label}</span>
