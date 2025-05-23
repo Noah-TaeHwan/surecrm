@@ -13,9 +13,6 @@ export default [
   route('invite/:code', 'common/pages/auth/invite-page.tsx'),
   route('recover', 'common/pages/auth/recover-page.tsx'),
 
-  // 초기 설정
-  route('onboarding', 'features/onboarding/pages/onboarding-page.tsx'),
-
   // 주요 기능 페이지
   route('network', 'features/network/pages/network-page.tsx'),
   route('pipeline', 'features/pipeline/pages/pipeline-page.tsx'),
@@ -28,9 +25,8 @@ export default [
   // 일정 관리
   route('calendar', 'features/calendar/pages/calendar-page.tsx'),
 
-  // 소개자 및 데이터 관리
+  // 소개자 관리
   route('influencers', 'features/influencers/pages/influencers-page.tsx'),
-  route('import', 'features/import/pages/import-page.tsx'),
 
   // 초대 및 팀 관리
   route('invitations', 'features/invitations/pages/invitations-page.tsx'),

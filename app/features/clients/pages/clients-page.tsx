@@ -75,6 +75,8 @@ import { ReferralDepthIndicator } from '../components/referral-depth-indicator';
 import { ClientCard } from '../components/client-card';
 import { ClientStatsCards } from '../components/client-stats-cards';
 import { AddClientModal } from '../components/add-client-modal';
+import { ClientAddChoiceModal } from '../components/client-add-choice-modal';
+import { ClientImportModal } from '../components/client-import-modal';
 import {
   insuranceTypeIcons,
   insuranceTypeText,
@@ -244,6 +246,8 @@ export default function ClientsPage({ loaderData }: Route.ComponentProps) {
   const [filterDepth, setFilterDepth] = useState('all');
   const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
   const [addClientOpen, setAddClientOpen] = useState(false);
+  const [addChoiceOpen, setAddChoiceOpen] = useState(false);
+  const [importModalOpen, setImportModalOpen] = useState(false);
 
   // 배지 설정들
   const statusBadgeVariant: Record<string, BadgeVariant> = {
@@ -415,6 +419,23 @@ export default function ClientsPage({ loaderData }: Route.ComponentProps) {
     }
   };
 
+  // 고객 추가 선택 핸들러
+  const handleAddClientChoice = (choice: 'individual' | 'import') => {
+    if (choice === 'individual') {
+      setAddClientOpen(true);
+    } else {
+      setImportModalOpen(true);
+    }
+  };
+
+  // 임포트 완료 핸들러
+  const handleImportComplete = (importData: any) => {
+    console.log('임포트 완료:', importData);
+    // TODO: 실제 API 호출로 데이터 저장
+    alert(`${importData.successRows}명의 고객이 성공적으로 추가되었습니다.`);
+    setImportModalOpen(false);
+  };
+
   // 총 페이지 수 계산
   const totalPages = Math.ceil(totalCount / pageSize);
 
@@ -452,7 +473,7 @@ export default function ClientsPage({ loaderData }: Route.ComponentProps) {
             >
               {viewMode === 'table' ? '카드 뷰로 전환' : '리스트 뷰로 전환'}
             </Button>
-            <Button onClick={() => setAddClientOpen(true)}>
+            <Button onClick={() => setAddChoiceOpen(true)}>
               <PlusIcon className="mr-2 h-4 w-4" />
               고객 추가
             </Button>
@@ -1032,18 +1053,32 @@ export default function ClientsPage({ loaderData }: Route.ComponentProps) {
               <p className="mt-2 text-muted-foreground">
                 필터 조건을 변경하거나 새 고객을 추가해보세요.
               </p>
-              <Button className="mt-4" onClick={() => setAddClientOpen(true)}>
+              <Button className="mt-4" onClick={() => setAddChoiceOpen(true)}>
                 <PlusIcon className="mr-2 h-4 w-4" />첫 고객 추가하기
               </Button>
             </CardContent>
           </Card>
         )}
 
-        {/* 고객 추가 모달 */}
+        {/* 고객 추가 선택 모달 */}
+        <ClientAddChoiceModal
+          open={addChoiceOpen}
+          onOpenChange={setAddChoiceOpen}
+          onChoiceSelect={handleAddClientChoice}
+        />
+
+        {/* 개별 고객 추가 모달 */}
         <AddClientModal
           open={addClientOpen}
           onOpenChange={setAddClientOpen}
           onSubmit={handleAddClient}
+        />
+
+        {/* 일괄 고객 임포트 모달 */}
+        <ClientImportModal
+          open={importModalOpen}
+          onOpenChange={setImportModalOpen}
+          // onImportComplete={handleImportComplete}
         />
       </div>
     </MainLayout>

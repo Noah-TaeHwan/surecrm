@@ -104,11 +104,11 @@ export default function NetworkDetailPanel({
     if (!stage) return 'default';
 
     const stageColorMap: Record<string, string> = {
-      '첫 상담': 'blue',
-      '니즈 분석': 'green',
-      '상품 설명': 'yellow',
-      '계약 검토': 'red',
-      '계약 완료': 'purple',
+      '첫 상담': 'secondary',
+      '니즈 분석': 'default',
+      '상품 설명': 'outline',
+      '계약 검토': 'destructive',
+      '계약 완료': 'default',
     };
 
     return stageColorMap[stage] || 'default';
@@ -124,7 +124,7 @@ export default function NetworkDetailPanel({
           <span
             key={index}
             className={`text-lg ${
-              index < importance ? 'text-yellow-400' : 'text-gray-300'
+              index < importance ? 'text-primary' : 'text-muted-foreground/50'
             }`}
           >
             ★
@@ -205,7 +205,7 @@ export default function NetworkDetailPanel({
                 className="group p-2.5 border border-border bg-card hover:bg-accent/5 rounded-md transition-colors cursor-pointer flex items-center"
                 onClick={() => handleNodeSelect(referredByNode.id)}
               >
-                <div className="w-1 self-stretch bg-blue-500/40 rounded-full mr-2.5"></div>
+                <div className="w-1 self-stretch bg-primary/40 rounded-full mr-2.5"></div>
                 <div className="flex-1 min-w-0">
                   <div className="font-medium text-card-foreground truncate">
                     {referredByNode.name}
@@ -218,7 +218,7 @@ export default function NetworkDetailPanel({
                           (_, i) => (
                             <Star
                               key={i}
-                              className="h-2.5 w-2.5 text-blue-500/60"
+                              className="h-2.5 w-2.5 text-primary/60"
                             />
                           )
                         )}

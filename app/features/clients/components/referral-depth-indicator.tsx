@@ -11,10 +11,10 @@ interface ReferralDepthIndicatorProps {
 
 export function ReferralDepthIndicator({ depth }: ReferralDepthIndicatorProps) {
   const depthColors = [
-    'bg-green-500',
-    'bg-blue-500',
-    'bg-yellow-500',
-    'bg-red-500',
+    'bg-primary',
+    'bg-secondary-foreground',
+    'bg-muted-foreground',
+    'bg-destructive',
   ];
   const depthLabels = ['직접', '1차', '2차', '3차+'];
 
@@ -33,7 +33,7 @@ export function ReferralDepthIndicator({ depth }: ReferralDepthIndicatorProps) {
             </span>
           </div>
         </TooltipTrigger>
-        <TooltipContent className="bg-background text-foreground">
+        <TooltipContent>
           <p>{depth === 0 ? '직접 개발한 고객' : `${depth}차 소개 고객`}</p>
         </TooltipContent>
       </Tooltip>

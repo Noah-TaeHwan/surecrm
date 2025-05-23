@@ -80,31 +80,31 @@ export function ClientCard({
     switch (importance) {
       case 'high':
         return {
-          borderColor: 'border-l-red-500',
-          badgeColor: 'bg-red-50 text-red-700 border-red-200',
-          dotColor: 'bg-red-500',
           label: '높음',
+          borderColor: 'border-l-primary',
+          dotColor: 'bg-primary',
+          badgeColor: 'bg-primary/10 border-primary/20 text-primary',
         };
       case 'medium':
         return {
-          borderColor: 'border-l-amber-500',
-          badgeColor: 'bg-amber-50 text-amber-700 border-amber-200',
-          dotColor: 'bg-amber-500',
-          label: '중간',
+          label: '보통',
+          borderColor: 'border-l-secondary-foreground',
+          dotColor: 'bg-secondary-foreground',
+          badgeColor: 'bg-secondary text-secondary-foreground',
         };
       case 'low':
         return {
-          borderColor: 'border-l-blue-500',
-          badgeColor: 'bg-blue-50 text-blue-700 border-blue-200',
-          dotColor: 'bg-blue-500',
           label: '낮음',
+          borderColor: 'border-l-muted-foreground',
+          dotColor: 'bg-muted-foreground',
+          badgeColor: 'bg-muted text-muted-foreground',
         };
       default:
         return {
+          label: '미설정',
           borderColor: 'border-l-border',
-          badgeColor: 'bg-muted text-muted-foreground border-border',
-          dotColor: 'bg-muted-foreground',
-          label: '',
+          dotColor: 'bg-border',
+          badgeColor: 'bg-muted text-muted-foreground',
         };
     }
   };
@@ -184,10 +184,10 @@ export function ClientCard({
       } bg-card border-border`}
     >
       {/* 카드 헤더 - 고객 기본 정보 */}
-      <CardHeader className="pb-3">
+      <CardHeader>
         <div className="flex items-start justify-between">
-          <div className="flex-1 min-w-0 space-y-2">
-            <div className="flex items-center space-x-2">
+          <div className="flex-1 min-w-0">
+            <div className="flex mb-2 items-center space-x-2">
               <h3 className="font-semibold text-base truncate text-foreground">
                 {name}
               </h3>
@@ -196,7 +196,7 @@ export function ClientCard({
               />
             </div>
 
-            <div className="flex items-center text-sm text-muted-foreground">
+            <div className="flex mb-2 items-center text-sm text-muted-foreground">
               <Phone className="h-3 w-3 mr-1.5 flex-shrink-0" />
               <span className="truncate">{phone}</span>
             </div>
@@ -204,7 +204,7 @@ export function ClientCard({
             {/* 소개자 정보 */}
             {referredBy && (
               <div className="flex items-center text-xs text-muted-foreground bg-muted px-2 py-1 rounded-md">
-                <Users className="h-3 w-3 mr-1" />
+                <Users className="h-3 w-3" />
                 <span className="truncate">소개: {referredBy.name}</span>
               </div>
             )}
@@ -268,17 +268,17 @@ export function ClientCard({
       </CardHeader>
 
       {/* 카드 콘텐츠 - 핵심 영업 정보 */}
-      <CardContent className="pb-3 space-y-3">
+      <CardContent className="space-y-3">
         {/* 다음 미팅 - 심플하게 표시 */}
         {nextMeeting && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+          <div className="bg-primary/5 border border-primary/20 rounded-lg p-3">
             <div className="flex items-center space-x-2">
-              <Calendar className="h-4 w-4 text-blue-600 flex-shrink-0" />
+              <Calendar className="h-4 w-4 text-primary flex-shrink-0" />
               <div>
-                <div className="text-blue-700 text-sm font-medium">
+                <div className="text-foreground text-sm font-medium">
                   다음 미팅
                 </div>
-                <div className="text-blue-600 text-xs flex items-center space-x-1">
+                <div className="text-muted-foreground text-xs flex items-center space-x-1">
                   <span>{formatDate(nextMeeting.date)}</span>
                   <span>•</span>
                   <span>{nextMeeting.time}</span>
@@ -379,7 +379,7 @@ export function ClientCard({
         {nextMeeting && (
           <Badge
             variant="outline"
-            className="text-xs h-5 bg-green-50 border-green-300 text-green-700"
+            className="text-xs h-5 bg-primary/10 border-primary/30 text-primary"
           >
             미팅 예정
           </Badge>

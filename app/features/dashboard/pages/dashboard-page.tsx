@@ -1,23 +1,11 @@
 import type { Route } from '.react-router/types/app/features/dashboard/pages/+types/dashboard-page';
-import { Button } from '~/common/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '~/common/components/ui/card';
 import { MainLayout } from '~/common/layouts/main-layout';
-import {
-  CalendarDays,
-  Landmark,
-  MoveUp,
-  Network,
-  Users,
-  Clock,
-  ChevronRight,
-} from 'lucide-react';
-import { Link } from 'react-router';
-import { PipelineChart } from '../components/pipeline-chart';
+import { WelcomeSection } from '../components/welcome-section';
+import { PerformanceKPICards } from '../components/performance-kpi-cards';
+import { TodayAgenda } from '../components/today-agenda';
+import { PipelineOverview } from '../components/pipeline-overview';
+import { RecentClients } from '../components/recent-clients';
+import { ReferralInsights } from '../components/referral-insights';
 
 export function meta({ data, params }: Route.MetaArgs) {
   return [
@@ -29,272 +17,261 @@ export function meta({ data, params }: Route.MetaArgs) {
 export function loader({ request }: Route.LoaderArgs) {
   // 실제 구현에서는 DB에서 데이터를 가져오는 로직이 들어갑니다
   return {
-    stats: {
-      totalClients: 12,
-      activeDeals: 5,
-      completedDeals: 3,
-      todayMeetings: 2,
+    // Welcome Section 데이터
+    user: {
+      name: '김보험',
     },
-    todayEvents: [
-      // 샘플 데이터
+    todayStats: {
+      scheduledMeetings: 3,
+      pendingTasks: 7,
+      newReferrals: 2,
+    },
+
+    // Performance KPI 데이터
+    kpiData: {
+      totalClients: 247,
+      monthlyNewClients: 18,
+      totalReferrals: 85,
+      conversionRate: 68.5,
+      monthlyGrowth: {
+        clients: 12.3,
+        referrals: 25.6,
+        revenue: 8.4,
+      },
+    },
+
+    // Today Agenda 데이터 (미팅만)
+    todayMeetings: [
       {
         id: '1',
         clientName: '김영희',
-        time: '10:00 AM',
-        type: '초기 상담',
-        note: '상품 설명 자료 준비 필요',
+        time: '10:00',
+        duration: 60,
+        type: '첫 상담',
+        location: '사무실 1층 상담실',
+        status: 'upcoming' as const,
+        reminderSent: true,
       },
       {
         id: '2',
         clientName: '이철수',
-        time: '2:30 PM',
+        time: '14:30',
+        duration: 45,
         type: '계약 검토',
-        note: '계약서 초안 검토',
+        location: '온라인 미팅',
+        status: 'upcoming' as const,
+        reminderSent: false,
+      },
+      {
+        id: '3',
+        clientName: '박지성',
+        time: '16:00',
+        duration: 30,
+        type: '니즈 분석',
+        location: '카페 미팅',
+        status: 'upcoming' as const,
+        reminderSent: true,
       },
     ],
-    topInfluencers: [
+
+    // Pipeline Overview 데이터
+    pipelineData: {
+      stages: [
+        {
+          id: '1',
+          name: '리드 확보',
+          count: 12,
+          value: 2400,
+          conversionRate: 85,
+        },
+        {
+          id: '2',
+          name: '첫 상담',
+          count: 8,
+          value: 1600,
+          conversionRate: 70,
+        },
+        {
+          id: '3',
+          name: '제안서 작성',
+          count: 5,
+          value: 1200,
+          conversionRate: 60,
+        },
+        {
+          id: '4',
+          name: '계약 협상',
+          count: 3,
+          value: 800,
+          conversionRate: 90,
+        },
+        {
+          id: '5',
+          name: '계약 체결',
+          count: 2,
+          value: 600,
+        },
+      ],
+      totalValue: 6600,
+      monthlyTarget: 8000,
+    },
+
+    // Recent Clients 데이터
+    recentClientsData: {
+      recentClients: [
+        {
+          id: '1',
+          name: '김영희',
+          status: 'proposal' as const,
+          lastContactDate: '2024-01-15',
+          potentialValue: 450,
+          referredBy: '박지성',
+          stage: '생명보험 제안 진행중',
+        },
+        {
+          id: '2',
+          name: '이철수',
+          status: 'contacted' as const,
+          lastContactDate: '2024-01-14',
+          potentialValue: 320,
+          stage: '니즈 분석 완료',
+        },
+        {
+          id: '3',
+          name: '정수현',
+          status: 'contracted' as const,
+          lastContactDate: '2024-01-13',
+          potentialValue: 680,
+          referredBy: '김민지',
+          stage: '화재보험 계약 체결',
+        },
+        {
+          id: '4',
+          name: '박민지',
+          status: 'prospect' as const,
+          lastContactDate: '2024-01-12',
+          potentialValue: 250,
+          stage: '초기 접촉 대기',
+        },
+        {
+          id: '5',
+          name: '최수진',
+          status: 'proposal' as const,
+          lastContactDate: '2024-01-11',
+          potentialValue: 520,
+          referredBy: '정현우',
+          stage: '자동차보험 제안 검토중',
+        },
+      ],
+      totalClients: 247,
+    },
+
+    // Referral Insights 데이터
+    topReferrers: [
       {
         id: '1',
         name: '박지성',
-        referrals: 5,
-        conversionRate: 0.8,
+        totalReferrals: 12,
+        successfulConversions: 10,
+        conversionRate: 83.3,
+        lastReferralDate: '2024-01-15',
+        rank: 1,
+        recentActivity: '김민수님을 통해 새로운 리드 확보',
       },
       {
         id: '2',
         name: '김민지',
-        referrals: 3,
-        conversionRate: 0.67,
+        totalReferrals: 8,
+        successfulConversions: 6,
+        conversionRate: 75.0,
+        lastReferralDate: '2024-01-12',
+        rank: 2,
+        recentActivity: '이영호님 화재보험 계약 성공',
       },
       {
         id: '3',
         name: '정현우',
-        referrals: 2,
-        conversionRate: 0.5,
+        totalReferrals: 6,
+        successfulConversions: 4,
+        conversionRate: 66.7,
+        lastReferralDate: '2024-01-10',
+        rank: 3,
+        recentActivity: '가족 대상 보험 상품 소개 진행',
+      },
+      {
+        id: '4',
+        name: '최수진',
+        totalReferrals: 5,
+        successfulConversions: 3,
+        conversionRate: 60.0,
+        lastReferralDate: '2024-01-08',
+        rank: 4,
+        recentActivity: '직장 동료 네트워크 확장 중',
+      },
+      {
+        id: '5',
+        name: '한도윤',
+        totalReferrals: 4,
+        successfulConversions: 2,
+        conversionRate: 50.0,
+        lastReferralDate: '2024-01-05',
+        rank: 5,
+        recentActivity: '동네 상인회 멤버 소개 예정',
       },
     ],
-    pipelineStages: [
-      {
-        name: '첫 상담',
-        count: 4,
-        color: '#8884d8',
-      },
-      {
-        name: '니즈 분석',
-        count: 3,
-        color: '#82ca9d',
-      },
-      {
-        name: '상품 설명',
-        count: 2,
-        color: '#ffc658',
-      },
-      {
-        name: '계약 검토',
-        count: 1,
-        color: '#ff8042',
-      },
-      {
-        name: '계약 완료',
-        count: 2,
-        color: '#0088fe',
-      },
-    ],
+
+    networkStats: {
+      totalConnections: 124,
+      networkDepth: 4,
+      activeReferrers: 23,
+      monthlyGrowth: 15.6,
+    },
   };
 }
 
 export default function DashboardPage({ loaderData }: Route.ComponentProps) {
-  const { stats, todayEvents, topInfluencers, pipelineStages } = loaderData;
+  const {
+    user,
+    todayStats,
+    kpiData,
+    todayMeetings,
+    pipelineData,
+    recentClientsData,
+    topReferrers,
+    networkStats,
+  } = loaderData;
 
   return (
     <MainLayout title="대시보드">
-      <div className="space-y-6">
-        {/* 요약 카드 섹션 */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">총 고객 수</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent className="flex flex-col items-start">
-              <div className="text-2xl font-bold mb-4">
-                {stats.totalClients}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                전주 대비 <span className="text-green-500">+20%</span>
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                영업 중인 고객
-              </CardTitle>
-              <MoveUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent className="flex flex-col items-start">
-              <div className="text-2xl font-bold mb-4">{stats.activeDeals}</div>
-              <p className="text-xs text-muted-foreground">
-                전주 대비 <span className="text-green-500">+25%</span>
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">완료된 계약</CardTitle>
-              <Landmark className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent className="flex flex-col items-start">
-              <div className="text-2xl font-bold mb-4">
-                {stats.completedDeals}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                전주 대비 <span className="text-green-500">+50%</span>
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">오늘의 미팅</CardTitle>
-              <CalendarDays className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent className="flex flex-col items-start">
-              <div className="text-2xl font-bold mb-4">
-                {stats.todayMeetings}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                전주 대비 <span className="text-blue-500">±0%</span>
-              </p>
-            </CardContent>
-          </Card>
+      <div className="space-y-8">
+        {/* 환영 섹션 */}
+        <WelcomeSection userName={user.name} todayStats={todayStats} />
+
+        {/* 성과 지표 카드 */}
+        <PerformanceKPICards data={kpiData} />
+
+        {/* 오늘의 일정 및 영업 파이프라인 */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <TodayAgenda meetings={todayMeetings} />
+          <PipelineOverview
+            stages={pipelineData.stages}
+            totalValue={pipelineData.totalValue}
+            monthlyTarget={pipelineData.monthlyTarget}
+          />
         </div>
 
-        {/* 메인 콘텐츠 섹션 */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="md:col-span-2">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>오늘의 일정</CardTitle>
-              <Link to="/calendar">
-                <Button variant="ghost" size="sm" className="gap-1">
-                  <span>모든 일정</span>
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </Link>
-            </CardHeader>
-            <CardContent>
-              {todayEvents.length > 0 ? (
-                <div className="space-y-4">
-                  {todayEvents.map((event, index) => (
-                    <div
-                      key={index}
-                      className="flex items-start space-x-4 border-b pb-4 last:border-0 last:pb-0"
-                    >
-                      <div className="bg-primary/10 p-2 rounded-full">
-                        <Clock className="h-5 w-5 text-primary" />
-                      </div>
-                      <div className="flex-1 space-y-1">
-                        <div className="flex items-center justify-between">
-                          <p className="font-medium">{event.clientName}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {event.time}
-                          </p>
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                          {event.type}
-                        </p>
-                        {event.note && <p className="text-sm">{event.note}</p>}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-6 space-y-3">
-                  <CalendarDays className="h-12 w-12 text-muted-foreground/50" />
-                  <p className="text-muted-foreground">
-                    예정된 미팅이 없습니다.
-                  </p>
-                  <Link to="/calendar">
-                    <Button>미팅 예약</Button>
-                  </Link>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>영업 단계별 분포</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {pipelineStages.length > 0 ? (
-                <div>
-                  <PipelineChart data={pipelineStages} />
-                  <div className="mt-2 text-center">
-                    <Link to="/pipeline">
-                      <Button variant="outline" size="sm">
-                        파이프라인 보기
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-6 space-y-3">
-                  <div className="h-40 w-full flex items-center justify-center border rounded-md border-dashed">
-                    <p className="text-muted-foreground">
-                      아직 고객 데이터가 없습니다.
-                    </p>
-                  </div>
-                  <Link to="/clients">
-                    <Button>고객 추가</Button>
-                  </Link>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>핵심 소개자 리스트</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {topInfluencers.length > 0 ? (
-                <div className="space-y-4">
-                  {topInfluencers.map((influencer) => (
-                    <div
-                      key={influencer.id}
-                      className="flex justify-between items-center border-b pb-2 last:border-0 last:pb-0"
-                    >
-                      <div>
-                        <p className="font-medium mb-2">{influencer.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          소개 {influencer.referrals}건 / 전환율{' '}
-                          {(influencer.conversionRate * 100).toFixed(0)}%
-                        </p>
-                      </div>
-                      <Link to={`/influencers?id=${influencer.id}`}>
-                        <Button variant="outline" size="sm">
-                          상세보기
-                        </Button>
-                      </Link>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-6">
-                  <Network className="h-12 w-12 text-muted-foreground/50 mb-2" />
-                  <p className="text-muted-foreground">
-                    소개 데이터가 없습니다.
-                  </p>
-                </div>
-              )}
-              <div className="mt-4 text-center">
-                <Link to="/network">
-                  <Button variant="outline" size="sm" className="w-full">
-                    소개 네트워크 보기
-                  </Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
+        {/* 최근 고객 현황 및 소개 네트워크 */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <RecentClients
+            recentClients={recentClientsData.recentClients}
+            totalClients={recentClientsData.totalClients}
+          />
+          <div>
+            <ReferralInsights
+              topReferrers={topReferrers}
+              networkStats={networkStats}
+            />
+          </div>
         </div>
       </div>
     </MainLayout>

@@ -1,0 +1,304 @@
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '~/common/components/ui/card';
+import { Button } from '~/common/components/ui/button';
+import { Badge } from '~/common/components/ui/badge';
+import { Avatar, AvatarFallback } from '~/common/components/ui/avatar';
+import { Progress } from '~/common/components/ui/progress';
+import {
+  Share1Icon,
+  Link2Icon,
+  ChevronRightIcon,
+  StarFilledIcon,
+  StarIcon,
+  BarChartIcon,
+} from '@radix-ui/react-icons';
+import { Link } from 'react-router';
+
+interface TopReferrer {
+  id: string;
+  name: string;
+  totalReferrals: number;
+  successfulConversions: number;
+  conversionRate: number;
+  lastReferralDate: string;
+  rank: number;
+  recentActivity: string;
+}
+
+interface NetworkStats {
+  totalConnections: number;
+  networkDepth: number;
+  activeReferrers: number;
+  monthlyGrowth: number;
+}
+
+interface ReferralInsightsProps {
+  topReferrers: TopReferrer[];
+  networkStats: NetworkStats;
+  onViewNetwork?: () => void;
+}
+
+export function ReferralInsights({
+  topReferrers,
+  networkStats,
+}: ReferralInsightsProps) {
+  const getRankIcon = (rank: number) => {
+    switch (rank) {
+      case 1:
+        return <StarFilledIcon className="h-3.5 w-3.5 text-primary" />;
+      case 2:
+      case 3:
+        return <StarIcon className="h-3.5 w-3.5 text-muted-foreground" />;
+      default:
+        return null;
+    }
+  };
+
+  const getRankBadgeColor = (rank: number) => {
+    switch (rank) {
+      case 1:
+        return 'bg-primary/10 text-primary border-primary/20';
+      case 2:
+      case 3:
+        return 'bg-muted/20 text-muted-foreground border-border/30';
+      default:
+        return 'bg-muted/20 text-muted-foreground border-border/30';
+    }
+  };
+
+  const getConversionRateColor = (rate: number) => {
+    if (rate >= 80) return 'text-primary';
+    if (rate >= 60) return 'text-foreground';
+    return 'text-muted-foreground';
+  };
+
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString('ko-KR', {
+      month: 'short',
+      day: 'numeric',
+    });
+  };
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* 핵심 소개자 TOP 5 */}
+      <Card className="border-border/50">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-base font-medium flex items-center gap-2">
+              <div className="p-1.5 bg-primary/10 rounded-lg">
+                <Share1Icon className="h-4 w-4 text-primary" />
+              </div>
+              핵심 소개자 TOP 5
+            </CardTitle>
+            <Link to="/influencers">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-xs text-muted-foreground hover:text-primary"
+              >
+                전체 보기
+                <ChevronRightIcon className="h-3 w-3 ml-1" />
+              </Button>
+            </Link>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {topReferrers.length > 0 ? (
+            <>
+              {topReferrers.slice(0, 5).map((referrer) => (
+                <div
+                  key={referrer.id}
+                  className="flex items-center gap-3 p-3 border border-border/30 rounded-lg hover:bg-accent/20 transition-all duration-200"
+                >
+                  <div className="flex items-center gap-2">
+                    <div className="relative">
+                      <Avatar className="w-9 h-9 border border-primary/20">
+                        <AvatarFallback className="text-xs font-medium bg-primary/10 text-primary">
+                          {referrer.name.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                      {referrer.rank <= 3 && (
+                        <div className="absolute -top-1 -right-1 w-5 h-5 bg-background border border-border/30 rounded-full flex items-center justify-center">
+                          {getRankIcon(referrer.rank)}
+                        </div>
+                      )}
+                    </div>
+                    <Badge
+                      variant="secondary"
+                      className={`text-xs ${getRankBadgeColor(referrer.rank)}`}
+                    >
+                      #{referrer.rank}
+                    </Badge>
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <p className="font-medium text-sm text-foreground">
+                        {referrer.name}
+                      </p>
+                      <Badge
+                        variant="secondary"
+                        className="text-xs bg-muted/20 text-muted-foreground border-border/30"
+                      >
+                        {referrer.totalReferrals}건
+                      </Badge>
+                    </div>
+
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs text-muted-foreground">
+                        전환률{' '}
+                        <span
+                          className={`font-medium ${getConversionRateColor(
+                            referrer.conversionRate
+                          )}`}
+                        >
+                          {referrer.conversionRate.toFixed(0)}%
+                        </span>
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {formatDate(referrer.lastReferralDate)}
+                      </span>
+                    </div>
+
+                    <div className="mb-2">
+                      <Progress
+                        value={referrer.conversionRate}
+                        className="h-1.5"
+                      />
+                    </div>
+
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      {referrer.recentActivity}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </>
+          ) : (
+            <div className="text-center py-8">
+              <div className="p-3 bg-muted/20 rounded-full w-fit mx-auto mb-3">
+                <Share1Icon className="h-8 w-8 text-muted-foreground" />
+              </div>
+              <p className="text-sm text-muted-foreground">
+                소개 데이터가 없습니다
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* 소개 네트워크 현황 */}
+      <Card className="border-border/50">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-base font-medium flex items-center gap-2">
+              <div className="p-1.5 bg-primary/10 rounded-lg">
+                <Link2Icon className="h-4 w-4 text-primary" />
+              </div>
+              네트워크 현황
+            </CardTitle>
+            <Link to="/network">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-xs text-muted-foreground hover:text-primary"
+              >
+                자세히 보기
+                <ChevronRightIcon className="h-3 w-3 ml-1" />
+              </Button>
+            </Link>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* 네트워크 통계 */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="text-center p-3 bg-primary/5 border border-primary/20 rounded-lg">
+              <div className="text-xl font-bold text-primary mb-1">
+                {networkStats.totalConnections}
+              </div>
+              <div className="text-xs text-muted-foreground">총 연결</div>
+            </div>
+
+            <div className="text-center p-3 bg-muted/20 border border-border/30 rounded-lg">
+              <div className="text-xl font-bold text-foreground mb-1">
+                {networkStats.networkDepth}
+              </div>
+              <div className="text-xs text-muted-foreground">최대 깊이</div>
+            </div>
+
+            <div className="text-center p-3 bg-muted/20 border border-border/30 rounded-lg">
+              <div className="text-xl font-bold text-foreground mb-1">
+                {networkStats.activeReferrers}
+              </div>
+              <div className="text-xs text-muted-foreground">활성 소개자</div>
+            </div>
+
+            <div className="text-center p-3 bg-muted/20 border border-border/30 rounded-lg">
+              <div className="text-xl font-bold text-foreground mb-1">
+                +{networkStats.monthlyGrowth}%
+              </div>
+              <div className="text-xs text-muted-foreground">월간 성장</div>
+            </div>
+          </div>
+
+          {/* 네트워크 시각화 미니 프리뷰 */}
+          <div className="p-4 bg-muted/10 border border-border/30 rounded-lg">
+            <div className="text-center">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <div className="w-3 h-3 bg-primary rounded-full"></div>
+                <div className="w-6 h-0.5 bg-muted-foreground/30"></div>
+                <div className="w-2 h-2 bg-muted-foreground rounded-full"></div>
+                <div className="w-4 h-0.5 bg-muted-foreground/30"></div>
+                <div className="w-2 h-2 bg-muted-foreground rounded-full"></div>
+              </div>
+              <div className="flex items-center justify-center gap-2 mb-3">
+                <div className="w-2 h-2 bg-muted-foreground rounded-full"></div>
+                <div className="w-4 h-0.5 bg-muted-foreground/30"></div>
+                <div className="w-3 h-3 bg-primary rounded-full"></div>
+                <div className="w-4 h-0.5 bg-muted-foreground/30"></div>
+                <div className="w-2 h-2 bg-muted-foreground rounded-full"></div>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                소개 네트워크 연결 구조
+              </p>
+            </div>
+          </div>
+
+          {/* 인사이트 */}
+          <div className="p-3 bg-muted/20 border border-border/30 rounded-lg">
+            <div className="flex items-start gap-2">
+              <BarChartIcon className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="text-sm font-medium text-foreground mb-1">
+                  네트워크 인사이트
+                </p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  이번 달 네트워크가{' '}
+                  <span className="font-medium text-primary">
+                    {networkStats.monthlyGrowth}%
+                  </span>{' '}
+                  성장했습니다.
+                  {topReferrers[0] && (
+                    <>
+                      {' '}
+                      최고 성과자는{' '}
+                      <span className="font-medium text-primary">
+                        {topReferrers[0].name}
+                      </span>
+                      님입니다.
+                    </>
+                  )}
+                </p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

@@ -1,5 +1,6 @@
 import { cn } from '~/lib/utils';
 import { meetingTypeColors, type Meeting } from './types';
+import { Fragment } from 'react';
 
 interface WeekViewProps {
   selectedDate: Date;
@@ -93,12 +94,9 @@ export function WeekView({
       {/* 시간대별 그리드 */}
       <div className="grid grid-cols-8 bg-gradient-to-br from-background/60 to-background/40">
         {timeSlots.map((hour) => (
-          <>
+          <Fragment key={hour}>
             {/* 시간 라벨 */}
-            <div
-              key={`time-${hour}`}
-              className="p-3 text-sm font-semibold text-muted-foreground border-r border-border/20 border-b border-border/10 bg-muted/20 text-center"
-            >
+            <div className="p-3 text-sm font-semibold text-muted-foreground border-r border-b border-border/20 bg-muted/20 text-center">
               {formatTime(hour)}
             </div>
 
@@ -116,7 +114,7 @@ export function WeekView({
                 <div
                   key={`${dateStr}-${hour}`}
                   className={cn(
-                    'min-h-16 p-2 border-r border-border/20 last:border-r-0 border-b border-border/10 relative group hover:bg-accent/20 transition-colors',
+                    'min-h-16 p-2 border-r border-b border-border/20 last:border-r-0 relative group hover:bg-accent/20 transition-colors',
                     isToday(date) && 'bg-primary/5',
                     dayIndex === 0 && 'bg-red-50/30 dark:bg-red-950/20',
                     dayIndex === 6 && 'bg-blue-50/30 dark:bg-blue-950/20'
@@ -145,7 +143,7 @@ export function WeekView({
                 </div>
               );
             })}
-          </>
+          </Fragment>
         ))}
       </div>
     </div>

@@ -98,19 +98,19 @@ const FallbackGraph = ({ data, onNodeSelect }: any) => {
 // 색상 상수 선언 (코드 시작 부분 수정)
 const HIGHLIGHT_COLORS = {
   // 불투명 원색 (소스 노드가 하이라이트된 경우)
-  ORANGE: 'rgb(255, 140, 0)', // 일관된 주황색 값으로 수정
+  ORANGE: 'rgb(167, 63, 3)', // primary 색상 기반
   // 불투명 원색 (타겟 노드가 하이라이트된 경우)
-  BLUE: 'rgb(66, 133, 244)',
+  BLUE: 'rgb(100, 116, 139)', // secondary-foreground 기반
   // 발광 효과용 색상
-  ORANGE_GLOW: 'rgba(255, 140, 0, 0.5)', // 주황색 발광 (투명도 통일)
-  BLUE_GLOW: 'rgba(66, 133, 244, 0.5)', // 파란색 발광 (투명도 통일)
+  ORANGE_GLOW: 'rgba(167, 63, 3, 0.4)', // primary 기반 발광
+  BLUE_GLOW: 'rgba(100, 116, 139, 0.4)', // secondary 기반 발광
   // 비하이라이트 링크용 색상
-  ORANGE_LIGHT: 'rgba(255, 140, 0, 0.7)', // 약한 주황색 (일관된 값으로 수정)
-  ORANGE_LIGHTER: 'rgba(255, 140, 0, 0.3)', // 매우 약한 주황색 (일관된 값으로 수정)
-  BLUE_LIGHT: 'rgba(66, 133, 244, 0.3)', // 약한 파란색
-  BLUE_LIGHTER: 'rgba(66, 133, 244, 0.2)', // 매우 약한 파란색
-  NEUTRAL: 'rgba(180, 180, 180, 0.3)', // 중립 색상
-  ARROW_DEFAULT: 'rgba(80, 140, 200, 0.7)', // 기본 화살표 색상
+  ORANGE_LIGHT: 'rgba(167, 63, 3, 0.6)', // 약한 primary
+  ORANGE_LIGHTER: 'rgba(167, 63, 3, 0.3)', // 매우 약한 primary
+  BLUE_LIGHT: 'rgba(100, 116, 139, 0.3)', // 약한 secondary
+  BLUE_LIGHTER: 'rgba(100, 116, 139, 0.2)', // 매우 약한 secondary
+  NEUTRAL: 'rgba(148, 163, 184, 0.3)', // muted-foreground 기반
+  ARROW_DEFAULT: 'rgba(148, 163, 184, 0.6)', // muted-foreground 기반 화살표
 };
 
 export default function NetworkGraphClient({
@@ -1345,13 +1345,13 @@ export default function NetworkGraphClient({
             }
 
             // 그룹/단계별 색상
-            let baseColor = node.group === 'influencer' ? '#ff9500' : '#666666';
+            let baseColor = node.group === 'influencer' ? '#a73f03' : '#64748b'; // primary와 muted-foreground 기반
             if (node.group !== 'influencer') {
-              if (node.stage === '첫 상담') baseColor = '#3498db';
-              if (node.stage === '니즈 분석') baseColor = '#2ecc71';
-              if (node.stage === '상품 설명') baseColor = '#f39c12';
-              if (node.stage === '계약 검토') baseColor = '#e74c3c';
-              if (node.stage === '계약 완료') baseColor = '#9b59b6';
+              if (node.stage === '첫 상담') baseColor = '#64748b'; // muted-foreground
+              if (node.stage === '니즈 분석') baseColor = '#a73f03'; // primary
+              if (node.stage === '상품 설명') baseColor = '#78716c'; // stone
+              if (node.stage === '계약 검토') baseColor = '#dc2626'; // destructive
+              if (node.stage === '계약 완료') baseColor = '#16a34a'; // green-600 (성공 의미)
             }
 
             // 투명도 설정 - 필터링된 노드와 하이라이트 관련 상태 모두 고려
@@ -1409,7 +1409,7 @@ export default function NetworkGraphClient({
                 0,
                 2 * Math.PI
               );
-              ctx.fillStyle = `rgba(255, 120, 70, ${0.08 * combinedPulse})`;
+              ctx.fillStyle = `rgba(167, 63, 3, ${0.08 * combinedPulse})`;
               ctx.fill();
 
               // 두 번째 글로우 링 - 중간 범위
@@ -1421,7 +1421,7 @@ export default function NetworkGraphClient({
                 0,
                 2 * Math.PI
               );
-              ctx.fillStyle = `rgba(255, 140, 70, ${0.15 * combinedPulse})`;
+              ctx.fillStyle = `rgba(167, 63, 3, ${0.15 * combinedPulse})`;
               ctx.fill();
 
               // 세 번째 글로우 링 - 가장 가까운 범위
@@ -1433,7 +1433,7 @@ export default function NetworkGraphClient({
                 0,
                 2 * Math.PI
               );
-              ctx.fillStyle = `rgba(255, 160, 80, ${0.25 * combinedPulse})`;
+              ctx.fillStyle = `rgba(167, 63, 3, ${0.25 * combinedPulse})`;
               ctx.fill();
 
               // 메인 노드 테두리 효과 강화
@@ -1441,7 +1441,7 @@ export default function NetworkGraphClient({
               ctx.arc(node.x, node.y, nodeSize, 0, 2 * Math.PI);
 
               // 외부 빛나는 효과 강화
-              ctx.shadowColor = `rgba(255, 120, 70, ${
+              ctx.shadowColor = `rgba(167, 63, 3, ${
                 0.6 + 0.15 * combinedPulse
               })`;
               ctx.shadowBlur = 15 + 5 * combinedPulse;
@@ -1449,7 +1449,7 @@ export default function NetworkGraphClient({
               ctx.shadowOffsetY = 0;
 
               // 메인 테두리 효과 - 더 뚜렷하게
-              ctx.strokeStyle = `rgba(255, 140, 70, ${
+              ctx.strokeStyle = `rgba(167, 63, 3, ${
                 0.8 + 0.15 * combinedPulse
               })`;
               ctx.lineWidth = (2.5 + 0.8 * combinedPulse) / globalScale;
@@ -1458,7 +1458,7 @@ export default function NetworkGraphClient({
               // 내부 하이라이트 링
               ctx.beginPath();
               ctx.arc(node.x, node.y, nodeSize * 0.85, 0, 2 * Math.PI);
-              ctx.strokeStyle = `rgba(255, 180, 100, ${
+              ctx.strokeStyle = `rgba(167, 63, 3, ${
                 0.4 + 0.2 * combinedPulse
               })`;
               ctx.lineWidth = (1.5 + 0.5 * combinedPulse) / globalScale;
@@ -1485,14 +1485,14 @@ export default function NetworkGraphClient({
             }
             // 검색 결과 노드 (첫 번째 제외) - 필터링되지 않은 경우에만
             else if (isSearchResultNode && !isFiltered) {
-              // 검색 결과 노드 효과 (주황색 테두리)
-              ctx.shadowColor = 'rgba(255, 140, 0, 0.5)';
+              // 검색 결과 노드 효과 (primary 색상 테두리)
+              ctx.shadowColor = 'rgba(167, 63, 3, 0.5)';
               ctx.shadowBlur = 8;
               ctx.shadowOffsetX = 0;
               ctx.shadowOffsetY = 0;
 
               // 테두리 효과
-              ctx.strokeStyle = 'rgba(255, 140, 0, 0.8)';
+              ctx.strokeStyle = 'rgba(167, 63, 3, 0.8)';
               ctx.lineWidth = 2 / globalScale;
               ctx.stroke();
 
@@ -1502,8 +1502,8 @@ export default function NetworkGraphClient({
             }
             // 연결된 노드 강조 효과 - 필터링되지 않은 경우에만
             else if (isConnectedNode && !isFiltered) {
-              // 단순한 테두리만 추가
-              ctx.strokeStyle = 'rgba(100, 150, 230, 0.8)';
+              // 단순한 테두리만 추가 (secondary 색상)
+              ctx.strokeStyle = 'rgba(100, 116, 139, 0.8)';
               ctx.lineWidth = 2 / globalScale;
               ctx.stroke();
 

@@ -32,10 +32,10 @@ export function ClientMeetingsTab({
 
   // 미팅 상태별 아이콘
   const meetingStatusIcon: Record<string, React.ReactNode> = {
-    scheduled: <ClockIcon className="h-4 w-4 text-blue-500" />,
-    completed: <CheckCircledIcon className="h-4 w-4 text-green-500" />,
-    cancelled: <CrossCircledIcon className="h-4 w-4 text-red-500" />,
-    rescheduled: <UpdateIcon className="h-4 w-4 text-yellow-500" />,
+    scheduled: <ClockIcon className="h-4 w-4 text-primary" />,
+    completed: <CheckCircledIcon className="h-4 w-4 text-primary" />,
+    cancelled: <CrossCircledIcon className="h-4 w-4 text-destructive" />,
+    rescheduled: <UpdateIcon className="h-4 w-4 text-muted-foreground" />,
   };
 
   const handleMeetingAdded = (newMeeting: any) => {

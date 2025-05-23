@@ -85,7 +85,7 @@ export function InfluencerAnalysisCard({
                     className="flex-1 flex flex-col items-center gap-1"
                   >
                     <div
-                      className="w-full bg-primary rounded-t"
+                      className="w-full bg-primary/60 rounded-t"
                       style={{
                         height: `${Math.max((count / 4) * 100, 10)}%`,
                       }}

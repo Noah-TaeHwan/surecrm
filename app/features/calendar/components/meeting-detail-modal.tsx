@@ -28,7 +28,6 @@ import {
   FileTextIcon,
   GlobeIcon,
   Pencil2Icon,
-  MobileIcon,
   PlusIcon,
   Cross2Icon,
   ArrowRightIcon,
@@ -37,14 +36,13 @@ import {
 } from '@radix-ui/react-icons';
 import { Link } from 'react-router';
 import { cn } from '~/lib/utils';
-import { meetingTypeColors, type Meeting, type MeetingNote } from './types';
+import {
+  meetingTypeColors,
+  type Meeting,
+  type MeetingNote,
+  type ChecklistItem,
+} from './types';
 import { useState } from 'react';
-
-interface ChecklistItem {
-  id: string;
-  text: string;
-  completed: boolean;
-}
 
 interface MeetingDetailModalProps {
   meeting: Meeting | null;

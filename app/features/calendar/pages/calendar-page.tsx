@@ -1,4 +1,4 @@
-import type { Route } from '.react-router/types/app/features/calendar/pages/+types/calendar-page';
+import type { Route } from './+types/calendar-page';
 import { Button } from '~/common/components/ui/button';
 import {
   Card,
@@ -70,16 +70,6 @@ import { CalendarSidebar } from '../components/calendar-sidebar';
 import { AddMeetingModal } from '../components/add-meeting-modal';
 import { MeetingDetailModal } from '../components/meeting-detail-modal';
 import { type Meeting, type Client, type ViewMode } from '../components/types';
-
-// 미팅 유형별 색상
-const meetingTypeColors = {
-  '첫 상담': 'bg-blue-500',
-  '니즈 분석': 'bg-purple-500',
-  '상품 설명': 'bg-orange-500',
-  '계약 검토': 'bg-yellow-500',
-  '계약 체결': 'bg-green-500',
-  '정기 점검': 'bg-gray-500',
-};
 
 // 미팅 폼 스키마
 const meetingSchema = z.object({

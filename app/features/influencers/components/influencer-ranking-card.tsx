@@ -11,6 +11,8 @@ import { HeartIcon } from '@radix-ui/react-icons';
 import { Link } from 'react-router';
 import { cn } from '~/lib/utils';
 import type { Influencer } from './types';
+import { Badge } from '~/common/components/ui/badge';
+import { PersonIcon, ArrowUpIcon } from '@radix-ui/react-icons';
 
 interface InfluencerRankingCardProps {
   influencers: Influencer[];
@@ -19,10 +21,20 @@ interface InfluencerRankingCardProps {
 
 // 관계 강도별 색상
 function getRelationshipColor(strength: number) {
-  if (strength >= 90) return 'text-green-700 bg-green-50 border-green-200';
-  if (strength >= 80) return 'text-blue-700 bg-blue-50 border-blue-200';
-  if (strength >= 70) return 'text-yellow-700 bg-yellow-50 border-yellow-200';
-  return 'text-red-700 bg-red-50 border-red-200';
+  if (strength >= 90) return 'text-primary bg-primary/10 border-primary/20';
+  if (strength >= 80)
+    return 'text-secondary-foreground bg-secondary/50 border-secondary';
+  if (strength >= 70) return 'text-muted-foreground bg-muted border-border';
+  return 'text-destructive bg-destructive/10 border-destructive/20';
+}
+
+// 순위별 색상
+function getRankColor(rank: number) {
+  if (rank === 1) return 'text-primary bg-primary/10 border-primary/20';
+  if (rank === 2)
+    return 'text-secondary-foreground bg-secondary/30 border-secondary/50';
+  if (rank === 3) return 'text-muted-foreground bg-muted border-border';
+  return 'text-muted-foreground bg-muted/50 border-border';
 }
 
 export function InfluencerRankingCard({

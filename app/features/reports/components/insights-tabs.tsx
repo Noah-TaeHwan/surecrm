@@ -395,7 +395,7 @@ export function InsightsTabs({
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>신규 고객</span>
-                      <span className="text-green-600">
+                      <span className="text-primary">
                         {performance.newClients}/35명 (80%)
                       </span>
                     </div>
@@ -404,7 +404,7 @@ export function InsightsTabs({
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>소개 건수</span>
-                      <span className="text-green-600">
+                      <span className="text-primary">
                         {performance.totalReferrals}/100건 (89%)
                       </span>
                     </div>
@@ -413,7 +413,7 @@ export function InsightsTabs({
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>수익 목표</span>
-                      <span className="text-yellow-600">
+                      <span className="text-muted-foreground">
                         1.25/1.5억원 (83%)
                       </span>
                     </div>
