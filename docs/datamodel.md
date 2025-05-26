@@ -103,7 +103,9 @@
       "vehicle_number": "12가3456",
       "owner_name": "홍길동",
       "vehicle_type": "승용차",
-      "manufacturer": "현대"
+      "manufacturer": "현대",
+      "requires_policy_photo": true,
+      "policy_photo_exception": "DB손해보험 제외"
     }
     ```
 - `is_active` (boolean, NOT NULL, default: true): 정보 활성 상태
@@ -170,7 +172,7 @@
 - `client_id` (UUID, FK, NOT NULL): 관련 고객 ID
 - `insurance_info_id` (UUID, FK, nullable): 관련 보험 정보 ID
 - `agent_id` (UUID, FK, NOT NULL): 업로드한 보험설계사 ID
-- `document_type` (enum: 'policy', 'id_card', 'vehicle_registration', 'vehicle_photo', 'dashboard_photo', 'license_plate_photo', 'blackbox_photo', 'other', NOT NULL): 문서 유형
+- `document_type` (enum: 'policy', 'id_card', 'vehicle_registration', 'vehicle_photo', 'dashboard_photo', 'license_plate_photo', 'blackbox_photo', 'insurance_policy_photo', 'other', NOT NULL): 문서 유형
 - `file_name` (string, NOT NULL): 파일명
 - `file_path` (string, NOT NULL): 저장 경로 (Supabase Storage)
 - `mime_type` (string, NOT NULL): 파일 형식
@@ -406,7 +408,7 @@ CREATE TABLE documents (
   agent_id UUID REFERENCES users(id) NOT NULL,
   document_type TEXT CHECK (document_type IN (
     'policy', 'id_card', 'vehicle_registration', 'vehicle_photo',
-    'dashboard_photo', 'license_plate_photo', 'blackbox_photo', 'other'
+    'dashboard_photo', 'license_plate_photo', 'blackbox_photo', 'insurance_policy_photo', 'other'
   )) NOT NULL,
   file_name TEXT NOT NULL,
   file_path TEXT NOT NULL,
