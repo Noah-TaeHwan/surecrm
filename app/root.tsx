@@ -150,95 +150,42 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 background: oklch(0.4b5563 0 0) !important;
               }
               
-              /* 로딩 스피너 */
-              .loading-spinner {
-                position: fixed !important;
-                top: 50% !important;
-                left: 50% !important;
-                transform: translate(-50%, -50%) !important;
-                width: 2rem !important;
-                height: 2rem !important;
-                border: 2px solid oklch(1 0 0 / 20%) !important;
-                border-top: 2px solid oklch(0.645 0.246 16.439) !important;
-                border-radius: 50% !important;
-                animation: spin 1s linear infinite !important;
-                z-index: 9999 !important;
-              }
-              
+              /* 애니메이션 키프레임 */
               @keyframes spin {
-                0% { transform: translate(-50%, -50%) rotate(0deg) !important; }
-                100% { transform: translate(-50%, -50%) rotate(360deg) !important; }
+                0% { transform: rotate(0deg) !important; }
+                100% { transform: rotate(360deg) !important; }
               }
               
-              /* 즉시 숨김 처리 */
-              .fouc-hidden {
-                visibility: hidden !important;
-                opacity: 0 !important;
+              @keyframes pulse {
+                0%, 100% { opacity: 1 !important; }
+                50% { opacity: 0.5 !important; }
               }
               
-              .fouc-visible {
-                visibility: visible !important;
-                opacity: 1 !important;
-                transition: opacity 0.15s ease !important;
+              @keyframes bounce {
+                0%, 100% { transform: translateY(-25%) !important; animation-timing-function: cubic-bezier(0.8, 0, 1, 1) !important; }
+                50% { transform: none !important; animation-timing-function: cubic-bezier(0, 0, 0.2, 1) !important; }
+              }
+              
+              /* 애니메이션 유틸리티 클래스 */
+              .animate-spin {
+                animation: spin 1s linear infinite !important;
+              }
+              
+              .animate-pulse {
+                animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+              }
+              
+              .animate-bounce {
+                animation: bounce 1s infinite !important;
               }
             `,
           }}
         />
       </head>
       <body className="layout-lock">
-        {/* 로딩 스피너 */}
-        <div id="loading-spinner" className="loading-spinner"></div>
-        <div id="app-content" className="fouc-hidden">
-          {children}
-        </div>
+        {children}
         <ScrollRestoration />
         <Scripts />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              // 🚀 FOUC 방지 스크립트
-              document.addEventListener('DOMContentLoaded', function() {
-                const spinner = document.getElementById('loading-spinner');
-                const content = document.getElementById('app-content');
-                
-                // 스타일시트 로딩 완료 대기
-                const checkStylesLoaded = () => {
-                  const stylesheets = document.querySelectorAll('link[rel="stylesheet"]');
-                  let loadedCount = 0;
-                  
-                  stylesheets.forEach(link => {
-                    if (link.sheet) {
-                      loadedCount++;
-                    }
-                  });
-                  
-                  if (loadedCount === stylesheets.length) {
-                    // 모든 스타일시트 로딩 완료
-                    setTimeout(() => {
-                      if (spinner) spinner.style.display = 'none';
-                      if (content) {
-                        content.classList.remove('fouc-hidden');
-                        content.classList.add('fouc-visible');
-                      }
-                    }, 100);
-                  } else {
-                    // 재시도
-                    setTimeout(checkStylesLoaded, 50);
-                  }
-                };
-                
-                checkStylesLoaded();
-              });
-              
-              // 폰트 로딩 최적화
-              if ('fonts' in document) {
-                document.fonts.ready.then(() => {
-                  document.body.classList.add('fonts-loaded');
-                });
-              }
-            `,
-          }}
-        />
       </body>
     </html>
   );

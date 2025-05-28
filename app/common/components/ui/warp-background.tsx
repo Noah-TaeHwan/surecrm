@@ -2,6 +2,7 @@
 
 import { motion } from 'motion/react';
 import { cn } from '~/lib/utils';
+import { useEffect, useState } from 'react';
 
 interface WarpBackgroundProps {
   className?: string;
@@ -18,6 +19,21 @@ export function WarpBackground({
   xOffset = 0,
   yOffset = 0,
 }: WarpBackgroundProps) {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // 서버 사이드에서는 빈 div 반환
+  if (!isMounted) {
+    return (
+      <div
+        className={cn('absolute inset-0 -z-10 overflow-hidden', className)}
+      />
+    );
+  }
+
   return (
     <div className={cn('absolute inset-0 -z-10 overflow-hidden', className)}>
       <div className="relative size-full">
@@ -53,9 +69,9 @@ export function WarpBackground({
             </radialGradient>
           </defs>
           <motion.circle
-            cx="50"
-            cy="50"
-            r="50"
+            cx={50}
+            cy={50}
+            r={35}
             fill="url(#warpBackgroundGradient)"
             animate={{
               r: [35, 50],
@@ -70,9 +86,9 @@ export function WarpBackground({
             }}
           />
           <motion.circle
-            cx="50"
-            cy="50"
-            r="50"
+            cx={50}
+            cy={50}
+            r={45}
             fill="url(#warpBackgroundGradient)"
             animate={{
               r: [45, 30],
@@ -87,9 +103,9 @@ export function WarpBackground({
             }}
           />
           <motion.circle
-            cx="50"
-            cy="50"
-            r="50"
+            cx={50}
+            cy={50}
+            r={25}
             fill="url(#warpBackgroundGradient)"
             animate={{
               r: [25, 40],

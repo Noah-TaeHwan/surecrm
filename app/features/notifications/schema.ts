@@ -307,6 +307,7 @@ export type NotificationSubscription =
 export type NewNotificationSubscription =
   typeof notificationSubscriptions.$inferInsert;
 
+// Enum 타입들 export
 export type NotificationType = (typeof notificationTypeEnum.enumValues)[number];
 export type NotificationPriority =
   (typeof notificationPriorityEnum.enumValues)[number];

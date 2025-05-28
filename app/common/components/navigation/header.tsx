@@ -16,6 +16,7 @@ import {
 } from '~/common/components/ui/dropdown-menu';
 import { Badge } from '~/common/components/ui/badge';
 import { ScrollArea } from '~/common/components/ui/scroll-area';
+import { useNotifications } from '~/hooks/use-notifications';
 
 interface HeaderProps {
   title?: string;
@@ -30,39 +31,28 @@ export function Header({
   showMenuButton = false,
   onMenuButtonClick,
 }: HeaderProps) {
-  // 더미 알림 데이터 - 심플하게 정리
-  const notifications = [
-    {
-      id: '1',
-      title: '새로운 고객 등록',
-      message: '이영희님이 김철수님의 소개로 등록되었습니다.',
-      time: '5분 전',
-      isRead: false,
-    },
-    {
-      id: '2',
-      title: '미팅 예정',
-      message: '박지성님과의 미팅이 30분 후 시작됩니다.',
-      time: '25분 전',
-      isRead: false,
-    },
-    {
-      id: '3',
-      title: '계약 체결 완료',
-      message: '최민수님의 보험 계약이 체결되었습니다.',
-      time: '1시간 전',
-      isRead: true,
-    },
-  ];
+  // 실제 알림 데이터 사용
+  const {
+    notifications,
+    unreadCount,
+    isLoading,
+    error,
+    markAsRead,
+    markAllAsRead,
+    formatTime,
+    getIcon,
+  } = useNotifications({
+    limit: 5, // 헤더에서는 최근 5개만 표시
+    autoRefresh: true,
+    refreshInterval: 30000, // 30초마다 새로고침
+  });
 
-  const unreadCount = notifications.filter((n) => !n.isRead).length;
-
-  const handleMarkAsRead = (id: string) => {
-    console.log('알림 읽음 처리:', id);
+  const handleMarkAsRead = async (id: string) => {
+    await markAsRead(id);
   };
 
-  const handleMarkAllAsRead = () => {
-    console.log('모든 알림 읽음 처리');
+  const handleMarkAllAsRead = async () => {
+    await markAllAsRead();
   };
 
   return (
@@ -123,24 +113,36 @@ export function Header({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
 
-            {notifications.length > 0 ? (
+            {isLoading ? (
+              <div className="p-8 text-center">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
+                <p className="text-sm text-muted-foreground mt-2">로딩 중...</p>
+              </div>
+            ) : error ? (
+              <div className="p-8 text-center">
+                <p className="text-sm text-destructive">{error}</p>
+              </div>
+            ) : notifications.length > 0 ? (
               <div className="max-h-80 overflow-y-auto">
                 {notifications.map((notification) => (
                   <DropdownMenuItem
                     key={notification.id}
                     className={cn(
                       'flex items-start p-4 cursor-pointer border-b border-border/50 last:border-b-0',
-                      !notification.isRead && 'bg-muted/30'
+                      !notification.readAt && 'bg-muted/30'
                     )}
                     onClick={() => handleMarkAsRead(notification.id)}
                   >
                     <div className="flex w-full gap-3">
+                      <div className="text-lg">
+                        {getIcon(notification.type)}
+                      </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between mb-1">
                           <p className="font-medium text-sm leading-tight">
                             {notification.title}
                           </p>
-                          {!notification.isRead && (
+                          {!notification.readAt && (
                             <div className="w-2 h-2 bg-primary rounded-full mt-1 ml-2 flex-shrink-0" />
                           )}
                         </div>
@@ -148,7 +150,7 @@ export function Header({
                           {notification.message}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {notification.time}
+                          {formatTime(new Date(notification.createdAt))}
                         </p>
                       </div>
                     </div>
@@ -157,9 +159,12 @@ export function Header({
               </div>
             ) : (
               <div className="p-8 text-center">
-                <Bell className="h-8 w-8 mx-auto mb-3 text-muted-foreground/50" />
-                <p className="text-sm text-muted-foreground">
+                <Bell className="h-12 w-12 mx-auto mb-4 text-muted-foreground/30" />
+                <p className="text-sm font-medium text-foreground mb-1">
                   새로운 알림이 없습니다
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  새로운 알림이 도착하면 여기에 표시됩니다
                 </p>
               </div>
             )}
@@ -179,7 +184,7 @@ export function Header({
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="rounded-full">
               <Avatar className="h-8 w-8">
-                <AvatarFallback className="text-xs">홍</AvatarFallback>
+                <AvatarFallback className="text-xs">관</AvatarFallback>
               </Avatar>
               <span className="sr-only">프로필 메뉴</span>
             </Button>
@@ -187,9 +192,9 @@ export function Header({
           <DropdownMenuContent className="w-56" align="end">
             <DropdownMenuLabel>
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium">홍길동</p>
+                <p className="text-sm font-medium">관리자</p>
                 <p className="text-xs text-muted-foreground">
-                  user@example.com
+                  admin@surecrm.com
                 </p>
               </div>
             </DropdownMenuLabel>

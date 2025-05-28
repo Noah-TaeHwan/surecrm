@@ -4,6 +4,9 @@ export default [
   // 랜딩 페이지
   index('common/pages/landing-page.tsx'),
 
+  // API 라우트
+  route('api/notifications', 'routes/api+/notifications.tsx'),
+
   // 대시보드
   route('dashboard', 'features/dashboard/pages/dashboard-page.tsx'),
 

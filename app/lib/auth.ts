@@ -2,6 +2,16 @@ import { db } from './db';
 import { profiles } from './supabase-schema';
 import { eq } from 'drizzle-orm';
 
+// 사용자 인터페이스
+export interface User {
+  id: string;
+  email: string;
+  fullName: string;
+  role: string;
+  teamId?: string;
+  isActive: boolean;
+}
+
 // 로그인 시도 인터페이스
 export interface LoginAttempt {
   email: string;
@@ -18,6 +28,68 @@ export interface LoginResult {
     fullName: string;
     role: string;
   };
+}
+
+/**
+ * 현재 사용자 정보 조회
+ * 실제로는 Supabase Auth에서 사용자 정보를 가져옴
+ */
+export async function getCurrentUser(request: Request): Promise<User | null> {
+  try {
+    // 실제로는 쿠키나 헤더에서 인증 토큰을 확인
+    // const token = getCookie(request, 'auth-token');
+    // const { data: { user }, error } = await supabase.auth.getUser(token);
+
+    // 현재는 더미 사용자 반환 (개발용)
+    // 실제 구현에서는 제공된 UID를 사용: 80b0993a-4194-4165-be5a-aec24b88cd80
+    const userId = '80b0993a-4194-4165-be5a-aec24b88cd80';
+
+    const userProfile = await db
+      .select({
+        id: profiles.id,
+        fullName: profiles.fullName,
+        role: profiles.role,
+        teamId: profiles.teamId,
+        isActive: profiles.isActive,
+      })
+      .from(profiles)
+      .where(eq(profiles.id, userId))
+      .limit(1);
+
+    if (userProfile.length === 0) {
+      // 사용자가 없으면 기본 프로필 생성
+      const newProfile = await db
+        .insert(profiles)
+        .values({
+          id: userId,
+          fullName: '관리자',
+          role: 'system_admin',
+          isActive: true,
+        })
+        .returning();
+
+      return {
+        id: newProfile[0].id,
+        email: 'admin@surecrm.com',
+        fullName: newProfile[0].fullName,
+        role: newProfile[0].role,
+        teamId: newProfile[0].teamId || undefined,
+        isActive: newProfile[0].isActive,
+      };
+    }
+
+    return {
+      id: userProfile[0].id,
+      email: 'admin@surecrm.com', // 실제로는 auth.users에서 가져옴
+      fullName: userProfile[0].fullName,
+      role: userProfile[0].role,
+      teamId: userProfile[0].teamId || undefined,
+      isActive: userProfile[0].isActive,
+    };
+  } catch (error) {
+    console.error('현재 사용자 조회 중 오류:', error);
+    return null;
+  }
 }
 
 /**

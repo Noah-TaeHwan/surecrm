@@ -13,8 +13,26 @@ export interface UserProfile {
 }
 
 export interface NotificationSettings {
-  meetingReminder: boolean;
-  contractUpdate: boolean;
+  // 알림 채널
+  emailNotifications: boolean;
+  smsNotifications: boolean;
+  pushNotifications: boolean;
+  kakaoNotifications: boolean;
+
+  // 알림 타입
+  meetingReminders: boolean;
+  goalDeadlines: boolean;
+  newReferrals: boolean;
+  clientMilestones: boolean;
+  teamUpdates: boolean;
+  systemAlerts: boolean;
+  birthdayReminders: boolean;
+  followUpReminders: boolean;
+
+  // 추가 설정
+  quietHoursStart?: string;
+  quietHoursEnd?: string;
+  weekendNotifications: boolean;
 }
 
 export interface SystemSettings {
