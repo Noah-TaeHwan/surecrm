@@ -1,4 +1,3 @@
-
 CREATE TYPE "public"."document_type" AS ENUM('policy', 'id_card', 'vehicle_registration', 'vehicle_photo', 'dashboard_photo', 'license_plate_photo', 'blackbox_photo', 'insurance_policy_photo', 'other');--> statement-breakpoint
 CREATE TYPE "public"."gender" AS ENUM('male', 'female');--> statement-breakpoint
 CREATE TYPE "public"."importance" AS ENUM('high', 'medium', 'low');--> statement-breakpoint
@@ -8,6 +7,9 @@ CREATE TYPE "public"."meeting_status" AS ENUM('scheduled', 'completed', 'cancell
 CREATE TYPE "public"."meeting_type" AS ENUM('first_consultation', 'product_explanation', 'contract_review', 'follow_up', 'other');--> statement-breakpoint
 CREATE TYPE "public"."referral_status" AS ENUM('active', 'inactive');--> statement-breakpoint
 CREATE TYPE "public"."user_role" AS ENUM('agent', 'team_admin', 'system_admin');--> statement-breakpoint
+CREATE TYPE "public"."content_status" AS ENUM('draft', 'published', 'archived');--> statement-breakpoint
+CREATE TYPE "public"."content_type" AS ENUM('terms_of_service', 'privacy_policy', 'faq', 'announcement', 'help_article');--> statement-breakpoint
+CREATE TYPE "public"."language" AS ENUM('ko', 'en', 'ja', 'zh');--> statement-breakpoint
 CREATE TYPE "public"."calendar_view" AS ENUM('month', 'week', 'day', 'agenda');--> statement-breakpoint
 CREATE TYPE "public"."recurrence_type" AS ENUM('none', 'daily', 'weekly', 'monthly', 'yearly');--> statement-breakpoint
 CREATE TYPE "public"."reminder_type" AS ENUM('none', '5_minutes', '15_minutes', '30_minutes', '1_hour', '1_day');--> statement-breakpoint
@@ -51,7 +53,7 @@ CREATE TYPE "public"."collaboration_type" AS ENUM('shared_client', 'joint_meetin
 CREATE TYPE "public"."member_role" AS ENUM('member', 'admin', 'owner', 'viewer');--> statement-breakpoint
 CREATE TYPE "public"."member_status" AS ENUM('active', 'inactive', 'pending', 'suspended');--> statement-breakpoint
 CREATE TYPE "public"."team_event_type" AS ENUM('member_joined', 'member_left', 'member_promoted', 'member_demoted', 'settings_changed', 'goal_created', 'goal_achieved', 'milestone_reached');--> statement-breakpoint
-
+--> statement-breakpoint
 CREATE TABLE "client_details" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"client_id" uuid NOT NULL,
@@ -199,6 +201,295 @@ CREATE TABLE "teams" (
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE "announcements" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"title" text NOT NULL,
+	"content" text NOT NULL,
+	"type" text DEFAULT 'general' NOT NULL,
+	"priority" integer DEFAULT 0 NOT NULL,
+	"is_published" boolean DEFAULT false NOT NULL,
+	"is_pinned" boolean DEFAULT false NOT NULL,
+	"language" "language" DEFAULT 'ko' NOT NULL,
+	"author_id" uuid,
+	"published_at" timestamp with time zone,
+	"expires_at" timestamp with time zone,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "common_announcements" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"title" text NOT NULL,
+	"content" text NOT NULL,
+	"type" text DEFAULT 'general' NOT NULL,
+	"priority" integer DEFAULT 0 NOT NULL,
+	"is_published" boolean DEFAULT false NOT NULL,
+	"is_pinned" boolean DEFAULT false NOT NULL,
+	"language" "language" DEFAULT 'ko' NOT NULL,
+	"author_id" uuid,
+	"published_at" timestamp with time zone,
+	"expires_at" timestamp with time zone,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "common_api_keys" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"name" text NOT NULL,
+	"key" text NOT NULL,
+	"user_id" uuid NOT NULL,
+	"permissions" jsonb,
+	"is_active" boolean DEFAULT true NOT NULL,
+	"last_used_at" timestamp with time zone,
+	"expires_at" timestamp with time zone,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "common_api_keys_key_unique" UNIQUE("key")
+);
+--> statement-breakpoint
+CREATE TABLE "common_audit_logs" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"user_id" uuid,
+	"action" text NOT NULL,
+	"resource" text NOT NULL,
+	"resource_id" uuid,
+	"details" jsonb,
+	"ip_address" text,
+	"user_agent" text,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "common_backup_configurations" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"name" text NOT NULL,
+	"schedule" text NOT NULL,
+	"is_active" boolean DEFAULT true NOT NULL,
+	"retention_days" integer DEFAULT 30 NOT NULL,
+	"config" jsonb,
+	"last_run_at" timestamp with time zone,
+	"created_by" uuid,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "common_faqs" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"question" text NOT NULL,
+	"answer" text NOT NULL,
+	"category" text DEFAULT 'general' NOT NULL,
+	"order" integer DEFAULT 0 NOT NULL,
+	"is_published" boolean DEFAULT true NOT NULL,
+	"language" "language" DEFAULT 'ko' NOT NULL,
+	"author_id" uuid,
+	"view_count" integer DEFAULT 0 NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "common_feature_flags" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"name" text NOT NULL,
+	"description" text,
+	"is_enabled" boolean DEFAULT false NOT NULL,
+	"rollout_percentage" integer DEFAULT 0 NOT NULL,
+	"target_users" jsonb,
+	"created_by" uuid,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "common_feature_flags_name_unique" UNIQUE("name")
+);
+--> statement-breakpoint
+CREATE TABLE "common_integrations" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"user_id" uuid NOT NULL,
+	"type" text NOT NULL,
+	"name" text NOT NULL,
+	"config" jsonb NOT NULL,
+	"is_active" boolean DEFAULT true NOT NULL,
+	"last_sync_at" timestamp with time zone,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "common_profiles" (
+	"id" uuid PRIMARY KEY NOT NULL,
+	"full_name" text NOT NULL,
+	"phone" text,
+	"company" text,
+	"role" text DEFAULT 'agent' NOT NULL,
+	"invitations_left" integer DEFAULT 5 NOT NULL,
+	"settings" jsonb,
+	"is_active" boolean DEFAULT true NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "common_public_contents" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"type" "content_type" NOT NULL,
+	"title" text NOT NULL,
+	"content" text NOT NULL,
+	"version" text DEFAULT '1.0' NOT NULL,
+	"language" "language" DEFAULT 'ko' NOT NULL,
+	"status" "content_status" DEFAULT 'draft' NOT NULL,
+	"effective_date" timestamp with time zone,
+	"expiry_date" timestamp with time zone,
+	"author_id" uuid,
+	"metadata" jsonb,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "common_site_settings" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"key" text NOT NULL,
+	"value" text NOT NULL,
+	"type" text DEFAULT 'string' NOT NULL,
+	"description" text,
+	"is_public" boolean DEFAULT false NOT NULL,
+	"updated_by" uuid,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "common_site_settings_key_unique" UNIQUE("key")
+);
+--> statement-breakpoint
+CREATE TABLE "common_system_settings" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"category" text NOT NULL,
+	"key" text NOT NULL,
+	"value" text NOT NULL,
+	"type" text DEFAULT 'string' NOT NULL,
+	"description" text,
+	"is_public" boolean DEFAULT false NOT NULL,
+	"updated_by" uuid,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "common_team_settings" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"team_id" uuid NOT NULL,
+	"category" text NOT NULL,
+	"key" text NOT NULL,
+	"value" jsonb NOT NULL,
+	"type" text DEFAULT 'json' NOT NULL,
+	"description" text,
+	"updated_by" uuid,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "common_teams" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"name" text NOT NULL,
+	"description" text,
+	"admin_id" uuid NOT NULL,
+	"settings" jsonb,
+	"is_active" boolean DEFAULT true NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "common_testimonials" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"name" text NOT NULL,
+	"role" text NOT NULL,
+	"company" text NOT NULL,
+	"quote" text NOT NULL,
+	"rating" integer DEFAULT 5 NOT NULL,
+	"initial" text NOT NULL,
+	"is_verified" boolean DEFAULT false NOT NULL,
+	"is_published" boolean DEFAULT false NOT NULL,
+	"order" integer DEFAULT 0 NOT NULL,
+	"language" "language" DEFAULT 'ko' NOT NULL,
+	"author_id" uuid,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "common_user_settings" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"user_id" uuid NOT NULL,
+	"category" text NOT NULL,
+	"key" text NOT NULL,
+	"value" jsonb NOT NULL,
+	"type" text DEFAULT 'json' NOT NULL,
+	"description" text,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "faqs" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"question" text NOT NULL,
+	"answer" text NOT NULL,
+	"category" text DEFAULT 'general' NOT NULL,
+	"order" integer DEFAULT 0 NOT NULL,
+	"is_published" boolean DEFAULT true NOT NULL,
+	"language" "language" DEFAULT 'ko' NOT NULL,
+	"author_id" uuid,
+	"view_count" integer DEFAULT 0 NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "page_views" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"path" text NOT NULL,
+	"user_agent" text,
+	"ip_address" text,
+	"referrer" text,
+	"session_id" text,
+	"user_id" uuid,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "public_contents" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"type" "content_type" NOT NULL,
+	"title" text NOT NULL,
+	"content" text NOT NULL,
+	"version" text DEFAULT '1.0' NOT NULL,
+	"language" "language" DEFAULT 'ko' NOT NULL,
+	"status" "content_status" DEFAULT 'draft' NOT NULL,
+	"effective_date" timestamp with time zone,
+	"expiry_date" timestamp with time zone,
+	"author_id" uuid,
+	"metadata" jsonb,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "site_settings" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"key" text NOT NULL,
+	"value" text NOT NULL,
+	"type" text DEFAULT 'string' NOT NULL,
+	"description" text,
+	"is_public" boolean DEFAULT false NOT NULL,
+	"updated_by" uuid,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "site_settings_key_unique" UNIQUE("key")
+);
+--> statement-breakpoint
+CREATE TABLE "testimonials" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"name" text NOT NULL,
+	"role" text NOT NULL,
+	"company" text NOT NULL,
+	"quote" text NOT NULL,
+	"rating" integer DEFAULT 5 NOT NULL,
+	"initial" text NOT NULL,
+	"is_verified" boolean DEFAULT false NOT NULL,
+	"is_published" boolean DEFAULT false NOT NULL,
+	"order" integer DEFAULT 0 NOT NULL,
+	"language" "language" DEFAULT 'ko' NOT NULL,
+	"author_id" uuid,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE "calendar_settings" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"agent_id" uuid NOT NULL,
@@ -213,6 +504,132 @@ CREATE TABLE "calendar_settings" (
 	CONSTRAINT "calendar_settings_agent_id_unique" UNIQUE("agent_id")
 );
 --> statement-breakpoint
+CREATE TABLE "features_calendar_events" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"agent_id" uuid NOT NULL,
+	"team_id" uuid,
+	"title" text NOT NULL,
+	"description" text,
+	"start_time" timestamp with time zone NOT NULL,
+	"end_time" timestamp with time zone NOT NULL,
+	"location" text,
+	"is_all_day" boolean DEFAULT false NOT NULL,
+	"color" text DEFAULT '#3b82f6' NOT NULL,
+	"is_private" boolean DEFAULT false NOT NULL,
+	"google_event_id" text,
+	"metadata" jsonb,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "features_calendar_meeting_attendees" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"meeting_id" uuid NOT NULL,
+	"client_id" uuid,
+	"agent_id" uuid,
+	"external_email" text,
+	"external_name" text,
+	"status" text DEFAULT 'pending' NOT NULL,
+	"response_at" timestamp with time zone,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "features_calendar_meeting_checklists" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"meeting_id" uuid NOT NULL,
+	"text" text NOT NULL,
+	"completed" boolean DEFAULT false NOT NULL,
+	"order" integer NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "features_calendar_meeting_notes" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"meeting_id" uuid NOT NULL,
+	"agent_id" uuid NOT NULL,
+	"content" text NOT NULL,
+	"is_private" boolean DEFAULT false NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "features_calendar_meeting_reminders" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"meeting_id" uuid NOT NULL,
+	"reminder_type" "reminder_type" NOT NULL,
+	"reminder_time" timestamp with time zone NOT NULL,
+	"is_sent" boolean DEFAULT false NOT NULL,
+	"sent_at" timestamp with time zone,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "features_calendar_meeting_templates" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"agent_id" uuid NOT NULL,
+	"name" text NOT NULL,
+	"description" text,
+	"default_duration" integer DEFAULT 60 NOT NULL,
+	"default_location" text,
+	"checklist" jsonb,
+	"is_default" boolean DEFAULT false NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "features_calendar_meetings" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"client_id" uuid NOT NULL,
+	"agent_id" uuid NOT NULL,
+	"title" text NOT NULL,
+	"description" text,
+	"start_time" timestamp with time zone NOT NULL,
+	"end_time" timestamp with time zone NOT NULL,
+	"location" text,
+	"meeting_type" "meeting_type" NOT NULL,
+	"status" "meeting_status" DEFAULT 'scheduled' NOT NULL,
+	"google_event_id" text,
+	"notes" text,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "features_calendar_recurring_meetings" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"parent_meeting_id" uuid NOT NULL,
+	"recurrence_type" "recurrence_type" NOT NULL,
+	"recurrence_interval" integer DEFAULT 1 NOT NULL,
+	"recurrence_end" timestamp with time zone,
+	"max_occurrences" integer,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "features_calendar_settings" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"agent_id" uuid NOT NULL,
+	"default_view" "calendar_view" DEFAULT 'month' NOT NULL,
+	"working_hours" jsonb,
+	"time_zone" text DEFAULT 'Asia/Seoul' NOT NULL,
+	"google_calendar_sync" boolean DEFAULT false NOT NULL,
+	"default_meeting_duration" integer DEFAULT 60 NOT NULL,
+	"default_reminder" "reminder_type" DEFAULT '30_minutes' NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "features_calendar_settings_agent_id_unique" UNIQUE("agent_id")
+);
+--> statement-breakpoint
+CREATE TABLE "features_calendar_sharing" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"owner_id" uuid NOT NULL,
+	"shared_with_id" uuid NOT NULL,
+	"permission" text DEFAULT 'view' NOT NULL,
+	"can_view_private" boolean DEFAULT false NOT NULL,
+	"is_active" boolean DEFAULT true NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "features_calendar_sharing_owner_shared_unique" UNIQUE("owner_id","shared_with_id")
+);
+--> statement-breakpoint
 CREATE TABLE "meeting_attendees" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"meeting_id" uuid NOT NULL,
@@ -223,6 +640,16 @@ CREATE TABLE "meeting_attendees" (
 	"status" text DEFAULT 'pending' NOT NULL,
 	"response_at" timestamp with time zone,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "meeting_checklists" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"meeting_id" uuid NOT NULL,
+	"text" text NOT NULL,
+	"completed" boolean DEFAULT false NOT NULL,
+	"order" integer NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "meeting_notes" (
@@ -1411,10 +1838,46 @@ ALTER TABLE "referrals" ADD CONSTRAINT "referrals_referrer_id_clients_id_fk" FOR
 ALTER TABLE "referrals" ADD CONSTRAINT "referrals_referred_id_clients_id_fk" FOREIGN KEY ("referred_id") REFERENCES "public"."clients"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "referrals" ADD CONSTRAINT "referrals_agent_id_profiles_id_fk" FOREIGN KEY ("agent_id") REFERENCES "public"."profiles"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "teams" ADD CONSTRAINT "teams_admin_id_profiles_id_fk" FOREIGN KEY ("admin_id") REFERENCES "public"."profiles"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "announcements" ADD CONSTRAINT "announcements_author_id_profiles_id_fk" FOREIGN KEY ("author_id") REFERENCES "public"."profiles"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "common_announcements" ADD CONSTRAINT "common_announcements_author_id_common_profiles_id_fk" FOREIGN KEY ("author_id") REFERENCES "public"."common_profiles"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "common_api_keys" ADD CONSTRAINT "common_api_keys_user_id_common_profiles_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."common_profiles"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "common_audit_logs" ADD CONSTRAINT "common_audit_logs_user_id_common_profiles_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."common_profiles"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "common_backup_configurations" ADD CONSTRAINT "common_backup_configurations_created_by_common_profiles_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."common_profiles"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "common_faqs" ADD CONSTRAINT "common_faqs_author_id_common_profiles_id_fk" FOREIGN KEY ("author_id") REFERENCES "public"."common_profiles"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "common_feature_flags" ADD CONSTRAINT "common_feature_flags_created_by_common_profiles_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."common_profiles"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "common_integrations" ADD CONSTRAINT "common_integrations_user_id_common_profiles_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."common_profiles"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "common_public_contents" ADD CONSTRAINT "common_public_contents_author_id_common_profiles_id_fk" FOREIGN KEY ("author_id") REFERENCES "public"."common_profiles"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "common_site_settings" ADD CONSTRAINT "common_site_settings_updated_by_common_profiles_id_fk" FOREIGN KEY ("updated_by") REFERENCES "public"."common_profiles"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "common_system_settings" ADD CONSTRAINT "common_system_settings_updated_by_common_profiles_id_fk" FOREIGN KEY ("updated_by") REFERENCES "public"."common_profiles"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "common_team_settings" ADD CONSTRAINT "common_team_settings_team_id_common_teams_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."common_teams"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "common_team_settings" ADD CONSTRAINT "common_team_settings_updated_by_common_profiles_id_fk" FOREIGN KEY ("updated_by") REFERENCES "public"."common_profiles"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "common_teams" ADD CONSTRAINT "common_teams_admin_id_common_profiles_id_fk" FOREIGN KEY ("admin_id") REFERENCES "public"."common_profiles"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "common_testimonials" ADD CONSTRAINT "common_testimonials_author_id_common_profiles_id_fk" FOREIGN KEY ("author_id") REFERENCES "public"."common_profiles"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "common_user_settings" ADD CONSTRAINT "common_user_settings_user_id_common_profiles_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."common_profiles"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "faqs" ADD CONSTRAINT "faqs_author_id_profiles_id_fk" FOREIGN KEY ("author_id") REFERENCES "public"."profiles"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "page_views" ADD CONSTRAINT "page_views_user_id_profiles_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."profiles"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "public_contents" ADD CONSTRAINT "public_contents_author_id_profiles_id_fk" FOREIGN KEY ("author_id") REFERENCES "public"."profiles"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "site_settings" ADD CONSTRAINT "site_settings_updated_by_profiles_id_fk" FOREIGN KEY ("updated_by") REFERENCES "public"."profiles"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "testimonials" ADD CONSTRAINT "testimonials_author_id_profiles_id_fk" FOREIGN KEY ("author_id") REFERENCES "public"."profiles"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "calendar_settings" ADD CONSTRAINT "calendar_settings_agent_id_profiles_id_fk" FOREIGN KEY ("agent_id") REFERENCES "public"."profiles"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "features_calendar_events" ADD CONSTRAINT "features_calendar_events_agent_id_common_profiles_id_fk" FOREIGN KEY ("agent_id") REFERENCES "public"."common_profiles"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "features_calendar_events" ADD CONSTRAINT "features_calendar_events_team_id_common_teams_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."common_teams"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "features_calendar_meeting_attendees" ADD CONSTRAINT "features_calendar_meeting_attendees_agent_id_common_profiles_id_fk" FOREIGN KEY ("agent_id") REFERENCES "public"."common_profiles"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "features_calendar_meeting_attendees" ADD CONSTRAINT "features_calendar_meeting_attendees_meeting_id_features_calendar_meetings_id_fk" FOREIGN KEY ("meeting_id") REFERENCES "public"."features_calendar_meetings"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "features_calendar_meeting_checklists" ADD CONSTRAINT "features_calendar_meeting_checklists_meeting_id_features_calendar_meetings_id_fk" FOREIGN KEY ("meeting_id") REFERENCES "public"."features_calendar_meetings"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "features_calendar_meeting_notes" ADD CONSTRAINT "features_calendar_meeting_notes_agent_id_common_profiles_id_fk" FOREIGN KEY ("agent_id") REFERENCES "public"."common_profiles"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "features_calendar_meeting_notes" ADD CONSTRAINT "features_calendar_meeting_notes_meeting_id_features_calendar_meetings_id_fk" FOREIGN KEY ("meeting_id") REFERENCES "public"."features_calendar_meetings"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "features_calendar_meeting_reminders" ADD CONSTRAINT "features_calendar_meeting_reminders_meeting_id_features_calendar_meetings_id_fk" FOREIGN KEY ("meeting_id") REFERENCES "public"."features_calendar_meetings"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "features_calendar_meeting_templates" ADD CONSTRAINT "features_calendar_meeting_templates_agent_id_common_profiles_id_fk" FOREIGN KEY ("agent_id") REFERENCES "public"."common_profiles"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "features_calendar_meetings" ADD CONSTRAINT "features_calendar_meetings_agent_id_common_profiles_id_fk" FOREIGN KEY ("agent_id") REFERENCES "public"."common_profiles"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "features_calendar_recurring_meetings" ADD CONSTRAINT "features_calendar_recurring_meetings_parent_meeting_id_features_calendar_meetings_id_fk" FOREIGN KEY ("parent_meeting_id") REFERENCES "public"."features_calendar_meetings"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "features_calendar_settings" ADD CONSTRAINT "features_calendar_settings_agent_id_common_profiles_id_fk" FOREIGN KEY ("agent_id") REFERENCES "public"."common_profiles"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "features_calendar_sharing" ADD CONSTRAINT "features_calendar_sharing_owner_id_common_profiles_id_fk" FOREIGN KEY ("owner_id") REFERENCES "public"."common_profiles"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "features_calendar_sharing" ADD CONSTRAINT "features_calendar_sharing_shared_with_id_common_profiles_id_fk" FOREIGN KEY ("shared_with_id") REFERENCES "public"."common_profiles"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "meeting_attendees" ADD CONSTRAINT "meeting_attendees_meeting_id_meetings_id_fk" FOREIGN KEY ("meeting_id") REFERENCES "public"."meetings"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "meeting_attendees" ADD CONSTRAINT "meeting_attendees_client_id_clients_id_fk" FOREIGN KEY ("client_id") REFERENCES "public"."clients"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "meeting_attendees" ADD CONSTRAINT "meeting_attendees_agent_id_profiles_id_fk" FOREIGN KEY ("agent_id") REFERENCES "public"."profiles"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "meeting_checklists" ADD CONSTRAINT "meeting_checklists_meeting_id_meetings_id_fk" FOREIGN KEY ("meeting_id") REFERENCES "public"."meetings"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "meeting_notes" ADD CONSTRAINT "meeting_notes_meeting_id_meetings_id_fk" FOREIGN KEY ("meeting_id") REFERENCES "public"."meetings"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "meeting_notes" ADD CONSTRAINT "meeting_notes_agent_id_profiles_id_fk" FOREIGN KEY ("agent_id") REFERENCES "public"."profiles"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "meeting_reminders" ADD CONSTRAINT "meeting_reminders_meeting_id_meetings_id_fk" FOREIGN KEY ("meeting_id") REFERENCES "public"."meetings"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint

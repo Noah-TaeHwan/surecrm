@@ -37,7 +37,7 @@ export function LandingLayout({
           {/* 데스크톱 네비게이션 */}
           <div className="hidden md:flex md:space-x-4">
             <Button variant="ghost" asChild>
-              <Link to="/login">로그인</Link>
+              <Link to="/auth/login">로그인</Link>
             </Button>
             <Button asChild>
               <Link to="/invite-only">시작하기</Link>
@@ -51,7 +51,7 @@ export function LandingLayout({
         <SheetContent side="right" className="w-64">
           <nav className="flex flex-col space-y-4 mt-8">
             <Button variant="ghost" asChild className="justify-start">
-              <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
+              <Link to="/auth/login" onClick={() => setIsMobileMenuOpen(false)}>
                 로그인
               </Link>
             </Button>

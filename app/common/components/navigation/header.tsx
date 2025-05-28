@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { Link } from 'react-router';
 import { Bell, User, LogOut, Settings, Menu, Eye } from 'lucide-react';
 import { cn } from '~/lib/utils';
@@ -31,6 +32,8 @@ export function Header({
   showMenuButton = false,
   onMenuButtonClick,
 }: HeaderProps) {
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
   // 실제 알림 데이터 사용
   const {
     notifications,
@@ -53,6 +56,32 @@ export function Header({
 
   const handleMarkAllAsRead = async () => {
     await markAllAsRead();
+  };
+
+  const handleLogout = async () => {
+    if (isLoggingOut) return;
+
+    setIsLoggingOut(true);
+    try {
+      // POST 요청으로 로그아웃 처리
+      const response = await fetch('/auth/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        // 로그아웃 성공 시 페이지 리다이렉트
+        window.location.href = '/auth/login?message=logged-out';
+      } else {
+        console.error('로그아웃 실패');
+        setIsLoggingOut(false);
+      }
+    } catch (error) {
+      console.error('로그아웃 중 오류:', error);
+      setIsLoggingOut(false);
+    }
   };
 
   return (
@@ -215,10 +244,11 @@ export function Header({
             <DropdownMenuSeparator />
             <DropdownMenuItem
               className="cursor-pointer"
-              onClick={() => console.log('로그아웃')}
+              onClick={handleLogout}
+              disabled={isLoggingOut}
             >
               <LogOut className="mr-2 h-4 w-4" />
-              <span>로그아웃</span>
+              <span>{isLoggingOut ? '로그아웃 중...' : '로그아웃'}</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

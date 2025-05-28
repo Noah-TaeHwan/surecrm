@@ -49,7 +49,7 @@ export function HeroSection() {
                 asChild
                 className="rounded-full px-6 h-12"
               >
-                <Link to="/login">계정이 있다면 로그인</Link>
+                <Link to="/auth/login">계정이 있다면 로그인</Link>
               </Button>
             </div>
           </div>

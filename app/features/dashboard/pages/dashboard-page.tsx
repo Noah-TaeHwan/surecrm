@@ -18,7 +18,7 @@ import {
   getUserGoals,
   setMonthlyGoal,
 } from '../lib/dashboard-data';
-import { requireAuth } from '../lib/auth-utils';
+import { requireAuth } from '~/lib/auth-middleware';
 import { useFetcher } from 'react-router';
 
 export function meta({ data, params }: Route.MetaArgs) {
@@ -30,12 +30,12 @@ export function meta({ data, params }: Route.MetaArgs) {
 
 export async function loader({ request }: Route.LoaderArgs) {
   // 인증 확인
-  const userId = await requireAuth(request);
+  const user = await requireAuth(request);
 
   try {
     // 모든 데이터를 병렬로 조회
     const [
-      user,
+      userInfo,
       todayStats,
       kpiData,
       todayMeetings,
@@ -44,18 +44,18 @@ export async function loader({ request }: Route.LoaderArgs) {
       referralInsights,
       userGoals,
     ] = await Promise.all([
-      getUserInfo(userId),
-      getTodayStats(userId),
-      getKPIData(userId),
-      getTodayMeetings(userId),
-      getPipelineData(userId),
-      getRecentClientsData(userId),
-      getReferralInsights(userId),
-      getUserGoals(userId),
+      getUserInfo(user.id),
+      getTodayStats(user.id),
+      getKPIData(user.id),
+      getTodayMeetings(user.id),
+      getPipelineData(user.id),
+      getRecentClientsData(user.id),
+      getReferralInsights(user.id),
+      getUserGoals(user.id),
     ]);
 
     return {
-      user,
+      user: { ...user, name: userInfo.name || user.fullName },
       todayStats,
       kpiData,
       todayMeetings,
@@ -70,7 +70,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 
     // 에러 시 기본값 반환
     return {
-      user: { name: '사용자' },
+      user: { name: user.fullName },
       todayStats: {
         scheduledMeetings: 0,
         pendingTasks: 0,
@@ -110,7 +110,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export async function action({ request }: Route.ActionArgs) {
-  const userId = await requireAuth(request);
+  const user = await requireAuth(request);
   const formData = await request.formData();
   const intent = formData.get('intent');
 
@@ -124,7 +124,7 @@ export async function action({ request }: Route.ActionArgs) {
       const targetValue = Number(formData.get('targetValue'));
       const title = formData.get('title') as string;
 
-      await setMonthlyGoal(userId, goalType, targetValue, title || undefined);
+      await setMonthlyGoal(user.id, goalType, targetValue, title || undefined);
 
       return { success: true, message: '목표가 설정되었습니다.' };
     } catch (error) {

@@ -7,6 +7,13 @@ import {
   getNotificationSettings,
   upsertNotificationSettings,
 } from '~/features/notifications/lib/notifications-data';
+import {
+  getUserProfile,
+  updateUserProfile,
+  getUserSettings,
+  updateUserSettings,
+  type UserProfile,
+} from '../lib/supabase-settings-data';
 
 // 컴포넌트 imports
 import { ProfileSection } from '../components/profile-section';
@@ -15,11 +22,7 @@ import { PasswordSection } from '../components/password-section';
 import { SystemSection } from '../components/system-section';
 
 // 타입 imports
-import type {
-  UserProfile,
-  NotificationSettings,
-  SystemSettings,
-} from '../components/types';
+import type { NotificationSettings, SystemSettings } from '../components/types';
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getCurrentUser(request);
@@ -28,8 +31,13 @@ export async function loader({ request }: Route.LoaderArgs) {
   }
 
   try {
-    // 실제 알림 설정 가져오기
-    const notificationSettingsData = await getNotificationSettings(user.id);
+    // 병렬로 데이터 가져오기
+    const [userProfileData, notificationSettingsData, userSettingsData] =
+      await Promise.all([
+        getUserProfile(user.id),
+        getNotificationSettings(user.id),
+        getUserSettings(user.id),
+      ]);
 
     // 기본값으로 설정 (설정이 없는 경우)
     const defaultNotificationSettings: NotificationSettings = {
@@ -50,7 +58,7 @@ export async function loader({ request }: Route.LoaderArgs) {
       weekendNotifications: false,
     };
 
-    const userProfile: UserProfile = {
+    const userProfile: UserProfile = userProfileData || {
       id: user.id,
       name: '사용자',
       email: user.email || '',
@@ -59,9 +67,14 @@ export async function loader({ request }: Route.LoaderArgs) {
       position: '보험설계사',
     };
 
+    // 이메일은 auth에서 가져온 정보로 업데이트
+    if (userProfile.email === '' && user.email) {
+      userProfile.email = user.email;
+    }
+
     const systemSettings: SystemSettings = {
-      language: 'ko',
-      darkMode: false,
+      language: userSettingsData?.language || 'ko',
+      darkMode: userSettingsData?.darkMode || false,
     };
 
     return {
@@ -142,6 +155,24 @@ export async function action({ request }: Route.ActionArgs) {
   const intent = formData.get('intent') as string;
 
   try {
+    if (intent === 'updateProfile') {
+      // 프로필 정보 업데이트
+      const profileUpdates = {
+        name: formData.get('name') as string,
+        phone: formData.get('phone') as string,
+        company: formData.get('company') as string,
+      };
+
+      const success = await updateUserProfile(user.id, profileUpdates);
+
+      return {
+        success,
+        message: success
+          ? '프로필이 성공적으로 업데이트되었습니다.'
+          : '프로필 업데이트에 실패했습니다.',
+      };
+    }
+
     if (intent === 'updateNotifications') {
       // 알림 설정 업데이트
       const notificationSettings = {
@@ -167,6 +198,23 @@ export async function action({ request }: Route.ActionArgs) {
       return {
         success: true,
         message: '알림 설정이 저장되었습니다.',
+      };
+    }
+
+    if (intent === 'updateSystem') {
+      // 시스템 설정 업데이트
+      const systemSettings = {
+        language: formData.get('language') as string,
+        darkMode: formData.get('darkMode') === 'true',
+      };
+
+      const success = await updateUserSettings(user.id, systemSettings);
+
+      return {
+        success,
+        message: success
+          ? '시스템 설정이 저장되었습니다.'
+          : '시스템 설정 저장에 실패했습니다.',
       };
     }
 

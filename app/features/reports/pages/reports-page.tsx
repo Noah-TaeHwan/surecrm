@@ -10,15 +10,16 @@ import {
 } from '~/common/components/ui/select';
 import { Download } from 'lucide-react';
 import { MainLayout } from '~/common/layouts/main-layout';
-
-// 분리된 컴포넌트들 import
 import {
-  PerformanceMetrics,
-  KakaoReport,
-  InsightsTabs,
+  getPerformanceData,
+  getTopPerformers,
+  createDefaultReportTemplates,
   type PerformanceData,
   type TopPerformer,
-} from '../components';
+} from '../lib/supabase-reports-data';
+
+// 분리된 컴포넌트들 import
+import { PerformanceMetrics, KakaoReport, InsightsTabs } from '../components';
 
 export function meta({ data, params }: Route.MetaArgs) {
   return [
@@ -27,45 +28,44 @@ export function meta({ data, params }: Route.MetaArgs) {
   ];
 }
 
-export function loader({ request }: Route.LoaderArgs) {
-  const performance: PerformanceData = {
-    totalClients: 245,
-    newClients: 28,
-    totalReferrals: 89,
-    conversionRate: 68.5,
-    revenue: 125000000,
-    growth: {
-      clients: 12.5,
-      referrals: 15.2,
-      revenue: 18.3,
-    },
-  };
+export async function loader({ request }: Route.LoaderArgs) {
+  try {
+    // 하드코딩된 사용자 ID (실제로는 인증에서 가져와야 함)
+    const userId = '80b0993a-4194-4165-be5a-aec24b88cd80';
 
-  const topPerformers: TopPerformer[] = [
-    {
-      id: '1',
-      name: '김영희',
-      clients: 45,
-      conversions: 32,
-      revenue: 28000000,
-    },
-    {
-      id: '2',
-      name: '박철수',
-      clients: 38,
-      conversions: 28,
-      revenue: 24000000,
-    },
-    {
-      id: '3',
-      name: '이민수',
-      clients: 32,
-      conversions: 22,
-      revenue: 19000000,
-    },
-  ];
+    // 기본 날짜 범위 설정 (이번 달)
+    const now = new Date();
+    const startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
-  return { performance, topPerformers };
+    // 기본 리포트 템플릿 생성 (없는 경우)
+    await createDefaultReportTemplates(userId);
+
+    // 성과 데이터와 최고 성과자 데이터를 병렬로 가져오기
+    const [performance, topPerformers] = await Promise.all([
+      getPerformanceData(userId, startDate, endDate),
+      getTopPerformers(userId, 5),
+    ]);
+
+    return { performance, topPerformers };
+  } catch (error) {
+    console.error('Error loading reports data:', error);
+
+    // 오류 발생 시 기본값 반환
+    const defaultPerformance: PerformanceData = {
+      totalClients: 0,
+      newClients: 0,
+      totalReferrals: 0,
+      conversionRate: 0,
+      revenue: 0,
+      growth: { clients: 0, referrals: 0, revenue: 0 },
+    };
+
+    return {
+      performance: defaultPerformance,
+      topPerformers: [] as TopPerformer[],
+    };
+  }
 }
 
 export function action({ request }: Route.ActionArgs) {

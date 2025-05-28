@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, type MetaFunction } from 'react-router';
+import { Link, type MetaFunction, redirect, useNavigate } from 'react-router';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -23,8 +23,7 @@ import {
 } from '~/common/components/ui/form';
 import { Alert, AlertDescription } from '~/common/components/ui/alert';
 import { Separator } from '~/common/components/ui/separator';
-import { getInviteStats, type InviteStats } from '~/lib/public-data';
-import type { Route } from './+types/invite-only-page';
+import { getInvitationStats } from '~/lib/invitation-utils';
 
 // Zod 스키마 정의
 const inviteCodeSchema = z.object({
@@ -33,19 +32,34 @@ const inviteCodeSchema = z.object({
 
 type InviteCodeFormData = z.infer<typeof inviteCodeSchema>;
 
+interface LoaderArgs {
+  request: Request;
+}
+
+interface InviteStats {
+  pending: number;
+  used: number;
+  expired: number;
+  total: number;
+}
+
 // Loader 함수 - 초대 통계 데이터 가져오기
-export async function loader({ request }: Route.LoaderArgs) {
+export async function loader({ request }: LoaderArgs) {
   try {
-    const inviteStats = await getInviteStats();
-    return { inviteStats };
+    // 새로운 invitation-utils 함수 사용
+    const inviteStats = await getInvitationStats();
+
+    return {
+      inviteStats,
+    };
   } catch (error) {
     console.error('초대 통계 데이터 로드 실패:', error);
     return {
       inviteStats: {
-        totalInvitations: 450,
-        usedInvitations: 320,
-        pendingInvitations: 130,
-        conversionRate: 71,
+        pending: 0,
+        used: 0,
+        expired: 0,
+        total: 0,
       } as InviteStats,
     };
   }
@@ -59,9 +73,15 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export default function InviteOnlyPage({ loaderData }: Route.ComponentProps) {
+interface ComponentProps {
+  loaderData: { inviteStats: InviteStats };
+}
+
+export default function InviteOnlyPage({ loaderData }: ComponentProps) {
   const { inviteStats } = loaderData;
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [clientError, setClientError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   // react-hook-form과 zodResolver를 사용한 폼 설정
   const form = useForm<InviteCodeFormData>({
@@ -71,9 +91,35 @@ export default function InviteOnlyPage({ loaderData }: Route.ComponentProps) {
     },
   });
 
-  const onSubmit = (data: InviteCodeFormData) => {
+  // 클라이언트 사이드 초대 코드 검증
+  const handleFormSubmit = async (data: InviteCodeFormData) => {
     setIsSubmitting(true);
-    window.location.href = `/invite/${data.inviteCode}`;
+    setClientError(null);
+
+    try {
+      // 클라이언트 사이드에서 먼저 검증
+      const response = await fetch('/api/validate-invitation', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ code: data.inviteCode }),
+      });
+
+      const validation = await response.json();
+
+      if (!validation.valid) {
+        setClientError(validation.error || '유효하지 않은 초대 코드입니다.');
+        setIsSubmitting(false);
+        return;
+      }
+
+      // 유효한 경우 직접 리다이렉트
+      navigate(`/auth/signup?code=${encodeURIComponent(data.inviteCode)}`);
+    } catch (error) {
+      setClientError('초대 코드 검증 중 오류가 발생했습니다.');
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -89,35 +135,18 @@ export default function InviteOnlyPage({ loaderData }: Route.ComponentProps) {
         </CardHeader>
 
         <CardContent className="pb-2">
-          {/* 초대 통계 표시 */}
-          {/* <div className="grid grid-cols-2 gap-4 mb-6">
-            <div className="text-center p-4 bg-muted/30 rounded-lg">
-              <div className="text-2xl font-bold text-primary">
-                {inviteStats.totalInvitations}
-              </div>
-              <div className="text-sm text-muted-foreground">총 초대</div>
-            </div>
-            <div className="text-center p-4 bg-muted/30 rounded-lg">
-              <div className="text-2xl font-bold text-green-600">
-                {inviteStats.conversionRate}%
-              </div>
-              <div className="text-sm text-muted-foreground">가입률</div>
-            </div>
-          </div> */}
-
-          {/* <Alert className="mb-4">
-            <AlertDescription>
-              현재 <strong>{inviteStats.usedInvitations}명</strong>이 SureCRM을
-              사용 중이며, <strong>{inviteStats.pendingInvitations}개</strong>의
-              초대가 대기 중입니다.
-            </AlertDescription>
-          </Alert> */}
+          {/* 오류 메시지 표시 (서버 또는 클라이언트) */}
+          {clientError && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertDescription>{clientError}</AlertDescription>
+            </Alert>
+          )}
 
           <div className="py-4 space-y-4">
             <Form {...form}>
               <form
-                onSubmit={form.handleSubmit(onSubmit)}
                 className="space-y-4"
+                onSubmit={form.handleSubmit(handleFormSubmit)}
               >
                 <FormField
                   control={form.control}
@@ -126,8 +155,9 @@ export default function InviteOnlyPage({ loaderData }: Route.ComponentProps) {
                     <FormItem>
                       <FormControl>
                         <Input
-                          placeholder="초대 코드를 입력하세요"
                           {...field}
+                          placeholder="초대 코드를 입력하세요 (예: ABC-DEF-GHI)"
+                          disabled={isSubmitting}
                         />
                       </FormControl>
                       <FormMessage />
@@ -140,7 +170,7 @@ export default function InviteOnlyPage({ loaderData }: Route.ComponentProps) {
                   className="w-full"
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? '처리 중...' : '초대 코드로 가입하기'}
+                  {isSubmitting ? '검증 중...' : '초대 코드로 가입하기'}
                 </Button>
               </form>
             </Form>
@@ -152,19 +182,10 @@ export default function InviteOnlyPage({ loaderData }: Route.ComponentProps) {
           <div className="text-center text-sm text-slate-600 dark:text-slate-400">
             <span>이미 계정이 있으신가요? </span>
             <Link
-              to="/login"
+              to="/auth/login"
               className="font-medium text-slate-900 hover:text-slate-700 dark:text-slate-300 dark:hover:text-slate-200"
             >
               로그인하기
-            </Link>
-          </div>
-          <div>
-            {' '}
-            <Link
-              to="/terms"
-              className="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-300"
-            >
-              이용약관 및 개인정보처리방침
             </Link>
           </div>
         </CardFooter>

@@ -14,6 +14,12 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from '~/common/components/ui/dropdown-menu';
+import {
+  getPipelineStages,
+  getClientsByStage,
+  createDefaultPipelineStages,
+} from '~/features/pipeline/lib/supabase-pipeline-data';
+import { getCurrentUserId } from '~/features/clients/lib/auth-utils';
 
 export function meta({ data, params }: Route.MetaArgs) {
   return [
@@ -22,262 +28,42 @@ export function meta({ data, params }: Route.MetaArgs) {
   ];
 }
 
-export function loader({ request }: Route.LoaderArgs) {
-  // 실제 구현에서는 DB에서 데이터를 가져오는 로직이 들어갑니다
-  return {
-    stages: [
-      {
-        id: 'stage-1',
-        name: '첫 상담',
-        order: 0,
-        color: '#8884d8',
-      },
-      {
-        id: 'stage-2',
-        name: '니즈 분석',
-        order: 1,
-        color: '#82ca9d',
-      },
-      {
-        id: 'stage-3',
-        name: '상품 설명',
-        order: 2,
-        color: '#ffc658',
-      },
-      {
-        id: 'stage-4',
-        name: '계약 검토',
-        order: 3,
-        color: '#ff8042',
-      },
-      {
-        id: 'stage-5',
-        name: '계약 완료',
-        order: 4,
-        color: '#0088fe',
-      },
-    ],
-    clients: [
-      {
-        id: 'client-1',
-        name: '김영희',
-        phone: '010-1234-5678',
-        email: 'kim@example.com',
-        address: '서울시 강남구 테헤란로 123',
-        occupation: '직장인 (IT회사)',
-        telecomProvider: 'SKT',
-        height: 165,
-        weight: 55,
-        hasDrivingLicense: true,
-        importance: 'high',
-        lastContactDate: '2023-05-15',
-        nextMeeting: {
-          date: '2023-05-20',
-          time: '14:00',
-          type: '상품 설명',
-        },
-        note: '자녀 교육 보험에 관심 있음. 안정적인 수익을 선호하며 위험도 낮은 상품 희망',
-        tags: ['교육보험', '고액', 'VIP'],
-        stageId: 'stage-1',
-        referredBy: {
-          id: 'client-5',
-          name: '박지성',
-        },
-        insuranceInfo: [
-          {
-            id: 'ins-1',
-            type: 'prenatal',
-            details: {
-              dueDate: '2023-11-15',
-              conceptionMethod: 'natural',
-              abortionPreventionMeds: false,
-              abnormalFindings: false,
-              disabilityTestFindings: false,
-            },
-          },
-          {
-            id: 'ins-2',
-            type: 'auto',
-            details: {
-              vehicleNumber: '12가3456',
-              ownerName: '김영희',
-              vehicleType: '승용차',
-              manufacturer: '현대',
-            },
-          },
-        ],
-        profileImageUrl: '/avatars/kim-younghee.jpg',
-        consentDate: '2023-05-01',
-      },
-      {
-        id: 'client-2',
-        name: '이철수',
-        phone: '010-2345-6789',
-        email: 'lee@example.com',
-        address: '서울시 서초구 반포대로 456',
-        occupation: '자영업 (카페 운영)',
-        telecomProvider: 'KT',
-        height: 175,
-        weight: 70,
-        hasDrivingLicense: true,
-        importance: 'medium',
-        lastContactDate: '2023-05-10',
-        note: '사업 확장을 위한 자금 필요. 투자형 보험 상품에 관심',
-        tags: ['자영업', '투자형'],
-        stageId: 'stage-2',
-        insuranceInfo: [
-          {
-            id: 'ins-3',
-            type: 'life',
-            details: {
-              coverage: '1억원',
-              term: '20년',
-            },
-          },
-        ],
-        consentDate: '2023-04-28',
-      },
-      {
-        id: 'client-3',
-        name: '박민지',
-        phone: '010-3456-7890',
-        email: 'park@example.com',
-        address: '서울시 마포구 월드컵로 789',
-        occupation: '대학생',
-        telecomProvider: 'LG U+',
-        height: 160,
-        weight: 50,
-        hasDrivingLicense: false,
-        importance: 'low',
-        note: '학자금 대출 상환 중. 저렴한 보험료 희망',
-        tags: ['학생', '저예산'],
-        stageId: 'stage-1',
-        consentDate: '2023-05-03',
-      },
-      {
-        id: 'client-4',
-        name: '최재영',
-        phone: '010-4567-8901',
-        email: 'choi@example.com',
-        address: '서울시 종로구 청계천로 321',
-        occupation: '의사 (내과 전문의)',
-        telecomProvider: 'SKT',
-        height: 180,
-        weight: 75,
-        hasDrivingLicense: true,
-        importance: 'high',
-        nextMeeting: {
-          date: '2023-05-22',
-          time: '10:00',
-          type: '계약 체결',
-        },
-        note: '고액 보험 가입 희망. 세금 절약 목적의 상품 관심',
-        tags: ['전문직', '고액', '세금절약'],
-        stageId: 'stage-4',
-        insuranceInfo: [
-          {
-            id: 'ins-4',
-            type: 'health',
-            details: {
-              coverage: '2억원',
-              familyHistory: '당뇨',
-            },
-          },
-          {
-            id: 'ins-5',
-            type: 'property',
-            details: {
-              propertyType: '아파트',
-              value: '15억원',
-            },
-          },
-        ],
-        consentDate: '2023-04-20',
-      },
-      {
-        id: 'client-5',
-        name: '박지성',
-        phone: '010-5678-9012',
-        email: 'js.park@example.com',
-        address: '서울시 송파구 올림픽로 654',
-        occupation: '회사 대표 (무역업)',
-        telecomProvider: 'SKT',
-        height: 178,
-        weight: 72,
-        hasDrivingLicense: true,
-        importance: 'high',
-        note: '핵심 소개자. 업계 인맥이 넓어 추가 고객 유치 가능성 높음',
-        tags: ['VIP', '영향력자', '소개자'],
-        stageId: 'stage-5',
-        insuranceInfo: [
-          {
-            id: 'ins-6',
-            type: 'life',
-            details: {
-              coverage: '5억원',
-              beneficiary: '가족',
-            },
-          },
-        ],
-        profileImageUrl: '/avatars/park-jisung.jpg',
-        consentDate: '2023-03-15',
-      },
-      {
-        id: 'client-6',
-        name: '김민수',
-        phone: '010-6789-0123',
-        email: 'minsu@example.com',
-        address: '서울시 영등포구 여의도동 987',
-        occupation: '금융업 (증권회사)',
-        telecomProvider: 'KT',
-        height: 172,
-        weight: 68,
-        hasDrivingLicense: true,
-        importance: 'medium',
-        note: '금융 상품에 대한 이해도 높음. 복합 상품 제안 가능',
-        tags: ['금융업', '복합상품'],
-        stageId: 'stage-3',
-        referredBy: {
-          id: 'client-5',
-          name: '박지성',
-        },
-        insuranceInfo: [
-          {
-            id: 'ins-7',
-            type: 'auto',
-            details: {
-              vehicleNumber: '34나5678',
-              ownerName: '김민수',
-              vehicleType: 'SUV',
-              manufacturer: '기아',
-            },
-          },
-        ],
-        consentDate: '2023-04-10',
-      },
-      {
-        id: 'client-7',
-        name: '정다영',
-        phone: '010-7890-1234',
-        email: 'jung@example.com',
-        address: '서울시 관악구 신림로 147',
-        occupation: '교사 (초등학교)',
-        telecomProvider: 'LG U+',
-        height: 163,
-        weight: 52,
-        hasDrivingLicense: false,
-        importance: 'medium',
-        note: '안정적인 직업. 교육 관련 보험 상품에 관심 높음',
-        tags: ['공무원', '교육', '안정형'],
-        stageId: 'stage-2',
-        referredBy: {
-          id: 'client-5',
-          name: '박지성',
-        },
-        consentDate: '2023-04-25',
-      },
-    ],
-  };
+export async function loader({ request }: Route.LoaderArgs) {
+  try {
+    // 현재 사용자 정보 가져오기
+    const currentUserId = await getCurrentUserId(request);
+    if (!currentUserId) {
+      throw new Error('인증이 필요합니다.');
+    }
+
+    // 파이프라인 단계 조회
+    let stages = await getPipelineStages(currentUserId);
+
+    // 단계가 없으면 기본 단계 생성
+    if (stages.length === 0) {
+      stages = await createDefaultPipelineStages(currentUserId);
+    }
+
+    // 고객 데이터 조회
+    const clients = await getClientsByStage(currentUserId);
+
+    return {
+      stages,
+      clients,
+      currentUserId,
+    };
+  } catch (error) {
+    console.error('Pipeline loader error:', error);
+    return {
+      stages: [],
+      clients: [],
+      currentUserId: null,
+      error:
+        error instanceof Error
+          ? error.message
+          : '데이터를 불러오는데 실패했습니다.',
+    };
+  }
 }
 
 export default function PipelinePage({ loaderData }: Route.ComponentProps) {
