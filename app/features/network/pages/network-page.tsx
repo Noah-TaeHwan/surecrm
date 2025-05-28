@@ -16,6 +16,7 @@ import {
   useState,
   useCallback,
   useEffect,
+  useMemo,
   Suspense,
   Component,
 } from 'react';
@@ -167,32 +168,25 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
   });
   const [searchQuery, setSearchQuery] = useState('');
 
-  // 네트워크 데이터 통계 상태 - 실제 데이터 사용
-  const [networkStats, setNetworkStats] = useState({
-    totalNodes: nodes.length,
-    filteredNodes: nodes.length,
-    influencerCount: nodes.filter(
-      (n) => n.type === 'agent' || n.importance === 'high'
-    ).length,
-    connectionCount: edges.length,
-  });
-
-  // 실제 네트워크 데이터 사용
-  const networkData = {
-    nodes: nodes.map((node) => ({
-      id: node.id,
-      name: node.name,
-      group: node.type === 'agent' ? 'influencer' : 'client',
-      importance:
-        node.importance === 'high' ? 5 : node.importance === 'medium' ? 3 : 1,
-      stage: node.status === 'active' ? '계약 완료' : '첫 상담',
-    })),
-    links: edges.map((edge) => ({
-      source: edge.source,
-      target: edge.target,
-      value: edge.strength,
-    })),
-  };
+  // 실제 네트워크 데이터 사용 - useMemo로 최적화
+  const networkData = useMemo(
+    () => ({
+      nodes: nodes.map((node) => ({
+        id: node.id,
+        name: node.name,
+        group: node.type === 'agent' ? 'influencer' : 'client',
+        importance:
+          node.importance === 'high' ? 5 : node.importance === 'medium' ? 3 : 1,
+        stage: node.status === 'active' ? '계약 완료' : '첫 상담',
+      })),
+      links: edges.map((edge) => ({
+        source: edge.source,
+        target: edge.target,
+        value: edge.strength,
+      })),
+    }),
+    [nodes, edges]
+  );
 
   // 에러 상태 관리
   const [graphLoadError, setGraphLoadError] = useState(false);
@@ -228,174 +222,150 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
     setSelectedNode(nodeId);
   }, []);
 
-  // 필터링된 데이터 계산 함수
-  const calculateFilteredData = useCallback(
-    (data: NetworkData, filters: FilterSettings, query: string = '') => {
-      // 노드 필터링 로직 (NetworkGraphClient와 동일한 로직)
-      let filteredNodes = [...data.nodes];
+  // 필터링된 데이터 계산 함수 - useMemo로 최적화
+  const filteredData = useMemo(() => {
+    // 노드 필터링 로직
+    let filteredNodes = [...networkData.nodes];
 
-      // 영업 단계별 필터링
-      if (filters.stageFilter !== 'all') {
-        filteredNodes = filteredNodes.filter(
-          (node) => node.stage === filters.stageFilter
-        );
-      }
+    // 영업 단계별 필터링
+    if (filterSettings.stageFilter !== 'all') {
+      filteredNodes = filteredNodes.filter(
+        (node) => node.stage === filterSettings.stageFilter
+      );
+    }
 
-      // 중요도 기준 필터링
-      if (filters.importanceFilter > 0) {
-        filteredNodes = filteredNodes.filter(
-          (node) => (node.importance || 0) >= filters.importanceFilter
-        );
-      }
+    // 중요도 기준 필터링
+    if (filterSettings.importanceFilter > 0) {
+      filteredNodes = filteredNodes.filter(
+        (node) => (node.importance || 0) >= filterSettings.importanceFilter
+      );
+    }
 
-      // 핵심 소개자 필터링 - 변경된 로직
-      if (filters.showInfluencersOnly) {
-        // 모든 영향력 있는 사용자 노드와 그들과 직접 연결된 노드들을 식별합니다
-        const influencersAndConnections = new Set<string>();
+    // 핵심 소개자 필터링
+    if (filterSettings.showInfluencersOnly) {
+      const influencersAndConnections = new Set<string>();
 
-        // 우선 모든 영향력 있는 사용자(influencer) 식별
-        const influencers = data.nodes.filter(
-          (node) => node.group === 'influencer'
-        );
-        influencers.forEach((influencer) =>
-          influencersAndConnections.add(influencer.id)
-        );
+      // 우선 모든 영향력 있는 사용자(influencer) 식별
+      const influencers = networkData.nodes.filter(
+        (node) => node.group === 'influencer'
+      );
+      influencers.forEach((influencer) =>
+        influencersAndConnections.add(influencer.id)
+      );
 
-        // 각 영향력 있는 사용자와 직접 연결된 모든 노드를 추가
-        data.links.forEach((link: NetworkLink) => {
-          const sourceId =
-            typeof link.source === 'string' ? link.source : link.source.id;
-          const targetId =
-            typeof link.target === 'string' ? link.target : link.target.id;
-
-          // 소스가 influencer인 경우 타겟 노드 추가
-          if (influencers.some((inf) => inf.id === sourceId)) {
-            influencersAndConnections.add(targetId);
-          }
-
-          // 타겟이 influencer인 경우 소스 노드 추가
-          if (influencers.some((inf) => inf.id === targetId)) {
-            influencersAndConnections.add(sourceId);
-          }
-        });
-
-        // 핵심 소개자와 그들의 연결 노드만 남김
-        filteredNodes = filteredNodes.filter((node) =>
-          influencersAndConnections.has(node.id)
-        );
-      }
-
-      // 소개 깊이에 따른 필터링
-      if (filters.depthFilter !== 'all') {
-        // 원본 데이터에서 링크 정보 추출
-        const nodeConnections = new Map();
-
-        // 모든 직접 연결 관계 수집
-        data.links.forEach((link: NetworkLink) => {
-          const sourceId =
-            typeof link.source === 'string' ? link.source : link.source.id;
-          const targetId =
-            typeof link.target === 'string' ? link.target : link.target.id;
-
-          if (!nodeConnections.has(sourceId)) {
-            nodeConnections.set(sourceId, new Set());
-          }
-          nodeConnections.get(sourceId).add(targetId);
-        });
-
-        if (filters.depthFilter === 'direct') {
-          // 직접 소개만 표시 (1촌)
-          const directConnectionNodes = new Set();
-
-          // 영향력 있는 사용자(influencer)와 그들의 직접 연결 노드만 선택
-          filteredNodes.forEach((node) => {
-            if (node.group === 'influencer') {
-              directConnectionNodes.add(node.id);
-              const connections = nodeConnections.get(node.id);
-              if (connections) {
-                connections.forEach((targetId: string) => {
-                  directConnectionNodes.add(targetId);
-                });
-              }
-            }
-          });
-
-          filteredNodes = filteredNodes.filter((node) =>
-            directConnectionNodes.has(node.id)
-          );
-        }
-      }
-
-      // 검색어 필터링 (검색어가 있는 경우)
-      if (query.trim()) {
-        const lowerQuery = query.toLowerCase().trim();
-        filteredNodes = filteredNodes.filter((node) =>
-          node.name.toLowerCase().includes(lowerQuery)
-        );
-      }
-
-      // 필터링된 노드ID 목록
-      const filteredNodeIds = new Set(filteredNodes.map((node) => node.id));
-
-      // 링크 필터링 (양쪽 노드가 모두 필터링된 결과에 있는 경우만 포함)
-      const filteredLinks = data.links.filter((link: NetworkLink) => {
+      // 각 영향력 있는 사용자와 직접 연결된 모든 노드를 추가
+      networkData.links.forEach((link: NetworkLink) => {
         const sourceId =
           typeof link.source === 'string' ? link.source : link.source.id;
         const targetId =
           typeof link.target === 'string' ? link.target : link.target.id;
-        return filteredNodeIds.has(sourceId) && filteredNodeIds.has(targetId);
+
+        // 소스가 influencer인 경우 타겟 노드 추가
+        if (influencers.some((inf) => inf.id === sourceId)) {
+          influencersAndConnections.add(targetId);
+        }
+
+        // 타겟이 influencer인 경우 소스 노드 추가
+        if (influencers.some((inf) => inf.id === targetId)) {
+          influencersAndConnections.add(sourceId);
+        }
       });
 
-      return {
-        nodes: filteredNodes,
-        links: filteredLinks,
-      };
-    },
-    []
+      // 핵심 소개자와 그들의 연결 노드만 남김
+      filteredNodes = filteredNodes.filter((node) =>
+        influencersAndConnections.has(node.id)
+      );
+    }
+
+    // 소개 깊이에 따른 필터링
+    if (filterSettings.depthFilter !== 'all') {
+      // 원본 데이터에서 링크 정보 추출
+      const nodeConnections = new Map();
+
+      // 모든 직접 연결 관계 수집
+      networkData.links.forEach((link: NetworkLink) => {
+        const sourceId =
+          typeof link.source === 'string' ? link.source : link.source.id;
+        const targetId =
+          typeof link.target === 'string' ? link.target : link.target.id;
+
+        if (!nodeConnections.has(sourceId)) {
+          nodeConnections.set(sourceId, new Set());
+        }
+        nodeConnections.get(sourceId).add(targetId);
+      });
+
+      if (filterSettings.depthFilter === 'direct') {
+        // 직접 소개만 표시 (1촌)
+        const directConnectionNodes = new Set();
+
+        // 영향력 있는 사용자(influencer)와 그들의 직접 연결 노드만 선택
+        filteredNodes.forEach((node) => {
+          if (node.group === 'influencer') {
+            directConnectionNodes.add(node.id);
+            const connections = nodeConnections.get(node.id);
+            if (connections) {
+              connections.forEach((targetId: string) => {
+                directConnectionNodes.add(targetId);
+              });
+            }
+          }
+        });
+
+        filteredNodes = filteredNodes.filter((node) =>
+          directConnectionNodes.has(node.id)
+        );
+      }
+    }
+
+    // 검색어 필터링 (검색어가 있는 경우)
+    if (searchQuery.trim()) {
+      const lowerQuery = searchQuery.toLowerCase().trim();
+      filteredNodes = filteredNodes.filter((node) =>
+        node.name.toLowerCase().includes(lowerQuery)
+      );
+    }
+
+    // 필터링된 노드ID 목록
+    const filteredNodeIds = new Set(filteredNodes.map((node) => node.id));
+
+    // 링크 필터링 (양쪽 노드가 모두 필터링된 결과에 있는 경우만 포함)
+    const filteredLinks = networkData.links.filter((link: NetworkLink) => {
+      const sourceId =
+        typeof link.source === 'string' ? link.source : link.source.id;
+      const targetId =
+        typeof link.target === 'string' ? link.target : link.target.id;
+      return filteredNodeIds.has(sourceId) && filteredNodeIds.has(targetId);
+    });
+
+    return {
+      nodes: filteredNodes,
+      links: filteredLinks,
+    };
+  }, [networkData, filterSettings, searchQuery]);
+
+  // 네트워크 데이터 통계 상태 - useMemo로 최적화
+  const networkStats = useMemo(
+    () => ({
+      totalNodes: networkData.nodes.length,
+      filteredNodes: filteredData.nodes.length,
+      influencerCount: filteredData.nodes.filter(
+        (n) => n.group === 'influencer'
+      ).length,
+      connectionCount: filteredData.links.length,
+    }),
+    [networkData.nodes.length, filteredData.nodes, filteredData.links.length]
   );
 
   // 필터 변경 시 통계 업데이트
-  const handleFilterChange = useCallback(
-    (newFilters: FilterSettings) => {
-      setFilterSettings(newFilters);
-
-      // 필터 변경 시 필터링된 데이터 기반 통계 업데이트
-      const filteredData = calculateFilteredData(
-        networkData,
-        newFilters,
-        searchQuery
-      );
-      setNetworkStats({
-        totalNodes: networkData.nodes.length,
-        filteredNodes: filteredData.nodes.length,
-        influencerCount: filteredData.nodes.filter(
-          (n) => n.group === 'influencer'
-        ).length,
-        connectionCount: filteredData.links.length,
-      });
-    },
-    [networkData, calculateFilteredData, searchQuery]
-  );
+  const handleFilterChange = useCallback((newFilters: FilterSettings) => {
+    setFilterSettings(newFilters);
+  }, []);
 
   // 검색어 변경 시도 통계 업데이트
   const handleSearchChange = useCallback(
     (query: string) => {
       setSearchQuery(query);
-
-      // 검색어 변경 시 필터링된 데이터 기반 통계 업데이트
-      const filteredData = calculateFilteredData(
-        networkData,
-        filterSettings,
-        query
-      );
-      setNetworkStats({
-        totalNodes: networkData.nodes.length,
-        filteredNodes: filteredData.nodes.length,
-        influencerCount: filteredData.nodes.filter(
-          (n) => n.group === 'influencer'
-        ).length,
-        connectionCount: filteredData.links.length,
-      });
 
       // 검색어가 있고 필터링 결과 노드가 있으면 첫 번째 노드 자동 선택
       if (query.trim() !== '' && filteredData.nodes.length > 0) {
@@ -407,26 +377,8 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
         setSelectedNode(null);
       }
     },
-    [networkData, filterSettings, calculateFilteredData]
+    [filteredData.nodes]
   );
-
-  // 초기 통계 설정
-  useEffect(() => {
-    // 컴포넌트 마운트 시 초기 통계 설정
-    const filteredData = calculateFilteredData(
-      networkData,
-      filterSettings,
-      searchQuery
-    );
-    setNetworkStats({
-      totalNodes: networkData.nodes.length,
-      filteredNodes: filteredData.nodes.length,
-      influencerCount: filteredData.nodes.filter(
-        (n) => n.group === 'influencer'
-      ).length,
-      connectionCount: filteredData.links.length,
-    });
-  }, [networkData, calculateFilteredData, filterSettings, searchQuery]);
 
   // 그래프 컴포넌트 렌더링
   const renderNetworkGraph = () => {

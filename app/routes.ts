@@ -36,7 +36,6 @@ export default [
 
   // 초대 및 팀 관리
   route('invitations', 'features/invitations/pages/invitations-page.tsx'),
-  route('my-invitations', 'features/invitations/pages/my-invitations-page.tsx'),
   route('team', 'features/team/pages/team-page.tsx'),
   route('team/join/:code', 'features/team/pages/team-join-page.tsx'),
 
