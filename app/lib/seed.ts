@@ -1,10 +1,12 @@
 import { db } from './db';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import {
   teams,
   pipelineStages,
   clients,
   clientDetails,
+  invitations,
+  profiles,
 } from './supabase-schema';
 
 // 각 feature별 스키마 import (필요한 것만)
@@ -18,6 +20,9 @@ import {
   announcements,
   siteSettings,
 } from '../common/schema';
+
+// 초대장 함수 import
+import { createInitialInvitations } from '../features/invitations/lib/invitations-data';
 
 export async function seedDatabase() {
   console.log('🌱 시드 데이터 생성을 시작합니다...');
@@ -100,7 +105,7 @@ async function seedPublicData() {
       role: '팀장',
       company: '한화생명',
       quote:
-        '팀 전체의 성과가 한눈에 보여서 관리가 훨씬 쉬워졌습니다. 데이터 기반 의사결정이 가능해졌어요.',
+        '팀 전체의 성과가 한눈에 보여서 관리가 훨씬 쉬졌습니다. 데이터 기반 의사결정이 가능해졌어요.',
       rating: 5,
       initial: '박',
       isVerified: true,
@@ -316,20 +321,31 @@ async function seedApplicationData() {
   console.log('🏢 메인 애플리케이션 데이터 생성 중...');
 
   try {
-    // 1. 팀 데이터 생성 (임시 adminId 사용)
+    // 1. 테스트 사용자 프로필 생성 (실제 Supabase Auth 사용자)
+    console.log('👤 실제 사용자 프로필 생성 중...');
+
+    // profiles 테이블에 실제 사용자 프로필 생성 (실제 auth.users에 있는 사용자만)
+    await db.execute(sql`
+      INSERT INTO profiles (id, full_name, phone, company, role, invitations_left, is_active, created_at, updated_at)
+      VALUES 
+        ('80b0993a-4194-4165-be5a-aec24b88cd80', 'Noah (Admin)', '010-1234-5678', 'SureCRM', 'agent', 2, true, NOW(), NOW())
+      ON CONFLICT (id) DO NOTHING
+    `);
+
+    // 2. 팀 데이터 생성
     console.log('📊 팀 데이터 생성 중...');
-    const [team] = await db
-      .insert(teams)
-      .values({
-        name: 'SureCRM 본사',
-        description: '메인 영업팀',
-        adminId: '00000000-0000-0000-0000-000000000001', // 임시 ID (실제로는 auth.users에서 가져와야 함)
-        settings: {
-          workingHours: { start: '09:00', end: '18:00' },
-          timezone: 'Asia/Seoul',
-        },
-      })
-      .returning();
+    const teamData = {
+      name: 'SureCRM 개발팀',
+      description: '보험설계사를 위한 고객관리 솔루션 개발팀',
+      adminId: '80b0993a-4194-4165-be5a-aec24b88cd80', // 실제 사용자 ID
+      settings: {
+        allowInvitations: true,
+        maxTeamSize: 50,
+        features: ['clients', 'pipeline', 'calendar', 'reports'],
+      },
+    };
+
+    const [team] = await db.insert(teams).values(teamData).returning();
 
     // 2. 파이프라인 스테이지 생성
     console.log('🔄 파이프라인 스테이지 생성 중...');
@@ -352,27 +368,27 @@ async function seedApplicationData() {
       {
         name: 'VIP',
         color: '#EF4444',
-        agentId: '00000000-0000-0000-0000-000000000001',
+        agentId: '80b0993a-4194-4165-be5a-aec24b88cd80',
       },
       {
         name: '신혼부부',
         color: '#F59E0B',
-        agentId: '00000000-0000-0000-0000-000000000001',
+        agentId: '80b0993a-4194-4165-be5a-aec24b88cd80',
       },
       {
         name: '고액자산가',
         color: '#8B5CF6',
-        agentId: '00000000-0000-0000-0000-000000000001',
+        agentId: '80b0993a-4194-4165-be5a-aec24b88cd80',
       },
       {
         name: '재계약',
         color: '#10B981',
-        agentId: '00000000-0000-0000-0000-000000000001',
+        agentId: '80b0993a-4194-4165-be5a-aec24b88cd80',
       },
       {
         name: '추천고객',
         color: '#3B82F6',
-        agentId: '00000000-0000-0000-0000-000000000001',
+        agentId: '80b0993a-4194-4165-be5a-aec24b88cd80',
       },
     ];
 
@@ -382,7 +398,7 @@ async function seedApplicationData() {
     console.log('👥 클라이언트 데이터 생성 중...');
     const clientsData = [
       {
-        agentId: '00000000-0000-0000-0000-000000000001',
+        agentId: '80b0993a-4194-4165-be5a-aec24b88cd80',
         teamId: team.id,
         fullName: '홍길동',
         email: 'hong@example.com',
@@ -399,7 +415,7 @@ async function seedApplicationData() {
         notes: '적극적인 상담 의지를 보임',
       },
       {
-        agentId: '00000000-0000-0000-0000-000000000001',
+        agentId: '80b0993a-4194-4165-be5a-aec24b88cd80',
         teamId: team.id,
         fullName: '김철수',
         email: 'kim@example.com',
@@ -416,7 +432,7 @@ async function seedApplicationData() {
         notes: '보험료 예산 충분함',
       },
       {
-        agentId: '00000000-0000-0000-0000-000000000001',
+        agentId: '80b0993a-4194-4165-be5a-aec24b88cd80',
         teamId: team.id,
         fullName: '이영희',
         email: 'lee@example.com',
@@ -433,7 +449,7 @@ async function seedApplicationData() {
         notes: '기존 고객, 추가 상품 관심',
       },
       {
-        agentId: '00000000-0000-0000-0000-000000000001',
+        agentId: '80b0993a-4194-4165-be5a-aec24b88cd80',
         teamId: team.id,
         fullName: '박민수',
         email: 'park@example.com',
@@ -480,19 +496,27 @@ async function seedApplicationData() {
 
     await db.insert(clientDetails).values(clientDetailsData);
 
+    // 6. 초대장 데이터 생성 (클럽하우스 모델 - 기본 2장)
+    console.log('🎫 초대장 데이터 생성 중...');
+
+    // createInitialInvitations 함수를 사용하여 자동 생성
+    await createInitialInvitations('80b0993a-4194-4165-be5a-aec24b88cd80', 2);
+
     console.log('✅ 메인 애플리케이션 데이터 생성 완료');
     console.log(`📊 생성된 애플리케이션 데이터:
     - 팀: 1개
     - 파이프라인 스테이지: ${stagesData.length}개
     - 클라이언트: ${clientsData.length}개
     - 태그: ${tagsData.length}개
-    - 클라이언트 상세정보: ${clientDetailsData.length}개`);
+    - 클라이언트 상세정보: ${clientDetailsData.length}개
+    - 초대장: 2개 (기본)`);
 
     console.log(`
 ⚠️  참고사항:
 - 프로필 데이터는 Supabase Auth를 통해 생성되어야 합니다.
 - 실제 사용 시에는 auth.users 테이블에 사용자가 먼저 생성되어야 합니다.
-- 현재는 임시 ID를 사용하고 있습니다.`);
+- 현재는 실제 사용자 ID를 사용하고 있습니다.
+- 초대장 시스템: 가입 시 2장, 성공적인 초대 시 1장 추가 지급`);
   } catch (error) {
     console.error('❌ 메인 애플리케이션 데이터 생성 중 오류 발생:', error);
     throw error;
@@ -507,11 +531,17 @@ export async function clearDatabase() {
 
     // 1. 애플리케이션 데이터 삭제
     console.log('🏢 애플리케이션 데이터 삭제 중...');
+    await db.delete(invitations);
     await db.delete(clientTags);
     await db.delete(clientDetails);
     await db.delete(clients);
     await db.delete(pipelineStages);
     await db.delete(teams);
+    // profiles는 auth.users와 연결되어 있어서 직접 삭제하지 않음
+    // 대신 SQL로 삭제
+    await db.execute(
+      sql`DELETE FROM profiles WHERE id::text LIKE '00000000-0000-0000-0000-%'`
+    );
 
     console.log('✅ 데이터베이스 초기화 완료 (공개 페이지 데이터는 보존됨)');
   } catch (error) {
@@ -525,11 +555,16 @@ export async function clearApplicationData() {
 
   try {
     // 외래 키 제약 조건 때문에 순서대로 삭제
+    await db.delete(invitations);
     await db.delete(clientTags);
     await db.delete(clientDetails);
     await db.delete(clients);
     await db.delete(pipelineStages);
     await db.delete(teams);
+    // 테스트 profiles 삭제
+    await db.execute(
+      sql`DELETE FROM profiles WHERE id::text LIKE '00000000-0000-0000-0000-%'`
+    );
 
     console.log('✅ 애플리케이션 데이터 삭제 완료');
   } catch (error) {

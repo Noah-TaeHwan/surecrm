@@ -1,4 +1,5 @@
 import type { Route } from '.react-router/types/app/features/dashboard/pages/+types/dashboard-page';
+import { useState } from 'react';
 import { MainLayout } from '~/common/layouts/main-layout';
 import { WelcomeSection } from '../components/welcome-section';
 import { PerformanceKPICards } from '../components/performance-kpi-cards';
@@ -14,8 +15,11 @@ import {
   getPipelineData,
   getRecentClientsData,
   getReferralInsights,
+  getUserGoals,
+  setMonthlyGoal,
 } from '../lib/dashboard-data';
 import { requireAuth } from '../lib/auth-utils';
+import { useFetcher } from 'react-router';
 
 export function meta({ data, params }: Route.MetaArgs) {
   return [
@@ -38,6 +42,7 @@ export async function loader({ request }: Route.LoaderArgs) {
       pipelineData,
       recentClientsData,
       referralInsights,
+      userGoals,
     ] = await Promise.all([
       getUserInfo(userId),
       getTodayStats(userId),
@@ -46,6 +51,7 @@ export async function loader({ request }: Route.LoaderArgs) {
       getPipelineData(userId),
       getRecentClientsData(userId),
       getReferralInsights(userId),
+      getUserGoals(userId),
     ]);
 
     return {
@@ -57,6 +63,7 @@ export async function loader({ request }: Route.LoaderArgs) {
       recentClientsData,
       topReferrers: referralInsights.topReferrers,
       networkStats: referralInsights.networkStats,
+      userGoals,
     };
   } catch (error) {
     console.error('Dashboard 페이지 로더 오류:', error);
@@ -97,8 +104,36 @@ export async function loader({ request }: Route.LoaderArgs) {
         activeReferrers: 0,
         monthlyGrowth: 0,
       },
+      userGoals: [],
     };
   }
+}
+
+export async function action({ request }: Route.ActionArgs) {
+  const userId = await requireAuth(request);
+  const formData = await request.formData();
+  const intent = formData.get('intent');
+
+  if (intent === 'setGoal') {
+    try {
+      const goalType = formData.get('goalType') as
+        | 'revenue'
+        | 'clients'
+        | 'meetings'
+        | 'referrals';
+      const targetValue = Number(formData.get('targetValue'));
+      const title = formData.get('title') as string;
+
+      await setMonthlyGoal(userId, goalType, targetValue, title || undefined);
+
+      return { success: true, message: '목표가 설정되었습니다.' };
+    } catch (error) {
+      console.error('목표 설정 오류:', error);
+      return { success: false, message: '목표 설정에 실패했습니다.' };
+    }
+  }
+
+  return { success: false, message: '알 수 없는 요청입니다.' };
 }
 
 export default function DashboardPage({ loaderData }: Route.ComponentProps) {
@@ -111,7 +146,26 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
     recentClientsData,
     topReferrers,
     networkStats,
+    userGoals,
   } = loaderData;
+
+  const fetcher = useFetcher();
+
+  const handleSetGoal = async (goalData: {
+    goalType: 'revenue' | 'clients' | 'meetings' | 'referrals';
+    targetValue: number;
+    title?: string;
+  }) => {
+    const formData = new FormData();
+    formData.append('intent', 'setGoal');
+    formData.append('goalType', goalData.goalType);
+    formData.append('targetValue', goalData.targetValue.toString());
+    if (goalData.title) {
+      formData.append('title', goalData.title);
+    }
+
+    fetcher.submit(formData, { method: 'post' });
+  };
 
   return (
     <MainLayout title="대시보드">
@@ -129,6 +183,8 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
             stages={pipelineData.stages}
             totalValue={pipelineData.totalValue}
             monthlyTarget={pipelineData.monthlyTarget}
+            currentGoals={userGoals}
+            onSaveGoal={handleSetGoal}
           />
         </div>
 
