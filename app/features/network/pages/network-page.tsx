@@ -20,162 +20,66 @@ import {
   Component,
 } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
+import type { Route } from './+types/network-page';
 
-// 더미 데이터 (실제로는 loader에서 가져와야 함)
-const DUMMY_NETWORK_DATA = {
-  nodes: [
-    // 주요 소개자 (핵심 소개자)
-    {
-      id: '1',
-      name: '김철수',
-      group: 'influencer',
-      importance: 5,
-      stage: '계약 완료',
-    },
-    // 1차 소개받은 사람들
-    {
-      id: '2',
-      name: '이영희',
-      group: 'client',
-      importance: 4,
-      stage: '계약 완료',
-    },
-    {
-      id: '3',
-      name: '박지성',
-      group: 'client',
-      importance: 3,
-      stage: '계약 검토',
-    },
-    {
-      id: '4',
-      name: '최민수',
-      group: 'client',
-      importance: 4,
-      stage: '계약 완료',
-    },
-    // 2차 소개받은 사람들 (이영희가 소개)
-    {
-      id: '5',
-      name: '정다운',
-      group: 'client',
-      importance: 2,
-      stage: '니즈 분석',
-    },
-    {
-      id: '6',
-      name: '한미영',
-      group: 'client',
-      importance: 3,
-      stage: '상품 설명',
-    },
-    // 2차 소개받은 사람들 (박지성이 소개)
-    {
-      id: '7',
-      name: '윤석진',
-      group: 'client',
-      importance: 2,
-      stage: '첫 상담',
-    },
-    {
-      id: '8',
-      name: '송지원',
-      group: 'client',
-      importance: 4,
-      stage: '계약 검토',
-    },
-    // 2차 소개받은 사람들 (최민수가 소개)
-    {
-      id: '9',
-      name: '장현우',
-      group: 'client',
-      importance: 3,
-      stage: '니즈 분석',
-    },
-    // 또 다른 핵심 소개자
-    {
-      id: '10',
-      name: '오민지',
-      group: 'influencer',
-      importance: 5,
-      stage: '계약 완료',
-    },
-    // 오민지가 소개한 사람들
-    {
-      id: '11',
-      name: '임재현',
-      group: 'client',
-      importance: 3,
-      stage: '상품 설명',
-    },
-    {
-      id: '12',
-      name: '강수민',
-      group: 'client',
-      importance: 4,
-      stage: '계약 완료',
-    },
-    // 3차 소개
-    {
-      id: '13',
-      name: '조예진',
-      group: 'client',
-      importance: 2,
-      stage: '첫 상담',
-    },
-    {
-      id: '14',
-      name: '신동훈',
-      group: 'client',
-      importance: 3,
-      stage: '니즈 분석',
-    },
-    {
-      id: '15',
-      name: '류민호',
-      group: 'client',
-      importance: 1,
-      stage: '첫 상담',
-    },
-  ],
-  links: [
-    // 김철수로부터 소개된 사람들
-    { source: '1', target: '2', value: 1 },
-    { source: '1', target: '3', value: 1 },
-    { source: '1', target: '4', value: 1 },
+// 실제 데이터베이스 함수들 import
+import { getNetworkData, searchNetwork } from '../lib/network-data';
+import { requireAuth } from '~/lib/auth-middleware';
 
-    // 이영희가 소개한 사람들
-    { source: '2', target: '5', value: 1 },
-    { source: '2', target: '6', value: 1 },
+export async function loader({ request }: Route.LoaderArgs) {
+  try {
+    // 인증 확인
+    const user = await requireAuth(request);
 
-    // 박지성이 소개한 사람들
-    { source: '3', target: '7', value: 1 },
-    { source: '3', target: '8', value: 1 },
+    // 실제 네트워크 데이터 조회
+    const networkData = await getNetworkData(user.id);
 
-    // 최민수가 소개한 사람
-    { source: '4', target: '9', value: 1 },
+    return {
+      nodes: networkData.nodes,
+      edges: networkData.edges,
+      stats: networkData.stats,
+      agentId: user.id,
+    };
+  } catch (error) {
+    console.error('네트워크 데이터 로딩 실패:', error);
 
-    // 오민지가 소개한 사람들
-    { source: '10', target: '11', value: 1 },
-    { source: '10', target: '12', value: 1 },
-
-    // 3차 소개
-    { source: '5', target: '13', value: 1 },
-    { source: '8', target: '14', value: 1 },
-    { source: '9', target: '15', value: 1 },
-
-    // 상호 소개 관계 (네트워크 복잡성 추가)
-    { source: '4', target: '10', value: 1 }, // 최민수와 오민지는 서로 알고 있음
-    { source: '6', target: '11', value: 1 }, // 한미영과 임재현은 연결됨
-  ],
-};
-
-export function loader() {
-  // 실제로는 DB에서 네트워크 데이터를 가져와야 함
-  return DUMMY_NETWORK_DATA;
+    // 에러 시 빈 데이터 반환
+    return {
+      nodes: [],
+      edges: [],
+      stats: {
+        totalNodes: 0,
+        totalEdges: 0,
+        maxDepth: 0,
+        avgReferralsPerNode: 0,
+        topReferrers: [],
+        networkGrowth: [],
+      },
+      agentId: 'fallback-agent-id',
+    };
+  }
 }
 
-export function meta() {
+export async function action({ request }: Route.ActionArgs) {
+  try {
+    const user = await requireAuth(request);
+    const formData = await request.formData();
+    const intent = formData.get('intent');
+
+    if (intent === 'search') {
+      const query = formData.get('query') as string;
+      const results = await searchNetwork(user.id, query);
+      return { searchResults: results };
+    }
+
+    return { success: false, message: '알 수 없는 요청입니다.' };
+  } catch (error) {
+    console.error('네트워크 액션 오류:', error);
+    return { success: false, message: '요청 처리에 실패했습니다.' };
+  }
+}
+
+export function meta({ data, params }: Route.MetaArgs) {
   return [
     { title: '소개 네트워크 - SureCRM' },
     {
@@ -250,7 +154,9 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   }
 }
 
-export default function NetworkPage() {
+export default function NetworkPage({ loaderData }: Route.ComponentProps) {
+  const { nodes, edges, stats, agentId } = loaderData;
+
   const graphRef = useRef<any>(null);
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
   const [filterSettings, setFilterSettings] = useState({
@@ -260,18 +166,33 @@ export default function NetworkPage() {
     showInfluencersOnly: false,
   });
   const [searchQuery, setSearchQuery] = useState('');
-  // 네트워크 데이터 통계 상태 추가
+
+  // 네트워크 데이터 통계 상태 - 실제 데이터 사용
   const [networkStats, setNetworkStats] = useState({
-    totalNodes: DUMMY_NETWORK_DATA.nodes.length,
-    filteredNodes: DUMMY_NETWORK_DATA.nodes.length,
-    influencerCount: DUMMY_NETWORK_DATA.nodes.filter(
-      (n) => n.group === 'influencer'
+    totalNodes: nodes.length,
+    filteredNodes: nodes.length,
+    influencerCount: nodes.filter(
+      (n) => n.type === 'agent' || n.importance === 'high'
     ).length,
-    connectionCount: DUMMY_NETWORK_DATA.links.length,
+    connectionCount: edges.length,
   });
 
-  // 실제로는 props를 통해 loaderData를 받아야 함
-  const networkData = DUMMY_NETWORK_DATA;
+  // 실제 네트워크 데이터 사용
+  const networkData = {
+    nodes: nodes.map((node) => ({
+      id: node.id,
+      name: node.name,
+      group: node.type === 'agent' ? 'influencer' : 'client',
+      importance:
+        node.importance === 'high' ? 5 : node.importance === 'medium' ? 3 : 1,
+      stage: node.status === 'active' ? '계약 완료' : '첫 상담',
+    })),
+    links: edges.map((edge) => ({
+      source: edge.source,
+      target: edge.target,
+      value: edge.strength,
+    })),
+  };
 
   // 에러 상태 관리
   const [graphLoadError, setGraphLoadError] = useState(false);

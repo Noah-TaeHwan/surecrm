@@ -11,76 +11,110 @@ import { TeamMemberProfile } from '../components/team-member-profile';
 // 타입 imports
 import type { TeamMember, TeamStats } from '../components/types';
 
-export function loader({ request }: Route.LoaderArgs) {
-  // TODO: 실제 API에서 데이터 가져오기
-  const teamMembers: TeamMember[] = [
-    {
-      id: '1',
-      name: '김영희',
-      email: 'kim@surecrm.com',
-      phone: '010-1234-5678',
-      company: 'ABC보험',
-      position: '팀장',
-      role: 'admin',
-      status: 'active',
-      joinedAt: '2023-01-15',
-      lastSeen: '2024-01-20 14:30',
-      clients: 45,
-      conversions: 32,
-    },
-    {
-      id: '2',
-      name: '박철수',
-      email: 'park@surecrm.com',
-      phone: '010-2345-6789',
-      company: 'ABC보험',
-      position: '선임',
-      role: 'manager',
-      status: 'active',
-      joinedAt: '2023-03-20',
-      lastSeen: '2024-01-20 16:45',
-      clients: 38,
-      conversions: 28,
-    },
-    {
-      id: '3',
-      name: '이민수',
-      email: 'lee@surecrm.com',
-      phone: '010-3456-7890',
-      company: 'ABC보험',
-      position: '설계사',
-      role: 'member',
-      status: 'active',
-      joinedAt: '2023-06-10',
-      lastSeen: '2024-01-19 18:20',
-      clients: 25,
-      conversions: 18,
-    },
-    {
-      id: '4',
-      name: '정수연',
-      email: 'jung@example.com',
-      role: 'member',
-      status: 'pending',
-      invitedAt: '2024-01-18',
-      clients: 0,
-      conversions: 0,
-    },
-  ];
+// 실제 데이터베이스 함수들 import
+import {
+  getTeamMembers,
+  getTeamStats,
+  inviteTeamMember,
+  removeTeamMember,
+  resendInvitation,
+} from '../lib/supabase-team-data';
+import { requireAuth } from '~/lib/auth-middleware';
 
-  const teamStats: TeamStats = {
-    totalMembers: 4,
-    activeMembers: 3,
-    pendingInvites: 1,
-    totalClients: 108,
-  };
+export async function loader({ request }: Route.LoaderArgs) {
+  try {
+    // 인증 확인
+    const user = await requireAuth(request);
 
-  return { teamMembers, teamStats };
+    // 실제 팀 데이터 조회
+    const [teamMembersData, teamStats] = await Promise.all([
+      getTeamMembers(user.id),
+      getTeamStats(user.id),
+    ]);
+
+    // TeamMember 타입에 맞게 변환
+    const teamMembers: TeamMember[] = teamMembersData.map((member) => ({
+      id: member.id,
+      name: member.name || '이름 없음',
+      email: member.email || '',
+      role: member.role as 'admin' | 'manager' | 'member',
+      status: member.status,
+      joinedAt: member.joinedAt,
+      invitedAt: member.invitedAt,
+      lastSeen: member.lastSeen,
+      clients: member.clients,
+      conversions: member.conversions,
+      phone: member.phone,
+      company: member.company,
+      position: member.position,
+    }));
+
+    return { teamMembers, teamStats };
+  } catch (error) {
+    console.error('팀 데이터 로딩 실패:', error);
+
+    // 에러 시 기본값 반환
+    return {
+      teamMembers: [],
+      teamStats: {
+        totalMembers: 0,
+        activeMembers: 0,
+        pendingInvites: 0,
+        totalClients: 0,
+      },
+    };
+  }
 }
 
-export function action({ request }: Route.ActionArgs) {
-  // TODO: 실제 팀원 초대/관리 로직
-  return { success: true };
+export async function action({ request }: Route.ActionArgs) {
+  try {
+    const user = await requireAuth(request);
+    const formData = await request.formData();
+    const intent = formData.get('intent');
+
+    switch (intent) {
+      case 'invite': {
+        const email = formData.get('email') as string;
+        const message = formData.get('message') as string;
+
+        const result = await inviteTeamMember(user.id, email, message);
+        if (result.success) {
+          return { success: true, message: '팀원 초대가 발송되었습니다.' };
+        } else {
+          return {
+            success: false,
+            message: result.error || '초대 발송에 실패했습니다.',
+          };
+        }
+      }
+
+      case 'remove': {
+        const memberId = formData.get('memberId') as string;
+        const success = await removeTeamMember(memberId);
+        if (success) {
+          return { success: true, message: '팀원이 제거되었습니다.' };
+        } else {
+          return { success: false, message: '팀원 제거에 실패했습니다.' };
+        }
+      }
+
+      case 'resend': {
+        const invitationId = formData.get('invitationId') as string;
+        const success = await resendInvitation(invitationId);
+        if (success) {
+          return { success: true, message: '초대장이 재발송되었습니다.' };
+        } else {
+          return { success: false, message: '초대장 재발송에 실패했습니다.' };
+        }
+      }
+
+      default:
+        return { success: false, message: '알 수 없는 요청입니다.' };
+    }
+  } catch (error) {
+    console.error('팀 액션 오류:', error);
+    return { success: false, message: '요청 처리에 실패했습니다.' };
+  }
 }
 
 export function meta({ data, params }: Route.MetaArgs) {
