@@ -1,0 +1,507 @@
+import { db } from '~/lib/db';
+import { meetings, clients, profiles } from '~/lib/supabase-schema';
+import { meetingChecklists, meetingNotes } from '../schema';
+import { eq, and, gte, lte, desc, asc } from 'drizzle-orm';
+import type { Meeting, Client, MeetingStatus } from '~/lib/supabase-schema';
+import type { MeetingChecklist, MeetingNote } from '../schema';
+
+// Calendar 페이지용 Meeting 타입 (컴포넌트와 호환)
+export interface CalendarMeeting {
+  id: string;
+  title: string;
+  client: {
+    id: string;
+    name: string;
+    phone?: string;
+  };
+  date: string; // YYYY-MM-DD 형식
+  time: string; // HH:MM 형식
+  duration: number; // 분 단위
+  type: string;
+  location: string;
+  description?: string;
+  status: 'scheduled' | 'completed' | 'cancelled' | 'rescheduled';
+  checklist: Array<{
+    id: string;
+    text: string;
+    completed: boolean;
+  }>;
+  notes?: Array<{
+    id: string;
+    content: string;
+    createdAt: string;
+    updatedAt?: string;
+  }>;
+}
+
+// Calendar 페이지용 Client 타입
+export interface CalendarClient {
+  id: string;
+  name: string;
+  phone?: string;
+}
+
+/**
+ * 특정 월의 모든 미팅 조회 (체크리스트와 노트 포함)
+ */
+export async function getMeetingsByMonth(
+  agentId: string,
+  year: number,
+  month: number
+): Promise<CalendarMeeting[]> {
+  try {
+    // 해당 월의 시작일과 마지막일 계산
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0, 23, 59, 59);
+
+    const dbMeetings = await db
+      .select({
+        meeting: meetings,
+        client: {
+          id: clients.id,
+          name: clients.fullName,
+          phone: clients.phone,
+        },
+      })
+      .from(meetings)
+      .innerJoin(clients, eq(meetings.clientId, clients.id))
+      .where(
+        and(
+          eq(meetings.agentId, agentId),
+          gte(meetings.startTime, startDate),
+          lte(meetings.startTime, endDate)
+        )
+      )
+      .orderBy(asc(meetings.startTime));
+
+    // 각 미팅의 체크리스트와 노트를 병렬로 조회
+    const meetingsWithDetails = await Promise.all(
+      dbMeetings.map(async (row) => {
+        const meeting = row.meeting;
+        const startTime = new Date(meeting.startTime);
+        const endTime = new Date(meeting.endTime);
+        const duration = Math.round(
+          (endTime.getTime() - startTime.getTime()) / (1000 * 60)
+        );
+
+        // 체크리스트 조회
+        const checklists = await db
+          .select()
+          .from(meetingChecklists)
+          .where(eq(meetingChecklists.meetingId, meeting.id))
+          .orderBy(asc(meetingChecklists.order));
+
+        // 노트 조회
+        const notes = await db
+          .select()
+          .from(meetingNotes)
+          .where(eq(meetingNotes.meetingId, meeting.id))
+          .orderBy(desc(meetingNotes.createdAt));
+
+        return {
+          id: meeting.id,
+          title: meeting.title,
+          client: {
+            id: row.client.id,
+            name: row.client.name,
+            phone: row.client.phone || undefined,
+          },
+          date: startTime.toISOString().split('T')[0],
+          time: startTime.toTimeString().slice(0, 5),
+          duration,
+          type: meeting.meetingType,
+          location: meeting.location || '',
+          description: meeting.description || undefined,
+          status: meeting.status as CalendarMeeting['status'],
+          checklist: checklists.map((item) => ({
+            id: item.id,
+            text: item.text,
+            completed: item.completed,
+          })),
+          notes: notes.map((note) => ({
+            id: note.id,
+            content: note.content,
+            createdAt: note.createdAt.toISOString(),
+            updatedAt: note.updatedAt?.toISOString(),
+          })),
+        };
+      })
+    );
+
+    return meetingsWithDetails;
+  } catch (error) {
+    console.error('미팅 조회 실패:', error);
+    return [];
+  }
+}
+
+/**
+ * 특정 날짜 범위의 미팅 조회 (주간/일간 뷰용)
+ */
+export async function getMeetingsByDateRange(
+  agentId: string,
+  startDate: Date,
+  endDate: Date
+): Promise<CalendarMeeting[]> {
+  try {
+    const dbMeetings = await db
+      .select({
+        meeting: meetings,
+        client: {
+          id: clients.id,
+          name: clients.fullName,
+          phone: clients.phone,
+        },
+      })
+      .from(meetings)
+      .innerJoin(clients, eq(meetings.clientId, clients.id))
+      .where(
+        and(
+          eq(meetings.agentId, agentId),
+          gte(meetings.startTime, startDate),
+          lte(meetings.startTime, endDate)
+        )
+      )
+      .orderBy(asc(meetings.startTime));
+
+    // 각 미팅의 체크리스트와 노트를 병렬로 조회
+    const meetingsWithDetails = await Promise.all(
+      dbMeetings.map(async (row) => {
+        const meeting = row.meeting;
+        const startTime = new Date(meeting.startTime);
+        const endTime = new Date(meeting.endTime);
+        const duration = Math.round(
+          (endTime.getTime() - startTime.getTime()) / (1000 * 60)
+        );
+
+        // 체크리스트 조회
+        const checklists = await db
+          .select()
+          .from(meetingChecklists)
+          .where(eq(meetingChecklists.meetingId, meeting.id))
+          .orderBy(asc(meetingChecklists.order));
+
+        // 노트 조회
+        const notes = await db
+          .select()
+          .from(meetingNotes)
+          .where(eq(meetingNotes.meetingId, meeting.id))
+          .orderBy(desc(meetingNotes.createdAt));
+
+        return {
+          id: meeting.id,
+          title: meeting.title,
+          client: {
+            id: row.client.id,
+            name: row.client.name,
+            phone: row.client.phone || undefined,
+          },
+          date: startTime.toISOString().split('T')[0],
+          time: startTime.toTimeString().slice(0, 5),
+          duration,
+          type: meeting.meetingType,
+          location: meeting.location || '',
+          description: meeting.description || undefined,
+          status: meeting.status as CalendarMeeting['status'],
+          checklist: checklists.map((item) => ({
+            id: item.id,
+            text: item.text,
+            completed: item.completed,
+          })),
+          notes: notes.map((note) => ({
+            id: note.id,
+            content: note.content,
+            createdAt: note.createdAt.toISOString(),
+            updatedAt: note.updatedAt?.toISOString(),
+          })),
+        };
+      })
+    );
+
+    return meetingsWithDetails;
+  } catch (error) {
+    console.error('미팅 조회 실패:', error);
+    return [];
+  }
+}
+
+/**
+ * 에이전트의 모든 클라이언트 조회 (미팅 생성용)
+ */
+export async function getClientsByAgent(
+  agentId: string
+): Promise<CalendarClient[]> {
+  try {
+    const dbClients = await db
+      .select({
+        id: clients.id,
+        name: clients.fullName,
+        phone: clients.phone,
+      })
+      .from(clients)
+      .where(eq(clients.agentId, agentId))
+      .orderBy(asc(clients.fullName));
+
+    return dbClients.map((client) => ({
+      id: client.id,
+      name: client.name,
+      phone: client.phone || undefined,
+    }));
+  } catch (error) {
+    console.error('클라이언트 조회 실패:', error);
+    return [];
+  }
+}
+
+/**
+ * 새 미팅 생성 (기본 체크리스트 포함)
+ */
+export async function createMeeting(
+  agentId: string,
+  meetingData: {
+    title: string;
+    clientId: string;
+    startTime: Date;
+    endTime: Date;
+    location?: string;
+    meetingType: string;
+    description?: string;
+  }
+) {
+  try {
+    const newMeeting = await db
+      .insert(meetings)
+      .values({
+        agentId,
+        title: meetingData.title,
+        clientId: meetingData.clientId,
+        startTime: meetingData.startTime,
+        endTime: meetingData.endTime,
+        location: meetingData.location,
+        meetingType: meetingData.meetingType as any,
+        description: meetingData.description,
+        status: 'scheduled',
+      })
+      .returning();
+
+    const meeting = newMeeting[0];
+
+    // 미팅 유형별 기본 체크리스트 생성
+    const defaultChecklists = getDefaultChecklistByType(
+      meetingData.meetingType
+    );
+
+    if (defaultChecklists.length > 0) {
+      await db.insert(meetingChecklists).values(
+        defaultChecklists.map((item, index) => ({
+          meetingId: meeting.id,
+          text: item,
+          completed: false,
+          order: index + 1,
+        }))
+      );
+    }
+
+    return meeting;
+  } catch (error) {
+    console.error('미팅 생성 실패:', error);
+    throw error;
+  }
+}
+
+/**
+ * 미팅 업데이트
+ */
+export async function updateMeeting(
+  meetingId: string,
+  agentId: string,
+  updateData: Partial<{
+    title: string;
+    startTime: Date;
+    endTime: Date;
+    location: string;
+    description: string;
+    status: MeetingStatus;
+  }>
+) {
+  try {
+    const updatedMeeting = await db
+      .update(meetings)
+      .set({
+        ...updateData,
+        updatedAt: new Date(),
+      })
+      .where(and(eq(meetings.id, meetingId), eq(meetings.agentId, agentId)))
+      .returning();
+
+    return updatedMeeting[0];
+  } catch (error) {
+    console.error('미팅 업데이트 실패:', error);
+    throw error;
+  }
+}
+
+/**
+ * 미팅 삭제
+ */
+export async function deleteMeeting(meetingId: string, agentId: string) {
+  try {
+    await db
+      .delete(meetings)
+      .where(and(eq(meetings.id, meetingId), eq(meetings.agentId, agentId)));
+
+    return true;
+  } catch (error) {
+    console.error('미팅 삭제 실패:', error);
+    throw error;
+  }
+}
+
+/**
+ * 체크리스트 항목 토글
+ */
+export async function toggleChecklistItem(
+  checklistId: string,
+  meetingId: string,
+  agentId: string
+) {
+  try {
+    // 먼저 해당 미팅이 에이전트의 것인지 확인
+    const meeting = await db
+      .select()
+      .from(meetings)
+      .where(and(eq(meetings.id, meetingId), eq(meetings.agentId, agentId)))
+      .limit(1);
+
+    if (meeting.length === 0) {
+      throw new Error('권한이 없습니다.');
+    }
+
+    // 현재 체크리스트 상태 조회
+    const currentItem = await db
+      .select()
+      .from(meetingChecklists)
+      .where(eq(meetingChecklists.id, checklistId))
+      .limit(1);
+
+    if (currentItem.length === 0) {
+      throw new Error('체크리스트 항목을 찾을 수 없습니다.');
+    }
+
+    // 상태 토글
+    const updatedItem = await db
+      .update(meetingChecklists)
+      .set({
+        completed: !currentItem[0].completed,
+        updatedAt: new Date(),
+      })
+      .where(eq(meetingChecklists.id, checklistId))
+      .returning();
+
+    return updatedItem[0];
+  } catch (error) {
+    console.error('체크리스트 토글 실패:', error);
+    throw error;
+  }
+}
+
+/**
+ * 미팅 노트 추가
+ */
+export async function addMeetingNote(
+  meetingId: string,
+  agentId: string,
+  content: string,
+  isPrivate: boolean = false
+) {
+  try {
+    const newNote = await db
+      .insert(meetingNotes)
+      .values({
+        meetingId,
+        agentId,
+        content,
+        isPrivate,
+      })
+      .returning();
+
+    return newNote[0];
+  } catch (error) {
+    console.error('노트 추가 실패:', error);
+    throw error;
+  }
+}
+
+/**
+ * 미팅 유형별 기본 체크리스트 반환
+ */
+function getDefaultChecklistByType(meetingType: string): string[] {
+  const checklistMap: Record<string, string[]> = {
+    first_consultation: [
+      '고객 정보 확인',
+      '상담 자료 준비',
+      '니즈 분석 시트 작성',
+      '다음 미팅 일정 협의',
+    ],
+    product_explanation: [
+      '상품 설명서 준비',
+      '견적서 작성',
+      '비교 상품 자료 준비',
+      '고객 질문 사항 정리',
+    ],
+    contract_review: [
+      '계약서 검토',
+      '약관 설명',
+      '서명 및 날인',
+      '초회 보험료 수납',
+    ],
+    follow_up: [
+      '기존 계약 현황 확인',
+      '변경 사항 논의',
+      '추가 상품 제안',
+      '만족도 조사',
+    ],
+    other: ['미팅 목적 확인', '필요 자료 준비', '논의 사항 정리'],
+  };
+
+  return checklistMap[meetingType] || checklistMap.other;
+}
+
+/**
+ * 기본 더미 데이터 (에러 시 폴백용)
+ */
+export function getDefaultMeetings(): CalendarMeeting[] {
+  const today = new Date();
+
+  return [
+    {
+      id: 'default-1',
+      title: '김영희님 첫 상담',
+      client: {
+        id: 'default-client-1',
+        name: '김영희',
+        phone: '010-1234-5678',
+      },
+      date: today.toISOString().split('T')[0],
+      time: '14:00',
+      duration: 60,
+      type: 'first_consultation',
+      location: '고객 사무실',
+      description: '보험 필요성 상담 및 니즈 파악',
+      status: 'scheduled',
+      checklist: [
+        { id: '1', text: '고객 정보 확인', completed: true },
+        { id: '2', text: '상담 자료 준비', completed: true },
+        { id: '3', text: '계약서 준비', completed: false },
+      ],
+    },
+  ];
+}
+
+export function getDefaultClients(): CalendarClient[] {
+  return [
+    { id: 'default-client-1', name: '김영희' },
+    { id: 'default-client-2', name: '이철수' },
+    { id: 'default-client-3', name: '박지민' },
+  ];
+}

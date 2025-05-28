@@ -56,7 +56,7 @@ import {
   BellIcon,
   FileTextIcon,
 } from '@radix-ui/react-icons';
-import { Link } from 'react-router';
+import { Link, redirect } from 'react-router';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -70,6 +70,21 @@ import { CalendarSidebar } from '../components/calendar-sidebar';
 import { AddMeetingModal } from '../components/add-meeting-modal';
 import { MeetingDetailModal } from '../components/meeting-detail-modal';
 import { type Meeting, type Client, type ViewMode } from '../components/types';
+
+// 실제 데이터베이스 연결 함수들 import
+import {
+  getMeetingsByMonth,
+  getClientsByAgent,
+  getDefaultMeetings,
+  getDefaultClients,
+  createMeeting,
+  updateMeeting,
+  deleteMeeting,
+  toggleChecklistItem,
+  type CalendarMeeting,
+  type CalendarClient,
+} from '../lib/calendar-data';
+import { requireAuth } from '../lib/auth-utils';
 
 // 미팅 폼 스키마
 const meetingSchema = z.object({
@@ -87,211 +102,143 @@ const meetingSchema = z.object({
 
 type MeetingFormData = z.infer<typeof meetingSchema>;
 
-export function loader({ request }: Route.LoaderArgs) {
-  // TODO: 실제 API에서 데이터 가져오기
-  const today = new Date();
-  const currentMonth = today.getMonth();
-  const currentYear = today.getFullYear();
+export async function loader({ request }: Route.LoaderArgs) {
+  try {
+    // 인증 확인
+    const agentId = requireAuth(request);
 
-  const meetings: Meeting[] = [
-    // 오늘 일정들
-    {
-      id: '1',
-      title: '김영희님 첫 상담',
-      client: { id: '1', name: '김영희', phone: '010-1234-5678' },
-      date: today.toISOString().split('T')[0],
-      time: '14:00',
-      duration: 60,
-      type: '첫 상담',
-      location: '고객 사무실',
-      description: '보험 필요성 상담 및 니즈 파악',
-      status: 'scheduled',
-      checklist: [
-        { id: '1', text: '고객 정보 확인', completed: true },
-        { id: '2', text: '상담 자료 준비', completed: true },
-        { id: '3', text: '계약서 준비', completed: false },
-      ],
-    },
-    {
-      id: '2',
-      title: '이철수님 상품 설명',
-      client: { id: '2', name: '이철수', phone: '010-9876-5432' },
-      date: today.toISOString().split('T')[0],
-      time: '16:30',
-      duration: 90,
-      type: '상품 설명',
-      location: '스타벅스 강남점',
-      description: '종신보험 상품 설명 및 견적 제시',
-      status: 'scheduled',
-      checklist: [
-        { id: '1', text: '상품 설명서 준비', completed: true },
-        { id: '2', text: '계산기 준비', completed: false },
-        { id: '3', text: '샘플 계약서 준비', completed: false },
-      ],
-    },
-    // 이번 주 일정들
-    {
-      id: '3',
-      title: '박지민님 계약 체결',
-      client: { id: '3', name: '박지민', phone: '010-2345-6789' },
-      date: new Date(today.getTime() + 1 * 24 * 60 * 60 * 1000)
-        .toISOString()
-        .split('T')[0],
-      time: '15:00',
-      duration: 120,
-      type: '계약 체결',
-      location: '본사 상담실',
-      description: '가족보험 계약 체결 및 서류 작성',
-      status: 'scheduled',
-      checklist: [
-        { id: '1', text: '신분증 사본 받기', completed: false },
-        { id: '2', text: '계약서 작성', completed: false },
-        { id: '3', text: '초회 보험료 수납', completed: false },
-      ],
-    },
-    {
-      id: '4',
-      title: '정수연님 니즈 분석',
-      client: { id: '4', name: '정수연', phone: '010-3456-7890' },
-      date: new Date(today.getTime() + 2 * 24 * 60 * 60 * 1000)
-        .toISOString()
-        .split('T')[0],
-      time: '10:00',
-      duration: 60,
-      type: '니즈 분석',
-      location: '고객 자택',
-      description: '가족 구성원별 보험 니즈 분석',
-      status: 'scheduled',
-      checklist: [
-        { id: '1', text: '가족 정보 조사', completed: true },
-        { id: '2', text: '니즈 분석 자료 준비', completed: false },
-      ],
-    },
-    {
-      id: '5',
-      title: '최민수님 정기 점검',
-      client: { id: '5', name: '최민수', phone: '010-4567-8901' },
-      date: new Date(today.getTime() + 2 * 24 * 60 * 60 * 1000)
-        .toISOString()
-        .split('T')[0],
-      time: '14:30',
-      duration: 45,
-      type: '정기 점검',
-      location: '카페 온더테이블',
-      description: '기존 보험 상품 점검 및 변경사항 논의',
-      status: 'scheduled',
-      checklist: [
-        { id: '1', text: '기존 계약서 검토', completed: true },
-        { id: '2', text: '변경 가능 상품 조사', completed: false },
-      ],
-    },
-    {
-      id: '6',
-      title: '김철호님 계약 검토',
-      client: { id: '6', name: '김철호', phone: '010-5678-9012' },
-      date: new Date(today.getTime() + 3 * 24 * 60 * 60 * 1000)
-        .toISOString()
-        .split('T')[0],
-      time: '11:00',
-      duration: 75,
-      type: '계약 검토',
-      location: '본사 회의실',
-      description: '실손보험 약관 검토 및 최종 확인',
-      status: 'scheduled',
-      checklist: [
-        { id: '1', text: '약관 설명 자료 준비', completed: false },
-        { id: '2', text: '고객 질문 사항 정리', completed: false },
-      ],
-    },
-    {
-      id: '7',
-      title: '홍길동님 첫 상담',
-      client: { id: '7', name: '홍길동', phone: '010-6789-0123' },
-      date: new Date(today.getTime() + 4 * 24 * 60 * 60 * 1000)
-        .toISOString()
-        .split('T')[0],
-      time: '09:30',
-      duration: 90,
-      type: '첫 상담',
-      location: '고객 직장',
-      description: '30대 직장인 보험 포트폴리오 상담',
-      status: 'scheduled',
-      checklist: [
-        { id: '1', text: '직장인 보험 자료 준비', completed: true },
-        { id: '2', text: '연령별 추천 상품 조사', completed: false },
-      ],
-    },
-    {
-      id: '8',
-      title: '이미경님 상품 설명',
-      client: { id: '8', name: '이미경', phone: '010-7890-1234' },
-      date: new Date(today.getTime() + 5 * 24 * 60 * 60 * 1000)
-        .toISOString()
-        .split('T')[0],
-      time: '16:00',
-      duration: 60,
-      type: '상품 설명',
-      location: '롯데백화점 카페',
-      description: '자녀 교육보험 상품 설명',
-      status: 'scheduled',
-      checklist: [
-        { id: '1', text: '교육보험 상품 자료', completed: true },
-        { id: '2', text: '학자금 계산 시뮬레이션', completed: false },
-      ],
-    },
-    // 다음 주 일정들
-    {
-      id: '9',
-      title: '강민수님 계약 체결',
-      client: { id: '9', name: '강민수', phone: '010-8901-2345' },
-      date: new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000)
-        .toISOString()
-        .split('T')[0],
-      time: '13:00',
-      duration: 100,
-      type: '계약 체결',
-      location: '본사 상담실',
-      description: '종신보험 + 암보험 패키지 계약',
-      status: 'scheduled',
-      checklist: [
-        { id: '1', text: '패키지 계약서 준비', completed: false },
-        { id: '2', text: '할인 혜택 확인', completed: false },
-      ],
-    },
-    {
-      id: '10',
-      title: '윤서영님 정기 점검',
-      client: { id: '10', name: '윤서영', phone: '010-9012-3456' },
-      date: new Date(today.getTime() + 8 * 24 * 60 * 60 * 1000)
-        .toISOString()
-        .split('T')[0],
-      time: '15:30',
-      duration: 50,
-      type: '정기 점검',
-      location: '고객 사무실',
-      description: '기업 단체보험 갱신 상담',
-      status: 'scheduled',
-      checklist: [
-        { id: '1', text: '단체보험 갱신 자료', completed: true },
-        { id: '2', text: '임직원 수 변동 확인', completed: false },
-      ],
-    },
-  ];
+    // 현재 날짜 정보
+    const today = new Date();
+    const currentMonth = today.getMonth() + 1; // 1-12
+    const currentYear = today.getFullYear();
 
-  const clients: Client[] = [
-    { id: '1', name: '김영희' },
-    { id: '2', name: '이철수' },
-    { id: '3', name: '박지민' },
-    { id: '4', name: '정수연' },
-    { id: '5', name: '최민수' },
-    { id: '6', name: '김철호' },
-    { id: '7', name: '홍길동' },
-    { id: '8', name: '이미경' },
-    { id: '9', name: '강민수' },
-    { id: '10', name: '윤서영' },
-  ];
+    // 실제 데이터베이스에서 데이터 조회
+    const [meetings, clients] = await Promise.all([
+      getMeetingsByMonth(agentId, currentYear, currentMonth),
+      getClientsByAgent(agentId),
+    ]);
 
-  return { meetings, clients, currentMonth, currentYear };
+    // 데이터가 없는 경우 기본 데이터 제공 (개발용)
+    const finalMeetings = meetings.length > 0 ? meetings : getDefaultMeetings();
+    const finalClients = clients.length > 0 ? clients : getDefaultClients();
+
+    return {
+      meetings: finalMeetings,
+      clients: finalClients,
+      currentMonth,
+      currentYear,
+      agentId,
+    };
+  } catch (error) {
+    console.error('Calendar 데이터 로딩 실패:', error);
+
+    // 에러 시 기본 데이터 반환
+    const today = new Date();
+    return {
+      meetings: getDefaultMeetings(),
+      clients: getDefaultClients(),
+      currentMonth: today.getMonth() + 1,
+      currentYear: today.getFullYear(),
+      agentId: 'fallback-agent-id',
+    };
+  }
+}
+
+export async function action({ request }: Route.ActionArgs) {
+  try {
+    // 인증 확인
+    const agentId = requireAuth(request);
+
+    const formData = await request.formData();
+    const actionType = formData.get('actionType') as string;
+
+    switch (actionType) {
+      case 'createMeeting': {
+        const title = formData.get('title') as string;
+        const clientId = formData.get('clientId') as string;
+        const date = formData.get('date') as string;
+        const time = formData.get('time') as string;
+        const duration = parseInt(formData.get('duration') as string);
+        const meetingType = formData.get('type') as string;
+        const location = formData.get('location') as string;
+        const description = formData.get('description') as string;
+
+        // 시작 시간과 종료 시간 계산
+        const [year, month, day] = date.split('-').map(Number);
+        const [hour, minute] = time.split(':').map(Number);
+
+        const startTime = new Date(year, month - 1, day, hour, minute);
+        const endTime = new Date(startTime.getTime() + duration * 60 * 1000);
+
+        await createMeeting(agentId, {
+          title,
+          clientId,
+          startTime,
+          endTime,
+          location,
+          meetingType,
+          description,
+        });
+
+        return { success: true, message: '미팅이 성공적으로 생성되었습니다.' };
+      }
+
+      case 'updateMeeting': {
+        const meetingId = formData.get('meetingId') as string;
+        const title = formData.get('title') as string;
+        const date = formData.get('date') as string;
+        const time = formData.get('time') as string;
+        const duration = parseInt(formData.get('duration') as string);
+        const location = formData.get('location') as string;
+        const description = formData.get('description') as string;
+        const status = formData.get('status') as string;
+
+        // 시작 시간과 종료 시간 계산
+        const [year, month, day] = date.split('-').map(Number);
+        const [hour, minute] = time.split(':').map(Number);
+
+        const startTime = new Date(year, month - 1, day, hour, minute);
+        const endTime = new Date(startTime.getTime() + duration * 60 * 1000);
+
+        await updateMeeting(meetingId, agentId, {
+          title,
+          startTime,
+          endTime,
+          location,
+          description,
+          status: status as any,
+        });
+
+        return { success: true, message: '미팅이 성공적으로 수정되었습니다.' };
+      }
+
+      case 'deleteMeeting': {
+        const meetingId = formData.get('meetingId') as string;
+
+        await deleteMeeting(meetingId, agentId);
+
+        return { success: true, message: '미팅이 성공적으로 삭제되었습니다.' };
+      }
+
+      case 'toggleChecklist': {
+        const meetingId = formData.get('meetingId') as string;
+        const checklistId = formData.get('checklistId') as string;
+
+        await toggleChecklistItem(checklistId, meetingId, agentId);
+
+        return { success: true, message: '체크리스트가 업데이트되었습니다.' };
+      }
+
+      default:
+        return { success: false, message: '알 수 없는 액션입니다.' };
+    }
+  } catch (error) {
+    console.error('Calendar 액션 실행 실패:', error);
+    return {
+      success: false,
+      message: '작업 중 오류가 발생했습니다. 다시 시도해주세요.',
+    };
+  }
 }
 
 export function meta({ data, params }: Route.MetaArgs) {
@@ -301,7 +248,10 @@ export function meta({ data, params }: Route.MetaArgs) {
   ];
 }
 
-export default function CalendarPage({ loaderData }: Route.ComponentProps) {
+export default function CalendarPage({
+  loaderData,
+  actionData,
+}: Route.ComponentProps) {
   const { meetings, clients } = loaderData;
 
   const [viewMode, setViewMode] = useState<ViewMode>('month');
@@ -332,12 +282,36 @@ export default function CalendarPage({ loaderData }: Route.ComponentProps) {
   // 미팅 추가 제출
   const onSubmitMeeting = (data: any) => {
     console.log('새 미팅:', data);
+    // Form 제출은 AddMeetingModal에서 처리
     setIsAddMeetingOpen(false);
   };
 
   // 체크리스트 토글
   const toggleChecklist = (meetingId: string, checklistId: string) => {
     console.log('체크리스트 토글:', meetingId, checklistId);
+    // Form 제출로 처리
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.style.display = 'none';
+
+    const actionInput = document.createElement('input');
+    actionInput.name = 'actionType';
+    actionInput.value = 'toggleChecklist';
+    form.appendChild(actionInput);
+
+    const meetingInput = document.createElement('input');
+    meetingInput.name = 'meetingId';
+    meetingInput.value = meetingId;
+    form.appendChild(meetingInput);
+
+    const checklistInput = document.createElement('input');
+    checklistInput.name = 'checklistId';
+    checklistInput.value = checklistId;
+    form.appendChild(checklistInput);
+
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
   };
 
   // 현재 표시 날짜 포맷
@@ -365,6 +339,20 @@ export default function CalendarPage({ loaderData }: Route.ComponentProps) {
   return (
     <MainLayout title="일정 관리">
       <div className="flex-1 space-y-6 p-4 md:p-6 pt-6">
+        {/* 액션 결과 메시지 */}
+        {actionData && (
+          <div
+            className={cn(
+              'p-4 rounded-md',
+              actionData.success
+                ? 'bg-green-50 text-green-800 border border-green-200'
+                : 'bg-red-50 text-red-800 border border-red-200'
+            )}
+          >
+            {actionData.message}
+          </div>
+        )}
+
         {/* 헤더 */}
         <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
           <div className="flex items-center gap-6">

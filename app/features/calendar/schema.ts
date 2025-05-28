@@ -98,6 +98,23 @@ export const meetingTemplates = pgTable('meeting_templates', {
     .notNull(),
 });
 
+// Meeting Checklists (미팅별 체크리스트)
+export const meetingChecklists = pgTable('meeting_checklists', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  meetingId: uuid('meeting_id')
+    .notNull()
+    .references(() => meetings.id, { onDelete: 'cascade' }),
+  text: text('text').notNull(),
+  completed: boolean('completed').default(false).notNull(),
+  order: integer('order').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
 // Meeting Reminders (미팅 알림)
 export const meetingReminders = pgTable('meeting_reminders', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -200,6 +217,16 @@ export const meetingTemplatesRelations = relations(
   })
 );
 
+export const meetingChecklistsRelations = relations(
+  meetingChecklists,
+  ({ one }) => ({
+    meeting: one(meetings, {
+      fields: [meetingChecklists.meetingId],
+      references: [meetings.id],
+    }),
+  })
+);
+
 export const meetingRemindersRelations = relations(
   meetingReminders,
   ({ one }) => ({
@@ -262,6 +289,8 @@ export const recurringMeetingsRelations = relations(
 // Calendar 특화 타입들
 export type MeetingTemplate = typeof meetingTemplates.$inferSelect;
 export type NewMeetingTemplate = typeof meetingTemplates.$inferInsert;
+export type MeetingChecklist = typeof meetingChecklists.$inferSelect;
+export type NewMeetingChecklist = typeof meetingChecklists.$inferInsert;
 export type MeetingReminder = typeof meetingReminders.$inferSelect;
 export type NewMeetingReminder = typeof meetingReminders.$inferInsert;
 export type MeetingAttendee = typeof meetingAttendees.$inferSelect;

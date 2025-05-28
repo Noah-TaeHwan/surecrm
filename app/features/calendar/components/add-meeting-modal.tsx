@@ -66,15 +66,39 @@ export function AddMeetingModal({
       date: '',
       time: '',
       duration: 60,
-      type: '첫 상담',
+      type: 'first_consultation',
       location: '',
       description: '',
-      reminder: '30',
+      reminder: '30_minutes',
       repeat: 'none',
     },
   });
 
   const handleSubmit = (data: MeetingFormData) => {
+    // Form 데이터를 실제 POST 요청으로 제출
+    const formElement = document.createElement('form');
+    formElement.method = 'POST';
+    formElement.style.display = 'none';
+
+    // actionType 추가
+    const actionInput = document.createElement('input');
+    actionInput.name = 'actionType';
+    actionInput.value = 'createMeeting';
+    formElement.appendChild(actionInput);
+
+    // 폼 데이터 추가
+    Object.entries(data).forEach(([key, value]) => {
+      const input = document.createElement('input');
+      input.name = key;
+      input.value = String(value);
+      formElement.appendChild(input);
+    });
+
+    document.body.appendChild(formElement);
+    formElement.submit();
+    document.body.removeChild(formElement);
+
+    // 모달 닫기 및 폼 리셋
     onSubmit(data);
     form.reset();
   };
@@ -158,12 +182,17 @@ export function AddMeetingModal({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="첫 상담">첫 상담</SelectItem>
-                        <SelectItem value="니즈 분석">니즈 분석</SelectItem>
-                        <SelectItem value="상품 설명">상품 설명</SelectItem>
-                        <SelectItem value="계약 검토">계약 검토</SelectItem>
-                        <SelectItem value="계약 체결">계약 체결</SelectItem>
-                        <SelectItem value="정기 점검">정기 점검</SelectItem>
+                        <SelectItem value="first_consultation">
+                          첫 상담
+                        </SelectItem>
+                        <SelectItem value="product_explanation">
+                          상품 설명
+                        </SelectItem>
+                        <SelectItem value="contract_review">
+                          계약 검토
+                        </SelectItem>
+                        <SelectItem value="follow_up">정기 점검</SelectItem>
+                        <SelectItem value="other">기타</SelectItem>
                       </SelectContent>
                     </Select>
                   </FormItem>
@@ -205,7 +234,7 @@ export function AddMeetingModal({
                   <FormItem>
                     <FormLabel>소요 시간 (분)</FormLabel>
                     <Select
-                      onValueChange={(v) => field.onChange(parseInt(v))}
+                      onValueChange={(value) => field.onChange(parseInt(value))}
                       defaultValue={field.value.toString()}
                     >
                       <FormControl>
@@ -218,8 +247,10 @@ export function AddMeetingModal({
                         <SelectItem value="60">1시간</SelectItem>
                         <SelectItem value="90">1시간 30분</SelectItem>
                         <SelectItem value="120">2시간</SelectItem>
+                        <SelectItem value="180">3시간</SelectItem>
                       </SelectContent>
                     </Select>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -231,8 +262,9 @@ export function AddMeetingModal({
                   <FormItem>
                     <FormLabel>장소</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="스타벅스 강남점" />
+                      <Input {...field} placeholder="고객 사무실" />
                     </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -254,12 +286,14 @@ export function AddMeetingModal({
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="none">알림 없음</SelectItem>
-                        <SelectItem value="10">10분 전</SelectItem>
-                        <SelectItem value="30">30분 전</SelectItem>
-                        <SelectItem value="60">1시간 전</SelectItem>
-                        <SelectItem value="1440">1일 전</SelectItem>
+                        <SelectItem value="5_minutes">5분 전</SelectItem>
+                        <SelectItem value="15_minutes">15분 전</SelectItem>
+                        <SelectItem value="30_minutes">30분 전</SelectItem>
+                        <SelectItem value="1_hour">1시간 전</SelectItem>
+                        <SelectItem value="1_day">1일 전</SelectItem>
                       </SelectContent>
                     </Select>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -286,6 +320,7 @@ export function AddMeetingModal({
                         <SelectItem value="monthly">매월</SelectItem>
                       </SelectContent>
                     </Select>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -295,14 +330,15 @@ export function AddMeetingModal({
                 name="description"
                 render={({ field }) => (
                   <FormItem className="col-span-2">
-                    <FormLabel>설명</FormLabel>
+                    <FormLabel>메모</FormLabel>
                     <FormControl>
                       <Textarea
                         {...field}
+                        placeholder="미팅 관련 메모를 입력하세요"
                         rows={3}
-                        placeholder="미팅 관련 메모나 준비사항을 입력하세요"
                       />
                     </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />

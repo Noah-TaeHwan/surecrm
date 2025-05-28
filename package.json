@@ -15,8 +15,13 @@
     "db:seed": "tsx scripts/seed.js seed",
     "db:seed:public": "tsx scripts/seed.js public",
     "db:seed:app": "tsx scripts/seed.js app",
+    "db:seed:calendar": "tsx scripts/seed-calendar.js",
     "db:clear": "tsx scripts/seed.js clear",
-    "db:reset": "tsx scripts/seed.js reset"
+    "db:clear:app": "tsx scripts/seed.js clear:app",
+    "db:clear:public": "tsx scripts/seed.js clear:public",
+    "db:clear:all": "tsx scripts/seed.js clear:all",
+    "db:reset": "tsx scripts/seed.js reset",
+    "db:reset:all": "tsx scripts/seed.js reset:all"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",

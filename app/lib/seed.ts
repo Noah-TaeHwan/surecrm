@@ -41,6 +41,10 @@ async function seedPublicData() {
 
   // 사이트 설정 데이터
   console.log('⚙️ 사이트 설정 생성 중...');
+
+  // 기존 사이트 설정 삭제 후 새로 삽입 (upsert 방식)
+  await db.delete(siteSettings);
+
   await db.insert(siteSettings).values([
     {
       key: 'app_version',
@@ -73,7 +77,11 @@ async function seedPublicData() {
   ]);
 
   // 후기 데이터
-  console.log('💬 후기 데이터 생성 중...');
+  console.log('�� 후기 데이터 생성 중...');
+
+  // 기존 후기 데이터 삭제 후 새로 삽입 (upsert 방식)
+  await db.delete(testimonials);
+
   await db.insert(testimonials).values([
     {
       name: '김영수',
@@ -127,6 +135,10 @@ async function seedPublicData() {
 
   // FAQ 데이터 (실제 서비스에 맞는 내용)
   console.log('❓ FAQ 데이터 생성 중...');
+
+  // 기존 FAQ 데이터 삭제 후 새로 삽입 (upsert 방식)
+  await db.delete(faqs);
+
   await db.insert(faqs).values([
     // 일반 (general) 카테고리
     {
@@ -145,20 +157,20 @@ async function seedPublicData() {
       order: 2,
       isPublished: true,
     },
-    {
-      question: '모바일에서도 사용할 수 있나요?',
-      answer:
-        '네, SureCRM은 반응형 웹 디자인으로 제작되어 모바일, 태블릿에서도 최적화된 환경으로 이용하실 수 있습니다.',
-      category: 'general',
-      order: 3,
-      isPublished: true,
-    },
+    // {
+    //   question: '모바일에서도 사용할 수 있나요?',
+    //   answer:
+    //     '네, SureCRM은 반응형 웹 디자인으로 제작되어 모바일, 태블릿에서도 최적화된 환경으로 이용하실 수 있습니다.',
+    //   category: 'general',
+    //   order: 3,
+    //   isPublished: true,
+    // },
 
     // 데이터 (data) 카테고리
     {
       question: '기존 고객 데이터를 가져올 수 있나요?',
       answer:
-        '네, CSV, 엑셀 파일에서 고객 데이터를 쉽게 가져올 수 있습니다. 또한 구글 연락처와의 연동도 지원합니다. 가져온 후에는 소개 관계를 설정하는 직관적인 인터페이스를 제공합니다.',
+        '네, CSV, 엑셀 파일에서 고객 데이터를 쉽게 가져올 수 있습니다. 가져온 후에는 소개 관계를 설정하는 직관적인 인터페이스를 제공합니다.',
       category: 'data',
       order: 1,
       isPublished: true,
@@ -171,14 +183,14 @@ async function seedPublicData() {
       order: 2,
       isPublished: true,
     },
-    {
-      question: '고객 데이터 내보내기가 가능한가요?',
-      answer:
-        '네, 언제든지 CSV 형태로 고객 데이터를 내보낼 수 있습니다. 데이터 이동의 자유를 보장합니다.',
-      category: 'data',
-      order: 3,
-      isPublished: true,
-    },
+    // {
+    //   question: '고객 데이터 내보내기가 가능한가요?',
+    //   answer:
+    //     '네, 언제든지 CSV 형태로 고객 데이터를 내보낼 수 있습니다. 데이터 이동의 자유를 보장합니다.',
+    //   category: 'data',
+    //   order: 3,
+    //   isPublished: true,
+    // },
 
     // 팀 (team) 카테고리
     {
@@ -217,26 +229,30 @@ async function seedPublicData() {
     },
 
     // 지원 (support) 카테고리
-    {
-      question: '기술 지원은 어떻게 받을 수 있나요?',
-      answer:
-        '이메일(support@surecrm.co.kr)로 문의하시면 24시간 내에 답변드립니다. 긴급한 경우 실시간 채팅도 지원합니다.',
-      category: 'support',
-      order: 1,
-      isPublished: true,
-    },
-    {
-      question: '사용법을 배울 수 있는 자료가 있나요?',
-      answer:
-        '가입 후 온보딩 가이드와 함께 도움말 센터에서 상세한 사용법을 확인하실 수 있습니다. 또한 정기적으로 웨비나도 진행합니다.',
-      category: 'support',
-      order: 2,
-      isPublished: true,
-    },
+    // {
+    //   question: '기술 지원은 어떻게 받을 수 있나요?',
+    //   answer:
+    //     '이메일(support@surecrm.co.kr)로 문의하시면 24시간 내에 답변드립니다. 긴급한 경우 실시간 채팅도 지원합니다.',
+    //   category: 'support',
+    //   order: 1,
+    //   isPublished: true,
+    // },
+    // {
+    //   question: '사용법을 배울 수 있는 자료가 있나요?',
+    //   answer:
+    //     '가입 후 온보딩 가이드와 함께 도움말 센터에서 상세한 사용법을 확인하실 수 있습니다. 또한 정기적으로 웨비나도 진행합니다.',
+    //   category: 'support',
+    //   order: 2,
+    //   isPublished: true,
+    // },
   ]);
 
   // 공개 콘텐츠 (이용약관, 개인정보처리방침)
-  console.log('📄 공개 콘텐츠 생성 중...');
+  console.log('�� 공개 콘텐츠 생성 중...');
+
+  // 기존 공개 콘텐츠 삭제 후 새로 삽입 (upsert 방식)
+  await db.delete(publicContents);
+
   await db.insert(publicContents).values([
     {
       type: 'terms_of_service',
@@ -497,17 +513,63 @@ export async function clearDatabase() {
     await db.delete(pipelineStages);
     await db.delete(teams);
 
-    // 2. 공개 페이지 데이터 삭제
-    console.log('🌐 공개 페이지 데이터 삭제 중...');
+    console.log('✅ 데이터베이스 초기화 완료 (공개 페이지 데이터는 보존됨)');
+  } catch (error) {
+    console.error('❌ 데이터베이스 초기화 중 오류 발생:', error);
+    throw error;
+  }
+}
+
+export async function clearApplicationData() {
+  console.log('🗑️ 애플리케이션 데이터만 삭제 중...');
+
+  try {
+    // 외래 키 제약 조건 때문에 순서대로 삭제
+    await db.delete(clientTags);
+    await db.delete(clientDetails);
+    await db.delete(clients);
+    await db.delete(pipelineStages);
+    await db.delete(teams);
+
+    console.log('✅ 애플리케이션 데이터 삭제 완료');
+  } catch (error) {
+    console.error('❌ 애플리케이션 데이터 삭제 중 오류 발생:', error);
+    throw error;
+  }
+}
+
+export async function clearPublicData() {
+  console.log('🗑️ 공개 페이지 데이터 삭제 중...');
+
+  try {
     await db.delete(testimonials);
     await db.delete(faqs);
     await db.delete(publicContents);
     await db.delete(announcements);
     await db.delete(siteSettings);
 
-    console.log('✅ 데이터베이스 초기화 완료');
+    console.log('✅ 공개 페이지 데이터 삭제 완료');
   } catch (error) {
-    console.error('❌ 데이터베이스 초기화 중 오류 발생:', error);
+    console.error('❌ 공개 페이지 데이터 삭제 중 오류 발생:', error);
+    throw error;
+  }
+}
+
+export async function clearAllData() {
+  console.log('🗑️ 모든 데이터 삭제 중...');
+
+  try {
+    // 1. 애플리케이션 데이터 삭제
+    console.log('🏢 애플리케이션 데이터 삭제 중...');
+    await clearApplicationData();
+
+    // 2. 공개 페이지 데이터 삭제
+    console.log('🌐 공개 페이지 데이터 삭제 중...');
+    await clearPublicData();
+
+    console.log('✅ 모든 데이터 삭제 완료');
+  } catch (error) {
+    console.error('❌ 모든 데이터 삭제 중 오류 발생:', error);
     throw error;
   }
 }

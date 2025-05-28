@@ -20,7 +20,7 @@ export interface Meeting {
   type: string;
   location: string;
   description?: string;
-  status: 'scheduled' | 'completed' | 'cancelled';
+  status: 'scheduled' | 'completed' | 'cancelled' | 'rescheduled';
   checklist: ChecklistItem[];
   notes?: MeetingNote[];
 }

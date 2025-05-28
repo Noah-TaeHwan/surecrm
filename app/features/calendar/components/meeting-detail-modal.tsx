@@ -190,23 +190,73 @@ export function MeetingDetailModal({
   };
 
   const handleSaveMeetingChanges = () => {
-    // 실제로는 여기서 API 호출이나 상위 컴포넌트로 변경사항을 전달해야 합니다
-    console.log('미팅 정보 저장:', editedMeeting);
+    // 실제 form 제출로 미팅 업데이트
+    const formElement = document.createElement('form');
+    formElement.method = 'POST';
+    formElement.style.display = 'none';
+
+    // actionType 추가
+    const actionInput = document.createElement('input');
+    actionInput.name = 'actionType';
+    actionInput.value = 'updateMeeting';
+    formElement.appendChild(actionInput);
+
+    // meetingId 추가
+    const meetingIdInput = document.createElement('input');
+    meetingIdInput.name = 'meetingId';
+    meetingIdInput.value = meeting.id;
+    formElement.appendChild(meetingIdInput);
+
+    // 편집된 데이터 추가
+    Object.entries(editedMeeting).forEach(([key, value]) => {
+      const input = document.createElement('input');
+      input.name = key;
+      input.value = String(value);
+      formElement.appendChild(input);
+    });
+
+    // 현재 상태 추가
+    const statusInput = document.createElement('input');
+    statusInput.name = 'status';
+    statusInput.value = meeting.status;
+    formElement.appendChild(statusInput);
+
+    document.body.appendChild(formElement);
+    formElement.submit();
+    document.body.removeChild(formElement);
+
     setIsEditingMeeting(false);
-    // TODO: 실제 저장 로직 구현
   };
 
   const handleCancelEditingMeeting = () => {
     setIsEditingMeeting(false);
-    setEditedMeeting({
-      title: meeting.title,
-      date: meeting.date,
-      time: meeting.time,
-      duration: meeting.duration,
-      location: meeting.location,
-      description: meeting.description || '',
-      type: meeting.type,
-    });
+  };
+
+  const handleDeleteMeeting = () => {
+    if (confirm('정말로 이 미팅을 삭제하시겠습니까?')) {
+      // 실제 form 제출로 미팅 삭제
+      const formElement = document.createElement('form');
+      formElement.method = 'POST';
+      formElement.style.display = 'none';
+
+      // actionType 추가
+      const actionInput = document.createElement('input');
+      actionInput.name = 'actionType';
+      actionInput.value = 'deleteMeeting';
+      formElement.appendChild(actionInput);
+
+      // meetingId 추가
+      const meetingIdInput = document.createElement('input');
+      meetingIdInput.name = 'meetingId';
+      meetingIdInput.value = meeting.id;
+      formElement.appendChild(meetingIdInput);
+
+      document.body.appendChild(formElement);
+      formElement.submit();
+      document.body.removeChild(formElement);
+
+      onClose();
+    }
   };
 
   const meetingTypes = Object.keys(meetingTypeColors);
@@ -678,21 +728,41 @@ export function MeetingDetailModal({
               </Button>
             </Link>
             <div className="flex gap-3">
-              {!isEditingMeeting ? (
-                <Button
-                  variant="outline"
-                  className="gap-2"
-                  onClick={handleStartEditingMeeting}
-                >
-                  <Pencil2Icon className="w-4 h-4" />
-                  수정
-                </Button>
-              ) : null}
-              {meeting.status === 'scheduled' && !isEditingMeeting && (
-                <Button className="gap-2">
-                  <CheckIcon className="w-4 h-4" />
-                  완료 처리
-                </Button>
+              {isEditingMeeting ? (
+                <>
+                  <Button
+                    variant="outline"
+                    onClick={handleCancelEditingMeeting}
+                  >
+                    취소
+                  </Button>
+                  <Button onClick={handleSaveMeetingChanges}>저장</Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    variant="outline"
+                    className="gap-2"
+                    onClick={handleStartEditingMeeting}
+                  >
+                    <Pencil2Icon className="w-4 h-4" />
+                    수정
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    className="gap-2"
+                    onClick={handleDeleteMeeting}
+                  >
+                    <TrashIcon className="w-4 h-4" />
+                    삭제
+                  </Button>
+                  {meeting.status === 'scheduled' && (
+                    <Button className="gap-2">
+                      <CheckIcon className="w-4 h-4" />
+                      완료 처리
+                    </Button>
+                  )}
+                </>
               )}
             </div>
           </div>
