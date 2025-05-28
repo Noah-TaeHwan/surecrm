@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
-/* 🚀 SCROLLBAR OVERRIDE - 최우선 적용 */
+/* 🚀 ENHANCED SCROLLBAR STYLING - Critical CSS 보완 */
 /* Firefox */
 * {
   scrollbar-width: thin !important;
@@ -225,6 +225,152 @@ nav .bg-sidebar-accent {
 nav button a {
   min-height: 2rem !important;
   padding: 0 !important;
+}
+
+/* 🎨 ENHANCED HTML ELEMENT CUSTOMIZATION */
+/* 추가적인 HTML 요소 커스터마이징 */
+
+/* Progress 바 커스터마이징 */
+progress {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  width: 100% !important;
+  height: 0.5rem !important;
+  border-radius: 0.75rem !important;
+  background-color: oklch(0.274 0.006 286.033) !important;
+  border: none !important;
+}
+
+progress::-webkit-progress-bar {
+  background-color: oklch(0.274 0.006 286.033) !important;
+  border-radius: 0.75rem !important;
+}
+
+progress::-webkit-progress-value {
+  background-color: oklch(0.645 0.246 16.439) !important;
+  border-radius: 0.75rem !important;
+}
+
+progress::-moz-progress-bar {
+  background-color: oklch(0.645 0.246 16.439) !important;
+  border-radius: 0.75rem !important;
+}
+
+/* Range 슬라이더 커스터마이징 */
+input[type='range'] {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  width: 100% !important;
+  height: 0.5rem !important;
+  border-radius: 0.75rem !important;
+  background: oklch(0.274 0.006 286.033) !important;
+  outline: none !important;
+  cursor: pointer !important;
+}
+
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+  border-radius: 50% !important;
+  background: oklch(0.645 0.246 16.439) !important;
+  cursor: pointer !important;
+  border: 2px solid oklch(0.969 0.015 12.422) !important;
+}
+
+input[type='range']::-moz-range-thumb {
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+  border-radius: 50% !important;
+  background: oklch(0.645 0.246 16.439) !important;
+  cursor: pointer !important;
+  border: 2px solid oklch(0.969 0.015 12.422) !important;
+}
+
+/* File input 커스터마이징 */
+input[type='file'] {
+  background-color: oklch(0.21 0.006 285.885) !important;
+  border: 1px solid oklch(1 0 0 / 10%) !important;
+  border-radius: 0.75rem !important;
+  padding: 0.5rem !important;
+  color: oklch(0.985 0 0) !important;
+  cursor: pointer !important;
+}
+
+input[type='file']::-webkit-file-upload-button {
+  background-color: oklch(0.645 0.246 16.439) !important;
+  color: oklch(0.969 0.015 12.422) !important;
+  border: none !important;
+  border-radius: 0.5rem !important;
+  padding: 0.25rem 0.75rem !important;
+  margin-right: 0.75rem !important;
+  cursor: pointer !important;
+  font-size: 0.875rem !important;
+}
+
+/* Details/Summary 커스터마이징 */
+details {
+  background-color: oklch(0.21 0.006 285.885) !important;
+  border: 1px solid oklch(1 0 0 / 10%) !important;
+  border-radius: 0.75rem !important;
+  padding: 1rem !important;
+  margin: 0.5rem 0 !important;
+}
+
+summary {
+  cursor: pointer !important;
+  font-weight: 500 !important;
+  color: oklch(0.985 0 0) !important;
+  list-style: none !important;
+}
+
+summary::-webkit-details-marker {
+  display: none !important;
+}
+
+summary::before {
+  content: '▶' !important;
+  margin-right: 0.5rem !important;
+  transition: transform 0.15s ease !important;
+}
+
+details[open] summary::before {
+  transform: rotate(90deg) !important;
+}
+
+/* 🎯 FOUC 방지 추가 클래스 */
+.fonts-loaded {
+  font-display: swap !important;
+}
+
+/* 로딩 상태 개선 */
+.loading-state {
+  opacity: 0.7 !important;
+  pointer-events: none !important;
+  transition: opacity 0.15s ease !important;
+}
+
+/* 스켈레톤 UI */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    oklch(0.274 0.006 286.033) 25%,
+    oklch(0.3 0.006 286.033) 50%,
+    oklch(0.274 0.006 286.033) 75%
+  ) !important;
+  background-size: 200% 100% !important;
+  animation: skeleton-loading 1.5s infinite !important;
+  border-radius: 0.5rem !important;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0 !important;
+  }
+  100% {
+    background-position: -200% 0 !important;
+  }
 }
 
 @custom-variant dark (&:is(.dark *));

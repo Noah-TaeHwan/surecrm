@@ -1,4 +1,4 @@
-import type { Route } from '.react-router/types/app/features/team/pages/+types/route';
+import type { Route } from './+types/team-join-page';
 import { Button } from '~/common/components/ui/button';
 
 export function loader({ request, params }: Route.LoaderArgs) {
