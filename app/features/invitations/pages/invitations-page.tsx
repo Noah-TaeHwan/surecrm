@@ -11,31 +11,50 @@ import { InvitedColleagues } from '../components/invited-colleagues';
 // 타입 imports
 import type { Invitation } from '../components/types';
 
-export function loader({ request }: Route.LoaderArgs) {
-  // 클럽하우스 스타일: 각 사용자는 2장의 초대장만 보유
-  const myInvitations: Invitation[] = [
-    {
-      id: '1',
-      code: 'CLUB-2024-A7X9',
-      status: 'available',
-      createdAt: '2024-01-10',
-    },
-    {
-      id: '2',
-      code: 'CLUB-2024-B2M5',
-      status: 'used',
-      createdAt: '2024-01-10',
-      usedAt: '2024-01-15',
-      invitee: {
-        id: '1',
-        name: '김영희',
-        email: 'kim@example.com',
-        joinedAt: '2024-01-15',
-      },
-    },
-  ];
+// 데이터 함수 imports
+import {
+  getUserInvitations,
+  getInvitationStats,
+  getInvitedColleagues,
+  createInvitation,
+} from '../lib/invitations-data';
+import { requireAuth } from '../lib/auth-utils';
 
-  return { myInvitations };
+export async function loader({ request }: Route.LoaderArgs) {
+  // 인증 확인
+  const userId = await requireAuth(request);
+
+  try {
+    // 모든 데이터를 병렬로 조회
+    const [myInvitations, invitationStats, invitedColleagues] =
+      await Promise.all([
+        getUserInvitations(userId),
+        getInvitationStats(userId),
+        getInvitedColleagues(userId),
+      ]);
+
+    return {
+      myInvitations,
+      invitationStats,
+      invitedColleagues,
+    };
+  } catch (error) {
+    console.error('Invitations 페이지 로더 오류:', error);
+
+    // 에러 시 기본값 반환
+    return {
+      myInvitations: [],
+      invitationStats: {
+        totalSent: 0,
+        totalUsed: 0,
+        totalExpired: 0,
+        availableInvitations: 0,
+        conversionRate: 0,
+        successfulInvitations: 0,
+      },
+      invitedColleagues: [],
+    };
+  }
 }
 
 export function meta({ data, params }: Route.MetaArgs) {
@@ -46,7 +65,7 @@ export function meta({ data, params }: Route.MetaArgs) {
 }
 
 export default function InvitationsPage({ loaderData }: Route.ComponentProps) {
-  const { myInvitations } = loaderData;
+  const { myInvitations, invitationStats, invitedColleagues } = loaderData;
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
   const availableInvitations = myInvitations.filter(
@@ -68,14 +87,14 @@ export default function InvitationsPage({ loaderData }: Route.ComponentProps) {
         {/* 헤더 */}
         <div>
           <p className="text-muted-foreground">
-            동료들을 SureCRM에 초대하고 함께 성장하세요. 각 사용자는 2장의
-            초대장을 보유합니다.
+            동료들을 SureCRM에 초대하고 함께 성장하세요. 초대장을 통해
+            네트워크를 확장하세요.
           </p>
         </div>
 
         {/* 초대장 현황 요약 */}
         <InvitationStatsCards
-          availableCount={availableInvitations.length}
+          availableCount={invitationStats.availableInvitations}
           usedInvitations={usedInvitations}
         />
 
@@ -83,25 +102,33 @@ export default function InvitationsPage({ loaderData }: Route.ComponentProps) {
         <div className="space-y-4">
           <h3 className="text-lg font-medium">내 초대장</h3>
 
-          <div className="grid gap-4">
-            {myInvitations.map((invitation) => (
-              <InvitationCard
-                key={invitation.id}
-                invitation={invitation}
-                onCopyLink={copyInviteLink}
-                copiedCode={copiedCode}
-              />
-            ))}
-          </div>
+          {myInvitations.length > 0 ? (
+            <div className="grid gap-4">
+              {myInvitations.map((invitation) => (
+                <InvitationCard
+                  key={invitation.id}
+                  invitation={invitation}
+                  onCopyLink={copyInviteLink}
+                  copiedCode={copiedCode}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              아직 초대장이 없습니다.
+            </div>
+          )}
 
           {/* 모든 초대장을 사용한 경우 */}
-          {availableInvitations.length === 0 && (
+          {availableInvitations.length === 0 && usedInvitations.length > 0 && (
             <EmptyInvitations usedCount={usedInvitations.length} />
           )}
         </div>
 
         {/* 내가 초대한 사람들 */}
-        <InvitedColleagues usedInvitations={usedInvitations} />
+        {invitedColleagues.length > 0 && (
+          <InvitedColleagues usedInvitations={invitedColleagues} />
+        )}
       </div>
     </MainLayout>
   );

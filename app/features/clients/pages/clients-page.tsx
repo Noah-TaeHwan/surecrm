@@ -82,140 +82,46 @@ import {
   insuranceTypeText,
 } from '../components/insurance-config';
 import type { Client, ClientStats, BadgeVariant } from '../components/types';
+import { getClients, getClientStats } from '../lib/client-data';
+import { requireAuth, getSearchParams } from '../lib/auth-utils';
 
-export function loader({ request }: Route.LoaderArgs) {
-  // TODO: 실제 API에서 데이터 가져오기
-  return {
-    clients: [
-      {
-        id: '1',
-        name: '김영희',
-        email: 'kim@example.com',
-        phone: '010-1234-5678',
-        company: 'ABC 회사',
-        status: 'active' as const,
-        stage: '첫 상담',
-        importance: 'high' as const,
-        referredBy: {
-          id: '2',
-          name: '박철수',
-        },
-        lastContactDate: '2024-01-15',
-        nextMeetingDate: '2024-01-20',
-        tags: ['VIP', '기업'],
-        contractAmount: 50000000,
-        insuranceTypes: ['auto', 'health'],
-        referralCount: 3,
-        referralDepth: 1,
-        profileImage: null,
-        createdAt: '2023-03-15T09:30:00.000Z',
-        updatedAt: '2023-04-02T14:15:00.000Z',
+export async function loader({ request }: Route.LoaderArgs) {
+  // 인증 확인
+  const userId = await requireAuth(request);
+
+  // 검색 파라미터 추출
+  const searchParams = getSearchParams(request);
+
+  try {
+    // 고객 목록 조회
+    const clientsData = await getClients({
+      agentId: userId,
+      ...searchParams,
+    });
+
+    // 통계 조회
+    const stats = await getClientStats(userId);
+
+    return {
+      ...clientsData,
+      stats,
+    };
+  } catch (error) {
+    console.error('Clients 페이지 로더 오류:', error);
+
+    // 에러 시 빈 데이터 반환
+    return {
+      clients: [],
+      totalCount: 0,
+      pageSize: searchParams.pageSize,
+      currentPage: searchParams.page,
+      stats: {
+        totalReferrals: 0,
+        averageDepth: 0,
+        topReferrers: [],
       },
-      {
-        id: '2',
-        name: '이철수',
-        email: 'lee@example.com',
-        phone: '010-9876-5432',
-        company: 'XYZ 기업',
-        status: 'active' as const,
-        stage: '니즈 분석',
-        importance: 'medium' as const,
-        referredBy: {
-          id: '1',
-          name: '김영희',
-        },
-        lastContactDate: '2024-01-20',
-        nextMeetingDate: '2024-01-25',
-        tags: ['개인'],
-        contractAmount: 30000000,
-        insuranceTypes: ['life'],
-        referralCount: 1,
-        referralDepth: 2,
-        profileImage: null,
-        createdAt: '2023-02-22T13:45:00.000Z',
-        updatedAt: '2023-04-05T10:20:00.000Z',
-      },
-      {
-        id: '3',
-        name: '박지민',
-        email: 'park@example.com',
-        phone: '010-2345-6789',
-        company: '대한 기업',
-        status: 'inactive' as const,
-        stage: '계약 완료',
-        importance: 'low' as const,
-        lastContactDate: '2024-01-10',
-        tags: ['완료'],
-        contractAmount: 70000000,
-        insuranceTypes: ['property', 'life'],
-        referralCount: 5,
-        referralDepth: 0,
-        profileImage: null,
-        createdAt: '2023-01-10T11:30:00.000Z',
-        updatedAt: '2023-03-28T15:45:00.000Z',
-      },
-      {
-        id: '4',
-        name: '최민수',
-        email: 'choi@example.com',
-        phone: '010-3456-7890',
-        company: '스타트업 Inc',
-        status: 'active' as const,
-        stage: '상품 설명',
-        importance: 'high' as const,
-        referredBy: {
-          id: '2',
-          name: '이철수',
-        },
-        lastContactDate: '2024-01-25',
-        nextMeetingDate: '2024-01-30',
-        tags: ['VIP', '잠재'],
-        contractAmount: 45000000,
-        insuranceTypes: ['auto', 'prenatal'],
-        referralCount: 0,
-        referralDepth: 3,
-        profileImage: null,
-        createdAt: '2023-04-01T10:00:00.000Z',
-        updatedAt: '2023-04-10T16:30:00.000Z',
-      },
-      {
-        id: '5',
-        name: '정수연',
-        email: 'jung@example.com',
-        phone: '010-4567-8901',
-        company: '글로벌 코프',
-        status: 'active' as const,
-        stage: '계약 검토',
-        importance: 'medium' as const,
-        referredBy: {
-          id: '3',
-          name: '박지민',
-        },
-        lastContactDate: '2024-01-18',
-        nextMeetingDate: '2024-01-22',
-        tags: ['기업', '진행중'],
-        contractAmount: 60000000,
-        insuranceTypes: ['health', 'other'],
-        referralCount: 2,
-        referralDepth: 1,
-        profileImage: null,
-        createdAt: '2023-05-15T14:20:00.000Z',
-        updatedAt: '2023-06-01T11:45:00.000Z',
-      },
-    ],
-    totalCount: 5,
-    pageSize: 10,
-    currentPage: 1,
-    stats: {
-      totalReferrals: 11,
-      averageDepth: 1.4,
-      topReferrers: [
-        { name: '박지민', count: 5 },
-        { name: '김영희', count: 3 },
-        { name: '정수연', count: 2 },
-      ],
-    },
-  };
+    };
+  }
 }
 
 export function meta({ data, params }: Route.MetaArgs) {
@@ -297,7 +203,7 @@ export default function ClientsPage({ loaderData }: Route.ComponentProps) {
         filterReferrer === 'all' || client.referredBy?.name === filterReferrer;
       const matchesInsuranceType =
         filterInsuranceType === 'all' ||
-        client.insuranceTypes?.includes(filterInsuranceType);
+        client.insuranceTypes?.includes(filterInsuranceType as never);
       const matchesDepth =
         filterDepth === 'all' ||
         (filterDepth === 'direct' && client.referralDepth === 0) ||

@@ -6,6 +6,16 @@ import { TodayAgenda } from '../components/today-agenda';
 import { PipelineOverview } from '../components/pipeline-overview';
 import { RecentClients } from '../components/recent-clients';
 import { ReferralInsights } from '../components/referral-insights';
+import {
+  getUserInfo,
+  getTodayStats,
+  getKPIData,
+  getTodayMeetings,
+  getPipelineData,
+  getRecentClientsData,
+  getReferralInsights,
+} from '../lib/dashboard-data';
+import { requireAuth } from '../lib/auth-utils';
 
 export function meta({ data, params }: Route.MetaArgs) {
   return [
@@ -14,219 +24,81 @@ export function meta({ data, params }: Route.MetaArgs) {
   ];
 }
 
-export function loader({ request }: Route.LoaderArgs) {
-  // 실제 구현에서는 DB에서 데이터를 가져오는 로직이 들어갑니다
-  return {
-    // Welcome Section 데이터
-    user: {
-      name: '김보험',
-    },
-    todayStats: {
-      scheduledMeetings: 3,
-      pendingTasks: 7,
-      newReferrals: 2,
-    },
+export async function loader({ request }: Route.LoaderArgs) {
+  // 인증 확인
+  const userId = await requireAuth(request);
 
-    // Performance KPI 데이터
-    kpiData: {
-      totalClients: 247,
-      monthlyNewClients: 18,
-      totalReferrals: 85,
-      conversionRate: 68.5,
-      monthlyGrowth: {
-        clients: 12.3,
-        referrals: 25.6,
-        revenue: 8.4,
-      },
-    },
+  try {
+    // 모든 데이터를 병렬로 조회
+    const [
+      user,
+      todayStats,
+      kpiData,
+      todayMeetings,
+      pipelineData,
+      recentClientsData,
+      referralInsights,
+    ] = await Promise.all([
+      getUserInfo(userId),
+      getTodayStats(userId),
+      getKPIData(userId),
+      getTodayMeetings(userId),
+      getPipelineData(userId),
+      getRecentClientsData(userId),
+      getReferralInsights(userId),
+    ]);
 
-    // Today Agenda 데이터 (미팅만)
-    todayMeetings: [
-      {
-        id: '1',
-        clientName: '김영희',
-        time: '10:00',
-        duration: 60,
-        type: '첫 상담',
-        location: '사무실 1층 상담실',
-        status: 'upcoming' as const,
-        reminderSent: true,
-      },
-      {
-        id: '2',
-        clientName: '이철수',
-        time: '14:30',
-        duration: 45,
-        type: '계약 검토',
-        location: '온라인 미팅',
-        status: 'upcoming' as const,
-        reminderSent: false,
-      },
-      {
-        id: '3',
-        clientName: '박지성',
-        time: '16:00',
-        duration: 30,
-        type: '니즈 분석',
-        location: '카페 미팅',
-        status: 'upcoming' as const,
-        reminderSent: true,
-      },
-    ],
+    return {
+      user,
+      todayStats,
+      kpiData,
+      todayMeetings,
+      pipelineData,
+      recentClientsData,
+      topReferrers: referralInsights.topReferrers,
+      networkStats: referralInsights.networkStats,
+    };
+  } catch (error) {
+    console.error('Dashboard 페이지 로더 오류:', error);
 
-    // Pipeline Overview 데이터
-    pipelineData: {
-      stages: [
-        {
-          id: '1',
-          name: '리드 확보',
-          count: 12,
-          value: 2400,
-          conversionRate: 85,
-        },
-        {
-          id: '2',
-          name: '첫 상담',
-          count: 8,
-          value: 1600,
-          conversionRate: 70,
-        },
-        {
-          id: '3',
-          name: '제안서 작성',
-          count: 5,
-          value: 1200,
-          conversionRate: 60,
-        },
-        {
-          id: '4',
-          name: '계약 협상',
-          count: 3,
-          value: 800,
-          conversionRate: 90,
-        },
-        {
-          id: '5',
-          name: '계약 체결',
-          count: 2,
-          value: 600,
-        },
-      ],
-      totalValue: 6600,
-      monthlyTarget: 8000,
-    },
-
-    // Recent Clients 데이터
-    recentClientsData: {
-      recentClients: [
-        {
-          id: '1',
-          name: '김영희',
-          status: 'proposal' as const,
-          lastContactDate: '2024-01-15',
-          potentialValue: 450,
-          referredBy: '박지성',
-          stage: '생명보험 제안 진행중',
-        },
-        {
-          id: '2',
-          name: '이철수',
-          status: 'contacted' as const,
-          lastContactDate: '2024-01-14',
-          potentialValue: 320,
-          stage: '니즈 분석 완료',
-        },
-        {
-          id: '3',
-          name: '정수현',
-          status: 'contracted' as const,
-          lastContactDate: '2024-01-13',
-          potentialValue: 680,
-          referredBy: '김민지',
-          stage: '화재보험 계약 체결',
-        },
-        {
-          id: '4',
-          name: '박민지',
-          status: 'prospect' as const,
-          lastContactDate: '2024-01-12',
-          potentialValue: 250,
-          stage: '초기 접촉 대기',
-        },
-        {
-          id: '5',
-          name: '최수진',
-          status: 'proposal' as const,
-          lastContactDate: '2024-01-11',
-          potentialValue: 520,
-          referredBy: '정현우',
-          stage: '자동차보험 제안 검토중',
-        },
-      ],
-      totalClients: 247,
-    },
-
-    // Referral Insights 데이터
-    topReferrers: [
-      {
-        id: '1',
-        name: '박지성',
-        totalReferrals: 12,
-        successfulConversions: 10,
-        conversionRate: 83.3,
-        lastReferralDate: '2024-01-15',
-        rank: 1,
-        recentActivity: '김민수님을 통해 새로운 리드 확보',
+    // 에러 시 기본값 반환
+    return {
+      user: { name: '사용자' },
+      todayStats: {
+        scheduledMeetings: 0,
+        pendingTasks: 0,
+        newReferrals: 0,
       },
-      {
-        id: '2',
-        name: '김민지',
-        totalReferrals: 8,
-        successfulConversions: 6,
-        conversionRate: 75.0,
-        lastReferralDate: '2024-01-12',
-        rank: 2,
-        recentActivity: '이영호님 화재보험 계약 성공',
+      kpiData: {
+        totalClients: 0,
+        monthlyNewClients: 0,
+        totalReferrals: 0,
+        conversionRate: 0,
+        monthlyGrowth: {
+          clients: 0,
+          referrals: 0,
+          revenue: 0,
+        },
       },
-      {
-        id: '3',
-        name: '정현우',
-        totalReferrals: 6,
-        successfulConversions: 4,
-        conversionRate: 66.7,
-        lastReferralDate: '2024-01-10',
-        rank: 3,
-        recentActivity: '가족 대상 보험 상품 소개 진행',
+      todayMeetings: [],
+      pipelineData: {
+        stages: [],
+        totalValue: 0,
+        monthlyTarget: 8000,
       },
-      {
-        id: '4',
-        name: '최수진',
-        totalReferrals: 5,
-        successfulConversions: 3,
-        conversionRate: 60.0,
-        lastReferralDate: '2024-01-08',
-        rank: 4,
-        recentActivity: '직장 동료 네트워크 확장 중',
+      recentClientsData: {
+        recentClients: [],
+        totalClients: 0,
       },
-      {
-        id: '5',
-        name: '한도윤',
-        totalReferrals: 4,
-        successfulConversions: 2,
-        conversionRate: 50.0,
-        lastReferralDate: '2024-01-05',
-        rank: 5,
-        recentActivity: '동네 상인회 멤버 소개 예정',
+      topReferrers: [],
+      networkStats: {
+        totalConnections: 0,
+        networkDepth: 0,
+        activeReferrers: 0,
+        monthlyGrowth: 0,
       },
-    ],
-
-    networkStats: {
-      totalConnections: 124,
-      networkDepth: 4,
-      activeReferrers: 23,
-      monthlyGrowth: 15.6,
-    },
-  };
+    };
+  }
 }
 
 export default function DashboardPage({ loaderData }: Route.ComponentProps) {
