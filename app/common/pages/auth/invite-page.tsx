@@ -28,6 +28,8 @@ import {
   AlertTitle,
 } from '~/common/components/ui/alert';
 import { Separator } from '~/common/components/ui/separator';
+import { validateInviteCode } from '~/lib/public-data';
+import type { Route } from './+types/invite-page';
 
 // 인터페이스 정의
 interface LoaderData {
@@ -72,21 +74,32 @@ const signupSchema = z
 type SignupFormData = z.infer<typeof signupSchema>;
 
 // 로더 함수 - 초대 코드 검증
-export function loader({ params }: LoaderArgs): LoaderData {
+export async function loader({ params }: Route.LoaderArgs) {
   const inviteCode = params.code;
 
-  // 실제로는 여기서 초대 코드 유효성을 서버에서 확인합니다
-  // 지금은 더미 데이터만 반환
-  const isValid = Boolean(inviteCode && inviteCode.length > 5);
+  if (!inviteCode) {
+    return {
+      inviteCode: '',
+      invitedBy: {
+        name: '알 수 없음',
+        email: '',
+      },
+      isValid: false,
+      message: '초대 코드가 제공되지 않았습니다.',
+    };
+  }
+
+  // 실제 데이터베이스에서 초대 코드 검증
+  const validationResult = await validateInviteCode(inviteCode);
 
   return {
     inviteCode,
-    invitedBy: {
-      name: '홍길동',
-      email: 'hong@example.com',
+    invitedBy: validationResult.invitedBy || {
+      name: '알 수 없음',
+      email: '',
     },
-    isValid,
-    message: isValid ? undefined : '유효하지 않은 초대 코드입니다',
+    isValid: validationResult.isValid,
+    message: validationResult.message,
   };
 }
 
@@ -99,7 +112,7 @@ export const meta: MetaFunction = () => {
 };
 
 // 초대 수락 페이지 컴포넌트
-export default function InvitePage({ loaderData }: { loaderData: LoaderData }) {
+export default function InvitePage({ loaderData }: Route.ComponentProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // react-hook-form과 zodResolver를 사용한 폼 설정

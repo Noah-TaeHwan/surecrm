@@ -24,6 +24,8 @@ import {
   FormMessage,
 } from '~/common/components/ui/form';
 import { Alert, AlertDescription } from '~/common/components/ui/alert';
+import { checkAuthStatus, authenticateUser } from '~/lib/auth';
+import type { Route } from './+types/login-page';
 
 // 인터페이스 정의
 interface LoaderData {
@@ -62,21 +64,54 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 
 // 로더 함수 - 이미 로그인되어 있으면 대시보드로 리다이렉트
-export function loader({ request }: LoaderArgs): LoaderData {
-  // 실제로는 여기서 인증 상태를 확인하고 필요시 리다이렉트합니다
-  // 지금은 더미 데이터만 반환
+export async function loader({ request }: Route.LoaderArgs) {
+  const isAuthenticated = await checkAuthStatus(request);
+
+  // 이미 로그인되어 있으면 대시보드로 리다이렉트
+  if (isAuthenticated) {
+    throw new Response(null, {
+      status: 302,
+      headers: {
+        Location: '/dashboard',
+      },
+    });
+  }
+
   return {
     isAuthenticated: false,
   };
 }
 
 // 액션 함수 - 로그인 폼 제출 처리
-export function action({ request }: ActionArgs): ActionData {
-  // 실제로는 여기서 폼 데이터를 처리하고 인증을 수행합니다
-  // 지금은 더미 데이터만 반환
+export async function action({ request }: Route.ActionArgs) {
+  const formData = await request.formData();
+  const email = formData.get('email') as string;
+  const password = formData.get('password') as string;
+
+  if (!email || !password) {
+    return {
+      success: false,
+      error: '이메일과 비밀번호를 모두 입력해주세요.',
+    };
+  }
+
+  const result = await authenticateUser({ email, password });
+
+  if (result.success) {
+    // 로그인 성공 시 대시보드로 리다이렉트
+    throw new Response(null, {
+      status: 302,
+      headers: {
+        Location: '/dashboard',
+        // 실제로는 여기서 인증 쿠키를 설정
+        // 'Set-Cookie': `auth-token=${token}; HttpOnly; Secure; SameSite=Strict`,
+      },
+    });
+  }
+
   return {
-    success: true,
-    error: null,
+    success: false,
+    error: result.error || '로그인에 실패했습니다.',
   };
 }
 
@@ -89,7 +124,10 @@ export const meta: MetaFunction = () => {
 };
 
 // 로그인 페이지 컴포넌트
-export default function LoginPage({ loaderData, actionData }: ComponentProps) {
+export default function LoginPage({
+  loaderData,
+  actionData,
+}: Route.ComponentProps) {
   const [formError, setFormError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 

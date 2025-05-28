@@ -2,6 +2,7 @@ import { Link, type MetaFunction } from 'react-router';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { sendPasswordResetEmail } from '~/lib/auth';
 import {
   Form,
   FormControl,
@@ -57,12 +58,30 @@ export function loader({ request }: Route['LoaderArgs']) {
   return {};
 }
 
-export function action({ request }: Route['ActionArgs']) {
-  // 실제 비밀번호 복구 이메일 발송 로직 구현
+export async function action({ request }: Route['ActionArgs']) {
+  const formData = await request.formData();
+  const email = formData.get('email') as string;
+
+  if (!email) {
+    return {
+      success: false,
+      message: '이메일 주소를 입력해주세요.',
+    };
+  }
+
+  const result = await sendPasswordResetEmail(email);
+
+  if (result.success) {
+    return {
+      success: true,
+      message:
+        '비밀번호 재설정 안내 이메일이 발송되었습니다. 이메일을 확인해주세요.',
+    };
+  }
+
   return {
-    success: true,
-    message:
-      '비밀번호 재설정 안내 이메일이 발송되었습니다. 이메일을 확인해주세요.',
+    success: false,
+    message: result.error || '이메일 발송 중 오류가 발생했습니다.',
   };
 }
 
@@ -103,8 +122,14 @@ export default function RecoverPage({
           </CardHeader>
 
           <CardContent>
-            {actionData?.success && (
-              <div className="bg-green-100 dark:bg-green-900 p-4 rounded-md mb-4 text-green-800 dark:text-green-300">
+            {actionData?.message && (
+              <div
+                className={`p-4 rounded-md mb-4 ${
+                  actionData.success
+                    ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300'
+                    : 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-300'
+                }`}
+              >
                 {actionData.message}
               </div>
             )}

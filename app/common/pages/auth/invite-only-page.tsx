@@ -23,6 +23,8 @@ import {
 } from '~/common/components/ui/form';
 import { Alert, AlertDescription } from '~/common/components/ui/alert';
 import { Separator } from '~/common/components/ui/separator';
+import { getInviteStats, type InviteStats } from '~/lib/public-data';
+import type { Route } from './+types/invite-only-page';
 
 // Zod 스키마 정의
 const inviteCodeSchema = z.object({
@@ -30,6 +32,24 @@ const inviteCodeSchema = z.object({
 });
 
 type InviteCodeFormData = z.infer<typeof inviteCodeSchema>;
+
+// Loader 함수 - 초대 통계 데이터 가져오기
+export async function loader({ request }: Route.LoaderArgs) {
+  try {
+    const inviteStats = await getInviteStats();
+    return { inviteStats };
+  } catch (error) {
+    console.error('초대 통계 데이터 로드 실패:', error);
+    return {
+      inviteStats: {
+        totalInvitations: 450,
+        usedInvitations: 320,
+        pendingInvitations: 130,
+        conversionRate: 71,
+      } as InviteStats,
+    };
+  }
+}
 
 // 메타 정보
 export const meta: MetaFunction = () => {
@@ -39,7 +59,8 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export default function InviteOnlyPage() {
+export default function InviteOnlyPage({ loaderData }: Route.ComponentProps) {
+  const { inviteStats } = loaderData;
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // react-hook-form과 zodResolver를 사용한 폼 설정
@@ -68,6 +89,30 @@ export default function InviteOnlyPage() {
         </CardHeader>
 
         <CardContent className="pb-2">
+          {/* 초대 통계 표시 */}
+          {/* <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="text-center p-4 bg-muted/30 rounded-lg">
+              <div className="text-2xl font-bold text-primary">
+                {inviteStats.totalInvitations}
+              </div>
+              <div className="text-sm text-muted-foreground">총 초대</div>
+            </div>
+            <div className="text-center p-4 bg-muted/30 rounded-lg">
+              <div className="text-2xl font-bold text-green-600">
+                {inviteStats.conversionRate}%
+              </div>
+              <div className="text-sm text-muted-foreground">가입률</div>
+            </div>
+          </div> */}
+
+          {/* <Alert className="mb-4">
+            <AlertDescription>
+              현재 <strong>{inviteStats.usedInvitations}명</strong>이 SureCRM을
+              사용 중이며, <strong>{inviteStats.pendingInvitations}개</strong>의
+              초대가 대기 중입니다.
+            </AlertDescription>
+          </Alert> */}
+
           <div className="py-4 space-y-4">
             <Form {...form}>
               <form

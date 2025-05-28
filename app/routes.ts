@@ -9,6 +9,7 @@ export default [
 
   // 인증 관련 페이지
   route('login', 'common/pages/auth/login-page.tsx'),
+  route('forgot-password', 'common/pages/auth/forgot-password-page.tsx'),
   route('invite-only', 'common/pages/auth/invite-only-page.tsx'),
   route('invite/:code', 'common/pages/auth/invite-page.tsx'),
   route('recover', 'common/pages/auth/recover-page.tsx'),
