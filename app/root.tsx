@@ -243,15 +243,15 @@ export default function App() {
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
-  let message = 'Oops!';
-  let details = 'An unexpected error occurred.';
+  let message = '오류!';
+  let details = '예상치 못한 오류가 발생했습니다.';
   let stack: string | undefined;
 
   if (isRouteErrorResponse(error)) {
-    message = error.status === 404 ? '404' : 'Error';
+    message = error.status === 404 ? '404' : '오류';
     details =
       error.status === 404
-        ? 'The requested page could not be found.'
+        ? '요청하신 페이지를 찾을 수 없습니다.'
         : error.statusText || details;
   } else if (import.meta.env.DEV && error && error instanceof Error) {
     details = error.message;
@@ -260,12 +260,15 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
 
   return (
     <main className="pt-16 p-4 container mx-auto">
-      <h1>{message}</h1>
-      <p>{details}</p>
+      <h1 className="text-2xl font-bold text-center mb-4">{message}</h1>
+      <p className="text-center text-muted-foreground mb-6">{details}</p>
       {stack && (
-        <pre className="w-full p-4 overflow-x-auto">
-          <code>{stack}</code>
-        </pre>
+        <div className="space-y-2">
+          <h2 className="text-lg font-semibold">개발자 정보:</h2>
+          <pre className="w-full p-4 overflow-x-auto bg-muted rounded-lg">
+            <code className="text-sm">{stack}</code>
+          </pre>
+        </div>
       )}
     </main>
   );
