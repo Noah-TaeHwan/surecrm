@@ -1,6 +1,7 @@
 import { db } from '~/lib/db';
 import { eq, desc, asc, count, sql, and, gte, lte } from 'drizzle-orm';
 import { clients, teams, referrals } from '~/lib/db-schema';
+import { profiles } from '~/lib/supabase-schema';
 import {
   meetings,
   meetingChecklists,
@@ -13,20 +14,23 @@ export async function getUserInfo(userId: string) {
   try {
     const profile = await db
       .select({
-        id: clients.id,
-        name: clients.name,
+        id: profiles.id,
+        fullName: profiles.fullName,
+        role: profiles.role,
       })
-      .from(clients)
-      .where(eq(clients.agentId, userId))
+      .from(profiles)
+      .where(eq(profiles.id, userId))
       .limit(1);
 
     return {
-      name: profile[0]?.name || '사용자',
+      name: profile[0]?.fullName || '사용자',
+      role: profile[0]?.role || 'agent',
     };
   } catch (error) {
     console.error('getUserInfo 오류:', error);
     return {
       name: '사용자',
+      role: 'agent',
     };
   }
 }

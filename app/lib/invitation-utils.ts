@@ -66,14 +66,12 @@ export async function createInvitationsForUser(
 
     for (let i = 0; i < count; i++) {
       const code = await generateUniqueInvitationCode();
-      const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + 30); // 30일 후 만료
 
       invitations.push({
         code,
         inviter_id: userId,
-        expires_at: expiresAt.toISOString(),
         status: 'pending',
+        // expires_at 제거 - 유효기간 없음
       });
     }
 

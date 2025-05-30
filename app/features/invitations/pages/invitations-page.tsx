@@ -300,14 +300,34 @@ export default function InvitationsPage({ loaderData }: Route.ComponentProps) {
         )}
 
         {/* 초대 가이드 */}
-        <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+        <Card className="border-border/40 bg-muted/20 backdrop-blur-sm">
           <CardHeader>
-            <CardTitle className="text-blue-900">💡 초대 팁</CardTitle>
+            <CardTitle className="text-foreground flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                💡
+              </div>
+              초대 팁
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2 text-sm text-blue-800">
-            <p>• 초대장은 한정된 수량으로 제공됩니다</p>
-            <p>• 성공적인 초대 시 추가 초대장을 받을 수 있습니다</p>
-            <p>• 초대받은 사람이 활발히 활동할수록 더 많은 혜택을 받습니다</p>
+          <CardContent className="space-y-3 text-sm">
+            <div className="flex items-start gap-3 p-3 rounded-lg bg-card/50 border border-border/30">
+              <div className="w-2 h-2 rounded-full bg-primary/60 mt-2 flex-shrink-0" />
+              <p className="text-muted-foreground">
+                초대장은 한정된 수량으로 제공되며, 신중하게 사용하시기 바랍니다
+              </p>
+            </div>
+            <div className="flex items-start gap-3 p-3 rounded-lg bg-card/50 border border-border/30">
+              <div className="w-2 h-2 rounded-full bg-primary/60 mt-2 flex-shrink-0" />
+              <p className="text-muted-foreground">
+                성공적인 초대 시 추가 초대장을 받을 수 있습니다
+              </p>
+            </div>
+            <div className="flex items-start gap-3 p-3 rounded-lg bg-card/50 border border-border/30">
+              <div className="w-2 h-2 rounded-full bg-primary/60 mt-2 flex-shrink-0" />
+              <p className="text-muted-foreground">
+                초대받은 사람이 활발히 활동할수록 더 많은 혜택을 받습니다
+              </p>
+            </div>
           </CardContent>
         </Card>
       </div>

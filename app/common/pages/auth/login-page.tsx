@@ -153,6 +153,15 @@ export default function LoginPage({ loaderData, actionData }: ComponentProps) {
             </Alert>
           )}
 
+          {/* 이메일 인증 완료 메시지 */}
+          {loaderData.message === 'email-verified' && (
+            <Alert className="mb-4 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800">
+              <AlertDescription>
+                이메일 인증이 완료되었습니다! 이제 로그인하세요.
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* 로그아웃 메시지 */}
           {loaderData.message === 'logged-out' && (
             <Alert className="mb-4 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800">

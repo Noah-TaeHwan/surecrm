@@ -14,22 +14,59 @@ import {
 } from '~/common/components/ui/select';
 import { Switch } from '~/common/components/ui/switch';
 import { Label } from '~/common/components/ui/label';
+import { Button } from '~/common/components/ui/button';
 import { GearIcon, GlobeIcon, SunIcon } from '@radix-ui/react-icons';
+import { Form, useSubmit } from 'react-router';
+import { useState, useEffect } from 'react';
 import type { SystemSectionProps } from './types';
 
 export function SystemSection({ settings, onUpdate }: SystemSectionProps) {
+  const submit = useSubmit();
+  const [localSettings, setLocalSettings] = useState(settings);
+
+  // 실제 다크모드 적용
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      if (localSettings.darkMode) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+  }, [localSettings.darkMode]);
+
   const handleLanguageChange = (language: string) => {
-    onUpdate({
-      ...settings,
+    const newSettings = {
+      ...localSettings,
       language,
-    });
+    };
+    setLocalSettings(newSettings);
+
+    // 즉시 서버에 저장
+    const formData = new FormData();
+    formData.append('intent', 'updateSystem');
+    formData.append('language', language);
+    formData.append('darkMode', localSettings.darkMode.toString());
+    submit(formData, { method: 'POST' });
   };
 
   const handleDarkModeToggle = () => {
-    onUpdate({
-      ...settings,
-      darkMode: !settings.darkMode,
-    });
+    const newDarkMode = !localSettings.darkMode;
+    const newSettings = {
+      ...localSettings,
+      darkMode: newDarkMode,
+    };
+    setLocalSettings(newSettings);
+
+    // 즉시 서버에 저장
+    const formData = new FormData();
+    formData.append('intent', 'updateSystem');
+    formData.append('language', localSettings.language);
+    formData.append('darkMode', newDarkMode.toString());
+    submit(formData, { method: 'POST' });
+
+    // 콜백도 호출 (기존 로직 유지)
+    onUpdate(newSettings);
   };
 
   return (
@@ -50,20 +87,20 @@ export function SystemSection({ settings, onUpdate }: SystemSectionProps) {
             <div>
               <Label className="font-medium">언어</Label>
               <p className="text-sm text-muted-foreground">
-                앱에서 사용할 언어를 선택하세요
+                현재 한국어만 지원됩니다 (MVP 버전)
               </p>
             </div>
           </div>
           <Select
-            value={settings.language}
+            value={localSettings.language}
             onValueChange={handleLanguageChange}
+            disabled
           >
-            <SelectTrigger className="w-32">
+            <SelectTrigger className="w-32 opacity-60">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="ko">한국어</SelectItem>
-              <SelectItem value="en">English</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -79,7 +116,7 @@ export function SystemSection({ settings, onUpdate }: SystemSectionProps) {
             </div>
           </div>
           <Switch
-            checked={settings.darkMode}
+            checked={localSettings.darkMode}
             onCheckedChange={handleDarkModeToggle}
           />
         </div>

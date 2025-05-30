@@ -2,58 +2,23 @@ import { reactRouter } from '@react-router/dev/vite';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig, loadEnv } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
-import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill';
-import { NodeModulesPolyfillPlugin } from '@esbuild-plugins/node-modules-polyfill';
 
 export default defineConfig(({ mode }) => {
-  // 환경변수 로드
+  // 환경 변수 로드
   const env = loadEnv(mode, process.cwd(), '');
 
   return {
     plugins: [tailwindcss(), reactRouter(), tsconfigPaths()],
     define: {
-      global: 'globalThis',
+      // 서버사이드에서 환경 변수 사용 가능하도록 설정
+      'process.env.SUPABASE_URL': JSON.stringify(env.SUPABASE_URL),
+      'process.env.SUPABASE_ANON_KEY': JSON.stringify(env.SUPABASE_ANON_KEY),
+      'process.env.SUPABASE_SERVICE_ROLE_KEY': JSON.stringify(
+        env.SUPABASE_SERVICE_ROLE_KEY
+      ),
       'process.env.DATABASE_URL': JSON.stringify(env.DATABASE_URL),
-      'process.env.DATABASE_PASSWORD': JSON.stringify(env.DATABASE_PASSWORD),
-    },
-    resolve: {
-      alias: {
-        buffer: 'buffer',
-        process: 'process/browser',
-        util: 'util',
-        stream: 'stream-browserify',
-        crypto: 'crypto-browserify',
-      },
-    },
-    optimizeDeps: {
-      include: [
-        'buffer',
-        'process',
-        'util',
-        'stream-browserify',
-        'crypto-browserify',
-        'react-force-graph-2d',
-      ],
-      esbuildOptions: {
-        plugins: [
-          NodeGlobalsPolyfillPlugin({
-            buffer: true,
-            process: true,
-          }),
-          NodeModulesPolyfillPlugin(),
-        ],
-      },
-    },
-    build: {
-      rollupOptions: {
-        external: [],
-      },
-    },
-    ssr: {
-      // SSR에서 제외할 패키지 목록
-      noExternal: ['react-force-graph-2d', 'buffer', 'process'],
-      // 외부화할 패키지들 - 서버에서 실행되지 않도록 함
-      external: ['force-graph', 'd3', 'kapsule', 'accessors'],
+      'process.env.SESSION_SECRET': JSON.stringify(env.SESSION_SECRET),
+      'process.env.NODE_ENV': JSON.stringify(env.NODE_ENV),
     },
   };
 });

@@ -32,14 +32,35 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
+        {/* 🌙 INSTANT DARK MODE - FOUC 방지 */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              // 즉시 실행되는 테마 설정 (FOUC 방지)
+              (function() {
+                try {
+                  const savedTheme = localStorage.getItem('surecrm-theme');
+                  const isDark = savedTheme ? savedTheme === 'dark' : true; // 기본값: 다크모드
+                  
+                  if (isDark) {
+                    document.documentElement.classList.add('dark');
+                  } else {
+                    document.documentElement.classList.remove('dark');
+                  }
+                } catch (e) {
+                  // localStorage 접근 실패 시 다크모드 기본값
+                  document.documentElement.classList.add('dark');
+                }
+              })();
+            `,
+          }}
+        />
         {/* 🚨 Critical CSS - FOUC 방지 (레이아웃 보존) */}
         <style
           dangerouslySetInnerHTML={{
             __html: `
-              /* 🎯 INSTANT DARK MODE APPLICATION - 레이아웃 파괴 없이 */
+              /* 🎯 INSTANT THEME APPLICATION - 레이아웃 파괴 없이 */
               html, body {
-                background-color: oklch(0.141 0.005 285.823) !important;
-                color: oklch(0.985 0 0) !important;
                 font-family: 'Inter', ui-sans-serif, system-ui, sans-serif !important;
                 -webkit-font-smoothing: antialiased !important;
                 -moz-osx-font-smoothing: grayscale !important;
@@ -48,6 +69,18 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 width: 100vw !important;
                 max-width: 100% !important;
                 min-height: 100vh !important;
+              }
+              
+              /* 라이트 테마 */
+              html:not(.dark) {
+                background-color: oklch(1 0 0) !important;
+                color: oklch(0.141 0.005 285.823) !important;
+              }
+              
+              /* 다크 테마 (기본값) */
+              html.dark {
+                background-color: oklch(0.141 0.005 285.823) !important;
+                color: oklch(0.985 0 0) !important;
               }
               
               /* 🛡️ HTML ELEMENT CUSTOMIZATION - 기본 스타일 유지하면서 커스터마이징 */
@@ -123,31 +156,45 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 background-color: oklch(0.969 0.015 12.422) !important;
               }
               
-              /* 스크롤바 즉시 적용 */
-              * {
+              /* 스크롤바 테마 반응형 */
+              html:not(.dark) * {
                 scrollbar-width: thin !important;
-                scrollbar-color: oklch(0.374151 0 0) transparent !important;
+                scrollbar-color: #6b7280 transparent !important;
               }
               
-              *::-webkit-scrollbar {
+              html:not(.dark) *::-webkit-scrollbar {
                 width: 14px !important;
                 height: 14px !important;
               }
               
-              *::-webkit-scrollbar-track {
+              html:not(.dark) *::-webkit-scrollbar-track {
                 background: transparent !important;
                 border-radius: 8px !important;
               }
               
-              *::-webkit-scrollbar-thumb {
-                background: oklch(0.374151 0 0) !important;
+              html:not(.dark) *::-webkit-scrollbar-thumb {
+                background: #6b7280 !important;
                 border-radius: 8px !important;
                 border: 3px solid transparent !important;
                 background-clip: content-box !important;
               }
               
-              *::-webkit-scrollbar-thumb:hover {
-                background: oklch(0.4b5563 0 0) !important;
+              html:not(.dark) *::-webkit-scrollbar-thumb:hover {
+                background: #4b5563 !important;
+              }
+              
+              /* 다크 테마 스크롤바 */
+              html.dark * {
+                scrollbar-width: thin !important;
+                scrollbar-color: #374151 transparent !important;
+              }
+              
+              html.dark *::-webkit-scrollbar-thumb {
+                background: #374151 !important;
+              }
+              
+              html.dark *::-webkit-scrollbar-thumb:hover {
+                background: #4b5563 !important;
               }
               
               /* 애니메이션 키프레임 */
@@ -182,8 +229,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
           }}
         />
       </head>
-      <body className="layout-lock">
-        {children}
+      <body className="font-sans text-foreground bg-background">
+        <Outlet />
         <ScrollRestoration />
         <Scripts />
       </body>

@@ -5,66 +5,29 @@ import {
   CardHeader,
   CardTitle,
 } from '~/common/components/ui/card';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '~/common/components/ui/form';
 import { Input } from '~/common/components/ui/input';
 import { Button } from '~/common/components/ui/button';
 import { Avatar, AvatarFallback } from '~/common/components/ui/avatar';
 import { Badge } from '~/common/components/ui/badge';
+import { Label } from '~/common/components/ui/label';
 import { CheckIcon, Pencil1Icon, PersonIcon } from '@radix-ui/react-icons';
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
+import { Form, useSubmit } from 'react-router';
 import type { ProfileSectionProps } from './types';
-
-const profileSchema = z.object({
-  name: z.string().min(2, '이름은 2자 이상이어야 합니다'),
-  email: z.string().email('올바른 이메일 형식이 아닙니다'),
-  phone: z.string(),
-  company: z.string(),
-  position: z.string(),
-  team: z.string().optional(),
-});
-
-type ProfileFormData = z.infer<typeof profileSchema>;
 
 export function ProfileSection({ profile, onUpdate }: ProfileSectionProps) {
   const [isEditing, setIsEditing] = useState(false);
+  const submit = useSubmit();
 
-  const form = useForm<ProfileFormData>({
-    resolver: zodResolver(profileSchema),
-    defaultValues: {
-      name: profile.name,
-      email: profile.email,
-      phone: profile.phone,
-      company: profile.company,
-      position: profile.position,
-      team: profile.team?.name || '',
-    },
-  });
-
-  const onSubmit = (data: ProfileFormData) => {
-    onUpdate({
-      ...data,
-      team: data.team
-        ? {
-            id: 'custom',
-            name: data.team,
-          }
-        : undefined,
-    });
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    formData.append('intent', 'updateProfile');
+    submit(formData, { method: 'POST' });
     setIsEditing(false);
   };
 
   const handleCancel = () => {
-    form.reset();
     setIsEditing(false);
   };
 
@@ -115,100 +78,81 @@ export function ProfileSection({ profile, onUpdate }: ProfileSectionProps) {
         </div>
 
         {/* 프로필 폼 */}
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <Form method="post" onSubmit={handleSubmit}>
+          <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>이름</FormLabel>
-                    <FormControl>
-                      <Input {...field} disabled={!isEditing} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="space-y-2">
+                <Label htmlFor="name">이름</Label>
+                <Input
+                  id="name"
+                  name="name"
+                  defaultValue={profile.name}
+                  disabled={!isEditing}
+                  required
+                />
+              </div>
 
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>이메일</FormLabel>
-                    <FormControl>
-                      <Input {...field} type="email" disabled={!isEditing} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="space-y-2">
+                <Label htmlFor="email">이메일</Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  defaultValue={profile.email}
+                  disabled={true}
+                  className="opacity-60"
+                />
+                <p className="text-xs text-muted-foreground">
+                  이메일은 변경할 수 없습니다
+                </p>
+              </div>
 
-              <FormField
-                control={form.control}
-                name="phone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>전화번호</FormLabel>
-                    <FormControl>
-                      <Input {...field} disabled={!isEditing} />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
+              <div className="space-y-2">
+                <Label htmlFor="phone">전화번호</Label>
+                <Input
+                  id="phone"
+                  name="phone"
+                  defaultValue={profile.phone}
+                  disabled={!isEditing}
+                />
+              </div>
 
-              <FormField
-                control={form.control}
-                name="company"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>회사</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        disabled={!isEditing}
-                        placeholder="소속 보험사"
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
+              <div className="space-y-2">
+                <Label htmlFor="company">회사</Label>
+                <Input
+                  id="company"
+                  name="company"
+                  defaultValue={profile.company}
+                  disabled={!isEditing}
+                  placeholder="소속 보험사"
+                />
+              </div>
 
-              <FormField
-                control={form.control}
-                name="position"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>직책</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        disabled={!isEditing}
-                        placeholder="영업팀장, 설계사 등"
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
+              <div className="space-y-2">
+                <Label htmlFor="position">직책</Label>
+                <Input
+                  id="position"
+                  name="position"
+                  defaultValue={profile.position}
+                  disabled={true}
+                  className="opacity-60"
+                  placeholder="영업팀장, 설계사 등"
+                />
+                <p className="text-xs text-muted-foreground">
+                  직책은 자동으로 설정됩니다
+                </p>
+              </div>
 
-              <FormField
-                control={form.control}
-                name="team"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>소속 팀</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        disabled={!isEditing}
-                        placeholder="팀 이름을 입력하세요"
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
+              <div className="space-y-2">
+                <Label htmlFor="team">소속 팀</Label>
+                <Input
+                  id="team"
+                  name="team"
+                  defaultValue={profile.team?.name || ''}
+                  disabled={!isEditing}
+                  placeholder="팀 이름을 입력하세요"
+                />
+              </div>
             </div>
 
             {isEditing && (
@@ -222,7 +166,7 @@ export function ProfileSection({ profile, onUpdate }: ProfileSectionProps) {
                 </Button>
               </div>
             )}
-          </form>
+          </div>
         </Form>
       </CardContent>
     </Card>

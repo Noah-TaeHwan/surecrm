@@ -24,6 +24,7 @@ import {
 import { Alert, AlertDescription } from '~/common/components/ui/alert';
 import { Separator } from '~/common/components/ui/separator';
 import { getInvitationStats } from '~/lib/invitation-utils';
+import { checkAuthStatus } from '~/lib/auth';
 
 // Zod 스키마 정의
 const inviteCodeSchema = z.object({
@@ -46,6 +47,13 @@ interface InviteStats {
 // Loader 함수 - 초대 통계 데이터 가져오기
 export async function loader({ request }: LoaderArgs) {
   try {
+    // 인증 상태 확인 - 이미 로그인한 사용자는 대시보드로 리다이렉트
+    const isAuthenticated = await checkAuthStatus(request);
+
+    if (isAuthenticated) {
+      throw redirect('/dashboard');
+    }
+
     // 새로운 invitation-utils 함수 사용
     const inviteStats = await getInvitationStats();
 
@@ -53,6 +61,11 @@ export async function loader({ request }: LoaderArgs) {
       inviteStats,
     };
   } catch (error) {
+    // 리다이렉트 에러는 다시 throw
+    if (error instanceof Response) {
+      throw error;
+    }
+
     console.error('초대 통계 데이터 로드 실패:', error);
     return {
       inviteStats: {

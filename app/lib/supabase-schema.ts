@@ -90,6 +90,8 @@ export const invitationStatusEnum = pgEnum('invitation_status', [
   'cancelled',
 ]);
 
+export const themeEnum = pgEnum('theme', ['light', 'dark']);
+
 // Public 스키마 테이블들 (우리가 관리)
 
 // Profiles 테이블 (auth.users 확장)
@@ -105,6 +107,7 @@ export const profiles = pgTable('profiles', {
   teamId: uuid('team_id'),
   invitedById: uuid('invited_by_id'),
   invitationsLeft: integer('invitations_left').default(2).notNull(),
+  theme: themeEnum('theme').default('dark').notNull(),
   googleCalendarToken: jsonb('google_calendar_token'),
   settings: jsonb('settings'),
   isActive: boolean('is_active').default(true).notNull(),

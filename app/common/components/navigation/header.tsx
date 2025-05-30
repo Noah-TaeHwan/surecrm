@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router';
 import { Bell, User, LogOut, Settings, Menu, Eye } from 'lucide-react';
 import { cn } from '~/lib/utils';
@@ -17,13 +17,23 @@ import {
 } from '~/common/components/ui/dropdown-menu';
 import { Badge } from '~/common/components/ui/badge';
 import { ScrollArea } from '~/common/components/ui/scroll-area';
-import { useNotifications } from '~/hooks/use-notifications';
+import { HeaderThemeToggle } from '~/common/components/ui/theme-toggle';
 
 interface HeaderProps {
   title?: string;
   className?: string;
   showMenuButton?: boolean;
   onMenuButtonClick?: () => void;
+}
+
+// 기본 알림 타입 정의
+interface BasicNotification {
+  id: string;
+  title: string;
+  message: string;
+  type: string;
+  createdAt: string;
+  readAt?: string | null;
 }
 
 export function Header({
@@ -33,29 +43,84 @@ export function Header({
   onMenuButtonClick,
 }: HeaderProps) {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [notifications, setNotifications] = useState<BasicNotification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // 실제 알림 데이터 사용
-  const {
-    notifications,
-    unreadCount,
-    isLoading,
-    error,
-    markAsRead,
-    markAllAsRead,
-    formatTime,
-    getIcon,
-  } = useNotifications({
-    limit: 5, // 헤더에서는 최근 5개만 표시
-    autoRefresh: true,
-    refreshInterval: 30000, // 30초마다 새로고침
-  });
+  // 알림 데이터를 직접 fetch하는 함수
+  const fetchNotifications = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch('/api/notifications?limit=5');
+
+      if (response.ok) {
+        const data = await response.json();
+        setNotifications(data.notifications || []);
+        setUnreadCount(data.unreadCount || 0);
+      } else {
+        // 인증 오류 등은 조용히 처리
+        setNotifications([]);
+        setUnreadCount(0);
+      }
+    } catch (error) {
+      console.warn('알림 로드 실패:', error);
+      setNotifications([]);
+      setUnreadCount(0);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // 컴포넌트 마운트 시 알림 로드
+  useEffect(() => {
+    fetchNotifications();
+
+    // 30초마다 알림 새로고침
+    const interval = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleMarkAsRead = async (id: string) => {
-    await markAsRead(id);
+    try {
+      const formData = new FormData();
+      formData.append('intent', 'markAsRead');
+      formData.append('notificationId', id);
+
+      await fetch('/api/notifications', {
+        method: 'POST',
+        body: formData,
+      });
+
+      // 성공 시 로컬 상태 업데이트
+      setNotifications((prev) =>
+        prev.map((n) =>
+          n.id === id ? { ...n, readAt: new Date().toISOString() } : n
+        )
+      );
+      setUnreadCount((prev) => Math.max(0, prev - 1));
+    } catch (error) {
+      console.error('알림 읽음 처리 실패:', error);
+    }
   };
 
   const handleMarkAllAsRead = async () => {
-    await markAllAsRead();
+    try {
+      const formData = new FormData();
+      formData.append('intent', 'markAllAsRead');
+
+      await fetch('/api/notifications', {
+        method: 'POST',
+        body: formData,
+      });
+
+      // 성공 시 로컬 상태 업데이트
+      setNotifications((prev) =>
+        prev.map((n) => ({ ...n, readAt: new Date().toISOString() }))
+      );
+      setUnreadCount(0);
+    } catch (error) {
+      console.error('모든 알림 읽음 처리 실패:', error);
+    }
   };
 
   const handleLogout = async () => {
@@ -63,7 +128,6 @@ export function Header({
 
     setIsLoggingOut(true);
     try {
-      // POST 요청으로 로그아웃 처리
       const response = await fetch('/auth/logout', {
         method: 'POST',
         headers: {
@@ -72,7 +136,6 @@ export function Header({
       });
 
       if (response.ok) {
-        // 로그아웃 성공 시 페이지 리다이렉트
         window.location.href = '/auth/login?message=logged-out';
       } else {
         console.error('로그아웃 실패');
@@ -81,6 +144,43 @@ export function Header({
     } catch (error) {
       console.error('로그아웃 중 오류:', error);
       setIsLoggingOut(false);
+    }
+  };
+
+  // 시간 포맷 함수
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    const minutes = Math.floor(diff / 60000);
+
+    if (minutes < 1) return '방금 전';
+    if (minutes < 60) return `${minutes}분 전`;
+
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}시간 전`;
+
+    const days = Math.floor(hours / 24);
+    return `${days}일 전`;
+  };
+
+  // 아이콘 가져오기 함수
+  const getIcon = (type: string) => {
+    switch (type) {
+      case 'meeting_reminder':
+        return '📅';
+      case 'client_milestone':
+        return '👤';
+      case 'new_referral':
+        return '🔗';
+      case 'goal_achievement':
+        return '🎯';
+      case 'team_update':
+        return '👥';
+      case 'system_alert':
+        return '⚠️';
+      default:
+        return '📢';
     }
   };
 
@@ -147,10 +247,6 @@ export function Header({
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
                 <p className="text-sm text-muted-foreground mt-2">로딩 중...</p>
               </div>
-            ) : error ? (
-              <div className="p-8 text-center">
-                <p className="text-sm text-destructive">{error}</p>
-              </div>
             ) : notifications.length > 0 ? (
               <div className="max-h-80 overflow-y-auto">
                 {notifications.map((notification) => (
@@ -179,7 +275,7 @@ export function Header({
                           {notification.message}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {formatTime(new Date(notification.createdAt))}
+                          {formatTime(notification.createdAt)}
                         </p>
                       </div>
                     </div>
@@ -207,6 +303,9 @@ export function Header({
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+
+        {/* 테마 토글 */}
+        <HeaderThemeToggle isAuthenticated />
 
         {/* 사용자 프로필 드롭다운 */}
         <DropdownMenu>

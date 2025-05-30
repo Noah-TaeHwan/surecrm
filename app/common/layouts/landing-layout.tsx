@@ -3,6 +3,7 @@ import { Button } from '~/common/components/ui/button';
 import { Link } from 'react-router';
 import { Menu, X } from 'lucide-react';
 import { Sheet, SheetContent } from '~/common/components/ui/sheet';
+import { HeaderThemeToggle } from '~/common/components/ui/theme-toggle';
 
 interface LandingLayoutProps {
   children: React.ReactNode;
@@ -35,7 +36,8 @@ export function LandingLayout({
           </Button>
 
           {/* 데스크톱 네비게이션 */}
-          <div className="hidden md:flex md:space-x-4">
+          <div className="hidden md:flex md:items-center md:space-x-2">
+            <HeaderThemeToggle />
             <Button variant="ghost" asChild>
               <Link to="/auth/login">로그인</Link>
             </Button>
@@ -50,6 +52,10 @@ export function LandingLayout({
       <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
         <SheetContent side="right" className="w-64">
           <nav className="flex flex-col space-y-4 mt-8">
+            <div className="flex items-center justify-between pb-4 border-b">
+              <span className="text-sm text-muted-foreground">테마 설정</span>
+              <HeaderThemeToggle />
+            </div>
             <Button variant="ghost" asChild className="justify-start">
               <Link to="/auth/login" onClick={() => setIsMobileMenuOpen(false)}>
                 로그인

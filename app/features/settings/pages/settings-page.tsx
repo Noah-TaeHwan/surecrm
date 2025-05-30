@@ -23,6 +23,7 @@ import { SystemSection } from '../components/system-section';
 
 // 타입 imports
 import type { NotificationSettings, SystemSettings } from '../components/types';
+import React from 'react';
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getCurrentUser(request);
@@ -74,7 +75,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 
     const systemSettings: SystemSettings = {
       language: userSettingsData?.language || 'ko',
-      darkMode: userSettingsData?.darkMode || false,
+      darkMode: userSettingsData?.darkMode || true,
     };
 
     return {
@@ -134,7 +135,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 
     const systemSettings: SystemSettings = {
       language: 'ko',
-      darkMode: false,
+      darkMode: true,
     };
 
     return {
@@ -246,17 +247,28 @@ export default function SettingsPage({
   const [localNotificationSettings, setLocalNotificationSettings] =
     useState(notificationSettings);
 
+  // 다크모드 설정 적용
+  React.useEffect(() => {
+    if (typeof document !== 'undefined') {
+      if (systemSettings.darkMode) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+  }, [systemSettings.darkMode]);
+
   // 프로필 업데이트
   const handleProfileUpdate = (data: Partial<UserProfile>) => {
     console.log('프로필 업데이트:', data);
-    // TODO: API 호출
+    // 실제 구현: Form submission으로 처리됨
   };
 
   // 알림 설정 업데이트
   const handleNotificationUpdate = (settings: NotificationSettings) => {
     console.log('알림 설정 업데이트:', settings);
     setLocalNotificationSettings(settings);
-    // TODO: API 호출
+    // 실제 구현: Form submission으로 처리됨
   };
 
   // 비밀번호 변경
@@ -271,7 +283,7 @@ export default function SettingsPage({
   // 시스템 설정 업데이트
   const handleSystemUpdate = (settings: SystemSettings) => {
     console.log('시스템 설정 업데이트:', settings);
-    // TODO: API 호출
+    // 실제 구현: Form submission으로 처리됨 (SystemSection에서)
   };
 
   return (
@@ -285,16 +297,18 @@ export default function SettingsPage({
 
           {/* 성공/에러 메시지 */}
           {actionData?.success && (
-            <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-md">
-              <p className="text-green-800">
+            <div className="mt-4 p-4 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-md">
+              <p className="text-green-800 dark:text-green-400">
                 {actionData.message || '설정이 성공적으로 저장되었습니다.'}
               </p>
             </div>
           )}
 
           {actionData && !actionData.success && (
-            <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-md">
-              <p className="text-red-800">{actionData.message}</p>
+            <div className="mt-4 p-4 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-md">
+              <p className="text-red-800 dark:text-red-400">
+                {actionData.message}
+              </p>
             </div>
           )}
         </div>

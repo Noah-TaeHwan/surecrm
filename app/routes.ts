@@ -1,12 +1,16 @@
 import { type RouteConfig, index, route } from '@react-router/dev/routes';
 
 export default [
-  // 랜딩 페이지
-  index('common/pages/landing-page.tsx'),
+  // 메인 페이지 (인증 상태에 따른 리다이렉트)
+  index('routes/_index.tsx'),
 
   // API 라우트
   route('api/notifications', 'routes/api+/notifications.tsx'),
   route('api/validate-invitation', 'routes/api+/validate-invitation.ts'),
+  route('api/resend-verification', 'routes/api+/resend-verification.ts'),
+  route('api/auth-webhook', 'routes/api+/auth-webhook.ts'),
+  route('api/cleanup-user', 'routes/api+/cleanup-user.ts'),
+  route('api/check-email', 'routes/api+/check-email.ts'),
 
   // 대시보드
   route('dashboard', 'features/dashboard/pages/dashboard-page.tsx'),
@@ -16,6 +20,12 @@ export default [
   route('auth/signup', 'common/pages/auth/signup-page.tsx'),
   route('auth/logout', 'routes/auth.logout.tsx'),
   route('auth/forgot-password', 'common/pages/auth/forgot-password-page.tsx'),
+  route('auth/otp-verification', 'common/pages/auth/otp-verification-page.tsx'),
+  route(
+    'auth/email-verification',
+    'common/pages/auth/email-verification-page.tsx'
+  ),
+  route('auth/email-confirmed', 'common/pages/auth/email-confirmed-page.tsx'),
   route('invite-only', 'common/pages/auth/invite-only-page.tsx'),
   route('auth/recover', 'common/pages/auth/recover-page.tsx'),
 

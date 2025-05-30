@@ -98,6 +98,7 @@ export async function action({ request }: ActionArgs) {
     invitationCode: formData.get('invitationCode') as string,
     email: formData.get('email') as string,
     password: formData.get('password') as string,
+    confirmPassword: formData.get('confirmPassword') as string,
     fullName: formData.get('fullName') as string,
     phone: (formData.get('phone') as string) || undefined,
     company: (formData.get('company') as string) || undefined,
@@ -108,6 +109,7 @@ export async function action({ request }: ActionArgs) {
     !signUpData.invitationCode ||
     !signUpData.email ||
     !signUpData.password ||
+    !signUpData.confirmPassword ||
     !signUpData.fullName
   ) {
     return {
@@ -116,10 +118,62 @@ export async function action({ request }: ActionArgs) {
     };
   }
 
-  const result = await signUpUser(signUpData);
+  // 비밀번호 일치 검증
+  if (signUpData.password !== signUpData.confirmPassword) {
+    return {
+      success: false,
+      error: '비밀번호가 일치하지 않습니다.',
+    };
+  }
+
+  // Zod 스키마로 전체 검증
+  try {
+    signUpSchema.parse(signUpData);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      const firstError = error.errors[0];
+      return {
+        success: false,
+        error: firstError.message,
+      };
+    }
+    return {
+      success: false,
+      error: '입력 데이터가 유효하지 않습니다.',
+    };
+  }
+
+  const result = await signUpUser({
+    invitationCode: signUpData.invitationCode,
+    email: signUpData.email,
+    password: signUpData.password,
+    fullName: signUpData.fullName,
+    phone: signUpData.phone,
+    company: signUpData.company,
+  });
 
   if (result.success && result.user) {
-    // 회원가입 성공 시 로그인 페이지로 리다이렉트
+    // OTP 인증이 필요한 경우 (isActive가 false인 경우)
+    if (!result.user.isActive) {
+      // OTP 인증 페이지로 리다이렉트 (signUpData도 함께 전달)
+      throw redirect(
+        `/auth/otp-verification?email=${encodeURIComponent(
+          signUpData.email
+        )}&invitation_code=${encodeURIComponent(
+          signUpData.invitationCode
+        )}&full_name=${encodeURIComponent(
+          signUpData.fullName
+        )}&phone=${encodeURIComponent(
+          signUpData.phone || ''
+        )}&company=${encodeURIComponent(
+          signUpData.company || ''
+        )}&message=${encodeURIComponent(
+          '회원가입 요청이 완료되었습니다. 이메일로 받은 인증 코드를 입력해주세요.'
+        )}`
+      );
+    }
+
+    // OTP 인증이 완료된 경우 (드물지만 OTP가 비활성화된 경우)
     throw redirect('/auth/login?message=signup-success');
   }
 
@@ -197,6 +251,47 @@ export default function SignUpPage({ loaderData, actionData }: ComponentProps) {
     }
   };
 
+  // 폼 제출 핸들러
+  const onSubmit = async (data: SignUpFormData) => {
+    setIsSubmitting(true);
+
+    // 초대 코드 검증
+    if (!invitationValid) {
+      form.setError('invitationCode', {
+        message: '유효하지 않은 초대 코드입니다.',
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
+    // React Router의 submit을 사용하여 action 함수 호출
+    const formData = new FormData();
+    formData.append('invitationCode', data.invitationCode);
+    formData.append('email', data.email);
+    formData.append('password', data.password);
+    formData.append('confirmPassword', data.confirmPassword);
+    formData.append('fullName', data.fullName);
+    if (data.phone) formData.append('phone', data.phone);
+    if (data.company) formData.append('company', data.company);
+
+    // React Router의 submit 함수 사용
+    const submitForm = document.createElement('form');
+    submitForm.method = 'POST';
+    submitForm.style.display = 'none';
+
+    // FormData의 모든 항목을 hidden input으로 추가
+    for (const [key, value] of formData.entries()) {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = key;
+      input.value = value as string;
+      submitForm.appendChild(input);
+    }
+
+    document.body.appendChild(submitForm);
+    submitForm.submit();
+  };
+
   return (
     <AuthLayout>
       <Card className="w-full bg-transparent border-none shadow-none">
@@ -212,12 +307,32 @@ export default function SignUpPage({ loaderData, actionData }: ComponentProps) {
         <CardContent className="pb-2">
           {actionData?.error && (
             <Alert variant="destructive" className="mb-4">
-              <AlertDescription>{actionData.error}</AlertDescription>
+              <AlertDescription>
+                {actionData.error}
+                {actionData.error.includes('이미 등록된 이메일') && (
+                  <div className="mt-2">
+                    <Link
+                      to="/auth/login"
+                      className="font-medium text-primary hover:text-primary/80 underline"
+                    >
+                      로그인 페이지로 이동하기
+                    </Link>
+                  </div>
+                )}
+              </AlertDescription>
             </Alert>
           )}
 
           <Form {...form}>
-            <form method="post" className="space-y-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              {form.formState.errors.root && (
+                <Alert variant="destructive" className="mb-4">
+                  <AlertDescription>
+                    {form.formState.errors.root.message}
+                  </AlertDescription>
+                </Alert>
+              )}
+
               <FormField
                 control={form.control}
                 name="invitationCode"
@@ -226,11 +341,10 @@ export default function SignUpPage({ loaderData, actionData }: ComponentProps) {
                     <FormLabel>초대 코드 *</FormLabel>
                     <FormControl>
                       <Input
+                        {...field}
                         type="text"
-                        name="invitationCode"
                         placeholder="INV-XXXXXX-XXXXXX"
                         disabled={isSubmitting}
-                        defaultValue={loaderData.invitationCode}
                         onBlur={handleInvitationCodeBlur}
                         className={
                           invitationValid === true
@@ -259,8 +373,8 @@ export default function SignUpPage({ loaderData, actionData }: ComponentProps) {
                     <FormLabel>이름 *</FormLabel>
                     <FormControl>
                       <Input
+                        {...field}
                         type="text"
-                        name="fullName"
                         placeholder="홍길동"
                         disabled={isSubmitting}
                       />
@@ -278,8 +392,8 @@ export default function SignUpPage({ loaderData, actionData }: ComponentProps) {
                     <FormLabel>이메일 *</FormLabel>
                     <FormControl>
                       <Input
+                        {...field}
                         type="email"
-                        name="email"
                         placeholder="your@email.com"
                         disabled={isSubmitting}
                       />
@@ -297,8 +411,8 @@ export default function SignUpPage({ loaderData, actionData }: ComponentProps) {
                     <FormLabel>전화번호</FormLabel>
                     <FormControl>
                       <Input
+                        {...field}
                         type="tel"
-                        name="phone"
                         placeholder="010-1234-5678"
                         disabled={isSubmitting}
                       />
@@ -316,8 +430,8 @@ export default function SignUpPage({ loaderData, actionData }: ComponentProps) {
                     <FormLabel>회사명</FormLabel>
                     <FormControl>
                       <Input
+                        {...field}
                         type="text"
-                        name="company"
                         placeholder="회사명을 입력하세요"
                         disabled={isSubmitting}
                       />
@@ -335,8 +449,8 @@ export default function SignUpPage({ loaderData, actionData }: ComponentProps) {
                     <FormLabel>비밀번호 *</FormLabel>
                     <FormControl>
                       <Input
+                        {...field}
                         type="password"
-                        name="password"
                         placeholder="••••••••"
                         disabled={isSubmitting}
                       />
@@ -354,8 +468,8 @@ export default function SignUpPage({ loaderData, actionData }: ComponentProps) {
                     <FormLabel>비밀번호 확인 *</FormLabel>
                     <FormControl>
                       <Input
+                        {...field}
                         type="password"
-                        name="confirmPassword"
                         placeholder="••••••••"
                         disabled={isSubmitting}
                       />

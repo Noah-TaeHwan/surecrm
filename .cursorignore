@@ -1,0 +1,5 @@
+# .env 파일을 무시하지 않도록 설정
+!.env
+!.env.local
+!.env.development
+!.env.production
