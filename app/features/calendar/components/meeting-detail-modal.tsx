@@ -41,7 +41,7 @@ import {
   type Meeting,
   type MeetingNote,
   type ChecklistItem,
-} from './types';
+} from '../types/types';
 import { useState } from 'react';
 
 interface MeetingDetailModalProps {

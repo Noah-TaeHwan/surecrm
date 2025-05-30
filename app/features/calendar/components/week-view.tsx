@@ -1,5 +1,5 @@
 import { cn } from '~/lib/utils';
-import { meetingTypeColors, type Meeting } from './types';
+import { meetingTypeColors, type Meeting } from '../types/types';
 import { Fragment } from 'react';
 
 interface WeekViewProps {

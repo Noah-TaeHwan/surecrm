@@ -24,12 +24,20 @@ import {
 import { Input } from '~/common/components/ui/input';
 import { Textarea } from '~/common/components/ui/textarea';
 import { Button } from '~/common/components/ui/button';
+import { Alert, AlertDescription } from '~/common/components/ui/alert';
+import { Checkbox } from '~/common/components/ui/checkbox';
+import { Badge } from '~/common/components/ui/badge';
+import {
+  CalendarIcon,
+  InfoCircledIcon,
+  ExclamationTriangleIcon,
+} from '@radix-ui/react-icons';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { type Client } from './types';
+import { type Client } from '../types/types';
 
-// 미팅 폼 스키마
+// 미팅 폼 스키마 (Google Calendar 옵션 추가)
 const meetingSchema = z.object({
   title: z.string().min(1, '제목을 입력하세요'),
   clientId: z.string().min(1, '고객을 선택하세요'),
@@ -41,6 +49,9 @@ const meetingSchema = z.object({
   description: z.string().optional(),
   reminder: z.string(),
   repeat: z.string(),
+  // 🌐 Google Calendar 연동 옵션 (MVP에서는 disabled) - required로 수정
+  syncToGoogle: z.boolean(),
+  googleMeetLink: z.boolean(),
 });
 
 type MeetingFormData = z.infer<typeof meetingSchema>;
@@ -71,6 +82,8 @@ export function AddMeetingModal({
       description: '',
       reminder: '30_minutes',
       repeat: 'none',
+      syncToGoogle: false,
+      googleMeetLink: false,
     },
   });
 
@@ -110,9 +123,11 @@ export function AddMeetingModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>새 미팅 예약</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            <CalendarIcon className="h-5 w-5" />새 미팅 예약
+          </DialogTitle>
           <DialogDescription>
             고객과의 미팅 일정을 예약합니다.
           </DialogDescription>
@@ -121,209 +136,293 @@ export function AddMeetingModal({
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-4"
+            className="space-y-6"
           >
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem className="col-span-2">
-                    <FormLabel>미팅 제목</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="김영희님 상품 설명" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            {/* 기본 정보 섹션 */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-semibold text-foreground">
+                기본 정보
+              </h3>
 
-              <FormField
-                control={form.control}
-                name="clientId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>고객</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem className="col-span-2">
+                      <FormLabel>미팅 제목</FormLabel>
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="고객 선택" />
-                        </SelectTrigger>
+                        <Input {...field} placeholder="김영희님 상품 설명" />
                       </FormControl>
-                      <SelectContent>
-                        {clients.map((client) => (
-                          <SelectItem key={client.id} value={client.id}>
-                            {client.name}
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="clientId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>고객</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="고객 선택" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {clients.map((client) => (
+                            <SelectItem key={client.id} value={client.id}>
+                              {client.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>미팅 유형</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="유형 선택" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="first_consultation">
+                            첫 상담
                           </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                          <SelectItem value="product_explanation">
+                            상품 설명
+                          </SelectItem>
+                          <SelectItem value="contract_review">
+                            계약 검토
+                          </SelectItem>
+                          <SelectItem value="follow_up">정기 점검</SelectItem>
+                          <SelectItem value="other">기타</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
 
-              <FormField
-                control={form.control}
-                name="type"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>미팅 유형</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+            {/* 일정 정보 섹션 */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-semibold text-foreground">
+                일정 정보
+              </h3>
+
+              <div className="grid grid-cols-3 gap-4">
+                <FormField
+                  control={form.control}
+                  name="date"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>날짜</FormLabel>
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="유형 선택" />
-                        </SelectTrigger>
+                        <Input {...field} type="date" />
                       </FormControl>
-                      <SelectContent>
-                        <SelectItem value="first_consultation">
-                          첫 상담
-                        </SelectItem>
-                        <SelectItem value="product_explanation">
-                          상품 설명
-                        </SelectItem>
-                        <SelectItem value="contract_review">
-                          계약 검토
-                        </SelectItem>
-                        <SelectItem value="follow_up">정기 점검</SelectItem>
-                        <SelectItem value="other">기타</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormItem>
-                )}
-              />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="date"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>날짜</FormLabel>
-                    <FormControl>
-                      <Input {...field} type="date" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="time"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>시간</FormLabel>
-                    <FormControl>
-                      <Input {...field} type="time" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="duration"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>소요 시간 (분)</FormLabel>
-                    <Select
-                      onValueChange={(value) => field.onChange(parseInt(value))}
-                      defaultValue={field.value.toString()}
-                    >
+                <FormField
+                  control={form.control}
+                  name="time"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>시간</FormLabel>
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
+                        <Input {...field} type="time" />
                       </FormControl>
-                      <SelectContent>
-                        <SelectItem value="30">30분</SelectItem>
-                        <SelectItem value="60">1시간</SelectItem>
-                        <SelectItem value="90">1시간 30분</SelectItem>
-                        <SelectItem value="120">2시간</SelectItem>
-                        <SelectItem value="180">3시간</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="location"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>장소</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="고객 사무실" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={form.control}
+                  name="duration"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>소요 시간 (분)</FormLabel>
+                      <Select
+                        onValueChange={(value) =>
+                          field.onChange(parseInt(value))
+                        }
+                        defaultValue={field.value.toString()}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="30">30분</SelectItem>
+                          <SelectItem value="60">1시간</SelectItem>
+                          <SelectItem value="90">1시간 30분</SelectItem>
+                          <SelectItem value="120">2시간</SelectItem>
+                          <SelectItem value="180">3시간</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
 
-              <FormField
-                control={form.control}
-                name="reminder"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>알림</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+            {/* 장소 정보 섹션 */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-semibold text-foreground">
+                장소 정보
+              </h3>
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="location"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>장소</FormLabel>
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
+                        <Input {...field} placeholder="고객 사무실" />
                       </FormControl>
-                      <SelectContent>
-                        <SelectItem value="none">알림 없음</SelectItem>
-                        <SelectItem value="5_minutes">5분 전</SelectItem>
-                        <SelectItem value="15_minutes">15분 전</SelectItem>
-                        <SelectItem value="30_minutes">30분 전</SelectItem>
-                        <SelectItem value="1_hour">1시간 전</SelectItem>
-                        <SelectItem value="1_day">1일 전</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
 
-              <FormField
-                control={form.control}
-                name="repeat"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>반복</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+            {/* 알림 정보 섹션 */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-semibold text-foreground">
+                알림 정보
+              </h3>
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="reminder"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>알림</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="none">알림 없음</SelectItem>
+                          <SelectItem value="5_minutes">5분 전</SelectItem>
+                          <SelectItem value="15_minutes">15분 전</SelectItem>
+                          <SelectItem value="30_minutes">30분 전</SelectItem>
+                          <SelectItem value="1_hour">1시간 전</SelectItem>
+                          <SelectItem value="1_day">1일 전</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="repeat"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>반복</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="none">반복 없음</SelectItem>
+                          <SelectItem value="daily">매일</SelectItem>
+                          <SelectItem value="weekly">매주</SelectItem>
+                          <SelectItem value="monthly">매월</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* 기타 정보 섹션 */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-semibold text-foreground">
+                기타 정보
+              </h3>
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="syncToGoogle"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Google Calendar 연동</FormLabel>
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
                       </FormControl>
-                      <SelectContent>
-                        <SelectItem value="none">반복 없음</SelectItem>
-                        <SelectItem value="daily">매일</SelectItem>
-                        <SelectItem value="weekly">매주</SelectItem>
-                        <SelectItem value="monthly">매월</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="googleMeetLink"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Google Meet 링크</FormLabel>
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* 메모 정보 섹션 */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-semibold text-foreground">메모</h3>
 
               <FormField
                 control={form.control}

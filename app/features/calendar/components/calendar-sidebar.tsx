@@ -9,6 +9,7 @@ import { Button } from '~/common/components/ui/button';
 import { Badge } from '~/common/components/ui/badge';
 import { Progress } from '~/common/components/ui/progress';
 import { Checkbox } from '~/common/components/ui/checkbox';
+import { Alert, AlertDescription } from '~/common/components/ui/alert';
 import {
   CalendarIcon,
   ClockIcon,
@@ -18,9 +19,11 @@ import {
   ActivityLogIcon,
   MixerHorizontalIcon,
   ResetIcon,
+  ExclamationTriangleIcon,
+  InfoCircledIcon,
 } from '@radix-ui/react-icons';
 import { cn } from '~/lib/utils';
-import { meetingTypeColors, type Meeting } from './types';
+import { meetingTypeColors, type Meeting } from '../types/types';
 
 interface CalendarSidebarProps {
   meetings: Meeting[];
@@ -84,6 +87,37 @@ export function CalendarSidebar({
 
   return (
     <div className="space-y-4">
+      {/* 🌐 Google Calendar 연동 상태 */}
+      <Card className="shadow-lg border border-border/50 bg-gradient-to-br from-card/90 to-card/70 backdrop-blur-sm">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <div className="p-1.5 bg-orange-500/10 rounded-lg">
+              <CalendarIcon className="h-4 w-4 text-orange-500" />
+            </div>
+            구글 캘린더 연동
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <Alert className="border-orange-200 bg-orange-50/50">
+            <InfoCircledIcon className="h-4 w-4 text-orange-600" />
+            <AlertDescription className="text-sm text-orange-700">
+              <div className="space-y-2">
+                <p className="font-medium">
+                  MVP에서는 구글 캘린더 연동이 제공되지 않습니다
+                </p>
+                <p className="text-xs">
+                  현재 개발 중이며, 향후 업데이트에서 제공될 예정입니다.
+                </p>
+              </div>
+            </AlertDescription>
+          </Alert>
+          <Button variant="outline" size="sm" className="w-full mt-3" disabled>
+            <CalendarIcon className="h-4 w-4 mr-2" />
+            구글 캘린더 연결 (개발 중)
+          </Button>
+        </CardContent>
+      </Card>
+
       {/* 오늘의 일정 */}
       <Card className="shadow-lg border border-border/50 bg-gradient-to-br from-card/90 to-card/70 backdrop-blur-sm">
         <CardHeader className="pb-3">
@@ -141,16 +175,23 @@ export function CalendarSidebar({
                           </div>
                         </div>
                       </div>
-                      <Badge
-                        className={cn(
-                          'text-white text-xs group-hover:scale-105 transition-transform shadow-sm',
-                          meetingTypeColors[
-                            meeting.type as keyof typeof meetingTypeColors
-                          ]
-                        )}
-                      >
-                        {meeting.type}
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        {/* 🌐 Google Calendar 동기화 상태 표시 */}
+                        <div
+                          className="w-2 h-2 rounded-full bg-gray-400"
+                          title="로컬 전용 (동기화 미지원)"
+                        />
+                        <Badge
+                          className={cn(
+                            'text-white text-xs group-hover:scale-105 transition-transform shadow-sm',
+                            meetingTypeColors[
+                              meeting.type as keyof typeof meetingTypeColors
+                            ]
+                          )}
+                        >
+                          {meeting.type}
+                        </Badge>
+                      </div>
                     </div>
                     <div className="space-y-1.5">
                       <div className="font-semibold text-sm text-foreground flex items-center gap-2">

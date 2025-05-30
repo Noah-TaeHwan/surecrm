@@ -1,12 +1,21 @@
 import { meetings, clients, profiles } from '~/lib/schema';
 import { createServerClient } from '~/lib/core/supabase';
 import { db } from '~/lib/core/db';
-import { calendarMeetingChecklists, calendarMeetingNotes } from './schema';
+import {
+  appCalendarMeetingChecklists,
+  appCalendarMeetingNotes,
+  appCalendarSettings,
+  appCalendarSyncLogs,
+  type AppCalendarMeetingChecklist,
+  type AppCalendarMeetingNote,
+  type AppCalendarSettings,
+  type CalendarSyncStatus,
+  type CalendarExternalSource,
+} from './schema';
 import { eq, and, gte, lte, desc, asc } from 'drizzle-orm';
 import type { Meeting, Client, MeetingStatus } from '~/lib/schema';
-import type { CalendarMeetingChecklist, CalendarMeetingNote } from './schema';
 
-// Calendar 페이지용 Meeting 타입 (컴포넌트와 호환)
+// Calendar 페이지용 Meeting 타입 (컴포넌트와 호환) - Google Calendar 연동 필드 추가
 export interface CalendarMeeting {
   id: string;
   title: string;
@@ -33,6 +42,13 @@ export interface CalendarMeeting {
     createdAt: string;
     updatedAt?: string;
   }>;
+  // 🌐 Google Calendar 연동 정보 추가
+  syncInfo?: {
+    status: CalendarSyncStatus;
+    externalSource: CalendarExternalSource;
+    externalEventId?: string;
+    lastSyncAt?: string;
+  };
 }
 
 // Calendar 페이지용 Client 타입
@@ -43,7 +59,7 @@ export interface CalendarClient {
 }
 
 /**
- * 특정 월의 모든 미팅 조회 (체크리스트와 노트 포함)
+ * 특정 월의 모든 미팅 조회 (체크리스트와 노트 포함) - Google Calendar 연동 정보 포함
  */
 export async function getMeetingsByMonth(
   agentId: string,
@@ -69,35 +85,42 @@ export async function getMeetingsByMonth(
       .where(
         and(
           eq(meetings.agentId, agentId),
-          gte(meetings.startTime, startDate),
-          lte(meetings.startTime, endDate)
+          gte(meetings.scheduledAt, startDate),
+          lte(meetings.scheduledAt, endDate)
         )
       )
-      .orderBy(asc(meetings.startTime));
+      .orderBy(asc(meetings.scheduledAt));
 
-    // 각 미팅의 체크리스트와 노트를 병렬로 조회
+    // 각 미팅의 체크리스트, 노트, 동기화 정보를 병렬로 조회
     const meetingsWithDetails = await Promise.all(
       dbMeetings.map(async (row) => {
         const meeting = row.meeting;
-        const startTime = new Date(meeting.startTime);
-        const endTime = new Date(meeting.endTime);
-        const duration = Math.round(
-          (endTime.getTime() - startTime.getTime()) / (1000 * 60)
-        );
+        const scheduledTime = new Date(meeting.scheduledAt);
+        const duration = meeting.duration; // 이미 분 단위로 저장됨
 
-        // 체크리스트 조회
+        // 체크리스트 조회 (새로운 테이블명 사용)
         const checklists = await db
           .select()
-          .from(calendarMeetingChecklists)
-          .where(eq(calendarMeetingChecklists.meetingId, meeting.id))
-          .orderBy(asc(calendarMeetingChecklists.order));
+          .from(appCalendarMeetingChecklists)
+          .where(eq(appCalendarMeetingChecklists.meetingId, meeting.id))
+          .orderBy(asc(appCalendarMeetingChecklists.order));
 
-        // 노트 조회
+        // 노트 조회 (새로운 테이블명 사용)
         const notes = await db
           .select()
-          .from(calendarMeetingNotes)
-          .where(eq(calendarMeetingNotes.meetingId, meeting.id))
-          .orderBy(desc(calendarMeetingNotes.createdAt));
+          .from(appCalendarMeetingNotes)
+          .where(eq(appCalendarMeetingNotes.meetingId, meeting.id))
+          .orderBy(desc(appCalendarMeetingNotes.createdAt));
+
+        // 🌐 Google Calendar 동기화 정보 조회
+        const syncLogs = await db
+          .select()
+          .from(appCalendarSyncLogs)
+          .where(eq(appCalendarSyncLogs.meetingId, meeting.id))
+          .orderBy(desc(appCalendarSyncLogs.createdAt))
+          .limit(1);
+
+        const latestSyncLog = syncLogs[0];
 
         return {
           id: meeting.id,
@@ -107,8 +130,8 @@ export async function getMeetingsByMonth(
             name: row.client.name,
             phone: row.client.phone || undefined,
           },
-          date: startTime.toISOString().split('T')[0],
-          time: startTime.toTimeString().slice(0, 5),
+          date: scheduledTime.toISOString().split('T')[0],
+          time: scheduledTime.toTimeString().slice(0, 5),
           duration,
           type: meeting.meetingType,
           location: meeting.location || '',
@@ -125,6 +148,15 @@ export async function getMeetingsByMonth(
             createdAt: note.createdAt.toISOString(),
             updatedAt: note.updatedAt?.toISOString(),
           })),
+          // 🌐 Google Calendar 동기화 정보
+          syncInfo: latestSyncLog
+            ? {
+                status: latestSyncLog.syncStatus,
+                externalSource: latestSyncLog.externalSource,
+                externalEventId: latestSyncLog.externalEventId || undefined,
+                lastSyncAt: latestSyncLog.createdAt.toISOString(),
+              }
+            : undefined,
         };
       })
     );
@@ -137,7 +169,7 @@ export async function getMeetingsByMonth(
 }
 
 /**
- * 특정 날짜 범위의 미팅 조회 (주간/일간 뷰용)
+ * 특정 날짜 범위의 미팅 조회 (주간/일간 뷰용) - Google Calendar 연동 정보 포함
  */
 export async function getMeetingsByDateRange(
   agentId: string,
@@ -159,35 +191,42 @@ export async function getMeetingsByDateRange(
       .where(
         and(
           eq(meetings.agentId, agentId),
-          gte(meetings.startTime, startDate),
-          lte(meetings.startTime, endDate)
+          gte(meetings.scheduledAt, startDate),
+          lte(meetings.scheduledAt, endDate)
         )
       )
-      .orderBy(asc(meetings.startTime));
+      .orderBy(asc(meetings.scheduledAt));
 
-    // 각 미팅의 체크리스트와 노트를 병렬로 조회
+    // 각 미팅의 체크리스트, 노트, 동기화 정보를 병렬로 조회
     const meetingsWithDetails = await Promise.all(
       dbMeetings.map(async (row) => {
         const meeting = row.meeting;
-        const startTime = new Date(meeting.startTime);
-        const endTime = new Date(meeting.endTime);
-        const duration = Math.round(
-          (endTime.getTime() - startTime.getTime()) / (1000 * 60)
-        );
+        const scheduledTime = new Date(meeting.scheduledAt);
+        const duration = meeting.duration; // 이미 분 단위로 저장됨
 
-        // 체크리스트 조회
+        // 체크리스트 조회 (새로운 테이블명 사용)
         const checklists = await db
           .select()
-          .from(calendarMeetingChecklists)
-          .where(eq(calendarMeetingChecklists.meetingId, meeting.id))
-          .orderBy(asc(calendarMeetingChecklists.order));
+          .from(appCalendarMeetingChecklists)
+          .where(eq(appCalendarMeetingChecklists.meetingId, meeting.id))
+          .orderBy(asc(appCalendarMeetingChecklists.order));
 
-        // 노트 조회
+        // 노트 조회 (새로운 테이블명 사용)
         const notes = await db
           .select()
-          .from(calendarMeetingNotes)
-          .where(eq(calendarMeetingNotes.meetingId, meeting.id))
-          .orderBy(desc(calendarMeetingNotes.createdAt));
+          .from(appCalendarMeetingNotes)
+          .where(eq(appCalendarMeetingNotes.meetingId, meeting.id))
+          .orderBy(desc(appCalendarMeetingNotes.createdAt));
+
+        // 🌐 Google Calendar 동기화 정보 조회
+        const syncLogs = await db
+          .select()
+          .from(appCalendarSyncLogs)
+          .where(eq(appCalendarSyncLogs.meetingId, meeting.id))
+          .orderBy(desc(appCalendarSyncLogs.createdAt))
+          .limit(1);
+
+        const latestSyncLog = syncLogs[0];
 
         return {
           id: meeting.id,
@@ -197,8 +236,8 @@ export async function getMeetingsByDateRange(
             name: row.client.name,
             phone: row.client.phone || undefined,
           },
-          date: startTime.toISOString().split('T')[0],
-          time: startTime.toTimeString().slice(0, 5),
+          date: scheduledTime.toISOString().split('T')[0],
+          time: scheduledTime.toTimeString().slice(0, 5),
           duration,
           type: meeting.meetingType,
           location: meeting.location || '',
@@ -215,6 +254,15 @@ export async function getMeetingsByDateRange(
             createdAt: note.createdAt.toISOString(),
             updatedAt: note.updatedAt?.toISOString(),
           })),
+          // 🌐 Google Calendar 동기화 정보
+          syncInfo: latestSyncLog
+            ? {
+                status: latestSyncLog.syncStatus,
+                externalSource: latestSyncLog.externalSource,
+                externalEventId: latestSyncLog.externalEventId || undefined,
+                lastSyncAt: latestSyncLog.createdAt.toISOString(),
+              }
+            : undefined,
         };
       })
     );
@@ -255,15 +303,15 @@ export async function getClientsByAgent(
 }
 
 /**
- * 새 미팅 생성 (기본 체크리스트 포함)
+ * 새 미팅 생성 (기본 체크리스트 포함) - 스키마 컬럼명에 맞춰 수정
  */
 export async function createMeeting(
   agentId: string,
   meetingData: {
     title: string;
     clientId: string;
-    startTime: Date;
-    endTime: Date;
+    scheduledAt: Date;
+    duration: number; // 분 단위
     location?: string;
     meetingType: string;
     description?: string;
@@ -276,8 +324,8 @@ export async function createMeeting(
         agentId,
         title: meetingData.title,
         clientId: meetingData.clientId,
-        startTime: meetingData.startTime,
-        endTime: meetingData.endTime,
+        scheduledAt: meetingData.scheduledAt,
+        duration: meetingData.duration,
         location: meetingData.location,
         meetingType: meetingData.meetingType as any,
         description: meetingData.description,
@@ -293,7 +341,7 @@ export async function createMeeting(
     );
 
     if (defaultChecklists.length > 0) {
-      await db.insert(calendarMeetingChecklists).values(
+      await db.insert(appCalendarMeetingChecklists).values(
         defaultChecklists.map((item, index) => ({
           meetingId: meeting.id,
           text: item,
@@ -311,15 +359,15 @@ export async function createMeeting(
 }
 
 /**
- * 미팅 업데이트
+ * 미팅 업데이트 - 스키마 컬럼명에 맞춰 수정
  */
 export async function updateMeeting(
   meetingId: string,
   agentId: string,
   updateData: Partial<{
     title: string;
-    startTime: Date;
-    endTime: Date;
+    scheduledAt: Date;
+    duration: number; // 분 단위
     location: string;
     description: string;
     status: MeetingStatus;
@@ -381,8 +429,8 @@ export async function toggleChecklistItem(
     // 현재 체크리스트 상태 조회
     const currentItem = await db
       .select()
-      .from(calendarMeetingChecklists)
-      .where(eq(calendarMeetingChecklists.id, checklistId))
+      .from(appCalendarMeetingChecklists)
+      .where(eq(appCalendarMeetingChecklists.id, checklistId))
       .limit(1);
 
     if (currentItem.length === 0) {
@@ -391,12 +439,12 @@ export async function toggleChecklistItem(
 
     // 상태 토글
     const updatedItem = await db
-      .update(calendarMeetingChecklists)
+      .update(appCalendarMeetingChecklists)
       .set({
         completed: !currentItem[0].completed,
         updatedAt: new Date(),
       })
-      .where(eq(calendarMeetingChecklists.id, checklistId))
+      .where(eq(appCalendarMeetingChecklists.id, checklistId))
       .returning();
 
     return updatedItem[0];
@@ -417,7 +465,7 @@ export async function addMeetingNote(
 ) {
   try {
     const newNote = await db
-      .insert(calendarMeetingNotes)
+      .insert(appCalendarMeetingNotes)
       .values({
         meetingId,
         agentId,

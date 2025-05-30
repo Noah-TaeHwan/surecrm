@@ -69,7 +69,7 @@ import { DayView } from '../components/day-view';
 import { CalendarSidebar } from '../components/calendar-sidebar';
 import { AddMeetingModal } from '../components/add-meeting-modal';
 import { MeetingDetailModal } from '../components/meeting-detail-modal';
-import { type Meeting, type Client, type ViewMode } from '../components/types';
+import { type Meeting, type Client, type ViewMode } from '../types/types';
 
 // 실제 데이터베이스 연결 함수들 import
 import {
@@ -163,18 +163,17 @@ export async function action({ request }: Route.ActionArgs) {
         const location = formData.get('location') as string;
         const description = formData.get('description') as string;
 
-        // 시작 시간과 종료 시간 계산
+        // 예약 시간 계산 (scheduledAt 필드 사용)
         const [year, month, day] = date.split('-').map(Number);
         const [hour, minute] = time.split(':').map(Number);
 
-        const startTime = new Date(year, month - 1, day, hour, minute);
-        const endTime = new Date(startTime.getTime() + duration * 60 * 1000);
+        const scheduledAt = new Date(year, month - 1, day, hour, minute);
 
         await createMeeting(agentId, {
           title,
           clientId,
-          startTime,
-          endTime,
+          scheduledAt,
+          duration, // 분 단위로 전달
           location,
           meetingType,
           description,
@@ -193,17 +192,16 @@ export async function action({ request }: Route.ActionArgs) {
         const description = formData.get('description') as string;
         const status = formData.get('status') as string;
 
-        // 시작 시간과 종료 시간 계산
+        // 예약 시간 계산 (scheduledAt 필드 사용)
         const [year, month, day] = date.split('-').map(Number);
         const [hour, minute] = time.split(':').map(Number);
 
-        const startTime = new Date(year, month - 1, day, hour, minute);
-        const endTime = new Date(startTime.getTime() + duration * 60 * 1000);
+        const scheduledAt = new Date(year, month - 1, day, hour, minute);
 
         await updateMeeting(meetingId, agentId, {
           title,
-          startTime,
-          endTime,
+          scheduledAt,
+          duration, // 분 단위로 전달
           location,
           description,
           status: status as any,
