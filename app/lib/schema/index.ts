@@ -112,11 +112,11 @@ export type Schema = typeof schema;
 
 // ===== SQL 트리거 (Supabase Auth 연동) =====
 export const authTriggerSQL = `
--- 새 사용자가 auth.users에 생성될 때 app_profiles 테이블에 자동으로 레코드 생성
+-- 새 사용자가 auth.users에 생성될 때 app_user_profiles 테이블에 자동으로 레코드 생성
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO public.app_profiles (id, full_name, role)
+  INSERT INTO public.app_user_profiles (id, full_name, role)
   VALUES (
     NEW.id,
     COALESCE(NEW.raw_user_meta_data->>'full_name', NEW.email),
@@ -132,26 +132,26 @@ CREATE OR REPLACE TRIGGER on_auth_user_created
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
 -- RLS 정책 설정
-ALTER TABLE public.app_profiles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.app_clients ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.app_user_profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.app_client_profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.app_client_details ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.app_meetings ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.app_documents ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.app_client_meetings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.app_client_documents ENABLE ROW LEVEL SECURITY;
 
 -- 프로필 접근 정책
-CREATE POLICY "Users can view own profile" ON public.app_profiles
+CREATE POLICY "Users can view own profile" ON public.app_user_profiles
   FOR SELECT USING (auth.uid() = id);
 
-CREATE POLICY "Users can update own profile" ON public.app_profiles
+CREATE POLICY "Users can update own profile" ON public.app_user_profiles
   FOR UPDATE USING (auth.uid() = id);
 
 -- 클라이언트 접근 정책
-CREATE POLICY "Users can view own clients" ON public.app_clients
+CREATE POLICY "Users can view own clients" ON public.app_client_profiles
   FOR SELECT USING (auth.uid() = agent_id);
 
-CREATE POLICY "Users can insert own clients" ON public.app_clients
+CREATE POLICY "Users can insert own clients" ON public.app_client_profiles
   FOR INSERT WITH CHECK (auth.uid() = agent_id);
 
-CREATE POLICY "Users can update own clients" ON public.app_clients
+CREATE POLICY "Users can update own clients" ON public.app_client_profiles
   FOR UPDATE USING (auth.uid() = agent_id);
 `;

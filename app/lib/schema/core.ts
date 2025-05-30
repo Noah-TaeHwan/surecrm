@@ -31,18 +31,22 @@ export const authUsers = authSchema.table('users', {
   isAnonymous: boolean('is_anonymous'),
 });
 
-// Enum 정의
-export const userRoleEnum = pgEnum('user_role', [
+// Enum 정의 (새로운 네이밍 컨벤션 적용)
+export const appUserRoleEnum = pgEnum('app_user_role_enum', [
   'agent',
   'team_admin',
   'system_admin',
 ]);
 
-export const importanceEnum = pgEnum('importance', ['high', 'medium', 'low']);
+export const appImportanceEnum = pgEnum('app_importance_enum', [
+  'high',
+  'medium',
+  'low',
+]);
 
-export const genderEnum = pgEnum('gender', ['male', 'female']);
+export const appGenderEnum = pgEnum('app_gender_enum', ['male', 'female']);
 
-export const insuranceTypeEnum = pgEnum('insurance_type', [
+export const appInsuranceTypeEnum = pgEnum('app_insurance_type_enum', [
   'life',
   'health',
   'auto',
@@ -51,7 +55,7 @@ export const insuranceTypeEnum = pgEnum('insurance_type', [
   'other',
 ]);
 
-export const meetingTypeEnum = pgEnum('meeting_type', [
+export const appMeetingTypeEnum = pgEnum('app_meeting_type_enum', [
   'first_consultation',
   'product_explanation',
   'contract_review',
@@ -59,19 +63,19 @@ export const meetingTypeEnum = pgEnum('meeting_type', [
   'other',
 ]);
 
-export const meetingStatusEnum = pgEnum('meeting_status', [
+export const appMeetingStatusEnum = pgEnum('app_meeting_status_enum', [
   'scheduled',
   'completed',
   'cancelled',
   'rescheduled',
 ]);
 
-export const referralStatusEnum = pgEnum('referral_status', [
+export const appReferralStatusEnum = pgEnum('app_referral_status_enum', [
   'active',
   'inactive',
 ]);
 
-export const documentTypeEnum = pgEnum('document_type', [
+export const appDocumentTypeEnum = pgEnum('app_document_type_enum', [
   'policy',
   'id_card',
   'vehicle_registration',
@@ -83,19 +87,19 @@ export const documentTypeEnum = pgEnum('document_type', [
   'other',
 ]);
 
-export const invitationStatusEnum = pgEnum('invitation_status', [
+export const appInvitationStatusEnum = pgEnum('app_invitation_status_enum', [
   'pending',
   'used',
   'expired',
   'cancelled',
 ]);
 
-export const themeEnum = pgEnum('theme', ['light', 'dark']);
+export const appThemeEnum = pgEnum('app_theme_enum', ['light', 'dark']);
 
 // ===== 핵심 공유 테이블들 =====
 
 // Profiles 테이블 (auth.users 확장)
-export const profiles = pgTable('app_profiles', {
+export const profiles = pgTable('app_user_profiles', {
   id: uuid('id')
     .primaryKey()
     .references(() => authUsers.id, { onDelete: 'cascade' }),
@@ -103,11 +107,11 @@ export const profiles = pgTable('app_profiles', {
   phone: text('phone'),
   profileImageUrl: text('profile_image_url'),
   company: text('company'),
-  role: userRoleEnum('role').default('agent').notNull(),
+  role: appUserRoleEnum('role').default('agent').notNull(),
   teamId: uuid('team_id'),
   invitedById: uuid('invited_by_id'),
   invitationsLeft: integer('invitations_left').default(2).notNull(),
-  theme: themeEnum('theme').default('dark').notNull(),
+  theme: appThemeEnum('theme').default('dark').notNull(),
   googleCalendarToken: jsonb('google_calendar_token'),
   settings: jsonb('settings'),
   isActive: boolean('is_active').default(true).notNull(),
@@ -121,7 +125,7 @@ export const profiles = pgTable('app_profiles', {
 });
 
 // Teams 테이블
-export const teams = pgTable('app_teams', {
+export const teams = pgTable('app_user_teams', {
   id: uuid('id').primaryKey().defaultRandom(),
   name: text('name').notNull(),
   description: text('description'),
@@ -156,7 +160,7 @@ export const pipelineStages = pgTable('app_pipeline_stages', {
 });
 
 // Clients 테이블
-export const clients: any = pgTable('app_clients', {
+export const clients: any = pgTable('app_client_profiles', {
   id: uuid('id').primaryKey().defaultRandom(),
   agentId: uuid('agent_id')
     .notNull()
@@ -172,7 +176,7 @@ export const clients: any = pgTable('app_clients', {
   height: integer('height'), // cm
   weight: integer('weight'), // kg
   tags: text('tags').array(),
-  importance: importanceEnum('importance').default('medium').notNull(),
+  importance: appImportanceEnum('importance').default('medium').notNull(),
   currentStageId: uuid('current_stage_id')
     .notNull()
     .references(() => pipelineStages.id),
@@ -197,7 +201,7 @@ export const clientDetails = pgTable('app_client_details', {
     .references(() => clients.id, { onDelete: 'cascade' }),
   ssn: text('ssn'), // 암호화 저장 필요
   birthDate: date('birth_date'),
-  gender: genderEnum('gender'),
+  gender: appGenderEnum('gender'),
   bankAccount: text('bank_account'), // 암호화 저장 필요
   emergencyContact: text('emergency_contact'),
   emergencyPhone: text('emergency_phone'),
@@ -211,12 +215,12 @@ export const clientDetails = pgTable('app_client_details', {
 });
 
 // Insurance Info 테이블
-export const insuranceInfo = pgTable('app_insurance_info', {
+export const insuranceInfo = pgTable('app_client_insurance', {
   id: uuid('id').primaryKey().defaultRandom(),
   clientId: uuid('client_id')
     .notNull()
     .references(() => clients.id),
-  insuranceType: insuranceTypeEnum('insurance_type').notNull(),
+  insuranceType: appInsuranceTypeEnum('insurance_type').notNull(),
   policyNumber: text('policy_number'),
   insurer: text('insurer'),
   premium: decimal('premium', { precision: 10, scale: 2 }),
@@ -234,7 +238,7 @@ export const insuranceInfo = pgTable('app_insurance_info', {
 });
 
 // Referrals 테이블 (소개 관계)
-export const referrals = pgTable('app_referrals', {
+export const referrals = pgTable('app_client_referrals', {
   id: uuid('id').primaryKey().defaultRandom(),
   referrerId: uuid('referrer_id')
     .notNull()
@@ -246,7 +250,7 @@ export const referrals = pgTable('app_referrals', {
     .notNull()
     .references(() => profiles.id),
   referralDate: date('referral_date').defaultNow().notNull(),
-  status: referralStatusEnum('status').default('active').notNull(),
+  status: appReferralStatusEnum('status').default('active').notNull(),
   notes: text('notes'),
   createdAt: timestamp('created_at', { withTimezone: true })
     .defaultNow()
@@ -257,7 +261,7 @@ export const referrals = pgTable('app_referrals', {
 });
 
 // Meetings 테이블
-export const meetings = pgTable('app_meetings', {
+export const meetings = pgTable('app_client_meetings', {
   id: uuid('id').primaryKey().defaultRandom(),
   clientId: uuid('client_id')
     .notNull()
@@ -267,8 +271,8 @@ export const meetings = pgTable('app_meetings', {
     .references(() => profiles.id),
   title: text('title').notNull(),
   description: text('description'),
-  meetingType: meetingTypeEnum('meeting_type').notNull(),
-  status: meetingStatusEnum('status').default('scheduled').notNull(),
+  meetingType: appMeetingTypeEnum('meeting_type').notNull(),
+  status: appMeetingStatusEnum('status').default('scheduled').notNull(),
   scheduledAt: timestamp('scheduled_at', { withTimezone: true }).notNull(),
   duration: integer('duration').default(60).notNull(), // 분 단위
   location: text('location'),
@@ -283,7 +287,7 @@ export const meetings = pgTable('app_meetings', {
 });
 
 // Invitations 테이블
-export const invitations = pgTable('app_invitations', {
+export const invitations = pgTable('app_user_invitations', {
   id: uuid('id').primaryKey().defaultRandom(),
   code: text('code').unique().notNull(),
   inviterId: uuid('inviter_id')
@@ -291,7 +295,7 @@ export const invitations = pgTable('app_invitations', {
     .references(() => profiles.id),
   inviteeEmail: text('invitee_email'),
   message: text('message'),
-  status: invitationStatusEnum('status').default('pending').notNull(),
+  status: appInvitationStatusEnum('status').default('pending').notNull(),
   usedById: uuid('used_by_id').references(() => profiles.id),
   createdAt: timestamp('created_at', { withTimezone: true })
     .defaultNow()
@@ -301,7 +305,7 @@ export const invitations = pgTable('app_invitations', {
 });
 
 // Documents 테이블
-export const documents = pgTable('app_documents', {
+export const documents = pgTable('app_client_documents', {
   id: uuid('id').primaryKey().defaultRandom(),
   clientId: uuid('client_id')
     .notNull()
@@ -310,7 +314,7 @@ export const documents = pgTable('app_documents', {
   agentId: uuid('agent_id')
     .notNull()
     .references(() => profiles.id),
-  documentType: documentTypeEnum('document_type').notNull(),
+  documentType: appDocumentTypeEnum('document_type').notNull(),
   fileName: text('file_name').notNull(),
   filePath: text('file_path').notNull(), // Supabase Storage 경로
   mimeType: text('mime_type').notNull(),
@@ -496,7 +500,7 @@ export const documentsRelations = relations(documents, ({ one }) => ({
 // ===== Admin 백오피스 전용 테이블들 =====
 
 // Admin 감사 로그 테이블 (system_admin 작업 추적)
-export const adminAuditLogs = pgTable('admin_audit_logs', {
+export const adminAuditLogs = pgTable('admin_system_audit_logs', {
   id: uuid('id').primaryKey().defaultRandom(),
   adminId: uuid('admin_id').notNull(), // system_admin 사용자 ID
   action: text('action').notNull(), // 수행한 작업
@@ -512,7 +516,7 @@ export const adminAuditLogs = pgTable('admin_audit_logs', {
 });
 
 // Admin 시스템 설정 테이블 (백오피스 전용 설정)
-export const adminSettings = pgTable('admin_settings', {
+export const adminSettings = pgTable('admin_system_settings', {
   id: uuid('id').primaryKey().defaultRandom(),
   key: text('key').unique().notNull(), // 설정 키
   value: jsonb('value').notNull(), // 설정 값
@@ -528,7 +532,7 @@ export const adminSettings = pgTable('admin_settings', {
 });
 
 // Admin 통계 캐시 테이블 (백오피스 대시보드용)
-export const adminStatsCache = pgTable('admin_stats_cache', {
+export const adminStatsCache = pgTable('admin_system_stats_cache', {
   id: uuid('id').primaryKey().defaultRandom(),
   statType: text('stat_type').unique().notNull(), // 통계 유형
   statData: jsonb('stat_data').notNull(), // 통계 데이터
@@ -588,13 +592,14 @@ export type NewAdminSetting = typeof adminSettings.$inferInsert;
 export type AdminStatsCache = typeof adminStatsCache.$inferSelect;
 export type NewAdminStatsCache = typeof adminStatsCache.$inferInsert;
 
-// Enum 타입들
-export type UserRole = (typeof userRoleEnum.enumValues)[number];
-export type Importance = (typeof importanceEnum.enumValues)[number];
-export type Gender = (typeof genderEnum.enumValues)[number];
-export type InsuranceType = (typeof insuranceTypeEnum.enumValues)[number];
-export type MeetingType = (typeof meetingTypeEnum.enumValues)[number];
-export type MeetingStatus = (typeof meetingStatusEnum.enumValues)[number];
-export type ReferralStatus = (typeof referralStatusEnum.enumValues)[number];
-export type DocumentType = (typeof documentTypeEnum.enumValues)[number];
-export type InvitationStatus = (typeof invitationStatusEnum.enumValues)[number];
+// Enum 타입들 (새로운 네이밍 반영)
+export type UserRole = (typeof appUserRoleEnum.enumValues)[number];
+export type Importance = (typeof appImportanceEnum.enumValues)[number];
+export type Gender = (typeof appGenderEnum.enumValues)[number];
+export type InsuranceType = (typeof appInsuranceTypeEnum.enumValues)[number];
+export type MeetingType = (typeof appMeetingTypeEnum.enumValues)[number];
+export type MeetingStatus = (typeof appMeetingStatusEnum.enumValues)[number];
+export type ReferralStatus = (typeof appReferralStatusEnum.enumValues)[number];
+export type DocumentType = (typeof appDocumentTypeEnum.enumValues)[number];
+export type InvitationStatus =
+  (typeof appInvitationStatusEnum.enumValues)[number];

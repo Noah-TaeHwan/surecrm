@@ -34,66 +34,68 @@ import {
 import { relations } from 'drizzle-orm';
 import { profiles, clients, meetings, teams } from '~/lib/schema';
 
-// 📌 Calendar 특화 Enum (prefix 네이밍 적용)
-export const calendarViewEnum = pgEnum('calendar_view_enum', [
+// �� Calendar 특화 Enum (새로운 네이밍 컨벤션 적용)
+export const appCalendarViewEnum = pgEnum('app_calendar_view_enum', [
   'month',
   'week',
   'day',
   'agenda',
 ]);
 
-export const calendarMeetingStatusEnum = pgEnum(
-  'calendar_meeting_status_enum',
+export const appCalendarMeetingStatusEnum = pgEnum(
+  'app_calendar_meeting_status_enum',
   ['scheduled', 'completed', 'cancelled', 'rescheduled']
 );
 
-export const calendarMeetingTypeEnum = pgEnum('calendar_meeting_type_enum', [
-  'first_consultation',
-  'product_explanation',
-  'contract_review',
-  'follow_up',
-  'other',
-]);
+export const appCalendarMeetingTypeEnum = pgEnum(
+  'app_calendar_meeting_type_enum',
+  [
+    'first_consultation',
+    'product_explanation',
+    'contract_review',
+    'follow_up',
+    'other',
+  ]
+);
 
-export const calendarReminderTypeEnum = pgEnum('calendar_reminder_type_enum', [
-  'none',
-  '5_minutes',
-  '15_minutes',
-  '30_minutes',
-  '1_hour',
-  '1_day',
-]);
+export const appCalendarReminderTypeEnum = pgEnum(
+  'app_calendar_reminder_type_enum',
+  ['none', '5_minutes', '15_minutes', '30_minutes', '1_hour', '1_day']
+);
 
-export const calendarRecurrenceTypeEnum = pgEnum(
-  'calendar_recurrence_type_enum',
+export const appCalendarRecurrenceTypeEnum = pgEnum(
+  'app_calendar_recurrence_type_enum',
   ['none', 'daily', 'weekly', 'monthly', 'yearly']
 );
 
-// 🏷️ Calendar 특화 테이블들 (prefix 네이밍 적용)
+// 🏷️ Calendar 특화 테이블들 (새로운 네이밍 컨벤션 적용)
 
 // Calendar Meeting Templates (미팅 템플릿)
-export const calendarMeetingTemplates = pgTable('calendar_meeting_templates', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  agentId: uuid('agent_id')
-    .notNull()
-    .references(() => profiles.id),
-  name: text('name').notNull(),
-  description: text('description'),
-  defaultDuration: integer('default_duration').default(60).notNull(), // 분
-  defaultLocation: text('default_location'),
-  checklist: jsonb('checklist'), // 미팅 체크리스트
-  isDefault: boolean('is_default').default(false).notNull(),
-  createdAt: timestamp('created_at', { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-  updatedAt: timestamp('updated_at', { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-});
+export const calendarMeetingTemplates = pgTable(
+  'app_calendar_meeting_templates',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    agentId: uuid('agent_id')
+      .notNull()
+      .references(() => profiles.id),
+    name: text('name').notNull(),
+    description: text('description'),
+    defaultDuration: integer('default_duration').default(60).notNull(), // 분
+    defaultLocation: text('default_location'),
+    checklist: jsonb('checklist'), // 미팅 체크리스트
+    isDefault: boolean('is_default').default(false).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  }
+);
 
 // Calendar Meeting Checklists (미팅별 체크리스트)
 export const calendarMeetingChecklists = pgTable(
-  'calendar_meeting_checklists',
+  'app_calendar_meeting_checklists',
   {
     id: uuid('id').primaryKey().defaultRandom(),
     meetingId: uuid('meeting_id')
@@ -112,39 +114,45 @@ export const calendarMeetingChecklists = pgTable(
 );
 
 // Calendar Meeting Reminders (미팅 알림)
-export const calendarMeetingReminders = pgTable('calendar_meeting_reminders', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  meetingId: uuid('meeting_id')
-    .notNull()
-    .references(() => meetings.id, { onDelete: 'cascade' }),
-  reminderType: calendarReminderTypeEnum('reminder_type').notNull(),
-  reminderTime: timestamp('reminder_time', { withTimezone: true }).notNull(),
-  isSent: boolean('is_sent').default(false).notNull(),
-  sentAt: timestamp('sent_at', { withTimezone: true }),
-  createdAt: timestamp('created_at', { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-});
+export const calendarMeetingReminders = pgTable(
+  'app_calendar_meeting_reminders',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    meetingId: uuid('meeting_id')
+      .notNull()
+      .references(() => meetings.id, { onDelete: 'cascade' }),
+    reminderType: appCalendarReminderTypeEnum('reminder_type').notNull(),
+    reminderTime: timestamp('reminder_time', { withTimezone: true }).notNull(),
+    isSent: boolean('is_sent').default(false).notNull(),
+    sentAt: timestamp('sent_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  }
+);
 
 // Calendar Meeting Attendees (미팅 참석자)
-export const calendarMeetingAttendees = pgTable('calendar_meeting_attendees', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  meetingId: uuid('meeting_id')
-    .notNull()
-    .references(() => meetings.id, { onDelete: 'cascade' }),
-  clientId: uuid('client_id').references(() => clients.id),
-  agentId: uuid('agent_id').references(() => profiles.id),
-  externalEmail: text('external_email'), // 외부 참석자
-  externalName: text('external_name'),
-  status: text('status').default('pending').notNull(), // pending, accepted, declined
-  responseAt: timestamp('response_at', { withTimezone: true }),
-  createdAt: timestamp('created_at', { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-});
+export const calendarMeetingAttendees = pgTable(
+  'app_calendar_meeting_attendees',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    meetingId: uuid('meeting_id')
+      .notNull()
+      .references(() => meetings.id, { onDelete: 'cascade' }),
+    clientId: uuid('client_id').references(() => clients.id),
+    agentId: uuid('agent_id').references(() => profiles.id),
+    externalEmail: text('external_email'), // 외부 참석자
+    externalName: text('external_name'),
+    status: text('status').default('pending').notNull(), // pending, accepted, declined
+    responseAt: timestamp('response_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  }
+);
 
 // Calendar Meeting Notes (미팅 노트)
-export const calendarMeetingNotes = pgTable('calendar_meeting_notes', {
+export const calendarMeetingNotes = pgTable('app_calendar_meeting_notes', {
   id: uuid('id').primaryKey().defaultRandom(),
   meetingId: uuid('meeting_id')
     .notNull()
@@ -163,20 +171,20 @@ export const calendarMeetingNotes = pgTable('calendar_meeting_notes', {
 });
 
 // Calendar Settings (캘린더 설정)
-export const calendarSettings = pgTable('calendar_settings', {
+export const calendarSettings = pgTable('app_calendar_settings', {
   id: uuid('id').primaryKey().defaultRandom(),
   agentId: uuid('agent_id')
     .notNull()
     .unique()
     .references(() => profiles.id),
-  defaultView: calendarViewEnum('default_view').default('month').notNull(),
+  defaultView: appCalendarViewEnum('default_view').default('month').notNull(),
   workingHours: jsonb('working_hours'), // { start: "09:00", end: "18:00", days: [1,2,3,4,5] }
   timeZone: text('time_zone').default('Asia/Seoul').notNull(),
   googleCalendarSync: boolean('google_calendar_sync').default(false).notNull(),
   defaultMeetingDuration: integer('default_meeting_duration')
     .default(60)
     .notNull(),
-  defaultReminder: calendarReminderTypeEnum('default_reminder')
+  defaultReminder: appCalendarReminderTypeEnum('default_reminder')
     .default('30_minutes')
     .notNull(),
   createdAt: timestamp('created_at', { withTimezone: true })
@@ -189,13 +197,13 @@ export const calendarSettings = pgTable('calendar_settings', {
 
 // Calendar Recurring Meetings (반복 미팅)
 export const calendarRecurringMeetings = pgTable(
-  'calendar_recurring_meetings',
+  'app_calendar_recurring_meetings',
   {
     id: uuid('id').primaryKey().defaultRandom(),
     parentMeetingId: uuid('parent_meeting_id')
       .notNull()
       .references(() => meetings.id),
-    recurrenceType: calendarRecurrenceTypeEnum('recurrence_type').notNull(),
+    recurrenceType: appCalendarRecurrenceTypeEnum('recurrence_type').notNull(),
     recurrenceInterval: integer('recurrence_interval').default(1).notNull(), // 매 N일/주/월
     recurrenceEnd: timestamp('recurrence_end', { withTimezone: true }),
     maxOccurrences: integer('max_occurrences'),
@@ -318,15 +326,15 @@ export type CalendarRecurringMeeting =
 export type NewCalendarRecurringMeeting =
   typeof calendarRecurringMeetings.$inferInsert;
 
-export type CalendarView = (typeof calendarViewEnum.enumValues)[number];
+export type CalendarView = (typeof appCalendarViewEnum.enumValues)[number];
 export type CalendarMeetingStatus =
-  (typeof calendarMeetingStatusEnum.enumValues)[number];
+  (typeof appCalendarMeetingStatusEnum.enumValues)[number];
 export type CalendarMeetingType =
-  (typeof calendarMeetingTypeEnum.enumValues)[number];
+  (typeof appCalendarMeetingTypeEnum.enumValues)[number];
 export type CalendarReminderType =
-  (typeof calendarReminderTypeEnum.enumValues)[number];
+  (typeof appCalendarReminderTypeEnum.enumValues)[number];
 export type CalendarRecurrenceType =
-  (typeof calendarRecurrenceTypeEnum.enumValues)[number];
+  (typeof appCalendarRecurrenceTypeEnum.enumValues)[number];
 
 // 🎯 Calendar 특화 인터페이스
 import type { Meeting } from '~/lib/schema';
