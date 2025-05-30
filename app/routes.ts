@@ -5,7 +5,7 @@ export default [
   index('common/pages/_index.tsx'),
 
   // 🔌 API 라우트
-  route('api/notifications', 'api/notifications.tsx'),
+  route('api/notifications', 'api/notifications.ts'),
   route('api/validate-invitation', 'api/validate-invitation.ts'),
   route('api/resend-verification', 'api/resend-verification.ts'),
   route('api/auth-webhook', 'api/auth-webhook.ts'),

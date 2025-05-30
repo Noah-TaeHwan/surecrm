@@ -1,88 +1,158 @@
-import { getCurrentUser } from '~/lib/auth/core';
-import { createServerClient } from '../lib/core/supabase';
-import { db } from '../lib/core/db';
-import { profiles } from '../lib/schema';
+/**
+ * 🎯 사용자 설정 API 엔드포인트
+ * 테마, 언어, 알림 설정 등 사용자 개인 설정 관리
+ */
+
+import { requireAuth } from './shared/auth';
+import {
+  createSuccessResponse,
+  methodNotAllowed,
+  badRequest,
+  parseJSON,
+  logAPIRequest,
+  logAPIError,
+  validateRequiredFields,
+} from './shared/utils';
+import { db } from '~/lib/core/db';
+import { profiles } from '~/lib/schema';
 import { eq } from 'drizzle-orm';
 
-interface ActionArgs {
-  request: Request;
+// ===== 설정 업데이트 타입 정의 =====
+interface ThemeUpdateData {
+  action: 'update-theme';
+  theme: 'light' | 'dark';
 }
 
-export async function action({ request }: ActionArgs) {
+interface ProfileUpdateData {
+  action: 'update-profile';
+  language?: string;
+  notifications?: boolean;
+  autoSave?: boolean;
+}
+
+type SettingsUpdateData = ThemeUpdateData | ProfileUpdateData;
+
+// ===== Action (POST 요청 처리) =====
+export async function action({ request }: { request: Request }) {
+  logAPIRequest(request.method, request.url);
+
+  // 메소드 검증
+  if (request.method !== 'POST') {
+    return methodNotAllowed();
+  }
+
+  // 인증 확인
+  const authResult = await requireAuth(request);
+  if (authResult instanceof Response) {
+    return authResult;
+  }
+
   try {
-    // 현재 사용자 확인
-    const user = await getCurrentUser(request);
-    if (!user) {
-      return Response.json(
-        { success: false, error: '인증이 필요합니다.' },
-        { status: 401 }
-      );
+    // JSON 데이터 파싱
+    const body = await parseJSON<SettingsUpdateData>(request);
+    if (!body) {
+      return badRequest('유효한 JSON 데이터가 필요합니다.');
     }
 
-    const body = await request.json();
-    const { action: actionType, ...data } = body;
+    const { action, ...data } = body;
 
-    switch (actionType) {
+    if (!action) {
+      return badRequest('action 필드가 필요합니다.');
+    }
+
+    switch (action) {
       case 'update-theme': {
-        const { theme } = data;
+        const { theme } = data as ThemeUpdateData;
 
+        // 테마 값 검증
         if (!theme || !['light', 'dark'].includes(theme)) {
-          return Response.json(
-            { success: false, error: '유효하지 않은 테마 값입니다.' },
-            { status: 400 }
+          return badRequest(
+            '유효하지 않은 테마 값입니다. light 또는 dark만 허용됩니다.',
+            {
+              allowedValues: ['light', 'dark'],
+              receivedValue: theme,
+            }
           );
         }
 
-        // 데이터베이스에 테마 설정 저장
-        await db
+        // 데이터베이스 업데이트
+        const updatedProfile = await db
           .update(profiles)
           .set({
             theme,
             updatedAt: new Date(),
           })
-          .where(eq(profiles.id, user.id));
+          .where(eq(profiles.id, authResult.id))
+          .returning();
 
-        return Response.json({
-          success: true,
-          message: '테마 설정이 저장되었습니다.',
-          theme,
-        });
+        if (updatedProfile.length === 0) {
+          return badRequest('프로필 업데이트에 실패했습니다.');
+        }
+
+        return createSuccessResponse(
+          { theme, profile: updatedProfile[0] },
+          '테마 설정이 성공적으로 저장되었습니다.'
+        );
       }
 
       case 'update-profile': {
-        const { language, notifications, autoSave } = data;
+        const { language, notifications, autoSave } = data as ProfileUpdateData;
 
-        const updateData: any = {
+        // 업데이트할 데이터 준비
+        const updateData: Record<string, any> = {
           updatedAt: new Date(),
         };
 
-        if (language !== undefined) updateData.language = language;
-        if (notifications !== undefined)
+        if (language !== undefined) {
+          updateData.language = language;
+        }
+        if (notifications !== undefined) {
           updateData.notificationsEnabled = notifications;
-        if (autoSave !== undefined) updateData.autoSave = autoSave;
+        }
+        if (autoSave !== undefined) {
+          updateData.autoSave = autoSave;
+        }
 
-        await db
+        // 실제 업데이트할 필드가 있는지 확인
+        if (Object.keys(updateData).length === 1) {
+          // updatedAt만 있는 경우
+          return badRequest('업데이트할 설정이 없습니다.');
+        }
+
+        // 데이터베이스 업데이트
+        const updatedProfile = await db
           .update(profiles)
           .set(updateData)
-          .where(eq(profiles.id, user.id));
+          .where(eq(profiles.id, authResult.id))
+          .returning();
 
-        return Response.json({
-          success: true,
-          message: '설정이 저장되었습니다.',
-        });
+        if (updatedProfile.length === 0) {
+          return badRequest('프로필 업데이트에 실패했습니다.');
+        }
+
+        return createSuccessResponse(
+          {
+            profile: updatedProfile[0],
+            updatedFields: Object.keys(updateData).filter(
+              (key) => key !== 'updatedAt'
+            ),
+          },
+          '설정이 성공적으로 저장되었습니다.'
+        );
       }
 
       default:
-        return Response.json(
-          { success: false, error: '알 수 없는 액션입니다.' },
-          { status: 400 }
-        );
+        return badRequest(`알 수 없는 action: ${action}`, {
+          supportedActions: ['update-theme', 'update-profile'],
+        });
     }
   } catch (error) {
-    console.error('설정 업데이트 중 오류:', error);
-    return Response.json(
-      { success: false, error: '설정 저장 중 오류가 발생했습니다.' },
-      { status: 500 }
-    );
+    logAPIError(request.method, request.url, error as Error, authResult.id);
+
+    if (error instanceof SyntaxError) {
+      return badRequest('잘못된 JSON 형식입니다.');
+    }
+
+    return badRequest('설정 저장 중 오류가 발생했습니다.');
   }
 }
