@@ -97,7 +97,7 @@ import type {
   ReferralNetwork,
 } from '../components/types';
 import { getClientById } from '../lib/client-data';
-import { requireAuth } from '../lib/auth-utils';
+import { requireAuth } from '~/lib/auth/helpers';
 
 export async function loader({ request, params }: Route.LoaderArgs) {
   // 인증 확인

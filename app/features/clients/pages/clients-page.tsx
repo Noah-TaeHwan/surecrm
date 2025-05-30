@@ -83,7 +83,7 @@ import {
 } from '../components/insurance-config';
 import type { Client, ClientStats, BadgeVariant } from '../components/types';
 import { getClients, getClientStats } from '../lib/client-data';
-import { requireAuth, getSearchParams } from '../lib/auth-utils';
+import { requireAuth, getSearchParams } from '~/lib/auth/helpers';
 
 export async function loader({ request }: Route.LoaderArgs) {
   // 인증 확인

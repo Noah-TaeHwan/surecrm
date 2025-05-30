@@ -39,7 +39,7 @@ import {
   getInvitedColleagues,
   createInvitation,
 } from '../lib/invitations-data';
-import { requireAuth } from '../lib/auth-utils';
+import { requireAuth } from '~/lib/auth/helpers';
 
 export async function loader({ request }: Route.LoaderArgs) {
   console.log('Invitations loader 시작');

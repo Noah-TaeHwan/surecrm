@@ -38,7 +38,7 @@ import {
   getNetworkAnalysis,
   createGratitude,
 } from '../lib/influencers-data';
-import { requireAuth } from '../lib/auth-utils';
+import { requireAuth } from '~/lib/auth/helpers';
 
 export async function action({ request }: Route.ActionArgs) {
   const userId = await requireAuth(request);

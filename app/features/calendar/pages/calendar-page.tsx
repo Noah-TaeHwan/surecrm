@@ -84,7 +84,7 @@ import {
   type CalendarMeeting,
   type CalendarClient,
 } from '../lib/calendar-data';
-import { requireAuth } from '../lib/auth-utils';
+import { requireAuth, requireAuthSync } from '~/lib/auth/helpers';
 
 // 미팅 폼 스키마
 const meetingSchema = z.object({
@@ -105,7 +105,7 @@ type MeetingFormData = z.infer<typeof meetingSchema>;
 export async function loader({ request }: Route.LoaderArgs) {
   try {
     // 인증 확인
-    const agentId = requireAuth(request);
+    const agentId = await requireAuth(request);
 
     // 현재 날짜 정보
     const today = new Date();
@@ -147,7 +147,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 export async function action({ request }: Route.ActionArgs) {
   try {
     // 인증 확인
-    const agentId = requireAuth(request);
+    const agentId = requireAuthSync(request);
 
     const formData = await request.formData();
     const actionType = formData.get('actionType') as string;
