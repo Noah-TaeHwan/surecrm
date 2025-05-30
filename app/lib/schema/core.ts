@@ -95,7 +95,7 @@ export const themeEnum = pgEnum('theme', ['light', 'dark']);
 // ===== 핵심 공유 테이블들 =====
 
 // Profiles 테이블 (auth.users 확장)
-export const profiles = pgTable('profiles', {
+export const profiles = pgTable('app_profiles', {
   id: uuid('id')
     .primaryKey()
     .references(() => authUsers.id, { onDelete: 'cascade' }),
@@ -121,7 +121,7 @@ export const profiles = pgTable('profiles', {
 });
 
 // Teams 테이블
-export const teams = pgTable('teams', {
+export const teams = pgTable('app_teams', {
   id: uuid('id').primaryKey().defaultRandom(),
   name: text('name').notNull(),
   description: text('description'),
@@ -139,7 +139,7 @@ export const teams = pgTable('teams', {
 });
 
 // Pipeline Stages 테이블
-export const pipelineStages = pgTable('pipeline_stages', {
+export const pipelineStages = pgTable('app_pipeline_stages', {
   id: uuid('id').primaryKey().defaultRandom(),
   agentId: uuid('agent_id').references(() => profiles.id),
   teamId: uuid('team_id').references(() => teams.id),
@@ -156,7 +156,7 @@ export const pipelineStages = pgTable('pipeline_stages', {
 });
 
 // Clients 테이블
-export const clients: any = pgTable('clients', {
+export const clients: any = pgTable('app_clients', {
   id: uuid('id').primaryKey().defaultRandom(),
   agentId: uuid('agent_id')
     .notNull()
@@ -189,7 +189,7 @@ export const clients: any = pgTable('clients', {
 });
 
 // Client Details 테이블 (민감 정보 분리)
-export const clientDetails = pgTable('client_details', {
+export const clientDetails = pgTable('app_client_details', {
   id: uuid('id').primaryKey().defaultRandom(),
   clientId: uuid('client_id')
     .notNull()
@@ -198,8 +198,10 @@ export const clientDetails = pgTable('client_details', {
   ssn: text('ssn'), // 암호화 저장 필요
   birthDate: date('birth_date'),
   gender: genderEnum('gender'),
-  consentDate: timestamp('consent_date', { withTimezone: true }),
-  consentDetails: jsonb('consent_details'),
+  bankAccount: text('bank_account'), // 암호화 저장 필요
+  emergencyContact: text('emergency_contact'),
+  emergencyPhone: text('emergency_phone'),
+  medicalHistory: text('medical_history'),
   createdAt: timestamp('created_at', { withTimezone: true })
     .defaultNow()
     .notNull(),
@@ -209,13 +211,19 @@ export const clientDetails = pgTable('client_details', {
 });
 
 // Insurance Info 테이블
-export const insuranceInfo = pgTable('insurance_info', {
+export const insuranceInfo = pgTable('app_insurance_info', {
   id: uuid('id').primaryKey().defaultRandom(),
   clientId: uuid('client_id')
     .notNull()
     .references(() => clients.id),
   insuranceType: insuranceTypeEnum('insurance_type').notNull(),
-  details: jsonb('details').notNull(), // 보험 유형별 세부 정보
+  policyNumber: text('policy_number'),
+  insurer: text('insurer'),
+  premium: decimal('premium', { precision: 10, scale: 2 }),
+  coverageAmount: decimal('coverage_amount', { precision: 12, scale: 2 }),
+  startDate: date('start_date'),
+  endDate: date('end_date'),
+  beneficiary: text('beneficiary'),
   isActive: boolean('is_active').default(true).notNull(),
   createdAt: timestamp('created_at', { withTimezone: true })
     .defaultNow()
@@ -225,8 +233,8 @@ export const insuranceInfo = pgTable('insurance_info', {
     .notNull(),
 });
 
-// Referrals 테이블
-export const referrals = pgTable('referrals', {
+// Referrals 테이블 (소개 관계)
+export const referrals = pgTable('app_referrals', {
   id: uuid('id').primaryKey().defaultRandom(),
   referrerId: uuid('referrer_id')
     .notNull()
@@ -238,8 +246,8 @@ export const referrals = pgTable('referrals', {
     .notNull()
     .references(() => profiles.id),
   referralDate: date('referral_date').defaultNow().notNull(),
-  notes: text('notes'),
   status: referralStatusEnum('status').default('active').notNull(),
+  notes: text('notes'),
   createdAt: timestamp('created_at', { withTimezone: true })
     .defaultNow()
     .notNull(),
@@ -249,7 +257,7 @@ export const referrals = pgTable('referrals', {
 });
 
 // Meetings 테이블
-export const meetings = pgTable('meetings', {
+export const meetings = pgTable('app_meetings', {
   id: uuid('id').primaryKey().defaultRandom(),
   clientId: uuid('client_id')
     .notNull()
@@ -259,12 +267,12 @@ export const meetings = pgTable('meetings', {
     .references(() => profiles.id),
   title: text('title').notNull(),
   description: text('description'),
-  startTime: timestamp('start_time', { withTimezone: true }).notNull(),
-  endTime: timestamp('end_time', { withTimezone: true }).notNull(),
-  location: text('location'),
   meetingType: meetingTypeEnum('meeting_type').notNull(),
   status: meetingStatusEnum('status').default('scheduled').notNull(),
-  googleEventId: text('google_event_id'),
+  scheduledAt: timestamp('scheduled_at', { withTimezone: true }).notNull(),
+  duration: integer('duration').default(60).notNull(), // 분 단위
+  location: text('location'),
+  googleMeetLink: text('google_meet_link'),
   notes: text('notes'),
   createdAt: timestamp('created_at', { withTimezone: true })
     .defaultNow()
@@ -275,7 +283,7 @@ export const meetings = pgTable('meetings', {
 });
 
 // Invitations 테이블
-export const invitations = pgTable('invitations', {
+export const invitations = pgTable('app_invitations', {
   id: uuid('id').primaryKey().defaultRandom(),
   code: text('code').unique().notNull(),
   inviterId: uuid('inviter_id')
@@ -293,7 +301,7 @@ export const invitations = pgTable('invitations', {
 });
 
 // Documents 테이블
-export const documents = pgTable('documents', {
+export const documents = pgTable('app_documents', {
   id: uuid('id').primaryKey().defaultRandom(),
   clientId: uuid('client_id')
     .notNull()
@@ -485,6 +493,69 @@ export const documentsRelations = relations(documents, ({ one }) => ({
   }),
 }));
 
+// ===== Admin 백오피스 전용 테이블들 =====
+
+// Admin 감사 로그 테이블 (system_admin 작업 추적)
+export const adminAuditLogs = pgTable('admin_audit_logs', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  adminId: uuid('admin_id').notNull(), // system_admin 사용자 ID
+  action: text('action').notNull(), // 수행한 작업
+  tableName: text('table_name'), // 대상 테이블
+  targetId: text('target_id'), // 대상 레코드 ID
+  oldValues: jsonb('old_values'), // 변경 전 데이터
+  newValues: jsonb('new_values'), // 변경 후 데이터
+  ipAddress: text('ip_address'), // 접근 IP
+  userAgent: text('user_agent'), // 브라우저 정보
+  createdAt: timestamp('created_at', { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+// Admin 시스템 설정 테이블 (백오피스 전용 설정)
+export const adminSettings = pgTable('admin_settings', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  key: text('key').unique().notNull(), // 설정 키
+  value: jsonb('value').notNull(), // 설정 값
+  description: text('description'), // 설정 설명
+  isActive: boolean('is_active').default(true).notNull(),
+  updatedById: uuid('updated_by_id').notNull(), // 마지막 수정자
+  createdAt: timestamp('created_at', { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+// Admin 통계 캐시 테이블 (백오피스 대시보드용)
+export const adminStatsCache = pgTable('admin_stats_cache', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  statType: text('stat_type').unique().notNull(), // 통계 유형
+  statData: jsonb('stat_data').notNull(), // 통계 데이터
+  calculatedAt: timestamp('calculated_at', { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+});
+
+// ===== Admin Relations =====
+
+export const adminAuditLogsRelations = relations(adminAuditLogs, ({ one }) => ({
+  admin: one(profiles, {
+    fields: [adminAuditLogs.adminId],
+    references: [profiles.id],
+    relationName: 'admin_audit_logs',
+  }),
+}));
+
+export const adminSettingsRelations = relations(adminSettings, ({ one }) => ({
+  updatedBy: one(profiles, {
+    fields: [adminSettings.updatedById],
+    references: [profiles.id],
+    relationName: 'admin_settings_updater',
+  }),
+}));
+
 // ===== 타입 추론 =====
 
 export type AuthUser = typeof authUsers.$inferSelect;
@@ -508,6 +579,14 @@ export type Invitation = typeof invitations.$inferSelect;
 export type NewInvitation = typeof invitations.$inferInsert;
 export type Document = typeof documents.$inferSelect;
 export type NewDocument = typeof documents.$inferInsert;
+
+// Admin 타입들
+export type AdminAuditLog = typeof adminAuditLogs.$inferSelect;
+export type NewAdminAuditLog = typeof adminAuditLogs.$inferInsert;
+export type AdminSetting = typeof adminSettings.$inferSelect;
+export type NewAdminSetting = typeof adminSettings.$inferInsert;
+export type AdminStatsCache = typeof adminStatsCache.$inferSelect;
+export type NewAdminStatsCache = typeof adminStatsCache.$inferInsert;
 
 // Enum 타입들
 export type UserRole = (typeof userRoleEnum.enumValues)[number];

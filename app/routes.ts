@@ -57,7 +57,23 @@ export default [
   route('notifications', 'features/notifications/pages/notifications-page.tsx'),
 
   // 🔑 관리자 기능
-  route('admin/invitations', 'features/admin/pages/admin-invitations-page.tsx'),
+  route('system-console', 'features/admin/pages/admin-dashboard-page.tsx'),
+  route(
+    'system-console/invitations-mgmt',
+    'features/admin/pages/admin-invitations-page.tsx'
+  ),
+  route(
+    'system-console/users-mgmt',
+    'features/admin/pages/admin-users-page.tsx'
+  ),
+  route(
+    'system-console/audit-logs',
+    'features/admin/pages/admin-audit-logs-page.tsx'
+  ),
+  route(
+    'system-console/settings',
+    'features/admin/pages/admin-settings-page.tsx'
+  ),
 
   // 🔧 시스템 페이지
   route('.well-known/*', 'common/pages/well-known-fallback.tsx'),

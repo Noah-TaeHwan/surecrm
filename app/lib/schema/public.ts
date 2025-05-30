@@ -56,7 +56,7 @@ export const publicContents = pgTable('public_contents', {
 });
 
 // FAQ 테이블
-export const faqs = pgTable('faqs', {
+export const faqs = pgTable('public_faqs', {
   id: uuid('id').primaryKey().defaultRandom(),
   question: text('question').notNull(),
   answer: text('answer').notNull(),
@@ -75,7 +75,7 @@ export const faqs = pgTable('faqs', {
 });
 
 // 공지사항 테이블
-export const announcements = pgTable('announcements', {
+export const announcements = pgTable('public_announcements', {
   id: uuid('id').primaryKey().defaultRandom(),
   title: text('title').notNull(),
   content: text('content').notNull(),
@@ -96,7 +96,7 @@ export const announcements = pgTable('announcements', {
 });
 
 // 사용자 후기 테이블
-export const testimonials = pgTable('testimonials', {
+export const testimonials = pgTable('public_testimonials', {
   id: uuid('id').primaryKey().defaultRandom(),
   name: text('name').notNull(),
   role: text('role').notNull(),
@@ -118,7 +118,7 @@ export const testimonials = pgTable('testimonials', {
 });
 
 // 사이트 설정 테이블
-export const siteSettings = pgTable('site_settings', {
+export const siteSettings = pgTable('public_site_settings', {
   id: uuid('id').primaryKey().defaultRandom(),
   key: text('key').notNull().unique(),
   value: text('value').notNull(),
@@ -135,7 +135,7 @@ export const siteSettings = pgTable('site_settings', {
 });
 
 // 페이지 조회수 추적 테이블
-export const pageViews = pgTable('page_views', {
+export const pageViews = pgTable('public_page_views', {
   id: uuid('id').primaryKey().defaultRandom(),
   path: text('path').notNull(),
   userAgent: text('user_agent'),
