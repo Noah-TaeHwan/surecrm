@@ -33,7 +33,7 @@ Table `public.xxx` is public, but RLS has not been enabled.
 1. **Supabase 대시보드** 접속
 2. **SQL Editor** 메뉴 선택
 3. **새 쿼리** 생성
-4. `app/lib/rls-policies.sql` 파일의 내용을 복사하여 붙여넣기
+4. `supabase/sql/policies/rls-policies.sql` 파일의 내용을 복사하여 붙여넣기
 5. **Run** 버튼 클릭하여 실행
 
 ### 2단계: 실행 결과 확인

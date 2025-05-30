@@ -5,6 +5,12 @@
     "**/.client/**/*",
     ".react-router/types/**/*"
   ],
+  "exclude": [
+    "**/*-backup-*.ts",
+    "**/*-backup-*.tsx",
+    "**/migrations_backup_*/**",
+    "supabase/migrations/*-backup-*"
+  ],
   "compilerOptions": {
     "lib": ["DOM", "DOM.Iterable", "ES2022"],
     "types": ["node", "vite/client"],

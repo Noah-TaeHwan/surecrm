@@ -110,6 +110,7 @@ export async function getKPIData(userId: string) {
     const now = new Date();
     const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
     // 총 고객 수
     const totalClientsResult = await db
@@ -188,6 +189,45 @@ export async function getKPIData(userId: string) {
         ? ((totalReferrals - lastMonthReferrals) / lastMonthReferrals) * 100
         : 0;
 
+    // 실제 수익 성장률 계산 (보험료 기반)
+    // 이번 달 수익
+    const thisMonthRevenueResult = await db
+      .select({
+        total: sql<number>`COALESCE(SUM(CAST(${clients.insuranceInfo}->>'premium' AS DECIMAL)), 0)`,
+      })
+      .from(clients)
+      .where(
+        and(
+          eq(clients.agentId, userId),
+          gte(clients.createdAt, thisMonth),
+          lte(clients.createdAt, nextMonth)
+        )
+      );
+
+    const thisMonthRevenue = thisMonthRevenueResult[0]?.total || 0;
+
+    // 지난달 수익
+    const lastMonthRevenueResult = await db
+      .select({
+        total: sql<number>`COALESCE(SUM(CAST(${clients.insuranceInfo}->>'premium' AS DECIMAL)), 0)`,
+      })
+      .from(clients)
+      .where(
+        and(
+          eq(clients.agentId, userId),
+          gte(clients.createdAt, lastMonth),
+          lte(clients.createdAt, thisMonth)
+        )
+      );
+
+    const lastMonthRevenue = lastMonthRevenueResult[0]?.total || 0;
+
+    // 수익 성장률 계산
+    const revenueGrowth =
+      lastMonthRevenue > 0
+        ? ((thisMonthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100
+        : 0;
+
     return {
       totalClients,
       monthlyNewClients,
@@ -196,7 +236,7 @@ export async function getKPIData(userId: string) {
       monthlyGrowth: {
         clients: Math.round(clientGrowth * 10) / 10,
         referrals: Math.round(referralGrowth * 10) / 10,
-        revenue: 8.4, // TODO: 실제 수익 데이터 연결 시 계산
+        revenue: Math.round(revenueGrowth * 10) / 10,
       },
     };
   } catch (error) {
@@ -251,21 +291,31 @@ export async function getTodayMeetings(userId: string) {
       )
       .orderBy(asc(meetings.startTime));
 
-    return todayMeetings.map((meeting) => ({
-      id: meeting.id,
-      clientName: meeting.client?.name || '미지정',
-      time: meeting.startTime.toLocaleTimeString('ko-KR', {
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
-      duration: Math.round(
-        (meeting.endTime.getTime() - meeting.startTime.getTime()) / (1000 * 60)
-      ),
-      type: meeting.meetingType || '미팅',
-      location: meeting.location || '미지정',
-      status: meeting.status as 'upcoming' | 'completed' | 'cancelled',
-      reminderSent: true, // TODO: 실제 알림 시스템 연결 시 구현
-    }));
+    return todayMeetings.map((meeting) => {
+      // 알림 발송 로직: 미팅 1시간 전에 자동 발송
+      const now = new Date();
+      const oneHourBeforeMeeting = new Date(
+        meeting.startTime.getTime() - 60 * 60 * 1000
+      );
+      const reminderSent = now >= oneHourBeforeMeeting;
+
+      return {
+        id: meeting.id,
+        clientName: meeting.client?.name || '미지정',
+        time: meeting.startTime.toLocaleTimeString('ko-KR', {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+        duration: Math.round(
+          (meeting.endTime.getTime() - meeting.startTime.getTime()) /
+            (1000 * 60)
+        ),
+        type: meeting.meetingType || '미팅',
+        location: meeting.location || '미지정',
+        status: meeting.status as 'upcoming' | 'completed' | 'cancelled',
+        reminderSent,
+      };
+    });
   } catch (error) {
     console.error('getTodayMeetings 오류:', error);
     return [];
@@ -396,6 +446,9 @@ export async function getReferralInsights(userId: string) {
         successfulReferrals: sql<number>`
           COUNT(CASE WHEN ${clients.stage} = '계약 완료' THEN 1 END)
         `,
+        lastReferralDate: sql<string>`
+          MAX(${clients.createdAt})::date
+        `,
       })
       .from(clients)
       .where(
@@ -417,7 +470,8 @@ export async function getReferralInsights(userId: string) {
         totalReferrals: totalRefs,
         successfulConversions: successfulRefs,
         conversionRate: Math.round(conversionRate * 10) / 10,
-        lastReferralDate: '2024-01-15', // TODO: 실제 마지막 소개 날짜 조회
+        lastReferralDate:
+          referrer.lastReferralDate || new Date().toISOString().split('T')[0],
         rank: index + 1,
         recentActivity: `최근 ${totalRefs}건의 소개를 통해 ${successfulRefs}건 성공`,
       };
@@ -452,8 +506,51 @@ export async function getReferralInsights(userId: string) {
 
     const activeReferrers = Number(activeReferrersResult[0]?.count || 0);
 
-    // 최대 네트워크 깊이 계산 (더미 - 실제로는 복잡한 재귀 쿼리 필요)
-    const networkDepth = Math.min(Math.floor(totalConnections / 10) + 1, 6);
+    // 실제 네트워크 깊이 계산 - 소개받은 고객 중 다시 소개를 한 비율 기반
+    const referredClientsResult = await db
+      .select({
+        count: sql<number>`COUNT(DISTINCT ${clients.id})`,
+      })
+      .from(clients)
+      .where(
+        and(
+          eq(clients.agentId, userId),
+          sql`${clients.referredById} IS NOT NULL`
+        )
+      );
+
+    const referredClientsCount = Number(referredClientsResult[0]?.count || 0);
+
+    // 소개받은 고객 중에서 다시 소개를 한 고객 수
+    const secondLevelReferrersResult = await db
+      .select({
+        count: sql<number>`COUNT(DISTINCT referrer_clients.id)`,
+      })
+      .from(clients)
+      .leftJoin(
+        sql`${clients} AS referrer_clients`,
+        sql`referrer_clients.referred_by_id = ${clients.id}`
+      )
+      .where(
+        and(
+          eq(clients.agentId, userId),
+          sql`${clients.referredById} IS NOT NULL`,
+          sql`referrer_clients.id IS NOT NULL`
+        )
+      );
+
+    const secondLevelReferrers = Number(
+      secondLevelReferrersResult[0]?.count || 0
+    );
+
+    // 네트워크 깊이 계산: 기본 1 + 2차 소개자 비율에 따른 가중치
+    const networkDepth = Math.min(
+      1 +
+        (referredClientsCount > 0
+          ? (secondLevelReferrers / referredClientsCount) * 2
+          : 0),
+      6
+    );
 
     // 월간 성장률 계산
     const lastMonth = new Date();

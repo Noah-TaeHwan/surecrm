@@ -6,7 +6,7 @@ import {
   clientTags,
   clientTagAssignments,
 } from '../schema';
-import { profiles, teams } from '~/lib/schema';
+import { profiles, teams, referrals } from '~/lib/schema';
 
 // 현재 인증된 사용자 정보 가져오기
 export async function getCurrentAgent(userId: string) {
@@ -235,32 +235,45 @@ export async function getClientStats(agentId: string) {
     // 총 소개 건수
     const totalReferralsResult = await db
       .select({ count: count() })
-      .from(clients)
-      .where(
-        and(
-          eq(clients.agentId, agentId),
-          sql`${clients.referredBy} IS NOT NULL`
-        )
-      );
+      .from(referrals)
+      .where(eq(referrals.agentId, agentId));
 
     const totalReferrals = totalReferralsResult[0]?.count || 0;
 
-    // 평균 소개 깊이
+    // 평균 소개 깊이 (clients 테이블의 referredById 기반)
     const avgDepthResult = await db
       .select({
-        avgDepth: sql<number>`AVG(${clients.referralDepth})`,
+        avgDepth: sql<number>`
+          AVG(
+            CASE 
+              WHEN ${clients.referredById} IS NOT NULL THEN 1 
+              ELSE 0 
+            END
+          )
+        `,
       })
       .from(clients)
       .where(eq(clients.agentId, agentId));
 
     const averageDepth = Number(avgDepthResult[0]?.avgDepth || 0);
 
-    // 상위 소개자들 (더미 데이터 - 실제로는 복잡한 쿼리 필요)
-    const topReferrers = [
-      { name: '김영희', count: 3 },
-      { name: '이철수', count: 2 },
-      { name: '박지민', count: 1 },
-    ];
+    // 상위 소개자들 - 실제 데이터베이스 쿼리
+    const topReferrersResult = await db
+      .select({
+        name: clients.fullName,
+        count: count(),
+      })
+      .from(referrals)
+      .innerJoin(clients, eq(referrals.referrerId, clients.id))
+      .where(eq(referrals.agentId, agentId))
+      .groupBy(clients.id, clients.fullName)
+      .orderBy(desc(count()))
+      .limit(5);
+
+    const topReferrers = topReferrersResult.map((item) => ({
+      name: item.name,
+      count: item.count,
+    }));
 
     return {
       totalReferrals,
