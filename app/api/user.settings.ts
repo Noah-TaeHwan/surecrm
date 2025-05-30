@@ -1,5 +1,6 @@
-import { getCurrentUser } from '../lib/auth';
-import { db } from '../lib/db';
+import { getCurrentUser } from '~/lib/auth/core';
+import { createServerClient } from '../lib/core/supabase';
+import { db } from '../lib/core/db';
 import { profiles } from '../lib/schema';
 import { eq } from 'drizzle-orm';
 

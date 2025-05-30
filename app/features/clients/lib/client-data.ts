@@ -1,4 +1,4 @@
-import { db } from '~/lib/db';
+import { db } from '~/lib/core/db';
 import { eq, desc, asc, like, and, or, count, sql } from 'drizzle-orm';
 import {
   clients,
@@ -6,7 +6,7 @@ import {
   clientTags,
   clientTagAssignments,
 } from '../schema';
-import { profiles, teams } from '~/lib/db-schema';
+import { profiles, teams } from '~/lib/schema';
 
 // 현재 인증된 사용자 정보 가져오기
 export async function getCurrentAgent(userId: string) {

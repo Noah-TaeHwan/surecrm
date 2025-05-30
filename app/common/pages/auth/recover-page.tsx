@@ -2,7 +2,7 @@ import { Link, type MetaFunction } from 'react-router';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { sendPasswordResetEmail } from '~/lib/auth';
+import { sendPasswordResetEmail } from '~/lib/auth/password';
 import {
   Form,
   FormControl,

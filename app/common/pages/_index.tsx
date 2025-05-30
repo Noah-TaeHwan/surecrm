@@ -1,5 +1,5 @@
 import { redirect } from 'react-router';
-import { checkAuthStatus } from '~/lib/auth';
+import { checkAuthStatus } from '~/lib/auth/core';
 
 interface LoaderArgs {
   request: Request;

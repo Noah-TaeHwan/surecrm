@@ -1,5 +1,6 @@
 import { meetings, clients, profiles } from '~/lib/schema';
-import { db } from '~/lib/db';
+import { createServerClient } from '~/lib/core/supabase';
+import { db } from '~/lib/core/db';
 import { meetingChecklists, meetingNotes } from '../schema';
 import { eq, and, gte, lte, desc, asc } from 'drizzle-orm';
 import type { Meeting, Client, MeetingStatus } from '~/lib/schema';

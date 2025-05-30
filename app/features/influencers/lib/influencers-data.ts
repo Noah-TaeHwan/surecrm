@@ -1,4 +1,4 @@
-import { db } from '~/lib/db';
+import { db } from '~/lib/core/db';
 import {
   eq,
   desc,
@@ -10,7 +10,7 @@ import {
   lte,
   isNotNull,
 } from 'drizzle-orm';
-import { clients, referrals } from '~/lib/db-schema';
+import { clients, referrals } from '~/lib/schema';
 import {
   influencerProfiles,
   gratitudeHistory,

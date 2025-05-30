@@ -1,8 +1,10 @@
-import { supabase } from '~/lib/auth';
+import { createServerClient } from '~/lib/core/supabase';
 
 interface ActionArgs {
   request: Request;
 }
+
+const supabase = createServerClient();
 
 export async function action({ request }: ActionArgs) {
   if (request.method !== 'POST') {

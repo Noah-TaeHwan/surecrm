@@ -19,7 +19,7 @@ import {
   removeTeamMember,
   resendInvitation,
 } from '../lib/supabase-team-data';
-import { requireAuth } from '~/lib/auth-middleware';
+import { requireAuth } from '~/lib/auth/middleware';
 
 export async function loader({ request }: Route.LoaderArgs) {
   try {

@@ -1,6 +1,6 @@
-import { db } from '~/lib/db';
+import { db } from '~/lib/core/db';
 import { eq, desc, asc, count, sql, and, gte, lte } from 'drizzle-orm';
-import { clients, teams, referrals } from '~/lib/db-schema';
+import { clients, teams, referrals } from '~/lib/schema';
 import { profiles } from '~/lib/schema';
 import {
   meetings,

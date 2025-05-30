@@ -9,11 +9,11 @@ import {
   CardTitle,
 } from '~/common/components/ui/card';
 import { CheckCircle, AlertCircle } from 'lucide-react';
-import {
-  supabase,
-  completeUserRegistration,
-  validateInvitationCode,
-} from '~/lib/auth';
+import { completeUserRegistration } from '~/lib/auth/registration';
+import { validateInvitationCode } from '~/lib/auth/validation';
+import { createServerClient } from '~/lib/core/supabase';
+
+const supabase = createServerClient();
 
 interface LoaderArgs {
   request: Request;

@@ -12,7 +12,7 @@ import {
   TabsList,
   TabsTrigger,
 } from '../components/ui/tabs';
-import { getTermsOfService, getPrivacyPolicy } from '~/lib/public-data';
+import { getTermsOfService, getPrivacyPolicy } from '~/lib/data/public';
 import type { Route } from './+types/terms-page';
 
 // Loader 함수 - 약관 정보 가져오기

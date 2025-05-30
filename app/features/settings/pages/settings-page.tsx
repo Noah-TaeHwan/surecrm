@@ -1,6 +1,6 @@
-import type { Route } from '.react-router/types/app/features/settings/pages/+types/settings-page';
+import type { Route } from './+types/settings-page';
 import { MainLayout } from '~/common/layouts/main-layout';
-import { getCurrentUser } from '~/lib/auth';
+import { getCurrentUser } from '~/lib/auth/core';
 import { redirect } from 'react-router';
 import { useState } from 'react';
 import {

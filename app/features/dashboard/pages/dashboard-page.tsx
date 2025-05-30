@@ -18,7 +18,7 @@ import {
   getUserGoals,
   setMonthlyGoal,
 } from '../lib/dashboard-data';
-import { requireAuth } from '~/lib/auth-middleware';
+import { requireAuth } from '~/lib/auth/middleware';
 import { useFetcher } from 'react-router';
 
 export function meta({ data, params }: Route.MetaArgs) {

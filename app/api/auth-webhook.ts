@@ -1,7 +1,7 @@
-import { db } from '~/lib/db';
+import { db } from '~/lib/core/db';
 import { profiles, invitations } from '~/lib/schema';
 import { eq } from 'drizzle-orm';
-import { createInvitationsForUser } from '~/lib/invitation-utils';
+import { createInvitationsForUser } from '~/lib/data/business/invitations';
 
 interface ActionArgs {
   request: Request;

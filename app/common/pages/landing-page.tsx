@@ -16,7 +16,7 @@ import {
   getFAQs,
   type PublicStats,
   type Testimonial,
-} from '~/lib/public-data';
+} from '~/lib/data/public';
 
 // Loader 함수의 인자 타입
 interface LoaderArgs {

@@ -1,8 +1,8 @@
 import type { Route } from './+types/admin-invitations-page';
-import { requireAdmin } from '~/lib/auth-middleware';
-import { createInvitationsForUser } from '~/lib/invitation-utils';
-import { db } from '~/lib/db';
-import { invitations, profiles } from '~/lib/db-schema';
+import { requireAdmin } from '~/lib/auth/middleware';
+import { createInvitationsForUser } from '~/lib/data/business/invitations';
+import { db } from '~/lib/core/db';
+import { invitations, profiles } from '~/lib/schema';
 import { eq } from 'drizzle-orm';
 import { Button } from '~/common/components/ui/button';
 import {

@@ -23,7 +23,8 @@ import {
 } from '~/common/components/ui/form';
 import { Alert, AlertDescription } from '~/common/components/ui/alert';
 import { Mail, RefreshCw, CheckCircle } from 'lucide-react';
-import { completeOTPVerification, supabase } from '~/lib/auth';
+import { completeOTPVerification } from '~/lib/auth/registration';
+import { createServerClient } from '~/lib/core/supabase';
 
 interface LoaderArgs {
   request: Request;
@@ -59,6 +60,8 @@ const otpSchema = z.object({
 });
 
 type OTPFormData = z.infer<typeof otpSchema>;
+
+const supabase = createServerClient();
 
 export async function loader({ request }: LoaderArgs) {
   const url = new URL(request.url);
@@ -118,7 +121,7 @@ export async function action({ request }: ActionArgs) {
 
     if (result.success) {
       // OTP 인증 성공 시 세션 생성하고 대시보드로 리다이렉트
-      const { createUserSession } = await import('~/lib/session');
+      const { createUserSession } = await import('~/lib/auth/session');
       return createUserSession(result.user!.id, '/dashboard');
     }
 

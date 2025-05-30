@@ -23,7 +23,8 @@ import {
   FormMessage,
 } from '~/common/components/ui/form';
 import { Alert, AlertDescription } from '~/common/components/ui/alert';
-import { checkAuthStatus, signUpUser } from '~/lib/auth';
+import { checkAuthStatus } from '~/lib/auth/core';
+import { signUpUser } from '~/lib/auth/registration';
 
 // Zod 스키마 정의
 const signUpSchema = z

@@ -1,6 +1,6 @@
-import { db } from '~/lib/db';
+import { db } from '~/lib/core/db';
 import { eq, desc, asc, count, sql, and, or, gte, lte } from 'drizzle-orm';
-import { clients, referrals, profiles } from '~/lib/db-schema';
+import { clients, referrals, profiles } from '~/lib/schema';
 
 // 네트워크 노드 인터페이스
 export interface NetworkNode {

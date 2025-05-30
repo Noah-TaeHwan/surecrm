@@ -4,7 +4,7 @@ import { DotPattern } from '~/common/components/magicui/dot-pattern';
 import { AnimatedGradientText } from '~/common/components/magicui/animated-gradient-text';
 import { MagicCard } from '~/common/components/magicui/magic-card';
 import { Avatar, AvatarFallback } from '~/common/components/ui/avatar';
-import type { PublicStats, Testimonial } from '~/lib/public-data';
+import type { PublicStats, Testimonial } from '~/lib/data/public';
 
 interface TestimonialCardProps {
   name: string;

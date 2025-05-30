@@ -1,5 +1,5 @@
-import { logoutUser } from '~/lib/auth';
-import { logout } from '~/lib/session';
+import { logoutUser } from '~/lib/auth/core';
+import { logout } from '~/lib/auth/session';
 
 interface ActionArgs {
   request: Request;

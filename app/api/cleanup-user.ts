@@ -1,11 +1,13 @@
-import { supabaseAdmin } from '~/lib/auth';
-import { db } from '~/lib/db';
+import { createAdminClient } from '~/lib/core/supabase';
+import { db } from '~/lib/core/db';
 import { profiles } from '~/lib/schema';
 import { eq } from 'drizzle-orm';
 
 interface ActionArgs {
   request: Request;
 }
+
+const supabaseAdmin = createAdminClient();
 
 export async function action({ request }: ActionArgs) {
   if (request.method !== 'POST') {

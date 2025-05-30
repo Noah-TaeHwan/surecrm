@@ -1,4 +1,4 @@
-import { db } from '~/lib/db';
+import { db } from '~/lib/core/db';
 import { profiles, type Profile } from '../schema';
 import { eq } from 'drizzle-orm';
 

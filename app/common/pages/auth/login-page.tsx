@@ -24,7 +24,7 @@ import {
   FormMessage,
 } from '~/common/components/ui/form';
 import { Alert, AlertDescription } from '~/common/components/ui/alert';
-import { checkAuthStatus, authenticateUser } from '~/lib/auth';
+import { checkAuthStatus, authenticateUser } from '~/lib/auth/core';
 import type { Route } from './+types/login-page';
 
 // 인터페이스 정의
@@ -100,7 +100,7 @@ export async function action({ request }: ActionArgs) {
 
   if (result.success && result.user) {
     // 로그인 성공 시 세션 생성하고 대시보드로 리다이렉트
-    const { createUserSession } = await import('~/lib/session');
+    const { createUserSession } = await import('~/lib/auth/session');
     return createUserSession(result.user.id, '/dashboard');
   }
 

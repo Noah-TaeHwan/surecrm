@@ -1,4 +1,4 @@
-import { db } from '~/lib/db';
+import { db } from '~/lib/core/db';
 import {
   eq,
   desc,
@@ -11,7 +11,7 @@ import {
   isNull,
   isNotNull,
 } from 'drizzle-orm';
-import { invitations, profiles, clients } from '~/lib/db-schema';
+import { invitations, profiles, clients } from '~/lib/schema';
 
 // 사용자의 초대장 목록 조회
 export async function getUserInvitations(userId: string) {

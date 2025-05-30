@@ -1,5 +1,5 @@
 import { data } from 'react-router';
-import { createAdminClient } from '~/lib/supabase.server';
+import { createAdminClient } from '~/lib/core/supabase';
 
 interface ActionArgs {
   request: Request;

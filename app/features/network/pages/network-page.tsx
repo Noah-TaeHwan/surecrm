@@ -25,7 +25,7 @@ import type { Route } from './+types/network-page';
 
 // 실제 데이터베이스 함수들 import
 import { getNetworkData, searchNetwork } from '../lib/network-data';
-import { requireAuth } from '~/lib/auth-middleware';
+import { requireAuth } from '~/lib/auth/middleware';
 
 export async function loader({ request }: Route.LoaderArgs) {
   try {

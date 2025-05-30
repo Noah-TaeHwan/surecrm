@@ -1,6 +1,6 @@
-import { db } from '~/lib/db';
+import { db } from '~/lib/core/db';
 import { eq, count } from 'drizzle-orm';
-import { invitations } from '~/lib/db-schema';
+import { invitations } from '~/lib/schema';
 
 /**
  * 초대장 통계 조회 (전체)

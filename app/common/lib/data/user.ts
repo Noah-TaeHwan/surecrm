@@ -1,6 +1,6 @@
-import { db } from '~/lib/db';
+import { db } from '~/lib/core/db';
 import { eq, count, and, gte } from 'drizzle-orm';
-import { profiles } from '~/lib/db-schema';
+import { profiles } from '~/lib/schema';
 
 /**
  * 사용자 프로필 정보 조회

@@ -1,4 +1,4 @@
-import { db } from '~/lib/db';
+import { db } from '~/lib/core/db';
 import { invitations, profiles } from '~/lib/schema';
 
 export async function action({ request }: { request: Request }) {

@@ -1,4 +1,4 @@
-import { validateInvitationCode } from '~/lib/auth';
+import { validateInvitationCode } from '~/lib/auth/validation';
 
 interface ActionArgs {
   request: Request;

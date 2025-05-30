@@ -23,8 +23,8 @@ import {
 } from '~/common/components/ui/form';
 import { Alert, AlertDescription } from '~/common/components/ui/alert';
 import { Separator } from '~/common/components/ui/separator';
-import { getInvitationStats } from '~/lib/invitation-utils';
-import { checkAuthStatus } from '~/lib/auth';
+import { getInvitationStats } from '~/lib/data/business/invitations';
+import { checkAuthStatus } from '~/lib/auth/core';
 
 // Zod 스키마 정의
 const inviteCodeSchema = z.object({

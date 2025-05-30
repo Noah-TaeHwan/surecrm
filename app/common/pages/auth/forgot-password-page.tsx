@@ -28,7 +28,7 @@ import {
   AlertTitle,
 } from '~/common/components/ui/alert';
 import { ArrowLeft, Mail, CheckCircle } from 'lucide-react';
-import { sendPasswordResetEmail } from '~/lib/auth';
+import { sendPasswordResetEmail } from '~/lib/auth/password';
 
 // 타입 정의
 interface LoaderData {}
