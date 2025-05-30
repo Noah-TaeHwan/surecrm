@@ -1,5 +1,5 @@
 import { db } from '~/lib/core/db';
-import { profiles, type Profile } from '../schema';
+import { profiles, type Profile } from './schema';
 import { eq } from 'drizzle-orm';
 
 // 사용자 프로필 인터페이스

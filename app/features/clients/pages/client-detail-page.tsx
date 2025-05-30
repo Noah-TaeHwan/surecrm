@@ -95,7 +95,7 @@ import type {
   Document,
   StageHistory,
   ReferralNetwork,
-} from '../components/types';
+} from '../types';
 import { getClientById } from '../lib/client-data';
 import { requireAuth } from '~/lib/auth/helpers';
 
@@ -121,41 +121,39 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 
     const client = {
       id: baseClient.id,
-      name: baseClient.name,
+      agentId: userId, // 현재 사용자 ID
+      teamId: baseClient.teamId,
+      fullName: baseClient.name || baseClient.fullName, // name → fullName
       email: baseClient.email,
       phone: baseClient.phone,
-      company: baseClient.company,
-      status: baseClient.status,
-      stage: baseClient.stage,
-      importance: baseClient.importance,
-      tags: baseClient.tags,
-      notes: baseClient.notes,
-      createdAt: baseClient.createdAt,
-      updatedAt: baseClient.updatedAt,
       telecomProvider: 'SK텔레콤',
-      position: baseClient.position || '마케팅 팀장',
       address: baseClient.address || '서울시 강남구 테헤란로 123',
       occupation: '마케팅 전문가 (10년 경력, 디지털 마케팅 전문)',
+      hasDrivingLicense: true,
       height: 165,
       weight: 55,
-      hasDrivingLicense: true,
-      referredBy: {
-        id: '2',
-        name: '박철수',
-        phone: '010-9999-8888',
-        relationship: '대학 동기',
-      },
+      tags: baseClient.tags,
+      importance: baseClient.importance as 'high' | 'medium' | 'low',
+      currentStageId: baseClient.stage || baseClient.currentStageId, // stage → currentStageId
+      referredById: baseClient.referredById,
+      notes: baseClient.notes,
+      customFields: {},
+      isActive: true, // 추가된 필드
+      createdAt: baseClient.createdAt,
+      updatedAt: baseClient.updatedAt,
+
+      // 조인된 필드들 (runtime에 추가됨)
+      referredBy: baseClient.referredBy
+        ? {
+            id: '2',
+            fullName: '박철수', // name → fullName
+            phone: '010-9999-8888',
+          }
+        : undefined,
       contractAmount: baseClient.contractAmount || 50000000,
       lastContactDate: baseClient.lastContactDate || '2024-01-15',
-      nextMeeting: {
-        date: '2024-01-20',
-        time: '14:00',
-        type: '상품 설명',
-        location: '카페 스타벅스 강남점',
-      },
+      nextMeetingDate: '2024-01-20', // nextMeeting → nextMeetingDate
       referralCount: baseClient.referralCount || 3,
-      referralDepth: baseClient.referralDepth || 1,
-      profileImage: null,
     };
 
     // 민감 정보 (암호화되어 저장)
@@ -175,23 +173,19 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     const insuranceInfo = [
       {
         id: '1',
-        type: 'auto',
-        status: 'active' as const,
-        details: {
-          vehicleNumber: '12가3456',
-          ownerName: client.name,
-          vehicleType: '승용차',
-          manufacturer: '현대',
-          model: '아반떼',
-          year: 2022,
-          engineType: '가솔린',
-          displacement: 1600,
-        },
-        documents: ['vehicle_registration', 'vehicle_photo', 'dashboard_photo'],
+        clientId: baseClient.id,
+        type: 'auto' as const,
+        policyNumber: 'AUTO-2024-001',
+        insurer: '현대해상',
         premium: 2400000,
+        coverage: 100000000,
         startDate: '2024-01-20',
         endDate: '2025-01-19',
+        status: 'active' as const,
+        documents: ['vehicle_registration', 'vehicle_photo', 'dashboard_photo'],
+        notes: '자동차 보험 가입 완료',
         createdAt: '2024-01-15',
+        updatedAt: '2024-01-15',
       },
     ];
 
@@ -232,7 +226,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 
 export function meta({ data, params }: Route.MetaArgs) {
   return [
-    { title: `${data?.client?.name || '고객'} 상세 - SureCRM` },
+    { title: `${data?.client?.fullName || '고객'} 상세 - SureCRM` },
     { name: 'description', content: '고객 상세 정보 및 관리' },
   ];
 }
@@ -269,7 +263,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
   }
 
   return (
-    <MainLayout title={`${client.name} 상세`}>
+    <MainLayout title={`${client.fullName} 상세`}>
       <div className="flex-1 space-y-4 p-4 md:p-6 pt-6">
         {/* 통합된 헤더 및 기본 정보 카드 */}
         <ClientDetailHeader
@@ -321,7 +315,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
             <ClientMeetingsTab
               meetings={meetings}
               clientId={client.id}
-              clientName={client.name}
+              clientName={client.fullName}
             />
           </TabsContent>
 
@@ -330,7 +324,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
             <ClientDocumentsTab
               documents={documents}
               clientId={client.id}
-              clientName={client.name}
+              clientName={client.fullName}
               insuranceTypes={availableInsuranceTypes}
             />
           </TabsContent>

@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Button } from '~/common/components/ui/button';
 import { Plus, Users } from 'lucide-react';
 import { ClientCard } from './client-card';
-import type { PipelineStage, Client } from '~/features/pipeline/types';
+import type { PipelineStage, Client } from '~/features/pipeline/types/types';
 
 interface PipelineBoardProps {
   stages: PipelineStage[];

@@ -12,7 +12,7 @@ import {
   CheckCircledIcon,
   CrossCircledIcon,
 } from '@radix-ui/react-icons';
-import type { Meeting, StageHistory } from './types';
+import type { Meeting, StageHistory } from '../types';
 
 interface ClientHistoryTabProps {
   meetings: Meeting[];
@@ -39,7 +39,17 @@ export function ClientHistoryTab({
   const timelineItems: TimelineItem[] = [
     ...meetings.map((item) => ({ ...item, itemType: 'meeting' as const })),
     ...stageHistory.map((item) => ({ ...item, itemType: 'stage' as const })),
-  ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  ].sort((a, b) => {
+    const dateA =
+      a.itemType === 'meeting'
+        ? new Date((a as any).scheduledDate)
+        : new Date((a as any).changedAt);
+    const dateB =
+      b.itemType === 'meeting'
+        ? new Date((b as any).scheduledDate)
+        : new Date((b as any).changedAt);
+    return dateB.getTime() - dateA.getTime();
+  });
 
   const isMeeting = (
     item: TimelineItem
@@ -80,11 +90,14 @@ export function ClientHistoryTab({
                   <div className="font-medium">
                     {isMeeting(item)
                       ? item.type
-                      : `단계 변경: ${isStageHistory(item) ? item.stage : ''}`}
+                      : `단계 변경: ${
+                          isStageHistory(item) ? item.toStage : ''
+                        }`}
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    {item.date}
-                    {isMeeting(item) && ` • ${item.time}`}
+                    {isMeeting(item)
+                      ? item.scheduledDate
+                      : (item as any).changedAt}
                     {isMeeting(item) && ` • ${item.location}`}
                   </div>
                   {isMeeting(item) && item.notes && (
@@ -92,9 +105,9 @@ export function ClientHistoryTab({
                       {item.notes}
                     </div>
                   )}
-                  {isStageHistory(item) && (
+                  {isStageHistory(item) && item.notes && (
                     <div className="text-sm mt-1 text-muted-foreground">
-                      {item.note}
+                      {item.notes}
                     </div>
                   )}
                 </div>

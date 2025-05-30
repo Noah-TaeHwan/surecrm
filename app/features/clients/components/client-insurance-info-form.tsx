@@ -21,8 +21,8 @@ import {
 import { Input } from '~/common/components/ui/input';
 import { Label } from '~/common/components/ui/label';
 import type { UseFormReturn } from 'react-hook-form';
-import type { ClientFormData } from './form-schema';
-import { insuranceTypeOptions, vehicleTypeOptions } from './form-schema';
+import type { ClientFormData } from '../lib/form-schema';
+import { insuranceTypeOptions, vehicleTypeOptions } from '../lib/form-schema';
 
 interface ClientInsuranceInfoFormProps {
   form: UseFormReturn<ClientFormData>;

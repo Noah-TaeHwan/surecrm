@@ -19,7 +19,7 @@ import type {
   InsuranceInfo,
   StageHistory,
   ReferralNetwork,
-} from './types';
+} from '../types';
 
 interface ClientOverviewTabProps {
   client: Client;
@@ -49,8 +49,8 @@ export function ClientOverviewTab({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* 소개 네트워크 미니 그래프 - 분리된 컴포넌트 사용 */}
         <ReferralNetworkMini
-          client={client}
-          referrals={referralNetwork.referrals}
+          client={client as any}
+          referrals={referralNetwork.referrals as any}
           stats={{
             totalReferred: referralNetwork.stats.totalReferred,
             conversionRate: referralNetwork.stats.conversionRate,
@@ -76,7 +76,7 @@ export function ClientOverviewTab({
                   <div className="flex-1">
                     <div className="font-medium">{meeting.type}</div>
                     <div className="text-sm text-muted-foreground">
-                      {meeting.date} {meeting.time} • {meeting.location}
+                      {meeting.scheduledDate} • {meeting.location}
                     </div>
                   </div>
                   <Badge
@@ -96,11 +96,14 @@ export function ClientOverviewTab({
                   <UpdateIcon className="h-4 w-4 text-blue-500" />
                   <div className="flex-1">
                     <div className="font-medium">
-                      단계 변경: {history.stage}
+                      {`${history.fromStage || '시작'} → ${history.toStage}`}
                     </div>
-                    <div className="text-sm text-muted-foreground">
-                      {history.date} • {history.note}
+                    <div className="text-xs text-muted-foreground">
+                      {history.changedAt}
                     </div>
+                    {history.notes && (
+                      <div className="text-xs">{history.notes}</div>
+                    )}
                   </div>
                 </div>
               ))}

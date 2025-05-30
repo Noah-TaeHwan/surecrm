@@ -1,10 +1,10 @@
 import { meetings, clients, profiles } from '~/lib/schema';
 import { createServerClient } from '~/lib/core/supabase';
 import { db } from '~/lib/core/db';
-import { meetingChecklists, meetingNotes } from '../schema';
+import { calendarMeetingChecklists, calendarMeetingNotes } from './schema';
 import { eq, and, gte, lte, desc, asc } from 'drizzle-orm';
 import type { Meeting, Client, MeetingStatus } from '~/lib/schema';
-import type { MeetingChecklist, MeetingNote } from '../schema';
+import type { CalendarMeetingChecklist, CalendarMeetingNote } from './schema';
 
 // Calendar 페이지용 Meeting 타입 (컴포넌트와 호환)
 export interface CalendarMeeting {
@@ -88,16 +88,16 @@ export async function getMeetingsByMonth(
         // 체크리스트 조회
         const checklists = await db
           .select()
-          .from(meetingChecklists)
-          .where(eq(meetingChecklists.meetingId, meeting.id))
-          .orderBy(asc(meetingChecklists.order));
+          .from(calendarMeetingChecklists)
+          .where(eq(calendarMeetingChecklists.meetingId, meeting.id))
+          .orderBy(asc(calendarMeetingChecklists.order));
 
         // 노트 조회
         const notes = await db
           .select()
-          .from(meetingNotes)
-          .where(eq(meetingNotes.meetingId, meeting.id))
-          .orderBy(desc(meetingNotes.createdAt));
+          .from(calendarMeetingNotes)
+          .where(eq(calendarMeetingNotes.meetingId, meeting.id))
+          .orderBy(desc(calendarMeetingNotes.createdAt));
 
         return {
           id: meeting.id,
@@ -178,16 +178,16 @@ export async function getMeetingsByDateRange(
         // 체크리스트 조회
         const checklists = await db
           .select()
-          .from(meetingChecklists)
-          .where(eq(meetingChecklists.meetingId, meeting.id))
-          .orderBy(asc(meetingChecklists.order));
+          .from(calendarMeetingChecklists)
+          .where(eq(calendarMeetingChecklists.meetingId, meeting.id))
+          .orderBy(asc(calendarMeetingChecklists.order));
 
         // 노트 조회
         const notes = await db
           .select()
-          .from(meetingNotes)
-          .where(eq(meetingNotes.meetingId, meeting.id))
-          .orderBy(desc(meetingNotes.createdAt));
+          .from(calendarMeetingNotes)
+          .where(eq(calendarMeetingNotes.meetingId, meeting.id))
+          .orderBy(desc(calendarMeetingNotes.createdAt));
 
         return {
           id: meeting.id,
@@ -293,7 +293,7 @@ export async function createMeeting(
     );
 
     if (defaultChecklists.length > 0) {
-      await db.insert(meetingChecklists).values(
+      await db.insert(calendarMeetingChecklists).values(
         defaultChecklists.map((item, index) => ({
           meetingId: meeting.id,
           text: item,
@@ -381,8 +381,8 @@ export async function toggleChecklistItem(
     // 현재 체크리스트 상태 조회
     const currentItem = await db
       .select()
-      .from(meetingChecklists)
-      .where(eq(meetingChecklists.id, checklistId))
+      .from(calendarMeetingChecklists)
+      .where(eq(calendarMeetingChecklists.id, checklistId))
       .limit(1);
 
     if (currentItem.length === 0) {
@@ -391,12 +391,12 @@ export async function toggleChecklistItem(
 
     // 상태 토글
     const updatedItem = await db
-      .update(meetingChecklists)
+      .update(calendarMeetingChecklists)
       .set({
         completed: !currentItem[0].completed,
         updatedAt: new Date(),
       })
-      .where(eq(meetingChecklists.id, checklistId))
+      .where(eq(calendarMeetingChecklists.id, checklistId))
       .returning();
 
     return updatedItem[0];
@@ -417,7 +417,7 @@ export async function addMeetingNote(
 ) {
   try {
     const newNote = await db
-      .insert(meetingNotes)
+      .insert(calendarMeetingNotes)
       .values({
         meetingId,
         agentId,

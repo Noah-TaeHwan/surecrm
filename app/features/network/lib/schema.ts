@@ -1,4 +1,5 @@
-// Network 기능에 특화된 스키마
+// 🌐 Network 기능 전용 스키마
+// Prefix 네이밍 컨벤션: network_ 사용
 // 공통 스키마에서 기본 테이블들을 import
 export {
   profiles,
@@ -30,8 +31,8 @@ import {
 import { relations } from 'drizzle-orm';
 import { profiles, teams, clients, referrals } from '~/lib/schema';
 
-// Network 특화 Enum
-export const networkNodeTypeEnum = pgEnum('network_node_type', [
+// 📌 Network 특화 Enum (prefix 네이밍 적용)
+export const networkNodeTypeEnum = pgEnum('network_node_type_enum', [
   'client',
   'prospect',
   'influencer',
@@ -39,16 +40,19 @@ export const networkNodeTypeEnum = pgEnum('network_node_type', [
   'external',
 ]);
 
-export const connectionTypeEnum = pgEnum('connection_type', [
-  'direct_referral',
-  'family_member',
-  'colleague',
-  'friend',
-  'business_partner',
-  'community_member',
-]);
+export const networkConnectionTypeEnum = pgEnum(
+  'network_connection_type_enum',
+  [
+    'direct_referral',
+    'family_member',
+    'colleague',
+    'friend',
+    'business_partner',
+    'community_member',
+  ]
+);
 
-export const networkAnalysisTypeEnum = pgEnum('network_analysis_type', [
+export const networkAnalysisTypeEnum = pgEnum('network_analysis_type_enum', [
   'centrality',
   'clustering',
   'path_analysis',
@@ -56,7 +60,7 @@ export const networkAnalysisTypeEnum = pgEnum('network_analysis_type', [
   'growth_tracking',
 ]);
 
-// Network 특화 테이블들
+// 🏷️ Network 특화 테이블들 (prefix 네이밍 적용)
 
 // Network Nodes 테이블 (네트워크 노드 관리)
 export const networkNodes = pgTable('network_nodes', {
@@ -104,7 +108,7 @@ export const networkConnections = pgTable('network_connections', {
   targetNodeId: uuid('target_node_id')
     .notNull()
     .references(() => networkNodes.id, { onDelete: 'cascade' }),
-  connectionType: connectionTypeEnum('connection_type').notNull(),
+  connectionType: networkConnectionTypeEnum('connection_type').notNull(),
   strength: decimal('strength', { precision: 3, scale: 2 })
     .default('1.0')
     .notNull(), // 0.0-10.0
@@ -198,14 +202,11 @@ export const networkOpportunities = pgTable('network_opportunities', {
   title: text('title').notNull(),
   description: text('description'),
   potentialValue: decimal('potential_value', { precision: 12, scale: 2 }),
-  probability: decimal('probability', { precision: 3, scale: 2 }).default(
-    '0.5'
-  ), // 0.0-1.0
-  priority: text('priority').default('medium').notNull(), // 'low', 'medium', 'high', 'urgent'
-  status: text('status').default('identified').notNull(), // 'identified', 'planned', 'in_progress', 'completed', 'missed'
-  dueDate: timestamp('due_date', { withTimezone: true }),
+  priority: text('priority').default('medium'), // 'low', 'medium', 'high'
+  status: text('status').default('open'), // 'open', 'pursuing', 'closed', 'rejected'
+  dueDate: date('due_date'),
   completedAt: timestamp('completed_at', { withTimezone: true }),
-  actualValue: decimal('actual_value', { precision: 12, scale: 2 }),
+  outcome: text('outcome'),
   notes: text('notes'),
   metadata: jsonb('metadata'),
   createdAt: timestamp('created_at', { withTimezone: true })
@@ -216,34 +217,7 @@ export const networkOpportunities = pgTable('network_opportunities', {
     .notNull(),
 });
 
-// Network Events 테이블 (네트워크 이벤트 관리)
-export const networkEvents = pgTable('network_events', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  agentId: uuid('agent_id')
-    .notNull()
-    .references(() => profiles.id),
-  teamId: uuid('team_id').references(() => teams.id),
-  title: text('title').notNull(),
-  description: text('description'),
-  eventType: text('event_type').notNull(), // 'networking_event', 'conference', 'meetup', 'workshop'
-  eventDate: timestamp('event_date', { withTimezone: true }).notNull(),
-  location: text('location'),
-  attendeeCount: integer('attendee_count').default(0).notNull(),
-  newConnections: integer('new_connections').default(0).notNull(),
-  followUpActions: jsonb('follow_up_actions'),
-  outcomes: jsonb('outcomes'),
-  cost: decimal('cost', { precision: 10, scale: 2 }),
-  roi: decimal('roi', { precision: 8, scale: 2 }), // Return on Investment
-  notes: text('notes'),
-  createdAt: timestamp('created_at', { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-  updatedAt: timestamp('updated_at', { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-});
-
-// Relations 정의
+// 🔗 Relations (관계 정의)
 export const networkNodesRelations = relations(
   networkNodes,
   ({ one, many }) => ({
@@ -256,10 +230,10 @@ export const networkNodesRelations = relations(
       references: [clients.id],
     }),
     sourceConnections: many(networkConnections, {
-      relationName: 'source_connections',
+      relationName: 'sourceConnections',
     }),
     targetConnections: many(networkConnections, {
-      relationName: 'target_connections',
+      relationName: 'targetConnections',
     }),
     opportunities: many(networkOpportunities),
   })
@@ -275,12 +249,12 @@ export const networkConnectionsRelations = relations(
     sourceNode: one(networkNodes, {
       fields: [networkConnections.sourceNodeId],
       references: [networkNodes.id],
-      relationName: 'source_connections',
+      relationName: 'sourceConnections',
     }),
     targetNode: one(networkNodes, {
       fields: [networkConnections.targetNodeId],
       references: [networkNodes.id],
-      relationName: 'target_connections',
+      relationName: 'targetConnections',
     }),
     interactions: many(networkInteractions),
   })
@@ -332,18 +306,7 @@ export const networkOpportunitiesRelations = relations(
   })
 );
 
-export const networkEventsRelations = relations(networkEvents, ({ one }) => ({
-  agent: one(profiles, {
-    fields: [networkEvents.agentId],
-    references: [profiles.id],
-  }),
-  team: one(teams, {
-    fields: [networkEvents.teamId],
-    references: [teams.id],
-  }),
-}));
-
-// Network 특화 타입들
+// 📝 Network 특화 타입들 (실제 코드와 일치)
 export type NetworkNode = typeof networkNodes.$inferSelect;
 export type NewNetworkNode = typeof networkNodes.$inferInsert;
 export type NetworkConnection = typeof networkConnections.$inferSelect;
@@ -355,72 +318,54 @@ export type NetworkInteraction = typeof networkInteractions.$inferSelect;
 export type NewNetworkInteraction = typeof networkInteractions.$inferInsert;
 export type NetworkOpportunity = typeof networkOpportunities.$inferSelect;
 export type NewNetworkOpportunity = typeof networkOpportunities.$inferInsert;
-export type NetworkEvent = typeof networkEvents.$inferSelect;
-export type NewNetworkEvent = typeof networkEvents.$inferInsert;
 
 export type NetworkNodeType = (typeof networkNodeTypeEnum.enumValues)[number];
-export type ConnectionType = (typeof connectionTypeEnum.enumValues)[number];
+export type NetworkConnectionType =
+  (typeof networkConnectionTypeEnum.enumValues)[number];
 export type NetworkAnalysisType =
   (typeof networkAnalysisTypeEnum.enumValues)[number];
 
-// Network 특화 인터페이스
+// 🎯 Network 특화 인터페이스
+export interface NetworkOverview {
+  nodes: NetworkNode[];
+  connections: NetworkConnection[];
+  analysisResults: NetworkAnalysisResult[];
+  opportunities: NetworkOpportunity[];
+  stats: {
+    totalNodes: number;
+    totalConnections: number;
+    networkDensity: number;
+    topInfluencers: NetworkNode[];
+  };
+}
+
+export interface NetworkFilter {
+  nodeTypes?: NetworkNodeType[];
+  connectionTypes?: NetworkConnectionType[];
+  strengthRange?: {
+    min: number;
+    max: number;
+  };
+  influenceRange?: {
+    min: number;
+    max: number;
+  };
+  isActive?: boolean;
+  tags?: string[];
+  location?: string;
+}
+
 export interface NetworkStats {
   totalNodes: number;
   totalConnections: number;
+  averageConnections: number;
   networkDensity: number;
   averagePathLength: number;
   clusteringCoefficient: number;
-  topInfluencers: {
-    id: string;
+  topInfluencers: Array<{
+    nodeId: string;
     name: string;
-    centralityScore: number;
+    influenceScore: number;
     connectionsCount: number;
-  }[];
-}
-
-export interface NetworkVisualizationData {
-  nodes: {
-    id: string;
-    name: string;
-    type: NetworkNodeType;
-    size: number;
-    color: string;
-    x?: number;
-    y?: number;
-  }[];
-  edges: {
-    source: string;
-    target: string;
-    type: ConnectionType;
-    strength: number;
-    color: string;
-  }[];
-}
-
-export interface NetworkGrowthMetrics {
-  period: string;
-  newNodes: number;
-  newConnections: number;
-  growthRate: number;
-  churnRate: number;
-  networkValue: number;
-}
-
-export interface OpportunityPipeline {
-  identified: NetworkOpportunity[];
-  planned: NetworkOpportunity[];
-  inProgress: NetworkOpportunity[];
-  completed: NetworkOpportunity[];
-  totalValue: number;
-  conversionRate: number;
-}
-
-export interface NetworkRecommendation {
-  type: 'introduction' | 'event' | 'follow_up' | 'expansion';
-  title: string;
-  description: string;
-  priority: number;
-  potentialValue: number;
-  actionItems: string[];
-  targetNodes: string[];
+  }>;
 }

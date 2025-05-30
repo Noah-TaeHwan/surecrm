@@ -45,7 +45,10 @@ import {
   Check,
   AlertCircle,
 } from 'lucide-react';
-import type { PipelineStage, InsuranceInfo } from '~/features/pipeline/types';
+import type {
+  PipelineStage,
+  InsuranceInfo,
+} from '~/features/pipeline/types/types';
 
 interface AddClientModalProps {
   open: boolean;

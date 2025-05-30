@@ -31,7 +31,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { Link } from 'react-router';
-import type { InsuranceInfo } from '~/features/pipeline/types';
+import type { InsuranceInfo } from '~/features/pipeline/types/types';
 
 interface ClientCardProps {
   id: string;

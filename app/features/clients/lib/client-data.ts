@@ -5,7 +5,7 @@ import {
   clientDetails,
   clientTags,
   clientTagAssignments,
-} from '../schema';
+} from './schema';
 import { profiles, teams, referrals } from '~/lib/schema';
 
 // 현재 인증된 사용자 정보 가져오기

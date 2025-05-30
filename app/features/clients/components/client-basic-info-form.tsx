@@ -20,7 +20,7 @@ import {
   HomeIcon,
 } from '@radix-ui/react-icons';
 import type { UseFormReturn } from 'react-hook-form';
-import type { ClientFormData } from './form-schema';
+import type { ClientFormData } from '../lib/form-schema';
 
 interface ClientBasicInfoFormProps {
   form: UseFormReturn<ClientFormData>;
@@ -45,7 +45,7 @@ export function ClientBasicInfoForm({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="name"
+            name="fullName"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>이름 *</FormLabel>
@@ -114,45 +114,25 @@ export function ClientBasicInfoForm({
 
           <FormField
             control={form.control}
-            name="company"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>회사명</FormLabel>
-                <FormControl>
-                  <div className="relative">
-                    <HomeIcon className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      {...field}
-                      className="pl-10"
-                      placeholder="ABC 회사"
-                    />
-                  </div>
-                </FormControl>
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="position"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>직책</FormLabel>
-                <FormControl>
-                  <Input {...field} placeholder="팀장" />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
             name="address"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>주소</FormLabel>
                 <FormControl>
                   <Input {...field} placeholder="서울시 강남구..." />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="occupation"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>직업</FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder="회사원, 자영업자 등" />
                 </FormControl>
               </FormItem>
             )}

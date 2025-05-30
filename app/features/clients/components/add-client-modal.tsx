@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from '~/common/components/ui/select';
 import { PlusIcon, UpdateIcon } from '@radix-ui/react-icons';
-import { formOptions } from './form-schema';
+import { formOptions } from '../lib/form-schema';
 
 interface AddClientModalProps {
   open: boolean;

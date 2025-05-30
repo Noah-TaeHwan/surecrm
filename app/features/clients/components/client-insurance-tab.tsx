@@ -10,7 +10,7 @@ import { Badge } from '~/common/components/ui/badge';
 import { PlusIcon } from '@radix-ui/react-icons';
 import { insuranceTypeConfig } from './insurance-config';
 import { AddInsuranceModal } from './add-insurance-modal';
-import type { InsuranceInfo } from './types';
+import type { InsuranceInfo } from '../types';
 
 // 상세정보 키를 한국어로 매핑하는 객체
 const detailsKeyMapping: Record<string, string> = {
@@ -154,51 +154,33 @@ export function ClientInsuranceTab({
                         </div>
                       </div>
                     )}
-
-                    {insurance.estimatedStartDate && (
-                      <div>
-                        <div className="text-sm font-medium mb-2">
-                          예상 시작일
-                        </div>
-                        <div className="text-sm">
-                          {insurance.estimatedStartDate}
-                        </div>
-                      </div>
-                    )}
                   </div>
 
                   <div className="space-y-4">
-                    <div>
-                      <div className="text-sm font-medium mb-2">상세 정보</div>
-                      <div className="space-y-2 text-sm">
-                        {Object.entries(insurance.details).map(
-                          ([key, value]) => (
-                            <div key={key} className="flex justify-between">
-                              <span className="text-muted-foreground">
-                                {detailsKeyMapping[key] || key}:
-                              </span>
-                              <span>{formatDetailValue(key, value)}</span>
-                            </div>
-                          )
-                        )}
+                    {insurance.notes && (
+                      <div>
+                        <div className="text-sm font-medium mb-2">메모</div>
+                        <div className="text-sm">{insurance.notes}</div>
                       </div>
-                    </div>
+                    )}
 
-                    {insurance.documents.length > 0 && (
+                    {insurance.documents?.length > 0 && (
                       <div>
                         <div className="text-sm font-medium mb-2">
                           관련 문서
                         </div>
                         <div className="flex flex-wrap gap-1">
-                          {insurance.documents.map((doc, index) => (
-                            <Badge
-                              key={index}
-                              variant="outline"
-                              className="text-xs"
-                            >
-                              {doc}
-                            </Badge>
-                          ))}
+                          {insurance.documents?.map(
+                            (doc: any, index: number) => (
+                              <Badge
+                                key={index}
+                                variant="outline"
+                                className="text-xs"
+                              >
+                                {doc}
+                              </Badge>
+                            )
+                          )}
                         </div>
                       </div>
                     )}

@@ -70,7 +70,7 @@ import {
   TooltipTrigger,
 } from '~/common/components/ui/tooltip';
 
-// 분리된 컴포넌트들 import
+// 🔄 수정된 import 경로들
 import { ReferralDepthIndicator } from '../components/referral-depth-indicator';
 import { ClientCard } from '../components/client-card';
 import { ClientStatsCards } from '../components/client-stats-cards';
@@ -81,7 +81,8 @@ import {
   insuranceTypeIcons,
   insuranceTypeText,
 } from '../components/insurance-config';
-import type { Client, ClientStats, BadgeVariant } from '../components/types';
+// 올바른 타입 import 경로
+import type { Client, ClientStats, BadgeVariant } from '../types';
 import { getClients, getClientStats } from '../lib/client-data';
 import { requireAuth, getSearchParams } from '~/lib/auth/helpers';
 

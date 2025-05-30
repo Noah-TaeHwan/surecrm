@@ -17,7 +17,7 @@ import {
   type NotificationChannel,
   type NotificationStatus,
   type NotificationPriority,
-} from '../schema';
+} from './schema';
 
 // 타입 재export
 export type { NotificationQueue, NotificationHistory, NotificationSettings };

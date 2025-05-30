@@ -13,13 +13,12 @@ import {
 import { clients, referrals } from '~/lib/schema';
 import {
   influencerProfiles,
-  gratitudeHistory,
-  networkAnalysis,
-  referralPatterns,
+  influencerGratitudeHistory,
+  influencerNetworkAnalysis,
   type InfluencerProfile,
-  type GratitudeHistory,
-  type NetworkAnalysis as NetworkAnalysisType,
-} from '../schema';
+  type InfluencerGratitudeHistory,
+  type InfluencerNetworkAnalysis as InfluencerNetworkAnalysisType,
+} from './schema';
 
 // 핵심 소개자 랭킹 조회
 export async function getTopInfluencers(
@@ -175,14 +174,14 @@ async function calculateNetworkDepth(
 async function getLastGratitudeDate(clientId: string): Promise<string | null> {
   try {
     const lastGratitude = await db
-      .select({ sentDate: gratitudeHistory.sentDate })
-      .from(gratitudeHistory)
+      .select({ sentDate: influencerGratitudeHistory.sentDate })
+      .from(influencerGratitudeHistory)
       .innerJoin(
         influencerProfiles,
-        eq(gratitudeHistory.influencerId, influencerProfiles.id)
+        eq(influencerGratitudeHistory.influencerId, influencerProfiles.id)
       )
       .where(eq(influencerProfiles.clientId, clientId))
-      .orderBy(desc(gratitudeHistory.sentDate))
+      .orderBy(desc(influencerGratitudeHistory.sentDate))
       .limit(1);
 
     return lastGratitude[0]?.sentDate || null;
@@ -255,24 +254,24 @@ export async function getGratitudeHistory(userId: string, limit: number = 10) {
   try {
     const history = await db
       .select({
-        id: gratitudeHistory.id,
-        influencerId: gratitudeHistory.influencerId,
+        id: influencerGratitudeHistory.id,
+        influencerId: influencerGratitudeHistory.influencerId,
         influencerName: clients.name,
-        type: gratitudeHistory.gratitudeType,
-        message: gratitudeHistory.message,
-        giftType: gratitudeHistory.giftType,
-        sentDate: gratitudeHistory.sentDate,
-        scheduledDate: gratitudeHistory.scheduledDate,
-        status: gratitudeHistory.status,
+        type: influencerGratitudeHistory.gratitudeType,
+        message: influencerGratitudeHistory.message,
+        giftType: influencerGratitudeHistory.giftType,
+        sentDate: influencerGratitudeHistory.sentDate,
+        scheduledDate: influencerGratitudeHistory.scheduledDate,
+        status: influencerGratitudeHistory.status,
       })
-      .from(gratitudeHistory)
+      .from(influencerGratitudeHistory)
       .innerJoin(
         influencerProfiles,
-        eq(gratitudeHistory.influencerId, influencerProfiles.id)
+        eq(influencerGratitudeHistory.influencerId, influencerProfiles.id)
       )
       .innerJoin(clients, eq(influencerProfiles.clientId, clients.id))
-      .where(eq(gratitudeHistory.agentId, userId))
-      .orderBy(desc(gratitudeHistory.createdAt))
+      .where(eq(influencerGratitudeHistory.agentId, userId))
+      .orderBy(desc(influencerGratitudeHistory.createdAt))
       .limit(limit);
 
     return history.map((item) => ({

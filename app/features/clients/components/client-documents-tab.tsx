@@ -24,7 +24,7 @@ import {
 } from '@radix-ui/react-icons';
 import { documentTypeConfig, insuranceTypeConfig } from './insurance-config';
 import { AddDocumentModal } from './add-document-modal';
-import type { Document } from './types';
+import type { Document } from '../types';
 
 interface ClientDocumentsTabProps {
   documents: Document[];
@@ -64,8 +64,8 @@ export function ClientDocumentsTab({
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {documents.map((document) => {
                 const config = documentTypeConfig[document.type];
-                const relatedInsurance = document.relatedInsurance
-                  ? insuranceTypeConfig[document.relatedInsurance]
+                const relatedInsurance = document.relatedInsuranceId
+                  ? insuranceTypeConfig[document.relatedInsuranceId]
                   : null;
 
                 return (
@@ -119,7 +119,7 @@ export function ClientDocumentsTab({
                     )}
 
                     <div className="text-xs text-muted-foreground mt-2">
-                      {document.uploadDate} 업로드
+                      {document.createdAt} 업로드
                     </div>
                   </Card>
                 );

@@ -4,10 +4,10 @@ import { clients, teams, referrals } from '~/lib/schema';
 import { profiles } from '~/lib/schema';
 import {
   meetings,
-  meetingChecklists,
-  meetingNotes,
-} from '~/features/calendar/schema';
-import { goals } from '~/features/dashboard/schema';
+  calendarMeetingChecklists,
+  calendarMeetingNotes,
+} from '~/features/calendar/lib/schema';
+import { dashboardGoals } from './schema';
 
 // 현재 사용자의 기본 정보 조회
 export async function getUserInfo(userId: string) {
@@ -63,12 +63,12 @@ export async function getTodayStats(userId: string) {
     // 미완료 체크리스트 항목 수 (대기 중인 작업)
     const pendingTasksResult = await db
       .select({ count: count() })
-      .from(meetingChecklists)
-      .innerJoin(meetings, eq(meetingChecklists.meetingId, meetings.id))
+      .from(calendarMeetingChecklists)
+      .innerJoin(meetings, eq(calendarMeetingChecklists.meetingId, meetings.id))
       .where(
         and(
           eq(meetings.agentId, userId),
-          eq(meetingChecklists.completed, false)
+          eq(calendarMeetingChecklists.completed, false)
         )
       );
 
@@ -408,17 +408,19 @@ export async function getMonthlyRevenueGoal(userId: string): Promise<number> {
 
     const goalResult = await db
       .select({
-        targetValue: goals.targetValue,
+        targetValue: dashboardGoals.targetValue,
       })
-      .from(goals)
+      .from(dashboardGoals)
       .where(
         and(
-          eq(goals.agentId, userId),
-          eq(goals.goalType, 'revenue'),
-          eq(goals.period, 'monthly'),
-          eq(goals.isActive, true),
-          gte(goals.startDate, thisMonth.toISOString().split('T')[0]),
-          sql`${goals.endDate} < ${nextMonth.toISOString().split('T')[0]}`
+          eq(dashboardGoals.agentId, userId),
+          eq(dashboardGoals.goalType, 'revenue'),
+          eq(dashboardGoals.period, 'monthly'),
+          eq(dashboardGoals.isActive, true),
+          gte(dashboardGoals.startDate, thisMonth.toISOString().split('T')[0]),
+          sql`${dashboardGoals.endDate} < ${
+            nextMonth.toISOString().split('T')[0]
+          }`
         )
       )
       .limit(1);
@@ -617,14 +619,14 @@ export async function setMonthlyGoal(
     // 기존 목표가 있는지 확인
     const existingGoal = await db
       .select()
-      .from(goals)
+      .from(dashboardGoals)
       .where(
         and(
-          eq(goals.agentId, userId),
-          eq(goals.goalType, goalType),
-          eq(goals.period, 'monthly'),
-          eq(goals.isActive, true),
-          gte(goals.startDate, startDate.toISOString().split('T')[0])
+          eq(dashboardGoals.agentId, userId),
+          eq(dashboardGoals.goalType, goalType),
+          eq(dashboardGoals.period, 'monthly'),
+          eq(dashboardGoals.isActive, true),
+          gte(dashboardGoals.startDate, startDate.toISOString().split('T')[0])
         )
       )
       .limit(1);
@@ -632,19 +634,19 @@ export async function setMonthlyGoal(
     if (existingGoal.length > 0) {
       // 기존 목표 업데이트
       await db
-        .update(goals)
+        .update(dashboardGoals)
         .set({
           targetValue: targetValue.toString(),
           title: title || `${goalType} 월간 목표`,
           updatedAt: new Date(),
         })
-        .where(eq(goals.id, existingGoal[0].id));
+        .where(eq(dashboardGoals.id, existingGoal[0].id));
 
       return existingGoal[0].id;
     } else {
       // 새 목표 생성
       const newGoal = await db
-        .insert(goals)
+        .insert(dashboardGoals)
         .values({
           agentId: userId,
           title: title || `${goalType} 월간 목표`,
@@ -670,9 +672,14 @@ export async function getUserGoals(userId: string) {
   try {
     const userGoals = await db
       .select()
-      .from(goals)
-      .where(and(eq(goals.agentId, userId), eq(goals.isActive, true)))
-      .orderBy(desc(goals.createdAt));
+      .from(dashboardGoals)
+      .where(
+        and(
+          eq(dashboardGoals.agentId, userId),
+          eq(dashboardGoals.isActive, true)
+        )
+      )
+      .orderBy(desc(dashboardGoals.createdAt));
 
     return userGoals.map((goal) => ({
       ...goal,

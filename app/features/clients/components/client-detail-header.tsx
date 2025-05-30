@@ -18,7 +18,7 @@ import {
 } from '~/common/components/ui/dropdown-menu';
 import {
   ArrowLeftIcon,
-  Pencil2Icon,
+  Pencil1Icon,
   MobileIcon,
   EnvelopeClosedIcon,
   HomeIcon,
@@ -36,10 +36,13 @@ import {
   CheckCircledIcon,
   Cross2Icon,
   HeartIcon,
+  FileTextIcon,
+  TrashIcon,
+  PlusIcon,
 } from '@radix-ui/react-icons';
 import { Link } from 'react-router';
 import { useState } from 'react';
-import type { Client, BadgeVariant } from './types';
+import type { Client, BadgeVariant } from '../types';
 import { AddMeetingModal } from './add-meeting-modal';
 import { AddDocumentModal } from './add-document-modal';
 import { ClientGratitudeModal } from './client-gratitude-modal';
@@ -163,52 +166,43 @@ export function ClientDetailHeader({
               고객 목록
             </Button>
           </Link>
-          <div>
-            <h1 className="text-3xl font-bold">{client.name}</h1>
-            <p className="text-muted-foreground">
-              {client.company} • {client.position}
-            </p>
+          <div className="flex flex-col">
+            <h1 className="text-3xl font-bold text-gray-900">
+              {client.fullName}
+            </h1>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline">
+              <Button variant="outline" size="sm">
                 <DotsHorizontalIcon className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>빠른 작업</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => setIsAddMeetingOpen(true)}>
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                미팅 예약
+              <DropdownMenuItem onClick={() => console.log('프로필 편집')}>
+                <PersonIcon className="mr-2 h-4 w-4" />
+                프로필 편집
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setIsGratitudeOpen(true)}>
                 <HeartIcon className="mr-2 h-4 w-4" />
-                감사 보내기
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Share1Icon className="mr-2 h-4 w-4" />
-                소개 요청
+                감사 메시지 보내기
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => setIsAddDocumentOpen(true)}>
-                <UploadIcon className="mr-2 h-4 w-4" />
-                문서 업로드
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <DownloadIcon className="mr-2 h-4 w-4" />
-                정보 내보내기
+              <DropdownMenuItem className="text-red-600">
+                <TrashIcon className="mr-2 h-4 w-4" />
+                고객 삭제
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          <Link to={`/clients/edit/${client.id}`}>
-            <Button>
-              <Pencil2Icon className="mr-2 h-4 w-4" />
-              편집
-            </Button>
-          </Link>
+          <Button size="sm" onClick={() => setIsAddDocumentOpen(true)}>
+            <FileTextIcon className="mr-2 h-4 w-4" />
+            문서 추가
+          </Button>
+          <Button onClick={() => setIsAddMeetingOpen(true)}>
+            <CalendarIcon className="mr-2 h-4 w-4" />
+            미팅 예약
+          </Button>
         </div>
       </div>
 
@@ -217,12 +211,7 @@ export function ClientDetailHeader({
         <CardContent className="pt-6 space-y-6">
           {/* 상단 섹션: 아바타, 기본 연락처, 영업 정보 */}
           <div className="flex items-start gap-6">
-            <Avatar className="w-16 h-16">
-              <AvatarImage src={client.profileImage || undefined} />
-              <AvatarFallback className="text-lg">
-                {client.name.charAt(0)}
-              </AvatarFallback>
-            </Avatar>
+            <ClientAvatar client={client} />
             <div className="flex-1">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-3">
@@ -250,8 +239,8 @@ export function ClientDetailHeader({
                 </div>
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
-                    <Badge variant={stageBadgeVariant[client.stage]}>
-                      {client.stage}
+                    <Badge variant={stageBadgeVariant[client.currentStageId]}>
+                      {client.currentStageId}
                     </Badge>
                     <Badge variant={importanceBadgeVariant[client.importance]}>
                       {importanceText[client.importance]}
@@ -265,9 +254,9 @@ export function ClientDetailHeader({
                           to={`/clients/${client.referredBy.id}`}
                           className="hover:underline"
                         >
-                          {client.referredBy.name}
+                          {client.referredBy.fullName}
                         </Link>
-                        님 소개 ({client.referredBy.relationship})
+                        님 소개
                       </span>
                     </div>
                   )}
@@ -288,17 +277,6 @@ export function ClientDetailHeader({
                       예상 계약금액
                     </div>
                   </div>
-                  {client.nextMeeting && (
-                    <div className="text-right">
-                      <div className="text-sm font-medium">다음 미팅</div>
-                      <div className="text-sm text-muted-foreground">
-                        {client.nextMeeting.date} {client.nextMeeting.time}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {client.nextMeeting.location}
-                      </div>
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
@@ -412,7 +390,7 @@ export function ClientDetailHeader({
                   size="sm"
                   onClick={() => setIsEditingNote(true)}
                 >
-                  <Pencil2Icon className="h-3 w-3 mr-1" />
+                  <Pencil1Icon className="h-3 w-3 mr-1" />
                   편집
                 </Button>
               )}
@@ -469,7 +447,7 @@ export function ClientDetailHeader({
         open={isAddMeetingOpen}
         onOpenChange={setIsAddMeetingOpen}
         clientId={client.id}
-        clientName={client.name}
+        clientName={client.fullName}
         onMeetingAdded={handleMeetingAdded}
       />
 
@@ -478,7 +456,7 @@ export function ClientDetailHeader({
         open={isAddDocumentOpen}
         onOpenChange={setIsAddDocumentOpen}
         clientId={client.id}
-        clientName={client.name}
+        clientName={client.fullName}
         insuranceTypes={insuranceTypes}
         onDocumentAdded={handleDocumentAdded}
       />
@@ -492,4 +470,63 @@ export function ClientDetailHeader({
       />
     </>
   );
+}
+
+function ClientAvatar({ client }: { client: Client }) {
+  return (
+    <div className="relative">
+      <Avatar className="h-16 w-16">
+        <AvatarImage src="" alt={client.fullName} />
+        <AvatarFallback className="text-lg">
+          {client.fullName
+            .split(' ')
+            .map((n) => n[0])
+            .join('')
+            .toUpperCase()}
+        </AvatarFallback>
+      </Avatar>
+      <div className="absolute -bottom-1 -right-1 rounded-full bg-white p-1">
+        <div className="h-3 w-3 rounded-full bg-green-500" />
+      </div>
+    </div>
+  );
+}
+
+function ClientStatusBadge({
+  stage,
+  variant = 'default',
+}: {
+  stage: string;
+  variant?: BadgeVariant;
+}) {
+  const badgeVariant = variant || getBadgeVariant(stage);
+
+  return (
+    <Badge variant={badgeVariant} className="font-medium">
+      {stage}
+    </Badge>
+  );
+}
+
+function ReferralBadge({ referral }: { referral: any }) {
+  return (
+    <Badge variant="outline" className="text-xs">
+      <PersonIcon className="mr-1 h-3 w-3" />
+      {referral.fullName} 추천
+    </Badge>
+  );
+}
+
+function getBadgeVariant(stage: string): BadgeVariant {
+  switch (stage) {
+    case '첫 상담':
+    case '니즈 분석':
+    case '상품 설명':
+    case '계약 검토':
+      return 'outline';
+    case '계약 완료':
+      return 'default';
+    default:
+      return 'secondary';
+  }
 }

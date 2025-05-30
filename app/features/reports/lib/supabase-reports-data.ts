@@ -12,7 +12,7 @@ import {
   type ReportTemplate,
   type ReportInstance,
   type ReportDashboard,
-} from '../schema';
+} from './schema';
 import {
   eq,
   and,

@@ -6,7 +6,7 @@ import {
   type Profile,
   type Team,
   type Invitation,
-} from '../schema';
+} from './schema';
 import { clients } from '~/lib/schema';
 import { eq, and, count, sql } from 'drizzle-orm';
 

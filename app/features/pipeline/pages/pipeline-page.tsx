@@ -7,7 +7,7 @@ import { AddClientModal } from '~/features/pipeline/components/add-client-modal'
 import { Plus, Search, SlidersHorizontal, Users } from 'lucide-react';
 import { Button } from '~/common/components/ui/button';
 import { Input } from '~/common/components/ui/input';
-import type { Client } from '~/features/pipeline/types';
+import type { Client } from '~/features/pipeline/types/types';
 import { Separator } from '~/common/components/ui/separator';
 import {
   DropdownMenu,

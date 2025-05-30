@@ -15,7 +15,7 @@ import {
   PlusIcon,
 } from '@radix-ui/react-icons';
 import { AddMeetingModal } from './add-meeting-modal';
-import type { Meeting } from './types';
+import type { Meeting } from '../types';
 
 interface ClientMeetingsTabProps {
   meetings: Meeting[];
@@ -66,7 +66,7 @@ export function ClientMeetingsTab({
                     <div>
                       <div className="font-medium">{meeting.type}</div>
                       <div className="text-sm text-muted-foreground">
-                        {meeting.date} {meeting.time} • {meeting.duration}분
+                        {meeting.scheduledDate} • {meeting.duration}분
                       </div>
                       <div className="text-sm text-muted-foreground">
                         📍 {meeting.location}
@@ -95,7 +95,7 @@ export function ClientMeetingsTab({
                   <div>
                     <div className="text-sm font-medium mb-2">체크리스트</div>
                     <div className="space-y-1">
-                      {meeting.checklist.map((item, index) => (
+                      {meeting.checklist.map((item: any, index: number) => (
                         <div key={index} className="flex items-center gap-2">
                           {item.completed ? (
                             <CheckCircledIcon className="h-4 w-4 text-green-500" />

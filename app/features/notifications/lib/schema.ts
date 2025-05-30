@@ -1,4 +1,5 @@
-// Notifications 기능에 특화된 스키마
+// 📢 Notifications 기능 전용 스키마
+// Prefix 네이밍 컨벤션: notification_ 사용
 // 공통 스키마에서 기본 테이블들을 import
 export {
   profiles,
@@ -26,8 +27,8 @@ import {
 import { relations } from 'drizzle-orm';
 import { profiles, teams, clients, meetings } from '~/lib/schema';
 
-// Notifications 특화 Enum
-export const notificationTypeEnum = pgEnum('notification_type', [
+// 📌 Notifications 특화 Enum (prefix 네이밍 적용)
+export const notificationTypeEnum = pgEnum('notification_type_enum', [
   'meeting_reminder',
   'goal_achievement',
   'goal_deadline',
@@ -41,14 +42,14 @@ export const notificationTypeEnum = pgEnum('notification_type', [
   'payment_due',
 ]);
 
-export const notificationPriorityEnum = pgEnum('notification_priority', [
+export const notificationPriorityEnum = pgEnum('notification_priority_enum', [
   'low',
   'normal',
   'high',
   'urgent',
 ]);
 
-export const notificationChannelEnum = pgEnum('notification_channel', [
+export const notificationChannelEnum = pgEnum('notification_channel_enum', [
   'in_app',
   'email',
   'sms',
@@ -56,7 +57,7 @@ export const notificationChannelEnum = pgEnum('notification_channel', [
   'kakao',
 ]);
 
-export const notificationStatusEnum = pgEnum('notification_status', [
+export const notificationStatusEnum = pgEnum('notification_status_enum', [
   'pending',
   'sent',
   'delivered',
@@ -65,7 +66,7 @@ export const notificationStatusEnum = pgEnum('notification_status', [
   'cancelled',
 ]);
 
-// Notifications 특화 테이블들
+// 🏷️ Notifications 특화 테이블들 (prefix 네이밍 적용)
 
 // Notification Settings 테이블 (알림 설정)
 export const notificationSettings = pgTable('notification_settings', {
@@ -200,10 +201,10 @@ export const notificationSubscriptions = pgTable('notification_subscriptions', {
   userId: uuid('user_id')
     .notNull()
     .references(() => profiles.id),
-  entityType: text('entity_type').notNull(), // 'client', 'team', 'meeting', etc.
-  entityId: uuid('entity_id').notNull(),
-  notificationTypes: text('notification_types').array().notNull(),
-  channels: text('channels').array().notNull(),
+  resourceType: text('resource_type').notNull(), // 'client', 'team', 'goal' etc.
+  resourceId: uuid('resource_id').notNull(),
+  subscriptionType: text('subscription_type').notNull(), // 'updates', 'reminders' etc.
+  channels: notificationChannelEnum('channels').array().notNull(),
   isActive: boolean('is_active').default(true).notNull(),
   createdAt: timestamp('created_at', { withTimezone: true })
     .defaultNow()
@@ -213,7 +214,7 @@ export const notificationSubscriptions = pgTable('notification_subscriptions', {
     .notNull(),
 });
 
-// Relations 정의
+// 🔗 Relations (관계 정의)
 export const notificationSettingsRelations = relations(
   notificationSettings,
   ({ one }) => ({
@@ -291,7 +292,7 @@ export const notificationSubscriptionsRelations = relations(
   })
 );
 
-// Notifications 특화 타입들
+// 📝 Notifications 특화 타입들 (실제 코드와 일치)
 export type NotificationSettings = typeof notificationSettings.$inferSelect;
 export type NewNotificationSettings = typeof notificationSettings.$inferInsert;
 export type NotificationTemplate = typeof notificationTemplates.$inferSelect;
@@ -307,7 +308,6 @@ export type NotificationSubscription =
 export type NewNotificationSubscription =
   typeof notificationSubscriptions.$inferInsert;
 
-// Enum 타입들 export
 export type NotificationType = (typeof notificationTypeEnum.enumValues)[number];
 export type NotificationPriority =
   (typeof notificationPriorityEnum.enumValues)[number];
@@ -316,29 +316,25 @@ export type NotificationChannel =
 export type NotificationStatus =
   (typeof notificationStatusEnum.enumValues)[number];
 
-// Notifications 특화 인터페이스
-export interface NotificationPreferences {
-  channels: NotificationChannel[];
-  types: NotificationType[];
-  quietHours: {
-    start: string;
-    end: string;
-  };
-  weekendEnabled: boolean;
+// 🎯 Notifications 특화 인터페이스
+export interface NotificationOverview {
+  settings: NotificationSettings;
+  unreadCount: number;
+  recentNotifications: NotificationHistory[];
+  upcomingReminders: NotificationQueue[];
+  activeRules: NotificationRule[];
 }
 
-export interface NotificationRuleConfig {
-  id: string;
-  name: string;
-  triggerEvent: string;
-  conditions: Record<string, any>;
-  actions: {
-    type: 'send_notification';
-    channel: NotificationChannel;
-    template?: string;
-    message?: string;
-  }[];
-  isActive: boolean;
+export interface NotificationFilter {
+  types?: NotificationType[];
+  channels?: NotificationChannel[];
+  priorities?: NotificationPriority[];
+  statuses?: NotificationStatus[];
+  dateRange?: {
+    start: Date;
+    end: Date;
+  };
+  unreadOnly?: boolean;
 }
 
 export interface NotificationStats {
@@ -347,31 +343,9 @@ export interface NotificationStats {
   totalRead: number;
   deliveryRate: number;
   readRate: number;
-  channelStats: {
+  channelBreakdown: {
     channel: NotificationChannel;
-    sent: number;
-    delivered: number;
-    read: number;
+    count: number;
+    deliveryRate: number;
   }[];
-  typeStats: {
-    type: NotificationType;
-    sent: number;
-    delivered: number;
-    read: number;
-  }[];
-}
-
-export interface NotificationBatch {
-  id: string;
-  name: string;
-  recipients: string[];
-  template: NotificationTemplate;
-  scheduledAt: Date;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
-  progress: {
-    total: number;
-    sent: number;
-    delivered: number;
-    failed: number;
-  };
 }

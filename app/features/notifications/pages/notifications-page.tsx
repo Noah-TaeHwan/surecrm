@@ -41,7 +41,7 @@ import {
   type NotificationStatus,
   type NotificationType,
   type NotificationPriority,
-} from '../schema';
+} from '../lib/schema';
 import {
   Select,
   SelectContent,

@@ -1,4 +1,5 @@
-// Clients 기능에 특화된 스키마
+// 📋 Clients 기능 전용 스키마
+// Prefix 네이밍 컨벤션: client_ 사용
 // 공통 스키마에서 기본 테이블들을 import
 export {
   profiles,
@@ -46,10 +47,8 @@ import {
 import { relations } from 'drizzle-orm';
 import { profiles, clients, insuranceInfo } from '~/lib/schema';
 
-// 기존 enum들은 공통 스키마에서 import하므로 제거됨
-
-// Clients 특화 Enum
-export const clientStatusEnum = pgEnum('client_status', [
+// 📌 Clients 특화 Enum (prefix 네이밍 적용)
+export const clientStatusEnum = pgEnum('client_status_enum', [
   'prospect',
   'contacted',
   'qualified',
@@ -60,7 +59,7 @@ export const clientStatusEnum = pgEnum('client_status', [
   'dormant',
 ]);
 
-export const contactMethodEnum = pgEnum('contact_method', [
+export const clientContactMethodEnum = pgEnum('client_contact_method_enum', [
   'phone',
   'email',
   'kakao',
@@ -69,7 +68,7 @@ export const contactMethodEnum = pgEnum('contact_method', [
   'video_call',
 ]);
 
-export const clientSourceEnum = pgEnum('client_source', [
+export const clientSourceEnum = pgEnum('client_source_enum', [
   'referral',
   'cold_call',
   'marketing',
@@ -80,9 +79,7 @@ export const clientSourceEnum = pgEnum('client_source', [
   'other',
 ]);
 
-// 기존 enum들은 공통 스키마에서 import하므로 제거
-
-// Clients 특화 테이블들
+// 🏷️ Clients 특화 테이블들 (prefix 네이밍 적용)
 
 // Client Tags (고객 태그)
 export const clientTags = pgTable('client_tags', {
@@ -122,7 +119,7 @@ export const clientContactHistory = pgTable('client_contact_history', {
   agentId: uuid('agent_id')
     .notNull()
     .references(() => profiles.id),
-  contactMethod: contactMethodEnum('contact_method').notNull(),
+  contactMethod: clientContactMethodEnum('contact_method').notNull(),
   subject: text('subject'),
   content: text('content'),
   duration: integer('duration'), // 분 (통화시간 등)
@@ -166,9 +163,9 @@ export const clientPreferences = pgTable('client_preferences', {
     .notNull()
     .unique()
     .references(() => clients.id, { onDelete: 'cascade' }),
-  preferredContactMethod: contactMethodEnum('preferred_contact_method').default(
-    'phone'
-  ),
+  preferredContactMethod: clientContactMethodEnum(
+    'preferred_contact_method'
+  ).default('phone'),
   preferredContactTime: jsonb('preferred_contact_time'), // { start: "09:00", end: "18:00", days: [1,2,3,4,5] }
   communicationStyle: text('communication_style'), // formal, casual, technical
   interests: text('interests').array(),
@@ -239,7 +236,7 @@ export const clientMilestones = pgTable('client_milestones', {
     .notNull(),
 });
 
-// Relations
+// 🔗 Relations (관계 정의)
 export const clientTagsRelations = relations(clientTags, ({ one, many }) => ({
   agent: one(profiles, {
     fields: [clientTags.agentId],
@@ -320,7 +317,7 @@ export const clientMilestonesRelations = relations(
   })
 );
 
-// Clients 특화 타입들
+// 📝 Clients 특화 타입들 (실제 코드와 일치)
 export type ClientTag = typeof clientTags.$inferSelect;
 export type NewClientTag = typeof clientTags.$inferInsert;
 export type ClientTagAssignment = typeof clientTagAssignments.$inferSelect;
@@ -337,16 +334,17 @@ export type ClientMilestone = typeof clientMilestones.$inferSelect;
 export type NewClientMilestone = typeof clientMilestones.$inferInsert;
 
 export type ClientStatus = (typeof clientStatusEnum.enumValues)[number];
-export type ContactMethod = (typeof contactMethodEnum.enumValues)[number];
+export type ClientContactMethod =
+  (typeof clientContactMethodEnum.enumValues)[number];
 export type ClientSource = (typeof clientSourceEnum.enumValues)[number];
 
-// Clients 특화 인터페이스
+// 🎯 Clients 특화 인터페이스 (types.ts와 일치)
 import type { Client, Importance } from '~/lib/schema';
 
 export interface ClientOverview {
   client: Client;
-  analytics: ClientAnalytics;
-  preferences: ClientPreferences;
+  analytics?: ClientAnalytics;
+  preferences?: ClientPreferences;
   tags: ClientTag[];
   familyMembers: ClientFamilyMember[];
   recentContacts: ClientContactHistory[];
@@ -355,7 +353,7 @@ export interface ClientOverview {
 
 export interface ContactSummary {
   totalContacts: number;
-  lastContact: ClientContactHistory;
+  lastContact?: ClientContactHistory;
   upcomingActions: {
     action: string;
     date: Date;
@@ -368,20 +366,20 @@ export interface ContactSummary {
 export interface ReferralNetwork {
   referrals: Array<{
     id: string;
-    name: string;
-    stage: string;
+    fullName: string;
+    currentStage?: string;
     contractAmount: number;
     relationship: string;
     phone: string;
-    lastContact: string;
+    lastContactDate?: string;
   }>;
   siblingReferrals: Array<{
     id: string;
-    name: string;
-    stage: string;
+    fullName: string;
+    currentStage?: string;
     contractAmount: number;
     relationship: string;
-    lastContact: string;
+    lastContactDate?: string;
   }>;
   stats: {
     totalReferred: number;

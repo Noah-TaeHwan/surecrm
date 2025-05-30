@@ -23,8 +23,8 @@ import {
 import { Input } from '~/common/components/ui/input';
 import { Textarea } from '~/common/components/ui/textarea';
 import type { UseFormReturn } from 'react-hook-form';
-import type { ClientFormData } from './form-schema';
-import { stageOptions, importanceOptions } from './form-schema';
+import type { ClientFormData } from '../lib/form-schema';
+import { stageOptions, importanceOptions } from '../lib/form-schema';
 import { TagManager } from './tag-manager';
 
 interface Referrer {
@@ -55,7 +55,7 @@ export function ClientSalesInfoForm({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="stage"
+            name="currentStageId"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>영업 단계 *</FormLabel>
@@ -111,7 +111,7 @@ export function ClientSalesInfoForm({
 
           <FormField
             control={form.control}
-            name="referredBy"
+            name="referredById"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>소개자</FormLabel>
@@ -151,8 +151,11 @@ export function ClientSalesInfoForm({
                     {...field}
                     type="number"
                     placeholder="50000000"
+                    value={field.value || ''}
                     onChange={(e) =>
-                      field.onChange(parseInt(e.target.value) || 0)
+                      field.onChange(
+                        e.target.value ? parseInt(e.target.value) : undefined
+                      )
                     }
                   />
                 </FormControl>

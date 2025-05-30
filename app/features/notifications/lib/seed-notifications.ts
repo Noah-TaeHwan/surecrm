@@ -9,7 +9,7 @@ import {
   type NotificationChannel,
   type NotificationPriority,
   type NotificationStatus,
-} from '../schema';
+} from './schema';
 
 // 알림 시드 데이터 생성
 export async function seedNotifications(userId: string) {
@@ -227,22 +227,18 @@ export async function seedNotifications(userId: string) {
     const subscriptions = [
       {
         userId,
-        entityType: 'client',
-        entityId: userId, // 모든 고객에 대한 구독
-        notificationTypes: [
-          'new_referral',
-          'client_milestone',
-          'birthday_reminder',
-        ],
-        channels: ['in_app', 'email'],
+        resourceType: 'client',
+        resourceId: userId,
+        subscriptionType: 'client_updates',
+        channels: ['in_app' as NotificationChannel],
         isActive: true,
       },
       {
         userId,
-        entityType: 'meeting',
-        entityId: userId, // 모든 미팅에 대한 구독
-        notificationTypes: ['meeting_reminder'],
-        channels: ['in_app', 'push'],
+        resourceType: 'meeting',
+        resourceId: userId,
+        subscriptionType: 'meeting_reminders',
+        channels: ['in_app' as NotificationChannel],
         isActive: true,
       },
     ];

@@ -8,7 +8,7 @@ import {
 import { Badge } from '~/common/components/ui/badge';
 import { Progress } from '~/common/components/ui/progress';
 import { Avatar, AvatarFallback } from '~/common/components/ui/avatar';
-import type { Client, ReferralNetwork, BadgeVariant } from './types';
+import type { Client, ReferralNetwork, BadgeVariant } from '../types';
 
 interface ClientNetworkTabProps {
   client: Client;
@@ -35,7 +35,7 @@ export function ClientNetworkTab({
             <CardHeader>
               <CardTitle>소개한 고객들</CardTitle>
               <CardDescription>
-                {client.name}님이 소개해주신 고객 목록
+                {client.fullName}님이 소개해주신 고객 목록
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -48,20 +48,20 @@ export function ClientNetworkTab({
                     <div className="flex items-center gap-3">
                       <Avatar>
                         <AvatarFallback>
-                          {referral.name.charAt(0)}
+                          {referral.fullName.charAt(0)}
                         </AvatarFallback>
                       </Avatar>
                       <div>
-                        <div className="font-medium">{referral.name}</div>
+                        <div className="font-medium">{referral.fullName}</div>
                         <div className="text-sm text-muted-foreground">
                           {referral.relationship} • {referral.phone}
                         </div>
                       </div>
                     </div>
                     <div className="text-right">
-                      <Badge variant={stageBadgeVariant[referral.stage]}>
-                        {referral.stage}
-                      </Badge>
+                      {referral.currentStage && (
+                        <Badge variant="outline">{referral.currentStage}</Badge>
+                      )}
                       <div className="text-sm text-muted-foreground mt-1">
                         ₩{referral.contractAmount.toLocaleString()}
                       </div>

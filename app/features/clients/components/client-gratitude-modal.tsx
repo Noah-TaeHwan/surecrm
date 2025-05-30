@@ -30,7 +30,7 @@ import { Input } from '~/common/components/ui/input';
 import { Textarea } from '~/common/components/ui/textarea';
 import { Button } from '~/common/components/ui/button';
 import { CheckIcon, Cross2Icon, HeartIcon } from '@radix-ui/react-icons';
-import type { Client } from './types';
+import type { Client } from '../types';
 
 // 감사 표현 폼 스키마
 const gratitudeSchema = z.object({
@@ -69,7 +69,7 @@ export function ClientGratitudeModal({
     const newGratitude = {
       id: Date.now().toString(),
       clientId: client.id,
-      clientName: client.name,
+      clientName: client.fullName,
       type: data.type,
       message: data.message,
       giftType: data.giftType || null,
@@ -94,7 +94,7 @@ export function ClientGratitudeModal({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <HeartIcon className="h-5 w-5 text-red-500" />
-            {client.name}님께 감사 표현
+            {client.fullName}님께 감사 표현
           </DialogTitle>
           <DialogDescription>
             소중한 고객님께 감사의 마음을 전하세요
