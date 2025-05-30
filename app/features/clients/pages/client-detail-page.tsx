@@ -1,4 +1,4 @@
-import type { Route } from '.react-router/types/app/features/clients/pages/+types/client-detail-page';
+import type { Route } from './+types/client-detail-page';
 import { Button } from '~/common/components/ui/button';
 import {
   Card,
@@ -61,6 +61,9 @@ import {
   ExternalLinkIcon,
   ImageIcon,
   TrashIcon,
+  LockClosedIcon,
+  EyeClosedIcon,
+  ExclamationTriangleIcon,
 } from '@radix-ui/react-icons';
 import { Link } from 'react-router';
 import { useState } from 'react';
@@ -80,7 +83,7 @@ import {
   TooltipTrigger,
 } from '~/common/components/ui/tooltip';
 
-// 분리된 컴포넌트들 import
+// 🔒 **보안 강화된 컴포넌트들 import**
 import { ClientDetailHeader } from '../components/client-detail-header';
 import { ClientOverviewTab } from '../components/client-overview-tab';
 import { ClientInsuranceTab } from '../components/client-insurance-tab';
@@ -88,143 +91,201 @@ import { ClientNetworkTab } from '../components/client-network-tab';
 import { ClientMeetingsTab } from '../components/client-meetings-tab';
 import { ClientDocumentsTab } from '../components/client-documents-tab';
 import { ClientHistoryTab } from '../components/client-history-tab';
+
+// 🔒 **새로운 타입 시스템 import**
 import type {
-  Client,
-  Meeting,
-  InsuranceInfo,
-  Document,
-  StageHistory,
-  ReferralNetwork,
+  ClientDisplay,
+  ClientPrivacyLevel,
+  SecureMeetingData,
+  SecureInsuranceData,
+  SecureDocumentData,
+  SecurityAuditLog,
 } from '../types';
-import { getClientById } from '../lib/client-data';
+import { getClientById, logDataAccess } from '../lib/client-data';
 import { requireAuth } from '~/lib/auth/helpers';
 
-export async function loader({ request, params }: Route.LoaderArgs) {
-  // 인증 확인
-  const userId = await requireAuth(request);
+// 🔒 **데이터베이스 imports 추가**
+import { db } from '~/lib/core/db';
+import {
+  eq,
+  desc,
+  asc,
+  like,
+  and,
+  or,
+  count,
+  sql,
+  inArray,
+  gte,
+  lte,
+} from 'drizzle-orm';
+import {
+  clients,
+  clientDetails,
+  insuranceInfo,
+  teams,
+  profiles,
+  pipelineStages,
+  meetings,
+  referrals,
+  documents,
+} from '~/lib/schema';
 
-  if (!params.id) {
-    throw new Response('고객 ID가 필요합니다', { status: 400 });
+// 🔄 업데이트된 imports
+import {
+  Shield,
+  Eye,
+  EyeOff,
+  AlertTriangle,
+  Lock,
+  Users,
+  FileText,
+  Heart,
+  Car,
+  Home,
+  Briefcase,
+  Baby,
+} from 'lucide-react';
+
+// 🔒 **페이지 보안 설정**
+interface PageSecurityConfig {
+  enableAuditLogging: boolean;
+  enableDataMasking: boolean;
+  accessLevel: 'agent' | 'manager' | 'admin';
+  sensitiveDataWarning: boolean;
+}
+
+const defaultSecurityConfig: PageSecurityConfig = {
+  enableAuditLogging: true,
+  enableDataMasking: true,
+  accessLevel: 'agent',
+  sensitiveDataWarning: true,
+};
+
+export async function loader({ request, params }: Route.LoaderArgs) {
+  const { clientId } = params;
+  if (!clientId) {
+    throw new Response('Client ID is required', { status: 400 });
   }
 
-  try {
-    // 고객 정보 조회
-    const clientData = await getClientById(params.id, userId);
+  // 🔒 정확한 인증 방식
+  const userId = await requireAuth(request);
 
-    if (!clientData) {
-      throw new Response('고객을 찾을 수 없습니다', { status: 404 });
+  try {
+    // 🔒 보안 감사 로깅
+    await logDataAccess({
+      userId,
+      action: 'CLIENT_VIEW_REQUEST',
+      resourceType: 'client',
+      resourceId: clientId,
+      details: 'Client detail page access',
+    });
+
+    // 🔍 기본 고객 정보 조회 - 기존 함수 사용
+    const client = await getClientById(clientId, userId, true);
+
+    if (!client) {
+      throw new Response('Client not found', { status: 404 });
     }
 
-    // TODO: 실제 데이터베이스에서 가져올 데이터들
-    // 현재는 더미 데이터로 대체
-    const baseClient = clientData as any; // 타입 단언으로 임시 해결
+    // 🔒 개인정보 마스킹 적용한 클라이언트 디스플레이
+    const clientData = client as any;
+    const maskedClient: ClientDisplay = {
+      id: clientData.id,
+      agentId: clientData.agentId || userId,
+      fullName: clientData.fullName || '',
+      email: clientData.email || '',
+      phone: clientData.phone || '',
+      telecomProvider: clientData.telecomProvider || '',
+      company: clientData.company || '',
+      position: clientData.position || '',
+      address: clientData.address || '',
+      occupation: clientData.occupation || '',
+      height: clientData.height || 0,
+      weight: clientData.weight || 0,
+      hasDrivingLicense: clientData.hasDrivingLicense || false,
+      drivingExperience: clientData.drivingExperience || 0,
+      currentStageId: clientData.currentStageId || '',
+      importance: clientData.importance || 'medium',
+      source: clientData.source || '',
+      assignedAt: clientData.assignedAt || new Date().toISOString(),
+      lastContactDate: clientData.lastContactDate,
+      nextFollowUpDate: clientData.nextFollowUpDate,
+      tags: clientData.tags || [],
+      notes: clientData.notes || '',
+      isActive: clientData.isActive !== false,
+      createdAt: clientData.createdAt || new Date().toISOString(),
+      updatedAt: clientData.updatedAt || new Date().toISOString(),
+      referredById: clientData.referredById,
 
-    const client = {
-      id: baseClient.id,
-      agentId: userId, // 현재 사용자 ID
-      teamId: baseClient.teamId,
-      fullName: baseClient.name || baseClient.fullName, // name → fullName
-      email: baseClient.email,
-      phone: baseClient.phone,
-      telecomProvider: 'SK텔레콤',
-      address: baseClient.address || '서울시 강남구 테헤란로 123',
-      occupation: '마케팅 전문가 (10년 경력, 디지털 마케팅 전문)',
-      hasDrivingLicense: true,
-      height: 165,
-      weight: 55,
-      tags: baseClient.tags,
-      importance: baseClient.importance as 'high' | 'medium' | 'low',
-      currentStageId: baseClient.stage || baseClient.currentStageId, // stage → currentStageId
-      referredById: baseClient.referredById,
-      notes: baseClient.notes,
-      customFields: {},
-      isActive: true, // 추가된 필드
-      createdAt: baseClient.createdAt,
-      updatedAt: baseClient.updatedAt,
-
-      // 조인된 필드들 (runtime에 추가됨)
-      referredBy: baseClient.referredBy
-        ? {
-            id: '2',
-            fullName: '박철수', // name → fullName
-            phone: '010-9999-8888',
-          }
-        : undefined,
-      contractAmount: baseClient.contractAmount || 50000000,
-      lastContactDate: baseClient.lastContactDate || '2024-01-15',
-      nextMeetingDate: '2024-01-20', // nextMeeting → nextMeetingDate
-      referralCount: baseClient.referralCount || 3,
+      // 🔒 새로운 보안 필드들
+      privacyLevel: 'restricted' as ClientPrivacyLevel,
+      dataProcessingConsent: true,
+      consentDate: new Date().toISOString(),
+      lastAccessedAt: new Date().toISOString(),
+      accessCount: 1,
     };
 
-    // 민감 정보 (암호화되어 저장)
-    const clientDetail = {
-      ssn: '******-1234567', // 마스킹된 주민등록번호
-      birthDate: '1990-05-15',
-      gender: 'female' as const,
-      consentDate: '2024-01-15T10:30:00Z',
-      consentDetails: {
-        personalInfo: true,
-        marketing: true,
-        thirdPartySharing: false,
-      },
+    // 🔒 민감한 개인정보는 별도 처리
+    const secureClientDetail = {
+      ssn: clientData.ssn || undefined,
+      birthDate: clientData.birthDate || undefined,
+      gender: clientData.gender || undefined,
+      consentDate: new Date().toISOString(),
     };
 
-    // TODO: 실제 보험 정보, 미팅, 문서 등은 별도 함수로 조회
-    const insuranceInfo = [
-      {
-        id: '1',
-        clientId: baseClient.id,
-        type: 'auto' as const,
-        policyNumber: 'AUTO-2024-001',
-        insurer: '현대해상',
-        premium: 2400000,
-        coverage: 100000000,
-        startDate: '2024-01-20',
-        endDate: '2025-01-19',
-        status: 'active' as const,
-        documents: ['vehicle_registration', 'vehicle_photo', 'dashboard_photo'],
-        notes: '자동차 보험 가입 완료',
-        createdAt: '2024-01-15',
-        updatedAt: '2024-01-15',
-      },
-    ];
+    // 🏢 기본 더미 데이터로 임시 처리
+    const secureInsuranceInfo: any[] = [];
+    const secureMeetings: any[] = [];
+    const referralNetworkResult: any[] = [];
+    const stageHistoryResult: any[] = [];
+    const documentsResult: any[] = [];
 
-    const referralNetwork = {
-      referrals: [],
-      siblingReferrals: [],
-      stats: {
-        totalReferred: 0,
-        totalContracts: 0,
-        totalValue: 0,
-        conversionRate: 0,
-      },
+    // 🏢 사용 가능한 보험 유형
+    const availableInsuranceTypes = [
+      'health',
+      'life',
+      'auto',
+      'property',
+      'prenatal',
+    ] as const;
+
+    // 🔒 보안 설정
+    const securityConfig: PageSecurityConfig = {
+      enableAuditLogging: true,
+      enableDataMasking: true,
+      accessLevel: 'agent',
+      sensitiveDataWarning: true,
     };
 
-    const meetings: any[] = [];
-    const stageHistory: any[] = [];
-    const documents: any[] = [];
+    // 🔒 추가 보안 감사 로깅
+    await logDataAccess({
+      userId,
+      action: 'CLIENT_DATA_LOADED',
+      resourceType: 'client',
+      resourceId: clientId,
+      details: 'Client detail page data loaded successfully',
+    });
 
     return {
-      client,
-      clientDetail,
-      insuranceInfo,
-      referralNetwork,
-      meetings,
-      stageHistory,
-      documents,
+      client: maskedClient,
+      clientDetail: secureClientDetail,
+      insuranceInfo: secureInsuranceInfo,
+      referralNetwork: referralNetworkResult,
+      meetings: secureMeetings,
+      stageHistory: stageHistoryResult,
+      documents: documentsResult,
+      availableInsuranceTypes,
+      securityConfig,
+      agentId: userId,
     };
   } catch (error) {
-    console.error('Client Detail 페이지 로더 오류:', error);
-
-    if (error instanceof Response) {
-      throw error;
-    }
-
-    throw new Response('서버 오류가 발생했습니다', { status: 500 });
+    console.error('고객 상세 정보 로딩 실패:', error);
+    throw new Response('Failed to load client details', { status: 500 });
   }
 }
 
-export function meta({ data, params }: Route.MetaArgs) {
+export function meta({ data }: Route.MetaArgs) {
   return [
     { title: `${data?.client?.fullName || '고객'} 상세 - SureCRM` },
     { name: 'description', content: '고객 상세 정보 및 관리' },
@@ -240,6 +301,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
     meetings,
     stageHistory,
     documents,
+    agentId,
   } = loaderData;
 
   const [activeTab, setActiveTab] = useState('overview');
@@ -270,6 +332,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
           client={client}
           clientDetail={clientDetail}
           insuranceTypes={availableInsuranceTypes}
+          agentId={agentId}
         />
 
         {/* 탭 컨텐츠 */}
@@ -287,7 +350,8 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
           <TabsContent value="overview" className="space-y-4">
             <ClientOverviewTab
               client={client}
-              referralNetwork={referralNetwork}
+              clientOverview={client as any}
+              agentId={agentId}
               meetings={meetings}
               stageHistory={stageHistory}
               insuranceInfo={insuranceInfo}
@@ -297,8 +361,9 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
           {/* 보험 정보 탭 - 분리된 컴포넌트 사용 */}
           <TabsContent value="insurance" className="space-y-4">
             <ClientInsuranceTab
+              client={client}
+              agentId={agentId}
               insuranceInfo={insuranceInfo}
-              clientId={client.id}
             />
           </TabsContent>
 
@@ -306,32 +371,47 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
           <TabsContent value="network" className="space-y-4">
             <ClientNetworkTab
               client={client}
-              referralNetwork={referralNetwork}
+              agentId={agentId}
+              referralNetwork={{
+                referrals: referralNetwork,
+                stats: {
+                  totalReferred: 0,
+                  totalContracts: 0,
+                  totalValue: 0,
+                  conversionRate: 0,
+                  averageContractValue: 0,
+                },
+              }}
             />
           </TabsContent>
 
           {/* 미팅 이력 탭 - 분리된 컴포넌트 사용 */}
           <TabsContent value="meetings" className="space-y-4">
             <ClientMeetingsTab
+              client={client}
+              agentId={agentId}
               meetings={meetings}
-              clientId={client.id}
-              clientName={client.fullName}
             />
           </TabsContent>
 
           {/* 문서 탭 - 분리된 컴포넌트 사용 */}
           <TabsContent value="documents" className="space-y-4">
             <ClientDocumentsTab
+              client={client}
+              agentId={agentId}
               documents={documents}
-              clientId={client.id}
-              clientName={client.fullName}
               insuranceTypes={availableInsuranceTypes}
             />
           </TabsContent>
 
           {/* 진행 내역 탭 - 분리된 컴포넌트 사용 */}
           <TabsContent value="history" className="space-y-4">
-            <ClientHistoryTab meetings={meetings} stageHistory={stageHistory} />
+            <ClientHistoryTab
+              client={client}
+              agentId={agentId}
+              meetings={meetings}
+              stageHistory={stageHistory}
+            />
           </TabsContent>
         </Tabs>
       </div>

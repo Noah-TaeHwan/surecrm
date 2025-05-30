@@ -11,26 +11,11 @@ import { CalendarIcon, Link2Icon, Share1Icon } from '@radix-ui/react-icons';
 import { Link } from 'react-router';
 import { ReferralDepthIndicator } from './referral-depth-indicator';
 import { insuranceTypeIcons, insuranceTypeText } from './insurance-config';
-
-interface Client {
-  id: string;
-  name: string;
-  company?: string;
-  importance: string;
-  stage: string;
-  referredBy?: {
-    id: string;
-    name: string;
-  };
-  referralDepth: number;
-  referralCount: number;
-  nextMeetingDate?: string;
-  tags?: string[];
-  insuranceTypes?: string[];
-}
+import type { ClientDisplay } from '~/features/clients/types';
+import { typeHelpers } from '~/features/clients/types';
 
 interface ClientCardProps {
-  client: Client;
+  client: ClientDisplay;
   importanceBadgeVariant: Record<
     string,
     'default' | 'secondary' | 'outline' | 'destructive'
@@ -48,6 +33,8 @@ export function ClientCard({
   importanceText,
   stageBadgeVariant,
 }: ClientCardProps) {
+  const displayName = typeHelpers.getClientDisplayName(client);
+
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardHeader className="pb-3">
@@ -55,24 +42,26 @@ export function ClientCard({
           <div className="flex items-center gap-3">
             <Avatar>
               <AvatarFallback className="bg-primary/10">
-                {client.name.charAt(0)}
+                {displayName.charAt(0)}
               </AvatarFallback>
             </Avatar>
             <div>
               <Link to={`/clients/${client.id}`} className="hover:underline">
-                <CardTitle className="text-lg">{client.name}</CardTitle>
+                <CardTitle className="text-lg">{displayName}</CardTitle>
               </Link>
               <CardDescription className="flex items-center gap-2">
                 {client.company && <span>{client.company}</span>}
-                <ReferralDepthIndicator depth={client.referralDepth} />
+                <ReferralDepthIndicator depth={client.referralDepth || 0} />
               </CardDescription>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Badge variant={importanceBadgeVariant[client.importance]}>
-              {importanceText[client.importance]}
+            <Badge
+              variant={importanceBadgeVariant[client.importance || 'medium']}
+            >
+              {importanceText[client.importance || 'medium']}
             </Badge>
-            {client.referralCount > 0 && (
+            {(client.referralCount || 0) > 0 && (
               <Badge variant="outline" className="flex items-center gap-1">
                 <Share1Icon className="h-3 w-3" />
                 {client.referralCount}
@@ -84,11 +73,17 @@ export function ClientCard({
       <CardContent>
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <Badge variant={stageBadgeVariant[client.stage] || 'outline'}>
-              {client.stage}
+            <Badge
+              variant={
+                stageBadgeVariant[
+                  client.currentStage?.name || client.stage || 'lead'
+                ] || 'outline'
+              }
+            >
+              {client.currentStage?.name || client.stage || 'Lead'}
             </Badge>
             <div className="flex items-center gap-1">
-              {client.insuranceTypes?.map((type) => (
+              {client.insuranceTypes?.map((type: string) => (
                 <div
                   key={type}
                   className="flex items-center gap-1 text-muted-foreground"
@@ -103,7 +98,7 @@ export function ClientCard({
           {client.referredBy && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Link2Icon className="h-3 w-3" />
-              <span>{client.referredBy.name}님 소개</span>
+              <span>{client.referredBy.fullName}님 소개</span>
             </div>
           )}
 
@@ -116,8 +111,12 @@ export function ClientCard({
 
           <div className="flex flex-wrap gap-1">
             {client.tags?.map((tag, index) => (
-              <Badge key={index} variant="outline" className="text-xs">
-                {tag}
+              <Badge
+                key={typeHelpers.getTagId(tag) || index}
+                variant="outline"
+                className="text-xs"
+              >
+                {typeHelpers.getTagName(tag)}
               </Badge>
             ))}
           </div>

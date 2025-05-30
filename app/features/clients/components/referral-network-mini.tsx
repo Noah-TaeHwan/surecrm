@@ -1,149 +1,117 @@
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from '~/common/components/ui/card';
-import { Button } from '~/common/components/ui/button';
+import { Badge } from '~/common/components/ui/badge';
 import { Avatar, AvatarFallback } from '~/common/components/ui/avatar';
-import { ArrowLeftIcon, Share1Icon } from '@radix-ui/react-icons';
+import { Button } from '~/common/components/ui/button';
 import { Link } from 'react-router';
-
-interface Client {
-  id: string;
-  name: string;
-  referredBy?: {
-    id: string;
-    name: string;
-    relationship: string;
-  };
-}
-
-interface Referral {
-  id: string;
-  name: string;
-  relationship: string;
-}
-
-interface ReferralNetworkStats {
-  totalReferred: number;
-  conversionRate: number;
-}
+import type { ClientDisplay } from '~/features/clients/types';
+import { typeHelpers } from '~/features/clients/types';
 
 interface ReferralNetworkMiniProps {
-  client: Client;
-  referrals: Referral[];
-  stats: ReferralNetworkStats;
+  client: ClientDisplay;
+  referrals: ClientDisplay[];
+  onSeeMore?: () => void;
 }
 
 export function ReferralNetworkMini({
   client,
   referrals,
-  stats,
+  onSeeMore,
 }: ReferralNetworkMiniProps) {
+  const displayReferrals = referrals.slice(0, 3);
+
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Share1Icon className="h-5 w-5" />
-          소개 네트워크
-        </CardTitle>
-        <CardDescription>이 고객을 중심으로 한 소개 관계</CardDescription>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg">소개 네트워크</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {/* 네트워크 통계 */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="text-center p-3 bg-muted rounded-lg">
-              <div className="text-2xl font-bold text-primary">
-                {stats.totalReferred}
-              </div>
-              <div className="text-sm text-muted-foreground">소개한 고객</div>
-            </div>
-            <div className="text-center p-3 bg-muted rounded-lg">
-              <div className="text-2xl font-bold text-green-600">
-                {stats.conversionRate}%
-              </div>
-              <div className="text-sm text-muted-foreground">계약 전환율</div>
-            </div>
-          </div>
-
-          {/* 소개 관계 시각화 */}
-          <div className="space-y-3">
-            {/* 소개받은 관계 */}
-            {client.referredBy && (
-              <div className="flex items-center gap-3 p-3 border rounded-lg">
-                <div className="flex items-center gap-2">
-                  <Avatar className="w-8 h-8">
-                    <AvatarFallback className="text-xs bg-blue-100">
-                      {client.referredBy.name.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <div className="font-medium">{client.referredBy.name}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {client.referredBy.relationship}
-                    </div>
-                  </div>
-                </div>
-                <div className="flex-1 flex items-center justify-center">
-                  <ArrowLeftIcon className="h-4 w-4 text-muted-foreground" />
-                </div>
-                <div className="flex items-center gap-2">
-                  <Avatar className="w-8 h-8">
-                    <AvatarFallback className="text-xs bg-primary/10">
-                      {client.name.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="font-medium">{client.name}</div>
-                </div>
-              </div>
-            )}
-
-            {/* 소개한 관계들 */}
-            {referrals.slice(0, 3).map((referral) => (
-              <div
-                key={referral.id}
-                className="flex items-center gap-3 p-3 border rounded-lg"
-              >
-                <div className="flex items-center gap-2">
-                  <Avatar className="w-8 h-8">
-                    <AvatarFallback className="text-xs bg-primary/10">
-                      {client.name.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="font-medium">{client.name}</div>
-                </div>
-                <div className="flex-1 flex items-center justify-center">
-                  <ArrowLeftIcon className="h-4 w-4 text-muted-foreground rotate-180" />
-                </div>
-                <div className="flex items-center gap-2">
-                  <Avatar className="w-8 h-8">
-                    <AvatarFallback className="text-xs bg-green-100">
-                      {referral.name.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <div className="font-medium">{referral.name}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {referral.relationship}
-                    </div>
+          {/* 현재 고객이 소개받은 사람 */}
+          {client.referredBy && (
+            <div className="pb-3 border-b">
+              <p className="text-sm text-muted-foreground mb-2">소개자</p>
+              <div className="flex items-center gap-3">
+                <Avatar className="h-8 w-8">
+                  <AvatarFallback className="text-xs">
+                    {client.referredBy.fullName.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1">
+                  <Link
+                    to={`/clients/${client.referredBy.id}`}
+                    className="text-sm font-medium hover:underline"
+                  >
+                    {client.referredBy.fullName}
+                  </Link>
+                  <div className="text-xs text-muted-foreground">
+                    {client.referredBy.phone}
                   </div>
                 </div>
               </div>
-            ))}
+            </div>
+          )}
 
-            {referrals.length > 3 && (
-              <div className="text-center">
-                <Link to={`/network?focus=${client.id}`}>
-                  <Button variant="outline" size="sm">
-                    전체 네트워크 보기 ({referrals.length}명)
-                  </Button>
-                </Link>
+          {/* 현재 고객이 소개한 사람들 */}
+          {displayReferrals.length > 0 && (
+            <div>
+              <p className="text-sm text-muted-foreground mb-2">
+                소개한 고객 ({referrals.length}명)
+              </p>
+              <div className="space-y-3">
+                {displayReferrals.map((referral) => (
+                  <div key={referral.id} className="flex items-center gap-3">
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback className="text-xs">
+                        {typeHelpers.getClientDisplayName(referral).charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <Link
+                        to={`/clients/${referral.id}`}
+                        className="text-sm font-medium hover:underline"
+                      >
+                        {typeHelpers.getClientDisplayName(referral)}
+                      </Link>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge variant="outline" className="text-xs">
+                          {referral.currentStage?.name ||
+                            referral.stage ||
+                            'Lead'}
+                        </Badge>
+                        {referral.contractAmount && (
+                          <span className="text-xs text-muted-foreground">
+                            {referral.contractAmount.toLocaleString()}원
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
-            )}
-          </div>
+
+              {referrals.length > 3 && onSeeMore && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={onSeeMore}
+                  className="w-full mt-3"
+                >
+                  더 보기 ({referrals.length - 3}명)
+                </Button>
+              )}
+            </div>
+          )}
+
+          {displayReferrals.length === 0 && !client.referredBy && (
+            <p className="text-sm text-muted-foreground text-center py-4">
+              소개 네트워크가 없습니다.
+            </p>
+          )}
         </div>
       </CardContent>
     </Card>

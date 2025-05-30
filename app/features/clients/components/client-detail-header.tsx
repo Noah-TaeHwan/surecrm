@@ -3,6 +3,8 @@ import { Card, CardContent } from '~/common/components/ui/card';
 import { Badge } from '~/common/components/ui/badge';
 import { Textarea } from '~/common/components/ui/textarea';
 import { Separator } from '~/common/components/ui/separator';
+import { Switch } from '~/common/components/ui/switch';
+import { Label } from '~/common/components/ui/label';
 import {
   Avatar,
   AvatarFallback,
@@ -17,6 +19,12 @@ import {
   DropdownMenuLabel,
 } from '~/common/components/ui/dropdown-menu';
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '~/common/components/ui/tooltip';
+import {
   ArrowLeftIcon,
   Pencil1Icon,
   MobileIcon,
@@ -27,28 +35,30 @@ import {
   DotsHorizontalIcon,
   ChatBubbleIcon,
   Share1Icon,
-  UploadIcon,
-  DownloadIcon,
-  PersonIcon,
-  RulerHorizontalIcon,
   CheckIcon,
   Cross1Icon,
-  CheckCircledIcon,
-  Cross2Icon,
   HeartIcon,
   FileTextIcon,
   TrashIcon,
-  PlusIcon,
+  PersonIcon,
+  LockClosedIcon,
+  EyeOpenIcon,
+  EyeClosedIcon,
 } from '@radix-ui/react-icons';
 import { Link } from 'react-router';
 import { useState } from 'react';
-import type { Client, BadgeVariant } from '../types';
+import type { ClientDisplay, ClientPrivacyLevel } from '../types';
+import { typeHelpers } from '../types';
 import { AddMeetingModal } from './add-meeting-modal';
 import { AddDocumentModal } from './add-document-modal';
 import { ClientGratitudeModal } from './client-gratitude-modal';
+import { logDataAccess as logClientDataAccess } from '../lib/client-data';
+
+// 🔧 BadgeVariant 타입 정의
+type BadgeVariant = 'default' | 'secondary' | 'outline' | 'destructive';
 
 interface ClientDetailHeaderProps {
-  client: Client;
+  client: ClientDisplay;
   clientDetail?: {
     ssn?: string;
     birthDate?: string;
@@ -56,18 +66,61 @@ interface ClientDetailHeaderProps {
     consentDate?: string;
   };
   insuranceTypes?: string[];
+  agentId: string; // 🔒 보안 로깅용
+  onDataAccess?: (accessType: string, data: string[]) => void;
+}
+
+// 🎨 Avatar 컴포넌트 분리
+function ClientAvatar({ client }: { client: ClientDisplay }) {
+  const displayName = typeHelpers.getClientDisplayName(client);
+  const privacyLevel = client.accessLevel || client.privacyLevel || 'private';
+
+  return (
+    <div className="relative">
+      <Avatar className="h-20 w-20">
+        <AvatarImage src={undefined} />
+        <AvatarFallback className="text-2xl bg-gradient-to-br from-blue-500 to-purple-600 text-white">
+          {displayName.charAt(0)}
+        </AvatarFallback>
+      </Avatar>
+      {/* 🔒 개인정보 보호 레벨 표시 */}
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="absolute -bottom-1 -right-1 p-1 bg-white rounded-full border">
+              {privacyLevel === 'confidential' ? (
+                <LockClosedIcon className="h-3 w-3 text-red-600" />
+              ) : privacyLevel === 'private' ? (
+                <LockClosedIcon className="h-3 w-3 text-yellow-600" />
+              ) : (
+                <PersonIcon className="h-3 w-3 text-green-600" />
+              )}
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>보안 레벨: {privacyLevel}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    </div>
+  );
 }
 
 export function ClientDetailHeader({
   client,
   clientDetail,
   insuranceTypes = [],
+  agentId,
+  onDataAccess,
 }: ClientDetailHeaderProps) {
   const [isEditingNote, setIsEditingNote] = useState(false);
   const [noteValue, setNoteValue] = useState(client.notes || '');
   const [isAddMeetingOpen, setIsAddMeetingOpen] = useState(false);
   const [isAddDocumentOpen, setIsAddDocumentOpen] = useState(false);
   const [isGratitudeOpen, setIsGratitudeOpen] = useState(false);
+
+  // 🔒 개인정보 표시 제어
+  const [showConfidentialData, setShowConfidentialData] = useState(false);
 
   // 배지 설정들
   const importanceBadgeVariant: Record<string, BadgeVariant> = {
@@ -83,11 +136,15 @@ export function ClientDetailHeader({
   };
 
   const stageBadgeVariant: Record<string, BadgeVariant> = {
-    '첫 상담': 'outline',
-    '니즈 분석': 'outline',
-    '상품 설명': 'outline',
-    '계약 검토': 'outline',
-    '계약 완료': 'default',
+    lead: 'outline',
+    contact: 'secondary',
+    proposal: 'default',
+    contract: 'destructive',
+  };
+
+  // 🔒 데이터 마스킹 함수
+  const maskData = (data: string, level: ClientPrivacyLevel) => {
+    return typeHelpers.maskData(data, level, showConfidentialData);
   };
 
   // 나이 계산
@@ -124,11 +181,34 @@ export function ClientDetailHeader({
     return { text: '비만', color: 'text-red-600' };
   };
 
+  // 🔒 데이터 접근 로깅
+  const logDataAccess = async (accessType: string, dataFields: string[]) => {
+    try {
+      await logClientDataAccess(
+        client.id,
+        agentId,
+        'view',
+        dataFields,
+        undefined,
+        navigator.userAgent,
+        `고객 상세 정보 ${accessType}`
+      );
+      onDataAccess?.(accessType, dataFields);
+    } catch (error) {
+      console.error('데이터 접근 로깅 실패:', error);
+    }
+  };
+
   // 메모 저장 핸들러
-  const handleSaveNote = () => {
-    // TODO: API 호출로 메모 저장
-    console.log('메모 저장:', noteValue);
-    setIsEditingNote(false);
+  const handleSaveNote = async () => {
+    try {
+      await logDataAccess('메모 수정', ['notes']);
+      // TODO: API 호출로 메모 저장
+      console.log('메모 저장:', noteValue);
+      setIsEditingNote(false);
+    } catch (error) {
+      console.error('메모 저장 실패:', error);
+    }
   };
 
   // 메모 취소 핸들러
@@ -138,22 +218,24 @@ export function ClientDetailHeader({
   };
 
   const handleMeetingAdded = (newMeeting: any) => {
-    // TODO: 실제 API 호출로 미팅 추가
+    logDataAccess('미팅 추가', ['meetings']);
     console.log('새 미팅 추가됨:', newMeeting);
-    // 상태 업데이트 또는 새로고침 로직
   };
 
   const handleDocumentAdded = (newDocument: any) => {
-    // TODO: 실제 API 호출로 문서 추가
+    logDataAccess('문서 추가', ['documents']);
     console.log('새 문서 추가됨:', newDocument);
-    // 상태 업데이트 또는 새로고침 로직
   };
 
   const handleGratitudeSent = (gratitude: any) => {
-    // TODO: 실제 API 호출로 감사 표현 기록
+    logDataAccess('감사 메시지', ['communications']);
     console.log('감사 표현 전송됨:', gratitude);
-    // 상태 업데이트 또는 새로고침 로직
   };
+
+  const displayName = typeHelpers.getClientDisplayName(client);
+  const privacyLevel = (client.accessLevel ||
+    client.privacyLevel ||
+    'private') as ClientPrivacyLevel;
 
   return (
     <>
@@ -168,8 +250,34 @@ export function ClientDetailHeader({
           </Link>
           <div className="flex flex-col">
             <h1 className="text-3xl font-bold text-gray-900">
-              {client.fullName}
+              {maskData(displayName, privacyLevel)}
             </h1>
+            {/* 🔒 개인정보 보호 컨트롤 */}
+            <div className="flex items-center gap-2 mt-1">
+              <Badge
+                variant={
+                  privacyLevel === 'confidential'
+                    ? 'destructive'
+                    : privacyLevel === 'private'
+                    ? 'default'
+                    : 'outline'
+                }
+                className="text-xs"
+              >
+                <LockClosedIcon className="h-3 w-3 mr-1" />
+                {privacyLevel}
+              </Badge>
+              <div className="flex items-center gap-1">
+                <Label htmlFor="show-confidential" className="text-xs">
+                  기밀정보 표시
+                </Label>
+                <Switch
+                  id="show-confidential"
+                  checked={showConfidentialData}
+                  onCheckedChange={setShowConfidentialData}
+                />
+              </div>
+            </div>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -180,7 +288,9 @@ export function ClientDetailHeader({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => console.log('프로필 편집')}>
+              <DropdownMenuItem
+                onClick={() => logDataAccess('프로필 편집', ['profile'])}
+              >
                 <PersonIcon className="mr-2 h-4 w-4" />
                 프로필 편집
               </DropdownMenuItem>
@@ -262,8 +372,12 @@ export function ClientDetailHeader({
                   )}
                   <div className="flex flex-wrap gap-1">
                     {client.tags?.map((tag, index) => (
-                      <Badge key={index} variant="outline" className="text-xs">
-                        {tag}
+                      <Badge
+                        key={typeHelpers.getTagId(tag) || index}
+                        variant="outline"
+                        className="text-xs"
+                      >
+                        {typeHelpers.getTagName(tag)}
                       </Badge>
                     ))}
                   </div>
@@ -407,7 +521,7 @@ export function ClientDetailHeader({
                 />
                 <div className="flex items-center gap-2">
                   <Button size="sm" onClick={handleSaveNote}>
-                    <CheckCircledIcon className="h-3 w-3 mr-1" />
+                    <CheckIcon className="h-3 w-3 mr-1" />
                     저장
                   </Button>
                   <Button
@@ -415,7 +529,7 @@ export function ClientDetailHeader({
                     size="sm"
                     onClick={handleCancelNote}
                   >
-                    <Cross2Icon className="h-3 w-3 mr-1" />
+                    <Cross1Icon className="h-3 w-3 mr-1" />
                     취소
                   </Button>
                 </div>
@@ -466,29 +580,10 @@ export function ClientDetailHeader({
         open={isGratitudeOpen}
         onOpenChange={setIsGratitudeOpen}
         client={client}
+        agentId={agentId}
         onGratitudeSent={handleGratitudeSent}
       />
     </>
-  );
-}
-
-function ClientAvatar({ client }: { client: Client }) {
-  return (
-    <div className="relative">
-      <Avatar className="h-16 w-16">
-        <AvatarImage src="" alt={client.fullName} />
-        <AvatarFallback className="text-lg">
-          {client.fullName
-            .split(' ')
-            .map((n) => n[0])
-            .join('')
-            .toUpperCase()}
-        </AvatarFallback>
-      </Avatar>
-      <div className="absolute -bottom-1 -right-1 rounded-full bg-white p-1">
-        <div className="h-3 w-3 rounded-full bg-green-500" />
-      </div>
-    </div>
   );
 }
 

@@ -1,5 +1,5 @@
 // 📋 Clients 기능 전용 스키마
-// Prefix 네이밍 컨벤션: client_ 사용
+// Prefix 네이밍 컨벤션: app_client_ 사용 (완전 통일)
 // 공통 스키마에서 기본 테이블들을 import
 export {
   profiles,
@@ -45,10 +45,10 @@ import {
   decimal,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
-import { profiles, clients, insuranceInfo } from '~/lib/schema';
+import { profiles, clients, insuranceInfo, pipelineStages } from '~/lib/schema';
 
-// 📌 Clients 특화 Enum (prefix 네이밍 적용)
-export const clientStatusEnum = pgEnum('client_status_enum', [
+// 📌 Clients 특화 Enum (완전한 app_client_ prefix 통일)
+export const appClientStatusEnum = pgEnum('app_client_status_enum', [
   'prospect',
   'contacted',
   'qualified',
@@ -59,16 +59,12 @@ export const clientStatusEnum = pgEnum('client_status_enum', [
   'dormant',
 ]);
 
-export const clientContactMethodEnum = pgEnum('client_contact_method_enum', [
-  'phone',
-  'email',
-  'kakao',
-  'sms',
-  'in_person',
-  'video_call',
-]);
+export const appClientContactMethodEnum = pgEnum(
+  'app_client_contact_method_enum',
+  ['phone', 'email', 'kakao', 'sms', 'in_person', 'video_call']
+);
 
-export const clientSourceEnum = pgEnum('client_source_enum', [
+export const appClientSourceEnum = pgEnum('app_client_source_enum', [
   'referral',
   'cold_call',
   'marketing',
@@ -79,10 +75,26 @@ export const clientSourceEnum = pgEnum('client_source_enum', [
   'other',
 ]);
 
-// 🏷️ Clients 특화 테이블들 (prefix 네이밍 적용)
+// 🔒 고객 데이터 보안 관련 Enum 추가
+export const appClientPrivacyLevelEnum = pgEnum(
+  'app_client_privacy_level_enum',
+  [
+    'public', // 팀 내 공유 가능
+    'restricted', // 제한적 공유
+    'private', // 본인만 접근
+    'confidential', // 최고 보안
+  ]
+);
 
-// Client Tags (고객 태그)
-export const clientTags = pgTable('client_tags', {
+export const appClientDataAccessLogTypeEnum = pgEnum(
+  'app_client_data_access_log_type_enum',
+  ['view', 'edit', 'export', 'share', 'delete']
+);
+
+// 🏷️ Clients 특화 테이블들 (완전한 app_client_ prefix 통일)
+
+// Client Tags (고객 태그) - prefix 통일
+export const appClientTags = pgTable('app_client_tags', {
   id: uuid('id').primaryKey().defaultRandom(),
   agentId: uuid('agent_id')
     .notNull()
@@ -91,27 +103,37 @@ export const clientTags = pgTable('client_tags', {
   color: text('color').notNull(),
   description: text('description'),
   isActive: boolean('is_active').default(true).notNull(),
+  // 🔒 보안 강화 필드
+  privacyLevel: appClientPrivacyLevelEnum('privacy_level')
+    .default('public')
+    .notNull(),
   createdAt: timestamp('created_at', { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true })
     .defaultNow()
     .notNull(),
 });
 
-// Client Tag Assignments (고객-태그 연결)
-export const clientTagAssignments = pgTable('client_tag_assignments', {
+// Client Tag Assignments (고객-태그 연결) - prefix 통일
+export const appClientTagAssignments = pgTable('app_client_tag_assignments', {
   id: uuid('id').primaryKey().defaultRandom(),
   clientId: uuid('client_id')
     .notNull()
     .references(() => clients.id, { onDelete: 'cascade' }),
   tagId: uuid('tag_id')
     .notNull()
-    .references(() => clientTags.id, { onDelete: 'cascade' }),
+    .references(() => appClientTags.id, { onDelete: 'cascade' }),
+  assignedBy: uuid('assigned_by')
+    .notNull()
+    .references(() => profiles.id),
   assignedAt: timestamp('assigned_at', { withTimezone: true })
     .defaultNow()
     .notNull(),
 });
 
-// Client Contact History (연락 이력)
-export const clientContactHistory = pgTable('client_contact_history', {
+// Client Contact History (연락 이력) - prefix 통일 및 보안 강화
+export const appClientContactHistory = pgTable('app_client_contact_history', {
   id: uuid('id').primaryKey().defaultRandom(),
   clientId: uuid('client_id')
     .notNull()
@@ -119,7 +141,7 @@ export const clientContactHistory = pgTable('client_contact_history', {
   agentId: uuid('agent_id')
     .notNull()
     .references(() => profiles.id),
-  contactMethod: clientContactMethodEnum('contact_method').notNull(),
+  contactMethod: appClientContactMethodEnum('contact_method').notNull(),
   subject: text('subject'),
   content: text('content'),
   duration: integer('duration'), // 분 (통화시간 등)
@@ -127,13 +149,19 @@ export const clientContactHistory = pgTable('client_contact_history', {
   nextAction: text('next_action'),
   nextActionDate: timestamp('next_action_date', { withTimezone: true }),
   attachments: jsonb('attachments'), // 첨부파일 정보
+  // 🔒 보안 강화 필드
+  privacyLevel: appClientPrivacyLevelEnum('privacy_level')
+    .default('restricted')
+    .notNull(),
+  isConfidential: boolean('is_confidential').default(false).notNull(),
+  accessibleBy: text('accessible_by').array(), // 접근 가능한 사용자 ID 목록
   createdAt: timestamp('created_at', { withTimezone: true })
     .defaultNow()
     .notNull(),
 });
 
-// Client Family Members (가족 구성원)
-export const clientFamilyMembers = pgTable('client_family_members', {
+// Client Family Members (가족 구성원) - prefix 통일 및 보안 강화
+export const appClientFamilyMembers = pgTable('app_client_family_members', {
   id: uuid('id').primaryKey().defaultRandom(),
   clientId: uuid('client_id')
     .notNull()
@@ -148,6 +176,12 @@ export const clientFamilyMembers = pgTable('client_family_members', {
   hasInsurance: boolean('has_insurance').default(false),
   insuranceDetails: jsonb('insurance_details'),
   notes: text('notes'),
+  // 🔒 개인정보 보호 강화
+  privacyLevel: appClientPrivacyLevelEnum('privacy_level')
+    .default('confidential')
+    .notNull(),
+  consentDate: timestamp('consent_date', { withTimezone: true }), // 정보 제공 동의 날짜
+  consentExpiry: timestamp('consent_expiry', { withTimezone: true }), // 동의 만료 날짜
   createdAt: timestamp('created_at', { withTimezone: true })
     .defaultNow()
     .notNull(),
@@ -156,14 +190,14 @@ export const clientFamilyMembers = pgTable('client_family_members', {
     .notNull(),
 });
 
-// Client Preferences (고객 선호도)
-export const clientPreferences = pgTable('client_preferences', {
+// Client Preferences (고객 선호도) - prefix 통일
+export const appClientPreferences = pgTable('app_client_preferences', {
   id: uuid('id').primaryKey().defaultRandom(),
   clientId: uuid('client_id')
     .notNull()
     .unique()
     .references(() => clients.id, { onDelete: 'cascade' }),
-  preferredContactMethod: clientContactMethodEnum(
+  preferredContactMethod: appClientContactMethodEnum(
     'preferred_contact_method'
   ).default('phone'),
   preferredContactTime: jsonb('preferred_contact_time'), // { start: "09:00", end: "18:00", days: [1,2,3,4,5] }
@@ -175,6 +209,17 @@ export const clientPreferences = pgTable('client_preferences', {
   investmentGoals: text('investment_goals').array(),
   specialNeeds: text('special_needs'),
   notes: text('notes'),
+  // 🔒 마케팅 동의 관리
+  marketingConsent: boolean('marketing_consent').default(false).notNull(),
+  dataProcessingConsent: boolean('data_processing_consent')
+    .default(true)
+    .notNull(),
+  thirdPartyShareConsent: boolean('third_party_share_consent')
+    .default(false)
+    .notNull(),
+  privacyLevel: appClientPrivacyLevelEnum('privacy_level')
+    .default('private')
+    .notNull(),
   createdAt: timestamp('created_at', { withTimezone: true })
     .defaultNow()
     .notNull(),
@@ -183,8 +228,8 @@ export const clientPreferences = pgTable('client_preferences', {
     .notNull(),
 });
 
-// Client Analytics (고객 분석)
-export const clientAnalytics = pgTable('client_analytics', {
+// Client Analytics (고객 분석) - prefix 통일
+export const appClientAnalytics = pgTable('app_client_analytics', {
   id: uuid('id').primaryKey().defaultRandom(),
   clientId: uuid('client_id')
     .notNull()
@@ -201,12 +246,8 @@ export const clientAnalytics = pgTable('client_analytics', {
   lifetimeValue: decimal('lifetime_value', { precision: 12, scale: 2 }),
   acquisitionCost: decimal('acquisition_cost', { precision: 10, scale: 2 }),
   referralCount: integer('referral_count').default(0),
-  referralValue: decimal('referral_value', { precision: 12, scale: 2 }).default(
-    '0'
-  ),
-  lastAnalyzedAt: timestamp('last_analyzed_at', {
-    withTimezone: true,
-  }).defaultNow(),
+  referralValue: decimal('referral_value', { precision: 12, scale: 2 }),
+  lastAnalyzedAt: timestamp('last_analyzed_at', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true })
     .defaultNow()
     .notNull(),
@@ -215,8 +256,8 @@ export const clientAnalytics = pgTable('client_analytics', {
     .notNull(),
 });
 
-// Client Milestones (고객 마일스톤)
-export const clientMilestones = pgTable('client_milestones', {
+// Client Milestones (고객 마일스톤) - prefix 통일
+export const appClientMilestones = pgTable('app_client_milestones', {
   id: uuid('id').primaryKey().defaultRandom(),
   clientId: uuid('client_id')
     .notNull()
@@ -229,190 +270,309 @@ export const clientMilestones = pgTable('client_milestones', {
   category: text('category'), // contract, payment, renewal, claim, etc.
   value: decimal('value', { precision: 12, scale: 2 }),
   achievedAt: timestamp('achieved_at', { withTimezone: true }).notNull(),
-  isSignificant: boolean('is_significant').default(false),
+  isSignificant: boolean('is_significant').default(false).notNull(),
   metadata: jsonb('metadata'),
   createdAt: timestamp('created_at', { withTimezone: true })
     .defaultNow()
     .notNull(),
 });
 
-// 🔗 Relations (관계 정의)
-export const clientTagsRelations = relations(clientTags, ({ one, many }) => ({
-  agent: one(profiles, {
-    fields: [clientTags.agentId],
-    references: [profiles.id],
-  }),
-  assignments: many(clientTagAssignments),
-}));
+// Client Stage History (단계 변경 이력) - prefix 통일
+export const appClientStageHistory = pgTable('app_client_stage_history', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  clientId: uuid('client_id')
+    .notNull()
+    .references(() => clients.id, { onDelete: 'cascade' }),
+  agentId: uuid('agent_id')
+    .notNull()
+    .references(() => profiles.id),
+  fromStageId: uuid('from_stage_id').references(() => pipelineStages.id),
+  toStageId: uuid('to_stage_id')
+    .notNull()
+    .references(() => pipelineStages.id),
+  reason: text('reason'),
+  notes: text('notes'),
+  changedAt: timestamp('changed_at', { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
 
-export const clientTagAssignmentsRelations = relations(
-  clientTagAssignments,
-  ({ one }) => ({
-    client: one(clients, {
-      fields: [clientTagAssignments.clientId],
-      references: [clients.id],
+// 🔒 NEW: Client Data Access Log (고객 데이터 접근 로그) - 보안 강화
+export const appClientDataAccessLogs = pgTable('app_client_data_access_logs', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  clientId: uuid('client_id')
+    .notNull()
+    .references(() => clients.id, { onDelete: 'cascade' }),
+  accessedBy: uuid('accessed_by')
+    .notNull()
+    .references(() => profiles.id),
+  accessType: appClientDataAccessLogTypeEnum('access_type').notNull(),
+  accessedData: text('accessed_data').array(), // 접근한 필드들
+  ipAddress: text('ip_address'),
+  userAgent: text('user_agent'),
+  purpose: text('purpose'), // 접근 목적
+  accessResult: text('access_result'), // success, failed, denied
+  metadata: jsonb('metadata'), // 추가 정보
+  accessedAt: timestamp('accessed_at', { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+// 🔒 NEW: Client Data Backup (고객 데이터 백업) - 데이터 보호
+export const appClientDataBackups = pgTable('app_client_data_backups', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  clientId: uuid('client_id')
+    .notNull()
+    .references(() => clients.id, { onDelete: 'cascade' }),
+  backupType: text('backup_type').notNull(), // full, incremental, emergency
+  backupData: jsonb('backup_data').notNull(), // 암호화된 백업 데이터
+  backupHash: text('backup_hash').notNull(), // 데이터 무결성 검증
+  triggeredBy: uuid('triggered_by')
+    .notNull()
+    .references(() => profiles.id),
+  triggerReason: text('trigger_reason'), // scheduled, manual, before_delete
+  retentionUntil: timestamp('retention_until', {
+    withTimezone: true,
+  }).notNull(),
+  isEncrypted: boolean('is_encrypted').default(true).notNull(),
+  encryptionKey: text('encryption_key'), // 암호화 키 ID (실제 키는 별도 보관)
+  createdAt: timestamp('created_at', { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+// 🔗 Relations (관계 정의) - 새로운 테이블명 반영
+export const appClientTagsRelations = relations(
+  appClientTags,
+  ({ one, many }) => ({
+    agent: one(profiles, {
+      fields: [appClientTags.agentId],
+      references: [profiles.id],
     }),
-    tag: one(clientTags, {
-      fields: [clientTagAssignments.tagId],
-      references: [clientTags.id],
-    }),
+    assignments: many(appClientTagAssignments),
   })
 );
 
-export const clientContactHistoryRelations = relations(
-  clientContactHistory,
+export const appClientTagAssignmentsRelations = relations(
+  appClientTagAssignments,
   ({ one }) => ({
     client: one(clients, {
-      fields: [clientContactHistory.clientId],
+      fields: [appClientTagAssignments.clientId],
       references: [clients.id],
     }),
-    agent: one(profiles, {
-      fields: [clientContactHistory.agentId],
+    tag: one(appClientTags, {
+      fields: [appClientTagAssignments.tagId],
+      references: [appClientTags.id],
+    }),
+    assignedByAgent: one(profiles, {
+      fields: [appClientTagAssignments.assignedBy],
       references: [profiles.id],
     }),
   })
 );
 
-export const clientFamilyMembersRelations = relations(
-  clientFamilyMembers,
+export const appClientContactHistoryRelations = relations(
+  appClientContactHistory,
   ({ one }) => ({
     client: one(clients, {
-      fields: [clientFamilyMembers.clientId],
-      references: [clients.id],
-    }),
-  })
-);
-
-export const clientPreferencesRelations = relations(
-  clientPreferences,
-  ({ one }) => ({
-    client: one(clients, {
-      fields: [clientPreferences.clientId],
-      references: [clients.id],
-    }),
-  })
-);
-
-export const clientAnalyticsRelations = relations(
-  clientAnalytics,
-  ({ one }) => ({
-    client: one(clients, {
-      fields: [clientAnalytics.clientId],
-      references: [clients.id],
-    }),
-  })
-);
-
-export const clientMilestonesRelations = relations(
-  clientMilestones,
-  ({ one }) => ({
-    client: one(clients, {
-      fields: [clientMilestones.clientId],
+      fields: [appClientContactHistory.clientId],
       references: [clients.id],
     }),
     agent: one(profiles, {
-      fields: [clientMilestones.agentId],
+      fields: [appClientContactHistory.agentId],
       references: [profiles.id],
     }),
   })
 );
 
-// 📝 Clients 특화 타입들 (실제 코드와 일치)
-export type ClientTag = typeof clientTags.$inferSelect;
-export type NewClientTag = typeof clientTags.$inferInsert;
-export type ClientTagAssignment = typeof clientTagAssignments.$inferSelect;
-export type NewClientTagAssignment = typeof clientTagAssignments.$inferInsert;
-export type ClientContactHistory = typeof clientContactHistory.$inferSelect;
-export type NewClientContactHistory = typeof clientContactHistory.$inferInsert;
-export type ClientFamilyMember = typeof clientFamilyMembers.$inferSelect;
-export type NewClientFamilyMember = typeof clientFamilyMembers.$inferInsert;
-export type ClientPreferences = typeof clientPreferences.$inferSelect;
-export type NewClientPreferences = typeof clientPreferences.$inferInsert;
-export type ClientAnalytics = typeof clientAnalytics.$inferSelect;
-export type NewClientAnalytics = typeof clientAnalytics.$inferInsert;
-export type ClientMilestone = typeof clientMilestones.$inferSelect;
-export type NewClientMilestone = typeof clientMilestones.$inferInsert;
+export const appClientFamilyMembersRelations = relations(
+  appClientFamilyMembers,
+  ({ one }) => ({
+    client: one(clients, {
+      fields: [appClientFamilyMembers.clientId],
+      references: [clients.id],
+    }),
+  })
+);
 
-export type ClientStatus = (typeof clientStatusEnum.enumValues)[number];
+export const appClientPreferencesRelations = relations(
+  appClientPreferences,
+  ({ one }) => ({
+    client: one(clients, {
+      fields: [appClientPreferences.clientId],
+      references: [clients.id],
+    }),
+  })
+);
+
+export const appClientAnalyticsRelations = relations(
+  appClientAnalytics,
+  ({ one }) => ({
+    client: one(clients, {
+      fields: [appClientAnalytics.clientId],
+      references: [clients.id],
+    }),
+  })
+);
+
+export const appClientMilestonesRelations = relations(
+  appClientMilestones,
+  ({ one }) => ({
+    client: one(clients, {
+      fields: [appClientMilestones.clientId],
+      references: [clients.id],
+    }),
+    agent: one(profiles, {
+      fields: [appClientMilestones.agentId],
+      references: [profiles.id],
+    }),
+  })
+);
+
+export const appClientStageHistoryRelations = relations(
+  appClientStageHistory,
+  ({ one }) => ({
+    client: one(clients, {
+      fields: [appClientStageHistory.clientId],
+      references: [clients.id],
+    }),
+    agent: one(profiles, {
+      fields: [appClientStageHistory.agentId],
+      references: [profiles.id],
+    }),
+    fromStage: one(pipelineStages, {
+      fields: [appClientStageHistory.fromStageId],
+      references: [pipelineStages.id],
+    }),
+    toStage: one(pipelineStages, {
+      fields: [appClientStageHistory.toStageId],
+      references: [pipelineStages.id],
+    }),
+  })
+);
+
+export const appClientDataAccessLogsRelations = relations(
+  appClientDataAccessLogs,
+  ({ one }) => ({
+    client: one(clients, {
+      fields: [appClientDataAccessLogs.clientId],
+      references: [clients.id],
+    }),
+    accessedByAgent: one(profiles, {
+      fields: [appClientDataAccessLogs.accessedBy],
+      references: [profiles.id],
+    }),
+  })
+);
+
+export const appClientDataBackupsRelations = relations(
+  appClientDataBackups,
+  ({ one }) => ({
+    client: one(clients, {
+      fields: [appClientDataBackups.clientId],
+      references: [clients.id],
+    }),
+    triggeredByAgent: one(profiles, {
+      fields: [appClientDataBackups.triggeredBy],
+      references: [profiles.id],
+    }),
+  })
+);
+
+// 📝 Clients 특화 타입들 (새로운 테이블명 반영)
+export type AppClientTag = typeof appClientTags.$inferSelect;
+export type NewAppClientTag = typeof appClientTags.$inferInsert;
+export type AppClientTagAssignment =
+  typeof appClientTagAssignments.$inferSelect;
+export type NewAppClientTagAssignment =
+  typeof appClientTagAssignments.$inferInsert;
+export type AppClientContactHistory =
+  typeof appClientContactHistory.$inferSelect;
+export type NewAppClientContactHistory =
+  typeof appClientContactHistory.$inferInsert;
+export type AppClientFamilyMember = typeof appClientFamilyMembers.$inferSelect;
+export type NewAppClientFamilyMember =
+  typeof appClientFamilyMembers.$inferInsert;
+export type AppClientPreferences = typeof appClientPreferences.$inferSelect;
+export type NewAppClientPreferences = typeof appClientPreferences.$inferInsert;
+export type AppClientAnalytics = typeof appClientAnalytics.$inferSelect;
+export type NewAppClientAnalytics = typeof appClientAnalytics.$inferInsert;
+export type AppClientMilestone = typeof appClientMilestones.$inferSelect;
+export type NewAppClientMilestone = typeof appClientMilestones.$inferInsert;
+export type AppClientStageHistory = typeof appClientStageHistory.$inferSelect;
+export type NewAppClientStageHistory =
+  typeof appClientStageHistory.$inferInsert;
+export type AppClientDataAccessLog =
+  typeof appClientDataAccessLogs.$inferSelect;
+export type NewAppClientDataAccessLog =
+  typeof appClientDataAccessLogs.$inferInsert;
+export type AppClientDataBackup = typeof appClientDataBackups.$inferSelect;
+export type NewAppClientDataBackup = typeof appClientDataBackups.$inferInsert;
+
+// Enum 타입들
+export type ClientStatus = (typeof appClientStatusEnum.enumValues)[number];
 export type ClientContactMethod =
-  (typeof clientContactMethodEnum.enumValues)[number];
-export type ClientSource = (typeof clientSourceEnum.enumValues)[number];
+  (typeof appClientContactMethodEnum.enumValues)[number];
+export type ClientSource = (typeof appClientSourceEnum.enumValues)[number];
+export type ClientPrivacyLevel =
+  (typeof appClientPrivacyLevelEnum.enumValues)[number];
+export type ClientDataAccessLogType =
+  (typeof appClientDataAccessLogTypeEnum.enumValues)[number];
 
-// 🎯 Clients 특화 인터페이스 (types.ts와 일치)
-import type { Client, Importance } from '~/lib/schema';
+// 🎯 Clients 특화 인터페이스 (보안 강화)
+import type { Client } from '~/lib/schema';
 
 export interface ClientOverview {
   client: Client;
-  analytics?: ClientAnalytics;
-  preferences?: ClientPreferences;
-  tags: ClientTag[];
-  familyMembers: ClientFamilyMember[];
-  recentContacts: ClientContactHistory[];
-  milestones: ClientMilestone[];
-}
-
-export interface ContactSummary {
-  totalContacts: number;
-  lastContact?: ClientContactHistory;
-  upcomingActions: {
-    action: string;
-    date: Date;
-    priority: string;
-  }[];
-  responseRate: number;
-  averageResponseTime: number;
-}
-
-export interface ReferralNetwork {
-  referrals: Array<{
-    id: string;
-    fullName: string;
-    currentStage?: string;
-    contractAmount: number;
-    relationship: string;
-    phone: string;
-    lastContactDate?: string;
-  }>;
-  siblingReferrals: Array<{
-    id: string;
-    fullName: string;
-    currentStage?: string;
-    contractAmount: number;
-    relationship: string;
-    lastContactDate?: string;
-  }>;
-  stats: {
-    totalReferred: number;
-    totalContracts: number;
-    totalValue: number;
-    conversionRate: number;
+  tags: AppClientTag[];
+  preferences?: AppClientPreferences;
+  analytics?: AppClientAnalytics;
+  familyMembers: AppClientFamilyMember[];
+  recentContacts: AppClientContactHistory[];
+  milestones: AppClientMilestone[];
+  stageHistory: AppClientStageHistory[];
+  // 🔒 보안 정보
+  accessLevel: ClientPrivacyLevel;
+  dataConsents: {
+    marketing: boolean;
+    dataProcessing: boolean;
+    thirdPartyShare: boolean;
   };
 }
 
-export interface ClientFilter {
-  stages?: string[];
-  importance?: Importance[];
-  tags?: string[];
+export interface ClientSearchFilters {
+  query?: string;
+  stageIds?: string[];
+  tagIds?: string[];
+  importance?: string[];
   sources?: ClientSource[];
+  privacyLevels?: ClientPrivacyLevel[];
   dateRange?: {
     start: Date;
     end: Date;
   };
-  hasInsurance?: boolean;
-  hasFamilyMembers?: boolean;
-  engagementScore?: {
-    min: number;
-    max: number;
-  };
+  hasRecentContact?: boolean;
+  hasUpcomingMeeting?: boolean;
 }
 
-export interface ClientSearchResult {
-  clients: Client[];
-  totalCount: number;
-  facets: {
-    stages: { name: string; count: number }[];
-    importance: { level: string; count: number }[];
-    tags: { name: string; count: number }[];
-    sources: { source: string; count: number }[];
-  };
+export interface ClientSecuritySettings {
+  clientId: string;
+  privacyLevel: ClientPrivacyLevel;
+  dataRetentionPeriod: number; // 일 단위
+  accessRestrictions: string[]; // 제한된 사용자 목록
+  auditLogEnabled: boolean;
+  backupFrequency: 'daily' | 'weekly' | 'monthly';
+  encryptionRequired: boolean;
 }
+
+// 이전 네이밍과의 호환성을 위한 타입 alias (Deprecated - 새 코드에서 사용 금지)
+/** @deprecated Use AppClientTag instead */
+export type ClientTag = AppClientTag;
+/** @deprecated Use AppClientContactHistory instead */
+export type ClientContactHistory = AppClientContactHistory;
+/** @deprecated Use AppClientFamilyMember instead */
+export type ClientFamilyMember = AppClientFamilyMember;
+/** @deprecated Use AppClientPreferences instead */
+export type ClientPreferences = AppClientPreferences;
+/** @deprecated Use AppClientAnalytics instead */
+export type ClientAnalytics = AppClientAnalytics;

@@ -9,6 +9,9 @@ import {
 import { Button } from '~/common/components/ui/button';
 import { Input } from '~/common/components/ui/input';
 import { Progress } from '~/common/components/ui/progress';
+import { Checkbox } from '~/common/components/ui/checkbox';
+import { Badge } from '~/common/components/ui/badge';
+import { Alert, AlertDescription } from '~/common/components/ui/alert';
 import {
   Select,
   SelectContent,
@@ -24,14 +27,18 @@ import {
   TableHeader,
   TableRow,
 } from '~/common/components/ui/table';
-import { Badge } from '~/common/components/ui/badge';
-import { Alert, AlertDescription } from '~/common/components/ui/alert';
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from '~/common/components/ui/tabs';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '~/common/components/ui/tooltip';
 import {
   UploadIcon,
   CheckIcon,
@@ -40,12 +47,159 @@ import {
   ArrowRightIcon,
   DownloadIcon,
   FileTextIcon,
+  LockClosedIcon,
+  EyeClosedIcon,
+  PersonIcon,
 } from '@radix-ui/react-icons';
+import type { ClientPrivacyLevel } from '../types';
+
+// 🔒 **보안 강화된 임포트 설정**
+interface SecuritySettings {
+  enableEncryption: boolean;
+  defaultPrivacyLevel: ClientPrivacyLevel;
+  enableDataMasking: boolean;
+  requireDataProcessingConsent: boolean;
+  enableAuditLogging: boolean;
+  maxFileSize: number; // MB
+  allowedFileTypes: string[];
+  quarantineEnabled: boolean;
+}
+
+// 🔒 **데이터 검증 규칙**
+interface ValidationRule {
+  field: string;
+  type: 'required' | 'format' | 'privacy' | 'duplicate' | 'security';
+  pattern?: RegExp;
+  message: string;
+  severity: 'error' | 'warning' | 'info';
+  securityLevel?: ClientPrivacyLevel;
+}
+
+// 🔒 **임포트 보안 로그**
+interface ImportSecurityLog {
+  id: string;
+  timestamp: string;
+  action: string;
+  details: string;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  userId: string;
+  ipAddress?: string;
+  dataCount?: number;
+  sensitiveDataDetected?: boolean;
+}
 
 interface ClientImportModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  // 🔒 보안 강화 props
+  enableSecurity?: boolean;
+  securitySettings?: SecuritySettings;
+  currentUserRole?: 'agent' | 'manager' | 'admin';
+  agentId?: string;
+  onSecurityAudit?: (log: ImportSecurityLog) => void;
 }
+
+// 🔒 **기본 보안 설정**
+const defaultSecuritySettings: SecuritySettings = {
+  enableEncryption: true,
+  defaultPrivacyLevel: 'restricted',
+  enableDataMasking: true,
+  requireDataProcessingConsent: true,
+  enableAuditLogging: true,
+  maxFileSize: 10, // 10MB
+  allowedFileTypes: ['.csv', '.xlsx', '.xls'],
+  quarantineEnabled: true,
+};
+
+// 🔒 **보안 강화된 검증 규칙**
+const securityValidationRules: ValidationRule[] = [
+  {
+    field: 'phone',
+    type: 'format',
+    pattern: /^010-\d{4}-\d{4}$/,
+    message: '전화번호 형식이 올바르지 않습니다 (010-0000-0000)',
+    severity: 'error',
+  },
+  {
+    field: 'email',
+    type: 'format',
+    pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+    message: '이메일 형식이 올바르지 않습니다',
+    severity: 'error',
+  },
+  {
+    field: 'phone',
+    type: 'privacy',
+    pattern: /\d{3}-\d{4}-\d{4}/,
+    message: '개인정보(전화번호) 검출 - 보안 처리 필요',
+    severity: 'warning',
+    securityLevel: 'private',
+  },
+  {
+    field: 'ssn',
+    type: 'privacy',
+    pattern: /\d{6}-\d{7}/,
+    message: '주민등록번호 검출 - 최고 기밀 처리 필요',
+    severity: 'error',
+    securityLevel: 'confidential',
+  },
+  {
+    field: 'address',
+    type: 'privacy',
+    pattern: /.+구.+/,
+    message: '주소 정보 검출 - 개인정보 보호 적용',
+    severity: 'info',
+    securityLevel: 'restricted',
+  },
+  {
+    field: 'name',
+    type: 'required',
+    message: '이름은 필수 항목입니다',
+    severity: 'error',
+  },
+  {
+    field: 'duplicate',
+    type: 'duplicate',
+    message: '중복 데이터가 발견되었습니다',
+    severity: 'warning',
+  },
+];
+
+// 🔒 **개인정보 패턴 검출 함수**
+const detectPersonalInfo = (
+  text: string
+): { detected: boolean; type: string; level: ClientPrivacyLevel } => {
+  const patterns = [
+    {
+      pattern: /\d{6}-\d{7}/,
+      type: '주민등록번호',
+      level: 'confidential' as ClientPrivacyLevel,
+    },
+    {
+      pattern: /\d{3}-\d{4}-\d{4}/,
+      type: '전화번호',
+      level: 'private' as ClientPrivacyLevel,
+    },
+    {
+      pattern: /[^\s@]+@[^\s@]+\.[^\s@]+/,
+      type: '이메일',
+      level: 'restricted' as ClientPrivacyLevel,
+    },
+    {
+      pattern: /\d{4}-\d{4}-\d{4}-\d{4}/,
+      type: '카드번호',
+      level: 'confidential' as ClientPrivacyLevel,
+    },
+  ];
+
+  for (const { pattern, type, level } of patterns) {
+    if (pattern.test(text)) {
+      return { detected: true, type, level };
+    }
+  }
+
+  return { detected: false, type: '', level: 'public' };
+};
 
 // 더미 데이터 생성 함수
 const generateMockDataFromFile = (fileName: string) => {
@@ -209,6 +363,11 @@ const generateValidationResults = (data: any[]) => {
 export function ClientImportModal({
   open,
   onOpenChange,
+  enableSecurity = false,
+  securitySettings = defaultSecuritySettings,
+  currentUserRole = 'agent',
+  agentId = '',
+  onSecurityAudit,
 }: ClientImportModalProps) {
   const [currentStep, setCurrentStep] = useState<
     'upload' | 'mapping' | 'preview' | 'complete'
@@ -232,7 +391,162 @@ export function ClientImportModal({
     title: '',
     message: '',
   });
+
+  // 🔒 **보안 강화된 상태들**
+  const [securityLogs, setSecurityLogs] = useState<ImportSecurityLog[]>([]);
+  const [sensitiveDataDetected, setSensitiveDataDetected] = useState(false);
+  const [dataProcessingConsent, setDataProcessingConsent] = useState(false);
+  const [encryptionEnabled, setEncryptionEnabled] = useState(
+    securitySettings.enableEncryption
+  );
+  const [quarantinedRows, setQuarantinedRows] = useState<number[]>([]);
+  const [privacyLevels, setPrivacyLevels] = useState<
+    Record<number, ClientPrivacyLevel>
+  >({});
+  const [maskedData, setMaskedData] = useState<Record<string, boolean>>({});
+
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // 🔒 **보안 감사 로깅 함수**
+  const logSecurityAction = (
+    action: string,
+    details: string,
+    severity: 'low' | 'medium' | 'high' | 'critical' = 'low'
+  ) => {
+    const log: ImportSecurityLog = {
+      id: `audit_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      timestamp: new Date().toISOString(),
+      action,
+      details,
+      severity,
+      userId: agentId,
+      ipAddress: undefined, // 실제 구현에서는 IP 추적
+      dataCount: previewData.length,
+      sensitiveDataDetected,
+    };
+
+    setSecurityLogs((prev) => [...prev, log]);
+
+    if (onSecurityAudit) {
+      onSecurityAudit(log);
+    }
+
+    console.log(`🔒 [보안감사] ${action}: ${details}`);
+  };
+
+  // 🔒 **개인정보 데이터 마스킹 함수**
+  const maskSensitiveData = (
+    data: string,
+    level: ClientPrivacyLevel
+  ): string => {
+    if (!securitySettings.enableDataMasking) return data;
+
+    switch (level) {
+      case 'confidential':
+        return '***-**-****';
+      case 'private':
+        return data.slice(0, 3) + '****' + data.slice(-2);
+      case 'restricted':
+        return data.slice(0, 2) + '***';
+      default:
+        return data;
+    }
+  };
+
+  // 🔒 **파일 보안 검증 함수**
+  const validateFileSecuritya = (
+    file: File
+  ): { isValid: boolean; issues: string[] } => {
+    const issues: string[] = [];
+
+    // 파일 크기 검증
+    if (file.size > securitySettings.maxFileSize * 1024 * 1024) {
+      issues.push(
+        `파일 크기가 너무 큽니다 (최대 ${securitySettings.maxFileSize}MB)`
+      );
+    }
+
+    // 파일 형식 검증
+    const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
+    if (!securitySettings.allowedFileTypes.includes(fileExtension || '')) {
+      issues.push(
+        `허용되지 않은 파일 형식입니다 (허용: ${securitySettings.allowedFileTypes.join(
+          ', '
+        )})`
+      );
+    }
+
+    // 파일명 보안 검증
+    if (/[<>:"/\\|?*]/.test(file.name)) {
+      issues.push('파일명에 보안 위험 문자가 포함되어 있습니다');
+    }
+
+    return {
+      isValid: issues.length === 0,
+      issues,
+    };
+  };
+
+  // 🔒 **데이터 스캔 및 개인정보 검출**
+  const scanDataForPersonalInfo = (data: any[]): void => {
+    let detectedSensitive = false;
+    const newPrivacyLevels: Record<number, ClientPrivacyLevel> = {};
+    const newQuarantineRows: number[] = [];
+
+    data.forEach((row, rowIndex) => {
+      let rowPrivacyLevel: ClientPrivacyLevel = 'public';
+
+      Object.values(row).forEach((value) => {
+        if (typeof value === 'string') {
+          const detection = detectPersonalInfo(value);
+          if (detection.detected) {
+            detectedSensitive = true;
+
+            // 가장 높은 보안 레벨 적용 (우선순위: confidential > private > restricted > public)
+            const levelPriority = {
+              public: 0,
+              restricted: 1,
+              private: 2,
+              confidential: 3,
+            };
+            if (
+              levelPriority[detection.level] > levelPriority[rowPrivacyLevel]
+            ) {
+              rowPrivacyLevel = detection.level;
+            }
+
+            logSecurityAction(
+              'SENSITIVE_DATA_DETECTED',
+              `${detection.type} 검출 (행 ${rowIndex + 1})`,
+              detection.level === 'confidential' ? 'critical' : 'medium'
+            );
+          }
+        }
+      });
+
+      newPrivacyLevels[rowIndex] = rowPrivacyLevel;
+
+      // 기밀 데이터 격리
+      if (
+        securitySettings.quarantineEnabled &&
+        rowPrivacyLevel === ('confidential' as ClientPrivacyLevel)
+      ) {
+        newQuarantineRows.push(rowIndex);
+      }
+    });
+
+    setSensitiveDataDetected(detectedSensitive);
+    setPrivacyLevels(newPrivacyLevels);
+    setQuarantinedRows(newQuarantineRows);
+
+    if (detectedSensitive) {
+      logSecurityAction(
+        'PRIVACY_SCAN_COMPLETE',
+        `총 ${data.length}행 스캔, ${newQuarantineRows.length}행 격리`,
+        'high'
+      );
+    }
+  };
 
   // 알림 표시 함수
   const showAlert = (title: string, message: string) => {

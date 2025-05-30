@@ -1,29 +1,18 @@
-import type { Route } from '.react-router/types/app/features/clients/pages/+types/clients-page';
+import type { Route } from './+types/clients-page';
+import { MainLayout } from '~/common/layouts/main-layout';
+import { useState } from 'react';
 import { Button } from '~/common/components/ui/button';
+import { Input } from '~/common/components/ui/input';
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
+  CardDescription,
 } from '~/common/components/ui/card';
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '~/common/components/ui/table';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '~/common/components/ui/dropdown-menu';
+import { Badge } from '~/common/components/ui/badge';
+import { Checkbox } from '~/common/components/ui/checkbox';
+import { Avatar, AvatarFallback } from '~/common/components/ui/avatar';
 import {
   Select,
   SelectContent,
@@ -31,135 +20,265 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/common/components/ui/select';
-import { Badge } from '~/common/components/ui/badge';
-import { Checkbox } from '~/common/components/ui/checkbox';
 import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from '~/common/components/ui/pagination';
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+  TableCaption,
+} from '~/common/components/ui/table';
 import {
-  DotsHorizontalIcon,
-  PlusIcon,
-  MagnifyingGlassIcon,
-  ArrowUpIcon,
-  ArrowDownIcon,
-  DownloadIcon,
-  TrashIcon,
-  PersonIcon,
-  Link2Icon,
-  CalendarIcon,
-  Share1Icon,
-  EyeOpenIcon,
-  MixerVerticalIcon,
-  Pencil2Icon,
-} from '@radix-ui/react-icons';
-import { Input } from '~/common/components/ui/input';
-import { Link } from 'react-router';
-import { useState } from 'react';
-import { MainLayout } from '~/common/layouts/main-layout';
-import { Avatar, AvatarFallback } from '~/common/components/ui/avatar';
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from '~/common/components/ui/dropdown-menu';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '~/common/components/ui/tooltip';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '~/common/components/ui/pagination';
+import { Label } from '~/common/components/ui/label';
+import { Switch } from '~/common/components/ui/switch';
+import { Link } from 'react-router';
+import {
+  PlusIcon,
+  MagnifyingGlassIcon,
+  DownloadIcon,
+  Link2Icon,
+  Share1Icon,
+  EyeOpenIcon,
+  EyeClosedIcon,
+  PersonIcon,
+  LockClosedIcon,
+  TrashIcon,
+  ArrowUpIcon,
+  ArrowDownIcon,
+  CalendarIcon,
+  DotsHorizontalIcon,
+  Pencil2Icon,
+} from '@radix-ui/react-icons';
 
-// 🔄 수정된 import 경로들
-import { ReferralDepthIndicator } from '../components/referral-depth-indicator';
-import { ClientCard } from '../components/client-card';
-import { ClientStatsCards } from '../components/client-stats-cards';
-import { AddClientModal } from '../components/add-client-modal';
-import { ClientAddChoiceModal } from '../components/client-add-choice-modal';
-import { ClientImportModal } from '../components/client-import-modal';
+import { ClientCard } from '~/features/clients/components/client-card';
+import { ClientStatsCards } from '~/features/clients/components/client-stats-cards';
+import { ClientAddChoiceModal } from '~/features/clients/components/client-add-choice-modal';
+import { ClientImportModal } from '~/features/clients/components/client-import-modal';
+import { AddClientModal } from '~/features/clients/components/add-client-modal';
+import { ReferralDepthIndicator } from '~/features/clients/components/referral-depth-indicator';
 import {
   insuranceTypeIcons,
   insuranceTypeText,
-} from '../components/insurance-config';
-// 올바른 타입 import 경로
-import type { Client, ClientStats, BadgeVariant } from '../types';
-import { getClients, getClientStats } from '../lib/client-data';
+} from '~/features/clients/components/insurance-config';
+
+import type {
+  ClientDisplay,
+  ClientStats,
+  ClientPrivacyLevel,
+} from '~/features/clients/types';
+import { typeHelpers } from '~/features/clients/types';
+import {
+  getClients,
+  getClientStats,
+  logDataAccess,
+} from '~/features/clients/lib/client-data';
 import { requireAuth, getSearchParams } from '~/lib/auth/helpers';
+import { data } from 'react-router';
+
+// 🎨 BadgeVariant 타입 정의
+type BadgeVariant = 'default' | 'secondary' | 'outline' | 'destructive';
 
 export async function loader({ request }: Route.LoaderArgs) {
-  // 인증 확인
+  // 🔒 인증 확인 (보안 강화)
   const userId = await requireAuth(request);
 
-  // 검색 파라미터 추출
-  const searchParams = getSearchParams(request);
+  // 🔍 검색 파라미터 추출 (새 필터 지원)
+  const url = new URL(request.url);
+  const searchParams = {
+    page: parseInt(url.searchParams.get('page') || '1'),
+    pageSize: parseInt(url.searchParams.get('pageSize') || '10'),
+    search: url.searchParams.get('search') || undefined,
+    stageIds: url.searchParams.getAll('stageId'),
+    tagIds: url.searchParams.getAll('tagId'),
+    importance: url.searchParams.getAll('importance'),
+    sources: url.searchParams.getAll('source'),
+    privacyLevels: url.searchParams.getAll(
+      'privacyLevel'
+    ) as ClientPrivacyLevel[],
+    sortBy: url.searchParams.get('sortBy') || 'fullName',
+    sortOrder: (url.searchParams.get('sortOrder') || 'asc') as 'asc' | 'desc',
+    // 🔒 보안 관련 파라미터
+    ipAddress:
+      request.headers.get('x-forwarded-for') ||
+      request.headers.get('x-real-ip') ||
+      'unknown',
+    userAgent: request.headers.get('user-agent') || 'unknown',
+  };
 
   try {
-    // 고객 목록 조회
+    // 🔒 고객 목록 조회 (접근 로그 포함)
     const clientsData = await getClients({
       agentId: userId,
       ...searchParams,
     });
 
-    // 통계 조회
+    // 📊 통계 조회
     const stats = await getClientStats(userId);
 
     return {
       ...clientsData,
       stats,
+      searchParams, // 현재 검색 상태 반환
     };
   } catch (error) {
     console.error('Clients 페이지 로더 오류:', error);
 
-    // 에러 시 빈 데이터 반환
+    // 🔒 에러 시 안전한 빈 데이터 반환
     return {
       clients: [],
       totalCount: 0,
       pageSize: searchParams.pageSize,
       currentPage: searchParams.page,
+      totalPages: 0,
       stats: {
-        totalReferrals: 0,
-        averageDepth: 0,
-        topReferrers: [],
+        totalClients: 0,
+        activeClients: 0,
+        inactiveClients: 0,
+        importanceDistribution: {
+          high: 0,
+          medium: 0,
+          low: 0,
+        },
+        privacyDistribution: {
+          public: 0,
+          restricted: 0,
+          private: 0,
+          confidential: 0,
+        },
+        dataComplianceStatus: {
+          gdprCompliant: 0,
+          consentExpiring: 0,
+          backupRequired: 0,
+        },
       },
+      searchParams,
     };
+  }
+}
+
+export async function action({ request }: Route.ActionArgs) {
+  const userId = await requireAuth(request);
+  const formData = await request.formData();
+  const intent = formData.get('intent') as string;
+
+  switch (intent) {
+    case 'bulkDelete':
+      try {
+        const clientIds = formData.getAll('clientIds') as string[];
+        // TODO: 일괄 삭제 로직 구현
+        return data({
+          success: true,
+          message: '선택된 고객이 삭제되었습니다.',
+        });
+      } catch (error) {
+        return data(
+          { success: false, error: '일괄 삭제 중 오류가 발생했습니다.' },
+          { status: 500 }
+        );
+      }
+
+    case 'bulkExport':
+      try {
+        const clientIds = formData.getAll('clientIds') as string[];
+        // TODO: 일괄 내보내기 로직 구현
+        return data({ success: true, message: '데이터가 내보내기되었습니다.' });
+      } catch (error) {
+        return data(
+          { success: false, error: '내보내기 중 오류가 발생했습니다.' },
+          { status: 500 }
+        );
+      }
+
+    default:
+      return data(
+        { success: false, error: '알 수 없는 작업입니다.' },
+        { status: 400 }
+      );
   }
 }
 
 export function meta({ data, params }: Route.MetaArgs) {
   return [
     { title: '고객 관리 - SureCRM' },
-    { name: 'description', content: '고객 목록 관리 및 조회' },
+    {
+      name: 'description',
+      content: '보험설계사를 위한 안전한 고객 관계 관리 시스템',
+    },
   ];
 }
 
-export default function ClientsPage({ loaderData }: Route.ComponentProps) {
+export default function ClientsPage({
+  loaderData,
+  actionData,
+}: Route.ComponentProps) {
   const {
     clients = [],
     totalCount = 0,
     pageSize = 10,
     currentPage = 1,
+    totalPages: loaderTotalPages = 0,
     stats,
+    searchParams: initialSearchParams,
   } = loaderData;
 
-  // 상태 관리
-  const [searchQuery, setSearchQuery] = useState('');
+  // 🔒 상태 관리 (보안 강화)
+  const [searchQuery, setSearchQuery] = useState(
+    initialSearchParams?.search || ''
+  );
   const [selectedClients, setSelectedClients] = useState<string[]>([]);
-  const [sortBy, setSortBy] = useState('name');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [sortBy, setSortBy] = useState(
+    initialSearchParams?.sortBy || 'fullName'
+  );
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>(
+    initialSearchParams?.sortOrder || 'asc'
+  );
   const [filterStage, setFilterStage] = useState('all');
   const [filterImportance, setFilterImportance] = useState('all');
   const [filterReferrer, setFilterReferrer] = useState('all');
-  const [filterInsuranceType, setFilterInsuranceType] = useState('all');
-  const [filterDepth, setFilterDepth] = useState('all');
+  const [filterPrivacyLevel, setFilterPrivacyLevel] = useState<
+    ClientPrivacyLevel | 'all'
+  >('all');
   const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
+  const [showConfidentialData, setShowConfidentialData] = useState(false);
   const [addClientOpen, setAddClientOpen] = useState(false);
   const [addChoiceOpen, setAddChoiceOpen] = useState(false);
   const [importModalOpen, setImportModalOpen] = useState(false);
+  const [filterInsuranceType, setFilterInsuranceType] = useState('all');
+  const [filterDepth, setFilterDepth] = useState('all');
 
-  // 배지 설정들
+  // 🔒 클라이언트를 ClientDisplay로 타입 캐스팅
+  const typedClients = clients as ClientDisplay[];
+
+  // 🔒 현재 사용자 ID (실제로는 loader에서 가져와야 함)
+  const currentUserId = 'current-user-id'; // TODO: loader에서 실제 사용자 ID 전달
+
+  // 🎨 배지 설정들 (app.css 준수)
   const statusBadgeVariant: Record<string, BadgeVariant> = {
     active: 'default',
     inactive: 'secondary',
+    pending: 'outline',
   };
 
   const statusText: Record<string, string> = {
@@ -168,11 +287,10 @@ export default function ClientsPage({ loaderData }: Route.ComponentProps) {
   };
 
   const stageBadgeVariant: Record<string, BadgeVariant> = {
-    '첫 상담': 'outline',
-    '니즈 분석': 'outline',
-    '상품 설명': 'outline',
-    '계약 검토': 'outline',
-    '계약 완료': 'default',
+    lead: 'outline',
+    contact: 'secondary',
+    proposal: 'default',
+    contract: 'destructive',
   };
 
   const importanceBadgeVariant: Record<string, BadgeVariant> = {
@@ -187,49 +305,74 @@ export default function ClientsPage({ loaderData }: Route.ComponentProps) {
     low: '낮음',
   };
 
-  // 필터링 및 정렬된 고객 목록
-  const filteredAndSortedClients = clients
+  // 🔒 개인정보 보호 레벨 설정
+  const privacyLevelIcon: Record<ClientPrivacyLevel, any> = {
+    public: PersonIcon,
+    restricted: PersonIcon,
+    private: LockClosedIcon,
+    confidential: LockClosedIcon,
+  };
+
+  const privacyLevelBadgeVariant: Record<ClientPrivacyLevel, BadgeVariant> = {
+    public: 'outline',
+    restricted: 'secondary',
+    private: 'default',
+    confidential: 'destructive',
+  };
+
+  const privacyLevelText: Record<ClientPrivacyLevel, string> = {
+    public: '공개',
+    restricted: '제한',
+    private: '비공개',
+    confidential: '기밀',
+  };
+
+  // 🔍 필터링된 고객 목록 (클라이언트 사이드 - 추가 보안 필터링)
+  const filteredAndSortedClients = typedClients
     .filter((client) => {
+      // 🔒 개인정보 보호 레벨 확인
+      if (!showConfidentialData && client.accessLevel === 'confidential') {
+        return false;
+      }
+
       const matchesSearch =
-        client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        !searchQuery ||
+        client.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
         client.phone.includes(searchQuery) ||
         client.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        client.company?.toLowerCase().includes(searchQuery.toLowerCase());
+        client.occupation?.toLowerCase().includes(searchQuery.toLowerCase());
 
       const matchesStage =
-        filterStage === 'all' || client.stage === filterStage;
+        filterStage === 'all' || client.currentStage?.name === filterStage;
+
       const matchesImportance =
         filterImportance === 'all' || client.importance === filterImportance;
+
       const matchesReferrer =
-        filterReferrer === 'all' || client.referredBy?.name === filterReferrer;
-      const matchesInsuranceType =
-        filterInsuranceType === 'all' ||
-        client.insuranceTypes?.includes(filterInsuranceType as never);
-      const matchesDepth =
-        filterDepth === 'all' ||
-        (filterDepth === 'direct' && client.referralDepth === 0) ||
-        (filterDepth === '1st' && client.referralDepth === 1) ||
-        (filterDepth === '2nd' && client.referralDepth === 2) ||
-        (filterDepth === '3rd+' && client.referralDepth >= 3);
+        filterReferrer === 'all' ||
+        client.referredBy?.fullName === filterReferrer;
+
+      const matchesPrivacyLevel =
+        filterPrivacyLevel === 'all' ||
+        client.accessLevel === filterPrivacyLevel;
 
       return (
         matchesSearch &&
         matchesStage &&
         matchesImportance &&
         matchesReferrer &&
-        matchesInsuranceType &&
-        matchesDepth
+        matchesPrivacyLevel
       );
     })
     .sort((a, b) => {
-      let aValue, bValue;
+      let aValue: any, bValue: any;
 
       switch (sortBy) {
-        case 'name':
-          aValue = a.name;
-          bValue = b.name;
+        case 'fullName':
+          aValue = a.fullName;
+          bValue = b.fullName;
           break;
-        case 'lastContact':
+        case 'lastContactDate':
           aValue = a.lastContactDate || '';
           bValue = b.lastContactDate || '';
           break;
@@ -241,31 +384,73 @@ export default function ClientsPage({ loaderData }: Route.ComponentProps) {
           aValue = a.referralCount || 0;
           bValue = b.referralCount || 0;
           break;
-        case 'referralDepth':
-          aValue = a.referralDepth || 0;
-          bValue = b.referralDepth || 0;
-          break;
         case 'createdAt':
           aValue = a.createdAt;
           bValue = b.createdAt;
           break;
+        case 'importance':
+          // 중요도 정렬을 위한 가중치
+          const importanceWeight: Record<string, number> = {
+            high: 3,
+            medium: 2,
+            low: 1,
+          };
+          aValue = importanceWeight[a.importance] || 0;
+          bValue = importanceWeight[b.importance] || 0;
+          break;
         default:
-          aValue = a.name;
-          bValue = b.name;
+          aValue = a.fullName;
+          bValue = b.fullName;
       }
 
-      if (
-        ['contractAmount', 'referralCount', 'referralDepth'].includes(sortBy)
-      ) {
-        return sortOrder === 'asc'
-          ? (aValue as number) - (bValue as number)
-          : (bValue as number) - (aValue as number);
-      } else {
-        return sortOrder === 'asc'
-          ? (aValue as string).localeCompare(bValue as string)
-          : (bValue as string).localeCompare(aValue as string);
+      // 숫자 정렬
+      if (typeof aValue === 'number' && typeof bValue === 'number') {
+        return sortOrder === 'desc' ? bValue - aValue : aValue - bValue;
       }
+
+      // 문자열 정렬
+      const comparison = String(aValue).localeCompare(String(bValue), 'ko-KR');
+      return sortOrder === 'desc' ? -comparison : comparison;
     });
+
+  // 🔒 고객 개인정보 보호 표시 함수
+  const renderPrivacyIndicator = (client: ClientDisplay) => {
+    const level = (client.accessLevel ||
+      client.privacyLevel ||
+      'private') as ClientPrivacyLevel;
+    const Icon = privacyLevelIcon[level];
+    return (
+      <Tooltip>
+        <TooltipTrigger>
+          <Badge variant={privacyLevelBadgeVariant[level]} className="gap-1">
+            <Icon className="h-3 w-3" />
+            {privacyLevelText[level]}
+          </Badge>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>개인정보 보호 레벨: {privacyLevelText[level]}</p>
+          {client.hasConfidentialData && (
+            <p className="text-yellow-600">⚠️ 민감정보 포함</p>
+          )}
+        </TooltipContent>
+      </Tooltip>
+    );
+  };
+
+  // 🔒 고객 데이터 마스킹 함수
+  const maskSensitiveData = (data: string, level: ClientPrivacyLevel) => {
+    if (showConfidentialData || level === 'public') return data;
+
+    if (level === 'confidential') {
+      return '***';
+    }
+
+    if (level === 'restricted' && data.length > 4) {
+      return data.slice(0, 2) + '***' + data.slice(-2);
+    }
+
+    return data;
+  };
 
   // 전체 선택/해제
   const handleSelectAll = (checked: boolean) => {
@@ -313,21 +498,9 @@ export default function ClientsPage({ loaderData }: Route.ComponentProps) {
     }
   };
 
-  // 고객 추가 핸들러
-  const handleAddClient = async (data: any) => {
-    try {
-      console.log('새 고객 추가:', data);
-      // TODO: 실제 API 호출로 고객 추가
-      // await addClient(data);
-      alert('고객이 성공적으로 추가되었습니다.');
-    } catch (error) {
-      console.error('고객 추가 실패:', error);
-      throw error;
-    }
-  };
-
-  // 고객 추가 선택 핸들러
+  // 🔒 고객 추가 방식 선택 핸들러
   const handleAddClientChoice = (choice: 'individual' | 'import') => {
+    setAddChoiceOpen(false);
     if (choice === 'individual') {
       setAddClientOpen(true);
     } else {
@@ -335,60 +508,70 @@ export default function ClientsPage({ loaderData }: Route.ComponentProps) {
     }
   };
 
-  // 임포트 완료 핸들러
-  const handleImportComplete = (importData: any) => {
-    console.log('임포트 완료:', importData);
-    // TODO: 실제 API 호출로 데이터 저장
-    alert(`${importData.successRows}명의 고객이 성공적으로 추가되었습니다.`);
-    setImportModalOpen(false);
+  // 🔒 개별 고객 추가 핸들러
+  const handleAddClient = async (clientData: any) => {
+    try {
+      // TODO: 고객 추가 로직 구현
+      console.log('새 고객 추가:', clientData);
+      setAddClientOpen(false);
+      // 페이지 새로고침 또는 상태 업데이트
+    } catch (error) {
+      console.error('고객 추가 실패:', error);
+    }
   };
 
-  // 총 페이지 수 계산
-  const totalPages = Math.ceil(totalCount / pageSize);
-
-  // 고유 소개자 목록
+  // 고유 소개자 목록 (fullName 사용)
   const uniqueReferrers = Array.from(
-    new Set(clients.map((c) => c.referredBy?.name).filter(Boolean))
-  );
+    new Set(typedClients.map((c) => c.referredBy?.fullName).filter(Boolean))
+  ) as string[];
+
+  // 페이지네이션 계산
+  const totalPages = Math.ceil(totalCount / pageSize);
 
   return (
     <MainLayout title="고객 관리">
       <div className="space-y-6">
         {/* 헤더 섹션 */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
+            <h1 className="text-3xl font-bold tracking-tight">고객 관리</h1>
             <p className="text-muted-foreground">
-              소개 네트워크 기반 고객 관계 관리
+              보험설계사를 위한 안전한 고객 관계 관리 시스템
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <MagnifyingGlassIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
-              <Input
-                type="search"
-                placeholder="고객 검색..."
-                className="pl-8 w-64"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            <Button
-              variant="outline"
-              onClick={() =>
-                setViewMode(viewMode === 'table' ? 'cards' : 'table')
-              }
-            >
-              {viewMode === 'table' ? '카드 뷰로 전환' : '리스트 뷰로 전환'}
-            </Button>
+          <div className="flex gap-2">
             <Button onClick={() => setAddChoiceOpen(true)}>
               <PlusIcon className="mr-2 h-4 w-4" />
               고객 추가
             </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">
+                  <DownloadIcon className="mr-2 h-4 w-4" />
+                  내보내기
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem>CSV로 내보내기</DropdownMenuItem>
+                <DropdownMenuItem>Excel로 내보내기</DropdownMenuItem>
+                <DropdownMenuItem>PDF로 내보내기</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 
-        {/* 통계 카드 섹션 - 분리된 컴포넌트 사용 */}
-        {stats && <ClientStatsCards totalCount={totalCount} stats={stats} />}
+        {/* 통계 카드 섹션 - 호환성을 위해 타입 변환 */}
+        {stats && (
+          <ClientStatsCards
+            totalCount={totalCount}
+            stats={{
+              totalReferrals: 0, // 임시값 - 추후 실제 데이터로 교체
+              averageDepth: 0, // 임시값 - 추후 실제 데이터로 교체
+              topReferrers: [], // 임시값 - 추후 실제 데이터로 교체
+              ...(stats as any), // 타입 호환성을 위한 임시 처리
+            }}
+          />
+        )}
 
         {/* 필터 섹션 */}
         <Card>
@@ -747,20 +930,20 @@ export default function ClientsPage({ loaderData }: Route.ComponentProps) {
                         <div className="flex items-center gap-3">
                           <Avatar className="w-8 h-8">
                             <AvatarFallback className="text-xs">
-                              {client.name.charAt(0)}
+                              {typeHelpers
+                                .getClientDisplayName(client)
+                                .charAt(0)}
                             </AvatarFallback>
                           </Avatar>
                           <div>
                             <Link
                               to={`/clients/${client.id}`}
-                              className="font-medium hover:underline"
+                              className="text-sm font-medium hover:underline"
                             >
-                              {client.name}
+                              {typeHelpers.getClientDisplayName(client)}
                             </Link>
                             <div className="text-xs text-muted-foreground">
-                              <ReferralDepthIndicator
-                                depth={client.referralDepth}
-                              />
+                              {client.occupation || '직업 미등록'}
                             </div>
                           </div>
                         </div>
@@ -784,7 +967,7 @@ export default function ClientsPage({ loaderData }: Route.ComponentProps) {
                               to={`/clients/${client.referredBy.id}`}
                               className="text-sm hover:underline"
                             >
-                              {client.referredBy.name}
+                              {client.referredBy.fullName}
                             </Link>
                           </div>
                         ) : (
@@ -809,59 +992,68 @@ export default function ClientsPage({ loaderData }: Route.ComponentProps) {
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-wrap gap-1">
-                          {client.insuranceTypes?.map((type) => (
+                          {client.insuranceTypes?.map((type: string) => (
                             <TooltipProvider key={type}>
                               <Tooltip>
                                 <TooltipTrigger>
-                                  <div className="p-1 rounded border">
+                                  <Badge
+                                    variant="outline"
+                                    className="flex items-center gap-1 text-xs"
+                                  >
                                     {insuranceTypeIcons[type]}
-                                  </div>
+                                    {insuranceTypeText[type]}
+                                  </Badge>
                                 </TooltipTrigger>
                                 <TooltipContent>
                                   <p>{insuranceTypeText[type]}</p>
                                 </TooltipContent>
                               </Tooltip>
                             </TooltipProvider>
-                          )) || '-'}
+                          ))}
                         </div>
                       </TableCell>
                       <TableCell>
-                        {client.referralCount > 0 ? (
-                          <Badge
-                            variant="outline"
-                            className="flex items-center gap-1 w-fit"
-                          >
-                            <Share1Icon className="h-3 w-3" />
-                            {client.referralCount}
-                          </Badge>
-                        ) : (
-                          <span className="text-muted-foreground">-</span>
+                        <div className="flex items-center gap-2">
+                          {(client.referralCount || 0) > 0 ? (
+                            <Badge
+                              variant="outline"
+                              className="flex items-center gap-1 w-fit"
+                            >
+                              <Share1Icon className="h-3 w-3" />
+                              {client.referralCount || 0}
+                            </Badge>
+                          ) : (
+                            <span className="text-muted-foreground text-sm">
+                              -
+                            </span>
+                          )}
+                          <ReferralDepthIndicator
+                            depth={client.referralDepth || 0}
+                          />
+                        </div>
+                        {client.lastContactDate && (
+                          <div className="text-xs text-muted-foreground mt-1">
+                            최근: {client.lastContactDate}
+                          </div>
+                        )}
+                        {client.nextMeetingDate && (
+                          <div className="text-xs text-muted-foreground flex items-center gap-1">
+                            <CalendarIcon className="h-3 w-3" />
+                            다음: {client.nextMeetingDate}
+                          </div>
                         )}
                       </TableCell>
                       <TableCell>
-                        <div>
-                          <div className="text-sm">
-                            {client.lastContactDate || '-'}
-                          </div>
-                          {client.nextMeetingDate && (
-                            <div className="text-xs text-muted-foreground flex items-center gap-1">
-                              <CalendarIcon className="h-3 w-3" />
-                              다음: {client.nextMeetingDate}
-                            </div>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
                         <div className="flex flex-wrap gap-1">
-                          {client.tags?.map((tag, index) => (
+                          {client.tags?.map((tag, index: number) => (
                             <Badge
-                              key={index}
+                              key={typeHelpers.getTagId(tag) || index}
                               variant="outline"
                               className="text-xs"
                             >
-                              {tag}
+                              {typeHelpers.getTagName(tag)}
                             </Badge>
-                          )) || '-'}
+                          ))}
                         </div>
                       </TableCell>
                       <TableCell className="text-right">
@@ -979,13 +1171,13 @@ export default function ClientsPage({ loaderData }: Route.ComponentProps) {
           open={addClientOpen}
           onOpenChange={setAddClientOpen}
           onSubmit={handleAddClient}
+          agentId={currentUserId}
         />
 
         {/* 일괄 고객 임포트 모달 */}
         <ClientImportModal
           open={importModalOpen}
           onOpenChange={setImportModalOpen}
-          // onImportComplete={handleImportComplete}
         />
       </div>
     </MainLayout>

@@ -30,36 +30,67 @@ import { Input } from '~/common/components/ui/input';
 import { Textarea } from '~/common/components/ui/textarea';
 import { Button } from '~/common/components/ui/button';
 import { Badge } from '~/common/components/ui/badge';
+import { Checkbox } from '~/common/components/ui/checkbox';
+import { Alert, AlertDescription } from '~/common/components/ui/alert';
 import { Separator } from '~/common/components/ui/separator';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '~/common/components/ui/tooltip';
 import {
   CheckIcon,
   Cross2Icon,
   CalendarIcon,
   TrashIcon,
   UploadIcon,
+  LockClosedIcon,
+  EyeClosedIcon,
+  ExclamationTriangleIcon,
+  PersonIcon,
 } from '@radix-ui/react-icons';
-import { insuranceTypeConfig } from './insurance-config';
+import {
+  secureInsuranceTypeConfig,
+  getInsuranceSecurityLevel,
+  requiresHealthInfo,
+  requiresFinancialInfo,
+  privacyLevelIcons,
+  privacyLevelColors,
+} from './insurance-config';
+import type { ClientPrivacyLevel } from '../types';
 
-// 보험 추가 폼 스키마
-const addInsuranceSchema = z.object({
+// 🔒 **보안 강화된 보험 추가 스키마**
+const secureInsuranceSchema = z.object({
   type: z.enum(['life', 'health', 'auto', 'prenatal', 'property', 'other']),
   premium: z.number().min(0).optional(),
   startDate: z.string().optional(),
   endDate: z.string().optional(),
-  status: z.enum(['active', 'reviewing', 'pending']).optional(),
-  notes: z.string().optional(),
+  status: z
+    .enum(['active', 'reviewing', 'pending', 'rejected', 'cancelled'])
+    .optional(),
+  notes: z.string().max(1000, '메모가 너무 깁니다').optional(),
 
-  // 자동차보험 특화 필드들
-  vehicleNumber: z.string().optional(),
-  ownerName: z.string().optional(),
+  // 🔒 보안 및 동의 관련 필드들
+  privacyLevel: z.enum(['public', 'restricted', 'private', 'confidential']),
+  dataProcessingConsent: z.boolean(),
+  healthInfoConsent: z.boolean().optional(),
+  financialInfoConsent: z.boolean().optional(),
+  medicalRecordsConsent: z.boolean().optional(),
+  isEncrypted: z.boolean(),
+  accessRestriction: z.enum(['agent', 'manager', 'admin']).optional(),
+
+  // 자동차보험 특화 필드들 (개인정보 포함)
+  vehicleNumber: z.string().max(20, '차량번호가 너무 깁니다').optional(),
+  ownerName: z.string().max(50, '소유자명이 너무 깁니다').optional(),
   vehicleType: z.string().optional(),
   manufacturer: z.string().optional(),
   model: z.string().optional(),
-  year: z.number().optional(),
+  year: z.number().min(1900).max(2030).optional(),
   engineType: z.string().optional(),
-  displacement: z.number().optional(),
+  displacement: z.number().min(0).optional(),
 
-  // 건강보험 특화 필드들
+  // 🔒 건강보험 특화 필드들 (최고 기밀)
   healthConditions: z.array(z.string()).optional(),
   previousSurgeries: z.array(z.string()).optional(),
   currentMedications: z.array(z.string()).optional(),
@@ -68,13 +99,31 @@ const addInsuranceSchema = z.object({
   drinkingStatus: z.enum(['never', 'occasionally', 'regularly']).optional(),
 });
 
-type AddInsuranceFormData = z.infer<typeof addInsuranceSchema>;
+type SecureInsuranceFormData = z.infer<typeof secureInsuranceSchema>;
+
+// 🔒 **보험 보안 감사 로그**
+interface InsuranceSecurityLog {
+  id: string;
+  timestamp: string;
+  action: string;
+  insuranceType: string;
+  clientId: string;
+  agentId: string;
+  privacyLevel: ClientPrivacyLevel;
+  sensitiveDataAccessed: boolean;
+  details: string;
+}
 
 interface AddInsuranceModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   clientId: string;
   onInsuranceAdded?: (insurance: any) => void;
+  // 🔒 보안 강화 props
+  enableSecurity?: boolean;
+  currentUserRole?: 'agent' | 'manager' | 'admin';
+  agentId?: string;
+  onSecurityAudit?: (log: InsuranceSecurityLog) => void;
 }
 
 export function AddInsuranceModal({
@@ -82,16 +131,40 @@ export function AddInsuranceModal({
   onOpenChange,
   clientId,
   onInsuranceAdded,
+  enableSecurity = false,
+  currentUserRole = 'agent',
+  agentId = '',
+  onSecurityAudit,
 }: AddInsuranceModalProps) {
   const [healthConditions, setHealthConditions] = useState<string[]>([]);
   const [healthConditionInput, setHealthConditionInput] = useState('');
   const [medications, setMedications] = useState<string[]>([]);
   const [medicationInput, setMedicationInput] = useState('');
 
-  const form = useForm<AddInsuranceFormData>({
-    resolver: zodResolver(addInsuranceSchema),
+  // 🔒 **보안 강화된 상태들**
+  const [showPrivacyWarning, setShowPrivacyWarning] = useState(false);
+  const [consentGiven, setConsentGiven] = useState({
+    dataProcessing: false,
+    healthInfo: false,
+    financialInfo: false,
+    medicalRecords: false,
+  });
+  const [encryptionEnabled, setEncryptionEnabled] = useState(true);
+  const [sensitiveDataWarnings, setSensitiveDataWarnings] = useState<string[]>(
+    []
+  );
+
+  const form = useForm<SecureInsuranceFormData>({
+    resolver: zodResolver(secureInsuranceSchema),
     defaultValues: {
       status: 'reviewing',
+      privacyLevel: 'restricted' as ClientPrivacyLevel,
+      dataProcessingConsent: false,
+      healthInfoConsent: false,
+      financialInfoConsent: false,
+      medicalRecordsConsent: false,
+      isEncrypted: true,
+      accessRestriction: currentUserRole,
       healthConditions: [],
       previousSurgeries: [],
       currentMedications: [],
@@ -100,6 +173,99 @@ export function AddInsuranceModal({
   });
 
   const watchedType = form.watch('type');
+
+  // 🔒 **보안 감사 로깅 함수**
+  const logSecurityAction = (
+    action: string,
+    details: string,
+    privacyLevel: ClientPrivacyLevel = 'restricted',
+    sensitiveDataAccessed: boolean = false
+  ) => {
+    if (!enableSecurity || !onSecurityAudit) return;
+
+    const log: InsuranceSecurityLog = {
+      id: `ins_audit_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      timestamp: new Date().toISOString(),
+      action,
+      insuranceType: watchedType || 'unknown',
+      clientId,
+      agentId,
+      privacyLevel,
+      sensitiveDataAccessed,
+      details,
+    };
+
+    onSecurityAudit(log);
+    console.log(`🔒 [보험보안] ${action}: ${details}`);
+  };
+
+  // 🔒 **보험 타입별 보안 레벨 적용**
+  const handleInsuranceTypeChange = (type: string) => {
+    const securityLevel = getInsuranceSecurityLevel(type);
+    const requiresHealth = requiresHealthInfo(type);
+    const requiresFinancial = requiresFinancialInfo(type);
+
+    form.setValue('privacyLevel', securityLevel);
+    form.setValue('healthInfoConsent', requiresHealth);
+    form.setValue('financialInfoConsent', requiresFinancial);
+
+    // 보안 경고 표시
+    if (securityLevel === 'confidential') {
+      setShowPrivacyWarning(true);
+      setSensitiveDataWarnings([
+        '이 보험은 최고 기밀 정보를 포함합니다',
+        '모든 데이터는 암호화됩니다',
+        '접근이 제한되며 감사 로그가 기록됩니다',
+      ]);
+    } else if (securityLevel === 'private') {
+      setSensitiveDataWarnings([
+        '개인정보가 포함된 보험입니다',
+        '적절한 보안 처리가 필요합니다',
+      ]);
+    } else {
+      setSensitiveDataWarnings([]);
+    }
+
+    logSecurityAction(
+      'INSURANCE_TYPE_SELECTED',
+      `보험 타입 선택: ${type} (보안레벨: ${securityLevel})`,
+      securityLevel
+    );
+  };
+
+  // 🔒 **민감한 건강정보 검증**
+  const validateHealthCondition = (
+    condition: string
+  ): { isValid: boolean; warning?: string } => {
+    const sensitiveConditions = [
+      '암',
+      'cancer',
+      '정신질환',
+      'depression',
+      '심장병',
+      'diabetes',
+      '당뇨',
+      'HIV',
+      'AIDS',
+      '간염',
+      'hepatitis',
+      '결핵',
+      'tuberculosis',
+    ];
+
+    const isSensitive = sensitiveConditions.some((keyword) =>
+      condition.toLowerCase().includes(keyword.toLowerCase())
+    );
+
+    if (isSensitive) {
+      return {
+        isValid: true,
+        warning: '민감한 건강정보가 감지되었습니다. 최고 보안으로 처리됩니다.',
+      };
+    }
+
+    return { isValid: true };
+  };
 
   // 건강 상태 추가
   const addHealthCondition = () => {
@@ -133,7 +299,7 @@ export function AddInsuranceModal({
     setMedications(medications.filter((m) => m !== medication));
   };
 
-  const onSubmit = (data: AddInsuranceFormData) => {
+  const onSubmit = (data: SecureInsuranceFormData) => {
     const newInsurance = {
       id: Date.now().toString(),
       type: data.type,
@@ -155,7 +321,7 @@ export function AddInsuranceModal({
     setMedications([]);
   };
 
-  const getInsuranceDetails = (data: AddInsuranceFormData) => {
+  const getInsuranceDetails = (data: SecureInsuranceFormData) => {
     switch (data.type) {
       case 'auto':
         return {
@@ -209,7 +375,7 @@ export function AddInsuranceModal({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {Object.entries(insuranceTypeConfig).map(
+                        {Object.entries(secureInsuranceTypeConfig).map(
                           ([key, config]) => (
                             <SelectItem key={key} value={key}>
                               <div className="flex items-center gap-2">
@@ -310,7 +476,7 @@ export function AddInsuranceModal({
                 <Separator />
                 <div>
                   <h4 className="text-sm font-medium mb-4">
-                    {insuranceTypeConfig[watchedType]?.label} 상세 정보
+                    {secureInsuranceTypeConfig[watchedType]?.label} 상세 정보
                   </h4>
 
                   {/* 자동차보험 상세 정보 */}
