@@ -14,7 +14,7 @@ export {
   type NewPipelineStage,
   type UserRole,
   type Importance,
-} from '~/lib/supabase-schema';
+} from '~/lib/schema';
 
 import {
   pgTable,
@@ -34,7 +34,7 @@ import {
   teams,
   clients,
   pipelineStages,
-} from '~/lib/supabase-schema';
+} from '~/lib/schema';
 
 // Pipeline 특화 Enum
 export const stageActionTypeEnum = pgEnum('stage_action_type', [

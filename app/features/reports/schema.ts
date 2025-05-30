@@ -18,7 +18,7 @@ export {
   type Importance,
   type MeetingStatus,
   type ReferralStatus,
-} from '~/lib/supabase-schema';
+} from '~/lib/schema';
 
 import {
   pgTable,
@@ -40,7 +40,7 @@ import {
   meetings,
   referrals,
   pipelineStages,
-} from '~/lib/supabase-schema';
+} from '~/lib/schema';
 
 // Reports 특화 Enum
 export const reportTypeEnum = pgEnum('report_type', [

@@ -13,7 +13,7 @@ export {
   type UserRole,
   type Importance,
   type ReferralStatus,
-} from '~/lib/supabase-schema';
+} from '~/lib/schema';
 
 import {
   pgTable,
@@ -28,7 +28,7 @@ import {
   decimal,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
-import { profiles, teams, clients, referrals } from '~/lib/supabase-schema';
+import { profiles, teams, clients, referrals } from '~/lib/schema';
 
 // Network 특화 Enum
 export const networkNodeTypeEnum = pgEnum('network_node_type', [

@@ -1,8 +1,8 @@
+import { meetings, clients, profiles } from '~/lib/schema';
 import { db } from '~/lib/db';
-import { meetings, clients, profiles } from '~/lib/supabase-schema';
 import { meetingChecklists, meetingNotes } from '../schema';
 import { eq, and, gte, lte, desc, asc } from 'drizzle-orm';
-import type { Meeting, Client, MeetingStatus } from '~/lib/supabase-schema';
+import type { Meeting, Client, MeetingStatus } from '~/lib/schema';
 import type { MeetingChecklist, MeetingNote } from '../schema';
 
 // Calendar 페이지용 Meeting 타입 (컴포넌트와 호환)

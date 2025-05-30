@@ -1,6 +1,6 @@
 import { type MetaFunction } from 'react-router';
 import { LandingLayout } from '~/common/layouts/landing-layout';
-import { ScrollProgress } from '~/common/components/ui/scroll-progress';
+import { ScrollProgress } from '~/common/components/magicui/scroll-progress';
 import { FloatingNavbar } from '~/common/components/ui/floating-navbar';
 import {
   HeroSection,
@@ -17,10 +17,23 @@ import {
   type PublicStats,
   type Testimonial,
 } from '~/lib/public-data';
-import type { Route } from './+types/landing-page';
+
+// Loader 함수의 인자 타입
+interface LoaderArgs {
+  request: Request;
+}
+
+// 컴포넌트 Props 타입
+interface LandingPageProps {
+  loaderData: {
+    stats: PublicStats;
+    testimonials: Testimonial[];
+    faqs: any[];
+  };
+}
 
 // Loader 함수 - 실제 데이터베이스에서 데이터 가져오기
-export async function loader({ request }: Route.LoaderArgs) {
+export async function loader({ request }: LoaderArgs) {
   try {
     const [stats, testimonials, faqs] = await Promise.all([
       getPublicStats(),
@@ -78,7 +91,7 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export default function LandingPage({ loaderData }: Route.ComponentProps) {
+export default function LandingPage({ loaderData }: LandingPageProps) {
   const { stats, testimonials, faqs } = loaderData;
 
   const navItems = [

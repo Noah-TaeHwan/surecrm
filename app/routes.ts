@@ -2,15 +2,17 @@ import { type RouteConfig, index, route } from '@react-router/dev/routes';
 
 export default [
   // 메인 페이지 (인증 상태에 따른 리다이렉트)
-  index('routes/_index.tsx'),
+  index('common/pages/_index.tsx'),
 
   // API 라우트
-  route('api/notifications', 'routes/api+/notifications.tsx'),
-  route('api/validate-invitation', 'routes/api+/validate-invitation.ts'),
-  route('api/resend-verification', 'routes/api+/resend-verification.ts'),
-  route('api/auth-webhook', 'routes/api+/auth-webhook.ts'),
-  route('api/cleanup-user', 'routes/api+/cleanup-user.ts'),
-  route('api/check-email', 'routes/api+/check-email.ts'),
+  route('api/notifications', 'api/notifications.tsx'),
+  route('api/validate-invitation', 'api/validate-invitation.ts'),
+  route('api/resend-verification', 'api/resend-verification.ts'),
+  route('api/auth-webhook', 'api/auth-webhook.ts'),
+  route('api/cleanup-user', 'api/cleanup-user.ts'),
+  route('api/check-email', 'api/check-email.ts'),
+  route('api/seed-invitations', 'api/seed-invitations.ts'),
+  route('api/user.settings', 'api/user.settings.ts'),
 
   // 대시보드
   route('dashboard', 'features/dashboard/pages/dashboard-page.tsx'),
@@ -18,7 +20,7 @@ export default [
   // 인증 관련 페이지
   route('auth/login', 'common/pages/auth/login-page.tsx'),
   route('auth/signup', 'common/pages/auth/signup-page.tsx'),
-  route('auth/logout', 'routes/auth.logout.tsx'),
+  route('auth/logout', 'common/pages/auth/auth.logout.tsx'),
   route('auth/forgot-password', 'common/pages/auth/forgot-password-page.tsx'),
   route('auth/otp-verification', 'common/pages/auth/otp-verification-page.tsx'),
   route(
@@ -53,6 +55,9 @@ export default [
   route('reports', 'features/reports/pages/reports-page.tsx'),
   route('settings', 'features/settings/pages/settings-page.tsx'),
   route('notifications', 'features/notifications/pages/notifications-page.tsx'),
+
+  // 관리자 기능
+  route('admin/invitations', 'features/admin/pages/admin-invitations-page.tsx'),
 
   // .well-known 경로 처리 (Chrome DevTools 등)
   route('.well-known/*', 'common/pages/well-known-fallback.tsx'),

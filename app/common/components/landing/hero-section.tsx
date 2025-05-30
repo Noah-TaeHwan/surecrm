@@ -2,10 +2,10 @@ import { Button } from '~/common/components/ui/button';
 import { Badge } from '~/common/components/ui/badge';
 import { Link } from 'react-router';
 import { ArrowRight } from 'lucide-react';
-import { WarpBackground } from '~/common/components/ui/warp-background';
-import { MagicCard } from '~/common/components/ui/magic-card';
-import { TextReveal } from '~/common/components/ui/text-reveal';
-import { AnimatedShinyText } from '~/common/components/ui/animated-shiny-text';
+import { WarpBackground } from '~/common/components/magicui/warp-background';
+import { MagicCard } from '~/common/components/magicui/magic-card';
+import { TextReveal } from '~/common/components/magicui/text-reveal';
+import { AnimatedShinyText } from '~/common/components/magicui/animated-shiny-text';
 
 export function HeroSection() {
   return (

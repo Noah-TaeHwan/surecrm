@@ -3,8 +3,8 @@ import { defineConfig } from 'drizzle-kit';
 export default defineConfig({
   dialect: 'postgresql',
   schema: [
-    './app/lib/supabase-schema.ts', // 공통 스키마 (auth, profiles, 기본 테이블들)
-    './app/common/schema.ts', // 공개 페이지용 스키마 (testimonials, faqs, etc.)
+    './app/lib/schema/core.ts', // 핵심 공유 테이블들
+    './app/lib/schema/public.ts', // 공개 페이지용 테이블들
     './app/features/*/schema.ts', // 각 feature별 특화 스키마들
   ],
   out: './supabase/migrations',

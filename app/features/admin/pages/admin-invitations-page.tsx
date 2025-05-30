@@ -1,3 +1,4 @@
+import type { Route } from './+types/admin-invitations-page';
 import { requireAdmin } from '~/lib/auth-middleware';
 import { createInvitationsForUser } from '~/lib/invitation-utils';
 import { db } from '~/lib/db';
@@ -14,7 +15,7 @@ import {
 import { Badge } from '~/common/components/ui/badge';
 import { Form } from 'react-router';
 
-export async function loader({ request }: any) {
+export async function loader({ request }: Route.LoaderArgs) {
   const user = await requireAdmin(request);
 
   // 모든 초대장 조회
@@ -51,7 +52,7 @@ export async function loader({ request }: any) {
   };
 }
 
-export async function action({ request }: any) {
+export async function action({ request }: Route.ActionArgs) {
   const user = await requireAdmin(request);
   const formData = await request.formData();
   const actionType = formData.get('action');
@@ -85,7 +86,17 @@ export async function action({ request }: any) {
   return { success: false, error: '잘못된 요청입니다.' };
 }
 
-export default function AdminInvitations({ loaderData, actionData }: any) {
+export function meta({ data }: Route.MetaArgs) {
+  return [
+    { title: '관리자 - 초대장 관리 | SureCRM' },
+    { name: 'description', content: '시스템 초대장을 관리합니다.' },
+  ];
+}
+
+export default function AdminInvitationsPage({
+  loaderData,
+  actionData,
+}: Route.ComponentProps) {
   const { user, invitations, stats } = loaderData;
 
   const getStatusBadge = (status: string) => {

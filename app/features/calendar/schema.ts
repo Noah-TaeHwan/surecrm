@@ -14,7 +14,7 @@ export {
   type MeetingType,
   type MeetingStatus,
   type UserRole,
-} from '~/lib/supabase-schema';
+} from '~/lib/schema';
 
 import {
   pgTable,
@@ -31,10 +31,9 @@ import {
   numeric,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
-import { profiles, clients, meetings } from '~/lib/supabase-schema';
-import { commonProfiles, commonTeams } from '~/common/schema';
+import { profiles, clients, meetings, teams } from '~/lib/schema';
 
-// 🗓️ Calendar Enums - 캘린더 관련 열거형
+// 🗓️ Calendar Enums - 캘린더 관련 열거형 (core에 없는 것들만)
 export const calendarView = pgEnum('calendar_view', [
   'month',
   'week',
@@ -377,7 +376,7 @@ export const featuresCalendarSettings = pgTable(
   (table) => [
     foreignKey({
       columns: [table.agentId],
-      foreignColumns: [commonProfiles.id],
+      foreignColumns: [profiles.id],
       name: 'features_calendar_settings_agent_id_common_profiles_id_fk',
     }),
     unique('features_calendar_settings_agent_id_unique').on(table.agentId),
@@ -416,7 +415,7 @@ export const featuresCalendarMeetings = pgTable(
   (table) => [
     foreignKey({
       columns: [table.agentId],
-      foreignColumns: [commonProfiles.id],
+      foreignColumns: [profiles.id],
       name: 'features_calendar_meetings_agent_id_common_profiles_id_fk',
     }),
     // clientId는 clients 테이블과 연결되므로 나중에 추가
@@ -445,7 +444,7 @@ export const featuresCalendarMeetingAttendees = pgTable(
   (table) => [
     foreignKey({
       columns: [table.agentId],
-      foreignColumns: [commonProfiles.id],
+      foreignColumns: [profiles.id],
       name: 'features_calendar_meeting_attendees_agent_id_common_profiles_id_fk',
     }),
     foreignKey({
@@ -476,7 +475,7 @@ export const featuresCalendarMeetingNotes = pgTable(
   (table) => [
     foreignKey({
       columns: [table.agentId],
-      foreignColumns: [commonProfiles.id],
+      foreignColumns: [profiles.id],
       name: 'features_calendar_meeting_notes_agent_id_common_profiles_id_fk',
     }),
     foreignKey({
@@ -535,7 +534,7 @@ export const featuresCalendarMeetingTemplates = pgTable(
   (table) => [
     foreignKey({
       columns: [table.agentId],
-      foreignColumns: [commonProfiles.id],
+      foreignColumns: [profiles.id],
       name: 'features_calendar_meeting_templates_agent_id_common_profiles_id_fk',
     }),
   ]
@@ -625,12 +624,12 @@ export const featuresCalendarEvents = pgTable(
   (table) => [
     foreignKey({
       columns: [table.agentId],
-      foreignColumns: [commonProfiles.id],
+      foreignColumns: [profiles.id],
       name: 'features_calendar_events_agent_id_common_profiles_id_fk',
     }),
     foreignKey({
       columns: [table.teamId],
-      foreignColumns: [commonTeams.id],
+      foreignColumns: [teams.id],
       name: 'features_calendar_events_team_id_common_teams_id_fk',
     }),
   ]
@@ -656,12 +655,12 @@ export const featuresCalendarSharing = pgTable(
   (table) => [
     foreignKey({
       columns: [table.ownerId],
-      foreignColumns: [commonProfiles.id],
+      foreignColumns: [profiles.id],
       name: 'features_calendar_sharing_owner_id_common_profiles_id_fk',
     }),
     foreignKey({
       columns: [table.sharedWithId],
-      foreignColumns: [commonProfiles.id],
+      foreignColumns: [profiles.id],
       name: 'features_calendar_sharing_shared_with_id_common_profiles_id_fk',
     }),
     unique('features_calendar_sharing_owner_shared_unique').on(

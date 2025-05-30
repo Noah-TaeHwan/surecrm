@@ -28,7 +28,7 @@ export {
   type MeetingType,
   type InsuranceType,
   type ReferralStatus,
-} from '~/lib/supabase-schema';
+} from '~/lib/schema';
 
 import {
   pgTable,
@@ -48,7 +48,7 @@ import {
   teams,
   clients,
   pipelineStages,
-} from '~/lib/supabase-schema';
+} from '~/lib/schema';
 
 // Dashboard 특화 Enum
 export const goalTypeEnum = pgEnum('goal_type', [

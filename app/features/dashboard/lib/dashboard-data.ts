@@ -1,7 +1,7 @@
 import { db } from '~/lib/db';
 import { eq, desc, asc, count, sql, and, gte, lte } from 'drizzle-orm';
 import { clients, teams, referrals } from '~/lib/db-schema';
-import { profiles } from '~/lib/supabase-schema';
+import { profiles } from '~/lib/schema';
 import {
   meetings,
   meetingChecklists,

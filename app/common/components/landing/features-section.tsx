@@ -1,7 +1,8 @@
+import { Button } from '~/common/components/ui/button';
 import { Badge } from '~/common/components/ui/badge';
-import { BlurFade } from '~/common/components/ui/blur-fade';
-import { BorderBeam } from '~/common/components/ui/border-beam';
-import { AnimatedGradientText } from '~/common/components/ui/animated-gradient-text';
+import { BlurFade } from '~/common/components/magicui/blur-fade';
+import { BorderBeam } from '~/common/components/magicui/border-beam';
+import { AnimatedGradientText } from '~/common/components/magicui/animated-gradient-text';
 import { FlickeringGrid } from '~/common/components/magicui/flickering-grid';
 import {
   Shield,

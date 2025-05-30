@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { db } from './db';
-import { profiles, invitations } from './supabase-schema';
+import { profiles, invitations } from './schema';
 import { eq } from 'drizzle-orm';
 import { createInvitationsForUser } from './invitation-utils';
 import { getUserId } from './session';

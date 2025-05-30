@@ -7,7 +7,7 @@ export {
   type Profile,
   type Team,
   type UserRole,
-} from '~/lib/supabase-schema';
+} from '~/lib/schema';
 
 import {
   pgTable,
@@ -20,7 +20,7 @@ import {
   jsonb,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
-import { profiles, teams } from '~/lib/supabase-schema';
+import { profiles, teams } from '~/lib/schema';
 
 // Settings 특화 Enum
 export const settingCategoryEnum = pgEnum('setting_category', [

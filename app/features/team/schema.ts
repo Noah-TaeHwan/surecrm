@@ -11,7 +11,7 @@ export {
   type Invitation,
   type UserRole,
   type InvitationStatus,
-} from '~/lib/supabase-schema';
+} from '~/lib/schema';
 
 import {
   pgTable,
@@ -25,7 +25,7 @@ import {
   decimal,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
-import { profiles, teams, invitations, type Team } from '~/lib/supabase-schema';
+import { profiles, teams, invitations, type Team } from '~/lib/schema';
 
 // Team 특화 Enum
 export const memberRoleEnum = pgEnum('member_role', [

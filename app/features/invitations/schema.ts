@@ -11,7 +11,7 @@ export {
   type NewInvitation,
   type UserRole,
   type InvitationStatus,
-} from '~/lib/supabase-schema';
+} from '~/lib/schema';
 
 import {
   pgTable,
@@ -30,7 +30,7 @@ import {
   teams,
   invitations,
   type InvitationStatus,
-} from '~/lib/supabase-schema';
+} from '~/lib/schema';
 
 // Invitations 특화 Enum
 export const invitationTypeEnum = pgEnum('invitation_type', [

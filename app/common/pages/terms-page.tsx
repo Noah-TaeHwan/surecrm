@@ -26,7 +26,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     return {
       terms: termsData,
       privacy: privacyData,
-      lastUpdated: termsData.lastUpdated.toLocaleDateString('ko-KR'),
+      lastUpdated: new Date(termsData.lastUpdated).toLocaleDateString('ko-KR'),
       version: termsData.version,
     };
   } catch (error) {

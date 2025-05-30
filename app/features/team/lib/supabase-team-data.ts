@@ -3,11 +3,11 @@ import {
   profiles,
   teams,
   invitations,
-  clients,
   type Profile,
   type Team,
   type Invitation,
 } from '../schema';
+import { clients } from '~/lib/schema';
 import { eq, and, count, sql } from 'drizzle-orm';
 
 // 팀 멤버 인터페이스

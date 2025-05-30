@@ -1,7 +1,7 @@
 import { Badge } from '~/common/components/ui/badge';
-import { BlurFade } from '~/common/components/ui/blur-fade';
-import { DotPattern } from '~/common/components/ui/dot-pattern';
-import { SparklesText } from '~/common/components/ui/sparkles-text';
+import { BlurFade } from '~/common/components/magicui/blur-fade';
+import { DotPattern } from '~/common/components/magicui/dot-pattern';
+import { SparklesText } from '~/common/components/magicui/sparkles-text';
 import { FlickeringGrid } from '~/common/components/magicui/flickering-grid';
 import { AnimatedGridPattern } from '~/common/components/magicui/animated-grid-pattern';
 import {

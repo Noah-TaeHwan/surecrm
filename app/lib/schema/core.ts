@@ -92,7 +92,7 @@ export const invitationStatusEnum = pgEnum('invitation_status', [
 
 export const themeEnum = pgEnum('theme', ['light', 'dark']);
 
-// Public 스키마 테이블들 (우리가 관리)
+// ===== 핵심 공유 테이블들 =====
 
 // Profiles 테이블 (auth.users 확장)
 export const profiles = pgTable('profiles', {
@@ -317,7 +317,8 @@ export const documents = pgTable('documents', {
     .notNull(),
 });
 
-// Relations 정의
+// ===== Relations 정의 =====
+
 export const profilesRelations = relations(profiles, ({ many, one }) => ({
   clients: many(clients, { relationName: 'agent_clients' }),
   meetings: many(meetings, { relationName: 'agent_meetings' }),
@@ -484,7 +485,8 @@ export const documentsRelations = relations(documents, ({ one }) => ({
   }),
 }));
 
-// 타입 추론
+// ===== 타입 추론 =====
+
 export type AuthUser = typeof authUsers.$inferSelect;
 export type Profile = typeof profiles.$inferSelect;
 export type NewProfile = typeof profiles.$inferInsert;
@@ -517,49 +519,3 @@ export type MeetingStatus = (typeof meetingStatusEnum.enumValues)[number];
 export type ReferralStatus = (typeof referralStatusEnum.enumValues)[number];
 export type DocumentType = (typeof documentTypeEnum.enumValues)[number];
 export type InvitationStatus = (typeof invitationStatusEnum.enumValues)[number];
-
-// Supabase Auth 연동을 위한 트리거 함수 (SQL)
-export const authTriggerSQL = `
--- 새 사용자가 auth.users에 생성될 때 profiles 테이블에 자동으로 레코드 생성
-CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS TRIGGER AS $$
-BEGIN
-  INSERT INTO public.profiles (id, full_name, role)
-  VALUES (
-    NEW.id,
-    COALESCE(NEW.raw_user_meta_data->>'full_name', NEW.email),
-    'agent'
-  );
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-
--- 트리거 생성
-CREATE OR REPLACE TRIGGER on_auth_user_created
-  AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
-
--- RLS 정책 설정
-ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.clients ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.client_details ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.meetings ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.documents ENABLE ROW LEVEL SECURITY;
-
--- 프로필 접근 정책
-CREATE POLICY "Users can view own profile" ON public.profiles
-  FOR SELECT USING (auth.uid() = id);
-
-CREATE POLICY "Users can update own profile" ON public.profiles
-  FOR UPDATE USING (auth.uid() = id);
-
--- 클라이언트 접근 정책
-CREATE POLICY "Users can view own clients" ON public.clients
-  FOR SELECT USING (auth.uid() = agent_id);
-
-CREATE POLICY "Users can insert own clients" ON public.clients
-  FOR INSERT WITH CHECK (auth.uid() = agent_id);
-
-CREATE POLICY "Users can update own clients" ON public.clients
-  FOR UPDATE USING (auth.uid() = agent_id);
-`;

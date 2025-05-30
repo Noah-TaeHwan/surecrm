@@ -15,7 +15,7 @@ export {
   type UserRole,
   type Importance,
   type ReferralStatus,
-} from '~/lib/supabase-schema';
+} from '~/lib/schema';
 
 import {
   pgTable,
@@ -36,7 +36,7 @@ import {
   clients,
   referrals,
   type Client,
-} from '~/lib/supabase-schema';
+} from '~/lib/schema';
 
 // Influencers 특화 Enum
 export const gratitudeTypeEnum = pgEnum('gratitude_type', [

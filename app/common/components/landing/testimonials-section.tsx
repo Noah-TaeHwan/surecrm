@@ -1,8 +1,8 @@
 import { Badge } from '~/common/components/ui/badge';
-import { BlurFade } from '~/common/components/ui/blur-fade';
-import { DotPattern } from '~/common/components/ui/dot-pattern';
-import { AnimatedGradientText } from '~/common/components/ui/animated-gradient-text';
-import { MagicCard } from '~/common/components/ui/magic-card';
+import { BlurFade } from '~/common/components/magicui/blur-fade';
+import { DotPattern } from '~/common/components/magicui/dot-pattern';
+import { AnimatedGradientText } from '~/common/components/magicui/animated-gradient-text';
+import { MagicCard } from '~/common/components/magicui/magic-card';
 import { Avatar, AvatarFallback } from '~/common/components/ui/avatar';
 import type { PublicStats, Testimonial } from '~/lib/public-data';
 

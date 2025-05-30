@@ -1,5 +1,5 @@
 import { db } from '~/lib/db';
-import { invitations, profiles } from '~/lib/supabase-schema';
+import { invitations, profiles } from '~/lib/schema';
 
 export async function action({ request }: { request: Request }) {
   try {

@@ -2,8 +2,8 @@
 
 import { Link } from 'react-router';
 import { Card } from '~/common/components/ui/card';
-import { BorderBeam } from '~/common/components/ui/border-beam';
-import { DotPattern } from '~/common/components/ui/dot-pattern';
+import { BorderBeam } from '~/common/components/magicui/border-beam';
+import { DotPattern } from '~/common/components/magicui/dot-pattern';
 import { FlickeringGrid } from '~/common/components/magicui/flickering-grid';
 import { AnimatedGridPattern } from '~/common/components/magicui/animated-grid-pattern';
 import { cn } from '~/lib/utils';

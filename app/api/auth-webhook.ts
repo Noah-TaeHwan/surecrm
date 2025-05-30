@@ -1,5 +1,5 @@
 import { db } from '~/lib/db';
-import { profiles, invitations } from '~/lib/supabase-schema';
+import { profiles, invitations } from '~/lib/schema';
 import { eq } from 'drizzle-orm';
 import { createInvitationsForUser } from '~/lib/invitation-utils';
 

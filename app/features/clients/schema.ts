@@ -6,9 +6,10 @@ export {
   clients,
   clientDetails,
   insuranceInfo,
-  referrals,
   documents,
   pipelineStages,
+  meetings,
+  referrals,
   // 타입들
   type Profile,
   type Team,
@@ -18,18 +19,17 @@ export {
   type NewClientDetail,
   type InsuranceInfo,
   type NewInsuranceInfo,
-  type Referral,
-  type NewReferral,
   type Document,
   type NewDocument,
   type PipelineStage,
+  type Meeting,
+  type Referral,
   type UserRole,
   type Importance,
   type Gender,
   type InsuranceType,
-  type ReferralStatus,
   type DocumentType,
-} from '~/lib/supabase-schema';
+} from '~/lib/schema';
 
 import {
   pgTable,
@@ -44,7 +44,7 @@ import {
   decimal,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
-import { profiles, clients, insuranceInfo } from '~/lib/supabase-schema';
+import { profiles, clients, insuranceInfo } from '~/lib/schema';
 
 // 기존 enum들은 공통 스키마에서 import하므로 제거됨
 
@@ -341,7 +341,7 @@ export type ContactMethod = (typeof contactMethodEnum.enumValues)[number];
 export type ClientSource = (typeof clientSourceEnum.enumValues)[number];
 
 // Clients 특화 인터페이스
-import type { Client, Importance } from '~/lib/supabase-schema';
+import type { Client, Importance } from '~/lib/schema';
 
 export interface ClientOverview {
   client: Client;

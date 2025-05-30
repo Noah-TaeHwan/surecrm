@@ -1,17 +1,16 @@
 import { db } from './db';
-import { profiles, teams, clients, invitations } from './supabase-schema';
+import { profiles, teams, clients, invitations } from './schema';
 import {
   publicContents,
-  testimonials,
   faqs,
+  announcements,
+  testimonials,
   siteSettings,
+  pageViews,
   type PublicContent,
   type Testimonial as DBTestimonial,
-  type FAQ,
-  type TermsData,
-  type PrivacyPolicyData,
-  type FAQCategory,
-} from '~/common/schema';
+  type Faq,
+} from './schema';
 import { count, sql, eq, and, gte, desc } from 'drizzle-orm';
 
 // 공개 통계 데이터 타입
@@ -42,6 +41,44 @@ export interface InviteStats {
   usedInvitations: number;
   pendingInvitations: number;
   conversionRate: number;
+}
+
+// 추가 타입 정의
+export interface TermsData {
+  id: string;
+  title: string;
+  content: string;
+  lastUpdated: string;
+  version: string;
+  effectiveDate: string;
+}
+
+export interface PrivacyPolicyData {
+  id: string;
+  title: string;
+  content: string;
+  lastUpdated: string;
+  version: string;
+  effectiveDate: string;
+}
+
+export interface FAQ {
+  id: string;
+  question: string;
+  answer: string;
+  category: string;
+  order?: number;
+  viewCount?: number;
+  isPublished?: boolean;
+  language?: string;
+  authorId?: string | null;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface FAQCategory {
+  category: string;
+  faqs: FAQ[];
 }
 
 /**
@@ -405,8 +442,10 @@ export async function getTermsOfService(): Promise<TermsData> {
         title: term.title,
         content: term.content,
         version: term.version,
-        effectiveDate: term.effectiveDate || new Date(),
-        lastUpdated: term.updatedAt,
+        effectiveDate: term.effectiveDate
+          ? new Date(term.effectiveDate).toISOString()
+          : new Date().toISOString(),
+        lastUpdated: new Date(term.updatedAt).toISOString(),
       };
     }
 
@@ -416,8 +455,8 @@ export async function getTermsOfService(): Promise<TermsData> {
       title: '서비스 이용약관',
       content: getDefaultTermsContent(),
       version: '1.0',
-      effectiveDate: new Date(),
-      lastUpdated: new Date(),
+      effectiveDate: new Date().toISOString(),
+      lastUpdated: new Date().toISOString(),
     };
   } catch (error) {
     console.error('이용약관 조회 실패:', error);
@@ -426,8 +465,8 @@ export async function getTermsOfService(): Promise<TermsData> {
       title: '서비스 이용약관',
       content: getDefaultTermsContent(),
       version: '1.0',
-      effectiveDate: new Date(),
-      lastUpdated: new Date(),
+      effectiveDate: new Date().toISOString(),
+      lastUpdated: new Date().toISOString(),
     };
   }
 }
@@ -464,8 +503,10 @@ export async function getPrivacyPolicy(): Promise<PrivacyPolicyData> {
         title: policy.title,
         content: policy.content,
         version: policy.version,
-        effectiveDate: policy.effectiveDate || new Date(),
-        lastUpdated: policy.updatedAt,
+        effectiveDate: policy.effectiveDate
+          ? new Date(policy.effectiveDate).toISOString()
+          : new Date().toISOString(),
+        lastUpdated: new Date(policy.updatedAt).toISOString(),
       };
     }
 
@@ -475,8 +516,8 @@ export async function getPrivacyPolicy(): Promise<PrivacyPolicyData> {
       title: '개인정보처리방침',
       content: getDefaultPrivacyContent(),
       version: '1.0',
-      effectiveDate: new Date(),
-      lastUpdated: new Date(),
+      effectiveDate: new Date().toISOString(),
+      lastUpdated: new Date().toISOString(),
     };
   } catch (error) {
     console.error('개인정보처리방침 조회 실패:', error);
@@ -485,8 +526,8 @@ export async function getPrivacyPolicy(): Promise<PrivacyPolicyData> {
       title: '개인정보처리방침',
       content: getDefaultPrivacyContent(),
       version: '1.0',
-      effectiveDate: new Date(),
-      lastUpdated: new Date(),
+      effectiveDate: new Date().toISOString(),
+      lastUpdated: new Date().toISOString(),
     };
   }
 }

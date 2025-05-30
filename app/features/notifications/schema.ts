@@ -11,7 +11,7 @@ export {
   type Client,
   type Meeting,
   type UserRole,
-} from '~/lib/supabase-schema';
+} from '~/lib/schema';
 
 import {
   pgTable,
@@ -24,7 +24,7 @@ import {
   jsonb,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
-import { profiles, teams, clients, meetings } from '~/lib/supabase-schema';
+import { profiles, teams, clients, meetings } from '~/lib/schema';
 
 // Notifications 특화 Enum
 export const notificationTypeEnum = pgEnum('notification_type', [

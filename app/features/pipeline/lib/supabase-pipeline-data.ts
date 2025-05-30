@@ -7,8 +7,8 @@ import {
   insuranceInfo,
   meetings,
   referrals,
-} from '~/lib/supabase-schema';
-import { profiles } from '~/lib/supabase-schema';
+} from '~/lib/schema';
+import { profiles } from '~/lib/schema';
 
 // Pipeline Stages 관련 함수들
 export async function getPipelineStages(agentId: string) {

@@ -1,6 +1,6 @@
 import { supabaseAdmin } from '~/lib/auth';
 import { db } from '~/lib/db';
-import { profiles } from '~/lib/supabase-schema';
+import { profiles } from '~/lib/schema';
 import { eq } from 'drizzle-orm';
 
 interface ActionArgs {

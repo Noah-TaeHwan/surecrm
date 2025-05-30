@@ -2,7 +2,7 @@ import { Button } from '~/common/components/ui/button';
 import { Badge } from '~/common/components/ui/badge';
 import { Link } from 'react-router';
 import { ArrowRight } from 'lucide-react';
-import { WarpBackground } from '~/common/components/ui/warp-background';
+import { WarpBackground } from '~/common/components/magicui/warp-background';
 import { AnimatedGridPattern } from '~/common/components/magicui/animated-grid-pattern';
 
 export function CTASection() {

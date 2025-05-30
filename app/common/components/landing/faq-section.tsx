@@ -1,5 +1,5 @@
 import { Badge } from '~/common/components/ui/badge';
-import { AuroraText } from '~/common/components/ui/aurora-text';
+import { AuroraText } from '~/common/components/magicui/aurora-text';
 import { AnimatedGridPattern } from '~/common/components/magicui/animated-grid-pattern';
 import {
   Accordion,
