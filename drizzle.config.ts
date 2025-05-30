@@ -7,7 +7,7 @@ export default defineConfig({
     './app/common/schema.ts', // 공개 페이지용 스키마 (testimonials, faqs, etc.)
     './app/features/*/schema.ts', // 각 feature별 특화 스키마들
   ],
-  out: './app/migrations',
+  out: './supabase/migrations',
   dbCredentials: {
     url: process.env.DATABASE_URL!,
   },
