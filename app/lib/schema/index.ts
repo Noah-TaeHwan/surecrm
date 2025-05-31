@@ -147,6 +147,22 @@ import {
   appInvitationUsageLogsRelations,
 } from '~/features/invitations/lib/schema';
 
+// Network 기능 전용 테이블들 import (새로운 테이블들만)
+import {
+  // Network 테이블들
+  appNetworkNodes,
+  appNetworkEdges,
+  appNetworkStats,
+  appNetworkInteractions,
+  appNetworkOpportunities,
+  // Network Relations
+  appNetworkNodesRelations,
+  appNetworkEdgesRelations,
+  appNetworkStatsRelations,
+  appNetworkInteractionsRelations,
+  appNetworkOpportunitiesRelations,
+} from '~/features/network/lib/schema';
+
 // Drizzle 설정용 통합 스키마
 export const schema = {
   // ===== Core 테이블들 =====
@@ -206,6 +222,13 @@ export const schema = {
 
   // ===== Invitations 기능 전용 테이블들 =====
   appInvitationUsageLogs,
+
+  // ===== Network 기능 전용 테이블들 =====
+  appNetworkNodes,
+  appNetworkEdges,
+  appNetworkStats,
+  appNetworkInteractions,
+  appNetworkOpportunities,
 
   // ===== Public 테이블들 =====
   publicContents,
@@ -271,6 +294,12 @@ export const schema = {
   pageViewsRelations,
   // Invitations Relations
   appInvitationUsageLogsRelations,
+  // Network Relations
+  appNetworkNodesRelations,
+  appNetworkEdgesRelations,
+  appNetworkStatsRelations,
+  appNetworkInteractionsRelations,
+  appNetworkOpportunitiesRelations,
 };
 
 // 타입 정의
