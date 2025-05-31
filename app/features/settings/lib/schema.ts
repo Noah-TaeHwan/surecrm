@@ -22,8 +22,8 @@ import {
 import { relations } from 'drizzle-orm';
 import { profiles, teams } from '~/lib/schema';
 
-// MVP Settings 특화 Enum (app_user_ prefix 적용)
-export const appUserSettingCategoryEnum = pgEnum('app_user_setting_category', [
+// Settings 특화 Enum (app_settings_ prefix 적용)
+export const appSettingsCategoryEnum = pgEnum('app_settings_category', [
   'profile',
   'notifications',
   'system',
@@ -31,8 +31,8 @@ export const appUserSettingCategoryEnum = pgEnum('app_user_setting_category', [
   'integrations',
 ]);
 
-export const appUserNotificationChannelEnum = pgEnum(
-  'app_user_notification_channel',
+export const appSettingsNotificationChannelEnum = pgEnum(
+  'app_settings_notification_channel',
   [
     'email',
     'sms',
@@ -41,22 +41,20 @@ export const appUserNotificationChannelEnum = pgEnum(
   ]
 );
 
-export const appUserIntegrationTypeEnum = pgEnum('app_user_integration_type', [
-  'kakao_talk',
-  'google_calendar',
-  'email',
-  'sms',
-]);
+export const appSettingsIntegrationTypeEnum = pgEnum(
+  'app_settings_integration_type',
+  ['kakao_talk', 'google_calendar', 'email', 'sms']
+);
 
-export const appUserIntegrationStatusEnum = pgEnum(
-  'app_user_integration_status',
+export const appSettingsIntegrationStatusEnum = pgEnum(
+  'app_settings_integration_status',
   ['active', 'inactive', 'error', 'pending']
 );
 
-// MVP Settings 특화 테이블들 (app_user_ prefix 적용)
+// Settings 특화 테이블들 (app_settings_ prefix 적용)
 
-// User Settings 테이블 (사용자 개인 설정)
-export const appUserSettings = pgTable('app_user_settings', {
+// Settings User Profiles 테이블 (사용자 개인 설정)
+export const appSettingsUserProfiles = pgTable('app_settings_user_profiles', {
   id: uuid('id').primaryKey().defaultRandom(),
   user_id: uuid('user_id')
     .notNull()
@@ -114,21 +112,24 @@ export const appUserSettings = pgTable('app_user_settings', {
     .notNull(),
 });
 
-// User Integrations 테이블 (외부 서비스 연동 - MVP 버전)
-export const appUserIntegrations = pgTable('app_user_integrations', {
+// Settings Integrations 테이블 (외부 서비스 연동 - MVP 버전)
+export const appSettingsIntegrations = pgTable('app_settings_integrations', {
   id: uuid('id').primaryKey().defaultRandom(),
   user_id: uuid('user_id')
     .notNull()
     .references(() => profiles.id),
 
-  integration_type: appUserIntegrationTypeEnum('integration_type').notNull(),
+  integration_type:
+    appSettingsIntegrationTypeEnum('integration_type').notNull(),
   integration_name: text('integration_name').notNull(),
 
   // 연동 설정 및 인증 정보
   config: jsonb('config').notNull(),
   credentials: jsonb('credentials'), // 암호화된 인증 정보
 
-  status: appUserIntegrationStatusEnum('status').default('pending').notNull(),
+  status: appSettingsIntegrationStatusEnum('status')
+    .default('pending')
+    .notNull(),
   is_active: boolean('is_active').default(true).notNull(),
 
   last_sync_at: timestamp('last_sync_at', { withTimezone: true }),
@@ -143,8 +144,8 @@ export const appUserIntegrations = pgTable('app_user_integrations', {
     .notNull(),
 });
 
-// Settings Backup 테이블 (설정 백업 - MVP 버전)
-export const appUserSettingsBackup = pgTable('app_user_settings_backup', {
+// Settings Backups 테이블 (설정 백업 - MVP 버전)
+export const appSettingsBackups = pgTable('app_settings_backups', {
   id: uuid('id').primaryKey().defaultRandom(),
   user_id: uuid('user_id')
     .notNull()
@@ -159,93 +160,172 @@ export const appUserSettingsBackup = pgTable('app_user_settings_backup', {
     .notNull(),
 });
 
-// Settings Change Log 테이블 (설정 변경 이력 - MVP 버전)
-export const appUserSettingsChangeLog = pgTable(
-  'app_user_settings_change_log',
+// Settings Change Logs 테이블 (설정 변경 이력 - MVP 버전)
+export const appSettingsChangeLogs = pgTable('app_settings_change_logs', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  user_id: uuid('user_id')
+    .notNull()
+    .references(() => profiles.id),
+
+  setting_category: appSettingsCategoryEnum('setting_category').notNull(),
+  setting_field: text('setting_field').notNull(),
+  old_value: jsonb('old_value'),
+  new_value: jsonb('new_value'),
+
+  change_reason: text('change_reason'), // 변경 사유
+  ip_address: text('ip_address'),
+  user_agent: text('user_agent'),
+
+  created_at: timestamp('created_at', { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+// Settings Theme Preferences 테이블 (테마 및 UI 설정)
+export const appSettingsThemePreferences = pgTable(
+  'app_settings_theme_preferences',
   {
     id: uuid('id').primaryKey().defaultRandom(),
     user_id: uuid('user_id')
       .notNull()
+      .unique()
       .references(() => profiles.id),
 
-    setting_category: appUserSettingCategoryEnum('setting_category').notNull(),
-    setting_field: text('setting_field').notNull(),
-    old_value: jsonb('old_value'),
-    new_value: jsonb('new_value'),
+    theme_mode: text('theme_mode').default('dark').notNull(), // 'light', 'dark', 'system'
+    sidebar_collapsed: boolean('sidebar_collapsed').default(false).notNull(),
+    compact_mode: boolean('compact_mode').default(false).notNull(),
 
-    change_reason: text('change_reason'), // 변경 사유
-    ip_address: text('ip_address'),
-    user_agent: text('user_agent'),
+    // 색상 테마 설정
+    primary_color: text('primary_color').default('#007bff').notNull(),
+    accent_color: text('accent_color').default('#6c757d').notNull(),
+
+    // 폰트 설정
+    font_size: text('font_size').default('medium').notNull(), // 'small', 'medium', 'large'
+    font_family: text('font_family').default('system').notNull(),
 
     created_at: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updated_at: timestamp('updated_at', { withTimezone: true })
       .defaultNow()
       .notNull(),
   }
 );
 
+// Settings Security Logs 테이블 (보안 관련 로그)
+export const appSettingsSecurityLogs = pgTable('app_settings_security_logs', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  user_id: uuid('user_id')
+    .notNull()
+    .references(() => profiles.id),
+
+  action_type: text('action_type').notNull(), // 'password_change', 'login', 'logout', '2fa_enable' 등
+  action_description: text('action_description').notNull(),
+
+  ip_address: text('ip_address'),
+  user_agent: text('user_agent'),
+  location: text('location'),
+
+  success: boolean('success').default(true).notNull(),
+  error_message: text('error_message'),
+
+  created_at: timestamp('created_at', { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
 // Relations (관계 정의)
-export const appUserSettingsRelations = relations(
-  appUserSettings,
+export const appSettingsUserProfilesRelations = relations(
+  appSettingsUserProfiles,
   ({ one }) => ({
     user: one(profiles, {
-      fields: [appUserSettings.user_id],
+      fields: [appSettingsUserProfiles.user_id],
       references: [profiles.id],
     }),
   })
 );
 
-export const appUserIntegrationsRelations = relations(
-  appUserIntegrations,
+export const appSettingsIntegrationsRelations = relations(
+  appSettingsIntegrations,
   ({ one }) => ({
     user: one(profiles, {
-      fields: [appUserIntegrations.user_id],
+      fields: [appSettingsIntegrations.user_id],
       references: [profiles.id],
     }),
   })
 );
 
-export const appUserSettingsBackupRelations = relations(
-  appUserSettingsBackup,
+export const appSettingsBackupsRelations = relations(
+  appSettingsBackups,
   ({ one }) => ({
     user: one(profiles, {
-      fields: [appUserSettingsBackup.user_id],
+      fields: [appSettingsBackups.user_id],
       references: [profiles.id],
     }),
   })
 );
 
-export const appUserSettingsChangeLogRelations = relations(
-  appUserSettingsChangeLog,
+export const appSettingsChangeLogsRelations = relations(
+  appSettingsChangeLogs,
   ({ one }) => ({
     user: one(profiles, {
-      fields: [appUserSettingsChangeLog.user_id],
+      fields: [appSettingsChangeLogs.user_id],
+      references: [profiles.id],
+    }),
+  })
+);
+
+export const appSettingsThemePreferencesRelations = relations(
+  appSettingsThemePreferences,
+  ({ one }) => ({
+    user: one(profiles, {
+      fields: [appSettingsThemePreferences.user_id],
+      references: [profiles.id],
+    }),
+  })
+);
+
+export const appSettingsSecurityLogsRelations = relations(
+  appSettingsSecurityLogs,
+  ({ one }) => ({
+    user: one(profiles, {
+      fields: [appSettingsSecurityLogs.user_id],
       references: [profiles.id],
     }),
   })
 );
 
 // Type exports (MVP 버전)
-export type AppUserSetting = typeof appUserSettings.$inferSelect;
-export type NewAppUserSetting = typeof appUserSettings.$inferInsert;
-export type AppUserIntegration = typeof appUserIntegrations.$inferSelect;
-export type NewAppUserIntegration = typeof appUserIntegrations.$inferInsert;
-export type AppUserSettingsBackup = typeof appUserSettingsBackup.$inferSelect;
-export type NewAppUserSettingsBackup =
-  typeof appUserSettingsBackup.$inferInsert;
-export type AppUserSettingsChangeLog =
-  typeof appUserSettingsChangeLog.$inferSelect;
-export type NewAppUserSettingsChangeLog =
-  typeof appUserSettingsChangeLog.$inferInsert;
+export type AppSettingsUserProfile =
+  typeof appSettingsUserProfiles.$inferSelect;
+export type NewAppSettingsUserProfile =
+  typeof appSettingsUserProfiles.$inferInsert;
+export type AppSettingsIntegration =
+  typeof appSettingsIntegrations.$inferSelect;
+export type NewAppSettingsIntegration =
+  typeof appSettingsIntegrations.$inferInsert;
+export type AppSettingsBackup = typeof appSettingsBackups.$inferSelect;
+export type NewAppSettingsBackup = typeof appSettingsBackups.$inferInsert;
+export type AppSettingsChangeLog = typeof appSettingsChangeLogs.$inferSelect;
+export type NewAppSettingsChangeLog = typeof appSettingsChangeLogs.$inferInsert;
+export type AppSettingsThemePreference =
+  typeof appSettingsThemePreferences.$inferSelect;
+export type NewAppSettingsThemePreference =
+  typeof appSettingsThemePreferences.$inferInsert;
+export type AppSettingsSecurityLog =
+  typeof appSettingsSecurityLogs.$inferSelect;
+export type NewAppSettingsSecurityLog =
+  typeof appSettingsSecurityLogs.$inferInsert;
 
 // Enum type exports
-export type AppUserSettingCategory =
-  (typeof appUserSettingCategoryEnum.enumValues)[number];
-export type AppUserNotificationChannel =
-  (typeof appUserNotificationChannelEnum.enumValues)[number];
-export type AppUserIntegrationType =
-  (typeof appUserIntegrationTypeEnum.enumValues)[number];
-export type AppUserIntegrationStatus =
-  (typeof appUserIntegrationStatusEnum.enumValues)[number];
+export type AppSettingsCategory =
+  (typeof appSettingsCategoryEnum.enumValues)[number];
+export type AppSettingsNotificationChannel =
+  (typeof appSettingsNotificationChannelEnum.enumValues)[number];
+export type AppSettingsIntegrationType =
+  (typeof appSettingsIntegrationTypeEnum.enumValues)[number];
+export type AppSettingsIntegrationStatus =
+  (typeof appSettingsIntegrationStatusEnum.enumValues)[number];
 
 // MVP 보험설계사 특화 인터페이스들
 export interface InsuranceAgentNotificationSettings {

@@ -216,6 +216,24 @@ import {
   reportSubscriptionsRelations,
 } from '~/features/reports/lib/schema';
 
+// Settings 기능 전용 테이블들 import (새로운 테이블들만)
+import {
+  // Settings 테이블들
+  appSettingsUserProfiles,
+  appSettingsIntegrations,
+  appSettingsBackups,
+  appSettingsChangeLogs,
+  appSettingsThemePreferences,
+  appSettingsSecurityLogs,
+  // Settings Relations
+  appSettingsUserProfilesRelations,
+  appSettingsIntegrationsRelations,
+  appSettingsBackupsRelations,
+  appSettingsChangeLogsRelations,
+  appSettingsThemePreferencesRelations,
+  appSettingsSecurityLogsRelations,
+} from '~/features/settings/lib/schema';
+
 // Drizzle 설정용 통합 스키마
 export const schema = {
   // ===== Core 테이블들 =====
@@ -307,6 +325,14 @@ export const schema = {
   reportExports,
   reportSubscriptions,
 
+  // ===== Settings 기능 전용 테이블들 =====
+  appSettingsUserProfiles,
+  appSettingsIntegrations,
+  appSettingsBackups,
+  appSettingsChangeLogs,
+  appSettingsThemePreferences,
+  appSettingsSecurityLogs,
+
   // ===== Public 테이블들 =====
   publicContents,
   faqs,
@@ -397,6 +423,13 @@ export const schema = {
   reportMetricsRelations,
   reportExportsRelations,
   reportSubscriptionsRelations,
+  // Settings Relations
+  appSettingsUserProfilesRelations,
+  appSettingsIntegrationsRelations,
+  appSettingsBackupsRelations,
+  appSettingsChangeLogsRelations,
+  appSettingsThemePreferencesRelations,
+  appSettingsSecurityLogsRelations,
 };
 
 // 타입 정의
