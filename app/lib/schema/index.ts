@@ -57,6 +57,28 @@ import {
   pageViewsRelations,
 } from './public';
 
+// Calendar 기능 전용 테이블들 import (새로운 테이블들만)
+import {
+  // Calendar 테이블들
+  appCalendarMeetingTemplates,
+  appCalendarMeetingChecklists,
+  appCalendarMeetingReminders,
+  appCalendarMeetingAttendees,
+  appCalendarMeetingNotes,
+  appCalendarSettings,
+  appCalendarRecurringMeetings,
+  appCalendarSyncLogs,
+  // Calendar Relations
+  appCalendarMeetingTemplatesRelations,
+  appCalendarMeetingChecklistsRelations,
+  appCalendarMeetingRemindersRelations,
+  appCalendarMeetingAttendeesRelations,
+  appCalendarMeetingNotesRelations,
+  appCalendarSettingsRelations,
+  appCalendarRecurringMeetingsRelations,
+  appCalendarSyncLogsRelations,
+} from '~/features/calendar/lib/schema';
+
 // Drizzle 설정용 통합 스키마
 export const schema = {
   // ===== Core 테이블들 =====
@@ -76,6 +98,16 @@ export const schema = {
   adminAuditLogs,
   adminSettings,
   adminStatsCache,
+
+  // ===== Calendar 기능 전용 테이블들 =====
+  appCalendarMeetingTemplates,
+  appCalendarMeetingChecklists,
+  appCalendarMeetingReminders,
+  appCalendarMeetingAttendees,
+  appCalendarMeetingNotes,
+  appCalendarSettings,
+  appCalendarRecurringMeetings,
+  appCalendarSyncLogs,
 
   // ===== Public 테이블들 =====
   publicContents,
@@ -99,6 +131,16 @@ export const schema = {
   // Admin Relations
   adminAuditLogsRelations,
   adminSettingsRelations,
+  // Calendar Relations
+  appCalendarMeetingTemplatesRelations,
+  appCalendarMeetingChecklistsRelations,
+  appCalendarMeetingRemindersRelations,
+  appCalendarMeetingAttendeesRelations,
+  appCalendarMeetingNotesRelations,
+  appCalendarSettingsRelations,
+  appCalendarRecurringMeetingsRelations,
+  appCalendarSyncLogsRelations,
+  // Public Relations
   publicContentsRelations,
   faqsRelations,
   announcementsRelations,
