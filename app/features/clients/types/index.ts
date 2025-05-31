@@ -57,7 +57,7 @@ export interface ClientDisplay extends Omit<Client, 'tags'> {
   privacyLevel?: ClientPrivacyLevel;
 }
 
-// 🔧 ExtendedClient 타입을 ClientDisplay로 통합
+// ✅ 타입 별칭으로 통일 (중복 제거)
 export type ExtendedClient = ClientDisplay;
 
 // 🔒 고객 개요 (보안 강화된 버전)

@@ -96,6 +96,7 @@ import {
 } from '~/features/clients/lib/client-data';
 import { requireAuth, getSearchParams } from '~/lib/auth/helpers';
 import { data } from 'react-router';
+import { ClientsEmptyState } from '~/features/clients/components/clients-empty-state';
 
 // 🎨 BadgeVariant 타입 정의
 type BadgeVariant = 'default' | 'secondary' | 'outline' | 'destructive';
@@ -1143,20 +1144,15 @@ export default function ClientsPage({
 
         {/* 빈 상태 */}
         {filteredAndSortedClients.length === 0 && (
-          <Card>
-            <CardContent className="py-10 text-center">
-              <PersonIcon className="mx-auto h-12 w-12 text-muted-foreground" />
-              <h3 className="mt-4 text-lg font-semibold">
-                조건에 맞는 고객이 없습니다
-              </h3>
-              <p className="mt-2 text-muted-foreground">
-                필터 조건을 변경하거나 새 고객을 추가해보세요.
-              </p>
-              <Button className="mt-4" onClick={() => setAddChoiceOpen(true)}>
-                <PlusIcon className="mr-2 h-4 w-4" />첫 고객 추가하기
-              </Button>
-            </CardContent>
-          </Card>
+          <ClientsEmptyState
+            onAddClient={() => setAddChoiceOpen(true)}
+            isFiltered={
+              searchQuery !== '' ||
+              filterStage !== 'all' ||
+              filterImportance !== 'all'
+            }
+            isSecurityRestricted={false}
+          />
         )}
 
         {/* 고객 추가 선택 모달 */}

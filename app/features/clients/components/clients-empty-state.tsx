@@ -1,47 +1,78 @@
-import { Card, CardContent } from '~/common/components/ui/card';
 import { Button } from '~/common/components/ui/button';
-import { PersonIcon, PlusIcon } from '@radix-ui/react-icons';
+import { PlusIcon, PersonIcon, LockClosedIcon } from '@radix-ui/react-icons';
 
 interface ClientsEmptyStateProps {
-  onAddClick: () => void;
+  onAddClient: () => void;
+  hasFilters?: boolean;
+  isFiltered?: boolean;
+  isSecurityRestricted?: boolean;
 }
 
-export function ClientsEmptyState({ onAddClick }: ClientsEmptyStateProps) {
-  return (
-    <Card>
-      <CardContent className="py-10 text-center">
-        <PersonIcon className="mx-auto h-12 w-12 text-muted-foreground" />
-        <h3 className="mt-4 text-lg font-semibold">
-          아직 등록된 고객이 없습니다
-        </h3>
-        <p className="mt-2 text-muted-foreground max-w-md mx-auto">
-          첫 번째 고객을 추가하여 보험 영업 관리를 시작하세요. 개별 등록 또는
-          엑셀 파일로 일괄 등록이 가능합니다.
-        </p>
-        <Button className="mt-4" onClick={onAddClick}>
-          <PlusIcon className="mr-2 h-4 w-4" />첫 고객 추가하기
-        </Button>
-
-        <div className="mt-6 pt-6 border-t">
-          <h4 className="text-sm font-medium text-muted-foreground mb-3">
-            고객 관리 기능
-          </h4>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-primary rounded-full" />
-              보안 강화된 개인정보 관리
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-primary rounded-full" />
-              소개 네트워크 추적
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-primary rounded-full" />
-              영업 단계별 관리
-            </div>
-          </div>
+export function ClientsEmptyState({
+  onAddClient,
+  hasFilters = false,
+  isFiltered = false,
+  isSecurityRestricted = false,
+}: ClientsEmptyStateProps) {
+  if (isSecurityRestricted) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 px-4">
+        <div className="rounded-full bg-muted/50 p-6 mb-6">
+          <LockClosedIcon className="h-12 w-12 text-muted-foreground" />
         </div>
-      </CardContent>
-    </Card>
+        <h3 className="text-xl font-semibold text-foreground mb-2">
+          접근 제한된 고객 정보
+        </h3>
+        <p className="text-muted-foreground text-center max-w-md mb-6">
+          현재 보안 설정으로 인해 일부 고객 정보가 제한되어 있습니다.
+          <br />
+          관리자에게 문의하거나 필터를 조정해 주세요.
+        </p>
+        <Button variant="outline" onClick={() => window.location.reload()}>
+          새로고침
+        </Button>
+      </div>
+    );
+  }
+
+  if (isFiltered) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 px-4">
+        <div className="rounded-full bg-muted/50 p-6 mb-6">
+          <PersonIcon className="h-12 w-12 text-muted-foreground" />
+        </div>
+        <h3 className="text-xl font-semibold text-foreground mb-2">
+          검색 결과가 없습니다
+        </h3>
+        <p className="text-muted-foreground text-center max-w-md mb-6">
+          현재 검색 조건에 맞는 고객을 찾을 수 없습니다.
+          <br />
+          다른 검색어나 필터를 시도해 보세요.
+        </p>
+        <Button variant="outline" onClick={() => window.location.reload()}>
+          필터 초기화
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col items-center justify-center py-16 px-4">
+      <div className="rounded-full bg-primary/10 p-6 mb-6">
+        <PersonIcon className="h-12 w-12 text-primary" />
+      </div>
+      <h3 className="text-xl font-semibold text-foreground mb-2">
+        첫 번째 고객을 추가해보세요
+      </h3>
+      <p className="text-muted-foreground text-center max-w-md mb-6">
+        아직 등록된 고객이 없습니다. 새 고객을 추가하여 고객 관계 관리를
+        시작하세요.
+        <br />
+        모든 고객 정보는 안전하게 보호됩니다.
+      </p>
+      <Button onClick={onAddClient} className="gap-2">
+        <PlusIcon className="h-4 w-4" />첫 고객 추가하기
+      </Button>
+    </div>
   );
 }

@@ -1,34 +1,18 @@
 // 📊 Dashboard 기능 전용 스키마
-// Prefix 네이밍 컨벤션: dashboard_ 사용
+// Prefix 네이밍 컨벤션: app_dashboard_ 사용 (완전 통일)
 // 공통 스키마에서 기본 테이블들을 import
 export {
   profiles,
   teams,
   clients,
-  clientDetails,
-  insuranceInfo,
-  referrals,
-  meetings,
-  invitations,
-  documents,
   pipelineStages,
   // 타입들
   type Profile,
   type Team,
   type Client,
-  type NewClient,
-  type ClientDetail,
-  type InsuranceInfo,
-  type Referral,
-  type Meeting,
-  type NewMeeting,
   type PipelineStage,
   type UserRole,
   type Importance,
-  type MeetingStatus,
-  type MeetingType,
-  type InsuranceType,
-  type ReferralStatus,
 } from '~/lib/schema';
 
 import {
@@ -46,8 +30,8 @@ import {
 import { relations } from 'drizzle-orm';
 import { profiles, teams, clients, pipelineStages } from '~/lib/schema';
 
-// 📌 Dashboard 특화 Enum (prefix 네이밍 적용)
-export const dashboardGoalTypeEnum = pgEnum('dashboard_goal_type_enum', [
+// 📌 Dashboard 특화 Enum (완전한 app_dashboard_ prefix 통일)
+export const appDashboardGoalTypeEnum = pgEnum('app_dashboard_goal_type_enum', [
   'clients',
   'meetings',
   'revenue',
@@ -55,14 +39,13 @@ export const dashboardGoalTypeEnum = pgEnum('dashboard_goal_type_enum', [
   'conversion_rate',
 ]);
 
-export const dashboardGoalPeriodEnum = pgEnum('dashboard_goal_period_enum', [
-  'monthly',
-  'quarterly',
-  'yearly',
-]);
+export const appDashboardGoalPeriodEnum = pgEnum(
+  'app_dashboard_goal_period_enum',
+  ['monthly', 'quarterly', 'yearly']
+);
 
-export const dashboardActivityTypeEnum = pgEnum(
-  'dashboard_activity_type_enum',
+export const appDashboardActivityTypeEnum = pgEnum(
+  'app_dashboard_activity_type_enum',
   [
     'client_added',
     'client_updated',
@@ -78,8 +61,8 @@ export const dashboardActivityTypeEnum = pgEnum(
   ]
 );
 
-export const dashboardNotificationTypeEnum = pgEnum(
-  'dashboard_notification_type_enum',
+export const appDashboardNotificationTypeEnum = pgEnum(
+  'app_dashboard_notification_type_enum',
   [
     'meeting_reminder',
     'goal_achievement',
@@ -91,21 +74,35 @@ export const dashboardNotificationTypeEnum = pgEnum(
   ]
 );
 
-export const dashboardNotificationPriorityEnum = pgEnum(
-  'dashboard_notification_priority_enum',
+export const appDashboardNotificationPriorityEnum = pgEnum(
+  'app_dashboard_notification_priority_enum',
   ['low', 'normal', 'high', 'urgent']
 );
 
-export const dashboardMetricPeriodEnum = pgEnum(
-  'dashboard_metric_period_enum',
+export const appDashboardMetricPeriodEnum = pgEnum(
+  'app_dashboard_metric_period_enum',
   ['daily', 'weekly', 'monthly', 'quarterly', 'yearly']
 );
 
-// 🏷️ Dashboard 특화 테이블들 (prefix 네이밍 적용)
+export const appDashboardWidgetTypeEnum = pgEnum(
+  'app_dashboard_widget_type_enum',
+  [
+    'kpi_card',
+    'chart',
+    'table',
+    'calendar',
+    'list',
+    'progress',
+    'notification',
+    'quick_action',
+  ]
+);
+
+// 🏷️ Dashboard 특화 테이블들 (완전한 app_dashboard_ prefix 통일)
 
 // Dashboard Performance Metrics 테이블 (일별/월별 성과 집계)
-export const dashboardPerformanceMetrics = pgTable(
-  'dashboard_performance_metrics',
+export const appDashboardPerformanceMetrics = pgTable(
+  'app_dashboard_performance_metrics',
   {
     id: uuid('id').primaryKey().defaultRandom(),
     agentId: uuid('agent_id')
@@ -113,7 +110,7 @@ export const dashboardPerformanceMetrics = pgTable(
       .references(() => profiles.id),
     teamId: uuid('team_id').references(() => teams.id),
     date: date('date').notNull(),
-    period: dashboardMetricPeriodEnum('period').notNull(),
+    period: appDashboardMetricPeriodEnum('period').notNull(),
     newClients: integer('new_clients').default(0).notNull(),
     totalMeetings: integer('total_meetings').default(0).notNull(),
     completedMeetings: integer('completed_meetings').default(0).notNull(),
@@ -132,6 +129,12 @@ export const dashboardPerformanceMetrics = pgTable(
     pipelineValue: decimal('pipeline_value', { precision: 15, scale: 2 })
       .default('0')
       .notNull(),
+    // 🔒 데이터 품질 보장 필드
+    calculatedAt: timestamp('calculated_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    isVerified: boolean('is_verified').default(false).notNull(),
+    dataVersion: integer('data_version').default(1).notNull(),
     createdAt: timestamp('created_at', { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -141,8 +144,8 @@ export const dashboardPerformanceMetrics = pgTable(
   }
 );
 
-// Dashboard Goals 테이블 (목표 설정)
-export const dashboardGoals = pgTable('dashboard_goals', {
+// Dashboard Goals 테이블 (목표 설정) - prefix 통일
+export const appDashboardGoals = pgTable('app_dashboard_goals', {
   id: uuid('id').primaryKey().defaultRandom(),
   agentId: uuid('agent_id')
     .notNull()
@@ -150,17 +153,20 @@ export const dashboardGoals = pgTable('dashboard_goals', {
   teamId: uuid('team_id').references(() => teams.id),
   title: text('title').notNull(),
   description: text('description'),
-  goalType: dashboardGoalTypeEnum('goal_type').notNull(),
+  goalType: appDashboardGoalTypeEnum('goal_type').notNull(),
   targetValue: decimal('target_value', { precision: 15, scale: 2 }).notNull(),
   currentValue: decimal('current_value', { precision: 15, scale: 2 })
     .default('0')
     .notNull(),
-  period: dashboardGoalPeriodEnum('period').notNull(),
+  period: appDashboardGoalPeriodEnum('period').notNull(),
   startDate: date('start_date').notNull(),
   endDate: date('end_date').notNull(),
   isActive: boolean('is_active').default(true).notNull(),
   isAchieved: boolean('is_achieved').default(false).notNull(),
   achievedAt: timestamp('achieved_at', { withTimezone: true }),
+  progressPercentage: decimal('progress_percentage', { precision: 5, scale: 2 })
+    .default('0')
+    .notNull(),
   metadata: jsonb('metadata'), // 추가 설정 정보
   createdAt: timestamp('created_at', { withTimezone: true })
     .defaultNow()
@@ -170,17 +176,18 @@ export const dashboardGoals = pgTable('dashboard_goals', {
     .notNull(),
 });
 
-// Dashboard Activity Log 테이블 (사용자 활동 추적)
-export const dashboardActivityLogs = pgTable('dashboard_activity_logs', {
+// Dashboard Activity Log 테이블 (사용자 활동 추적) - prefix 통일
+export const appDashboardActivityLogs = pgTable('app_dashboard_activity_logs', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: uuid('user_id')
     .notNull()
     .references(() => profiles.id),
-  activityType: dashboardActivityTypeEnum('activity_type').notNull(),
+  activityType: appDashboardActivityTypeEnum('activity_type').notNull(),
   entityType: text('entity_type'), // 'client', 'meeting', 'referral' 등
   entityId: uuid('entity_id'),
   title: text('title').notNull(),
   description: text('description').notNull(),
+  impact: text('impact'), // 'positive', 'neutral', 'negative'
   metadata: jsonb('metadata'), // 추가 정보
   ipAddress: text('ip_address'),
   userAgent: text('user_agent'),
@@ -189,41 +196,46 @@ export const dashboardActivityLogs = pgTable('dashboard_activity_logs', {
     .notNull(),
 });
 
-// Dashboard Notifications 테이블 (알림)
-export const dashboardNotifications = pgTable('dashboard_notifications', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  userId: uuid('user_id')
-    .notNull()
-    .references(() => profiles.id),
-  title: text('title').notNull(),
-  message: text('message').notNull(),
-  type: dashboardNotificationTypeEnum('type').notNull(),
-  priority: dashboardNotificationPriorityEnum('priority')
-    .default('normal')
-    .notNull(),
-  isRead: boolean('is_read').default(false).notNull(),
-  readAt: timestamp('read_at', { withTimezone: true }),
-  actionUrl: text('action_url'), // 클릭시 이동할 URL
-  metadata: jsonb('metadata'),
-  expiresAt: timestamp('expires_at', { withTimezone: true }),
-  createdAt: timestamp('created_at', { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-});
+// Dashboard Notifications 테이블 (알림) - prefix 통일
+export const appDashboardNotifications = pgTable(
+  'app_dashboard_notifications',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => profiles.id),
+    title: text('title').notNull(),
+    message: text('message').notNull(),
+    type: appDashboardNotificationTypeEnum('type').notNull(),
+    priority: appDashboardNotificationPriorityEnum('priority')
+      .default('normal')
+      .notNull(),
+    isRead: boolean('is_read').default(false).notNull(),
+    actionUrl: text('action_url'), // 클릭 시 이동할 URL
+    actionLabel: text('action_label'), // 액션 버튼 텍스트
+    expiresAt: timestamp('expires_at', { withTimezone: true }),
+    readAt: timestamp('read_at', { withTimezone: true }),
+    metadata: jsonb('metadata'), // 추가 정보
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  }
+);
 
-// Dashboard Widgets 테이블 (대시보드 위젯 설정)
-export const dashboardWidgets = pgTable('dashboard_widgets', {
+// Dashboard Widgets 테이블 (사용자 맞춤형 위젯 설정) - prefix 통일
+export const appDashboardWidgets = pgTable('app_dashboard_widgets', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: uuid('user_id')
     .notNull()
     .references(() => profiles.id),
-  widgetType: text('widget_type').notNull(), // 'chart', 'metric', 'list', 'calendar'
+  widgetType: appDashboardWidgetTypeEnum('widget_type').notNull(),
   title: text('title').notNull(),
-  position: jsonb('position').notNull(), // { x: 0, y: 0, w: 2, h: 2 }
-  configuration: jsonb('configuration').notNull(), // 위젯별 설정
+  position: jsonb('position').notNull(), // { x: 0, y: 0, width: 4, height: 3 }
+  config: jsonb('config').notNull(), // 위젯별 설정
   isVisible: boolean('is_visible').default(true).notNull(),
-  refreshInterval: integer('refresh_interval').default(300), // 초 단위
+  refreshInterval: integer('refresh_interval').default(300), // 초 단위 (5분)
   lastRefreshed: timestamp('last_refreshed', { withTimezone: true }),
+  order: integer('order').default(0).notNull(),
   createdAt: timestamp('created_at', { withTimezone: true })
     .defaultNow()
     .notNull(),
@@ -232,22 +244,22 @@ export const dashboardWidgets = pgTable('dashboard_widgets', {
     .notNull(),
 });
 
-// Dashboard Quick Actions 테이블 (빠른 액션)
-export const dashboardQuickActions = pgTable('dashboard_quick_actions', {
+// Dashboard Quick Actions 테이블 (빠른 액션 설정) - prefix 통일
+export const appDashboardQuickActions = pgTable('app_dashboard_quick_actions', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: uuid('user_id')
     .notNull()
     .references(() => profiles.id),
-  name: text('name').notNull(),
+  actionType: text('action_type').notNull(), // 'add_client', 'schedule_meeting', etc.
+  title: text('title').notNull(),
   description: text('description'),
-  actionType: text('action_type').notNull(), // 'navigate', 'modal', 'api_call'
-  actionConfig: jsonb('action_config').notNull(), // 액션 설정
   icon: text('icon'), // 아이콘 이름
-  color: text('color').default('#3B82F6'), // 색상
-  position: integer('position').default(0), // 정렬 순서
+  actionUrl: text('action_url'), // 이동할 URL
+  shortcut: text('shortcut'), // 키보드 단축키
   isActive: boolean('is_active').default(true).notNull(),
   usageCount: integer('usage_count').default(0).notNull(),
   lastUsed: timestamp('last_used', { withTimezone: true }),
+  order: integer('order').default(0).notNull(),
   createdAt: timestamp('created_at', { withTimezone: true })
     .defaultNow()
     .notNull(),
@@ -257,66 +269,69 @@ export const dashboardQuickActions = pgTable('dashboard_quick_actions', {
 });
 
 // 🔗 Relations (관계 정의)
-export const dashboardPerformanceMetricsRelations = relations(
-  dashboardPerformanceMetrics,
+export const appDashboardPerformanceMetricsRelations = relations(
+  appDashboardPerformanceMetrics,
   ({ one }) => ({
     agent: one(profiles, {
-      fields: [dashboardPerformanceMetrics.agentId],
+      fields: [appDashboardPerformanceMetrics.agentId],
       references: [profiles.id],
     }),
     team: one(teams, {
-      fields: [dashboardPerformanceMetrics.teamId],
+      fields: [appDashboardPerformanceMetrics.teamId],
       references: [teams.id],
     }),
   })
 );
 
-export const dashboardGoalsRelations = relations(dashboardGoals, ({ one }) => ({
-  agent: one(profiles, {
-    fields: [dashboardGoals.agentId],
-    references: [profiles.id],
-  }),
-  team: one(teams, {
-    fields: [dashboardGoals.teamId],
-    references: [teams.id],
-  }),
-}));
+export const appDashboardGoalsRelations = relations(
+  appDashboardGoals,
+  ({ one }) => ({
+    agent: one(profiles, {
+      fields: [appDashboardGoals.agentId],
+      references: [profiles.id],
+    }),
+    team: one(teams, {
+      fields: [appDashboardGoals.teamId],
+      references: [teams.id],
+    }),
+  })
+);
 
-export const dashboardActivityLogsRelations = relations(
-  dashboardActivityLogs,
+export const appDashboardActivityLogsRelations = relations(
+  appDashboardActivityLogs,
   ({ one }) => ({
     user: one(profiles, {
-      fields: [dashboardActivityLogs.userId],
+      fields: [appDashboardActivityLogs.userId],
       references: [profiles.id],
     }),
   })
 );
 
-export const dashboardNotificationsRelations = relations(
-  dashboardNotifications,
+export const appDashboardNotificationsRelations = relations(
+  appDashboardNotifications,
   ({ one }) => ({
     user: one(profiles, {
-      fields: [dashboardNotifications.userId],
+      fields: [appDashboardNotifications.userId],
       references: [profiles.id],
     }),
   })
 );
 
-export const dashboardWidgetsRelations = relations(
-  dashboardWidgets,
+export const appDashboardWidgetsRelations = relations(
+  appDashboardWidgets,
   ({ one }) => ({
     user: one(profiles, {
-      fields: [dashboardWidgets.userId],
+      fields: [appDashboardWidgets.userId],
       references: [profiles.id],
     }),
   })
 );
 
-export const dashboardQuickActionsRelations = relations(
-  dashboardQuickActions,
+export const appDashboardQuickActionsRelations = relations(
+  appDashboardQuickActions,
   ({ one }) => ({
     user: one(profiles, {
-      fields: [dashboardQuickActions.userId],
+      fields: [appDashboardQuickActions.userId],
       references: [profiles.id],
     }),
   })
@@ -324,33 +339,36 @@ export const dashboardQuickActionsRelations = relations(
 
 // 📝 Dashboard 특화 타입들 (실제 코드와 일치)
 export type DashboardPerformanceMetrics =
-  typeof dashboardPerformanceMetrics.$inferSelect;
+  typeof appDashboardPerformanceMetrics.$inferSelect;
 export type NewDashboardPerformanceMetrics =
-  typeof dashboardPerformanceMetrics.$inferInsert;
-export type DashboardGoal = typeof dashboardGoals.$inferSelect;
-export type NewDashboardGoal = typeof dashboardGoals.$inferInsert;
-export type DashboardActivityLog = typeof dashboardActivityLogs.$inferSelect;
-export type NewDashboardActivityLog = typeof dashboardActivityLogs.$inferInsert;
-export type DashboardNotification = typeof dashboardNotifications.$inferSelect;
+  typeof appDashboardPerformanceMetrics.$inferInsert;
+export type DashboardGoal = typeof appDashboardGoals.$inferSelect;
+export type NewDashboardGoal = typeof appDashboardGoals.$inferInsert;
+export type DashboardActivityLog = typeof appDashboardActivityLogs.$inferSelect;
+export type NewDashboardActivityLog =
+  typeof appDashboardActivityLogs.$inferInsert;
+export type DashboardNotification =
+  typeof appDashboardNotifications.$inferSelect;
 export type NewDashboardNotification =
-  typeof dashboardNotifications.$inferInsert;
-export type DashboardWidget = typeof dashboardWidgets.$inferSelect;
-export type NewDashboardWidget = typeof dashboardWidgets.$inferInsert;
-export type DashboardQuickAction = typeof dashboardQuickActions.$inferSelect;
-export type NewDashboardQuickAction = typeof dashboardQuickActions.$inferInsert;
+  typeof appDashboardNotifications.$inferInsert;
+export type DashboardWidget = typeof appDashboardWidgets.$inferSelect;
+export type NewDashboardWidget = typeof appDashboardWidgets.$inferInsert;
+export type DashboardQuickAction = typeof appDashboardQuickActions.$inferSelect;
+export type NewDashboardQuickAction =
+  typeof appDashboardQuickActions.$inferInsert;
 
 export type DashboardGoalType =
-  (typeof dashboardGoalTypeEnum.enumValues)[number];
+  (typeof appDashboardGoalTypeEnum.enumValues)[number];
 export type DashboardGoalPeriod =
-  (typeof dashboardGoalPeriodEnum.enumValues)[number];
+  (typeof appDashboardGoalPeriodEnum.enumValues)[number];
 export type DashboardActivityType =
-  (typeof dashboardActivityTypeEnum.enumValues)[number];
+  (typeof appDashboardActivityTypeEnum.enumValues)[number];
 export type DashboardNotificationType =
-  (typeof dashboardNotificationTypeEnum.enumValues)[number];
+  (typeof appDashboardNotificationTypeEnum.enumValues)[number];
 export type DashboardNotificationPriority =
-  (typeof dashboardNotificationPriorityEnum.enumValues)[number];
+  (typeof appDashboardNotificationPriorityEnum.enumValues)[number];
 export type DashboardMetricPeriod =
-  (typeof dashboardMetricPeriodEnum.enumValues)[number];
+  (typeof appDashboardMetricPeriodEnum.enumValues)[number];
 
 // 🎯 Dashboard 특화 인터페이스
 export interface DashboardOverview {
