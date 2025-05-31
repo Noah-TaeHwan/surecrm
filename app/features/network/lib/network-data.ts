@@ -46,6 +46,16 @@ export interface NetworkStats {
   }>;
 }
 
+// 고급 네트워크 분석을 위한 인터페이스 추가
+export interface NetworkMetrics {
+  nodeCentrality: Map<string, number>;
+  clusteringCoefficient: number;
+  networkDensity: number;
+  averagePathLength: number;
+  influenceHubs: NetworkNode[];
+  isolatedNodes: NetworkNode[];
+}
+
 /**
  * 사용자의 네트워크 데이터 조회
  */
@@ -415,4 +425,295 @@ export async function searchNetwork(
     console.error('네트워크 검색 오류:', error);
     return [];
   }
+}
+
+/**
+ * 고급 네트워크 메트릭 계산 (옵시디언 스타일 분석)
+ */
+export function calculateNetworkMetrics(
+  nodes: NetworkNode[],
+  edges: NetworkEdge[]
+): NetworkMetrics {
+  // 인접 리스트 생성
+  const adjacencyList = new Map<string, Set<string>>();
+  nodes.forEach((node) => {
+    adjacencyList.set(node.id, new Set());
+  });
+
+  edges.forEach((edge) => {
+    adjacencyList.get(edge.source)?.add(edge.target);
+    adjacencyList.get(edge.target)?.add(edge.source);
+  });
+
+  // 노드 중심성 계산 (연결 중심성)
+  const nodeCentrality = new Map<string, number>();
+  nodes.forEach((node) => {
+    const connections = adjacencyList.get(node.id)?.size || 0;
+    const maxPossibleConnections = nodes.length - 1;
+    const centrality =
+      maxPossibleConnections > 0 ? connections / maxPossibleConnections : 0;
+    nodeCentrality.set(node.id, centrality);
+  });
+
+  // 클러스터링 계수 계산
+  let totalClusteringCoefficient = 0;
+  let nodeCount = 0;
+
+  nodes.forEach((node) => {
+    const neighbors = adjacencyList.get(node.id);
+    if (!neighbors || neighbors.size < 2) return;
+
+    const neighborsArray = Array.from(neighbors);
+    let edgesAmongNeighbors = 0;
+
+    for (let i = 0; i < neighborsArray.length; i++) {
+      for (let j = i + 1; j < neighborsArray.length; j++) {
+        if (adjacencyList.get(neighborsArray[i])?.has(neighborsArray[j])) {
+          edgesAmongNeighbors++;
+        }
+      }
+    }
+
+    const maxPossibleEdges = (neighbors.size * (neighbors.size - 1)) / 2;
+    const clusteringCoeff =
+      maxPossibleEdges > 0 ? edgesAmongNeighbors / maxPossibleEdges : 0;
+    totalClusteringCoefficient += clusteringCoeff;
+    nodeCount++;
+  });
+
+  const clusteringCoefficient =
+    nodeCount > 0 ? totalClusteringCoefficient / nodeCount : 0;
+
+  // 네트워크 밀도 계산
+  const maxPossibleEdges = (nodes.length * (nodes.length - 1)) / 2;
+  const networkDensity =
+    maxPossibleEdges > 0 ? edges.length / maxPossibleEdges : 0;
+
+  // 평균 경로 길이 계산 (BFS 사용)
+  let totalPathLength = 0;
+  let pathCount = 0;
+
+  nodes.forEach((startNode) => {
+    const distances = new Map<string, number>();
+    const queue = [{ nodeId: startNode.id, distance: 0 }];
+    distances.set(startNode.id, 0);
+
+    while (queue.length > 0) {
+      const { nodeId, distance } = queue.shift()!;
+      const neighbors = adjacencyList.get(nodeId);
+
+      neighbors?.forEach((neighborId) => {
+        if (!distances.has(neighborId)) {
+          distances.set(neighborId, distance + 1);
+          queue.push({ nodeId: neighborId, distance: distance + 1 });
+          totalPathLength += distance + 1;
+          pathCount++;
+        }
+      });
+    }
+  });
+
+  const averagePathLength = pathCount > 0 ? totalPathLength / pathCount : 0;
+
+  // 영향력 허브 식별 (높은 중심성 + 높은 중요도)
+  const influenceHubs = nodes
+    .filter((node) => {
+      const centrality = nodeCentrality.get(node.id) || 0;
+      return centrality > 0.3 && node.importance === 'high';
+    })
+    .sort((a, b) => {
+      const centralityA = nodeCentrality.get(a.id) || 0;
+      const centralityB = nodeCentrality.get(b.id) || 0;
+      return centralityB - centralityA;
+    })
+    .slice(0, 5);
+
+  // 고립된 노드 식별
+  const isolatedNodes = nodes.filter((node) => {
+    const connections = adjacencyList.get(node.id)?.size || 0;
+    return connections === 0;
+  });
+
+  return {
+    nodeCentrality,
+    clusteringCoefficient,
+    networkDensity,
+    averagePathLength,
+    influenceHubs,
+    isolatedNodes,
+  };
+}
+
+/**
+ * 실시간 네트워크 변화 감지
+ */
+export function detectNetworkChanges(
+  oldNodes: NetworkNode[],
+  newNodes: NetworkNode[],
+  oldEdges: NetworkEdge[],
+  newEdges: NetworkEdge[]
+): {
+  addedNodes: NetworkNode[];
+  removedNodes: NetworkNode[];
+  addedEdges: NetworkEdge[];
+  removedEdges: NetworkEdge[];
+  modifiedNodes: NetworkNode[];
+} {
+  const oldNodeIds = new Set(oldNodes.map((n) => n.id));
+  const newNodeIds = new Set(newNodes.map((n) => n.id));
+  const oldEdgeIds = new Set(oldEdges.map((e) => e.id));
+  const newEdgeIds = new Set(newEdges.map((e) => e.id));
+
+  const addedNodes = newNodes.filter((n) => !oldNodeIds.has(n.id));
+  const removedNodes = oldNodes.filter((n) => !newNodeIds.has(n.id));
+  const addedEdges = newEdges.filter((e) => !oldEdgeIds.has(e.id));
+  const removedEdges = oldEdges.filter((e) => !newEdgeIds.has(e.id));
+
+  // 수정된 노드 감지 (속성 변화)
+  const modifiedNodes: NetworkNode[] = [];
+  newNodes.forEach((newNode) => {
+    const oldNode = oldNodes.find((n) => n.id === newNode.id);
+    if (oldNode) {
+      if (
+        oldNode.importance !== newNode.importance ||
+        oldNode.status !== newNode.status ||
+        oldNode.contractValue !== newNode.contractValue ||
+        oldNode.referralCount !== newNode.referralCount
+      ) {
+        modifiedNodes.push(newNode);
+      }
+    }
+  });
+
+  return {
+    addedNodes,
+    removedNodes,
+    addedEdges,
+    removedEdges,
+    modifiedNodes,
+  };
+}
+
+/**
+ * 네트워크 추천 알고리즘 (옵시디언 스타일)
+ */
+export function generateNetworkRecommendations(
+  nodes: NetworkNode[],
+  edges: NetworkEdge[],
+  targetNodeId: string
+): Array<{
+  type: 'introduction' | 'follow_up' | 'cluster_expansion';
+  priority: 'high' | 'medium' | 'low';
+  title: string;
+  description: string;
+  targetNodeIds: string[];
+  potentialValue: number;
+}> {
+  const recommendations: Array<{
+    type: 'introduction' | 'follow_up' | 'cluster_expansion';
+    priority: 'high' | 'medium' | 'low';
+    title: string;
+    description: string;
+    targetNodeIds: string[];
+    potentialValue: number;
+  }> = [];
+
+  const targetNode = nodes.find((n) => n.id === targetNodeId);
+  if (!targetNode) return recommendations;
+
+  // 인접 리스트 생성
+  const adjacencyList = new Map<string, Set<string>>();
+  nodes.forEach((node) => {
+    adjacencyList.set(node.id, new Set());
+  });
+
+  edges.forEach((edge) => {
+    adjacencyList.get(edge.source)?.add(edge.target);
+    adjacencyList.get(edge.target)?.add(edge.source);
+  });
+
+  // 1. 소개 기회 찾기 (2단계 연결)
+  const directConnections = adjacencyList.get(targetNodeId) || new Set();
+  const potentialIntroductions = new Set<string>();
+
+  directConnections.forEach((directId) => {
+    const secondLevelConnections = adjacencyList.get(directId) || new Set();
+    secondLevelConnections.forEach((secondLevelId) => {
+      if (
+        secondLevelId !== targetNodeId &&
+        !directConnections.has(secondLevelId)
+      ) {
+        potentialIntroductions.add(secondLevelId);
+      }
+    });
+  });
+
+  // 높은 가치 소개 추천
+  const highValueIntroductions = Array.from(potentialIntroductions)
+    .map((nodeId) => nodes.find((n) => n.id === nodeId))
+    .filter((node) => node && node.importance === 'high')
+    .slice(0, 3);
+
+  highValueIntroductions.forEach((node) => {
+    if (node) {
+      recommendations.push({
+        type: 'introduction',
+        priority: 'high',
+        title: `${node.name}님과의 소개 기회`,
+        description: `공통 연결점을 통해 ${node.name}님과 연결될 수 있습니다.`,
+        targetNodeIds: [node.id],
+        potentialValue: node.contractValue,
+      });
+    }
+  });
+
+  // 2. 팔로우업 추천 (비활성 고가치 고객)
+  const inactiveHighValue = nodes
+    .filter(
+      (node) =>
+        node.status === 'inactive' &&
+        node.contractValue > 500000 &&
+        directConnections.has(node.id)
+    )
+    .slice(0, 2);
+
+  inactiveHighValue.forEach((node) => {
+    recommendations.push({
+      type: 'follow_up',
+      priority: 'medium',
+      title: `${node.name}님 재연결 제안`,
+      description: `고가치 고객이지만 현재 비활성 상태입니다. 재연결을 시도해보세요.`,
+      targetNodeIds: [node.id],
+      potentialValue: node.contractValue,
+    });
+  });
+
+  // 3. 클러스터 확장 추천
+  const metrics = calculateNetworkMetrics(nodes, edges);
+  const highCentralityNodes = Array.from(metrics.nodeCentrality.entries())
+    .filter(
+      ([nodeId, centrality]) =>
+        centrality > 0.4 && !directConnections.has(nodeId)
+    )
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 2);
+
+  highCentralityNodes.forEach(([nodeId, centrality]) => {
+    const node = nodes.find((n) => n.id === nodeId);
+    if (node) {
+      recommendations.push({
+        type: 'cluster_expansion',
+        priority: 'low',
+        title: `네트워크 허브 ${node.name}님`,
+        description: `이 고객은 네트워크의 중심 역할을 하고 있어 추가 연결 기회가 많습니다.`,
+        targetNodeIds: [nodeId],
+        potentialValue: centrality * 1000000,
+      });
+    }
+  });
+
+  return recommendations.sort((a, b) => {
+    const priorityOrder = { high: 3, medium: 2, low: 1 };
+    return priorityOrder[b.priority] - priorityOrder[a.priority];
+  });
 }

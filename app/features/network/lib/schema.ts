@@ -1,5 +1,5 @@
 // 🌐 Network 기능 전용 스키마
-// Prefix 네이밍 컨벤션: network_ 사용
+// Prefix 네이밍 컨벤션: app_network_ 사용
 // 공통 스키마에서 기본 테이블들을 import
 export {
   profiles,
@@ -31,8 +31,8 @@ import {
 import { relations } from 'drizzle-orm';
 import { profiles, teams, clients, referrals } from '~/lib/schema';
 
-// 📌 Network 특화 Enum (prefix 네이밍 적용)
-export const networkNodeTypeEnum = pgEnum('network_node_type_enum', [
+// 📌 Network 특화 Enum (app_network_ prefix 적용)
+export const appNetworkNodeTypeEnum = pgEnum('app_network_node_type_enum', [
   'client',
   'prospect',
   'influencer',
@@ -40,8 +40,8 @@ export const networkNodeTypeEnum = pgEnum('network_node_type_enum', [
   'external',
 ]);
 
-export const networkConnectionTypeEnum = pgEnum(
-  'network_connection_type_enum',
+export const appNetworkConnectionTypeEnum = pgEnum(
+  'app_network_connection_type_enum',
   [
     'direct_referral',
     'family_member',
@@ -52,24 +52,27 @@ export const networkConnectionTypeEnum = pgEnum(
   ]
 );
 
-export const networkAnalysisTypeEnum = pgEnum('network_analysis_type_enum', [
-  'centrality',
-  'clustering',
-  'path_analysis',
-  'influence_mapping',
-  'growth_tracking',
-]);
+export const appNetworkAnalysisTypeEnum = pgEnum(
+  'app_network_analysis_type_enum',
+  [
+    'centrality',
+    'clustering',
+    'path_analysis',
+    'influence_mapping',
+    'growth_tracking',
+  ]
+);
 
-// 🏷️ Network 특화 테이블들 (prefix 네이밍 적용)
+// 🏷️ Network 특화 테이블들 (app_network_ prefix 적용)
 
 // Network Nodes 테이블 (네트워크 노드 관리)
-export const networkNodes = pgTable('network_nodes', {
+export const appNetworkNodes = pgTable('app_network_nodes', {
   id: uuid('id').primaryKey().defaultRandom(),
   agentId: uuid('agent_id')
     .notNull()
     .references(() => profiles.id),
   clientId: uuid('client_id').references(() => clients.id), // 고객인 경우
-  nodeType: networkNodeTypeEnum('node_type').notNull(),
+  nodeType: appNetworkNodeTypeEnum('node_type').notNull(),
   name: text('name').notNull(),
   email: text('email'),
   phone: text('phone'),
@@ -96,19 +99,19 @@ export const networkNodes = pgTable('network_nodes', {
     .notNull(),
 });
 
-// Network Connections 테이블 (네트워크 연결 관리)
-export const networkConnections = pgTable('network_connections', {
+// Network Edges/Connections 테이블 (네트워크 연결 관리)
+export const appNetworkEdges = pgTable('app_network_edges', {
   id: uuid('id').primaryKey().defaultRandom(),
   agentId: uuid('agent_id')
     .notNull()
     .references(() => profiles.id),
   sourceNodeId: uuid('source_node_id')
     .notNull()
-    .references(() => networkNodes.id, { onDelete: 'cascade' }),
+    .references(() => appNetworkNodes.id, { onDelete: 'cascade' }),
   targetNodeId: uuid('target_node_id')
     .notNull()
-    .references(() => networkNodes.id, { onDelete: 'cascade' }),
-  connectionType: networkConnectionTypeEnum('connection_type').notNull(),
+    .references(() => appNetworkNodes.id, { onDelete: 'cascade' }),
+  connectionType: appNetworkConnectionTypeEnum('connection_type').notNull(),
   strength: decimal('strength', { precision: 3, scale: 2 })
     .default('1.0')
     .notNull(), // 0.0-10.0
@@ -127,14 +130,14 @@ export const networkConnections = pgTable('network_connections', {
     .notNull(),
 });
 
-// Network Analysis Results 테이블 (네트워크 분석 결과)
-export const networkAnalysisResults = pgTable('network_analysis_results', {
+// Network Stats/Analysis Results 테이블 (네트워크 분석 결과)
+export const appNetworkStats = pgTable('app_network_stats', {
   id: uuid('id').primaryKey().defaultRandom(),
   agentId: uuid('agent_id')
     .notNull()
     .references(() => profiles.id),
   teamId: uuid('team_id').references(() => teams.id),
-  analysisType: networkAnalysisTypeEnum('analysis_type').notNull(),
+  analysisType: appNetworkAnalysisTypeEnum('analysis_type').notNull(),
   analysisDate: timestamp('analysis_date', { withTimezone: true })
     .defaultNow()
     .notNull(),
@@ -163,14 +166,14 @@ export const networkAnalysisResults = pgTable('network_analysis_results', {
 });
 
 // Network Interactions 테이블 (네트워크 상호작용 추적)
-export const networkInteractions = pgTable('network_interactions', {
+export const appNetworkInteractions = pgTable('app_network_interactions', {
   id: uuid('id').primaryKey().defaultRandom(),
   agentId: uuid('agent_id')
     .notNull()
     .references(() => profiles.id),
-  connectionId: uuid('connection_id')
+  edgeId: uuid('edge_id')
     .notNull()
-    .references(() => networkConnections.id, { onDelete: 'cascade' }),
+    .references(() => appNetworkEdges.id, { onDelete: 'cascade' }),
   interactionType: text('interaction_type').notNull(), // 'meeting', 'call', 'email', 'referral', 'event'
   interactionDate: timestamp('interaction_date', {
     withTimezone: true,
@@ -189,15 +192,15 @@ export const networkInteractions = pgTable('network_interactions', {
 });
 
 // Network Opportunities 테이블 (네트워크 기회 관리)
-export const networkOpportunities = pgTable('network_opportunities', {
+export const appNetworkOpportunities = pgTable('app_network_opportunities', {
   id: uuid('id').primaryKey().defaultRandom(),
   agentId: uuid('agent_id')
     .notNull()
     .references(() => profiles.id),
   sourceNodeId: uuid('source_node_id')
     .notNull()
-    .references(() => networkNodes.id),
-  targetNodeId: uuid('target_node_id').references(() => networkNodes.id), // 연결 대상 (있는 경우)
+    .references(() => appNetworkNodes.id),
+  targetNodeId: uuid('target_node_id').references(() => appNetworkNodes.id), // 연결 대상 (있는 경우)
   opportunityType: text('opportunity_type').notNull(), // 'introduction', 'collaboration', 'referral', 'event'
   title: text('title').notNull(),
   description: text('description'),
@@ -218,130 +221,132 @@ export const networkOpportunities = pgTable('network_opportunities', {
 });
 
 // 🔗 Relations (관계 정의)
-export const networkNodesRelations = relations(
-  networkNodes,
+export const appNetworkNodesRelations = relations(
+  appNetworkNodes,
   ({ one, many }) => ({
     agent: one(profiles, {
-      fields: [networkNodes.agentId],
+      fields: [appNetworkNodes.agentId],
       references: [profiles.id],
     }),
     client: one(clients, {
-      fields: [networkNodes.clientId],
+      fields: [appNetworkNodes.clientId],
       references: [clients.id],
     }),
-    sourceConnections: many(networkConnections, {
-      relationName: 'sourceConnections',
+    sourceEdges: many(appNetworkEdges, {
+      relationName: 'sourceEdges',
     }),
-    targetConnections: many(networkConnections, {
-      relationName: 'targetConnections',
+    targetEdges: many(appNetworkEdges, {
+      relationName: 'targetEdges',
     }),
-    opportunities: many(networkOpportunities),
+    opportunities: many(appNetworkOpportunities),
   })
 );
 
-export const networkConnectionsRelations = relations(
-  networkConnections,
+export const appNetworkEdgesRelations = relations(
+  appNetworkEdges,
   ({ one, many }) => ({
     agent: one(profiles, {
-      fields: [networkConnections.agentId],
+      fields: [appNetworkEdges.agentId],
       references: [profiles.id],
     }),
-    sourceNode: one(networkNodes, {
-      fields: [networkConnections.sourceNodeId],
-      references: [networkNodes.id],
-      relationName: 'sourceConnections',
+    sourceNode: one(appNetworkNodes, {
+      fields: [appNetworkEdges.sourceNodeId],
+      references: [appNetworkNodes.id],
+      relationName: 'sourceEdges',
     }),
-    targetNode: one(networkNodes, {
-      fields: [networkConnections.targetNodeId],
-      references: [networkNodes.id],
-      relationName: 'targetConnections',
+    targetNode: one(appNetworkNodes, {
+      fields: [appNetworkEdges.targetNodeId],
+      references: [appNetworkNodes.id],
+      relationName: 'targetEdges',
     }),
-    interactions: many(networkInteractions),
+    interactions: many(appNetworkInteractions),
   })
 );
 
-export const networkAnalysisResultsRelations = relations(
-  networkAnalysisResults,
+export const appNetworkStatsRelations = relations(
+  appNetworkStats,
   ({ one }) => ({
     agent: one(profiles, {
-      fields: [networkAnalysisResults.agentId],
+      fields: [appNetworkStats.agentId],
       references: [profiles.id],
     }),
     team: one(teams, {
-      fields: [networkAnalysisResults.teamId],
+      fields: [appNetworkStats.teamId],
       references: [teams.id],
     }),
   })
 );
 
-export const networkInteractionsRelations = relations(
-  networkInteractions,
+export const appNetworkInteractionsRelations = relations(
+  appNetworkInteractions,
   ({ one }) => ({
     agent: one(profiles, {
-      fields: [networkInteractions.agentId],
+      fields: [appNetworkInteractions.agentId],
       references: [profiles.id],
     }),
-    connection: one(networkConnections, {
-      fields: [networkInteractions.connectionId],
-      references: [networkConnections.id],
+    edge: one(appNetworkEdges, {
+      fields: [appNetworkInteractions.edgeId],
+      references: [appNetworkEdges.id],
     }),
   })
 );
 
-export const networkOpportunitiesRelations = relations(
-  networkOpportunities,
+export const appNetworkOpportunitiesRelations = relations(
+  appNetworkOpportunities,
   ({ one }) => ({
     agent: one(profiles, {
-      fields: [networkOpportunities.agentId],
+      fields: [appNetworkOpportunities.agentId],
       references: [profiles.id],
     }),
-    sourceNode: one(networkNodes, {
-      fields: [networkOpportunities.sourceNodeId],
-      references: [networkNodes.id],
+    sourceNode: one(appNetworkNodes, {
+      fields: [appNetworkOpportunities.sourceNodeId],
+      references: [appNetworkNodes.id],
     }),
-    targetNode: one(networkNodes, {
-      fields: [networkOpportunities.targetNodeId],
-      references: [networkNodes.id],
+    targetNode: one(appNetworkNodes, {
+      fields: [appNetworkOpportunities.targetNodeId],
+      references: [appNetworkNodes.id],
     }),
   })
 );
 
-// 📝 Network 특화 타입들 (실제 코드와 일치)
-export type NetworkNode = typeof networkNodes.$inferSelect;
-export type NewNetworkNode = typeof networkNodes.$inferInsert;
-export type NetworkConnection = typeof networkConnections.$inferSelect;
-export type NewNetworkConnection = typeof networkConnections.$inferInsert;
-export type NetworkAnalysisResult = typeof networkAnalysisResults.$inferSelect;
-export type NewNetworkAnalysisResult =
-  typeof networkAnalysisResults.$inferInsert;
-export type NetworkInteraction = typeof networkInteractions.$inferSelect;
-export type NewNetworkInteraction = typeof networkInteractions.$inferInsert;
-export type NetworkOpportunity = typeof networkOpportunities.$inferSelect;
-export type NewNetworkOpportunity = typeof networkOpportunities.$inferInsert;
+// 📝 Network 특화 타입들 (app_network_ 컨벤션 적용)
+export type AppNetworkNode = typeof appNetworkNodes.$inferSelect;
+export type NewAppNetworkNode = typeof appNetworkNodes.$inferInsert;
+export type AppNetworkEdge = typeof appNetworkEdges.$inferSelect;
+export type NewAppNetworkEdge = typeof appNetworkEdges.$inferInsert;
+export type AppNetworkStats = typeof appNetworkStats.$inferSelect;
+export type NewAppNetworkStats = typeof appNetworkStats.$inferInsert;
+export type AppNetworkInteraction = typeof appNetworkInteractions.$inferSelect;
+export type NewAppNetworkInteraction =
+  typeof appNetworkInteractions.$inferInsert;
+export type AppNetworkOpportunity = typeof appNetworkOpportunities.$inferSelect;
+export type NewAppNetworkOpportunity =
+  typeof appNetworkOpportunities.$inferInsert;
 
-export type NetworkNodeType = (typeof networkNodeTypeEnum.enumValues)[number];
-export type NetworkConnectionType =
-  (typeof networkConnectionTypeEnum.enumValues)[number];
-export type NetworkAnalysisType =
-  (typeof networkAnalysisTypeEnum.enumValues)[number];
+export type AppNetworkNodeType =
+  (typeof appNetworkNodeTypeEnum.enumValues)[number];
+export type AppNetworkConnectionType =
+  (typeof appNetworkConnectionTypeEnum.enumValues)[number];
+export type AppNetworkAnalysisType =
+  (typeof appNetworkAnalysisTypeEnum.enumValues)[number];
 
-// 🎯 Network 특화 인터페이스
-export interface NetworkOverview {
-  nodes: NetworkNode[];
-  connections: NetworkConnection[];
-  analysisResults: NetworkAnalysisResult[];
-  opportunities: NetworkOpportunity[];
-  stats: {
+// 🎯 Network 특화 인터페이스 (app_network_ 컨벤션 적용)
+export interface AppNetworkOverview {
+  nodes: AppNetworkNode[];
+  edges: AppNetworkEdge[];
+  stats: AppNetworkStats[];
+  opportunities: AppNetworkOpportunity[];
+  summary: {
     totalNodes: number;
-    totalConnections: number;
+    totalEdges: number;
     networkDensity: number;
-    topInfluencers: NetworkNode[];
+    topInfluencers: AppNetworkNode[];
   };
 }
 
-export interface NetworkFilter {
-  nodeTypes?: NetworkNodeType[];
-  connectionTypes?: NetworkConnectionType[];
+export interface AppNetworkFilter {
+  nodeTypes?: AppNetworkNodeType[];
+  connectionTypes?: AppNetworkConnectionType[];
   strengthRange?: {
     min: number;
     max: number;
@@ -355,9 +360,9 @@ export interface NetworkFilter {
   location?: string;
 }
 
-export interface NetworkStats {
+export interface AppNetworkMetrics {
   totalNodes: number;
-  totalConnections: number;
+  totalEdges: number;
   averageConnections: number;
   networkDensity: number;
   averagePathLength: number;
@@ -369,3 +374,22 @@ export interface NetworkStats {
     connectionsCount: number;
   }>;
 }
+
+// 🔄 호환성을 위한 별칭 (기존 코드와의 호환성 유지)
+export const networkNodes = appNetworkNodes;
+export const networkConnections = appNetworkEdges;
+export const networkAnalysisResults = appNetworkStats;
+export const networkInteractions = appNetworkInteractions;
+export const networkOpportunities = appNetworkOpportunities;
+
+export type NetworkNode = AppNetworkNode;
+export type NetworkConnection = AppNetworkEdge;
+export type NetworkAnalysisResult = AppNetworkStats;
+export type NetworkInteraction = AppNetworkInteraction;
+export type NetworkOpportunity = AppNetworkOpportunity;
+export type NetworkNodeType = AppNetworkNodeType;
+export type NetworkConnectionType = AppNetworkConnectionType;
+export type NetworkAnalysisType = AppNetworkAnalysisType;
+export type NetworkOverview = AppNetworkOverview;
+export type NetworkFilter = AppNetworkFilter;
+export type NetworkStats = AppNetworkMetrics;

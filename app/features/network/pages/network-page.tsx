@@ -146,6 +146,17 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
   });
   const [searchQuery, setSearchQuery] = useState('');
 
+  // 검색 결과 상태 추가 (옵시디언 스타일)
+  const [searchResults, setSearchResults] = useState<
+    Array<{
+      id: string;
+      name: string;
+      type: string;
+      stage?: string;
+      importance?: number;
+    }>
+  >([]);
+
   // 실제 네트워크 데이터 사용 - useMemo로 최적화
   const networkData = useMemo(
     () => ({
@@ -195,6 +206,55 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
     console.error('네트워크 그래프 오류 발생');
     setGraphLoadError(true);
   }, []);
+
+  // 검색 처리 함수 (옵시디언 스타일 즉시 검색)
+  const handleSearch = useCallback(
+    (query: string) => {
+      setSearchQuery(query);
+
+      if (!query.trim()) {
+        setSearchResults([]);
+        return;
+      }
+
+      // 실시간 검색 - 노드 이름으로 필터링
+      const results = nodes
+        .filter((node) => node.name.toLowerCase().includes(query.toLowerCase()))
+        .map((node) => ({
+          id: node.id,
+          name: node.name,
+          type: node.type === 'agent' ? 'influencer' : 'client',
+          stage: node.status === 'active' ? '계약 완료' : '첫 상담',
+          importance:
+            node.importance === 'high'
+              ? 5
+              : node.importance === 'medium'
+              ? 3
+              : 1,
+        }))
+        .slice(0, 10); // 최대 10개 결과
+
+      setSearchResults(results);
+    },
+    [nodes]
+  );
+
+  // 노드 포커스 함수 (옵시디언 스타일)
+  const handleNodeFocus = useCallback(
+    (nodeId: string) => {
+      setSelectedNode(nodeId);
+
+      // 그래프에서 해당 노드로 이동
+      if (graphRef.current && typeof graphRef.current.centerAt === 'function') {
+        const node = nodes.find((n) => n.id === nodeId);
+        if (node && node.position) {
+          // 노드 위치로 부드럽게 이동
+          graphRef.current.centerAt(node.position.x, node.position.y, 1000);
+        }
+      }
+    },
+    [nodes]
+  );
 
   const handleNodeSelect = useCallback((nodeId: string) => {
     setSelectedNode(nodeId);
@@ -340,24 +400,6 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
     setFilterSettings(newFilters);
   }, []);
 
-  // 검색어 변경 시도 통계 업데이트
-  const handleSearchChange = useCallback(
-    (query: string) => {
-      setSearchQuery(query);
-
-      // 검색어가 있고 필터링 결과 노드가 있으면 첫 번째 노드 자동 선택
-      if (query.trim() !== '' && filteredData.nodes.length > 0) {
-        // 필터링된 첫 번째 노드 선택
-        const firstMatchNode = filteredData.nodes[0];
-        setSelectedNode(firstMatchNode.id);
-      } else if (query.trim() === '') {
-        // 검색어가 비어있으면 선택 해제
-        setSelectedNode(null);
-      }
-    },
-    [filteredData.nodes]
-  );
-
   // 그래프 컴포넌트 렌더링
   const renderNetworkGraph = () => {
     // 서버 렌더링 시 표시할 내용
@@ -458,7 +500,11 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
               </CardDescription>
 
               {/* 컨트롤 패널 */}
-              <NetworkControls onSearch={handleSearchChange} />
+              <NetworkControls
+                onSearch={handleSearch}
+                searchResults={searchResults}
+                onNodeFocus={handleNodeFocus}
+              />
             </CardHeader>
 
             <CardContent className="flex-1 p-0 overflow-hidden relative">
