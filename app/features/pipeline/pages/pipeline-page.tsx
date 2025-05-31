@@ -4,11 +4,19 @@ import { useState } from 'react';
 import { PipelineBoard } from '~/features/pipeline/components/pipeline-board';
 import { PipelineFilters } from '~/features/pipeline/components/pipeline-filters';
 import { AddClientModal } from '~/features/pipeline/components/add-client-modal';
-import { Plus, Search, SlidersHorizontal, Users } from 'lucide-react';
+import {
+  Plus,
+  Search,
+  SlidersHorizontal,
+  Users,
+  TrendingUp,
+  Target,
+} from 'lucide-react';
 import { Button } from '~/common/components/ui/button';
 import { Input } from '~/common/components/ui/input';
 import type { Client } from '~/features/pipeline/types/types';
 import { Separator } from '~/common/components/ui/separator';
+import { Badge } from '~/common/components/ui/badge';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -107,7 +115,29 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
       name: client.name,
     }));
 
-  // 각 단계별 고객 수와 총 가치 계산
+  // 🎯 MVP용 전체 통계 계산
+  const getTotalStats = () => {
+    const totalClients = filteredClients.length;
+    const highImportanceClients = filteredClients.filter(
+      (client) => client.importance === 'high'
+    ).length;
+    const conversionRate =
+      stages.length > 0
+        ? Math.round(
+            (filteredClients.filter(
+              (client) =>
+                stages.findIndex((s) => s.id === client.stageId) >=
+                stages.length - 2
+            ).length /
+              Math.max(totalClients, 1)) *
+              100
+          )
+        : 0;
+
+    return { totalClients, highImportanceClients, conversionRate };
+  };
+
+  // 각 단계별 고객 수와 중요 고객 수 계산
   const getStageStats = (stageId: string) => {
     const stageClients = filteredClients.filter(
       (client) => client.stageId === stageId
@@ -158,30 +188,118 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
 
   // 필터가 적용되었는지 확인
   const isFilterActive =
-    selectedReferrerId !== null || selectedImportance !== 'all';
+    selectedReferrerId !== null ||
+    selectedImportance !== 'all' ||
+    searchQuery !== '';
+
+  const totalStats = getTotalStats();
 
   return (
     <MainLayout title="영업 파이프라인">
       <div className="space-y-6">
-        {/* 전체 상단 영역 - sticky로 고정 */}
+        {/* 🎯 MVP 통계 헤더 - sticky로 고정 */}
         <div className="sticky -top-8 z-20 bg-background border-b border-border pb-6">
+          {/* 전체 통계 카드 */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 pt-6">
+            <div className="flex items-center space-x-3 p-4 bg-card rounded-lg border">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <Users className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  전체 고객
+                </p>
+                <p className="text-2xl font-bold text-foreground">
+                  {totalStats.totalClients}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  중요 고객:{' '}
+                  <span className="text-red-500 font-medium">
+                    {totalStats.highImportanceClients}
+                  </span>
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-3 p-4 bg-card rounded-lg border">
+              <div className="p-2 bg-emerald-500/10 rounded-lg">
+                <TrendingUp className="h-5 w-5 text-emerald-600" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  전환율
+                </p>
+                <p className="text-2xl font-bold text-foreground">
+                  {totalStats.conversionRate}%
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  최종 단계 진입률
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-3 p-4 bg-card rounded-lg border">
+              <div className="p-2 bg-blue-500/10 rounded-lg">
+                <Target className="h-5 w-5 text-blue-600" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  진행 단계
+                </p>
+                <p className="text-2xl font-bold text-foreground">
+                  {stages.length}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  활성 파이프라인 단계
+                </p>
+              </div>
+            </div>
+          </div>
+
           {/* 필터 및 검색 섹션 */}
-          <div className="flex items-center justify-between mb-6 pt-6">
-            <div className="flex w-full max-w-sm items-center space-x-2">
-              <Input
-                type="search"
-                placeholder="고객명, 전화번호 검색..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-[250px]"
-                autoComplete="off"
-              />
-              <Button type="submit" size="icon" variant="ghost">
-                <Search className="h-4 w-4" />
-              </Button>
+          <div className="flex items-center justify-between">
+            <div className="flex w-full max-w-md items-center space-x-2">
+              <div className="relative w-full">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="search"
+                  placeholder="고객명, 전화번호 검색..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 w-full"
+                  autoComplete="off"
+                />
+              </div>
             </div>
 
             <div className="flex items-center gap-3">
+              {/* 활성 필터 표시 */}
+              {isFilterActive && (
+                <div className="flex items-center gap-2">
+                  {searchQuery && (
+                    <Badge variant="secondary" className="text-xs">
+                      검색: {searchQuery}
+                    </Badge>
+                  )}
+                  {selectedImportance !== 'all' && (
+                    <Badge variant="secondary" className="text-xs">
+                      중요도:{' '}
+                      {selectedImportance === 'high'
+                        ? '높음'
+                        : selectedImportance === 'medium'
+                        ? '보통'
+                        : '낮음'}
+                    </Badge>
+                  )}
+                  {selectedReferrerId && (
+                    <Badge variant="secondary" className="text-xs">
+                      소개자:{' '}
+                      {referrers.find((r) => r.id === selectedReferrerId)?.name}
+                    </Badge>
+                  )}
+                </div>
+              )}
+
               {/* 필터 드롭다운 메뉴 */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -190,7 +308,15 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
                     className="flex items-center gap-2"
                   >
                     <SlidersHorizontal className="h-4 w-4" />
-                    <span>필터 {isFilterActive ? '적용됨' : ''}</span>
+                    <span>필터</span>
+                    {isFilterActive && (
+                      <Badge
+                        variant="destructive"
+                        className="ml-1 px-1 text-xs"
+                      >
+                        ●
+                      </Badge>
+                    )}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
@@ -198,154 +324,75 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
                   align="end"
                   sideOffset={4}
                 >
-                  <div className="space-y-4">
-                    <h3 className="font-medium">필터 설정</h3>
-                    <PipelineFilters
-                      referrers={referrers}
-                      selectedReferrerId={selectedReferrerId}
-                      onReferrerChange={setSelectedReferrerId}
-                      selectedImportance={selectedImportance}
-                      onImportanceChange={setSelectedImportance}
-                    />
-                  </div>
+                  <PipelineFilters
+                    referrers={referrers}
+                    selectedReferrerId={selectedReferrerId}
+                    onReferrerChange={setSelectedReferrerId}
+                    selectedImportance={selectedImportance}
+                    onImportanceChange={setSelectedImportance}
+                  />
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              <Separator orientation="vertical" className="h-6" />
-
+              {/* 고객 추가 버튼 */}
               <Button
+                onClick={() => setAddClientOpen(true)}
                 className="flex items-center gap-2"
-                onClick={() => {
-                  setSelectedStageId('');
-                  setAddClientOpen(true);
-                }}
               >
                 <Plus className="h-4 w-4" />
                 <span>고객 추가</span>
               </Button>
             </div>
           </div>
-
-          {/* 활성화된 필터 표시 */}
-          {isFilterActive && (
-            <div className="flex flex-wrap gap-2 items-center mb-6">
-              {selectedReferrerId && (
-                <div className="inline-flex items-center rounded-full bg-muted px-3 py-1 text-sm">
-                  <span className="mr-1">소개자:</span>
-                  <span className="font-semibold mr-1">
-                    {referrers.find((r) => r.id === selectedReferrerId)?.name}
-                  </span>
-                  <button
-                    onClick={() => setSelectedReferrerId(null)}
-                    className="ml-1 rounded-full hover:bg-muted-foreground/20 w-4 h-4 inline-flex items-center justify-center"
-                  >
-                    ×
-                  </button>
-                </div>
-              )}
-
-              {selectedImportance !== 'all' && (
-                <div className="inline-flex items-center rounded-full bg-muted px-3 py-1 text-sm">
-                  <span className="mr-1">중요도:</span>
-                  <span className="font-semibold mr-1">
-                    {selectedImportance === 'high'
-                      ? '높음'
-                      : selectedImportance === 'medium'
-                      ? '중간'
-                      : '낮음'}
-                  </span>
-                  <button
-                    onClick={() => setSelectedImportance('all')}
-                    className="ml-1 rounded-full hover:bg-muted-foreground/20 w-4 h-4 inline-flex items-center justify-center"
-                  >
-                    ×
-                  </button>
-                </div>
-              )}
-
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-xs h-7"
-                onClick={() => {
-                  setSelectedReferrerId(null);
-                  setSelectedImportance('all');
-                }}
-              >
-                필터 초기화
-              </Button>
-            </div>
-          )}
-
-          {/* 칸반보드 헤더 - sticky 영역에 포함 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-            {stages.map((stage) => {
-              const stats = getStageStats(stage.id);
-
-              return (
-                <div key={`header-${stage.id}`} className="min-w-[300px]">
-                  <div className="flex flex-col p-4 rounded-lg border bg-card">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center space-x-3">
-                        <div
-                          className="w-3 h-3 rounded-full"
-                          style={{ backgroundColor: stage.color }}
-                        />
-                        <h3 className="font-semibold text-foreground text-base">
-                          {stage.name}
-                        </h3>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                        onClick={() => handleAddClientToStage(stage.id)}
-                      >
-                        <Plus className="h-4 w-4" />
-                      </Button>
-                    </div>
-
-                    <div className="flex items-center justify-between text-sm">
-                      <div className="flex items-center space-x-1 text-muted-foreground">
-                        <Users className="h-3 w-3" />
-                        <span className="font-medium">
-                          {stats.clientCount}명
-                        </span>
-                      </div>
-                      {stats.highImportanceCount > 0 && (
-                        <div className="flex items-center space-x-1">
-                          <div className="w-2 h-2 rounded-full bg-red-500" />
-                          <span className="text-xs text-red-600 font-medium">
-                            중요 {stats.highImportanceCount}명
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
         </div>
 
-        {/* 칸반보드 섹션 */}
-        <PipelineBoard
-          stages={stages}
-          clients={filteredClients as Client[]}
-          onClientMove={handleClientMove}
-          onAddClientToStage={handleAddClientToStage}
-        />
+        {/* 🎯 칸반보드 메인 콘텐츠 */}
+        <div className="min-h-[600px]">
+          <PipelineBoard
+            stages={stages.map((stage) => ({
+              ...stage,
+              stats: getStageStats(stage.id),
+            }))}
+            clients={filteredClients}
+            onClientMove={handleClientMove}
+            onAddClientToStage={handleAddClientToStage}
+          />
+        </div>
 
-        {/* 고객 추가 모달 */}
-        <AddClientModal
-          open={addClientOpen}
-          onOpenChange={setAddClientOpen}
-          stages={stages}
-          referrers={referrers}
-          initialStageId={selectedStageId}
-          onAddClient={handleAddClient}
-        />
+        {/* 필터 결과 안내 */}
+        {isFilterActive && (
+          <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border border-dashed">
+            <div className="flex items-center gap-2">
+              <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium">
+                필터 적용됨: {filteredClients.length}명의 고객이 표시되고
+                있습니다
+              </span>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setSearchQuery('');
+                setSelectedReferrerId(null);
+                setSelectedImportance('all');
+              }}
+            >
+              필터 초기화
+            </Button>
+          </div>
+        )}
       </div>
+
+      {/* 고객 추가 모달 */}
+      <AddClientModal
+        open={addClientOpen}
+        onOpenChange={setAddClientOpen}
+        stages={stages}
+        referrers={referrers}
+        initialStageId={selectedStageId}
+        onAddClient={handleAddClient}
+      />
     </MainLayout>
   );
 }

@@ -1,5 +1,5 @@
 // 🔄 Pipeline 기능 전용 스키마
-// Prefix 네이밍 컨벤션: pipeline_ 사용
+// Prefix 네이밍 컨벤션: app_pipeline_ 사용 (공통 스키마와 일관성 유지)
 // 공통 스키마에서 기본 테이블들을 import
 export {
   profiles,
@@ -32,9 +32,9 @@ import {
 import { relations } from 'drizzle-orm';
 import { profiles, teams, clients, pipelineStages } from '~/lib/schema';
 
-// 📌 Pipeline 특화 Enum (prefix 네이밍 적용)
-export const pipelineStageActionTypeEnum = pgEnum(
-  'pipeline_stage_action_type_enum',
+// 📌 Pipeline 특화 Enum (app_pipeline_ prefix 네이밍 적용)
+export const appPipelineStageActionTypeEnum = pgEnum(
+  'app_pipeline_stage_action_type_enum',
   [
     'moved_to_stage',
     'stage_created',
@@ -45,7 +45,7 @@ export const pipelineStageActionTypeEnum = pgEnum(
   ]
 );
 
-export const pipelineViewTypeEnum = pgEnum('pipeline_view_type_enum', [
+export const appPipelineViewTypeEnum = pgEnum('app_pipeline_view_type_enum', [
   'kanban',
   'list',
   'table',
@@ -53,8 +53,8 @@ export const pipelineViewTypeEnum = pgEnum('pipeline_view_type_enum', [
   'funnel',
 ]);
 
-export const pipelineAutomationTriggerEnum = pgEnum(
-  'pipeline_automation_trigger_enum',
+export const appPipelineAutomationTriggerEnum = pgEnum(
+  'app_pipeline_automation_trigger_enum',
   [
     'stage_entry',
     'stage_exit',
@@ -65,8 +65,8 @@ export const pipelineAutomationTriggerEnum = pgEnum(
   ]
 );
 
-export const pipelineAutomationActionEnum = pgEnum(
-  'pipeline_automation_action_enum',
+export const appPipelineAutomationActionEnum = pgEnum(
+  'app_pipeline_automation_action_enum',
   [
     'send_notification',
     'create_task',
@@ -77,10 +77,10 @@ export const pipelineAutomationActionEnum = pgEnum(
   ]
 );
 
-// 🏷️ Pipeline 특화 테이블들 (prefix 네이밍 적용)
+// 🏷️ Pipeline 특화 테이블들 (app_pipeline_ prefix 네이밍 적용)
 
 // Pipeline Stage History 테이블 (단계 변경 이력)
-export const pipelineStageHistory = pgTable('pipeline_stage_history', {
+export const appPipelineStageHistory = pgTable('app_pipeline_stage_history', {
   id: uuid('id').primaryKey().defaultRandom(),
   clientId: uuid('client_id')
     .notNull()
@@ -92,7 +92,7 @@ export const pipelineStageHistory = pgTable('pipeline_stage_history', {
   changedBy: uuid('changed_by')
     .notNull()
     .references(() => profiles.id),
-  actionType: pipelineStageActionTypeEnum('action_type').notNull(),
+  actionType: appPipelineStageActionTypeEnum('action_type').notNull(),
   reason: text('reason'),
   notes: text('notes'),
   timeInPreviousStage: integer('time_in_previous_stage'), // 이전 단계에서 머문 시간 (일)
@@ -103,7 +103,7 @@ export const pipelineStageHistory = pgTable('pipeline_stage_history', {
 });
 
 // Pipeline Views 테이블 (파이프라인 뷰 설정)
-export const pipelineViews = pgTable('pipeline_views', {
+export const appPipelineViews = pgTable('app_pipeline_views', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: uuid('user_id')
     .notNull()
@@ -111,7 +111,7 @@ export const pipelineViews = pgTable('pipeline_views', {
   teamId: uuid('team_id').references(() => teams.id),
   name: text('name').notNull(),
   description: text('description'),
-  viewType: pipelineViewTypeEnum('view_type').default('kanban').notNull(),
+  viewType: appPipelineViewTypeEnum('view_type').default('kanban').notNull(),
   filters: jsonb('filters'), // 필터 설정
   sortBy: text('sort_by').default('created_at'),
   sortOrder: text('sort_order').default('desc'), // 'asc', 'desc'
@@ -131,7 +131,7 @@ export const pipelineViews = pgTable('pipeline_views', {
 });
 
 // Pipeline Automations 테이블 (파이프라인 자동화)
-export const pipelineAutomations = pgTable('pipeline_automations', {
+export const appPipelineAutomations = pgTable('app_pipeline_automations', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: uuid('user_id')
     .notNull()
@@ -139,7 +139,7 @@ export const pipelineAutomations = pgTable('pipeline_automations', {
   teamId: uuid('team_id').references(() => teams.id),
   name: text('name').notNull(),
   description: text('description'),
-  trigger: pipelineAutomationTriggerEnum('trigger').notNull(),
+  trigger: appPipelineAutomationTriggerEnum('trigger').notNull(),
   triggerConditions: jsonb('trigger_conditions').notNull(),
   actions: jsonb('actions').notNull(), // 실행할 액션들
   stageId: uuid('stage_id').references(() => pipelineStages.id), // 특정 단계에 대한 자동화
@@ -154,8 +154,8 @@ export const pipelineAutomations = pgTable('pipeline_automations', {
     .notNull(),
 });
 
-// Pipeline Analytics 테이블 (파이프라인 분석)
-export const pipelineAnalytics = pgTable('pipeline_analytics', {
+// Pipeline Analytics 테이블 (파이프라인 분석) - MVP에서는 기본 통계만
+export const appPipelineAnalytics = pgTable('app_pipeline_analytics', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: uuid('user_id')
     .notNull()
@@ -173,56 +173,53 @@ export const pipelineAnalytics = pgTable('pipeline_analytics', {
     scale: 2,
   }), // 평균 머무는 시간 (일)
   conversionRate: decimal('conversion_rate', { precision: 5, scale: 2 }), // 다음 단계로의 전환율
-  totalValue: decimal('total_value', { precision: 15, scale: 2 }).default('0'), // 해당 단계 고객들의 총 가치
-  averageValue: decimal('average_value', { precision: 12, scale: 2 }).default(
-    '0'
-  ), // 평균 고객 가치
   createdAt: timestamp('created_at', { withTimezone: true })
     .defaultNow()
     .notNull(),
 });
 
 // Pipeline Stage Templates 테이블 (단계 템플릿)
-export const pipelineStageTemplates = pgTable('pipeline_stage_templates', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  userId: uuid('user_id').references(() => profiles.id), // null이면 시스템 템플릿
-  teamId: uuid('team_id').references(() => teams.id),
-  name: text('name').notNull(),
-  description: text('description'),
-  category: text('category'), // 'insurance', 'general', 'custom'
-  stages: jsonb('stages').notNull(), // 단계 정의들
-  isDefault: boolean('is_default').default(false).notNull(),
-  isPublic: boolean('is_public').default(false).notNull(),
-  usageCount: integer('usage_count').default(0).notNull(),
-  createdAt: timestamp('created_at', { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-  updatedAt: timestamp('updated_at', { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-});
+export const appPipelineStageTemplates = pgTable(
+  'app_pipeline_stage_templates',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id').references(() => profiles.id), // null이면 시스템 템플릿
+    teamId: uuid('team_id').references(() => teams.id),
+    name: text('name').notNull(),
+    description: text('description'),
+    category: text('category'), // 'insurance', 'general', 'custom'
+    stages: jsonb('stages').notNull(), // 단계 정의들
+    isDefault: boolean('is_default').default(false).notNull(),
+    isPublic: boolean('is_public').default(false).notNull(),
+    usageCount: integer('usage_count').default(0).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  }
+);
 
-// Pipeline Goals 테이블 (파이프라인 목표)
-export const pipelineGoals = pgTable('pipeline_goals', {
+// Pipeline Goals 테이블 (목표 설정) - MVP에서는 단순한 목표만
+export const appPipelineGoals = pgTable('app_pipeline_goals', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: uuid('user_id')
     .notNull()
     .references(() => profiles.id),
   teamId: uuid('team_id').references(() => teams.id),
-  stageId: uuid('stage_id').references(() => pipelineStages.id), // 특정 단계 목표
+  stageId: uuid('stage_id').references(() => pipelineStages.id), // null이면 전체 파이프라인 목표
   name: text('name').notNull(),
   description: text('description'),
-  targetType: text('target_type').notNull(), // 'conversion_rate', 'time_in_stage', 'value', 'count'
-  targetValue: decimal('target_value', { precision: 12, scale: 2 }).notNull(),
-  currentValue: decimal('current_value', { precision: 12, scale: 2 }).default(
+  targetType: text('target_type').notNull(), // 'client_count', 'conversion_rate'
+  targetValue: decimal('target_value', { precision: 10, scale: 2 }).notNull(),
+  currentValue: decimal('current_value', { precision: 10, scale: 2 }).default(
     '0'
   ),
-  period: text('period').notNull(), // 'daily', 'weekly', 'monthly', 'quarterly', 'yearly'
+  period: text('period').notNull(), // 'daily', 'weekly', 'monthly', 'quarterly'
   startDate: date('start_date').notNull(),
   endDate: date('end_date').notNull(),
   isActive: boolean('is_active').default(true).notNull(),
-  achievedAt: timestamp('achieved_at', { withTimezone: true }),
-  notifications: jsonb('notifications'), // 알림 설정
   createdAt: timestamp('created_at', { withTimezone: true })
     .defaultNow()
     .notNull(),
@@ -231,138 +228,114 @@ export const pipelineGoals = pgTable('pipeline_goals', {
     .notNull(),
 });
 
-// 🔗 Relations (관계 정의)
-export const pipelineStageHistoryRelations = relations(
-  pipelineStageHistory,
+// 🔗 Relations (단순화된 MVP 버전)
+export const appPipelineStageHistoryRelations = relations(
+  appPipelineStageHistory,
   ({ one }) => ({
     client: one(clients, {
-      fields: [pipelineStageHistory.clientId],
+      fields: [appPipelineStageHistory.clientId],
       references: [clients.id],
     }),
     fromStage: one(pipelineStages, {
-      fields: [pipelineStageHistory.fromStageId],
+      fields: [appPipelineStageHistory.fromStageId],
       references: [pipelineStages.id],
     }),
     toStage: one(pipelineStages, {
-      fields: [pipelineStageHistory.toStageId],
+      fields: [appPipelineStageHistory.toStageId],
       references: [pipelineStages.id],
     }),
     changedByUser: one(profiles, {
-      fields: [pipelineStageHistory.changedBy],
+      fields: [appPipelineStageHistory.changedBy],
       references: [profiles.id],
     }),
   })
 );
 
-export const pipelineViewsRelations = relations(pipelineViews, ({ one }) => ({
-  user: one(profiles, {
-    fields: [pipelineViews.userId],
-    references: [profiles.id],
-  }),
-  team: one(teams, {
-    fields: [pipelineViews.teamId],
-    references: [teams.id],
-  }),
-}));
-
-export const pipelineAutomationsRelations = relations(
-  pipelineAutomations,
+export const appPipelineViewsRelations = relations(
+  appPipelineViews,
   ({ one }) => ({
     user: one(profiles, {
-      fields: [pipelineAutomations.userId],
+      fields: [appPipelineViews.userId],
       references: [profiles.id],
     }),
     team: one(teams, {
-      fields: [pipelineAutomations.teamId],
+      fields: [appPipelineViews.teamId],
+      references: [teams.id],
+    }),
+  })
+);
+
+export const appPipelineAnalyticsRelations = relations(
+  appPipelineAnalytics,
+  ({ one }) => ({
+    user: one(profiles, {
+      fields: [appPipelineAnalytics.userId],
+      references: [profiles.id],
+    }),
+    team: one(teams, {
+      fields: [appPipelineAnalytics.teamId],
       references: [teams.id],
     }),
     stage: one(pipelineStages, {
-      fields: [pipelineAutomations.stageId],
+      fields: [appPipelineAnalytics.stageId],
       references: [pipelineStages.id],
     }),
   })
 );
 
-export const pipelineAnalyticsRelations = relations(
-  pipelineAnalytics,
+export const appPipelineGoalsRelations = relations(
+  appPipelineGoals,
   ({ one }) => ({
     user: one(profiles, {
-      fields: [pipelineAnalytics.userId],
+      fields: [appPipelineGoals.userId],
       references: [profiles.id],
     }),
     team: one(teams, {
-      fields: [pipelineAnalytics.teamId],
+      fields: [appPipelineGoals.teamId],
       references: [teams.id],
     }),
     stage: one(pipelineStages, {
-      fields: [pipelineAnalytics.stageId],
+      fields: [appPipelineGoals.stageId],
       references: [pipelineStages.id],
     }),
   })
 );
 
-export const pipelineStageTemplatesRelations = relations(
-  pipelineStageTemplates,
-  ({ one }) => ({
-    user: one(profiles, {
-      fields: [pipelineStageTemplates.userId],
-      references: [profiles.id],
-    }),
-    team: one(teams, {
-      fields: [pipelineStageTemplates.teamId],
-      references: [teams.id],
-    }),
-  })
-);
-
-export const pipelineGoalsRelations = relations(pipelineGoals, ({ one }) => ({
-  user: one(profiles, {
-    fields: [pipelineGoals.userId],
-    references: [profiles.id],
-  }),
-  team: one(teams, {
-    fields: [pipelineGoals.teamId],
-    references: [teams.id],
-  }),
-  stage: one(pipelineStages, {
-    fields: [pipelineGoals.stageId],
-    references: [pipelineStages.id],
-  }),
-}));
-
-// 📝 Pipeline 특화 타입들 (실제 코드와 일치)
-export type PipelineStageHistory = typeof pipelineStageHistory.$inferSelect;
-export type NewPipelineStageHistory = typeof pipelineStageHistory.$inferInsert;
-export type PipelineView = typeof pipelineViews.$inferSelect;
-export type NewPipelineView = typeof pipelineViews.$inferInsert;
-export type PipelineAutomation = typeof pipelineAutomations.$inferSelect;
-export type NewPipelineAutomation = typeof pipelineAutomations.$inferInsert;
-export type PipelineAnalytics = typeof pipelineAnalytics.$inferSelect;
-export type NewPipelineAnalytics = typeof pipelineAnalytics.$inferInsert;
-export type PipelineStageTemplate = typeof pipelineStageTemplates.$inferSelect;
+// 🎯 MVP용 타입 정의 (필수 기능만)
+export type PipelineStageHistory = typeof appPipelineStageHistory.$inferSelect;
+export type NewPipelineStageHistory =
+  typeof appPipelineStageHistory.$inferInsert;
+export type PipelineView = typeof appPipelineViews.$inferSelect;
+export type NewPipelineView = typeof appPipelineViews.$inferInsert;
+export type PipelineAnalytics = typeof appPipelineAnalytics.$inferSelect;
+export type NewPipelineAnalytics = typeof appPipelineAnalytics.$inferInsert;
+export type PipelineStageTemplate =
+  typeof appPipelineStageTemplates.$inferSelect;
 export type NewPipelineStageTemplate =
-  typeof pipelineStageTemplates.$inferInsert;
-export type PipelineGoal = typeof pipelineGoals.$inferSelect;
-export type NewPipelineGoal = typeof pipelineGoals.$inferInsert;
+  typeof appPipelineStageTemplates.$inferInsert;
+export type PipelineGoal = typeof appPipelineGoals.$inferSelect;
+export type NewPipelineGoal = typeof appPipelineGoals.$inferInsert;
 
+// Enum 타입들
 export type PipelineStageActionType =
-  (typeof pipelineStageActionTypeEnum.enumValues)[number];
-export type PipelineViewType = (typeof pipelineViewTypeEnum.enumValues)[number];
+  (typeof appPipelineStageActionTypeEnum.enumValues)[number];
+export type PipelineViewType =
+  (typeof appPipelineViewTypeEnum.enumValues)[number];
 export type PipelineAutomationTrigger =
-  (typeof pipelineAutomationTriggerEnum.enumValues)[number];
+  (typeof appPipelineAutomationTriggerEnum.enumValues)[number];
 export type PipelineAutomationAction =
-  (typeof pipelineAutomationActionEnum.enumValues)[number];
+  (typeof appPipelineAutomationActionEnum.enumValues)[number];
 
-// 🎯 Pipeline 특화 인터페이스
+// 🎯 MVP용 인터페이스 (단순화된 버전)
 export interface PipelineOverview {
   stages: (typeof pipelineStages.$inferSelect)[];
   analytics: PipelineAnalytics[];
   goals: PipelineGoal[];
-  automations: PipelineAutomation[];
   totalClients: number;
   conversionRates: { [stageId: string]: number };
 }
 
+// MVP용 필터 (기본 필터링만)
 export interface PipelineFilter {
   stageIds?: string[];
   userIds?: string[];
@@ -370,24 +343,18 @@ export interface PipelineFilter {
     start: Date;
     end: Date;
   };
-  valueRange?: {
-    min: number;
-    max: number;
-  };
   clientImportance?: string[];
+  searchQuery?: string;
 }
 
+// MVP용 통계 (핵심 지표만)
 export interface PipelineStats {
   totalClients: number;
-  totalValue: number;
-  averageValue: number;
-  overallConversionRate: number;
   stageBreakdown: {
     stageId: string;
     stageName: string;
     clientCount: number;
-    totalValue: number;
+    highImportanceCount: number;
     averageTimeInStage: number;
-    conversionRate: number;
   }[];
 }
