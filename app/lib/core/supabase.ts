@@ -1,7 +1,6 @@
-import {
-  createClient as createSupabaseClient,
-  SupabaseClient,
-} from '@supabase/supabase-js';
+import pkg from '@supabase/supabase-js';
+const { createClient: createSupabaseClient } = pkg;
+type SupabaseClient = any; // 임시 타입 정의
 
 // 환경변수 검증 및 로드
 function getSupabaseConfig() {
