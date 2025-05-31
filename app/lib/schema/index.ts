@@ -181,6 +181,21 @@ import {
   appNotificationSubscriptionsRelations,
 } from '~/features/notifications/lib/schema';
 
+// Pipeline 기능 전용 테이블들 import (새로운 테이블들만)
+import {
+  // Pipeline 테이블들
+  appPipelineStageHistory,
+  appPipelineViews,
+  appPipelineAnalytics,
+  appPipelineStageTemplates,
+  appPipelineGoals,
+  // Pipeline Relations
+  appPipelineStageHistoryRelations,
+  appPipelineViewsRelations,
+  appPipelineAnalyticsRelations,
+  appPipelineGoalsRelations,
+} from '~/features/pipeline/lib/schema';
+
 // Drizzle 설정용 통합 스키마
 export const schema = {
   // ===== Core 테이블들 =====
@@ -255,6 +270,13 @@ export const schema = {
   appNotificationHistory,
   appNotificationRules,
   appNotificationSubscriptions,
+
+  // ===== Pipeline 기능 전용 테이블들 =====
+  appPipelineStageHistory,
+  appPipelineViews,
+  appPipelineAnalytics,
+  appPipelineStageTemplates,
+  appPipelineGoals,
 
   // ===== Public 테이블들 =====
   publicContents,
@@ -333,6 +355,11 @@ export const schema = {
   appNotificationHistoryRelations,
   appNotificationRulesRelations,
   appNotificationSubscriptionsRelations,
+  // Pipeline Relations
+  appPipelineStageHistoryRelations,
+  appPipelineViewsRelations,
+  appPipelineAnalyticsRelations,
+  appPipelineGoalsRelations,
 };
 
 // 타입 정의
