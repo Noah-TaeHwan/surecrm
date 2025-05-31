@@ -119,7 +119,7 @@ export async function getClientsByStage(agentId: string) {
           .select()
           .from(meetings)
           .where(eq(meetings.clientId, item.client.id))
-          .orderBy(desc(meetings.startTime))
+          .orderBy(desc(meetings.scheduledAt))
           .limit(5);
 
         return {
@@ -182,7 +182,7 @@ export async function getClientById(id: string) {
       .select()
       .from(meetings)
       .where(eq(meetings.clientId, item.client.id))
-      .orderBy(desc(meetings.startTime));
+      .orderBy(desc(meetings.scheduledAt));
 
     // 추천 정보
     const clientReferrals = await db

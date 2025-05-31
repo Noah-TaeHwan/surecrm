@@ -52,7 +52,7 @@ export async function generateUniqueInvitationCode(): Promise<string> {
 }
 
 /**
- * 사용자에게 초대장 발급
+ * 사용자에게 추천 코드 발급 (MVP: 정확히 2개만)
  */
 export async function createInvitationsForUser(
   userId: string,
@@ -61,16 +61,54 @@ export async function createInvitationsForUser(
   const supabase = createServerClient();
 
   try {
+    // MVP: 무조건 2개로 제한
+    const finalCount = Math.min(count, 2);
+
+    // 기존 추천 코드 개수 확인 (중복 생성 방지)
+    const { data: existing, error: checkError } = await supabase
+      .from('invitations')
+      .select('id')
+      .eq('inviter_id', userId);
+
+    if (checkError) {
+      console.error('기존 추천 코드 확인 오류:', checkError);
+      return { success: false, error: checkError.message };
+    }
+
+    // 이미 추천 코드가 있으면 생성하지 않음
+    if (existing && existing.length >= 2) {
+      console.log(
+        `사용자 ${userId}는 이미 ${existing.length}개의 추천 코드를 보유중`
+      );
+      return {
+        success: true,
+        invitations: existing,
+        error: '이미 최대 개수의 추천 코드를 보유하고 있습니다.',
+      };
+    }
+
+    // 새로 생성할 개수 계산
+    const remainingSlots = 2 - (existing?.length || 0);
+    const createCount = Math.min(finalCount, remainingSlots);
+
+    if (createCount <= 0) {
+      return {
+        success: true,
+        invitations: existing,
+        error: '더 이상 추천 코드를 생성할 수 없습니다.',
+      };
+    }
+
     const invitations = [];
 
-    for (let i = 0; i < count; i++) {
+    for (let i = 0; i < createCount; i++) {
       const code = await generateUniqueInvitationCode();
 
       invitations.push({
         code,
         inviter_id: userId,
         status: 'pending',
-        // expires_at 제거 - 유효기간 없음
+        // expires_at 제거 - 유효기간 없음 (영구 유효)
       });
     }
 
@@ -80,14 +118,19 @@ export async function createInvitationsForUser(
       .select();
 
     if (error) {
-      console.error('초대장 생성 오류:', error);
+      console.error('추천 코드 생성 오류:', error);
       return { success: false, error: error.message };
     }
 
+    console.log(
+      `✨ 사용자 ${userId}에게 ${createCount}개의 추천 코드 생성 완료 (총 ${
+        (existing?.length || 0) + createCount
+      }개)`
+    );
     return { success: true, invitations: data };
   } catch (error) {
-    console.error('초대장 생성 중 예외 발생:', error);
-    return { success: false, error: '초대장 생성 중 오류가 발생했습니다.' };
+    console.error('추천 코드 생성 중 예외 발생:', error);
+    return { success: false, error: '추천 코드 생성 중 오류가 발생했습니다.' };
   }
 }
 

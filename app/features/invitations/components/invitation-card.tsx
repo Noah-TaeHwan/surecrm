@@ -10,7 +10,7 @@ import { Button } from '~/common/components/ui/button';
 import { Input } from '~/common/components/ui/input';
 import { Avatar, AvatarFallback } from '~/common/components/ui/avatar';
 import { CopyIcon, CheckCircledIcon, TimerIcon } from '@radix-ui/react-icons';
-import type { InvitationCardProps } from './types';
+import type { InvitationCardProps } from '../types';
 
 export function InvitationCard({
   invitation,
@@ -22,7 +22,9 @@ export function InvitationCard({
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="text-lg">초대장 #{invitation.id}</CardTitle>
+            <CardTitle className="text-lg">
+              추천 코드 #{invitation.id}
+            </CardTitle>
             <CardDescription>
               생성일: {invitation.createdAt}
               {invitation.usedAt && ` · 사용일: ${invitation.usedAt}`}
@@ -59,7 +61,7 @@ export function InvitationCard({
                 {invitation.invitee.name}님이 가입했습니다
               </div>
               <div className="text-sm text-muted-foreground">
-                {invitation.invitee.joinedAt} 가입
+                {invitation.invitee.joinedAt} 프리미엄 멤버십 가입
               </div>
             </div>
             <Badge variant="secondary">성공</Badge>
@@ -68,7 +70,7 @@ export function InvitationCard({
           <div className="space-y-3">
             <div>
               <label className="text-sm font-medium text-muted-foreground">
-                초대 링크
+                추천 링크
               </label>
               <div className="flex items-center gap-2 mt-1">
                 <Input
@@ -90,9 +92,9 @@ export function InvitationCard({
               </div>
             </div>
             <div className="text-sm text-muted-foreground bg-muted/30 p-3 rounded-lg border border-border">
-              💡 <strong>팁:</strong> 링크를 복사해서 카카오톡, 이메일, 문자로
-              동료에게 전송하세요. 보험설계사 동료들에게 SureCRM의 소개 네트워크
-              기능을 소개해보세요!
+              💡 <strong>추천 가이드:</strong> 링크를 복사해서 카카오톡, 이메일,
+              문자로 소중한 동료에게 전송하세요. SureCRM 프리미엄 멤버십의 고급
+              CRM 기능을 함께 활용할 전문가들을 추천해보세요!
             </div>
           </div>
         )}

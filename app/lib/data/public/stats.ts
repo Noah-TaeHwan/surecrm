@@ -218,7 +218,7 @@ export async function getGrowthRate(): Promise<number> {
 }
 
 /**
- * 초대 코드 검증 및 정보 조회
+ * 초대 코드 검증 및 정보 조회 (MVP: 영구 유효 코드)
  */
 export async function validateInviteCode(code: string) {
   try {
@@ -245,16 +245,17 @@ export async function validateInviteCode(code: string) {
     }
 
     const invite = invitation[0];
-    const now = new Date();
-    const expiresAt = new Date(invite.expiresAt);
 
-    // 만료 확인
-    if (expiresAt < now) {
-      return {
-        isValid: false,
-        message: '만료된 초대 코드입니다.',
-      };
-    }
+    // MVP: 만료 체크 제거 - 영구 유효 코드
+    // 기존 만료 로직 주석 처리
+    // const now = new Date();
+    // const expiresAt = invite.expiresAt ? new Date(invite.expiresAt) : null;
+    // if (expiresAt && expiresAt < now) {
+    //   return {
+    //     isValid: false,
+    //     message: '만료된 초대 코드입니다.',
+    //   };
+    // }
 
     // 이미 사용된 코드 확인
     if (invite.status === 'used') {

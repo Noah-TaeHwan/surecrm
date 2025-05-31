@@ -286,7 +286,7 @@ export const meetings = pgTable('app_client_meetings', {
     .notNull(),
 });
 
-// Invitations 테이블
+// Invitations 테이블 - SureCRM 프리미엄 멤버십 추천 코드 시스템
 export const invitations = pgTable('app_user_invitations', {
   id: uuid('id').primaryKey().defaultRandom(),
   code: text('code').unique().notNull(),
@@ -300,7 +300,7 @@ export const invitations = pgTable('app_user_invitations', {
   createdAt: timestamp('created_at', { withTimezone: true })
     .defaultNow()
     .notNull(),
-  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }), // MVP: 영구 유효 코드 (선택적)
   usedAt: timestamp('used_at', { withTimezone: true }),
 });
 

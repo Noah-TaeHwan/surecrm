@@ -1,7 +1,7 @@
 import { Card, CardContent } from '~/common/components/ui/card';
 import { Badge } from '~/common/components/ui/badge';
 import { Avatar, AvatarFallback } from '~/common/components/ui/avatar';
-import type { InvitedColleaguesProps } from './types';
+import type { InvitedColleaguesProps } from '../types';
 
 export function InvitedColleagues({ usedInvitations }: InvitedColleaguesProps) {
   if (usedInvitations.length === 0) {
@@ -10,7 +10,7 @@ export function InvitedColleagues({ usedInvitations }: InvitedColleaguesProps) {
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-medium">내가 초대한 동료들</h3>
+      <h3 className="text-lg font-medium">내가 추천한 동료들</h3>
       <Card>
         <CardContent className="p-6">
           <div className="space-y-4">
@@ -29,11 +29,11 @@ export function InvitedColleagues({ usedInvitations }: InvitedColleaguesProps) {
                           {invitation.invitee.name}
                         </h4>
                         <Badge variant="secondary" className="text-xs">
-                          활성
+                          프리미엄
                         </Badge>
                       </div>
                       <p className="text-sm text-muted-foreground mt-1">
-                        {invitation.invitee.joinedAt} 가입 · 초대장 #
+                        {invitation.invitee.joinedAt} 가입 · 추천 코드 #
                         {invitation.id}
                       </p>
                     </div>

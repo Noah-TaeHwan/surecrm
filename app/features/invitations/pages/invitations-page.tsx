@@ -30,7 +30,7 @@ import { EmptyInvitations } from '../components/empty-invitations';
 import { InvitedColleagues } from '../components/invited-colleagues';
 
 // 타입 imports
-import type { Invitation } from '../components/types';
+import type { Invitation } from '../types';
 
 // 데이터 함수 imports
 import {
@@ -110,8 +110,11 @@ export async function loader({ request }: Route.LoaderArgs) {
 
 export function meta({ data, params }: Route.MetaArgs) {
   return [
-    { title: '초대장 관리 - SureCRM' },
-    { name: 'description', content: '초대장을 관리하고 동료들을 초대하세요' },
+    { title: '동료 추천 - SureCRM' },
+    {
+      name: 'description',
+      content: '동료 추천 코드를 관리하고 전문가들을 추천하세요',
+    },
   ];
 }
 
@@ -122,37 +125,28 @@ function EmptyInvitationsState() {
       <div className="mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-6">
         <Users className="w-12 h-12 text-muted-foreground" />
       </div>
-      <h3 className="text-lg font-semibold mb-2">아직 초대장이 없습니다</h3>
+      <h3 className="text-lg font-semibold mb-2">추천 코드가 없습니다</h3>
       <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-        SureCRM에 가입하시면 자동으로 2장의 초대장이 발급됩니다. 동료들을
-        초대하여 함께 성장하세요!
+        SureCRM 프리미엄 멤버십에 가입하시면 2개의 동료 추천 코드가 자동으로
+        발급됩니다. 소중한 동료들을 추천하여 함께 성장하세요!
       </p>
       <div className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-xl mx-auto">
           <Card className="p-4">
             <div className="text-center">
               <Gift className="w-8 h-8 text-blue-500 mx-auto mb-2" />
-              <h4 className="font-medium mb-1">무료 초대장</h4>
+              <h4 className="font-medium mb-1">프리미엄 혜택</h4>
               <p className="text-sm text-muted-foreground">
-                가입 시 2장 무료 제공
+                가입 시 2개 코드 제공
               </p>
             </div>
           </Card>
           <Card className="p-4">
             <div className="text-center">
               <Users className="w-8 h-8 text-green-500 mx-auto mb-2" />
-              <h4 className="font-medium mb-1">네트워크 확장</h4>
+              <h4 className="font-medium mb-1">전문가 네트워크</h4>
               <p className="text-sm text-muted-foreground">
                 동료들과 함께 성장
-              </p>
-            </div>
-          </Card>
-          <Card className="p-4">
-            <div className="text-center">
-              <TrendingUp className="w-8 h-8 text-purple-500 mx-auto mb-2" />
-              <h4 className="font-medium mb-1">추가 혜택</h4>
-              <p className="text-sm text-muted-foreground">
-                성공적인 초대 시 보너스
               </p>
             </div>
           </Card>
@@ -160,8 +154,7 @@ function EmptyInvitationsState() {
         <Alert className="max-w-md mx-auto">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            초대장은 한정된 수량으로 제공되며, 성공적인 초대 시 추가 초대장을
-            받을 수 있습니다.
+            추천 코드는 가입 시 2개만 제공되며, 영구적으로 유효합니다.
           </AlertDescription>
         </Alert>
       </div>
@@ -197,7 +190,7 @@ export default function InvitationsPage({ loaderData }: Route.ComponentProps) {
   );
   const usedInvitations = myInvitations.filter((inv) => inv.status === 'used');
 
-  // 초대 링크 복사
+  // 추천 링크 복사
   const copyInviteLink = (code: string) => {
     const link = `https://surecrm.com/invite/${code}`;
     navigator.clipboard.writeText(link);
@@ -208,7 +201,7 @@ export default function InvitationsPage({ loaderData }: Route.ComponentProps) {
   // 에러 상태 처리
   if (error) {
     return (
-      <MainLayout title="초대장 관리">
+      <MainLayout title="동료 추천">
         <ErrorState error={error} />
       </MainLayout>
     );
@@ -217,34 +210,34 @@ export default function InvitationsPage({ loaderData }: Route.ComponentProps) {
   // 빈 데이터 상태 처리
   if (!hasData) {
     return (
-      <MainLayout title="초대장 관리">
+      <MainLayout title="동료 추천">
         <EmptyInvitationsState />
       </MainLayout>
     );
   }
 
   return (
-    <MainLayout title="초대장 관리">
+    <MainLayout title="동료 추천">
       <div className="space-y-6">
         {/* 헤더 */}
         <div>
           <p className="text-muted-foreground">
-            동료들을 SureCRM에 초대하고 함께 성장하세요. 초대장을 통해
-            네트워크를 확장하세요.
+            소중한 동료들을 SureCRM 프리미엄 멤버십에 추천하고 함께 성장하세요.
+            추천 코드를 통해 전문가 네트워크를 확장하세요.
           </p>
         </div>
 
-        {/* 초대장 현황 요약 */}
+        {/* 추천 코드 현황 요약 */}
         <InvitationStatsCards
           availableCount={invitationStats.availableInvitations}
           usedInvitations={usedInvitations}
         />
 
-        {/* 내 초대장들 */}
+        {/* 내 추천 코드들 */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium">내 초대장</h3>
-            <Badge variant="outline">{myInvitations.length}장 보유</Badge>
+            <h3 className="text-lg font-medium">내 추천 코드</h3>
+            <Badge variant="outline">{myInvitations.length}개 보유</Badge>
           </div>
 
           {myInvitations.length > 0 ? (
@@ -262,70 +255,67 @@ export default function InvitationsPage({ loaderData }: Route.ComponentProps) {
             <Card>
               <CardContent className="text-center py-8">
                 <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <h4 className="font-medium mb-2">초대장이 없습니다</h4>
+                <h4 className="font-medium mb-2">추천 코드가 없습니다</h4>
                 <p className="text-sm text-muted-foreground mb-4">
-                  성공적인 초대를 통해 추가 초대장을 받을 수 있습니다.
+                  SureCRM 프리미엄 멤버십 가입 시 2개의 추천 코드가 제공됩니다.
                 </p>
-                <Button variant="outline" size="sm">
-                  초대장 요청하기
-                </Button>
               </CardContent>
             </Card>
           )}
 
-          {/* 모든 초대장을 사용한 경우 */}
+          {/* 모든 추천 코드를 사용한 경우 */}
           {availableInvitations.length === 0 && usedInvitations.length > 0 && (
             <EmptyInvitations usedCount={usedInvitations.length} />
           )}
         </div>
 
-        {/* 내가 초대한 사람들 */}
+        {/* 내가 추천한 사람들 */}
         {invitedColleagues.length > 0 ? (
           <InvitedColleagues usedInvitations={invitedColleagues} />
         ) : (
           <div className="space-y-4">
-            <h3 className="text-lg font-medium">초대한 동료들</h3>
+            <h3 className="text-lg font-medium">추천한 동료들</h3>
             <Card>
               <CardContent className="text-center py-8">
                 <CheckCircle className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                 <h4 className="font-medium mb-2">
-                  아직 초대한 동료가 없습니다
+                  아직 추천한 동료가 없습니다
                 </h4>
                 <p className="text-sm text-muted-foreground">
-                  초대장을 공유하여 동료들을 SureCRM에 초대해보세요.
+                  추천 코드를 공유하여 동료들을 SureCRM에 추천해보세요.
                 </p>
               </CardContent>
             </Card>
           </div>
         )}
 
-        {/* 초대 가이드 */}
+        {/* 추천 가이드 */}
         <Card className="border-border/40 bg-muted/20 backdrop-blur-sm">
           <CardHeader>
             <CardTitle className="text-foreground flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                 💡
               </div>
-              초대 팁
+              추천 가이드
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             <div className="flex items-start gap-3 p-3 rounded-lg bg-card/50 border border-border/30">
               <div className="w-2 h-2 rounded-full bg-primary/60 mt-2 flex-shrink-0" />
               <p className="text-muted-foreground">
-                초대장은 한정된 수량으로 제공되며, 신중하게 사용하시기 바랍니다
+                프리미엄 멤버십 가입 시 2개의 추천 코드가 제공됩니다
               </p>
             </div>
             <div className="flex items-start gap-3 p-3 rounded-lg bg-card/50 border border-border/30">
               <div className="w-2 h-2 rounded-full bg-primary/60 mt-2 flex-shrink-0" />
               <p className="text-muted-foreground">
-                성공적인 초대 시 추가 초대장을 받을 수 있습니다
+                추천 코드는 영구적으로 유효하며 만료되지 않습니다
               </p>
             </div>
             <div className="flex items-start gap-3 p-3 rounded-lg bg-card/50 border border-border/30">
               <div className="w-2 h-2 rounded-full bg-primary/60 mt-2 flex-shrink-0" />
               <p className="text-muted-foreground">
-                초대받은 사람이 활발히 활동할수록 더 많은 혜택을 받습니다
+                소중한 동료들에게만 추천 코드를 공유하시기 바랍니다
               </p>
             </div>
           </CardContent>

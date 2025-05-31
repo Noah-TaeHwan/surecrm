@@ -219,7 +219,7 @@ export async function useInvitation(code: string, userId: string) {
   }
 }
 
-// 초대 코드 생성 함수 (클럽하우스 스타일)
+// 초대 코드 생성 함수 (SureCRM 프리미엄 멤버십 스타일)
 function generateInvitationCode(): string {
   // 더 안전하고 고급스러운 코드 생성
   const timestamp = Date.now().toString(36).toUpperCase(); // 시간 기반
@@ -307,17 +307,21 @@ export async function getInvitedColleagues(userId: string) {
 }
 
 /**
- * 클럽하우스 모델: 새 사용자에게 자동으로 초대장 생성
- * 가입 시 기본 2장의 초대장을 제공 (만료 없음)
+ * SureCRM MVP 모델: 새 사용자에게 자동으로 초대 코드 생성
+ * 가입 시 기본 2장의 초대 코드를 제공 (만료 없음)
+ * 추가 지급 불가 - MVP 단순함 유지
  */
 export async function createInitialInvitations(
   userId: string,
   count: number = 2
 ) {
   try {
+    // MVP: 정확히 2장만 지급, 추가 불가
+    const finalCount = Math.min(count, 2);
+
     const invitationsToCreate = [];
 
-    for (let i = 0; i < count; i++) {
+    for (let i = 0; i < finalCount; i++) {
       const code = generateInvitationCode();
       // 만료일 제거 - 영구적으로 사용 가능
       const expiresAt = new Date('2099-12-31'); // 실질적으로 만료되지 않음
@@ -329,7 +333,7 @@ export async function createInitialInvitations(
         status: 'pending' as const,
         message: `${
           i === 0 ? '첫 번째' : '두 번째'
-        } 초대장입니다. 소중한 동료를 초대해보세요!`,
+        } 동료 추천 코드입니다. 소중한 동료를 SureCRM에 초대해보세요!`,
       });
     }
 
@@ -339,80 +343,43 @@ export async function createInitialInvitations(
       .returning();
 
     console.log(
-      `✨ 사용자 ${userId}에게 ${count}장의 초기 초대장 생성 완료 (만료 없음)`
+      `✨ 사용자 ${userId}에게 ${finalCount}장의 초기 추천 코드 생성 완료 (만료 없음)`
     );
     return newInvitations;
   } catch (error) {
-    console.error('초기 초대장 생성 실패:', error);
+    console.error('초기 추천 코드 생성 실패:', error);
     throw error;
   }
 }
 
 /**
- * 초대장 사용 시 새로운 초대장 생성 (보상 시스템)
- * 성공적인 초대 시 추가 초대장 제공 (클럽하우스 모델의 핵심)
+ * MVP: 보상 시스템 비활성화
+ * 단순한 2장 제한 시스템으로 운영
+ * 추가 초대 코드 지급 없음
  */
 export async function grantBonusInvitations(
   inviterId: string,
   bonusCount: number = 1
 ) {
   try {
-    // 현재 사용자의 성공적인 초대 수 확인 (레벨 시스템)
-    const successfulInvites = await db
-      .select({ count: count() })
-      .from(invitations)
-      .where(
-        and(
-          eq(invitations.inviterId, inviterId),
-          eq(invitations.status, 'used')
-        )
-      );
-
-    const inviteLevel = Math.floor((successfulInvites[0]?.count || 0) / 5); // 5명당 레벨업
-    const actualBonusCount = Math.min(bonusCount + inviteLevel, 3); // 최대 3장까지
-
-    const bonusInvitations = [];
-
-    for (let i = 0; i < actualBonusCount; i++) {
-      const code = generateInvitationCode();
-      // 보너스 초대장도 만료 없음
-      const expiresAt = new Date('2099-12-31');
-
-      bonusInvitations.push({
-        code,
-        inviterId,
-        expiresAt,
-        status: 'pending' as const,
-        message: `🎉 성공적인 초대에 대한 보상 초대장입니다! (레벨 ${
-          inviteLevel + 1
-        })`,
-      });
-    }
-
-    const newBonusInvitations = await db
-      .insert(invitations)
-      .values(bonusInvitations)
-      .returning();
-
+    // MVP: 보상 시스템 비활성화 - 추가 초대 코드 지급 안함
     console.log(
-      `🎁 사용자 ${inviterId}에게 보너스 초대장 ${actualBonusCount}장 지급 (레벨 ${
-        inviteLevel + 1
-      }, 만료 없음)`
+      `🚫 MVP 모드: 사용자 ${inviterId}에게 추가 초대 코드 지급하지 않음 (2장 제한)`
     );
-    return newBonusInvitations;
+    return [];
   } catch (error) {
-    console.error('보너스 초대장 생성 실패:', error);
+    console.error('보너스 초대 코드 처리 실패:', error);
     throw error;
   }
 }
 
 /**
- * 초대장 사용 처리 + 보너스 초대장 자동 생성
- * 클럽하우스 모델의 핵심: 초대 성공 시 초대자에게 보상
+ * 초대 코드 사용 처리 (MVP 단순화 버전)
+ * SureCRM 프리미엄 멤버십: 초대 성공 시 추가 지급 없음
  */
 export async function useInvitationWithBonus(code: string, userId: string) {
   try {
-    // 1. 초대장 사용 처리
+    // 1. 초대 코드 사용 처리
     const updatedInvitation = await db
       .update(invitations)
       .set({
@@ -424,32 +391,25 @@ export async function useInvitationWithBonus(code: string, userId: string) {
       .returning();
 
     if (!updatedInvitation[0]) {
-      throw new Error('초대장 업데이트 실패');
+      throw new Error('초대 코드 업데이트 실패');
     }
 
     const invitation = updatedInvitation[0];
 
-    // 2. 초대자에게 보너스 초대장 지급 (성공적인 초대에 대한 보상)
-    await grantBonusInvitations(invitation.inviterId, 1);
+    // 2. MVP: 보상 시스템 비활성화 - 추가 초대 코드 지급 안함
+    // await grantBonusInvitations(invitation.inviterId, 1); // 비활성화
 
-    // 3. 새 사용자에게 기본 초대장 지급 (2장)
+    // 3. 새 사용자에게 기본 초대 코드 지급 (정확히 2장만)
     await createInitialInvitations(userId, 2);
 
-    // 4. 초대자의 profiles 테이블 업데이트 (통계용)
-    await db.execute(sql`
-      UPDATE profiles 
-      SET invitations_left = invitations_left + 1,
-          updated_at = NOW()
-      WHERE id = ${invitation.inviterId}
-    `);
-
-    console.log(`🎯 초대장 ${code} 사용 완료 및 보상 지급 완료`);
-    console.log(`   - 초대자: ${invitation.inviterId} (보너스 +1장)`);
-    console.log(`   - 신규 사용자: ${userId} (기본 +2장)`);
+    // 4. MVP: 통계 업데이트 단순화
+    console.log(`🎯 초대 코드 ${code} 사용 완료 (MVP 모드)`);
+    console.log(`   - 초대자: ${invitation.inviterId} (추가 지급 없음)`);
+    console.log(`   - 신규 사용자: ${userId} (기본 2장 지급)`);
 
     return invitation;
   } catch (error) {
-    console.error('초대장 사용 및 보상 처리 실패:', error);
+    console.error('초대 코드 사용 처리 실패:', error);
     throw error;
   }
 }
