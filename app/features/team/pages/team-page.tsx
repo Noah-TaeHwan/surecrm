@@ -1,6 +1,8 @@
 import type { Route } from '.react-router/types/app/features/team/pages/+types/team-page';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Form, useFetcher } from 'react-router';
 import { MainLayout } from '~/common/layouts/main-layout';
+import { toast } from 'sonner';
 
 // 컴포넌트 imports
 import { TeamStatsCards } from '../components/team-stats-cards';
@@ -9,7 +11,7 @@ import { TeamMemberList } from '../components/team-member-list';
 import { TeamMemberProfile } from '../components/team-member-profile';
 
 // 타입 imports
-import type { TeamMember, TeamStats } from '../components/types';
+import type { TeamMember, TeamStats } from '../types';
 
 // 실제 데이터베이스 함수들 import
 import {
@@ -75,9 +77,10 @@ export async function action({ request }: Route.ActionArgs) {
     switch (intent) {
       case 'invite': {
         const email = formData.get('email') as string;
+        const role = formData.get('role') as string;
         const message = formData.get('message') as string;
 
-        const result = await inviteTeamMember(user.id, email, message);
+        const result = await inviteTeamMember(user.id, email, role, message);
         if (result.success) {
           return { success: true, message: '팀원 초대가 발송되었습니다.' };
         } else {
@@ -130,23 +133,46 @@ export default function TeamPage({
 }: Route.ComponentProps) {
   const { teamMembers, teamStats } = loaderData;
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
+  const fetcher = useFetcher();
 
-  // 팀원 초대
+  // actionData로부터 피드백 처리
+  useEffect(() => {
+    if (actionData?.success) {
+      toast.success(actionData.message);
+    } else if (actionData?.success === false) {
+      toast.error(actionData.message);
+    }
+  }, [actionData]);
+
+  // 팀원 초대 - Form action 활용
   const handleInvite = (email: string, role: string, message?: string) => {
-    console.log('팀원 초대:', { email, role, message });
-    // TODO: API 호출
+    const formData = new FormData();
+    formData.append('intent', 'invite');
+    formData.append('email', email);
+    formData.append('role', role);
+    if (message) formData.append('message', message);
+
+    fetcher.submit(formData, { method: 'post' });
   };
 
-  // 팀원 제거
+  // 팀원 제거 - Form action 활용
   const handleRemoveMember = (memberId: string) => {
-    console.log('팀원 제거:', memberId);
-    // TODO: API 호출
+    if (confirm('정말로 이 팀원을 제거하시겠습니까?')) {
+      const formData = new FormData();
+      formData.append('intent', 'remove');
+      formData.append('memberId', memberId);
+
+      fetcher.submit(formData, { method: 'post' });
+    }
   };
 
-  // 초대 재발송
+  // 초대 재발송 - Form action 활용
   const handleResendInvite = (memberId: string) => {
-    console.log('초대 재발송:', memberId);
-    // TODO: API 호출
+    const formData = new FormData();
+    formData.append('intent', 'resend');
+    formData.append('invitationId', memberId);
+
+    fetcher.submit(formData, { method: 'post' });
   };
 
   // 팀원 정보 보기
@@ -154,12 +180,17 @@ export default function TeamPage({
     setSelectedMember(member);
   };
 
+  // 로딩 상태 표시
+  const isLoading =
+    fetcher.state === 'submitting' || fetcher.state === 'loading';
+
   return (
     <MainLayout title="팀 관리">
       <div className="space-y-6">
         {/* 헤더 */}
         <div className="flex items-center justify-between">
           <div>
+            <h1 className="text-2xl font-bold">팀 관리</h1>
             <p className="text-muted-foreground">팀원을 초대하고 관리하세요</p>
           </div>
           <InviteMember onInvite={handleInvite} />
@@ -183,6 +214,16 @@ export default function TeamPage({
             isOpen={!!selectedMember}
             onClose={() => setSelectedMember(null)}
           />
+        )}
+
+        {/* 로딩 오버레이 */}
+        {isLoading && (
+          <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+              <p className="text-sm text-muted-foreground">처리 중...</p>
+            </div>
+          </div>
         )}
       </div>
     </MainLayout>

@@ -26,7 +26,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import type { InviteMemberProps } from './types';
+import type { InviteMemberProps } from '../types';
 
 const inviteSchema = z.object({
   email: z.string().email('올바른 이메일 형식이 아닙니다'),
@@ -78,7 +78,7 @@ export function InviteMember({ onInvite }: InviteMemberProps) {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button>
+        <Button data-testid="invite-trigger">
           <PlusIcon className="mr-2 h-4 w-4" />
           팀원 초대
         </Button>
@@ -130,7 +130,7 @@ export function InviteMember({ onInvite }: InviteMemberProps) {
                         <Label
                           key={role.id}
                           htmlFor={role.id}
-                          className="flex items-center space-x-3 rounded-lg border-2 border-gray-800 p-3 cursor-pointer hover:border-primary/50 has-[:checked]:border-primary has-[:checked]:bg-primary/5 transition-colors"
+                          className="flex items-center space-x-3 rounded-lg border-2 border-gray-800 p-3 cursor-pointer hover:border-primary/5 has-[:checked]:border-primary has-[:checked]:bg-primary/5 transition-colors"
                         >
                           <RadioGroupItem value={role.id} id={role.id} />
                           <div className="flex-1">

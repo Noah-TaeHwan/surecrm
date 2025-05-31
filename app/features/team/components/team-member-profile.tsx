@@ -21,7 +21,8 @@ import {
   EnvelopeClosedIcon,
   MobileIcon,
 } from '@radix-ui/react-icons';
-import type { TeamMemberProfileProps } from './types';
+import type { TeamMemberProfileProps } from '../types';
+import { TEAM_ROLE_LABELS, TEAM_STATUS_LABELS } from '../types';
 
 export function TeamMemberProfile({
   member,
@@ -30,9 +31,9 @@ export function TeamMemberProfile({
 }: TeamMemberProfileProps) {
   const getRoleBadge = (role: string) => {
     const roleConfig = {
-      admin: { label: '관리자', variant: 'destructive' as const },
-      manager: { label: '매니저', variant: 'default' as const },
-      member: { label: '멤버', variant: 'secondary' as const },
+      admin: { label: TEAM_ROLE_LABELS.admin, variant: 'destructive' as const },
+      manager: { label: TEAM_ROLE_LABELS.manager, variant: 'default' as const },
+      member: { label: TEAM_ROLE_LABELS.member, variant: 'secondary' as const },
     };
 
     const config =
@@ -42,9 +43,15 @@ export function TeamMemberProfile({
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
-      active: { label: '활성', variant: 'default' as const },
-      pending: { label: '대기 중', variant: 'outline' as const },
-      inactive: { label: '비활성', variant: 'secondary' as const },
+      active: { label: TEAM_STATUS_LABELS.active, variant: 'default' as const },
+      pending: {
+        label: TEAM_STATUS_LABELS.pending,
+        variant: 'outline' as const,
+      },
+      inactive: {
+        label: TEAM_STATUS_LABELS.inactive,
+        variant: 'secondary' as const,
+      },
     };
 
     const config =
@@ -69,11 +76,13 @@ export function TeamMemberProfile({
             <div className="flex items-center gap-4 mb-6">
               <Avatar className="h-16 w-16">
                 <AvatarFallback className="text-lg">
-                  {member.name[0]}
+                  {member.name?.[0] || '?'}
                 </AvatarFallback>
               </Avatar>
               <div className="space-y-2">
-                <h3 className="font-semibold text-lg">{member.name}</h3>
+                <h3 className="font-semibold text-lg">
+                  {member.name || '이름 없음'}
+                </h3>
                 <div className="flex items-center gap-2">
                   {getRoleBadge(member.role)}
                   {getStatusBadge(member.status)}
@@ -90,16 +99,24 @@ export function TeamMemberProfile({
               </h4>
 
               <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <EnvelopeClosedIcon className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm">{member.email}</span>
-                </div>
+                {member.email && (
+                  <div className="flex items-center gap-3">
+                    <EnvelopeClosedIcon className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm">{member.email}</span>
+                  </div>
+                )}
 
                 {member.phone && (
                   <div className="flex items-center gap-3">
                     <MobileIcon className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm">{member.phone}</span>
                   </div>
+                )}
+
+                {!member.email && !member.phone && (
+                  <p className="text-sm text-muted-foreground">
+                    연락처 정보가 없습니다
+                  </p>
                 )}
               </div>
             </div>

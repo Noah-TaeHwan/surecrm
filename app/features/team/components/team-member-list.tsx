@@ -31,7 +31,12 @@ import {
   PersonIcon,
   PlusIcon,
 } from '@radix-ui/react-icons';
-import type { TeamMemberListProps } from './types';
+import type {
+  TeamMemberListProps,
+  TeamMemberRole,
+  TeamMemberStatus,
+} from '../types';
+import { TEAM_ROLE_LABELS, TEAM_STATUS_LABELS } from '../types';
 
 export function TeamMemberList({
   members,
@@ -40,7 +45,7 @@ export function TeamMemberList({
   onViewMember,
 }: TeamMemberListProps) {
   const statusBadgeVariant: Record<
-    string,
+    TeamMemberStatus,
     'default' | 'secondary' | 'outline' | 'destructive'
   > = {
     active: 'default',
@@ -48,25 +53,13 @@ export function TeamMemberList({
     inactive: 'secondary',
   };
 
-  const statusText: Record<string, string> = {
-    active: '활성',
-    pending: '대기 중',
-    inactive: '비활성',
-  };
-
   const roleBadgeVariant: Record<
-    string,
+    TeamMemberRole,
     'default' | 'secondary' | 'outline' | 'destructive'
   > = {
     admin: 'destructive',
     manager: 'default',
     member: 'secondary',
-  };
-
-  const roleText: Record<string, string> = {
-    admin: '관리자',
-    manager: '매니저',
-    member: '멤버',
   };
 
   const handleRemoveMember = (memberId: string) => {
@@ -100,14 +93,16 @@ export function TeamMemberList({
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <Avatar>
-                        <AvatarFallback>{member.name[0]}</AvatarFallback>
+                        <AvatarFallback>
+                          {member.name?.[0] || '?'}
+                        </AvatarFallback>
                       </Avatar>
                       <div>
                         <button
                           onClick={() => onViewMember(member)}
                           className="font-medium text-sm hover:text-primary cursor-pointer transition-colors"
                         >
-                          {member.name}
+                          {member.name || '이름 없음'}
                         </button>
                         <div className="text-sm text-muted-foreground">
                           {member.email}
@@ -117,12 +112,12 @@ export function TeamMemberList({
                   </TableCell>
                   <TableCell>
                     <Badge variant={roleBadgeVariant[member.role]}>
-                      {roleText[member.role]}
+                      {TEAM_ROLE_LABELS[member.role]}
                     </Badge>
                   </TableCell>
                   <TableCell>
                     <Badge variant={statusBadgeVariant[member.status]}>
-                      {statusText[member.status]}
+                      {TEAM_STATUS_LABELS[member.status]}
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -154,10 +149,9 @@ export function TeamMemberList({
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>작업</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={() => onViewMember(member)}>
                           <PersonIcon className="mr-2 h-4 w-4" />
-                          팀원 정보 보기
+                          정보 보기
                         </DropdownMenuItem>
                         {member.status === 'pending' && (
                           <DropdownMenuItem
@@ -169,11 +163,11 @@ export function TeamMemberList({
                         )}
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
-                          className="text-red-600"
                           onClick={() => handleRemoveMember(member.id)}
+                          className="text-red-600"
                         >
                           <TrashIcon className="mr-2 h-4 w-4" />
-                          팀에서 제거
+                          제거
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -184,19 +178,23 @@ export function TeamMemberList({
           </Table>
         ) : (
           <div className="text-center py-12">
-            <div className="mx-auto w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
-              <PersonIcon className="w-8 h-8 text-muted-foreground" />
-            </div>
-            <h3 className="text-lg font-semibold mb-2">팀원이 없습니다</h3>
-            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-              아직 팀에 초대된 멤버가 없습니다. 동료들을 초대하여 함께
-              일해보세요.
+            <PersonIcon className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+            <h3 className="text-lg font-medium mb-2">아직 팀원이 없습니다</h3>
+            <p className="text-muted-foreground mb-6">
+              첫 번째 팀원을 초대해서 협업을 시작하세요
             </p>
-            <div className="space-y-3">
-              <p className="text-sm text-muted-foreground">
-                💡 팀원을 초대하면 고객 정보를 공유하고 협업할 수 있습니다
-              </p>
-            </div>
+            <Button
+              onClick={() => {
+                const inviteButton = document.querySelector(
+                  '[data-testid="invite-trigger"]'
+                ) as HTMLButtonElement;
+                if (inviteButton) {
+                  inviteButton.click();
+                }
+              }}
+            >
+              <PlusIcon className="mr-2 h-4 w-4" />첫 팀원 초대하기
+            </Button>
           </div>
         )}
       </CardContent>

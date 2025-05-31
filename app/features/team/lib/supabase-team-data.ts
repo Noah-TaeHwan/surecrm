@@ -7,6 +7,7 @@ import {
   type Team,
   type Invitation,
 } from './schema';
+import { authUsers } from '~/lib/schema';
 import { clients } from '~/lib/schema';
 import { eq, and, count, sql } from 'drizzle-orm';
 
@@ -199,9 +200,43 @@ export async function getTeamStats(userId: string): Promise<TeamStats> {
 export async function inviteTeamMember(
   inviterId: string,
   email: string,
+  role: string = 'member',
   message?: string
 ): Promise<{ success: boolean; invitationCode?: string; error?: string }> {
   try {
+    // 이메일 중복 확인 (authUsers 테이블에서)
+    const existingUser = await db
+      .select({ id: authUsers.id })
+      .from(authUsers)
+      .where(eq(authUsers.email, email))
+      .limit(1);
+
+    if (existingUser[0]) {
+      return {
+        success: false,
+        error: '이미 가입된 이메일입니다.',
+      };
+    }
+
+    // 기존 초대 확인
+    const existingInvitation = await db
+      .select({ id: invitations.id })
+      .from(invitations)
+      .where(
+        and(
+          eq(invitations.inviteeEmail, email),
+          eq(invitations.status, 'pending')
+        )
+      )
+      .limit(1);
+
+    if (existingInvitation[0]) {
+      return {
+        success: false,
+        error: '이미 초대가 발송된 이메일입니다.',
+      };
+    }
+
     // 초대 코드 생성 (8자리 랜덤 문자열)
     const invitationCode = Math.random()
       .toString(36)
@@ -218,7 +253,7 @@ export async function inviteTeamMember(
         code: invitationCode,
         inviterId,
         inviteeEmail: email,
-        message: message || '',
+        message: message || `${role} 역할로 팀에 초대합니다.`,
         expiresAt,
       })
       .returning({ id: invitations.id, code: invitations.code });
