@@ -5,7 +5,7 @@ export default defineConfig({
   schema: [
     './app/lib/schema/core.ts', // 핵심 공유 테이블들
     './app/lib/schema/public.ts', // 공개 페이지용 테이블들
-    './app/features/*/schema.ts', // 각 feature별 특화 스키마들
+    './app/features/*/lib/schema.ts', // 각 feature별 특화 스키마들
   ],
   out: './supabase/migrations',
   dbCredentials: {
