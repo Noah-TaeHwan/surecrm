@@ -79,6 +79,32 @@ import {
   appCalendarSyncLogsRelations,
 } from '~/features/calendar/lib/schema';
 
+// Clients 기능 전용 테이블들 import (새로운 테이블들만)
+import {
+  // Clients 테이블들
+  appClientTags,
+  appClientTagAssignments,
+  appClientContactHistory,
+  appClientFamilyMembers,
+  appClientPreferences,
+  appClientAnalytics,
+  appClientMilestones,
+  appClientStageHistory,
+  appClientDataAccessLogs,
+  appClientDataBackups,
+  // Clients Relations
+  appClientTagsRelations,
+  appClientTagAssignmentsRelations,
+  appClientContactHistoryRelations,
+  appClientFamilyMembersRelations,
+  appClientPreferencesRelations,
+  appClientAnalyticsRelations,
+  appClientMilestonesRelations,
+  appClientStageHistoryRelations,
+  appClientDataAccessLogsRelations,
+  appClientDataBackupsRelations,
+} from '~/features/clients/lib/schema';
+
 // Drizzle 설정용 통합 스키마
 export const schema = {
   // ===== Core 테이블들 =====
@@ -108,6 +134,18 @@ export const schema = {
   appCalendarSettings,
   appCalendarRecurringMeetings,
   appCalendarSyncLogs,
+
+  // ===== Clients 기능 전용 테이블들 =====
+  appClientTags,
+  appClientTagAssignments,
+  appClientContactHistory,
+  appClientFamilyMembers,
+  appClientPreferences,
+  appClientAnalytics,
+  appClientMilestones,
+  appClientStageHistory,
+  appClientDataAccessLogs,
+  appClientDataBackups,
 
   // ===== Public 테이블들 =====
   publicContents,
@@ -140,6 +178,17 @@ export const schema = {
   appCalendarSettingsRelations,
   appCalendarRecurringMeetingsRelations,
   appCalendarSyncLogsRelations,
+  // Clients Relations
+  appClientTagsRelations,
+  appClientTagAssignmentsRelations,
+  appClientContactHistoryRelations,
+  appClientFamilyMembersRelations,
+  appClientPreferencesRelations,
+  appClientAnalyticsRelations,
+  appClientMilestonesRelations,
+  appClientStageHistoryRelations,
+  appClientDataAccessLogsRelations,
+  appClientDataBackupsRelations,
   // Public Relations
   publicContentsRelations,
   faqsRelations,
