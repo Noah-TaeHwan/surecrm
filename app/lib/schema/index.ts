@@ -196,6 +196,26 @@ import {
   appPipelineGoalsRelations,
 } from '~/features/pipeline/lib/schema';
 
+// Reports 기능 전용 테이블들 import (새로운 테이블들만)
+import {
+  // Reports 테이블들
+  reportTemplates,
+  reportSchedules,
+  reportInstances,
+  reportDashboards,
+  reportMetrics,
+  reportExports,
+  reportSubscriptions,
+  // Reports Relations
+  reportTemplatesRelations,
+  reportSchedulesRelations,
+  reportInstancesRelations,
+  reportDashboardsRelations,
+  reportMetricsRelations,
+  reportExportsRelations,
+  reportSubscriptionsRelations,
+} from '~/features/reports/lib/schema';
+
 // Drizzle 설정용 통합 스키마
 export const schema = {
   // ===== Core 테이블들 =====
@@ -277,6 +297,15 @@ export const schema = {
   appPipelineAnalytics,
   appPipelineStageTemplates,
   appPipelineGoals,
+
+  // ===== Reports 기능 전용 테이블들 =====
+  reportTemplates,
+  reportSchedules,
+  reportInstances,
+  reportDashboards,
+  reportMetrics,
+  reportExports,
+  reportSubscriptions,
 
   // ===== Public 테이블들 =====
   publicContents,
@@ -360,6 +389,14 @@ export const schema = {
   appPipelineViewsRelations,
   appPipelineAnalyticsRelations,
   appPipelineGoalsRelations,
+  // Reports Relations
+  reportTemplatesRelations,
+  reportSchedulesRelations,
+  reportInstancesRelations,
+  reportDashboardsRelations,
+  reportMetricsRelations,
+  reportExportsRelations,
+  reportSubscriptionsRelations,
 };
 
 // 타입 정의
