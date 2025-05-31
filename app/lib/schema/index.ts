@@ -234,6 +234,26 @@ import {
   appSettingsSecurityLogsRelations,
 } from '~/features/settings/lib/schema';
 
+// Team 기능 전용 테이블들 import (새로운 테이블들만)
+import {
+  // Team 테이블들
+  appTeamMembers,
+  appTeamStatsCache,
+  appTeamPerformanceMetrics,
+  appTeamGoals,
+  appTeamActivityLogs,
+  appTeamCommunicationChannels,
+  appTeamTrainingRecords,
+  // Team Relations
+  appTeamMembersRelations,
+  appTeamStatsCacheRelations,
+  appTeamPerformanceMetricsRelations,
+  appTeamGoalsRelations,
+  appTeamActivityLogsRelations,
+  appTeamCommunicationChannelsRelations,
+  appTeamTrainingRecordsRelations,
+} from '~/features/team/lib/schema';
+
 // Drizzle 설정용 통합 스키마
 export const schema = {
   // ===== Core 테이블들 =====
@@ -333,6 +353,15 @@ export const schema = {
   appSettingsThemePreferences,
   appSettingsSecurityLogs,
 
+  // ===== Team 기능 전용 테이블들 =====
+  appTeamMembers,
+  appTeamStatsCache,
+  appTeamPerformanceMetrics,
+  appTeamGoals,
+  appTeamActivityLogs,
+  appTeamCommunicationChannels,
+  appTeamTrainingRecords,
+
   // ===== Public 테이블들 =====
   publicContents,
   faqs,
@@ -430,6 +459,14 @@ export const schema = {
   appSettingsChangeLogsRelations,
   appSettingsThemePreferencesRelations,
   appSettingsSecurityLogsRelations,
+  // Team Relations
+  appTeamMembersRelations,
+  appTeamStatsCacheRelations,
+  appTeamPerformanceMetricsRelations,
+  appTeamGoalsRelations,
+  appTeamActivityLogsRelations,
+  appTeamCommunicationChannelsRelations,
+  appTeamTrainingRecordsRelations,
 };
 
 // 타입 정의
