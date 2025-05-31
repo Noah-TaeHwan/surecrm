@@ -20,7 +20,7 @@ import { LockClosedIcon, UpdateIcon } from '@radix-ui/react-icons';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import type { PasswordSectionProps } from './types';
+import type { PasswordSectionProps } from '../types';
 
 const passwordSchema = z
   .object({

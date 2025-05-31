@@ -1,4 +1,4 @@
-// Settings 기능에 특화된 스키마
+// Settings 기능에 특화된 스키마 (MVP 버전)
 // 공통 스키마에서 기본 테이블들을 import
 export {
   profiles,
@@ -22,488 +22,320 @@ import {
 import { relations } from 'drizzle-orm';
 import { profiles, teams } from '~/lib/schema';
 
-// Settings 특화 Enum
-export const settingCategoryEnum = pgEnum('setting_category', [
-  'general',
+// MVP Settings 특화 Enum (app_user_ prefix 적용)
+export const appUserSettingCategoryEnum = pgEnum('app_user_setting_category', [
+  'profile',
   'notifications',
-  'privacy',
+  'system',
   'security',
   'integrations',
-  'appearance',
-  'billing',
-  'team',
 ]);
 
-export const settingTypeEnum = pgEnum('setting_type', [
-  'boolean',
-  'string',
-  'number',
-  'json',
-  'array',
-  'enum',
-]);
+export const appUserNotificationChannelEnum = pgEnum(
+  'app_user_notification_channel',
+  [
+    'email',
+    'sms',
+    'push',
+    'kakao', // 보험설계사 핵심 채널
+  ]
+);
 
-export const integrationTypeEnum = pgEnum('integration_type', [
-  'google_calendar',
+export const appUserIntegrationTypeEnum = pgEnum('app_user_integration_type', [
   'kakao_talk',
-  'slack',
+  'google_calendar',
   'email',
   'sms',
-  'webhook',
-  'api',
 ]);
 
-export const integrationStatusEnum = pgEnum('integration_status', [
-  'active',
-  'inactive',
-  'error',
-  'pending',
-  'expired',
-]);
+export const appUserIntegrationStatusEnum = pgEnum(
+  'app_user_integration_status',
+  ['active', 'inactive', 'error', 'pending']
+);
 
-export const auditActionEnum = pgEnum('audit_action', [
-  'create',
-  'update',
-  'delete',
-  'login',
-  'logout',
-  'export',
-  'import',
-  'share',
-  'invite',
-]);
+// MVP Settings 특화 테이블들 (app_user_ prefix 적용)
 
-// Settings 특화 테이블들
-
-// User Settings 테이블 (사용자 설정)
-export const userSettings = pgTable('user_settings', {
+// User Settings 테이블 (사용자 개인 설정)
+export const appUserSettings = pgTable('app_user_settings', {
   id: uuid('id').primaryKey().defaultRandom(),
-  userId: uuid('user_id')
+  user_id: uuid('user_id')
     .notNull()
     .unique()
     .references(() => profiles.id),
-  category: settingCategoryEnum('category').notNull(),
-  key: text('key').notNull(),
-  value: jsonb('value').notNull(),
-  type: settingTypeEnum('type').notNull(),
-  isDefault: boolean('is_default').default(false).notNull(),
-  description: text('description'),
-  createdAt: timestamp('created_at', { withTimezone: true })
+
+  // 시스템 설정
+  language: text('language').default('ko').notNull(),
+  dark_mode: boolean('dark_mode').default(true).notNull(),
+  timezone: text('timezone').default('Asia/Seoul').notNull(),
+
+  // 알림 설정 (JSON으로 저장)
+  notification_settings: jsonb('notification_settings').notNull().default({
+    kakaoNotifications: true,
+    emailNotifications: true,
+    pushNotifications: true,
+    smsNotifications: false,
+    meetingReminders: true,
+    goalDeadlines: true,
+    newReferrals: true,
+    clientMilestones: true,
+    followUpReminders: true,
+    birthdayReminders: false,
+    teamUpdates: true,
+    systemAlerts: true,
+    weekendNotifications: false,
+    quietHoursStart: '22:00',
+    quietHoursEnd: '08:00',
+  }),
+
+  // 보험설계사 특화 설정
+  agent_settings: jsonb('agent_settings').default({
+    workingHours: {
+      start: '09:00',
+      end: '18:00',
+      workDays: [1, 2, 3, 4, 5], // 월-금
+    },
+    clientManagement: {
+      autoFollowUpDays: 7,
+      birthdayReminderDays: 3,
+      contractRenewalReminderDays: 30,
+    },
+    performanceTracking: {
+      monthlyGoalReminder: true,
+      weeklyReportGeneration: true,
+      achievementNotifications: true,
+    },
+  }),
+
+  created_at: timestamp('created_at', { withTimezone: true })
     .defaultNow()
     .notNull(),
-  updatedAt: timestamp('updated_at', { withTimezone: true })
+  updated_at: timestamp('updated_at', { withTimezone: true })
     .defaultNow()
     .notNull(),
 });
 
-// Team Settings 테이블 (팀 설정)
-export const teamSettings = pgTable('team_settings', {
+// User Integrations 테이블 (외부 서비스 연동 - MVP 버전)
+export const appUserIntegrations = pgTable('app_user_integrations', {
   id: uuid('id').primaryKey().defaultRandom(),
-  teamId: uuid('team_id')
-    .notNull()
-    .references(() => teams.id),
-  category: settingCategoryEnum('category').notNull(),
-  key: text('key').notNull(),
-  value: jsonb('value').notNull(),
-  type: settingTypeEnum('type').notNull(),
-  isDefault: boolean('is_default').default(false).notNull(),
-  description: text('description'),
-  updatedBy: uuid('updated_by')
-    .notNull()
-    .references(() => profiles.id),
-  createdAt: timestamp('created_at', { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-  updatedAt: timestamp('updated_at', { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-});
-
-// System Settings 테이블 (시스템 설정)
-export const systemSettings = pgTable('system_settings', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  category: settingCategoryEnum('category').notNull(),
-  key: text('key').notNull().unique(),
-  value: jsonb('value').notNull(),
-  type: settingTypeEnum('type').notNull(),
-  description: text('description'),
-  isPublic: boolean('is_public').default(false).notNull(), // 공개 설정 여부
-  updatedBy: uuid('updated_by').references(() => profiles.id),
-  createdAt: timestamp('created_at', { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-  updatedAt: timestamp('updated_at', { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-});
-
-// Integrations 테이블 (외부 서비스 연동)
-export const integrations = pgTable('integrations', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  userId: uuid('user_id')
+  user_id: uuid('user_id')
     .notNull()
     .references(() => profiles.id),
-  teamId: uuid('team_id').references(() => teams.id),
-  type: integrationTypeEnum('type').notNull(),
-  name: text('name').notNull(),
-  description: text('description'),
-  config: jsonb('config').notNull(), // 연동 설정
-  credentials: jsonb('credentials'), // 인증 정보 (암호화 필요)
-  status: integrationStatusEnum('status').default('pending').notNull(),
-  lastSyncAt: timestamp('last_sync_at', { withTimezone: true }),
-  lastErrorAt: timestamp('last_error_at', { withTimezone: true }),
-  errorMessage: text('error_message'),
-  syncCount: integer('sync_count').default(0).notNull(),
-  isActive: boolean('is_active').default(true).notNull(),
-  createdAt: timestamp('created_at', { withTimezone: true })
+
+  integration_type: appUserIntegrationTypeEnum('integration_type').notNull(),
+  integration_name: text('integration_name').notNull(),
+
+  // 연동 설정 및 인증 정보
+  config: jsonb('config').notNull(),
+  credentials: jsonb('credentials'), // 암호화된 인증 정보
+
+  status: appUserIntegrationStatusEnum('status').default('pending').notNull(),
+  is_active: boolean('is_active').default(true).notNull(),
+
+  last_sync_at: timestamp('last_sync_at', { withTimezone: true }),
+  last_error_message: text('last_error_message'),
+  sync_count: integer('sync_count').default(0).notNull(),
+
+  created_at: timestamp('created_at', { withTimezone: true })
     .defaultNow()
     .notNull(),
-  updatedAt: timestamp('updated_at', { withTimezone: true })
+  updated_at: timestamp('updated_at', { withTimezone: true })
     .defaultNow()
     .notNull(),
 });
 
-// API Keys 테이블 (API 키 관리)
-export const apiKeys = pgTable('api_keys', {
+// Settings Backup 테이블 (설정 백업 - MVP 버전)
+export const appUserSettingsBackup = pgTable('app_user_settings_backup', {
   id: uuid('id').primaryKey().defaultRandom(),
-  userId: uuid('user_id')
+  user_id: uuid('user_id')
     .notNull()
     .references(() => profiles.id),
-  teamId: uuid('team_id').references(() => teams.id),
-  name: text('name').notNull(),
-  description: text('description'),
-  keyHash: text('key_hash').notNull().unique(), // 해시된 키
-  permissions: text('permissions').array().notNull(), // 권한 목록
-  lastUsedAt: timestamp('last_used_at', { withTimezone: true }),
-  usageCount: integer('usage_count').default(0).notNull(),
-  rateLimit: integer('rate_limit').default(1000).notNull(), // 시간당 요청 제한
-  isActive: boolean('is_active').default(true).notNull(),
-  expiresAt: timestamp('expires_at', { withTimezone: true }),
-  createdAt: timestamp('created_at', { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-  updatedAt: timestamp('updated_at', { withTimezone: true })
+
+  backup_name: text('backup_name').notNull(),
+  backup_data: jsonb('backup_data').notNull(), // 전체 설정 데이터
+  backup_version: text('backup_version').default('MVP_v1.0').notNull(),
+
+  created_at: timestamp('created_at', { withTimezone: true })
     .defaultNow()
     .notNull(),
 });
 
-// Audit Logs 테이블 (감사 로그)
-export const auditLogs = pgTable('audit_logs', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  userId: uuid('user_id').references(() => profiles.id),
-  teamId: uuid('team_id').references(() => teams.id),
-  action: auditActionEnum('action').notNull(),
-  entityType: text('entity_type'), // 'user', 'team', 'client', 'setting' 등
-  entityId: uuid('entity_id'),
-  description: text('description').notNull(),
-  changes: jsonb('changes'), // 변경 내용
-  metadata: jsonb('metadata'), // 추가 메타데이터
-  ipAddress: text('ip_address'),
-  userAgent: text('user_agent'),
-  createdAt: timestamp('created_at', { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-});
+// Settings Change Log 테이블 (설정 변경 이력 - MVP 버전)
+export const appUserSettingsChangeLog = pgTable(
+  'app_user_settings_change_log',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    user_id: uuid('user_id')
+      .notNull()
+      .references(() => profiles.id),
 
-// Backup Configurations 테이블 (백업 설정)
-export const backupConfigurations = pgTable('backup_configurations', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  userId: uuid('user_id').references(() => profiles.id),
-  teamId: uuid('team_id').references(() => teams.id),
-  name: text('name').notNull(),
-  description: text('description'),
-  schedule: text('schedule').notNull(), // cron 표현식
-  includeData: text('include_data').array().notNull(), // 백업할 데이터 유형
-  excludeData: text('exclude_data').array(), // 제외할 데이터 유형
-  storageConfig: jsonb('storage_config').notNull(), // 저장소 설정
-  retentionDays: integer('retention_days').default(30).notNull(),
-  isActive: boolean('is_active').default(true).notNull(),
-  lastBackupAt: timestamp('last_backup_at', { withTimezone: true }),
-  nextBackupAt: timestamp('next_backup_at', { withTimezone: true }),
-  backupCount: integer('backup_count').default(0).notNull(),
-  createdAt: timestamp('created_at', { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-  updatedAt: timestamp('updated_at', { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-});
+    setting_category: appUserSettingCategoryEnum('setting_category').notNull(),
+    setting_field: text('setting_field').notNull(),
+    old_value: jsonb('old_value'),
+    new_value: jsonb('new_value'),
 
-// Feature Flags 테이블 (기능 플래그)
-export const featureFlags = pgTable('feature_flags', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  name: text('name').notNull().unique(),
-  description: text('description'),
-  isEnabled: boolean('is_enabled').default(false).notNull(),
-  rolloutPercentage: integer('rollout_percentage').default(0).notNull(), // 0-100
-  targetUsers: text('target_users').array(), // 특정 사용자 대상
-  targetTeams: text('target_teams').array(), // 특정 팀 대상
-  conditions: jsonb('conditions'), // 활성화 조건
-  metadata: jsonb('metadata'),
-  createdBy: uuid('created_by').references(() => profiles.id),
-  createdAt: timestamp('created_at', { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-  updatedAt: timestamp('updated_at', { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-});
+    change_reason: text('change_reason'), // 변경 사유
+    ip_address: text('ip_address'),
+    user_agent: text('user_agent'),
 
-// Relations 정의
-export const userSettingsRelations = relations(userSettings, ({ one }) => ({
-  user: one(profiles, {
-    fields: [userSettings.userId],
-    references: [profiles.id],
-  }),
-}));
+    created_at: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  }
+);
 
-export const teamSettingsRelations = relations(teamSettings, ({ one }) => ({
-  team: one(teams, {
-    fields: [teamSettings.teamId],
-    references: [teams.id],
-  }),
-  updatedByUser: one(profiles, {
-    fields: [teamSettings.updatedBy],
-    references: [profiles.id],
-  }),
-}));
-
-export const systemSettingsRelations = relations(systemSettings, ({ one }) => ({
-  updatedByUser: one(profiles, {
-    fields: [systemSettings.updatedBy],
-    references: [profiles.id],
-  }),
-}));
-
-export const integrationsRelations = relations(integrations, ({ one }) => ({
-  user: one(profiles, {
-    fields: [integrations.userId],
-    references: [profiles.id],
-  }),
-  team: one(teams, {
-    fields: [integrations.teamId],
-    references: [teams.id],
-  }),
-}));
-
-export const apiKeysRelations = relations(apiKeys, ({ one }) => ({
-  user: one(profiles, {
-    fields: [apiKeys.userId],
-    references: [profiles.id],
-  }),
-  team: one(teams, {
-    fields: [apiKeys.teamId],
-    references: [teams.id],
-  }),
-}));
-
-export const auditLogsRelations = relations(auditLogs, ({ one }) => ({
-  user: one(profiles, {
-    fields: [auditLogs.userId],
-    references: [profiles.id],
-  }),
-  team: one(teams, {
-    fields: [auditLogs.teamId],
-    references: [teams.id],
-  }),
-}));
-
-export const backupConfigurationsRelations = relations(
-  backupConfigurations,
+// Relations (관계 정의)
+export const appUserSettingsRelations = relations(
+  appUserSettings,
   ({ one }) => ({
     user: one(profiles, {
-      fields: [backupConfigurations.userId],
+      fields: [appUserSettings.user_id],
       references: [profiles.id],
-    }),
-    team: one(teams, {
-      fields: [backupConfigurations.teamId],
-      references: [teams.id],
     }),
   })
 );
 
-export const featureFlagsRelations = relations(featureFlags, ({ one }) => ({
-  createdByUser: one(profiles, {
-    fields: [featureFlags.createdBy],
-    references: [profiles.id],
-  }),
-}));
+export const appUserIntegrationsRelations = relations(
+  appUserIntegrations,
+  ({ one }) => ({
+    user: one(profiles, {
+      fields: [appUserIntegrations.user_id],
+      references: [profiles.id],
+    }),
+  })
+);
 
-// Settings 특화 타입들
-export type UserSetting = typeof userSettings.$inferSelect;
-export type NewUserSetting = typeof userSettings.$inferInsert;
-export type TeamSetting = typeof teamSettings.$inferSelect;
-export type NewTeamSetting = typeof teamSettings.$inferInsert;
-export type SystemSetting = typeof systemSettings.$inferSelect;
-export type NewSystemSetting = typeof systemSettings.$inferInsert;
-export type Integration = typeof integrations.$inferSelect;
-export type NewIntegration = typeof integrations.$inferInsert;
-export type ApiKey = typeof apiKeys.$inferSelect;
-export type NewApiKey = typeof apiKeys.$inferInsert;
-export type AuditLog = typeof auditLogs.$inferSelect;
-export type NewAuditLog = typeof auditLogs.$inferInsert;
-export type BackupConfiguration = typeof backupConfigurations.$inferSelect;
-export type NewBackupConfiguration = typeof backupConfigurations.$inferInsert;
-export type FeatureFlag = typeof featureFlags.$inferSelect;
-export type NewFeatureFlag = typeof featureFlags.$inferInsert;
+export const appUserSettingsBackupRelations = relations(
+  appUserSettingsBackup,
+  ({ one }) => ({
+    user: one(profiles, {
+      fields: [appUserSettingsBackup.user_id],
+      references: [profiles.id],
+    }),
+  })
+);
 
-export type SettingCategory = (typeof settingCategoryEnum.enumValues)[number];
-export type SettingType = (typeof settingTypeEnum.enumValues)[number];
-export type IntegrationType = (typeof integrationTypeEnum.enumValues)[number];
-export type IntegrationStatus =
-  (typeof integrationStatusEnum.enumValues)[number];
-export type AuditAction = (typeof auditActionEnum.enumValues)[number];
+export const appUserSettingsChangeLogRelations = relations(
+  appUserSettingsChangeLog,
+  ({ one }) => ({
+    user: one(profiles, {
+      fields: [appUserSettingsChangeLog.user_id],
+      references: [profiles.id],
+    }),
+  })
+);
 
-// Settings 특화 인터페이스
-export interface SettingsGroup {
-  category: SettingCategory;
-  title: string;
-  description?: string;
-  settings: SettingItem[];
+// Type exports (MVP 버전)
+export type AppUserSetting = typeof appUserSettings.$inferSelect;
+export type NewAppUserSetting = typeof appUserSettings.$inferInsert;
+export type AppUserIntegration = typeof appUserIntegrations.$inferSelect;
+export type NewAppUserIntegration = typeof appUserIntegrations.$inferInsert;
+export type AppUserSettingsBackup = typeof appUserSettingsBackup.$inferSelect;
+export type NewAppUserSettingsBackup =
+  typeof appUserSettingsBackup.$inferInsert;
+export type AppUserSettingsChangeLog =
+  typeof appUserSettingsChangeLog.$inferSelect;
+export type NewAppUserSettingsChangeLog =
+  typeof appUserSettingsChangeLog.$inferInsert;
+
+// Enum type exports
+export type AppUserSettingCategory =
+  (typeof appUserSettingCategoryEnum.enumValues)[number];
+export type AppUserNotificationChannel =
+  (typeof appUserNotificationChannelEnum.enumValues)[number];
+export type AppUserIntegrationType =
+  (typeof appUserIntegrationTypeEnum.enumValues)[number];
+export type AppUserIntegrationStatus =
+  (typeof appUserIntegrationStatusEnum.enumValues)[number];
+
+// MVP 보험설계사 특화 인터페이스들
+export interface InsuranceAgentNotificationSettings {
+  // 알림 채널
+  kakaoNotifications: boolean;
+  emailNotifications: boolean;
+  pushNotifications: boolean;
+  smsNotifications: boolean;
+
+  // 업무 알림
+  meetingReminders: boolean;
+  goalDeadlines: boolean;
+  newReferrals: boolean;
+  clientMilestones: boolean;
+  followUpReminders: boolean;
+  birthdayReminders: boolean;
+  teamUpdates: boolean;
+  systemAlerts: boolean;
+  weekendNotifications: boolean;
+
+  // 방해금지 시간
+  quietHoursStart: string;
+  quietHoursEnd: string;
 }
 
-export interface SettingItem {
-  key: string;
-  label: string;
-  description?: string;
-  type: SettingType;
-  value: any;
-  defaultValue: any;
-  options?: { label: string; value: any }[]; // enum 타입용
-  validation?: {
-    required?: boolean;
-    min?: number;
-    max?: number;
-    pattern?: string;
+export interface InsuranceAgentWorkSettings {
+  workingHours: {
+    start: string;
+    end: string;
+    workDays: number[];
   };
-  isReadOnly?: boolean;
-  isAdvanced?: boolean;
-}
-
-export interface IntegrationConfig {
-  type: IntegrationType;
-  name: string;
-  description?: string;
-  isEnabled: boolean;
-  config: Record<string, any>;
-  credentials?: Record<string, any>;
-  lastSync?: Date;
-  syncInterval?: number; // 분 단위
-  errorMessage?: string;
-}
-
-export interface ApiKeyData {
-  id: string;
-  name: string;
-  description?: string;
-  key: string; // 실제 키 (생성 시에만 표시)
-  permissions: string[];
-  lastUsed?: Date;
-  usageCount: number;
-  rateLimit: number;
-  isActive: boolean;
-  expiresAt?: Date;
-  createdAt: Date;
-}
-
-export interface AuditLogEntry {
-  id: string;
-  user?: {
-    id: string;
-    name: string;
-    email: string;
+  clientManagement: {
+    autoFollowUpDays: number;
+    birthdayReminderDays: number;
+    contractRenewalReminderDays: number;
   };
-  action: AuditAction;
-  entityType?: string;
-  entityId?: string;
-  description: string;
-  changes?: Record<string, { from: any; to: any }>;
-  ipAddress?: string;
-  userAgent?: string;
-  createdAt: Date;
-}
-
-export interface BackupConfig {
-  id: string;
-  name: string;
-  description?: string;
-  schedule: string; // cron 표현식
-  includeData: string[];
-  excludeData?: string[];
-  storageType: 'local' | 's3' | 'gcs' | 'azure';
-  storageConfig: Record<string, any>;
-  retentionDays: number;
-  isActive: boolean;
-  lastBackup?: Date;
-  nextBackup?: Date;
-  backupCount: number;
-}
-
-export interface FeatureFlagConfig {
-  name: string;
-  description?: string;
-  isEnabled: boolean;
-  rolloutPercentage: number;
-  targetUsers?: string[];
-  targetTeams?: string[];
-  conditions?: Record<string, any>;
-}
-
-export interface SecuritySettings {
-  passwordPolicy: {
-    minLength: number;
-    requireUppercase: boolean;
-    requireLowercase: boolean;
-    requireNumbers: boolean;
-    requireSymbols: boolean;
-    maxAge: number; // 일 단위
-  };
-  sessionSettings: {
-    maxDuration: number; // 분 단위
-    idleTimeout: number; // 분 단위
-    maxConcurrentSessions: number;
-  };
-  twoFactorAuth: {
-    isRequired: boolean;
-    methods: ('sms' | 'email' | 'app')[];
-  };
-  ipWhitelist?: string[];
-  auditRetentionDays: number;
-}
-
-export interface NotificationSettings {
-  email: {
-    isEnabled: boolean;
-    frequency: 'immediate' | 'hourly' | 'daily' | 'weekly';
-    types: string[];
-  };
-  sms: {
-    isEnabled: boolean;
-    types: string[];
-  };
-  push: {
-    isEnabled: boolean;
-    types: string[];
-  };
-  inApp: {
-    isEnabled: boolean;
-    types: string[];
-  };
-  quietHours: {
-    isEnabled: boolean;
-    start: string; // HH:MM
-    end: string; // HH:MM
-    timezone: string;
+  performanceTracking: {
+    monthlyGoalReminder: boolean;
+    weeklyReportGeneration: boolean;
+    achievementNotifications: boolean;
   };
 }
 
-export interface AppearanceSettings {
-  theme: 'light' | 'dark' | 'system';
+export interface InsuranceAgentSystemSettings {
   language: string;
-  dateFormat: string;
-  timeFormat: '12h' | '24h';
-  currency: string;
+  darkMode: boolean;
   timezone: string;
-  compactMode: boolean;
-  animations: boolean;
+  dateFormat?: string;
+  numberFormat?: string;
 }
+
+// MVP 설정 기본값
+export const MVP_SETTINGS_DEFAULTS = {
+  system: {
+    language: 'ko',
+    darkMode: true,
+    timezone: 'Asia/Seoul',
+  },
+  notifications: {
+    kakaoNotifications: true, // 보험설계사 핵심
+    emailNotifications: true,
+    pushNotifications: true,
+    smsNotifications: false,
+    meetingReminders: true,
+    goalDeadlines: true,
+    newReferrals: true,
+    clientMilestones: true,
+    followUpReminders: true,
+    birthdayReminders: false,
+    teamUpdates: true,
+    systemAlerts: true,
+    weekendNotifications: false,
+    quietHoursStart: '22:00',
+    quietHoursEnd: '08:00',
+  },
+  agentSettings: {
+    workingHours: {
+      start: '09:00',
+      end: '18:00',
+      workDays: [1, 2, 3, 4, 5],
+    },
+    clientManagement: {
+      autoFollowUpDays: 7,
+      birthdayReminderDays: 3,
+      contractRenewalReminderDays: 30,
+    },
+    performanceTracking: {
+      monthlyGoalReminder: true,
+      weeklyReportGeneration: true,
+      achievementNotifications: true,
+    },
+  },
+} as const;
