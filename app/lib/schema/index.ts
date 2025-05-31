@@ -123,6 +123,22 @@ import {
   appDashboardQuickActionsRelations,
 } from '~/features/dashboard/lib/schema';
 
+// Influencers 기능 전용 테이블들 import (새로운 테이블들만)
+import {
+  // Influencers 테이블들
+  appInfluencerProfiles,
+  appInfluencerGratitudeHistory,
+  appInfluencerNetworkAnalysis,
+  appInfluencerActivityLogs,
+  appInfluencerGratitudeTemplates,
+  // Influencers Relations
+  appInfluencerProfilesRelations,
+  appInfluencerGratitudeHistoryRelations,
+  appInfluencerNetworkAnalysisRelations,
+  appInfluencerActivityLogsRelations,
+  appInfluencerGratitudeTemplatesRelations,
+} from '~/features/influencers/lib/schema';
+
 // Drizzle 설정용 통합 스키마
 export const schema = {
   // ===== Core 테이블들 =====
@@ -173,6 +189,13 @@ export const schema = {
   appDashboardWidgets,
   appDashboardQuickActions,
 
+  // ===== Influencers 기능 전용 테이블들 =====
+  appInfluencerProfiles,
+  appInfluencerGratitudeHistory,
+  appInfluencerNetworkAnalysis,
+  appInfluencerActivityLogs,
+  appInfluencerGratitudeTemplates,
+
   // ===== Public 테이블들 =====
   publicContents,
   faqs,
@@ -222,6 +245,12 @@ export const schema = {
   appDashboardNotificationsRelations,
   appDashboardWidgetsRelations,
   appDashboardQuickActionsRelations,
+  // Influencers Relations
+  appInfluencerProfilesRelations,
+  appInfluencerGratitudeHistoryRelations,
+  appInfluencerNetworkAnalysisRelations,
+  appInfluencerActivityLogsRelations,
+  appInfluencerGratitudeTemplatesRelations,
   // Public Relations
   publicContentsRelations,
   faqsRelations,
