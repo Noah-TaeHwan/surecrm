@@ -139,6 +139,14 @@ import {
   appInfluencerGratitudeTemplatesRelations,
 } from '~/features/influencers/lib/schema';
 
+// Invitations 기능 전용 테이블들 import (새로운 테이블들만)
+import {
+  // Invitations 테이블들
+  appInvitationUsageLogs,
+  // Invitations Relations
+  appInvitationUsageLogsRelations,
+} from '~/features/invitations/lib/schema';
+
 // Drizzle 설정용 통합 스키마
 export const schema = {
   // ===== Core 테이블들 =====
@@ -195,6 +203,9 @@ export const schema = {
   appInfluencerNetworkAnalysis,
   appInfluencerActivityLogs,
   appInfluencerGratitudeTemplates,
+
+  // ===== Invitations 기능 전용 테이블들 =====
+  appInvitationUsageLogs,
 
   // ===== Public 테이블들 =====
   publicContents,
@@ -258,6 +269,8 @@ export const schema = {
   testimonialsRelations,
   siteSettingsRelations,
   pageViewsRelations,
+  // Invitations Relations
+  appInvitationUsageLogsRelations,
 };
 
 // 타입 정의
