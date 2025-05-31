@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   formatNotificationTime,
   getNotificationTypeIcon,
@@ -19,7 +19,7 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
     try {
       setIsLoading(true);
 
@@ -49,7 +49,7 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [limit]);
 
   const markAsRead = async (notificationId: string) => {
     try {
@@ -118,7 +118,7 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
   // 초기 데이터 로드
   useEffect(() => {
     fetchNotifications();
-  }, []);
+  }, [fetchNotifications]);
 
   // 자동 새로고침
   useEffect(() => {
@@ -126,7 +126,7 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
 
     const interval = setInterval(fetchNotifications, refreshInterval);
     return () => clearInterval(interval);
-  }, [autoRefresh, refreshInterval]);
+  }, [autoRefresh, refreshInterval, fetchNotifications]);
 
   return {
     notifications,
