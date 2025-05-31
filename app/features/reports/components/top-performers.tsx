@@ -14,7 +14,7 @@ import {
   TableRow,
 } from '~/common/components/ui/table';
 import { cn } from '~/lib/utils';
-import type { TopPerformersProps } from './types';
+import type { TopPerformersProps } from '../types';
 
 export function TopPerformers({ performers }: TopPerformersProps) {
   const formatCurrency = (amount: number) => {

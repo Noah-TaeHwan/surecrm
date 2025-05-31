@@ -40,7 +40,7 @@ import {
   Timer,
 } from 'lucide-react';
 import { cn } from '~/lib/utils';
-import type { PerformanceData, TopPerformer } from './types';
+import type { PerformanceData, TopPerformer } from '../types';
 
 interface InsightsTabsProps {
   performance: PerformanceData;

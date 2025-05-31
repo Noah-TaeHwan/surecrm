@@ -8,7 +8,7 @@ import {
 import { Progress } from '~/common/components/ui/progress';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 import { cn } from '~/lib/utils';
-import type { NetworkStatusProps } from './types';
+import type { NetworkStatusProps } from '../types';
 
 export function PerformanceSummary({ performance }: NetworkStatusProps) {
   const TrendIndicator = ({

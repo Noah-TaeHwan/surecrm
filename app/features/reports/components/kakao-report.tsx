@@ -10,6 +10,7 @@ import {
 import { Textarea } from '~/common/components/ui/textarea';
 import { Input } from '~/common/components/ui/input';
 import { Label } from '~/common/components/ui/label';
+import { Badge } from '~/common/components/ui/badge';
 import {
   Tabs,
   TabsContent,
@@ -28,11 +29,13 @@ import {
   TrendingUp,
   Plus,
   Minus,
+  Award,
+  AlertCircle,
 } from 'lucide-react';
-import type { KakaoReportProps, KakaoReportData } from './types';
+import type { KakaoReportProps, KakaoReportData } from '../types';
 
 export function KakaoReport({ performance }: KakaoReportProps) {
-  const [isCopied, setIsCopied] = useState(false);
+  const [isCopied, setIsCopied] = useState<{ [key: string]: boolean }>({});
   const [kakaoReport, setKakaoReport] = useState<KakaoReportData>({
     startTime: '09:00',
     endTime: '18:00',
@@ -57,61 +60,101 @@ export function KakaoReport({ performance }: KakaoReportProps) {
       weekday: 'long',
     });
 
+    // 작업 효율성 계산
+    const workHours = calculateWorkHours(
+      kakaoReport.startTime,
+      kakaoReport.endTime
+    );
+    const clientsPerHour =
+      workHours > 0 ? (kakaoReport.newClients / workHours).toFixed(1) : '0';
+
     return `📅 ${dateString}
 👤 보고자: ${userName}
 
 📋 일일 업무 보고서
 
-⏰ 근무시간: ${kakaoReport.startTime} ~ ${kakaoReport.endTime}
+⏰ 근무시간: ${kakaoReport.startTime} ~ ${
+      kakaoReport.endTime
+    } (${workHours}시간)
 
 📊 오늘의 성과
-• 신규 고객: ${kakaoReport.newClients}명
+• 신규 고객: ${kakaoReport.newClients}명 (시간당 ${clientsPerHour}명)
 • 고객 미팅: ${kakaoReport.meetings}건
 • 상담 전화: ${kakaoReport.calls}건
 • 주요 활동: ${kakaoReport.activities}
 
-📈 누적 현황
+📈 누적 현황 (이번 달)
 • 총 고객 수: ${performance.totalClients}명
-• 이번 달 신규: ${performance.newClients}명
+• 신규 고객: ${performance.newClients}명 
 • 계약 전환율: ${performance.conversionRate}%
+• 소개 건수: ${performance.totalReferrals}건
+
+🎯 성과 분석
+• 고객 증가율: ${performance.growth.clients > 0 ? '+' : ''}${
+      performance.growth.clients
+    }%
+• 수익 증가율: ${performance.growth.revenue > 0 ? '+' : ''}${
+      performance.growth.revenue
+    }%
+${
+  performance.conversionRate >= 70
+    ? '• 🏆 전환율 우수!'
+    : performance.conversionRate >= 50
+    ? '• ✅ 전환율 양호'
+    : '• ⚠️ 전환율 개선 필요'
+}
 
 📝 내일 계획
 ${kakaoReport.tomorrowPlan}
 
 ${kakaoReport.notes ? `💬 특이사항\n${kakaoReport.notes}` : ''}
 
-#업무보고 #SureCRM`;
+#업무보고 #SureCRM #보험설계사`;
   };
 
   const generateWeeklyReport = () => {
-    const thisWeek = new Date().toLocaleDateString('ko-KR', {
-      month: 'long',
-      day: 'numeric',
-    });
+    const thisWeek = getWeekRange();
+    const weeklyNewClients = kakaoReport.newClients * 5; // 5일 기준
+    const weeklyMeetings = kakaoReport.meetings * 5;
+    const weeklyCalls = kakaoReport.calls * 5;
 
     return `📊 주간 업무 요약 보고서
 
-📅 ${thisWeek} 주간
+📅 ${thisWeek}
 👤 작성자: ${userName}
-⭐ 이번 주 하이라이트
+⭐ 주간 하이라이트
 
 📈 주요 성과
-• 총 신규 고객: ${kakaoReport.newClients * 5}명
-• 주간 미팅: ${kakaoReport.meetings * 5}건  
-• 상담 전화: ${kakaoReport.calls * 5}건
-• 계약 성사: ${Math.round(kakaoReport.newClients * 0.7)}건
+• 총 신규 고객: ${weeklyNewClients}명 (일평균 ${kakaoReport.newClients}명)
+• 주간 미팅: ${weeklyMeetings}건  
+• 상담 전화: ${weeklyCalls}건
+• 계약 성사: ${Math.round(
+      weeklyNewClients * (performance.conversionRate / 100)
+    )}건
 
 🎯 목표 달성률
-• 신규 고객: 85% (목표 대비)
-• 미팅 횟수: 92% (목표 대비)
-• 전환율: ${performance.conversionRate}%
+• 신규 고객: ${Math.round((weeklyNewClients / 25) * 100)}% (주간 목표 25명 기준)
+• 전환율: ${performance.conversionRate}% (목표 60% 기준)
+• 미팅 효율: ${((weeklyNewClients / weeklyMeetings) * 100).toFixed(1)}%
+
+📊 성장 지표
+• 고객 증가: ${performance.growth.clients > 0 ? '+' : ''}${
+      performance.growth.clients
+    }%
+• 수익 증가: ${performance.growth.revenue > 0 ? '+' : ''}${
+      performance.growth.revenue
+    }%
+• 소개 증가: ${performance.growth.referrals > 0 ? '+' : ''}${
+      performance.growth.referrals
+    }%
 
 💡 다음 주 전략
-• 기존 고객 관리 강화
-• 신규 채널 개발
-• 팀 협업 증대
+• 기존 고객 관리 강화 (재계약 유도)
+• 신규 채널 개발 (온라인 마케팅)
+• 팀 협업 증대 (소개 시스템 활용)
+• ${performance.conversionRate < 60 ? '전환율 개선 집중' : '고객 확보 확대'}
 
-#주간보고 #SureCRM`;
+#주간보고 #성과분석 #SureCRM`;
   };
 
   const generateMonthlyReport = () => {
@@ -120,6 +163,12 @@ ${kakaoReport.notes ? `💬 특이사항\n${kakaoReport.notes}` : ''}
       month: 'long',
     });
 
+    const monthlyGoalClients = 50; // 월간 목표
+    const achievementRate = (
+      (performance.newClients / monthlyGoalClients) *
+      100
+    ).toFixed(1);
+
     return `📈 월간 성과 보고서
 
 📅 ${thisMonth}
@@ -127,22 +176,95 @@ ${kakaoReport.notes ? `💬 특이사항\n${kakaoReport.notes}` : ''}
 🏆 월간 종합 성과
 
 💼 비즈니스 성과
-• 총 고객 수: ${performance.totalClients}명
-• 이번 달 신규: ${performance.newClients}명
-• 총 수익: ${(performance.revenue / 10000000).toFixed(1)}천만원
-• 전환율: ${performance.conversionRate}%
+• 총 고객 수: ${performance.totalClients.toLocaleString()}명
+• 이번 달 신규: ${performance.newClients}명 (목표달성률: ${achievementRate}%)
+• 총 수익: ${(performance.revenue / 100000000).toFixed(1)}억원
+• 계약 전환율: ${performance.conversionRate}%
+• 소개 건수: ${performance.totalReferrals}건
 
-📊 성장률
-• 고객 증가: +${performance.growth.clients}%
-• 수익 증가: +${performance.growth.revenue}%
-• 소개 증가: +${performance.growth.referrals}%
+📊 성장률 분석
+• 고객 증가: ${performance.growth.clients > 0 ? '+' : ''}${
+      performance.growth.clients
+    }%
+• 수익 증가: ${performance.growth.revenue > 0 ? '+' : ''}${
+      performance.growth.revenue
+    }%
+• 소개 증가: ${performance.growth.referrals > 0 ? '+' : ''}${
+      performance.growth.referrals
+    }%
 
-🎯 다음 달 목표
-• 신규 고객 35명 확보
-• 전환율 70% 달성
-• 수익 1.8억원 목표
+🎯 성과 등급
+${getPerformanceGrade(performance)}
 
-#월간보고 #성과분석 #SureCRM`;
+🚀 다음 달 목표
+• 신규 고객 ${Math.max(monthlyGoalClients, performance.newClients + 5)}명 확보
+• 전환율 ${Math.min(85, performance.conversionRate + 5)}% 달성
+• 수익 ${((performance.revenue * 1.15) / 100000000).toFixed(1)}억원 목표
+• 소개 네트워크 확장
+
+💡 개선 포인트
+${getImprovementSuggestions(performance)}
+
+#월간보고 #성과분석 #목표설정 #SureCRM`;
+  };
+
+  // 헬퍼 함수들
+  const calculateWorkHours = (start: string, end: string): number => {
+    const [startHour, startMin] = start.split(':').map(Number);
+    const [endHour, endMin] = end.split(':').map(Number);
+    const startTotal = startHour + startMin / 60;
+    const endTotal = endHour + endMin / 60;
+    return Math.round((endTotal - startTotal) * 10) / 10;
+  };
+
+  const getWeekRange = (): string => {
+    const today = new Date();
+    const monday = new Date(
+      today.setDate(today.getDate() - today.getDay() + 1)
+    );
+    const friday = new Date(today.setDate(monday.getDate() + 4));
+
+    return `${monday.toLocaleDateString('ko-KR', {
+      month: 'long',
+      day: 'numeric',
+    })} ~ ${friday.toLocaleDateString('ko-KR', {
+      month: 'long',
+      day: 'numeric',
+    })}`;
+  };
+
+  const getPerformanceGrade = (perf: any): string => {
+    const score =
+      perf.conversionRate * 0.4 +
+      perf.growth.revenue * 0.3 +
+      perf.growth.clients * 0.3;
+
+    if (score >= 80) return '🏆 S등급 (탁월한 성과)';
+    if (score >= 60) return '🥇 A등급 (우수한 성과)';
+    if (score >= 40) return '🥈 B등급 (양호한 성과)';
+    if (score >= 20) return '🥉 C등급 (개선 필요)';
+    return '📈 D등급 (집중 관리 필요)';
+  };
+
+  const getImprovementSuggestions = (perf: any): string => {
+    const suggestions: string[] = [];
+
+    if (perf.conversionRate < 50) {
+      suggestions.push('• 고객 상담 프로세스 개선');
+    }
+    if (perf.growth.clients < 10) {
+      suggestions.push('• 신규 고객 개발 채널 다양화');
+    }
+    if (perf.totalReferrals < 20) {
+      suggestions.push('• 기존 고객 소개 시스템 활성화');
+    }
+    if (perf.growth.revenue < 15) {
+      suggestions.push('• 고객 단가 상승 전략 수립');
+    }
+
+    return suggestions.length > 0
+      ? suggestions.join('\n')
+      : '• 현재 성과 수준 유지 및 지속적 성장';
   };
 
   // 입력값이 변경될 때마다 미리보기 업데이트
@@ -150,11 +272,13 @@ ${kakaoReport.notes ? `💬 특이사항\n${kakaoReport.notes}` : ''}
     setPreviewText(generateKakaoReport());
   }, [kakaoReport, performance, userName]);
 
-  const handleCopyReport = async () => {
+  const handleCopyReport = async (reportType: string, text: string) => {
     try {
-      await navigator.clipboard.writeText(previewText);
-      setIsCopied(true);
-      setTimeout(() => setIsCopied(false), 2000);
+      await navigator.clipboard.writeText(text);
+      setIsCopied((prev) => ({ ...prev, [reportType]: true }));
+      setTimeout(() => {
+        setIsCopied((prev) => ({ ...prev, [reportType]: false }));
+      }, 2000);
     } catch (err) {
       console.error('복사 실패:', err);
     }
@@ -199,25 +323,25 @@ ${kakaoReport.notes ? `💬 특이사항\n${kakaoReport.notes}` : ''}
           type="button"
           variant="ghost"
           size="sm"
-          className="absolute left-1 top-1/2 -translate-y-1/2 h-6 w-6 p-0 hover:bg-muted/50"
-          onClick={() => handleNumberChange(field, value - 1)}
+          className="absolute right-0 top-0 h-10 w-8 p-0 hover:bg-muted"
+          onClick={() => handleNumberChange(field, value + 1)}
         >
-          <Minus className="h-3 w-3" />
+          <Plus className="h-3 w-3" />
         </Button>
         <Button
           type="button"
           variant="ghost"
           size="sm"
-          className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 p-0 hover:bg-muted/50"
-          onClick={() => handleNumberChange(field, value + 1)}
+          className="absolute left-0 top-0 h-10 w-8 p-0 hover:bg-muted"
+          onClick={() => handleNumberChange(field, value - 1)}
         >
-          <Plus className="h-3 w-3" />
+          <Minus className="h-3 w-3" />
         </Button>
       </div>
     </div>
   );
 
-  // 개선된 시간 입력 컴포넌트
+  // 시간 입력 컴포넌트
   const TimeInput = ({
     label,
     value,
@@ -228,71 +352,50 @@ ${kakaoReport.notes ? `💬 특이사항\n${kakaoReport.notes}` : ''}
     onChange: (value: string) => void;
   }) => {
     const [hour, minute] = value.split(':');
-    const [hourInput, setHourInput] = useState(hour);
-    const [minuteInput, setMinuteInput] = useState(minute);
-
-    // 시간이 외부에서 변경되면 로컬 상태도 업데이트
-    useEffect(() => {
-      const [h, m] = value.split(':');
-      setHourInput(h);
-      setMinuteInput(m);
-    }, [value]);
 
     const handleHourChange = (newHour: string) => {
-      // 로컬 상태만 업데이트, 부모 상태는 onBlur에서만 업데이트
-      setHourInput(newHour);
+      const validHour = Math.max(0, Math.min(23, parseInt(newHour) || 0));
+      onChange(`${validHour.toString().padStart(2, '0')}:${minute}`);
     };
 
     const handleHourBlur = () => {
-      const h = Math.max(0, Math.min(23, parseInt(hourInput) || 0));
-      const formattedHour = h.toString().padStart(2, '0');
-      setHourInput(formattedHour);
-      onChange(`${formattedHour}:${minute}`);
+      const validHour = Math.max(0, Math.min(23, parseInt(hour) || 0));
+      onChange(`${validHour.toString().padStart(2, '0')}:${minute}`);
     };
 
     const handleMinuteChange = (newMinute: string) => {
-      // 로컬 상태만 업데이트, 부모 상태는 onBlur에서만 업데이트
-      setMinuteInput(newMinute);
+      const validMinute = Math.max(0, Math.min(59, parseInt(newMinute) || 0));
+      onChange(`${hour}:${validMinute.toString().padStart(2, '0')}`);
     };
 
     const handleMinuteBlur = () => {
-      const m = Math.max(0, Math.min(59, parseInt(minuteInput) || 0));
-      const formattedMinute = m.toString().padStart(2, '0');
-      setMinuteInput(formattedMinute);
-      onChange(`${hour}:${formattedMinute}`);
+      const validMinute = Math.max(0, Math.min(59, parseInt(minute) || 0));
+      onChange(`${hour}:${validMinute.toString().padStart(2, '0')}`);
     };
 
     return (
-      <div className="flex-1">
-        <Label className="text-xs text-muted-foreground mb-1 block">
-          {label}
-        </Label>
-        <div className="flex items-center gap-2">
-          <div className="relative flex-1">
-            <input
-              type="number"
-              value={hourInput}
-              onChange={(e) => handleHourChange(e.target.value)}
-              onBlur={handleHourBlur}
-              className="h-10 w-full text-center font-medium bg-background border border-input rounded-md focus:outline-none focus:ring-1 focus:ring-primary/50 focus:border-primary/50 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-              min="0"
-              max="23"
-              placeholder="09"
-            />
-          </div>
-          <span className="text-muted-foreground font-bold text-lg">:</span>
-          <div className="relative flex-1">
-            <input
-              type="number"
-              value={minuteInput}
-              onChange={(e) => handleMinuteChange(e.target.value)}
-              onBlur={handleMinuteBlur}
-              className="h-10 w-full text-center font-medium bg-background border border-input rounded-md focus:outline-none focus:ring-1 focus:ring-primary/50 focus:border-primary/50 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-              min="0"
-              max="59"
-              placeholder="00"
-            />
-          </div>
+      <div className="space-y-2 flex-1">
+        <Label className="text-xs text-muted-foreground">{label}</Label>
+        <div className="flex items-center gap-1">
+          <input
+            type="number"
+            value={parseInt(hour)}
+            onChange={(e) => handleHourChange(e.target.value)}
+            onBlur={handleHourBlur}
+            className="h-10 w-12 text-center font-medium bg-background border border-input rounded-md focus:outline-none focus:ring-1 focus:ring-primary/50 focus:border-primary/50 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+            min="0"
+            max="23"
+          />
+          <span className="text-muted-foreground">:</span>
+          <input
+            type="number"
+            value={parseInt(minute)}
+            onChange={(e) => handleMinuteChange(e.target.value)}
+            onBlur={handleMinuteBlur}
+            className="h-10 w-12 text-center font-medium bg-background border border-input rounded-md focus:outline-none focus:ring-1 focus:ring-primary/50 focus:border-primary/50 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+            min="0"
+            max="59"
+          />
         </div>
       </div>
     );
@@ -304,17 +407,26 @@ ${kakaoReport.notes ? `💬 특이사항\n${kakaoReport.notes}` : ''}
         <div className="flex items-center gap-2">
           <MessageCircle className="h-5 w-5 text-primary" />
           <CardTitle>카카오톡 업무 보고</CardTitle>
+          <Badge variant="secondary" className="text-xs">
+            MVP 특화
+          </Badge>
         </div>
         <CardDescription>
-          업무 정보를 입력하고 다양한 형태의 보고서를 생성하세요
+          보험설계사를 위한 실용적인 업무 보고서를 생성하고 복사하세요
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="daily" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="daily">일일 보고</TabsTrigger>
-            <TabsTrigger value="weekly">주간 요약</TabsTrigger>
-            <TabsTrigger value="monthly">월간 성과</TabsTrigger>
+            <TabsTrigger value="daily" className="text-sm">
+              일일 보고
+            </TabsTrigger>
+            <TabsTrigger value="weekly" className="text-sm">
+              주간 요약
+            </TabsTrigger>
+            <TabsTrigger value="monthly" className="text-sm">
+              월간 성과
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="daily" className="mt-6">
@@ -339,10 +451,10 @@ ${kakaoReport.notes ? `💬 특이사항\n${kakaoReport.notes}` : ''}
                 </div>
 
                 {/* 성과 지표 섹션 */}
-                <div className="bg-muted/50 rounded-lg p-4 space-y-4">
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 space-y-4 border border-blue-200">
                   <div className="flex items-center gap-2 text-sm font-medium mb-3">
-                    <Target className="h-4 w-4" />
-                    오늘의 성과
+                    <Target className="h-4 w-4 text-blue-600" />
+                    <span className="text-blue-900">오늘의 성과</span>
                   </div>
 
                   <div className="grid grid-cols-3 gap-4">
@@ -400,6 +512,15 @@ ${kakaoReport.notes ? `💬 특이사항\n${kakaoReport.notes}` : ''}
                         }))
                       }
                     />
+                  </div>
+
+                  <div className="mt-2 text-xs text-muted-foreground bg-muted/50 p-2 rounded">
+                    💡 총 근무시간:{' '}
+                    {calculateWorkHours(
+                      kakaoReport.startTime,
+                      kakaoReport.endTime
+                    )}
+                    시간
                   </div>
                 </div>
 
@@ -460,12 +581,12 @@ ${kakaoReport.notes ? `💬 특이사항\n${kakaoReport.notes}` : ''}
                     <h4 className="text-sm font-semibold">미리보기 및 편집</h4>
                   </div>
                   <Button
-                    onClick={handleCopyReport}
+                    onClick={() => handleCopyReport('daily', previewText)}
                     size="sm"
-                    disabled={isCopied}
+                    disabled={isCopied['daily']}
                     className="min-w-[100px]"
                   >
-                    {isCopied ? (
+                    {isCopied['daily'] ? (
                       <>
                         <Check className="mr-2 h-4 w-4" />
                         복사됨
@@ -486,9 +607,16 @@ ${kakaoReport.notes ? `💬 특이사항\n${kakaoReport.notes}` : ''}
                   placeholder="생성된 보고서가 여기에 표시됩니다..."
                 />
 
-                <p className="text-xs text-muted-foreground bg-muted/30 p-2 rounded">
-                  💡 미리보기 텍스트를 직접 수정할 수 있습니다
-                </p>
+                <div className="bg-green-50 border border-green-200 p-3 rounded-lg">
+                  <div className="flex items-center gap-2 text-green-800 text-xs font-medium">
+                    <Award className="h-3 w-3" />
+                    MVP 특화 기능
+                  </div>
+                  <p className="text-xs text-green-700 mt-1">
+                    💡 미리보기 텍스트를 직접 수정 가능 • 자동 효율성 계산 •
+                    성과 등급 표시
+                  </p>
+                </div>
               </div>
             </div>
           </TabsContent>
@@ -497,22 +625,19 @@ ${kakaoReport.notes ? `💬 특이사항\n${kakaoReport.notes}` : ''}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5" />
+                  <TrendingUp className="h-5 w-5 text-blue-600" />
                   <h4 className="text-sm font-semibold">주간 요약 정보</h4>
                 </div>
-                <div className="bg-muted/30 p-4 rounded-lg">
-                  <p className="text-sm mb-2">
+                <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-lg border border-purple-200">
+                  <p className="text-sm mb-2 text-purple-900 font-medium">
                     일일 입력 데이터를 기반으로 주간 보고서를 자동 생성합니다.
                   </p>
-                  <p className="text-xs text-muted-foreground">
-                    • 주간 누적 성과 계산
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    • 목표 달성률 분석
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    • 다음 주 전략 제안
-                  </p>
+                  <div className="space-y-1 text-xs text-purple-700">
+                    <p>• 주간 누적 성과 자동 계산</p>
+                    <p>• 목표 달성률 분석</p>
+                    <p>• 성장 지표 모니터링</p>
+                    <p>• 다음 주 개선 전략 제안</p>
+                  </div>
                 </div>
               </div>
 
@@ -521,12 +646,22 @@ ${kakaoReport.notes ? `💬 특이사항\n${kakaoReport.notes}` : ''}
                   <h4 className="text-sm font-semibold">주간 보고서</h4>
                   <Button
                     onClick={() =>
-                      navigator.clipboard.writeText(generateWeeklyReport())
+                      handleCopyReport('weekly', generateWeeklyReport())
                     }
                     size="sm"
+                    disabled={isCopied['weekly']}
                   >
-                    <Copy className="mr-2 h-4 w-4" />
-                    복사하기
+                    {isCopied['weekly'] ? (
+                      <>
+                        <Check className="mr-2 h-4 w-4" />
+                        복사됨
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="mr-2 h-4 w-4" />
+                        복사하기
+                      </>
+                    )}
                   </Button>
                 </div>
 
@@ -543,36 +678,43 @@ ${kakaoReport.notes ? `💬 특이사항\n${kakaoReport.notes}` : ''}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
-                  <Target className="h-5 w-5" />
+                  <Target className="h-5 w-5 text-orange-600" />
                   <h4 className="text-sm font-semibold">월간 성과 분석</h4>
                 </div>
-                <div className="bg-muted/30 p-4 rounded-lg">
-                  <p className="text-sm mb-2">
-                    전체 성과 데이터를 종합하여 월간 보고서를 생성합니다.
+                <div className="bg-gradient-to-r from-orange-50 to-yellow-50 p-4 rounded-lg border border-orange-200">
+                  <p className="text-sm mb-2 text-orange-900 font-medium">
+                    월간 종합 성과를 분석하고 다음 달 목표를 설정합니다.
                   </p>
-                  <p className="text-xs text-muted-foreground">
-                    • 월간 종합 성과 요약
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    • 성장률 및 트렌드 분석
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    • 다음 달 목표 설정
-                  </p>
+                  <div className="space-y-1 text-xs text-orange-700">
+                    <p>• 성과 등급 자동 산정</p>
+                    <p>• 목표 달성률 상세 분석</p>
+                    <p>• 개선 포인트 맞춤 제안</p>
+                    <p>• 다음 달 목표 자동 설정</p>
+                  </div>
                 </div>
               </div>
 
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-semibold">월간 보고서</h4>
+                  <h4 className="text-sm font-semibold">월간 성과 보고서</h4>
                   <Button
                     onClick={() =>
-                      navigator.clipboard.writeText(generateMonthlyReport())
+                      handleCopyReport('monthly', generateMonthlyReport())
                     }
                     size="sm"
+                    disabled={isCopied['monthly']}
                   >
-                    <Copy className="mr-2 h-4 w-4" />
-                    복사하기
+                    {isCopied['monthly'] ? (
+                      <>
+                        <Check className="mr-2 h-4 w-4" />
+                        복사됨
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="mr-2 h-4 w-4" />
+                        복사하기
+                      </>
+                    )}
                   </Button>
                 </div>
 

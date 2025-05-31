@@ -42,8 +42,8 @@ import {
   pipelineStages,
 } from '~/lib/schema';
 
-// Reports 특화 Enum
-export const reportTypeEnum = pgEnum('report_type', [
+// MVP 특화: Reports 전용 Enum (app_report_ prefix 적용)
+export const appReportTypeEnum = pgEnum('app_report_type_enum', [
   'performance',
   'pipeline',
   'client_analysis',
@@ -55,7 +55,7 @@ export const reportTypeEnum = pgEnum('report_type', [
   'custom',
 ]);
 
-export const reportFormatEnum = pgEnum('report_format', [
+export const appReportFormatEnum = pgEnum('app_report_format_enum', [
   'pdf',
   'excel',
   'csv',
@@ -63,7 +63,7 @@ export const reportFormatEnum = pgEnum('report_format', [
   'html',
 ]);
 
-export const reportFrequencyEnum = pgEnum('report_frequency', [
+export const appReportFrequencyEnum = pgEnum('app_report_frequency_enum', [
   'daily',
   'weekly',
   'monthly',
@@ -72,7 +72,7 @@ export const reportFrequencyEnum = pgEnum('report_frequency', [
   'on_demand',
 ]);
 
-export const reportStatusEnum = pgEnum('report_status', [
+export const appReportStatusEnum = pgEnum('app_report_status_enum', [
   'pending',
   'generating',
   'completed',
@@ -80,7 +80,7 @@ export const reportStatusEnum = pgEnum('report_status', [
   'cancelled',
 ]);
 
-export const chartTypeEnum = pgEnum('chart_type', [
+export const appChartTypeEnum = pgEnum('app_chart_type_enum', [
   'line',
   'bar',
   'pie',
@@ -91,18 +91,18 @@ export const chartTypeEnum = pgEnum('chart_type', [
   'gauge',
 ]);
 
-// Reports 특화 테이블들
+// MVP 특화: Reports 전용 테이블들 (app_report_ prefix 적용)
 
-// Report Templates 테이블 (리포트 템플릿)
-export const reportTemplates = pgTable('report_templates', {
+// Report Templates 테이블 (보고서 템플릿)
+export const reportTemplates = pgTable('app_report_templates', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: uuid('user_id').references(() => profiles.id), // null이면 시스템 템플릿
   teamId: uuid('team_id').references(() => teams.id),
   name: text('name').notNull(),
   description: text('description'),
-  type: reportTypeEnum('type').notNull(),
-  category: text('category'), // 'sales', 'performance', 'analytics'
-  config: jsonb('config').notNull(), // 리포트 설정
+  type: appReportTypeEnum('type').notNull(),
+  category: text('category'), // 'daily', 'weekly', 'monthly'
+  config: jsonb('config').notNull(), // 보고서 설정
   layout: jsonb('layout'), // 레이아웃 설정
   filters: jsonb('filters'), // 기본 필터
   charts: jsonb('charts'), // 차트 설정
@@ -117,8 +117,8 @@ export const reportTemplates = pgTable('report_templates', {
     .notNull(),
 });
 
-// Report Schedules 테이블 (리포트 스케줄)
-export const reportSchedules = pgTable('report_schedules', {
+// Report Schedules 테이블 (보고서 스케줄)
+export const reportSchedules = pgTable('app_report_schedules', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: uuid('user_id')
     .notNull()
@@ -129,8 +129,8 @@ export const reportSchedules = pgTable('report_schedules', {
     .references(() => reportTemplates.id),
   name: text('name').notNull(),
   description: text('description'),
-  frequency: reportFrequencyEnum('frequency').notNull(),
-  format: reportFormatEnum('format').default('pdf').notNull(),
+  frequency: appReportFrequencyEnum('frequency').notNull(),
+  format: appReportFormatEnum('format').default('pdf').notNull(),
   recipients: text('recipients').array().notNull(), // 이메일 주소들
   filters: jsonb('filters'), // 동적 필터
   nextRunAt: timestamp('next_run_at', { withTimezone: true }),
@@ -145,8 +145,8 @@ export const reportSchedules = pgTable('report_schedules', {
     .notNull(),
 });
 
-// Report Instances 테이블 (생성된 리포트)
-export const reportInstances = pgTable('report_instances', {
+// Report Instances 테이블 (생성된 보고서)
+export const reportInstances = pgTable('app_report_instances', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: uuid('user_id')
     .notNull()
@@ -154,13 +154,13 @@ export const reportInstances = pgTable('report_instances', {
   templateId: uuid('template_id').references(() => reportTemplates.id),
   scheduleId: uuid('schedule_id').references(() => reportSchedules.id),
   name: text('name').notNull(),
-  type: reportTypeEnum('type').notNull(),
-  format: reportFormatEnum('format').notNull(),
-  status: reportStatusEnum('status').default('pending').notNull(),
+  type: appReportTypeEnum('type').notNull(),
+  format: appReportFormatEnum('format').notNull(),
+  status: appReportStatusEnum('status').default('pending').notNull(),
   filePath: text('file_path'), // 생성된 파일 경로
   fileSize: integer('file_size'), // 파일 크기 (바이트)
   parameters: jsonb('parameters'), // 생성 시 사용된 파라미터
-  data: jsonb('data'), // 리포트 데이터 (작은 리포트의 경우)
+  data: jsonb('data'), // 보고서 데이터 (작은 보고서의 경우)
   metadata: jsonb('metadata'), // 메타데이터
   generatedAt: timestamp('generated_at', { withTimezone: true }),
   expiresAt: timestamp('expires_at', { withTimezone: true }),
@@ -172,7 +172,7 @@ export const reportInstances = pgTable('report_instances', {
 });
 
 // Report Dashboards 테이블 (대시보드)
-export const reportDashboards = pgTable('report_dashboards', {
+export const reportDashboards = pgTable('app_report_dashboards', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: uuid('user_id')
     .notNull()
@@ -196,8 +196,8 @@ export const reportDashboards = pgTable('report_dashboards', {
     .notNull(),
 });
 
-// Report Metrics 테이블 (리포트 지표)
-export const reportMetrics = pgTable('report_metrics', {
+// Report Metrics 테이블 (보고서 지표)
+export const reportMetrics = pgTable('app_report_metrics', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: uuid('user_id')
     .notNull()
@@ -214,8 +214,8 @@ export const reportMetrics = pgTable('report_metrics', {
     .notNull(),
 });
 
-// Report Exports 테이블 (리포트 내보내기 이력)
-export const reportExports = pgTable('report_exports', {
+// Report Exports 테이블 (보고서 내보내기 이력)
+export const reportExports = pgTable('app_report_exports', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: uuid('user_id')
     .notNull()
@@ -223,7 +223,7 @@ export const reportExports = pgTable('report_exports', {
   reportInstanceId: uuid('report_instance_id').references(
     () => reportInstances.id
   ),
-  format: reportFormatEnum('format').notNull(),
+  format: appReportFormatEnum('format').notNull(),
   filePath: text('file_path').notNull(),
   fileSize: integer('file_size').notNull(),
   downloadCount: integer('download_count').default(0).notNull(),
@@ -234,8 +234,8 @@ export const reportExports = pgTable('report_exports', {
     .notNull(),
 });
 
-// Report Subscriptions 테이블 (리포트 구독)
-export const reportSubscriptions = pgTable('report_subscriptions', {
+// Report Subscriptions 테이블 (보고서 구독)
+export const reportSubscriptions = pgTable('app_report_subscriptions', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: uuid('user_id')
     .notNull()
@@ -244,8 +244,8 @@ export const reportSubscriptions = pgTable('report_subscriptions', {
     .notNull()
     .references(() => reportTemplates.id),
   email: text('email').notNull(),
-  frequency: reportFrequencyEnum('frequency').notNull(),
-  format: reportFormatEnum('format').default('pdf').notNull(),
+  frequency: appReportFrequencyEnum('frequency').notNull(),
+  format: appReportFormatEnum('format').default('pdf').notNull(),
   filters: jsonb('filters'), // 구독자별 필터
   isActive: boolean('is_active').default(true).notNull(),
   lastSent: timestamp('last_sent', { withTimezone: true }),
@@ -379,11 +379,12 @@ export type NewReportExport = typeof reportExports.$inferInsert;
 export type ReportSubscription = typeof reportSubscriptions.$inferSelect;
 export type NewReportSubscription = typeof reportSubscriptions.$inferInsert;
 
-export type ReportType = (typeof reportTypeEnum.enumValues)[number];
-export type ReportFormat = (typeof reportFormatEnum.enumValues)[number];
-export type ReportFrequency = (typeof reportFrequencyEnum.enumValues)[number];
-export type ReportStatus = (typeof reportStatusEnum.enumValues)[number];
-export type ChartType = (typeof chartTypeEnum.enumValues)[number];
+export type ReportType = (typeof appReportTypeEnum.enumValues)[number];
+export type ReportFormat = (typeof appReportFormatEnum.enumValues)[number];
+export type ReportFrequency =
+  (typeof appReportFrequencyEnum.enumValues)[number];
+export type ReportStatus = (typeof appReportStatusEnum.enumValues)[number];
+export type ChartType = (typeof appChartTypeEnum.enumValues)[number];
 
 // Reports 특화 인터페이스
 export interface ReportConfig {
