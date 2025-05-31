@@ -163,6 +163,24 @@ import {
   appNetworkOpportunitiesRelations,
 } from '~/features/network/lib/schema';
 
+// Notifications 기능 전용 테이블들 import (새로운 테이블들만)
+import {
+  // Notifications 테이블들
+  appNotificationSettings,
+  appNotificationTemplates,
+  appNotificationQueue,
+  appNotificationHistory,
+  appNotificationRules,
+  appNotificationSubscriptions,
+  // Notifications Relations
+  appNotificationSettingsRelations,
+  appNotificationTemplatesRelations,
+  appNotificationQueueRelations,
+  appNotificationHistoryRelations,
+  appNotificationRulesRelations,
+  appNotificationSubscriptionsRelations,
+} from '~/features/notifications/lib/schema';
+
 // Drizzle 설정용 통합 스키마
 export const schema = {
   // ===== Core 테이블들 =====
@@ -229,6 +247,14 @@ export const schema = {
   appNetworkStats,
   appNetworkInteractions,
   appNetworkOpportunities,
+
+  // ===== Notifications 기능 전용 테이블들 =====
+  appNotificationSettings,
+  appNotificationTemplates,
+  appNotificationQueue,
+  appNotificationHistory,
+  appNotificationRules,
+  appNotificationSubscriptions,
 
   // ===== Public 테이블들 =====
   publicContents,
@@ -300,6 +326,13 @@ export const schema = {
   appNetworkStatsRelations,
   appNetworkInteractionsRelations,
   appNetworkOpportunitiesRelations,
+  // Notifications Relations
+  appNotificationSettingsRelations,
+  appNotificationTemplatesRelations,
+  appNotificationQueueRelations,
+  appNotificationHistoryRelations,
+  appNotificationRulesRelations,
+  appNotificationSubscriptionsRelations,
 };
 
 // 타입 정의
