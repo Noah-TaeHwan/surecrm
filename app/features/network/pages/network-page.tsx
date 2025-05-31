@@ -22,6 +22,12 @@ import {
 } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
 import type { Route } from './+types/network-page';
+import type {
+  NetworkNode,
+  NetworkLink,
+  NetworkData,
+  NetworkFilters,
+} from '../types';
 
 // 실제 데이터베이스 함수들 import
 import { getNetworkData, searchNetwork } from '../lib/network-data';
@@ -90,34 +96,6 @@ export function meta({ data, params }: Route.MetaArgs) {
   ];
 }
 
-// 데이터 타입 정의
-interface NetworkNode {
-  id: string;
-  name: string;
-  group?: string;
-  importance?: number;
-  stage?: string;
-  referredBy?: string;
-}
-
-interface NetworkLink {
-  source: string | NetworkNode;
-  target: string | NetworkNode;
-  value: number;
-}
-
-interface NetworkData {
-  nodes: NetworkNode[];
-  links: NetworkLink[];
-}
-
-interface FilterSettings {
-  stageFilter: string;
-  depthFilter: string;
-  importanceFilter: number;
-  showInfluencersOnly: boolean;
-}
-
 // Error Boundary 컴포넌트 추가
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -160,7 +138,7 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
 
   const graphRef = useRef<any>(null);
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
-  const [filterSettings, setFilterSettings] = useState({
+  const [filterSettings, setFilterSettings] = useState<NetworkFilters>({
     stageFilter: 'all',
     depthFilter: 'all',
     importanceFilter: 0,
@@ -358,7 +336,7 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
   );
 
   // 필터 변경 시 통계 업데이트
-  const handleFilterChange = useCallback((newFilters: FilterSettings) => {
+  const handleFilterChange = useCallback((newFilters: NetworkFilters) => {
     setFilterSettings(newFilters);
   }, []);
 

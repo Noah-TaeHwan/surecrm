@@ -1,41 +1,7 @@
 'use client';
 
 import { Suspense, lazy, useEffect, useState } from 'react';
-
-interface NetworkNode {
-  id: string;
-  name: string;
-  group?: string;
-  importance?: number;
-  stage?: string;
-  referredBy?: string;
-}
-
-interface NetworkLink {
-  source: string | NetworkNode;
-  target: string | NetworkNode;
-  value: number;
-}
-
-interface NetworkData {
-  nodes: NetworkNode[];
-  links: NetworkLink[];
-}
-
-interface NetworkGraphProps {
-  data: NetworkData;
-  onNodeSelect: (nodeId: string) => void;
-  filters: {
-    stageFilter: string;
-    depthFilter: string;
-    importanceFilter: number;
-    showInfluencersOnly?: boolean;
-  };
-  layout?: string;
-  searchQuery?: string;
-  graphRef?: React.MutableRefObject<any>;
-  highlightedNodeId?: string | null;
-}
+import type { NetworkGraphProps } from '../types';
 
 // 로딩 컴포넌트
 const LoadingFallback = () => (

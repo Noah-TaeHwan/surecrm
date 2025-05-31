@@ -1,38 +1,26 @@
-import { Button } from '~/common/components/ui/button';
-import { Separator } from '~/common/components/ui/separator';
-import { Badge } from '~/common/components/ui/badge';
+import { useMemo } from 'react';
 import {
   X,
+  Users,
+  TrendingUp,
+  Star,
+  ArrowRight,
   Phone,
   Mail,
   Calendar,
-  ChevronRight,
-  Users,
   UserRound,
   ArrowUpRight,
-  Star,
 } from 'lucide-react';
-import { useMemo } from 'react';
-
-interface NetworkNode {
-  id: string;
-  name: string;
-  group?: string;
-  importance?: number;
-  stage?: string;
-  referredBy?: string;
-}
-
-interface NetworkLink {
-  source: string | NetworkNode;
-  target: string | NetworkNode;
-  value: number;
-}
-
-interface NetworkData {
-  nodes: NetworkNode[];
-  links: NetworkLink[];
-}
+import { Button } from '~/common/components/ui/button';
+import { Badge } from '~/common/components/ui/badge';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '~/common/components/ui/card';
+import { Separator } from '~/common/components/ui/separator';
+import type { NetworkNode, NetworkLink, NetworkData } from '../types';
 
 interface NetworkDetailPanelProps {
   nodeId: string;
@@ -98,6 +86,26 @@ export default function NetworkDetailPanel({
   }, [data, nodeId, selectedNode]);
 
   if (!selectedNode) return null;
+
+  // 연결된 노드들을 통한 통계 계산
+  const connections = referredNodes.length;
+  const totalImportance = referredNodes.reduce(
+    (sum, node) => sum + (node.importance || 0),
+    0
+  );
+
+  const handleContactAction = (action: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    console.log(`${action} 액션 실행:`, selectedNode.name);
+    // 실제 연락 액션 로직 구현
+  };
+
+  const handleReferralAction = (nodeId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onNodeSelect) {
+      onNodeSelect(nodeId);
+    }
+  };
 
   // 영업 단계별 배지 색상
   const getStageBadgeColor = (stage: string | undefined) => {
@@ -203,7 +211,7 @@ export default function NetworkDetailPanel({
               </h3>
               <div
                 className="group p-2.5 border border-border bg-card hover:bg-accent/5 rounded-md transition-colors cursor-pointer flex items-center"
-                onClick={() => handleNodeSelect(referredByNode.id)}
+                onClick={(e) => handleReferralAction(referredByNode.id, e)}
               >
                 <div className="w-1 self-stretch bg-primary/40 rounded-full mr-2.5"></div>
                 <div className="flex-1 min-w-0">
@@ -232,7 +240,7 @@ export default function NetworkDetailPanel({
                   className="h-6 w-6 p-0 rounded-full text-muted-foreground opacity-60 group-hover:opacity-100"
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleNodeSelect(referredByNode.id);
+                    handleReferralAction(referredByNode.id, e);
                   }}
                 >
                   <ArrowUpRight className="h-3.5 w-3.5" />
@@ -262,7 +270,7 @@ export default function NetworkDetailPanel({
                   <div
                     key={node.id}
                     className="group p-2.5 border border-border bg-card hover:bg-accent/5 rounded-md transition-colors cursor-pointer flex items-center"
-                    onClick={() => handleNodeSelect(node.id)}
+                    onClick={(e) => handleReferralAction(node.id, e)}
                   >
                     <div className="w-1 self-stretch bg-orange-500/40 rounded-full mr-2.5"></div>
                     <div className="flex-1 min-w-0">
@@ -291,7 +299,7 @@ export default function NetworkDetailPanel({
                       className="h-6 w-6 p-0 rounded-full text-muted-foreground opacity-60 group-hover:opacity-100"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleNodeSelect(node.id);
+                        handleReferralAction(node.id, e);
                       }}
                     >
                       <ArrowUpRight className="h-3.5 w-3.5" />
