@@ -105,6 +105,24 @@ import {
   appClientDataBackupsRelations,
 } from '~/features/clients/lib/schema';
 
+// Dashboard 기능 전용 테이블들 import (새로운 테이블들만)
+import {
+  // Dashboard 테이블들
+  appDashboardPerformanceMetrics,
+  appDashboardGoals,
+  appDashboardActivityLogs,
+  appDashboardNotifications,
+  appDashboardWidgets,
+  appDashboardQuickActions,
+  // Dashboard Relations
+  appDashboardPerformanceMetricsRelations,
+  appDashboardGoalsRelations,
+  appDashboardActivityLogsRelations,
+  appDashboardNotificationsRelations,
+  appDashboardWidgetsRelations,
+  appDashboardQuickActionsRelations,
+} from '~/features/dashboard/lib/schema';
+
 // Drizzle 설정용 통합 스키마
 export const schema = {
   // ===== Core 테이블들 =====
@@ -146,6 +164,14 @@ export const schema = {
   appClientStageHistory,
   appClientDataAccessLogs,
   appClientDataBackups,
+
+  // ===== Dashboard 기능 전용 테이블들 =====
+  appDashboardPerformanceMetrics,
+  appDashboardGoals,
+  appDashboardActivityLogs,
+  appDashboardNotifications,
+  appDashboardWidgets,
+  appDashboardQuickActions,
 
   // ===== Public 테이블들 =====
   publicContents,
@@ -189,6 +215,13 @@ export const schema = {
   appClientStageHistoryRelations,
   appClientDataAccessLogsRelations,
   appClientDataBackupsRelations,
+  // Dashboard Relations
+  appDashboardPerformanceMetricsRelations,
+  appDashboardGoalsRelations,
+  appDashboardActivityLogsRelations,
+  appDashboardNotificationsRelations,
+  appDashboardWidgetsRelations,
+  appDashboardQuickActionsRelations,
   // Public Relations
   publicContentsRelations,
   faqsRelations,
