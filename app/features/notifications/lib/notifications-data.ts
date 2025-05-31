@@ -1,23 +1,26 @@
 import { db } from '~/lib/core/db';
 import { eq, desc, and, or, count, sql } from 'drizzle-orm';
 import {
-  notificationQueue,
-  notificationHistory,
-  notificationSettings,
-  notificationTemplates,
-  notificationRules,
-  notificationSubscriptions,
-  type NotificationQueue,
-  type NotificationHistory,
-  type NotificationSettings,
-  type NotificationTemplate,
-  type NotificationRule,
-  type NotificationSubscription,
-  type NotificationType,
-  type NotificationChannel,
-  type NotificationStatus,
-  type NotificationPriority,
+  appNotificationQueue,
+  appNotificationHistory,
+  appNotificationSettings,
+  appNotificationTemplates,
+  appNotificationRules,
+  appNotificationSubscriptions,
 } from './schema';
+
+// 타입들을 중앙 타입 파일에서 import
+import type {
+  NotificationQueue,
+  NotificationHistory,
+  NotificationSettings,
+  NotificationStatus,
+  NotificationType,
+  NotificationChannel,
+  NotificationPriority,
+  CreateNotificationData,
+  NotificationQueryOptions,
+} from '../types';
 
 // 타입 재export
 export type { NotificationQueue, NotificationHistory, NotificationSettings };
@@ -25,37 +28,31 @@ export type { NotificationQueue, NotificationHistory, NotificationSettings };
 // 알림 목록 조회
 export async function getNotifications(
   userId: string,
-  options?: {
-    limit?: number;
-    offset?: number;
-    status?: NotificationStatus;
-    type?: NotificationType;
-    unreadOnly?: boolean;
-  }
+  options?: NotificationQueryOptions
 ) {
   const { limit = 50, offset = 0, status, type, unreadOnly } = options || {};
 
   try {
     // 필터 조건 추가
-    const conditions = [eq(notificationQueue.userId, userId)];
+    const conditions = [eq(appNotificationQueue.userId, userId)];
 
     if (status) {
-      conditions.push(eq(notificationQueue.status, status));
+      conditions.push(eq(appNotificationQueue.status, status));
     }
 
     if (type) {
-      conditions.push(eq(notificationQueue.type, type));
+      conditions.push(eq(appNotificationQueue.type, type));
     }
 
     if (unreadOnly) {
-      conditions.push(sql`${notificationQueue.readAt} IS NULL`);
+      conditions.push(sql`${appNotificationQueue.readAt} IS NULL`);
     }
 
     const notifications = await db
       .select()
-      .from(notificationQueue)
+      .from(appNotificationQueue)
       .where(and(...conditions))
-      .orderBy(desc(notificationQueue.createdAt))
+      .orderBy(desc(appNotificationQueue.createdAt))
       .limit(limit)
       .offset(offset);
 
@@ -72,11 +69,11 @@ export async function getUnreadNotificationCount(userId: string) {
   try {
     const result = await db
       .select({ count: count() })
-      .from(notificationQueue)
+      .from(appNotificationQueue)
       .where(
         and(
-          eq(notificationQueue.userId, userId),
-          sql`${notificationQueue.readAt} IS NULL`
+          eq(appNotificationQueue.userId, userId),
+          sql`${appNotificationQueue.readAt} IS NULL`
         )
       );
 
@@ -94,15 +91,15 @@ export async function markNotificationAsRead(
 ) {
   try {
     const result = await db
-      .update(notificationQueue)
+      .update(appNotificationQueue)
       .set({
         readAt: new Date(),
         status: 'read',
       })
       .where(
         and(
-          eq(notificationQueue.id, notificationId),
-          eq(notificationQueue.userId, userId)
+          eq(appNotificationQueue.id, notificationId),
+          eq(appNotificationQueue.userId, userId)
         )
       )
       .returning();
@@ -118,15 +115,15 @@ export async function markNotificationAsRead(
 export async function markAllNotificationsAsRead(userId: string) {
   try {
     const result = await db
-      .update(notificationQueue)
+      .update(appNotificationQueue)
       .set({
         readAt: new Date(),
         status: 'read',
       })
       .where(
         and(
-          eq(notificationQueue.userId, userId),
-          sql`${notificationQueue.readAt} IS NULL`
+          eq(appNotificationQueue.userId, userId),
+          sql`${appNotificationQueue.readAt} IS NULL`
         )
       )
       .returning();
@@ -144,11 +141,11 @@ export async function deleteNotification(
   userId: string
 ) {
   const result = await db
-    .delete(notificationQueue)
+    .delete(appNotificationQueue)
     .where(
       and(
-        eq(notificationQueue.id, notificationId),
-        eq(notificationQueue.userId, userId)
+        eq(appNotificationQueue.id, notificationId),
+        eq(appNotificationQueue.userId, userId)
       )
     )
     .returning();
@@ -160,8 +157,8 @@ export async function deleteNotification(
 export async function getNotificationSettings(userId: string) {
   const settings = await db
     .select()
-    .from(notificationSettings)
-    .where(eq(notificationSettings.userId, userId))
+    .from(appNotificationSettings)
+    .where(eq(appNotificationSettings.userId, userId))
     .limit(1);
 
   return settings[0] || null;
@@ -176,18 +173,18 @@ export async function upsertNotificationSettings(
 
   if (existing) {
     const result = await db
-      .update(notificationSettings)
+      .update(appNotificationSettings)
       .set({
         ...settings,
         updatedAt: new Date(),
       })
-      .where(eq(notificationSettings.userId, userId))
+      .where(eq(appNotificationSettings.userId, userId))
       .returning();
 
     return result[0];
   } else {
     const result = await db
-      .insert(notificationSettings)
+      .insert(appNotificationSettings)
       .values({
         userId,
         ...settings,
@@ -199,19 +196,9 @@ export async function upsertNotificationSettings(
 }
 
 // 알림 생성
-export async function createNotification(notification: {
-  userId: string;
-  type: NotificationType;
-  channel: NotificationChannel;
-  priority?: NotificationPriority;
-  title: string;
-  message: string;
-  recipient: string;
-  scheduledAt?: Date;
-  metadata?: Record<string, any>;
-}) {
+export async function createNotification(notification: CreateNotificationData) {
   const result = await db
-    .insert(notificationQueue)
+    .insert(appNotificationQueue)
     .values({
       ...notification,
       scheduledAt: notification.scheduledAt || new Date(),
@@ -230,49 +217,49 @@ export async function getNotificationStats(userId: string, days = 30) {
   // 전체 통계
   const totalStats = await db
     .select({
-      status: notificationQueue.status,
+      status: appNotificationQueue.status,
       count: count(),
     })
-    .from(notificationQueue)
+    .from(appNotificationQueue)
     .where(
       and(
-        eq(notificationQueue.userId, userId),
-        sql`${notificationQueue.createdAt} >= ${startDate}`
+        eq(appNotificationQueue.userId, userId),
+        sql`${appNotificationQueue.createdAt} >= ${startDate}`
       )
     )
-    .groupBy(notificationQueue.status);
+    .groupBy(appNotificationQueue.status);
 
   // 채널별 통계
   const channelStats = await db
     .select({
-      channel: notificationQueue.channel,
-      status: notificationQueue.status,
+      channel: appNotificationQueue.channel,
+      status: appNotificationQueue.status,
       count: count(),
     })
-    .from(notificationQueue)
+    .from(appNotificationQueue)
     .where(
       and(
-        eq(notificationQueue.userId, userId),
-        sql`${notificationQueue.createdAt} >= ${startDate}`
+        eq(appNotificationQueue.userId, userId),
+        sql`${appNotificationQueue.createdAt} >= ${startDate}`
       )
     )
-    .groupBy(notificationQueue.channel, notificationQueue.status);
+    .groupBy(appNotificationQueue.channel, appNotificationQueue.status);
 
   // 타입별 통계
   const typeStats = await db
     .select({
-      type: notificationQueue.type,
-      status: notificationQueue.status,
+      type: appNotificationQueue.type,
+      status: appNotificationQueue.status,
       count: count(),
     })
-    .from(notificationQueue)
+    .from(appNotificationQueue)
     .where(
       and(
-        eq(notificationQueue.userId, userId),
-        sql`${notificationQueue.createdAt} >= ${startDate}`
+        eq(appNotificationQueue.userId, userId),
+        sql`${appNotificationQueue.createdAt} >= ${startDate}`
       )
     )
-    .groupBy(notificationQueue.type, notificationQueue.status);
+    .groupBy(appNotificationQueue.type, appNotificationQueue.status);
 
   return {
     totalStats,
@@ -288,18 +275,18 @@ export async function getNotificationTemplates(
 ) {
   const conditions = [
     or(
-      eq(notificationTemplates.userId, userId),
-      sql`${notificationTemplates.userId} IS NULL`, // 시스템 템플릿
-      teamId ? eq(notificationTemplates.teamId, teamId) : sql`false`
+      eq(appNotificationTemplates.userId, userId),
+      sql`${appNotificationTemplates.userId} IS NULL`, // 시스템 템플릿
+      teamId ? eq(appNotificationTemplates.teamId, teamId) : sql`false`
     ),
-    eq(notificationTemplates.isActive, true),
+    eq(appNotificationTemplates.isActive, true),
   ];
 
   const templates = await db
     .select()
-    .from(notificationTemplates)
+    .from(appNotificationTemplates)
     .where(and(...conditions))
-    .orderBy(desc(notificationTemplates.createdAt));
+    .orderBy(desc(appNotificationTemplates.createdAt));
 
   return templates;
 }
@@ -307,19 +294,19 @@ export async function getNotificationTemplates(
 // 알림 규칙 조회
 export async function getNotificationRules(userId: string, teamId?: string) {
   const conditions = [
-    eq(notificationRules.userId, userId),
-    eq(notificationRules.isActive, true),
+    eq(appNotificationRules.userId, userId),
+    eq(appNotificationRules.isActive, true),
   ];
 
   if (teamId) {
-    conditions.push(eq(notificationRules.teamId, teamId));
+    conditions.push(eq(appNotificationRules.teamId, teamId));
   }
 
   const rules = await db
     .select()
-    .from(notificationRules)
+    .from(appNotificationRules)
     .where(and(...conditions))
-    .orderBy(desc(notificationRules.createdAt));
+    .orderBy(desc(appNotificationRules.createdAt));
 
   return rules;
 }
@@ -328,14 +315,14 @@ export async function getNotificationRules(userId: string, teamId?: string) {
 export async function getNotificationSubscriptions(userId: string) {
   const subscriptions = await db
     .select()
-    .from(notificationSubscriptions)
+    .from(appNotificationSubscriptions)
     .where(
       and(
-        eq(notificationSubscriptions.userId, userId),
-        eq(notificationSubscriptions.isActive, true)
+        eq(appNotificationSubscriptions.userId, userId),
+        eq(appNotificationSubscriptions.isActive, true)
       )
     )
-    .orderBy(desc(notificationSubscriptions.createdAt));
+    .orderBy(desc(appNotificationSubscriptions.createdAt));
 
   return subscriptions;
 }

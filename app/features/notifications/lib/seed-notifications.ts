@@ -1,10 +1,10 @@
 import { db } from '~/lib/core/db';
 import {
-  notificationSettings,
-  notificationTemplates,
-  notificationQueue,
-  notificationRules,
-  notificationSubscriptions,
+  appNotificationSettings,
+  appNotificationTemplates,
+  appNotificationQueue,
+  appNotificationRules,
+  appNotificationSubscriptions,
   type NotificationType,
   type NotificationChannel,
   type NotificationPriority,
@@ -18,7 +18,7 @@ export async function seedNotifications(userId: string) {
   try {
     // 1. 알림 설정 생성
     await db
-      .insert(notificationSettings)
+      .insert(appNotificationSettings)
       .values({
         userId,
         emailNotifications: true,
@@ -82,7 +82,7 @@ export async function seedNotifications(userId: string) {
     ];
 
     await db
-      .insert(notificationTemplates)
+      .insert(appNotificationTemplates)
       .values(templates)
       .onConflictDoNothing();
 
@@ -183,7 +183,7 @@ export async function seedNotifications(userId: string) {
     ];
 
     await db
-      .insert(notificationQueue)
+      .insert(appNotificationQueue)
       .values(sampleNotifications)
       .onConflictDoNothing();
 
@@ -221,7 +221,7 @@ export async function seedNotifications(userId: string) {
       },
     ];
 
-    await db.insert(notificationRules).values(rules).onConflictDoNothing();
+    await db.insert(appNotificationRules).values(rules).onConflictDoNothing();
 
     // 5. 알림 구독 설정
     const subscriptions = [
@@ -244,7 +244,7 @@ export async function seedNotifications(userId: string) {
     ];
 
     await db
-      .insert(notificationSubscriptions)
+      .insert(appNotificationSubscriptions)
       .values(subscriptions)
       .onConflictDoNothing();
 
@@ -267,11 +267,11 @@ export async function cleanNotifications() {
   console.log('🧹 Notifications 데이터 정리 중...');
 
   try {
-    await db.delete(notificationSubscriptions);
-    await db.delete(notificationRules);
-    await db.delete(notificationQueue);
-    await db.delete(notificationTemplates);
-    await db.delete(notificationSettings);
+    await db.delete(appNotificationSubscriptions);
+    await db.delete(appNotificationRules);
+    await db.delete(appNotificationQueue);
+    await db.delete(appNotificationTemplates);
+    await db.delete(appNotificationSettings);
 
     console.log('✅ Notifications 데이터 정리 완료');
   } catch (error) {

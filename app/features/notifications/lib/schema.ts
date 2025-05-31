@@ -1,5 +1,5 @@
 // 📢 Notifications 기능 전용 스키마
-// Prefix 네이밍 컨벤션: notification_ 사용
+// Prefix 네이밍 컨벤션: app_notification_ 사용
 // 공통 스키마에서 기본 테이블들을 import
 export {
   profiles,
@@ -27,8 +27,8 @@ import {
 import { relations } from 'drizzle-orm';
 import { profiles, teams, clients, meetings } from '~/lib/schema';
 
-// 📌 Notifications 특화 Enum (prefix 네이밍 적용)
-export const notificationTypeEnum = pgEnum('notification_type_enum', [
+// 📌 Notifications 특화 Enum (app_notification_ prefix 네이밍 적용)
+export const appNotificationTypeEnum = pgEnum('app_notification_type_enum', [
   'meeting_reminder',
   'goal_achievement',
   'goal_deadline',
@@ -42,34 +42,25 @@ export const notificationTypeEnum = pgEnum('notification_type_enum', [
   'payment_due',
 ]);
 
-export const notificationPriorityEnum = pgEnum('notification_priority_enum', [
-  'low',
-  'normal',
-  'high',
-  'urgent',
-]);
+export const appNotificationPriorityEnum = pgEnum(
+  'app_notification_priority_enum',
+  ['low', 'normal', 'high', 'urgent']
+);
 
-export const notificationChannelEnum = pgEnum('notification_channel_enum', [
-  'in_app',
-  'email',
-  'sms',
-  'push',
-  'kakao',
-]);
+export const appNotificationChannelEnum = pgEnum(
+  'app_notification_channel_enum',
+  ['in_app', 'email', 'sms', 'push', 'kakao']
+);
 
-export const notificationStatusEnum = pgEnum('notification_status_enum', [
-  'pending',
-  'sent',
-  'delivered',
-  'read',
-  'failed',
-  'cancelled',
-]);
+export const appNotificationStatusEnum = pgEnum(
+  'app_notification_status_enum',
+  ['pending', 'sent', 'delivered', 'read', 'failed', 'cancelled']
+);
 
-// 🏷️ Notifications 특화 테이블들 (prefix 네이밍 적용)
+// 🏷️ Notifications 특화 테이블들 (app_notification_ prefix 네이밍 적용)
 
 // Notification Settings 테이블 (알림 설정)
-export const notificationSettings = pgTable('notification_settings', {
+export const appNotificationSettings = pgTable('app_notification_settings', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: uuid('user_id')
     .notNull()
@@ -101,12 +92,12 @@ export const notificationSettings = pgTable('notification_settings', {
 });
 
 // Notification Templates 테이블 (알림 템플릿)
-export const notificationTemplates = pgTable('notification_templates', {
+export const appNotificationTemplates = pgTable('app_notification_templates', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: uuid('user_id').references(() => profiles.id), // null이면 시스템 템플릿
   teamId: uuid('team_id').references(() => teams.id),
-  type: notificationTypeEnum('type').notNull(),
-  channel: notificationChannelEnum('channel').notNull(),
+  type: appNotificationTypeEnum('type').notNull(),
+  channel: appNotificationChannelEnum('channel').notNull(),
   name: text('name').notNull(),
   subject: text('subject'),
   bodyTemplate: text('body_template').notNull(),
@@ -123,15 +114,15 @@ export const notificationTemplates = pgTable('notification_templates', {
 });
 
 // Notification Queue 테이블 (알림 대기열)
-export const notificationQueue = pgTable('notification_queue', {
+export const appNotificationQueue = pgTable('app_notification_queue', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: uuid('user_id')
     .notNull()
     .references(() => profiles.id),
-  templateId: uuid('template_id').references(() => notificationTemplates.id),
-  type: notificationTypeEnum('type').notNull(),
-  channel: notificationChannelEnum('channel').notNull(),
-  priority: notificationPriorityEnum('priority').default('normal').notNull(),
+  templateId: uuid('template_id').references(() => appNotificationTemplates.id),
+  type: appNotificationTypeEnum('type').notNull(),
+  channel: appNotificationChannelEnum('channel').notNull(),
+  priority: appNotificationPriorityEnum('priority').default('normal').notNull(),
   title: text('title').notNull(),
   message: text('message').notNull(),
   recipient: text('recipient').notNull(), // 이메일, 전화번호 등
@@ -139,7 +130,7 @@ export const notificationQueue = pgTable('notification_queue', {
   sentAt: timestamp('sent_at', { withTimezone: true }),
   deliveredAt: timestamp('delivered_at', { withTimezone: true }),
   readAt: timestamp('read_at', { withTimezone: true }),
-  status: notificationStatusEnum('status').default('pending').notNull(),
+  status: appNotificationStatusEnum('status').default('pending').notNull(),
   retryCount: integer('retry_count').default(0).notNull(),
   maxRetries: integer('max_retries').default(3).notNull(),
   errorMessage: text('error_message'),
@@ -150,21 +141,21 @@ export const notificationQueue = pgTable('notification_queue', {
 });
 
 // Notification History 테이블 (알림 이력)
-export const notificationHistory = pgTable('notification_history', {
+export const appNotificationHistory = pgTable('app_notification_history', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: uuid('user_id')
     .notNull()
     .references(() => profiles.id),
-  queueId: uuid('queue_id').references(() => notificationQueue.id),
-  type: notificationTypeEnum('type').notNull(),
-  channel: notificationChannelEnum('channel').notNull(),
+  queueId: uuid('queue_id').references(() => appNotificationQueue.id),
+  type: appNotificationTypeEnum('type').notNull(),
+  channel: appNotificationChannelEnum('channel').notNull(),
   title: text('title').notNull(),
   message: text('message').notNull(),
   recipient: text('recipient').notNull(),
   sentAt: timestamp('sent_at', { withTimezone: true }).notNull(),
   deliveredAt: timestamp('delivered_at', { withTimezone: true }),
   readAt: timestamp('read_at', { withTimezone: true }),
-  status: notificationStatusEnum('status').notNull(),
+  status: appNotificationStatusEnum('status').notNull(),
   responseData: jsonb('response_data'), // 외부 서비스 응답
   metadata: jsonb('metadata'),
   createdAt: timestamp('created_at', { withTimezone: true })
@@ -173,7 +164,7 @@ export const notificationHistory = pgTable('notification_history', {
 });
 
 // Notification Rules 테이블 (알림 규칙)
-export const notificationRules = pgTable('notification_rules', {
+export const appNotificationRules = pgTable('app_notification_rules', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: uuid('user_id')
     .notNull()
@@ -196,127 +187,133 @@ export const notificationRules = pgTable('notification_rules', {
 });
 
 // Notification Subscriptions 테이블 (구독 관리)
-export const notificationSubscriptions = pgTable('notification_subscriptions', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  userId: uuid('user_id')
-    .notNull()
-    .references(() => profiles.id),
-  resourceType: text('resource_type').notNull(), // 'client', 'team', 'goal' etc.
-  resourceId: uuid('resource_id').notNull(),
-  subscriptionType: text('subscription_type').notNull(), // 'updates', 'reminders' etc.
-  channels: notificationChannelEnum('channels').array().notNull(),
-  isActive: boolean('is_active').default(true).notNull(),
-  createdAt: timestamp('created_at', { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-  updatedAt: timestamp('updated_at', { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-});
+export const appNotificationSubscriptions = pgTable(
+  'app_notification_subscriptions',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => profiles.id),
+    resourceType: text('resource_type').notNull(), // 'client', 'team', 'goal' etc.
+    resourceId: uuid('resource_id').notNull(),
+    subscriptionType: text('subscription_type').notNull(), // 'updates', 'reminders' etc.
+    channels: appNotificationChannelEnum('channels').array().notNull(),
+    isActive: boolean('is_active').default(true).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  }
+);
 
 // 🔗 Relations (관계 정의)
-export const notificationSettingsRelations = relations(
-  notificationSettings,
+export const appNotificationSettingsRelations = relations(
+  appNotificationSettings,
   ({ one }) => ({
     user: one(profiles, {
-      fields: [notificationSettings.userId],
+      fields: [appNotificationSettings.userId],
       references: [profiles.id],
     }),
   })
 );
 
-export const notificationTemplatesRelations = relations(
-  notificationTemplates,
+export const appNotificationTemplatesRelations = relations(
+  appNotificationTemplates,
   ({ one, many }) => ({
     user: one(profiles, {
-      fields: [notificationTemplates.userId],
+      fields: [appNotificationTemplates.userId],
       references: [profiles.id],
     }),
     team: one(teams, {
-      fields: [notificationTemplates.teamId],
+      fields: [appNotificationTemplates.teamId],
       references: [teams.id],
     }),
-    queueItems: many(notificationQueue),
+    queueItems: many(appNotificationQueue),
   })
 );
 
-export const notificationQueueRelations = relations(
-  notificationQueue,
+export const appNotificationQueueRelations = relations(
+  appNotificationQueue,
   ({ one }) => ({
     user: one(profiles, {
-      fields: [notificationQueue.userId],
+      fields: [appNotificationQueue.userId],
       references: [profiles.id],
     }),
-    template: one(notificationTemplates, {
-      fields: [notificationQueue.templateId],
-      references: [notificationTemplates.id],
+    template: one(appNotificationTemplates, {
+      fields: [appNotificationQueue.templateId],
+      references: [appNotificationTemplates.id],
     }),
   })
 );
 
-export const notificationHistoryRelations = relations(
-  notificationHistory,
+export const appNotificationHistoryRelations = relations(
+  appNotificationHistory,
   ({ one }) => ({
     user: one(profiles, {
-      fields: [notificationHistory.userId],
+      fields: [appNotificationHistory.userId],
       references: [profiles.id],
     }),
-    queueItem: one(notificationQueue, {
-      fields: [notificationHistory.queueId],
-      references: [notificationQueue.id],
+    queueItem: one(appNotificationQueue, {
+      fields: [appNotificationHistory.queueId],
+      references: [appNotificationQueue.id],
     }),
   })
 );
 
-export const notificationRulesRelations = relations(
-  notificationRules,
+export const appNotificationRulesRelations = relations(
+  appNotificationRules,
   ({ one }) => ({
     user: one(profiles, {
-      fields: [notificationRules.userId],
+      fields: [appNotificationRules.userId],
       references: [profiles.id],
     }),
     team: one(teams, {
-      fields: [notificationRules.teamId],
+      fields: [appNotificationRules.teamId],
       references: [teams.id],
     }),
   })
 );
 
-export const notificationSubscriptionsRelations = relations(
-  notificationSubscriptions,
+export const appNotificationSubscriptionsRelations = relations(
+  appNotificationSubscriptions,
   ({ one }) => ({
     user: one(profiles, {
-      fields: [notificationSubscriptions.userId],
+      fields: [appNotificationSubscriptions.userId],
       references: [profiles.id],
     }),
   })
 );
 
 // 📝 Notifications 특화 타입들 (실제 코드와 일치)
-export type NotificationSettings = typeof notificationSettings.$inferSelect;
-export type NewNotificationSettings = typeof notificationSettings.$inferInsert;
-export type NotificationTemplate = typeof notificationTemplates.$inferSelect;
-export type NewNotificationTemplate = typeof notificationTemplates.$inferInsert;
-export type NotificationQueue = typeof notificationQueue.$inferSelect;
-export type NewNotificationQueue = typeof notificationQueue.$inferInsert;
-export type NotificationHistory = typeof notificationHistory.$inferSelect;
-export type NewNotificationHistory = typeof notificationHistory.$inferInsert;
-export type NotificationRule = typeof notificationRules.$inferSelect;
-export type NewNotificationRule = typeof notificationRules.$inferInsert;
+export type NotificationSettings = typeof appNotificationSettings.$inferSelect;
+export type NewNotificationSettings =
+  typeof appNotificationSettings.$inferInsert;
+export type NotificationTemplate = typeof appNotificationTemplates.$inferSelect;
+export type NewNotificationTemplate =
+  typeof appNotificationTemplates.$inferInsert;
+export type NotificationQueue = typeof appNotificationQueue.$inferSelect;
+export type NewNotificationQueue = typeof appNotificationQueue.$inferInsert;
+export type NotificationHistory = typeof appNotificationHistory.$inferSelect;
+export type NewNotificationHistory = typeof appNotificationHistory.$inferInsert;
+export type NotificationRule = typeof appNotificationRules.$inferSelect;
+export type NewNotificationRule = typeof appNotificationRules.$inferInsert;
 export type NotificationSubscription =
-  typeof notificationSubscriptions.$inferSelect;
+  typeof appNotificationSubscriptions.$inferSelect;
 export type NewNotificationSubscription =
-  typeof notificationSubscriptions.$inferInsert;
+  typeof appNotificationSubscriptions.$inferInsert;
 
-export type NotificationType = (typeof notificationTypeEnum.enumValues)[number];
+export type NotificationType =
+  (typeof appNotificationTypeEnum.enumValues)[number];
 export type NotificationPriority =
-  (typeof notificationPriorityEnum.enumValues)[number];
+  (typeof appNotificationPriorityEnum.enumValues)[number];
 export type NotificationChannel =
-  (typeof notificationChannelEnum.enumValues)[number];
+  (typeof appNotificationChannelEnum.enumValues)[number];
 export type NotificationStatus =
-  (typeof notificationStatusEnum.enumValues)[number];
+  (typeof appNotificationStatusEnum.enumValues)[number];
 
-// 🎯 Notifications 특화 인터페이스
+// �� Notifications 특화 인터페이스
 export interface NotificationOverview {
   settings: NotificationSettings;
   unreadCount: number;

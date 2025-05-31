@@ -35,13 +35,7 @@ import {
   formatNotificationTime,
   getNotificationTypeIcon,
   getNotificationPriorityClass,
-  type NotificationQueue,
 } from '../lib/notifications-data';
-import {
-  type NotificationStatus,
-  type NotificationType,
-  type NotificationPriority,
-} from '../lib/schema';
 import {
   Select,
   SelectContent,
@@ -56,6 +50,22 @@ import {
   TabsTrigger,
 } from '~/common/components/ui/tabs';
 
+// 타입들을 중앙 타입 파일에서 import
+import type {
+  NotificationQueue,
+  NotificationStatus,
+  NotificationType,
+  NotificationPriority,
+  NotificationPageData,
+  NotificationActionData,
+} from '../types';
+
+// 새로 생성한 컴포넌트들 import
+import { NotificationCard } from '../components/notification-card';
+import { NotificationFilters } from '../components/notification-filters';
+import { NotificationTabs } from '../components/notification-tabs';
+import { NotificationEmptyState } from '../components/notification-empty-state';
+
 export function meta(): any {
   return [
     { title: '알림 | SureCRM' },
@@ -63,7 +73,9 @@ export function meta(): any {
   ];
 }
 
-export async function loader({ request }: Route.LoaderArgs) {
+export async function loader({
+  request,
+}: Route.LoaderArgs): Promise<NotificationPageData> {
   try {
     // 현재 사용자 정보 가져오기
     const user = await getCurrentUser(request);
@@ -92,7 +104,9 @@ export async function loader({ request }: Route.LoaderArgs) {
   }
 }
 
-export async function action({ request }: Route.ActionArgs) {
+export async function action({
+  request,
+}: Route.ActionArgs): Promise<NotificationActionData> {
   const formData = await request.formData();
   const intent = formData.get('intent') as string;
   const notificationId = formData.get('notificationId') as string;
@@ -157,19 +171,19 @@ export default function NotificationsPage({
     return matchesSearch && matchesStatus && matchesType && matchesTab;
   });
 
-  // 알림 우선순위별 아이콘
-  const getPriorityIcon = (priority: NotificationPriority) => {
-    switch (priority) {
-      case 'urgent':
-        return <AlertCircle className="h-4 w-4 text-red-500" />;
-      case 'high':
-        return <AlertCircle className="h-4 w-4 text-orange-500" />;
-      case 'normal':
-        return <Info className="h-4 w-4 text-blue-500" />;
-      case 'low':
-        return <Info className="h-4 w-4 text-gray-500" />;
+  // 빈 상태 타입 결정
+  const getEmptyStateType = () => {
+    if (searchQuery || statusFilter !== 'all' || typeFilter !== 'all') {
+      return 'no-search-results';
+    }
+
+    switch (activeTab) {
+      case 'unread':
+        return 'no-unread';
+      case 'read':
+        return 'no-read';
       default:
-        return <Info className="h-4 w-4 text-gray-500" />;
+        return 'no-notifications';
     }
   };
 
@@ -207,233 +221,42 @@ export default function NotificationsPage({
         </div>
 
         {/* 필터 및 검색 섹션 */}
-        <Card className="border-border bg-card">
-          <CardContent className="p-4">
-            <div className="flex flex-col sm:flex-row gap-4">
-              {/* 검색 */}
-              <div className="flex-1">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="알림 검색..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 bg-background border-border"
-                  />
-                </div>
-              </div>
-
-              {/* 필터 */}
-              <div className="flex gap-2">
-                <Select
-                  value={statusFilter}
-                  onValueChange={(value) => setStatusFilter(value as any)}
-                >
-                  <SelectTrigger className="w-32 bg-background border-border">
-                    <SelectValue placeholder="상태" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">모든 상태</SelectItem>
-                    <SelectItem value="pending">대기중</SelectItem>
-                    <SelectItem value="sent">발송됨</SelectItem>
-                    <SelectItem value="read">읽음</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                <Select
-                  value={typeFilter}
-                  onValueChange={(value) => setTypeFilter(value as any)}
-                >
-                  <SelectTrigger className="w-32 bg-background border-border">
-                    <SelectValue placeholder="유형" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">모든 유형</SelectItem>
-                    <SelectItem value="meeting_reminder">미팅 알림</SelectItem>
-                    <SelectItem value="goal_achievement">목표 달성</SelectItem>
-                    <SelectItem value="new_referral">새 추천</SelectItem>
-                    <SelectItem value="birthday_reminder">생일 알림</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <NotificationFilters
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          statusFilter={statusFilter}
+          onStatusFilterChange={setStatusFilter}
+          typeFilter={typeFilter}
+          onTypeFilterChange={setTypeFilter}
+        />
 
         {/* 탭 섹션 */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 bg-muted">
-            <TabsTrigger
-              value="all"
-              className="data-[state=active]:bg-background"
-            >
-              전체 ({notifications.length})
-            </TabsTrigger>
-            <TabsTrigger
-              value="unread"
-              className="data-[state=active]:bg-background"
-            >
-              읽지 않음 ({unreadCount})
-            </TabsTrigger>
-            <TabsTrigger
-              value="read"
-              className="data-[state=active]:bg-background"
-            >
-              읽음 ({notifications.length - unreadCount})
-            </TabsTrigger>
-          </TabsList>
+        <NotificationTabs
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          totalCount={notifications.length}
+          unreadCount={unreadCount}
+        />
 
-          <TabsContent value={activeTab} className="mt-6">
-            {/* 알림 목록 */}
-            {filteredNotifications.length > 0 ? (
-              <div className="space-y-3">
-                {filteredNotifications.map((notification) => (
-                  <Card
-                    key={notification.id}
-                    className={cn(
-                      'border-border bg-card hover:bg-accent/50 transition-colors',
-                      !notification.readAt &&
-                        'border-l-4 border-l-primary bg-primary/5'
-                    )}
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex items-start gap-4">
-                        {/* 아이콘 */}
-                        <div className="flex-shrink-0 mt-1">
-                          <div className="text-2xl">
-                            {getNotificationTypeIcon(notification.type)}
-                          </div>
-                        </div>
-
-                        {/* 내용 */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between mb-2">
-                            <div className="flex items-center gap-2">
-                              <h3
-                                className={cn(
-                                  'font-medium text-foreground',
-                                  !notification.readAt && 'font-semibold'
-                                )}
-                              >
-                                {notification.title}
-                              </h3>
-                              {getPriorityIcon(notification.priority)}
-                              {!notification.readAt && (
-                                <div className="w-2 h-2 bg-primary rounded-full" />
-                              )}
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Badge
-                                variant={
-                                  notification.status === 'read'
-                                    ? 'secondary'
-                                    : 'default'
-                                }
-                                className="text-xs"
-                              >
-                                {notification.status === 'read'
-                                  ? '읽음'
-                                  : '읽지 않음'}
-                              </Badge>
-                            </div>
-                          </div>
-
-                          <p className="text-muted-foreground text-sm mb-3 leading-relaxed">
-                            {notification.message}
-                          </p>
-
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                              <span className="flex items-center gap-1">
-                                <Clock className="h-3 w-3" />
-                                {formatNotificationTime(
-                                  new Date(notification.createdAt)
-                                )}
-                              </span>
-                              <span>
-                                {notification.channel === 'in_app'
-                                  ? '앱 내'
-                                  : notification.channel}
-                              </span>
-                            </div>
-
-                            <div className="flex items-center gap-2">
-                              {!notification.readAt && (
-                                <Form method="post" className="inline">
-                                  <input
-                                    type="hidden"
-                                    name="intent"
-                                    value="markAsRead"
-                                  />
-                                  <input
-                                    type="hidden"
-                                    name="notificationId"
-                                    value={notification.id}
-                                  />
-                                  <Button
-                                    type="submit"
-                                    variant="ghost"
-                                    size="sm"
-                                  >
-                                    <Check className="h-4 w-4" />
-                                  </Button>
-                                </Form>
-                              )}
-                              <Form method="post" className="inline">
-                                <input
-                                  type="hidden"
-                                  name="intent"
-                                  value="delete"
-                                />
-                                <input
-                                  type="hidden"
-                                  name="notificationId"
-                                  value={notification.id}
-                                />
-                                <Button
-                                  type="submit"
-                                  variant="ghost"
-                                  size="sm"
-                                  className="text-destructive hover:text-destructive"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </Form>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <Card className="border-border bg-card">
-                <CardContent className="p-12 text-center">
-                  <Bell className="h-16 w-16 mx-auto mb-4 text-muted-foreground/30" />
-                  <h3 className="text-lg font-medium text-foreground mb-2">
-                    {searchQuery ||
-                    statusFilter !== 'all' ||
-                    typeFilter !== 'all'
-                      ? '검색 결과가 없습니다'
-                      : activeTab === 'unread'
-                      ? '읽지 않은 알림이 없습니다'
-                      : activeTab === 'read'
-                      ? '읽은 알림이 없습니다'
-                      : '알림이 없습니다'}
-                  </h3>
-                  <p className="text-muted-foreground">
-                    {searchQuery ||
-                    statusFilter !== 'all' ||
-                    typeFilter !== 'all'
-                      ? '다른 검색 조건을 시도해보세요'
-                      : '새로운 알림이 도착하면 여기에 표시됩니다'}
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-        </Tabs>
+        {/* 알림 목록 */}
+        <div className="mt-6">
+          {filteredNotifications.length > 0 ? (
+            <div className="space-y-3">
+              {filteredNotifications.map((notification) => (
+                <NotificationCard
+                  key={notification.id}
+                  notification={notification}
+                />
+              ))}
+            </div>
+          ) : (
+            <NotificationEmptyState
+              type={getEmptyStateType()}
+              searchQuery={searchQuery}
+              hasFilters={statusFilter !== 'all' || typeFilter !== 'all'}
+            />
+          )}
+        </div>
       </div>
     </MainLayout>
   );
