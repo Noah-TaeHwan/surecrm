@@ -153,5 +153,5 @@ CREATE POLICY "Users can insert own clients" ON public.app_client_profiles
   FOR INSERT WITH CHECK (auth.uid() = agent_id);
 
 CREATE POLICY "Users can update own clients" ON public.app_client_profiles
-  FOR UPDATE USING (auth.uid() = agent_id);
+  FOR UPDATE USING (auth.uid() = admin_id);
 `;
