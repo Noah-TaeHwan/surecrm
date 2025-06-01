@@ -249,7 +249,13 @@ export async function action({ request }: Route.ActionArgs) {
         const newPassword = formData.get('newPassword') as string;
         const confirmPassword = formData.get('confirmPassword') as string;
 
-        // 비밀번호 검증
+        if (!currentPassword || !newPassword || !confirmPassword) {
+          return data({
+            success: false,
+            error: '모든 비밀번호 필드를 입력해주세요.',
+          });
+        }
+
         if (newPassword !== confirmPassword) {
           return data({
             success: false,
@@ -260,20 +266,40 @@ export async function action({ request }: Route.ActionArgs) {
         if (newPassword.length < 6) {
           return data({
             success: false,
-            error: '새 비밀번호는 6자 이상이어야 합니다.',
+            error: '새 비밀번호는 최소 6자 이상이어야 합니다.',
+          });
+        }
+
+        if (currentPassword === newPassword) {
+          return data({
+            success: false,
+            error: '새 비밀번호는 현재 비밀번호와 다르게 설정해야 합니다.',
           });
         }
 
         try {
-          // Admin 권한으로 비밀번호 변경
-          const supabaseAdmin = createAdminClient();
-          const { error } = await supabaseAdmin.auth.admin.updateUserById(
-            user.id,
-            { password: newPassword }
-          );
+          // 1. 현재 비밀번호로 인증 확인
+          const supabase = createServerClient();
+          const { error: authError } = await supabase.auth.signInWithPassword({
+            email: user.email,
+            password: currentPassword,
+          });
 
-          if (error) {
-            console.error('비밀번호 변경 오류:', error);
+          if (authError) {
+            console.error('현재 비밀번호 인증 실패:', authError);
+            return data({
+              success: false,
+              error: '현재 비밀번호가 올바르지 않습니다.',
+            });
+          }
+
+          // 2. 인증 성공 후 새 비밀번호로 변경
+          const { error: updateError } = await supabase.auth.updateUser({
+            password: newPassword,
+          });
+
+          if (updateError) {
+            console.error('비밀번호 변경 오류:', updateError);
             return data({
               success: false,
               error: '비밀번호 변경에 실패했습니다.',
@@ -282,7 +308,8 @@ export async function action({ request }: Route.ActionArgs) {
 
           return data({
             success: true,
-            message: '비밀번호가 성공적으로 변경되었습니다.',
+            message:
+              '비밀번호가 성공적으로 변경되었습니다. 보안을 위해 다시 로그인해주세요.',
           });
         } catch (error) {
           console.error('비밀번호 변경 예외:', error);
