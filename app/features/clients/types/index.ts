@@ -28,18 +28,10 @@ export type UnifiedTag = string | AppClientTag;
 export interface ClientDisplay extends Omit<Client, 'tags'> {
   // 기본 필드들은 Client에서 상속
 
-  // 조인된 필드들 (런타임에 추가됨)
-  currentStage?: {
-    id: string;
-    name: string;
-    color: string;
-    order: number;
-  };
-  referredBy?: {
-    id: string;
-    fullName: string;
-    phone?: string;
-  };
+  // 조인된 필드들 (런타임에 추가됨) - DB 응답에 맞게 수정
+  stageName?: string;
+  stageColor?: string;
+  stageOrder?: number;
 
   // 계산된 필드들
   referralCount?: number;

@@ -349,8 +349,10 @@ export function ClientDetailHeader({
                 </div>
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
-                    <Badge variant={stageBadgeVariant[client.currentStageId]}>
-                      {client.currentStageId}
+                    <Badge
+                      variant={stageBadgeVariant[client.stageName || 'default']}
+                    >
+                      {client.stageName || '미설정'}
                     </Badge>
                     <Badge variant={importanceBadgeVariant[client.importance]}>
                       {importanceText[client.importance]}

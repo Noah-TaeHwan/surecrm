@@ -1,18 +1,13 @@
-import type { Route } from './+types/clients-page';
 import { MainLayout } from '~/common/layouts/main-layout';
-import { useState } from 'react';
-import { Button } from '~/common/components/ui/button';
-import { Input } from '~/common/components/ui/input';
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from '~/common/components/ui/card';
+import { Button } from '~/common/components/ui/button';
+import { Input } from '~/common/components/ui/input';
 import { Badge } from '~/common/components/ui/badge';
-import { Checkbox } from '~/common/components/ui/checkbox';
-import { Avatar, AvatarFallback } from '~/common/components/ui/avatar';
 import {
   Select,
   SelectContent,
@@ -27,1161 +22,1198 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-  TableCaption,
 } from '~/common/components/ui/table';
+import { Avatar, AvatarFallback } from '~/common/components/ui/avatar';
+import { Separator } from '~/common/components/ui/separator';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-} from '~/common/components/ui/dropdown-menu';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '~/common/components/ui/tooltip';
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from '~/common/components/ui/pagination';
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '~/common/components/ui/dialog';
 import { Label } from '~/common/components/ui/label';
-import { Switch } from '~/common/components/ui/switch';
-import { Link } from 'react-router';
 import {
-  PlusIcon,
-  MagnifyingGlassIcon,
-  DownloadIcon,
-  Link2Icon,
-  Share1Icon,
-  EyeOpenIcon,
-  EyeClosedIcon,
-  PersonIcon,
-  LockClosedIcon,
-  TrashIcon,
-  ArrowUpIcon,
-  ArrowDownIcon,
-  CalendarIcon,
-  DotsHorizontalIcon,
-  Pencil2Icon,
-} from '@radix-ui/react-icons';
-
-import { ClientCard } from '~/features/clients/components/client-card';
-import { ClientStatsCards } from '~/features/clients/components/client-stats-cards';
-import { ClientAddChoiceModal } from '~/features/clients/components/client-add-choice-modal';
-import { ClientImportModal } from '~/features/clients/components/client-import-modal';
-import { AddClientModal } from '~/features/clients/components/add-client-modal';
-import { ReferralDepthIndicator } from '~/features/clients/components/referral-depth-indicator';
-import {
-  insuranceTypeIcons,
-  insuranceTypeText,
-} from '~/features/clients/components/insurance-config';
-
+  Users,
+  Network,
+  TrendingUp,
+  Shield,
+  Search,
+  Filter,
+  Plus,
+  Upload,
+  Download,
+  LayoutGrid,
+  LayoutList,
+  Calendar,
+  Phone,
+  Mail,
+  MapPin,
+  Clock,
+  MessageCircle,
+  Edit2,
+  Trash2,
+  FileDown,
+  DollarSign,
+  Target,
+  Eye,
+  Star,
+} from 'lucide-react';
+import { useState, useMemo } from 'react';
+import type { Route } from './+types/clients-page';
 import type {
-  ClientDisplay,
-  ClientStats,
+  Client,
+  ClientOverview,
+  ClientSearchFilters,
+  AppClientTag,
+  AppClientContactHistory,
+  PipelineStage,
+  Importance,
   ClientPrivacyLevel,
-} from '~/features/clients/types';
-import { typeHelpers } from '~/features/clients/types';
-import {
-  getClients,
-  getClientStats,
-  logDataAccess,
-} from '~/features/clients/lib/client-data';
-import { requireAuth, getSearchParams } from '~/lib/auth/helpers';
-import { requireAuth as requireAuthMiddleware } from '~/lib/auth/middleware';
-import { data } from 'react-router';
-import { ClientsEmptyState } from '~/features/clients/components/clients-empty-state';
+} from '~/features/clients/lib/schema';
+import { format } from 'date-fns';
+import { ko } from 'date-fns/locale';
 
-// 🎨 BadgeVariant 타입 정의
-type BadgeVariant = 'default' | 'secondary' | 'outline' | 'destructive';
+// 🎯 보험설계사 특화 고객 관리 페이지
+// 실제 스키마 타입 사용으로 데이터베이스 연동 준비 완료
 
-export async function loader({ request }: Route.LoaderArgs) {
-  // 🔒 인증 확인 (보안 강화)
-  const user = await requireAuthMiddleware(request);
-  const userId = user.id;
-
-  // 🔍 검색 파라미터 추출 (새 필터 지원)
-  const url = new URL(request.url);
-  const searchParams = {
-    page: parseInt(url.searchParams.get('page') || '1'),
-    pageSize: parseInt(url.searchParams.get('pageSize') || '10'),
-    search: url.searchParams.get('search') || undefined,
-    stageIds: url.searchParams.getAll('stageId'),
-    tagIds: url.searchParams.getAll('tagId'),
-    importance: url.searchParams.getAll('importance'),
-    sources: url.searchParams.getAll('source'),
-    privacyLevels: url.searchParams.getAll(
-      'privacyLevel'
-    ) as ClientPrivacyLevel[],
-    sortBy: url.searchParams.get('sortBy') || 'fullName',
-    sortOrder: (url.searchParams.get('sortOrder') || 'asc') as 'asc' | 'desc',
-    // 🔒 보안 관련 파라미터
-    ipAddress:
-      request.headers.get('x-forwarded-for') ||
-      request.headers.get('x-real-ip') ||
-      'unknown',
-    userAgent: request.headers.get('user-agent') || 'unknown',
+// 🎯 확장된 고객 프로필 타입 (페이지에서 사용)
+interface ClientProfile extends Client {
+  // 추가 계산 필드들 (런타임에서 계산됨)
+  referralCount: number;
+  insuranceTypes: string[];
+  totalPremium: number;
+  currentStage: {
+    id: string;
+    name: string;
+    color: string;
   };
+  engagementScore: number;
+  conversionProbability: number;
+  lifetimeValue: number;
+  lastContactDate?: string;
+  nextActionDate?: string;
+  upcomingMeeting?: {
+    date: string;
+    type: string;
+  };
+  referredBy?: {
+    id: string;
+    name: string;
+    relationship: string;
+  };
+}
 
+// 🎯 MVP 핵심 통계 (보험설계사 관점)
+const MOCK_STATS = {
+  totalClients: 47,
+  activeClients: 42,
+  inactiveClients: 5,
+  networkStats: {
+    totalReferrals: 28,
+    directReferrers: 12,
+    secondDegreeConnections: 15,
+    networkValue: 8420000,
+  },
+  salesStats: {
+    totalContracts: 23,
+    monthlyPremium: 1240000,
+    averageContractValue: 180000,
+    conversionRate: 48.9,
+  },
+  activityStats: {
+    scheduledMeetings: 8,
+    pendingActions: 6,
+    overdueFollowups: 2,
+  },
+};
+
+// 🎯 보험설계사 특화 풍부한 고객 데이터 (실제 스키마 기반)
+const MOCK_CLIENTS: ClientProfile[] = [
+  {
+    // 🎯 기본 Client 필드들 (스키마 기반)
+    id: '1',
+    agentId: 'demo-agent',
+    teamId: 'team-1',
+    fullName: '김철수',
+    email: 'kimcs@example.com',
+    phone: '010-1234-5678',
+    telecomProvider: 'SKT',
+    address: '서울시 강남구 역삼동',
+    occupation: '회사원 (삼성전자)',
+    hasDrivingLicense: true,
+    height: 175,
+    weight: 70,
+    tags: ['VIP', '핵심 소개자', '장기 고객'],
+    importance: 'high' as Importance,
+    currentStageId: 'stage3',
+    referredById: null,
+    notes: '매우 적극적인 고객. 추가 소개 가능성 높음.',
+    customFields: {},
+    isActive: true,
+    createdAt: new Date('2023-08-15'),
+    updatedAt: new Date('2024-01-10'),
+
+    // 🎯 계산/확장 필드들
+    referralCount: 3,
+    insuranceTypes: ['자동차보험', '건강보험', '연금보험'],
+    totalPremium: 320000,
+    currentStage: {
+      id: 'stage3',
+      name: '상품 설명',
+      color: '#3b82f6',
+    },
+    engagementScore: 8.5,
+    conversionProbability: 85,
+    lifetimeValue: 2400000,
+    lastContactDate: '2024-01-10',
+    nextActionDate: '2024-01-15',
+    upcomingMeeting: {
+      date: '2024-01-15',
+      type: '계약 체결',
+    },
+    referredBy: {
+      id: 'ref1',
+      name: '박영희',
+      relationship: '대학 동기',
+    },
+  },
+  {
+    // 🎯 기본 Client 필드들 (스키마 기반)
+    id: '2',
+    agentId: 'demo-agent',
+    teamId: 'team-1',
+    fullName: '이미영',
+    email: 'leemy@example.com',
+    phone: '010-9876-5432',
+    telecomProvider: 'KT',
+    address: '서울시 서초구 반포동',
+    occupation: '의사 (강남세브란스)',
+    hasDrivingLicense: true,
+    height: 165,
+    weight: 55,
+    tags: ['VIP', '고소득', '전문직'],
+    importance: 'high' as Importance,
+    currentStageId: 'stage4',
+    referredById: '1', // 김철수가 소개
+    notes: '의료진 네트워크 활용 가능',
+    customFields: {},
+    isActive: true,
+    createdAt: new Date('2023-09-20'),
+    updatedAt: new Date('2024-01-08'),
+
+    // 🎯 계산/확장 필드들
+    referralCount: 2,
+    insuranceTypes: ['의료배상보험', '연금보험'],
+    totalPremium: 580000,
+    currentStage: {
+      id: 'stage4',
+      name: '계약 검토',
+      color: '#8b5cf6',
+    },
+    engagementScore: 9.2,
+    conversionProbability: 92,
+    lifetimeValue: 4200000,
+    lastContactDate: '2024-01-08',
+    nextActionDate: '2024-01-12',
+    referredBy: {
+      id: '1',
+      name: '김철수',
+      relationship: '직장 동료',
+    },
+  },
+  {
+    // 🎯 기본 Client 필드들 (스키마 기반)
+    id: '3',
+    agentId: 'demo-agent',
+    teamId: 'team-1',
+    fullName: '박준호',
+    email: 'parkjh@example.com',
+    phone: '010-5555-1234',
+    telecomProvider: 'LG U+',
+    address: '경기도 성남시 분당구',
+    occupation: '자영업 (카페 운영)',
+    hasDrivingLicense: true,
+    height: 178,
+    weight: 75,
+    tags: ['자영업', '소상공인'],
+    importance: 'medium' as Importance,
+    currentStageId: 'stage2',
+    referredById: '2', // 이미영이 소개
+    notes: '사업 확장 계획 있음',
+    customFields: {},
+    isActive: true,
+    createdAt: new Date('2023-10-10'),
+    updatedAt: new Date('2024-01-05'),
+
+    // 🎯 계산/확장 필드들
+    referralCount: 1,
+    insuranceTypes: ['화재보험', '사업자보험'],
+    totalPremium: 180000,
+    currentStage: {
+      id: 'stage2',
+      name: '니즈 분석',
+      color: '#10b981',
+    },
+    engagementScore: 6.8,
+    conversionProbability: 65,
+    lifetimeValue: 1800000,
+    lastContactDate: '2024-01-05',
+    nextActionDate: '2024-01-18',
+    referredBy: {
+      id: '2',
+      name: '이미영',
+      relationship: '친구',
+    },
+  },
+  // 더 많은 고객 데이터...
+];
+
+// 🎯 Loader 함수 - 실제 데이터베이스 연동
+export async function loader() {
   try {
-    // 🔒 고객 목록 조회 (접근 로그 포함)
-    const clientsData = await getClients({
-      agentId: userId,
-      ...searchParams,
+    console.log('🔄 Loader: 고객 목록 로딩 중...');
+
+    // 🎯 실제 API 호출
+    const { getClients, getClientStats } = await import('~/api/shared/clients');
+
+    // Demo 에이전트 ID (실제 환경에서는 인증된 사용자 ID 사용)
+    const demoAgentId = 'demo-agent-id';
+
+    // 병렬로 데이터 조회
+    const [clientsResponse, statsResponse] = await Promise.all([
+      getClients({
+        agentId: demoAgentId,
+        page: 1,
+        limit: 50, // 첫 로딩에서는 많이 가져오기
+      }),
+      getClientStats(demoAgentId),
+    ]);
+
+    console.log('✅ Loader: 데이터 로딩 완료', {
+      clientsCount: clientsResponse.data.length,
+      statsLoaded: statsResponse.success,
     });
 
-    // 📊 통계 조회
-    const stats = await getClientStats(userId);
-
     return {
-      ...clientsData,
-      stats,
-      searchParams, // 현재 검색 상태 반환
-      currentUserId: userId, // 🔧 수정: 실제 사용자 ID 전달
+      clients: clientsResponse.data,
+      stats: statsResponse.data,
+      pagination: {
+        total: clientsResponse.total,
+        page: clientsResponse.page,
+        totalPages: clientsResponse.totalPages,
+      },
     };
   } catch (error) {
-    console.error('Clients 페이지 로더 오류:', error);
+    console.error('❌ Loader: 데이터 로딩 실패:', error);
 
-    // 🔒 에러 시 안전한 빈 데이터 반환
+    // 오류 시 빈 데이터 반환
     return {
       clients: [],
-      totalCount: 0,
-      pageSize: searchParams.pageSize,
-      currentPage: searchParams.page,
-      totalPages: 0,
       stats: {
         totalClients: 0,
-        activeClients: 0,
-        inactiveClients: 0,
-        importanceDistribution: {
-          high: 0,
-          medium: 0,
-          low: 0,
-        },
-        privacyDistribution: {
-          public: 0,
-          restricted: 0,
-          private: 0,
-          confidential: 0,
-        },
-        dataComplianceStatus: {
-          gdprCompliant: 0,
-          consentExpiring: 0,
-          backupRequired: 0,
-        },
+        newThisMonth: 0,
+        activeDeals: 0,
+        totalRevenue: 0,
+        conversionRate: 0,
+        topStages: [],
       },
-      searchParams,
-      currentUserId: null, // 🔧 수정: 에러 시에도 사용자 ID 필드 추가
+      pagination: {
+        total: 0,
+        page: 1,
+        totalPages: 0,
+      },
     };
   }
 }
 
-export async function action({ request }: Route.ActionArgs) {
-  const user = await requireAuthMiddleware(request);
-  const userId = user.id;
-  const formData = await request.formData();
-  const intent = formData.get('intent') as string;
-
-  switch (intent) {
-    case 'bulkDelete':
-      try {
-        const clientIds = formData.getAll('clientIds') as string[];
-        // TODO: 일괄 삭제 로직 구현
-        return data({
-          success: true,
-          message: '선택된 고객이 삭제되었습니다.',
-        });
-      } catch (error) {
-        return data(
-          { success: false, error: '일괄 삭제 중 오류가 발생했습니다.' },
-          { status: 500 }
-        );
-      }
-
-    case 'bulkExport':
-      try {
-        const clientIds = formData.getAll('clientIds') as string[];
-        // TODO: 일괄 내보내기 로직 구현
-        return data({ success: true, message: '데이터가 내보내기되었습니다.' });
-      } catch (error) {
-        return data(
-          { success: false, error: '내보내기 중 오류가 발생했습니다.' },
-          { status: 500 }
-        );
-      }
-
-    default:
-      return data(
-        { success: false, error: '알 수 없는 작업입니다.' },
-        { status: 400 }
-      );
-  }
+export function meta() {
+  return [{ title: '고객 관리 | SureCRM' }];
 }
 
-export function meta({ data, params }: Route.MetaArgs) {
-  return [
-    { title: '고객 관리 - SureCRM' },
-    {
-      name: 'description',
-      content: '보험설계사를 위한 안전한 고객 관계 관리 시스템',
-    },
-  ];
-}
-
-export default function ClientsPage({
-  loaderData,
-  actionData,
-}: Route.ComponentProps) {
-  const {
-    clients = [],
-    totalCount = 0,
-    pageSize = 10,
-    currentPage = 1,
-    totalPages: loaderTotalPages = 0,
-    stats,
-    searchParams: initialSearchParams,
-    currentUserId: rawCurrentUserId,
-  } = loaderData;
-
-  // 🔧 수정: currentUserId null 체크
-  const currentUserId = rawCurrentUserId || '';
-
-  // 🔒 상태 관리 (보안 강화)
-  const [searchQuery, setSearchQuery] = useState(
-    initialSearchParams?.search || ''
-  );
-  const [selectedClients, setSelectedClients] = useState<string[]>([]);
-  const [sortBy, setSortBy] = useState(
-    initialSearchParams?.sortBy || 'fullName'
-  );
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>(
-    initialSearchParams?.sortOrder || 'asc'
-  );
-  const [filterStage, setFilterStage] = useState('all');
-  const [filterImportance, setFilterImportance] = useState('all');
-  const [filterReferrer, setFilterReferrer] = useState('all');
-  const [filterPrivacyLevel, setFilterPrivacyLevel] = useState<
-    ClientPrivacyLevel | 'all'
+export default function ClientsPage({ loaderData }: any) {
+  // 🎯 상태 관리
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterImportance, setFilterImportance] = useState<
+    'all' | 'high' | 'medium' | 'low'
   >('all');
-  const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
-  const [showConfidentialData, setShowConfidentialData] = useState(false);
-  const [addClientOpen, setAddClientOpen] = useState(false);
-  const [addChoiceOpen, setAddChoiceOpen] = useState(false);
-  const [importModalOpen, setImportModalOpen] = useState(false);
-  const [filterInsuranceType, setFilterInsuranceType] = useState('all');
-  const [filterDepth, setFilterDepth] = useState('all');
+  const [filterStage, setFilterStage] = useState<string>('all');
+  const [filterReferralStatus, setFilterReferralStatus] =
+    useState<string>('all');
+  const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
+  const [showFilters, setShowFilters] = useState(false);
+  const [sortBy, setSortBy] = useState<
+    'name' | 'stage' | 'importance' | 'premium' | 'lastContact' | 'createdAt'
+  >('createdAt');
 
-  // 🔒 클라이언트를 ClientDisplay로 타입 캐스팅
-  const typedClients = clients as ClientDisplay[];
+  // 🎯 모달 상태 관리
+  const [showAddClientModal, setShowAddClientModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [showEditClientModal, setShowEditClientModal] = useState(false);
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<ClientProfile | null>(
+    null
+  );
 
-  // 🎨 배지 설정들 (app.css 준수)
-  const statusBadgeVariant: Record<string, BadgeVariant> = {
-    active: 'default',
-    inactive: 'secondary',
-    pending: 'outline',
-  };
+  // 🎯 고급 필터링 (보험설계사 특화)
+  const filteredClients = loaderData.clients.filter((client: ClientProfile) => {
+    // 검색어 필터링
+    const matchesSearch =
+      !searchQuery ||
+      client.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      client.phone.includes(searchQuery) ||
+      (client.email &&
+        client.email.toLowerCase().includes(searchQuery.toLowerCase()));
 
-  const statusText: Record<string, string> = {
-    active: '활성',
-    inactive: '비활성',
-  };
+    // 중요도 필터링
+    const matchesImportance =
+      !filterImportance || client.importance === filterImportance;
 
-  const stageBadgeVariant: Record<string, BadgeVariant> = {
-    lead: 'outline',
-    contact: 'secondary',
-    proposal: 'default',
-    contract: 'destructive',
-  };
+    // 영업 단계 필터링
+    const matchesStage =
+      !filterStage || client.currentStage.name === filterStage;
 
-  const importanceBadgeVariant: Record<string, BadgeVariant> = {
-    high: 'destructive',
-    medium: 'default',
-    low: 'secondary',
-  };
+    // 소개 상태 필터링
+    const matchesReferralStatus =
+      filterReferralStatus === 'all' ||
+      (filterReferralStatus === 'has_referrer' && client.referredBy) ||
+      (filterReferralStatus === 'no_referrer' && !client.referredBy) ||
+      (filterReferralStatus === 'top_referrer' && client.referralCount >= 3);
 
-  const importanceText: Record<string, string> = {
-    high: '높음',
-    medium: '보통',
-    low: '낮음',
-  };
-
-  // 🔒 개인정보 보호 레벨 설정
-  const privacyLevelIcon: Record<ClientPrivacyLevel, any> = {
-    public: PersonIcon,
-    restricted: PersonIcon,
-    private: LockClosedIcon,
-    confidential: LockClosedIcon,
-  };
-
-  const privacyLevelBadgeVariant: Record<ClientPrivacyLevel, BadgeVariant> = {
-    public: 'outline',
-    restricted: 'secondary',
-    private: 'default',
-    confidential: 'destructive',
-  };
-
-  const privacyLevelText: Record<ClientPrivacyLevel, string> = {
-    public: '공개',
-    restricted: '제한',
-    private: '비공개',
-    confidential: '기밀',
-  };
-
-  // 🔍 필터링된 고객 목록 (클라이언트 사이드 - 추가 보안 필터링)
-  const filteredAndSortedClients = typedClients
-    .filter((client) => {
-      // 🔒 개인정보 보호 레벨 확인
-      if (!showConfidentialData && client.accessLevel === 'confidential') {
-        return false;
-      }
-
-      const matchesSearch =
-        !searchQuery ||
-        client.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        client.phone.includes(searchQuery) ||
-        client.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        client.occupation?.toLowerCase().includes(searchQuery.toLowerCase());
-
-      const matchesStage =
-        filterStage === 'all' || client.currentStage?.name === filterStage;
-
-      const matchesImportance =
-        filterImportance === 'all' || client.importance === filterImportance;
-
-      const matchesReferrer =
-        filterReferrer === 'all' ||
-        client.referredBy?.fullName === filterReferrer;
-
-      const matchesPrivacyLevel =
-        filterPrivacyLevel === 'all' ||
-        client.accessLevel === filterPrivacyLevel;
-
-      return (
-        matchesSearch &&
-        matchesStage &&
-        matchesImportance &&
-        matchesReferrer &&
-        matchesPrivacyLevel
-      );
-    })
-    .sort((a, b) => {
-      let aValue: any, bValue: any;
-
-      switch (sortBy) {
-        case 'fullName':
-          aValue = a.fullName;
-          bValue = b.fullName;
-          break;
-        case 'lastContactDate':
-          aValue = a.lastContactDate || '';
-          bValue = b.lastContactDate || '';
-          break;
-        case 'contractAmount':
-          aValue = a.contractAmount || 0;
-          bValue = b.contractAmount || 0;
-          break;
-        case 'referralCount':
-          aValue = a.referralCount || 0;
-          bValue = b.referralCount || 0;
-          break;
-        case 'createdAt':
-          aValue = a.createdAt;
-          bValue = b.createdAt;
-          break;
-        case 'importance':
-          // 중요도 정렬을 위한 가중치
-          const importanceWeight: Record<string, number> = {
-            high: 3,
-            medium: 2,
-            low: 1,
-          };
-          aValue = importanceWeight[a.importance] || 0;
-          bValue = importanceWeight[b.importance] || 0;
-          break;
-        default:
-          aValue = a.fullName;
-          bValue = b.fullName;
-      }
-
-      // 숫자 정렬
-      if (typeof aValue === 'number' && typeof bValue === 'number') {
-        return sortOrder === 'desc' ? bValue - aValue : aValue - bValue;
-      }
-
-      // 문자열 정렬
-      const comparison = String(aValue).localeCompare(String(bValue), 'ko-KR');
-      return sortOrder === 'desc' ? -comparison : comparison;
-    });
-
-  // 🔒 고객 개인정보 보호 표시 함수
-  const renderPrivacyIndicator = (client: ClientDisplay) => {
-    const level = (client.accessLevel ||
-      client.privacyLevel ||
-      'private') as ClientPrivacyLevel;
-    const Icon = privacyLevelIcon[level];
     return (
-      <Tooltip>
-        <TooltipTrigger>
-          <Badge variant={privacyLevelBadgeVariant[level]} className="gap-1">
-            <Icon className="h-3 w-3" />
-            {privacyLevelText[level]}
-          </Badge>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>개인정보 보호 레벨: {privacyLevelText[level]}</p>
-          {client.hasConfidentialData && (
-            <p className="text-yellow-600">⚠️ 민감정보 포함</p>
-          )}
-        </TooltipContent>
-      </Tooltip>
+      matchesSearch &&
+      matchesImportance &&
+      matchesStage &&
+      matchesReferralStatus
     );
-  };
+  });
 
-  // 🔒 고객 데이터 마스킹 함수
-  const maskSensitiveData = (data: string, level: ClientPrivacyLevel) => {
-    if (showConfidentialData || level === 'public') return data;
+  // 🎯 정렬 로직
+  const sortedClients = useMemo(() => {
+    const sorted = [...filteredClients].sort((a, b) => {
+      switch (sortBy) {
+        case 'name':
+          return a.fullName.localeCompare(b.fullName);
+        case 'stage':
+          return a.currentStage.name.localeCompare(b.currentStage.name);
+        case 'importance':
+          const importanceOrder = { high: 3, medium: 2, low: 1 };
+          return (
+            (importanceOrder[b.importance as keyof typeof importanceOrder] ||
+              0) -
+            (importanceOrder[a.importance as keyof typeof importanceOrder] || 0)
+          );
+        case 'premium':
+          return b.totalPremium - a.totalPremium;
+        case 'lastContact':
+          if (!a.lastContactDate && !b.lastContactDate) return 0;
+          if (!a.lastContactDate) return 1;
+          if (!b.lastContactDate) return -1;
+          return (
+            new Date(b.lastContactDate).getTime() -
+            new Date(a.lastContactDate).getTime()
+          );
+        case 'createdAt':
+        default:
+          return (
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+      }
+    });
+    return sorted;
+  }, [filteredClients, sortBy]);
 
-    if (level === 'confidential') {
-      return '***';
-    }
-
-    if (level === 'restricted' && data.length > 4) {
-      return data.slice(0, 2) + '***' + data.slice(-2);
-    }
-
-    return data;
-  };
-
-  // 전체 선택/해제
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      setSelectedClients(filteredAndSortedClients.map((client) => client.id));
-    } else {
-      setSelectedClients([]);
-    }
-  };
-
-  // 개별 선택/해제
-  const handleSelectClient = (clientId: string, checked: boolean) => {
-    if (checked) {
-      setSelectedClients([...selectedClients, clientId]);
-    } else {
-      setSelectedClients(selectedClients.filter((id) => id !== clientId));
-    }
-  };
-
-  // 정렬 핸들러
-  const handleSort = (column: string) => {
-    if (sortBy === column) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortBy(column);
-      setSortOrder('asc');
-    }
-  };
-
-  // 일괄 작업 핸들러
-  const handleBulkAction = (action: string) => {
-    switch (action) {
-      case 'delete':
-        console.log('삭제할 고객:', selectedClients);
-        break;
-      case 'changeStage':
-        console.log('단계 변경할 고객:', selectedClients);
-        break;
-      case 'addTag':
-        console.log('태그 추가할 고객:', selectedClients);
-        break;
-      case 'export':
-        console.log('내보낼 고객:', selectedClients);
-        break;
+  // 🎯 헬퍼 함수들
+  const getImportanceBadgeColor = (importance: string) => {
+    switch (importance) {
+      case 'high':
+        return 'bg-red-100 text-red-800 border-red-200';
+      case 'medium':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'low':
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
 
-  // 🔒 고객 추가 방식 선택 핸들러
-  const handleAddClientChoice = (choice: 'individual' | 'import') => {
-    setAddChoiceOpen(false);
-    if (choice === 'individual') {
-      setAddClientOpen(true);
-    } else {
-      setImportModalOpen(true);
+  const getImportanceText = (importance: string) => {
+    switch (importance) {
+      case 'high':
+        return '높음';
+      case 'medium':
+        return '보통';
+      case 'low':
+        return '낮음';
+      default:
+        return '미설정';
     }
   };
 
-  // 🔒 개별 고객 추가 핸들러
-  const handleAddClient = async (clientData: any) => {
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('ko-KR', {
+      style: 'currency',
+      currency: 'KRW',
+    }).format(amount);
+  };
+
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return '-';
+    return format(new Date(dateString), 'yyyy.MM.dd', { locale: ko });
+  };
+
+  // 🎯 핸들러 함수들 (데이터베이스 연동 고려)
+  const handleClientRowClick = (clientId: string) => {
+    // 🎯 실제 상세 페이지로 라우팅
+    window.location.href = `/clients/${clientId}`;
+  };
+
+  const handleAddClient = () => {
+    setSelectedClient(null);
+    setShowAddClientModal(true);
+  };
+
+  const handleEditClient = (e: React.MouseEvent, client: ClientProfile) => {
+    e.stopPropagation(); // 행 클릭 이벤트 방지
+    setSelectedClient(client);
+    setShowEditClientModal(true);
+  };
+
+  const handleDeleteClient = (e: React.MouseEvent, client: ClientProfile) => {
+    e.stopPropagation(); // 행 클릭 이벤트 방지
+    setSelectedClient(client);
+    setShowDeleteConfirmModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!selectedClient) return;
+
     try {
-      // TODO: 고객 추가 로직 구현
-      console.log('새 고객 추가:', clientData);
-      setAddClientOpen(false);
-      // 페이지 새로고침 또는 상태 업데이트
+      // 🎯 실제 API 호출 (Phase 3에서 완전 구현)
+      const { deleteClient } = await import('~/api/shared/clients');
+
+      const result = await deleteClient(selectedClient.id, 'demo-agent');
+      if (result.success) {
+        console.log('고객 삭제 성공:', result.data);
+        alert(
+          `${selectedClient.fullName} 고객이 삭제되었습니다.\n(Phase 3에서 실제 페이지 새로고침 및 연관 데이터 정리 구현 예정)`
+        );
+
+        // 경고 메시지 표시
+        if (result.warnings && result.warnings.length > 0) {
+          alert('주의사항:\n' + result.warnings.join('\n'));
+        }
+
+        setShowDeleteConfirmModal(false);
+        setSelectedClient(null);
+        // TODO: Phase 3에서 페이지 데이터 새로고침 구현
+      } else {
+        console.error('고객 삭제 실패:', result.message);
+        alert(result.message || '고객 삭제에 실패했습니다.');
+      }
     } catch (error) {
-      console.error('고객 추가 실패:', error);
+      console.error('고객 삭제 오류:', error);
+      alert('고객 삭제 중 오류가 발생했습니다.');
     }
   };
 
-  // 고유 소개자 목록 (fullName 사용)
-  const uniqueReferrers = Array.from(
-    new Set(typedClients.map((c) => c.referredBy?.fullName).filter(Boolean))
-  ) as string[];
+  const handleImportClients = () => {
+    setShowImportModal(true);
+  };
 
-  // 페이지네이션 계산
-  const totalPages = Math.ceil(totalCount / pageSize);
+  const handleClientSubmit = async (
+    clientData: Partial<ClientProfile>,
+    isEdit: boolean = false
+  ) => {
+    try {
+      if (isEdit && selectedClient) {
+        // 수정
+        const { updateClient } = await import('~/api/shared/clients');
+        const result = await updateClient(
+          selectedClient.id,
+          clientData,
+          'demo-agent'
+        );
+
+        if (result.success) {
+          console.log('고객 수정 성공:', result.data);
+          alert(result.message || '고객 정보가 수정되었습니다.');
+        } else {
+          console.error('고객 수정 실패:', result.message);
+          alert(result.message || '고객 수정에 실패했습니다.');
+        }
+      } else {
+        // 생성
+        const { createClient } = await import('~/api/shared/clients');
+        const result = await createClient(
+          clientData as any, // TODO: 타입 정확히 맞추기
+          'demo-agent'
+        );
+
+        if (result.success) {
+          console.log('고객 생성 성공:', result.data);
+          alert(result.message || '새 고객이 등록되었습니다.');
+        } else {
+          console.error('고객 생성 실패:', result.message);
+          alert(result.message || '고객 등록에 실패했습니다.');
+        }
+      }
+
+      // 모달 닫기
+      setShowAddClientModal(false);
+      setShowEditClientModal(false);
+      setSelectedClient(null);
+      // TODO: Phase 3에서 페이지 데이터 새로고침 구현
+    } catch (error) {
+      console.error('고객 처리 오류:', error);
+      alert('작업 중 오류가 발생했습니다.');
+    }
+  };
+
+  // 🎯 카드 뷰 렌더링
+  const renderCardView = () => (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {sortedClients.map((client: ClientProfile) => (
+        <Card
+          key={client.id}
+          className="cursor-pointer hover:shadow-lg transition-shadow duration-200 border-l-4"
+          style={{ borderLeftColor: client.currentStage.color }}
+          onClick={() => handleClientRowClick(client.id)}
+        >
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
+                  {client.fullName.charAt(0)}
+                </div>
+                <div>
+                  <CardTitle className="text-lg">{client.fullName}</CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    {client.phone}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Badge
+                  variant="outline"
+                  className={getImportanceBadgeColor(client.importance)}
+                >
+                  {getImportanceText(client.importance)}
+                </Badge>
+                {client.importance === 'high' && (
+                  <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                )}
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {/* 현재 단계 */}
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">현재 단계</span>
+              <Badge
+                variant="outline"
+                style={{
+                  borderColor: client.currentStage.color,
+                  color: client.currentStage.color,
+                }}
+              >
+                {client.currentStage.name}
+              </Badge>
+            </div>
+
+            {/* 보험 정보 */}
+            {client.insuranceTypes.length > 0 && (
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">보험 종류</span>
+                <span className="text-sm font-medium">
+                  {client.insuranceTypes.slice(0, 2).join(', ')}
+                  {client.insuranceTypes.length > 2 &&
+                    ` 외 ${client.insuranceTypes.length - 2}개`}
+                </span>
+              </div>
+            )}
+
+            {/* 총 보험료 */}
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">총 보험료</span>
+              <span className="text-sm font-semibold text-green-600">
+                {formatCurrency(client.totalPremium)}
+              </span>
+            </div>
+
+            {/* 소개 정보 */}
+            {client.referredBy && (
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">소개자</span>
+                <span className="text-sm">{client.referredBy.name}</span>
+              </div>
+            )}
+
+            {/* 최근 연락 */}
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">최근 연락</span>
+              <span className="text-sm">
+                {formatDate(client.lastContactDate)}
+              </span>
+            </div>
+
+            {/* 액션 버튼들 */}
+            <div className="flex justify-end space-x-2 pt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={(e) => handleEditClient(e, client)}
+                className="flex items-center space-x-1"
+              >
+                <Edit2 className="h-3 w-3" />
+                <span>수정</span>
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={(e) => handleDeleteClient(e, client)}
+                className="flex items-center space-x-1 text-red-600 hover:text-red-700"
+              >
+                <Trash2 className="h-3 w-3" />
+                <span>삭제</span>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+
+  // 🎯 테이블 뷰 렌더링
+  const renderTableView = () => (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>고객 정보</TableHead>
+          <TableHead>연락처</TableHead>
+          <TableHead>소개 관계</TableHead>
+          <TableHead>영업 단계</TableHead>
+          <TableHead>성과</TableHead>
+          <TableHead>다음 액션</TableHead>
+          <TableHead>액션</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {sortedClients.map((client) => (
+          <TableRow
+            key={client.id}
+            className="cursor-pointer hover:bg-muted/50"
+            onClick={() => handleClientRowClick(client.id)}
+          >
+            <TableCell>
+              <div className="flex items-center gap-3">
+                <div className="flex -space-x-2">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-sm font-medium">
+                    {client.fullName.charAt(0)}
+                  </div>
+                </div>
+                <div>
+                  <p className="font-medium">{client.fullName}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {client.phone}
+                  </p>
+                </div>
+              </div>
+            </TableCell>
+            <TableCell>
+              <div>
+                <p className="text-sm">{client.occupation || '미입력'}</p>
+                <p className="text-xs text-muted-foreground">
+                  {client.address || '주소 미입력'}
+                </p>
+              </div>
+            </TableCell>
+            <TableCell>
+              {client.referredBy ? (
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="text-xs">
+                    {client.referredBy.name}
+                  </Badge>
+                  <span className="text-xs text-muted-foreground">
+                    ({client.referredBy.relationship})
+                  </span>
+                </div>
+              ) : (
+                <span className="text-sm text-muted-foreground">직접 고객</span>
+              )}
+            </TableCell>
+            <TableCell>
+              <Badge
+                variant={
+                  client.importance === 'high'
+                    ? 'destructive'
+                    : client.importance === 'medium'
+                    ? 'default'
+                    : 'secondary'
+                }
+              >
+                {client.importance === 'high'
+                  ? 'VIP'
+                  : client.importance === 'medium'
+                  ? '일반'
+                  : '낮음'}
+              </Badge>
+            </TableCell>
+            <TableCell>
+              <div className="flex items-center gap-2">
+                <div
+                  className={`w-2 h-2 rounded-full ${client.currentStage.color}`}
+                />
+                <span className="text-sm">{client.currentStage.name}</span>
+              </div>
+            </TableCell>
+            <TableCell>
+              <div className="text-sm">
+                <span className="font-medium">{client.referralCount}명</span>
+                <p className="text-xs text-muted-foreground">소개고객</p>
+              </div>
+            </TableCell>
+            <TableCell>
+              <div className="text-sm">
+                <span className="font-medium">
+                  {(client.totalPremium / 10000).toFixed(0)}만원
+                </span>
+                <p className="text-xs text-muted-foreground">월납보험료</p>
+              </div>
+            </TableCell>
+            <TableCell>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => handleEditClient(e, client)}
+                  className="text-blue-600 hover:text-blue-700 h-8 w-8 p-0"
+                >
+                  <Edit2 className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => handleDeleteClient(e, client)}
+                  className="text-red-600 hover:text-red-700 h-8 w-8 p-0"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
 
   return (
     <MainLayout title="고객 관리">
-      <div className="space-y-6">
-        {/* 헤더 섹션 */}
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">고객 관리</h1>
-            <p className="text-muted-foreground">
-              보험설계사를 위한 안전한 고객 관계 관리 시스템
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <Button onClick={() => setAddChoiceOpen(true)}>
-              <PlusIcon className="mr-2 h-4 w-4" />
-              고객 추가
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline">
-                  <DownloadIcon className="mr-2 h-4 w-4" />
-                  내보내기
+      <div className="space-y-8">
+        {/* 🎯 고객 관리 핵심 액션 */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* 빠른 고객 등록 */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Plus className="h-5 w-5 text-green-600" />새 고객 등록
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                새 고객을 빠르게 추가하고 관리를 시작하세요
+              </p>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <Button onClick={handleAddClient} className="w-full">
+                  <Plus className="h-4 w-4 mr-2" />새 고객 추가
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem>CSV로 내보내기</DropdownMenuItem>
-                <DropdownMenuItem>Excel로 내보내기</DropdownMenuItem>
-                <DropdownMenuItem>PDF로 내보내기</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  size="sm"
+                  onClick={handleImportClients}
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  엑셀로 가져오기
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* 고객 관리 통계 요약 */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-blue-600" />
+                고객 현황 요약
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                현재 관리 중인 고객들의 핵심 지표
+              </p>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">전체 고객</span>
+                  <Badge variant="default">
+                    {loaderData.stats.totalClients}명
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">활성 고객</span>
+                  <Badge variant="secondary">
+                    {loaderData.stats.activeClients}명
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">VIP 고객</span>
+                  <Badge variant="destructive">
+                    {
+                      filteredClients.filter(
+                        (c: ClientProfile) => c.importance === 'high'
+                      ).length
+                    }
+                    명
+                  </Badge>
+                </div>
+                <div className="pt-2">
+                  <Button variant="outline" className="w-full" size="sm">
+                    <Download className="h-4 w-4 mr-2" />
+                    고객 목록 내보내기
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* 통계 카드 섹션 - 호환성을 위해 타입 변환 */}
-        {stats && (
-          <ClientStatsCards
-            totalCount={totalCount}
-            stats={{
-              totalReferrals: 0, // 임시값 - 추후 실제 데이터로 교체
-              averageDepth: 0, // 임시값 - 추후 실제 데이터로 교체
-              topReferrers: [], // 임시값 - 추후 실제 데이터로 교체
-              ...(stats as any), // 타입 호환성을 위한 임시 처리
-            }}
-          />
-        )}
-
-        {/* 필터 섹션 */}
+        {/* 🎯 스마트 검색 및 필터 */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">필터 및 정렬</CardTitle>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>고객 검색 및 필터</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  {filteredClients.length}명의 고객이 검색되었습니다
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowFilters(!showFilters)}
+                >
+                  <Filter className="h-4 w-4 mr-2" />
+                  필터 {showFilters ? '숨기기' : '보기'}
+                </Button>
+                <Separator orientation="vertical" className="h-6" />
+                <Button
+                  variant={viewMode === 'cards' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setViewMode('cards')}
+                >
+                  <LayoutGrid className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant={viewMode === 'table' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setViewMode('table')}
+                >
+                  <LayoutList className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
-              <div>
-                <label className="text-sm font-medium mb-2 block">
-                  영업 단계
-                </label>
-                <Select value={filterStage} onValueChange={setFilterStage}>
-                  <SelectTrigger className="cursor-pointer">
-                    <SelectValue placeholder="단계 선택" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all" className="cursor-pointer">
-                      모든 단계
-                    </SelectItem>
-                    <SelectItem value="첫 상담" className="cursor-pointer">
-                      첫 상담
-                    </SelectItem>
-                    <SelectItem value="니즈 분석" className="cursor-pointer">
-                      니즈 분석
-                    </SelectItem>
-                    <SelectItem value="상품 설명" className="cursor-pointer">
-                      상품 설명
-                    </SelectItem>
-                    <SelectItem value="계약 검토" className="cursor-pointer">
-                      계약 검토
-                    </SelectItem>
-                    <SelectItem value="계약 완료" className="cursor-pointer">
-                      계약 완료
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <label className="text-sm font-medium mb-2 block">중요도</label>
+            <div className="space-y-4">
+              {/* 기본 검색 */}
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="이름, 전화번호, 이메일, 직업, 주소로 검색..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
                 <Select
                   value={filterImportance}
-                  onValueChange={setFilterImportance}
+                  onValueChange={(value) =>
+                    setFilterImportance(
+                      value as 'all' | 'high' | 'medium' | 'low'
+                    )
+                  }
                 >
-                  <SelectTrigger className="cursor-pointer">
-                    <SelectValue placeholder="중요도 선택" />
+                  <SelectTrigger className="w-[120px]">
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all" className="cursor-pointer">
-                      모든 중요도
-                    </SelectItem>
-                    <SelectItem value="high" className="cursor-pointer">
-                      높음
-                    </SelectItem>
-                    <SelectItem value="medium" className="cursor-pointer">
-                      보통
-                    </SelectItem>
-                    <SelectItem value="low" className="cursor-pointer">
-                      낮음
-                    </SelectItem>
+                    <SelectItem value="all">모든 중요도</SelectItem>
+                    <SelectItem value="high">높음</SelectItem>
+                    <SelectItem value="medium">보통</SelectItem>
+                    <SelectItem value="low">낮음</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
-              <div>
-                <label className="text-sm font-medium mb-2 block">소개자</label>
-                <Select
-                  value={filterReferrer}
-                  onValueChange={setFilterReferrer}
-                >
-                  <SelectTrigger className="cursor-pointer">
-                    <SelectValue placeholder="소개자 선택" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all" className="cursor-pointer">
-                      모든 소개자
-                    </SelectItem>
-                    {uniqueReferrers.map((referrer) => (
-                      <SelectItem
-                        key={referrer}
-                        value={referrer || ''}
-                        className="cursor-pointer"
-                      >
-                        {referrer}
+              {/* 고급 필터 */}
+              {showFilters && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t">
+                  <Select value={filterStage} onValueChange={setFilterStage}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="영업 단계" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">모든 단계</SelectItem>
+                      <SelectItem value="첫 상담">첫 상담</SelectItem>
+                      <SelectItem value="니즈 분석">니즈 분석</SelectItem>
+                      <SelectItem value="상품 설명">상품 설명</SelectItem>
+                      <SelectItem value="계약 검토">계약 검토</SelectItem>
+                      <SelectItem value="계약 완료">계약 완료</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <Select
+                    value={filterReferralStatus}
+                    onValueChange={setFilterReferralStatus}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="소개 상태" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">모든 고객</SelectItem>
+                      <SelectItem value="has_referrer">
+                        소개받은 고객
                       </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                      <SelectItem value="no_referrer">
+                        직접 영업 고객
+                      </SelectItem>
+                      <SelectItem value="top_referrer">
+                        핵심 소개자 (3명+)
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
 
-              <div>
-                <label className="text-sm font-medium mb-2 block">
-                  보험 유형
-                </label>
-                <Select
-                  value={filterInsuranceType}
-                  onValueChange={setFilterInsuranceType}
-                >
-                  <SelectTrigger className="cursor-pointer">
-                    <SelectValue placeholder="보험 유형" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all" className="cursor-pointer">
-                      모든 유형
-                    </SelectItem>
-                    <SelectItem value="life" className="cursor-pointer">
-                      생명보험
-                    </SelectItem>
-                    <SelectItem value="health" className="cursor-pointer">
-                      건강보험
-                    </SelectItem>
-                    <SelectItem value="auto" className="cursor-pointer">
-                      자동차보험
-                    </SelectItem>
-                    <SelectItem value="prenatal" className="cursor-pointer">
-                      태아보험
-                    </SelectItem>
-                    <SelectItem value="property" className="cursor-pointer">
-                      재산보험
-                    </SelectItem>
-                    <SelectItem value="other" className="cursor-pointer">
-                      기타
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <label className="text-sm font-medium mb-2 block">
-                  소개 깊이
-                </label>
-                <Select value={filterDepth} onValueChange={setFilterDepth}>
-                  <SelectTrigger className="cursor-pointer">
-                    <SelectValue placeholder="소개 깊이" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all" className="cursor-pointer">
-                      모든 깊이
-                    </SelectItem>
-                    <SelectItem value="direct" className="cursor-pointer">
-                      직접 고객
-                    </SelectItem>
-                    <SelectItem value="1st" className="cursor-pointer">
-                      1차 소개
-                    </SelectItem>
-                    <SelectItem value="2nd" className="cursor-pointer">
-                      2차 소개
-                    </SelectItem>
-                    <SelectItem value="3rd+" className="cursor-pointer">
-                      3차+ 소개
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <label className="text-sm font-medium mb-2 block">정렬</label>
-                <Select
-                  value={`${sortBy}_${sortOrder}`}
-                  onValueChange={(value) => {
-                    const [column, order] = value.split('_');
-                    setSortBy(column);
-                    setSortOrder(order as 'asc' | 'desc');
-                  }}
-                >
-                  <SelectTrigger className="cursor-pointer">
-                    <SelectValue placeholder="정렬 방식" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="name_asc" className="cursor-pointer">
-                      이름 오름차순
-                    </SelectItem>
-                    <SelectItem value="name_desc" className="cursor-pointer">
-                      이름 내림차순
-                    </SelectItem>
-                    <SelectItem
-                      value="contractAmount_desc"
-                      className="cursor-pointer"
-                    >
-                      계약금액 높은순
-                    </SelectItem>
-                    <SelectItem
-                      value="contractAmount_asc"
-                      className="cursor-pointer"
-                    >
-                      계약금액 낮은순
-                    </SelectItem>
-                    <SelectItem
-                      value="lastContact_desc"
-                      className="cursor-pointer"
-                    >
-                      최근 연락순
-                    </SelectItem>
-                    <SelectItem
-                      value="referralCount_desc"
-                      className="cursor-pointer"
-                    >
-                      소개 건수 많은순
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm" className="flex-1">
+                      <Download className="h-4 w-4 mr-2" />
+                      내보내기
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
 
-        {/* 일괄 작업 섹션 */}
-        {selectedClients.length > 0 && (
-          <Card className="mb-6">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">
-                  {selectedClients.length}명 선택됨
-                </span>
-                <div className="flex items-center gap-2">
+        {/* 🎯 고객 목록 */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  고객 목록
+                  <Badge variant="outline" className="ml-2">
+                    {filteredClients.length}명
+                  </Badge>
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  {viewMode === 'cards'
+                    ? '카드 뷰로 고객 상세 정보를 확인하세요'
+                    : '테이블 뷰로 고객을 빠르게 비교하세요'}
+                </p>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {filteredClients.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 px-4">
+                <div className="rounded-full bg-primary/10 p-6 mb-6">
+                  <Users className="h-12 w-12 text-primary" />
+                </div>
+                <h3 className="text-xl font-semibold text-foreground mb-2">
+                  검색 결과가 없습니다
+                </h3>
+                <p className="text-muted-foreground text-center max-w-md mb-6">
+                  검색 조건을 변경하거나 새 고객을 추가해보세요.
+                </p>
+                <Button onClick={handleAddClient}>
+                  <Plus className="h-4 w-4 mr-2" />새 고객 추가하기
+                </Button>
+              </div>
+            ) : viewMode === 'cards' ? (
+              renderCardView()
+            ) : (
+              renderTableView()
+            )}
+          </CardContent>
+        </Card>
+
+        {/* 🎯 고객 추가 모달 */}
+        {showAddClientModal && (
+          <Dialog
+            open={showAddClientModal}
+            onOpenChange={setShowAddClientModal}
+          >
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>새 고객 추가</DialogTitle>
+                <DialogDescription>
+                  Phase 3에서 실제 CRUD 기능을 구현할 예정입니다.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label>이름</Label>
+                  <Input placeholder="고객 이름" />
+                </div>
+                <div>
+                  <Label>전화번호</Label>
+                  <Input placeholder="010-1234-5678" />
+                </div>
+                <div>
+                  <Label>이메일</Label>
+                  <Input placeholder="example@email.com" />
+                </div>
+                <div className="flex gap-2">
                   <Button
                     variant="outline"
-                    size="sm"
-                    onClick={() => handleBulkAction('changeStage')}
+                    onClick={() => setShowAddClientModal(false)}
                   >
-                    <PersonIcon className="mr-1 h-3 w-3" />
-                    단계 변경
+                    취소
                   </Button>
                   <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleBulkAction('addTag')}
+                    onClick={() => {
+                      alert('Phase 3에서 실제 저장 기능을 구현할 예정입니다.');
+                      setShowAddClientModal(false);
+                    }}
                   >
-                    태그 추가
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleBulkAction('export')}
-                  >
-                    <DownloadIcon className="mr-1 h-3 w-3" />
-                    내보내기
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleBulkAction('delete')}
-                    className="text-red-600 hover:text-red-700"
-                  >
-                    <TrashIcon className="mr-1 h-3 w-3" />
-                    삭제
+                    추가
                   </Button>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </DialogContent>
+          </Dialog>
         )}
 
-        {/* 고객 목록 - 카드 뷰 */}
-        {viewMode === 'cards' ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredAndSortedClients.map((client) => (
-              <ClientCard
-                key={client.id}
-                client={client}
-                importanceBadgeVariant={importanceBadgeVariant}
-                importanceText={importanceText}
-                stageBadgeVariant={stageBadgeVariant}
-              />
-            ))}
-          </div>
-        ) : (
-          /* 고객 목록 - 테이블 뷰 */
-          <Card>
-            <CardHeader>
-              <CardTitle>고객 목록</CardTitle>
-              <CardDescription>
-                전체 {totalCount}명 중 {filteredAndSortedClients.length}명 표시
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableCaption>전체 고객 목록</TableCaption>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[50px]">
-                      <Checkbox
-                        checked={
-                          selectedClients.length ===
-                            filteredAndSortedClients.length &&
-                          filteredAndSortedClients.length > 0
-                        }
-                        onCheckedChange={handleSelectAll}
-                      />
-                    </TableHead>
-                    <TableHead
-                      className="cursor-pointer"
-                      onClick={() => handleSort('name')}
-                    >
-                      <div className="flex items-center">
-                        고객명
-                        {sortBy === 'name' &&
-                          (sortOrder === 'asc' ? (
-                            <ArrowUpIcon className="ml-1 h-3 w-3" />
-                          ) : (
-                            <ArrowDownIcon className="ml-1 h-3 w-3" />
-                          ))}
-                      </div>
-                    </TableHead>
-                    <TableHead>연락처</TableHead>
-                    <TableHead>회사</TableHead>
-                    <TableHead>소개 관계</TableHead>
-                    <TableHead>단계</TableHead>
-                    <TableHead>중요도</TableHead>
-                    <TableHead>보험 유형</TableHead>
-                    <TableHead
-                      className="cursor-pointer"
-                      onClick={() => handleSort('referralCount')}
-                    >
-                      <div className="flex items-center">
-                        소개 건수
-                        {sortBy === 'referralCount' &&
-                          (sortOrder === 'asc' ? (
-                            <ArrowUpIcon className="ml-1 h-3 w-3" />
-                          ) : (
-                            <ArrowDownIcon className="ml-1 h-3 w-3" />
-                          ))}
-                      </div>
-                    </TableHead>
-                    <TableHead
-                      className="cursor-pointer"
-                      onClick={() => handleSort('lastContact')}
-                    >
-                      <div className="flex items-center">
-                        최근 접촉
-                        {sortBy === 'lastContact' &&
-                          (sortOrder === 'asc' ? (
-                            <ArrowUpIcon className="ml-1 h-3 w-3" />
-                          ) : (
-                            <ArrowDownIcon className="ml-1 h-3 w-3" />
-                          ))}
-                      </div>
-                    </TableHead>
-                    <TableHead>태그</TableHead>
-                    <TableHead className="text-right">작업</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredAndSortedClients.map((client) => (
-                    <TableRow key={client.id}>
-                      <TableCell>
-                        <Checkbox
-                          checked={selectedClients.includes(client.id)}
-                          onCheckedChange={(checked) =>
-                            handleSelectClient(client.id, checked as boolean)
-                          }
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <Avatar className="w-8 h-8">
-                            <AvatarFallback className="text-xs">
-                              {typeHelpers
-                                .getClientDisplayName(client)
-                                .charAt(0)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <Link
-                              to={`/clients/${client.id}`}
-                              className="text-sm font-medium hover:underline"
-                            >
-                              {typeHelpers.getClientDisplayName(client)}
-                            </Link>
-                            <div className="text-xs text-muted-foreground">
-                              {client.occupation || '직업 미등록'}
-                            </div>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">{client.phone}</div>
-                          {client.email && (
-                            <div className="text-xs text-muted-foreground">
-                              {client.email}
-                            </div>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>{client.company || '-'}</TableCell>
-                      <TableCell>
-                        {client.referredBy ? (
-                          <div className="flex items-center gap-2">
-                            <Link2Icon className="h-3 w-3 text-muted-foreground" />
-                            <Link
-                              to={`/clients/${client.referredBy.id}`}
-                              className="text-sm hover:underline"
-                            >
-                              {client.referredBy.fullName}
-                            </Link>
-                          </div>
-                        ) : (
-                          <span className="text-muted-foreground text-sm">
-                            직접 개발
-                          </span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={stageBadgeVariant[client.stage] || 'outline'}
-                        >
-                          {client.stage}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={importanceBadgeVariant[client.importance]}
-                        >
-                          {importanceText[client.importance]}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-wrap gap-1">
-                          {client.insuranceTypes?.map((type: string) => (
-                            <TooltipProvider key={type}>
-                              <Tooltip>
-                                <TooltipTrigger>
-                                  <Badge
-                                    variant="outline"
-                                    className="flex items-center gap-1 text-xs"
-                                  >
-                                    {insuranceTypeIcons[type]}
-                                    {insuranceTypeText[type]}
-                                  </Badge>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>{insuranceTypeText[type]}</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          ))}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          {(client.referralCount || 0) > 0 ? (
-                            <Badge
-                              variant="outline"
-                              className="flex items-center gap-1 w-fit"
-                            >
-                              <Share1Icon className="h-3 w-3" />
-                              {client.referralCount || 0}
-                            </Badge>
-                          ) : (
-                            <span className="text-muted-foreground text-sm">
-                              -
-                            </span>
-                          )}
-                          <ReferralDepthIndicator
-                            depth={client.referralDepth || 0}
-                          />
-                        </div>
-                        {client.lastContactDate && (
-                          <div className="text-xs text-muted-foreground mt-1">
-                            최근: {client.lastContactDate}
-                          </div>
-                        )}
-                        {client.nextMeetingDate && (
-                          <div className="text-xs text-muted-foreground flex items-center gap-1">
-                            <CalendarIcon className="h-3 w-3" />
-                            다음: {client.nextMeetingDate}
-                          </div>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-wrap gap-1">
-                          {client.tags?.map((tag, index: number) => (
-                            <Badge
-                              key={typeHelpers.getTagId(tag) || index}
-                              variant="outline"
-                              className="text-xs"
-                            >
-                              {typeHelpers.getTagName(tag)}
-                            </Badge>
-                          ))}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
-                              <span className="sr-only">메뉴 열기</span>
-                              <DotsHorizontalIcon className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>작업</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem className="cursor-pointer">
-                              <Link to={`/clients/${client.id}`}>
-                                <div className="flex items-center gap-2">
-                                  <EyeOpenIcon className="h-3 w-3" />
-                                  상세 보기
-                                </div>
-                              </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="cursor-pointer">
-                              <Link to={`/clients/edit/${client.id}`}>
-                                <div className="flex items-center gap-2">
-                                  <Pencil2Icon className="h-3 w-3" />
-                                  수정
-                                </div>
-                              </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="cursor-pointer">
-                              <div className="flex items-center gap-2">
-                                <CalendarIcon className="h-3 w-3" />
-                                미팅 예약
-                              </div>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="cursor-pointer">
-                              <div className="flex items-center gap-2">
-                                <Share1Icon className="h-3 w-3" />
-                                소개 네트워크 보기
-                              </div>
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-red-600 cursor-pointer">
-                              <div className="flex items-center gap-2">
-                                <TrashIcon className="h-3 w-3" />
-                                삭제
-                              </div>
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-
-              {/* 페이지네이션 */}
-              {totalPages > 1 && (
-                <div className="mt-6">
-                  <Pagination>
-                    <PaginationContent>
-                      <PaginationItem>
-                        <PaginationPrevious href="#" />
-                      </PaginationItem>
-                      {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                        (page) => (
-                          <PaginationItem key={page}>
-                            <PaginationLink
-                              href="#"
-                              isActive={page === currentPage}
-                            >
-                              {page}
-                            </PaginationLink>
-                          </PaginationItem>
-                        )
-                      )}
-                      <PaginationItem>
-                        <PaginationNext href="#" />
-                      </PaginationItem>
-                    </PaginationContent>
-                  </Pagination>
+        {/* 🎯 엑셀 가져오기 모달 */}
+        {showImportModal && (
+          <Dialog open={showImportModal} onOpenChange={setShowImportModal}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>엑셀 가져오기</DialogTitle>
+                <DialogDescription>
+                  Phase 3에서 실제 파일 업로드 기능을 구현할 예정입니다.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">
+                  <Upload className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <p className="text-sm text-muted-foreground">
+                    CSV 또는 Excel 파일을 드래그하거나 클릭하여 업로드
+                  </p>
                 </div>
-              )}
-            </CardContent>
-          </Card>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowImportModal(false)}
+                  >
+                    취소
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      alert(
+                        'Phase 3에서 실제 파일 업로드 기능을 구현할 예정입니다.'
+                      );
+                      setShowImportModal(false);
+                    }}
+                  >
+                    업로드
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         )}
 
-        {/* 빈 상태 */}
-        {filteredAndSortedClients.length === 0 && (
-          <ClientsEmptyState
-            onAddClient={() => setAddChoiceOpen(true)}
-            isFiltered={
-              searchQuery !== '' ||
-              filterStage !== 'all' ||
-              filterImportance !== 'all'
-            }
-            isSecurityRestricted={false}
-          />
+        {/* 🎯 고객 수정 모달 */}
+        {showEditClientModal && (
+          <Dialog
+            open={showEditClientModal}
+            onOpenChange={setShowEditClientModal}
+          >
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>고객 정보 수정</DialogTitle>
+                <DialogDescription>
+                  Phase 3에서 실제 수정 기능을 구현할 예정입니다.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label>이름</Label>
+                  <Input placeholder="고객 이름" />
+                </div>
+                <div>
+                  <Label>전화번호</Label>
+                  <Input placeholder="010-1234-5678" />
+                </div>
+                <div>
+                  <Label>이메일</Label>
+                  <Input placeholder="example@email.com" />
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowEditClientModal(false)}
+                  >
+                    취소
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      alert('Phase 3에서 실제 수정 기능을 구현할 예정입니다.');
+                      setShowEditClientModal(false);
+                    }}
+                  >
+                    수정
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         )}
 
-        {/* 고객 추가 선택 모달 */}
-        <ClientAddChoiceModal
-          open={addChoiceOpen}
-          onOpenChange={setAddChoiceOpen}
-          onChoiceSelect={handleAddClientChoice}
-        />
-
-        {/* 개별 고객 추가 모달 */}
-        <AddClientModal
-          open={addClientOpen}
-          onOpenChange={setAddClientOpen}
-          onSubmit={handleAddClient}
-          agentId={currentUserId}
-        />
-
-        {/* 일괄 고객 임포트 모달 */}
-        <ClientImportModal
-          open={importModalOpen}
-          onOpenChange={setImportModalOpen}
-          agentId={currentUserId}
-        />
+        {/* 🎯 고객 삭제 확인 모달 */}
+        {showDeleteConfirmModal && (
+          <Dialog
+            open={showDeleteConfirmModal}
+            onOpenChange={setShowDeleteConfirmModal}
+          >
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>고객 삭제 확인</DialogTitle>
+                <DialogDescription>
+                  {selectedClient?.fullName} 고객을 정말로 삭제하시겠습니까?
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowDeleteConfirmModal(false)}
+                >
+                  취소
+                </Button>
+                <Button variant="destructive" onClick={handleConfirmDelete}>
+                  삭제
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
     </MainLayout>
   );

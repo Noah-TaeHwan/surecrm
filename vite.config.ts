@@ -19,6 +19,46 @@ export default defineConfig(({ mode }) => {
       'process.env.DATABASE_URL': JSON.stringify(env.DATABASE_URL),
       'process.env.SESSION_SECRET': JSON.stringify(env.SESSION_SECRET),
       'process.env.NODE_ENV': JSON.stringify(env.NODE_ENV),
+      // Node.js 전역 변수 polyfill
+      global: 'globalThis',
+    },
+    resolve: {
+      alias: {
+        // Node.js 모듈 polyfill - 정확한 패키지 이름 사용
+        buffer: 'buffer',
+        crypto: 'crypto-browserify',
+        stream: 'stream-browserify',
+        util: 'util',
+        process: 'process/browser',
+        events: 'events',
+      },
+    },
+    optimizeDeps: {
+      include: [
+        'buffer',
+        'crypto-browserify',
+        'stream-browserify',
+        'util',
+        'process',
+        'events',
+      ],
+    },
+    build: {
+      rollupOptions: {
+        external: [],
+        output: {
+          globals: {
+            buffer: 'Buffer',
+            process: 'process',
+          },
+        },
+      },
+    },
+    // Node.js polyfill을 위한 설정
+    server: {
+      fs: {
+        allow: ['..'],
+      },
     },
   };
 });

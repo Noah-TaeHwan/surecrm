@@ -75,12 +75,10 @@ export function ClientCard({
           <div className="flex items-center justify-between">
             <Badge
               variant={
-                stageBadgeVariant[
-                  client.currentStage?.name || client.stage || 'lead'
-                ] || 'outline'
+                stageBadgeVariant[client.stageName || client.stage || 'lead']
               }
             >
-              {client.currentStage?.name || client.stage || 'Lead'}
+              {client.stageName || client.stage || 'Lead'}
             </Badge>
             <div className="flex items-center gap-1">
               {client.insuranceTypes?.map((type: string) => (

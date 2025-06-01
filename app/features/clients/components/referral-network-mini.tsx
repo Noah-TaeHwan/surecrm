@@ -79,9 +79,7 @@ export function ReferralNetworkMini({
                       </Link>
                       <div className="flex items-center gap-2 mt-1">
                         <Badge variant="outline" className="text-xs">
-                          {referral.currentStage?.name ||
-                            referral.stage ||
-                            'Lead'}
+                          {referral.stageName || referral.stage || 'Lead'}
                         </Badge>
                         {referral.contractAmount && (
                           <span className="text-xs text-muted-foreground">

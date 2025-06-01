@@ -290,14 +290,13 @@ export function ClientsTableView({
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {client.currentStage ? (
+                      {client.stageName ? (
                         <Badge
                           variant={
-                            stageBadgeVariant[client.currentStage.name] ||
-                            'outline'
+                            stageBadgeVariant[client.stageName] || 'outline'
                           }
                         >
-                          {client.currentStage.name}
+                          {client.stageName}
                         </Badge>
                       ) : (
                         <span className="text-muted-foreground text-sm">-</span>

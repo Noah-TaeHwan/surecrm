@@ -1,5 +1,9 @@
+import { useState } from 'react';
+import { Link } from 'react-router';
 import type { Route } from './+types/client-detail-page';
+import { MainLayout } from '~/common/layouts/main-layout';
 import { Button } from '~/common/components/ui/button';
+import { Badge } from '~/common/components/ui/badge';
 import {
   Card,
   CardContent,
@@ -13,12 +17,6 @@ import {
   TabsList,
   TabsTrigger,
 } from '~/common/components/ui/tabs';
-import { Badge } from '~/common/components/ui/badge';
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from '~/common/components/ui/avatar';
 import {
   Table,
   TableBody,
@@ -27,394 +25,586 @@ import {
   TableHeader,
   TableRow,
 } from '~/common/components/ui/table';
-import { Alert, AlertDescription } from '~/common/components/ui/alert';
-import { Progress } from '~/common/components/ui/progress';
 import { Separator } from '~/common/components/ui/separator';
 import {
-  ArrowLeftIcon,
-  Pencil2Icon,
-  MobileIcon,
-  EnvelopeClosedIcon,
-  HomeIcon,
-  PersonIcon,
-  CalendarIcon,
-  FileTextIcon,
-  Link2Icon,
-  LayersIcon,
-  MixerVerticalIcon,
-  StarIcon,
-  HeartIcon,
-  DownloadIcon,
-  EyeOpenIcon,
-  InfoCircledIcon,
-  UploadIcon,
-  DrawingPinIcon,
-  ClockIcon,
-  CheckCircledIcon,
-  CrossCircledIcon,
-  UpdateIcon,
-  Share1Icon,
-  ChatBubbleIcon,
-  GearIcon,
-  PlusIcon,
-  DotsHorizontalIcon,
-  ExternalLinkIcon,
-  ImageIcon,
-  TrashIcon,
-  LockClosedIcon,
-  EyeClosedIcon,
-  ExclamationTriangleIcon,
-} from '@radix-ui/react-icons';
-import { Link } from 'react-router';
-import { useState } from 'react';
-import { MainLayout } from '~/common/layouts/main-layout';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-  DropdownMenuLabel,
-} from '~/common/components/ui/dropdown-menu';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '~/common/components/ui/tooltip';
-
-// 🔒 **보안 강화된 컴포넌트들 import**
-import { ClientDetailHeader } from '../components/client-detail-header';
-import { ClientOverviewTab } from '../components/client-overview-tab';
-import { ClientInsuranceTab } from '../components/client-insurance-tab';
-import { ClientNetworkTab } from '../components/client-network-tab';
-import { ClientMeetingsTab } from '../components/client-meetings-tab';
-import { ClientDocumentsTab } from '../components/client-documents-tab';
-import { ClientHistoryTab } from '../components/client-history-tab';
-
-// 🔒 **새로운 타입 시스템 import**
-import type {
-  ClientDisplay,
-  ClientPrivacyLevel,
-  SecureMeetingData,
-  SecureInsuranceData,
-  SecureDocumentData,
-  SecurityAuditLog,
-} from '../types';
-import { getClientById, logDataAccess } from '../lib/client-data';
-import { requireAuth } from '~/lib/auth/middleware';
-
-// 🔒 **데이터베이스 imports 추가**
-import { db } from '~/lib/core/db';
-import {
-  eq,
-  desc,
-  asc,
-  like,
-  and,
-  or,
-  count,
-  sql,
-  inArray,
-  gte,
-  lte,
-} from 'drizzle-orm';
-import {
-  clients,
-  clientDetails,
-  insuranceInfo,
-  teams,
-  profiles,
-  pipelineStages,
-  meetings,
-  referrals,
-  documents,
-} from '~/lib/schema';
-
-// 🔄 업데이트된 imports
-import {
-  Shield,
-  Eye,
-  EyeOff,
-  AlertTriangle,
-  Lock,
-  Users,
+  ArrowLeft,
+  Edit2,
+  Phone,
+  Mail,
+  MapPin,
+  User,
+  Calendar,
+  Network,
   FileText,
-  Heart,
-  Car,
-  Home,
-  Briefcase,
-  Baby,
+  TrendingUp,
+  Shield,
+  Settings,
+  MessageCircle,
+  Trash2,
+  Download,
+  Upload,
+  Eye,
+  Clock,
+  Award,
+  Target,
 } from 'lucide-react';
+import type {
+  Client,
+  ClientOverview,
+  AppClientContactHistory,
+  AppClientAnalytics,
+} from '~/features/clients/lib/schema';
 
-// 🔒 **페이지 보안 설정**
-interface PageSecurityConfig {
-  enableAuditLogging: boolean;
-  enableDataMasking: boolean;
-  accessLevel: 'agent' | 'manager' | 'admin';
-  sensitiveDataWarning: boolean;
+// 🎯 확장된 고객 프로필 타입 (상세 페이지용)
+interface ClientDetailProfile extends Client {
+  // 계산 필드들
+  referralCount: number;
+  insuranceTypes: string[];
+  totalPremium: number;
+  currentStage: {
+    id: string;
+    name: string;
+    color: string;
+  };
+  engagementScore: number;
+  conversionProbability: number;
+  lifetimeValue: number;
+  lastContactDate?: string;
+  nextActionDate?: string;
+  upcomingMeeting?: {
+    date: string;
+    type: string;
+  };
+  referredBy?: {
+    id: string;
+    name: string;
+    relationship: string;
+  };
+  // 상세 데이터
+  recentContacts: AppClientContactHistory[];
+  analytics: AppClientAnalytics | null;
+  familyMembers: any[];
+  milestones: any[];
 }
-
-const defaultSecurityConfig: PageSecurityConfig = {
-  enableAuditLogging: true,
-  enableDataMasking: true,
-  accessLevel: 'agent',
-  sensitiveDataWarning: true,
-};
 
 export async function loader({ request, params }: Route.LoaderArgs) {
   const { clientId } = params;
+
   if (!clientId) {
-    throw new Response('Client ID is required', { status: 400 });
+    throw new Response('고객 ID가 필요합니다.', { status: 400 });
   }
 
   try {
-    // 🔒 정확한 인증 방식
-    const user = await requireAuth(request);
-    const userId = user.id;
+    // 🎯 실제 API 호출 (Phase 3에서 완전 구현)
+    const { getClientById } = await import('~/api/shared/clients');
 
-    // 🔒 보안 감사 로깅
-    await logDataAccess({
-      userId,
-      action: 'CLIENT_VIEW_REQUEST',
-      resourceType: 'client',
-      resourceId: clientId,
-      details: 'Client detail page access',
-    });
+    const clientOverview = await getClientById(clientId, 'demo-agent');
 
-    // 🔍 기본 고객 정보 조회 - 기존 함수 사용
-    const client = await getClientById(clientId, userId, true);
-
-    if (!client) {
-      throw new Response('Client not found', { status: 404 });
+    if (!clientOverview) {
+      throw new Response('고객을 찾을 수 없습니다.', { status: 404 });
     }
 
-    // 🔒 개인정보 마스킹 적용한 클라이언트 디스플레이
-    const clientData = client as any;
-    const maskedClient: ClientDisplay = {
-      id: clientData.id,
-      agentId: clientData.agentId || userId,
-      fullName: clientData.fullName || '',
-      email: clientData.email || '',
-      phone: clientData.phone || '',
-      telecomProvider: clientData.telecomProvider || '',
-      company: clientData.company || '',
-      position: clientData.position || '',
-      address: clientData.address || '',
-      occupation: clientData.occupation || '',
-      height: clientData.height || 0,
-      weight: clientData.weight || 0,
-      hasDrivingLicense: clientData.hasDrivingLicense || false,
-      drivingExperience: clientData.drivingExperience || 0,
-      currentStageId: clientData.currentStageId || '',
-      importance: clientData.importance || 'medium',
-      source: clientData.source || '',
-      assignedAt: clientData.assignedAt || new Date().toISOString(),
-      lastContactDate: clientData.lastContactDate,
-      nextFollowUpDate: clientData.nextFollowUpDate,
-      tags: clientData.tags || [],
-      notes: clientData.notes || '',
-      isActive: clientData.isActive !== false,
-      createdAt: clientData.createdAt || new Date().toISOString(),
-      updatedAt: clientData.updatedAt || new Date().toISOString(),
-      referredById: clientData.referredById,
+    // 🎯 Mock 데이터 (현재 단계용)
+    const mockClientDetail: ClientDetailProfile = {
+      // 기본 Client 필드들
+      id: clientId,
+      agentId: 'demo-agent',
+      teamId: 'team-1',
+      fullName: '김철수',
+      email: 'kimcs@example.com',
+      phone: '010-1234-5678',
+      telecomProvider: 'SKT',
+      address: '서울시 강남구 역삼동 123-45',
+      occupation: '회사원 (삼성전자)',
+      hasDrivingLicense: true,
+      height: 175,
+      weight: 70,
+      tags: ['VIP', '핵심 소개자', '장기 고객'],
+      importance: 'high' as const,
+      currentStageId: 'stage3',
+      referredById: null,
+      notes:
+        '매우 적극적인 고객. 추가 소개 가능성 높음. 신뢰도가 높고 장기적인 관계 구축이 가능함.',
+      customFields: {
+        preferredContactTime: '오후 2-6시',
+        hobbies: ['골프', '독서', '여행'],
+        children: 2,
+      },
+      isActive: true,
+      createdAt: new Date('2023-08-15'),
+      updatedAt: new Date('2024-01-10'),
 
-      // 🔒 새로운 보안 필드들
-      privacyLevel: 'restricted' as ClientPrivacyLevel,
-      dataProcessingConsent: true,
-      consentDate: new Date().toISOString(),
-      lastAccessedAt: new Date().toISOString(),
-      accessCount: 1,
+      // 계산/확장 필드들
+      referralCount: 3,
+      insuranceTypes: ['자동차보험', '건강보험', '연금보험'],
+      totalPremium: 320000,
+      currentStage: {
+        id: 'stage3',
+        name: '상품 설명',
+        color: '#3b82f6',
+      },
+      engagementScore: 8.5,
+      conversionProbability: 85,
+      lifetimeValue: 2400000,
+      lastContactDate: '2024-01-10',
+      nextActionDate: '2024-01-15',
+      upcomingMeeting: {
+        date: '2024-01-15',
+        type: '계약 체결',
+      },
+      referredBy: {
+        id: 'ref1',
+        name: '박영희',
+        relationship: '대학 동기',
+      },
+
+      // 상세 데이터
+      recentContacts: [],
+      analytics: null,
+      familyMembers: [
+        {
+          id: '1',
+          name: '김영희',
+          relationship: '배우자',
+          birthDate: '1988-03-15',
+          hasInsurance: true,
+        },
+        {
+          id: '2',
+          name: '김민수',
+          relationship: '자녀',
+          birthDate: '2015-07-20',
+          hasInsurance: false,
+        },
+      ],
+      milestones: [
+        {
+          id: '1',
+          title: '첫 미팅',
+          date: '2023-08-15',
+          type: 'meeting',
+        },
+        {
+          id: '2',
+          title: '니즈 분석 완료',
+          date: '2023-09-01',
+          type: 'stage_change',
+        },
+      ],
     };
-
-    // 🔒 민감한 개인정보는 별도 처리
-    const secureClientDetail = {
-      ssn: clientData.ssn || undefined,
-      birthDate: clientData.birthDate || undefined,
-      gender: clientData.gender || undefined,
-      consentDate: new Date().toISOString(),
-    };
-
-    // 🏢 기본 더미 데이터로 임시 처리
-    const secureInsuranceInfo: any[] = [];
-    const secureMeetings: any[] = [];
-    const referralNetworkResult: any[] = [];
-    const stageHistoryResult: any[] = [];
-    const documentsResult: any[] = [];
-
-    // 🏢 사용 가능한 보험 유형
-    const availableInsuranceTypes = [
-      'health',
-      'life',
-      'auto',
-      'property',
-      'prenatal',
-    ] as const;
-
-    // 🔒 보안 설정
-    const securityConfig: PageSecurityConfig = {
-      enableAuditLogging: true,
-      enableDataMasking: true,
-      accessLevel: 'agent',
-      sensitiveDataWarning: true,
-    };
-
-    // 🔒 추가 보안 감사 로깅
-    await logDataAccess({
-      userId,
-      action: 'CLIENT_DATA_LOADED',
-      resourceType: 'client',
-      resourceId: clientId,
-      details: 'Client detail page data loaded successfully',
-    });
 
     return {
-      client: maskedClient,
-      clientDetail: secureClientDetail,
-      insuranceInfo: secureInsuranceInfo,
-      referralNetwork: referralNetworkResult,
-      meetings: secureMeetings,
-      stageHistory: stageHistoryResult,
-      documents: documentsResult,
-      availableInsuranceTypes,
-      securityConfig,
-      agentId: userId,
+      client: mockClientDetail,
+      currentUserId: 'demo-agent',
     };
   } catch (error) {
-    console.error('고객 상세 정보 로딩 실패:', error);
-    throw new Response('Failed to load client details', { status: 500 });
+    console.error('고객 상세 정보 조회 실패:', error);
+    throw new Response('고객 정보를 불러오는데 실패했습니다.', { status: 500 });
   }
 }
 
 export function meta({ data }: Route.MetaArgs) {
+  const clientName = data?.client?.fullName || '고객';
   return [
-    { title: `${data?.client?.fullName || '고객'} 상세 - SureCRM` },
-    { name: 'description', content: '고객 상세 정보 및 관리' },
+    { title: `${clientName} - 고객 상세 | SureCRM` },
+    { name: 'description', content: `${clientName}의 상세 정보를 확인하세요.` },
   ];
 }
 
 export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
-  const {
-    client,
-    clientDetail,
-    insuranceInfo,
-    referralNetwork,
-    meetings,
-    stageHistory,
-    documents,
-    agentId,
-  } = loaderData;
-
+  const { client } = loaderData;
   const [activeTab, setActiveTab] = useState('overview');
 
-  // 고객의 보험 유형 목록 추출
-  const availableInsuranceTypes = insuranceInfo.map(
-    (insurance) => insurance.type
-  );
+  // 🎯 액션 핸들러들
+  const handleEditClient = () => {
+    // TODO: Phase 3에서 편집 페이지로 라우팅
+    alert('고객 편집 페이지로 이동합니다. (Phase 3에서 구현 예정)');
+  };
 
-  if (!client) {
-    return (
-      <MainLayout title="고객 상세">
-        <div className="flex-1 space-y-4 p-4 md:p-6 pt-6">
-          <Alert>
-            <InfoCircledIcon className="h-4 w-4" />
-            <AlertDescription>고객을 찾을 수 없습니다.</AlertDescription>
-          </Alert>
-        </div>
-      </MainLayout>
-    );
-  }
+  const handleDeleteClient = () => {
+    // TODO: Phase 3에서 삭제 확인 및 처리
+    alert('고객 삭제 기능은 Phase 3에서 구현 예정입니다.');
+  };
+
+  const handleAddContact = () => {
+    alert('연락 이력 추가 기능은 Phase 3에서 구현 예정입니다.');
+  };
+
+  const handleScheduleMeeting = () => {
+    alert('미팅 일정 등록 기능은 Phase 3에서 구현 예정입니다.');
+  };
 
   return (
-    <MainLayout title={`${client.fullName} 상세`}>
-      <div className="flex-1 space-y-4 p-4 md:p-6 pt-6">
-        {/* 통합된 헤더 및 기본 정보 카드 */}
-        <ClientDetailHeader
-          client={client}
-          clientDetail={clientDetail}
-          insuranceTypes={availableInsuranceTypes}
-          agentId={agentId}
-        />
+    <MainLayout title={`${client.fullName} - 고객 상세`}>
+      <div className="space-y-6">
+        {/* 🎯 헤더 섹션 */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link to="/clients">
+              <Button variant="ghost" size="sm">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                고객 목록
+              </Button>
+            </Link>
+            <div>
+              <h1 className="text-3xl font-bold">{client.fullName}</h1>
+              <p className="text-muted-foreground">
+                {client.occupation} • {client.phone}
+              </p>
+            </div>
+          </div>
 
-        {/* 탭 컨텐츠 */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-6 my-4">
-            <TabsTrigger value="overview">개요</TabsTrigger>
-            <TabsTrigger value="insurance">보험 정보</TabsTrigger>
-            <TabsTrigger value="network">소개 네트워크</TabsTrigger>
-            <TabsTrigger value="meetings">미팅 이력</TabsTrigger>
-            <TabsTrigger value="documents">문서</TabsTrigger>
-            <TabsTrigger value="history">진행 내역</TabsTrigger>
-          </TabsList>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={handleEditClient}>
+              <Edit2 className="h-4 w-4 mr-2" />
+              수정
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleDeleteClient}
+              className="text-red-600"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              삭제
+            </Button>
+          </div>
+        </div>
 
-          {/* 개요 탭 - 분리된 컴포넌트 사용 */}
-          <TabsContent value="overview" className="space-y-4">
-            <ClientOverviewTab
-              client={client}
-              clientOverview={client as any}
-              agentId={agentId}
-              meetings={meetings}
-              stageHistory={stageHistory}
-              insuranceInfo={insuranceInfo}
-            />
-          </TabsContent>
+        {/* 🎯 기본 정보 카드 */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* 고객 기본 정보 */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <User className="h-5 w-5" />
+                기본 정보
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Phone className="h-4 w-4 text-muted-foreground" />
+                <span>{client.phone}</span>
+              </div>
+              {client.email && (
+                <div className="flex items-center gap-2">
+                  <Mail className="h-4 w-4 text-muted-foreground" />
+                  <span>{client.email}</span>
+                </div>
+              )}
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm">{client.address}</span>
+              </div>
+              <div className="pt-2">
+                <Badge
+                  variant={
+                    client.importance === 'high'
+                      ? 'destructive'
+                      : client.importance === 'medium'
+                      ? 'default'
+                      : 'secondary'
+                  }
+                >
+                  {client.importance === 'high'
+                    ? 'VIP 고객'
+                    : client.importance === 'medium'
+                    ? '일반 고객'
+                    : '일반 고객'}
+                </Badge>
+              </div>
+            </CardContent>
+          </Card>
 
-          {/* 보험 정보 탭 - 분리된 컴포넌트 사용 */}
-          <TabsContent value="insurance" className="space-y-4">
-            <ClientInsuranceTab
-              client={client}
-              agentId={agentId}
-              insuranceInfo={insuranceInfo}
-            />
-          </TabsContent>
+          {/* 영업 현황 */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5" />
+                영업 현황
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm">현재 단계</span>
+                <Badge
+                  variant="outline"
+                  style={{ color: client.currentStage.color }}
+                >
+                  {client.currentStage.name}
+                </Badge>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">전환 확률</span>
+                <span className="font-medium">
+                  {client.conversionProbability}%
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">월 보험료</span>
+                <span className="font-medium">
+                  {(client.totalPremium / 10000).toFixed(0)}만원
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">예상 LTV</span>
+                <span className="font-medium">
+                  {(client.lifetimeValue / 10000).toFixed(0)}만원
+                </span>
+              </div>
+            </CardContent>
+          </Card>
 
-          {/* 소개 네트워크 탭 - 분리된 컴포넌트 사용 */}
-          <TabsContent value="network" className="space-y-4">
-            <ClientNetworkTab
-              client={client}
-              agentId={agentId}
-              referralNetwork={{
-                referrals: referralNetwork,
-                stats: {
-                  totalReferred: 0,
-                  totalContracts: 0,
-                  totalValue: 0,
-                  conversionRate: 0,
-                  averageContractValue: 0,
-                },
-              }}
-            />
-          </TabsContent>
+          {/* 네트워크 정보 */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Network className="h-5 w-5" />
+                네트워크
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {client.referredBy && (
+                <div>
+                  <span className="text-sm text-muted-foreground">소개자</span>
+                  <p className="font-medium">{client.referredBy.name}</p>
+                  <p className="text-sm text-muted-foreground">
+                    ({client.referredBy.relationship})
+                  </p>
+                </div>
+              )}
+              <div className="flex items-center justify-between">
+                <span className="text-sm">소개 고객 수</span>
+                <span className="font-medium">{client.referralCount}명</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">참여도 점수</span>
+                <span className="font-medium">{client.engagementScore}/10</span>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
-          {/* 미팅 이력 탭 - 분리된 컴포넌트 사용 */}
-          <TabsContent value="meetings" className="space-y-4">
-            <ClientMeetingsTab
-              client={client}
-              agentId={agentId}
-              meetings={meetings}
-            />
-          </TabsContent>
+        {/* 🎯 상세 탭 섹션 */}
+        <Card>
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <CardHeader>
+              <TabsList className="grid w-full grid-cols-5">
+                <TabsTrigger value="overview">개요</TabsTrigger>
+                <TabsTrigger value="insurance">보험</TabsTrigger>
+                <TabsTrigger value="family">가족</TabsTrigger>
+                <TabsTrigger value="contacts">연락 이력</TabsTrigger>
+                <TabsTrigger value="milestones">마일스톤</TabsTrigger>
+              </TabsList>
+            </CardHeader>
 
-          {/* 문서 탭 - 분리된 컴포넌트 사용 */}
-          <TabsContent value="documents" className="space-y-4">
-            <ClientDocumentsTab
-              client={client}
-              agentId={agentId}
-              documents={documents}
-              insuranceTypes={availableInsuranceTypes}
-            />
-          </TabsContent>
+            <CardContent>
+              {/* 개요 탭 */}
+              <TabsContent value="overview" className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <h3 className="text-lg font-semibold mb-4">태그</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {client.tags.map((tag: string, index: number) => (
+                        <Badge key={index} variant="outline">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
 
-          {/* 진행 내역 탭 - 분리된 컴포넌트 사용 */}
-          <TabsContent value="history" className="space-y-4">
-            <ClientHistoryTab
-              client={client}
-              agentId={agentId}
-              meetings={meetings}
-              stageHistory={stageHistory}
-            />
-          </TabsContent>
-        </Tabs>
+                  <div>
+                    <h3 className="text-lg font-semibold mb-4">보험 유형</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {client.insuranceTypes.map(
+                        (type: string, index: number) => (
+                          <Badge key={index} variant="secondary">
+                            {type}
+                          </Badge>
+                        )
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div>
+                  <h3 className="text-lg font-semibold mb-4">메모</h3>
+                  <p className="text-muted-foreground">
+                    {client.notes || '메모가 없습니다.'}
+                  </p>
+                </div>
+
+                {client.customFields &&
+                  Object.keys(client.customFields).length > 0 && (
+                    <>
+                      <Separator />
+                      <div>
+                        <h3 className="text-lg font-semibold mb-4">
+                          추가 정보
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {Object.entries(client.customFields).map(
+                            ([key, value]) => (
+                              <div key={key}>
+                                <span className="text-sm font-medium">
+                                  {key}:{' '}
+                                </span>
+                                <span className="text-sm text-muted-foreground">
+                                  {Array.isArray(value)
+                                    ? value.join(', ')
+                                    : String(value)}
+                                </span>
+                              </div>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    </>
+                  )}
+              </TabsContent>
+
+              {/* 보험 탭 */}
+              <TabsContent value="insurance">
+                <div className="text-center py-8">
+                  <Shield className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">보험 정보</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Phase 3에서 상세한 보험 정보를 구현할 예정입니다.
+                  </p>
+                  <Button variant="outline">
+                    <Upload className="h-4 w-4 mr-2" />
+                    보험 정보 추가
+                  </Button>
+                </div>
+              </TabsContent>
+
+              {/* 가족 탭 */}
+              <TabsContent value="family">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold">가족 구성원</h3>
+                    <Button variant="outline" size="sm">
+                      <User className="h-4 w-4 mr-2" />
+                      구성원 추가
+                    </Button>
+                  </div>
+
+                  {client.familyMembers.length > 0 ? (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>이름</TableHead>
+                          <TableHead>관계</TableHead>
+                          <TableHead>생년월일</TableHead>
+                          <TableHead>보험 가입</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {client.familyMembers.map((member: any) => (
+                          <TableRow key={member.id}>
+                            <TableCell className="font-medium">
+                              {member.name}
+                            </TableCell>
+                            <TableCell>{member.relationship}</TableCell>
+                            <TableCell>{member.birthDate}</TableCell>
+                            <TableCell>
+                              <Badge
+                                variant={
+                                  member.hasInsurance ? 'default' : 'outline'
+                                }
+                              >
+                                {member.hasInsurance ? '가입' : '미가입'}
+                              </Badge>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      등록된 가족 구성원이 없습니다.
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+
+              {/* 연락 이력 탭 */}
+              <TabsContent value="contacts">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold">연락 이력</h3>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleAddContact}
+                    >
+                      <MessageCircle className="h-4 w-4 mr-2" />
+                      연락 이력 추가
+                    </Button>
+                  </div>
+
+                  <div className="text-center py-8 text-muted-foreground">
+                    연락 이력이 없습니다. (Phase 3에서 구현 예정)
+                  </div>
+                </div>
+              </TabsContent>
+
+              {/* 마일스톤 탭 */}
+              <TabsContent value="milestones">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold">마일스톤</h3>
+                    <Button variant="outline" size="sm">
+                      <Award className="h-4 w-4 mr-2" />
+                      마일스톤 추가
+                    </Button>
+                  </div>
+
+                  {client.milestones.length > 0 ? (
+                    <div className="space-y-4">
+                      {client.milestones.map((milestone: any) => (
+                        <div
+                          key={milestone.id}
+                          className="flex items-center gap-4 p-4 border rounded-lg"
+                        >
+                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                          <div className="flex-1">
+                            <h4 className="font-medium">{milestone.title}</h4>
+                            <p className="text-sm text-muted-foreground">
+                              {milestone.date}
+                            </p>
+                          </div>
+                          <Badge variant="outline">{milestone.type}</Badge>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      마일스톤이 없습니다.
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+            </CardContent>
+          </Tabs>
+        </Card>
+
+        {/* 🎯 액션 버튼들 */}
+        <div className="flex justify-center gap-4">
+          <Button onClick={handleScheduleMeeting}>
+            <Calendar className="h-4 w-4 mr-2" />
+            미팅 일정 등록
+          </Button>
+          <Button variant="outline" onClick={handleAddContact}>
+            <MessageCircle className="h-4 w-4 mr-2" />
+            연락 이력 추가
+          </Button>
+          <Button variant="outline">
+            <Download className="h-4 w-4 mr-2" />
+            정보 내보내기
+          </Button>
+        </div>
       </div>
     </MainLayout>
   );
