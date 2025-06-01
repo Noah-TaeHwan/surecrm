@@ -142,6 +142,7 @@ export async function loader({ request }: Route.LoaderArgs) {
       ...clientsData,
       stats,
       searchParams, // 현재 검색 상태 반환
+      currentUserId: userId, // 🔧 수정: 실제 사용자 ID 전달
     };
   } catch (error) {
     console.error('Clients 페이지 로더 오류:', error);
@@ -175,6 +176,7 @@ export async function loader({ request }: Route.LoaderArgs) {
         },
       },
       searchParams,
+      currentUserId: null, // 🔧 수정: 에러 시에도 사용자 ID 필드 추가
     };
   }
 }
@@ -242,7 +244,11 @@ export default function ClientsPage({
     totalPages: loaderTotalPages = 0,
     stats,
     searchParams: initialSearchParams,
+    currentUserId: rawCurrentUserId,
   } = loaderData;
+
+  // 🔧 수정: currentUserId null 체크
+  const currentUserId = rawCurrentUserId || '';
 
   // 🔒 상태 관리 (보안 강화)
   const [searchQuery, setSearchQuery] = useState(
@@ -271,9 +277,6 @@ export default function ClientsPage({
 
   // 🔒 클라이언트를 ClientDisplay로 타입 캐스팅
   const typedClients = clients as ClientDisplay[];
-
-  // 🔒 현재 사용자 ID (실제로는 loader에서 가져와야 함)
-  const currentUserId = 'current-user-id'; // TODO: loader에서 실제 사용자 ID 전달
 
   // 🎨 배지 설정들 (app.css 준수)
   const statusBadgeVariant: Record<string, BadgeVariant> = {
@@ -1174,6 +1177,7 @@ export default function ClientsPage({
         <ClientImportModal
           open={importModalOpen}
           onOpenChange={setImportModalOpen}
+          agentId={currentUserId}
         />
       </div>
     </MainLayout>

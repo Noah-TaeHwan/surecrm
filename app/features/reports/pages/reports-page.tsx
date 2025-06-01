@@ -18,6 +18,10 @@ import {
   type TopPerformer,
 } from '../lib/supabase-reports-data';
 
+// 🔧 수정: 실제 인증 함수 import
+import { getCurrentUser } from '~/lib/auth/core';
+import { redirect } from 'react-router';
+
 // 분리된 컴포넌트들 import
 import { PerformanceMetrics, KakaoReport, InsightsTabs } from '../components';
 
@@ -61,8 +65,13 @@ export function meta({ data, params }: Route.MetaArgs) {
 
 export async function loader({ request }: Route.LoaderArgs) {
   try {
-    // 하드코딩된 사용자 ID (실제로는 인증에서 가져와야 함)
-    const userId = '80b0993a-4194-4165-be5a-aec24b88cd80';
+    // 🔧 수정: 실제 인증된 사용자 정보 가져오기
+    const user = await getCurrentUser(request);
+    if (!user) {
+      throw redirect('/auth/login');
+    }
+
+    const userId = user.id;
 
     // URL에서 기간 파라미터 확인
     const url = new URL(request.url);
