@@ -3,9 +3,7 @@ import { MainLayout } from '~/common/layouts/main-layout';
 import { getCurrentUser } from '~/lib/auth/core';
 import {
   getUserProfile,
-  getUserSettings,
   updateUserProfile,
-  updateUserSettings,
 } from '../lib/supabase-settings-data';
 import {
   getNotificationSettings,
@@ -28,14 +26,11 @@ import { Badge } from '~/common/components/ui/badge';
 import {
   User,
   Bell,
-  Monitor,
   Shield,
   Save,
   Phone,
   Mail,
   Building,
-  Sun,
-  Moon,
   Settings as SettingsIcon,
   Check,
   AlertCircle,
@@ -58,9 +53,6 @@ interface SettingsPageData {
   };
   notificationSettings: {
     emailNotifications: boolean;
-  };
-  systemSettings: {
-    darkMode: boolean;
   };
   user: {
     id: string;
@@ -100,9 +92,6 @@ export async function loader({
         notificationSettings: {
           emailNotifications: false,
         },
-        systemSettings: {
-          darkMode: true,
-        },
         user: null,
       };
     }
@@ -110,12 +99,10 @@ export async function loader({
     console.log('인증 성공:', user.email);
 
     // 모든 설정 데이터를 병렬로 로딩
-    const [userProfileData, notificationSettingsData, userSettingsData] =
-      await Promise.all([
-        getUserProfile(user.id),
-        getNotificationSettings(user.id),
-        getUserSettings(user.id),
-      ]);
+    const [userProfileData, notificationSettingsData] = await Promise.all([
+      getUserProfile(user.id),
+      getNotificationSettings(user.id),
+    ]);
 
     console.log('설정 페이지 데이터 로딩 완료');
 
@@ -132,9 +119,6 @@ export async function loader({
       notificationSettings: {
         emailNotifications:
           notificationSettingsData?.emailNotifications ?? true,
-      },
-      systemSettings: {
-        darkMode: userSettingsData?.darkMode ?? true,
       },
       user: {
         id: user.id,
@@ -158,9 +142,6 @@ export async function loader({
       },
       notificationSettings: {
         emailNotifications: false,
-      },
-      systemSettings: {
-        darkMode: true,
       },
       user: null,
     };
@@ -220,26 +201,6 @@ export async function action({ request }: Route.ActionArgs) {
           return data({
             success: false,
             error: '알림 설정 저장에 실패했습니다.',
-          });
-        }
-      }
-
-      case 'updateSystem': {
-        const darkMode = formData.get('darkMode') === 'true';
-
-        const success = await updateUserSettings(user.id, {
-          darkMode,
-        });
-
-        if (success) {
-          return data({
-            success: true,
-            message: '시스템 설정이 성공적으로 저장되었습니다.',
-          });
-        } else {
-          return data({
-            success: false,
-            error: '시스템 설정 저장에 실패했습니다.',
           });
         }
       }
@@ -333,8 +294,7 @@ export default function SettingsPage({
   loaderData,
   actionData,
 }: Route.ComponentProps) {
-  const { userProfile, notificationSettings, systemSettings, user } =
-    loaderData;
+  const { userProfile, notificationSettings, user } = loaderData;
 
   // State 관리
   const [profileData, setProfileData] = useState({
@@ -348,8 +308,6 @@ export default function SettingsPage({
   const [emailNotifications, setEmailNotifications] = useState(
     notificationSettings.emailNotifications
   );
-
-  const [darkMode, setDarkMode] = useState(systemSettings.darkMode);
 
   // 비밀번호 변경 state
   const [passwordData, setPasswordData] = useState({
@@ -389,21 +347,21 @@ export default function SettingsPage({
 
   return (
     <MainLayout title="설정">
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+      <div className="min-h-screen bg-background">
         <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
           {/* 성공/오류 메시지 - 더 세련된 디자인 */}
           {actionData && (
             <div
               className={`relative overflow-hidden rounded-xl border backdrop-blur-sm transition-all duration-300 ${
                 actionData.success
-                  ? 'bg-green-500/10 text-green-400 border-green-500/30 shadow-lg shadow-green-500/20'
-                  : 'bg-red-500/10 text-red-400 border-red-500/30 shadow-lg shadow-red-500/20'
+                  ? 'bg-primary/10 text-primary border-primary/30'
+                  : 'bg-destructive/10 text-destructive border-destructive/30'
               }`}
             >
               <div className="flex items-center gap-3 p-4">
                 <div
                   className={`p-2 rounded-full ${
-                    actionData.success ? 'bg-green-500/20' : 'bg-red-500/20'
+                    actionData.success ? 'bg-primary/20' : 'bg-destructive/20'
                   }`}
                 >
                   {actionData.success ? (
@@ -420,31 +378,23 @@ export default function SettingsPage({
                   </p>
                 </div>
               </div>
-              <div
-                className={`h-1 w-full ${
-                  actionData.success
-                    ? 'bg-gradient-to-r from-green-500 to-emerald-500'
-                    : 'bg-gradient-to-r from-red-500 to-rose-500'
-                }`}
-              />
             </div>
           )}
 
           {/* 헤더 - 더 임팩트 있게 */}
           <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-primary/10 to-transparent rounded-2xl blur-xl" />
-            <div className="relative bg-card/50 backdrop-blur-sm border border-white/10 rounded-2xl p-8 shadow-2xl">
+            <div className="relative bg-card border rounded-xl p-6">
               <div className="flex items-center justify-between">
                 <div className="space-y-2">
                   <div className="flex items-center gap-3">
-                    <div className="p-3 bg-primary/20 rounded-xl">
-                      <SettingsIcon className="h-6 w-6 text-primary" />
+                    <div className="p-3 bg-muted rounded-xl">
+                      <SettingsIcon className="h-6 w-6 text-foreground" />
                     </div>
                     <div>
-                      <h1 className="text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                      <h1 className="text-3xl font-bold text-foreground">
                         설정
                       </h1>
-                      <p className="text-muted-foreground/80">
+                      <p className="text-muted-foreground">
                         {user ? `${user.fullName || user.email}님의 ` : ''}계정
                         정보와 환경설정을 관리하세요
                       </p>
@@ -452,10 +402,7 @@ export default function SettingsPage({
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Badge
-                    variant="outline"
-                    className="px-4 py-2 bg-primary/10 border-primary/30 text-primary font-medium"
-                  >
+                  <Badge variant="outline" className="px-4 py-2">
                     <Crown className="h-3 w-3 mr-2" />
                     MVP 버전
                   </Badge>
@@ -467,20 +414,16 @@ export default function SettingsPage({
           {/* 설정 섹션들 - 더 모던한 그리드 레이아웃 */}
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
             {/* 프로필 정보 - 개선된 카드 */}
-            <Card className="group relative overflow-hidden border-white/10 bg-card/50 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-[1.02]">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent" />
-              <CardHeader className="relative">
+            <Card className="border bg-card">
+              <CardHeader>
                 <CardTitle className="flex items-center gap-3 text-lg font-semibold">
-                  <div className="p-2 bg-blue-500/20 rounded-lg">
-                    <User className="h-5 w-5 text-blue-400" />
+                  <div className="p-2 bg-muted rounded-lg">
+                    <User className="h-5 w-5 text-foreground" />
                   </div>
                   프로필 정보
-                  <div className="ml-auto">
-                    <div className="h-2 w-2 bg-green-400 rounded-full animate-pulse" />
-                  </div>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="relative space-y-6">
+              <CardContent className="space-y-6">
                 <Form method="post" className="space-y-5">
                   <input
                     type="hidden"
@@ -505,7 +448,7 @@ export default function SettingsPage({
                             handleProfileChange('name', e.target.value)
                           }
                           placeholder="이름을 입력하세요"
-                          className="bg-background/50 border-white/20 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-200"
+                          className="bg-background border"
                         />
                       </div>
                     </div>
@@ -560,7 +503,7 @@ export default function SettingsPage({
                       htmlFor="phone"
                       className="flex items-center gap-2 text-sm font-medium text-foreground/80"
                     >
-                      <Phone className="h-4 w-4 text-cyan-400" />
+                      <Phone className="h-4 w-4 text-foreground" />
                       전화번호
                     </Label>
                     <div className="relative">
@@ -572,7 +515,7 @@ export default function SettingsPage({
                           handleProfileChange('phone', e.target.value)
                         }
                         placeholder="전화번호를 입력하세요"
-                        className="bg-background/50 border-white/20 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-200 pl-10"
+                        className="bg-background border pl-10"
                       />
                       <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     </div>
@@ -583,7 +526,7 @@ export default function SettingsPage({
                       htmlFor="company"
                       className="flex items-center gap-2 text-sm font-medium text-foreground/80"
                     >
-                      <Building className="h-4 w-4 text-purple-400" />
+                      <Building className="h-4 w-4 text-foreground" />
                       회사
                     </Label>
                     <div className="relative">
@@ -595,16 +538,13 @@ export default function SettingsPage({
                           handleProfileChange('company', e.target.value)
                         }
                         placeholder="회사명을 입력하세요"
-                        className="bg-background/50 border-white/20 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-200 pl-10"
+                        className="bg-background border pl-10"
                       />
                       <Building className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     </div>
                   </div>
 
-                  <Button
-                    type="submit"
-                    className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-200 h-11"
-                  >
+                  <Button type="submit" className="w-full">
                     <Save className="h-4 w-4 mr-2" />
                     프로필 저장
                   </Button>
@@ -613,28 +553,24 @@ export default function SettingsPage({
             </Card>
 
             {/* 알림 설정 */}
-            <Card className="group relative overflow-hidden border-white/10 bg-card/50 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-[1.02]">
-              <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 to-transparent" />
-              <CardHeader className="relative">
+            <Card className="border bg-card">
+              <CardHeader>
                 <CardTitle className="flex items-center gap-3 text-lg font-semibold">
-                  <div className="p-2 bg-yellow-500/20 rounded-lg">
-                    <Bell className="h-5 w-5 text-yellow-400" />
+                  <div className="p-2 bg-muted rounded-lg">
+                    <Bell className="h-5 w-5 text-foreground" />
                   </div>
                   알림 설정
                   <div className="ml-auto">
                     <Badge
-                      className={`text-xs ${
-                        emailNotifications
-                          ? 'bg-green-500/20 text-green-400'
-                          : 'bg-gray-500/20 text-gray-400'
-                      }`}
+                      variant={emailNotifications ? 'default' : 'secondary'}
+                      className="text-xs"
                     >
                       {emailNotifications ? '활성화' : '비활성화'}
                     </Badge>
                   </div>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="relative space-y-6">
+              <CardContent className="space-y-6">
                 <Form method="post" className="space-y-5">
                   <input
                     type="hidden"
@@ -647,11 +583,11 @@ export default function SettingsPage({
                     value={emailNotifications.toString()}
                   />
 
-                  <div className="p-4 rounded-xl bg-background/30 border border-white/10">
+                  <div className="p-4 rounded-xl bg-muted/50 border">
                     <div className="flex items-center justify-between">
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                          <Mail className="h-4 w-4 text-emerald-400" />
+                          <Mail className="h-4 w-4 text-foreground" />
                           <Label
                             htmlFor="email-notifications"
                             className="font-medium"
@@ -668,15 +604,11 @@ export default function SettingsPage({
                         id="email-notifications"
                         checked={emailNotifications}
                         onCheckedChange={setEmailNotifications}
-                        className="data-[state=checked]:bg-primary"
                       />
                     </div>
                   </div>
 
-                  <Button
-                    type="submit"
-                    className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white shadow-lg hover:shadow-xl transition-all duration-200 h-11"
-                  >
+                  <Button type="submit" className="w-full">
                     <Save className="h-4 w-4 mr-2" />
                     알림 설정 저장
                   </Button>
@@ -684,85 +616,17 @@ export default function SettingsPage({
               </CardContent>
             </Card>
 
-            {/* 시스템 설정 */}
-            <Card className="group relative overflow-hidden border-white/10 bg-card/50 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-[1.02]">
-              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent" />
-              <CardHeader className="relative">
-                <CardTitle className="flex items-center gap-3 text-lg font-semibold">
-                  <div className="p-2 bg-indigo-500/20 rounded-lg">
-                    <Monitor className="h-5 w-5 text-indigo-400" />
-                  </div>
-                  시스템 설정
-                  <div className="ml-auto">
-                    <Badge className="bg-indigo-500/20 text-indigo-400 text-xs">
-                      {darkMode ? '다크' : '라이트'} 모드
-                    </Badge>
-                  </div>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="relative space-y-6">
-                <Form method="post" className="space-y-5">
-                  <input type="hidden" name="actionType" value="updateSystem" />
-                  <input
-                    type="hidden"
-                    name="darkMode"
-                    value={darkMode.toString()}
-                  />
-
-                  <div className="p-4 rounded-xl bg-background/30 border border-white/10">
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          {darkMode ? (
-                            <Moon className="h-4 w-4 text-indigo-400" />
-                          ) : (
-                            <Sun className="h-4 w-4 text-yellow-400" />
-                          )}
-                          <Label htmlFor="dark-mode" className="font-medium">
-                            다크 모드
-                          </Label>
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                          어두운 테마로 눈의 피로를 줄이고 집중력을 높여보세요
-                        </p>
-                      </div>
-                      <Switch
-                        id="dark-mode"
-                        checked={darkMode}
-                        onCheckedChange={setDarkMode}
-                        className="data-[state=checked]:bg-primary"
-                      />
-                    </div>
-                  </div>
-
-                  <Button
-                    type="submit"
-                    className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white shadow-lg hover:shadow-xl transition-all duration-200 h-11"
-                  >
-                    <Save className="h-4 w-4 mr-2" />
-                    시스템 설정 저장
-                  </Button>
-                </Form>
-              </CardContent>
-            </Card>
-
             {/* 보안 설정 */}
-            <Card className="group relative overflow-hidden border-white/10 bg-card/50 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-[1.02]">
-              <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 to-transparent" />
-              <CardHeader className="relative">
+            <Card className="border bg-card xl:col-span-2">
+              <CardHeader>
                 <CardTitle className="flex items-center gap-3 text-lg font-semibold">
-                  <div className="p-2 bg-red-500/20 rounded-lg">
-                    <Shield className="h-5 w-5 text-red-400" />
+                  <div className="p-2 bg-muted rounded-lg">
+                    <Shield className="h-5 w-5 text-foreground" />
                   </div>
                   보안 설정
-                  <div className="ml-auto">
-                    <Badge className="bg-red-500/20 text-red-400 text-xs">
-                      보안
-                    </Badge>
-                  </div>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="relative space-y-6">
+              <CardContent className="space-y-6">
                 <Form method="post" className="space-y-5">
                   <input
                     type="hidden"
@@ -770,9 +634,9 @@ export default function SettingsPage({
                     value="changePassword"
                   />
 
-                  <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-2">
-                      <Label className="text-sm font-medium text-foreground/80">
+                      <Label className="text-sm font-medium text-foreground">
                         현재 비밀번호
                       </Label>
                       <Input
@@ -786,12 +650,12 @@ export default function SettingsPage({
                           )
                         }
                         placeholder="현재 비밀번호를 입력하세요"
-                        className="bg-background/50 border-white/20 focus:border-red-500/50 focus:ring-2 focus:ring-red-500/20 transition-all duration-200"
+                        className="bg-background border"
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label className="text-sm font-medium text-foreground/80">
+                      <Label className="text-sm font-medium text-foreground">
                         새 비밀번호
                       </Label>
                       <Input
@@ -802,12 +666,12 @@ export default function SettingsPage({
                           handlePasswordChange('newPassword', e.target.value)
                         }
                         placeholder="새 비밀번호를 입력하세요 (6자 이상)"
-                        className="bg-background/50 border-white/20 focus:border-red-500/50 focus:ring-2 focus:ring-red-500/20 transition-all duration-200"
+                        className="bg-background border"
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label className="text-sm font-medium text-foreground/80">
+                      <Label className="text-sm font-medium text-foreground">
                         새 비밀번호 확인
                       </Label>
                       <Input
@@ -821,14 +685,15 @@ export default function SettingsPage({
                           )
                         }
                         placeholder="새 비밀번호를 다시 입력하세요"
-                        className="bg-background/50 border-white/20 focus:border-red-500/50 focus:ring-2 focus:ring-red-500/20 transition-all duration-200"
+                        className="bg-background border"
                       />
                     </div>
                   </div>
 
                   <Button
                     type="submit"
-                    className="w-full bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 text-white shadow-lg hover:shadow-xl transition-all duration-200 h-11"
+                    variant="destructive"
+                    className="w-full md:w-auto"
                   >
                     <Shield className="h-4 w-4 mr-2" />
                     비밀번호 변경
@@ -838,37 +703,36 @@ export default function SettingsPage({
             </Card>
           </div>
 
-          {/* 계정 정보 - 더 세련된 디자인 */}
-          <Card className="relative overflow-hidden border-white/10 bg-card/50 backdrop-blur-sm shadow-xl">
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5" />
-            <CardHeader className="relative">
+          {/* 계정 정보 */}
+          <Card className="border bg-card">
+            <CardHeader>
               <CardTitle className="flex items-center gap-3">
-                <div className="p-2 bg-primary/20 rounded-lg">
-                  <User className="h-5 w-5 text-primary" />
+                <div className="p-2 bg-muted rounded-lg">
+                  <User className="h-5 w-5 text-foreground" />
                 </div>
                 계정 정보
               </CardTitle>
             </CardHeader>
             <CardContent className="relative">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="p-4 rounded-xl bg-background/30 border border-white/10 space-y-2">
+                <div className="p-4 rounded-xl bg-muted/50 border space-y-2">
                   <div className="flex items-center gap-2">
-                    <div className="p-1 bg-blue-500/20 rounded">
-                      <User className="h-3 w-3 text-blue-400" />
+                    <div className="p-1 bg-muted rounded">
+                      <User className="h-3 w-3 text-foreground" />
                     </div>
                     <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       사용자 ID
                     </Label>
                   </div>
-                  <p className="font-mono text-xs text-foreground/80 break-all bg-background/50 p-2 rounded border border-white/10">
+                  <p className="font-mono text-xs text-foreground break-all bg-background p-2 rounded border">
                     {userProfile.id}
                   </p>
                 </div>
 
-                <div className="p-4 rounded-xl bg-background/30 border border-white/10 space-y-2">
+                <div className="p-4 rounded-xl bg-muted/50 border space-y-2">
                   <div className="flex items-center gap-2">
-                    <div className="p-1 bg-green-500/20 rounded">
-                      <Calendar className="h-3 w-3 text-green-400" />
+                    <div className="p-1 bg-muted rounded">
+                      <Calendar className="h-3 w-3 text-foreground" />
                     </div>
                     <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       가입일
@@ -879,37 +743,31 @@ export default function SettingsPage({
                   </p>
                 </div>
 
-                <div className="p-4 rounded-xl bg-background/30 border border-white/10 space-y-2">
+                <div className="p-4 rounded-xl bg-muted/50 border space-y-2">
                   <div className="flex items-center gap-2">
-                    <div className="p-1 bg-purple-500/20 rounded">
-                      <Crown className="h-3 w-3 text-purple-400" />
+                    <div className="p-1 bg-muted rounded">
+                      <Crown className="h-3 w-3 text-foreground" />
                     </div>
                     <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       플랜
                     </Label>
                   </div>
-                  <Badge className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground font-medium">
-                    MVP 베타
-                  </Badge>
+                  <Badge variant="outline">MVP 베타</Badge>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* 안내 메시지 - 더 아름답게 */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border border-primary/20 backdrop-blur-sm">
-            <div className="absolute inset-0 bg-grid-pattern opacity-5" />
-            <div className="relative p-6 text-center">
-              <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-primary/20 border border-primary/30 text-primary font-medium text-sm">
-                <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-                설정 가이드
-              </div>
-              <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
-                💡 모든 설정 변경사항은{' '}
-                <span className="text-primary font-medium">저장 버튼</span>을
-                클릭하여 즉시 적용됩니다.
-              </p>
+          {/* 안내 메시지 */}
+          <div className="rounded-xl bg-muted/50 border p-6 text-center">
+            <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-primary/10 border text-primary font-medium text-sm">
+              설정 가이드
             </div>
+            <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
+              💡 모든 설정 변경사항은{' '}
+              <span className="text-primary font-medium">저장 버튼</span>을
+              클릭하여 즉시 적용됩니다.
+            </p>
           </div>
         </div>
       </div>

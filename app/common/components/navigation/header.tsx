@@ -15,7 +15,6 @@ import {
 } from '~/common/components/ui/dropdown-menu';
 import { Badge } from '~/common/components/ui/badge';
 import { ScrollArea } from '~/common/components/ui/scroll-area';
-import { HeaderThemeToggle } from '~/common/components/ui/theme-toggle';
 
 interface HeaderProps {
   title?: string;
@@ -308,9 +307,6 @@ export function Header({
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-
-        {/* 테마 토글 */}
-        <HeaderThemeToggle isAuthenticated />
 
         {/* 사용자 프로필 드롭다운 */}
         <DropdownMenu>
