@@ -1,6 +1,4 @@
-'use client';
-
-import { useState, useEffect } from 'react';
+import React from 'react';
 import { Link } from 'react-router';
 import { Bell, User, LogOut, Settings, Menu, Eye } from 'lucide-react';
 import { cn } from '~/lib/utils';
@@ -42,10 +40,12 @@ export function Header({
   showMenuButton = false,
   onMenuButtonClick,
 }: HeaderProps) {
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const [notifications, setNotifications] = useState<BasicNotification[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = React.useState(false);
+  const [notifications, setNotifications] = React.useState<BasicNotification[]>(
+    []
+  );
+  const [unreadCount, setUnreadCount] = React.useState(0);
+  const [isLoading, setIsLoading] = React.useState(false);
 
   // 알림 데이터를 직접 fetch하는 함수
   const fetchNotifications = async () => {
@@ -74,7 +74,7 @@ export function Header({
   };
 
   // 컴포넌트 마운트 시 알림 로드
-  useEffect(() => {
+  React.useEffect(() => {
     fetchNotifications();
 
     // 30초마다 알림 새로고침

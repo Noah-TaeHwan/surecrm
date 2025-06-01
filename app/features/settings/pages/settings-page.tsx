@@ -14,6 +14,7 @@ import {
   updateUserSettings,
   type UserProfile,
 } from '../lib/supabase-settings-data';
+import { requireAuth } from '~/lib/auth/middleware';
 
 // UI imports
 import {
@@ -37,12 +38,9 @@ import type { NotificationSettings, SystemSettings } from '../types';
 import React from 'react';
 
 export async function loader({ request }: Route.LoaderArgs) {
-  const user = await getCurrentUser(request);
-  if (!user) {
-    throw redirect('/auth/login');
-  }
-
   try {
+    const user = await requireAuth(request);
+
     // 병렬로 데이터 가져오기
     const [userProfileData, notificationSettingsData, userSettingsData] =
       await Promise.all([
@@ -118,9 +116,9 @@ export async function loader({ request }: Route.LoaderArgs) {
 
     // 에러 발생 시 기본값 반환
     const userProfile: UserProfile = {
-      id: user.id,
+      id: 'unknown-user',
       name: '사용자',
-      email: user.email || '',
+      email: '',
       phone: '',
       company: 'SureCRM',
       position: '보험설계사',
@@ -158,15 +156,12 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export async function action({ request }: Route.ActionArgs) {
-  const user = await getCurrentUser(request);
-  if (!user) {
-    throw redirect('/auth/login');
-  }
-
-  const formData = await request.formData();
-  const intent = formData.get('intent') as string;
-
   try {
+    const user = await requireAuth(request);
+
+    const formData = await request.formData();
+    const intent = formData.get('intent') as string;
+
     if (intent === 'updateProfile') {
       // 프로필 정보 업데이트
       const profileUpdates = {

@@ -1,5 +1,4 @@
-'use client';
-
+import React from 'react';
 import { useState, useEffect } from 'react';
 import { Sidebar } from '~/common/components/navigation/sidebar';
 import { Header } from '~/common/components/navigation/header';

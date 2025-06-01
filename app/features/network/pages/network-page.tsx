@@ -1,5 +1,5 @@
-'use client';
-
+import type { Route } from './+types/network-page';
+import { MainLayout } from '~/common/layouts/main-layout';
 import {
   Card,
   CardContent,
@@ -7,7 +7,6 @@ import {
   CardHeader,
   CardTitle,
 } from '~/common/components/ui/card';
-import { MainLayout } from '~/common/layouts/main-layout';
 import NetworkControls from '../components/NetworkControls';
 import NetworkSidebar from '../components/NetworkSidebar';
 import NetworkDetailPanel from '../components/NetworkDetailPanel';
@@ -21,7 +20,6 @@ import {
   Component,
 } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
-import type { Route } from './+types/network-page';
 import type {
   NetworkNode,
   NetworkLink,

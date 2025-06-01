@@ -1,5 +1,5 @@
-'use client';
-
+import React from 'react';
+import type { ReactNode } from 'react';
 import { Link } from 'react-router';
 import { Card } from '~/common/components/ui/card';
 import { BorderBeam } from '~/common/components/magicui/border-beam';

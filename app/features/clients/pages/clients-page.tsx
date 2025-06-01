@@ -95,6 +95,7 @@ import {
   logDataAccess,
 } from '~/features/clients/lib/client-data';
 import { requireAuth, getSearchParams } from '~/lib/auth/helpers';
+import { requireAuth as requireAuthMiddleware } from '~/lib/auth/middleware';
 import { data } from 'react-router';
 import { ClientsEmptyState } from '~/features/clients/components/clients-empty-state';
 
@@ -103,7 +104,8 @@ type BadgeVariant = 'default' | 'secondary' | 'outline' | 'destructive';
 
 export async function loader({ request }: Route.LoaderArgs) {
   // 🔒 인증 확인 (보안 강화)
-  const userId = await requireAuth(request);
+  const user = await requireAuthMiddleware(request);
+  const userId = user.id;
 
   // 🔍 검색 파라미터 추출 (새 필터 지원)
   const url = new URL(request.url);
@@ -182,7 +184,8 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export async function action({ request }: Route.ActionArgs) {
-  const userId = await requireAuth(request);
+  const user = await requireAuthMiddleware(request);
+  const userId = user.id;
   const formData = await request.formData();
   const intent = formData.get('intent') as string;
 

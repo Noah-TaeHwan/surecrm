@@ -27,7 +27,7 @@ import {
   getClientsByStage,
   createDefaultPipelineStages,
 } from '~/features/pipeline/lib/supabase-pipeline-data';
-import { getCurrentUserIdSync } from '~/lib/auth/helpers';
+import { requireAuth } from '~/lib/auth/middleware';
 
 export function meta({ data, params }: Route.MetaArgs) {
   return [
@@ -39,10 +39,8 @@ export function meta({ data, params }: Route.MetaArgs) {
 export async function loader({ request }: Route.LoaderArgs) {
   try {
     // 현재 사용자 정보 가져오기
-    const currentUserId = await getCurrentUserIdSync(request);
-    if (!currentUserId) {
-      throw new Error('인증이 필요합니다.');
-    }
+    const user = await requireAuth(request);
+    const currentUserId = user.id;
 
     // 파이프라인 단계 조회
     let stages = await getPipelineStages(currentUserId);

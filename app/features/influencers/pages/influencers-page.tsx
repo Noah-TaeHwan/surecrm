@@ -61,10 +61,11 @@ import {
   getNetworkAnalysis,
   createGratitude,
 } from '../lib/influencers-data';
-import { requireAuth } from '~/lib/auth/helpers';
+import { requireAuth } from '~/lib/auth/middleware';
 
 export async function action({ request }: Route.ActionArgs) {
-  const userId = await requireAuth(request);
+  const user = await requireAuth(request);
+  const userId = user.id;
   const formData = await request.formData();
 
   const actionType = formData.get('actionType') as string;
@@ -117,22 +118,44 @@ export async function action({ request }: Route.ActionArgs) {
 }
 
 export async function loader({ request }: Route.LoaderArgs) {
-  // 인증 확인
-  const userId = await requireAuth(request);
-
-  // URL에서 기간 파라미터 추출 (확장된 옵션)
-  const url = new URL(request.url);
-  const period = url.searchParams.get('period') || 'all';
-  const tab = url.searchParams.get('tab') || 'ranking';
-
   try {
-    // 모든 데이터를 병렬로 조회 (성능 최적화)
-    const [topInfluencers, gratitudeHistory, networkAnalysis] =
-      await Promise.all([
-        getTopInfluencers(userId, 20, period), // 더 많은 데이터 조회
-        getGratitudeHistory(userId, 15),
-        getNetworkAnalysis(userId),
-      ]);
+    // 인증 확인
+    const user = await requireAuth(request);
+    const userId = user.id;
+
+    // URL에서 기간 파라미터 추출 (확장된 옵션)
+    const url = new URL(request.url);
+    const period = url.searchParams.get('period') || 'all';
+    const tab = url.searchParams.get('tab') || 'ranking';
+
+    // 각 데이터를 개별적으로 조회하여 하나가 실패해도 다른 것들은 정상적으로 로드
+    let topInfluencers: any[] = [];
+    let gratitudeHistory: any[] = [];
+    let networkAnalysis: any = null;
+
+    // 핵심 소개자 데이터 조회
+    try {
+      topInfluencers = await getTopInfluencers(userId, 20, period);
+    } catch (error) {
+      console.error('핵심 소개자 조회 실패:', error);
+      topInfluencers = [];
+    }
+
+    // 감사 표현 이력 조회
+    try {
+      gratitudeHistory = await getGratitudeHistory(userId, 15);
+    } catch (error) {
+      console.error('감사 표현 이력 조회 실패:', error);
+      gratitudeHistory = [];
+    }
+
+    // 네트워크 분석 조회
+    try {
+      networkAnalysis = await getNetworkAnalysis(userId);
+    } catch (error) {
+      console.error('네트워크 분석 조회 실패:', error);
+      networkAnalysis = getDefaultNetworkAnalysis();
+    }
 
     // KPI 데이터 생성 (networkAnalysis 기반)
     const kpiData: InfluencerKPIData = generateKPIData(
@@ -159,37 +182,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     return {
       topInfluencers: [],
       gratitudeHistory: [],
-      networkAnalysis: {
-        totalInfluencers: 0,
-        activeInfluencers: 0,
-        averageConversionRate: 0,
-        totalNetworkValue: 0,
-        avgNetworkDepth: 0,
-        avgNetworkWidth: 0,
-        monthlyGrowth: 0,
-        averageRelationshipStrength: 0,
-        totalGratitudesSent: 0,
-        averageGratitudeFrequency: 0,
-        dataQualityScore: 0,
-        confidenceLevel: 0,
-        lastCalculated: new Date().toISOString(),
-        lastUpdated: new Date().toISOString(),
-        overallNetworkStrength: 0,
-        networkGrowthRate: 0,
-        averageReferralsPerInfluencer: 0,
-        maxNetworkDepth: 1,
-        totalSecondDegreeConnections: 0,
-        strongConnections: 0,
-        conversionRate: 0,
-        averageContractValue: 0,
-        trends: {
-          referrals: [],
-          conversions: [],
-          value: [],
-          gratitude: [],
-        },
-        monthlyTrends: [],
-      },
+      networkAnalysis: getDefaultNetworkAnalysis(),
       kpiData: getDefaultKPIData(),
       selectedPeriod: 'all',
       activeTab: 'ranking',
@@ -634,5 +627,39 @@ function getDefaultKPIData(): InfluencerKPIData {
       trend: 'stable',
       label: '감사 표현 전송',
     },
+  };
+}
+
+function getDefaultNetworkAnalysis() {
+  return {
+    totalInfluencers: 0,
+    activeInfluencers: 0,
+    averageConversionRate: 0,
+    totalNetworkValue: 0,
+    avgNetworkDepth: 0,
+    avgNetworkWidth: 0,
+    monthlyGrowth: 0,
+    averageRelationshipStrength: 0,
+    totalGratitudesSent: 0,
+    averageGratitudeFrequency: 0,
+    dataQualityScore: 0,
+    confidenceLevel: 0,
+    lastCalculated: new Date().toISOString(),
+    lastUpdated: new Date().toISOString(),
+    overallNetworkStrength: 0,
+    networkGrowthRate: 0,
+    averageReferralsPerInfluencer: 0,
+    maxNetworkDepth: 1,
+    totalSecondDegreeConnections: 0,
+    strongConnections: 0,
+    conversionRate: 0,
+    averageContractValue: 0,
+    trends: {
+      referrals: [],
+      conversions: [],
+      value: [],
+      gratitude: [],
+    },
+    monthlyTrends: [],
   };
 }

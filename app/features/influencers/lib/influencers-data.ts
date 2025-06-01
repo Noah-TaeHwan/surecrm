@@ -76,40 +76,27 @@ export async function getTopInfluencers(
   }
 
   try {
+    console.log('현재 사용자 ID 조회:', userId);
+
     // 🗓️ 기간 필터 계산 (확장된 옵션)
     const dateFilter = calculateDateFilter(period);
 
-    // 📊 핵심 소개자 기본 데이터 조회 (최적화된 쿼리)
+    // 📊 핵심 소개자 기본 데이터 조회 (수정된 쿼리)
     const baseQuery = db
       .select({
         clientId: referrals.referrerId,
         clientName: clients.fullName,
-        clientAvatar: clients.avatar,
         clientPhone: clients.phone,
         clientEmail: clients.email,
         totalReferrals: count(referrals.id),
         successfulReferrals: sql<number>`
           COUNT(CASE 
-            WHEN ${clients.currentStage} IN ('계약체결', '완료') 
+            WHEN ${clients.currentStageId} IN (
+              SELECT id FROM app_pipeline_stages 
+              WHERE name IN ('계약체결', '완료')
+            ) 
             THEN 1 
             END)
-        `,
-        totalContractValue: sql<number>`
-          COALESCE(SUM(CASE 
-            WHEN ${clients.currentStage} IN ('계약체결', '완료') 
-            THEN ${clients.contractAmount} 
-            ELSE 0 
-            END), 0)
-        `,
-        averageContractValue: sql<number>`
-          CASE 
-            WHEN COUNT(CASE WHEN ${clients.currentStage} IN ('계약체결', '완료') THEN 1 END) > 0
-            THEN COALESCE(AVG(CASE 
-              WHEN ${clients.currentStage} IN ('계약체결', '완료') 
-              THEN ${clients.contractAmount} 
-              END), 0)
-            ELSE 0
-          END
         `,
         lastReferralDate: sql<Date>`MAX(${referrals.createdAt})`,
         firstReferralDate: sql<Date>`MIN(${referrals.createdAt})`,
@@ -126,16 +113,19 @@ export async function getTopInfluencers(
       .groupBy(
         referrals.referrerId,
         clients.fullName,
-        clients.avatar,
         clients.phone,
         clients.email
       )
       .having(sql`COUNT(${referrals.id}) > 0`)
       .orderBy(
         desc(count(referrals.id)),
-        desc(
-          sql`SUM(CASE WHEN ${clients.currentStage} IN ('계약체결', '완료') THEN ${clients.contractAmount} ELSE 0 END)`
-        )
+        desc(sql<number>`COUNT(CASE 
+          WHEN ${clients.currentStageId} IN (
+            SELECT id FROM app_pipeline_stages 
+            WHERE name IN ('계약체결', '완료')
+          ) 
+          THEN 1 
+          END)`)
       )
       .limit(limit);
 
@@ -202,7 +192,7 @@ export async function getTopInfluencers(
         const relationshipStrength = calculateEnhancedRelationshipStrength(
           Number(referrer.totalReferrals),
           conversionRate,
-          Number(referrer.totalContractValue),
+          Number(profile?.totalContractValue || 0),
           referrer.lastReferralDate,
           gratitude?.lastGratitudeDate || null,
           activities.length
@@ -226,13 +216,13 @@ export async function getTopInfluencers(
         return {
           id: referrer.clientId,
           name: referrer.clientName || '이름 없음',
-          avatar: referrer.clientAvatar || '',
+          avatar: '', // 기본값으로 빈 문자열 설정
           rank: index + 1,
           totalReferrals: referrer.totalReferrals,
           successfulContracts: referrer.successfulReferrals,
           conversionRate,
-          totalContractValue: Number(referrer.totalContractValue),
-          averageContractValue: Number(referrer.averageContractValue),
+          totalContractValue: Number(profile?.totalContractValue || 0),
+          averageContractValue: Number(profile?.averageContractValue || 0),
           networkDepth: network?.depth || 0,
           networkWidth: network?.width || 0,
           relationshipStrength,
@@ -396,7 +386,6 @@ export async function getGratitudeHistory(
         id: appInfluencerGratitudeHistory.id,
         influencerId: appInfluencerGratitudeHistory.influencerId,
         influencerName: clients.fullName,
-        influencerAvatar: clients.avatar,
         type: appInfluencerGratitudeHistory.gratitudeType,
         giftType: appInfluencerGratitudeHistory.giftType,
         title: appInfluencerGratitudeHistory.title,
@@ -429,7 +418,7 @@ export async function getGratitudeHistory(
       id: item.id,
       influencerId: item.influencerId,
       influencerName: item.influencerName || '이름 없음',
-      influencerAvatar: item.influencerAvatar || undefined,
+      influencerAvatar: undefined, // 기본값으로 undefined 설정
       type: item.type as InfluencerGratitudeType,
       typeLabel: getGratitudeTypeLabel(item.type as InfluencerGratitudeType),
       giftType: item.giftType as InfluencerGiftType | undefined,
@@ -608,48 +597,63 @@ function calculateDateFilter(period: string): Date | null {
 async function getInfluencerProfiles(clientIds: string[]) {
   if (clientIds.length === 0) return [];
 
-  return await db
-    .select()
-    .from(appInfluencerProfiles)
-    .where(inArray(appInfluencerProfiles.clientId, clientIds));
+  try {
+    return await db
+      .select()
+      .from(appInfluencerProfiles)
+      .where(inArray(appInfluencerProfiles.clientId, clientIds));
+  } catch (error) {
+    console.error('영향력자 프로필 조회 오류:', error);
+    return [];
+  }
 }
 
 // 🎁 최근 감사 표현 이력 조회
 async function getRecentGratitudeHistory(clientIds: string[]) {
   if (clientIds.length === 0) return [];
 
-  return await db
-    .select({
-      clientId: appInfluencerProfiles.clientId,
-      lastGratitudeDate: sql<Date>`MAX(${appInfluencerGratitudeHistory.sentDate})`,
-    })
-    .from(appInfluencerGratitudeHistory)
-    .innerJoin(
-      appInfluencerProfiles,
-      eq(appInfluencerGratitudeHistory.influencerId, appInfluencerProfiles.id)
-    )
-    .where(inArray(appInfluencerProfiles.clientId, clientIds))
-    .groupBy(appInfluencerProfiles.clientId);
+  try {
+    return await db
+      .select({
+        clientId: appInfluencerProfiles.clientId,
+        lastGratitudeDate: sql<Date>`MAX(${appInfluencerGratitudeHistory.sentDate})`,
+      })
+      .from(appInfluencerGratitudeHistory)
+      .innerJoin(
+        appInfluencerProfiles,
+        eq(appInfluencerGratitudeHistory.influencerId, appInfluencerProfiles.id)
+      )
+      .where(inArray(appInfluencerProfiles.clientId, clientIds))
+      .groupBy(appInfluencerProfiles.clientId);
+  } catch (error) {
+    console.error('감사 표현 이력 조회 오류:', error);
+    return [];
+  }
 }
 
 // 📊 최근 활동 로그 조회
 async function getRecentActivityLogs(clientIds: string[]) {
   if (clientIds.length === 0) return [];
 
-  return await db
-    .select({
-      clientId: appInfluencerProfiles.clientId,
-      activityType: appInfluencerActivityLogs.activityType,
-      createdAt: appInfluencerActivityLogs.createdAt,
-    })
-    .from(appInfluencerActivityLogs)
-    .innerJoin(
-      appInfluencerProfiles,
-      eq(appInfluencerActivityLogs.influencerId, appInfluencerProfiles.id)
-    )
-    .where(inArray(appInfluencerProfiles.clientId, clientIds))
-    .orderBy(desc(appInfluencerActivityLogs.createdAt))
-    .limit(100);
+  try {
+    return await db
+      .select({
+        clientId: appInfluencerProfiles.clientId,
+        activityType: appInfluencerActivityLogs.activityType,
+        createdAt: appInfluencerActivityLogs.createdAt,
+      })
+      .from(appInfluencerActivityLogs)
+      .innerJoin(
+        appInfluencerProfiles,
+        eq(appInfluencerActivityLogs.influencerId, appInfluencerProfiles.id)
+      )
+      .where(inArray(appInfluencerProfiles.clientId, clientIds))
+      .orderBy(desc(appInfluencerActivityLogs.createdAt))
+      .limit(100);
+  } catch (error) {
+    console.error('활동 로그 조회 오류:', error);
+    return [];
+  }
 }
 
 // 💪 향상된 관계 강도 계산

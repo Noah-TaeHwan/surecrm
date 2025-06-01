@@ -1,6 +1,5 @@
-import pkg from '@supabase/supabase-js';
-const { createClient: createSupabaseClient } = pkg;
-type SupabaseClient = any; // 임시 타입 정의
+import { createClient as supabaseCreateClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 // 환경변수 검증 및 로드
 function getSupabaseConfig() {
@@ -36,7 +35,7 @@ function getSupabaseClientConfig() {
  */
 export function createServerClient() {
   const { url, anonKey } = getSupabaseConfig();
-  return createSupabaseClient(url, anonKey);
+  return supabaseCreateClient(url, anonKey);
 }
 
 /**
@@ -51,7 +50,7 @@ export function createAdminClient() {
     );
   }
 
-  return createSupabaseClient(url, serviceKey, {
+  return supabaseCreateClient(url, serviceKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
@@ -64,7 +63,7 @@ export function createAdminClient() {
  */
 export function createClientSideClient() {
   const { url, anonKey } = getSupabaseClientConfig();
-  return createSupabaseClient(url, anonKey);
+  return supabaseCreateClient(url, anonKey);
 }
 
 // 기본 클라이언트 인스턴스들 (싱글톤)

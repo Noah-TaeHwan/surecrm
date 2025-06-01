@@ -1,5 +1,3 @@
-'use client';
-
 import { Link, useLocation } from 'react-router';
 import {
   LayoutDashboard,
@@ -16,7 +14,6 @@ import {
   Bell,
 } from 'lucide-react';
 import { cn } from '~/lib/utils';
-import { Button } from '~/common/components/ui/button';
 import { Separator } from '~/common/components/ui/separator';
 
 interface SidebarProps {
@@ -119,7 +116,6 @@ export function Sidebar({ className, onClose }: SidebarProps) {
           to="/dashboard"
           onClick={() => handleNavigation('/dashboard')}
           className="text-xl font-bold text-sidebar-foreground flex justify-center cursor-pointer hover:text-sidebar-primary transition-colors"
-          style={{ cursor: 'pointer' }}
         >
           SureCRM
         </Link>
@@ -132,27 +128,22 @@ export function Sidebar({ className, onClose }: SidebarProps) {
               const isActive = isActiveRoute(item.href);
               return (
                 <li key={item.href}>
-                  <Button
-                    asChild
-                    variant={isActive ? 'secondary' : 'ghost'}
+                  <Link
+                    to={item.href}
+                    onClick={() => handleNavigation(item.href)}
                     className={cn(
-                      'w-full justify-start h-12 cursor-pointer',
+                      // Button 스타일을 직접 적용
+                      'inline-flex items-center justify-start gap-3 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+                      'w-full h-12 px-4 py-2',
+                      // 활성/비활성 상태 스타일
                       isActive
                         ? 'bg-sidebar-accent text-sidebar-accent-foreground'
                         : 'text-sidebar-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/50'
                     )}
-                    style={{ cursor: 'pointer' }}
                   >
-                    <Link
-                      to={item.href}
-                      className="flex items-center gap-3 cursor-pointer w-full"
-                      onClick={() => handleNavigation(item.href)}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      {item.icon}
-                      <span className="font-medium">{item.label}</span>
-                    </Link>
-                  </Button>
+                    {item.icon}
+                    <span className="font-medium">{item.label}</span>
+                  </Link>
                 </li>
               );
             })}

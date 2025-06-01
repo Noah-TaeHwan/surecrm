@@ -35,7 +35,7 @@ import type {
   ClientFormData,
 } from '../types';
 import { getClientById, updateClient, logDataAccess } from '../lib/client-data';
-import { requireAuth } from '~/lib/auth/helpers';
+import { requireAuth } from '~/lib/auth/middleware';
 import { data } from 'react-router';
 
 // 🔒 **보안 강화된 클라이언트 편집 스키마**
@@ -84,7 +84,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     throw new Response('Client ID is required', { status: 400 });
   }
 
-  const userId = await requireAuth(request);
+  const user = await requireAuth(request);
+  const userId = user.id;
 
   try {
     const client = await getClientById(clientId, userId, true);
@@ -117,7 +118,8 @@ export async function action({ request, params }: Route.ActionArgs) {
     throw new Response('Client ID is required', { status: 400 });
   }
 
-  const userId = await requireAuth(request);
+  const user = await requireAuth(request);
+  const userId = user.id;
   const formData = await request.formData();
 
   try {

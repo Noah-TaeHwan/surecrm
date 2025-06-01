@@ -102,7 +102,7 @@ import type {
   SecurityAuditLog,
 } from '../types';
 import { getClientById, logDataAccess } from '../lib/client-data';
-import { requireAuth } from '~/lib/auth/helpers';
+import { requireAuth } from '~/lib/auth/middleware';
 
 // 🔒 **데이터베이스 imports 추가**
 import { db } from '~/lib/core/db';
@@ -168,10 +168,11 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     throw new Response('Client ID is required', { status: 400 });
   }
 
-  // 🔒 정확한 인증 방식
-  const userId = await requireAuth(request);
-
   try {
+    // 🔒 정확한 인증 방식
+    const user = await requireAuth(request);
+    const userId = user.id;
+
     // 🔒 보안 감사 로깅
     await logDataAccess({
       userId,

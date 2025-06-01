@@ -39,35 +39,16 @@ import {
   getInvitedColleagues,
   createInvitation,
 } from '../lib/invitations-data';
-import { requireAuth } from '~/lib/auth/helpers';
+import { requireAuth } from '~/lib/auth/middleware';
 
 export async function loader({ request }: Route.LoaderArgs) {
   console.log('Invitations loader 시작');
 
-  // 인증 확인
-  let userId: string;
   try {
-    userId = await requireAuth(request);
-  } catch (error) {
-    console.error('인증 오류:', error);
-    // 인증 실패 시 빈 데이터 반환
-    return {
-      myInvitations: [],
-      invitationStats: {
-        totalSent: 0,
-        totalUsed: 0,
-        totalExpired: 0,
-        availableInvitations: 0,
-        conversionRate: 0,
-        successfulInvitations: 0,
-      },
-      invitedColleagues: [],
-      hasData: false,
-      error: '인증이 필요합니다.',
-    };
-  }
+    // 인증 확인
+    const user = await requireAuth(request);
+    const userId = user.id;
 
-  try {
     // 실제 데이터베이스에서 데이터 조회
     const [myInvitations, invitationStats, invitedColleagues] =
       await Promise.all([
