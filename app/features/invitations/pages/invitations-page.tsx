@@ -32,32 +32,32 @@ import { InvitedColleagues } from '../components/invited-colleagues';
 // 타입 imports
 import type { Invitation } from '../types';
 
-// 데이터 함수 imports
-import {
-  getUserInvitations,
-  getInvitationStats,
-  getInvitedColleagues,
-  createInvitation,
-} from '../lib/invitations-data';
+// 인증, 통계, 초대장 목록 함수 import (단계적 복구)
 import { requireAuth } from '~/lib/auth/middleware';
+import {
+  getInvitationStats,
+  getUserInvitations,
+  getInvitedColleagues,
+} from '../lib/invitations-data';
 
+// 초대장 페이지 로더 - 모든 데이터를 실제 데이터베이스에서 로딩
 export async function loader({ request }: Route.LoaderArgs) {
-  console.log('Invitations loader 시작');
+  console.log('초대장 페이지 로드 시작');
 
   try {
     // 인증 확인
     const user = await requireAuth(request);
     const userId = user.id;
 
-    // 실제 데이터베이스에서 데이터 조회
-    const [myInvitations, invitationStats, invitedColleagues] =
+    // 모든 필요한 데이터를 병렬로 로딩
+    const [invitationStats, myInvitations, invitedColleagues] =
       await Promise.all([
-        getUserInvitations(userId),
         getInvitationStats(userId),
+        getUserInvitations(userId),
         getInvitedColleagues(userId),
       ]);
 
-    console.log('Invitations loader 완료');
+    console.log('초대장 페이지 데이터 로딩 완료');
 
     const hasData = myInvitations.length > 0 || invitedColleagues.length > 0;
 
@@ -67,9 +67,13 @@ export async function loader({ request }: Route.LoaderArgs) {
       invitedColleagues,
       hasData,
       error: null,
+      userId,
     };
   } catch (error) {
-    console.error('초대장 데이터 조회 실패:', error);
+    console.error('초대장 페이지 로드 실패:', error);
+
+    const errorMessage =
+      error instanceof Error ? error.message : '알 수 없는 오류';
 
     // 에러 시 빈 데이터 반환
     return {
@@ -84,7 +88,8 @@ export async function loader({ request }: Route.LoaderArgs) {
       },
       invitedColleagues: [],
       hasData: false,
-      error: '초대장 데이터를 불러오는데 실패했습니다.',
+      error: `초대장 데이터 로딩 실패: ${errorMessage}`,
+      userId: null,
     };
   }
 }
