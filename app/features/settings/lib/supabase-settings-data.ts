@@ -10,6 +10,7 @@ export interface UserProfile {
   phone: string;
   company: string;
   position: string;
+  createdAt?: string;
   team?: {
     id: string;
     name: string;
@@ -99,6 +100,7 @@ export async function getUserProfile(
         company: profiles.company,
         role: profiles.role,
         settings: profiles.settings,
+        createdAt: profiles.createdAt,
       })
       .from(profiles)
       .where(eq(profiles.id, userId))
@@ -114,6 +116,7 @@ export async function getUserProfile(
         phone: '',
         company: INSURANCE_AGENT_DEFAULTS.company,
         position: INSURANCE_AGENT_DEFAULTS.position,
+        createdAt: new Date().toISOString(),
       };
     }
 
@@ -126,6 +129,7 @@ export async function getUserProfile(
       phone: userProfile.phone || '',
       company: userProfile.company || INSURANCE_AGENT_DEFAULTS.company,
       position: getRoleDisplayName(userProfile.role),
+      createdAt: userProfile.createdAt?.toString() || new Date().toISOString(),
       // TODO: 팀 정보는 추후 구현
     };
   } catch (error) {
