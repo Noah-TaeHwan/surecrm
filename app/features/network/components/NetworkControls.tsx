@@ -159,7 +159,7 @@ export default function NetworkControls({
   return (
     <div className={cn('relative', className)}>
       {/* 메인 검색 바 */}
-      <div className="flex items-center justify-between p-3 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="flex  items-center justify-between p-3 border-b ">
         <div className="flex items-center space-x-4 flex-1">
           {/* 검색 입력 필드 */}
           <div className="relative flex-1 max-w-md">
