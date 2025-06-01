@@ -907,9 +907,7 @@ export default function SettingsPage({
               <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
                 💡 모든 설정 변경사항은{' '}
                 <span className="text-primary font-medium">저장 버튼</span>을
-                클릭하여 즉시 적용됩니다. 문제가 발생하면 언제든지{' '}
-                <span className="text-primary font-medium">고객지원팀</span>에
-                문의하세요.
+                클릭하여 즉시 적용됩니다.
               </p>
             </div>
           </div>
