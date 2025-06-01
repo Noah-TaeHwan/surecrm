@@ -51,7 +51,9 @@ export function Header({
   const fetchNotifications = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch('/api/notifications?limit=5');
+      const response = await fetch('/api/notifications?limit=5', {
+        credentials: 'include',
+      });
 
       if (response.ok) {
         const data = await response.json();
@@ -89,6 +91,7 @@ export function Header({
       await fetch('/api/notifications', {
         method: 'POST',
         body: formData,
+        credentials: 'include',
       });
 
       // 성공 시 로컬 상태 업데이트
@@ -111,6 +114,7 @@ export function Header({
       await fetch('/api/notifications', {
         method: 'POST',
         body: formData,
+        credentials: 'include',
       });
 
       // 성공 시 로컬 상태 업데이트
@@ -133,6 +137,7 @@ export function Header({
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
       });
 
       if (response.ok) {

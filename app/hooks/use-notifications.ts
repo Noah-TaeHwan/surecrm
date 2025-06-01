@@ -24,7 +24,10 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
       setIsLoading(true);
 
       const response = await fetch(
-        `/api/notifications?limit=${limit}&unreadOnly=false`
+        `/api/notifications?limit=${limit}&unreadOnly=false`,
+        {
+          credentials: 'include',
+        }
       );
 
       if (!response.ok) {
@@ -60,6 +63,7 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
       const response = await fetch('/api/notifications', {
         method: 'POST',
         body: formData,
+        credentials: 'include',
       });
 
       const result = await response.json();
@@ -94,6 +98,7 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
       const response = await fetch('/api/notifications', {
         method: 'POST',
         body: formData,
+        credentials: 'include',
       });
 
       const result = await response.json();
