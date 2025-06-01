@@ -1,4 +1,4 @@
-import type { Route } from '.react-router/types/app/features/team/pages/+types/team-page';
+import type { Route } from './+types/team-page';
 import { useState, useEffect } from 'react';
 import { Form, useFetcher } from 'react-router';
 import { MainLayout } from '~/common/layouts/main-layout';

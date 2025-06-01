@@ -1,4 +1,4 @@
-import type { Route } from '.react-router/types/app/features/reports/pages/+types/reports-page';
+import type { Route } from './+types/reports-page';
 import { useState, useEffect } from 'react';
 import { Button } from '~/common/components/ui/button';
 import {

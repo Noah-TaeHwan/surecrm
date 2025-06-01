@@ -147,7 +147,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 export async function action({ request }: Route.ActionArgs) {
   try {
     // 인증 확인
-    const agentId = requireAuthSync(request);
+    const agentId = await requireAuthSync(request);
 
     const formData = await request.formData();
     const actionType = formData.get('actionType') as string;

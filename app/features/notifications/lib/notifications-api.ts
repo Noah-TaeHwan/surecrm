@@ -35,13 +35,14 @@ export async function handleNotificationsLoader({
 }: {
   request: Request;
 }) {
-  logAPIRequest('GET', request.url);
-
   // 인증 확인
   const authResult = await requireAuth(request);
   if (authResult instanceof Response) {
     return authResult;
   }
+
+  // 🔧 수정: 인증된 사용자 ID를 포함하여 로깅
+  logAPIRequest('GET', request.url, authResult.id);
 
   try {
     // 쿼리 파라미터 파싱
@@ -117,17 +118,18 @@ export async function handleNotificationsAction({
 }: {
   request: Request;
 }) {
-  logAPIRequest(request.method, request.url);
-
-  // 메소드 검증
-  if (request.method !== 'POST') {
-    return methodNotAllowed();
-  }
-
   // 인증 확인
   const authResult = await requireAuth(request);
   if (authResult instanceof Response) {
     return authResult;
+  }
+
+  // 🔧 수정: 인증된 사용자 ID를 포함하여 로깅
+  logAPIRequest(request.method, request.url, authResult.id);
+
+  // 메소드 검증
+  if (request.method !== 'POST') {
+    return methodNotAllowed();
   }
 
   try {

@@ -1,4 +1,4 @@
-import type { Route } from '.react-router/types/app/features/influencers/pages/+types/influencers-page';
+import type { Route } from './+types/influencers-page';
 import {
   Select,
   SelectContent,

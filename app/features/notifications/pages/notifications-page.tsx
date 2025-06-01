@@ -1,4 +1,4 @@
-import type { Route } from '.react-router/types/app/features/notifications/pages/+types/notifications-page';
+import type { Route } from './+types/notifications-page';
 import { useState } from 'react';
 import { Form, redirect, Link } from 'react-router';
 import { Button } from '~/common/components/ui/button';

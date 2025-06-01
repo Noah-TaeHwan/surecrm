@@ -34,8 +34,6 @@ type SettingsUpdateData = ThemeUpdateData | ProfileUpdateData;
 
 // ===== Action (POST 요청 처리) =====
 export async function action({ request }: { request: Request }) {
-  logAPIRequest(request.method, request.url);
-
   // 메소드 검증
   if (request.method !== 'POST') {
     return methodNotAllowed();
@@ -46,6 +44,9 @@ export async function action({ request }: { request: Request }) {
   if (authResult instanceof Response) {
     return authResult;
   }
+
+  // 🔧 수정: 인증된 사용자 ID를 포함하여 로깅
+  logAPIRequest(request.method, request.url, authResult.id);
 
   try {
     // JSON 데이터 파싱

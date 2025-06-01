@@ -1,4 +1,4 @@
-import type { Route } from '.react-router/types/app/features/invitations/pages/+types/invitations-page';
+import type { Route } from './+types/invitations-page';
 import { useState } from 'react';
 import { MainLayout } from '~/common/layouts/main-layout';
 import { Button } from '~/common/components/ui/button';

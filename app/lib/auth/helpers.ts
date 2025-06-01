@@ -1,5 +1,6 @@
 import { redirect } from 'react-router';
 import { getCurrentUser } from './core';
+import { getUserId } from './session';
 
 /**
  * 현재 로그인한 사용자의 ID를 가져옵니다. (비동기 버전)
@@ -22,19 +23,22 @@ export async function getCurrentUserId(request: Request): Promise<string> {
 
 /**
  * 현재 로그인한 사용자의 ID를 가져옵니다. (동기 버전)
- * 주로 action 함수에서 사용됩니다.
- * TODO: 실제 구현에서는 세션에서 직접 추출하도록 수정 필요
+ * 주로 loader 함수에서 사용됩니다.
+ * 🔧 수정: 실제 세션에서 사용자 ID 추출
  */
-export function getCurrentUserIdSync(request: Request): string {
-  // 임시 구현: 개발용 하드코딩
-  // 실제로는 세션 쿠키에서 바로 추출해야 함
-  const mockUserId = 'mock-agent-id-1';
+export async function getCurrentUserIdSync(request: Request): Promise<string> {
+  try {
+    const userId = await getUserId(request);
 
-  if (!mockUserId) {
-    throw redirect('/login');
+    if (!userId) {
+      throw redirect('/auth/login');
+    }
+
+    return userId;
+  } catch (error) {
+    console.error('getCurrentUserIdSync 오류:', error);
+    throw redirect('/auth/login');
   }
-
-  return mockUserId;
 }
 
 /**
@@ -49,8 +53,8 @@ export async function requireAuth(request: Request): Promise<string> {
  * 인증 확인 및 사용자 ID 반환 (동기 버전)
  * 주로 action 함수에서 사용됩니다.
  */
-export function requireAuthSync(request: Request): string {
-  return getCurrentUserIdSync(request);
+export async function requireAuthSync(request: Request): Promise<string> {
+  return await getCurrentUserIdSync(request);
 }
 
 /**

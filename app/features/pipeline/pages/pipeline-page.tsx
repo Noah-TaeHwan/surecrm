@@ -1,4 +1,4 @@
-import type { Route } from '.react-router/types/app/features/pipeline/pages/+types/pipeline-page';
+import type { Route } from './+types/pipeline-page';
 import { MainLayout } from '~/common/layouts/main-layout';
 import { useState } from 'react';
 import { PipelineBoard } from '~/features/pipeline/components/pipeline-board';
@@ -39,7 +39,7 @@ export function meta({ data, params }: Route.MetaArgs) {
 export async function loader({ request }: Route.LoaderArgs) {
   try {
     // 현재 사용자 정보 가져오기
-    const currentUserId = getCurrentUserIdSync(request);
+    const currentUserId = await getCurrentUserIdSync(request);
     if (!currentUserId) {
       throw new Error('인증이 필요합니다.');
     }

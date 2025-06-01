@@ -1,4 +1,4 @@
-import type { Route } from '.react-router/types/app/features/dashboard/pages/+types/dashboard-page';
+import type { Route } from './+types/dashboard-page';
 import { useState } from 'react';
 import { MainLayout } from '~/common/layouts/main-layout';
 import { WelcomeSection } from '../components/welcome-section';
