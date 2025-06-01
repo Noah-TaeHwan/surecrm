@@ -20,19 +20,28 @@ import {
   Gift,
   Settings,
   Trash2,
+  MoreHorizontal,
 } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '~/common/components/ui/dropdown-menu';
+import { useFetcher } from 'react-router';
 
 // 타입들만 최소한으로 import
 import type { NotificationPageData } from '../types';
 
-// Step 2.1: 인증 함수만 추가 (점진적 복구)
+// 데이터 함수 imports
 import { getCurrentUser } from '~/lib/auth/core';
-
-// Step 2.2: 인증 + 읽지 않은 알림 수 함수 추가 (점진적 복구)
-import { getUnreadNotificationCount } from '../lib/notifications-data';
-
-// Step 2.3: 모든 데이터 함수 import (완전 복구)
-import { getNotifications } from '../lib/notifications-data';
+import {
+  getUnreadNotificationCount,
+  getNotifications,
+  markAllNotificationsAsRead,
+  markNotificationAsRead,
+  deleteNotification,
+} from '../lib/notifications-data';
 
 export function meta(): any {
   return [
@@ -87,6 +96,74 @@ export async function loader({
       notifications: [],
       unreadCount: 0,
       user: null,
+    };
+  }
+}
+
+// 알림 액션 처리
+export async function action({ request }: Route.ActionArgs) {
+  console.log('알림 액션 처리 시작');
+
+  try {
+    // 인증 확인
+    const user = await getCurrentUser(request);
+    if (!user) {
+      return {
+        success: false,
+        message: '인증이 필요합니다.',
+      };
+    }
+
+    const formData = await request.formData();
+    const intent = formData.get('intent') as string;
+
+    switch (intent) {
+      case 'markAllAsRead':
+        await markAllNotificationsAsRead(user.id);
+        return {
+          success: true,
+          message: '모든 알림을 읽음으로 처리했습니다.',
+        };
+
+      case 'markAsRead':
+        const notificationId = formData.get('notificationId') as string;
+        if (!notificationId) {
+          return {
+            success: false,
+            message: '알림 ID가 필요합니다.',
+          };
+        }
+        await markNotificationAsRead(notificationId, user.id);
+        return {
+          success: true,
+          message: '알림을 읽음으로 처리했습니다.',
+        };
+
+      case 'delete':
+        const deleteId = formData.get('notificationId') as string;
+        if (!deleteId) {
+          return {
+            success: false,
+            message: '알림 ID가 필요합니다.',
+          };
+        }
+        await deleteNotification(deleteId, user.id);
+        return {
+          success: true,
+          message: '알림을 삭제했습니다.',
+        };
+
+      default:
+        return {
+          success: false,
+          message: '알 수 없는 액션입니다.',
+        };
+    }
+  } catch (error) {
+    console.error('알림 액션 처리 실패:', error);
+    return {
+      success: false,
+      message: '작업 처리 중 오류가 발생했습니다.',
     };
   }
 }
@@ -152,8 +229,37 @@ function getStatusBadge(status: string, readAt: Date | null) {
 
 export default function NotificationsPage({
   loaderData,
+  actionData,
 }: Route.ComponentProps) {
   const { notifications, unreadCount, user } = loaderData;
+  const fetcher = useFetcher();
+
+  // 성공 메시지 표시를 위한 상태
+  const isSubmitting = fetcher.state === 'submitting';
+  const isSuccessful = actionData?.success;
+
+  // 모든 알림 읽음 처리
+  const handleMarkAllAsRead = () => {
+    const formData = new FormData();
+    formData.append('intent', 'markAllAsRead');
+    fetcher.submit(formData, { method: 'post' });
+  };
+
+  // 개별 알림 읽음 처리
+  const handleMarkAsRead = (notificationId: string) => {
+    const formData = new FormData();
+    formData.append('intent', 'markAsRead');
+    formData.append('notificationId', notificationId);
+    fetcher.submit(formData, { method: 'post' });
+  };
+
+  // 알림 삭제
+  const handleDelete = (notificationId: string) => {
+    const formData = new FormData();
+    formData.append('intent', 'delete');
+    formData.append('notificationId', notificationId);
+    fetcher.submit(formData, { method: 'post' });
+  };
 
   return (
     <MainLayout title="알림">
