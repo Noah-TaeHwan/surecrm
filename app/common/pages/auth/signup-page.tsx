@@ -232,17 +232,25 @@ export default function SignUpPage({ loaderData, actionData }: ComponentProps) {
         });
 
         const validation = await response.json();
-        setInvitationValid(validation.valid);
 
-        if (!validation.valid) {
+        // API 응답 구조에 맞게 수정: validation.data.valid 확인
+        const isValid = validation.success && validation.data?.valid;
+        setInvitationValid(isValid);
+
+        if (!isValid) {
+          const errorMessage =
+            validation.data?.error ||
+            validation.error ||
+            '유효하지 않은 초대 코드입니다';
           form.setError('invitationCode', {
             type: 'manual',
-            message: validation.error || '유효하지 않은 초대 코드입니다',
+            message: errorMessage,
           });
         } else {
           form.clearErrors('invitationCode');
         }
       } catch (error) {
+        console.error('초대 코드 검증 오류:', error);
         setInvitationValid(false);
         form.setError('invitationCode', {
           type: 'manual',

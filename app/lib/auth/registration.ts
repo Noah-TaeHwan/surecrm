@@ -11,7 +11,7 @@ import type {
 } from './types';
 
 /**
- * 회원가입 처리 - OTP 인증 플로우
+ * 회원가입 처리 - OTP 인증 플로우 (미완료 가입 재시도 지원)
  */
 export async function signUpUser(
   signUpData: SignUpData
@@ -32,15 +32,14 @@ export async function signUpUser(
 
     console.log('초대장 검증 완료');
 
-    // 2. 이메일 중복 확인 (API 호출)
-    console.log('이메일 중복 확인 중:', signUpData.email);
+    // 2. 스마트한 이메일 중복 확인
+    console.log('스마트한 이메일 중복 확인 중:', signUpData.email);
 
     try {
-      // 브라우저에서만 실행되는 경우 현재 origin 사용
       const baseUrl =
         typeof window !== 'undefined'
           ? window.location.origin
-          : 'http://localhost:5173'; // 서버 사이드 기본값
+          : 'http://localhost:5173';
 
       const emailCheckResponse = await fetch(`${baseUrl}/api/check-email`, {
         method: 'POST',
@@ -52,56 +51,101 @@ export async function signUpUser(
 
       const emailCheckResult = await emailCheckResponse.json();
 
-      if (!emailCheckResult.available) {
-        console.log('이미 존재하는 이메일:', signUpData.email);
-        return {
-          success: false,
-          error: '이미 등록된 이메일 주소입니다. 로그인을 시도해주세요.',
-        };
+      // API 응답 구조: { success: true, data: { available: boolean, details: {...} } }
+      if (!emailCheckResult.success || !emailCheckResult.data.available) {
+        const reason = emailCheckResult.data?.details?.reason;
+
+        // 완전한 가입 완료인 경우만 차단
+        if (reason === 'completed_registration') {
+          console.log('완전한 가입 완료된 이메일:', signUpData.email);
+          return {
+            success: false,
+            error: '이미 등록된 이메일 주소입니다. 로그인을 시도해주세요.',
+          };
+        }
+
+        // 미완료 가입인 경우 재시도 허용
+        console.log('미완료 가입 발견 - 재시도 진행:', {
+          email: signUpData.email,
+          reason: reason,
+          available: emailCheckResult.data?.available,
+        });
       }
 
-      console.log('이메일 중복 확인 완료 - 사용 가능');
+      console.log('이메일 중복 확인 완료 - 가입 진행 가능');
     } catch (emailCheckError) {
       console.warn('이메일 중복 확인 API 오류:', emailCheckError);
       // API 호출 실패 시에도 회원가입 진행 (OTP 단계에서 검증됨)
     }
 
-    // 3. OTP 전송 (새 사용자 생성)
+    // 3. OTP 전송 (스마트한 사용자 생성)
     const supabase = createServerClient();
-    const { error } = await supabase.auth.signInWithOtp({
-      email: signUpData.email,
-      options: {
-        shouldCreateUser: true, // 사용자가 없으면 생성
-        data: {
-          full_name: signUpData.fullName,
-          phone: signUpData.phone,
-          company: signUpData.company,
-          invitation_code: signUpData.invitationCode,
+
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email: signUpData.email,
+        options: {
+          shouldCreateUser: true, // 새 사용자 생성 허용
+          data: {
+            full_name: signUpData.fullName,
+            phone: signUpData.phone,
+            company: signUpData.company,
+            invitation_code: signUpData.invitationCode,
+          },
         },
-      },
-    });
+      });
 
-    if (error) {
-      console.error('OTP 전송 오류:', error);
+      if (error) {
+        console.error('OTP 전송 오류:', error);
 
-      // 이미 등록된 이메일 오류 처리
-      if (
-        error.message.includes('already registered') ||
-        error.message.includes('User already registered')
-      ) {
-        return {
-          success: false,
-          error: '이미 등록된 이메일 주소입니다. 로그인을 시도해주세요.',
-        };
+        // 이미 등록된 이메일인 경우 → 기존 사용자에게 OTP 재발송
+        if (
+          error.message.includes('already registered') ||
+          error.message.includes('User already registered')
+        ) {
+          console.log('기존 사용자에게 OTP 재발송 시도');
+
+          // shouldCreateUser: false로 기존 사용자에게 OTP 발송
+          const { error: resendError } = await supabase.auth.signInWithOtp({
+            email: signUpData.email,
+            options: {
+              shouldCreateUser: false, // 기존 사용자 사용
+              data: {
+                full_name: signUpData.fullName,
+                phone: signUpData.phone,
+                company: signUpData.company,
+                invitation_code: signUpData.invitationCode,
+              },
+            },
+          });
+
+          if (resendError) {
+            console.error('OTP 재발송 오류:', resendError);
+            return {
+              success: false,
+              error: 'OTP 발송에 실패했습니다. 잠시 후 다시 시도해주세요.',
+            };
+          }
+
+          console.log('기존 사용자에게 OTP 재발송 완료');
+        } else {
+          return {
+            success: false,
+            error: error.message || 'OTP 전송에 실패했습니다.',
+          };
+        }
+      } else {
+        console.log('새 사용자 OTP 전송 완료');
       }
-
+    } catch (otpError) {
+      console.error('OTP 처리 중 예외:', otpError);
       return {
         success: false,
-        error: error.message || 'OTP 전송에 실패했습니다.',
+        error: 'OTP 처리 중 오류가 발생했습니다.',
       };
     }
 
-    console.log('OTP 전송 완료');
+    console.log('OTP 전송 완료 - 인증 대기 중');
 
     return {
       success: true,

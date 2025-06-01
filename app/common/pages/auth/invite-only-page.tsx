@@ -121,8 +121,13 @@ export default function InviteOnlyPage({ loaderData }: ComponentProps) {
 
       const validation = await response.json();
 
-      if (!validation.valid) {
-        setClientError(validation.error || '유효하지 않은 초대 코드입니다.');
+      // API 응답 구조에 맞게 수정: validation.data.valid 또는 validation.success && validation.data?.valid 확인
+      if (!validation.success || !validation.data?.valid) {
+        const errorMessage =
+          validation.data?.error ||
+          validation.error ||
+          '유효하지 않은 초대 코드입니다.';
+        setClientError(errorMessage);
         setIsSubmitting(false);
         return;
       }
@@ -130,6 +135,7 @@ export default function InviteOnlyPage({ loaderData }: ComponentProps) {
       // 유효한 경우 직접 리다이렉트
       navigate(`/auth/signup?code=${encodeURIComponent(data.inviteCode)}`);
     } catch (error) {
+      console.error('초대 코드 검증 오류:', error);
       setClientError('초대 코드 검증 중 오류가 발생했습니다.');
       setIsSubmitting(false);
     }

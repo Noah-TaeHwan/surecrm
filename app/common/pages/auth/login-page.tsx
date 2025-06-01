@@ -6,7 +6,6 @@ import { useForm } from 'react-hook-form';
 import { AuthLayout } from '~/common/layouts/auth-layout';
 import { Button } from '~/common/components/ui/button';
 import { Input } from '~/common/components/ui/input';
-import { Label } from '~/common/components/ui/label';
 import {
   Card,
   CardContent,
@@ -24,7 +23,9 @@ import {
   FormMessage,
 } from '~/common/components/ui/form';
 import { Alert, AlertDescription } from '~/common/components/ui/alert';
+import { LogIn, Eye, EyeOff } from 'lucide-react';
 import { checkAuthStatus, authenticateUser } from '~/lib/auth/core';
+import { createUserSession } from '~/lib/auth/session';
 import type { Route } from './+types/login-page';
 
 // 인터페이스 정의
@@ -35,7 +36,8 @@ interface LoaderData {
 
 interface ActionData {
   success: boolean;
-  error: string | null;
+  error?: string;
+  message?: string;
 }
 
 interface LoaderArgs {
@@ -51,15 +53,13 @@ interface ComponentProps {
   actionData?: ActionData | null;
 }
 
-// Zod 스키마 정의
+// Zod 스키마 정의 (클래식 이메일/비밀번호 방식)
 const loginSchema = z.object({
   email: z
     .string()
     .min(1, { message: '이메일을 입력해주세요' })
     .email({ message: '유효한 이메일 주소를 입력해주세요' }),
-  password: z
-    .string()
-    .min(6, { message: '비밀번호는 최소 6자 이상이어야 합니다' }),
+  password: z.string().min(1, { message: '비밀번호를 입력해주세요' }),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -83,7 +83,7 @@ export async function loader({ request }: LoaderArgs) {
   };
 }
 
-// 액션 함수 - 로그인 폼 제출 처리
+// 액션 함수 - 클래식 이메일/비밀번호 로그인 처리
 export async function action({ request }: ActionArgs) {
   const formData = await request.formData();
   const email = formData.get('email') as string;
@@ -92,16 +92,26 @@ export async function action({ request }: ActionArgs) {
   if (!email || !password) {
     return {
       success: false,
-      error: '이메일과 비밀번호를 모두 입력해주세요.',
+      error: '이메일과 비밀번호를 입력해주세요.',
     };
   }
 
+  // 이메일/비밀번호 형식 검증
+  const loginValidation = loginSchema.safeParse({ email, password });
+  if (!loginValidation.success) {
+    const firstError = loginValidation.error.errors[0];
+    return {
+      success: false,
+      error: firstError.message,
+    };
+  }
+
+  // 클래식 이메일/비밀번호 로그인 시도
   const result = await authenticateUser({ email, password });
 
   if (result.success && result.user) {
-    // 로그인 성공 시 세션 생성하고 대시보드로 리다이렉트
-    const { createUserSession } = await import('~/lib/auth/session');
-    return createUserSession(result.user.id, '/dashboard');
+    // React Router 세션 설정과 함께 대시보드로 리다이렉트
+    return await createUserSession(result.user.id, '/dashboard');
   }
 
   return {
@@ -121,6 +131,7 @@ export const meta: MetaFunction = () => {
 // 로그인 페이지 컴포넌트
 export default function LoginPage({ loaderData, actionData }: ComponentProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   // react-hook-form과 zodResolver를 사용한 폼 설정
   const form = useForm<LoginFormData>({
@@ -134,12 +145,15 @@ export default function LoginPage({ loaderData, actionData }: ComponentProps) {
   return (
     <AuthLayout>
       <Card className="w-full bg-transparent border-none shadow-none">
-        <CardHeader className="space-y-1 pb-2 flex flex-col items-center">
-          <CardTitle className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+        <CardHeader className="space-y-1 pb-6 flex flex-col items-center">
+          <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center mb-4">
+            <LogIn className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+          </div>
+          <CardTitle className="text-2xl font-bold text-slate-900 dark:text-slate-100 text-center">
             로그인
           </CardTitle>
-          <CardDescription className="text-slate-600 dark:text-slate-400">
-            계정에 로그인하여 SureCRM을 이용하세요
+          <CardDescription className="text-slate-600 dark:text-slate-400 text-center">
+            이메일과 비밀번호로 SureCRM에 로그인하세요
           </CardDescription>
         </CardHeader>
 
@@ -180,26 +194,43 @@ export default function LoginPage({ loaderData, actionData }: ComponentProps) {
             </Alert>
           )}
 
+          {/* 에러 메시지 */}
           {actionData?.error && (
             <Alert variant="destructive" className="mb-4">
-              <AlertDescription>{actionData.error}</AlertDescription>
+              <AlertDescription>
+                {actionData.error}
+                {(actionData.error.includes('등록되지 않은 이메일') ||
+                  actionData.error.includes(
+                    '사용자 프로필을 찾을 수 없습니다'
+                  )) && (
+                  <div className="mt-2">
+                    <Link
+                      to="/invite-only"
+                      className="font-medium text-primary hover:text-primary/80 underline"
+                    >
+                      초대 코드로 회원가입하기
+                    </Link>
+                  </div>
+                )}
+              </AlertDescription>
             </Alert>
           )}
 
           <Form {...form}>
-            <form method="post" className="space-y-4">
+            <form method="post" className="space-y-6">
               <FormField
                 control={form.control}
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>이메일</FormLabel>
+                    <FormLabel>이메일 주소</FormLabel>
                     <FormControl>
                       <Input
                         type="email"
-                        name="email"
                         placeholder="your@email.com"
                         disabled={isSubmitting}
+                        autoComplete="email"
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage />
@@ -212,22 +243,33 @@ export default function LoginPage({ loaderData, actionData }: ComponentProps) {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <div className="flex items-center justify-between">
-                      <FormLabel>비밀번호</FormLabel>
-                      <Link
-                        to="/auth/forgot-password"
-                        className="text-sm text-slate-900 hover:text-slate-700 dark:text-slate-300 dark:hover:text-slate-200"
-                      >
-                        비밀번호를 잊으셨나요?
-                      </Link>
-                    </div>
+                    <FormLabel>비밀번호</FormLabel>
                     <FormControl>
-                      <Input
-                        type="password"
-                        name="password"
-                        placeholder="••••••••"
-                        disabled={isSubmitting}
-                      />
+                      <div className="relative">
+                        <Input
+                          type={showPassword ? 'text' : 'password'}
+                          placeholder="••••••••"
+                          disabled={isSubmitting}
+                          autoComplete="current-password"
+                          {...field}
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                          <span className="sr-only">
+                            {showPassword ? '비밀번호 숨기기' : '비밀번호 보기'}
+                          </span>
+                        </Button>
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -235,10 +277,30 @@ export default function LoginPage({ loaderData, actionData }: ComponentProps) {
               />
 
               <Button type="submit" className="w-full" disabled={isSubmitting}>
-                {isSubmitting ? '로그인 중...' : '로그인'}
+                {isSubmitting ? (
+                  <>
+                    <LogIn className="w-4 h-4 mr-2 animate-pulse" />
+                    로그인 중...
+                  </>
+                ) : (
+                  <>
+                    <LogIn className="w-4 h-4 mr-2" />
+                    로그인
+                  </>
+                )}
               </Button>
             </form>
           </Form>
+
+          {/* 비밀번호 찾기 링크 */}
+          <div className="mt-4 text-center">
+            <Link
+              to="/auth/forgot-password"
+              className="text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 underline"
+            >
+              비밀번호를 잊으셨나요?
+            </Link>
+          </div>
         </CardContent>
 
         <CardFooter className="flex flex-col space-y-4 pt-2">

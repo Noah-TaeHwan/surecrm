@@ -19,10 +19,21 @@ export interface SignUpData {
   invitationCode: string;
 }
 
-// 로그인 시도 인터페이스
+// 로그인 시도 인터페이스 (기존 비밀번호 방식)
 export interface LoginAttempt {
   email: string;
   password: string;
+}
+
+// 매직링크 요청 인터페이스 (새로운 로그인 방식)
+export interface MagicLinkRequest {
+  email: string;
+}
+
+// 매직링크 검증 인터페이스
+export interface MagicLinkVerification {
+  token: string;
+  type: string;
 }
 
 // 로그인 결과 인터페이스
@@ -30,6 +41,13 @@ export interface LoginResult {
   success: boolean;
   error?: string;
   user?: User;
+}
+
+// 매직링크 결과 인터페이스
+export interface MagicLinkResult {
+  success: boolean;
+  error?: string;
+  message?: string;
 }
 
 // 회원가입 결과 인터페이스

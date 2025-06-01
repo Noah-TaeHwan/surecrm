@@ -33,7 +33,7 @@ export async function generateUniqueInvitationCode(): Promise<string> {
     code = generateInvitationCode();
 
     const { data, error } = await supabase
-      .from('invitations')
+      .from('app_user_invitations')
       .select('id')
       .eq('code', code)
       .single();
@@ -66,7 +66,7 @@ export async function createInvitationsForUser(
 
     // 기존 추천 코드 개수 확인 (중복 생성 방지)
     const { data: existing, error: checkError } = await supabase
-      .from('invitations')
+      .from('app_user_invitations')
       .select('id')
       .eq('inviter_id', userId);
 
@@ -113,7 +113,7 @@ export async function createInvitationsForUser(
     }
 
     const { data, error } = await supabase
-      .from('invitations')
+      .from('app_user_invitations')
       .insert(invitations)
       .select();
 
@@ -148,7 +148,7 @@ export async function createInvitation(
     const code = await generateUniqueInvitationCode();
 
     const { data, error } = await supabase
-      .from('invitations')
+      .from('app_user_invitations')
       .insert([
         {
           code,
@@ -184,7 +184,7 @@ export async function useInvitationCode(
 
   try {
     const { data, error } = await supabase
-      .from('invitations')
+      .from('app_user_invitations')
       .update({
         status: 'used',
         used_by_id: userId,
@@ -216,7 +216,7 @@ export async function useInvitationCode(
  */
 export async function getUserInvitations(userId: string) {
   const { data, error } = await getClientSideClient()
-    .from('invitations')
+    .from('app_user_invitations')
     .select('*')
     .eq('inviter_id', userId)
     .order('created_at', { ascending: false });

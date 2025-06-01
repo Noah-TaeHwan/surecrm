@@ -113,7 +113,7 @@ export async function action({ request }: { request: Request }) {
       });
     }
 
-    // 이메일 중복 확인 (효율적인 방식)
+    // 이메일 중복 확인 (스마트한 방식)
     const existsResult = await checkEmailExists(email);
 
     if (existsResult.exists) {
@@ -130,8 +130,10 @@ export async function action({ request }: { request: Request }) {
         email,
         message: '이미 등록된 이메일 주소입니다.',
         details: {
-          reason: 'already_registered',
-          suggestion: '다른 이메일 주소를 사용하거나 로그인을 시도해보세요.',
+          reason: existsResult.reason,
+          suggestion: existsResult.details?.authUser
+            ? '로그인을 시도해보세요.'
+            : '다른 이메일 주소를 사용하거나 로그인을 시도해보세요.',
         },
       });
     } else {
@@ -207,73 +209,101 @@ function validateEmailFormat(email: string): {
 }
 
 /**
- * 효율적인 이메일 중복 확인
- * 성능 최적화: Supabase Admin API를 사용한 효율적인 조회
+ * 스마트한 이메일 중복 확인
+ * 미완료 가입 vs 완료된 가입을 정확히 구분
  */
 async function checkEmailExists(email: string): Promise<{
   exists: boolean;
-  source?: 'auth';
+  reason?: string;
+  details?: {
+    authUser?: boolean;
+    emailConfirmed?: boolean;
+    profileExists?: boolean;
+  };
 }> {
   try {
-    // Supabase Auth에서 확인 (Admin API 사용)
     const supabase = createAdminClient();
 
-    // listUsers 대신 더 효율적인 방법 사용
-    // 특정 이메일로 사용자를 검색하기 위해 필터링된 조회 시도
-    const { data: users, error } = await supabase.auth.admin.listUsers({
-      page: 1,
-      perPage: 1, // 최소한의 결과만 요청
+    // 1. auth.users에서 사용자 조회
+    const { data: users, error: listError } =
+      await supabase.auth.admin.listUsers();
+
+    if (listError) {
+      console.error('사용자 목록 조회 오류:', listError);
+      throw listError;
+    }
+
+    // 이메일로 사용자 찾기
+    const authUser = users.users.find((user) => user.email === email);
+
+    if (!authUser) {
+      // auth.users에 없음 → 가입 가능
+      return {
+        exists: false,
+        details: {
+          authUser: false,
+          emailConfirmed: false,
+          profileExists: false,
+        },
+      };
+    }
+
+    // 2. 이메일 확인 상태 체크
+    const isEmailConfirmed = !!authUser.email_confirmed_at;
+
+    // 3. app_user_profiles에서 프로필 존재 여부 확인
+    const profileQuery = await db
+      .select({ id: profiles.id })
+      .from(profiles)
+      .where(eq(profiles.id, authUser.id))
+      .limit(1);
+
+    const profileExists = profileQuery.length > 0;
+
+    console.log(`이메일 중복 확인 상세:`, {
+      email,
+      authUserId: authUser.id,
+      emailConfirmed: isEmailConfirmed,
+      profileExists,
     });
 
-    if (error) {
-      console.error('사용자 목록 조회 중 Supabase 오류:', error);
-      throw error;
-    }
-
-    // 이메일 매치 확인
-    if (users && users.users) {
-      const existingUser = users.users.find((user) => user.email === email);
-      if (existingUser) {
-        return { exists: true, source: 'auth' };
-      }
-    }
-
-    // 더 확실한 검증을 위해 임시 가입 시도
-    // 이미 존재하는 이메일이면 에러가 발생함
-    try {
-      const { error: signUpError } = await supabase.auth.admin.createUser({
+    // 4. 판단 로직
+    if (isEmailConfirmed && profileExists) {
+      // 완전한 가입 완료 → 중복으로 판단
+      return {
+        exists: true,
+        reason: 'completed_registration',
+        details: {
+          authUser: true,
+          emailConfirmed: true,
+          profileExists: true,
+        },
+      };
+    } else {
+      // 미완료 가입 (좀비 계정) → 가입 재시도 허용
+      console.log(`미완료 가입 발견 - 재시도 허용:`, {
         email,
-        password: Math.random().toString(36), // 임시 비밀번호
-        email_confirm: false, // 이메일 확인 안함
-        user_metadata: { temp_check: true },
+        emailConfirmed: isEmailConfirmed,
+        profileExists,
       });
 
-      if (signUpError) {
-        // 이미 등록된 이메일인 경우
-        if (
-          signUpError.message?.includes('already') ||
-          signUpError.message?.includes('exists') ||
-          signUpError.message?.includes('registered')
-        ) {
-          return { exists: true, source: 'auth' };
-        }
-
-        // 다른 에러는 로깅만 하고 넘어감
-        console.warn('임시 사용자 생성 시도 중 에러:', signUpError.message);
-      } else {
-        // 사용자가 성공적으로 생성되었다면 즉시 삭제
-        // (실제로는 이런 방식보다는 다른 검증 방법을 권장)
-        console.log('임시 사용자 생성됨 - 이메일 사용 가능:', email);
-      }
-    } catch (tempError) {
-      console.warn('임시 가입 시도 실패:', tempError);
+      return {
+        exists: false,
+        reason: 'incomplete_registration',
+        details: {
+          authUser: true,
+          emailConfirmed: isEmailConfirmed,
+          profileExists: profileExists,
+        },
+      };
     }
-
-    return { exists: false };
   } catch (error) {
     console.error('이메일 존재 확인 실패:', error);
-    // 에러 발생 시 안전을 위해 존재하는 것으로 처리
-    throw error;
+    // 에러 발생 시 안전을 위해 존재하지 않는 것으로 처리 (가입 허용)
+    return {
+      exists: false,
+      reason: 'check_failed',
+    };
   }
 }
 

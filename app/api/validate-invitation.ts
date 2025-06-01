@@ -41,9 +41,9 @@ interface InvitationValidationResponse {
 }
 
 // ===== 보안 관련 상수 =====
-const MAX_CODE_LENGTH = 20;
-const MIN_CODE_LENGTH = 6;
-const ALLOWED_CODE_PATTERN = /^[A-Z0-9]+$/; // 대문자와 숫자만 허용
+const MAX_CODE_LENGTH = 30;
+const MIN_CODE_LENGTH = 3; // 'asdf' 같은 기존 코드 허용
+const ALLOWED_CODE_PATTERN = /^[A-Za-z0-9\-_]+$/; // 대소문자, 숫자, 하이픈, 언더스코어 허용
 
 // ===== Action (POST 요청 처리) =====
 export async function action({ request }: { request: Request }) {
@@ -99,7 +99,8 @@ export async function action({ request }: { request: Request }) {
         error: '올바른 초대 코드 형식이 아닙니다.',
         details: {
           reason: 'invalid_format',
-          suggestion: '초대 코드는 6-20자의 대문자와 숫자 조합이어야 합니다.',
+          suggestion:
+            '초대 코드는 3-30자의 대소문자, 숫자, 하이픈, 언더스코어 조합이어야 합니다.',
         },
       });
     }
@@ -186,15 +187,17 @@ function validateCodeFormat(code: string): {
     return { isValid: false, reason: 'not_string' };
   }
 
-  if (code.length < MIN_CODE_LENGTH) {
+  const trimmedCode = code.trim();
+
+  if (trimmedCode.length < MIN_CODE_LENGTH) {
     return { isValid: false, reason: 'too_short' };
   }
 
-  if (code.length > MAX_CODE_LENGTH) {
+  if (trimmedCode.length > MAX_CODE_LENGTH) {
     return { isValid: false, reason: 'too_long' };
   }
 
-  if (!ALLOWED_CODE_PATTERN.test(code)) {
+  if (!ALLOWED_CODE_PATTERN.test(trimmedCode)) {
     return { isValid: false, reason: 'invalid_characters' };
   }
 
