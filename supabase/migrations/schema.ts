@@ -3698,3 +3698,22 @@ export const appTeamTrainingRecords = pgTable(
     }),
   ]
 );
+
+// ===== Supabase Auth 테이블 정의 =====
+export const users = pgTable('users', {
+  id: uuid().primaryKey().notNull(),
+  email: text(),
+  email_confirmed_at: timestamp('email_confirmed_at', {
+    withTimezone: true,
+    mode: 'string',
+  }),
+  created_at: timestamp('created_at', { withTimezone: true, mode: 'string' })
+    .defaultNow()
+    .notNull(),
+  updated_at: timestamp('updated_at', { withTimezone: true, mode: 'string' })
+    .defaultNow()
+    .notNull(),
+});
+
+// usersInAuth alias for compatibility
+export const usersInAuth = users;

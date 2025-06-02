@@ -5,6 +5,7 @@ import { useFetcher, useRevalidator } from 'react-router';
 import { PipelineBoard } from '~/features/pipeline/components/pipeline-board';
 import { PipelineFilters } from '~/features/pipeline/components/pipeline-filters';
 import { AddClientModal } from '~/features/clients/components/add-client-modal';
+import { ExistingClientOpportunityModal } from '../components/existing-client-opportunity-modal';
 import {
   Plus,
   Search,
@@ -12,6 +13,7 @@ import {
   Users,
   TrendingUp,
   Target,
+  UserPlus,
 } from 'lucide-react';
 import { Button } from '~/common/components/ui/button';
 import { Input } from '~/common/components/ui/input';
@@ -39,29 +41,67 @@ export function meta({ data, params }: Route.MetaArgs) {
 }
 
 export async function loader({ request }: Route.LoaderArgs) {
+  console.log('🎯 파이프라인 페이지 loader 시작');
+
   try {
-    // 현재 사용자 정보 가져오기
+    // 🎯 인증 확인
     const user = await requireAuth(request);
-    const currentUserId = user.id;
+    const agentId = user.id;
 
-    // 파이프라인 단계 조회
-    let stages = await getPipelineStages(currentUserId);
+    console.log('👤 로그인된 보험설계사:', {
+      agentId,
+      fullName: user.fullName,
+    });
 
-    // 단계가 없으면 기본 단계 생성
-    if (stages.length === 0) {
-      stages = await createDefaultPipelineStages(currentUserId);
+    // 🎯 파이프라인 단계 조회
+    let stages: any[] = [];
+    try {
+      stages = await getPipelineStages(agentId);
+      console.log('📋 파이프라인 단계 조회 결과:', {
+        stagesCount: stages.length,
+        stages: stages.map((s) => ({ id: s.id, name: s.name })),
+      });
+
+      // 🎯 파이프라인 단계가 없으면 기본 단계 생성
+      if (stages.length === 0) {
+        console.log('⚙️ 기본 파이프라인 단계 생성 중...');
+        stages = await createDefaultPipelineStages(agentId);
+        console.log('✅ 기본 파이프라인 단계 생성 완료:', stages.length);
+      }
+    } catch (stageError) {
+      console.error('❌ 파이프라인 단계 조회/생성 실패:', stageError);
+      // 빈 배열로 fallback
+      stages = [];
     }
 
-    // 고객 데이터 조회
-    const clients = await getClientsByStage(currentUserId);
+    // 🎯 모든 고객 조회
+    let allClients: any[] = [];
+    try {
+      allClients = await getClientsByStage(agentId);
+      console.log('👥 전체 고객 조회 결과:', {
+        totalClients: allClients.length,
+        clientsByStage: stages.map((stage) => ({
+          stageName: stage.name,
+          clientCount: allClients.filter(
+            (client) => client.stageId === stage.id
+          ).length,
+        })),
+      });
+    } catch (clientError) {
+      console.error('❌ 고객 조회 실패:', clientError);
+      // 빈 배열로 fallback
+      allClients = [];
+    }
 
     return {
       stages,
-      clients,
-      currentUserId,
+      clients: allClients,
+      currentUserId: agentId,
     };
   } catch (error) {
-    console.error('Pipeline loader error:', error);
+    console.error('❌ 파이프라인 데이터 로드 실패:', error);
+
+    // 🎯 더 상세한 에러 정보와 함께 안전한 fallback 반환
     return {
       stages: [],
       clients: [],
@@ -183,6 +223,89 @@ export async function action({ request }: Route.ActionArgs) {
       }
     }
 
+    if (intent === 'existingClientOpportunity') {
+      // 기존 고객 새 영업 기회 생성
+      const clientId = formData.get('clientId') as string;
+      const clientName = formData.get('clientName') as string;
+      const insuranceType = formData.get('insuranceType') as string;
+      const notes = formData.get('notes') as string;
+
+      if (!clientId || !insuranceType) {
+        return {
+          success: false,
+          error: '고객 ID 또는 보험 상품 타입이 누락되었습니다.',
+        };
+      }
+
+      console.log('🚀 기존 고객 새 영업 기회 생성:', {
+        clientId,
+        clientName,
+        insuranceType,
+        notes,
+      });
+
+      // 첫 상담 단계 찾기
+      const stages = await getPipelineStages(user.id);
+      const firstStage = stages.find((s) => s.name === '첫 상담') || stages[0];
+
+      if (!firstStage) {
+        return {
+          success: false,
+          error: '첫 상담 단계를 찾을 수 없습니다.',
+        };
+      }
+
+      // 고객 정보 업데이트 및 단계 이동
+      const { updateClient, updateClientStage } = await import(
+        '~/api/shared/clients'
+      );
+
+      // 영업 기회 메모 추가
+      const getInsuranceTypeName = (type: string) => {
+        const typeMap: Record<string, string> = {
+          auto: '자동차보험',
+          life: '생명보험',
+          health: '건강보험',
+          home: '주택보험',
+          business: '사업자보험',
+        };
+        return typeMap[type] || type;
+      };
+
+      const opportunityNotes = `[${getInsuranceTypeName(
+        insuranceType
+      )} 영업] ${notes}`;
+
+      // 현재 고객 정보 조회해서 기존 메모에 추가
+      const { getClientById } = await import('~/api/shared/clients');
+      const existingClient = await getClientById(clientId, user.id);
+
+      const updateData = {
+        notes: existingClient?.notes
+          ? `${existingClient.notes}\n\n--- 새 영업 기회 ---\n${opportunityNotes}`
+          : opportunityNotes,
+      };
+
+      await updateClient(clientId, updateData, user.id);
+
+      // 고객을 첫 상담 단계로 이동
+      const result = await updateClientStage(clientId, firstStage.id, user.id);
+
+      if (result.success) {
+        console.log('✅ 기존 고객 새 영업 기회 생성 완료');
+        return {
+          success: true,
+          message: `${clientName} 고객의 새 영업 기회가 생성되었습니다.`,
+          client: result.data,
+        };
+      } else {
+        return {
+          success: false,
+          error: result.message || '영업 기회 생성에 실패했습니다.',
+        };
+      }
+    }
+
     return { success: false, error: '알 수 없는 요청입니다.' };
   } catch (error) {
     console.error('❌ Action에서 고객 추가 실패:', error);
@@ -209,6 +332,8 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
     'all' | 'high' | 'medium' | 'low'
   >('all');
   const [addClientOpen, setAddClientOpen] = useState(false);
+  const [existingClientModalOpen, setExistingClientModalOpen] = useState(false);
+  const [isCreatingOpportunity, setIsCreatingOpportunity] = useState(false);
 
   // 🎯 fetcher 상태 기반으로 상태 관리
   const isSubmitting = fetcher.state === 'submitting';
@@ -221,11 +346,19 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
       if (addClientOpen) {
         setAddClientOpen(false);
       }
+      if (existingClientModalOpen) {
+        setExistingClientModalOpen(false);
+      }
 
       // 데이터 새로고침
       revalidator.revalidate();
     }
-  }, [fetcher.data?.success, addClientOpen, revalidator]);
+  }, [
+    fetcher.data?.success,
+    addClientOpen,
+    existingClientModalOpen,
+    revalidator,
+  ]);
 
   // 필터링된 고객 목록
   const filteredClients = clients.filter((client) => {
@@ -340,6 +473,29 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
     fetcher.submit(formData, { method: 'post' });
   };
 
+  // 기존 고객 새 영업 기회 처리 함수
+  const handleExistingClientOpportunity = async (data: {
+    clientId: string;
+    clientName: string;
+    insuranceType: string;
+    notes: string;
+  }) => {
+    setIsCreatingOpportunity(true);
+
+    // 🎯 FormData 생성
+    const formData = new FormData();
+    formData.append('intent', 'existingClientOpportunity');
+    formData.append('clientId', data.clientId);
+    formData.append('clientName', data.clientName);
+    formData.append('insuranceType', data.insuranceType);
+    formData.append('notes', data.notes);
+
+    // 🎯 action 함수 호출
+    fetcher.submit(formData, { method: 'post' });
+
+    setIsCreatingOpportunity(false);
+  };
+
   // 특정 단계에 고객 추가 함수
   const handleAddClientToStage = (stageId: string) => {
     setAddClientOpen(true);
@@ -352,6 +508,14 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
     searchQuery !== '';
 
   const totalStats = getTotalStats();
+
+  // 기존 고객 목록 (영업 기회 생성용)
+  const existingClientsForOpportunity = clients.map((client) => ({
+    id: client.id,
+    name: client.name,
+    phone: client.phone,
+    currentStage: stages.find((s) => s.id === client.stageId)?.name,
+  }));
 
   return (
     <MainLayout title="영업 파이프라인">
@@ -497,6 +661,16 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
                 </DropdownMenuContent>
               </DropdownMenu>
 
+              {/* 🚀 기존 고객 새 영업 기회 버튼 */}
+              <Button
+                variant="default"
+                onClick={() => setExistingClientModalOpen(true)}
+                className="flex items-center gap-2"
+              >
+                <UserPlus className="h-4 w-4" />
+                <span>기존 고객 영업 기회 추가</span>
+              </Button>
+
               {/* 고객 추가 버튼 */}
               <Button
                 onClick={() => {
@@ -505,7 +679,7 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
                 className="flex items-center gap-2"
               >
                 <Plus className="h-4 w-4" />
-                <span>고객 추가</span>
+                <span>신규 고객 추가</span>
               </Button>
             </div>
           </div>
@@ -549,7 +723,7 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
         )}
       </div>
 
-      {/* 고객 추가 모달 - 고객 관리 페이지와 통일 */}
+      {/* 신규 고객 추가 모달 */}
       <AddClientModal
         open={addClientOpen}
         onOpenChange={setAddClientOpen}
@@ -557,6 +731,15 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
         isSubmitting={isSubmitting}
         error={submitError}
         referrers={potentialReferrers}
+      />
+
+      {/* 🚀 기존 고객 새 영업 기회 모달 */}
+      <ExistingClientOpportunityModal
+        isOpen={existingClientModalOpen}
+        onClose={() => setExistingClientModalOpen(false)}
+        onConfirm={handleExistingClientOpportunity}
+        clients={existingClientsForOpportunity}
+        isLoading={isCreatingOpportunity}
       />
     </MainLayout>
   );

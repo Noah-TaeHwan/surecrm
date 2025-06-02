@@ -7,8 +7,8 @@ import {
   insuranceInfo,
   meetings,
   referrals,
-} from '~/lib/schema';
-import { profiles } from '~/lib/schema';
+} from '~/lib/schema/core';
+import { profiles } from '~/lib/schema/core';
 
 // Pipeline Stages 관련 함수들
 export async function getPipelineStages(agentId: string) {
@@ -82,6 +82,8 @@ export async function deletePipelineStage(id: string) {
 // Clients 관련 함수들
 export async function getClientsByStage(agentId: string) {
   try {
+    console.log('🔍 고객 데이터 조회 시작:', { agentId });
+
     const clientsData = await db
       .select({
         client: clients,
@@ -94,70 +96,101 @@ export async function getClientsByStage(agentId: string) {
       .where(and(eq(clients.agentId, agentId), eq(clients.isActive, true)))
       .orderBy(desc(clients.createdAt));
 
+    console.log('✅ DB 조회 완료:', clientsData.length, '건');
+
     // 각 고객의 추가 정보 조회
     const enrichedClients = await Promise.all(
       clientsData.map(async (item) => {
-        // 추천인 정보
-        let referredBy = null;
-        if (item.client.referredById) {
-          const referrer = await db
-            .select({ id: clients.id, fullName: clients.fullName })
-            .from(clients)
-            .where(eq(clients.id, item.client.referredById))
-            .limit(1);
-          if (referrer[0]) {
-            referredBy = {
-              id: referrer[0].id,
-              name: referrer[0].fullName,
-            };
+        try {
+          // 추천인 정보
+          let referredBy = null;
+          if (item.client.referredById) {
+            const referrer = await db
+              .select({ id: clients.id, fullName: clients.fullName })
+              .from(clients)
+              .where(eq(clients.id, item.client.referredById))
+              .limit(1);
+            if (referrer[0]) {
+              referredBy = {
+                id: referrer[0].id,
+                name: referrer[0].fullName,
+              };
+            }
           }
+
+          // 보험 정보
+          const insurance = await db
+            .select()
+            .from(insuranceInfo)
+            .where(eq(insuranceInfo.clientId, item.client.id));
+
+          // 미팅 정보
+          const clientMeetings = await db
+            .select()
+            .from(meetings)
+            .where(eq(meetings.clientId, item.client.id))
+            .orderBy(desc(meetings.scheduledAt))
+            .limit(5);
+
+          // 🎯 파이프라인 타입에 정확히 맞게 필드명 변환
+          return {
+            id: item.client.id,
+            name: item.client.fullName,
+            phone: item.client.phone,
+            email: item.client.email || undefined,
+            address: item.client.address || undefined,
+            occupation: item.client.occupation || undefined,
+            telecomProvider: item.client.telecomProvider || undefined,
+            height: item.client.height || undefined,
+            weight: item.client.weight || undefined,
+            hasDrivingLicense: item.client.hasDrivingLicense || undefined,
+            importance: item.client.importance,
+            note: item.client.notes || undefined,
+            tags: item.client.tags || [],
+            stageId: item.client.currentStageId,
+            referredBy,
+            currentStage: item.stage,
+            clientDetails: item.details,
+            insuranceInfo: insurance,
+            meetings: clientMeetings,
+            // 추가 필드들
+            lastContactDate: item.client.updatedAt?.toISOString().split('T')[0],
+            createdAt: item.client.createdAt?.toISOString(),
+          };
+        } catch (error) {
+          console.error('❌ 고객 정보 변환 실패:', {
+            clientId: item.client.id,
+            clientName: item.client.fullName,
+            error,
+          });
+
+          // ✅ 에러가 발생해도 기본 정보는 반환
+          return {
+            id: item.client.id,
+            name: item.client.fullName,
+            phone: item.client.phone,
+            email: item.client.email || undefined,
+            importance: item.client.importance,
+            note: item.client.notes || undefined,
+            tags: item.client.tags || [],
+            stageId: item.client.currentStageId,
+            referredBy: null,
+            lastContactDate: item.client.updatedAt?.toISOString().split('T')[0],
+            createdAt: item.client.createdAt?.toISOString(),
+          };
         }
-
-        // 보험 정보
-        const insurance = await db
-          .select()
-          .from(insuranceInfo)
-          .where(eq(insuranceInfo.clientId, item.client.id));
-
-        // 미팅 정보
-        const clientMeetings = await db
-          .select()
-          .from(meetings)
-          .where(eq(meetings.clientId, item.client.id))
-          .orderBy(desc(meetings.scheduledAt))
-          .limit(5);
-
-        // 🎯 파이프라인 타입에 맞게 필드명 변환
-        return {
-          id: item.client.id,
-          name: item.client.fullName,
-          phone: item.client.phone,
-          email: item.client.email,
-          address: item.client.address,
-          occupation: item.client.occupation,
-          telecomProvider: item.client.telecomProvider,
-          height: item.client.height,
-          weight: item.client.weight,
-          hasDrivingLicense: item.client.hasDrivingLicense,
-          importance: item.client.importance,
-          note: item.client.notes,
-          tags: item.client.tags,
-          stageId: item.client.currentStageId,
-          referredBy,
-          currentStage: item.stage,
-          clientDetails: item.details,
-          insuranceInfo: insurance,
-          meetings: clientMeetings,
-          // 추가 필드들
-          lastContactDate: item.client.updatedAt?.toISOString().split('T')[0],
-        };
       })
     );
 
+    console.log('✅ 고객 데이터 변환 완료:', enrichedClients.length, '건');
     return enrichedClients;
   } catch (error) {
-    console.error('Error fetching clients:', error);
-    throw new Error('고객 정보를 가져오는데 실패했습니다.');
+    console.error('❌ getClientsByStage 실패:', error);
+    throw new Error(
+      `고객 정보를 가져오는데 실패했습니다: ${
+        error instanceof Error ? error.message : '알 수 없는 오류'
+      }`
+    );
   }
 }
 
