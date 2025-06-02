@@ -347,428 +347,410 @@ export default function SettingsPage({
 
   return (
     <MainLayout title="설정">
-      <div className="min-h-screen bg-background">
-        <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
-          {/* 성공/오류 메시지 - 더 세련된 디자인 */}
-          {actionData && (
-            <div
-              className={`relative overflow-hidden rounded-xl border backdrop-blur-sm transition-all duration-300 ${
-                actionData.success
-                  ? 'bg-primary/10 text-primary border-primary/30'
-                  : 'bg-destructive/10 text-destructive border-destructive/30'
-              }`}
-            >
-              <div className="flex items-center gap-3 p-4">
-                <div
-                  className={`p-2 rounded-full ${
-                    actionData.success ? 'bg-primary/20' : 'bg-destructive/20'
-                  }`}
-                >
-                  {actionData.success ? (
-                    <Check className="h-4 w-4" />
-                  ) : (
-                    <AlertCircle className="h-4 w-4" />
-                  )}
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium">
-                    {actionData.success
-                      ? (actionData as any).message
-                      : (actionData as any).error}
-                  </p>
-                </div>
+      <div className="space-y-6">
+        {/* 성공/오류 메시지 - 더 세련된 디자인 */}
+        {actionData && (
+          <div
+            className={`relative overflow-hidden rounded-xl border backdrop-blur-sm transition-all duration-300 ${
+              actionData.success
+                ? 'bg-primary/10 text-primary border-primary/30'
+                : 'bg-destructive/10 text-destructive border-destructive/30'
+            }`}
+          >
+            <div className="flex items-center gap-3 p-4">
+              <div
+                className={`p-2 rounded-full ${
+                  actionData.success ? 'bg-primary/20' : 'bg-destructive/20'
+                }`}
+              >
+                {actionData.success ? (
+                  <Check className="h-4 w-4" />
+                ) : (
+                  <AlertCircle className="h-4 w-4" />
+                )}
               </div>
-            </div>
-          )}
-
-          {/* 헤더 - 더 임팩트 있게 */}
-          <div className="relative">
-            <div className="relative bg-card border rounded-xl p-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-3">
-                    <div className="p-3 bg-muted rounded-xl">
-                      <SettingsIcon className="h-6 w-6 text-foreground" />
-                    </div>
-                    <div>
-                      <h1 className="text-3xl font-bold text-foreground">
-                        설정
-                      </h1>
-                      <p className="text-muted-foreground">
-                        {user ? `${user.fullName || user.email}님의 ` : ''}계정
-                        정보와 환경설정을 관리하세요
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Badge variant="outline" className="px-4 py-2">
-                    <Crown className="h-3 w-3 mr-2" />
-                    MVP 버전
-                  </Badge>
-                </div>
+              <div className="flex-1">
+                <p className="font-medium">
+                  {actionData.success
+                    ? (actionData as any).message
+                    : (actionData as any).error}
+                </p>
               </div>
             </div>
           </div>
+        )}
 
-          {/* 설정 섹션들 - 더 모던한 그리드 레이아웃 */}
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            {/* 프로필 정보 - 개선된 카드 */}
-            <Card className="border bg-card">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3 text-lg font-semibold">
-                  <div className="p-2 bg-muted rounded-lg">
-                    <User className="h-5 w-5 text-foreground" />
+        {/* 헤더 - 더 임팩트 있게 */}
+        <div className="relative">
+          <div className="relative bg-card border rounded-xl p-6">
+            <div className="flex items-center justify-between">
+              <div className="space-y-2">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 bg-muted rounded-xl">
+                    <SettingsIcon className="h-6 w-6 text-foreground" />
                   </div>
-                  프로필 정보
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <Form method="post" className="space-y-5">
-                  <input
-                    type="hidden"
-                    name="actionType"
-                    value="updateProfile"
-                  />
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="name"
-                        className="text-sm font-medium text-foreground/80"
-                      >
-                        이름
-                      </Label>
-                      <div className="relative">
-                        <Input
-                          id="name"
-                          name="name"
-                          value={profileData.name}
-                          onChange={(e) =>
-                            handleProfileChange('name', e.target.value)
-                          }
-                          placeholder="이름을 입력하세요"
-                          className="bg-background border"
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="position"
-                        className="text-sm font-medium text-foreground/80"
-                      >
-                        직책
-                      </Label>
-                      <div className="relative">
-                        <Input
-                          id="position"
-                          value={profileData.position}
-                          placeholder="직책"
-                          className="bg-muted/50 border-white/10 text-muted-foreground cursor-not-allowed"
-                          readOnly
-                        />
-                        <Badge className="absolute right-2 top-2 text-xs bg-muted text-muted-foreground">
-                          읽기 전용
-                        </Badge>
-                      </div>
-                    </div>
+                  <div>
+                    <h1 className="text-3xl font-bold text-foreground">설정</h1>
+                    <p className="text-muted-foreground">
+                      {user ? `${user.fullName || user.email}님의 ` : ''}계정
+                      정보와 환경설정을 관리하세요
+                    </p>
                   </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <Badge variant="outline" className="px-4 py-2">
+                  <Crown className="h-3 w-3 mr-2" />
+                  MVP 버전
+                </Badge>
+              </div>
+            </div>
+          </div>
+        </div>
 
+        {/* 설정 섹션들 - 더 모던한 그리드 레이아웃 */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          {/* 프로필 정보 - 개선된 카드 */}
+          <Card className="border bg-card">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-3 text-lg font-semibold">
+                <div className="p-2 bg-muted rounded-lg">
+                  <User className="h-5 w-5 text-foreground" />
+                </div>
+                프로필 정보
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6 space-y-6">
+              <Form method="post" className="space-y-5">
+                <input type="hidden" name="actionType" value="updateProfile" />
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label
-                      htmlFor="email"
-                      className="flex items-center gap-2 text-sm font-medium text-foreground/80"
+                      htmlFor="name"
+                      className="text-sm font-medium text-foreground/80"
                     >
-                      <Mail className="h-4 w-4 text-emerald-400" />
-                      이메일
+                      이름
                     </Label>
                     <div className="relative">
                       <Input
-                        id="email"
-                        type="email"
-                        value={profileData.email}
-                        placeholder="이메일"
-                        className="bg-muted/50 border-white/10 text-muted-foreground cursor-not-allowed pl-10"
+                        id="name"
+                        name="name"
+                        value={profileData.name}
+                        onChange={(e) =>
+                          handleProfileChange('name', e.target.value)
+                        }
+                        placeholder="이름을 입력하세요"
+                        className="bg-background border"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="position"
+                      className="text-sm font-medium text-foreground/80"
+                    >
+                      직책
+                    </Label>
+                    <div className="relative">
+                      <Input
+                        id="position"
+                        value={profileData.position}
+                        placeholder="직책"
+                        className="bg-muted/50 border-white/10 text-muted-foreground cursor-not-allowed"
                         readOnly
                       />
-                      <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                       <Badge className="absolute right-2 top-2 text-xs bg-muted text-muted-foreground">
                         읽기 전용
                       </Badge>
                     </div>
                   </div>
+                </div>
 
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="phone"
-                      className="flex items-center gap-2 text-sm font-medium text-foreground/80"
-                    >
-                      <Phone className="h-4 w-4 text-foreground" />
-                      전화번호
-                    </Label>
-                    <div className="relative">
-                      <Input
-                        id="phone"
-                        name="phone"
-                        value={profileData.phone}
-                        onChange={(e) =>
-                          handleProfileChange('phone', e.target.value)
-                        }
-                        placeholder="전화번호를 입력하세요"
-                        className="bg-background border pl-10"
-                      />
-                      <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="company"
-                      className="flex items-center gap-2 text-sm font-medium text-foreground/80"
-                    >
-                      <Building className="h-4 w-4 text-foreground" />
-                      회사
-                    </Label>
-                    <div className="relative">
-                      <Input
-                        id="company"
-                        name="company"
-                        value={profileData.company}
-                        onChange={(e) =>
-                          handleProfileChange('company', e.target.value)
-                        }
-                        placeholder="회사명을 입력하세요"
-                        className="bg-background border pl-10"
-                      />
-                      <Building className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    </div>
-                  </div>
-
-                  <Button type="submit" className="w-full">
-                    <Save className="h-4 w-4 mr-2" />
-                    프로필 저장
-                  </Button>
-                </Form>
-              </CardContent>
-            </Card>
-
-            {/* 알림 설정 */}
-            <Card className="border bg-card">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3 text-lg font-semibold">
-                  <div className="p-2 bg-muted rounded-lg">
-                    <Bell className="h-5 w-5 text-foreground" />
-                  </div>
-                  알림 설정
-                  <div className="ml-auto">
-                    <Badge
-                      variant={emailNotifications ? 'default' : 'secondary'}
-                      className="text-xs"
-                    >
-                      {emailNotifications ? '활성화' : '비활성화'}
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="email"
+                    className="flex items-center gap-2 text-sm font-medium text-foreground/80"
+                  >
+                    <Mail className="h-4 w-4" />
+                    이메일
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      id="email"
+                      type="email"
+                      value={profileData.email}
+                      placeholder="이메일"
+                      className="bg-muted/50 border-white/10 text-muted-foreground cursor-not-allowed pl-10"
+                      readOnly
+                    />
+                    <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Badge className="absolute right-2 top-2 text-xs bg-muted text-muted-foreground">
+                      읽기 전용
                     </Badge>
                   </div>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <Form method="post" className="space-y-5">
-                  <input
-                    type="hidden"
-                    name="actionType"
-                    value="updateNotifications"
-                  />
-                  <input
-                    type="hidden"
-                    name="emailNotifications"
-                    value={emailNotifications.toString()}
-                  />
+                </div>
 
-                  <div className="p-4 rounded-xl bg-muted/50 border">
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <Mail className="h-4 w-4 text-foreground" />
-                          <Label
-                            htmlFor="email-notifications"
-                            className="font-medium"
-                          >
-                            이메일 알림
-                          </Label>
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                          새로운 고객, 회의 일정 등 중요한 정보를 이메일로
-                          받아보세요
-                        </p>
-                      </div>
-                      <Switch
-                        id="email-notifications"
-                        checked={emailNotifications}
-                        onCheckedChange={setEmailNotifications}
-                      />
-                    </div>
-                  </div>
-
-                  <Button type="submit" className="w-full">
-                    <Save className="h-4 w-4 mr-2" />
-                    알림 설정 저장
-                  </Button>
-                </Form>
-              </CardContent>
-            </Card>
-
-            {/* 보안 설정 */}
-            <Card className="border bg-card xl:col-span-2">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3 text-lg font-semibold">
-                  <div className="p-2 bg-muted rounded-lg">
-                    <Shield className="h-5 w-5 text-foreground" />
-                  </div>
-                  보안 설정
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <Form method="post" className="space-y-5">
-                  <input
-                    type="hidden"
-                    name="actionType"
-                    value="changePassword"
-                  />
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-foreground">
-                        현재 비밀번호
-                      </Label>
-                      <Input
-                        type="password"
-                        name="currentPassword"
-                        value={passwordData.currentPassword}
-                        onChange={(e) =>
-                          handlePasswordChange(
-                            'currentPassword',
-                            e.target.value
-                          )
-                        }
-                        placeholder="현재 비밀번호를 입력하세요"
-                        className="bg-background border"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-foreground">
-                        새 비밀번호
-                      </Label>
-                      <Input
-                        type="password"
-                        name="newPassword"
-                        value={passwordData.newPassword}
-                        onChange={(e) =>
-                          handlePasswordChange('newPassword', e.target.value)
-                        }
-                        placeholder="새 비밀번호를 입력하세요 (6자 이상)"
-                        className="bg-background border"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-foreground">
-                        새 비밀번호 확인
-                      </Label>
-                      <Input
-                        type="password"
-                        name="confirmPassword"
-                        value={passwordData.confirmPassword}
-                        onChange={(e) =>
-                          handlePasswordChange(
-                            'confirmPassword',
-                            e.target.value
-                          )
-                        }
-                        placeholder="새 비밀번호를 다시 입력하세요"
-                        className="bg-background border"
-                      />
-                    </div>
-                  </div>
-
-                  <Button
-                    type="submit"
-                    variant="destructive"
-                    className="w-full md:w-auto"
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="phone"
+                    className="flex items-center gap-2 text-sm font-medium text-foreground/80"
                   >
-                    <Shield className="h-4 w-4 mr-2" />
-                    비밀번호 변경
-                  </Button>
-                </Form>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* 계정 정보 */}
-          <Card className="border bg-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3">
-                <div className="p-2 bg-muted rounded-lg">
-                  <User className="h-5 w-5 text-foreground" />
-                </div>
-                계정 정보
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="relative">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="p-4 rounded-xl bg-muted/50 border space-y-2">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1 bg-muted rounded">
-                      <User className="h-3 w-3 text-foreground" />
-                    </div>
-                    <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      사용자 ID
-                    </Label>
+                    <Phone className="h-4 w-4 text-foreground" />
+                    전화번호
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      id="phone"
+                      name="phone"
+                      value={profileData.phone}
+                      onChange={(e) =>
+                        handleProfileChange('phone', e.target.value)
+                      }
+                      placeholder="전화번호를 입력하세요"
+                      className="bg-background border pl-10"
+                    />
+                    <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   </div>
-                  <p className="font-mono text-xs text-foreground break-all bg-background p-2 rounded border">
-                    {userProfile.id}
-                  </p>
                 </div>
 
-                <div className="p-4 rounded-xl bg-muted/50 border space-y-2">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1 bg-muted rounded">
-                      <Calendar className="h-3 w-3 text-foreground" />
-                    </div>
-                    <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      가입일
-                    </Label>
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="company"
+                    className="flex items-center gap-2 text-sm font-medium text-foreground/80"
+                  >
+                    <Building className="h-4 w-4 text-foreground" />
+                    회사
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      id="company"
+                      name="company"
+                      value={profileData.company}
+                      onChange={(e) =>
+                        handleProfileChange('company', e.target.value)
+                      }
+                      placeholder="회사명을 입력하세요"
+                      className="bg-background border pl-10"
+                    />
+                    <Building className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   </div>
-                  <p className="text-sm font-medium text-foreground">
-                    {formatJoinDate(userProfile.createdAt)}
-                  </p>
                 </div>
 
-                <div className="p-4 rounded-xl bg-muted/50 border space-y-2">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1 bg-muted rounded">
-                      <Crown className="h-3 w-3 text-foreground" />
-                    </div>
-                    <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      플랜
-                    </Label>
-                  </div>
-                  <Badge variant="outline">MVP 베타</Badge>
-                </div>
-              </div>
+                <Button type="submit" className="w-full">
+                  <Save className="h-4 w-4 mr-2" />
+                  프로필 저장
+                </Button>
+              </Form>
             </CardContent>
           </Card>
 
-          {/* 안내 메시지 */}
-          <div className="rounded-xl bg-muted/50 border p-6 text-center">
-            <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-primary/10 border text-primary font-medium text-sm">
-              설정 가이드
+          {/* 알림 설정 */}
+          <Card className="border bg-card">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-3 text-lg font-semibold">
+                <div className="p-2 bg-muted rounded-lg">
+                  <Bell className="h-5 w-5 text-foreground" />
+                </div>
+                알림 설정
+                <div className="ml-auto">
+                  <Badge
+                    variant={emailNotifications ? 'default' : 'secondary'}
+                    className="text-xs"
+                  >
+                    {emailNotifications ? '활성화' : '비활성화'}
+                  </Badge>
+                </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6 space-y-6">
+              <Form method="post" className="space-y-5">
+                <input
+                  type="hidden"
+                  name="actionType"
+                  value="updateNotifications"
+                />
+                <input
+                  type="hidden"
+                  name="emailNotifications"
+                  value={emailNotifications.toString()}
+                />
+
+                <div className="p-4 rounded-xl bg-muted/50 border">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <Mail className="h-4 w-4 text-foreground" />
+                        <Label
+                          htmlFor="email-notifications"
+                          className="font-medium"
+                        >
+                          이메일 알림
+                        </Label>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        새로운 고객, 회의 일정 등 중요한 정보를 이메일로
+                        받아보세요
+                      </p>
+                    </div>
+                    <Switch
+                      id="email-notifications"
+                      checked={emailNotifications}
+                      onCheckedChange={setEmailNotifications}
+                    />
+                  </div>
+                </div>
+
+                <Button type="submit" className="w-full">
+                  <Save className="h-4 w-4 mr-2" />
+                  알림 설정 저장
+                </Button>
+              </Form>
+            </CardContent>
+          </Card>
+
+          {/* 보안 설정 */}
+          <Card className="border bg-card xl:col-span-2">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-3 text-lg font-semibold">
+                <div className="p-2 bg-muted rounded-lg">
+                  <Shield className="h-5 w-5 text-foreground" />
+                </div>
+                보안 설정
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6 space-y-6">
+              <Form method="post" className="space-y-5">
+                <input type="hidden" name="actionType" value="changePassword" />
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-foreground">
+                      현재 비밀번호
+                    </Label>
+                    <Input
+                      type="password"
+                      name="currentPassword"
+                      value={passwordData.currentPassword}
+                      onChange={(e) =>
+                        handlePasswordChange('currentPassword', e.target.value)
+                      }
+                      placeholder="현재 비밀번호를 입력하세요"
+                      className="bg-background border"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-foreground">
+                      새 비밀번호
+                    </Label>
+                    <Input
+                      type="password"
+                      name="newPassword"
+                      value={passwordData.newPassword}
+                      onChange={(e) =>
+                        handlePasswordChange('newPassword', e.target.value)
+                      }
+                      placeholder="새 비밀번호를 입력하세요 (6자 이상)"
+                      className="bg-background border"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-foreground">
+                      새 비밀번호 확인
+                    </Label>
+                    <Input
+                      type="password"
+                      name="confirmPassword"
+                      value={passwordData.confirmPassword}
+                      onChange={(e) =>
+                        handlePasswordChange('confirmPassword', e.target.value)
+                      }
+                      placeholder="새 비밀번호를 다시 입력하세요"
+                      className="bg-background border"
+                    />
+                  </div>
+                </div>
+
+                <Button
+                  type="submit"
+                  variant="destructive"
+                  className="w-full md:w-auto"
+                >
+                  <Shield className="h-4 w-4 mr-2" />
+                  비밀번호 변경
+                </Button>
+              </Form>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* 계정 정보 */}
+        <Card className="border bg-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-3">
+              <div className="p-2 bg-muted rounded-lg">
+                <User className="h-5 w-5 text-foreground" />
+              </div>
+              계정 정보
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6 relative">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="p-4 rounded-xl bg-muted/50 border space-y-2">
+                <div className="flex items-center gap-2">
+                  <div className="p-1 bg-muted rounded">
+                    <User className="h-3 w-3 text-foreground" />
+                  </div>
+                  <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    사용자 ID
+                  </Label>
+                </div>
+                <p className="font-mono text-xs text-foreground break-all bg-background p-2 rounded border">
+                  {userProfile.id}
+                </p>
+              </div>
+
+              <div className="p-4 rounded-xl bg-muted/50 border space-y-2">
+                <div className="flex items-center gap-2">
+                  <div className="p-1 bg-muted rounded">
+                    <Calendar className="h-3 w-3 text-foreground" />
+                  </div>
+                  <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    가입일
+                  </Label>
+                </div>
+                <p className="text-sm font-medium text-foreground">
+                  {formatJoinDate(userProfile.createdAt)}
+                </p>
+              </div>
+
+              <div className="p-4 rounded-xl bg-muted/50 border space-y-2">
+                <div className="flex items-center gap-2">
+                  <div className="p-1 bg-muted rounded">
+                    <Crown className="h-3 w-3 text-foreground" />
+                  </div>
+                  <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    플랜
+                  </Label>
+                </div>
+                <Badge variant="outline">MVP 베타</Badge>
+              </div>
             </div>
-            <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
-              💡 모든 설정 변경사항은{' '}
-              <span className="text-primary font-medium">저장 버튼</span>을
-              클릭하여 즉시 적용됩니다.
-            </p>
+          </CardContent>
+        </Card>
+
+        {/* 안내 메시지 */}
+        <div className="rounded-xl bg-muted/50 border p-6 text-center">
+          <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-primary/10 border text-primary font-medium text-sm">
+            설정 가이드
           </div>
+          <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
+            💡 모든 설정 변경사항은{' '}
+            <span className="text-primary font-medium">저장 버튼</span>을
+            클릭하여 즉시 적용됩니다.
+          </p>
         </div>
       </div>
     </MainLayout>
