@@ -75,8 +75,6 @@ import { type Meeting, type Client, type ViewMode } from '../types/types';
 import {
   getMeetingsByMonth,
   getClientsByAgent,
-  getDefaultMeetings,
-  getDefaultClients,
   createMeeting,
   updateMeeting,
   deleteMeeting,
@@ -119,13 +117,9 @@ export async function loader({ request }: Route.LoaderArgs) {
       getClientsByAgent(agentId),
     ]);
 
-    // 데이터가 없는 경우 기본 데이터 제공 (개발용)
-    const finalMeetings = meetings.length > 0 ? meetings : getDefaultMeetings();
-    const finalClients = clients.length > 0 ? clients : getDefaultClients();
-
     return {
-      meetings: finalMeetings,
-      clients: finalClients,
+      meetings: meetings,
+      clients: clients,
       currentMonth,
       currentYear,
       agentId,
@@ -133,14 +127,14 @@ export async function loader({ request }: Route.LoaderArgs) {
   } catch (error) {
     console.error('Calendar 데이터 로딩 실패:', error);
 
-    // 에러 시 기본 데이터 반환
+    // 에러 시 빈 배열 반환
     const today = new Date();
     return {
-      meetings: getDefaultMeetings(),
-      clients: getDefaultClients(),
+      meetings: [],
+      clients: [],
       currentMonth: today.getMonth() + 1,
       currentYear: today.getFullYear(),
-      agentId: 'fallback-agent-id',
+      agentId: 'error-fallback',
     };
   }
 }
@@ -323,16 +317,26 @@ export default function CalendarPage({
       weekStart.setDate(selectedDate.getDate() - selectedDate.getDay());
       const weekEnd = new Date(weekStart);
       weekEnd.setDate(weekStart.getDate() + 6);
-      return `${weekStart.getMonth() + 1}.${weekStart.getDate()} - ${
-        weekEnd.getMonth() + 1
-      }.${weekEnd.getDate()}`;
+
+      // 같은 달인 경우와 다른 달인 경우 처리
+      if (weekStart.getMonth() === weekEnd.getMonth()) {
+        return `${weekStart.getFullYear()}년 ${
+          weekStart.getMonth() + 1
+        }월 ${weekStart.getDate()}일 - ${weekEnd.getDate()}일`;
+      } else {
+        return `${weekStart.getFullYear()}년 ${
+          weekStart.getMonth() + 1
+        }월 ${weekStart.getDate()}일 - ${
+          weekEnd.getMonth() + 1
+        }월 ${weekEnd.getDate()}일`;
+      }
     } else {
-      return selectedDate.toLocaleDateString('ko-KR', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        weekday: 'long',
-      });
+      return `${selectedDate.getFullYear()}년 ${
+        selectedDate.getMonth() + 1
+      }월 ${selectedDate.getDate()}일 ${selectedDate.toLocaleDateString(
+        'ko-KR',
+        { weekday: 'long' }
+      )}`;
     }
   };
 
@@ -412,48 +416,105 @@ export default function CalendarPage({
           </div>
         </div>
 
-        {/* 캘린더 뷰 */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-          <div className="lg:col-span-4">
-            <Card className="shadow-lg border border-border/50 bg-card/50 backdrop-blur-sm">
-              <CardContent className="p-0">
-                {viewMode === 'month' && (
-                  <CalendarGrid
-                    selectedDate={selectedDate}
-                    meetings={meetings}
-                    onMeetingClick={setSelectedMeeting}
-                    filteredTypes={filteredTypes}
-                    onDateClick={handleDateClick}
-                  />
-                )}
-                {viewMode === 'week' && (
-                  <WeekView
-                    selectedDate={selectedDate}
-                    meetings={meetings}
-                    onMeetingClick={setSelectedMeeting}
-                    filteredTypes={filteredTypes}
-                  />
-                )}
-                {viewMode === 'day' && (
-                  <DayView
-                    selectedDate={selectedDate}
-                    meetings={meetings}
-                    onMeetingClick={setSelectedMeeting}
-                    filteredTypes={filteredTypes}
-                  />
-                )}
+        {/* 데이터가 없는 경우 빈 상태 표시 */}
+        {meetings.length === 0 && clients.length === 0 ? (
+          <div className="text-center py-16">
+            <Card className="max-w-md mx-auto shadow-lg border border-border/50 bg-gradient-to-br from-card/90 to-card/70 backdrop-blur-sm">
+              <CardContent className="pt-8 pb-8">
+                <div className="p-6 bg-muted/20 rounded-full w-fit mx-auto mb-6">
+                  <CalendarIcon className="w-16 h-16 text-muted-foreground/50" />
+                </div>
+                <h3 className="text-2xl font-bold text-foreground mb-3">
+                  일정 관리를 시작해보세요
+                </h3>
+                <p className="text-muted-foreground mb-6 leading-relaxed">
+                  아직 등록된 고객이나 미팅이 없습니다.
+                  <br />첫 번째 미팅을 예약하여 시작해보세요.
+                </p>
+                <div className="space-y-3">
+                  <Button
+                    onClick={() => setIsAddMeetingOpen(true)}
+                    className="w-full"
+                    size="lg"
+                  >
+                    <PlusIcon className="mr-2 h-5 w-5" />첫 미팅 예약하기
+                  </Button>
+                  <Button variant="outline" asChild className="w-full">
+                    <Link to="/clients">고객 등록하기</Link>
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </div>
+        ) : meetings.length === 0 ? (
+          <div className="text-center py-16">
+            <Card className="max-w-md mx-auto shadow-lg border border-border/50 bg-gradient-to-br from-card/90 to-card/70 backdrop-blur-sm">
+              <CardContent className="pt-8 pb-8">
+                <div className="p-6 bg-muted/20 rounded-full w-fit mx-auto mb-6">
+                  <BellIcon className="w-16 h-16 text-muted-foreground/50" />
+                </div>
+                <h3 className="text-2xl font-bold text-foreground mb-3">
+                  예정된 미팅이 없습니다
+                </h3>
+                <p className="text-muted-foreground mb-6 leading-relaxed">
+                  등록된 고객은 {clients.length}명이지만,
+                  <br />
+                  예정된 미팅이 없습니다. 새로운 미팅을 예약해보세요.
+                </p>
+                <Button
+                  onClick={() => setIsAddMeetingOpen(true)}
+                  className="w-full"
+                  size="lg"
+                >
+                  <PlusIcon className="mr-2 h-5 w-5" />새 미팅 예약하기
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        ) : (
+          /* 캘린더 뷰 */
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+            <div className="lg:col-span-4">
+              <Card className="shadow-lg border border-border/50 bg-card/50 backdrop-blur-sm">
+                <CardContent className="p-0">
+                  {viewMode === 'month' && (
+                    <CalendarGrid
+                      selectedDate={selectedDate}
+                      meetings={meetings}
+                      onMeetingClick={setSelectedMeeting}
+                      filteredTypes={filteredTypes}
+                      onDateClick={handleDateClick}
+                    />
+                  )}
+                  {viewMode === 'week' && (
+                    <WeekView
+                      selectedDate={selectedDate}
+                      meetings={meetings}
+                      onMeetingClick={setSelectedMeeting}
+                      filteredTypes={filteredTypes}
+                    />
+                  )}
+                  {viewMode === 'day' && (
+                    <DayView
+                      selectedDate={selectedDate}
+                      meetings={meetings}
+                      onMeetingClick={setSelectedMeeting}
+                      filteredTypes={filteredTypes}
+                    />
+                  )}
+                </CardContent>
+              </Card>
+            </div>
 
-          {/* 사이드바 */}
-          <CalendarSidebar
-            meetings={meetings}
-            onMeetingClick={setSelectedMeeting}
-            filteredTypes={filteredTypes}
-            onFilterChange={setFilteredTypes}
-          />
-        </div>
+            {/* 사이드바 */}
+            <CalendarSidebar
+              meetings={meetings}
+              onMeetingClick={setSelectedMeeting}
+              filteredTypes={filteredTypes}
+              onFilterChange={setFilteredTypes}
+            />
+          </div>
+        )}
 
         {/* 모달들 */}
         <AddMeetingModal

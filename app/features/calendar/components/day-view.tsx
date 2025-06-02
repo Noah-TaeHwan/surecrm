@@ -29,6 +29,9 @@ export function DayView({
     (meeting) => meeting.date === dateStr
   );
 
+  // 해당 날짜의 전체 미팅들 (필터링 전)
+  const allDayMeetings = meetings.filter((meeting) => meeting.date === dateStr);
+
   // 시간대 생성 (6시부터 23시까지)
   const timeSlots = [];
   for (let hour = 6; hour <= 23; hour++) {
@@ -165,27 +168,61 @@ export function DayView({
         ) : (
           // 일정이 없는 경우
           <div className="p-12 text-center">
-            <div className="p-6 bg-muted/20 rounded-full w-fit mx-auto mb-6">
-              <svg
-                className="w-16 h-16 text-muted-foreground/50"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                />
-              </svg>
-            </div>
-            <h3 className="text-xl font-semibold text-foreground mb-2">
-              일정이 없는 하루입니다
-            </h3>
-            <p className="text-muted-foreground mb-6">
-              이 날에는 예정된 미팅이 없습니다. 새로운 일정을 추가해보세요.
-            </p>
+            {allDayMeetings.length > 0 ? (
+              // 필터링으로 인해 빈 경우
+              <>
+                <div className="p-6 bg-muted/20 rounded-full w-fit mx-auto mb-6">
+                  <svg
+                    className="w-16 h-16 text-muted-foreground/50"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z"
+                    />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-semibold text-foreground mb-2">
+                  선택한 필터에 해당하는 일정이 없습니다
+                </h3>
+                <p className="text-muted-foreground mb-6">
+                  이 날에는 전체 {allDayMeetings.length}개의 일정이 있지만,
+                  선택한 필터 조건에 맞는 일정은 없습니다.
+                </p>
+                <div className="text-sm text-muted-foreground bg-muted/20 px-4 py-2 rounded-lg inline-block">
+                  전체 일정: {allDayMeetings.length}개 | 필터링된 일정: 0개
+                </div>
+              </>
+            ) : (
+              // 전체적으로 빈 경우
+              <>
+                <div className="p-6 bg-muted/20 rounded-full w-fit mx-auto mb-6">
+                  <svg
+                    className="w-16 h-16 text-muted-foreground/50"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-semibold text-foreground mb-2">
+                  일정이 없는 하루입니다
+                </h3>
+                <p className="text-muted-foreground mb-6">
+                  이 날에는 예정된 미팅이 없습니다. 새로운 일정을 추가해보세요.
+                </p>
+              </>
+            )}
           </div>
         )}
       </div>

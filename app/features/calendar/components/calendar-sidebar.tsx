@@ -87,7 +87,7 @@ export function CalendarSidebar({
 
   return (
     <div className="space-y-4">
-      {/* 🌐 Google Calendar 연동 상태 */}
+      {/* 🌐 Google Calendar 연동 상태 (MVP 안내) */}
       <Card className="shadow-lg border border-border/50 bg-gradient-to-br from-card/90 to-card/70 backdrop-blur-sm">
         <CardHeader className="pb-3">
           <CardTitle className="text-lg flex items-center gap-2">
@@ -360,31 +360,6 @@ export function CalendarSidebar({
               </div>
             </div>
           )}
-        </CardContent>
-      </Card>
-
-      {/* 구글 캘린더 연동 카드 */}
-      <Card className="shadow-lg border border-blue-500/30 bg-gradient-to-br from-blue-950/10 to-indigo-950/20 backdrop-blur-sm overflow-hidden relative">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-indigo-500/5" />
-        <CardHeader className="pb-3 relative z-10">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <div className="p-1.5 bg-blue-500/10 rounded-lg">
-              <CalendarIcon className="h-4 w-4 text-blue-400" />
-            </div>
-            구글 캘린더
-          </CardTitle>
-          <CardDescription className="text-blue-200/80 text-sm">
-            구글 캘린더와 동기화하여 일정을 통합 관리하세요
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="relative z-10 pt-0">
-          <Button
-            variant="outline"
-            className="w-full border-blue-400/40 hover:bg-blue-500/10 hover:border-blue-400/60 text-blue-200 hover:text-blue-100 transition-all duration-300 h-10 text-sm font-medium hover:shadow-md"
-          >
-            <CalendarIcon className="mr-2 h-4 w-4" />
-            구글 캘린더 연동하기
-          </Button>
         </CardContent>
       </Card>
 
