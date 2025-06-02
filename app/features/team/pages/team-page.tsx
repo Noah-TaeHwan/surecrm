@@ -122,7 +122,7 @@ export async function action({ request }: Route.ActionArgs) {
 
 export function meta({ data, params }: Route.MetaArgs) {
   return [
-    { title: '팀 관리 - SureCRM' },
+    { title: '나의 팀 - SureCRM' },
     { name: 'description', content: '팀원을 관리하고 팀 설정을 변경합니다' },
   ];
 }
@@ -185,19 +185,17 @@ export default function TeamPage({
     fetcher.state === 'submitting' || fetcher.state === 'loading';
 
   return (
-    <MainLayout title="팀 관리">
-      <div className="space-y-6">
-        {/* 헤더 */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold">팀 관리</h1>
-            <p className="text-muted-foreground">팀원을 초대하고 관리하세요</p>
+    <MainLayout title="나의 팀">
+      <div className="space-y-8">
+        {/* 팀 통계와 초대 버튼 */}
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+          <div className="flex-1">
+            <TeamStatsCards stats={teamStats} />
           </div>
-          <InviteMember onInvite={handleInvite} />
+          <div className="sm:ml-4">
+            <InviteMember onInvite={handleInvite} />
+          </div>
         </div>
-
-        {/* 팀 통계 */}
-        <TeamStatsCards stats={teamStats} />
 
         {/* 팀원 목록 */}
         <TeamMemberList
