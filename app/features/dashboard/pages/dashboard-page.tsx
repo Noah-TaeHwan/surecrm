@@ -3,7 +3,9 @@ import { useState } from 'react';
 import { MainLayout } from '~/common/layouts/main-layout';
 import { WelcomeSection } from '../components/welcome-section';
 import { PerformanceKPICards } from '../components/performance-kpi-cards';
-import { TodayAgenda } from '../components/today-agenda';
+// 🗓️ 오늘의 일정 - 일정 관리 기능 개발 후 활성화 예정
+// import { TodayAgenda } from '../components/today-agenda';
+import { MyGoals } from '../components/my-goals';
 import { PipelineOverview } from '../components/pipeline-overview';
 import { RecentClients } from '../components/recent-clients';
 import { ReferralInsights } from '../components/referral-insights';
@@ -378,7 +380,9 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
 
         {/* 오늘의 일정 및 영업 파이프라인 */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <TodayAgenda meetings={transformedTodayMeetings} />
+          {/* 🗓️ 오늘의 일정 - 일정 관리 기능 개발 후 활성화 예정 */}
+          {/* <TodayAgenda meetings={transformedTodayMeetings} /> */}
+          <MyGoals currentGoals={userGoals} onSetGoal={handleSetGoal} />
           <PipelineOverview
             stages={transformedPipelineStages}
             totalValue={pipelineData.totalValue}

@@ -120,12 +120,12 @@ export function PipelineOverview({
           {hasData ? (
             <>
               {/* 월간 목표 진행률 */}
-              <div className="p-3 bg-muted/30 rounded-lg border border-border/30">
+              <div className="p-3 bg-gradient-to-r from-orange-50 to-amber-50 rounded-lg border border-orange-100">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-foreground">
+                  <span className="text-sm font-medium text-orange-900">
                     {hasRevenueGoal ? '월간 목표 달성률' : '예상 매출 현황'}
                   </span>
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-sm text-orange-700 font-medium">
                     {totalValue.toLocaleString()}만원
                     {hasRevenueGoal && (
                       <>
@@ -137,13 +137,16 @@ export function PipelineOverview({
                 </div>
                 {hasRevenueGoal && (
                   <>
-                    <Progress value={displayProgress} className="h-2 mb-2" />
+                    <Progress
+                      value={displayProgress}
+                      className="h-3 mb-2 bg-orange-100"
+                    />
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-xs text-orange-600">
                         {displayProgress.toFixed(1)}% 달성
                       </span>
                       {displayProgress < 100 && (
-                        <span className="text-xs text-muted-foreground">
+                        <span className="text-xs text-orange-600">
                           목표까지{' '}
                           {(displayTarget - totalValue).toLocaleString()}만원
                         </span>
@@ -152,14 +155,14 @@ export function PipelineOverview({
                   </>
                 )}
                 {!hasRevenueGoal && (
-                  <div className="mt-2 p-2 bg-primary/5 border border-primary/20 rounded text-xs text-primary">
+                  <div className="mt-2 p-2 bg-orange-100 border border-orange-200 rounded text-xs text-orange-800">
                     💡 월간 매출 목표를 설정하면 더 정확한 진행률을 확인할 수
                     있습니다
                     <Button
                       variant="link"
                       size="sm"
                       onClick={() => setIsGoalModalOpen(true)}
-                      className="text-xs text-primary p-0 h-auto ml-2"
+                      className="text-xs text-orange-700 p-0 h-auto ml-2 hover:text-orange-900"
                     >
                       목표 설정하기
                     </Button>
@@ -169,45 +172,60 @@ export function PipelineOverview({
 
               {/* 파이프라인 단계별 현황 */}
               <div className="space-y-2">
-                <h4 className="text-sm font-medium text-foreground mb-2">
+                <h4 className="text-sm font-medium text-foreground mb-3">
                   단계별 현황
                 </h4>
-                {stages.map((stage, index) => (
-                  <div
-                    key={stage.id}
-                    className="flex items-center justify-between p-2 rounded-lg border border-border/30 hover:bg-accent/20 transition-colors"
-                  >
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-primary" />
-                      <span className="text-sm text-foreground">
-                        {stage.name}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="text-right">
-                        <div className="text-sm font-medium text-foreground">
-                          {stage.count}건
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          {stage.value.toLocaleString()}만원
-                        </div>
+                {stages.map((stage, index) => {
+                  // 단계별 색상 매핑 (오렌지-브라운 톤앤매너)
+                  const stageColors = [
+                    'bg-orange-500', // 첫 상담
+                    'bg-amber-500', // 니즈 분석
+                    'bg-yellow-500', // 상품 설명
+                    'bg-orange-600', // 계약 검토
+                    'bg-amber-600', // 계약 체결
+                  ];
+                  const dotColor =
+                    stageColors[index % stageColors.length] || 'bg-primary';
+
+                  return (
+                    <div
+                      key={stage.id}
+                      className="flex items-center justify-between p-3 rounded-lg border border-border/30 hover:bg-accent/20 transition-all duration-200 group"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`w-3 h-3 rounded-full ${dotColor} group-hover:scale-110 transition-transform`}
+                        />
+                        <span className="text-sm text-foreground font-medium">
+                          {stage.name}
+                        </span>
                       </div>
-                      {stage.conversionRate && stage.conversionRate > 0 && (
-                        <Badge
-                          variant="secondary"
-                          className="text-xs bg-muted/20 text-muted-foreground"
-                        >
-                          {stage.conversionRate}%
-                        </Badge>
-                      )}
+                      <div className="flex items-center gap-3">
+                        <div className="text-right">
+                          <div className="text-sm font-medium text-foreground">
+                            {stage.count}건
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {stage.value.toLocaleString()}만원
+                          </div>
+                        </div>
+                        {stage.conversionRate && stage.conversionRate > 0 && (
+                          <Badge
+                            variant="secondary"
+                            className="text-xs bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100"
+                          >
+                            {stage.conversionRate}%
+                          </Badge>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               {/* 요약 통계 */}
-              <div className="grid grid-cols-3 gap-3 pt-2 border-t border-border/30">
-                <div className="text-center">
+              <div className="grid grid-cols-3 gap-3 pt-3 border-t border-border/30">
+                <div className="text-center p-2 rounded-lg bg-muted/20 hover:bg-muted/30 transition-colors">
                   <div className="text-lg font-semibold text-foreground">
                     {totalDeals}
                   </div>
@@ -215,23 +233,19 @@ export function PipelineOverview({
                     총 진행 건수
                   </div>
                 </div>
-                <div className="text-center">
-                  <div className="text-lg font-semibold text-primary">
+                <div className="text-center p-2 rounded-lg bg-orange-50 hover:bg-orange-100 transition-colors">
+                  <div className="text-lg font-semibold text-orange-700">
                     {totalValue.toLocaleString()}
                   </div>
-                  <div className="text-xs text-muted-foreground">
-                    예상 매출(만원)
-                  </div>
+                  <div className="text-xs text-orange-600">예상 매출(만원)</div>
                 </div>
-                <div className="text-center">
-                  <div className="text-lg font-semibold text-foreground">
+                <div className="text-center p-2 rounded-lg bg-amber-50 hover:bg-amber-100 transition-colors">
+                  <div className="text-lg font-semibold text-amber-700">
                     {totalDeals > 0
                       ? (totalValue / totalDeals).toFixed(0)
                       : '0'}
                   </div>
-                  <div className="text-xs text-muted-foreground">
-                    평균 건당(만원)
-                  </div>
+                  <div className="text-xs text-amber-600">평균 건당(만원)</div>
                 </div>
               </div>
             </>
