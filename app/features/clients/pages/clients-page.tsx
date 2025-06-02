@@ -33,6 +33,7 @@ import {
   DialogDescription,
 } from '~/common/components/ui/dialog';
 import { Label } from '~/common/components/ui/label';
+import { Alert, AlertDescription } from '~/common/components/ui/alert';
 import {
   Users,
   Network,
@@ -59,12 +60,12 @@ import {
   Eye,
   Star,
 } from 'lucide-react';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { useFetcher } from 'react-router';
+import { z } from 'zod';
 import type { Route } from './+types/clients-page';
 import type {
   Client,
-  ClientOverview,
-  ClientSearchFilters,
   AppClientTag,
   AppClientContactHistory,
   PipelineStage,
@@ -73,6 +74,7 @@ import type {
 } from '~/features/clients/lib/schema';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
+import { AddClientModal } from '../components/add-client-modal';
 
 // 🎯 보험설계사 특화 고객 관리 페이지
 // 실제 스키마 타입 사용으로 데이터베이스 연동 준비 완료
@@ -270,24 +272,45 @@ const MOCK_CLIENTS: ClientProfile[] = [
 ];
 
 // 🎯 Loader 함수 - 실제 데이터베이스 연동
-export async function loader() {
+export async function loader({ request }: { request: Request }) {
   try {
     console.log('🔄 Loader: 고객 목록 로딩 중...');
+
+    // 🎯 실제 사용자 ID 가져오기
+    const { getCurrentUser } = await import('~/lib/auth/core');
+    const user = await getCurrentUser(request);
+
+    if (!user) {
+      console.error('❌ Loader: 인증되지 않은 사용자');
+      return {
+        clients: [],
+        stats: {
+          totalClients: 0,
+          newThisMonth: 0,
+          activeDeals: 0,
+          totalRevenue: 0,
+          conversionRate: 0,
+          topStages: [],
+        },
+        pagination: {
+          total: 0,
+          page: 1,
+          totalPages: 0,
+        },
+      };
+    }
 
     // 🎯 실제 API 호출
     const { getClients, getClientStats } = await import('~/api/shared/clients');
 
-    // Demo 에이전트 ID (실제 환경에서는 인증된 사용자 ID 사용)
-    const demoAgentId = 'demo-agent-id';
-
     // 병렬로 데이터 조회
     const [clientsResponse, statsResponse] = await Promise.all([
       getClients({
-        agentId: demoAgentId,
+        agentId: user.id,
         page: 1,
         limit: 50, // 첫 로딩에서는 많이 가져오기
       }),
-      getClientStats(demoAgentId),
+      getClientStats(user.id),
     ]);
 
     console.log('✅ Loader: 데이터 로딩 완료', {
@@ -303,6 +326,7 @@ export async function loader() {
         page: clientsResponse.page,
         totalPages: clientsResponse.totalPages,
       },
+      userId: user.id, // 실제 사용자 ID 전달
     };
   } catch (error) {
     console.error('❌ Loader: 데이터 로딩 실패:', error);
@@ -331,7 +355,137 @@ export function meta() {
   return [{ title: '고객 관리 | SureCRM' }];
 }
 
+// 🎯 고객 데이터 유효성 검사 스키마
+const clientValidationSchema = z.object({
+  fullName: z.string().min(2, '이름은 2글자 이상이어야 합니다'),
+  phone: z.string().min(10, '올바른 전화번호를 입력해주세요'),
+  email: z
+    .string()
+    .email('올바른 이메일 주소를 입력해주세요')
+    .optional()
+    .or(z.literal('')),
+  address: z.string().optional(),
+  occupation: z.string().optional(),
+  importance: z.enum(['high', 'medium', 'low']).default('medium'),
+  tags: z.array(z.string()).optional(),
+  notes: z.string().optional(),
+});
+
+export async function action({ request }: Route.ActionArgs) {
+  try {
+    console.log('🔄 Action: 고객 관리 액션 시작');
+
+    // 실제 사용자 ID 가져오기
+    const { getCurrentUser } = await import('~/lib/auth/core');
+    const user = await getCurrentUser(request);
+
+    if (!user) {
+      return {
+        success: false,
+        message: '인증이 필요합니다.',
+      };
+    }
+
+    const formData = await request.formData();
+    const intent = formData.get('intent') as string;
+
+    if (intent === 'create-client') {
+      console.log('➕ Action: 고객 생성 시작');
+
+      // 서버사이드에서만 API 호출
+      const { createClient } = await import('~/api/shared/clients');
+      const { getPipelineStages } = await import(
+        '~/features/pipeline/lib/supabase-pipeline-data'
+      );
+
+      // pipeline stages 조회
+      const stages = await getPipelineStages(user.id);
+
+      if (!stages || stages.length === 0) {
+        return {
+          success: false,
+          message: '파이프라인 단계 정보를 가져올 수 없습니다.',
+        };
+      }
+
+      // 기본 단계 찾기
+      const defaultStage =
+        stages.find(
+          (stage: any) => stage.name === '첫 상담' || stage.isDefault
+        ) || stages[0];
+
+      // 폼 데이터 파싱 및 유효성 검사
+      const fullName = formData.get('fullName') as string;
+      const phone = formData.get('phone') as string;
+
+      if (!fullName || !phone) {
+        return {
+          success: false,
+          message: '이름과 전화번호는 필수 항목입니다.',
+        };
+      }
+
+      const email = formData.get('email') as string;
+      const address = formData.get('address') as string;
+      const occupation = formData.get('occupation') as string;
+      const importance = formData.get('importance') as string;
+      const tagsString = formData.get('tags') as string;
+      const notes = formData.get('notes') as string;
+
+      // tags 배열 변환
+      const tags = tagsString
+        ? tagsString
+            .split(',')
+            .map((tag: string) => tag.trim())
+            .filter(Boolean)
+        : [];
+
+      const clientData = {
+        fullName,
+        phone,
+        email: email || null,
+        address: address || null,
+        occupation: occupation || null,
+        importance: importance || 'medium',
+        currentStageId: defaultStage.id,
+        tags,
+        notes: notes || null,
+      };
+
+      console.log('📝 Action: 고객 데이터 준비 완료', clientData);
+
+      const result = await createClient(clientData, user.id);
+
+      if (result.success) {
+        console.log('✅ Action: 고객 생성 성공', result.data);
+
+        // 성공 시 현재 페이지로 redirect (데이터 새로고침됨)
+        return Response.redirect(request.url + '?success=created');
+      } else {
+        console.error('❌ Action: 고객 생성 실패', result.message);
+        return {
+          success: false,
+          message: result.message,
+        };
+      }
+    }
+
+    return {
+      success: false,
+      message: '알 수 없는 작업입니다.',
+    };
+  } catch (error) {
+    console.error('❌ Action: 처리 중 오류:', error);
+    return {
+      success: false,
+      message: '서버 오류가 발생했습니다.',
+    };
+  }
+}
+
 export default function ClientsPage({ loaderData }: any) {
+  const fetcher = useFetcher();
+
   // 🎯 상태 관리
   const [searchQuery, setSearchQuery] = useState('');
   const [filterImportance, setFilterImportance] = useState<
@@ -355,6 +509,144 @@ export default function ClientsPage({ loaderData }: any) {
     null
   );
 
+  // 🎯 성공 메시지 처리 (URL 파라미터 확인)
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const success = urlParams.get('success');
+
+    if (success === 'created') {
+      // URL에서 성공 파라미터 제거 (깔끔하게)
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, '', newUrl);
+
+      // 성공 메시지는 이제 Toast로 표시하거나 생략 (redirect 자체가 성공 표시)
+      console.log('✅ 고객 생성 성공 - 페이지가 새로고침되었습니다');
+    }
+  }, []);
+
+  // 🎯 Fetcher 상태 처리 (에러만 모달에서 처리)
+  useEffect(() => {
+    if (fetcher.state === 'idle' && fetcher.data?.success === false) {
+      // 에러는 모달 내부에서 표시되므로 여기서는 로그만
+      console.error('❌ 고객 생성 실패:', fetcher.data.message);
+    }
+  }, [fetcher.state, fetcher.data]);
+
+  // 🎯 핸들러 함수들
+  const handleClientSubmit = async (
+    clientData: Partial<ClientProfile>,
+    isEdit: boolean = false
+  ) => {
+    try {
+      if (isEdit && selectedClient) {
+        // 수정 - 기존 방식 유지 (나중에 action으로 이동)
+        const { updateClient } = await import('~/api/shared/clients');
+        const result = await updateClient(
+          selectedClient.id,
+          clientData,
+          loaderData.userId
+        );
+
+        if (result.success) {
+          console.log('고객 수정 성공:', result.data);
+          // 성공 메시지는 Toast 시스템으로 교체 예정
+          console.log('✅ 고객 정보가 수정되었습니다:', result.message);
+        } else {
+          console.error('고객 수정 실패:', result.message);
+          // 에러 메시지는 별도 에러 처리 시스템으로 교체 예정
+          console.error('❌ 고객 수정 실패:', result.message);
+        }
+
+        setShowEditClientModal(false);
+        setSelectedClient(null);
+      } else {
+        // 생성 - React Router Action 사용 (SSR)
+        console.log('🚀 클라이언트: Action으로 고객 생성 요청');
+
+        const formData = new FormData();
+        formData.append('intent', 'create-client');
+        formData.append('fullName', clientData.fullName || '');
+        formData.append('phone', clientData.phone || '');
+        formData.append('email', clientData.email || '');
+        formData.append('address', clientData.address || '');
+        formData.append('occupation', clientData.occupation || '');
+        formData.append('importance', clientData.importance || 'medium');
+        formData.append(
+          'tags',
+          Array.isArray(clientData.tags)
+            ? clientData.tags.join(',')
+            : clientData.tags || ''
+        );
+        formData.append('notes', clientData.notes || '');
+
+        // React Router Action 호출 (서버사이드에서 처리됨)
+        fetcher.submit(formData, { method: 'POST' });
+
+        // 모달 닫기 (redirect 시 자동으로 새로고침됨)
+        setShowAddClientModal(false);
+        setSelectedClient(null);
+      }
+    } catch (error) {
+      console.error('클라이언트 처리 중 오류:', error);
+      // Alert 대신 콘솔 로그 (모달에서 fetcher.data로 에러 표시됨)
+      console.error('❌ 처리 중 오류가 발생했습니다');
+    }
+  };
+
+  // 🎯 고객 관리 핵심 액션
+  const handleAddClient = () => {
+    setSelectedClient(null);
+    setShowAddClientModal(true);
+  };
+
+  const handleEditClient = (e: React.MouseEvent, client: ClientProfile) => {
+    e.stopPropagation(); // 행 클릭 이벤트 방지
+    setSelectedClient(client);
+    setShowEditClientModal(true);
+  };
+
+  const handleDeleteClient = (e: React.MouseEvent, client: ClientProfile) => {
+    e.stopPropagation(); // 행 클릭 이벤트 방지
+    setSelectedClient(client);
+    setShowDeleteConfirmModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!selectedClient) return;
+
+    try {
+      // 🎯 실제 API 호출 (Phase 3에서 완전 구현)
+      const { deleteClient } = await import('~/api/shared/clients');
+
+      const result = await deleteClient(selectedClient.id, loaderData.userId);
+      if (result.success) {
+        console.log('고객 삭제 성공:', result.data);
+        alert(
+          `${selectedClient.fullName} 고객이 삭제되었습니다.\n(Phase 3에서 실제 페이지 새로고침 및 연관 데이터 정리 구현 예정)`
+        );
+
+        // 경고 메시지 표시
+        if (result.warnings && result.warnings.length > 0) {
+          alert('주의사항:\n' + result.warnings.join('\n'));
+        }
+
+        setShowDeleteConfirmModal(false);
+        setSelectedClient(null);
+        // TODO: Phase 3에서 페이지 데이터 새로고침 구현
+      } else {
+        console.error('고객 삭제 실패:', result.message);
+        alert(result.message || '고객 삭제에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('고객 삭제 오류:', error);
+      alert('고객 삭제 중 오류가 발생했습니다.');
+    }
+  };
+
+  const handleImportClients = () => {
+    setShowImportModal(true);
+  };
+
   // 🎯 고급 필터링 (보험설계사 특화)
   const filteredClients = loaderData.clients.filter((client: ClientProfile) => {
     // 검색어 필터링
@@ -367,11 +659,11 @@ export default function ClientsPage({ loaderData }: any) {
 
     // 중요도 필터링
     const matchesImportance =
-      !filterImportance || client.importance === filterImportance;
+      filterImportance === 'all' || client.importance === filterImportance;
 
     // 영업 단계 필터링
     const matchesStage =
-      !filterStage || client.currentStage.name === filterStage;
+      filterStage === 'all' || client.currentStage?.name === filterStage;
 
     // 소개 상태 필터링
     const matchesReferralStatus =
@@ -466,108 +758,6 @@ export default function ClientsPage({ loaderData }: any) {
   const handleClientRowClick = (clientId: string) => {
     // 🎯 실제 상세 페이지로 라우팅
     window.location.href = `/clients/${clientId}`;
-  };
-
-  const handleAddClient = () => {
-    setSelectedClient(null);
-    setShowAddClientModal(true);
-  };
-
-  const handleEditClient = (e: React.MouseEvent, client: ClientProfile) => {
-    e.stopPropagation(); // 행 클릭 이벤트 방지
-    setSelectedClient(client);
-    setShowEditClientModal(true);
-  };
-
-  const handleDeleteClient = (e: React.MouseEvent, client: ClientProfile) => {
-    e.stopPropagation(); // 행 클릭 이벤트 방지
-    setSelectedClient(client);
-    setShowDeleteConfirmModal(true);
-  };
-
-  const handleConfirmDelete = async () => {
-    if (!selectedClient) return;
-
-    try {
-      // 🎯 실제 API 호출 (Phase 3에서 완전 구현)
-      const { deleteClient } = await import('~/api/shared/clients');
-
-      const result = await deleteClient(selectedClient.id, 'demo-agent');
-      if (result.success) {
-        console.log('고객 삭제 성공:', result.data);
-        alert(
-          `${selectedClient.fullName} 고객이 삭제되었습니다.\n(Phase 3에서 실제 페이지 새로고침 및 연관 데이터 정리 구현 예정)`
-        );
-
-        // 경고 메시지 표시
-        if (result.warnings && result.warnings.length > 0) {
-          alert('주의사항:\n' + result.warnings.join('\n'));
-        }
-
-        setShowDeleteConfirmModal(false);
-        setSelectedClient(null);
-        // TODO: Phase 3에서 페이지 데이터 새로고침 구현
-      } else {
-        console.error('고객 삭제 실패:', result.message);
-        alert(result.message || '고객 삭제에 실패했습니다.');
-      }
-    } catch (error) {
-      console.error('고객 삭제 오류:', error);
-      alert('고객 삭제 중 오류가 발생했습니다.');
-    }
-  };
-
-  const handleImportClients = () => {
-    setShowImportModal(true);
-  };
-
-  const handleClientSubmit = async (
-    clientData: Partial<ClientProfile>,
-    isEdit: boolean = false
-  ) => {
-    try {
-      if (isEdit && selectedClient) {
-        // 수정
-        const { updateClient } = await import('~/api/shared/clients');
-        const result = await updateClient(
-          selectedClient.id,
-          clientData,
-          'demo-agent'
-        );
-
-        if (result.success) {
-          console.log('고객 수정 성공:', result.data);
-          alert(result.message || '고객 정보가 수정되었습니다.');
-        } else {
-          console.error('고객 수정 실패:', result.message);
-          alert(result.message || '고객 수정에 실패했습니다.');
-        }
-      } else {
-        // 생성
-        const { createClient } = await import('~/api/shared/clients');
-        const result = await createClient(
-          clientData as any, // TODO: 타입 정확히 맞추기
-          'demo-agent'
-        );
-
-        if (result.success) {
-          console.log('고객 생성 성공:', result.data);
-          alert(result.message || '새 고객이 등록되었습니다.');
-        } else {
-          console.error('고객 생성 실패:', result.message);
-          alert(result.message || '고객 등록에 실패했습니다.');
-        }
-      }
-
-      // 모달 닫기
-      setShowAddClientModal(false);
-      setShowEditClientModal(false);
-      setSelectedClient(null);
-      // TODO: Phase 3에서 페이지 데이터 새로고침 구현
-    } catch (error) {
-      console.error('고객 처리 오류:', error);
-      alert('작업 중 오류가 발생했습니다.');
-    }
   };
 
   // 🎯 카드 뷰 렌더링
@@ -824,18 +1014,22 @@ export default function ClientsPage({ loaderData }: any) {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                <Button onClick={handleAddClient} className="w-full">
+                <Button onClick={handleAddClient} className="w-full h-10">
                   <Plus className="h-4 w-4 mr-2" />새 고객 추가
                 </Button>
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  size="sm"
-                  onClick={handleImportClients}
-                >
-                  <Upload className="h-4 w-4 mr-2" />
-                  엑셀로 가져오기
-                </Button>
+                <div className="space-y-2">
+                  <Button
+                    variant="outline"
+                    className="w-full h-10 opacity-60 cursor-not-allowed"
+                    disabled
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    엑셀로 가져오기
+                  </Button>
+                  <p className="text-xs text-muted-foreground text-center">
+                    MVP에서는 제공되지 않는 기능입니다
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -877,10 +1071,17 @@ export default function ClientsPage({ loaderData }: any) {
                   </Badge>
                 </div>
                 <div className="pt-2">
-                  <Button variant="outline" className="w-full" size="sm">
+                  <Button
+                    variant="outline"
+                    className="w-full h-10 opacity-60 cursor-not-allowed"
+                    disabled
+                  >
                     <Download className="h-4 w-4 mr-2" />
                     고객 목록 내보내기
                   </Button>
+                  <p className="text-xs text-muted-foreground text-center mt-2">
+                    MVP에서는 제공되지 않는 기능입니다
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -900,7 +1101,7 @@ export default function ClientsPage({ loaderData }: any) {
               <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
-                  size="sm"
+                  className="h-10"
                   onClick={() => setShowFilters(!showFilters)}
                 >
                   <Filter className="h-4 w-4 mr-2" />
@@ -909,14 +1110,14 @@ export default function ClientsPage({ loaderData }: any) {
                 <Separator orientation="vertical" className="h-6" />
                 <Button
                   variant={viewMode === 'cards' ? 'default' : 'outline'}
-                  size="sm"
+                  className="h-10 w-10"
                   onClick={() => setViewMode('cards')}
                 >
                   <LayoutGrid className="h-4 w-4" />
                 </Button>
                 <Button
                   variant={viewMode === 'table' ? 'default' : 'outline'}
-                  size="sm"
+                  className="h-10 w-10"
                   onClick={() => setViewMode('table')}
                 >
                   <LayoutList className="h-4 w-4" />
@@ -935,7 +1136,7 @@ export default function ClientsPage({ loaderData }: any) {
                       placeholder="이름, 전화번호, 이메일, 직업, 주소로 검색..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10"
+                      className="pl-10 h-10"
                     />
                   </div>
                 </div>
@@ -947,7 +1148,7 @@ export default function ClientsPage({ loaderData }: any) {
                     )
                   }
                 >
-                  <SelectTrigger className="w-[120px]">
+                  <SelectTrigger className="w-[120px] h-10">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -963,7 +1164,7 @@ export default function ClientsPage({ loaderData }: any) {
               {showFilters && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t">
                   <Select value={filterStage} onValueChange={setFilterStage}>
-                    <SelectTrigger>
+                    <SelectTrigger className="h-10">
                       <SelectValue placeholder="영업 단계" />
                     </SelectTrigger>
                     <SelectContent>
@@ -980,7 +1181,7 @@ export default function ClientsPage({ loaderData }: any) {
                     value={filterReferralStatus}
                     onValueChange={setFilterReferralStatus}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="h-10">
                       <SelectValue placeholder="소개 상태" />
                     </SelectTrigger>
                     <SelectContent>
@@ -998,10 +1199,19 @@ export default function ClientsPage({ loaderData }: any) {
                   </Select>
 
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" className="flex-1">
-                      <Download className="h-4 w-4 mr-2" />
-                      내보내기
-                    </Button>
+                    <div className="flex-1">
+                      <Button
+                        variant="outline"
+                        className="w-full h-10 opacity-60 cursor-not-allowed"
+                        disabled
+                      >
+                        <Download className="h-4 w-4 mr-2" />
+                        내보내기
+                      </Button>
+                      <p className="text-xs text-muted-foreground text-center mt-1">
+                        MVP에서는 제공되지 않는 기능입니다
+                      </p>
+                    </div>
                   </div>
                 </div>
               )}
@@ -1054,51 +1264,13 @@ export default function ClientsPage({ loaderData }: any) {
         </Card>
 
         {/* 🎯 고객 추가 모달 */}
-        {showAddClientModal && (
-          <Dialog
-            open={showAddClientModal}
-            onOpenChange={setShowAddClientModal}
-          >
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle>새 고객 추가</DialogTitle>
-                <DialogDescription>
-                  Phase 3에서 실제 CRUD 기능을 구현할 예정입니다.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <Label>이름</Label>
-                  <Input placeholder="고객 이름" />
-                </div>
-                <div>
-                  <Label>전화번호</Label>
-                  <Input placeholder="010-1234-5678" />
-                </div>
-                <div>
-                  <Label>이메일</Label>
-                  <Input placeholder="example@email.com" />
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => setShowAddClientModal(false)}
-                  >
-                    취소
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      alert('Phase 3에서 실제 저장 기능을 구현할 예정입니다.');
-                      setShowAddClientModal(false);
-                    }}
-                  >
-                    추가
-                  </Button>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
-        )}
+        <AddClientModal
+          open={showAddClientModal}
+          onOpenChange={setShowAddClientModal}
+          onSubmit={handleClientSubmit}
+          isSubmitting={fetcher.state === 'submitting'}
+          error={fetcher.data?.success === false ? fetcher.data.message : null}
+        />
 
         {/* 🎯 엑셀 가져오기 모달 */}
         {showImportModal && (

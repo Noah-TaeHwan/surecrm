@@ -42,10 +42,11 @@ export default defineConfig(({ mode }) => {
         'process',
         'events',
       ],
+      exclude: ['pg-native'],
     },
     build: {
       rollupOptions: {
-        external: [],
+        external: ['pg-native'],
         output: {
           globals: {
             buffer: 'Buffer',
