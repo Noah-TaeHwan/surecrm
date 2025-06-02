@@ -93,6 +93,7 @@ export async function action({ request }: Route.ActionArgs) {
         occupation: (formData.get('occupation') as string) || undefined,
         importance:
           (formData.get('importance') as 'high' | 'medium' | 'low') || 'medium',
+        referredById: (formData.get('referredById') as string) || undefined,
         tags: formData.get('tags')
           ? (formData.get('tags') as string)
               .split(',')
@@ -127,6 +128,7 @@ export async function action({ request }: Route.ActionArgs) {
         address: clientData.address,
         occupation: clientData.occupation,
         importance: clientData.importance,
+        referredById: clientData.referredById,
         tags: clientData.tags,
         notes: clientData.notes,
         currentStageId: firstStage.id, // 🎯 첫 상담 단계로 설정
@@ -245,13 +247,13 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
     return matchesSearch && matchesReferrer && matchesImportance;
   });
 
-  // 모든 소개자 목록 생성 (중복 제거)
-  const referrers = clients
-    .filter((client) => clients.some((c) => c.referredBy?.id === client.id))
+  // 소개자 후보 목록 생성 (모든 기존 고객이 소개자가 될 수 있음)
+  const potentialReferrers = clients
     .map((client) => ({
       id: client.id,
       name: client.name,
-    }));
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name)); // 이름순 정렬
 
   // 🎯 MVP용 전체 통계 계산
   const getTotalStats = () => {
@@ -313,6 +315,7 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
     address?: string;
     occupation?: string;
     importance: 'high' | 'medium' | 'low';
+    referredById?: string;
     tags?: string;
     notes?: string;
   }) => {
@@ -328,6 +331,8 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
     if (clientData.occupation)
       formData.append('occupation', clientData.occupation);
     formData.append('importance', clientData.importance);
+    if (clientData.referredById)
+      formData.append('referredById', clientData.referredById);
     if (clientData.tags) formData.append('tags', clientData.tags);
     if (clientData.notes) formData.append('notes', clientData.notes);
 
@@ -448,7 +453,11 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
                   {selectedReferrerId && (
                     <Badge variant="secondary" className="text-xs">
                       소개자:{' '}
-                      {referrers.find((r) => r.id === selectedReferrerId)?.name}
+                      {
+                        potentialReferrers.find(
+                          (r) => r.id === selectedReferrerId
+                        )?.name
+                      }
                     </Badge>
                   )}
                 </div>
@@ -479,7 +488,7 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
                   sideOffset={4}
                 >
                   <PipelineFilters
-                    referrers={referrers}
+                    referrers={potentialReferrers}
                     selectedReferrerId={selectedReferrerId}
                     onReferrerChange={setSelectedReferrerId}
                     selectedImportance={selectedImportance}
@@ -547,6 +556,7 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
         onSubmit={handleAddClient}
         isSubmitting={isSubmitting}
         error={submitError}
+        referrers={potentialReferrers}
       />
     </MainLayout>
   );

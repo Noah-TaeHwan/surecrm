@@ -1,6 +1,16 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '~/common/components/ui/button';
-import { Users, TrendingUp, AlertCircle } from 'lucide-react';
+import {
+  Users,
+  TrendingUp,
+  AlertCircle,
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  EyeOff,
+  ChevronDown,
+  ChevronUp,
+} from 'lucide-react';
 import { ClientCard } from './client-card';
 import type { PipelineStage, Client } from '~/features/pipeline/types/types';
 
@@ -26,6 +36,11 @@ export function PipelineBoard({
   const [draggedClientId, setDraggedClientId] = useState<string | null>(null);
   const dragSourceStageId = useRef<string | null>(null);
   const [draggingOver, setDraggingOver] = useState<string | null>(null);
+
+  // 🎯 각 단계별 고객 카드들 접기/펼치기 상태 (단계 ID를 키로 사용)
+  const [collapsedStages, setCollapsedStages] = useState<
+    Record<string, boolean>
+  >({});
 
   // 컴포넌트 마운트 시 클라이언트 상태 업데이트를 위한 효과
   const [clientsState, setClientsState] = useState<Client[]>(clients);
@@ -129,6 +144,33 @@ export function PipelineBoard({
     setDraggingOver(null);
   };
 
+  // 🎯 단계별 카드들 토글 함수
+  const toggleStageCards = (stageId: string) => {
+    setCollapsedStages((prev) => ({
+      ...prev,
+      [stageId]: !prev[stageId],
+    }));
+  };
+
+  // 🎯 단계별 표시 텍스트 생성
+  const getStageDisplayText = (stage: PipelineStage) => {
+    const stageClients = clientsByStage[stage.id] || [];
+    switch (stage.name) {
+      case '첫 상담':
+        return `${stageClients.length}명 상담 대기`;
+      case '니즈 분석':
+        return `${stageClients.length}명 분석 중`;
+      case '상품 설명':
+        return `${stageClients.length}명 설명 중`;
+      case '계약 검토':
+        return `${stageClients.length}명 검토 중`;
+      case '계약 완료':
+        return `${stageClients.length}명 완료`;
+      default:
+        return `${stageClients.length}명`;
+    }
+  };
+
   return (
     <div className="w-full overflow-x-auto">
       {/* 🎯 MVP 칸반보드 헤더와 콘텐츠 */}
@@ -139,6 +181,7 @@ export function PipelineBoard({
             const isDragTarget = draggingOver === stage.id;
             const canDrop =
               draggedClientId && dragSourceStageId.current !== stage.id;
+            const isCollapsed = collapsedStages[stage.id];
 
             return (
               <div
@@ -154,9 +197,9 @@ export function PipelineBoard({
                       : 'border-border'
                   }`}
                 >
-                  {/* 단계 제목과 추가 버튼 */}
+                  {/* 단계 제목과 버튼들 */}
                   <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center space-x-3 min-w-0 flex-1">
                       <div
                         className="w-3 h-3 rounded-full flex-shrink-0"
                         style={{ backgroundColor: stage.color }}
@@ -165,6 +208,23 @@ export function PipelineBoard({
                         {stage.name}
                       </h3>
                     </div>
+
+                    {/* 🎯 모든 단계에 카드 접기/펼치기 버튼 추가 */}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => toggleStageCards(stage.id)}
+                      className="h-8 w-8 p-0 hover:bg-muted transition-colors duration-200"
+                      title={
+                        isCollapsed ? '고객 카드 보기' : '고객 카드 숨기기'
+                      }
+                    >
+                      {isCollapsed ? (
+                        <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                      ) : (
+                        <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </Button>
                   </div>
 
                   {/* 단계별 통계 */}
@@ -197,6 +257,7 @@ export function PipelineBoard({
             const canDrop =
               draggedClientId && dragSourceStageId.current !== stage.id;
             const stageClients = clientsByStage[stage.id] || [];
+            const isCollapsed = collapsedStages[stage.id];
 
             return (
               <div
@@ -216,7 +277,28 @@ export function PipelineBoard({
                       : 'bg-transparent'
                   }`}
                 >
-                  {stageClients.length > 0 ? (
+                  {isCollapsed ? (
+                    /* 🎯 모든 단계에서 카드들이 접힌 상태 */
+                    <div className="flex flex-col items-center justify-center h-32 bg-muted/20 border border-border rounded-lg">
+                      <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center mb-2">
+                        <Users className="h-4 w-4 text-muted-foreground" />
+                      </div>
+                      <p className="text-sm font-medium text-foreground">
+                        {getStageDisplayText(stage)}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        카드가 숨겨짐
+                      </p>
+
+                      {/* 접힌 상태에서도 드래그 앤 드롭 지원 */}
+                      {isDragTarget && canDrop && (
+                        <div className="mt-2 text-xs text-primary font-medium">
+                          {stage.name}로 이동
+                        </div>
+                      )}
+                    </div>
+                  ) : /* 🎯 일반 상태: 모든 고객 카드들 표시 */
+                  stageClients.length > 0 ? (
                     stageClients.map((client) => (
                       <div
                         key={client.id}
@@ -234,6 +316,19 @@ export function PipelineBoard({
                       >
                         <ClientCard
                           {...client}
+                          tags={
+                            Array.isArray(client.tags)
+                              ? client.tags.join(', ')
+                              : client.tags
+                          }
+                          createdAt={
+                            client.createdAt || new Date().toISOString()
+                          }
+                          insuranceInfo={
+                            Array.isArray(client.insuranceInfo)
+                              ? client.insuranceInfo[0]
+                              : client.insuranceInfo
+                          }
                           referredBy={client.referredBy || undefined}
                           isDragging={client.id === draggedClientId}
                         />

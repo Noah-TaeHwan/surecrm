@@ -21,6 +21,7 @@ module.exports = {
         ping: 'ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite',
         grid: 'grid 15s linear infinite',
         pulse: 'pulse 3s ease-in-out infinite',
+        'border-beam': 'border-beam 2s linear infinite',
       },
       keyframes: {
         marquee: {
@@ -54,6 +55,19 @@ module.exports = {
         pulse: {
           '0%, 100%': { opacity: 0.2 },
           '50%': { opacity: 0.8 },
+        },
+        'border-beam': {
+          '0%': {
+            transform: 'rotate(0deg)',
+            opacity: 0.3,
+          },
+          '50%': {
+            opacity: 1,
+          },
+          '100%': {
+            transform: 'rotate(360deg)',
+            opacity: 0.3,
+          },
         },
       },
     },

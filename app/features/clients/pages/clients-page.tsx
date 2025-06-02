@@ -431,6 +431,7 @@ export async function action({ request }: Route.ActionArgs) {
       const importance = formData.get('importance') as string;
       const tagsString = formData.get('tags') as string;
       const notes = formData.get('notes') as string;
+      const referredById = formData.get('referredById') as string;
 
       // tags 배열 변환
       const tags = tagsString
@@ -448,6 +449,7 @@ export async function action({ request }: Route.ActionArgs) {
         occupation: occupation || null,
         importance: importance || 'medium',
         currentStageId: defaultStage.id,
+        referredById: referredById || null,
         tags,
         notes: notes || null,
       };
@@ -495,7 +497,7 @@ export default function ClientsPage({ loaderData }: any) {
   const [filterStage, setFilterStage] = useState<string>('all');
   const [filterReferralStatus, setFilterReferralStatus] =
     useState<string>('all');
-  const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
+  const [viewMode, setViewMode] = useState<'cards' | 'table'>('table');
   const [showFilters, setShowFilters] = useState(false);
   const [sortBy, setSortBy] = useState<
     'name' | 'stage' | 'importance' | 'premium' | 'lastContact' | 'createdAt'
@@ -572,6 +574,7 @@ export default function ClientsPage({ loaderData }: any) {
         formData.append('address', clientData.address || '');
         formData.append('occupation', clientData.occupation || '');
         formData.append('importance', clientData.importance || 'medium');
+        formData.append('referredById', clientData.referredById || '');
         formData.append(
           'tags',
           Array.isArray(clientData.tags)
@@ -607,7 +610,7 @@ export default function ClientsPage({ loaderData }: any) {
   };
 
   const handleDeleteClient = (e: React.MouseEvent, client: ClientProfile) => {
-    e.stopPropagation(); // �� 이벤트 버블링 방지
+    e.stopPropagation(); // 🎯 이벤트 버블링 방지
     setSelectedClient(client);
     setShowDeleteConfirmModal(true);
   };
@@ -761,6 +764,14 @@ export default function ClientsPage({ loaderData }: any) {
     navigate(`/clients/${clientId}`);
   };
 
+  // 소개자 후보 목록 생성 (모든 기존 고객이 소개자가 될 수 있음)
+  const potentialReferrers = loaderData.clients
+    .map((client: ClientProfile) => ({
+      id: client.id,
+      name: client.fullName,
+    }))
+    .sort((a: any, b: any) => a.name.localeCompare(b.name)); // 이름순 정렬
+
   // 🎯 카드 뷰 렌더링
   const renderCardView = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -847,28 +858,6 @@ export default function ClientsPage({ loaderData }: any) {
                 {formatDate(client.lastContactDate)}
               </span>
             </div>
-
-            {/* 액션 버튼들 */}
-            <div className="flex justify-end space-x-2 pt-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={(e) => handleEditClient(e, client)}
-                className="flex items-center space-x-1"
-              >
-                <Edit2 className="h-3 w-3" />
-                <span>수정</span>
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={(e) => handleDeleteClient(e, client)}
-                className="flex items-center space-x-1 text-red-600 hover:text-red-700"
-              >
-                <Trash2 className="h-3 w-3" />
-                <span>삭제</span>
-              </Button>
-            </div>
           </CardContent>
         </Card>
       ))}
@@ -883,10 +872,9 @@ export default function ClientsPage({ loaderData }: any) {
           <TableHead>고객 정보</TableHead>
           <TableHead>연락처</TableHead>
           <TableHead>소개 관계</TableHead>
+          <TableHead>중요도</TableHead>
           <TableHead>영업 단계</TableHead>
-          <TableHead>성과</TableHead>
-          <TableHead>다음 액션</TableHead>
-          <TableHead>액션</TableHead>
+          <TableHead className="text-center">성과</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -958,38 +946,12 @@ export default function ClientsPage({ loaderData }: any) {
                 <span className="text-sm">{client.currentStage.name}</span>
               </div>
             </TableCell>
-            <TableCell>
+            <TableCell className="text-center">
               <div className="text-sm">
-                <span className="font-medium">{client.referralCount}명</span>
-                <p className="text-xs text-muted-foreground">소개고객</p>
-              </div>
-            </TableCell>
-            <TableCell>
-              <div className="text-sm">
-                <span className="font-medium">
-                  {(client.totalPremium / 10000).toFixed(0)}만원
-                </span>
-                <p className="text-xs text-muted-foreground">월납보험료</p>
-              </div>
-            </TableCell>
-            <TableCell>
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={(e) => handleEditClient(e, client)}
-                  className="text-blue-600 hover:text-blue-700 h-8 w-8 p-0"
-                >
-                  <Edit2 className="h-3.5 w-3.5" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={(e) => handleDeleteClient(e, client)}
-                  className="text-red-600 hover:text-red-700 h-8 w-8 p-0"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
+                <div className="font-medium">{client.referralCount}명 소개</div>
+                <div className="text-xs text-muted-foreground">
+                  {(client.totalPremium / 10000).toFixed(0)}만원 월납
+                </div>
               </div>
             </TableCell>
           </TableRow>
@@ -1271,6 +1233,7 @@ export default function ClientsPage({ loaderData }: any) {
           onSubmit={handleClientSubmit}
           isSubmitting={fetcher.state === 'submitting'}
           error={fetcher.data?.success === false ? fetcher.data.message : null}
+          referrers={potentialReferrers}
         />
 
         {/* 🎯 엑셀 가져오기 모달 */}

@@ -1,42 +1,84 @@
 import { Badge } from '~/common/components/ui/badge';
 import { Button } from '~/common/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from '~/common/components/ui/card';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '~/common/components/ui/dropdown-menu';
+import { Card, CardContent, CardHeader } from '~/common/components/ui/card';
 import {
   Calendar,
-  Clock,
-  MoreVertical,
-  Phone,
-  Tag,
-  Trash,
   Users,
   Briefcase,
-  Shield,
-  Car,
-  Baby,
-  Heart,
-  Home,
-  ExternalLink,
-  AlertCircle,
   User,
   GripVertical,
   Timer,
-  Smartphone,
+  Phone,
+  MessageSquare,
+  TrendingUp,
+  DollarSign,
+  Clock,
+  Building2,
+  ShieldCheck,
+  UserCheck,
+  AlertTriangle,
+  ChevronRight,
+  PhoneCall,
 } from 'lucide-react';
 import { Link } from 'react-router';
 import type { InsuranceInfo } from '~/features/pipeline/types/types';
+
+// 🎨 매직UI 컴포넌트 import
+const BorderBeam = ({
+  size = 200,
+  duration = 15,
+  delay = 0,
+}: {
+  size?: number;
+  duration?: number;
+  delay?: number;
+}) => {
+  return (
+    <div className="absolute inset-0 overflow-hidden rounded-[inherit]">
+      <div
+        className="absolute inset-0 animate-border-beam"
+        style={{
+          background: `conic-gradient(from 0deg, 
+            transparent 0deg, 
+            transparent 90deg, 
+            oklch(0.645 0.246 16.439) 180deg,
+            oklch(0.769 0.188 70.08) 270deg,
+            transparent 360deg
+          )`,
+          animationDuration: `${duration}s`,
+          animationDelay: `${delay}s`,
+          maskImage: `
+            linear-gradient(white, white),
+            linear-gradient(white, white)
+          `,
+          maskClip: 'padding-box, border-box',
+          maskComposite: 'intersect',
+          padding: '1px',
+        }}
+      >
+        <div className="h-full w-full rounded-[inherit] bg-card" />
+      </div>
+      {/* 🌟 추가적인 Glow 효과 */}
+      <div
+        className="absolute inset-0 animate-border-beam opacity-50"
+        style={{
+          background: `conic-gradient(from 0deg, 
+            transparent 0deg, 
+            transparent 45deg, 
+            oklch(0.645 0.246 16.439) 135deg,
+            oklch(0.769 0.188 70.08) 225deg,
+            transparent 315deg,
+            transparent 360deg
+          )`,
+          animationDuration: `${duration * 1.5}s`,
+          animationDelay: `${delay + 1}s`,
+          filter: 'blur(4px)',
+          zIndex: -1,
+        }}
+      />
+    </div>
+  );
+};
 
 interface ClientCardProps {
   id: string;
@@ -49,418 +91,312 @@ interface ClientCardProps {
   height?: number;
   weight?: number;
   hasDrivingLicense?: boolean;
+  hasHealthIssues?: boolean;
+  importance: 'high' | 'medium' | 'low';
+  tags?: string;
+  notes?: string;
+  createdAt: string;
+  lastContactDate?: string;
   referredBy?: {
     id: string;
     name: string;
   };
-  importance: 'high' | 'medium' | 'low';
-  lastContactDate?: string;
-  nextMeeting?: {
-    date: string;
-    time: string;
-    type: string;
-  };
-  note?: string;
-  tags?: string[];
-  insuranceInfo?: InsuranceInfo[];
-  profileImageUrl?: string;
+  insuranceInfo?: InsuranceInfo;
   isDragging?: boolean;
-  createdAt?: string;
 }
 
 export function ClientCard({
   id,
   name,
   phone,
+  email,
+  address,
   occupation,
   telecomProvider,
+  height,
+  weight,
   hasDrivingLicense,
-  referredBy,
+  hasHealthIssues,
   importance,
-  lastContactDate,
-  nextMeeting,
-  note,
   tags,
-  insuranceInfo,
-  isDragging,
+  notes,
   createdAt,
+  lastContactDate,
+  referredBy,
+  insuranceInfo,
+  isDragging = false,
 }: ClientCardProps) {
-  const getImportanceConfig = (importance: string) => {
-    switch (importance) {
-      case 'high':
-        return {
-          label: '높음',
-          borderColor: 'border-l-red-500',
-          dotColor: 'bg-red-500',
-          badgeColor: 'bg-red-50 border-red-200 text-red-700',
-          cardBg: 'bg-red-50/30',
-        };
-      case 'medium':
-        return {
-          label: '보통',
-          borderColor: 'border-l-yellow-500',
-          dotColor: 'bg-yellow-500',
-          badgeColor: 'bg-yellow-50 border-yellow-200 text-yellow-700',
-          cardBg: 'bg-yellow-50/20',
-        };
-      case 'low':
-        return {
-          label: '낮음',
-          borderColor: 'border-l-green-500',
-          dotColor: 'bg-green-500',
-          badgeColor: 'bg-green-50 border-green-200 text-green-700',
-          cardBg: 'bg-green-50/20',
-        };
-      default:
-        return {
-          label: '미설정',
-          borderColor: 'border-l-gray-400',
-          dotColor: 'bg-gray-400',
-          badgeColor: 'bg-gray-50 border-gray-200 text-gray-700',
-          cardBg: 'bg-gray-50/20',
-        };
-    }
+  // 🎯 중요도별 스타일 (서비스 톤앤매너 적용)
+  const importanceStyles = {
+    high: {
+      borderColor: 'border-l-orange-500',
+      bgGradient:
+        'bg-gradient-to-br from-orange-50/50 to-white dark:from-orange-950/20 dark:to-background',
+      badge:
+        'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
+      icon: 'text-orange-600',
+    },
+    medium: {
+      borderColor: 'border-l-blue-500',
+      bgGradient:
+        'bg-gradient-to-br from-blue-50/50 to-white dark:from-blue-950/20 dark:to-background',
+      badge: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+      icon: 'text-blue-600',
+    },
+    low: {
+      borderColor: 'border-l-muted-foreground',
+      bgGradient:
+        'bg-gradient-to-br from-muted/30 to-white dark:from-muted/10 dark:to-background',
+      badge: 'bg-muted text-muted-foreground',
+      icon: 'text-muted-foreground',
+    },
   };
 
-  const getInsuranceIcon = (type: string) => {
-    switch (type) {
-      case 'auto':
-        return <Car className="h-3 w-3" />;
-      case 'prenatal':
-        return <Baby className="h-3 w-3" />;
-      case 'health':
-        return <Heart className="h-3 w-3" />;
-      case 'property':
-        return <Home className="h-3 w-3" />;
-      default:
-        return <Shield className="h-3 w-3" />;
-    }
+  const styles = importanceStyles[importance];
+
+  // 📊 예상 보험료 계산 (직업 기반)
+  const calculateExpectedPremium = () => {
+    const basePremium = 150000; // 기본 15만원
+    const occupationMultiplier =
+      occupation?.includes('의사') || occupation?.includes('변호사')
+        ? 2.5
+        : occupation?.includes('회사원')
+        ? 1.2
+        : 1.0;
+    return Math.round(basePremium * occupationMultiplier);
   };
 
-  const getInsuranceLabel = (type: string) => {
-    switch (type) {
-      case 'auto':
-        return '자동차';
-      case 'prenatal':
-        return '태아';
-      case 'health':
-        return '건강';
-      case 'life':
-        return '생명';
-      case 'property':
-        return '재산';
-      default:
-        return '기타';
-    }
+  // 💰 예상 연 수수료 계산
+  const calculateExpectedCommission = () => {
+    return Math.round(calculateExpectedPremium() * 12 * 0.15); // 15% 수수료율
   };
 
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
+  // ⏰ 파이프라인 체류 기간 계산
+  const getDaysInPipeline = () => {
+    const created = new Date(createdAt);
     const now = new Date();
-    const diffDays = Math.ceil(
-      (date.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+    return Math.floor(
+      (now.getTime() - created.getTime()) / (1000 * 60 * 60 * 24)
     );
-
-    if (diffDays === 0) return '오늘';
-    if (diffDays === 1) return '내일';
-    if (diffDays > 0 && diffDays <= 7) return `${diffDays}일 후`;
-
-    return new Intl.DateTimeFormat('ko-KR', {
-      month: 'short',
-      day: 'numeric',
-    }).format(date);
   };
 
-  const formatLastContact = (dateStr: string) => {
-    const date = new Date(dateStr);
+  // 📅 마지막 연락일 계산
+  const getDaysSinceLastContact = () => {
+    if (!lastContactDate) return null;
+    const lastContact = new Date(lastContactDate);
     const now = new Date();
-    const diffDays = Math.floor(
-      (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24)
+    return Math.floor(
+      (now.getTime() - lastContact.getTime()) / (1000 * 60 * 60 * 24)
     );
-
-    if (diffDays === 0) return '오늘';
-    if (diffDays === 1) return '어제';
-    if (diffDays <= 7) return `${diffDays}일 전`;
-    if (diffDays <= 30) return `${Math.floor(diffDays / 7)}주 전`;
-
-    return `${Math.floor(diffDays / 30)}개월 전`;
   };
 
-  // 파이프라인 체류 기간 계산 (createdAt 기준)
-  const formatPipelineStay = (createdAt?: string) => {
-    if (!createdAt) return null;
+  const daysInPipeline = getDaysInPipeline();
+  const daysSinceLastContact = getDaysSinceLastContact();
+  const expectedPremium = calculateExpectedPremium();
+  const expectedCommission = calculateExpectedCommission();
 
-    const createdDate = new Date(createdAt);
-    const now = new Date();
-    const diffDays = Math.floor(
-      (now.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24)
-    );
-
-    if (diffDays === 0) return '오늘 등록';
-    if (diffDays === 1) return '1일째';
-    if (diffDays <= 7) return `${diffDays}일째`;
-    if (diffDays <= 30) return `${Math.floor(diffDays / 7)}주째`;
-
-    return `${Math.floor(diffDays / 30)}개월째`;
-  };
-
-  // 통신사 아이콘 및 색상 매핑
-  const getTelecomInfo = (provider?: string) => {
-    if (!provider) return null;
-
-    switch (provider.toLowerCase()) {
-      case 'kt':
-        return { label: 'KT', color: 'text-red-600 bg-red-50 border-red-200' };
-      case 'skt':
-      case 'sk텔레콤':
-        return { label: 'SKT', color: 'text-red-600 bg-red-50 border-red-200' };
-      case 'lg':
-      case 'lgu+':
-        return {
-          label: 'LG U+',
-          color: 'text-pink-600 bg-pink-50 border-pink-200',
-        };
-      default:
-        return {
-          label: provider,
-          color: 'text-gray-600 bg-gray-50 border-gray-200',
-        };
-    }
-  };
-
-  const importanceConfig = getImportanceConfig(importance);
+  // 🚨 긴급도 표시 (7일 이상 연락 없음)
+  const isUrgent = daysSinceLastContact !== null && daysSinceLastContact >= 7;
+  const isStale = daysInPipeline >= 30; // 30일 이상 체류
 
   return (
     <Card
-      className={`relative border-l-4 group ${
-        importanceConfig.borderColor
-      } hover:shadow-lg transition-all duration-200 select-none ${
+      className={`relative ${
+        styles.borderColor
+      } border-l-4 group transition-all duration-200 select-none ${
+        styles.bgGradient
+      } ${
         isDragging
-          ? 'shadow-xl opacity-90 transform rotate-1 scale-105 z-50 ring-2 ring-primary/20'
-          : 'hover:scale-[1.02] hover:shadow-md'
-      } bg-card border-border ${
-        importance === 'high' ? importanceConfig.cardBg : ''
-      }`}
+          ? 'shadow-xl opacity-95 transform rotate-1 scale-105 z-50 ring-2 ring-primary/30 border-primary/50'
+          : 'hover:shadow-md hover:scale-[1.02] hover:-translate-y-1'
+      } border-border/50 backdrop-blur-sm overflow-hidden`}
     >
-      {/* 🎯 MVP 드래그 핸들 - 상단에 배치 */}
+      {/* 🎯 드래그 핸들 */}
       {!isDragging && (
-        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
           <GripVertical className="h-4 w-4 text-muted-foreground" />
         </div>
       )}
 
-      {/* 카드 헤더 - 고객 기본 정보 */}
       <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
+        <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
-            {/* 고객 이름과 중요도 */}
-            <div className="flex mb-2 items-center space-x-2">
-              <h3 className="font-semibold text-base truncate text-foreground">
-                {name}
-              </h3>
-              {importance === 'high' && (
-                <AlertCircle className="h-4 w-4 text-red-500 flex-shrink-0" />
+            {/* 🏷️ 이름 (텍스트 오버플로우 수정) */}
+            <h3
+              className="font-semibold text-base leading-tight text-foreground truncate pr-8"
+              title={name}
+            >
+              {name}
+            </h3>
+
+            {/* 📱 연락처 정보 */}
+            <div className="flex items-center gap-2 mt-1">
+              <span className="text-sm text-muted-foreground truncate">
+                {phone}
+              </span>
+              {telecomProvider && (
+                <Badge variant="outline" className="text-xs px-1.5 py-0.5">
+                  {telecomProvider}
+                </Badge>
               )}
             </div>
-
-            {/* 전화번호 */}
-            <div className="flex mb-1 items-center text-sm text-muted-foreground">
-              <Phone className="h-3 w-3 mr-1.5 flex-shrink-0" />
-              <span className="truncate">{phone}</span>
-            </div>
-
-            {/* 직업 정보 */}
-            {occupation && (
-              <div className="flex items-center text-sm text-muted-foreground">
-                <Briefcase className="h-3 w-3 mr-1.5 flex-shrink-0" />
-                <span className="truncate">{occupation}</span>
-              </div>
-            )}
           </div>
 
-          {/* 중요도 배지 */}
+          {/* 🎯 중요도 배지 */}
           <Badge
-            variant="outline"
-            className={`${importanceConfig.badgeColor} text-xs font-medium border px-2 py-1 flex-shrink-0`}
+            className={`${styles.badge} text-xs font-medium flex-shrink-0`}
           >
-            {importanceConfig.label}
+            {importance === 'high'
+              ? 'VIP'
+              : importance === 'medium'
+              ? '일반'
+              : '관심'}
           </Badge>
         </div>
+
+        {/* 🏢 직업 정보 */}
+        {occupation && (
+          <div className="flex items-center gap-2 mt-2">
+            <Building2 className={`h-3.5 w-3.5 ${styles.icon}`} />
+            <span className="text-sm text-muted-foreground truncate">
+              {occupation}
+            </span>
+          </div>
+        )}
       </CardHeader>
 
-      {/* 카드 콘텐츠 - 부가 정보 */}
-      <CardContent className="pt-0 pb-3">
-        {/* 소개자 정보 */}
+      <CardContent className="pt-0 space-y-4">
+        {/* 💰 예상 수익 정보 */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-muted/30 rounded-lg p-3">
+            <div className="flex items-center gap-2 mb-1">
+              <DollarSign className="h-3.5 w-3.5 text-green-600" />
+              <span className="text-xs text-muted-foreground">월 보험료</span>
+            </div>
+            <p className="text-sm font-semibold text-foreground">
+              {(expectedPremium / 10000).toFixed(0)}만원
+            </p>
+          </div>
+
+          <div className="bg-muted/30 rounded-lg p-3">
+            <div className="flex items-center gap-2 mb-1">
+              <TrendingUp className="h-3.5 w-3.5 text-blue-600" />
+              <span className="text-xs text-muted-foreground">연 수수료</span>
+            </div>
+            <p className="text-sm font-semibold text-foreground">
+              {(expectedCommission / 10000).toFixed(0)}만원
+            </p>
+          </div>
+        </div>
+
+        {/* ⏰ 진행 상황 */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Timer
+                className={`h-3.5 w-3.5 ${
+                  isStale ? 'text-orange-500' : 'text-muted-foreground'
+                }`}
+              />
+              <span className="text-xs text-muted-foreground">
+                파이프라인 체류
+              </span>
+            </div>
+            <span
+              className={`text-xs font-medium ${
+                isStale ? 'text-orange-600' : 'text-foreground'
+              }`}
+            >
+              {daysInPipeline}일
+            </span>
+          </div>
+
+          {daysSinceLastContact !== null && (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Clock
+                  className={`h-3.5 w-3.5 ${
+                    isUrgent ? 'text-red-500' : 'text-muted-foreground'
+                  }`}
+                />
+                <span className="text-xs text-muted-foreground">
+                  마지막 연락
+                </span>
+              </div>
+              <span
+                className={`text-xs font-medium ${
+                  isUrgent ? 'text-red-600' : 'text-foreground'
+                }`}
+              >
+                {daysSinceLastContact}일 전
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* 🔗 소개자 정보 */}
         {referredBy && (
-          <div className="flex items-center mb-2 text-sm">
-            <Users className="h-3 w-3 mr-1.5 text-blue-500 flex-shrink-0" />
-            <span className="text-blue-600 truncate">
+          <div className="flex items-center gap-2 p-2 bg-blue-50/50 dark:bg-blue-950/20 rounded-lg">
+            <Users className="h-3.5 w-3.5 text-blue-600" />
+            <span className="text-xs text-blue-700 dark:text-blue-300 truncate">
               {referredBy.name} 소개
             </span>
           </div>
         )}
 
-        {/* 파이프라인 체류 기간 */}
-        {formatPipelineStay(createdAt) && (
-          <div className="flex items-center mb-2 text-sm">
-            <Timer className="h-3 w-3 mr-1.5 text-orange-500 flex-shrink-0" />
-            <span className="text-orange-600 font-medium">
-              {formatPipelineStay(createdAt)}
-            </span>
-          </div>
-        )}
-
-        {/* 통신사 정보 */}
-        {getTelecomInfo(telecomProvider) && (
-          <div className="flex items-center mb-2 text-sm">
-            <Smartphone className="h-3 w-3 mr-1.5 text-gray-500 flex-shrink-0" />
-            <Badge
-              variant="outline"
-              className={`text-xs px-2 py-0.5 ${
-                getTelecomInfo(telecomProvider)?.color
-              }`}
-            >
-              {getTelecomInfo(telecomProvider)?.label}
-            </Badge>
-          </div>
-        )}
-
-        {/* 운전면허 정보 */}
-        {hasDrivingLicense && (
-          <div className="flex items-center mb-2 text-sm">
-            <Car className="h-3 w-3 mr-1.5 text-green-500 flex-shrink-0" />
-            <span className="text-green-600 text-xs font-medium">
-              운전면허 보유
-            </span>
-          </div>
-        )}
-
-        {/* 다음 미팅 */}
-        {nextMeeting && (
-          <div className="flex items-center mb-2 text-sm">
-            <Calendar className="h-3 w-3 mr-1.5 text-emerald-500 flex-shrink-0" />
-            <span className="text-emerald-600 font-medium">
-              {formatDate(nextMeeting.date)} {nextMeeting.time}
-            </span>
-          </div>
-        )}
-
-        {/* 마지막 연락 */}
-        {lastContactDate && (
-          <div className="flex items-center mb-2 text-sm">
-            <Clock className="h-3 w-3 mr-1.5 text-muted-foreground flex-shrink-0" />
-            <span className="text-muted-foreground">
-              {formatLastContact(lastContactDate)} 연락
-            </span>
-          </div>
-        )}
-
-        {/* 보험 정보 */}
-        {insuranceInfo && insuranceInfo.length > 0 && (
-          <div className="flex flex-wrap gap-1 mb-2">
-            {insuranceInfo.slice(0, 3).map((insurance, index) => (
-              <Badge
-                key={index}
-                variant="secondary"
-                className="text-xs px-2 py-0.5 flex items-center space-x-1 bg-blue-50 text-blue-700 border-blue-200"
-              >
-                {getInsuranceIcon(insurance.type)}
-                <span>{getInsuranceLabel(insurance.type)}</span>
-              </Badge>
-            ))}
-            {insuranceInfo.length > 3 && (
-              <Badge
-                variant="secondary"
-                className="text-xs px-2 py-0.5 bg-gray-50 text-gray-600 border-gray-200"
-              >
-                +{insuranceInfo.length - 3}
-              </Badge>
+        {/* 🏥 건강 정보 */}
+        {(hasHealthIssues !== undefined || hasDrivingLicense !== undefined) && (
+          <div className="flex items-center gap-3">
+            {hasHealthIssues === false && (
+              <div className="flex items-center gap-1">
+                <ShieldCheck className="h-3.5 w-3.5 text-green-600" />
+                <span className="text-xs text-green-700 dark:text-green-300">
+                  건강
+                </span>
+              </div>
+            )}
+            {hasHealthIssues === true && (
+              <div className="flex items-center gap-1">
+                <AlertTriangle className="h-3.5 w-3.5 text-orange-500" />
+                <span className="text-xs text-orange-600">주의</span>
+              </div>
+            )}
+            {hasDrivingLicense && (
+              <div className="flex items-center gap-1">
+                <UserCheck className="h-3.5 w-3.5 text-blue-600" />
+                <span className="text-xs text-blue-700 dark:text-blue-300">
+                  운전
+                </span>
+              </div>
             )}
           </div>
         )}
 
-        {/* 태그 */}
-        {tags && tags.length > 0 && (
-          <div className="flex flex-wrap gap-1 mb-2">
-            {tags.slice(0, 2).map((tag, index) => (
-              <Badge
-                key={index}
-                variant="outline"
-                className="text-xs px-2 py-0.5 bg-purple-50 text-purple-700 border-purple-200"
-              >
-                <Tag className="h-2 w-2 mr-1" />
-                {tag}
-              </Badge>
-            ))}
-            {tags.length > 2 && (
-              <Badge
-                variant="outline"
-                className="text-xs px-2 py-0.5 bg-gray-50 text-gray-600 border-gray-200"
-              >
-                +{tags.length - 2}
-              </Badge>
-            )}
+        {/* 🚨 긴급 알림 */}
+        {(isUrgent || isStale) && (
+          <div
+            className={`flex items-center gap-2 p-2 rounded-lg ${
+              isUrgent
+                ? 'bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-300'
+                : 'bg-orange-50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-300'
+            }`}
+          >
+            <AlertTriangle className="h-3.5 w-3.5" />
+            <span className="text-xs font-medium">
+              {isUrgent ? '연락 필요' : '장기 체류'}
+            </span>
           </div>
         )}
 
-        {/* 메모 */}
-        {note && (
-          <div className="text-xs text-muted-foreground bg-muted/30 p-2 rounded-sm border-l-2 border-muted-foreground/20">
-            <p className="line-clamp-2">{note}</p>
-          </div>
-        )}
+        {/* 🔗 상세보기 링크 */}
+        <Link
+          to={`/clients/${id}`}
+          className="flex items-center justify-center gap-2 w-full p-2 text-sm text-primary hover:text-primary/80 hover:bg-primary/5 rounded-lg transition-colors group/link"
+        >
+          <span>상세보기</span>
+          <ChevronRight className="h-3.5 w-3.5 group-hover/link:translate-x-0.5 transition-transform" />
+        </Link>
       </CardContent>
-
-      {/* 카드 푸터 - 액션 버튼 */}
-      <CardFooter className="pt-0 pb-3 px-4">
-        <div className="flex items-center justify-between w-full">
-          {/* 고객 상세 보기 링크 */}
-          <Link to={`/clients/${id}`} className="flex-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full justify-start text-xs h-7 hover:bg-muted/80"
-            >
-              <User className="h-3 w-3 mr-1" />
-              상세보기
-            </Button>
-          </Link>
-
-          {/* 더보기 메뉴 */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7 text-muted-foreground hover:text-foreground"
-              >
-                <MoreVertical className="h-3 w-3" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-40">
-              <DropdownMenuLabel>고객 관리</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-xs">
-                <Calendar className="h-3 w-3 mr-2" />
-                미팅 예약
-              </DropdownMenuItem>
-              <DropdownMenuItem className="text-xs">
-                <Phone className="h-3 w-3 mr-2" />
-                통화하기
-              </DropdownMenuItem>
-              <DropdownMenuItem className="text-xs">
-                <ExternalLink className="h-3 w-3 mr-2" />
-                수정하기
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-xs text-destructive">
-                <Trash className="h-3 w-3 mr-2" />
-                삭제하기
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </CardFooter>
     </Card>
   );
 }

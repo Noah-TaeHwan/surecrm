@@ -53,6 +53,10 @@ const clientSchema = z.object({
   address: z.string().optional(),
   occupation: z.string().optional(),
   importance: z.enum(['high', 'medium', 'low']),
+  referredById: z
+    .string()
+    .optional()
+    .transform((val) => (val === 'none' ? undefined : val)),
   tags: z.string().optional(),
   notes: z.string().optional(),
 });
@@ -65,6 +69,7 @@ interface AddClientModalProps {
   onSubmit: (data: ClientFormData) => Promise<void>;
   isSubmitting?: boolean;
   error?: string | null;
+  referrers?: Array<{ id: string; name: string }>; // 소개자 후보 목록
 }
 
 export function AddClientModal({
@@ -73,6 +78,7 @@ export function AddClientModal({
   onSubmit,
   isSubmitting = false,
   error,
+  referrers,
 }: AddClientModalProps) {
   const form = useForm<ClientFormData>({
     resolver: zodResolver(clientSchema),
@@ -84,6 +90,7 @@ export function AddClientModal({
       address: '',
       occupation: '',
       importance: 'medium',
+      referredById: '',
       tags: '',
       notes: '',
     },
@@ -91,7 +98,13 @@ export function AddClientModal({
 
   const handleSubmit = async (data: ClientFormData) => {
     try {
-      await onSubmit(data);
+      // referredById 값 정리
+      const cleanedData = {
+        ...data,
+        referredById:
+          data.referredById === 'none' ? undefined : data.referredById,
+      };
+      await onSubmit(cleanedData);
       // 성공 시 redirect되므로 모달을 수동으로 닫지 않음
       // 에러 시에는 모달이 열려있어야 에러 메시지를 볼 수 있음
     } catch (error) {
@@ -125,7 +138,14 @@ export function AddClientModal({
     },
   ];
 
-  const telecomProviders = ['SKT', 'KT', 'LG U+'];
+  const telecomProviders = [
+    'SKT',
+    'KT',
+    'LG U+',
+    '알뜰폰 SKT',
+    '알뜰폰 KT',
+    '알뜰폰 LG U+',
+  ];
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -251,6 +271,40 @@ export function AddClientModal({
                   )}
                 />
               </div>
+
+              {/* 소개자 선택 */}
+              {referrers && referrers.length > 0 && (
+                <FormField
+                  control={form.control}
+                  name="referredById"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>소개자 (선택사항)</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-11">
+                            <SelectValue placeholder="소개자 선택" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="none">
+                            직접 개발 (소개자 없음)
+                          </SelectItem>
+                          {referrers.map((referrer) => (
+                            <SelectItem key={referrer.id} value={referrer.id}>
+                              {referrer.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
 
               <FormField
                 control={form.control}

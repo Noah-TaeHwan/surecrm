@@ -129,7 +129,7 @@ export async function logDataAccess(
   }
 }
 
-// �� 데이터 백업 함수 (데이터 보호) - 서버 전용
+// 🔄 데이터 백업 함수 (데이터 보호) - 서버 전용
 async function createDataBackup(
   clientId: string,
   triggeredBy: string,
@@ -594,6 +594,26 @@ export async function createClient(
         .insert(clients)
         .values(finalClientData)
         .returning();
+
+      // 🔗 소개자 정보가 있는 경우 referrals 테이블에도 관계 생성
+      if (clientData.referredById) {
+        try {
+          await tx.insert(referrals).values({
+            referrerId: clientData.referredById,
+            referredId: newClient.id,
+            agentId: agentId,
+            referralDate: new Date().toISOString().split('T')[0], // YYYY-MM-DD 형식
+            status: 'active',
+            notes: `${newClient.fullName} 고객 등록 시 소개 관계 자동 생성`,
+          });
+          console.log(
+            `✅ 소개 관계 생성 완료: ${clientData.referredById} → ${newClient.id}`
+          );
+        } catch (referralError) {
+          console.warn('⚠️ 소개 관계 생성 실패 (계속 진행):', referralError);
+          // 소개 관계 생성 실패해도 고객 생성은 계속 진행
+        }
+      }
 
       // 🔒 데이터 백업 생성 - 임시 비활성화 (Buffer 에러 해결까지)
       // await createDataBackup(
