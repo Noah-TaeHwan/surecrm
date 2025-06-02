@@ -334,6 +334,7 @@ export function InsightsTabs({
                 </div>
 
                 {/* 상위 성과자 테이블 */}
+                {/* 👥 팀 성과 랭킹 - 팀 기능 개발 후 활성화 예정
                 <Card>
                   <CardHeader>
                     <CardTitle>팀 성과 랭킹</CardTitle>
@@ -400,6 +401,7 @@ export function InsightsTabs({
                     )}
                   </CardContent>
                 </Card>
+                */}
               </>
             )}
           </TabsContent>

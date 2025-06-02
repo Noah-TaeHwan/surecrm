@@ -56,16 +56,18 @@ export function Sidebar({ className, onClose }: SidebarProps) {
       href: '/clients',
       icon: <Users className="h-5 w-5" />,
     },
-    {
-      label: '나의 팀',
-      href: '/team',
-      icon: <UserPlus className="h-5 w-5" />,
-    },
-    {
-      label: '일정 관리',
-      href: '/calendar',
-      icon: <Calendar className="h-5 w-5" />,
-    },
+    // 👥 나의 팀 - 팀 관련 기능 개발 후 활성화 예정
+    // {
+    //   label: '나의 팀',
+    //   href: '/team',
+    //   icon: <UserPlus className="h-5 w-5" />,
+    // },
+    // 🗓️ 일정 관리 - 구글 캘린더 연동 후 활성화 예정
+    // {
+    //   label: '일정 관리',
+    //   href: '/calendar',
+    //   icon: <Calendar className="h-5 w-5" />,
+    // },
     {
       label: '초대장 관리',
       href: '/invitations',
