@@ -13,6 +13,7 @@ import {
   type ReportInstance,
   type ReportDashboard,
 } from './schema';
+import { insuranceInfo } from '~/lib/schema';
 import {
   eq,
   and,
@@ -71,138 +72,128 @@ export async function getPerformanceData(
   endDate: Date
 ): Promise<PerformanceData> {
   try {
-    // 현재 기간 데이터 (병렬 처리로 성능 최적화)
-    const [
-      totalClientsResult,
-      newClientsResult,
-      totalReferralsResult,
-      revenueResult,
-      conversionResult,
-      meetingsResult,
-      activeClientsResult,
-    ] = await Promise.all([
-      // 총 클라이언트 수
-      db
-        .select({ count: count() })
-        .from(clients)
-        .where(eq(clients.agentId, userId)),
+    // 기본 클라이언트 수 조회 (가장 단순한 쿼리로 테스트)
+    const totalClientsResult = await db
+      .select({ count: count() })
+      .from(clients)
+      .where(eq(clients.agentId, userId));
 
-      // 신규 클라이언트 수 (기간 내)
-      db
-        .select({ count: count() })
-        .from(clients)
-        .where(
-          and(
-            eq(clients.agentId, userId),
-            gte(clients.createdAt, startDate),
-            lte(clients.createdAt, endDate)
-          )
-        ),
+    // 신규 클라이언트 수 (날짜 조건 테스트 - and 함수 사용)
+    const newClientsResult = await db
+      .select({ count: count() })
+      .from(clients)
+      .where(
+        and(
+          eq(clients.agentId, userId),
+          gte(clients.createdAt, startDate),
+          lte(clients.createdAt, endDate)
+        )
+      );
 
-      // 총 추천 수 (기간 내)
-      db
-        .select({ count: count() })
-        .from(referrals)
-        .where(
-          and(
-            eq(referrals.agentId, userId),
-            gte(referrals.createdAt, startDate),
-            lte(referrals.createdAt, endDate)
-          )
-        ),
+    // 추천 수 조회 (날짜 조건 추가)
+    const totalReferralsResult = await db
+      .select({ count: count() })
+      .from(referrals)
+      .where(
+        and(
+          eq(referrals.agentId, userId),
+          gte(referrals.createdAt, startDate),
+          lte(referrals.createdAt, endDate)
+        )
+      );
 
-      // 수익 계산 (보험료 합계) - MVP: 더 정확한 계산
-      db
-        .select({
-          total: sql<number>`COALESCE(SUM(CAST(${clients.insuranceInfo}->>'premium' AS DECIMAL)), 0)`,
-          count: count(),
-        })
-        .from(clients)
-        .where(
-          and(
-            eq(clients.agentId, userId),
-            gte(clients.createdAt, startDate),
-            lte(clients.createdAt, endDate)
-          )
-        ),
+    // 미팅 수 조회 (날짜 조건 추가)
+    const meetingsResult = await db
+      .select({ count: count() })
+      .from(meetings)
+      .where(
+        and(
+          eq(meetings.agentId, userId),
+          gte(meetings.scheduledAt, startDate),
+          lte(meetings.scheduledAt, endDate)
+        )
+      );
 
-      // 전환율 계산 (계약 완료된 클라이언트 비율) - MVP: 더 정확한 상태 체크
-      db
-        .select({
-          total: count(),
-          converted: sql<number>`COUNT(CASE WHEN ${clients.status} = ANY(ARRAY['active', 'contracted']) THEN 1 END)`,
-          prospects: sql<number>`COUNT(CASE WHEN ${clients.status} = ANY(ARRAY['prospect', 'contacted']) THEN 1 END)`,
-        })
-        .from(clients)
-        .where(
-          and(
-            eq(clients.agentId, userId),
-            gte(clients.createdAt, startDate),
-            lte(clients.createdAt, endDate)
-          )
-        ),
+    // 수익 계산 (날짜 조건 + 활성 보험 조건 추가)
+    const revenueResult = await db
+      .select({
+        total: sql<number>`COALESCE(SUM(${insuranceInfo.premium}), 0)`,
+        count: count(),
+      })
+      .from(clients)
+      .innerJoin(insuranceInfo, eq(clients.id, insuranceInfo.clientId))
+      .where(
+        and(
+          eq(clients.agentId, userId),
+          eq(insuranceInfo.isActive, true),
+          gte(clients.createdAt, startDate),
+          lte(clients.createdAt, endDate)
+        )
+      );
 
-      // 미팅 수 (기간 내)
-      db
-        .select({ count: count() })
-        .from(meetings)
-        .where(
-          and(
-            eq(meetings.agentId, userId),
-            gte(meetings.scheduledAt, startDate),
-            lte(meetings.scheduledAt, endDate)
-          )
-        ),
+    // 전환율 계산 (isActive 필드 사용)
+    const conversionResult = await db
+      .select({
+        total: count(),
+        converted: sql<number>`COUNT(CASE WHEN ${clients.isActive} = true THEN 1 END)`,
+        prospects: sql<number>`COUNT(CASE WHEN ${clients.isActive} = false THEN 1 END)`,
+      })
+      .from(clients)
+      .where(
+        and(
+          eq(clients.agentId, userId),
+          gte(clients.createdAt, startDate),
+          lte(clients.createdAt, endDate)
+        )
+      );
 
-      // 활성 고객 수 (현재 계약 중인 고객)
-      db
-        .select({ count: count() })
-        .from(clients)
-        .where(and(eq(clients.agentId, userId), eq(clients.status, 'active'))),
-    ]);
+    // 활성 고객 수
+    const activeClientsResult = await db
+      .select({ count: count() })
+      .from(clients)
+      .where(and(eq(clients.agentId, userId), eq(clients.isActive, true)));
 
-    // 이전 기간 데이터 (성장률 계산용) - MVP: 더 정확한 비교
+    // 이전 기간 데이터 (성장률 계산용) - 완전 복원
     const periodDiff = endDate.getTime() - startDate.getTime();
     const prevStartDate = new Date(startDate.getTime() - periodDiff);
     const prevEndDate = new Date(endDate.getTime() - periodDiff);
 
-    const [prevClientsResult, prevReferralsResult, prevRevenueResult] =
-      await Promise.all([
-        db
-          .select({ count: count() })
-          .from(clients)
-          .where(
-            and(
-              eq(clients.agentId, userId),
-              gte(clients.createdAt, prevStartDate),
-              lte(clients.createdAt, prevEndDate)
-            )
-          ),
+    const prevClientsResult = await db
+      .select({ count: count() })
+      .from(clients)
+      .where(
+        and(
+          eq(clients.agentId, userId),
+          gte(clients.createdAt, prevStartDate),
+          lte(clients.createdAt, prevEndDate)
+        )
+      );
 
-        db
-          .select({ count: count() })
-          .from(referrals)
-          .where(
-            and(
-              eq(referrals.agentId, userId),
-              gte(referrals.createdAt, prevStartDate),
-              lte(referrals.createdAt, prevEndDate)
-            )
-          ),
+    const prevReferralsResult = await db
+      .select({ count: count() })
+      .from(referrals)
+      .where(
+        and(
+          eq(referrals.agentId, userId),
+          gte(referrals.createdAt, prevStartDate),
+          lte(referrals.createdAt, prevEndDate)
+        )
+      );
 
-        db
-          .select({
-            total: sql<number>`COALESCE(SUM(CAST(${clients.insuranceInfo}->>'premium' AS DECIMAL)), 0)`,
-          })
-          .from(clients)
-          .where(
-            and(
-              eq(clients.agentId, userId),
-              gte(clients.createdAt, prevStartDate),
-              lte(clients.createdAt, prevEndDate)
-            )
-          ),
-      ]);
+    const prevRevenueResult = await db
+      .select({
+        total: sql<number>`COALESCE(SUM(${insuranceInfo.premium}), 0)`,
+      })
+      .from(clients)
+      .innerJoin(insuranceInfo, eq(clients.id, insuranceInfo.clientId))
+      .where(
+        and(
+          eq(clients.agentId, userId),
+          eq(insuranceInfo.isActive, true),
+          gte(clients.createdAt, prevStartDate),
+          lte(clients.createdAt, prevEndDate)
+        )
+      );
 
     // 데이터 추출 및 계산
     const totalClients = totalClientsResult[0]?.count || 0;
@@ -305,18 +296,19 @@ export async function getTopPerformers(
         id: profiles.id,
         name: sql<string>`COALESCE(${profiles.fullName}, 'Unknown')`,
         totalClients: sql<number>`COUNT(DISTINCT ${clients.id})`,
-        activeClients: sql<number>`COUNT(DISTINCT CASE WHEN ${clients.status} = 'active' THEN ${clients.id} END)`,
-        totalRevenue: sql<number>`COALESCE(SUM(CAST(${clients.insuranceInfo}->>'premium' AS DECIMAL)), 0)`,
+        activeClients: sql<number>`COUNT(DISTINCT CASE WHEN ${clients.isActive} = true THEN ${clients.id} END)`,
+        totalRevenue: sql<number>`COALESCE(SUM(CASE WHEN ${insuranceInfo.isActive} = true THEN ${insuranceInfo.premium} ELSE 0 END), 0)`,
         meetingsCount: sql<number>`COUNT(DISTINCT ${meetings.id})`,
       })
       .from(profiles)
       .leftJoin(clients, eq(clients.agentId, profiles.id))
       .leftJoin(meetings, eq(meetings.agentId, profiles.id))
+      .leftJoin(insuranceInfo, eq(clients.id, insuranceInfo.clientId))
       .where(eq(profiles.teamId, teamId))
       .groupBy(profiles.id, profiles.fullName)
       .orderBy(
         desc(
-          sql<number>`COALESCE(SUM(CAST(${clients.insuranceInfo}->>'premium' AS DECIMAL)), 0)`
+          sql<number>`COALESCE(SUM(CASE WHEN ${insuranceInfo.isActive} = true THEN ${insuranceInfo.premium} ELSE 0 END), 0)`
         )
       )
       .limit(limit);
@@ -410,7 +402,7 @@ export async function getReportStats(userId: string): Promise<ReportStats> {
           total: count(),
           completed: sql<number>`COUNT(CASE WHEN status = 'completed' THEN 1 END)`,
           failed: sql<number>`COUNT(CASE WHEN status = 'failed' THEN 1 END)`,
-          downloads: sql<number>`COALESCE(SUM(CAST(metadata->>'downloadCount' AS INTEGER)), 0)`,
+          downloads: sql<number>`COALESCE(SUM(${reportInstances.downloadCount}), 0)`,
         })
         .from(reportInstances)
         .where(eq(reportInstances.userId, userId)),
