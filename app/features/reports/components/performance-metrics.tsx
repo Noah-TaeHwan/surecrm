@@ -61,7 +61,9 @@ export function PerformanceMetrics({ performance }: PerformanceMetricsProps) {
       <div
         className={cn(
           'flex items-center gap-1 text-sm font-medium',
-          isPositive ? 'text-green-600' : 'text-red-600',
+          isPositive
+            ? 'text-green-600 dark:text-green-400'
+            : 'text-red-600 dark:text-red-400',
           className
         )}
       >
@@ -92,58 +94,66 @@ export function PerformanceMetrics({ performance }: PerformanceMetricsProps) {
 
   return (
     <div className="space-y-4">
-      {/* 상단 요약 카드 */}
-      <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+      {/* 상단 요약 카드 - 다크 테마에 맞춘 색상 조정 */}
+      <Card className="bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800/50 dark:to-slate-900/50 border-slate-200 dark:border-slate-700">
         <CardHeader className="pb-3">
-          <CardTitle className="text-lg text-blue-900">
+          <CardTitle className="text-lg text-slate-900 dark:text-slate-100">
             이번 달 핵심 성과
           </CardTitle>
-          <CardDescription className="text-blue-700">
+          <CardDescription className="text-slate-700 dark:text-slate-300">
             주요 비즈니스 지표 요약
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-900">
+              <div className="text-2xl font-bold text-slate-900 dark:text-slate-100">
                 {formatNumber(performance.totalClients)}
               </div>
-              <p className="text-sm text-blue-700">총 고객수</p>
+              <p className="text-sm text-slate-600 dark:text-slate-400">
+                총 고객수
+              </p>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-green-900">
+              <div className="text-2xl font-bold text-emerald-700 dark:text-emerald-400">
                 {formatNumber(performance.newClients)}
               </div>
-              <p className="text-sm text-green-700">신규 고객</p>
+              <p className="text-sm text-emerald-600 dark:text-emerald-400">
+                신규 고객
+              </p>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-purple-900">
+              <div className="text-2xl font-bold text-violet-700 dark:text-violet-400">
                 {performance.conversionRate}%
               </div>
-              <p className="text-sm text-purple-700">전환율</p>
+              <p className="text-sm text-violet-600 dark:text-violet-400">
+                전환율
+              </p>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-orange-900">
+              <div className="text-2xl font-bold text-amber-700 dark:text-amber-400">
                 {formatCurrency(performance.revenue)}
               </div>
-              <p className="text-sm text-orange-700">총 수익</p>
+              <p className="text-sm text-amber-600 dark:text-amber-400">
+                총 수익
+              </p>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* 상세 지표 카드들 */}
+      {/* 상세 지표 카드들 - 다크 테마 맞춤 */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="hover:shadow-md transition-shadow">
+        <Card className="hover:shadow-lg dark:hover:shadow-slate-900/50 transition-shadow border-slate-200 dark:border-slate-700">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardDescription>총 고객 수</CardDescription>
-              <Users className="h-4 w-4 text-blue-500" />
+              <Users className="h-4 w-4 text-slate-500 dark:text-slate-400" />
             </div>
             <CardTitle className="text-2xl flex items-center gap-2">
               {formatNumber(performance.totalClients)}
               {performance.growth.clients !== 0 && (
-                <ArrowUpRight className="h-4 w-4 text-green-500" />
+                <ArrowUpRight className="h-4 w-4 text-emerald-500" />
               )}
             </CardTitle>
           </CardHeader>
@@ -153,13 +163,13 @@ export function PerformanceMetrics({ performance }: PerformanceMetricsProps) {
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-md transition-shadow">
+        <Card className="hover:shadow-lg dark:hover:shadow-slate-900/50 transition-shadow border-slate-200 dark:border-slate-700">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardDescription>신규 고객</CardDescription>
-              <UserPlus className="h-4 w-4 text-green-500" />
+              <UserPlus className="h-4 w-4 text-emerald-500" />
             </div>
-            <CardTitle className="text-2xl text-green-700">
+            <CardTitle className="text-2xl text-emerald-700 dark:text-emerald-400">
               {formatNumber(performance.newClients)}
             </CardTitle>
           </CardHeader>
@@ -176,11 +186,11 @@ export function PerformanceMetrics({ performance }: PerformanceMetricsProps) {
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-md transition-shadow">
+        <Card className="hover:shadow-lg dark:hover:shadow-slate-900/50 transition-shadow border-slate-200 dark:border-slate-700">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardDescription>계약 전환율</CardDescription>
-              <BarChart3 className="h-4 w-4 text-purple-500" />
+              <BarChart3 className="h-4 w-4 text-violet-500" />
             </div>
             <CardTitle className="text-2xl flex items-center gap-2">
               {performance.conversionRate}%
@@ -200,21 +210,96 @@ export function PerformanceMetrics({ performance }: PerformanceMetricsProps) {
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-md transition-shadow">
+        <Card className="hover:shadow-lg dark:hover:shadow-slate-900/50 transition-shadow border-slate-200 dark:border-slate-700">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardDescription>총 수익</CardDescription>
-              <DollarSign className="h-4 w-4 text-orange-500" />
+              <DollarSign className="h-4 w-4 text-amber-500" />
             </div>
-            <CardTitle className="text-2xl text-orange-700">
+            <CardTitle className="text-2xl text-amber-700 dark:text-amber-400">
               {formatCurrency(performance.revenue)}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <TrendIndicator value={performance.growth.revenue} />
-            <p className="text-xs text-muted-foreground mt-1">
-              월 평균: {formatCurrency(performance.revenue / 12)}
-            </p>
+            <div className="flex items-center justify-between mt-2">
+              <span className="text-xs text-muted-foreground">
+                고객당 평균: {formatCurrency(performance.averageClientValue)}
+              </span>
+              <Badge variant="secondary" className="text-xs">
+                {performance.activeClients}명 계약중
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* 추가 인사이트 카드들 */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+        <Card className="border-slate-200 dark:border-slate-700">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Target className="h-4 w-4 text-blue-500" />
+              미팅 효율성
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-blue-700 dark:text-blue-400">
+              {performance.meetingsCount}
+            </div>
+            <p className="text-sm text-muted-foreground">총 미팅 수</p>
+            <div className="mt-2 text-xs text-muted-foreground">
+              미팅당 평균 전환:{' '}
+              {performance.meetingsCount > 0
+                ? (
+                    (performance.newClients / performance.meetingsCount) *
+                    100
+                  ).toFixed(1)
+                : 0}
+              %
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-slate-200 dark:border-slate-700">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Users className="h-4 w-4 text-purple-500" />
+              활성 고객
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-purple-700 dark:text-purple-400">
+              {performance.activeClients}
+            </div>
+            <p className="text-sm text-muted-foreground">현재 계약중</p>
+            <div className="mt-2 text-xs text-muted-foreground">
+              전체 대비:{' '}
+              {performance.totalClients > 0
+                ? (
+                    (performance.activeClients / performance.totalClients) *
+                    100
+                  ).toFixed(1)
+                : 0}
+              %
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-slate-200 dark:border-slate-700">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-green-500" />월 수수료
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-700 dark:text-green-400">
+              {formatCurrency(performance.monthlyRecurringRevenue)}
+            </div>
+            <p className="text-sm text-muted-foreground">예상 월수익</p>
+            <div className="mt-2 text-xs text-muted-foreground">
+              보험료의 약 10% 기준
+            </div>
           </CardContent>
         </Card>
       </div>

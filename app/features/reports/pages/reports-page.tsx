@@ -22,11 +22,22 @@ import {
 import { getCurrentUser } from '~/lib/auth/core';
 import { redirect } from 'react-router';
 
+// 🔧 추가: 설정에서 사용자 프로필 가져오기
+import { getUserProfile } from '~/features/settings/lib/supabase-settings-data';
+
 // 분리된 컴포넌트들 import
 import { PerformanceMetrics, KakaoReport, InsightsTabs } from '../components';
 
-// 기간 계산 헬퍼 함수
-function getDateRange(period: string): { startDate: Date; endDate: Date } {
+// 🔧 수정: 서버 전용 기간 계산 헬퍼 함수 (클라이언트에서는 사용하지 않음)
+function getDateRangeOnServer(period: string): {
+  startDate: Date;
+  endDate: Date;
+} {
+  // 서버에서만 실행
+  if (typeof window !== 'undefined') {
+    throw new Error('이 함수는 서버에서만 실행되어야 합니다.');
+  }
+
   const now = new Date();
   let startDate: Date;
   let endDate: Date = new Date(); // 오늘까지
@@ -76,7 +87,12 @@ export async function loader({ request }: Route.LoaderArgs) {
     // URL에서 기간 파라미터 확인
     const url = new URL(request.url);
     const period = url.searchParams.get('period') || 'month';
-    const { startDate, endDate } = getDateRange(period);
+
+    // 🔧 수정: 서버에서만 날짜 계산
+    const { startDate, endDate } = getDateRangeOnServer(period);
+
+    // 🔧 추가: 사용자 프로필 정보 가져오기 (설정 페이지에서 관리하는 이름)
+    const userProfile = await getUserProfile(userId);
 
     // 기본 리포트 템플릿 생성 (없는 경우)
     await createDefaultReportTemplates(userId);
@@ -87,6 +103,15 @@ export async function loader({ request }: Route.LoaderArgs) {
       getTopPerformers(userId, 5),
     ]);
 
+    // 🔧 수정: 서버에서 날짜 포맷팅하여 Hydration 오류 방지
+    const formatServerDate = (date: Date) => {
+      return date.toLocaleDateString('ko-KR', {
+        year: 'numeric',
+        month: 'numeric',
+        day: 'numeric',
+      });
+    };
+
     return {
       performance,
       topPerformers,
@@ -94,12 +119,25 @@ export async function loader({ request }: Route.LoaderArgs) {
       dateRange: {
         start: startDate.toISOString(),
         end: endDate.toISOString(),
+        formatted: `${formatServerDate(startDate)} ~ ${formatServerDate(
+          endDate
+        )}`,
       },
+      // 🔧 수정: 설정 페이지의 실제 사용자 이름 사용
+      user: {
+        id: user.id,
+        name: userProfile?.name || user.email?.split('@')[0] || '사용자',
+        email: user.email,
+      },
+      // 🔧 추가: 서버 타임스탬프 추가 (클라이언트 동기화용)
+      serverTimestamp: new Date().toISOString(),
     };
   } catch (error) {
     console.error('Error loading reports data:', error);
 
-    // 오류 발생 시 기본값 반환
+    // 🔧 수정: 오류 발생 시에도 서버 타임스탬프 포함
+    const now = new Date().toISOString();
+    const nowDate = new Date();
     const defaultPerformance: PerformanceData = {
       totalClients: 0,
       newClients: 0,
@@ -118,9 +156,20 @@ export async function loader({ request }: Route.LoaderArgs) {
       topPerformers: [] as TopPerformer[],
       period: 'month',
       dateRange: {
-        start: new Date().toISOString(),
-        end: new Date().toISOString(),
+        start: now,
+        end: now,
+        formatted: nowDate.toLocaleDateString('ko-KR', {
+          year: 'numeric',
+          month: 'numeric',
+          day: 'numeric',
+        }),
       },
+      user: {
+        id: 'unknown',
+        name: '사용자',
+        email: '',
+      },
+      serverTimestamp: now,
     };
   }
 }
@@ -146,13 +195,26 @@ export default function ReportsPage({ loaderData }: Route.ComponentProps) {
     topPerformers: [],
     period: 'month',
     dateRange: {
-      start: new Date().toISOString(),
-      end: new Date().toISOString(),
+      start: '2024-01-01T00:00:00.000Z',
+      end: '2024-01-01T00:00:00.000Z',
+      formatted: '2024. 1. 1. ~ 2024. 1. 1.',
     },
+    user: {
+      id: 'unknown',
+      name: '사용자',
+      email: '',
+    },
+    serverTimestamp: '2024-01-01T00:00:00.000Z',
   };
 
-  const { performance, topPerformers, period, dateRange } =
-    loaderData || defaultData;
+  const {
+    performance,
+    topPerformers,
+    period,
+    dateRange,
+    user,
+    serverTimestamp,
+  } = loaderData || defaultData;
   const [selectedPeriod, setSelectedPeriod] = useState(period || 'month');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -167,6 +229,11 @@ export default function ReportsPage({ loaderData }: Route.ComponentProps) {
 
   // 데이터 다운로드 기능
   const handleDownload = () => {
+    // 🔧 수정: 서버 타임스탬프 사용
+    const downloadDate = serverTimestamp
+      ? new Date(serverTimestamp).toISOString().split('T')[0]
+      : 'unknown';
+
     const reportData = {
       기간:
         selectedPeriod === 'week'
@@ -176,9 +243,7 @@ export default function ReportsPage({ loaderData }: Route.ComponentProps) {
           : selectedPeriod === 'quarter'
           ? '이번 분기'
           : '올해',
-      조회기간: `${new Date(dateRange.start).toLocaleDateString()} ~ ${new Date(
-        dateRange.end
-      ).toLocaleDateString()}`,
+      조회기간: dateRange.formatted,
       총고객수: performance.totalClients,
       신규고객: performance.newClients,
       총소개건수: performance.totalReferrals,
@@ -202,9 +267,7 @@ export default function ReportsPage({ loaderData }: Route.ComponentProps) {
     const url = URL.createObjectURL(dataBlob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `보고서_${selectedPeriod}_${
-      new Date().toISOString().split('T')[0]
-    }.json`;
+    link.download = `보고서_${selectedPeriod}_${downloadDate}.json`;
     link.click();
     URL.revokeObjectURL(url);
   };
@@ -220,8 +283,7 @@ export default function ReportsPage({ loaderData }: Route.ComponentProps) {
             </p>
             <p className="text-sm text-muted-foreground mt-1">
               <Calendar className="inline h-4 w-4 mr-1" />
-              {new Date(dateRange.start).toLocaleDateString()} ~{' '}
-              {new Date(dateRange.end).toLocaleDateString()}
+              {dateRange.formatted}
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -254,7 +316,7 @@ export default function ReportsPage({ loaderData }: Route.ComponentProps) {
         <PerformanceMetrics performance={performance} />
 
         {/* 카카오톡 업무 보고 양식 */}
-        <KakaoReport performance={performance} />
+        <KakaoReport performance={performance} user={user} />
 
         {/* 비즈니스 인사이트 탭 */}
         <InsightsTabs performance={performance} topPerformers={topPerformers} />

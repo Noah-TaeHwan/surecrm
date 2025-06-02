@@ -24,6 +24,7 @@ import {
   desc,
   asc,
   sql,
+  inArray,
 } from 'drizzle-orm';
 
 // 성과 데이터 인터페이스 (MVP 특화)
@@ -129,8 +130,8 @@ export async function getPerformanceData(
       db
         .select({
           total: count(),
-          converted: sql<number>`COUNT(CASE WHEN ${clients.status} IN ('active', 'contracted') THEN 1 END)`,
-          prospects: sql<number>`COUNT(CASE WHEN ${clients.status} IN ('prospect', 'contacted') THEN 1 END)`,
+          converted: sql<number>`COUNT(CASE WHEN ${clients.status} = ANY(ARRAY['active', 'contracted']) THEN 1 END)`,
+          prospects: sql<number>`COUNT(CASE WHEN ${clients.status} = ANY(ARRAY['prospect', 'contacted']) THEN 1 END)`,
         })
         .from(clients)
         .where(

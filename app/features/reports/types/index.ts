@@ -26,14 +26,16 @@ export interface TopPerformer {
 }
 
 export interface KakaoReportData {
-  startTime: string;
-  endTime: string;
-  activities: string;
-  newClients: number;
-  meetings: number;
-  calls: number;
-  tomorrowPlan: string;
-  notes: string;
+  workStartTime: string;
+  workEndTime: string;
+  clientMeetings: number;
+  phoneCalls: number;
+  quotations: number;
+  contracts: number;
+  referrals: number;
+  prospects: number;
+  followUps: number;
+  adminTasks: number;
 }
 
 export interface ReportPeriod {
@@ -82,6 +84,11 @@ export interface PerformanceMetricsProps {
 
 export interface KakaoReportProps {
   performance: PerformanceData;
+  user?: {
+    id: string;
+    name: string;
+    email?: string;
+  };
   defaultData?: Partial<KakaoReportData>;
   onDataChange?: (data: KakaoReportData) => void;
 }
