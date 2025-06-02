@@ -682,7 +682,10 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                 {/* 고객 단계 */}
                 <div className="space-y-2">
                   <h4 className="text-sm font-medium">현재 단계</h4>
-                  <Badge variant="outline" className="w-full justify-center">
+                  <Badge
+                    variant="outline"
+                    className="w-full justify-center h-10"
+                  >
                     {client.currentStage?.name || '미설정'}
                   </Badge>
                 </div>
