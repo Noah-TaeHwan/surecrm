@@ -1,5 +1,5 @@
 import type { Route } from './+types/dashboard-page';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MainLayout } from '~/common/layouts/main-layout';
 import { WelcomeSection } from '../components/welcome-section';
 import { PerformanceKPICards } from '../components/performance-kpi-cards';
@@ -19,9 +19,10 @@ import {
   getReferralInsights,
   getUserGoals,
   setMonthlyGoal,
+  deleteGoal,
 } from '../lib/dashboard-data';
 import { requireAuth } from '~/lib/auth/middleware';
-import { useFetcher } from 'react-router';
+import { useFetcher, useRevalidator } from 'react-router';
 
 // 새로운 타입 시스템 import
 import type {
@@ -182,16 +183,28 @@ export async function action({ request }: Route.ActionArgs) {
       const goalType = formData.get('goalType') as
         | 'revenue'
         | 'clients'
-        | 'meetings'
         | 'referrals';
       const targetValue = Number(formData.get('targetValue'));
       const title = formData.get('title') as string;
+      const goalId = formData.get('goalId') as string;
+      const targetYear = Number(formData.get('targetYear'));
+      const targetMonth = Number(formData.get('targetMonth'));
 
-      await setMonthlyGoal(user.id, goalType, targetValue, title || undefined);
+      await setMonthlyGoal(
+        user.id,
+        goalType,
+        targetValue,
+        title || undefined,
+        goalId || undefined,
+        targetYear,
+        targetMonth
+      );
 
       return {
         success: true,
-        message: '목표가 성공적으로 설정되었습니다.',
+        message: goalId
+          ? '목표가 성공적으로 수정되었습니다.'
+          : '목표가 성공적으로 설정되었습니다.',
         timestamp: new Date().toISOString(),
       };
     } catch (error) {
@@ -199,6 +212,34 @@ export async function action({ request }: Route.ActionArgs) {
       return {
         success: false,
         message: '목표 설정에 실패했습니다. 다시 시도해주세요.',
+        error: error instanceof Error ? error.message : '알 수 없는 오류',
+      };
+    }
+  }
+
+  if (intent === 'deleteGoal') {
+    try {
+      const goalId = formData.get('goalId') as string;
+
+      if (!goalId) {
+        return {
+          success: false,
+          message: '삭제할 목표를 찾을 수 없습니다.',
+        };
+      }
+
+      await deleteGoal(user.id, goalId);
+
+      return {
+        success: true,
+        message: '목표가 성공적으로 삭제되었습니다.',
+        timestamp: new Date().toISOString(),
+      };
+    } catch (error) {
+      console.error('목표 삭제 오류:', error);
+      return {
+        success: false,
+        message: '목표 삭제에 실패했습니다. 다시 시도해주세요.',
         error: error instanceof Error ? error.message : '알 수 없는 오류',
       };
     }
@@ -225,7 +266,20 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
   } = loaderData;
 
   const fetcher = useFetcher();
+  const revalidator = useRevalidator();
   const [isLoading, setIsLoading] = useState(false);
+
+  // ✅ 목표 설정/삭제 성공 시 자동 새로고침 (버그 수정)
+  useEffect(() => {
+    if (fetcher.data?.success) {
+      // 성공 메시지를 잠깐 보여준 후 데이터 새로고침
+      const timer = setTimeout(() => {
+        revalidator.revalidate();
+      }, 1500); // 1.5초 후 새로고침
+
+      return () => clearTimeout(timer);
+    }
+  }, [fetcher.data?.success, revalidator]);
 
   // 기존 컴포넌트와의 호환성을 위한 데이터 변환
   const transformedTodayMeetings = todayMeetings.map(
@@ -329,10 +383,23 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
     averageClientValue: kpiData.averageClientValue ?? 0,
   };
 
+  // MyGoals 컴포넌트와의 호환성을 위한 데이터 변환
+  const compatibleUserGoals = userGoals
+    .filter((goal: any) => goal.goalType !== 'meetings') // meetings 타입 제외
+    .map((goal: any) => ({
+      ...goal,
+      targetValue: Number(goal.targetValue),
+      currentValue: Number(goal.currentValue),
+      progress: Math.min(goal.progress || 0, 100),
+    }));
+
   const handleSetGoal = async (goalData: {
-    goalType: 'revenue' | 'clients' | 'meetings' | 'referrals';
+    goalType: 'revenue' | 'clients' | 'referrals';
     targetValue: number;
     title?: string;
+    id?: string; // 목표 수정 시 필요
+    targetYear: number;
+    targetMonth: number;
   }) => {
     setIsLoading(true);
 
@@ -340,9 +407,27 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
     formData.append('intent', 'setGoal');
     formData.append('goalType', goalData.goalType);
     formData.append('targetValue', goalData.targetValue.toString());
+    formData.append('targetYear', goalData.targetYear.toString());
+    formData.append('targetMonth', goalData.targetMonth.toString());
     if (goalData.title) {
       formData.append('title', goalData.title);
     }
+    if (goalData.id) {
+      formData.append('goalId', goalData.id);
+    }
+
+    fetcher.submit(formData, { method: 'post' });
+    setIsLoading(false);
+  };
+
+  const handleDeleteGoal = async (goalId: string) => {
+    if (!goalId) return;
+
+    setIsLoading(true);
+
+    const formData = new FormData();
+    formData.append('intent', 'deleteGoal');
+    formData.append('goalId', goalId);
 
     fetcher.submit(formData, { method: 'post' });
     setIsLoading(false);
@@ -382,13 +467,15 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* 🗓️ 오늘의 일정 - 일정 관리 기능 개발 후 활성화 예정 */}
           {/* <TodayAgenda meetings={transformedTodayMeetings} /> */}
-          <MyGoals currentGoals={userGoals} onSetGoal={handleSetGoal} />
+          <MyGoals
+            currentGoals={compatibleUserGoals}
+            onSetGoal={handleSetGoal}
+            onDeleteGoal={handleDeleteGoal}
+          />
           <PipelineOverview
             stages={transformedPipelineStages}
             totalValue={pipelineData.totalValue}
             monthlyTarget={pipelineData.monthlyTarget}
-            currentGoals={userGoals}
-            onSaveGoal={handleSetGoal}
           />
         </div>
 
@@ -406,14 +493,14 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
 
         {/* 성공 메시지 표시 */}
         {fetcher.data?.success && (
-          <div className="fixed bottom-4 right-4 bg-green-600 text-white px-4 py-2 rounded-md shadow-lg">
+          <div className="fixed bottom-4 right-4 bg-orange-600 text-white px-4 py-2 rounded-md shadow-lg">
             {fetcher.data.message}
           </div>
         )}
 
         {/* 에러 메시지 표시 */}
         {fetcher.data?.success === false && (
-          <div className="fixed bottom-4 right-4 bg-red-600 text-white px-4 py-2 rounded-md shadow-lg">
+          <div className="fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded-md shadow-lg">
             {fetcher.data.message}
           </div>
         )}

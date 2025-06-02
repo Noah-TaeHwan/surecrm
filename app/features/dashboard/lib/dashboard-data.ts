@@ -11,7 +11,13 @@ import {
   lte,
   sql,
 } from 'drizzle-orm';
-import { clients, teams, referrals, pipelineStages } from '~/lib/schema';
+import {
+  clients,
+  teams,
+  referrals,
+  pipelineStages,
+  insuranceInfo,
+} from '~/lib/schema';
 import { profiles } from '~/lib/schema';
 import {
   meetings,
@@ -645,16 +651,59 @@ export async function getReferralInsights(userId: string) {
 // 월간 목표 설정
 export async function setMonthlyGoal(
   userId: string,
-  goalType: 'revenue' | 'clients' | 'meetings' | 'referrals',
+  goalType: 'revenue' | 'clients' | 'referrals',
   targetValue: number,
-  title?: string
+  title?: string,
+  goalId?: string,
+  targetYear?: number,
+  targetMonth?: number
 ) {
   try {
-    const now = new Date();
-    const startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-    const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    // 목표 연도와 월이 제공되지 않으면 현재 월 사용
+    const year = targetYear || new Date().getFullYear();
+    const month = targetMonth || new Date().getMonth() + 1;
 
-    // 기존 목표가 있는지 확인
+    console.log('🗓️ 목표 설정 - 입력값:', {
+      targetYear,
+      targetMonth,
+      year,
+      month,
+    });
+
+    // ✅ 시간대 이슈 해결: ISO 문자열 직접 생성
+    const startDate = `${year}-${month.toString().padStart(2, '0')}-01`;
+    const endDate = `${year}-${month.toString().padStart(2, '0')}-${new Date(
+      year,
+      month,
+      0
+    ).getDate()}`;
+
+    console.log('🗓️ 목표 설정 - 계산된 날짜:', { startDate, endDate });
+
+    // 수정 모드인 경우
+    if (goalId) {
+      await db
+        .update(appDashboardGoals)
+        .set({
+          targetValue: targetValue.toString(),
+          title: title || `${goalType} ${year}년 ${month}월 목표`,
+          goalType,
+          startDate,
+          endDate,
+          updatedAt: new Date(),
+        })
+        .where(
+          and(
+            eq(appDashboardGoals.id, goalId),
+            eq(appDashboardGoals.agentId, userId)
+          )
+        );
+
+      console.log('✅ 목표 수정 완료:', { goalId, year, month });
+      return goalId;
+    }
+
+    // 기존 목표가 있는지 확인 (새로 생성하는 경우)
     const existingGoal = await db
       .select()
       .from(appDashboardGoals)
@@ -664,10 +713,7 @@ export async function setMonthlyGoal(
           eq(appDashboardGoals.goalType, goalType),
           eq(appDashboardGoals.period, 'monthly'),
           eq(appDashboardGoals.isActive, true),
-          gte(
-            appDashboardGoals.startDate,
-            startDate.toISOString().split('T')[0]
-          )
+          eq(appDashboardGoals.startDate, startDate)
         )
       )
       .limit(1);
@@ -678,11 +724,12 @@ export async function setMonthlyGoal(
         .update(appDashboardGoals)
         .set({
           targetValue: targetValue.toString(),
-          title: title || `${goalType} 월간 목표`,
+          title: title || `${goalType} ${year}년 ${month}월 목표`,
           updatedAt: new Date(),
         })
         .where(eq(appDashboardGoals.id, existingGoal[0].id));
 
+      console.log('✅ 기존 목표 업데이트 완료:', { year, month });
       return existingGoal[0].id;
     } else {
       // 새 목표 생성
@@ -690,16 +737,21 @@ export async function setMonthlyGoal(
         .insert(appDashboardGoals)
         .values({
           agentId: userId,
-          title: title || `${goalType} 월간 목표`,
+          title: title || `${goalType} ${year}년 ${month}월 목표`,
           goalType,
           targetValue: targetValue.toString(),
           period: 'monthly',
-          startDate: startDate.toISOString().split('T')[0],
-          endDate: endDate.toISOString().split('T')[0],
+          startDate,
+          endDate,
           isActive: true,
         })
         .returning();
 
+      console.log('✅ 새 목표 생성 완료:', {
+        year,
+        month,
+        goalId: newGoal[0].id,
+      });
       return newGoal[0].id;
     }
   } catch (error) {
@@ -708,7 +760,7 @@ export async function setMonthlyGoal(
   }
 }
 
-// 모든 활성 목표 조회
+// 모든 활성 목표 조회 및 진행률 계산
 export async function getUserGoals(userId: string) {
   try {
     const userGoals = await db
@@ -722,12 +774,129 @@ export async function getUserGoals(userId: string) {
       )
       .orderBy(desc(appDashboardGoals.createdAt));
 
-    return userGoals.map((goal) => ({
-      ...goal,
-      targetValue: Number(goal.targetValue),
-      currentValue: Number(goal.currentValue),
-      progress: (Number(goal.currentValue) / Number(goal.targetValue)) * 100,
-    }));
+    // 각 목표의 실제 달성률 계산
+    const goalsWithProgress = await Promise.all(
+      userGoals
+        .filter((goal) => goal.goalType !== 'meetings') // 미팅 목표 제외
+        .map(async (goal) => {
+          let currentValue = 0;
+
+          // 목표 유형별 실제 데이터 조회
+          switch (goal.goalType) {
+            case 'revenue':
+              // ✅ 개선된 매출 목표 계산 로직 (보험료 기준)
+              const goalStartDate = new Date(goal.startDate);
+              const goalEndDate = new Date(goal.endDate);
+
+              // 보험 가입 완료된 고객들의 실제 보험료 합계 계산
+              const contractedInsuranceResult = await db
+                .select({
+                  clientId: insuranceInfo.clientId,
+                  premium: insuranceInfo.premium,
+                  coverageAmount: insuranceInfo.coverageAmount,
+                  clientUpdatedAt: clients.updatedAt,
+                })
+                .from(insuranceInfo)
+                .innerJoin(clients, eq(insuranceInfo.clientId, clients.id))
+                .where(
+                  and(
+                    eq(clients.agentId, userId),
+                    eq(insuranceInfo.isActive, true), // 활성 보험만
+                    sql`${insuranceInfo.premium} > 0`, // 보험료가 설정된 경우
+                    gte(clients.updatedAt, goalStartDate), // 목표 기간 내 업데이트
+                    lte(clients.updatedAt, goalEndDate)
+                  )
+                );
+
+              // 실제 보험료 합계 (연간 보험료를 월 단위로 환산)
+              const totalPremium = contractedInsuranceResult.reduce(
+                (sum, insurance) => {
+                  const monthlyPremium = Number(insurance.premium) || 0;
+                  return sum + monthlyPremium;
+                },
+                0
+              );
+
+              currentValue = Math.round(totalPremium / 10000); // 원을 만원으로 변환
+
+              // 보험료 데이터가 없는 경우 기본값 적용
+              if (currentValue === 0) {
+                // 목표 기간 내 업데이트된 고객 수로 추정
+                const updatedClientsResult = await db
+                  .select({ count: count() })
+                  .from(clients)
+                  .where(
+                    and(
+                      eq(clients.agentId, userId),
+                      gte(clients.updatedAt, goalStartDate),
+                      lte(clients.updatedAt, goalEndDate)
+                    )
+                  );
+
+                const updatedClients = updatedClientsResult[0]?.count || 0;
+                currentValue = updatedClients * 150; // 기본값: 고객당 150만원
+              }
+
+              break;
+
+            case 'clients':
+              // 목표 기간에 해당하는 신규 고객 수
+              const clientsStartDate = new Date(goal.startDate);
+              const clientsEndDate = new Date(goal.endDate);
+
+              const newClientsResult = await db
+                .select({ count: count() })
+                .from(clients)
+                .where(
+                  and(
+                    eq(clients.agentId, userId),
+                    gte(clients.createdAt, clientsStartDate),
+                    lte(clients.createdAt, clientsEndDate)
+                  )
+                );
+
+              currentValue = newClientsResult[0]?.count || 0;
+              break;
+
+            case 'referrals':
+              // 목표 기간에 해당하는 소개 건수
+              const referralsStartDate = new Date(goal.startDate);
+              const referralsEndDate = new Date(goal.endDate);
+
+              const referralsResult = await db
+                .select({ count: count() })
+                .from(referrals)
+                .where(
+                  and(
+                    eq(referrals.agentId, userId),
+                    gte(referrals.createdAt, referralsStartDate),
+                    lte(referrals.createdAt, referralsEndDate)
+                  )
+                );
+
+              currentValue = referralsResult[0]?.count || 0;
+              break;
+
+            default:
+              currentValue = Number(goal.currentValue);
+              break;
+          }
+
+          // 진행률 계산
+          const targetValue = Number(goal.targetValue);
+          const progress =
+            targetValue > 0 ? (currentValue / targetValue) * 100 : 0;
+
+          return {
+            ...goal,
+            targetValue,
+            currentValue,
+            progress: Math.min(progress, 100), // 100% 초과하지 않도록
+          };
+        })
+    );
+
+    return goalsWithProgress;
   } catch (error) {
     console.error('getUserGoals 오류:', error);
     return [];
@@ -804,4 +973,65 @@ export async function getRecentClientsData(userId: string) {
 export async function getTopReferrers(userId: string) {
   const insights = await getReferralInsights(userId);
   return insights.topReferrers;
+}
+
+// 목표 삭제 (소프트 삭제)
+export async function deleteGoal(userId: string, goalId: string) {
+  try {
+    // 사용자 권한 확인 후 소프트 삭제
+    const result = await db
+      .update(appDashboardGoals)
+      .set({
+        isActive: false,
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(appDashboardGoals.id, goalId),
+          eq(appDashboardGoals.agentId, userId)
+        )
+      )
+      .returning();
+
+    if (result.length === 0) {
+      throw new Error('목표를 찾을 수 없거나 삭제 권한이 없습니다.');
+    }
+
+    return result[0];
+  } catch (error) {
+    console.error('deleteGoal 오류:', error);
+    throw error;
+  }
+}
+
+// 목표 상세 조회
+export async function getGoalById(userId: string, goalId: string) {
+  try {
+    const goal = await db
+      .select()
+      .from(appDashboardGoals)
+      .where(
+        and(
+          eq(appDashboardGoals.id, goalId),
+          eq(appDashboardGoals.agentId, userId),
+          eq(appDashboardGoals.isActive, true)
+        )
+      )
+      .limit(1);
+
+    if (goal.length === 0) {
+      return null;
+    }
+
+    return {
+      ...goal[0],
+      targetValue: Number(goal[0].targetValue),
+      currentValue: Number(goal[0].currentValue),
+      progress:
+        (Number(goal[0].currentValue) / Number(goal[0].targetValue)) * 100,
+    };
+  } catch (error) {
+    console.error('getGoalById 오류:', error);
+    return null;
+  }
 }

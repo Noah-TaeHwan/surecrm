@@ -28,15 +28,23 @@ import {
 } from '~/common/components/ui/select';
 import { Badge } from '~/common/components/ui/badge';
 import { Card, CardContent } from '~/common/components/ui/card';
-import { TargetIcon } from '@radix-ui/react-icons';
+import {
+  TargetIcon,
+  Pencil1Icon,
+  TrashIcon,
+  CheckIcon,
+  Cross2Icon,
+} from '@radix-ui/react-icons';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 
 const goalSchema = z.object({
-  goalType: z.enum(['revenue', 'clients', 'meetings', 'referrals']),
+  goalType: z.enum(['revenue', 'clients', 'referrals']),
   targetValue: z.string().min(1, '목표값을 입력해주세요'),
   title: z.string().optional(),
+  targetYear: z.string().min(1, '목표 연도를 선택해주세요'),
+  targetMonth: z.string().min(1, '목표 월을 선택해주세요'),
 });
 
 type GoalFormData = z.infer<typeof goalSchema>;
@@ -44,12 +52,7 @@ type GoalFormData = z.infer<typeof goalSchema>;
 interface Goal {
   id: string;
   title: string;
-  goalType:
-    | 'revenue'
-    | 'clients'
-    | 'meetings'
-    | 'referrals'
-    | 'conversion_rate';
+  goalType: 'revenue' | 'clients' | 'referrals' | 'conversion_rate';
   targetValue: number;
   currentValue: number;
   progress: number;
@@ -61,10 +64,14 @@ interface Goal {
 interface GoalSettingModalProps {
   currentGoals: Goal[];
   onSaveGoal: (goalData: {
-    goalType: 'revenue' | 'clients' | 'meetings' | 'referrals';
+    goalType: 'revenue' | 'clients' | 'referrals';
     targetValue: number;
     title?: string;
+    id?: string; // 수정 시 필요
+    targetYear: number;
+    targetMonth: number;
   }) => Promise<void>;
+  onDeleteGoal?: (goalId: string) => Promise<void>;
   trigger?: React.ReactNode;
   isOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -73,12 +80,15 @@ interface GoalSettingModalProps {
 export function GoalSettingModal({
   currentGoals,
   onSaveGoal,
+  onDeleteGoal,
   trigger,
   isOpen: externalIsOpen,
   onOpenChange: externalOnOpenChange,
 }: GoalSettingModalProps) {
   const [internalIsOpen, setInternalIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
+  const [deletingGoalId, setDeletingGoalId] = useState<string | null>(null);
 
   // 외부에서 제어되는 경우와 내부에서 제어되는 경우를 구분
   const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
@@ -90,7 +100,28 @@ export function GoalSettingModal({
       goalType: 'revenue',
       targetValue: '',
       title: '',
+      targetYear: new Date().getFullYear().toString(),
+      targetMonth: (new Date().getMonth() + 1).toString(),
     },
+  });
+
+  // ✅ 선택한 년/월에 해당하는 목표만 필터링
+  const selectedYear = parseInt(form.watch('targetYear'));
+  const selectedMonth = parseInt(form.watch('targetMonth'));
+
+  const filteredGoals = currentGoals.filter((goal) => {
+    const goalStartDate = new Date(goal.startDate);
+    const goalYear = goalStartDate.getFullYear();
+    const goalMonth = goalStartDate.getMonth() + 1;
+
+    return goalYear === selectedYear && goalMonth === selectedMonth;
+  });
+
+  console.log('🎯 목표 필터링:', {
+    selectedYear,
+    selectedMonth,
+    totalGoals: currentGoals.length,
+    filteredGoals: filteredGoals.length,
   });
 
   const onSubmit = async (data: GoalFormData) => {
@@ -99,14 +130,48 @@ export function GoalSettingModal({
       await onSaveGoal({
         ...data,
         targetValue: Number(data.targetValue),
+        targetYear: Number(data.targetYear),
+        targetMonth: Number(data.targetMonth),
+        id: editingGoal?.id, // 수정 시 ID 포함
       });
       setIsOpen(false);
       form.reset();
+      setEditingGoal(null);
     } catch (error) {
       console.error('목표 설정 오류:', error);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleEdit = (goal: Goal) => {
+    setEditingGoal(goal);
+    form.setValue('goalType', goal.goalType as any);
+    form.setValue('targetValue', goal.targetValue.toString());
+    form.setValue('title', goal.title);
+
+    // 목표의 시작 날짜에서 연도와 월 추출
+    const startDate = new Date(goal.startDate);
+    form.setValue('targetYear', startDate.getFullYear().toString());
+    form.setValue('targetMonth', (startDate.getMonth() + 1).toString());
+  };
+
+  const handleDelete = async (goalId: string) => {
+    if (!onDeleteGoal) return;
+
+    setDeletingGoalId(goalId);
+    try {
+      await onDeleteGoal(goalId);
+    } catch (error) {
+      console.error('목표 삭제 오류:', error);
+    } finally {
+      setDeletingGoalId(null);
+    }
+  };
+
+  const handleCancel = () => {
+    setEditingGoal(null);
+    form.reset();
   };
 
   const getGoalTypeLabel = (type: string) => {
@@ -115,8 +180,6 @@ export function GoalSettingModal({
         return '매출';
       case 'clients':
         return '고객 수';
-      case 'meetings':
-        return '미팅 수';
       case 'referrals':
         return '소개 건수';
       default:
@@ -130,8 +193,6 @@ export function GoalSettingModal({
         return '만원';
       case 'clients':
         return '명';
-      case 'meetings':
-        return '건';
       case 'referrals':
         return '건';
       default:
@@ -150,78 +211,217 @@ export function GoalSettingModal({
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+      <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader className="pb-4">
+          <DialogTitle className="flex items-center gap-2 text-lg">
             <TargetIcon className="h-5 w-5 text-primary" />
-            월간 목표 설정
+            {editingGoal ? '목표 수정' : '목표 설정'}
           </DialogTitle>
-          <DialogDescription>
-            이번 달 달성하고 싶은 목표를 설정하세요. 설정된 목표는 대시보드에서
-            진행률을 확인할 수 있습니다.
+          <DialogDescription className="text-sm text-muted-foreground">
+            {editingGoal
+              ? '설정된 목표를 수정하거나 삭제할 수 있습니다.'
+              : '특정 월의 목표를 설정하고 달성률을 확인하세요.'}
           </DialogDescription>
         </DialogHeader>
 
-        {/* 현재 목표 현황 */}
-        {currentGoals.length > 0 && (
-          <div className="space-y-3">
-            <h4 className="text-sm font-medium text-foreground">현재 목표</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {currentGoals.map((goal) => (
-                <Card key={goal.id} className="border-border/50">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-foreground">
-                        {getGoalTypeLabel(goal.goalType)}
-                      </span>
-                      <Badge
-                        variant="secondary"
-                        className={`text-xs ${getProgressColor(goal.progress)}`}
-                      >
-                        {Math.round(goal.progress)}%
-                      </Badge>
-                    </div>
-                    <div className="text-lg font-semibold text-foreground mb-1">
-                      {goal.currentValue.toLocaleString()} /{' '}
-                      {goal.targetValue.toLocaleString()}{' '}
-                      {getGoalTypeUnit(goal.goalType)}
-                    </div>
-                    <div className="w-full bg-muted rounded-full h-2">
-                      <div
-                        className="bg-primary h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${Math.min(goal.progress, 100)}%` }}
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        )}
-
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            {/* 🗓️ STEP 1: 목표 기간 선택 (가장 먼저) */}
+            <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
+              <h4 className="text-sm font-medium text-primary mb-3 flex items-center gap-2">
+                📅 목표 기간 설정
+              </h4>
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="targetYear"
+                  render={({ field }) => (
+                    <FormItem className="space-y-2">
+                      <FormLabel className="text-sm font-medium">
+                        목표 연도
+                      </FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-10 text-sm">
+                            <SelectValue placeholder="연도 선택" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {Array.from({ length: 3 }, (_, i) => {
+                            const year = new Date().getFullYear() + i;
+                            return (
+                              <SelectItem
+                                key={year}
+                                value={year.toString()}
+                                className="text-sm py-2"
+                              >
+                                {year}년
+                              </SelectItem>
+                            );
+                          })}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="targetMonth"
+                  render={({ field }) => (
+                    <FormItem className="space-y-2">
+                      <FormLabel className="text-sm font-medium">
+                        목표 월
+                      </FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-10 text-sm">
+                            <SelectValue placeholder="월 선택" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {Array.from({ length: 12 }, (_, i) => {
+                            const month = i + 1;
+                            return (
+                              <SelectItem
+                                key={month}
+                                value={month.toString()}
+                                className="text-sm py-2"
+                              >
+                                {month}월
+                              </SelectItem>
+                            );
+                          })}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                💡 선택한 기간의 목표를 설정하고 실시간 달성률을 확인할 수
+                있습니다
+              </p>
+            </div>
+
+            {/* 🎯 STEP 2: 현재 목표 현황 */}
+            {currentGoals.length > 0 && !editingGoal && (
+              <div className="space-y-4 pb-4 border-b border-border/30">
+                <h4 className="text-base font-medium text-foreground flex items-center gap-2">
+                  🎯 현재 설정된 목표
+                </h4>
+                <div className="space-y-3">
+                  {filteredGoals.map((goal) => (
+                    <Card
+                      key={goal.id}
+                      className="border-border/50 hover:border-border transition-colors"
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex-1">
+                            <span className="text-sm font-medium text-foreground">
+                              {goal.title || getGoalTypeLabel(goal.goalType)}
+                            </span>
+                            <div className="text-xs text-muted-foreground mt-1">
+                              📅 {new Date(goal.startDate).getFullYear()}년{' '}
+                              {new Date(goal.startDate).getMonth() + 1}월 목표
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge
+                              variant="secondary"
+                              className={`text-xs px-2 py-1 ${getProgressColor(
+                                goal.progress
+                              )}`}
+                            >
+                              {Math.round(goal.progress)}%
+                            </Badge>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEdit(goal)}
+                              className="h-7 w-7 p-0 hover:bg-muted"
+                            >
+                              <Pencil1Icon className="h-3 w-3" />
+                            </Button>
+                            {onDeleteGoal && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDelete(goal.id)}
+                                disabled={deletingGoalId === goal.id}
+                                className="h-7 w-7 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                              >
+                                <TrashIcon className="h-3 w-3" />
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="text-lg font-semibold text-foreground">
+                            {goal.currentValue.toLocaleString()} /{' '}
+                            {goal.targetValue.toLocaleString()}{' '}
+                            {getGoalTypeUnit(goal.goalType)}
+                          </div>
+                        </div>
+
+                        <div className="w-full bg-muted rounded-full h-3 mb-1">
+                          <div
+                            className="bg-primary h-3 rounded-full transition-all duration-300"
+                            style={{
+                              width: `${Math.min(goal.progress, 100)}%`,
+                            }}
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 🚀 STEP 3: 새 목표 설정 */}
+            <div className="space-y-4">
+              <h4 className="text-base font-medium text-foreground flex items-center gap-2">
+                🚀 {editingGoal ? '목표 수정' : '새 목표 설정'}
+              </h4>
+
               <FormField
                 control={form.control}
                 name="goalType"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>목표 유형</FormLabel>
+                  <FormItem className="space-y-2">
+                    <FormLabel className="text-sm font-medium">
+                      목표 유형
+                    </FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="h-10 text-sm">
                           <SelectValue placeholder="목표 유형을 선택하세요" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="revenue">매출 목표</SelectItem>
-                        <SelectItem value="clients">신규 고객 목표</SelectItem>
-                        <SelectItem value="meetings">미팅 목표</SelectItem>
-                        <SelectItem value="referrals">소개 목표</SelectItem>
+                        <SelectItem value="revenue" className="text-sm py-2">
+                          💰 매출 목표
+                        </SelectItem>
+                        <SelectItem value="clients" className="text-sm py-2">
+                          👥 신규 고객 목표
+                        </SelectItem>
+                        <SelectItem value="referrals" className="text-sm py-2">
+                          🤝 소개 목표
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -233,18 +433,19 @@ export function GoalSettingModal({
                 control={form.control}
                 name="targetValue"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
+                  <FormItem className="space-y-2">
+                    <FormLabel className="text-sm font-medium">
                       목표값 ({getGoalTypeUnit(form.watch('goalType'))})
                     </FormLabel>
                     <FormControl>
                       <Input
                         type="number"
                         placeholder="목표값을 입력하세요"
+                        className="h-10 text-sm"
                         {...field}
                       />
                     </FormControl>
-                    <FormDescription>
+                    <FormDescription className="text-xs">
                       {form.watch('goalType') === 'revenue' &&
                         '만원 단위로 입력하세요 (예: 5000 = 5천만원)'}
                     </FormDescription>
@@ -252,38 +453,62 @@ export function GoalSettingModal({
                   </FormItem>
                 )}
               />
+
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem className="space-y-2">
+                    <FormLabel className="text-sm font-medium">
+                      목표 제목 (선택사항)
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="목표에 대한 설명을 입력하세요"
+                        className="h-10 text-sm"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription className="text-xs">
+                      비워두면 자동으로 생성됩니다
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
 
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>목표 제목 (선택사항)</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="목표에 대한 설명을 입력하세요"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    비워두면 자동으로 생성됩니다
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
+            <DialogFooter className="gap-2 pt-4">
+              {editingGoal && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleCancel}
+                  className="gap-2 h-9 px-4"
+                >
+                  <Cross2Icon className="h-3 w-3" />
+                  취소
+                </Button>
               )}
-            />
-
-            <DialogFooter>
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setIsOpen(false)}
+                className="h-9 px-4"
               >
-                취소
+                닫기
               </Button>
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? '저장 중...' : '목표 설정'}
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="gap-2 h-9 px-4"
+              >
+                <CheckIcon className="h-3 w-3" />
+                {isLoading
+                  ? '저장 중...'
+                  : editingGoal
+                  ? '목표 수정'
+                  : '목표 설정'}
               </Button>
             </DialogFooter>
           </form>

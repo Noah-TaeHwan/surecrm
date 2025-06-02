@@ -76,13 +76,13 @@ export function WelcomeSection({ userName, todayStats }: WelcomeSectionProps) {
               <div className="text-2xl font-bold text-primary mb-0.5">
                 {todayStats.scheduledMeetings}
               </div>
-              <div className="text-xs text-muted-foreground">오늘 미팅</div>
+              <div className="text-xs text-muted-foreground">활성 고객</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-foreground mb-0.5">
                 {todayStats.pendingTasks}
               </div>
-              <div className="text-xs text-muted-foreground">대기 업무</div>
+              <div className="text-xs text-muted-foreground">소개 대기</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-foreground mb-0.5">
@@ -103,7 +103,7 @@ export function WelcomeSection({ userName, todayStats }: WelcomeSectionProps) {
                   variant="secondary"
                   className="bg-primary/10 text-primary border-primary/20 text-xs"
                 >
-                  📅 오늘 {todayStats.scheduledMeetings}건의 미팅 예정
+                  👥 활성 고객 {todayStats.scheduledMeetings}명
                 </Badge>
               )}
               {todayStats.pendingTasks > 0 && (
@@ -111,7 +111,7 @@ export function WelcomeSection({ userName, todayStats }: WelcomeSectionProps) {
                   variant="secondary"
                   className="bg-muted/20 text-muted-foreground border-border/30 text-xs"
                 >
-                  📋 {todayStats.pendingTasks}개의 팔로업 대기
+                  🤝 소개 대기 {todayStats.pendingTasks}건
                 </Badge>
               )}
               {todayStats.newReferrals > 0 && (

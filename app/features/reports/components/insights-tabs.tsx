@@ -430,12 +430,15 @@ export function InsightsTabs({
                           {efficiency.callToContractRate}%
                         </span>
                       </div>
+                      {/* 미팅 관련 기능 - MVP에서 제외 */}
+                      {/*
                       <div className="flex justify-between items-center">
                         <span className="text-sm">미팅당 성사율</span>
                         <span className="font-medium text-primary">
                           {efficiency.meetingSuccessRate}%
                         </span>
                       </div>
+                      */}
                       <div className="flex justify-between items-center">
                         <span className="text-sm">평균 상담 시간</span>
                         <span className="font-medium">
@@ -474,12 +477,15 @@ export function InsightsTabs({
                           {efficiency.responseRate.follow.toFixed(0)}%
                         </span>
                       </div>
+                      {/* 미팅 관련 기능 - MVP에서 제외 */}
+                      {/*
                       <div className="flex justify-between items-center">
                         <span className="text-sm">미팅 약속률</span>
                         <span className="font-medium">
                           {efficiency.responseRate.meeting.toFixed(0)}%
                         </span>
                       </div>
+                      */}
                       <div className="pt-2 border-t">
                         <p className="text-xs text-muted-foreground">
                           {efficiency.responseRate.first > 80
