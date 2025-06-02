@@ -23,8 +23,6 @@ export async function getCurrentUser(request: Request): Promise<User | null> {
       return null;
     }
 
-    console.log('현재 사용자 ID 조회:', userId);
-
     // 프로필 정보 조회
     const userProfile = await db
       .select()

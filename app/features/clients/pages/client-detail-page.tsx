@@ -54,6 +54,7 @@ import type {
   AppClientContactHistory,
   AppClientAnalytics,
 } from '~/features/clients/lib/schema';
+import { requireAuth } from '~/lib/auth/middleware';
 
 // 🎯 확장된 고객 프로필 타입 (상세 페이지용)
 interface ClientDetailProfile extends Client {
@@ -88,118 +89,65 @@ interface ClientDetailProfile extends Client {
 }
 
 export async function loader({ request, params }: Route.LoaderArgs) {
-  const { clientId } = params;
+  const { id: clientId } = params;
+
+  console.log('🔍 클라이언트 상세 페이지 loader 시작:', { clientId });
 
   if (!clientId) {
+    console.error('❌ 클라이언트 ID가 없음');
     throw new Response('고객 ID가 필요합니다.', { status: 400 });
   }
 
   try {
-    // 🎯 실제 API 호출 (Phase 3에서 완전 구현)
+    // 🎯 실제 로그인된 보험설계사 정보 가져오기
+    const user = await requireAuth(request);
+    const agentId = user.id;
+
+    console.log('👤 로그인된 보험설계사:', {
+      agentId,
+      fullName: user.fullName,
+    });
+
+    // 🎯 실제 API 호출로 고객 상세 정보 조회
     const { getClientById } = await import('~/api/shared/clients');
 
-    const clientOverview = await getClientById(clientId, 'demo-agent');
+    console.log('📞 API 호출 시작:', { clientId, agentId });
 
-    if (!clientOverview) {
-      throw new Response('고객을 찾을 수 없습니다.', { status: 404 });
+    const clientDetail = await getClientById(clientId, agentId);
+
+    console.log('📞 API 호출 결과:', { clientDetail: !!clientDetail });
+
+    if (!clientDetail) {
+      console.log('⚠️ 고객을 찾을 수 없음, 빈 상태 처리');
+
+      // 🎯 고객이 없을 때 빈 상태 데이터 반환 (404 대신)
+      return {
+        client: null,
+        currentUserId: agentId,
+        isEmpty: true,
+      };
     }
 
-    // 🎯 Mock 데이터 (현재 단계용)
-    const mockClientDetail: ClientDetailProfile = {
-      // 기본 Client 필드들
-      id: clientId,
-      agentId: 'demo-agent',
-      teamId: 'team-1',
-      fullName: '김철수',
-      email: 'kimcs@example.com',
-      phone: '010-1234-5678',
-      telecomProvider: 'SKT',
-      address: '서울시 강남구 역삼동 123-45',
-      occupation: '회사원 (삼성전자)',
-      hasDrivingLicense: true,
-      height: 175,
-      weight: 70,
-      tags: ['VIP', '핵심 소개자', '장기 고객'],
-      importance: 'high' as const,
-      currentStageId: 'stage3',
-      referredById: null,
-      notes:
-        '매우 적극적인 고객. 추가 소개 가능성 높음. 신뢰도가 높고 장기적인 관계 구축이 가능함.',
-      customFields: {
-        preferredContactTime: '오후 2-6시',
-        hobbies: ['골프', '독서', '여행'],
-        children: 2,
-      },
-      isActive: true,
-      createdAt: new Date('2023-08-15'),
-      updatedAt: new Date('2024-01-10'),
-
-      // 계산/확장 필드들
-      referralCount: 3,
-      insuranceTypes: ['자동차보험', '건강보험', '연금보험'],
-      totalPremium: 320000,
-      currentStage: {
-        id: 'stage3',
-        name: '상품 설명',
-        color: '#3b82f6',
-      },
-      engagementScore: 8.5,
-      conversionProbability: 85,
-      lifetimeValue: 2400000,
-      lastContactDate: '2024-01-10',
-      nextActionDate: '2024-01-15',
-      upcomingMeeting: {
-        date: '2024-01-15',
-        type: '계약 체결',
-      },
-      referredBy: {
-        id: 'ref1',
-        name: '박영희',
-        relationship: '대학 동기',
-      },
-
-      // 상세 데이터
-      recentContacts: [],
-      analytics: null,
-      familyMembers: [
-        {
-          id: '1',
-          name: '김영희',
-          relationship: '배우자',
-          birthDate: '1988-03-15',
-          hasInsurance: true,
-        },
-        {
-          id: '2',
-          name: '김민수',
-          relationship: '자녀',
-          birthDate: '2015-07-20',
-          hasInsurance: false,
-        },
-      ],
-      milestones: [
-        {
-          id: '1',
-          title: '첫 미팅',
-          date: '2023-08-15',
-          type: 'meeting',
-        },
-        {
-          id: '2',
-          title: '니즈 분석 완료',
-          date: '2023-09-01',
-          type: 'stage_change',
-        },
-      ],
-    };
+    console.log('✅ 고객 상세 정보 로드 완료:', clientDetail.fullName);
 
     return {
-      client: mockClientDetail,
-      currentUserId: 'demo-agent',
+      client: clientDetail,
+      currentUserId: agentId,
+      isEmpty: false,
     };
   } catch (error) {
-    console.error('고객 상세 정보 조회 실패:', error);
-    throw new Response('고객 정보를 불러오는데 실패했습니다.', { status: 500 });
+    console.error('❌ 고객 상세 정보 조회 실패:', error);
+
+    // 🎯 에러 상태 반환 (서버 에러 대신)
+    return {
+      client: null,
+      currentUserId: null,
+      isEmpty: true,
+      error:
+        error instanceof Error
+          ? error.message
+          : '알 수 없는 오류가 발생했습니다.',
+    };
   }
 }
 
@@ -212,10 +160,44 @@ export function meta({ data }: Route.MetaArgs) {
 }
 
 export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
-  const { client } = loaderData;
+  const { client, isEmpty, error } = loaderData;
   const [activeTab, setActiveTab] = useState('overview');
 
-  // 🎯 액션 핸들러들
+  // 🎯 빈 상태 처리
+  if (isEmpty || !client) {
+    return (
+      <MainLayout title="고객 상세">
+        <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+          <div className="text-6xl">🔍</div>
+          {error ? (
+            <>
+              <h2 className="text-2xl font-semibold">오류가 발생했습니다</h2>
+              <p className="text-muted-foreground text-center max-w-md">
+                {error}
+              </p>
+            </>
+          ) : (
+            <>
+              <h2 className="text-2xl font-semibold">
+                고객을 찾을 수 없습니다
+              </h2>
+              <p className="text-muted-foreground text-center max-w-md">
+                요청하신 고객 정보가 존재하지 않거나 접근 권한이 없습니다.
+              </p>
+            </>
+          )}
+          <Link to="/clients">
+            <Button variant="outline">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              고객 목록으로 돌아가기
+            </Button>
+          </Link>
+        </div>
+      </MainLayout>
+    );
+  }
+
+  // 🎯 액션 핸들러들 (client가 확실히 존재할 때만 실행)
   const handleEditClient = () => {
     // TODO: Phase 3에서 편집 페이지로 라우팅
     alert('고객 편집 페이지로 이동합니다. (Phase 3에서 구현 예정)');

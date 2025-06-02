@@ -61,7 +61,7 @@ import {
   Star,
 } from 'lucide-react';
 import { useState, useMemo, useEffect } from 'react';
-import { useFetcher } from 'react-router';
+import { useFetcher, useNavigate } from 'react-router';
 import { z } from 'zod';
 import type { Route } from './+types/clients-page';
 import type {
@@ -485,6 +485,7 @@ export async function action({ request }: Route.ActionArgs) {
 
 export default function ClientsPage({ loaderData }: any) {
   const fetcher = useFetcher();
+  const navigate = useNavigate();
 
   // 🎯 상태 관리
   const [searchQuery, setSearchQuery] = useState('');
@@ -600,13 +601,13 @@ export default function ClientsPage({ loaderData }: any) {
   };
 
   const handleEditClient = (e: React.MouseEvent, client: ClientProfile) => {
-    e.stopPropagation(); // 행 클릭 이벤트 방지
+    e.stopPropagation(); // 🎯 이벤트 버블링 방지
     setSelectedClient(client);
     setShowEditClientModal(true);
   };
 
   const handleDeleteClient = (e: React.MouseEvent, client: ClientProfile) => {
-    e.stopPropagation(); // 행 클릭 이벤트 방지
+    e.stopPropagation(); // �� 이벤트 버블링 방지
     setSelectedClient(client);
     setShowDeleteConfirmModal(true);
   };
@@ -756,8 +757,8 @@ export default function ClientsPage({ loaderData }: any) {
 
   // 🎯 핸들러 함수들 (데이터베이스 연동 고려)
   const handleClientRowClick = (clientId: string) => {
-    // 🎯 실제 상세 페이지로 라우팅
-    window.location.href = `/clients/${clientId}`;
+    // 🎯 React Router를 사용한 정확한 라우팅
+    navigate(`/clients/${clientId}`);
   };
 
   // 🎯 카드 뷰 렌더링

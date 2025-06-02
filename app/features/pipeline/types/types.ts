@@ -39,7 +39,7 @@ export interface Client {
   referredBy?: {
     id: string;
     name: string;
-  };
+  } | null;
   importance: 'high' | 'medium' | 'low';
   lastContactDate?: string;
   nextMeeting?: {
@@ -54,6 +54,7 @@ export interface Client {
   // 개인정보 동의 관련
   consentDate?: string;
   profileImageUrl?: string;
+  createdAt?: string; // 체류 기간 계산용
 }
 
 export interface LoaderData {

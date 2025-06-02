@@ -32,6 +32,8 @@ import {
   AlertCircle,
   User,
   GripVertical,
+  Timer,
+  Smartphone,
 } from 'lucide-react';
 import { Link } from 'react-router';
 import type { InsuranceInfo } from '~/features/pipeline/types/types';
@@ -63,6 +65,7 @@ interface ClientCardProps {
   insuranceInfo?: InsuranceInfo[];
   profileImageUrl?: string;
   isDragging?: boolean;
+  createdAt?: string;
 }
 
 export function ClientCard({
@@ -70,6 +73,8 @@ export function ClientCard({
   name,
   phone,
   occupation,
+  telecomProvider,
+  hasDrivingLicense,
   referredBy,
   importance,
   lastContactDate,
@@ -78,6 +83,7 @@ export function ClientCard({
   tags,
   insuranceInfo,
   isDragging,
+  createdAt,
 }: ClientCardProps) {
   const getImportanceConfig = (importance: string) => {
     switch (importance) {
@@ -180,6 +186,48 @@ export function ClientCard({
     return `${Math.floor(diffDays / 30)}개월 전`;
   };
 
+  // 파이프라인 체류 기간 계산 (createdAt 기준)
+  const formatPipelineStay = (createdAt?: string) => {
+    if (!createdAt) return null;
+
+    const createdDate = new Date(createdAt);
+    const now = new Date();
+    const diffDays = Math.floor(
+      (now.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24)
+    );
+
+    if (diffDays === 0) return '오늘 등록';
+    if (diffDays === 1) return '1일째';
+    if (diffDays <= 7) return `${diffDays}일째`;
+    if (diffDays <= 30) return `${Math.floor(diffDays / 7)}주째`;
+
+    return `${Math.floor(diffDays / 30)}개월째`;
+  };
+
+  // 통신사 아이콘 및 색상 매핑
+  const getTelecomInfo = (provider?: string) => {
+    if (!provider) return null;
+
+    switch (provider.toLowerCase()) {
+      case 'kt':
+        return { label: 'KT', color: 'text-red-600 bg-red-50 border-red-200' };
+      case 'skt':
+      case 'sk텔레콤':
+        return { label: 'SKT', color: 'text-red-600 bg-red-50 border-red-200' };
+      case 'lg':
+      case 'lgu+':
+        return {
+          label: 'LG U+',
+          color: 'text-pink-600 bg-pink-50 border-pink-200',
+        };
+      default:
+        return {
+          label: provider,
+          color: 'text-gray-600 bg-gray-50 border-gray-200',
+        };
+    }
+  };
+
   const importanceConfig = getImportanceConfig(importance);
 
   return (
@@ -248,6 +296,41 @@ export function ClientCard({
             <Users className="h-3 w-3 mr-1.5 text-blue-500 flex-shrink-0" />
             <span className="text-blue-600 truncate">
               {referredBy.name} 소개
+            </span>
+          </div>
+        )}
+
+        {/* 파이프라인 체류 기간 */}
+        {formatPipelineStay(createdAt) && (
+          <div className="flex items-center mb-2 text-sm">
+            <Timer className="h-3 w-3 mr-1.5 text-orange-500 flex-shrink-0" />
+            <span className="text-orange-600 font-medium">
+              {formatPipelineStay(createdAt)}
+            </span>
+          </div>
+        )}
+
+        {/* 통신사 정보 */}
+        {getTelecomInfo(telecomProvider) && (
+          <div className="flex items-center mb-2 text-sm">
+            <Smartphone className="h-3 w-3 mr-1.5 text-gray-500 flex-shrink-0" />
+            <Badge
+              variant="outline"
+              className={`text-xs px-2 py-0.5 ${
+                getTelecomInfo(telecomProvider)?.color
+              }`}
+            >
+              {getTelecomInfo(telecomProvider)?.label}
+            </Badge>
+          </div>
+        )}
+
+        {/* 운전면허 정보 */}
+        {hasDrivingLicense && (
+          <div className="flex items-center mb-2 text-sm">
+            <Car className="h-3 w-3 mr-1.5 text-green-500 flex-shrink-0" />
+            <span className="text-green-600 text-xs font-medium">
+              운전면허 보유
             </span>
           </div>
         )}

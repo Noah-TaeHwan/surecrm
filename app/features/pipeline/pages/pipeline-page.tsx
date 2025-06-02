@@ -1,9 +1,10 @@
 import type { Route } from './+types/pipeline-page';
 import { MainLayout } from '~/common/layouts/main-layout';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useFetcher, useRevalidator } from 'react-router';
 import { PipelineBoard } from '~/features/pipeline/components/pipeline-board';
 import { PipelineFilters } from '~/features/pipeline/components/pipeline-filters';
-import { AddClientModal } from '~/features/pipeline/components/add-client-modal';
+import { AddClientModal } from '~/features/clients/components/add-client-modal';
 import {
   Plus,
   Search,
@@ -28,6 +29,7 @@ import {
   createDefaultPipelineStages,
 } from '~/features/pipeline/lib/supabase-pipeline-data';
 import { requireAuth } from '~/lib/auth/middleware';
+import { redirect } from 'react-router';
 
 export function meta({ data, params }: Route.MetaArgs) {
   return [
@@ -72,8 +74,130 @@ export async function loader({ request }: Route.LoaderArgs) {
   }
 }
 
+// 🎯 새로운 action 함수 - 서버사이드에서 고객 추가 처리
+export async function action({ request }: Route.ActionArgs) {
+  try {
+    const user = await requireAuth(request);
+    const formData = await request.formData();
+    const intent = formData.get('intent');
+
+    if (intent === 'addClient') {
+      // 폼 데이터 파싱
+      const clientData = {
+        fullName: formData.get('fullName') as string,
+        phone: formData.get('phone') as string,
+        email: (formData.get('email') as string) || undefined,
+        telecomProvider:
+          (formData.get('telecomProvider') as string) || undefined,
+        address: (formData.get('address') as string) || undefined,
+        occupation: (formData.get('occupation') as string) || undefined,
+        importance:
+          (formData.get('importance') as 'high' | 'medium' | 'low') || 'medium',
+        tags: formData.get('tags')
+          ? (formData.get('tags') as string)
+              .split(',')
+              .map((tag) => tag.trim())
+              .filter((tag) => tag.length > 0)
+          : [],
+        notes: (formData.get('notes') as string) || undefined,
+      };
+
+      console.log('🎯 서버사이드에서 새 고객 추가 시작:', clientData);
+
+      // 첫 상담 단계 찾기
+      const stages = await getPipelineStages(user.id);
+      const firstStage = stages.find((s) => s.name === '첫 상담') || stages[0];
+
+      if (!firstStage) {
+        return {
+          success: false,
+          error:
+            '첫 상담 단계를 찾을 수 없습니다. 파이프라인 설정을 확인해주세요.',
+        };
+      }
+
+      // 🎯 실제 Supabase API 호출
+      const { createClient } = await import('~/api/shared/clients');
+
+      const newClientData = {
+        fullName: clientData.fullName,
+        phone: clientData.phone,
+        email: clientData.email,
+        telecomProvider: clientData.telecomProvider,
+        address: clientData.address,
+        occupation: clientData.occupation,
+        importance: clientData.importance,
+        tags: clientData.tags,
+        notes: clientData.notes,
+        currentStageId: firstStage.id, // 🎯 첫 상담 단계로 설정
+      };
+
+      const result = await createClient(newClientData, user.id);
+
+      if (result.success && result.data) {
+        console.log('✅ 새 고객 추가 성공:', result.data.fullName);
+        // 🎯 성공 응답 반환 (redirect 대신)
+        return {
+          success: true,
+          message: '고객이 성공적으로 추가되었습니다.',
+          client: result.data,
+        };
+      } else {
+        return {
+          success: false,
+          error: result.message || '고객 추가에 실패했습니다.',
+        };
+      }
+    }
+
+    if (intent === 'moveClient') {
+      // 고객 단계 이동 데이터 파싱
+      const clientId = formData.get('clientId') as string;
+      const targetStageId = formData.get('targetStageId') as string;
+
+      if (!clientId || !targetStageId) {
+        return {
+          success: false,
+          error: '고객 ID 또는 대상 단계 ID가 누락되었습니다.',
+        };
+      }
+
+      // 🎯 실제 Supabase API 호출
+      const { updateClientStage } = await import('~/api/shared/clients');
+
+      const result = await updateClientStage(clientId, targetStageId, user.id);
+
+      if (result.success && result.data) {
+        return {
+          success: true,
+          message: result.message,
+          client: result.data,
+        };
+      } else {
+        return {
+          success: false,
+          error: result.message || '고객 단계 이동에 실패했습니다.',
+        };
+      }
+    }
+
+    return { success: false, error: '알 수 없는 요청입니다.' };
+  } catch (error) {
+    console.error('❌ Action에서 고객 추가 실패:', error);
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : '알 수 없는 오류가 발생했습니다.',
+    };
+  }
+}
+
 export default function PipelinePage({ loaderData }: Route.ComponentProps) {
   const { stages, clients } = loaderData;
+  const fetcher = useFetcher();
+  const revalidator = useRevalidator();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedReferrerId, setSelectedReferrerId] = useState<string | null>(
@@ -83,7 +207,23 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
     'all' | 'high' | 'medium' | 'low'
   >('all');
   const [addClientOpen, setAddClientOpen] = useState(false);
-  const [selectedStageId, setSelectedStageId] = useState<string>('');
+
+  // 🎯 fetcher 상태 기반으로 상태 관리
+  const isSubmitting = fetcher.state === 'submitting';
+  const submitError = fetcher.data?.error || null;
+
+  // 🎯 성공 시 모달 닫기 및 데이터 새로고침 로직
+  useEffect(() => {
+    if (fetcher.data?.success === true) {
+      // 고객 추가 성공 시 모달 닫기
+      if (addClientOpen) {
+        setAddClientOpen(false);
+      }
+
+      // 데이터 새로고침
+      revalidator.revalidate();
+    }
+  }, [fetcher.data?.success, addClientOpen, revalidator]);
 
   // 필터링된 고객 목록
   const filteredClients = clients.filter((client) => {
@@ -154,33 +294,49 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
     sourceStageId: string,
     destinationStageId: string
   ) => {
-    // 실제 구현에서는 여기서 API 호출을 통해 DB 업데이트를 수행합니다
-    console.log(
-      `Move client ${clientId} from ${sourceStageId} to ${destinationStageId}`
-    );
+    // 🎯 FormData 생성하여 서버로 전송
+    const formData = new FormData();
+    formData.append('intent', 'moveClient');
+    formData.append('clientId', clientId);
+    formData.append('targetStageId', destinationStageId);
+
+    // 🎯 action 함수 호출
+    fetcher.submit(formData, { method: 'post' });
   };
 
-  // 새 고객 추가 처리 함수
-  const handleAddClient = (client: {
-    name: string;
+  // 새 고객 추가 처리 함수 (useFetcher 사용)
+  const handleAddClient = async (clientData: {
+    fullName: string;
     phone: string;
     email?: string;
-    stageId: string;
+    telecomProvider?: string;
+    address?: string;
+    occupation?: string;
     importance: 'high' | 'medium' | 'low';
-    referrerId?: string;
-    note?: string;
+    tags?: string;
+    notes?: string;
   }) => {
-    // 실제 구현에서는 여기서 API 호출을 통해 DB에 새 고객을 추가합니다
-    console.log('Add new client:', client);
+    // 🎯 FormData 생성
+    const formData = new FormData();
+    formData.append('intent', 'addClient');
+    formData.append('fullName', clientData.fullName);
+    formData.append('phone', clientData.phone);
+    if (clientData.email) formData.append('email', clientData.email);
+    if (clientData.telecomProvider)
+      formData.append('telecomProvider', clientData.telecomProvider);
+    if (clientData.address) formData.append('address', clientData.address);
+    if (clientData.occupation)
+      formData.append('occupation', clientData.occupation);
+    formData.append('importance', clientData.importance);
+    if (clientData.tags) formData.append('tags', clientData.tags);
+    if (clientData.notes) formData.append('notes', clientData.notes);
 
-    // 성공적으로 추가 후 모달 닫기
-    setAddClientOpen(false);
-    setSelectedStageId(''); // 단계 선택 초기화
+    // 🎯 action 함수 호출
+    fetcher.submit(formData, { method: 'post' });
   };
 
   // 특정 단계에 고객 추가 함수
   const handleAddClientToStage = (stageId: string) => {
-    setSelectedStageId(stageId);
     setAddClientOpen(true);
   };
 
@@ -334,7 +490,9 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
 
               {/* 고객 추가 버튼 */}
               <Button
-                onClick={() => setAddClientOpen(true)}
+                onClick={() => {
+                  setAddClientOpen(true);
+                }}
                 className="flex items-center gap-2"
               >
                 <Plus className="h-4 w-4" />
@@ -351,7 +509,7 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
               ...stage,
               stats: getStageStats(stage.id),
             }))}
-            clients={filteredClients}
+            clients={filteredClients as unknown as Client[]}
             onClientMove={handleClientMove}
             onAddClientToStage={handleAddClientToStage}
           />
@@ -382,14 +540,13 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
         )}
       </div>
 
-      {/* 고객 추가 모달 */}
+      {/* 고객 추가 모달 - 고객 관리 페이지와 통일 */}
       <AddClientModal
         open={addClientOpen}
         onOpenChange={setAddClientOpen}
-        stages={stages}
-        referrers={referrers}
-        initialStageId={selectedStageId}
-        onAddClient={handleAddClient}
+        onSubmit={handleAddClient}
+        isSubmitting={isSubmitting}
+        error={submitError}
       />
     </MainLayout>
   );

@@ -105,7 +105,12 @@ export async function getClientsByStage(agentId: string) {
             .from(clients)
             .where(eq(clients.id, item.client.referredById))
             .limit(1);
-          referredBy = referrer[0] || null;
+          if (referrer[0]) {
+            referredBy = {
+              id: referrer[0].id,
+              name: referrer[0].fullName,
+            };
+          }
         }
 
         // 보험 정보
@@ -122,13 +127,29 @@ export async function getClientsByStage(agentId: string) {
           .orderBy(desc(meetings.scheduledAt))
           .limit(5);
 
+        // 🎯 파이프라인 타입에 맞게 필드명 변환
         return {
-          ...item.client,
+          id: item.client.id,
+          name: item.client.fullName,
+          phone: item.client.phone,
+          email: item.client.email,
+          address: item.client.address,
+          occupation: item.client.occupation,
+          telecomProvider: item.client.telecomProvider,
+          height: item.client.height,
+          weight: item.client.weight,
+          hasDrivingLicense: item.client.hasDrivingLicense,
+          importance: item.client.importance,
+          note: item.client.notes,
+          tags: item.client.tags,
+          stageId: item.client.currentStageId,
+          referredBy,
           currentStage: item.stage,
           clientDetails: item.details,
-          referredBy,
           insuranceInfo: insurance,
           meetings: clientMeetings,
+          // 추가 필드들
+          lastContactDate: item.client.updatedAt?.toISOString().split('T')[0],
         };
       })
     );

@@ -76,8 +76,6 @@ export async function getTopInfluencers(
   }
 
   try {
-    console.log('현재 사용자 ID 조회:', userId);
-
     // 🗓️ 기간 필터 계산 (확장된 옵션)
     const dateFilter = calculateDateFilter(period);
 

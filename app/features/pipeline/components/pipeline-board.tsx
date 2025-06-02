@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '~/common/components/ui/button';
-import { Plus, Users, TrendingUp, AlertCircle } from 'lucide-react';
+import { Users, TrendingUp, AlertCircle } from 'lucide-react';
 import { ClientCard } from './client-card';
 import type { PipelineStage, Client } from '~/features/pipeline/types/types';
 
@@ -165,15 +165,6 @@ export function PipelineBoard({
                         {stage.name}
                       </h3>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted/80 flex-shrink-0"
-                      onClick={() => onAddClientToStage?.(stage.id)}
-                      title={`${stage.name} 단계에 고객 추가`}
-                    >
-                      <Plus className="h-4 w-4" />
-                    </Button>
                   </div>
 
                   {/* 단계별 통계 */}
@@ -193,16 +184,6 @@ export function PipelineBoard({
                       </div>
                     )}
                   </div>
-
-                  {/* 드래그 타겟 인디케이터 */}
-                  {isDragTarget && canDrop && (
-                    <div className="mt-2 p-2 border-2 border-dashed border-primary rounded-md bg-primary/10">
-                      <div className="flex items-center justify-center text-primary text-sm font-medium">
-                        <TrendingUp className="h-4 w-4 mr-1" />
-                        여기에 고객을 이동하세요
-                      </div>
-                    </div>
-                  )}
                 </div>
               </div>
             );
@@ -253,6 +234,7 @@ export function PipelineBoard({
                       >
                         <ClientCard
                           {...client}
+                          referredBy={client.referredBy || undefined}
                           isDragging={client.id === draggedClientId}
                         />
                       </div>
@@ -279,18 +261,9 @@ export function PipelineBoard({
                           <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center mb-2">
                             <Users className="h-5 w-5 text-muted-foreground" />
                           </div>
-                          <p className="text-sm text-muted-foreground mb-1">
+                          <p className="text-sm text-muted-foreground">
                             고객이 없습니다
                           </p>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-xs h-7 text-muted-foreground hover:text-foreground"
-                            onClick={() => onAddClientToStage?.(stage.id)}
-                          >
-                            <Plus className="h-3 w-3 mr-1" />
-                            고객 추가
-                          </Button>
                         </>
                       )}
                     </div>

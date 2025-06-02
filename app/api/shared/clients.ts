@@ -85,6 +85,20 @@ interface ClientDetailProfile extends Client {
   milestones: AppClientMilestone[];
 }
 
+// 🎯 API 응답 타입들
+interface ClientsAPIResponse {
+  success: boolean;
+  data?: {
+    totalClients: number;
+    activeClients: number;
+    inactiveClients: number;
+    recentGrowth: number;
+    conversionRate: number;
+  };
+  message?: string;
+  error?: string;
+}
+
 // 🎯 고객 목록 조회 (Phase 3에서 실제 구현)
 export async function getClients(params: {
   agentId: string;
@@ -281,14 +295,213 @@ export async function getClients(params: {
 export async function getClientById(
   clientId: string,
   agentId: string
-): Promise<ClientOverview | null> {
+): Promise<ClientDetailProfile | null> {
   try {
-    console.log('API: getClientById called with:', { clientId, agentId });
+    console.log('🔍 API: getClientById 호출됨', { clientId, agentId });
 
-    // TODO: Phase 3에서 실제 구현
-    return null;
+    // 기본 고객 정보 조회 (stages, referrer 정보 포함)
+    const [baseClient] = await db
+      .select({
+        // 기본 클라이언트 데이터
+        id: clients.id,
+        agentId: clients.agentId,
+        teamId: clients.teamId,
+        fullName: clients.fullName,
+        email: clients.email,
+        phone: clients.phone,
+        telecomProvider: clients.telecomProvider,
+        address: clients.address,
+        occupation: clients.occupation,
+        hasDrivingLicense: clients.hasDrivingLicense,
+        height: clients.height,
+        weight: clients.weight,
+        tags: clients.tags,
+        importance: clients.importance,
+        currentStageId: clients.currentStageId,
+        referredById: clients.referredById,
+        notes: clients.notes,
+        customFields: clients.customFields,
+        isActive: clients.isActive,
+        createdAt: clients.createdAt,
+        updatedAt: clients.updatedAt,
+        // 현재 단계 정보
+        stageName: pipelineStages.name,
+        stageColor: pipelineStages.color,
+        // 소개자 정보
+        referrerName: sql<string>`ref_client.full_name`,
+      })
+      .from(clients)
+      .leftJoin(pipelineStages, eq(clients.currentStageId, pipelineStages.id))
+      .leftJoin(
+        sql`${clients} AS ref_client`,
+        eq(clients.referredById, sql`ref_client.id`)
+      )
+      .where(
+        and(
+          eq(clients.id, clientId),
+          eq(clients.agentId, agentId),
+          eq(clients.isActive, true)
+        )
+      );
+
+    if (!baseClient) {
+      console.log('❌ API: 고객을 찾을 수 없음', clientId);
+      return null;
+    }
+
+    // 소개 횟수 계산
+    const [referralCountResult] = await db
+      .select({ count: count() })
+      .from(clients)
+      .where(eq(clients.referredById, clientId));
+
+    // 보험 정보 조회
+    const insurances = await db
+      .select()
+      .from(insuranceInfo)
+      .where(eq(insuranceInfo.clientId, clientId));
+
+    // 최근 연락 이력 조회 (최대 10개)
+    const recentContacts = await db
+      .select()
+      .from(appClientContactHistory)
+      .where(eq(appClientContactHistory.clientId, clientId))
+      .orderBy(desc(appClientContactHistory.createdAt))
+      .limit(10);
+
+    // 가족 구성원 조회
+    const familyMembers = await db
+      .select()
+      .from(appClientFamilyMembers)
+      .where(eq(appClientFamilyMembers.clientId, clientId))
+      .orderBy(desc(appClientFamilyMembers.createdAt));
+
+    // 마일스톤 조회
+    const milestones = await db
+      .select()
+      .from(appClientMilestones)
+      .where(eq(appClientMilestones.clientId, clientId))
+      .orderBy(desc(appClientMilestones.achievedAt));
+
+    // 분석 데이터 조회 (최신 1개)
+    const [analytics] = await db
+      .select()
+      .from(appClientAnalytics)
+      .where(eq(appClientAnalytics.clientId, clientId))
+      .orderBy(desc(appClientAnalytics.updatedAt))
+      .limit(1);
+
+    // 계산된 데이터
+    const totalPremium = insurances.reduce(
+      (sum, ins) => sum + (ins.premium ? parseInt(ins.premium) : 0),
+      0
+    );
+    const insuranceTypes = insurances.map(
+      (ins) => ins.insuranceType || '알 수 없음'
+    );
+
+    // 참여도 점수 계산 (연락 빈도 기반)
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const recentContactsCount = recentContacts.filter(
+      (contact) =>
+        contact.createdAt && new Date(contact.createdAt) > thirtyDaysAgo
+    ).length;
+
+    const engagementScore = Math.min(10, recentContactsCount * 2); // 최대 10점
+
+    // 마지막 연락일 계산
+    const lastContact = recentContacts[0];
+    const lastContactDate = lastContact?.createdAt?.toISOString().split('T')[0];
+
+    // 다음 액션 계산 (마지막 연락으로부터 7일 후)
+    let nextActionDate;
+    if (lastContact?.createdAt) {
+      const nextAction = new Date(lastContact.createdAt);
+      nextAction.setDate(nextAction.getDate() + 7);
+      nextActionDate = nextAction.toISOString().split('T')[0];
+    }
+
+    // 전환 확률 계산 (단계별 기본값 + 참여도 보정)
+    const stageBaseProbability = {
+      stage1: 20, // 첫 상담
+      stage2: 40, // 니즈 분석
+      stage3: 60, // 상품 설명
+      stage4: 80, // 제안서 발송
+      stage5: 95, // 계약 체결
+    };
+
+    const baseProbability =
+      stageBaseProbability[
+        baseClient.currentStageId as keyof typeof stageBaseProbability
+      ] || 50;
+    const conversionProbability = Math.min(
+      95,
+      baseProbability + engagementScore * 2
+    );
+
+    // 생애가치 계산 (월 보험료 * 24개월)
+    const lifetimeValue = totalPremium * 24;
+
+    const enrichedClient: ClientDetailProfile = {
+      // 기본 데이터
+      id: baseClient.id,
+      agentId: baseClient.agentId,
+      teamId: baseClient.teamId,
+      fullName: baseClient.fullName,
+      email: baseClient.email,
+      phone: baseClient.phone,
+      telecomProvider: baseClient.telecomProvider,
+      address: baseClient.address,
+      occupation: baseClient.occupation,
+      hasDrivingLicense: baseClient.hasDrivingLicense,
+      height: baseClient.height,
+      weight: baseClient.weight,
+      tags: baseClient.tags,
+      importance: baseClient.importance,
+      currentStageId: baseClient.currentStageId,
+      referredById: baseClient.referredById,
+      notes: baseClient.notes,
+      customFields: baseClient.customFields,
+      isActive: baseClient.isActive,
+      createdAt: baseClient.createdAt,
+      updatedAt: baseClient.updatedAt,
+
+      // 계산된 필드들
+      referralCount: referralCountResult.count,
+      insuranceTypes,
+      totalPremium,
+      currentStage: {
+        id: baseClient.currentStageId,
+        name: baseClient.stageName || '알 수 없음',
+        color: baseClient.stageColor || '#6b7280',
+      },
+      engagementScore,
+      conversionProbability,
+      lifetimeValue,
+      lastContactDate,
+      nextActionDate,
+      upcomingMeeting: undefined, // TODO: 캘린더 연동 시 구현
+      referredBy: baseClient.referrerName
+        ? {
+            id: baseClient.referredById || '',
+            name: baseClient.referrerName,
+            relationship: '알 수 없음', // TODO: 관계 정보 추가 시 구현
+          }
+        : undefined,
+
+      // 상세 데이터
+      recentContacts,
+      analytics,
+      familyMembers,
+      milestones,
+    };
+
+    console.log('✅ API: 고객 상세 정보 조회 완료', baseClient.fullName);
+    return enrichedClient;
   } catch (error) {
-    console.error('고객 상세 조회 실패:', error);
+    console.error('❌ API: getClientById 오류:', error);
     return null;
   }
 }
@@ -517,19 +730,8 @@ export async function getClientStats(
         totalClients: 0,
         activeClients: 0,
         inactiveClients: 0,
-        stageStats: [],
-        networkStats: {
-          totalReferrals: 0,
-          directReferrers: 0,
-          secondDegreeConnections: 0,
-          networkValue: 0,
-        },
-        salesStats: {
-          totalContracts: 0,
-          monthlyPremium: 0,
-          averageContractValue: 0,
-          conversionRate: 0,
-        },
+        recentGrowth: 0,
+        conversionRate: 0,
       },
     };
   } catch (error) {
@@ -656,6 +858,81 @@ export async function importClients(
         failed: fileData.length,
         errors: ['파일 처리 중 오류가 발생했습니다.'],
       },
+    };
+  }
+}
+
+// 🎯 고객 파이프라인 단계 이동
+export async function updateClientStage(
+  clientId: string,
+  targetStageId: string,
+  agentId: string
+): Promise<{
+  success: boolean;
+  data: Client | null;
+  message?: string;
+}> {
+  try {
+    // 권한 체크 및 현재 클라이언트 정보 조회
+    const [existingClient] = await db
+      .select()
+      .from(clients)
+      .where(
+        and(
+          eq(clients.id, clientId),
+          eq(clients.agentId, agentId),
+          eq(clients.isActive, true)
+        )
+      );
+
+    if (!existingClient) {
+      return {
+        success: false,
+        data: null,
+        message: '고객을 찾을 수 없거나 수정 권한이 없습니다.',
+      };
+    }
+
+    // 대상 단계가 존재하는지 확인
+    const [targetStage] = await db
+      .select()
+      .from(pipelineStages)
+      .where(
+        and(
+          eq(pipelineStages.id, targetStageId),
+          eq(pipelineStages.agentId, agentId)
+        )
+      );
+
+    if (!targetStage) {
+      return {
+        success: false,
+        data: null,
+        message: '대상 단계를 찾을 수 없습니다.',
+      };
+    }
+
+    // 단계 업데이트
+    const [updatedClient] = await db
+      .update(clients)
+      .set({
+        currentStageId: targetStageId,
+        updatedAt: new Date(),
+      })
+      .where(eq(clients.id, clientId))
+      .returning();
+
+    return {
+      success: true,
+      data: updatedClient,
+      message: `${updatedClient.fullName} 고객이 "${targetStage.name}" 단계로 이동되었습니다.`,
+    };
+  } catch (error) {
+    console.error('❌ updateClientStage 오류:', error);
+    return {
+      success: false,
+      data: null,
+      message: '고객 단계 이동 중 오류가 발생했습니다.',
     };
   }
 }
