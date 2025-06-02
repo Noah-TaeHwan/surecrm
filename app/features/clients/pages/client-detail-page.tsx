@@ -509,7 +509,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
 
   return (
     <MainLayout title={`${client.fullName} - 고객 상세`}>
-      <div className="max-w-7xl mx-auto space-y-6">
+      <div className="space-y-6">
         {/* 🎯 헤더 섹션 */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -589,7 +589,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                 </div>
               </CardHeader>
 
-              <CardContent className="space-y-4">
+              <CardContent className="p-6 space-y-4">
                 {/* 연락처 정보 */}
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
@@ -762,7 +762,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                       메모 및 특이사항
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="p-6">
                     {isEditing ? (
                       <Textarea
                         value={editFormData.notes}
@@ -808,7 +808,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                       태그
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="p-6">
                     <div className="flex flex-wrap gap-2">
                       {client.tags && client.tags.length > 0 ? (
                         client.tags.map((tag: string, index: number) => (
@@ -849,7 +849,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                       현재 유효한 보험 계약 목록
                     </CardDescription>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="p-6">
                     {client.insurance &&
                     client.insurance.filter((ins: any) => ins.isActive).length >
                       0 ? (
@@ -963,7 +963,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                       현재 영업 파이프라인에서 진행 중인 상품들
                     </CardDescription>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="p-6">
                     <div className="text-center py-8">
                       <TrendingUp className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
                       <p className="text-sm text-muted-foreground mb-4">
@@ -989,7 +989,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                       가족 단위 보험 설계를 위한 구성원 정보
                     </CardDescription>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="p-6">
                     {client.familyMembers && client.familyMembers.length > 0 ? (
                       <div className="space-y-4">
                         {client.familyMembers.map((member: any) => (
@@ -1098,7 +1098,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                       고객과의 모든 상담 및 연락 기록
                     </CardDescription>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="p-6">
                     {client.contactHistory &&
                     client.contactHistory.length > 0 ? (
                       <div className="space-y-4">
