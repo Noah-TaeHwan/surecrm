@@ -75,6 +75,7 @@ import type {
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { AddClientModal } from '../components/add-client-modal';
+import { ShineBorder } from '~/common/components/magicui/shine-border';
 
 // 🎯 보험설계사 특화 고객 관리 페이지
 // 실제 스키마 타입 사용으로 데이터베이스 연동 준비 완료
@@ -774,28 +775,28 @@ export default function ClientsPage({ loaderData }: any) {
     return sorted;
   }, [filteredClients, sortBy]);
 
-  // 🎯 헬퍼 함수들
+  // 🎯 헬퍼 함수들 (통일된 디자인 시스템)
   const getImportanceBadgeColor = (importance: string) => {
     switch (importance) {
       case 'high':
-        return 'bg-red-100 text-red-800 border-red-200';
+        return 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300 border-orange-200';
       case 'medium':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 border-blue-200';
       case 'low':
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return 'bg-muted text-muted-foreground border-muted-foreground/20';
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return 'bg-muted text-muted-foreground border-muted-foreground/20';
     }
   };
 
   const getImportanceText = (importance: string) => {
     switch (importance) {
       case 'high':
-        return '높음';
+        return 'VIP';
       case 'medium':
-        return '보통';
+        return '일반';
       case 'low':
-        return '낮음';
+        return '관심';
       default:
         return '미설정';
     }
@@ -827,95 +828,155 @@ export default function ClientsPage({ loaderData }: any) {
     }))
     .sort((a: any, b: any) => a.name.localeCompare(b.name)); // 이름순 정렬
 
-  // 🎯 카드 뷰 렌더링
+  // 🎯 카드 뷰 렌더링 (영업 파이프라인과 동일한 스타일)
   const renderCardView = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {sortedClients.map((client: ClientProfile) => (
-        <Card
-          key={client.id}
-          className="cursor-pointer hover:shadow-lg transition-shadow duration-200 border-l-4"
-          style={{ borderLeftColor: client.currentStage.color }}
-          onClick={() => handleClientRowClick(client.id)}
-        >
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
-                  {client.fullName.charAt(0)}
+      {sortedClients.map((client: ClientProfile) => {
+        // 중요도별 스타일 (왼쪽 보더 제거)
+        const getClientCardStyle = (importance: string) => {
+          switch (importance) {
+            case 'high':
+              return {
+                bgGradient:
+                  'bg-gradient-to-br from-orange-50/50 to-white dark:from-orange-950/20 dark:to-background',
+                borderClass: 'client-card-vip', // VIP 전용 애니메이션 클래스
+              };
+            case 'medium':
+              return {
+                bgGradient:
+                  'bg-gradient-to-br from-blue-50/50 to-white dark:from-blue-950/20 dark:to-background',
+                borderClass: 'client-card-normal', // 일반 고객 은은한 효과
+              };
+            case 'low':
+              return {
+                bgGradient:
+                  'bg-gradient-to-br from-muted/30 to-white dark:from-muted/10 dark:to-background',
+                borderClass: '', // 효과 없음
+              };
+            default:
+              return {
+                bgGradient:
+                  'bg-gradient-to-br from-muted/30 to-white dark:from-muted/10 dark:to-background',
+                borderClass: '',
+              };
+          }
+        };
+
+        const cardStyle = getClientCardStyle(client.importance);
+
+        return (
+          <div key={client.id} className="relative">
+            <Card
+              className={`group hover:shadow-lg transition-all duration-200 ${cardStyle.bgGradient} ${cardStyle.borderClass} cursor-pointer hover:scale-[1.02] hover:-translate-y-1 h-[320px] flex flex-col relative overflow-hidden`}
+              onClick={() => handleClientRowClick(client.id)}
+            >
+              <CardHeader className="pb-3 flex-shrink-0">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
+                      {client.fullName.charAt(0)}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <CardTitle className="text-lg truncate">
+                        {client.fullName}
+                      </CardTitle>
+                      <p className="text-sm text-muted-foreground truncate">
+                        {client.phone}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2 flex-shrink-0">
+                    <Badge
+                      className={`${getImportanceBadgeColor(
+                        client.importance
+                      )} border text-xs font-medium`}
+                    >
+                      {getImportanceText(client.importance)}
+                    </Badge>
+                    {client.importance === 'high' && (
+                      <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                    )}
+                  </div>
                 </div>
-                <div>
-                  <CardTitle className="text-lg">{client.fullName}</CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    {client.phone}
-                  </p>
+              </CardHeader>
+
+              <CardContent className="flex-1 flex flex-col justify-between space-y-3 min-h-0">
+                <div className="space-y-3">
+                  {/* 현재 단계 - 항상 표시 */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">
+                      현재 단계
+                    </span>
+                    <Badge
+                      variant="outline"
+                      style={{
+                        borderColor: client.currentStage.color,
+                        color: client.currentStage.color,
+                      }}
+                    >
+                      {client.currentStage.name}
+                    </Badge>
+                  </div>
+
+                  {/* 보험 정보 - 항상 표시 (없으면 "미설정") */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">
+                      보험 종류
+                    </span>
+                    <span className="text-sm font-medium text-right">
+                      {client.insuranceTypes.length > 0 ? (
+                        <>
+                          {client.insuranceTypes.slice(0, 2).join(', ')}
+                          {client.insuranceTypes.length > 2 &&
+                            ` 외 ${client.insuranceTypes.length - 2}개`}
+                        </>
+                      ) : (
+                        <span className="text-muted-foreground">미설정</span>
+                      )}
+                    </span>
+                  </div>
+
+                  {/* 총 보험료 - 항상 표시 */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">
+                      총 보험료
+                    </span>
+                    <span className="text-sm font-semibold text-green-600">
+                      {client.totalPremium > 0
+                        ? formatCurrency(client.totalPremium)
+                        : '미설정'}
+                    </span>
+                  </div>
+
+                  {/* 소개 정보 - 항상 표시 (없으면 "직접 고객") */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">
+                      소개자
+                    </span>
+                    <span className="text-sm">
+                      {client.referredBy ? (
+                        client.referredBy.name
+                      ) : (
+                        <span className="text-muted-foreground">직접 고객</span>
+                      )}
+                    </span>
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Badge
-                  variant="outline"
-                  className={getImportanceBadgeColor(client.importance)}
-                >
-                  {getImportanceText(client.importance)}
-                </Badge>
-                {client.importance === 'high' && (
-                  <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                )}
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {/* 현재 단계 */}
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">현재 단계</span>
-              <Badge
-                variant="outline"
-                style={{
-                  borderColor: client.currentStage.color,
-                  color: client.currentStage.color,
-                }}
-              >
-                {client.currentStage.name}
-              </Badge>
-            </div>
 
-            {/* 보험 정보 */}
-            {client.insuranceTypes.length > 0 && (
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">보험 종류</span>
-                <span className="text-sm font-medium">
-                  {client.insuranceTypes.slice(0, 2).join(', ')}
-                  {client.insuranceTypes.length > 2 &&
-                    ` 외 ${client.insuranceTypes.length - 2}개`}
-                </span>
-              </div>
-            )}
-
-            {/* 총 보험료 */}
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">총 보험료</span>
-              <span className="text-sm font-semibold text-green-600">
-                {formatCurrency(client.totalPremium)}
-              </span>
-            </div>
-
-            {/* 소개 정보 */}
-            {client.referredBy && (
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">소개자</span>
-                <span className="text-sm">{client.referredBy.name}</span>
-              </div>
-            )}
-
-            {/* 최근 연락 */}
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">최근 연락</span>
-              <span className="text-sm">
-                {formatDate(client.lastContactDate)}
-              </span>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+                {/* 최근 연락 - 하단 고정 */}
+                <div className="flex items-center justify-between pt-2 border-t border-border/30">
+                  <span className="text-sm text-muted-foreground">
+                    최근 연락
+                  </span>
+                  <span className="text-sm">
+                    {formatDate(client.lastContactDate)}
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        );
+      })}
     </div>
   );
 
@@ -924,12 +985,12 @@ export default function ClientsPage({ loaderData }: any) {
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>고객 정보</TableHead>
-          <TableHead>연락처</TableHead>
-          <TableHead>소개 관계</TableHead>
-          <TableHead>중요도</TableHead>
-          <TableHead>영업 단계</TableHead>
-          <TableHead className="text-center">성과</TableHead>
+          <TableHead className="text-left">고객 정보</TableHead>
+          <TableHead className="text-left">연락처</TableHead>
+          <TableHead className="text-left">소개 관계</TableHead>
+          <TableHead className="text-left">중요도</TableHead>
+          <TableHead className="text-left">영업 단계</TableHead>
+          <TableHead className="text-left">성과</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -978,19 +1039,11 @@ export default function ClientsPage({ loaderData }: any) {
             </TableCell>
             <TableCell>
               <Badge
-                variant={
-                  client.importance === 'high'
-                    ? 'destructive'
-                    : client.importance === 'medium'
-                    ? 'default'
-                    : 'secondary'
-                }
+                className={`${getImportanceBadgeColor(
+                  client.importance
+                )} border`}
               >
-                {client.importance === 'high'
-                  ? 'VIP'
-                  : client.importance === 'medium'
-                  ? '일반'
-                  : '낮음'}
+                {getImportanceText(client.importance)}
               </Badge>
             </TableCell>
             <TableCell>
@@ -1001,7 +1054,7 @@ export default function ClientsPage({ loaderData }: any) {
                 <span className="text-sm">{client.currentStage.name}</span>
               </div>
             </TableCell>
-            <TableCell className="text-center">
+            <TableCell className="text-left">
               <div className="text-sm">
                 <div className="font-medium">{client.referralCount}명 소개</div>
                 <div className="text-xs text-muted-foreground">

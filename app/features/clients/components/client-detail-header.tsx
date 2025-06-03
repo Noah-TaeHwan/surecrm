@@ -122,17 +122,44 @@ export function ClientDetailHeader({
   // 🔒 개인정보 표시 제어
   const [showConfidentialData, setShowConfidentialData] = useState(false);
 
-  // 배지 설정들
-  const importanceBadgeVariant: Record<string, BadgeVariant> = {
-    high: 'destructive',
-    medium: 'default',
-    low: 'secondary',
+  // 🎨 중요도별 스타일 통일 (영업 파이프라인과 동일한 색상 시스템)
+  const importanceStyles = {
+    high: {
+      borderColor: 'border-l-orange-500',
+      bgGradient:
+        'bg-gradient-to-br from-orange-50/50 to-white dark:from-orange-950/20 dark:to-background',
+      badge:
+        'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300 border-orange-200',
+      icon: 'text-orange-600',
+    },
+    medium: {
+      borderColor: 'border-l-blue-500',
+      bgGradient:
+        'bg-gradient-to-br from-blue-50/50 to-white dark:from-blue-950/20 dark:to-background',
+      badge:
+        'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 border-blue-200',
+      icon: 'text-blue-600',
+    },
+    low: {
+      borderColor: 'border-l-muted-foreground',
+      bgGradient:
+        'bg-gradient-to-br from-muted/30 to-white dark:from-muted/10 dark:to-background',
+      badge: 'bg-muted text-muted-foreground border-muted-foreground/20',
+      icon: 'text-muted-foreground',
+    },
   };
 
+  const currentImportanceStyle =
+    importanceStyles[client.importance as keyof typeof importanceStyles] ||
+    importanceStyles.medium;
+
+  // 배지 설정들 (기존 코드 교체)
+  const importanceBadgeClass = currentImportanceStyle.badge;
+
   const importanceText: Record<string, string> = {
-    high: '높음',
-    medium: '보통',
-    low: '낮음',
+    high: 'VIP',
+    medium: '일반',
+    low: '관심',
   };
 
   const stageBadgeVariant: Record<string, BadgeVariant> = {
@@ -317,7 +344,9 @@ export function ClientDetailHeader({
       </div>
 
       {/* 통합된 기본 정보 카드 */}
-      <Card>
+      <Card
+        className={`${currentImportanceStyle.borderColor} border-l-4 ${currentImportanceStyle.bgGradient} border-border/50`}
+      >
         <CardContent className="pt-6 space-y-6">
           {/* 상단 섹션: 아바타, 기본 연락처, 영업 정보 */}
           <div className="flex items-start gap-6">
@@ -354,7 +383,7 @@ export function ClientDetailHeader({
                     >
                       {client.stageName || '미설정'}
                     </Badge>
-                    <Badge variant={importanceBadgeVariant[client.importance]}>
+                    <Badge className={`${importanceBadgeClass} border`}>
                       {importanceText[client.importance]}
                     </Badge>
                   </div>

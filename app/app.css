@@ -479,6 +479,31 @@ details[open] summary::before {
   --sidebar-border: oklch(0.92 0.004 286.32);
   --sidebar-ring: oklch(0.645 0.246 16.439);
   --primary-rgb: 167 63 3;
+
+  /* 🎨 고객 중요도별 통일 색상 시스템 */
+  /* VIP (높음) - 은은한 오렌지 계열 */
+  --importance-high-bg: oklch(0.975 0.03 35);
+  --importance-high-border: oklch(0.92 0.08 35);
+  --importance-high-text: oklch(0.55 0.15 35);
+  --importance-high-badge-bg: oklch(0.97 0.05 35);
+  --importance-high-badge-text: oklch(0.45 0.18 35);
+  --importance-high-accent: oklch(0.92 0.08 35);
+
+  /* 일반 (보통) - 은은한 블루 계열 */
+  --importance-medium-bg: oklch(0.975 0.025 240);
+  --importance-medium-border: oklch(0.92 0.06 240);
+  --importance-medium-text: oklch(0.5 0.12 240);
+  --importance-medium-badge-bg: oklch(0.97 0.04 240);
+  --importance-medium-badge-text: oklch(0.4 0.15 240);
+  --importance-medium-accent: oklch(0.92 0.06 240);
+
+  /* 관심 (낮음) - 은은한 회색 계열 */
+  --importance-low-bg: oklch(0.975 0.002 285);
+  --importance-low-border: oklch(0.92 0.004 285);
+  --importance-low-text: oklch(0.52 0.016 285);
+  --importance-low-badge-bg: oklch(0.97 0.001 285);
+  --importance-low-badge-text: oklch(0.45 0.02 285);
+  --importance-low-accent: oklch(0.92 0.004 285);
 }
 
 .dark {
@@ -514,6 +539,31 @@ details[open] summary::before {
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.645 0.246 16.439);
   --primary-rgb: 244 115 32;
+
+  /* 🎨 고객 중요도별 통일 색상 시스템 (다크 모드) */
+  /* VIP (높음) - 은은한 오렌지 계열 (다크) */
+  --importance-high-bg: oklch(0.18 0.05 35);
+  --importance-high-border: oklch(0.25 0.1 35);
+  --importance-high-text: oklch(0.75 0.15 35);
+  --importance-high-badge-bg: oklch(0.22 0.08 35);
+  --importance-high-badge-text: oklch(0.85 0.12 35);
+  --importance-high-accent: oklch(0.3 0.12 35);
+
+  /* 일반 (보통) - 은은한 블루 계열 (다크) */
+  --importance-medium-bg: oklch(0.18 0.04 240);
+  --importance-medium-border: oklch(0.25 0.08 240);
+  --importance-medium-text: oklch(0.7 0.12 240);
+  --importance-medium-badge-bg: oklch(0.22 0.06 240);
+  --importance-medium-badge-text: oklch(0.8 0.1 240);
+  --importance-medium-accent: oklch(0.3 0.1 240);
+
+  /* 관심 (낮음) - 은은한 회색 계열 (다크) */
+  --importance-low-bg: oklch(0.18 0.005 285);
+  --importance-low-border: oklch(0.25 0.008 285);
+  --importance-low-text: oklch(0.65 0.02 285);
+  --importance-low-badge-bg: oklch(0.22 0.006 285);
+  --importance-low-badge-text: oklch(0.75 0.015 285);
+  --importance-low-accent: oklch(0.3 0.01 285);
 }
 
 @layer base {
@@ -673,4 +723,142 @@ textarea {
 
 .animate-bounce {
   animation: bounce 1s infinite;
+}
+
+@layer utilities {
+  /* 기존 유틸리티 클래스들 */
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* 🎨 Magic UI 애니메이션 */
+  @keyframes shine {
+    0% {
+      background-position: 0% 0%;
+    }
+    50% {
+      background-position: 100% 100%;
+    }
+    to {
+      background-position: 0% 0%;
+    }
+  }
+
+  .animate-shine {
+    animation: shine var(--duration, 3s) ease-in-out infinite;
+  }
+
+  /* 🎨 고객 카드 보더 애니메이션 */
+  @keyframes vip-border-glow {
+    0%,
+    100% {
+      box-shadow: 0 0 0 1px rgba(255, 107, 53, 0.2),
+        0 0 8px rgba(255, 107, 53, 0.1);
+    }
+    50% {
+      box-shadow: 0 0 0 1px rgba(255, 107, 53, 0.4),
+        0 0 16px rgba(255, 107, 53, 0.2);
+    }
+  }
+
+  @keyframes normal-border-subtle {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0.5px rgba(74, 144, 226, 0.15);
+    }
+    50% {
+      box-shadow: 0 0 0 0.5px rgba(74, 144, 226, 0.25);
+    }
+  }
+
+  /* VIP 고객 카드 - 은은한 오렌지 글로우 애니메이션 */
+  .client-card-vip {
+    position: relative;
+    animation: vip-border-glow 8s ease-in-out infinite;
+    border: 1px solid rgba(255, 107, 53, 0.2);
+  }
+
+  .client-card-vip::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+      45deg,
+      rgba(255, 107, 53, 0.3),
+      rgba(255, 143, 101, 0.2),
+      rgba(255, 184, 149, 0.1),
+      rgba(255, 107, 53, 0.3)
+    );
+    background-size: 300% 300%;
+    animation: vip-gradient-move 12s ease-in-out infinite;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  @keyframes vip-gradient-move {
+    0%,
+    100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+
+  /* 일반 고객 카드 - 매우 은은한 블루 효과 */
+  .client-card-normal {
+    position: relative;
+    animation: normal-border-subtle 20s ease-in-out infinite;
+    border: 1px solid rgba(74, 144, 226, 0.15);
+  }
+
+  .client-card-normal::before {
+    content: '';
+    position: absolute;
+    inset: -0.5px;
+    border-radius: inherit;
+    padding: 0.5px;
+    background: linear-gradient(
+      45deg,
+      rgba(74, 144, 226, 0.1),
+      rgba(107, 163, 232, 0.08),
+      rgba(139, 182, 238, 0.06),
+      rgba(74, 144, 226, 0.1)
+    );
+    background-size: 200% 200%;
+    animation: normal-gradient-move 25s ease-in-out infinite;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  @keyframes normal-gradient-move {
+    0%,
+    100% {
+      background-position: 0% 25%;
+    }
+    50% {
+      background-position: 100% 75%;
+    }
+  }
+
+  /* 호버 시 효과 강화 */
+  .client-card-vip:hover {
+    animation: vip-border-glow 4s ease-in-out infinite;
+  }
+
+  .client-card-normal:hover {
+    animation: normal-border-subtle 10s ease-in-out infinite;
+  }
 }

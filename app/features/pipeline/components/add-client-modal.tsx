@@ -119,8 +119,15 @@ export function AddClientModal({
   // 폼 검증 상태
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // 통신사 목록
-  const telecomProviders = ['SKT', 'KT', 'LG U+', '알뜰폰'];
+  // 통신사 목록 (🔧 다른 페이지와 일치하도록 표준화)
+  const telecomProviders = [
+    'SKT',
+    'KT',
+    'LG U+',
+    '알뜰폰 SKT',
+    '알뜰폰 KT',
+    '알뜰폰 LG U+',
+  ];
 
   // 초기 단계 ID가 변경되면 업데이트
   useEffect(() => {

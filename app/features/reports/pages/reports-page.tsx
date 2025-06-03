@@ -25,6 +25,9 @@ import { redirect } from 'react-router';
 // 🔧 추가: 설정에서 사용자 프로필 가져오기
 import { getUserProfile } from '~/features/settings/lib/supabase-settings-data';
 
+// 🔧 추가: 대시보드 목표 데이터 가져오기
+import { getUserGoals } from '~/features/dashboard/lib/dashboard-data';
+
 // 분리된 컴포넌트들 import
 import { PerformanceMetrics, KakaoReport, InsightsTabs } from '../components';
 
@@ -97,10 +100,11 @@ export async function loader({ request }: Route.LoaderArgs) {
     // 기본 리포트 템플릿 생성 (없는 경우)
     await createDefaultReportTemplates(userId);
 
-    // 성과 데이터와 최고 성과자 데이터를 병렬로 가져오기
-    const [performance, topPerformers] = await Promise.all([
+    // 성과 데이터, 최고 성과자 데이터, 사용자 목표 데이터를 병렬로 가져오기
+    const [performance, topPerformers, userGoals] = await Promise.all([
       getPerformanceData(userId, startDate, endDate),
       getTopPerformers(userId, 5),
+      getUserGoals(userId), // 🔧 추가: 사용자 목표 데이터
     ]);
 
     // 🔧 수정: 서버에서 날짜 포맷팅하여 Hydration 오류 방지
@@ -115,6 +119,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     return {
       performance,
       topPerformers,
+      userGoals, // 🔧 추가: 사용자 목표 데이터 반환
       period,
       dateRange: {
         start: startDate.toISOString(),
@@ -154,6 +159,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     return {
       performance: defaultPerformance,
       topPerformers: [] as TopPerformer[],
+      userGoals: [], // 🔧 추가: 빈 목표 배열
       period: 'month',
       dateRange: {
         start: now,
@@ -193,6 +199,7 @@ export default function ReportsPage({ loaderData }: Route.ComponentProps) {
       monthlyRecurringRevenue: 0,
     },
     topPerformers: [],
+    userGoals: [], // 🔧 추가: 기본 빈 목표 배열
     period: 'month',
     dateRange: {
       start: '2024-01-01T00:00:00.000Z',
@@ -210,6 +217,7 @@ export default function ReportsPage({ loaderData }: Route.ComponentProps) {
   const {
     performance,
     topPerformers,
+    userGoals, // 🔧 추가: 사용자 목표 데이터 추출
     period,
     dateRange,
     user,
@@ -318,8 +326,12 @@ export default function ReportsPage({ loaderData }: Route.ComponentProps) {
         {/* 카카오톡 업무 보고 양식 */}
         <KakaoReport performance={performance} user={user} />
 
-        {/* 비즈니스 인사이트 탭 */}
-        <InsightsTabs performance={performance} topPerformers={topPerformers} />
+        {/* 비즈니스 인사이트 탭 - 🔧 수정: userGoals 전달 */}
+        <InsightsTabs
+          performance={performance}
+          topPerformers={topPerformers}
+          userGoals={userGoals}
+        />
       </div>
     </MainLayout>
   );

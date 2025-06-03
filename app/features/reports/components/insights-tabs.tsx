@@ -45,12 +45,60 @@ import type { PerformanceData, TopPerformer } from '../types';
 interface InsightsTabsProps {
   performance: PerformanceData;
   topPerformers: TopPerformer[];
+  userGoals?: Array<{
+    id: string;
+    title: string;
+    goalType:
+      | 'revenue'
+      | 'clients'
+      | 'referrals'
+      | 'conversion_rate'
+      | 'meetings';
+    targetValue: number;
+    currentValue: number;
+    progress: number;
+    period: string;
+    startDate: string;
+    endDate: string;
+    agentId: string;
+    teamId?: string | null;
+    description?: string | null;
+    isActive: boolean;
+    isAchieved: boolean;
+    achievedAt?: Date | null;
+    progressPercentage: string; // 🔧 수정: decimal 타입은 문자열로 반환됨
+    metadata?: any;
+    createdAt: Date;
+    updatedAt: Date;
+  }>;
 }
 
 export function InsightsTabs({
   performance,
   topPerformers,
+  userGoals = [],
 }: InsightsTabsProps) {
+  // 🎯 실제 사용자 목표 데이터 활용
+  const currentMonthGoals = userGoals
+    .filter((goal) => goal.goalType !== 'meetings') // meetings 타입 제외
+    .filter((goal) => {
+      const goalStart = new Date(goal.startDate);
+      const goalEnd = new Date(goal.endDate);
+      const now = new Date();
+      return goalStart <= now && goalEnd >= now;
+    });
+
+  // 목표별 데이터 매핑
+  const revenueGoal = currentMonthGoals.find(
+    (goal) => goal.goalType === 'revenue'
+  );
+  const clientsGoal = currentMonthGoals.find(
+    (goal) => goal.goalType === 'clients'
+  );
+  const referralsGoal = currentMonthGoals.find(
+    (goal) => goal.goalType === 'referrals'
+  );
+
   const conversionRate = performance.conversionRate || 0;
   const avgCallsPerDay =
     performance.totalReferrals > 0
@@ -103,6 +151,19 @@ export function InsightsTabs({
       return `${(amount / 1000000).toFixed(1)}백만원`;
     }
     return `${amount.toLocaleString()}원`;
+  };
+
+  const formatGoalValue = (value: number, type: string) => {
+    switch (type) {
+      case 'revenue':
+        return value >= 10000
+          ? `${(value / 10000).toFixed(1)}억원`
+          : `${value.toLocaleString()}만원`;
+      case 'conversion_rate':
+        return `${value}%`;
+      default:
+        return `${value.toLocaleString()}${type === 'clients' ? '명' : '건'}`;
+    }
   };
 
   const TrendIndicator = ({
@@ -241,6 +302,7 @@ export function InsightsTabs({
         </div>
 
         {/* 업무 효율성 섹션 */}
+        {/* 🚫 주석처리: MVP 실제 기능 개발 전에는 의미없는 섹션
         <div className="space-y-6">
           <div className="flex items-center gap-2 pb-2 border-b">
             <Activity className="h-5 w-5 text-primary" />
@@ -318,6 +380,7 @@ export function InsightsTabs({
             </div>
           )}
         </div>
+        */}
 
         {/* 목표 분석 탭 - 목표 달성률, 예측, 네트워크 현황 */}
         <div className="space-y-6">
@@ -333,7 +396,7 @@ export function InsightsTabs({
             />
           ) : (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 gap-6">
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-lg flex items-center gap-2">
@@ -342,123 +405,137 @@ export function InsightsTabs({
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span>신규 고객</span>
-                        <span className="text-primary">
-                          {performance.newClients}/{nextMonthTarget}명 (
-                          {Math.round(
-                            (performance.newClients / nextMonthTarget) * 100
-                          )}
-                          %)
-                        </span>
-                      </div>
-                      <Progress
-                        value={Math.min(
-                          100,
-                          (performance.newClients / nextMonthTarget) * 100
-                        )}
-                        className="h-2"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span>소개 건수</span>
-                        <span className="text-primary">
-                          {performance.totalReferrals}/
-                          {Math.max(10, performance.totalReferrals + 5)}건 (
-                          {Math.round(
-                            (performance.totalReferrals /
-                              Math.max(10, performance.totalReferrals + 5)) *
-                              100
-                          )}
-                          %)
-                        </span>
-                      </div>
-                      <Progress
-                        value={Math.min(
-                          100,
-                          (performance.totalReferrals /
-                            Math.max(10, performance.totalReferrals + 5)) *
-                            100
-                        )}
-                        className="h-2"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span>수익 목표</span>
-                        <span className="text-muted-foreground">
-                          {(performance.revenue / 100000000).toFixed(1)}/
-                          {((performance.revenue * 1.3) / 100000000).toFixed(1)}
-                          억원 (
-                          {Math.round(
-                            (performance.revenue /
-                              (performance.revenue * 1.3)) *
-                              100
-                          )}
-                          %)
-                        </span>
-                      </div>
-                      <Progress
-                        value={Math.min(
-                          100,
-                          (performance.revenue / (performance.revenue * 1.3)) *
-                            100
-                        )}
-                        className="h-2"
-                      />
-                    </div>
+                    {/* 🎯 실제 사용자 목표 표시 */}
+                    {currentMonthGoals.length > 0 ? (
+                      currentMonthGoals.map((goal) => (
+                        <div key={goal.id} className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span>{goal.title}</span>
+                            <span className="text-primary font-medium">
+                              {goal.goalType === 'revenue'
+                                ? formatGoalValue(
+                                    goal.currentValue,
+                                    goal.goalType
+                                  )
+                                : `${goal.currentValue.toLocaleString()}${
+                                    goal.goalType === 'clients' ? '명' : '건'
+                                  }`}
+                              /
+                              {goal.goalType === 'revenue'
+                                ? formatGoalValue(
+                                    goal.targetValue,
+                                    goal.goalType
+                                  )
+                                : `${goal.targetValue.toLocaleString()}${
+                                    goal.goalType === 'clients' ? '명' : '건'
+                                  }`}
+                              ({Math.round(goal.progress)}%)
+                            </span>
+                          </div>
+                          <Progress
+                            value={Math.min(100, goal.progress)}
+                            className="h-2"
+                          />
+                        </div>
+                      ))
+                    ) : (
+                      /* 기본 목표 표시 (사용자 목표가 없는 경우) */
+                      <>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span>신규 고객</span>
+                            <span className="text-primary font-medium">
+                              {performance.newClients}/{nextMonthTarget}명 (
+                              {Math.round(
+                                (performance.newClients / nextMonthTarget) * 100
+                              )}
+                              %)
+                            </span>
+                          </div>
+                          <Progress
+                            value={Math.min(
+                              100,
+                              (performance.newClients / nextMonthTarget) * 100
+                            )}
+                            className="h-2"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span>소개 건수</span>
+                            <span className="text-primary font-medium">
+                              {performance.totalReferrals}/
+                              {Math.max(10, performance.totalReferrals + 5)}건 (
+                              {Math.round(
+                                (performance.totalReferrals /
+                                  Math.max(
+                                    10,
+                                    performance.totalReferrals + 5
+                                  )) *
+                                  100
+                              )}
+                              %)
+                            </span>
+                          </div>
+                          <Progress
+                            value={Math.min(
+                              100,
+                              (performance.totalReferrals /
+                                Math.max(10, performance.totalReferrals + 5)) *
+                                100
+                            )}
+                            className="h-2"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span>수익 목표</span>
+                            <span className="text-muted-foreground">
+                              {Math.round(
+                                performance.revenue / 10000
+                              ).toLocaleString()}
+                              /
+                              {Math.round(
+                                (performance.revenue * 1.3) / 10000
+                              ).toLocaleString()}
+                              만원 (
+                              {Math.round(
+                                (performance.revenue /
+                                  (performance.revenue * 1.3)) *
+                                  100
+                              )}
+                              %)
+                            </span>
+                          </div>
+                          <Progress
+                            value={Math.min(
+                              100,
+                              (performance.revenue /
+                                (performance.revenue * 1.3)) *
+                                100
+                            )}
+                            className="h-2"
+                          />
+                        </div>
+                      </>
+                    )}
                     <div className="pt-2 border-t">
                       <p className="text-xs text-muted-foreground">
-                        {performance.newClients > 0 &&
-                        performance.totalReferrals > 0 &&
-                        performance.revenue > 0
+                        {currentMonthGoals.length > 0
+                          ? '💡 설정된 목표를 기반으로 진행률을 표시합니다'
+                          : performance.newClients > 0 &&
+                            performance.totalReferrals > 0 &&
+                            performance.revenue > 0
                           ? '💡 꾸준한 성장 패턴을 보이고 있습니다'
                           : '💡 목표 달성을 위한 추가 활동이 필요합니다'}
                       </p>
                     </div>
                   </CardContent>
                 </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">다음 달 성과 예측</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm">예상 신규 고객</span>
-                      <span className="font-medium text-green-600">
-                        {nextMonthTarget}명
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm">목표 달성 확률</span>
-                      <span className="font-medium text-primary">
-                        {Math.max(20, Math.min(95, 60 + conversionRate))}%
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm">예상 수익 증가</span>
-                      <span className="font-medium text-green-600">
-                        +{Math.max(5, performance.growth.revenue || 10)}%
-                      </span>
-                    </div>
-                    <div className="pt-2 p-3 bg-muted/30 border border-border rounded-lg">
-                      <p className="text-xs text-muted-foreground">
-                        {performance.growth.revenue > 15
-                          ? '💡 우수한 성장률로 목표 초과 달성 전망'
-                          : performance.growth.revenue > 5
-                          ? '💡 현재 성장률 유지 시 목표 달성 가능'
-                          : '💡 성장률 개선을 위한 전략 수정이 필요합니다'}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
               </div>
 
-              {/* 소개 네트워크 & 목표 달성률 통합 */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* 소개 네트워크 현황만 유지 (분기별 목표 진행률 카드 제거) */}
+              <div className="grid grid-cols-1 gap-6">
                 <Card>
                   <CardHeader>
                     <CardTitle>소개 네트워크 현황</CardTitle>
@@ -473,7 +550,7 @@ export function InsightsTabs({
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-sm">성공 전환</span>
-                      <span className="font-medium text-green-600">
+                      <span className="font-medium text-primary">
                         {Math.round(
                           (performance.totalReferrals *
                             performance.conversionRate) /
@@ -488,7 +565,7 @@ export function InsightsTabs({
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-sm">진행 중</span>
-                      <span className="font-medium text-yellow-600">
+                      <span className="font-medium text-muted-foreground">
                         {Math.max(
                           0,
                           performance.totalReferrals -
@@ -503,88 +580,6 @@ export function InsightsTabs({
                     </div>
                     <div className="pt-2 border-t">
                       <TrendIndicator value={performance.growth.referrals} />
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>분기별 목표 진행률</CardTitle>
-                    <CardDescription>분기 목표 대비 누적 성과</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span>분기 신규고객</span>
-                        <span>
-                          {performance.newClients * 3}/
-                          {performance.newClients * 3 + 10}명 (
-                          {Math.round(
-                            ((performance.newClients * 3) /
-                              (performance.newClients * 3 + 10)) *
-                              100
-                          )}
-                          %)
-                        </span>
-                      </div>
-                      <Progress
-                        value={Math.min(
-                          100,
-                          ((performance.newClients * 3) /
-                            (performance.newClients * 3 + 10)) *
-                            100
-                        )}
-                        className="h-2"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span>분기 소개건수</span>
-                        <span>
-                          {performance.totalReferrals * 3}/
-                          {performance.totalReferrals * 3 + 15}건 (
-                          {Math.round(
-                            ((performance.totalReferrals * 3) /
-                              (performance.totalReferrals * 3 + 15)) *
-                              100
-                          )}
-                          %)
-                        </span>
-                      </div>
-                      <Progress
-                        value={Math.min(
-                          100,
-                          ((performance.totalReferrals * 3) /
-                            (performance.totalReferrals * 3 + 15)) *
-                            100
-                        )}
-                        className="h-2"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span>분기 수익목표</span>
-                        <span>
-                          {((performance.revenue * 3) / 100000000).toFixed(1)}/
-                          {((performance.revenue * 3.5) / 100000000).toFixed(1)}
-                          억원 (
-                          {Math.round(
-                            ((performance.revenue * 3) /
-                              (performance.revenue * 3.5)) *
-                              100
-                          )}
-                          %)
-                        </span>
-                      </div>
-                      <Progress
-                        value={Math.min(
-                          100,
-                          ((performance.revenue * 3) /
-                            (performance.revenue * 3.5)) *
-                            100
-                        )}
-                        className="h-2"
-                      />
                     </div>
                   </CardContent>
                 </Card>
@@ -633,9 +628,9 @@ export function InsightsTabs({
                     ) : null}
 
                     {performance.totalReferrals < 5 ? (
-                      <div className="p-3 border-l-4 border-primary/50 bg-muted/50 rounded-r-lg">
+                      <div className="p-3 border-l-4 border-muted bg-muted/20 rounded-r-lg">
                         <div className="flex items-center gap-2 mb-1">
-                          <AlertTriangle className="h-4 w-4 text-primary" />
+                          <AlertTriangle className="h-4 w-4 text-muted-foreground" />
                           <p className="text-sm font-medium">
                             소개 시스템 강화
                           </p>
@@ -646,14 +641,14 @@ export function InsightsTabs({
                         </p>
                       </div>
                     ) : (
-                      <div className="p-3 border-l-4 border-green-500 bg-green-50 rounded-r-lg">
+                      <div className="p-3 border-l-4 border-primary bg-primary/5 rounded-r-lg">
                         <div className="flex items-center gap-2 mb-1">
-                          <CheckCircle className="h-4 w-4 text-green-600" />
-                          <p className="text-sm font-medium text-green-800">
+                          <CheckCircle className="h-4 w-4 text-primary" />
+                          <p className="text-sm font-medium text-primary">
                             우수한 소개 활동
                           </p>
                         </div>
-                        <p className="text-xs text-green-700">
+                        <p className="text-xs text-muted-foreground">
                           {performance.totalReferrals}건의 활발한 소개 활동을
                           유지하세요
                         </p>
@@ -673,14 +668,14 @@ export function InsightsTabs({
                         </p>
                       </div>
                     ) : (
-                      <div className="p-3 border-l-4 border-blue-500 bg-blue-50 rounded-r-lg">
+                      <div className="p-3 border-l-4 border-primary bg-primary/10 rounded-r-lg">
                         <div className="flex items-center gap-2 mb-1">
-                          <TrendingUp className="h-4 w-4 text-blue-600" />
-                          <p className="text-sm font-medium text-blue-800">
+                          <TrendingUp className="h-4 w-4 text-primary" />
+                          <p className="text-sm font-medium text-primary">
                             높은 고객 가치
                           </p>
                         </div>
-                        <p className="text-xs text-blue-700">
+                        <p className="text-xs text-muted-foreground">
                           평균 고객 가치{' '}
                           {formatCurrency(performance.averageClientValue)} -
                           우수한 성과입니다

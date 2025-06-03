@@ -120,8 +120,30 @@ export function GoalSettingModal({
   const onSubmit = async (data: GoalFormData) => {
     setIsLoading(true);
     try {
+      // 🔧 수정: 제목이 비어있을 때 자동으로 한국어 제목 생성
+      let autoTitle = data.title;
+      if (!autoTitle || autoTitle.trim() === '') {
+        const year = data.targetYear;
+        const month = data.targetMonth;
+
+        switch (data.goalType) {
+          case 'referrals':
+            autoTitle = `소개 목표 (${year}년 ${month}월)`;
+            break;
+          case 'clients':
+            autoTitle = `신규 고객 목표 (${year}년 ${month}월)`;
+            break;
+          case 'revenue':
+            autoTitle = `매출 목표 (${year}년 ${month}월)`;
+            break;
+          default:
+            autoTitle = `목표 (${year}년 ${month}월)`;
+        }
+      }
+
       await onSaveGoal({
         ...data,
+        title: autoTitle,
         targetValue: Number(data.targetValue),
         targetYear: Number(data.targetYear),
         targetMonth: Number(data.targetMonth),

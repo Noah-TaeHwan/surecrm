@@ -1022,7 +1022,7 @@ export function ClientImportModal({
                                     setColumnMapping((prev) => ({
                                       ...prev,
                                       [field.key]:
-                                        value === '__none__' ? '' : value,
+                                        value === 'none' ? '' : value,
                                     }))
                                   }
                                 >
@@ -1031,7 +1031,7 @@ export function ClientImportModal({
                                   </SelectTrigger>
                                   <SelectContent>
                                     <SelectItem
-                                      value="__none__"
+                                      value="none"
                                       className="cursor-pointer"
                                     >
                                       선택 안함
@@ -1081,8 +1081,7 @@ export function ClientImportModal({
                                 onValueChange={(value) =>
                                   setColumnMapping((prev) => ({
                                     ...prev,
-                                    [field.key]:
-                                      value === '__none__' ? '' : value,
+                                    [field.key]: value === 'none' ? '' : value,
                                   }))
                                 }
                               >
@@ -1091,7 +1090,7 @@ export function ClientImportModal({
                                 </SelectTrigger>
                                 <SelectContent>
                                   <SelectItem
-                                    value="__none__"
+                                    value="none"
                                     className="cursor-pointer"
                                   >
                                     선택 안함

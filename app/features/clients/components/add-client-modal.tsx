@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -96,6 +96,24 @@ export function AddClientModal({
     },
   });
 
+  // 🔄 모달이 열릴 때마다 폼 상태 완전 초기화
+  useEffect(() => {
+    if (open) {
+      form.reset({
+        fullName: '',
+        phone: '',
+        email: '',
+        telecomProvider: '',
+        address: '',
+        occupation: '',
+        importance: 'medium',
+        referredById: '',
+        tags: '',
+        notes: '',
+      });
+    }
+  }, [open, form]);
+
   const handleSubmit = async (data: ClientFormData) => {
     try {
       // referredById 값 정리
@@ -120,21 +138,24 @@ export function AddClientModal({
   const importanceOptions = [
     {
       id: 'high',
-      name: '높음 (VIP)',
+      name: 'VIP',
       description: '우선 관리가 필요한 중요 고객',
-      color: 'bg-red-50 border-red-200',
+      color:
+        'bg-orange-50/50 border-orange-200 dark:bg-orange-950/20 dark:border-orange-800/30',
     },
     {
       id: 'medium',
-      name: '보통',
-      description: '일반적인 관리 수준의 고객',
-      color: 'bg-blue-50 border-blue-200',
+      name: '일반',
+      description: '정기적인 관심과 소통이 필요한 고객',
+      color:
+        'bg-blue-50/50 border-blue-200 dark:bg-blue-950/20 dark:border-blue-800/30',
     },
     {
       id: 'low',
-      name: '낮음',
-      description: '기본적인 관리 수준의 고객',
-      color: 'bg-gray-50 border-gray-200',
+      name: '관심',
+      description: '기본 접촉으로 관계를 유지하는 고객',
+      color:
+        'bg-muted/30 border-muted-foreground/20 dark:bg-muted/10 dark:border-muted-foreground/20',
     },
   ];
 
@@ -362,7 +383,11 @@ export function AddClientModal({
                           <Label
                             key={option.id}
                             htmlFor={option.id}
-                            className="flex items-center space-x-3 rounded-lg border-2 border-gray-800 p-3 cursor-pointer hover:border-primary/5 has-[:checked]:border-primary has-[:checked]:bg-primary/5 transition-colors"
+                            className={`flex items-center space-x-3 rounded-lg border-2 p-3 cursor-pointer transition-all duration-200 ${
+                              field.value === option.id
+                                ? `${option.color} border-opacity-100`
+                                : 'border-border hover:border-primary/20 hover:bg-primary/5'
+                            }`}
                           >
                             <RadioGroupItem value={option.id} id={option.id} />
                             <div className="flex-1">

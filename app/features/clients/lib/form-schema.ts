@@ -101,14 +101,14 @@ export const clientPreferencesSchema = z.object({
 
 // 📝 폼 옵션들 (prefix 네이밍 적용)
 export const clientFormOptions = {
-  // 통신사 옵션
+  // 통신사 옵션 (🔧 UI와 일치하도록 표준화)
   telecomProviders: [
-    'SK텔레콤',
+    'SKT',
     'KT',
     'LG U+',
-    '알뜰폰(SK)',
-    '알뜰폰(KT)',
-    '알뜰폰(LG)',
+    '알뜰폰 SKT',
+    '알뜰폰 KT',
+    '알뜰폰 LG U+',
   ],
 
   // 영업 단계 옵션 (실제로는 DB에서 가져와야 함)
