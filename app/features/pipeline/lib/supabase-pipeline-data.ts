@@ -17,11 +17,11 @@ export async function getPipelineStages(agentId: string) {
       .select()
       .from(pipelineStages)
       .where(eq(pipelineStages.agentId, agentId))
-      .orderBy(asc(pipelineStages.order));
+      .orderBy(pipelineStages.order);
 
-    return stages;
+    // 🎯 "제외됨" 단계는 파이프라인 보드에서 숨김
+    return stages.filter((stage) => stage.name !== '제외됨');
   } catch (error) {
-    console.error('Error fetching pipeline stages:', error);
     throw new Error('파이프라인 단계를 가져오는데 실패했습니다.');
   }
 }
@@ -42,7 +42,6 @@ export async function createPipelineStage(stageData: {
 
     return newStage[0];
   } catch (error) {
-    console.error('Error creating pipeline stage:', error);
     throw new Error('파이프라인 단계 생성에 실패했습니다.');
   }
 }
@@ -59,13 +58,15 @@ export async function updatePipelineStage(
   try {
     const updatedStage = await db
       .update(pipelineStages)
-      .set(updates)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
       .where(eq(pipelineStages.id, id))
       .returning();
 
     return updatedStage[0];
   } catch (error) {
-    console.error('Error updating pipeline stage:', error);
     throw new Error('파이프라인 단계 수정에 실패했습니다.');
   }
 }
@@ -74,7 +75,6 @@ export async function deletePipelineStage(id: string) {
   try {
     await db.delete(pipelineStages).where(eq(pipelineStages.id, id));
   } catch (error) {
-    console.error('Error deleting pipeline stage:', error);
     throw new Error('파이프라인 단계 삭제에 실패했습니다.');
   }
 }
@@ -82,8 +82,6 @@ export async function deletePipelineStage(id: string) {
 // Clients 관련 함수들
 export async function getClientsByStage(agentId: string) {
   try {
-    console.log('🔍 고객 데이터 조회 시작:', { agentId });
-
     const clientsData = await db
       .select({
         client: clients,
@@ -95,8 +93,6 @@ export async function getClientsByStage(agentId: string) {
       .leftJoin(clientDetails, eq(clients.id, clientDetails.clientId))
       .where(and(eq(clients.agentId, agentId), eq(clients.isActive, true)))
       .orderBy(desc(clients.createdAt));
-
-    console.log('✅ DB 조회 완료:', clientsData.length, '건');
 
     // 각 고객의 추가 정보 조회
     const enrichedClients = await Promise.all(
@@ -158,12 +154,6 @@ export async function getClientsByStage(agentId: string) {
             createdAt: item.client.createdAt?.toISOString(),
           };
         } catch (error) {
-          console.error('❌ 고객 정보 변환 실패:', {
-            clientId: item.client.id,
-            clientName: item.client.fullName,
-            error,
-          });
-
           // ✅ 에러가 발생해도 기본 정보는 반환
           return {
             id: item.client.id,
@@ -182,10 +172,8 @@ export async function getClientsByStage(agentId: string) {
       })
     );
 
-    console.log('✅ 고객 데이터 변환 완료:', enrichedClients.length, '건');
     return enrichedClients;
   } catch (error) {
-    console.error('❌ getClientsByStage 실패:', error);
     throw new Error(
       `고객 정보를 가져오는데 실패했습니다: ${
         error instanceof Error ? error.message : '알 수 없는 오류'
@@ -254,7 +242,6 @@ export async function getClientById(id: string) {
       referrals: clientReferrals,
     };
   } catch (error) {
-    console.error('Error fetching client:', error);
     throw new Error('고객 정보를 가져오는데 실패했습니다.');
   }
 }
@@ -284,7 +271,6 @@ export async function createClient(clientData: {
     // 생성된 고객의 상세 정보 조회
     return await getClientById(newClient[0].id);
   } catch (error) {
-    console.error('Error creating client:', error);
     throw new Error('고객 생성에 실패했습니다.');
   }
 }
@@ -321,7 +307,6 @@ export async function updateClient(
 
     return await getClientById(updatedClient[0].id);
   } catch (error) {
-    console.error('Error updating client:', error);
     throw new Error('고객 정보 수정에 실패했습니다.');
   }
 }
@@ -339,7 +324,6 @@ export async function moveClientToStage(clientId: string, stageId: string) {
 
     return await getClientById(updatedClient[0].id);
   } catch (error) {
-    console.error('Error moving client to stage:', error);
     throw new Error('고객 단계 이동에 실패했습니다.');
   }
 }
@@ -348,7 +332,6 @@ export async function deleteClient(id: string) {
   try {
     await db.update(clients).set({ isActive: false }).where(eq(clients.id, id));
   } catch (error) {
-    console.error('Error deleting client:', error);
     throw new Error('고객 삭제에 실패했습니다.');
   }
 }

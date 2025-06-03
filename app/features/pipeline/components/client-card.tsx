@@ -19,6 +19,7 @@ import {
   AlertTriangle,
   ChevronRight,
   PhoneCall,
+  Archive,
 } from 'lucide-react';
 import { Link } from 'react-router';
 import type { InsuranceInfo } from '~/features/pipeline/types/types';
@@ -103,6 +104,7 @@ interface ClientCardProps {
   };
   insuranceInfo?: InsuranceInfo;
   isDragging?: boolean;
+  onRemoveFromPipeline?: (clientId: string, clientName: string) => void;
 }
 
 export function ClientCard({
@@ -125,6 +127,7 @@ export function ClientCard({
   referredBy,
   insuranceInfo,
   isDragging = false,
+  onRemoveFromPipeline,
 }: ClientCardProps) {
   // 🎯 중요도별 스타일 (서비스 톤앤매너 적용)
   const importanceStyles = {
@@ -213,9 +216,7 @@ export function ClientCard({
     >
       {/* 🎯 드래그 핸들 */}
       {!isDragging && (
-        <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
-          <GripVertical className="h-4 w-4 text-muted-foreground" />
-        </div>
+        <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"></div>
       )}
 
       <CardHeader className="pb-3">
@@ -396,6 +397,17 @@ export function ClientCard({
           <span>상세보기</span>
           <ChevronRight className="h-3.5 w-3.5 group-hover/link:translate-x-0.5 transition-transform" />
         </Link>
+
+        {/* 📁 영업에서 제외 버튼 */}
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full mt-2 text-xs text-muted-foreground hover:text-orange-700 hover:bg-orange-50 hover:border-orange-300 transition-colors"
+          onClick={() => onRemoveFromPipeline?.(id, name)}
+        >
+          <Archive className="h-3 w-3 mr-1" />
+          영업에서 제외
+        </Button>
       </CardContent>
     </Card>
   );

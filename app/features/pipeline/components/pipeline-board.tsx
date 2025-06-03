@@ -25,6 +25,7 @@ interface PipelineBoardProps {
     destinationStageId: string
   ) => void;
   onAddClientToStage?: (stageId: string) => void;
+  onRemoveFromPipeline?: (clientId: string, clientName: string) => void;
 }
 
 export function PipelineBoard({
@@ -32,6 +33,7 @@ export function PipelineBoard({
   clients,
   onClientMove,
   onAddClientToStage,
+  onRemoveFromPipeline,
 }: PipelineBoardProps) {
   const [draggedClientId, setDraggedClientId] = useState<string | null>(null);
   const dragSourceStageId = useRef<string | null>(null);
@@ -331,6 +333,7 @@ export function PipelineBoard({
                           }
                           referredBy={client.referredBy || undefined}
                           isDragging={client.id === draggedClientId}
+                          onRemoveFromPipeline={onRemoveFromPipeline}
                         />
                       </div>
                     ))

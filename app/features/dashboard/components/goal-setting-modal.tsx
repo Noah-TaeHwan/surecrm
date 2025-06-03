@@ -117,13 +117,6 @@ export function GoalSettingModal({
     return goalYear === selectedYear && goalMonth === selectedMonth;
   });
 
-  console.log('🎯 목표 필터링:', {
-    selectedYear,
-    selectedMonth,
-    totalGoals: currentGoals.length,
-    filteredGoals: filteredGoals.length,
-  });
-
   const onSubmit = async (data: GoalFormData) => {
     setIsLoading(true);
     try {

@@ -784,57 +784,105 @@ export async function getUserGoals(userId: string) {
           // 목표 유형별 실제 데이터 조회
           switch (goal.goalType) {
             case 'revenue':
-              // ✅ 개선된 매출 목표 계산 로직 (보험료 기준)
+              // ✅ 개선된 매출 목표 계산 로직 - "계약 완료" 단계의 고객만 실제 매출로 계산
               const goalStartDate = new Date(goal.startDate);
               const goalEndDate = new Date(goal.endDate);
 
-              // 보험 가입 완료된 고객들의 실제 보험료 합계 계산
-              const contractedInsuranceResult = await db
+              // 🎯 먼저 "계약 완료" 단계 찾기
+              const contractCompletedStage = await db
                 .select({
-                  clientId: insuranceInfo.clientId,
-                  premium: insuranceInfo.premium,
-                  coverageAmount: insuranceInfo.coverageAmount,
-                  clientUpdatedAt: clients.updatedAt,
+                  id: pipelineStages.id,
                 })
-                .from(insuranceInfo)
-                .innerJoin(clients, eq(insuranceInfo.clientId, clients.id))
+                .from(pipelineStages)
                 .where(
                   and(
-                    eq(clients.agentId, userId),
-                    eq(insuranceInfo.isActive, true), // 활성 보험만
-                    sql`${insuranceInfo.premium} > 0`, // 보험료가 설정된 경우
-                    gte(clients.updatedAt, goalStartDate), // 목표 기간 내 업데이트
-                    lte(clients.updatedAt, goalEndDate)
+                    eq(pipelineStages.agentId, userId),
+                    eq(pipelineStages.name, '계약 완료')
                   )
-                );
+                )
+                .limit(1);
 
-              // 실제 보험료 합계 (연간 보험료를 월 단위로 환산)
-              const totalPremium = contractedInsuranceResult.reduce(
-                (sum, insurance) => {
-                  const monthlyPremium = Number(insurance.premium) || 0;
-                  return sum + monthlyPremium;
-                },
-                0
-              );
+              // "계약 완료" 단계가 있는 경우에만 해당 단계 고객들의 보험료 계산
+              if (contractCompletedStage.length > 0) {
+                const contractStageId = contractCompletedStage[0].id;
 
-              currentValue = Math.round(totalPremium / 10000); // 원을 만원으로 변환
-
-              // 보험료 데이터가 없는 경우 기본값 적용
-              if (currentValue === 0) {
-                // 목표 기간 내 업데이트된 고객 수로 추정
-                const updatedClientsResult = await db
-                  .select({ count: count() })
-                  .from(clients)
+                // 🎯 "계약 완료" 단계에 있는 고객들의 보험료만 실제 매출로 계산
+                const contractedInsuranceResult = await db
+                  .select({
+                    clientId: insuranceInfo.clientId,
+                    premium: insuranceInfo.premium,
+                    coverageAmount: insuranceInfo.coverageAmount,
+                    clientUpdatedAt: clients.updatedAt,
+                  })
+                  .from(insuranceInfo)
+                  .innerJoin(clients, eq(insuranceInfo.clientId, clients.id))
                   .where(
                     and(
                       eq(clients.agentId, userId),
-                      gte(clients.updatedAt, goalStartDate),
+                      eq(clients.currentStageId, contractStageId), // 🎯 계약 완료 단계만!
+                      eq(insuranceInfo.isActive, true), // 활성 보험만
+                      sql`${insuranceInfo.premium} > 0`, // 보험료가 설정된 경우
+                      gte(clients.updatedAt, goalStartDate), // 목표 기간 내 업데이트
                       lte(clients.updatedAt, goalEndDate)
                     )
                   );
 
+                // 실제 보험료 합계 (연간 보험료를 월 단위로 환산)
+                const totalPremium = contractedInsuranceResult.reduce(
+                  (sum, insurance) => {
+                    const monthlyPremium = Number(insurance.premium) || 0;
+                    return sum + monthlyPremium;
+                  },
+                  0
+                );
+
+                currentValue = Math.round(totalPremium / 10000); // 원을 만원으로 변환
+
+                console.log('🎯 매출 목표 달성률 계산:', {
+                  goalPeriod: `${goal.startDate} ~ ${goal.endDate}`,
+                  contractCompletedClients: contractedInsuranceResult.length,
+                  totalContractedPremium: totalPremium,
+                  currentValueInTenThousands: currentValue,
+                });
+              }
+
+              // 계약 완료 단계가 없거나 보험료 데이터가 없는 경우 기본값 적용
+              if (currentValue === 0) {
+                console.log(
+                  '⚠️ 계약 완료 단계 또는 보험료 데이터 없음 - 기본값 적용'
+                );
+
+                // 목표 기간 내 업데이트된 고객 수로 추정 (계약 완료 단계가 있으면 해당 단계만)
+                const fallbackQuery =
+                  contractCompletedStage.length > 0
+                    ? db
+                        .select({ count: count() })
+                        .from(clients)
+                        .where(
+                          and(
+                            eq(clients.agentId, userId),
+                            eq(
+                              clients.currentStageId,
+                              contractCompletedStage[0].id
+                            ),
+                            gte(clients.updatedAt, goalStartDate),
+                            lte(clients.updatedAt, goalEndDate)
+                          )
+                        )
+                    : db
+                        .select({ count: count() })
+                        .from(clients)
+                        .where(
+                          and(
+                            eq(clients.agentId, userId),
+                            gte(clients.updatedAt, goalStartDate),
+                            lte(clients.updatedAt, goalEndDate)
+                          )
+                        );
+
+                const updatedClientsResult = await fallbackQuery;
                 const updatedClients = updatedClientsResult[0]?.count || 0;
-                currentValue = updatedClients * 150; // 기본값: 고객당 150만원
+                currentValue = updatedClients * 150; // 기본값: 계약 완료 고객당 150만원
               }
 
               break;

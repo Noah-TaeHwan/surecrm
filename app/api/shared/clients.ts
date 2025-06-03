@@ -297,8 +297,6 @@ export async function getClientById(
   agentId: string
 ): Promise<ClientDetailProfile | null> {
   try {
-    console.log('🔍 API: getClientById 호출됨', { clientId, agentId });
-
     // 기본 고객 정보 조회 (stages, referrer 정보 포함)
     const [baseClient] = await db
       .select({
@@ -345,7 +343,6 @@ export async function getClientById(
       );
 
     if (!baseClient) {
-      console.log('❌ API: 고객을 찾을 수 없음', clientId);
       return null;
     }
 
@@ -498,7 +495,6 @@ export async function getClientById(
       milestones,
     };
 
-    console.log('✅ API: 고객 상세 정보 조회 완료', baseClient.fullName);
     return enrichedClient;
   } catch (error) {
     console.error('❌ API: getClientById 오류:', error);
@@ -508,55 +504,35 @@ export async function getClientById(
 
 // 🎯 새 고객 생성 (Phase 3에서 실제 구현)
 export async function createClient(
-  clientData: Partial<NewClient> & { fullName: string; phone: string },
+  clientData: Omit<Client, 'id' | 'createdAt' | 'updatedAt' | 'isActive'>,
   agentId: string
-): Promise<{
-  success: boolean;
-  data: Client | null;
-  message?: string;
-}> {
+): Promise<{ success: boolean; data?: Client; message?: string }> {
   try {
-    console.log('➕ API: createClient 호출됨', { clientData, agentId });
-
-    // 기본값 설정
-    const newClientData: NewClient = {
-      agentId,
-      fullName: clientData.fullName,
-      phone: clientData.phone,
-      email: clientData.email || null,
-      telecomProvider: clientData.telecomProvider || null,
-      address: clientData.address || null,
-      occupation: clientData.occupation || null,
-      hasDrivingLicense: clientData.hasDrivingLicense || null,
-      height: clientData.height || null,
-      weight: clientData.weight || null,
-      tags: clientData.tags || [],
-      importance: clientData.importance || 'medium',
-      currentStageId: clientData.currentStageId!,
-      referredById: clientData.referredById || null,
-      notes: clientData.notes || null,
-      customFields: clientData.customFields || {},
-      isActive: true,
-    };
-
+    // 🎯 실제 Supabase 고객 생성
     const [createdClient] = await db
       .insert(clients)
-      .values(newClientData)
+      .values({
+        ...clientData,
+        agentId,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
       .returning();
 
-    console.log('✅ API: 새 고객 생성 완료', createdClient.fullName);
-
+    // 성공 응답
     return {
       success: true,
       data: createdClient,
-      message: `${createdClient.fullName} 고객이 성공적으로 등록되었습니다.`,
+      message: '고객이 성공적으로 생성되었습니다.',
     };
   } catch (error) {
     console.error('❌ API: createClient 오류:', error);
     return {
       success: false,
-      data: null,
-      message: '고객 등록 중 오류가 발생했습니다.',
+      message: `고객 생성 중 오류가 발생했습니다: ${
+        error instanceof Error ? error.message : '알 수 없는 오류'
+      }`,
     };
   }
 }
@@ -928,7 +904,6 @@ export async function updateClientStage(
       message: `${updatedClient.fullName} 고객이 "${targetStage.name}" 단계로 이동되었습니다.`,
     };
   } catch (error) {
-    console.error('❌ updateClientStage 오류:', error);
     return {
       success: false,
       data: null,

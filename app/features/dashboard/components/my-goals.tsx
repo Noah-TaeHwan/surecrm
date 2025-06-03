@@ -330,8 +330,8 @@ export function MyGoals({
                   </h4>
                   <div className="grid grid-cols-2 gap-3 text-xs">
                     <div className="text-center">
-                      <p className="text-muted-foreground">달성 완료</p>
-                      <p className="font-medium text-green-600">
+                      <p className="text-lg text-muted-foreground">달성 완료</p>
+                      <p className="text-lg font-medium text-green-600">
                         {
                           viewingMonthGoals.filter((g) => g.progress >= 100)
                             .length
@@ -340,10 +340,10 @@ export function MyGoals({
                       </p>
                     </div>
                     <div className="text-center">
-                      <p className="text-muted-foreground">
+                      <p className="text-lg text-muted-foreground">
                         {isCurrentMonth ? '진행 중' : '미달성'}
                       </p>
-                      <p className="font-medium text-primary">
+                      <p className="text-lg font-medium text-primary">
                         {
                           viewingMonthGoals.filter((g) => g.progress < 100)
                             .length

@@ -6,6 +6,7 @@ import { PipelineBoard } from '~/features/pipeline/components/pipeline-board';
 import { PipelineFilters } from '~/features/pipeline/components/pipeline-filters';
 import { AddClientModal } from '~/features/clients/components/add-client-modal';
 import { ExistingClientOpportunityModal } from '../components/existing-client-opportunity-modal';
+import { RemoveClientModal } from '../components/remove-client-modal';
 import {
   Plus,
   Search,
@@ -41,70 +42,56 @@ export function meta({ data, params }: Route.MetaArgs) {
 }
 
 export async function loader({ request }: Route.LoaderArgs) {
-  console.log('🎯 파이프라인 페이지 loader 시작');
-
   try {
     // 🎯 인증 확인
     const user = await requireAuth(request);
     const agentId = user.id;
 
-    console.log('👤 로그인된 보험설계사:', {
-      agentId,
-      fullName: user.fullName,
-    });
-
     // 🎯 파이프라인 단계 조회
     let stages: any[] = [];
     try {
       stages = await getPipelineStages(agentId);
-      console.log('📋 파이프라인 단계 조회 결과:', {
-        stagesCount: stages.length,
-        stages: stages.map((s) => ({ id: s.id, name: s.name })),
-      });
 
       // 🎯 파이프라인 단계가 없으면 기본 단계 생성
       if (stages.length === 0) {
-        console.log('⚙️ 기본 파이프라인 단계 생성 중...');
         stages = await createDefaultPipelineStages(agentId);
-        console.log('✅ 기본 파이프라인 단계 생성 완료:', stages.length);
       }
     } catch (stageError) {
-      console.error('❌ 파이프라인 단계 조회/생성 실패:', stageError);
       // 빈 배열로 fallback
       stages = [];
     }
 
     // 🎯 모든 고객 조회
     let allClients: any[] = [];
+    let totalAllClients = 0;
     try {
       allClients = await getClientsByStage(agentId);
-      console.log('👥 전체 고객 조회 결과:', {
-        totalClients: allClients.length,
-        clientsByStage: stages.map((stage) => ({
-          stageName: stage.name,
-          clientCount: allClients.filter(
-            (client) => client.stageId === stage.id
-          ).length,
-        })),
+
+      // 🎯 전체 고객 수 조회 (파이프라인에 없는 고객 포함)
+      const { getClients } = await import('~/api/shared/clients');
+      const allClientsResult = await getClients({
+        agentId,
+        limit: 1000, // 충분히 큰 숫자
       });
+      totalAllClients = allClientsResult.total;
     } catch (clientError) {
-      console.error('❌ 고객 조회 실패:', clientError);
       // 빈 배열로 fallback
       allClients = [];
+      totalAllClients = 0;
     }
 
     return {
       stages,
       clients: allClients,
+      totalAllClients, // 🎯 전체 고객 수 추가
       currentUserId: agentId,
     };
   } catch (error) {
-    console.error('❌ 파이프라인 데이터 로드 실패:', error);
-
     // 🎯 더 상세한 에러 정보와 함께 안전한 fallback 반환
     return {
       stages: [],
       clients: [],
+      totalAllClients: 0,
       currentUserId: null,
       error:
         error instanceof Error
@@ -143,8 +130,6 @@ export async function action({ request }: Route.ActionArgs) {
         notes: (formData.get('notes') as string) || undefined,
       };
 
-      console.log('🎯 서버사이드에서 새 고객 추가 시작:', clientData);
-
       // 첫 상담 단계 찾기
       const stages = await getPipelineStages(user.id);
       const firstStage = stages.find((s) => s.name === '첫 상담') || stages[0];
@@ -177,7 +162,6 @@ export async function action({ request }: Route.ActionArgs) {
       const result = await createClient(newClientData, user.id);
 
       if (result.success && result.data) {
-        console.log('✅ 새 고객 추가 성공:', result.data.fullName);
         // 🎯 성공 응답 반환 (redirect 대신)
         return {
           success: true,
@@ -237,13 +221,6 @@ export async function action({ request }: Route.ActionArgs) {
         };
       }
 
-      console.log('🚀 기존 고객 새 영업 기회 생성:', {
-        clientId,
-        clientName,
-        insuranceType,
-        notes,
-      });
-
       // 첫 상담 단계 찾기
       const stages = await getPipelineStages(user.id);
       const firstStage = stages.find((s) => s.name === '첫 상담') || stages[0];
@@ -292,7 +269,6 @@ export async function action({ request }: Route.ActionArgs) {
       const result = await updateClientStage(clientId, firstStage.id, user.id);
 
       if (result.success) {
-        console.log('✅ 기존 고객 새 영업 기회 생성 완료');
         return {
           success: true,
           message: `${clientName} 고객의 새 영업 기회가 생성되었습니다.`,
@@ -306,9 +282,59 @@ export async function action({ request }: Route.ActionArgs) {
       }
     }
 
+    if (intent === 'removeFromPipeline') {
+      // 영업 파이프라인에서 고객 제외
+      const clientId = formData.get('clientId') as string;
+
+      if (!clientId) {
+        return {
+          success: false,
+          error: '고객 ID가 누락되었습니다.',
+        };
+      }
+
+      // 🎯 "제외됨" 단계 찾기 또는 생성
+      const stages = await getPipelineStages(user.id);
+      let excludedStage = stages.find((s) => s.name === '제외됨');
+
+      if (!excludedStage) {
+        // "제외됨" 단계가 없으면 생성
+        const { createPipelineStage } = await import(
+          '~/features/pipeline/lib/supabase-pipeline-data'
+        );
+        excludedStage = await createPipelineStage({
+          agentId: user.id,
+          name: '제외됨',
+          order: 999, // 맨 마지막 순서
+          color: '#6b7280', // 회색
+          isDefault: false,
+        });
+      }
+
+      // 🎯 고객을 "제외됨" 단계로 이동
+      const { updateClientStage } = await import('~/api/shared/clients');
+
+      const result = await updateClientStage(
+        clientId,
+        excludedStage.id,
+        user.id
+      );
+
+      if (result.success) {
+        return {
+          success: true,
+          message: '고객이 영업 파이프라인에서 제외되었습니다.',
+        };
+      } else {
+        return {
+          success: false,
+          error: result.message || '영업에서 제외하는데 실패했습니다.',
+        };
+      }
+    }
+
     return { success: false, error: '알 수 없는 요청입니다.' };
   } catch (error) {
-    console.error('❌ Action에서 고객 추가 실패:', error);
     return {
       success: false,
       error:
@@ -320,7 +346,7 @@ export async function action({ request }: Route.ActionArgs) {
 }
 
 export default function PipelinePage({ loaderData }: Route.ComponentProps) {
-  const { stages, clients } = loaderData;
+  const { stages, clients, totalAllClients } = loaderData;
   const fetcher = useFetcher();
   const revalidator = useRevalidator();
 
@@ -334,6 +360,14 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
   const [addClientOpen, setAddClientOpen] = useState(false);
   const [existingClientModalOpen, setExistingClientModalOpen] = useState(false);
   const [isCreatingOpportunity, setIsCreatingOpportunity] = useState(false);
+
+  // 🗑️ 영업에서 제외 관련 상태
+  const [removeClientModalOpen, setRemoveClientModalOpen] = useState(false);
+  const [clientToRemove, setClientToRemove] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+  const [isRemovingClient, setIsRemovingClient] = useState(false);
 
   // 🎯 fetcher 상태 기반으로 상태 관리
   const isSubmitting = fetcher.state === 'submitting';
@@ -388,26 +422,42 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
     }))
     .sort((a, b) => a.name.localeCompare(b.name)); // 이름순 정렬
 
-  // 🎯 MVP용 전체 통계 계산
+  // 🎯 MVP용 전체 통계 계산 (확장)
   const getTotalStats = () => {
-    const totalClients = filteredClients.length;
-    const highImportanceClients = filteredClients.filter(
+    // 1. 전체 고객 (고객 관리 페이지의 모든 고객)
+    const totalAllClientsCount = totalAllClients; // 파이프라인에 없는 고객 포함
+
+    // 2. 영업 파이프라인 관리 중인 고객 (현재 칸반보드에 있는 고객)
+    const pipelineClients = filteredClients.length;
+
+    // 3. 계약 완료 고객 (실제 성과)
+    const contractedClients = filteredClients.filter(
+      (client) =>
+        stages.find((s) => s.id === client.stageId)?.name === '계약 완료'
+    ).length;
+
+    // 4. 고가치 고객 (VIP 고객)
+    const highValueClients = filteredClients.filter(
       (client) => client.importance === 'high'
     ).length;
+
+    // 5. 전환율 계산 (계약 완료 / 전체 파이프라인 고객)
     const conversionRate =
-      stages.length > 0
-        ? Math.round(
-            (filteredClients.filter(
-              (client) =>
-                stages.findIndex((s) => s.id === client.stageId) >=
-                stages.length - 2
-            ).length /
-              Math.max(totalClients, 1)) *
-              100
-          )
+      pipelineClients > 0
+        ? Math.round((contractedClients / pipelineClients) * 100)
         : 0;
 
-    return { totalClients, highImportanceClients, conversionRate };
+    // 6. 활성 단계 수
+    const activeStages = stages.length;
+
+    return {
+      totalAllClients: totalAllClientsCount,
+      pipelineClients,
+      contractedClients,
+      highValueClients,
+      conversionRate,
+      activeStages,
+    };
   };
 
   // 각 단계별 고객 수와 중요 고객 수 계산
@@ -501,6 +551,36 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
     setAddClientOpen(true);
   };
 
+  // 🗑️ 영업에서 제외 핸들러
+  const handleRemoveFromPipeline = (clientId: string, clientName: string) => {
+    setClientToRemove({ id: clientId, name: clientName });
+    setRemoveClientModalOpen(true);
+  };
+
+  const handleConfirmRemove = async () => {
+    if (!clientToRemove) return;
+
+    setIsRemovingClient(true);
+
+    // 🎯 FormData 생성하여 서버로 전송
+    const formData = new FormData();
+    formData.append('intent', 'removeFromPipeline');
+    formData.append('clientId', clientToRemove.id);
+
+    // 🎯 action 함수 호출
+    fetcher.submit(formData, { method: 'post' });
+
+    // 모달 상태 초기화
+    setIsRemovingClient(false);
+    setRemoveClientModalOpen(false);
+    setClientToRemove(null);
+  };
+
+  const handleCancelRemove = () => {
+    setRemoveClientModalOpen(false);
+    setClientToRemove(null);
+  };
+
   // 필터가 적용되었는지 확인
   const isFilterActive =
     selectedReferrerId !== null ||
@@ -523,27 +603,80 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
         {/* 🎯 MVP 통계 헤더 - sticky로 고정 */}
         <div className="sticky -top-8 z-20 bg-background border-b border-border pb-6">
           {/* 전체 통계 카드 */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 pt-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-6 pt-6">
+            {/* 1. 전체 고객 */}
             <div className="flex items-center space-x-3 p-4 bg-card rounded-lg border">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <Users className="h-5 w-5 text-primary" />
+              <div className="p-2 bg-blue-500/10 rounded-lg">
+                <Users className="h-5 w-5 text-blue-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">
                   전체 고객
                 </p>
                 <p className="text-2xl font-bold text-foreground">
-                  {totalStats.totalClients}
+                  {totalStats.totalAllClients}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  중요 고객:{' '}
-                  <span className="text-red-500 font-medium">
-                    {totalStats.highImportanceClients}
-                  </span>
+                  고객 관리의 모든 고객
                 </p>
               </div>
             </div>
 
+            {/* 2. 영업 관리 중 */}
+            <div className="flex items-center space-x-3 p-4 bg-card rounded-lg border">
+              <div className="p-2 bg-orange-500/10 rounded-lg">
+                <TrendingUp className="h-5 w-5 text-orange-600" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  영업 관리 중
+                </p>
+                <p className="text-2xl font-bold text-foreground">
+                  {totalStats.pipelineClients}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  현재 파이프라인 진행 중
+                </p>
+              </div>
+            </div>
+
+            {/* 3. 계약 완료 */}
+            <div className="flex items-center space-x-3 p-4 bg-card rounded-lg border">
+              <div className="p-2 bg-green-500/10 rounded-lg">
+                <Target className="h-5 w-5 text-green-600" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  계약 완료
+                </p>
+                <p className="text-2xl font-bold text-foreground">
+                  {totalStats.contractedClients}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  실제 성과 달성 고객
+                </p>
+              </div>
+            </div>
+
+            {/* 4. VIP 고객 */}
+            <div className="flex items-center space-x-3 p-4 bg-card rounded-lg border">
+              <div className="p-2 bg-red-500/10 rounded-lg">
+                <Users className="h-5 w-5 text-red-600" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  VIP 고객
+                </p>
+                <p className="text-2xl font-bold text-foreground">
+                  {totalStats.highValueClients}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  고가치 중요 고객
+                </p>
+              </div>
+            </div>
+
+            {/* 5. 전환율 */}
             <div className="flex items-center space-x-3 p-4 bg-card rounded-lg border">
               <div className="p-2 bg-emerald-500/10 rounded-lg">
                 <TrendingUp className="h-5 w-5 text-emerald-600" />
@@ -556,24 +689,7 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
                   {totalStats.conversionRate}%
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  최종 단계 진입률
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-3 p-4 bg-card rounded-lg border">
-              <div className="p-2 bg-blue-500/10 rounded-lg">
-                <Target className="h-5 w-5 text-blue-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">
-                  진행 단계
-                </p>
-                <p className="text-2xl font-bold text-foreground">
-                  {stages.length}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  활성 파이프라인 단계
+                  계약 완료 성공률
                 </p>
               </div>
             </div>
@@ -695,6 +811,7 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
             clients={filteredClients as unknown as Client[]}
             onClientMove={handleClientMove}
             onAddClientToStage={handleAddClientToStage}
+            onRemoveFromPipeline={handleRemoveFromPipeline}
           />
         </div>
 
@@ -740,6 +857,15 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
         onConfirm={handleExistingClientOpportunity}
         clients={existingClientsForOpportunity}
         isLoading={isCreatingOpportunity}
+      />
+
+      {/* 🗑️ 영업에서 제외 모달 */}
+      <RemoveClientModal
+        isOpen={removeClientModalOpen}
+        onClose={handleCancelRemove}
+        onConfirm={handleConfirmRemove}
+        clientName={clientToRemove?.name || ''}
+        isLoading={isRemovingClient}
       />
     </MainLayout>
   );

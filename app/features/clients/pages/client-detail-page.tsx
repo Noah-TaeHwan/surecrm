@@ -338,13 +338,6 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
     setIsCreatingOpportunity(true);
 
     try {
-      console.log('🚀 새 영업 기회 생성 시작:', {
-        clientId: client.id,
-        clientName: client.fullName,
-        insuranceType: data.insuranceType,
-        notes: data.notes,
-      });
-
       // TODO: 실제 API 호출로 영업 파이프라인에 추가
       // 1. 파이프라인 단계 조회
       const { getPipelineStages } = await import(
@@ -380,7 +373,6 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
       );
 
       if (result.success) {
-        console.log('✅ 새 영업 기회 생성 완료');
         alert(
           `${client.fullName} 고객의 새 영업 기회가 생성되었습니다!\n\n` +
             `상품: ${getInsuranceTypeName(data.insuranceType)}\n` +
