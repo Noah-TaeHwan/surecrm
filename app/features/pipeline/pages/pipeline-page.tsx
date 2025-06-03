@@ -1,7 +1,7 @@
 import type { Route } from './+types/pipeline-page';
 import { MainLayout } from '~/common/layouts/main-layout';
 import { useState, useEffect } from 'react';
-import { useFetcher, useRevalidator } from 'react-router';
+import { useFetcher } from 'react-router';
 import { PipelineBoard } from '~/features/pipeline/components/pipeline-board';
 import { PipelineFilters } from '~/features/pipeline/components/pipeline-filters';
 import { AddClientModal } from '~/features/clients/components/add-client-modal';
@@ -347,8 +347,12 @@ export async function action({ request }: Route.ActionArgs) {
 
 export default function PipelinePage({ loaderData }: Route.ComponentProps) {
   const { stages, clients, totalAllClients } = loaderData;
-  const fetcher = useFetcher();
-  const revalidator = useRevalidator();
+
+  // 🎯 각 액션별로 별도의 fetcher 사용
+  const moveFetcher = useFetcher(); // 드래그 앤 드롭용
+  const addClientFetcher = useFetcher(); // 신규 고객 추가용
+  const opportunityFetcher = useFetcher(); // 기존 고객 영업 기회용
+  const removeFetcher = useFetcher(); // 고객 제거용
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedReferrerId, setSelectedReferrerId] = useState<string | null>(
@@ -359,7 +363,6 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
   >('all');
   const [addClientOpen, setAddClientOpen] = useState(false);
   const [existingClientModalOpen, setExistingClientModalOpen] = useState(false);
-  const [isCreatingOpportunity, setIsCreatingOpportunity] = useState(false);
 
   // 🗑️ 영업에서 제외 관련 상태
   const [removeClientModalOpen, setRemoveClientModalOpen] = useState(false);
@@ -367,32 +370,10 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
     id: string;
     name: string;
   } | null>(null);
-  const [isRemovingClient, setIsRemovingClient] = useState(false);
 
   // 🎯 fetcher 상태 기반으로 상태 관리
-  const isSubmitting = fetcher.state === 'submitting';
-  const submitError = fetcher.data?.error || null;
-
-  // 🎯 성공 시 모달 닫기 및 데이터 새로고침 로직
-  useEffect(() => {
-    if (fetcher.data?.success === true) {
-      // 고객 추가 성공 시 모달 닫기
-      if (addClientOpen) {
-        setAddClientOpen(false);
-      }
-      if (existingClientModalOpen) {
-        setExistingClientModalOpen(false);
-      }
-
-      // 데이터 새로고침
-      revalidator.revalidate();
-    }
-  }, [
-    fetcher.data?.success,
-    addClientOpen,
-    existingClientModalOpen,
-    revalidator,
-  ]);
+  const isSubmitting = addClientFetcher.state === 'submitting';
+  const submitError = addClientFetcher.data?.error || null;
 
   // 필터링된 고객 목록
   const filteredClients = clients.filter((client) => {
@@ -486,7 +467,7 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
     formData.append('targetStageId', destinationStageId);
 
     // 🎯 action 함수 호출
-    fetcher.submit(formData, { method: 'post' });
+    moveFetcher.submit(formData, { method: 'post' });
   };
 
   // 새 고객 추가 처리 함수 (useFetcher 사용)
@@ -520,7 +501,7 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
     if (clientData.notes) formData.append('notes', clientData.notes);
 
     // 🎯 action 함수 호출
-    fetcher.submit(formData, { method: 'post' });
+    addClientFetcher.submit(formData, { method: 'post' });
   };
 
   // 기존 고객 새 영업 기회 처리 함수
@@ -530,8 +511,6 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
     insuranceType: string;
     notes: string;
   }) => {
-    setIsCreatingOpportunity(true);
-
     // 🎯 FormData 생성
     const formData = new FormData();
     formData.append('intent', 'existingClientOpportunity');
@@ -541,9 +520,7 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
     formData.append('notes', data.notes);
 
     // 🎯 action 함수 호출
-    fetcher.submit(formData, { method: 'post' });
-
-    setIsCreatingOpportunity(false);
+    opportunityFetcher.submit(formData, { method: 'post' });
   };
 
   // 특정 단계에 고객 추가 함수
@@ -560,18 +537,15 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
   const handleConfirmRemove = async () => {
     if (!clientToRemove) return;
 
-    setIsRemovingClient(true);
-
     // 🎯 FormData 생성하여 서버로 전송
     const formData = new FormData();
     formData.append('intent', 'removeFromPipeline');
     formData.append('clientId', clientToRemove.id);
 
     // 🎯 action 함수 호출
-    fetcher.submit(formData, { method: 'post' });
+    removeFetcher.submit(formData, { method: 'post' });
 
     // 모달 상태 초기화
-    setIsRemovingClient(false);
     setRemoveClientModalOpen(false);
     setClientToRemove(null);
   };
@@ -596,6 +570,57 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
     phone: client.phone,
     currentStage: stages.find((s) => s.id === client.stageId)?.name,
   }));
+
+  // 🎯 모달 제출 완료 후 모달 닫기 (성공한 새 제출에 대해서만)
+  useEffect(() => {
+    if (
+      addClientFetcher.state === 'idle' &&
+      addClientFetcher.data?.success === true
+    ) {
+      // 제출이 완료되고 성공했을 때, 모달이 열려있으면 닫기
+      // 단, 약간의 지연을 두어 사용자가 성공을 인지할 수 있도록 함
+      const timer = setTimeout(() => {
+        if (addClientOpen) {
+          setAddClientOpen(false);
+        }
+      }, 1000); // 1초 후 모달 닫기 (충분한 피드백 시간)
+
+      return () => clearTimeout(timer);
+    }
+  }, [addClientFetcher.state, addClientFetcher.data?.success]);
+
+  // 🎯 기존 고객 영업 기회 모달 제어
+  useEffect(() => {
+    if (
+      opportunityFetcher.state === 'idle' &&
+      opportunityFetcher.data?.success === true
+    ) {
+      const timer = setTimeout(() => {
+        if (existingClientModalOpen) {
+          setExistingClientModalOpen(false);
+        }
+      }, 1000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [opportunityFetcher.state, opportunityFetcher.data?.success]);
+
+  // 🎯 고객 제거 모달 제어
+  useEffect(() => {
+    if (
+      removeFetcher.state === 'idle' &&
+      removeFetcher.data?.success === true
+    ) {
+      const timer = setTimeout(() => {
+        if (removeClientModalOpen) {
+          setRemoveClientModalOpen(false);
+          setClientToRemove(null);
+        }
+      }, 1000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [removeFetcher.state, removeFetcher.data?.success]);
 
   return (
     <MainLayout title="영업 파이프라인">
@@ -856,7 +881,7 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
         onClose={() => setExistingClientModalOpen(false)}
         onConfirm={handleExistingClientOpportunity}
         clients={existingClientsForOpportunity}
-        isLoading={isCreatingOpportunity}
+        isLoading={opportunityFetcher.state === 'submitting'}
       />
 
       {/* 🗑️ 영업에서 제외 모달 */}
@@ -865,7 +890,7 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
         onClose={handleCancelRemove}
         onConfirm={handleConfirmRemove}
         clientName={clientToRemove?.name || ''}
-        isLoading={isRemovingClient}
+        isLoading={removeFetcher.state === 'submitting'}
       />
     </MainLayout>
   );

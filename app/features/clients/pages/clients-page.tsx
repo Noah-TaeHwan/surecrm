@@ -316,11 +316,59 @@ export async function loader({ request }: { request: Request }) {
     console.log('✅ Loader: 데이터 로딩 완료', {
       clientsCount: clientsResponse.data.length,
       statsLoaded: statsResponse.success,
+      stats: statsResponse.data,
     });
+
+    // 🎯 statsResponse가 실패했거나 데이터가 없으면 클라이언트 데이터로 직접 계산
+    let finalStats = statsResponse.data;
+
+    if (
+      !statsResponse.success ||
+      !statsResponse.data ||
+      statsResponse.data.totalClients === 0
+    ) {
+      console.log(
+        '📊 Stats API 실패 또는 빈 데이터, 클라이언트 데이터로 직접 계산'
+      );
+
+      const clients = clientsResponse.data;
+      const totalClients = clients.length;
+
+      // VIP 고객 수
+      const vipClients = clients.filter(
+        (c: any) => c.importance === 'high'
+      ).length;
+
+      // 계약 완료 고객 수 (currentStage.name이 '계약 완료'인 고객)
+      const contractedClients = clients.filter(
+        (c: any) => c.currentStage?.name === '계약 완료'
+      ).length;
+
+      // 활성 고객 수 (제외됨이 아닌 고객)
+      const activeClients = clients.filter(
+        (c: any) => c.currentStage?.name !== '제외됨'
+      ).length;
+
+      // 전환율 계산
+      const conversionRate =
+        activeClients > 0
+          ? Math.round((contractedClients / activeClients) * 100 * 10) / 10
+          : 0;
+
+      finalStats = {
+        totalClients: totalClients,
+        activeClients: activeClients,
+        inactiveClients: totalClients - activeClients,
+        recentGrowth: 0,
+        conversionRate: conversionRate,
+      } as any;
+
+      console.log('📊 직접 계산된 통계:', finalStats);
+    }
 
     return {
       clients: clientsResponse.data,
-      stats: statsResponse.data,
+      stats: finalStats,
       pagination: {
         total: clientsResponse.total,
         page: clientsResponse.page,
@@ -1011,26 +1059,47 @@ export default function ClientsPage({ loaderData }: any) {
             <CardContent>
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm">전체 고객</span>
-                  <Badge variant="default">
-                    {loaderData.stats.totalClients}명
+                  <span className="text-sm text-muted-foreground">
+                    전체 고객
+                  </span>
+                  <Badge variant="outline" className="b">
+                    {loaderData.stats?.totalClients || 0}명
                   </Badge>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm">활성 고객</span>
-                  <Badge variant="secondary">
-                    {loaderData.stats.activeClients}명
+                  <span className="text-sm text-muted-foreground">
+                    활성 관리 중
+                  </span>
+                  <Badge variant="outline" className="">
+                    {loaderData.stats?.activeClients || 0}명
                   </Badge>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm">VIP 고객</span>
-                  <Badge variant="destructive">
-                    {
-                      filteredClients.filter(
-                        (c: ClientProfile) => c.importance === 'high'
-                      ).length
-                    }
+                  <span className="text-sm text-muted-foreground">
+                    VIP 고객
+                  </span>
+                  <Badge variant="outline" className="">
+                    {loaderData.clients?.filter(
+                      (c: ClientProfile) => c.importance === 'high'
+                    ).length || 0}
                     명
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">
+                    계약 완료
+                  </span>
+                  <Badge variant="outline" className="">
+                    {loaderData.clients?.filter(
+                      (c: ClientProfile) => c.currentStage?.name === '계약 완료'
+                    ).length || 0}
+                    명
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">전환율</span>
+                  <Badge variant="outline" className="">
+                    {loaderData.stats?.conversionRate || 0}%
                   </Badge>
                 </div>
                 <div className="pt-2">
