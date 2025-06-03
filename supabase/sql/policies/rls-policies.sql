@@ -94,6 +94,25 @@ CREATE POLICY "Users can manage team client details" ON public.client_details
     )
   );
 
+-- App Client Details 테이블 (새로운 테이블 정책 추가)
+ALTER TABLE public.app_client_details ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view app client details" ON public.app_client_details
+  FOR SELECT USING (
+    client_id IN (
+      SELECT id FROM public.app_client_profiles 
+      WHERE agent_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can manage app client details" ON public.app_client_details
+  FOR ALL USING (
+    client_id IN (
+      SELECT id FROM public.app_client_profiles 
+      WHERE agent_id = auth.uid()
+    )
+  );
+
 -- Insurance Info 테이블
 ALTER TABLE public.insurance_info ENABLE ROW LEVEL SECURITY;
 

@@ -27,6 +27,7 @@ interface HeaderProps {
     name?: string;
     profileImage?: string;
   } | null;
+  isLoadingUser?: boolean;
 }
 
 // 기본 알림 타입 정의
@@ -40,11 +41,12 @@ interface BasicNotification {
 }
 
 export function Header({
-  title = '대시보드',
+  title = '',
   className,
   showMenuButton = false,
   onMenuButtonClick,
   currentUser,
+  isLoadingUser = false,
 }: HeaderProps) {
   const [isLoggingOut, setIsLoggingOut] = React.useState(false);
   const [notifications, setNotifications] = React.useState<BasicNotification[]>(
@@ -215,11 +217,6 @@ export function Header({
             <span className="sr-only">메뉴 열기</span>
           </Button>
         )}
-
-        {/* 페이지 제목 */}
-        <h1 className="text-base md:text-lg font-medium text-foreground truncate">
-          {title}
-        </h1>
       </div>
 
       {/* 헤더 우측 요소들 */}
@@ -320,13 +317,19 @@ export function Header({
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="rounded-full">
               <Avatar className="h-8 w-8">
-                <AvatarFallback className="text-xs">
-                  {currentUser?.name
-                    ? currentUser.name.charAt(0).toUpperCase()
-                    : currentUser?.email
-                    ? currentUser.email.charAt(0).toUpperCase()
-                    : '사'}
-                </AvatarFallback>
+                {isLoadingUser ? (
+                  <AvatarFallback className="text-xs animate-pulse bg-muted">
+                    <div className="w-4 h-4 bg-muted-foreground/20 rounded-full" />
+                  </AvatarFallback>
+                ) : (
+                  <AvatarFallback className="text-xs">
+                    {currentUser?.name
+                      ? currentUser.name.charAt(0).toUpperCase()
+                      : currentUser?.email
+                      ? currentUser.email.charAt(0).toUpperCase()
+                      : '사'}
+                  </AvatarFallback>
+                )}
               </Avatar>
               <span className="sr-only">프로필 메뉴</span>
             </Button>
@@ -334,12 +337,21 @@ export function Header({
           <DropdownMenuContent className="w-56" align="end">
             <DropdownMenuLabel>
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium">
-                  {currentUser?.name || '사용자'}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {currentUser?.email || 'email@example.com'}
-                </p>
+                {isLoadingUser ? (
+                  <>
+                    <div className="h-4 bg-muted rounded animate-pulse" />
+                    <div className="h-3 bg-muted rounded animate-pulse w-3/4" />
+                  </>
+                ) : (
+                  <>
+                    <p className="text-sm font-medium">
+                      {currentUser?.name || '사용자'}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {currentUser?.email || 'email@example.com'}
+                    </p>
+                  </>
+                )}
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />

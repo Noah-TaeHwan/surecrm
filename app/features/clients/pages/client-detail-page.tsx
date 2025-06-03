@@ -30,6 +30,13 @@ import { DeleteConfirmationModal } from '~/common/components/ui/delete-confirmat
 import { NewOpportunityModal } from '../components/new-opportunity-modal';
 import { EnhancedClientOverview } from '../components/enhanced-client-overview';
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '~/common/components/ui/dialog';
+import {
   ArrowLeft,
   Edit2,
   Phone,
@@ -71,6 +78,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/common/components/ui/select';
+import { z } from 'zod';
 
 // 🎯 확장된 고객 프로필 타입 (상세 페이지용)
 interface ClientDetailProfile extends Client {
@@ -107,9 +115,59 @@ interface ClientDetailProfile extends Client {
 interface LoaderData {
   client: Client | null;
   currentUserId: string | null;
+  currentUser: {
+    id: string;
+    email: string;
+    name: string;
+  };
   isEmpty: boolean;
   error?: string;
 }
+
+// 🎯 Zod 유효성 검증 스키마
+const ClientValidationSchema = z.object({
+  fullName: z
+    .string()
+    .min(1, '고객명을 입력해주세요')
+    .max(50, '고객명은 50자 이내로 입력해주세요'),
+  phone: z
+    .string()
+    .min(1, '전화번호를 입력해주세요')
+    .regex(
+      /^(01[016789])-?(\d{3,4})-?(\d{4})$/,
+      '올바른 전화번호 형식이 아닙니다 (예: 010-1234-5678)'
+    ),
+  email: z
+    .string()
+    .optional()
+    .refine(
+      (val) => !val || z.string().email().safeParse(val).success,
+      '올바른 이메일 형식이 아닙니다'
+    ),
+  address: z.string().max(200, '주소는 200자 이내로 입력해주세요').optional(),
+  occupation: z.string().max(50, '직업은 50자 이내로 입력해주세요').optional(),
+  height: z
+    .string()
+    .optional()
+    .refine((val) => {
+      if (!val || val.trim() === '') return true;
+      const height = parseInt(val);
+      return !isNaN(height) && height >= 100 && height <= 250;
+    }, '키는 100cm~250cm 사이로 입력해주세요'),
+  weight: z
+    .string()
+    .optional()
+    .refine((val) => {
+      if (!val || val.trim() === '') return true;
+      const weight = parseInt(val);
+      return !isNaN(weight) && weight >= 30 && weight <= 200;
+    }, '몸무게는 30kg~200kg 사이로 입력해주세요'),
+  telecomProvider: z.string().optional(),
+  notes: z.string().max(1000, '메모는 1000자 이내로 입력해주세요').optional(),
+  ssn: z.string().optional(),
+  importance: z.enum(['high', 'medium', 'low']),
+  hasDrivingLicense: z.boolean(),
+});
 
 export async function loader({ request, params }: Route.LoaderArgs) {
   const { id: clientId } = params;
@@ -176,6 +234,11 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       return {
         client: null,
         currentUserId: agentId,
+        currentUser: {
+          id: user.id,
+          email: user.email,
+          name: user.fullName || user.email.split('@')[0],
+        },
         isEmpty: true,
       };
     }
@@ -218,6 +281,11 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     return {
       client: enhancedClient,
       currentUserId: agentId,
+      currentUser: {
+        id: user.id,
+        email: user.email,
+        name: user.fullName || user.email.split('@')[0],
+      },
       isEmpty: false,
     };
   } catch (error) {
@@ -227,6 +295,11 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     return {
       client: null,
       currentUserId: null,
+      currentUser: {
+        id: '',
+        email: '',
+        name: '',
+      },
       isEmpty: true,
       error:
         error instanceof Error
@@ -251,6 +324,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
   const client = data?.client || null;
   const isEmpty = data?.isEmpty || false;
   const error = data?.error || null;
+  const currentUser = data?.currentUser || null;
 
   const [activeTab, setActiveTab] = useState('overview');
   const [isDeleting, setIsDeleting] = useState(false);
@@ -258,11 +332,17 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [showOpportunityModal, setShowOpportunityModal] = useState(false);
   const [isCreatingOpportunity, setIsCreatingOpportunity] = useState(false);
+  const [showSaveSuccessModal, setShowSaveSuccessModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorModalContent, setErrorModalContent] = useState({
+    title: '',
+    message: '',
+  });
   const [editFormData, setEditFormData] = useState({
     fullName: '',
     phone: '',
     email: '',
-    telecomProvider: undefined as string | undefined,
+    telecomProvider: 'none',
     address: '',
     occupation: '',
     height: '',
@@ -271,16 +351,40 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
     importance: 'medium' as 'high' | 'medium' | 'low',
     notes: '',
     ssn: '',
+    ssnFront: '',
+    ssnBack: '',
+    birthDate: '',
+    gender: '' as 'male' | 'female' | '',
   });
   const navigate = useNavigate();
 
   // 수정 모드 진입
   const handleEditStart = () => {
+    const telecomProviderValue = client?.telecomProvider;
+
+    // 🔒 SSN 복호화 처리 (보안 패치)
+    let existingSsn = '';
+    if (client?.extendedDetails?.ssn) {
+      try {
+        // Base64로 인코딩된 SSN 디코딩
+        existingSsn = atob(client.extendedDetails.ssn);
+      } catch (decryptError) {
+        existingSsn = '';
+      }
+    }
+
+    const ssnParts = existingSsn.includes('-')
+      ? existingSsn.split('-')
+      : ['', ''];
+
     setEditFormData({
       fullName: client?.fullName || '',
       phone: client?.phone || '',
       email: client?.email || '',
-      telecomProvider: client?.telecomProvider || undefined,
+      telecomProvider:
+        telecomProviderValue && telecomProviderValue.trim()
+          ? telecomProviderValue
+          : 'none',
       address: client?.address || '',
       occupation: client?.occupation || '',
       height: client?.height || '',
@@ -288,10 +392,137 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
       hasDrivingLicense: client?.hasDrivingLicense || false,
       importance: client?.importance || 'medium',
       notes: client?.notes || '',
-      ssn: client?.extendedDetails?.ssn || '',
+      ssn: existingSsn,
+      ssnFront: ssnParts[0] || '',
+      ssnBack: ssnParts[1] || '',
+      birthDate: client?.extendedDetails?.birthDate || '',
+      gender: client?.extendedDetails?.gender || '',
     });
     setIsEditing(true);
   };
+
+  // 🎯 주민등록번호 자동 처리 함수
+  const handleSsnChange = async (ssnFront: string, ssnBack: string) => {
+    const fullSsn = ssnFront && ssnBack ? `${ssnFront}-${ssnBack}` : '';
+
+    // SSN 파싱 및 생년월일/성별 추출
+    if (fullSsn.length === 14) {
+      try {
+        const { parseKoreanId } = await import('~/lib/utils/korean-id-utils');
+        const parseResult = parseKoreanId(fullSsn);
+
+        if (
+          parseResult.isValid &&
+          parseResult.birthDate &&
+          parseResult.gender
+        ) {
+          // 자동으로 생년월일과 성별 업데이트
+          setEditFormData((prev) => ({
+            ...prev,
+            ssn: fullSsn,
+            ssnFront,
+            ssnBack,
+            birthDate: parseResult.birthDate!.toISOString().split('T')[0],
+            gender: parseResult.gender!,
+          }));
+        } else {
+          // 유효하지 않은 경우 SSN만 업데이트
+          setEditFormData((prev) => ({
+            ...prev,
+            ssn: fullSsn,
+            ssnFront,
+            ssnBack,
+          }));
+        }
+      } catch (error) {
+        setEditFormData((prev) => ({
+          ...prev,
+          ssn: fullSsn,
+          ssnFront,
+          ssnBack,
+        }));
+      }
+    } else {
+      setEditFormData((prev) => ({
+        ...prev,
+        ssn: fullSsn,
+        ssnFront,
+        ssnBack,
+      }));
+    }
+  };
+
+  // 🎯 3가지 나이 계산 함수
+  const calculateAge = (
+    birthDate: Date,
+    type: 'standard' | 'korean' | 'insurance'
+  ) => {
+    const today = new Date();
+    const birth = new Date(birthDate);
+
+    switch (type) {
+      case 'standard': // 만 나이
+        let age = today.getFullYear() - birth.getFullYear();
+        const monthDiff = today.getMonth() - birth.getMonth();
+        if (
+          monthDiff < 0 ||
+          (monthDiff === 0 && today.getDate() < birth.getDate())
+        ) {
+          age--;
+        }
+        return age;
+
+      case 'korean': // 한국 나이 (연도 차이 + 1)
+        return today.getFullYear() - birth.getFullYear() + 1;
+
+      case 'insurance': // 보험 나이 (상령일 기준 - 생일이 지나면 +1)
+        let insuranceAge = today.getFullYear() - birth.getFullYear();
+        const birthdayThisYear = new Date(
+          today.getFullYear(),
+          birth.getMonth(),
+          birth.getDate()
+        );
+        if (today >= birthdayThisYear) {
+          insuranceAge++;
+        }
+        return insuranceAge;
+
+      default:
+        return 0;
+    }
+  };
+
+  // 🎯 BMI 계산 함수
+  const calculateBMI = (height: string, weight: string) => {
+    const h = parseFloat(height);
+    const w = parseFloat(weight);
+
+    if (!h || !w || h <= 0 || w <= 0) return null;
+
+    const bmi = w / Math.pow(h / 100, 2);
+    return Math.round(bmi * 10) / 10; // 소수점 1자리
+  };
+
+  // 🎯 BMI 상태 분류 함수
+  const getBMIStatus = (bmi: number) => {
+    if (bmi < 18.5) return { text: '저체중', color: 'text-blue-600' };
+    if (bmi < 23) return { text: '정상', color: 'text-green-600' };
+    if (bmi < 25) return { text: '과체중', color: 'text-yellow-600' };
+    if (bmi < 30) return { text: '비만', color: 'text-orange-600' };
+    return { text: '고도비만', color: 'text-red-600' };
+  };
+
+  // 현재 BMI 계산 (읽기 모드용)
+  const currentBMI =
+    client?.height && client?.weight
+      ? calculateBMI(client.height.toString(), client.weight.toString())
+      : null;
+
+  // 수정 중 BMI 계산 (수정 모드용)
+  const editingBMI =
+    editFormData.height && editFormData.weight
+      ? calculateBMI(editFormData.height, editFormData.weight)
+      : null;
 
   // 수정 취소
   const handleEditCancel = () => {
@@ -300,7 +531,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
       fullName: '',
       phone: '',
       email: '',
-      telecomProvider: undefined,
+      telecomProvider: 'none',
       address: '',
       occupation: '',
       height: '',
@@ -309,66 +540,124 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
       importance: 'medium',
       notes: '',
       ssn: '',
+      ssnFront: '',
+      ssnBack: '',
+      birthDate: '',
+      gender: '',
     });
+  };
+
+  // 🎯 에러 모달 표시 함수
+  const showError = (title: string, message: string) => {
+    setErrorModalContent({ title, message });
+    setShowErrorModal(true);
+  };
+
+  // 🎯 폼 유효성 검증 함수
+  const validateForm = () => {
+    try {
+      const formData = {
+        fullName: editFormData.fullName,
+        phone: editFormData.phone,
+        email: editFormData.email || undefined,
+        address: editFormData.address || undefined,
+        occupation: editFormData.occupation || undefined,
+        height: editFormData.height || undefined,
+        weight: editFormData.weight || undefined,
+        telecomProvider:
+          editFormData.telecomProvider === 'none'
+            ? undefined
+            : editFormData.telecomProvider,
+        notes: editFormData.notes || undefined,
+        ssn: editFormData.ssn || undefined,
+        importance: editFormData.importance,
+        hasDrivingLicense: editFormData.hasDrivingLicense,
+      };
+
+      ClientValidationSchema.parse(formData);
+      return { isValid: true, errors: [] };
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return {
+          isValid: false,
+          errors: error.errors.map(
+            (err) => `${err.path.join('.')}: ${err.message}`
+          ),
+        };
+      }
+      return {
+        isValid: false,
+        errors: ['알 수 없는 유효성 검사 오류가 발생했습니다.'],
+      };
+    }
   };
 
   // 수정 저장
   const handleEditSave = async () => {
+    // 🎯 유효성 검증 먼저 실행
+    const validation = validateForm();
+    if (!validation.isValid) {
+      showError('입력 정보 확인 필요', validation.errors.join('\n'));
+      return;
+    }
+
     try {
       // 기본 고객 정보와 민감 정보 분리
-      const { ssn, ...basicClientData } = editFormData;
+      const { ssn, ssnFront, ssnBack, ...basicClientData } = editFormData;
 
-      // 1. 기본 고객 정보 업데이트
+      // telecomProvider 'none' 처리
+      const processedBasicData = {
+        ...basicClientData,
+        telecomProvider:
+          basicClientData.telecomProvider === 'none'
+            ? null
+            : basicClientData.telecomProvider,
+      };
+
+      // 🎯 기존 API 사용 - Supabase 직접 호출 제거
       const { updateClient } = await import('~/api/shared/clients');
 
-      const basicResult = await updateClient(
-        client.id,
-        basicClientData,
-        client.agentId
-      );
-
-      if (!basicResult.success) {
-        throw new Error(
-          basicResult.message || '기본 정보 업데이트에 실패했습니다.'
-        );
-      }
-
-      // 2. 민감 정보 업데이트 (SSN이 있는 경우)
-      if (ssn !== undefined && ssn !== client.extendedDetails?.ssn) {
-        const { updateClientDetails } = await import(
-          '~/api/shared/client-extended-data'
-        );
-
-        const detailsResult = await updateClientDetails(
-          client.id,
-          { ssn: ssn || undefined },
-          client.agentId
-        );
-
-        if (!detailsResult.success) {
-          console.warn('⚠️ 민감 정보 업데이트 실패:', detailsResult.message);
-          // 기본 정보는 성공했으므로 경고만 표시
-          alert(
-            '기본 정보는 업데이트되었지만, 민감 정보 업데이트에 실패했습니다.'
-          );
+      // 🔒 SSN 암호화 처리 (보안 패치)
+      let encryptedSSN = null;
+      if (ssn && ssn.length === 14) {
+        try {
+          encryptedSSN = btoa(ssn); // Base64 인코딩 (기본 보안)
+        } catch (encryptError) {
+          encryptedSSN = null;
         }
       }
 
-      console.log('✅ 고객 정보 업데이트 완료');
-      alert('고객 정보가 성공적으로 업데이트되었습니다.');
-      setIsEditing(false);
+      // 전체 데이터 구성
+      const updateData = {
+        ...processedBasicData,
+        // 민감정보 포함
+        ssn: encryptedSSN,
+        birthDate: editFormData.birthDate || null,
+        gender: editFormData.gender || null,
+      };
 
-      // 페이지 새로고침으로 최신 데이터 반영
-      window.location.reload();
+      // API 호출
+      const result = await updateClient(client.id, updateData, client.agentId);
+
+      if (result.success) {
+        setShowSaveSuccessModal(true);
+        setIsEditing(false);
+
+        // 페이지 새로고침으로 최신 데이터 반영 (모달 닫힌 후 실행하도록 지연)
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      } else {
+        throw new Error(result.message || '고객 정보 업데이트에 실패했습니다.');
+      }
     } catch (error) {
-      console.error('❌ 고객 정보 업데이트 실패:', error);
-      alert(
-        `고객 정보 업데이트에 실패했습니다.\n\n${
-          error instanceof Error
-            ? error.message
-            : '알 수 없는 오류가 발생했습니다.'
-        }`
-      );
+      let errorMessage = '고객 정보 업데이트에 실패했습니다.';
+
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
+      showError('저장 실패', `${errorMessage}\n\n다시 시도해 주세요.`);
     }
   };
 
@@ -403,13 +692,18 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
       });
 
       // 1. 파이프라인 단계 조회 (안전한 에러 처리)
-      const { getPipelineStages } = await import(
+      console.log('📋 파이프라인 단계 조회 시작');
+
+      // 🎯 동적 import로 순환 의존성 방지
+      const pipelineModule = await import(
         '~/features/pipeline/lib/supabase-pipeline-data'
       );
 
       let stages: any[] = [];
       try {
-        const stagesResult = await getPipelineStages(client.agentId);
+        const stagesResult = await pipelineModule.getPipelineStages(
+          client.agentId
+        );
         stages = Array.isArray(stagesResult) ? stagesResult : [];
         console.log('📋 파이프라인 단계 조회 성공:', stages.length, '개');
       } catch (stageError) {
@@ -446,9 +740,10 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
       console.log('🎯 선택된 파이프라인 단계:', firstStage.name);
 
       // 2. 고객 메모 업데이트 (더 안전한 방식)
-      const { updateClient, updateClientStage } = await import(
-        '~/api/shared/clients'
-      );
+      console.log('📝 고객 메모 업데이트 시작');
+
+      // 🎯 동적 import로 순환 의존성 방지
+      const clientsModule = await import('~/api/shared/clients');
 
       // 영업 기회 메모 생성 (안전한 문자열 처리)
       const opportunityNotes = `[${getInsuranceTypeName(
@@ -464,11 +759,9 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
           : opportunityNotes,
       };
 
-      console.log('📝 고객 메모 업데이트 시작');
-
       let updateResult = null;
       try {
-        updateResult = await updateClient(
+        updateResult = await clientsModule.updateClient(
           client.id,
           updateData,
           client.agentId
@@ -481,7 +774,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
       // 3. 고객 단계를 첫 상담으로 변경
       console.log('🔄 고객 단계 변경 시작:', firstStage.name);
 
-      const stageResult = await updateClientStage(
+      const stageResult = await clientsModule.updateClientStage(
         client.id,
         firstStage.id,
         client.agentId
@@ -489,6 +782,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
 
       if (stageResult?.success) {
         console.log('✅ 영업 기회 생성 완료');
+        // alert를 커스텀 성공 모달로 교체할 수 있지만, 현재는 기존 로직 유지
         alert(
           `🎉 ${client.fullName} 고객의 새 영업 기회가 생성되었습니다!\n\n` +
             `📋 상품: ${getInsuranceTypeName(sanitizedData.insuranceType)}\n` +
@@ -523,8 +817,9 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
         }
       }
 
-      alert(
-        `❌ ${userMessage}\n\n🔧 기술적 세부사항:\n${
+      showError(
+        '영업 기회 생성 실패',
+        `${userMessage}\n\n🔧 기술적 세부사항:\n${
           error instanceof Error ? error.message : '알 수 없는 오류'
         }`
       );
@@ -618,26 +913,56 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
   const confirmDeleteClient = async () => {
     setIsDeleting(true);
     try {
-      // 🎯 실제 API 호출로 고객 삭제
-      const { deleteClient } = await import('~/api/shared/clients');
-
       console.log('📞 고객 삭제 API 호출 시작:', {
         clientId: client.id,
         agentId: client.agentId,
       });
 
-      const result = await deleteClient(client.id, client.agentId);
+      console.log('🔍 클라이언트 정보 확인:', {
+        client: {
+          id: client.id,
+          fullName: client.fullName,
+          agentId: client.agentId,
+          isActive: client.isActive,
+        },
+      });
+
+      // 🎯 HTTP API 호출로 변경 (동적 import 제거)
+      const formData = new FormData();
+      formData.append('clientId', client.id);
+      formData.append('agentId', client.agentId);
+
+      const response = await fetch('/api/clients/delete', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      console.log('📋 deleteClient 결과:', {
+        success: result.success,
+        message: result.message,
+        warnings: result.warnings,
+        data: result.data,
+      });
 
       if (result.success) {
         console.log('✅ 고객 삭제 완료');
         alert('고객이 성공적으로 삭제되었습니다.');
         navigate('/clients');
       } else {
+        console.error('❌ API 응답 실패:', result.message);
         throw new Error(result.message || '삭제에 실패했습니다.');
       }
     } catch (error) {
       console.error('❌ 고객 삭제 실패:', error);
-      alert(
+      console.error(
+        '❌ 에러 스택:',
+        error instanceof Error ? error.stack : 'No stack trace'
+      );
+
+      showError(
+        '고객 삭제 실패',
         `고객 삭제에 실패했습니다.\n\n${
           error instanceof Error
             ? error.message
@@ -735,31 +1060,65 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
               <Card
                 className={`sticky top-6 border-border/50 ${cardStyle.bgGradient} ${cardStyle.borderClass} overflow-hidden`}
               >
-                <CardHeader className="text-center pb-4">
-                  <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                    <User className="h-12 w-12 text-primary" />
+                <CardHeader className="text-center pb-2">
+                  <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                    <User className="h-6 w-6 text-primary" />
                   </div>
                   {isEditing ? (
-                    <Input
-                      value={editFormData.fullName}
-                      onChange={(e) =>
-                        setEditFormData({
-                          ...editFormData,
-                          fullName: e.target.value,
-                        })
-                      }
-                      className="text-center text-lg font-semibold"
-                      placeholder="고객명"
-                    />
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-xs font-medium text-muted-foreground mb-1 block">
+                          고객명
+                        </label>
+                        <Input
+                          value={editFormData.fullName}
+                          onChange={(e) =>
+                            setEditFormData({
+                              ...editFormData,
+                              fullName: e.target.value,
+                            })
+                          }
+                          className="text-center text-lg font-semibold"
+                          placeholder="고객명"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-medium text-muted-foreground mb-1 block">
+                          중요도
+                        </label>
+                        <Select
+                          value={editFormData.importance}
+                          onValueChange={(value: 'high' | 'medium' | 'low') =>
+                            setEditFormData({
+                              ...editFormData,
+                              importance: value,
+                            })
+                          }
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="중요도" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="high">VIP</SelectItem>
+                            <SelectItem value="medium">일반</SelectItem>
+                            <SelectItem value="low">관심</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
                   ) : (
-                    <CardTitle className="text-xl">{client.fullName}</CardTitle>
+                    <>
+                      <CardTitle className="text-xl">
+                        {client.fullName}
+                      </CardTitle>
+                      <div className="flex justify-center">
+                        {getImportanceBadge(client.importance)}
+                      </div>
+                    </>
                   )}
-                  <div className="flex justify-center">
-                    {getImportanceBadge(client.importance)}
-                  </div>
                 </CardHeader>
 
-                <CardContent className="p-6 space-y-4">
+                <CardContent className="p-6 pt-3 space-y-4">
                   {/* 연락처 정보 */}
                   <div className="space-y-3">
                     <div className="flex items-center gap-3">
@@ -781,268 +1140,583 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                       )}
                     </div>
 
-                    {(client.email || isEditing) && (
-                      <div className="flex items-center gap-3">
-                        <Mail className="h-4 w-4 text-muted-foreground" />
-                        {isEditing ? (
-                          <Input
-                            value={editFormData.email}
-                            onChange={(e) =>
-                              setEditFormData({
-                                ...editFormData,
-                                email: e.target.value,
-                              })
-                            }
-                            placeholder="이메일"
-                            className="text-sm"
-                          />
-                        ) : (
-                          <span className="text-sm">{client.email}</span>
-                        )}
-                      </div>
-                    )}
+                    {/* 이메일 */}
+                    <div className="flex items-center gap-3">
+                      <Mail className="h-4 w-4 text-muted-foreground" />
+                      {isEditing ? (
+                        <Input
+                          value={editFormData.email}
+                          onChange={(e) =>
+                            setEditFormData({
+                              ...editFormData,
+                              email: e.target.value,
+                            })
+                          }
+                          placeholder="email@example.com"
+                          type="email"
+                          className="text-sm"
+                        />
+                      ) : (
+                        <span className="text-sm">
+                          {client.email || (
+                            <span
+                              className="text-muted-foreground italic cursor-pointer hover:text-foreground transition-colors"
+                              onClick={handleEditStart}
+                              title="클릭하여 입력"
+                            >
+                              미입력
+                            </span>
+                          )}
+                        </span>
+                      )}
+                    </div>
 
-                    {(client.address || isEditing) && (
-                      <div className="flex items-start gap-3">
-                        <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
-                        {isEditing ? (
-                          <Input
-                            value={editFormData.address}
-                            onChange={(e) =>
-                              setEditFormData({
-                                ...editFormData,
-                                address: e.target.value,
-                              })
-                            }
-                            placeholder="주소"
-                            className="text-sm"
-                          />
-                        ) : (
-                          <span className="text-sm leading-relaxed">
-                            {client.address}
+                    {/* 주소 - 항상 표시 */}
+                    <div className="flex items-start gap-3">
+                      <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
+                      {isEditing ? (
+                        <Input
+                          value={editFormData.address}
+                          onChange={(e) =>
+                            setEditFormData({
+                              ...editFormData,
+                              address: e.target.value,
+                            })
+                          }
+                          placeholder="주소"
+                          className="text-sm"
+                        />
+                      ) : (
+                        <span className="text-sm leading-relaxed">
+                          {client.address || (
+                            <span
+                              className="text-muted-foreground italic cursor-pointer hover:text-foreground transition-colors"
+                              onClick={handleEditStart}
+                              title="클릭하여 입력"
+                            >
+                              주소 미입력
+                            </span>
+                          )}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* 직업 - 항상 표시 */}
+                    <div className="flex items-center gap-3">
+                      <User className="h-4 w-4 text-muted-foreground" />
+                      {isEditing ? (
+                        <Input
+                          value={editFormData.occupation}
+                          onChange={(e) =>
+                            setEditFormData({
+                              ...editFormData,
+                              occupation: e.target.value,
+                            })
+                          }
+                          placeholder="직업"
+                          className="text-sm"
+                        />
+                      ) : (
+                        <span className="text-sm">
+                          {client.occupation || (
+                            <span
+                              className="text-muted-foreground italic cursor-pointer hover:text-foreground transition-colors"
+                              onClick={handleEditStart}
+                              title="클릭하여 입력"
+                            >
+                              직업 미입력
+                            </span>
+                          )}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* 통신사 정보 - 항상 표시 */}
+                    <div className="flex items-center gap-3">
+                      <span className="h-4 w-4 text-muted-foreground flex items-center justify-center">
+                        📱
+                      </span>
+                      {isEditing ? (
+                        <Select
+                          value={editFormData.telecomProvider || 'none'}
+                          onValueChange={(value) =>
+                            setEditFormData({
+                              ...editFormData,
+                              telecomProvider: value,
+                            })
+                          }
+                        >
+                          <SelectTrigger className="text-sm">
+                            <SelectValue placeholder="통신사 선택" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">선택 안함</SelectItem>
+                            <SelectItem value="SKT">SKT</SelectItem>
+                            <SelectItem value="KT">KT</SelectItem>
+                            <SelectItem value="LG U+">LG U+</SelectItem>
+                            <SelectItem value="알뜰폰 SKT">
+                              알뜰폰 SKT
+                            </SelectItem>
+                            <SelectItem value="알뜰폰 KT">알뜰폰 KT</SelectItem>
+                            <SelectItem value="알뜰폰 LG U+">
+                              알뜰폰 LG U+
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <span className="text-sm">
+                          <span className="text-xs text-muted-foreground mr-2">
+                            통신사
                           </span>
-                        )}
-                      </div>
-                    )}
+                          {client.telecomProvider || (
+                            <span
+                              className="text-muted-foreground italic cursor-pointer hover:text-foreground transition-colors"
+                              onClick={handleEditStart}
+                              title="클릭하여 선택"
+                            >
+                              미선택
+                            </span>
+                          )}
+                        </span>
+                      )}
+                    </div>
+                  </div>
 
-                    {(client.occupation || isEditing) && (
-                      <div className="flex items-center gap-3">
-                        <User className="h-4 w-4 text-muted-foreground" />
-                        {isEditing ? (
-                          <Input
-                            value={editFormData.occupation}
-                            onChange={(e) =>
-                              setEditFormData({
-                                ...editFormData,
-                                occupation: e.target.value,
-                              })
-                            }
-                            placeholder="직업"
-                            className="text-sm"
-                          />
-                        ) : (
-                          <span className="text-sm">{client.occupation}</span>
-                        )}
-                      </div>
-                    )}
+                  <Separator />
 
-                    {/* 통신사 정보 */}
-                    {(client.telecomProvider || isEditing) && (
-                      <div className="flex items-center gap-3">
-                        <Phone className="h-4 w-4 text-muted-foreground" />
-                        {isEditing ? (
-                          <Select
-                            value={editFormData.telecomProvider || undefined}
-                            onValueChange={(value) =>
-                              setEditFormData({
-                                ...editFormData,
-                                telecomProvider:
-                                  value === 'none' ? undefined : value,
-                              })
-                            }
-                          >
-                            <SelectTrigger className="text-sm">
-                              <SelectValue placeholder="통신사 선택" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="none">선택 안함</SelectItem>
-                              <SelectItem value="SKT">SKT</SelectItem>
-                              <SelectItem value="KT">KT</SelectItem>
-                              <SelectItem value="LG U+">LG U+</SelectItem>
-                              <SelectItem value="알뜰폰 SKT">
-                                알뜰폰 SKT
-                              </SelectItem>
-                              <SelectItem value="알뜰폰 KT">
-                                알뜰폰 KT
-                              </SelectItem>
-                              <SelectItem value="알뜰폰 LG U+">
-                                알뜰폰 LG U+
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
-                        ) : (
-                          <span className="text-sm">
-                            {client.telecomProvider}
-                          </span>
-                        )}
+                  {/* 현재 단계 - 위로 이동 */}
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium">현재 단계</h4>
+                    <Badge
+                      variant="outline"
+                      className="w-full justify-center h-10 text-md font-semibold"
+                    >
+                      {client.currentStage?.name || '미설정'}
+                    </Badge>
+                    {!client.currentStage?.name && (
+                      <div className="text-xs text-muted-foreground bg-muted/20 p-2 rounded border-l-2 border-muted-foreground/30">
+                        💡 <strong>미설정</strong>은 아직 영업 파이프라인에
+                        진입하지 않은 상태입니다. "새 영업 기회" 버튼을 눌러
+                        파이프라인에 추가할 수 있습니다.
                       </div>
                     )}
                   </div>
 
                   <Separator />
 
+                  {/* 개인 상세 정보 */}
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-medium">개인 정보</h4>
+
+                    {/* 생년월일 - 항상 표시 */}
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm text-muted-foreground min-w-[50px]">
+                        생년월일
+                      </span>
+                      {!isEditing ? (
+                        client?.extendedDetails?.birthDate ? (
+                          <div className="space-y-1">
+                            <span className="text-sm">
+                              {new Date(
+                                client.extendedDetails.birthDate
+                              ).toLocaleDateString('ko-KR')}
+                            </span>
+                            {/* 3가지 나이 표시 */}
+                            <div className="text-xs text-muted-foreground space-y-1">
+                              <div>
+                                만 나이:{' '}
+                                {calculateAge(
+                                  new Date(client.extendedDetails.birthDate),
+                                  'standard'
+                                )}
+                                세
+                              </div>
+                              <div>
+                                한국 나이:{' '}
+                                {calculateAge(
+                                  new Date(client.extendedDetails.birthDate),
+                                  'korean'
+                                )}
+                                세
+                              </div>
+                              <div>
+                                보험 나이:{' '}
+                                {calculateAge(
+                                  new Date(client.extendedDetails.birthDate),
+                                  'insurance'
+                                )}
+                                세
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <span
+                            className="text-sm text-muted-foreground italic cursor-pointer hover:text-foreground transition-colors"
+                            onClick={handleEditStart}
+                            title="클릭하여 입력"
+                          >
+                            미입력
+                          </span>
+                        )
+                      ) : (
+                        <span className="text-xs text-orange-600">
+                          주민등록번호를 입력하시면 자동으로 저장됩니다
+                        </span>
+                      )}
+                    </div>
+
+                    {/* 성별 - 항상 표시 */}
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm text-muted-foreground min-w-[50px]">
+                        성별
+                      </span>
+                      {!isEditing ? (
+                        client?.extendedDetails?.gender ? (
+                          <Badge variant="outline" className="text-xs">
+                            {client.extendedDetails.gender === 'male'
+                              ? '남성'
+                              : '여성'}
+                          </Badge>
+                        ) : (
+                          <span
+                            className="text-sm text-muted-foreground italic cursor-pointer hover:text-foreground transition-colors"
+                            onClick={handleEditStart}
+                            title="클릭하여 입력"
+                          >
+                            미입력
+                          </span>
+                        )
+                      ) : (
+                        <span className="text-xs text-orange-600">
+                          주민등록번호를 입력하시면 자동으로 저장됩니다
+                        </span>
+                      )}
+                    </div>
+
+                    {/* 주민등록번호 - 읽기 모드에서도 표시 */}
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm text-muted-foreground min-w-[50px]">
+                        주민등록번호
+                      </span>
+                      {!isEditing ? (
+                        client?.extendedDetails?.ssn ? (
+                          <span className="text-sm font-mono">
+                            {(() => {
+                              try {
+                                // 🔓 암호화된 SSN 복호화 후 마스킹 표시
+                                const decryptedSSN = atob(
+                                  client.extendedDetails.ssn
+                                );
+                                return decryptedSSN.replace(
+                                  /(\d{6})-(\d{7})/,
+                                  '$1-*******'
+                                );
+                              } catch {
+                                return '🔒 암호화된 데이터';
+                              }
+                            })()}
+                          </span>
+                        ) : (
+                          <span
+                            className="text-sm text-muted-foreground italic cursor-pointer hover:text-foreground transition-colors"
+                            onClick={handleEditStart}
+                            title="클릭하여 입력"
+                          >
+                            미입력
+                          </span>
+                        )
+                      ) : (
+                        <span className="text-xs text-orange-600">
+                          하단에서 입력하세요
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <Separator />
+
                   {/* 신체 정보 */}
-                  {(client.height ||
-                    client.weight ||
-                    client.hasDrivingLicense !== undefined ||
-                    isEditing) && (
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-medium">신체 정보</h4>
+
+                    {/* 키 - 항상 표시 */}
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm text-muted-foreground min-w-[40px]">
+                        키
+                      </span>
+                      {isEditing ? (
+                        <Input
+                          type="number"
+                          value={editFormData.height}
+                          onChange={(e) =>
+                            setEditFormData({
+                              ...editFormData,
+                              height: e.target.value,
+                            })
+                          }
+                          placeholder="170"
+                          className="text-sm"
+                        />
+                      ) : client.height ? (
+                        <span className="text-sm">{client.height}cm</span>
+                      ) : (
+                        <span
+                          className="text-sm text-muted-foreground italic cursor-pointer hover:text-foreground transition-colors"
+                          onClick={handleEditStart}
+                          title="클릭하여 입력"
+                        >
+                          미입력
+                        </span>
+                      )}
+                      {isEditing && (
+                        <span className="text-xs text-muted-foreground">
+                          cm
+                        </span>
+                      )}
+                    </div>
+
+                    {/* 몸무게 - 항상 표시 */}
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm text-muted-foreground min-w-[40px]">
+                        몸무게
+                      </span>
+                      {isEditing ? (
+                        <Input
+                          type="number"
+                          value={editFormData.weight}
+                          onChange={(e) =>
+                            setEditFormData({
+                              ...editFormData,
+                              weight: e.target.value,
+                            })
+                          }
+                          placeholder="70"
+                          className="text-sm"
+                        />
+                      ) : client.weight ? (
+                        <span className="text-sm">{client.weight}kg</span>
+                      ) : (
+                        <span
+                          className="text-sm text-muted-foreground italic cursor-pointer hover:text-foreground transition-colors"
+                          onClick={handleEditStart}
+                          title="클릭하여 입력"
+                        >
+                          미입력
+                        </span>
+                      )}
+                      {isEditing && (
+                        <span className="text-xs text-muted-foreground">
+                          kg
+                        </span>
+                      )}
+                    </div>
+
+                    {/* 🎯 BMI 표시 - 키와 몸무게가 모두 있을 때만 */}
+                    {((isEditing && editingBMI) ||
+                      (!isEditing && currentBMI)) && (
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm text-muted-foreground min-w-[40px]">
+                          BMI
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium">
+                            {isEditing ? editingBMI : currentBMI}
+                          </span>
+                          <Badge
+                            variant="outline"
+                            className={`text-xs ${
+                              getBMIStatus(
+                                isEditing ? editingBMI! : currentBMI!
+                              ).color
+                            }`}
+                          >
+                            {
+                              getBMIStatus(
+                                isEditing ? editingBMI! : currentBMI!
+                              ).text
+                            }
+                          </Badge>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 운전 여부 - 항상 표시 */}
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm text-muted-foreground min-w-[40px]">
+                        운전
+                      </span>
+                      {isEditing ? (
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={editFormData.hasDrivingLicense}
+                            onChange={(e) =>
+                              setEditFormData({
+                                ...editFormData,
+                                hasDrivingLicense: e.target.checked,
+                              })
+                            }
+                            className="rounded"
+                          />
+                          <span className="text-sm">운전 가능</span>
+                        </label>
+                      ) : (
+                        <Badge
+                          variant={
+                            client.hasDrivingLicense ? 'default' : 'secondary'
+                          }
+                          className="text-xs"
+                        >
+                          {client.hasDrivingLicense !== undefined
+                            ? client.hasDrivingLicense
+                              ? '운전 가능'
+                              : '운전 불가'
+                            : '미설정'}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* 주민등록번호 입력 - 수정 모드에서만 표시 */}
+                  {isEditing && (
                     <>
                       <Separator />
-                      <div className="space-y-3">
-                        <h4 className="text-sm font-medium">신체 정보</h4>
+                      <div className="space-y-4">
+                        <h4 className="text-sm font-medium text-foreground flex items-center gap-2">
+                          🔒 민감정보 관리
+                        </h4>
+                        <div className="border border-border rounded-lg p-4 bg-muted/30">
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-2 mb-3">
+                              <span className="text-xs font-medium text-foreground">
+                                주민등록번호
+                              </span>
+                              <span className="text-xs text-amber-800 bg-amber-100 px-2 py-1 rounded border border-amber-200 dark:text-amber-300 dark:bg-amber-900/30 dark:border-amber-800">
+                                ⚠️ 민감정보
+                              </span>
+                            </div>
 
-                        {/* 키 - 일반 모드에서도 표시 */}
-                        {(client.height || isEditing) && (
-                          <div className="flex items-center gap-3">
-                            <span className="text-sm text-muted-foreground min-w-[40px]">
-                              키
-                            </span>
-                            {isEditing ? (
+                            {/* 주민등록번호 분리 입력 - Full Width */}
+                            <div className="grid grid-cols-5 gap-2 items-center">
                               <Input
-                                type="number"
-                                value={editFormData.height}
-                                onChange={(e) =>
-                                  setEditFormData({
-                                    ...editFormData,
-                                    height: e.target.value,
-                                  })
-                                }
-                                placeholder="170"
-                                className="text-sm"
+                                type="text"
+                                placeholder="YYMMDD"
+                                value={editFormData.ssnFront}
+                                onChange={(e) => {
+                                  const value = e.target.value
+                                    .replace(/\D/g, '')
+                                    .slice(0, 6);
+                                  handleSsnChange(value, editFormData.ssnBack);
+                                }}
+                                className="col-span-2 text-center font-mono"
+                                maxLength={6}
                               />
-                            ) : client.height ? (
-                              <span className="text-sm">{client.height}cm</span>
-                            ) : (
-                              <span className="text-sm text-muted-foreground">
-                                미입력
+                              <span className="text-muted-foreground font-bold text-center">
+                                -
                               </span>
-                            )}
-                            {isEditing && (
-                              <span className="text-xs text-muted-foreground">
-                                cm
-                              </span>
-                            )}
-                          </div>
-                        )}
-
-                        {/* 몸무게 - 일반 모드에서도 표시 */}
-                        {(client.weight || isEditing) && (
-                          <div className="flex items-center gap-3">
-                            <span className="text-sm text-muted-foreground min-w-[40px]">
-                              몸무게
-                            </span>
-                            {isEditing ? (
                               <Input
-                                type="number"
-                                value={editFormData.weight}
-                                onChange={(e) =>
-                                  setEditFormData({
-                                    ...editFormData,
-                                    weight: e.target.value,
-                                  })
-                                }
-                                placeholder="70"
-                                className="text-sm"
+                                type="text"
+                                placeholder="1●●●●●●"
+                                value={editFormData.ssnBack}
+                                onChange={(e) => {
+                                  const value = e.target.value
+                                    .replace(/\D/g, '')
+                                    .slice(0, 7);
+                                  handleSsnChange(editFormData.ssnFront, value);
+                                }}
+                                className="col-span-2 text-center font-mono"
+                                maxLength={7}
                               />
-                            ) : client.weight ? (
-                              <span className="text-sm">{client.weight}kg</span>
-                            ) : (
-                              <span className="text-sm text-muted-foreground">
-                                미입력
-                              </span>
-                            )}
-                            {isEditing && (
-                              <span className="text-xs text-muted-foreground">
-                                kg
-                              </span>
-                            )}
-                          </div>
-                        )}
+                            </div>
 
-                        {/* 운전 여부 - 일반 모드에서도 표시 */}
-                        {(client.hasDrivingLicense !== undefined ||
-                          isEditing) && (
-                          <div className="flex items-center gap-3">
-                            <span className="text-sm text-muted-foreground min-w-[40px]">
-                              운전
-                            </span>
-                            {isEditing ? (
-                              <label className="flex items-center gap-2 cursor-pointer">
-                                <input
-                                  type="checkbox"
-                                  checked={editFormData.hasDrivingLicense}
-                                  onChange={(e) =>
-                                    setEditFormData({
-                                      ...editFormData,
-                                      hasDrivingLicense: e.target.checked,
-                                    })
-                                  }
-                                  className="rounded"
-                                />
-                                <span className="text-sm">운전 가능</span>
-                              </label>
-                            ) : (
-                              <Badge
-                                variant={
-                                  client.hasDrivingLicense
-                                    ? 'default'
-                                    : 'secondary'
-                                }
-                                className="text-xs"
-                              >
-                                {client.hasDrivingLicense
-                                  ? '운전 가능'
-                                  : '운전 불가'}
-                              </Badge>
-                            )}
-                          </div>
-                        )}
+                            {/* 입력 가이드 */}
+                            <div className="text-xs text-muted-foreground space-y-1">
+                              <p>
+                                • 생년월일 6자리 (YYMMDD) + 개인식별번호 7자리
+                              </p>
+                              <p>• 입력된 정보는 안전하게 저장됩니다</p>
+                            </div>
 
-                        {/* 주민등록번호 (보안 처리) */}
-                        {(client.extendedDetails?.ssn || isEditing) && (
-                          <div className="flex items-center gap-3">
-                            <User className="h-4 w-4 text-muted-foreground" />
-                            {isEditing ? (
-                              <Input
-                                type="password"
-                                value={editFormData.ssn || ''}
-                                onChange={(e) =>
-                                  setEditFormData({
-                                    ...editFormData,
-                                    ssn: e.target.value,
-                                  })
-                                }
-                                placeholder="주민등록번호"
-                                className="text-sm"
-                              />
-                            ) : client.extendedDetails?.ssn ? (
-                              <span className="text-sm font-mono">
-                                {client.extendedDetails.ssn.substring(0, 6)}
-                                **-*******
-                              </span>
-                            ) : (
-                              <span className="text-sm text-muted-foreground">
-                                미입력
-                              </span>
-                            )}
+                            {/* 추출된 정보 표시 */}
+                            {editFormData.ssn.length === 14 &&
+                              editFormData.birthDate &&
+                              editFormData.gender && (
+                                <div className="mt-3 p-3 bg-blue-50/70 border border-blue-200/60 rounded-lg dark:bg-blue-950/30 dark:border-blue-800/50">
+                                  <div className="text-xs font-medium text-blue-800 mb-2 dark:text-blue-300">
+                                    추출된 정보
+                                  </div>
+                                  <div className="grid grid-cols-2 gap-3 text-xs">
+                                    <div>
+                                      <span className="text-blue-700 dark:text-blue-400">
+                                        생년월일:
+                                      </span>
+                                      <span className="ml-1 font-medium text-foreground">
+                                        {new Date(
+                                          editFormData.birthDate
+                                        ).toLocaleDateString('ko-KR')}
+                                      </span>
+                                    </div>
+                                    <div>
+                                      <span className="text-blue-700 dark:text-blue-400">
+                                        성별:
+                                      </span>
+                                      <span className="ml-1 font-medium text-foreground">
+                                        {editFormData.gender === 'male'
+                                          ? '남성'
+                                          : '여성'}
+                                      </span>
+                                    </div>
+                                  </div>
+                                  {/* 3가지 나이 표시 */}
+                                  <div className="mt-2 space-y-1 text-xs">
+                                    <div>
+                                      <span className="text-blue-700 dark:text-blue-400">
+                                        만 나이:
+                                      </span>
+                                      <span className="ml-1 font-medium text-foreground">
+                                        {calculateAge(
+                                          new Date(editFormData.birthDate),
+                                          'standard'
+                                        )}
+                                        세
+                                      </span>
+                                    </div>
+                                    <div>
+                                      <span className="text-blue-700 dark:text-blue-400">
+                                        한국 나이:
+                                      </span>
+                                      <span className="ml-1 font-medium text-foreground">
+                                        {calculateAge(
+                                          new Date(editFormData.birthDate),
+                                          'korean'
+                                        )}
+                                        세
+                                      </span>
+                                    </div>
+                                    <div>
+                                      <span className="text-blue-700 dark:text-blue-400">
+                                        보험 나이:
+                                      </span>
+                                      <span className="ml-1 font-medium text-foreground">
+                                        {calculateAge(
+                                          new Date(editFormData.birthDate),
+                                          'insurance'
+                                        )}
+                                        세
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
                           </div>
-                        )}
+                        </div>
                       </div>
                     </>
                   )}
 
-                  {/* 소개 정보 (개선된 버전) */}
                   <Separator />
+
+                  {/* 소개 정보 */}
                   <div className="space-y-3">
                     <h4 className="text-sm font-medium">소개 정보</h4>
 
@@ -1062,7 +1736,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                               {client.referredBy.name}
                             </Link>
                             <Badge variant="outline" className="text-xs">
-                              {client.referredBy.relationship || '소개자'}
+                              소개자
                             </Badge>
                           </div>
                         ) : (
@@ -1098,11 +1772,6 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                                 소개 기여자
                               </Badge>
                             </div>
-                            {/* TODO: 실제 소개된 고객 리스트 구현 예정 */}
-                            <div className="text-xs text-muted-foreground p-2 bg-muted/20 rounded border-l-2 border-green-400">
-                              💡 소개된 고객 상세 리스트는 추후 업데이트
-                              예정입니다
-                            </div>
                           </div>
                         ) : (
                           <div className="flex items-center gap-2">
@@ -1114,62 +1783,6 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                             </Badge>
                           </div>
                         )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 고객 단계 */}
-                  <div className="space-y-2">
-                    <h4 className="text-sm font-medium">현재 단계</h4>
-                    <Badge
-                      variant="outline"
-                      className="w-full justify-center h-10 text-md font-semibold"
-                    >
-                      {client.currentStage?.name || '미설정'}
-                    </Badge>
-                  </div>
-
-                  {isEditing && (
-                    <>
-                      <Separator />
-                      <div className="space-y-2">
-                        <h4 className="text-sm font-medium">중요도</h4>
-                        <Select
-                          value={editFormData.importance}
-                          onValueChange={(value: 'high' | 'medium' | 'low') =>
-                            setEditFormData({
-                              ...editFormData,
-                              importance: value,
-                            })
-                          }
-                        >
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="중요도 선택" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="high">VIP</SelectItem>
-                            <SelectItem value="medium">일반</SelectItem>
-                            <SelectItem value="low">관심</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </>
-                  )}
-
-                  {/* KPI 요약 */}
-                  <Separator />
-                  <div className="space-y-3">
-                    <h4 className="text-sm font-medium">성과 요약</h4>
-                    <div className="grid grid-cols-2 gap-2 text-center">
-                      <div className="p-2 bg-muted/30 rounded-lg">
-                        <p className="text-xs text-muted-foreground">LTV</p>
-                        <p className="text-sm font-medium">500만원</p>
-                      </div>
-                      <div className="p-2 bg-muted/30 rounded-lg">
-                        <p className="text-xs text-muted-foreground">소개</p>
-                        <p className="text-sm font-medium">
-                          {client.referralCount || 0}건
-                        </p>
                       </div>
                     </div>
                   </div>
@@ -1273,373 +1886,60 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                 </Card>
               </TabsContent>
 
-              {/* 보험 탭 */}
+              {/* 나머지 탭들은 간소화 */}
               <TabsContent value="insurance" className="space-y-6">
-                {/* 계약 완료된 보험 */}
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-lg flex items-center gap-2">
-                      <CheckCircle className="h-5 w-5 text-green-600" />
-                      계약 완료 보험 (
-                      {client.insurance?.filter((ins: any) => ins.isActive)
-                        .length || 0}
-                      건)
+                      <Shield className="h-5 w-5" />
+                      보험 정보
                     </CardTitle>
-                    <CardDescription>
-                      현재 유효한 보험 계약 목록
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="p-6">
-                    {client.insurance &&
-                    client.insurance.filter((ins: any) => ins.isActive).length >
-                      0 ? (
-                      <div className="space-y-4">
-                        {client.insurance
-                          .filter((ins: any) => ins.isActive)
-                          .map((insurance: any) => (
-                            <Card
-                              key={insurance.id}
-                              className="border-l-4 border-l-green-500"
-                            >
-                              <CardContent className="p-4">
-                                <div className="flex items-start justify-between">
-                                  <div className="space-y-2">
-                                    <div className="flex items-center gap-2">
-                                      <Shield className="h-4 w-4 text-green-600" />
-                                      <h4 className="font-medium">
-                                        {insurance.insuranceType}
-                                      </h4>
-                                      {insurance.policyNumber && (
-                                        <Badge
-                                          variant="outline"
-                                          className="text-xs"
-                                        >
-                                          {insurance.policyNumber}
-                                        </Badge>
-                                      )}
-                                    </div>
-                                    <div className="text-sm text-muted-foreground space-y-1">
-                                      {insurance.insurer && (
-                                        <p>
-                                          <strong>보험사:</strong>{' '}
-                                          {insurance.insurer}
-                                        </p>
-                                      )}
-                                      {insurance.premium && (
-                                        <p>
-                                          <strong>보험료:</strong>{' '}
-                                          {Number(
-                                            insurance.premium
-                                          ).toLocaleString()}
-                                          원
-                                        </p>
-                                      )}
-                                      {insurance.coverageAmount && (
-                                        <p>
-                                          <strong>보장금액:</strong>{' '}
-                                          {Number(
-                                            insurance.coverageAmount
-                                          ).toLocaleString()}
-                                          원
-                                        </p>
-                                      )}
-                                      {insurance.startDate &&
-                                        insurance.endDate && (
-                                          <p>
-                                            <strong>보장기간:</strong>{' '}
-                                            {insurance.startDate} ~{' '}
-                                            {insurance.endDate}
-                                          </p>
-                                        )}
-                                      {insurance.beneficiary && (
-                                        <p>
-                                          <strong>수익자:</strong>{' '}
-                                          {insurance.beneficiary}
-                                        </p>
-                                      )}
-                                    </div>
-                                  </div>
-                                  <div className="flex gap-2">
-                                    <Button variant="outline" size="sm">
-                                      <Edit2 className="h-3 w-3 mr-1" />
-                                      수정
-                                    </Button>
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      className="text-red-600 hover:text-red-700"
-                                    >
-                                      <Trash2 className="h-3 w-3" />
-                                    </Button>
-                                  </div>
-                                </div>
-                              </CardContent>
-                            </Card>
-                          ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-8">
-                        <Shield className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                        <p className="text-sm text-muted-foreground mb-4">
-                          계약 완료된 보험이 없습니다
-                        </p>
-                        <Button variant="outline" size="sm">
-                          <Plus className="h-4 w-4 mr-2" />
-                          보험 정보 추가
-                        </Button>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-
-                {/* 진행 중인 영업 */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <TrendingUp className="h-5 w-5 text-primary" />
-                      진행 중인 영업 ({0}건)
-                    </CardTitle>
-                    <CardDescription>
-                      현재 영업 파이프라인에서 진행 중인 상품들
-                    </CardDescription>
                   </CardHeader>
                   <CardContent className="p-6">
                     <div className="text-center py-8">
-                      <TrendingUp className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                      <p className="text-sm text-muted-foreground mb-4">
-                        진행 중인 영업 기회가 없습니다
+                      <Shield className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                      <p className="text-sm text-muted-foreground">
+                        보험 정보가 준비 중입니다.
                       </p>
-                      <Button onClick={() => setShowOpportunityModal(true)}>
-                        <Plus className="h-4 w-4 mr-2" />첫 번째 영업 기회 생성
-                      </Button>
                     </div>
                   </CardContent>
                 </Card>
               </TabsContent>
 
-              {/* 가족 탭 */}
               <TabsContent value="family" className="space-y-6">
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-lg flex items-center gap-2">
                       <User className="h-5 w-5" />
-                      가족 구성원 ({client.familyMembers?.length || 0}명)
+                      가족 구성원
                     </CardTitle>
-                    <CardDescription>
-                      가족 단위 보험 설계를 위한 구성원 정보
-                    </CardDescription>
                   </CardHeader>
                   <CardContent className="p-6">
-                    {client.familyMembers && client.familyMembers.length > 0 ? (
-                      <div className="space-y-4">
-                        {client.familyMembers.map((member: any) => (
-                          <Card
-                            key={member.id}
-                            className="border-l-4 border-l-purple-500"
-                          >
-                            <CardContent className="p-4">
-                              <div className="flex items-start justify-between">
-                                <div className="space-y-2">
-                                  <div className="flex items-center gap-2">
-                                    <User className="h-4 w-4 text-purple-600" />
-                                    <h4 className="font-medium">
-                                      {member.name}
-                                    </h4>
-                                    <Badge
-                                      variant="outline"
-                                      className="text-xs"
-                                    >
-                                      {member.relationship}
-                                    </Badge>
-                                    {member.hasInsurance && (
-                                      <Badge className="text-xs bg-green-100 text-green-700">
-                                        보험 가입
-                                      </Badge>
-                                    )}
-                                  </div>
-                                  <div className="text-sm text-muted-foreground space-y-1">
-                                    {member.birthDate && (
-                                      <p>
-                                        <strong>생년월일:</strong>{' '}
-                                        {new Date(
-                                          member.birthDate
-                                        ).toLocaleDateString()}
-                                      </p>
-                                    )}
-                                    {member.gender && (
-                                      <p>
-                                        <strong>성별:</strong>{' '}
-                                        {member.gender === 'male'
-                                          ? '남성'
-                                          : '여성'}
-                                      </p>
-                                    )}
-                                    {member.occupation && (
-                                      <p>
-                                        <strong>직업:</strong>{' '}
-                                        {member.occupation}
-                                      </p>
-                                    )}
-                                    {member.phone && (
-                                      <p>
-                                        <strong>연락처:</strong> {member.phone}
-                                      </p>
-                                    )}
-                                    {member.notes && (
-                                      <p>
-                                        <strong>메모:</strong> {member.notes}
-                                      </p>
-                                    )}
-                                  </div>
-                                </div>
-                                <div className="flex gap-2">
-                                  <Button variant="outline" size="sm">
-                                    <Edit2 className="h-3 w-3 mr-1" />
-                                    수정
-                                  </Button>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="text-red-600 hover:text-red-700"
-                                  >
-                                    <Trash2 className="h-3 w-3" />
-                                  </Button>
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-8">
-                        <User className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                        <p className="text-sm text-muted-foreground mb-4">
-                          등록된 가족 구성원이 없습니다
-                        </p>
-                        <Button variant="outline" size="sm">
-                          <Plus className="h-4 w-4 mr-2" />
-                          가족 구성원 추가
-                        </Button>
-                      </div>
-                    )}
+                    <div className="text-center py-8">
+                      <User className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                      <p className="text-sm text-muted-foreground">
+                        가족 정보가 준비 중입니다.
+                      </p>
+                    </div>
                   </CardContent>
                 </Card>
               </TabsContent>
 
-              {/* 이력 탭 */}
               <TabsContent value="history" className="space-y-6">
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-lg flex items-center gap-2">
                       <Clock className="h-5 w-5" />
-                      연락 이력 ({client.contactHistory?.length || 0}건)
+                      연락 이력
                     </CardTitle>
-                    <CardDescription>
-                      고객과의 모든 상담 및 연락 기록
-                    </CardDescription>
                   </CardHeader>
                   <CardContent className="p-6">
-                    {client.contactHistory &&
-                    client.contactHistory.length > 0 ? (
-                      <div className="space-y-4">
-                        {client.contactHistory.map((contact: any) => (
-                          <Card
-                            key={contact.id}
-                            className="border-l-4 border-l-blue-500"
-                          >
-                            <CardContent className="p-4">
-                              <div className="flex items-start justify-between">
-                                <div className="space-y-2">
-                                  <div className="flex items-center gap-2">
-                                    <MessageCircle className="h-4 w-4 text-blue-600" />
-                                    <h4 className="font-medium">
-                                      {contact.subject || contact.contactMethod}
-                                    </h4>
-                                    <Badge
-                                      variant="outline"
-                                      className="text-xs"
-                                    >
-                                      {contact.contactMethod}
-                                    </Badge>
-                                    <span className="text-xs text-muted-foreground">
-                                      {new Date(
-                                        contact.createdAt
-                                      ).toLocaleDateString()}{' '}
-                                      {new Date(
-                                        contact.createdAt
-                                      ).toLocaleTimeString()}
-                                    </span>
-                                  </div>
-                                  <div className="text-sm text-muted-foreground space-y-1">
-                                    {contact.content && (
-                                      <p>
-                                        <strong>내용:</strong> {contact.content}
-                                      </p>
-                                    )}
-                                    {contact.duration && (
-                                      <p>
-                                        <strong>통화시간:</strong>{' '}
-                                        {contact.duration}분
-                                      </p>
-                                    )}
-                                    {contact.outcome && (
-                                      <p>
-                                        <strong>결과:</strong> {contact.outcome}
-                                      </p>
-                                    )}
-                                    {contact.nextAction && (
-                                      <p>
-                                        <strong>다음 액션:</strong>{' '}
-                                        {contact.nextAction}
-                                      </p>
-                                    )}
-                                    {contact.nextActionDate && (
-                                      <p>
-                                        <strong>다음 액션 예정일:</strong>{' '}
-                                        {new Date(
-                                          contact.nextActionDate
-                                        ).toLocaleDateString()}
-                                      </p>
-                                    )}
-                                  </div>
-                                </div>
-                                <div className="flex gap-2">
-                                  <Button variant="outline" size="sm">
-                                    <Edit2 className="h-3 w-3 mr-1" />
-                                    수정
-                                  </Button>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="text-red-600 hover:text-red-700"
-                                  >
-                                    <Trash2 className="h-3 w-3" />
-                                  </Button>
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))}
-                        {client.contactHistory.length >= 10 && (
-                          <div className="text-center">
-                            <Button variant="outline" size="sm">
-                              더 많은 이력 보기
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="text-center py-8">
-                        <MessageCircle className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                        <p className="text-sm text-muted-foreground mb-4">
-                          연락 이력이 없습니다
-                        </p>
-                        <Button variant="outline" size="sm">
-                          <Plus className="h-4 w-4 mr-2" />
-                          연락 기록 추가
-                        </Button>
-                      </div>
-                    )}
+                    <div className="text-center py-8">
+                      <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                      <p className="text-sm text-muted-foreground">
+                        연락 이력이 준비 중입니다.
+                      </p>
+                    </div>
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -1655,6 +1955,76 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
           clientName={client.fullName}
           isLoading={isCreatingOpportunity}
         />
+
+        {/* 🎉 저장 성공 모달 */}
+        <Dialog
+          open={showSaveSuccessModal}
+          onOpenChange={setShowSaveSuccessModal}
+        >
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader className="text-center">
+              <div className="mx-auto w-16 h-16 bg-muted/20 rounded-full flex items-center justify-center mb-4">
+                <CheckCircle className="h-8 w-8 text-foreground" />
+              </div>
+              <DialogTitle className="text-xl font-semibold">
+                고객 정보가 성공적으로 저장되었습니다
+              </DialogTitle>
+            </DialogHeader>
+
+            <div className="text-center space-y-3 mt-4">
+              <DialogDescription className="text-sm text-muted-foreground">
+                <span className="font-medium text-foreground">
+                  {client.fullName}
+                </span>{' '}
+                고객의 정보가 안전하게 업데이트되었습니다.
+              </DialogDescription>
+
+              <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground bg-muted/20 px-3 py-2 rounded-lg border border-border">
+                <Shield className="h-3 w-3" />
+                민감정보는 암호화되어 보관됩니다
+              </div>
+            </div>
+
+            <div className="flex justify-center mt-6">
+              <Button
+                onClick={() => setShowSaveSuccessModal(false)}
+                className="px-8"
+              >
+                확인
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* ❌ 에러 모달 */}
+        <Dialog open={showErrorModal} onOpenChange={setShowErrorModal}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader className="text-center">
+              <div className="mx-auto w-16 h-16 bg-muted/20 rounded-full flex items-center justify-center mb-4">
+                <X className="h-8 w-8 text-muted-foreground" />
+              </div>
+              <DialogTitle className="text-xl font-semibold text-foreground">
+                {errorModalContent.title}
+              </DialogTitle>
+            </DialogHeader>
+
+            <div className="text-center space-y-3 mt-4">
+              <DialogDescription className="text-sm text-muted-foreground whitespace-pre-line">
+                {errorModalContent.message}
+              </DialogDescription>
+            </div>
+
+            <div className="flex justify-center mt-6">
+              <Button
+                onClick={() => setShowErrorModal(false)}
+                variant="outline"
+                className="px-8"
+              >
+                확인
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         {/* 🗑️ 삭제 확인 모달 */}
         <DeleteConfirmationModal

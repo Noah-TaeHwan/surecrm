@@ -18,7 +18,7 @@ export {
   type Importance,
   type MeetingStatus,
   type ReferralStatus,
-} from '~/lib/schema';
+} from '~/lib/schema/core';
 
 import {
   pgTable,
@@ -40,7 +40,7 @@ import {
   meetings,
   referrals,
   pipelineStages,
-} from '~/lib/schema';
+} from '~/lib/schema/core';
 
 // MVP 특화: Reports 전용 Enum (app_report_ prefix 적용)
 export const appReportTypeEnum = pgEnum('app_report_type_enum', [

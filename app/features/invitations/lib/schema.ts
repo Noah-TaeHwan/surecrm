@@ -11,7 +11,7 @@ export {
   type NewInvitation,
   type UserRole,
   type InvitationStatus,
-} from '~/lib/schema';
+} from '~/lib/schema/core';
 
 import {
   pgTable,
@@ -21,16 +21,23 @@ import {
   pgEnum,
   boolean,
   integer,
-  date,
   jsonb,
+  date,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import {
   profiles,
   teams,
+  clients,
   invitations,
+  meetings,
+  type Profile,
+  type Team,
+  type Client,
+  type Invitation,
+  type Meeting,
   type InvitationStatus,
-} from '~/lib/schema';
+} from '~/lib/schema/core';
 
 // Invitations 특화 Enum
 export const invitationTypeEnum = pgEnum('invitation_type', [

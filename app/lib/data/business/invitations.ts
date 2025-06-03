@@ -48,7 +48,7 @@ export async function generateUniqueInvitationCode(): Promise<string> {
   }
 
   // 최대 시도 횟수 초과 시 UUID 기반 코드 생성
-  return `INV-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
+  return `INV-${Date.now().toString(36).slice(-8).toUpperCase()}`;
 }
 
 /**

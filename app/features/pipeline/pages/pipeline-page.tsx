@@ -383,6 +383,12 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
 
   // 필터링된 고객 목록
   const filteredClients = clients.filter((client) => {
+    // "제외됨" 단계의 고객들은 칸반보드에 표시하지 않음
+    const stage = stages.find((s) => s.id === client.stageId);
+    if (stage && stage.name === '제외됨') {
+      return false;
+    }
+
     // 검색어 필터링
     const matchesSearch =
       searchQuery === '' ||
@@ -414,19 +420,23 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
     // 1. 전체 고객 (고객 관리 페이지의 모든 고객)
     const totalAllClientsCount = totalAllClients; // 파이프라인에 없는 고객 포함
 
-    // 2. 영업 파이프라인 관리 중인 고객 (현재 칸반보드에 있는 고객)
-    const pipelineClients = filteredClients.length;
+    // 2. 영업 파이프라인 관리 중인 고객 (제외됨 단계 제외)
+    const pipelineClients = clients.filter((client) => {
+      const stage = stages.find((s) => s.id === client.stageId);
+      return stage && stage.name !== '제외됨';
+    }).length;
 
-    // 3. 계약 완료 고객 (실제 성과)
-    const contractedClients = filteredClients.filter(
-      (client) =>
-        stages.find((s) => s.id === client.stageId)?.name === '계약 완료'
-    ).length;
+    // 3. 계약 완료 고객 (실제 성과) - 제외됨 단계 제외
+    const contractedClients = clients.filter((client) => {
+      const stage = stages.find((s) => s.id === client.stageId);
+      return stage && stage.name === '계약 완료';
+    }).length;
 
-    // 4. 고가치 고객 (VIP 고객)
-    const highValueClients = filteredClients.filter(
-      (client) => client.importance === 'high'
-    ).length;
+    // 4. 고가치 고객 (VIP 고객) - 제외됨 단계 제외
+    const highValueClients = clients.filter((client) => {
+      const stage = stages.find((s) => s.id === client.stageId);
+      return client.importance === 'high' && stage && stage.name !== '제외됨';
+    }).length;
 
     // 5. 전환율 계산 (계약 완료 / 전체 파이프라인 고객)
     const conversionRate =
@@ -629,7 +639,7 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
   }, [removeFetcher.state, removeFetcher.data?.success]);
 
   return (
-    <MainLayout title="영업 파이프라인" currentUser={currentUser}>
+    <MainLayout title="영업 파이프라인">
       <div className="space-y-6">
         {/* 🎯 MVP 통계 헤더 - sticky로 고정 */}
         <div className="sticky -top-8 z-20 bg-background border-b border-border pb-6">

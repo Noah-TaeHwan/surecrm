@@ -477,9 +477,15 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
 
   return (
     <MainLayout title="소개 네트워크">
-      <div className="flex flex-col lg:flex-row h-full overflow-hidden">
-        {/* 필터 사이드바 - 모바일에서는 독립 버튼, 데스크톱에서는 적정 너비 */}
-        <div className="lg:w-[280px] w-auto shrink-0">
+      <div
+        className={`grid gap-6 h-[calc(100vh-8rem)] ${
+          selectedNode
+            ? 'grid-cols-1 lg:grid-cols-9' // 노드 선택 시: 필터1 + 그래프6 + 상세2
+            : 'grid-cols-1 lg:grid-cols-7' // 노드 미선택 시: 필터1 + 그래프6
+        }`}
+      >
+        {/* 필터 사이드바 - 더 좁게 */}
+        <div className="lg:col-span-2">
           <NetworkSidebar
             filters={filterSettings}
             onFilterChange={handleFilterChange}
@@ -487,10 +493,10 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
           />
         </div>
 
-        {/* 메인 콘텐츠 영역 - 더 넓은 공간 차지 */}
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <Card className="m-2 lg:m-4 flex-1 overflow-hidden flex flex-col">
-            <CardHeader className="pb-0">
+        {/* 메인 콘텐츠 영역 - 더 넓게 */}
+        <div className="lg:col-span-5 mb-6">
+          <Card className="h-full flex flex-col">
+            <CardHeader className="flex-shrink-0 pb-3">
               <CardTitle>소개 네트워크</CardTitle>
               <CardDescription>
                 고객 간 소개 관계를 시각화합니다. 노드를 클릭하면 상세 정보를 볼
@@ -505,16 +511,18 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
               />
             </CardHeader>
 
-            <CardContent className="flex-1 p-0 overflow-hidden relative">
-              {/* 그래프 시각화 */}
-              <div className="w-full h-full">{renderNetworkGraph()}</div>
+            <CardContent className="flex-1 p-0 overflow-hidden">
+              {/* 그래프 시각화 - 전체 영역 꽉 채우기 */}
+              <div className="w-full h-full relative">
+                {renderNetworkGraph()}
+              </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* 고객 상세 정보 패널 (선택된 노드가 있을 때만 표시) - 좀 더 좁게 조정 */}
+        {/* 고객 상세 정보 패널 - 노드 선택했을 때만 표시 */}
         {selectedNode && (
-          <div className="lg:w-[320px] w-full shrink-0 max-h-screen overflow-y-auto">
+          <div className="lg:col-span-2">
             <NetworkDetailPanel
               nodeId={selectedNode}
               data={networkData}

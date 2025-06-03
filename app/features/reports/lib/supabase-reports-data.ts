@@ -429,6 +429,11 @@ export async function getReportStats(userId: string): Promise<ReportStats> {
   }
 }
 
+// 간단한 UUID 대체 함수 (응급 조치)
+function generateId(): string {
+  return Date.now().toString(36) + Math.random().toString(36).substr(2);
+}
+
 // MVP 특화: 기본 보고서 템플릿 생성 (보험설계사 특화)
 export async function createDefaultReportTemplates(
   userId: string
@@ -447,7 +452,7 @@ export async function createDefaultReportTemplates(
     // MVP 특화: 보험설계사를 위한 기본 템플릿들
     const defaultTemplates = [
       {
-        id: crypto.randomUUID(),
+        id: generateId(),
         userId,
         name: '일일 업무 보고서',
         description: '매일 작성하는 기본 업무 보고서',
@@ -465,7 +470,7 @@ export async function createDefaultReportTemplates(
         updatedAt: new Date(),
       },
       {
-        id: crypto.randomUUID(),
+        id: generateId(),
         userId,
         name: '주간 성과 요약',
         description: '주간 성과를 요약한 보고서',
@@ -483,7 +488,7 @@ export async function createDefaultReportTemplates(
         updatedAt: new Date(),
       },
       {
-        id: crypto.randomUUID(),
+        id: generateId(),
         userId,
         name: '월간 종합 분석',
         description: '월간 종합 성과 분석 보고서',

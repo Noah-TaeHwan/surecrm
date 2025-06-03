@@ -15,7 +15,7 @@ export {
   type MeetingType,
   type MeetingStatus,
   type UserRole,
-} from '~/lib/schema';
+} from '~/lib/schema/core';
 
 import {
   pgTable,
@@ -32,7 +32,7 @@ import {
   numeric,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
-import { profiles, clients, meetings, teams } from '~/lib/schema';
+import { profiles, clients, meetings, teams } from '~/lib/schema/core';
 
 // 📊 Calendar 특화 Enum (완전한 app_calendar_ prefix 통일)
 export const appCalendarViewEnum = pgEnum('app_calendar_view_enum', [
@@ -410,7 +410,7 @@ export type CalendarExternalSource =
   (typeof appCalendarExternalSourceEnum.enumValues)[number];
 
 // 🎯 Calendar 특화 인터페이스 (Google Calendar 연동 준비)
-import type { Meeting } from '~/lib/schema';
+import type { Meeting } from '~/lib/schema/core';
 
 export interface CalendarMeetingOverview {
   meeting: Meeting;

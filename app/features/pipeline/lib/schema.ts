@@ -5,17 +5,22 @@ export {
   profiles,
   teams,
   clients,
+  clientDetails,
+  insuranceInfo,
   pipelineStages,
-  // 타입들
+  meetings,
+  documents,
   type Profile,
   type Team,
   type Client,
-  type NewClient,
+  type ClientDetail,
+  type InsuranceInfo,
   type PipelineStage,
-  type NewPipelineStage,
+  type Meeting,
+  type Document,
   type UserRole,
   type Importance,
-} from '~/lib/schema';
+} from '~/lib/schema/core';
 
 import {
   pgTable,
@@ -30,7 +35,7 @@ import {
   decimal,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
-import { profiles, teams, clients, pipelineStages } from '~/lib/schema';
+import { profiles, teams, clients, pipelineStages } from '~/lib/schema/core';
 
 // 📌 Pipeline 특화 Enum (app_pipeline_ prefix 네이밍 적용)
 export const appPipelineStageActionTypeEnum = pgEnum(

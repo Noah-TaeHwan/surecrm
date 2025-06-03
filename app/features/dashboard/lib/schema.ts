@@ -13,7 +13,7 @@ export {
   type PipelineStage,
   type UserRole,
   type Importance,
-} from '~/lib/schema';
+} from '~/lib/schema/core';
 
 import {
   pgTable,
@@ -28,7 +28,7 @@ import {
   decimal,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
-import { profiles, teams, clients, pipelineStages } from '~/lib/schema';
+import { profiles, teams, clients, pipelineStages } from '~/lib/schema/core';
 
 // 📌 Dashboard 특화 Enum (완전한 app_dashboard_ prefix 통일)
 export const appDashboardGoalTypeEnum = pgEnum('app_dashboard_goal_type_enum', [

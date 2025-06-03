@@ -8,20 +8,14 @@ import {
   profiles,
   type Client,
   type NewClient,
-} from '~/lib/schema';
+} from '~/lib/schema/core';
 import {
-  appClientTags,
-  appClientTagAssignments,
   appClientContactHistory,
   appClientFamilyMembers,
-  appClientPreferences,
   appClientAnalytics,
   appClientMilestones,
-  appClientStageHistory,
-  type AppClientTag,
   type AppClientContactHistory,
   type AppClientFamilyMember,
-  type AppClientPreferences,
   type AppClientAnalytics,
   type AppClientMilestone,
 } from '~/features/clients/lib/schema';
@@ -616,10 +610,10 @@ export async function deleteClient(
   message?: string;
 }> {
   try {
-    // 🎯 개발용 로그 제거 (성능 최적화)
-    // console.log('🗑️ API: deleteClient 호출됨', { clientId, agentId });
+    console.log('🗑️ [deleteClient] API 시작:', { clientId, agentId });
 
     // 권한 체크 및 관련 데이터 확인
+    console.log('🔍 [deleteClient] 기존 고객 조회 중...');
     const [existingClient] = await db
       .select()
       .from(clients)
@@ -631,7 +625,14 @@ export async function deleteClient(
         )
       );
 
+    console.log('📋 [deleteClient] 기존 고객 조회 결과:', {
+      found: !!existingClient,
+      clientName: existingClient?.fullName,
+      isActive: existingClient?.isActive,
+    });
+
     if (!existingClient) {
+      console.error('❌ [deleteClient] 고객을 찾을 수 없음');
       return {
         success: false,
         data: null,
@@ -640,29 +641,37 @@ export async function deleteClient(
     }
 
     // 관련 데이터 체크 (경고 메시지용)
+    console.log('🔍 [deleteClient] 관련 데이터 체크 중...');
     const warnings: string[] = [];
 
     // 보험 정보 체크
+    console.log('🛡️ [deleteClient] 보험 정보 조회 중...');
     const [insuranceCount] = await db
       .select({ count: count() })
       .from(insuranceInfo)
       .where(eq(insuranceInfo.clientId, clientId));
+
+    console.log('📊 [deleteClient] 보험 정보 개수:', insuranceCount.count);
 
     if (insuranceCount.count > 0) {
       warnings.push(`${insuranceCount.count}개의 보험 정보가 함께 삭제됩니다.`);
     }
 
     // 연락 이력 체크
+    console.log('📞 [deleteClient] 연락 이력 조회 중...');
     const [contactCount] = await db
       .select({ count: count() })
       .from(appClientContactHistory)
       .where(eq(appClientContactHistory.clientId, clientId));
+
+    console.log('📊 [deleteClient] 연락 이력 개수:', contactCount.count);
 
     if (contactCount.count > 0) {
       warnings.push(`${contactCount.count}개의 연락 이력이 함께 삭제됩니다.`);
     }
 
     // 소프트 삭제 실행
+    console.log('🔄 [deleteClient] 소프트 삭제 실행 중...');
     const [deletedClient] = await db
       .update(clients)
       .set({
@@ -672,7 +681,10 @@ export async function deleteClient(
       .where(eq(clients.id, clientId))
       .returning();
 
-    // console.log('✅ API: 고객 삭제 완료', deletedClient.fullName);
+    console.log('✅ [deleteClient] 소프트 삭제 완료:', {
+      clientName: deletedClient.fullName,
+      isActive: deletedClient.isActive,
+    });
 
     return {
       success: true,
@@ -681,11 +693,23 @@ export async function deleteClient(
       message: `${deletedClient.fullName} 고객이 성공적으로 삭제되었습니다.`,
     };
   } catch (error) {
-    // console.error('❌ API: deleteClient 오류:', error);
+    console.error('❌ [deleteClient] API 오류:', error);
+    console.error(
+      '❌ [deleteClient] 에러 스택:',
+      error instanceof Error ? error.stack : 'No stack'
+    );
+    console.error('❌ [deleteClient] 에러 타입:', typeof error);
+    console.error(
+      '❌ [deleteClient] 에러 메시지:',
+      error instanceof Error ? error.message : String(error)
+    );
+
     return {
       success: false,
       data: null,
-      message: '고객 삭제 중 오류가 발생했습니다.',
+      message: `고객 삭제 중 오류가 발생했습니다: ${
+        error instanceof Error ? error.message : '알 수 없는 오류'
+      }`,
     };
   }
 }

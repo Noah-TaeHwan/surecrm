@@ -7,7 +7,7 @@ export {
   type Profile,
   type Team,
   type UserRole,
-} from '~/lib/schema';
+} from '~/lib/schema/core';
 
 import {
   pgTable,
@@ -20,7 +20,7 @@ import {
   jsonb,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
-import { profiles, teams } from '~/lib/schema';
+import { profiles, teams } from '~/lib/schema/core';
 
 // Settings 특화 Enum (app_settings_ prefix 적용)
 export const appSettingsCategoryEnum = pgEnum('app_settings_category', [

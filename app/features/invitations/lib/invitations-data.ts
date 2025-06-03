@@ -236,19 +236,9 @@ function generateSecureRandomString(length: number): string {
   const chars = '23456789ABCDEFGHJKMNPQRSTUVWXYZ';
   let result = '';
 
-  // crypto.getRandomValues 사용 (Node.js 환경에서는 crypto 모듈 사용)
-  const array = new Uint8Array(length);
-  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
-    crypto.getRandomValues(array);
-  } else {
-    // Node.js 환경 폴백
-    for (let i = 0; i < length; i++) {
-      array[i] = Math.floor(Math.random() * 256);
-    }
-  }
-
+  // Math.random() 사용 (응급 조치)
   for (let i = 0; i < length; i++) {
-    result += chars[array[i] % chars.length];
+    result += chars[Math.floor(Math.random() * chars.length)];
   }
 
   return result;

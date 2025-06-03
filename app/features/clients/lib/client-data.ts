@@ -147,22 +147,16 @@ async function createDataBackup(
     // 고객 데이터 수집
     const clientData = await getClientOverview(clientId, triggeredBy);
 
-    // 데이터 해시 생성 (무결성 검증용) - 서버 전용
+    // 데이터 해시 생성 (무결성 검증용) - 단순화
     const dataString = JSON.stringify(clientData);
     let backupHash: string;
 
-    // 서버 환경에서만 Buffer 사용
-    if (typeof Buffer !== 'undefined') {
-      backupHash = Buffer.from(dataString).toString('base64');
-    } else {
-      // 폴백: crypto API 사용
-      const encoder = new TextEncoder();
-      const data = encoder.encode(dataString);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      backupHash = hashArray
-        .map((b) => b.toString(16).padStart(2, '0'))
-        .join('');
+    // 브라우저 호환 인코딩 사용 (Buffer 완전 제거)
+    try {
+      backupHash = btoa(dataString);
+    } catch (error) {
+      // btoa 실패 시 간단한 해시
+      backupHash = dataString.length.toString(36) + Date.now().toString(36);
     }
 
     // 백업 생성

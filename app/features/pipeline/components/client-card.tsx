@@ -217,7 +217,7 @@ export function ClientCard({
   return (
     <div className="relative">
       <Card
-        className={`relative group transition-all duration-200 select-none ${
+        className={`mb-4 relative group transition-all duration-200 select-none ${
           styles.bgGradient
         } ${styles.borderClass} ${
           isDragging
@@ -230,7 +230,7 @@ export function ClientCard({
           <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"></div>
         )}
 
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-0">
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1 min-w-0">
               {/* 🏷️ 이름 (텍스트 오버플로우 수정) */}
@@ -280,7 +280,7 @@ export function ClientCard({
                 <DollarSign className="h-3.5 w-3.5 text-green-600" />
                 <span className="text-xs text-muted-foreground">월 보험료</span>
               </div>
-              <p className="text-sm font-semibold text-foreground">
+              <p className="text-sm font-semibold text-foreground text-center">
                 {(expectedPremium / 10000).toFixed(0)}만원
               </p>
             </div>
@@ -290,7 +290,7 @@ export function ClientCard({
                 <TrendingUp className="h-3.5 w-3.5 text-blue-600" />
                 <span className="text-xs text-muted-foreground">연 수수료</span>
               </div>
-              <p className="text-sm font-semibold text-foreground">
+              <p className="text-sm font-semibold text-foreground text-center">
                 {(expectedCommission / 10000).toFixed(0)}만원
               </p>
             </div>
@@ -396,25 +396,28 @@ export function ClientCard({
             </div>
           )}
 
-          {/* 🔗 상세보기 링크 */}
-          <Link
-            to={`/clients/${id}`}
-            className="flex items-center justify-center gap-2 w-full p-2 text-sm text-primary hover:text-primary/80 hover:bg-primary/5 rounded-lg transition-colors group/link"
-          >
-            <span>상세보기</span>
-            <ChevronRight className="h-3.5 w-3.5 group-hover/link:translate-x-0.5 transition-transform" />
-          </Link>
+          {/* 🎯 가로 배치 버튼들 - 상세보기 + 영업에서 제외 */}
+          <div className="flex gap-2 pt-1">
+            {/* 🔗 상세보기 링크 */}
+            <Link
+              to={`/clients/${id}`}
+              className="flex items-center justify-center gap-2 flex-1 p-2 text-sm text-primary hover:text-primary/80 hover:bg-primary/5 rounded-lg transition-colors group/link"
+            >
+              <span>상세보기</span>
+              <ChevronRight className="h-3.5 w-3.5 group-hover/link:translate-x-0.5 transition-transform" />
+            </Link>
 
-          {/* 📁 영업에서 제외 버튼 */}
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full mt-2 text-xs text-muted-foreground hover:text-orange-700 hover:bg-orange-50 hover:border-orange-300 transition-colors"
-            onClick={() => onRemoveFromPipeline?.(id, name)}
-          >
-            <Archive className="h-3 w-3 mr-1" />
-            영업에서 제외
-          </Button>
+            {/* 📁 영업에서 보관 버튼 */}
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1 text-xs text-muted-foreground hover:text-orange-700 hover:bg-orange-50 hover:border-orange-300 transition-colors"
+              onClick={() => onRemoveFromPipeline?.(id, name)}
+            >
+              <Archive className="h-3 w-3 mr-1" />
+              보관
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>

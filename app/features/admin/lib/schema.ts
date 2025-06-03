@@ -49,7 +49,7 @@ import {
   type Invitation,
   type Client,
   type Team,
-} from '~/lib/schema';
+} from '~/lib/schema/core';
 
 // ===== 공통 스키마 재export (기존 구조 100% 보존) =====
 export {

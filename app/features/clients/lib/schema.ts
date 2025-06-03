@@ -30,7 +30,7 @@ export {
   type Gender,
   type InsuranceType,
   type DocumentType,
-} from '~/lib/schema';
+} from '~/lib/schema/core';
 
 import {
   pgTable,
@@ -45,7 +45,12 @@ import {
   decimal,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
-import { profiles, clients, insuranceInfo, pipelineStages } from '~/lib/schema';
+import {
+  profiles,
+  clients,
+  insuranceInfo,
+  pipelineStages,
+} from '~/lib/schema/core';
 
 // 📌 Clients 특화 Enum (완전한 app_client_ prefix 통일)
 export const appClientStatusEnum = pgEnum('app_client_status_enum', [
@@ -520,7 +525,7 @@ export type ClientDataAccessLogType =
   (typeof appClientDataAccessLogTypeEnum.enumValues)[number];
 
 // 🎯 Clients 특화 인터페이스 (보안 강화)
-import type { Client } from '~/lib/schema';
+import type { Client } from '~/lib/schema/core';
 
 export interface ClientOverview {
   client: Client;

@@ -11,7 +11,7 @@ export {
   type Invitation,
   type UserRole,
   type InvitationStatus,
-} from '~/lib/schema';
+} from '~/lib/schema/core';
 
 import {
   pgTable,
@@ -25,7 +25,7 @@ import {
   decimal,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
-import { profiles, teams, invitations, type Team } from '~/lib/schema';
+import { profiles, teams, invitations, type Team } from '~/lib/schema/core';
 
 // ===== Team 관리 Enum (app_team_ prefix 적용) =====
 export const appTeamMemberRoleEnum = pgEnum('app_team_member_role_enum', [

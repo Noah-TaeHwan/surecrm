@@ -149,8 +149,63 @@ export default function NetworkGraphClient({
   const internalGraphRef = useRef<any>(null);
   const graphRef = externalGraphRef || internalGraphRef;
 
+  // 컨테이너 크기를 감지하기 위한 ref 추가
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+
   // ForceGraph2D 컴포넌트 로딩 상태 관리
   const [graphComponent, setGraphComponent] = useState<any>(null);
+
+  // 컨테이너 크기 감지 useEffect 추가
+  useEffect(() => {
+    const updateDimensions = () => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        setDimensions({
+          width: rect.width,
+          height: rect.height,
+        });
+      }
+    };
+
+    // 초기 크기 설정
+    updateDimensions();
+
+    // 짧은 지연 후 다시 시도 (렌더링 완료 대기)
+    setTimeout(updateDimensions, 100);
+    setTimeout(updateDimensions, 500);
+
+    // ResizeObserver로 크기 변화 감지
+    const resizeObserver = new ResizeObserver(updateDimensions);
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+
+    // 윈도우 리사이즈 이벤트도 감지
+    window.addEventListener('resize', updateDimensions);
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener('resize', updateDimensions);
+    };
+  }, []);
+
+  // 컨테이너 크기가 변경되면 그래프 크기 업데이트
+  useEffect(() => {
+    if (dimensions.width > 0 && dimensions.height > 0 && graphRef.current) {
+      // 그래프 크기 강제 업데이트
+      if (typeof graphRef.current.width === 'function') {
+        graphRef.current.width(dimensions.width);
+      }
+      if (typeof graphRef.current.height === 'function') {
+        graphRef.current.height(dimensions.height);
+      }
+      // 다시 그리기 트리거
+      if (typeof graphRef.current.refresh === 'function') {
+        graphRef.current.refresh();
+      }
+    }
+  }, [dimensions.width, dimensions.height]);
 
   // 브라우저 환경에서만 ForceGraph2D 로드 (동적 import 방식으로 변경)
   useEffect(() => {
@@ -837,7 +892,11 @@ export default function NetworkGraphClient({
   }
 
   return (
-    <div className="h-full w-full relative flex items-center justify-center">
+    <div
+      ref={containerRef}
+      className="h-full w-full absolute inset-0"
+      style={{ width: '100%', height: '100%' }}
+    >
       {graphState.showDebug && (
         <DebugInfo
           data={data}
@@ -854,6 +913,8 @@ export default function NetworkGraphClient({
         nodeLabel="name"
         nodeAutoColorBy="group"
         nodeRelSize={8}
+        width={dimensions.width || window.innerWidth}
+        height={dimensions.height || window.innerHeight - 200}
         nodeVal={(node: any) => {
           // 노드 크기를 중요도와 그룹에 따라 차별화
           const baseSize = (node.importance || 1) * 1.8;
@@ -1290,8 +1351,6 @@ export default function NetworkGraphClient({
             }
           }, 300);
         }}
-        width={graphRef.current?.width || undefined}
-        height={graphRef.current?.height || undefined}
         nodeCanvasObject={(node: any, ctx: any, globalScale: number) => {
           try {
             const label = node.name;

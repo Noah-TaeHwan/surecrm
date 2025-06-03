@@ -14,7 +14,7 @@ export {
   type UserRole,
   type Importance,
   type ReferralStatus,
-} from '~/lib/schema';
+} from '~/lib/schema/core';
 
 import {
   pgTable,
@@ -29,7 +29,7 @@ import {
   decimal,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
-import { profiles, teams, clients, referrals } from '~/lib/schema';
+import { profiles, teams, clients, referrals } from '~/lib/schema/core';
 
 // 📌 Network 특화 Enum (app_network_ prefix 적용)
 export const appNetworkNodeTypeEnum = pgEnum('app_network_node_type_enum', [

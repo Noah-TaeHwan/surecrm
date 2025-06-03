@@ -12,7 +12,7 @@ export {
   type Client,
   type Meeting,
   type UserRole,
-} from '~/lib/schema';
+} from '~/lib/schema/core';
 
 import {
   pgTable,
@@ -25,7 +25,7 @@ import {
   jsonb,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
-import { profiles, teams, clients, meetings } from '~/lib/schema';
+import { profiles, teams, clients, meetings } from '~/lib/schema/core';
 
 // 📌 Notifications 특화 Enum (app_notification_ prefix 네이밍 적용)
 export const appNotificationTypeEnum = pgEnum('app_notification_type_enum', [
@@ -313,7 +313,7 @@ export type NotificationChannel =
 export type NotificationStatus =
   (typeof appNotificationStatusEnum.enumValues)[number];
 
-// �� Notifications 특화 인터페이스
+// 📢 Notifications 특화 인터페이스
 export interface NotificationOverview {
   settings: NotificationSettings;
   unreadCount: number;

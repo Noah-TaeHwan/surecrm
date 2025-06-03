@@ -162,16 +162,16 @@ export default function NetworkDetailPanel({
   };
 
   return (
-    <div className="w-80 border-l h-full bg-background overflow-y-auto">
-      <div className="p-6 space-y-6">
+    <div className="w-full border-l h-full bg-background overflow-y-auto">
+      <div className="p-4 space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold">고객 정보</h2>
+          <h2 className="text-lg font-semibold">고객 정보</h2>
           <Button variant="ghost" size="icon" onClick={onClose}>
             <X className="h-4 w-4" />
           </Button>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-4">
           <div className="space-y-2">
             <h3 className="text-2xl font-bold">{selectedNode.name}</h3>
             <div className="flex items-center space-x-2">

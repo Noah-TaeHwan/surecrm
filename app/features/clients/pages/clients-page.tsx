@@ -1069,7 +1069,7 @@ export default function ClientsPage({ loaderData }: any) {
   );
 
   return (
-    <MainLayout title="고객 관리" currentUser={loaderData.currentUser}>
+    <MainLayout title="고객 관리">
       <div className="space-y-8">
         {/* 🎯 고객 관리 핵심 액션 */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

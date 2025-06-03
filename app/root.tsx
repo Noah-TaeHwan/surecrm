@@ -32,6 +32,425 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
+        {/* 🔧 Buffer polyfill - 브라우저 환경에서 Buffer 사용 가능하도록 */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              // Buffer polyfill using dynamic import
+              if (typeof window !== 'undefined' && !window.Buffer) {
+                try {
+                  // Try to load the real buffer package
+                  import('buffer').then(bufferModule => {
+                    window.Buffer = bufferModule.Buffer;
+                  }).catch(() => {
+                    // Fallback to simple polyfill
+                    window.Buffer = {
+                      from: function(data, encoding) {
+                        if (typeof data === 'string') {
+                          if (encoding === 'hex') {
+                            const bytes = [];
+                            for (let i = 0; i < data.length; i += 2) {
+                              bytes.push(parseInt(data.substr(i, 2), 16));
+                            }
+                            const result = new Uint8Array(bytes);
+                            result.toString = function(enc) {
+                              if (enc === 'hex') {
+                                return Array.from(this).map(b => b.toString(16).padStart(2, '0')).join('');
+                              }
+                              return new TextDecoder().decode(this);
+                            };
+                            // Add essential Buffer methods
+                            result.writeUInt32BE = function(value, offset) {
+                              offset = offset || 0;
+                              this[offset] = (value >>> 24) & 0xFF;
+                              this[offset + 1] = (value >>> 16) & 0xFF;
+                              this[offset + 2] = (value >>> 8) & 0xFF;
+                              this[offset + 3] = value & 0xFF;
+                              return offset + 4;
+                            };
+                            result.writeUInt32LE = function(value, offset) {
+                              offset = offset || 0;
+                              this[offset] = value & 0xFF;
+                              this[offset + 1] = (value >>> 8) & 0xFF;
+                              this[offset + 2] = (value >>> 16) & 0xFF;
+                              this[offset + 3] = (value >>> 24) & 0xFF;
+                              return offset + 4;
+                            };
+                            result.readUInt32BE = function(offset) {
+                              offset = offset || 0;
+                              return (this[offset] << 24) + (this[offset + 1] << 16) + (this[offset + 2] << 8) + this[offset + 3];
+                            };
+                            result.readUInt32LE = function(offset) {
+                              offset = offset || 0;
+                              return this[offset] + (this[offset + 1] << 8) + (this[offset + 2] << 16) + (this[offset + 3] << 24);
+                            };
+                            result.write = function(string, offset, length, encoding) {
+                              if (typeof string !== 'string') return 0;
+                              offset = offset || 0;
+                              encoding = encoding || 'utf8';
+                              
+                              const bytes = new TextEncoder().encode(string);
+                              const bytesToWrite = Math.min(bytes.length, length || bytes.length);
+                              
+                              for (let i = 0; i < bytesToWrite; i++) {
+                                if (offset + i < this.length) {
+                                  this[offset + i] = bytes[i];
+                                }
+                              }
+                              return bytesToWrite;
+                            };
+                            return result;
+                          }
+                          const result = new TextEncoder().encode(data);
+                          result.toString = function(enc) {
+                            if (enc === 'hex') {
+                              return Array.from(this).map(b => b.toString(16).padStart(2, '0')).join('');
+                            }
+                            return new TextDecoder().decode(this);
+                          };
+                          // Add essential Buffer methods
+                          result.writeUInt32BE = function(value, offset) {
+                            offset = offset || 0;
+                            this[offset] = (value >>> 24) & 0xFF;
+                            this[offset + 1] = (value >>> 16) & 0xFF;
+                            this[offset + 2] = (value >>> 8) & 0xFF;
+                            this[offset + 3] = value & 0xFF;
+                            return offset + 4;
+                          };
+                          result.writeUInt32LE = function(value, offset) {
+                            offset = offset || 0;
+                            this[offset] = value & 0xFF;
+                            this[offset + 1] = (value >>> 8) & 0xFF;
+                            this[offset + 2] = (value >>> 16) & 0xFF;
+                            this[offset + 3] = (value >>> 24) & 0xFF;
+                            return offset + 4;
+                          };
+                          result.readUInt32BE = function(offset) {
+                            offset = offset || 0;
+                            return (this[offset] << 24) + (this[offset + 1] << 16) + (this[offset + 2] << 8) + this[offset + 3];
+                          };
+                          result.readUInt32LE = function(offset) {
+                            offset = offset || 0;
+                            return this[offset] + (this[offset + 1] << 8) + (this[offset + 2] << 16) + (this[offset + 3] << 24);
+                          };
+                          result.write = function(string, offset, length, encoding) {
+                            if (typeof string !== 'string') return 0;
+                            offset = offset || 0;
+                            encoding = encoding || 'utf8';
+                            
+                            const bytes = new TextEncoder().encode(string);
+                            const bytesToWrite = Math.min(bytes.length, length || bytes.length);
+                            
+                            for (let i = 0; i < bytesToWrite; i++) {
+                              if (offset + i < this.length) {
+                                this[offset + i] = bytes[i];
+                              }
+                            }
+                            return bytesToWrite;
+                          };
+                          return result;
+                        }
+                        const result = new Uint8Array(data);
+                        // Add essential Buffer methods
+                        result.toString = function(enc) {
+                          if (enc === 'hex') {
+                            return Array.from(this).map(b => b.toString(16).padStart(2, '0')).join('');
+                          }
+                          return new TextDecoder().decode(this);
+                        };
+                        result.writeUInt32BE = function(value, offset) {
+                          offset = offset || 0;
+                          this[offset] = (value >>> 24) & 0xFF;
+                          this[offset + 1] = (value >>> 16) & 0xFF;
+                          this[offset + 2] = (value >>> 8) & 0xFF;
+                          this[offset + 3] = value & 0xFF;
+                          return offset + 4;
+                        };
+                        result.writeUInt32LE = function(value, offset) {
+                          offset = offset || 0;
+                          this[offset] = value & 0xFF;
+                          this[offset + 1] = (value >>> 8) & 0xFF;
+                          this[offset + 2] = (value >>> 16) & 0xFF;
+                          this[offset + 3] = (value >>> 24) & 0xFF;
+                          return offset + 4;
+                        };
+                        result.readUInt32BE = function(offset) {
+                          offset = offset || 0;
+                          return (this[offset] << 24) + (this[offset + 1] << 16) + (this[offset + 2] << 8) + this[offset + 3];
+                        };
+                        result.readUInt32LE = function(offset) {
+                          offset = offset || 0;
+                          return this[offset] + (this[offset + 1] << 8) + (this[offset + 2] << 16) + (this[offset + 3] << 24);
+                        };
+                        result.write = function(string, offset, length, encoding) {
+                          if (typeof string !== 'string') return 0;
+                          offset = offset || 0;
+                          encoding = encoding || 'utf8';
+                          
+                          const bytes = new TextEncoder().encode(string);
+                          const bytesToWrite = Math.min(bytes.length, length || bytes.length);
+                          
+                          for (let i = 0; i < bytesToWrite; i++) {
+                            if (offset + i < this.length) {
+                              this[offset + i] = bytes[i];
+                            }
+                          }
+                          return bytesToWrite;
+                        };
+                        return result;
+                      },
+                      alloc: function(size, fill, encoding) {
+                        const buf = new Uint8Array(size);
+                        if (fill !== undefined) {
+                          buf.fill(fill);
+                        }
+                        buf.toString = function(enc) {
+                          if (enc === 'hex') {
+                            return Array.from(this).map(b => b.toString(16).padStart(2, '0')).join('');
+                          }
+                          return new TextDecoder().decode(this);
+                        };
+                        // Add write methods
+                        buf.writeUInt32BE = function(value, offset) {
+                          offset = offset || 0;
+                          this[offset] = (value >>> 24) & 0xFF;
+                          this[offset + 1] = (value >>> 16) & 0xFF;
+                          this[offset + 2] = (value >>> 8) & 0xFF;
+                          this[offset + 3] = value & 0xFF;
+                          return offset + 4;
+                        };
+                        buf.writeUInt32LE = function(value, offset) {
+                          offset = offset || 0;
+                          this[offset] = value & 0xFF;
+                          this[offset + 1] = (value >>> 8) & 0xFF;
+                          this[offset + 2] = (value >>> 16) & 0xFF;
+                          this[offset + 3] = (value >>> 24) & 0xFF;
+                          return offset + 4;
+                        };
+                        buf.readUInt32BE = function(offset) {
+                          offset = offset || 0;
+                          return (this[offset] << 24) + (this[offset + 1] << 16) + (this[offset + 2] << 8) + this[offset + 3];
+                        };
+                        buf.readUInt32LE = function(offset) {
+                          offset = offset || 0;
+                          return this[offset] + (this[offset + 1] << 8) + (this[offset + 2] << 16) + (this[offset + 3] << 24);
+                        };
+                        // Add more write/read methods
+                        buf.writeUInt16BE = function(value, offset) {
+                          offset = offset || 0;
+                          this[offset] = (value >>> 8) & 0xFF;
+                          this[offset + 1] = value & 0xFF;
+                          return offset + 2;
+                        };
+                        buf.writeUInt16LE = function(value, offset) {
+                          offset = offset || 0;
+                          this[offset] = value & 0xFF;
+                          this[offset + 1] = (value >>> 8) & 0xFF;
+                          return offset + 2;
+                        };
+                        buf.writeUInt8 = function(value, offset) {
+                          offset = offset || 0;
+                          this[offset] = value & 0xFF;
+                          return offset + 1;
+                        };
+                        buf.readUInt16BE = function(offset) {
+                          offset = offset || 0;
+                          return (this[offset] << 8) + this[offset + 1];
+                        };
+                        buf.readUInt16LE = function(offset) {
+                          offset = offset || 0;
+                          return this[offset] + (this[offset + 1] << 8);
+                        };
+                        buf.readUInt8 = function(offset) {
+                          offset = offset || 0;
+                          return this[offset];
+                        };
+                        buf.slice = function(start, end) {
+                          const result = new Uint8Array(this.subarray(start, end));
+                          // Copy all methods to slice result
+                          Object.assign(result, this);
+                          return result;
+                        };
+                        buf.subarray = function(start, end) {
+                          const result = new Uint8Array(this.buffer, this.byteOffset + (start || 0), (end || this.length) - (start || 0));
+                          Object.assign(result, this);
+                          return result;
+                        };
+                        buf.write = function(string, offset, length, encoding) {
+                          if (typeof string !== 'string') return 0;
+                          offset = offset || 0;
+                          encoding = encoding || 'utf8';
+                          
+                          const bytes = new TextEncoder().encode(string);
+                          const bytesToWrite = Math.min(bytes.length, length || bytes.length);
+                          
+                          for (let i = 0; i < bytesToWrite; i++) {
+                            if (offset + i < this.length) {
+                              this[offset + i] = bytes[i];
+                            }
+                          }
+                          return bytesToWrite;
+                        };
+                        return buf;
+                      },
+                      allocUnsafe: function(size) {
+                        const buf = new Uint8Array(size);
+                        buf.toString = function(enc) {
+                          if (enc === 'hex') {
+                            return Array.from(this).map(b => b.toString(16).padStart(2, '0')).join('');
+                          }
+                          return new TextDecoder().decode(this);
+                        };
+                        // Add write methods
+                        buf.writeUInt32BE = function(value, offset) {
+                          offset = offset || 0;
+                          this[offset] = (value >>> 24) & 0xFF;
+                          this[offset + 1] = (value >>> 16) & 0xFF;
+                          this[offset + 2] = (value >>> 8) & 0xFF;
+                          this[offset + 3] = value & 0xFF;
+                          return offset + 4;
+                        };
+                        buf.writeUInt32LE = function(value, offset) {
+                          offset = offset || 0;
+                          this[offset] = value & 0xFF;
+                          this[offset + 1] = (value >>> 8) & 0xFF;
+                          this[offset + 2] = (value >>> 16) & 0xFF;
+                          this[offset + 3] = (value >>> 24) & 0xFF;
+                          return offset + 4;
+                        };
+                        buf.readUInt32BE = function(offset) {
+                          offset = offset || 0;
+                          return (this[offset] << 24) + (this[offset + 1] << 16) + (this[offset + 2] << 8) + this[offset + 3];
+                        };
+                        buf.readUInt32LE = function(offset) {
+                          offset = offset || 0;
+                          return this[offset] + (this[offset + 1] << 8) + (this[offset + 2] << 16) + (this[offset + 3] << 24);
+                        };
+                        // Add more write/read methods
+                        buf.writeUInt16BE = function(value, offset) {
+                          offset = offset || 0;
+                          this[offset] = (value >>> 8) & 0xFF;
+                          this[offset + 1] = value & 0xFF;
+                          return offset + 2;
+                        };
+                        buf.writeUInt16LE = function(value, offset) {
+                          offset = offset || 0;
+                          this[offset] = value & 0xFF;
+                          this[offset + 1] = (value >>> 8) & 0xFF;
+                          return offset + 2;
+                        };
+                        buf.writeUInt8 = function(value, offset) {
+                          offset = offset || 0;
+                          this[offset] = value & 0xFF;
+                          return offset + 1;
+                        };
+                        buf.readUInt16BE = function(offset) {
+                          offset = offset || 0;
+                          return (this[offset] << 8) + this[offset + 1];
+                        };
+                        buf.readUInt16LE = function(offset) {
+                          offset = offset || 0;
+                          return this[offset] + (this[offset + 1] << 8);
+                        };
+                        buf.readUInt8 = function(offset) {
+                          offset = offset || 0;
+                          return this[offset];
+                        };
+                        buf.slice = function(start, end) {
+                          const result = new Uint8Array(this.subarray(start, end));
+                          // Copy all methods to slice result
+                          Object.assign(result, this);
+                          return result;
+                        };
+                        buf.subarray = function(start, end) {
+                          const result = new Uint8Array(this.buffer, this.byteOffset + (start || 0), (end || this.length) - (start || 0));
+                          Object.assign(result, this);
+                          return result;
+                        };
+                        buf.write = function(string, offset, length, encoding) {
+                          if (typeof string !== 'string') return 0;
+                          offset = offset || 0;
+                          encoding = encoding || 'utf8';
+                          
+                          const bytes = new TextEncoder().encode(string);
+                          const bytesToWrite = Math.min(bytes.length, length || bytes.length);
+                          
+                          for (let i = 0; i < bytesToWrite; i++) {
+                            if (offset + i < this.length) {
+                              this[offset + i] = bytes[i];
+                            }
+                          }
+                          return bytesToWrite;
+                        };
+                        return buf;
+                      },
+                      concat: function(list, totalLength) {
+                        if (!totalLength) {
+                          totalLength = list.reduce((sum, buf) => sum + buf.length, 0);
+                        }
+                        const result = new Uint8Array(totalLength);
+                        let offset = 0;
+                        for (const buf of list) {
+                          result.set(buf, offset);
+                          offset += buf.length;
+                        }
+                        result.toString = function(enc) {
+                          if (enc === 'hex') {
+                            return Array.from(this).map(b => b.toString(16).padStart(2, '0')).join('');
+                          }
+                          return new TextDecoder().decode(this);
+                        };
+                        return result;
+                      },
+                      isBuffer: function(obj) {
+                        return obj instanceof Uint8Array;
+                      },
+                      // Add byteLength static method
+                      byteLength: function(string, encoding) {
+                        if (typeof string !== 'string') return 0;
+                        if (encoding === 'hex') {
+                          return Math.floor(string.length / 2);
+                        }
+                        // Default to UTF-8
+                        return new TextEncoder().encode(string).length;
+                      },
+                      // Add compare static method
+                      compare: function(buf1, buf2) {
+                        if (buf1.length !== buf2.length) {
+                          return buf1.length < buf2.length ? -1 : 1;
+                        }
+                        for (let i = 0; i < buf1.length; i++) {
+                          if (buf1[i] !== buf2[i]) {
+                            return buf1[i] < buf2[i] ? -1 : 1;
+                          }
+                        }
+                        return 0;
+                      },
+                      // Add write method for strings
+                      write: function(string, offset, length, encoding) {
+                        if (typeof string !== 'string') return 0;
+                        offset = offset || 0;
+                        encoding = encoding || 'utf8';
+                        
+                        const bytes = new TextEncoder().encode(string);
+                        const bytesToWrite = Math.min(bytes.length, length || bytes.length);
+                        
+                        for (let i = 0; i < bytesToWrite; i++) {
+                          if (offset + i < this.length) {
+                            this[offset + i] = bytes[i];
+                          }
+                        }
+                        return bytesToWrite;
+                      }
+                    };
+                  });
+                } catch (e) {
+                  console.warn('Buffer polyfill setup failed:', e);
+                }
+              }
+            `,
+          }}
+        />
         {/* 🌙 INSTANT DARK MODE - FOUC 방지 */}
         <script
           dangerouslySetInnerHTML={{

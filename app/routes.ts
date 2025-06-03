@@ -9,6 +9,7 @@ export default [
   route('api/validate-invitation', 'api/validate-invitation.ts'),
   route('api/resend-verification', 'api/resend-verification.ts'),
   route('api/auth-webhook', 'api/auth-webhook.ts'),
+  route('api/auth-me', 'api/auth-me.ts'),
   route('api/cleanup-user', 'api/cleanup-user.ts'),
   route('api/check-email', 'api/check-email.ts'),
   route('api/seed-invitations', 'api/seed-invitations.ts'),

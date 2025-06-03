@@ -16,7 +16,7 @@ export {
   type UserRole,
   type Importance,
   type ReferralStatus,
-} from '~/lib/schema';
+} from '~/lib/schema/core';
 
 import {
   pgTable,
@@ -31,7 +31,13 @@ import {
   decimal,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
-import { profiles, teams, clients, referrals, type Client } from '~/lib/schema';
+import {
+  profiles,
+  teams,
+  clients,
+  referrals,
+  type Client,
+} from '~/lib/schema/core';
 
 // 📌 Influencers 특화 Enum (완전한 app_influencer_ prefix 통일)
 export const appInfluencerGratitudeTypeEnum = pgEnum(
