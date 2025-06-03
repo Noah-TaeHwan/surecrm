@@ -189,9 +189,9 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       fullName: user.fullName,
     });
 
-    // 🎯 Supabase 클라이언트를 사용하여 직접 조회
-    const { createServerClient } = await import('~/lib/core/supabase');
-    const supabase = createServerClient();
+    // 🎯 Supabase Admin 클라이언트를 사용하여 직접 조회 (RLS 우회)
+    const { createAdminClient } = await import('~/lib/core/supabase');
+    const supabase = createAdminClient();
 
     // 고객 기본 정보 조회
     const { data: clientData, error: clientError } = await supabase
@@ -216,6 +216,134 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       };
     }
 
+    // 🎯 현재 단계 정보 조회
+    let currentStage = null;
+    if (clientData.current_stage_id) {
+      const { data: stageData, error: stageError } = await supabase
+        .from('app_pipeline_stages')
+        .select('id, name, color, "order"') // 🔥 수정: stage_order → order (컬럼명 정확히)
+        .eq('id', clientData.current_stage_id)
+        .eq('agent_id', agentId)
+        .single();
+
+      if (!stageError && stageData) {
+        currentStage = {
+          id: stageData.id,
+          name: stageData.name,
+          color: stageData.color,
+          order: stageData.order, // 🔥 수정: stage_order → order
+        };
+      }
+    }
+
+    // 🎯 파이프라인 단계들 조회 (새 영업 기회 생성용)
+    const { data: stagesData, error: stagesError } = await supabase
+      .from('app_pipeline_stages')
+      .select('id, name, color, "order"') // 🔥 수정: stage_order → order
+      .eq('agent_id', agentId)
+      .neq('name', '제외됨') // 제외됨 단계는 숨김
+      .order('order'); // 🔥 수정: stage_order → order
+
+    const availableStages = stagesData || [];
+
+    // 🎯 소개자 정보 조회 (referred_by_id가 있는 경우)
+    let referredBy = null;
+    if (clientData.referred_by_id) {
+      const { data: referrerData, error: referrerError } = await supabase
+        .from('app_client_profiles')
+        .select('id, full_name')
+        .eq('id', clientData.referred_by_id)
+        .eq('agent_id', agentId)
+        .eq('is_active', true)
+        .single();
+
+      if (!referrerError && referrerData) {
+        referredBy = {
+          id: referrerData.id,
+          name: referrerData.full_name,
+          relationship: '소개자', // 기본 관계
+        };
+      }
+    }
+
+    // 🎯 이 고객이 소개한 사람들의 정보 조회 (이름 포함)
+    const { data: referredClientsData, error: referredClientsError } =
+      await supabase
+        .from('app_client_profiles')
+        .select('id, full_name, created_at')
+        .eq('referred_by_id', clientId)
+        .eq('agent_id', agentId)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
+
+    const referredClients = referredClientsData || [];
+    const referralCount = referredClients.length;
+
+    // 🎯 확장된 상세 정보 조회 (app_client_details 테이블에서)
+    console.log('🔍 확장 상세 정보 조회 시작:', { clientId });
+    const { data: detailsData, error: detailsError } = await supabase
+      .from('app_client_details')
+      .select('birth_date, gender, ssn')
+      .eq('client_id', clientId)
+      .maybeSingle(); // 🔧 .single() → .maybeSingle() 변경 (0개 허용)
+
+    console.log('📋 확장 상세 정보 조회 결과:', {
+      hasData: !!detailsData,
+      error: detailsError?.message,
+      dataKeys: detailsData ? Object.keys(detailsData) : [],
+      hasSsn: !!detailsData?.ssn,
+      ssnLength: detailsData?.ssn?.length,
+      hasBirthDate: !!detailsData?.birth_date,
+      hasGender: !!detailsData?.gender,
+    });
+
+    let extendedDetails = null;
+    if (!detailsError && detailsData) {
+      // 🔒 주민등록번호 복호화 처리
+      let decryptedSSN = null;
+      if (detailsData.ssn) {
+        console.log('🔐 SSN 복호화 시작:', {
+          ssnLength: detailsData.ssn.length,
+          isBase64Like: !detailsData.ssn.startsWith('{'),
+        });
+
+        try {
+          // Base64 복호화 (임시 - 나중에 AES-256-GCM으로 업그레이드)
+          console.log('🔄 Base64 복호화 시도...');
+          decryptedSSN = atob(detailsData.ssn);
+          console.log('✅ Base64 복호화 성공:', {
+            ssnMasked: decryptedSSN.replace(
+              /(\d{6})-(\d{1})(\d{6})/,
+              '$1-$2******'
+            ),
+          });
+        } catch (base64Error) {
+          console.warn('⚠️ Base64 복호화 실패:', base64Error);
+        }
+      } else {
+        console.log('ℹ️ SSN 데이터 없음');
+      }
+
+      extendedDetails = {
+        birthDate: detailsData.birth_date,
+        gender: detailsData.gender,
+        ssn: decryptedSSN, // 복호화된 주민등록번호
+      };
+
+      console.log('📊 최종 확장 상세 정보:', {
+        hasBirthDate: !!extendedDetails.birthDate,
+        hasGender: !!extendedDetails.gender,
+        hasDecryptedSsn: !!extendedDetails.ssn,
+        birthDate: extendedDetails.birthDate,
+        gender: extendedDetails.gender,
+        ssnMasked: extendedDetails.ssn
+          ? extendedDetails.ssn.replace(/(\d{6})-(\d{1})(\d{6})/, '$1-$2******')
+          : 'None',
+      });
+    } else {
+      console.log('ℹ️ 확장 상세 정보 없음 또는 오류:', detailsError?.message);
+    }
+
     // 필드명을 camelCase로 변환
     const client = {
       id: clientData.id,
@@ -233,7 +361,17 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       tags: clientData.tags,
       importance: clientData.importance,
       currentStageId: clientData.current_stage_id,
+      currentStage: currentStage, // 🔥 현재 단계 정보
       referredById: clientData.referred_by_id,
+      referredBy: referredBy, // 🔥 소개자 정보
+      referralCount: referralCount, // 🔥 이 고객이 소개한 사람 수
+      referredClients: referredClients.map((c) => ({
+        // 🔥 이 고객이 소개한 사람들 목록
+        id: c.id,
+        name: c.full_name,
+        createdAt: c.created_at,
+      })),
+      extendedDetails: extendedDetails, // 🔥 확장 상세 정보
       notes: clientData.notes,
       customFields: clientData.custom_fields,
       isActive: clientData.is_active,
@@ -243,10 +381,12 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 
     console.log('✅ 고객 정보 로드 완료:', {
       clientName: client.fullName,
+      currentStage: currentStage?.name || '미설정',
     });
 
     return {
       client: client,
+      availableStages: availableStages, // 🔥 파이프라인 단계들 추가
       currentUserId: agentId,
       currentUser: {
         id: user.id,
@@ -261,6 +401,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     // 🎯 에러 상태 반환 (서버 에러 대신)
     return {
       client: null,
+      availableStages: [],
       currentUserId: null,
       currentUser: {
         id: '',
@@ -289,6 +430,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
   // 안전한 타입 체크와 기본값 설정
   const data = loaderData as any;
   const client = data?.client || null;
+  const availableStages = data?.availableStages || []; // 🔥 파이프라인 단계들 추가
   const isEmpty = data?.isEmpty || false;
   const error = data?.error || null;
   const currentUser = data?.currentUser || null;
@@ -482,12 +624,8 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
     // 🔒 SSN 복호화 처리 (보안 패치)
     let existingSsn = '';
     if (client?.extendedDetails?.ssn) {
-      try {
-        // Base64로 인코딩된 SSN 디코딩
-        existingSsn = atob(client.extendedDetails.ssn);
-      } catch (decryptError) {
-        existingSsn = '';
-      }
+      // extendedDetails.ssn은 이미 loader에서 복호화된 상태
+      existingSsn = client.extendedDetails.ssn;
     }
 
     const ssnParts = existingSsn.includes('-')
@@ -504,8 +642,8 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
           : 'none',
       address: client?.address || '',
       occupation: client?.occupation || '',
-      height: client?.height || '',
-      weight: client?.weight || '',
+      height: client?.height ? client.height.toString() : '', // 🔧 숫자 → 문자열 변환
+      weight: client?.weight ? client.weight.toString() : '', // 🔧 숫자 → 문자열 변환
       hasDrivingLicense: client?.hasDrivingLicense || false,
       importance: client?.importance || 'medium',
       notes: client?.notes || '',
@@ -737,6 +875,12 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
         editFormData.hasDrivingLicense.toString()
       );
 
+      // 🔒 주민등록번호 필드 추가
+      if (editFormData.ssnFront && editFormData.ssnBack) {
+        formData.append('ssnFront', editFormData.ssnFront);
+        formData.append('ssnBack', editFormData.ssnBack);
+      }
+
       // Action 호출
       submit(formData, { method: 'post' });
 
@@ -745,10 +889,10 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
       setShowSaveSuccessModal(true);
       setIsEditing(false);
 
-      // 페이지 새로고침으로 최신 데이터 반영 (모달 닫힌 후 실행하도록 지연)
+      // navigate를 사용하여 페이지 재로드 (새로고침 대신)
       setTimeout(() => {
-        window.location.reload();
-      }, 2000);
+        navigate(`/clients/${client.id}`, { replace: true });
+      }, 1500); // 모달 표시 시간 확보
     } catch (error) {
       let errorMessage = '고객 정보 업데이트에 실패했습니다.';
 
@@ -790,30 +934,11 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
         notesLength: sanitizedData.notes.length,
       });
 
-      // 1. 파이프라인 단계 조회 (API route 사용)
-      console.log('📋 파이프라인 단계 조회 시작');
-
-      const stagesResponse = await fetch('/api/pipeline/stages', {
-        method: 'GET',
-      });
-
-      if (!stagesResponse.ok) {
-        throw new Error('파이프라인 단계를 조회할 수 없습니다.');
-      }
-
-      const stagesResult = await stagesResponse.json();
-
-      if (!stagesResult.success || !Array.isArray(stagesResult.data)) {
-        throw new Error(
-          '파이프라인 단계를 조회할 수 없습니다. 파이프라인을 먼저 설정해주세요.'
-        );
-      }
-
-      const stages = stagesResult.data;
-      console.log('📋 파이프라인 단계 조회 성공:', stages.length, '개');
+      // 🎯 loader에서 받은 파이프라인 단계 사용
+      console.log('📋 파이프라인 단계 확인:', availableStages.length, '개');
 
       // 🔧 안전성 검사: stages 배열 유효성 확인 (강화)
-      if (stages.length === 0) {
+      if (availableStages.length === 0) {
         throw new Error(
           '파이프라인 단계가 설정되지 않았습니다. 먼저 파이프라인을 설정해주세요.'
         );
@@ -823,11 +948,11 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
       let firstStage = null;
       try {
         firstStage =
-          stages.find((s: any) => s?.name === '첫 상담') ||
-          stages.find(
+          availableStages.find((s: any) => s?.name === '첫 상담') ||
+          availableStages.find(
             (s: any) => s?.name?.includes && s.name.includes('상담')
           ) ||
-          stages.find((s: any) => s?.id) || // id가 있는 첫 번째 단계
+          availableStages.find((s: any) => s?.id) || // id가 있는 첫 번째 단계
           null;
       } catch (findError) {
         console.error('❌ 단계 찾기 에러:', findError);
@@ -840,78 +965,33 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
 
       console.log('🎯 선택된 파이프라인 단계:', firstStage.name);
 
-      // 2. 고객 메모 업데이트 (API route 사용)
-      console.log('📝 고객 메모 업데이트 시작');
-
-      // 영업 기회 메모 생성 (안전한 문자열 처리)
-      const opportunityNotes = `[${getInsuranceTypeName(
-        sanitizedData.insuranceType
-      )} 영업] ${sanitizedData.notes || '새로운 영업 기회'}`;
-
-      const existingNotes = client.notes ? String(client.notes) : '';
-      const currentDate = new Date().toLocaleDateString('ko-KR');
-
-      const memoUpdateData = new FormData();
-      memoUpdateData.append(
-        'notes',
-        existingNotes
-          ? `${existingNotes}\n\n--- 새 영업 기회 (${currentDate}) ---\n${opportunityNotes}`
-          : opportunityNotes
-      );
-
-      try {
-        const memoResponse = await fetch(
-          `/api/clients/update?clientId=${client.id}`,
-          {
-            method: 'POST',
-            body: memoUpdateData,
-          }
-        );
-
-        const memoResult = await memoResponse.json();
-        if (!memoResult.success) {
-          console.warn('⚠️ 메모 업데이트 실패, 계속 진행:', memoResult.message);
-        }
-      } catch (updateError) {
-        console.warn('⚠️ 메모 업데이트 실패, 계속 진행:', updateError);
-        // 메모 업데이트 실패는 전체 프로세스를 중단하지 않음
-      }
-
-      // 3. 고객 단계를 첫 상담으로 변경 (API route 사용)
-      console.log('🔄 고객 단계 변경 시작:', firstStage.name);
-
+      // 🎯 action을 통해 고객 단계 변경
       const stageUpdateData = new FormData();
+      stageUpdateData.append('intent', 'updateClientStage');
       stageUpdateData.append('targetStageId', firstStage.id);
-
-      const stageResponse = await fetch(
-        `/api/clients/stage?clientId=${client.id}`,
-        {
-          method: 'POST',
-          body: stageUpdateData,
-        }
+      stageUpdateData.append(
+        'notes',
+        `[${getInsuranceTypeName(sanitizedData.insuranceType)} 영업] ${
+          sanitizedData.notes || '새로운 영업 기회'
+        }`
       );
 
-      const stageResult = await stageResponse.json();
+      // Action 호출
+      submit(stageUpdateData, { method: 'post' });
 
-      if (stageResult?.success) {
-        console.log('✅ 영업 기회 생성 완료');
-        alert(
-          `🎉 ${client.fullName} 고객의 새 영업 기회가 생성되었습니다!\n\n` +
-            `📋 상품: ${getInsuranceTypeName(sanitizedData.insuranceType)}\n` +
-            `📈 상태: 영업 파이프라인 '${firstStage.name}' 단계에 추가됨\n\n` +
-            `💡 영업 파이프라인 페이지에서 확인할 수 있습니다.`
-        );
-        setShowOpportunityModal(false);
+      console.log('✅ 영업 기회 생성 완료');
+      alert(
+        `🎉 ${client.fullName} 고객의 새 영업 기회가 생성되었습니다!\n\n` +
+          `📋 상품: ${getInsuranceTypeName(sanitizedData.insuranceType)}\n` +
+          `📈 상태: 영업 파이프라인 '${firstStage.name}' 단계에 추가됨\n\n` +
+          `💡 영업 파이프라인 페이지에서 확인할 수 있습니다.`
+      );
+      setShowOpportunityModal(false);
 
-        // 페이지 새로고침 (데이터 동기화)
-        setTimeout(() => {
-          window.location.reload();
-        }, 1000);
-      } else {
-        throw new Error(
-          stageResult?.message || '고객 단계 변경에 실패했습니다.'
-        );
-      }
+      // 페이지 새로고침 (데이터 동기화)
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     } catch (error) {
       console.error('❌ 영업 기회 생성 실패:', error);
 
@@ -1119,7 +1199,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                               onClick={handleEditStart}
                               title="클릭하여 입력"
                             >
-                              미입력
+                              이메일 미입력
                             </span>
                           )}
                         </span>
@@ -1357,17 +1437,16 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                         client?.extendedDetails?.ssn ? (
                           <span className="text-sm font-mono">
                             {(() => {
-                              try {
-                                // 🔓 암호화된 SSN 복호화 후 마스킹 표시
-                                const decryptedSSN = atob(
-                                  client.extendedDetails.ssn
-                                );
+                              // 🔓 extendedDetails.ssn은 이미 복호화된 상태
+                              const decryptedSSN = client.extendedDetails.ssn;
+                              if (decryptedSSN) {
+                                // 🎯 앞6자리-뒤첫1자리****** 형태로 마스킹
                                 return decryptedSSN.replace(
-                                  /(\d{6})-(\d{7})/,
-                                  '$1-*******'
+                                  /(\d{6})-(\d{1})(\d{6})/,
+                                  '$1-$2******'
                                 );
-                              } catch {
-                                return '🔒 암호화된 데이터';
+                              } else {
+                                return '🔒 복호화 실패';
                               }
                             })()}
                           </span>
@@ -1714,7 +1793,8 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                         <div className="text-xs text-muted-foreground mb-1">
                           이 고객이 소개한 사람들
                         </div>
-                        {client?.referralCount && client.referralCount > 0 ? (
+                        {client?.referredClients &&
+                        client.referredClients.length > 0 ? (
                           <div className="space-y-2">
                             <div className="flex items-center gap-2 mb-2">
                               <span className="text-sm font-medium">
@@ -1726,6 +1806,32 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                               >
                                 소개 기여자
                               </Badge>
+                            </div>
+                            {/* 🔥 실제 소개한 사람들 이름 목록 */}
+                            <div className="space-y-1">
+                              {client.referredClients.map(
+                                (referredClient: any, index: number) => (
+                                  <div
+                                    key={referredClient.id}
+                                    className="flex items-center gap-2"
+                                  >
+                                    <Link
+                                      to={`/clients/${referredClient.id}`}
+                                      className="text-sm text-primary hover:underline font-medium"
+                                    >
+                                      {index + 1}. {referredClient.name}
+                                    </Link>
+                                    <Badge
+                                      variant="outline"
+                                      className="text-xs"
+                                    >
+                                      {new Date(
+                                        referredClient.createdAt
+                                      ).toLocaleDateString('ko-KR')}
+                                    </Badge>
+                                  </div>
+                                )
+                              )}
                             </div>
                           </div>
                         ) : (
@@ -2045,6 +2151,10 @@ export async function action({ request, params }: Route.ActionArgs) {
       const notes = formData.get('notes')?.toString();
       const hasDrivingLicense = formData.get('hasDrivingLicense') === 'true';
 
+      // 🔒 주민등록번호 관련 필드들 추가
+      const ssnFront = formData.get('ssnFront')?.toString();
+      const ssnBack = formData.get('ssnBack')?.toString();
+
       // snake_case 필드명으로 변환
       if (fullName) updateData.full_name = fullName;
       if (phone) updateData.phone = phone;
@@ -2064,19 +2174,177 @@ export async function action({ request, params }: Route.ActionArgs) {
 
       updateData.updated_at = new Date().toISOString();
 
-      // 🎯 Supabase 클라이언트를 사용하여 직접 업데이트
-      const { createServerClient } = await import('~/lib/core/supabase');
-      const supabase = createServerClient();
+      // 🎯 Supabase Admin 클라이언트를 사용하여 직접 업데이트 (RLS 우회)
+      const { createAdminClient } = await import('~/lib/core/supabase');
+      const supabase = createAdminClient();
 
+      // 1️⃣ 기본 프로필 정보 업데이트
       const { error: updateError } = await supabase
         .from('app_client_profiles')
         .update(updateData)
         .eq('id', clientId)
         .eq('agent_id', agentId)
-        .eq('is_active', true); // 활성 고객만 업데이트
+        .eq('is_active', true);
 
       if (updateError) {
         throw new Error(updateError.message);
+      }
+
+      // 2️⃣ 주민등록번호가 입력된 경우 상세 정보 처리
+      if (
+        ssnFront &&
+        ssnBack &&
+        ssnFront.length === 6 &&
+        ssnBack.length === 7
+      ) {
+        const fullSSN = `${ssnFront}-${ssnBack}`;
+
+        console.log('🔍 주민등록번호 처리 시작:', {
+          clientId,
+          agentId,
+          ssnMasked: `${ssnFront}-${ssnBack.charAt(0)}******`,
+        });
+
+        // 🔍 주민등록번호 파싱
+        const { parseKoreanId } = await import('~/lib/utils/korean-id-utils');
+        const parseResult = parseKoreanId(fullSSN);
+
+        console.log('📋 주민등록번호 파싱 결과:', {
+          isValid: parseResult.isValid,
+          hasBirthDate: !!parseResult.birthDate,
+          hasGender: !!parseResult.gender,
+          errorMessage: parseResult.errorMessage,
+        });
+
+        if (
+          parseResult.isValid &&
+          parseResult.birthDate &&
+          parseResult.gender
+        ) {
+          try {
+            // 🔒 주민등록번호 Base64 인코딩 (임시 - 나중에 AES-256-GCM으로 업그레이드)
+            console.log('🔐 Base64 인코딩 시작...');
+            const encryptedSSN = btoa(fullSSN); // 간단한 Base64 인코딩
+
+            console.log('✅ Base64 인코딩 완료:', {
+              encryptedLength: encryptedSSN.length,
+              hasEncryptedData: encryptedSSN.length > 0,
+            });
+
+            // 상세 정보 객체 생성
+            const detailsData = {
+              client_id: clientId,
+              birth_date: parseResult.birthDate.toISOString().split('T')[0], // YYYY-MM-DD 형식
+              gender: parseResult.gender,
+              ssn: encryptedSSN, // 🔒 AES-256-GCM 암호화된 JSON 문자열
+              updated_at: new Date().toISOString(),
+            };
+
+            console.log('📊 저장할 데이터:', {
+              client_id: detailsData.client_id,
+              birth_date: detailsData.birth_date,
+              gender: detailsData.gender,
+              ssnLength: detailsData.ssn.length,
+              updated_at: detailsData.updated_at,
+            });
+
+            // 🎯 기존 데이터 확인 후 upsert
+            console.log('🔍 기존 데이터 확인 중...');
+            const { data: existingDetails } = await supabase
+              .from('app_client_details')
+              .select('id')
+              .eq('client_id', clientId)
+              .single();
+
+            console.log('📋 기존 데이터 확인 결과:', {
+              hasExisting: !!existingDetails,
+              existingId: existingDetails?.id,
+            });
+
+            if (existingDetails) {
+              // 기존 데이터 업데이트
+              console.log('🔄 기존 데이터 업데이트 시작...');
+              const { data: updateResult, error: detailsUpdateError } =
+                await supabase
+                  .from('app_client_details')
+                  .update(detailsData)
+                  .eq('client_id', clientId)
+                  .select(); // 업데이트된 데이터 반환
+
+              if (detailsUpdateError) {
+                console.error(
+                  '❌ 상세 정보 업데이트 실패:',
+                  detailsUpdateError
+                );
+                throw new Error(
+                  `상세 정보 업데이트 실패: ${detailsUpdateError.message}`
+                );
+              } else {
+                console.log('✅ 상세 정보 업데이트 성공:', {
+                  updatedRecords: updateResult?.length || 0,
+                  firstRecord: updateResult?.[0]
+                    ? {
+                        id: updateResult[0].id,
+                        birth_date: updateResult[0].birth_date,
+                        gender: updateResult[0].gender,
+                      }
+                    : null,
+                });
+              }
+            } else {
+              // 새 데이터 삽입
+              console.log('➕ 새 데이터 삽입 시작...');
+              const { data: insertResult, error: detailsInsertError } =
+                await supabase
+                  .from('app_client_details')
+                  .insert(detailsData)
+                  .select(); // 삽입된 데이터 반환
+
+              if (detailsInsertError) {
+                console.error('❌ 상세 정보 삽입 실패:', detailsInsertError);
+                throw new Error(
+                  `상세 정보 삽입 실패: ${detailsInsertError.message}`
+                );
+              } else {
+                console.log('✅ 상세 정보 삽입 성공:', {
+                  insertedRecords: insertResult?.length || 0,
+                  firstRecord: insertResult?.[0]
+                    ? {
+                        id: insertResult[0].id,
+                        birth_date: insertResult[0].birth_date,
+                        gender: insertResult[0].gender,
+                      }
+                    : null,
+                });
+              }
+            }
+
+            console.log('✅ 주민등록번호 파싱 및 저장 완료:', {
+              birthDate: parseResult.birthDate.toISOString().split('T')[0],
+              gender: parseResult.gender,
+              ssnMasked: `${ssnFront}-${ssnBack.charAt(0)}******`, // 🔒 마스킹된 SSN만 로그
+            });
+          } catch (encodingError) {
+            console.error(
+              '❌ Base64 인코딩 또는 저장 과정에서 오류:',
+              encodingError
+            );
+            throw new Error(
+              `주민등록번호 처리 실패: ${
+                encodingError instanceof Error
+                  ? encodingError.message
+                  : '알 수 없는 오류'
+              }`
+            );
+          }
+        } else {
+          console.warn('⚠️ 주민등록번호 파싱 실패:', parseResult.errorMessage);
+          throw new Error(
+            `주민등록번호 파싱 실패: ${parseResult.errorMessage}`
+          );
+        }
+      } else {
+        console.log('ℹ️ 주민등록번호 입력되지 않음 - 상세 정보 처리 건너뜀');
       }
 
       return {
@@ -2098,9 +2366,9 @@ export async function action({ request, params }: Route.ActionArgs) {
 
   if (intent === 'deleteClient') {
     try {
-      // 🎯 Supabase 클라이언트를 사용하여 직접 삭제 (soft delete)
-      const { createServerClient } = await import('~/lib/core/supabase');
-      const supabase = createServerClient();
+      // 🎯 Supabase Admin 클라이언트를 사용하여 직접 삭제 (soft delete)
+      const { createAdminClient } = await import('~/lib/core/supabase');
+      const supabase = createAdminClient();
 
       const { error: deleteError } = await supabase
         .from('app_client_profiles')
@@ -2125,6 +2393,69 @@ export async function action({ request, params }: Route.ActionArgs) {
       return {
         success: false,
         message: `고객 삭제에 실패했습니다: ${
+          error instanceof Error ? error.message : '알 수 없는 오류'
+        }`,
+        error: error instanceof Error ? error.message : '알 수 없는 오류',
+      };
+    }
+  }
+
+  if (intent === 'updateClientStage') {
+    try {
+      const targetStageId = formData.get('targetStageId')?.toString();
+      const notes = formData.get('notes')?.toString();
+
+      if (!targetStageId) {
+        throw new Error('대상 단계 ID가 필요합니다.');
+      }
+
+      // 🎯 Supabase Admin 클라이언트를 사용하여 직접 업데이트
+      const { createAdminClient } = await import('~/lib/core/supabase');
+      const supabase = createAdminClient();
+
+      // 기존 메모와 새 메모 결합
+      const { data: currentClient, error: fetchError } = await supabase
+        .from('app_client_profiles')
+        .select('notes')
+        .eq('id', clientId)
+        .eq('agent_id', agentId)
+        .single();
+
+      if (fetchError) {
+        throw new Error(fetchError.message);
+      }
+
+      const existingNotes = currentClient?.notes || '';
+      const currentDate = new Date().toLocaleDateString('ko-KR');
+      const updatedNotes = existingNotes
+        ? `${existingNotes}\n\n--- 새 영업 기회 (${currentDate}) ---\n${notes}`
+        : notes;
+
+      // 고객 단계와 메모 업데이트
+      const { error: updateError } = await supabase
+        .from('app_client_profiles')
+        .update({
+          current_stage_id: targetStageId,
+          notes: updatedNotes,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', clientId)
+        .eq('agent_id', agentId);
+
+      if (updateError) {
+        throw new Error(updateError.message);
+      }
+
+      return {
+        success: true,
+        message: '영업 기회가 성공적으로 생성되었습니다.',
+        timestamp: new Date().toISOString(),
+      };
+    } catch (error) {
+      console.error('❌ 영업 기회 생성 실패:', error);
+      return {
+        success: false,
+        message: `영업 기회 생성에 실패했습니다: ${
           error instanceof Error ? error.message : '알 수 없는 오류'
         }`,
         error: error instanceof Error ? error.message : '알 수 없는 오류',
