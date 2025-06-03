@@ -161,9 +161,24 @@ export default function NetworkGraphClient({
     const updateDimensions = () => {
       if (containerRef.current) {
         const rect = containerRef.current.getBoundingClientRect();
-        setDimensions({
+        const newDimensions = {
           width: rect.width,
           height: rect.height,
+        };
+
+        // 크기가 실제로 변경되었을 때만 업데이트
+        setDimensions((prev) => {
+          if (
+            Math.abs(prev.width - newDimensions.width) > 1 ||
+            Math.abs(prev.height - newDimensions.height) > 1
+          ) {
+            console.log('📏 그래프 컨테이너 크기 변경:', {
+              이전: prev,
+              현재: newDimensions,
+            });
+            return newDimensions;
+          }
+          return prev;
         });
       }
     };
@@ -171,39 +186,103 @@ export default function NetworkGraphClient({
     // 초기 크기 설정
     updateDimensions();
 
-    // 짧은 지연 후 다시 시도 (렌더링 완료 대기)
-    setTimeout(updateDimensions, 100);
-    setTimeout(updateDimensions, 500);
+    // 여러 시점에서 크기 체크 (렌더링 완료 대기)
+    const timeouts = [100, 300, 500, 1000].map((delay) =>
+      setTimeout(updateDimensions, delay)
+    );
 
-    // ResizeObserver로 크기 변화 감지
-    const resizeObserver = new ResizeObserver(updateDimensions);
+    // ResizeObserver로 크기 변화 감지 (가장 확실한 방법)
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect;
+        setDimensions((prev) => {
+          if (
+            Math.abs(prev.width - width) > 1 ||
+            Math.abs(prev.height - height) > 1
+          ) {
+            console.log('🔍 ResizeObserver 감지:', { width, height });
+            return { width, height };
+          }
+          return prev;
+        });
+      }
+    });
+
     if (containerRef.current) {
       resizeObserver.observe(containerRef.current);
     }
 
-    // 윈도우 리사이즈 이벤트도 감지
-    window.addEventListener('resize', updateDimensions);
+    // MutationObserver로 DOM 변화 감지 (사이드바 열림/닫힘 감지)
+    const mutationObserver = new MutationObserver(() => {
+      setTimeout(updateDimensions, 50);
+      setTimeout(updateDimensions, 200);
+    });
 
+    if (containerRef.current?.parentElement) {
+      mutationObserver.observe(containerRef.current.parentElement, {
+        attributes: true,
+        attributeFilter: ['class', 'style'],
+        subtree: true,
+      });
+    }
+
+    // 윈도우 리사이즈 이벤트도 감지
+    const debouncedResize = debounce(updateDimensions, 100);
+    window.addEventListener('resize', debouncedResize);
+
+    // 정리 함수
     return () => {
+      timeouts.forEach(clearTimeout);
       resizeObserver.disconnect();
-      window.removeEventListener('resize', updateDimensions);
+      mutationObserver.disconnect();
+      window.removeEventListener('resize', debouncedResize);
     };
   }, []);
 
   // 컨테이너 크기가 변경되면 그래프 크기 업데이트
   useEffect(() => {
     if (dimensions.width > 0 && dimensions.height > 0 && graphRef.current) {
-      // 그래프 크기 강제 업데이트
-      if (typeof graphRef.current.width === 'function') {
-        graphRef.current.width(dimensions.width);
-      }
-      if (typeof graphRef.current.height === 'function') {
-        graphRef.current.height(dimensions.height);
-      }
-      // 다시 그리기 트리거
-      if (typeof graphRef.current.refresh === 'function') {
-        graphRef.current.refresh();
-      }
+      console.log('🎯 그래프 크기 강제 업데이트:', dimensions);
+
+      // 그래프 크기 강제 업데이트 (다양한 방법으로 시도)
+      const updateGraphSize = () => {
+        if (!graphRef.current) return;
+
+        try {
+          // 방법 1: width/height 함수 호출
+          if (typeof graphRef.current.width === 'function') {
+            graphRef.current.width(dimensions.width);
+          }
+          if (typeof graphRef.current.height === 'function') {
+            graphRef.current.height(dimensions.height);
+          }
+
+          // 방법 2: 직접 속성 설정
+          if (graphRef.current.canvas) {
+            graphRef.current.canvas.width = dimensions.width;
+            graphRef.current.canvas.height = dimensions.height;
+          }
+
+          // 방법 3: 다시 그리기 트리거
+          if (typeof graphRef.current.refresh === 'function') {
+            graphRef.current.refresh();
+          }
+
+          // 방법 4: 시뮬레이션 재시작 (포지션 재계산)
+          if (typeof graphRef.current.d3ReheatSimulation === 'function') {
+            graphRef.current.d3ReheatSimulation();
+          }
+
+          console.log('✅ 그래프 크기 업데이트 완료');
+        } catch (error) {
+          console.error('❌ 그래프 크기 업데이트 실패:', error);
+        }
+      };
+
+      // 즉시 업데이트 + 지연 업데이트 (안전장치)
+      updateGraphSize();
+      setTimeout(updateGraphSize, 100);
+      setTimeout(updateGraphSize, 300);
     }
   }, [dimensions.width, dimensions.height]);
 
@@ -260,6 +339,31 @@ export default function NetworkGraphClient({
       ...prev,
       highlightedNodeId: externalHighlightedNodeId,
     }));
+
+    // 사이드바 열림/닫힘으로 인한 레이아웃 변화 감지
+    // 약간의 지연 후 크기 재측정 (CSS 트랜지션 완료 대기)
+    const timeouts = [100, 300, 500].map((delay) =>
+      setTimeout(() => {
+        if (containerRef.current) {
+          const rect = containerRef.current.getBoundingClientRect();
+          setDimensions((prev) => {
+            if (
+              Math.abs(prev.width - rect.width) > 1 ||
+              Math.abs(prev.height - rect.height) > 1
+            ) {
+              console.log('🔄 사이드바 상태 변화로 인한 크기 재측정:', {
+                이전: prev,
+                현재: { width: rect.width, height: rect.height },
+              });
+              return { width: rect.width, height: rect.height };
+            }
+            return prev;
+          });
+        }
+      }, delay)
+    );
+
+    return () => timeouts.forEach(clearTimeout);
   }, [externalHighlightedNodeId]);
 
   // 옵시디언 스타일 필터링 및 검색 시스템

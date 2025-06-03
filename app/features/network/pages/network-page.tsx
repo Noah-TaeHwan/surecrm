@@ -480,11 +480,11 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
       <div
         className={`grid gap-6 h-[calc(100vh-8rem)] ${
           selectedNode
-            ? 'grid-cols-1 lg:grid-cols-9' // 노드 선택 시: 필터1 + 그래프6 + 상세2
-            : 'grid-cols-1 lg:grid-cols-7' // 노드 미선택 시: 필터1 + 그래프6
+            ? 'grid-cols-1 lg:grid-cols-9' // 노드 선택 시: 필터2 + 그래프5 + 상세2
+            : 'grid-cols-1 lg:grid-cols-7' // 노드 미선택 시: 필터2 + 그래프5
         }`}
       >
-        {/* 필터 사이드바 - 더 좁게 */}
+        {/* 필터 사이드바 */}
         <div className="lg:col-span-2">
           <NetworkSidebar
             filters={filterSettings}
@@ -493,8 +493,10 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
           />
         </div>
 
-        {/* 메인 콘텐츠 영역 - 더 넓게 */}
-        <div className="lg:col-span-5 mb-6">
+        {/* 메인 콘텐츠 영역 - 사이드바 상태에 따라 크기 조정 */}
+        <div
+          className={selectedNode ? 'lg:col-span-5 mb-6' : 'lg:col-span-5 mb-6'}
+        >
           <Card className="h-full flex flex-col">
             <CardHeader className="flex-shrink-0 pb-3">
               <CardTitle>소개 네트워크</CardTitle>
