@@ -45,6 +45,10 @@ export default defineConfig(({ mode }) => {
         'url',
         'querystring',
         'zlib',
+        'dotenv',
+        'postgres',
+        'drizzle-orm/postgres-js',
+        'drizzle-orm',
       ],
       include: ['buffer'],
     },
@@ -66,6 +70,11 @@ export default defineConfig(({ mode }) => {
         path: 'data:text/javascript,export default {}',
         querystring: 'data:text/javascript,export default {}',
         zlib: 'data:text/javascript,export default {}',
+        dotenv:
+          'data:text/javascript,export default {}; export const config = () => {}',
+        postgres: 'data:text/javascript,export default () => {}',
+        'drizzle-orm/postgres-js':
+          'data:text/javascript,export const drizzle = () => {}',
       },
     },
     // Rollup 옵션에서 외부 모듈과 polyfill 설정
@@ -89,6 +98,10 @@ export default defineConfig(({ mode }) => {
           'url',
           'querystring',
           'zlib',
+          'dotenv',
+          'postgres',
+          'drizzle-orm/postgres-js',
+          'drizzle-orm',
         ],
         output: {
           globals: {
@@ -107,6 +120,10 @@ export default defineConfig(({ mode }) => {
             url: '{}',
             querystring: '{}',
             zlib: '{}',
+            dotenv: '{}',
+            postgres: '{}',
+            'drizzle-orm/postgres-js': '{}',
+            'drizzle-orm': '{}',
           },
         },
       },

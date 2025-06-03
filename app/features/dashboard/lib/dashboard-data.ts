@@ -163,7 +163,7 @@ export async function getTodayStats(
 
     const pendingTasks = pendingTasksResult[0]?.count || 0;
 
-    // 이번 주 새로운 소개 건수
+    // 이번 주 새로운 소개 건수 (🔥 활성 고객만)
     const weekStart = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
     const newReferralsResult = await db
       .select({ count: count() })
@@ -171,6 +171,7 @@ export async function getTodayStats(
       .where(
         and(
           eq(clients.agentId, userId),
+          eq(clients.isActive, true), // 🔥 추가: 활성 고객만
           sql`${clients.referredById} IS NOT NULL`,
           gte(clients.createdAt, weekStart)
         )
@@ -222,56 +223,73 @@ export async function getKPIData(userId: string): Promise<DashboardKPIData> {
       lastMonthClientsResult,
       lastMonthReferralsResult,
     ] = await Promise.all([
-      // 총 고객 수
-      db
-        .select({ count: count() })
-        .from(clients)
-        .where(eq(clients.agentId, userId)),
-
-      // 이번 달 신규 고객 수
-      db
-        .select({ count: count() })
-        .from(clients)
-        .where(
-          and(eq(clients.agentId, userId), gte(clients.createdAt, thisMonth))
-        ),
-
-      // 총 소개 건수
+      // 총 고객 수 (🔥 활성 고객만)
       db
         .select({ count: count() })
         .from(clients)
         .where(
           and(
             eq(clients.agentId, userId),
+            eq(clients.isActive, true) // 🔥 추가: 활성 고객만
+          )
+        ),
+
+      // 이번 달 신규 고객 수 (🔥 활성 고객만)
+      db
+        .select({ count: count() })
+        .from(clients)
+        .where(
+          and(
+            eq(clients.agentId, userId),
+            eq(clients.isActive, true), // 🔥 추가: 활성 고객만
+            gte(clients.createdAt, thisMonth)
+          )
+        ),
+
+      // 총 소개 건수 (🔥 활성 고객만)
+      db
+        .select({ count: count() })
+        .from(clients)
+        .where(
+          and(
+            eq(clients.agentId, userId),
+            eq(clients.isActive, true), // 🔥 추가: 활성 고객만
             sql`${clients.referredById} IS NOT NULL`
           )
         ),
 
-      // 계약 완료 고객 (전환율 계산용) - 실제 "계약 완료" 단계 고객 수 사용
-      db
-        .select({ count: count() })
-        .from(clients)
-        .where(eq(clients.agentId, userId)),
-
-      // 지난 달 신규 고객 수
+      // 계약 완료 고객 (전환율 계산용) - 실제 "계약 완료" 단계 고객 수 사용 (🔥 활성 고객만)
       db
         .select({ count: count() })
         .from(clients)
         .where(
           and(
             eq(clients.agentId, userId),
+            eq(clients.isActive, true) // 🔥 추가: 활성 고객만
+          )
+        ),
+
+      // 지난 달 신규 고객 수 (🔥 활성 고객만)
+      db
+        .select({ count: count() })
+        .from(clients)
+        .where(
+          and(
+            eq(clients.agentId, userId),
+            eq(clients.isActive, true), // 🔥 추가: 활성 고객만
             gte(clients.createdAt, lastMonth),
             lte(clients.createdAt, thisMonth)
           )
         ),
 
-      // 지난 달 소개 건수
+      // 지난 달 소개 건수 (🔥 활성 고객만)
       db
         .select({ count: count() })
         .from(clients)
         .where(
           and(
             eq(clients.agentId, userId),
+            eq(clients.isActive, true), // 🔥 추가: 활성 고객만
             sql`${clients.referredById} IS NOT NULL`,
             gte(clients.createdAt, lastMonth),
             lte(clients.createdAt, thisMonth)
@@ -297,13 +315,14 @@ export async function getKPIData(userId: string): Promise<DashboardKPIData> {
       .limit(1);
 
     if (contractCompletedStage.length > 0) {
-      // 실제 "계약 완료" 단계에 있는 고객 수
+      // 실제 "계약 완료" 단계에 있는 고객 수 (🔥 활성 고객만)
       const contractedResult = await db
         .select({ count: count() })
         .from(clients)
         .where(
           and(
             eq(clients.agentId, userId),
+            eq(clients.isActive, true), // 🔥 추가: 활성 고객만
             eq(clients.currentStageId, contractCompletedStage[0].id)
           )
         );
@@ -351,6 +370,7 @@ export async function getKPIData(userId: string): Promise<DashboardKPIData> {
         .where(
           and(
             eq(clients.agentId, userId),
+            eq(clients.isActive, true), // 🔥 추가: 활성 고객만
             eq(clients.currentStageId, contractCompletedStage[0].id),
             gte(clients.updatedAt, lastMonthStart),
             lte(clients.updatedAt, lastMonthEnd)
@@ -501,7 +521,7 @@ export async function getPipelineData(userId: string) {
         let totalValue = 0;
 
         if (userStages.length > 0 && 'id' in stage) {
-          // 실제 파이프라인 단계 사용
+          // 실제 파이프라인 단계 사용 (🔥 활성 고객만)
           const stageResult = await db
             .select({
               count: count(),
@@ -510,6 +530,7 @@ export async function getPipelineData(userId: string) {
             .where(
               and(
                 eq(clients.agentId, userId),
+                eq(clients.isActive, true), // 🔥 추가: 활성 고객만
                 eq(clients.currentStageId, stage.id)
               )
             );
@@ -538,6 +559,7 @@ export async function getPipelineData(userId: string) {
               .where(
                 and(
                   eq(clients.agentId, userId),
+                  eq(clients.isActive, true), // 🔥 추가: 활성 고객만
                   eq(clients.currentStageId, nextStage.id)
                 )
               );
@@ -639,7 +661,7 @@ export async function getMonthlyRevenueGoal(userId: string): Promise<number> {
 // 상위 소개자 및 네트워크 통계 조회 (실제 데이터베이스 연결)
 export async function getReferralInsights(userId: string) {
   try {
-    // 실제 소개자별 통계 조회 - referrals 테이블 사용
+    // 실제 소개자별 통계 조회 - referrals 테이블 사용 (🔥 활성 고객만)
     const topReferrersData = await db
       .select({
         referrerId: referrals.referrerId,
@@ -649,7 +671,12 @@ export async function getReferralInsights(userId: string) {
       })
       .from(referrals)
       .innerJoin(clients, eq(referrals.referrerId, clients.id))
-      .where(eq(referrals.agentId, userId))
+      .where(
+        and(
+          eq(referrals.agentId, userId),
+          eq(clients.isActive, true) // 🔥 추가: 활성 고객만 (소개자)
+        )
+      )
       .groupBy(referrals.referrerId, clients.fullName)
       .orderBy(desc(count(referrals.id)))
       .limit(5);
@@ -961,6 +988,7 @@ export async function getUserGoals(userId: string) {
                         .where(
                           and(
                             eq(clients.agentId, userId),
+                            eq(clients.isActive, true), // 🔥 추가: 활성 고객만
                             eq(
                               clients.currentStageId,
                               contractCompletedStage[0].id
@@ -975,6 +1003,7 @@ export async function getUserGoals(userId: string) {
                         .where(
                           and(
                             eq(clients.agentId, userId),
+                            eq(clients.isActive, true), // 🔥 추가: 활성 고객만
                             gte(clients.updatedAt, goalStartDate),
                             lte(clients.updatedAt, goalEndDate)
                           )
@@ -998,6 +1027,7 @@ export async function getUserGoals(userId: string) {
                 .where(
                   and(
                     eq(clients.agentId, userId),
+                    eq(clients.isActive, true), // 🔥 추가: 활성 고객만
                     gte(clients.createdAt, clientsStartDate),
                     lte(clients.createdAt, clientsEndDate)
                   )
@@ -1064,15 +1094,25 @@ export async function getRecentClientsData(userId: string) {
         updatedAt: clients.updatedAt,
       })
       .from(clients)
-      .where(eq(clients.agentId, userId))
+      .where(
+        and(
+          eq(clients.agentId, userId),
+          eq(clients.isActive, true) // 🔥 추가: 활성 고객만
+        )
+      )
       .orderBy(desc(clients.createdAt))
       .limit(5);
 
-    // 총 고객 수
+    // 총 고객 수 (🔥 활성 고객만)
     const totalClientsResult = await db
       .select({ count: count() })
       .from(clients)
-      .where(eq(clients.agentId, userId));
+      .where(
+        and(
+          eq(clients.agentId, userId),
+          eq(clients.isActive, true) // 🔥 추가: 활성 고객만
+        )
+      );
 
     const totalClients = totalClientsResult[0]?.count || 0;
 

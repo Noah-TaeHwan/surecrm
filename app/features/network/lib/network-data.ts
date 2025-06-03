@@ -93,7 +93,7 @@ export async function getNetworkData(agentId: string): Promise<{
 
     const edges: NetworkEdge[] = [];
 
-    // 직접 고객들 조회
+    // 직접 고객들 조회 (🔥 활성 고객만)
     const directClients = await db
       .select({
         client: clients,
@@ -102,7 +102,12 @@ export async function getNetworkData(agentId: string): Promise<{
         `,
       })
       .from(clients)
-      .where(eq(clients.agentId, agentId));
+      .where(
+        and(
+          eq(clients.agentId, agentId),
+          eq(clients.isActive, true) // 🔥 추가: 활성 고객만
+        )
+      );
 
     // 직접 고객 노드 추가
     for (const { client, referralCount } of directClients) {
@@ -128,7 +133,7 @@ export async function getNetworkData(agentId: string): Promise<{
       });
     }
 
-    // 추천 관계 조회
+    // 추천 관계 조회 (🔥 활성 고객만)
     const referralRelations = await db
       .select({
         referral: referrals,
@@ -151,7 +156,12 @@ export async function getNetworkData(agentId: string): Promise<{
         sql`${clients} as referred`,
         sql`${referrals.referredId} = referred.id`
       )
-      .where(eq(clients.agentId, agentId));
+      .where(
+        and(
+          eq(clients.agentId, agentId),
+          eq(clients.isActive, true) // 🔥 추가: 활성 고객만
+        )
+      );
 
     // 추천 관계 엣지 추가
     for (const relation of referralRelations) {
@@ -207,13 +217,17 @@ async function expandNetworkDepth(
 
     for (const node of currentLevelNodes) {
       if (node.type === 'client') {
-        // 이 고객이 추천한 사람들 조회
+        // 이 고객이 추천한 사람들 조회 (🔥 활성 고객만)
         const referredClients = await db
           .select()
           .from(clients)
           .innerJoin(referrals, eq(clients.id, referrals.referredId))
           .where(
-            and(eq(referrals.referrerId, node.id), eq(clients.agentId, agentId))
+            and(
+              eq(referrals.referrerId, node.id),
+              eq(clients.agentId, agentId),
+              eq(clients.isActive, true) // 🔥 추가: 활성 고객만
+            )
           );
 
         for (const referred of referredClients) {
@@ -286,7 +300,7 @@ async function calculateNetworkStats(
   edges: NetworkEdge[]
 ): Promise<NetworkStats> {
   try {
-    // 상위 추천자들
+    // 상위 추천자들 (🔥 활성 고객만)
     const topReferrers = await db
       .select({
         id: clients.id,
@@ -295,12 +309,17 @@ async function calculateNetworkStats(
       })
       .from(clients)
       .leftJoin(referrals, eq(clients.id, referrals.referrerId))
-      .where(eq(clients.agentId, agentId))
+      .where(
+        and(
+          eq(clients.agentId, agentId),
+          eq(clients.isActive, true) // 🔥 추가: 활성 고객만
+        )
+      )
       .groupBy(clients.id, clients.fullName)
       .orderBy(desc(count(referrals.id)))
       .limit(5);
 
-    // 월별 성장 데이터 (최근 6개월)
+    // 월별 성장 데이터 (최근 6개월) (🔥 활성 고객만)
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
@@ -311,7 +330,11 @@ async function calculateNetworkStats(
       })
       .from(clients)
       .where(
-        and(eq(clients.agentId, agentId), gte(clients.createdAt, sixMonthsAgo))
+        and(
+          eq(clients.agentId, agentId),
+          eq(clients.isActive, true), // 🔥 추가: 활성 고객만
+          gte(clients.createdAt, sixMonthsAgo)
+        )
       )
       .groupBy(sql`TO_CHAR(${clients.createdAt}, 'YYYY-MM')`)
       .orderBy(sql`TO_CHAR(${clients.createdAt}, 'YYYY-MM')`);
@@ -361,14 +384,20 @@ export async function getNodeDetails(
     const client = await db
       .select()
       .from(clients)
-      .where(and(eq(clients.id, nodeId), eq(clients.agentId, agentId)))
+      .where(
+        and(
+          eq(clients.id, nodeId),
+          eq(clients.agentId, agentId),
+          eq(clients.isActive, true) // 🔥 추가: 활성 고객만
+        )
+      )
       .limit(1);
 
     if (!client[0]) {
       return null;
     }
 
-    // 추천 관계 조회
+    // 추천 관계 조회 (🔥 활성 고객만)
     const clientReferrals = await db
       .select({
         referral: referrals,
@@ -376,7 +405,12 @@ export async function getNodeDetails(
       })
       .from(referrals)
       .innerJoin(clients, eq(referrals.referredId, clients.id))
-      .where(eq(referrals.referrerId, nodeId));
+      .where(
+        and(
+          eq(referrals.referrerId, nodeId),
+          eq(clients.isActive, true) // 🔥 추가: 활성 고객만
+        )
+      );
 
     return {
       ...client[0],
@@ -402,6 +436,7 @@ export async function searchNetwork(
       .where(
         and(
           eq(clients.agentId, agentId),
+          eq(clients.isActive, true), // 🔥 추가: 활성 고객만
           or(
             sql`${clients.fullName} ILIKE ${`%${query}%`}`,
             sql`${clients.phone} ILIKE ${`%${query}%`}`,

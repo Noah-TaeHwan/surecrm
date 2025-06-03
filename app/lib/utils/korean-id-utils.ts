@@ -12,14 +12,11 @@
  * - 접근 권한 엄격 제어
  */
 
-export interface KoreanIdParseResult {
+interface KoreanIdParseResult {
   isValid: boolean;
-  birthDate: Date | null;
-  gender: 'male' | 'female' | null;
-  century: string | null; // '1900s' | '2000s' | '1800s'
-  genderCode: number | null;
-  maskedId: string;
-  errors: string[];
+  birthDate?: Date;
+  gender?: 'male' | 'female';
+  errorMessage?: string;
 }
 
 /**
@@ -28,229 +25,131 @@ export interface KoreanIdParseResult {
 const KOREAN_ID_PATTERN = /^(\d{2})(\d{2})(\d{2})-?(\d{1})(\d{6})$/;
 
 /**
- * 주민등록번호 파싱 및 검증
- * @param idNumber 주민등록번호 (하이픈 있거나 없거나)
- * @returns 파싱 결과 객체
+ * 한국 주민등록번호를 파싱하여 생년월일과 성별을 추출
+ * @param ssn - 주민등록번호 (YYMMDD-1234567 형식)
  */
-export function parseKoreanId(idNumber: string): KoreanIdParseResult {
-  const errors: string[] = [];
+export function parseKoreanId(ssn: string): KoreanIdParseResult {
+  try {
+    // 하이픈 제거하고 숫자만 추출
+    const cleanSsn = ssn.replace(/[^0-9]/g, '');
 
-  // 기본값 설정
-  const result: KoreanIdParseResult = {
-    isValid: false,
-    birthDate: null,
-    gender: null,
-    century: null,
-    genderCode: null,
-    maskedId: maskKoreanId(idNumber),
-    errors: [],
-  };
+    if (cleanSsn.length !== 13) {
+      return {
+        isValid: false,
+        errorMessage: '주민등록번호는 13자리여야 합니다.',
+      };
+    }
 
-  // 1. 기본 형식 검증
-  if (!idNumber || typeof idNumber !== 'string') {
-    errors.push('주민등록번호가 입력되지 않았습니다.');
-    return { ...result, errors };
-  }
+    // 생년월일 추출 (앞 6자리)
+    const birthYY = parseInt(cleanSsn.substring(0, 2));
+    const birthMM = parseInt(cleanSsn.substring(2, 4));
+    const birthDD = parseInt(cleanSsn.substring(4, 6));
 
-  // 공백 제거 및 정규화
-  const cleanId = idNumber.replace(/\s/g, '');
+    // 성별 코드 (7번째 자리)
+    const genderCode = parseInt(cleanSsn.substring(6, 7));
 
-  // 2. 정규식 매칭
-  const match = cleanId.match(KOREAN_ID_PATTERN);
-  if (!match) {
-    errors.push('주민등록번호 형식이 올바르지 않습니다. (YYMMDD-NNNNNNN)');
-    return { ...result, errors };
-  }
+    // 연도 계산 (성별 코드로 세기 판단)
+    let birthYear: number;
+    if (genderCode === 1 || genderCode === 2) {
+      // 1900년대 출생
+      birthYear = 1900 + birthYY;
+    } else if (genderCode === 3 || genderCode === 4) {
+      // 2000년대 출생
+      birthYear = 2000 + birthYY;
+    } else {
+      return {
+        isValid: false,
+        errorMessage: '유효하지 않은 성별 코드입니다.',
+      };
+    }
 
-  const [, yy, mm, dd, genderCode, restDigits] = match;
-  const genderCodeNum = parseInt(genderCode);
+    // 성별 판단
+    const gender: 'male' | 'female' = genderCode % 2 === 1 ? 'male' : 'female';
 
-  // 3. 날짜 유효성 검증
-  const { isValidDate, birthDate, century } = validateAndParseBirthDate(
-    yy,
-    mm,
-    dd,
-    genderCodeNum
-  );
+    // 날짜 유효성 검사
+    const birthDate = new Date(birthYear, birthMM - 1, birthDD);
 
-  if (!isValidDate) {
-    errors.push('생년월일이 유효하지 않습니다.');
-    return { ...result, errors };
-  }
+    if (
+      birthDate.getFullYear() !== birthYear ||
+      birthDate.getMonth() !== birthMM - 1 ||
+      birthDate.getDate() !== birthDD
+    ) {
+      return {
+        isValid: false,
+        errorMessage: '유효하지 않은 생년월일입니다.',
+      };
+    }
 
-  // 4. 성별 코드 검증 및 성별 추출
-  const gender = extractGender(genderCodeNum);
-  if (!gender) {
-    errors.push('성별 코드가 유효하지 않습니다.');
-    return { ...result, errors };
-  }
+    // 현재 날짜보다 미래인지 검사
+    if (birthDate > new Date()) {
+      return {
+        isValid: false,
+        errorMessage: '생년월일이 미래 날짜입니다.',
+      };
+    }
 
-  // 5. 체크섬 검증
-  const isValidChecksum = validateChecksum(cleanId);
-  if (!isValidChecksum) {
-    errors.push('주민등록번호 체크섬이 일치하지 않습니다.');
-    return { ...result, errors };
-  }
-
-  // 6. 모든 검증 통과
-  return {
-    isValid: true,
-    birthDate,
-    gender,
-    century,
-    genderCode: genderCodeNum,
-    maskedId: maskKoreanId(cleanId),
-    errors: [],
-  };
-}
-
-/**
- * 생년월일 유효성 검증 및 파싱
- */
-function validateAndParseBirthDate(
-  yy: string,
-  mm: string,
-  dd: string,
-  genderCode: number
-) {
-  const month = parseInt(mm);
-  const day = parseInt(dd);
-  const year2digit = parseInt(yy);
-
-  // 월 유효성 (1-12)
-  if (month < 1 || month > 12) {
-    return { isValidDate: false, birthDate: null, century: null };
-  }
-
-  // 일 유효성 (1-31)
-  if (day < 1 || day > 31) {
-    return { isValidDate: false, birthDate: null, century: null };
-  }
-
-  // 성별 코드로 세기 판단
-  let fullYear: number;
-  let century: string;
-
-  switch (genderCode) {
-    case 1:
-    case 2:
-    case 5:
-    case 6:
-      // 1900년대생
-      fullYear = 1900 + year2digit;
-      century = '1900s';
-      break;
-    case 3:
-    case 4:
-    case 7:
-    case 8:
-      // 2000년대생
-      fullYear = 2000 + year2digit;
-      century = '2000s';
-      break;
-    case 9:
-    case 0:
-      // 1800년대생 (외국인 포함)
-      fullYear = 1800 + year2digit;
-      century = '1800s';
-      break;
-    default:
-      return { isValidDate: false, birthDate: null, century: null };
-  }
-
-  // Date 객체 생성 및 유효성 검증
-  const birthDate = new Date(fullYear, month - 1, day); // month는 0부터 시작
-
-  // 실제 날짜와 입력한 날짜가 일치하는지 확인 (예: 2월 30일 같은 잘못된 날짜 방지)
-  if (
-    birthDate.getFullYear() !== fullYear ||
-    birthDate.getMonth() !== month - 1 ||
-    birthDate.getDate() !== day
-  ) {
-    return { isValidDate: false, birthDate: null, century: null };
-  }
-
-  // 미래 날짜 체크
-  if (birthDate > new Date()) {
-    return { isValidDate: false, birthDate: null, century: null };
-  }
-
-  return { isValidDate: true, birthDate, century };
-}
-
-/**
- * 성별 추출
- */
-function extractGender(genderCode: number): 'male' | 'female' | null {
-  switch (genderCode) {
-    case 1:
-    case 3:
-    case 5:
-    case 7:
-    case 9:
-      return 'male';
-    case 2:
-    case 4:
-    case 6:
-    case 8:
-    case 0:
-      return 'female';
-    default:
-      return null;
+    return {
+      isValid: true,
+      birthDate,
+      gender,
+    };
+  } catch (error) {
+    return {
+      isValid: false,
+      errorMessage: '주민등록번호 파싱 중 오류가 발생했습니다.',
+    };
   }
 }
 
 /**
- * 체크섬 검증 (마지막 자리 체크)
+ * 주민등록번호 앞자리 마스킹
+ * @param ssn - 주민등록번호
  */
-function validateChecksum(idNumber: string): boolean {
-  // 하이픈 제거
-  const digits = idNumber.replace('-', '');
+export function maskKoreanId(ssn: string): string {
+  if (!ssn || ssn.length < 8) return ssn;
 
-  if (digits.length !== 13) {
+  const cleanSsn = ssn.replace(/[^0-9-]/g, '');
+
+  if (cleanSsn.includes('-')) {
+    // YYMMDD-1234567 형식
+    const parts = cleanSsn.split('-');
+    if (parts.length === 2 && parts[0].length === 6 && parts[1].length === 7) {
+      return `${parts[0]}-${'*'.repeat(7)}`;
+    }
+  }
+
+  return ssn;
+}
+
+/**
+ * 주민등록번호 유효성 검사 (체크섬 포함)
+ * @param ssn - 주민등록번호
+ */
+export function validateKoreanId(ssn: string): boolean {
+  try {
+    const cleanSsn = ssn.replace(/[^0-9]/g, '');
+
+    if (cleanSsn.length !== 13) return false;
+
+    // 기본 파싱 검사
+    const parseResult = parseKoreanId(ssn);
+    if (!parseResult.isValid) return false;
+
+    // 체크섬 검사
+    const digits = cleanSsn.split('').map(Number);
+    const weights = [2, 3, 4, 5, 6, 7, 8, 9, 2, 3, 4, 5];
+
+    let sum = 0;
+    for (let i = 0; i < 12; i++) {
+      sum += digits[i] * weights[i];
+    }
+
+    const checkDigit = (11 - (sum % 11)) % 10;
+
+    return checkDigit === digits[12];
+  } catch (error) {
     return false;
   }
-
-  // 체크섬 계산
-  const weights = [2, 3, 4, 5, 6, 7, 8, 9, 2, 3, 4, 5];
-  let sum = 0;
-
-  for (let i = 0; i < 12; i++) {
-    sum += parseInt(digits[i]) * weights[i];
-  }
-
-  const checkDigit = (11 - (sum % 11)) % 10;
-  const lastDigit = parseInt(digits[12]);
-
-  return checkDigit === lastDigit;
-}
-
-/**
- * 주민등록번호 마스킹
- * @param idNumber 원본 주민등록번호
- * @returns 마스킹된 주민등록번호 (예: 931119-1●●●●●●)
- */
-export function maskKoreanId(idNumber: string): string {
-  if (!idNumber) return '';
-
-  const cleanId = idNumber.replace(/\s/g, '');
-  const match = cleanId.match(KOREAN_ID_PATTERN);
-
-  if (!match) {
-    return '●●●●●●-●●●●●●●';
-  }
-
-  const [, yy, mm, dd, genderCode] = match;
-  return `${yy}${mm}${dd}-${genderCode}●●●●●●`;
-}
-
-/**
- * 주민등록번호 형식 검증 (간단)
- */
-export function isValidKoreanIdFormat(idNumber: string): boolean {
-  if (!idNumber) return false;
-  const cleanId = idNumber.replace(/\s/g, '');
-  return KOREAN_ID_PATTERN.test(cleanId);
 }
 
 /**
@@ -325,11 +224,6 @@ export function debugKoreanIdParse(idNumber: string): void {
 
   const result = parseKoreanId(idNumber);
   console.log('🆔 주민등록번호 파싱 결과:', {
-    maskedId: result.maskedId,
-    isValid: result.isValid,
-    birthDate: result.birthDate?.toLocaleDateString('ko-KR'),
-    gender: result.gender ? formatGender(result.gender) : null,
-    age: result.birthDate ? calculateAge(result.birthDate) : null,
-    errors: result.errors,
+    errorMessage: result.errorMessage,
   });
 }

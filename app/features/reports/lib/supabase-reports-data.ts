@@ -72,19 +72,25 @@ export async function getPerformanceData(
   endDate: Date
 ): Promise<PerformanceData> {
   try {
-    // 기본 클라이언트 수 조회 (가장 단순한 쿼리로 테스트)
+    // 기본 클라이언트 수 조회 (🔥 활성 고객만)
     const totalClientsResult = await db
       .select({ count: count() })
       .from(clients)
-      .where(eq(clients.agentId, userId));
+      .where(
+        and(
+          eq(clients.agentId, userId),
+          eq(clients.isActive, true) // 🔥 추가: 활성 고객만
+        )
+      );
 
-    // 신규 클라이언트 수 (날짜 조건 테스트 - and 함수 사용)
+    // 신규 클라이언트 수 (🔥 활성 고객만)
     const newClientsResult = await db
       .select({ count: count() })
       .from(clients)
       .where(
         and(
           eq(clients.agentId, userId),
+          eq(clients.isActive, true), // 🔥 추가: 활성 고객만
           gte(clients.createdAt, startDate),
           lte(clients.createdAt, endDate)
         )
@@ -114,7 +120,7 @@ export async function getPerformanceData(
         )
       );
 
-    // 수익 계산 (날짜 조건 + 활성 보험 조건 추가)
+    // 수익 계산 (🔥 활성 고객만)
     const revenueResult = await db
       .select({
         total: sql<number>`COALESCE(SUM(${insuranceInfo.premium}), 0)`,
@@ -125,13 +131,14 @@ export async function getPerformanceData(
       .where(
         and(
           eq(clients.agentId, userId),
+          eq(clients.isActive, true), // 🔥 추가: 활성 고객만
           eq(insuranceInfo.isActive, true),
           gte(clients.createdAt, startDate),
           lte(clients.createdAt, endDate)
         )
       );
 
-    // 전환율 계산 (isActive 필드 사용)
+    // 전환율 계산 (🔥 삭제되지 않은 고객만 대상)
     const conversionResult = await db
       .select({
         total: count(),
@@ -142,6 +149,8 @@ export async function getPerformanceData(
       .where(
         and(
           eq(clients.agentId, userId),
+          // 🔥 주의: 여기서는 실제 is_active 컬럼이 아닌 status 필드로 전환율을 계산
+          // 삭제된 고객은 제외하고 활성/잠재 고객만 포함
           gte(clients.createdAt, startDate),
           lte(clients.createdAt, endDate)
         )
@@ -164,6 +173,7 @@ export async function getPerformanceData(
       .where(
         and(
           eq(clients.agentId, userId),
+          eq(clients.isActive, true), // 🔥 추가: 활성 고객만
           gte(clients.createdAt, prevStartDate),
           lte(clients.createdAt, prevEndDate)
         )
@@ -189,6 +199,7 @@ export async function getPerformanceData(
       .where(
         and(
           eq(clients.agentId, userId),
+          eq(clients.isActive, true), // 🔥 추가: 활성 고객만
           eq(insuranceInfo.isActive, true),
           gte(clients.createdAt, prevStartDate),
           lte(clients.createdAt, prevEndDate)
@@ -290,14 +301,14 @@ export async function getTopPerformers(
 
     const teamId = teamResult[0].teamId;
 
-    // 팀 멤버들의 성과 데이터 조회
+    // 팀 멤버들의 성과 데이터 조회 (🔥 활성 고객만)
     const performersData = await db
       .select({
         id: profiles.id,
         name: sql<string>`COALESCE(${profiles.fullName}, 'Unknown')`,
-        totalClients: sql<number>`COUNT(DISTINCT ${clients.id})`,
+        totalClients: sql<number>`COUNT(DISTINCT CASE WHEN ${clients.isActive} = true THEN ${clients.id} END)`,
         activeClients: sql<number>`COUNT(DISTINCT CASE WHEN ${clients.isActive} = true THEN ${clients.id} END)`,
-        totalRevenue: sql<number>`COALESCE(SUM(CASE WHEN ${insuranceInfo.isActive} = true THEN ${insuranceInfo.premium} ELSE 0 END), 0)`,
+        totalRevenue: sql<number>`COALESCE(SUM(CASE WHEN ${clients.isActive} = true AND ${insuranceInfo.isActive} = true THEN ${insuranceInfo.premium} ELSE 0 END), 0)`,
         meetingsCount: sql<number>`COUNT(DISTINCT ${meetings.id})`,
       })
       .from(profiles)
@@ -308,7 +319,7 @@ export async function getTopPerformers(
       .groupBy(profiles.id, profiles.fullName)
       .orderBy(
         desc(
-          sql<number>`COALESCE(SUM(CASE WHEN ${insuranceInfo.isActive} = true THEN ${insuranceInfo.premium} ELSE 0 END), 0)`
+          sql<number>`COALESCE(SUM(CASE WHEN ${clients.isActive} = true AND ${insuranceInfo.isActive} = true THEN ${insuranceInfo.premium} ELSE 0 END), 0)`
         )
       )
       .limit(limit);

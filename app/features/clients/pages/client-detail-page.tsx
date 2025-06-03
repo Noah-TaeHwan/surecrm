@@ -189,48 +189,21 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       fullName: user.fullName,
     });
 
-    // 🎯 핵심 4개 테이블 + 기본 정보 병렬 로딩
-    const [
-      // 1. 기본 고객 정보 (현재 작동하는 API)
-      clientDetail,
+    // 🎯 Supabase 클라이언트를 사용하여 직접 조회
+    const { createServerClient } = await import('~/lib/core/supabase');
+    const supabase = createServerClient();
 
-      // 2-5. 핵심 4개 테이블 실제 API 호출
-      clientExtendedDetails, // app_client_details
-      clientInsuranceList, // app_client_insurance
-      clientFamilyMembers, // app_client_family_members
-      clientContactHistory, // app_client_contact_history (최근 10건)
-    ] = await Promise.all([
-      // 1. 기본 고객 정보
-      import('~/api/shared/clients').then(({ getClientById }) =>
-        getClientById(clientId, agentId)
-      ),
+    // 고객 기본 정보 조회
+    const { data: clientData, error: clientError } = await supabase
+      .from('app_client_profiles')
+      .select('*')
+      .eq('id', clientId)
+      .eq('agent_id', agentId)
+      .eq('is_active', true)
+      .single();
 
-      // 2. 고객 상세 정보 (app_client_details)
-      import('~/api/shared/client-extended-data').then(({ getClientDetails }) =>
-        getClientDetails(clientId, agentId).catch(() => null)
-      ),
-
-      // 3. 고객 보험 정보 (app_client_insurance)
-      import('~/api/shared/client-extended-data').then(
-        ({ getClientInsurance }) =>
-          getClientInsurance(clientId, agentId).catch(() => [])
-      ),
-
-      // 4. 고객 가족 구성원 (app_client_family_members)
-      import('~/api/shared/client-extended-data').then(
-        ({ getClientFamilyMembers }) =>
-          getClientFamilyMembers(clientId, agentId).catch(() => [])
-      ),
-
-      // 5. 고객 연락 이력 (app_client_contact_history) - 최근 10건
-      import('~/api/shared/client-extended-data').then(
-        ({ getClientContactHistory }) =>
-          getClientContactHistory(clientId, agentId, 10).catch(() => [])
-      ),
-    ]);
-
-    if (!clientDetail) {
-      console.log('⚠️ 고객을 찾을 수 없음, 빈 상태 처리');
+    if (clientError || !clientData) {
+      console.log('⚠️ 고객을 찾을 수 없음:', clientError?.message);
       return {
         client: null,
         currentUserId: agentId,
@@ -243,43 +216,37 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       };
     }
 
-    console.log('✅ 고객 전체 정보 로드 완료:', {
-      clientName: clientDetail.fullName,
-      hasExtendedDetails: !!clientExtendedDetails,
-      insuranceCount: clientInsuranceList?.length || 0,
-      familyMembersCount: clientFamilyMembers?.length || 0,
-      contactHistoryCount: clientContactHistory?.length || 0,
-    });
-
-    // 🎯 통합 고객 프로필 구성 (실제 데이터 병합)
-    const enhancedClient = {
-      // 기본 정보
-      ...clientDetail,
-
-      // 실제 확장 정보 병합
-      extendedDetails: clientExtendedDetails,
-      insurance: clientInsuranceList || [],
-      familyMembers: clientFamilyMembers || [],
-      contactHistory: clientContactHistory || [],
-
-      // 계산된 필드들 (실제 데이터 기반)
-      referralCount: 0, // TODO: app_client_referrals 연동 시 구현
-      insuranceTypes:
-        clientInsuranceList?.map((insurance) => insurance.insuranceType) || [],
-      totalPremium:
-        clientInsuranceList?.reduce(
-          (sum, insurance) => sum + parseFloat(insurance.premium || '0'),
-          0
-        ) || 0,
-      engagementScore: 5, // TODO: app_client_analytics 연동 시 구현
-      conversionProbability: 75, // TODO: app_client_analytics 연동 시 구현
-      lifetimeValue: 5000000, // TODO: app_client_analytics 연동 시 구현
-      lastContactDate:
-        clientContactHistory?.[0]?.createdAt || clientDetail.updatedAt,
+    // 필드명을 camelCase로 변환
+    const client = {
+      id: clientData.id,
+      agentId: clientData.agent_id,
+      teamId: clientData.team_id,
+      fullName: clientData.full_name,
+      email: clientData.email,
+      phone: clientData.phone,
+      telecomProvider: clientData.telecom_provider,
+      address: clientData.address,
+      occupation: clientData.occupation,
+      hasDrivingLicense: clientData.has_driving_license,
+      height: clientData.height,
+      weight: clientData.weight,
+      tags: clientData.tags,
+      importance: clientData.importance,
+      currentStageId: clientData.current_stage_id,
+      referredById: clientData.referred_by_id,
+      notes: clientData.notes,
+      customFields: clientData.custom_fields,
+      isActive: clientData.is_active,
+      createdAt: clientData.created_at,
+      updatedAt: clientData.updated_at,
     };
 
+    console.log('✅ 고객 정보 로드 완료:', {
+      clientName: client.fullName,
+    });
+
     return {
-      client: enhancedClient,
+      client: client,
       currentUserId: agentId,
       currentUser: {
         id: user.id,
@@ -333,6 +300,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
   const [showOpportunityModal, setShowOpportunityModal] = useState(false);
   const [isCreatingOpportunity, setIsCreatingOpportunity] = useState(false);
   const [showSaveSuccessModal, setShowSaveSuccessModal] = useState(false);
+  const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorModalContent, setErrorModalContent] = useState({
     title: '',
@@ -357,6 +325,162 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
     gender: '' as 'male' | 'female' | '',
   });
   const navigate = useNavigate();
+
+  // 🎨 중요도별 은은한 색상 스타일 (왼쪽 보더 제거)
+  const getClientCardStyle = (importance: string) => {
+    switch (importance) {
+      case 'high':
+        return {
+          bgGradient:
+            'bg-gradient-to-br from-orange-50/50 to-white dark:from-orange-950/20 dark:to-background',
+          borderClass: 'client-card-vip', // VIP 전용 애니메이션 클래스
+        };
+      case 'medium':
+        return {
+          bgGradient:
+            'bg-gradient-to-br from-blue-50/50 to-white dark:from-blue-950/20 dark:to-background',
+          borderClass: 'client-card-normal', // 일반 고객 은은한 효과
+        };
+      case 'low':
+        return {
+          bgGradient:
+            'bg-gradient-to-br from-muted/30 to-white dark:from-muted/10 dark:to-background',
+          borderClass: '', // 효과 없음
+        };
+      default:
+        return {
+          bgGradient:
+            'bg-gradient-to-br from-muted/30 to-white dark:from-muted/10 dark:to-background',
+          borderClass: '',
+        };
+    }
+  };
+
+  const cardStyle = getClientCardStyle(client?.importance || 'medium');
+
+  // 🎯 빈 상태 처리
+  if (isEmpty || !client) {
+    return (
+      <MainLayout title="고객 상세">
+        <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+          <div className="text-6xl">🔍</div>
+          {error ? (
+            <>
+              <h2 className="text-2xl font-semibold">오류가 발생했습니다</h2>
+              <p className="text-muted-foreground text-center max-w-md">
+                {error}
+              </p>
+            </>
+          ) : (
+            <>
+              <h2 className="text-2xl font-semibold">
+                고객을 찾을 수 없습니다
+              </h2>
+              <p className="text-muted-foreground text-center max-w-md">
+                요청하신 고객 정보가 존재하지 않거나 접근 권한이 없습니다.
+              </p>
+            </>
+          )}
+          <Link to="/clients">
+            <Button variant="outline">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              고객 목록으로 돌아가기
+            </Button>
+          </Link>
+        </div>
+      </MainLayout>
+    );
+  }
+
+  const handleDeleteClient = async () => {
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteClient = async () => {
+    setIsDeleting(true);
+    try {
+      console.log('📞 고객 삭제 API 호출 시작:', {
+        clientId: client.id,
+        agentId: client.agentId,
+      });
+
+      console.log('🔍 클라이언트 정보 확인:', {
+        client: {
+          id: client.id,
+          fullName: client.fullName,
+          agentId: client.agentId,
+          isActive: client.isActive,
+        },
+      });
+
+      // 🎯 Supabase 클라이언트를 사용하여 직접 삭제 (soft delete)
+      const { createServerClient } = await import('~/lib/core/supabase');
+      const supabase = createServerClient();
+
+      const { error: deleteError } = await supabase
+        .from('app_client_profiles')
+        .update({
+          is_active: false,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', client.id)
+        .eq('agent_id', client.agentId);
+
+      if (deleteError) {
+        throw new Error(deleteError.message);
+      }
+
+      console.log('✅ 고객 삭제 완료');
+      setShowDeleteSuccessModal(true);
+
+      // 모달이 닫힌 후 고객 목록으로 이동
+      setTimeout(() => {
+        navigate('/clients');
+      }, 2500); // 모달 표시 시간을 위해 약간의 지연
+    } catch (error) {
+      console.error('❌ 고객 삭제 실패:', error);
+      console.error(
+        '❌ 에러 스택:',
+        error instanceof Error ? error.stack : 'No stack trace'
+      );
+
+      showError(
+        '고객 삭제 실패',
+        `고객 삭제에 실패했습니다.\n\n${
+          error instanceof Error
+            ? error.message
+            : '알 수 없는 오류가 발생했습니다.'
+        }`
+      );
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteModal(false);
+    }
+  };
+
+  const getImportanceBadge = (importance: string) => {
+    // 🎨 중요도별 통일된 색상 시스템 (CSS 변수 사용)
+    const importanceStyles = {
+      high: 'border bg-[var(--importance-high-badge-bg)] text-[var(--importance-high-badge-text)] border-[var(--importance-high-border)]',
+      medium:
+        'border bg-[var(--importance-medium-badge-bg)] text-[var(--importance-medium-badge-text)] border-[var(--importance-medium-border)]',
+      low: 'border bg-[var(--importance-low-badge-bg)] text-[var(--importance-low-badge-text)] border-[var(--importance-low-border)]',
+    };
+
+    const importanceText = {
+      high: 'VIP',
+      medium: '일반',
+      low: '관심',
+    };
+
+    const style =
+      importanceStyles[importance as keyof typeof importanceStyles] ||
+      importanceStyles.medium;
+    const text =
+      importanceText[importance as keyof typeof importanceText] || importance;
+
+    return <Badge className={style}>{text}</Badge>;
+  };
 
   // 수정 모드 진입
   const handleEditStart = () => {
@@ -614,42 +738,58 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
             : basicClientData.telecomProvider,
       };
 
-      // 🎯 기존 API 사용 - Supabase 직접 호출 제거
-      const { updateClient } = await import('~/api/shared/clients');
-
-      // 🔒 SSN 암호화 처리 (보안 패치)
-      let encryptedSSN = null;
-      if (ssn && ssn.length === 14) {
-        try {
-          encryptedSSN = btoa(ssn); // Base64 인코딩 (기본 보안)
-        } catch (encryptError) {
-          encryptedSSN = null;
-        }
-      }
-
       // 전체 데이터 구성
       const updateData = {
         ...processedBasicData,
         // 민감정보 포함
-        ssn: encryptedSSN,
+        ssn: ssn,
         birthDate: editFormData.birthDate || null,
         gender: editFormData.gender || null,
       };
 
-      // API 호출
-      const result = await updateClient(client.id, updateData, client.agentId);
+      // Supabase 클라이언트를 사용하여 직접 업데이트
+      const { createServerClient } = await import('~/lib/core/supabase');
+      const supabase = createServerClient();
 
-      if (result.success) {
-        setShowSaveSuccessModal(true);
-        setIsEditing(false);
+      // snake_case 필드명으로 변환
+      const dbUpdateData: any = {};
+      if (updateData.fullName) dbUpdateData.full_name = updateData.fullName;
+      if (updateData.phone) dbUpdateData.phone = updateData.phone;
+      if (updateData.email !== undefined) dbUpdateData.email = updateData.email;
+      if (updateData.telecomProvider !== undefined)
+        dbUpdateData.telecom_provider = updateData.telecomProvider;
+      if (updateData.address !== undefined)
+        dbUpdateData.address = updateData.address;
+      if (updateData.occupation !== undefined)
+        dbUpdateData.occupation = updateData.occupation;
+      if (updateData.height !== undefined)
+        dbUpdateData.height = updateData.height;
+      if (updateData.weight !== undefined)
+        dbUpdateData.weight = updateData.weight;
+      if (updateData.hasDrivingLicense !== undefined)
+        dbUpdateData.has_driving_license = updateData.hasDrivingLicense;
+      if (updateData.importance)
+        dbUpdateData.importance = updateData.importance;
+      if (updateData.notes !== undefined) dbUpdateData.notes = updateData.notes;
+      dbUpdateData.updated_at = new Date().toISOString();
 
-        // 페이지 새로고침으로 최신 데이터 반영 (모달 닫힌 후 실행하도록 지연)
-        setTimeout(() => {
-          window.location.reload();
-        }, 2000);
-      } else {
-        throw new Error(result.message || '고객 정보 업데이트에 실패했습니다.');
+      const { error: updateError } = await supabase
+        .from('app_client_profiles')
+        .update(dbUpdateData)
+        .eq('id', client.id)
+        .eq('agent_id', client.agentId);
+
+      if (updateError) {
+        throw new Error(updateError.message);
       }
+
+      setShowSaveSuccessModal(true);
+      setIsEditing(false);
+
+      // 페이지 새로고침으로 최신 데이터 반영 (모달 닫힌 후 실행하도록 지연)
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
     } catch (error) {
       let errorMessage = '고객 정보 업데이트에 실패했습니다.';
 
@@ -691,30 +831,30 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
         notesLength: sanitizedData.notes.length,
       });
 
-      // 1. 파이프라인 단계 조회 (안전한 에러 처리)
+      // 1. 파이프라인 단계 조회 (API route 사용)
       console.log('📋 파이프라인 단계 조회 시작');
 
-      // 🎯 동적 import로 순환 의존성 방지
-      const pipelineModule = await import(
-        '~/features/pipeline/lib/supabase-pipeline-data'
-      );
+      const stagesResponse = await fetch('/api/pipeline/stages', {
+        method: 'GET',
+      });
 
-      let stages: any[] = [];
-      try {
-        const stagesResult = await pipelineModule.getPipelineStages(
-          client.agentId
-        );
-        stages = Array.isArray(stagesResult) ? stagesResult : [];
-        console.log('📋 파이프라인 단계 조회 성공:', stages.length, '개');
-      } catch (stageError) {
-        console.error('❌ 파이프라인 단계 조회 실패:', stageError);
+      if (!stagesResponse.ok) {
+        throw new Error('파이프라인 단계를 조회할 수 없습니다.');
+      }
+
+      const stagesResult = await stagesResponse.json();
+
+      if (!stagesResult.success || !Array.isArray(stagesResult.data)) {
         throw new Error(
           '파이프라인 단계를 조회할 수 없습니다. 파이프라인을 먼저 설정해주세요.'
         );
       }
 
+      const stages = stagesResult.data;
+      console.log('📋 파이프라인 단계 조회 성공:', stages.length, '개');
+
       // 🔧 안전성 검사: stages 배열 유효성 확인 (강화)
-      if (!Array.isArray(stages) || stages.length === 0) {
+      if (stages.length === 0) {
         throw new Error(
           '파이프라인 단계가 설정되지 않았습니다. 먼저 파이프라인을 설정해주세요.'
         );
@@ -724,9 +864,11 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
       let firstStage = null;
       try {
         firstStage =
-          stages.find((s) => s?.name === '첫 상담') ||
-          stages.find((s) => s?.name?.includes && s.name.includes('상담')) ||
-          stages.find((s) => s?.id) || // id가 있는 첫 번째 단계
+          stages.find((s: any) => s?.name === '첫 상담') ||
+          stages.find(
+            (s: any) => s?.name?.includes && s.name.includes('상담')
+          ) ||
+          stages.find((s: any) => s?.id) || // id가 있는 첫 번째 단계
           null;
       } catch (findError) {
         console.error('❌ 단계 찾기 에러:', findError);
@@ -739,11 +881,8 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
 
       console.log('🎯 선택된 파이프라인 단계:', firstStage.name);
 
-      // 2. 고객 메모 업데이트 (더 안전한 방식)
+      // 2. 고객 메모 업데이트 (API route 사용)
       console.log('📝 고객 메모 업데이트 시작');
-
-      // 🎯 동적 import로 순환 의존성 방지
-      const clientsModule = await import('~/api/shared/clients');
 
       // 영업 기회 메모 생성 (안전한 문자열 처리)
       const opportunityNotes = `[${getInsuranceTypeName(
@@ -753,36 +892,50 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
       const existingNotes = client.notes ? String(client.notes) : '';
       const currentDate = new Date().toLocaleDateString('ko-KR');
 
-      const updateData = {
-        notes: existingNotes
+      const memoUpdateData = new FormData();
+      memoUpdateData.append(
+        'notes',
+        existingNotes
           ? `${existingNotes}\n\n--- 새 영업 기회 (${currentDate}) ---\n${opportunityNotes}`
-          : opportunityNotes,
-      };
+          : opportunityNotes
+      );
 
-      let updateResult = null;
       try {
-        updateResult = await clientsModule.updateClient(
-          client.id,
-          updateData,
-          client.agentId
+        const memoResponse = await fetch(
+          `/api/clients/update?clientId=${client.id}`,
+          {
+            method: 'POST',
+            body: memoUpdateData,
+          }
         );
+
+        const memoResult = await memoResponse.json();
+        if (!memoResult.success) {
+          console.warn('⚠️ 메모 업데이트 실패, 계속 진행:', memoResult.message);
+        }
       } catch (updateError) {
         console.warn('⚠️ 메모 업데이트 실패, 계속 진행:', updateError);
         // 메모 업데이트 실패는 전체 프로세스를 중단하지 않음
       }
 
-      // 3. 고객 단계를 첫 상담으로 변경
+      // 3. 고객 단계를 첫 상담으로 변경 (API route 사용)
       console.log('🔄 고객 단계 변경 시작:', firstStage.name);
 
-      const stageResult = await clientsModule.updateClientStage(
-        client.id,
-        firstStage.id,
-        client.agentId
+      const stageUpdateData = new FormData();
+      stageUpdateData.append('targetStageId', firstStage.id);
+
+      const stageResponse = await fetch(
+        `/api/clients/stage?clientId=${client.id}`,
+        {
+          method: 'POST',
+          body: stageUpdateData,
+        }
       );
+
+      const stageResult = await stageResponse.json();
 
       if (stageResult?.success) {
         console.log('✅ 영업 기회 생성 완료');
-        // alert를 커스텀 성공 모달로 교체할 수 있지만, 현재는 기존 로직 유지
         alert(
           `🎉 ${client.fullName} 고객의 새 영업 기회가 생성되었습니다!\n\n` +
             `📋 상품: ${getInsuranceTypeName(sanitizedData.insuranceType)}\n` +
@@ -840,167 +993,8 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
     return typeMap[type] || type;
   };
 
-  // 🎨 중요도별 은은한 색상 스타일 (왼쪽 보더 제거)
-  const getClientCardStyle = (importance: string) => {
-    switch (importance) {
-      case 'high':
-        return {
-          bgGradient:
-            'bg-gradient-to-br from-orange-50/50 to-white dark:from-orange-950/20 dark:to-background',
-          borderClass: 'client-card-vip', // VIP 전용 애니메이션 클래스
-        };
-      case 'medium':
-        return {
-          bgGradient:
-            'bg-gradient-to-br from-blue-50/50 to-white dark:from-blue-950/20 dark:to-background',
-          borderClass: 'client-card-normal', // 일반 고객 은은한 효과
-        };
-      case 'low':
-        return {
-          bgGradient:
-            'bg-gradient-to-br from-muted/30 to-white dark:from-muted/10 dark:to-background',
-          borderClass: '', // 효과 없음
-        };
-      default:
-        return {
-          bgGradient:
-            'bg-gradient-to-br from-muted/30 to-white dark:from-muted/10 dark:to-background',
-          borderClass: '',
-        };
-    }
-  };
-
-  const cardStyle = getClientCardStyle(client.importance);
-
-  // 🎯 빈 상태 처리
-  if (isEmpty || !client) {
-    return (
-      <MainLayout title="고객 상세">
-        <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-          <div className="text-6xl">🔍</div>
-          {error ? (
-            <>
-              <h2 className="text-2xl font-semibold">오류가 발생했습니다</h2>
-              <p className="text-muted-foreground text-center max-w-md">
-                {error}
-              </p>
-            </>
-          ) : (
-            <>
-              <h2 className="text-2xl font-semibold">
-                고객을 찾을 수 없습니다
-              </h2>
-              <p className="text-muted-foreground text-center max-w-md">
-                요청하신 고객 정보가 존재하지 않거나 접근 권한이 없습니다.
-              </p>
-            </>
-          )}
-          <Link to="/clients">
-            <Button variant="outline">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              고객 목록으로 돌아가기
-            </Button>
-          </Link>
-        </div>
-      </MainLayout>
-    );
-  }
-
-  const handleDeleteClient = async () => {
-    setShowDeleteModal(true);
-  };
-
-  const confirmDeleteClient = async () => {
-    setIsDeleting(true);
-    try {
-      console.log('📞 고객 삭제 API 호출 시작:', {
-        clientId: client.id,
-        agentId: client.agentId,
-      });
-
-      console.log('🔍 클라이언트 정보 확인:', {
-        client: {
-          id: client.id,
-          fullName: client.fullName,
-          agentId: client.agentId,
-          isActive: client.isActive,
-        },
-      });
-
-      // 🎯 HTTP API 호출로 변경 (동적 import 제거)
-      const formData = new FormData();
-      formData.append('clientId', client.id);
-      formData.append('agentId', client.agentId);
-
-      const response = await fetch('/api/clients/delete', {
-        method: 'POST',
-        body: formData,
-      });
-
-      const result = await response.json();
-
-      console.log('📋 deleteClient 결과:', {
-        success: result.success,
-        message: result.message,
-        warnings: result.warnings,
-        data: result.data,
-      });
-
-      if (result.success) {
-        console.log('✅ 고객 삭제 완료');
-        alert('고객이 성공적으로 삭제되었습니다.');
-        navigate('/clients');
-      } else {
-        console.error('❌ API 응답 실패:', result.message);
-        throw new Error(result.message || '삭제에 실패했습니다.');
-      }
-    } catch (error) {
-      console.error('❌ 고객 삭제 실패:', error);
-      console.error(
-        '❌ 에러 스택:',
-        error instanceof Error ? error.stack : 'No stack trace'
-      );
-
-      showError(
-        '고객 삭제 실패',
-        `고객 삭제에 실패했습니다.\n\n${
-          error instanceof Error
-            ? error.message
-            : '알 수 없는 오류가 발생했습니다.'
-        }`
-      );
-    } finally {
-      setIsDeleting(false);
-      setShowDeleteModal(false);
-    }
-  };
-
-  const getImportanceBadge = (importance: string) => {
-    // 🎨 중요도별 통일된 색상 시스템 (CSS 변수 사용)
-    const importanceStyles = {
-      high: 'border bg-[var(--importance-high-badge-bg)] text-[var(--importance-high-badge-text)] border-[var(--importance-high-border)]',
-      medium:
-        'border bg-[var(--importance-medium-badge-bg)] text-[var(--importance-medium-badge-text)] border-[var(--importance-medium-border)]',
-      low: 'border bg-[var(--importance-low-badge-bg)] text-[var(--importance-low-badge-text)] border-[var(--importance-low-border)]',
-    };
-
-    const importanceText = {
-      high: 'VIP',
-      medium: '일반',
-      low: '관심',
-    };
-
-    const style =
-      importanceStyles[importance as keyof typeof importanceStyles] ||
-      importanceStyles.medium;
-    const text =
-      importanceText[importance as keyof typeof importanceText] || importance;
-
-    return <Badge className={style}>{text}</Badge>;
-  };
-
   return (
-    <MainLayout title={`${client.fullName} - 고객 상세`}>
+    <MainLayout title={`${client?.fullName || '고객'} - 고객 상세`}>
       <div className="space-y-6">
         {/* 🎯 헤더 섹션 */}
         <div className="flex items-center justify-between">
@@ -1109,10 +1103,10 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                   ) : (
                     <>
                       <CardTitle className="text-xl">
-                        {client.fullName}
+                        {client?.fullName || '고객'}
                       </CardTitle>
                       <div className="flex justify-center">
-                        {getImportanceBadge(client.importance)}
+                        {getImportanceBadge(client?.importance || 'medium')}
                       </div>
                     </>
                   )}
@@ -1136,7 +1130,9 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                           className="text-sm"
                         />
                       ) : (
-                        <span className="text-sm">{client.phone}</span>
+                        <span className="text-sm">
+                          {client?.phone || '정보 없음'}
+                        </span>
                       )}
                     </div>
 
@@ -1158,7 +1154,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                         />
                       ) : (
                         <span className="text-sm">
-                          {client.email || (
+                          {client?.email || (
                             <span
                               className="text-muted-foreground italic cursor-pointer hover:text-foreground transition-colors"
                               onClick={handleEditStart}
@@ -1188,7 +1184,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                         />
                       ) : (
                         <span className="text-sm leading-relaxed">
-                          {client.address || (
+                          {client?.address || (
                             <span
                               className="text-muted-foreground italic cursor-pointer hover:text-foreground transition-colors"
                               onClick={handleEditStart}
@@ -1218,7 +1214,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                         />
                       ) : (
                         <span className="text-sm">
-                          {client.occupation || (
+                          {client?.occupation || (
                             <span
                               className="text-muted-foreground italic cursor-pointer hover:text-foreground transition-colors"
                               onClick={handleEditStart}
@@ -1268,7 +1264,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                           <span className="text-xs text-muted-foreground mr-2">
                             통신사
                           </span>
-                          {client.telecomProvider || (
+                          {client?.telecomProvider || (
                             <span
                               className="text-muted-foreground italic cursor-pointer hover:text-foreground transition-colors"
                               onClick={handleEditStart}
@@ -1291,9 +1287,9 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                       variant="outline"
                       className="w-full justify-center h-10 text-md font-semibold"
                     >
-                      {client.currentStage?.name || '미설정'}
+                      {client?.currentStage?.name || '미설정'}
                     </Badge>
-                    {!client.currentStage?.name && (
+                    {!client?.currentStage?.name && (
                       <div className="text-xs text-muted-foreground bg-muted/20 p-2 rounded border-l-2 border-muted-foreground/30">
                         💡 <strong>미설정</strong>은 아직 영업 파이프라인에
                         진입하지 않은 상태입니다. "새 영업 기회" 버튼을 눌러
@@ -1457,7 +1453,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                           placeholder="170"
                           className="text-sm"
                         />
-                      ) : client.height ? (
+                      ) : client?.height ? (
                         <span className="text-sm">{client.height}cm</span>
                       ) : (
                         <span
@@ -1493,7 +1489,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                           placeholder="70"
                           className="text-sm"
                         />
-                      ) : client.weight ? (
+                      ) : client?.weight ? (
                         <span className="text-sm">{client.weight}kg</span>
                       ) : (
                         <span
@@ -1563,11 +1559,11 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                       ) : (
                         <Badge
                           variant={
-                            client.hasDrivingLicense ? 'default' : 'secondary'
+                            client?.hasDrivingLicense ? 'default' : 'secondary'
                           }
                           className="text-xs"
                         >
-                          {client.hasDrivingLicense !== undefined
+                          {client?.hasDrivingLicense !== undefined
                             ? client.hasDrivingLicense
                               ? '운전 가능'
                               : '운전 불가'
@@ -1727,7 +1723,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                         <div className="text-xs text-muted-foreground mb-1">
                           이 고객을 소개한 사람
                         </div>
-                        {client.referredBy ? (
+                        {client?.referredBy ? (
                           <div className="flex items-center gap-2">
                             <Link
                               to={`/clients/${client.referredBy.id}`}
@@ -1759,7 +1755,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                         <div className="text-xs text-muted-foreground mb-1">
                           이 고객이 소개한 사람들
                         </div>
-                        {client.referralCount && client.referralCount > 0 ? (
+                        {client?.referralCount && client.referralCount > 0 ? (
                           <div className="space-y-2">
                             <div className="flex items-center gap-2 mb-2">
                               <span className="text-sm font-medium">
@@ -1828,7 +1824,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                         placeholder="고객에 대한 메모를 입력하세요..."
                         className="min-h-[120px] resize-none"
                       />
-                    ) : client.notes ? (
+                    ) : client?.notes ? (
                       <div className="p-4 bg-muted/20 rounded-lg border">
                         <p className="text-sm whitespace-pre-wrap leading-relaxed">
                           {client.notes}
@@ -1863,7 +1859,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                   </CardHeader>
                   <CardContent className="p-6">
                     <div className="flex flex-wrap gap-2">
-                      {client.tags && client.tags.length > 0 ? (
+                      {client?.tags && client.tags.length > 0 ? (
                         client.tags.map((tag: string, index: number) => (
                           <Badge key={index} variant="secondary">
                             {tag}
@@ -1886,7 +1882,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                 </Card>
               </TabsContent>
 
-              {/* 나머지 탭들은 간소화 */}
+              {/* 나머지 탭들 */}
               <TabsContent value="insurance" className="space-y-6">
                 <Card>
                   <CardHeader>
@@ -1952,79 +1948,9 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
           isOpen={showOpportunityModal}
           onClose={() => setShowOpportunityModal(false)}
           onConfirm={handleCreateOpportunity}
-          clientName={client.fullName}
+          clientName={client?.fullName || '고객'}
           isLoading={isCreatingOpportunity}
         />
-
-        {/* 🎉 저장 성공 모달 */}
-        <Dialog
-          open={showSaveSuccessModal}
-          onOpenChange={setShowSaveSuccessModal}
-        >
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader className="text-center">
-              <div className="mx-auto w-16 h-16 bg-muted/20 rounded-full flex items-center justify-center mb-4">
-                <CheckCircle className="h-8 w-8 text-foreground" />
-              </div>
-              <DialogTitle className="text-xl font-semibold">
-                고객 정보가 성공적으로 저장되었습니다
-              </DialogTitle>
-            </DialogHeader>
-
-            <div className="text-center space-y-3 mt-4">
-              <DialogDescription className="text-sm text-muted-foreground">
-                <span className="font-medium text-foreground">
-                  {client.fullName}
-                </span>{' '}
-                고객의 정보가 안전하게 업데이트되었습니다.
-              </DialogDescription>
-
-              <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground bg-muted/20 px-3 py-2 rounded-lg border border-border">
-                <Shield className="h-3 w-3" />
-                민감정보는 암호화되어 보관됩니다
-              </div>
-            </div>
-
-            <div className="flex justify-center mt-6">
-              <Button
-                onClick={() => setShowSaveSuccessModal(false)}
-                className="px-8"
-              >
-                확인
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-
-        {/* ❌ 에러 모달 */}
-        <Dialog open={showErrorModal} onOpenChange={setShowErrorModal}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader className="text-center">
-              <div className="mx-auto w-16 h-16 bg-muted/20 rounded-full flex items-center justify-center mb-4">
-                <X className="h-8 w-8 text-muted-foreground" />
-              </div>
-              <DialogTitle className="text-xl font-semibold text-foreground">
-                {errorModalContent.title}
-              </DialogTitle>
-            </DialogHeader>
-
-            <div className="text-center space-y-3 mt-4">
-              <DialogDescription className="text-sm text-muted-foreground whitespace-pre-line">
-                {errorModalContent.message}
-              </DialogDescription>
-            </div>
-
-            <div className="flex justify-center mt-6">
-              <Button
-                onClick={() => setShowErrorModal(false)}
-                variant="outline"
-                className="px-8"
-              >
-                확인
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
 
         {/* 🗑️ 삭제 확인 모달 */}
         <DeleteConfirmationModal
@@ -2032,12 +1958,98 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
           onClose={() => setShowDeleteModal(false)}
           onConfirm={confirmDeleteClient}
           title="고객 삭제 확인"
-          description={`정말로 "${client?.fullName}" 고객을 삭제하시겠습니까?`}
+          description={`정말로 "${
+            client?.fullName || '고객'
+          }" 고객을 삭제하시겠습니까?`}
           itemName={client?.fullName}
           itemType="고객"
           warningMessage="이 고객과 관련된 모든 데이터(보험 정보, 미팅 기록, 연락 이력 등)가 함께 삭제됩니다."
           isLoading={isDeleting}
         />
+
+        {/* 💾 저장 성공 모달 */}
+        <Dialog
+          open={showSaveSuccessModal}
+          onOpenChange={setShowSaveSuccessModal}
+        >
+          <DialogContent className="max-w-md">
+            <div className="text-center space-y-4">
+              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+                <CheckCircle className="h-6 w-6 text-green-600" />
+              </div>
+              <DialogHeader>
+                <DialogTitle>저장 완료</DialogTitle>
+                <DialogDescription>
+                  고객 정보가 성공적으로 업데이트되었습니다.
+                </DialogDescription>
+              </DialogHeader>
+              <Button
+                onClick={() => setShowSaveSuccessModal(false)}
+                className="w-full"
+              >
+                확인
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* 🗑️ 삭제 성공 모달 */}
+        <Dialog
+          open={showDeleteSuccessModal}
+          onOpenChange={setShowDeleteSuccessModal}
+        >
+          <DialogContent className="max-w-md">
+            <div className="text-center space-y-4">
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto">
+                <CheckCircle className="h-6 w-6 text-red-600" />
+              </div>
+              <DialogHeader>
+                <DialogTitle>삭제 완료</DialogTitle>
+                <DialogDescription>
+                  '{client?.fullName || '고객'}' 고객이 성공적으로
+                  삭제되었습니다.
+                  <br />
+                  <span className="text-sm text-muted-foreground mt-2 block">
+                    잠시 후 고객 목록으로 이동합니다.
+                  </span>
+                </DialogDescription>
+              </DialogHeader>
+              <Button
+                onClick={() => {
+                  setShowDeleteSuccessModal(false);
+                  navigate('/clients');
+                }}
+                className="w-full bg-red-600 hover:bg-red-700"
+              >
+                고객 목록으로 이동
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* ❌ 에러 모달 */}
+        <Dialog open={showErrorModal} onOpenChange={setShowErrorModal}>
+          <DialogContent className="max-w-md">
+            <div className="text-center space-y-4">
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto">
+                <X className="h-6 w-6 text-red-600" />
+              </div>
+              <DialogHeader>
+                <DialogTitle>{errorModalContent.title}</DialogTitle>
+                <DialogDescription className="text-left whitespace-pre-wrap">
+                  {errorModalContent.message}
+                </DialogDescription>
+              </DialogHeader>
+              <Button
+                onClick={() => setShowErrorModal(false)}
+                variant="outline"
+                className="w-full"
+              >
+                확인
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </MainLayout>
   );
