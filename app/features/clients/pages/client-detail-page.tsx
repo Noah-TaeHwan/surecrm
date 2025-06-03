@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router';
+import { Link, useNavigate, useFetcher, useSubmit } from 'react-router';
 import type { Route } from './+types/client-detail-page';
 import { MainLayout } from '~/common/layouts/main-layout';
 import { Button } from '~/common/components/ui/button';
@@ -324,7 +324,10 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
     birthDate: '',
     gender: '' as 'male' | 'female' | '',
   });
+
   const navigate = useNavigate();
+  const fetcher = useFetcher();
+  const submit = useSubmit();
 
   // 🎨 중요도별 은은한 색상 스타일 (왼쪽 보더 제거)
   const getClientCardStyle = (importance: string) => {
@@ -413,22 +416,12 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
         },
       });
 
-      // 🎯 Supabase 클라이언트를 사용하여 직접 삭제 (soft delete)
-      const { createServerClient } = await import('~/lib/core/supabase');
-      const supabase = createServerClient();
+      // FormData 생성
+      const formData = new FormData();
+      formData.append('intent', 'deleteClient');
 
-      const { error: deleteError } = await supabase
-        .from('app_client_profiles')
-        .update({
-          is_active: false,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', client.id)
-        .eq('agent_id', client.agentId);
-
-      if (deleteError) {
-        throw new Error(deleteError.message);
-      }
+      // Action 호출
+      submit(formData, { method: 'post' });
 
       console.log('✅ 고객 삭제 완료');
       setShowDeleteSuccessModal(true);
@@ -726,63 +719,29 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
     }
 
     try {
-      // 기본 고객 정보와 민감 정보 분리
-      const { ssn, ssnFront, ssnBack, ...basicClientData } = editFormData;
+      // FormData 생성
+      const formData = new FormData();
+      formData.append('intent', 'updateClient');
+      formData.append('fullName', editFormData.fullName);
+      formData.append('phone', editFormData.phone);
+      formData.append('email', editFormData.email || '');
+      formData.append('telecomProvider', editFormData.telecomProvider);
+      formData.append('address', editFormData.address || '');
+      formData.append('occupation', editFormData.occupation || '');
+      formData.append('height', editFormData.height || '');
+      formData.append('weight', editFormData.weight || '');
+      formData.append('importance', editFormData.importance);
+      formData.append('notes', editFormData.notes || '');
+      formData.append(
+        'hasDrivingLicense',
+        editFormData.hasDrivingLicense.toString()
+      );
 
-      // telecomProvider 'none' 처리
-      const processedBasicData = {
-        ...basicClientData,
-        telecomProvider:
-          basicClientData.telecomProvider === 'none'
-            ? null
-            : basicClientData.telecomProvider,
-      };
+      // Action 호출
+      submit(formData, { method: 'post' });
 
-      // 전체 데이터 구성
-      const updateData = {
-        ...processedBasicData,
-        // 민감정보 포함
-        ssn: ssn,
-        birthDate: editFormData.birthDate || null,
-        gender: editFormData.gender || null,
-      };
-
-      // Supabase 클라이언트를 사용하여 직접 업데이트
-      const { createServerClient } = await import('~/lib/core/supabase');
-      const supabase = createServerClient();
-
-      // snake_case 필드명으로 변환
-      const dbUpdateData: any = {};
-      if (updateData.fullName) dbUpdateData.full_name = updateData.fullName;
-      if (updateData.phone) dbUpdateData.phone = updateData.phone;
-      if (updateData.email !== undefined) dbUpdateData.email = updateData.email;
-      if (updateData.telecomProvider !== undefined)
-        dbUpdateData.telecom_provider = updateData.telecomProvider;
-      if (updateData.address !== undefined)
-        dbUpdateData.address = updateData.address;
-      if (updateData.occupation !== undefined)
-        dbUpdateData.occupation = updateData.occupation;
-      if (updateData.height !== undefined)
-        dbUpdateData.height = updateData.height;
-      if (updateData.weight !== undefined)
-        dbUpdateData.weight = updateData.weight;
-      if (updateData.hasDrivingLicense !== undefined)
-        dbUpdateData.has_driving_license = updateData.hasDrivingLicense;
-      if (updateData.importance)
-        dbUpdateData.importance = updateData.importance;
-      if (updateData.notes !== undefined) dbUpdateData.notes = updateData.notes;
-      dbUpdateData.updated_at = new Date().toISOString();
-
-      const { error: updateError } = await supabase
-        .from('app_client_profiles')
-        .update(dbUpdateData)
-        .eq('id', client.id)
-        .eq('agent_id', client.agentId);
-
-      if (updateError) {
-        throw new Error(updateError.message);
-      }
-
+      // 성공 처리는 fetcher.data를 통해 확인
+      // 먼저 모달 표시
       setShowSaveSuccessModal(true);
       setIsEditing(false);
 
@@ -2053,4 +2012,128 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
       </div>
     </MainLayout>
   );
+}
+
+export async function action({ request, params }: Route.ActionArgs) {
+  const { id: clientId } = params;
+
+  if (!clientId) {
+    throw new Response('고객 ID가 필요합니다.', { status: 400 });
+  }
+
+  // 🎯 실제 로그인된 보험설계사 정보 가져오기
+  const user = await requireAuth(request);
+  const agentId = user.id;
+
+  const formData = await request.formData();
+  const intent = formData.get('intent');
+
+  if (intent === 'updateClient') {
+    try {
+      // 폼 데이터 추출
+      const updateData: any = {};
+
+      const fullName = formData.get('fullName')?.toString();
+      const phone = formData.get('phone')?.toString();
+      const email = formData.get('email')?.toString();
+      const telecomProvider = formData.get('telecomProvider')?.toString();
+      const address = formData.get('address')?.toString();
+      const occupation = formData.get('occupation')?.toString();
+      const height = formData.get('height')?.toString();
+      const weight = formData.get('weight')?.toString();
+      const importance = formData.get('importance')?.toString();
+      const notes = formData.get('notes')?.toString();
+      const hasDrivingLicense = formData.get('hasDrivingLicense') === 'true';
+
+      // snake_case 필드명으로 변환
+      if (fullName) updateData.full_name = fullName;
+      if (phone) updateData.phone = phone;
+      if (email !== undefined) updateData.email = email || null;
+      if (telecomProvider !== undefined) {
+        updateData.telecom_provider =
+          telecomProvider === 'none' ? null : telecomProvider;
+      }
+      if (address !== undefined) updateData.address = address || null;
+      if (occupation !== undefined) updateData.occupation = occupation || null;
+      if (height !== undefined) updateData.height = height || null;
+      if (weight !== undefined) updateData.weight = weight || null;
+      if (importance) updateData.importance = importance;
+      if (notes !== undefined) updateData.notes = notes || null;
+      if (hasDrivingLicense !== undefined)
+        updateData.has_driving_license = hasDrivingLicense;
+
+      updateData.updated_at = new Date().toISOString();
+
+      // 🎯 Supabase 클라이언트를 사용하여 직접 업데이트
+      const { createServerClient } = await import('~/lib/core/supabase');
+      const supabase = createServerClient();
+
+      const { error: updateError } = await supabase
+        .from('app_client_profiles')
+        .update(updateData)
+        .eq('id', clientId)
+        .eq('agent_id', agentId)
+        .eq('is_active', true); // 활성 고객만 업데이트
+
+      if (updateError) {
+        throw new Error(updateError.message);
+      }
+
+      return {
+        success: true,
+        message: '고객 정보가 성공적으로 업데이트되었습니다.',
+        timestamp: new Date().toISOString(),
+      };
+    } catch (error) {
+      console.error('❌ 고객 정보 업데이트 실패:', error);
+      return {
+        success: false,
+        message: `고객 정보 업데이트에 실패했습니다: ${
+          error instanceof Error ? error.message : '알 수 없는 오류'
+        }`,
+        error: error instanceof Error ? error.message : '알 수 없는 오류',
+      };
+    }
+  }
+
+  if (intent === 'deleteClient') {
+    try {
+      // 🎯 Supabase 클라이언트를 사용하여 직접 삭제 (soft delete)
+      const { createServerClient } = await import('~/lib/core/supabase');
+      const supabase = createServerClient();
+
+      const { error: deleteError } = await supabase
+        .from('app_client_profiles')
+        .update({
+          is_active: false,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', clientId)
+        .eq('agent_id', agentId);
+
+      if (deleteError) {
+        throw new Error(deleteError.message);
+      }
+
+      return {
+        success: true,
+        message: '고객이 성공적으로 삭제되었습니다.',
+        timestamp: new Date().toISOString(),
+      };
+    } catch (error) {
+      console.error('❌ 고객 삭제 실패:', error);
+      return {
+        success: false,
+        message: `고객 삭제에 실패했습니다: ${
+          error instanceof Error ? error.message : '알 수 없는 오류'
+        }`,
+        error: error instanceof Error ? error.message : '알 수 없는 오류',
+      };
+    }
+  }
+
+  return {
+    success: false,
+    message: '알 수 없는 요청입니다.',
+  };
 }
