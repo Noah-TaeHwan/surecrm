@@ -7,6 +7,12 @@ import {
 import { Badge } from '~/common/components/ui/badge';
 import { Progress } from '~/common/components/ui/progress';
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '~/common/components/ui/tooltip';
+import {
   TriangleUpIcon,
   TriangleDownIcon,
   ArrowUpIcon,
@@ -15,6 +21,7 @@ import {
   Share1Icon,
   BarChartIcon,
   ActivityLogIcon,
+  QuestionMarkCircledIcon,
 } from '@radix-ui/react-icons';
 import { cn } from '~/lib/utils';
 
@@ -61,7 +68,7 @@ export function PerformanceKPICards({
       change: data.monthlyGrowth.revenue,
       icon: BarChartIcon,
       color: 'warning',
-      description: '계약 전환율',
+      description: '계약 완료 / 전체 고객',
       isPercentage: true,
     },
   ];
@@ -143,94 +150,125 @@ export function PerformanceKPICards({
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      {kpiItems.map((item, index) => {
-        const changeIndicator = getChangeIndicator(item.change);
-        const IconComponent = item.icon;
+    <TooltipProvider>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {kpiItems.map((item, index) => {
+          const changeIndicator = getChangeIndicator(item.change);
+          const IconComponent = item.icon;
 
-        return (
-          <Card
-            key={index}
-            className="hover:shadow-md transition-all duration-200 border-border/50 hover:border-border"
-          >
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-2">
-                  <p className="text-sm font-medium text-muted-foreground">
-                    {item.title}
-                  </p>
-                  <div className="flex items-baseline gap-2">
-                    <p className="text-2xl font-bold text-foreground">
-                      {typeof item.value === 'number' && !item.isPercentage
-                        ? item.value.toLocaleString()
-                        : item.value}
+          return (
+            <Card
+              key={index}
+              className="hover:shadow-md transition-all duration-200 border-border/50 hover:border-border"
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-1">
+                      <p className="text-sm font-medium text-muted-foreground">
+                        {item.title}
+                      </p>
+                      {(item.title === '전환율' ||
+                        item.title === '총 고객 수' ||
+                        item.title === '신규 고객' ||
+                        item.title === '소개 네트워크') && (
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <QuestionMarkCircledIcon className="h-3 w-3 text-muted-foreground hover:text-foreground transition-colors" />
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="max-w-xs">
+                            {item.title === '전환율' && (
+                              <p className="">
+                                전체 고객 대비 '계약 완료' 단계에 있는 고객의
+                                비율입니다.
+                                <br />
+                                증가율: 지난 달 대비 계약 완료 고객 증가율
+                              </p>
+                            )}
+                            {item.title === '총 고객 수' && (
+                              <p className="">
+                                전체 관리 중인 고객의 수입니다.
+                                <br />
+                                증가율: 지난 달 대비 신규 고객 증가율
+                              </p>
+                            )}
+                            {item.title === '신규 고객' && (
+                              <p className="">
+                                이번 달에 새로 등록된 고객 수입니다.
+                                <br />
+                                증가율: 지난 달 대비 신규 고객 증가율
+                              </p>
+                            )}
+                            {item.title === '소개 네트워크' && (
+                              <p className="">
+                                총 소개받은 고객의 수입니다.
+                                <br />
+                                증가율: 지난 달 대비 소개 건수 증가율
+                              </p>
+                            )}
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <p className="text-2xl font-bold text-foreground">
+                        {typeof item.value === 'number' && !item.isPercentage
+                          ? item.value.toLocaleString()
+                          : item.value}
+                      </p>
+                      {item.change !== 0 && (
+                        <div
+                          className={cn(
+                            'flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs font-medium',
+                            changeIndicator.bgColor
+                          )}
+                        >
+                          {changeIndicator.icon && (
+                            <changeIndicator.icon
+                              className={cn('h-3 w-3', changeIndicator.color)}
+                            />
+                          )}
+                          <span className={changeIndicator.color}>
+                            {changeIndicator.prefix}
+                            {Math.abs(item.change).toFixed(1)}%
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {item.description}
                     </p>
-                    {item.change !== 0 && (
-                      <div
-                        className={cn(
-                          'flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs font-medium',
-                          changeIndicator.bgColor
-                        )}
-                      >
-                        {changeIndicator.icon && (
-                          <changeIndicator.icon
-                            className={cn('h-3 w-3', changeIndicator.color)}
-                          />
-                        )}
-                        <span className={changeIndicator.color}>
-                          {changeIndicator.prefix}
-                          {Math.abs(item.change).toFixed(1)}%
-                        </span>
-                      </div>
+                  </div>
+                  <div
+                    className={cn(
+                      'flex items-center justify-center h-12 w-12 rounded-lg',
+                      getBackgroundColorClass(item.color)
                     )}
+                  >
+                    <IconComponent
+                      className={cn('h-6 w-6', getIconColorClass(item.color))}
+                    />
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    {item.description}
-                  </p>
                 </div>
-                <div
-                  className={cn(
-                    'flex items-center justify-center h-12 w-12 rounded-lg',
-                    getBackgroundColorClass(item.color)
-                  )}
-                >
-                  <IconComponent
-                    className={cn('h-6 w-6', getIconColorClass(item.color))}
-                  />
-                </div>
-              </div>
 
-              {/* 진행률 표시 (전환율의 경우) */}
-              {item.title === '전환율' && (
-                <div className="mt-4 space-y-2">
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>목표 대비</span>
-                    <span>{data.conversionRate.toFixed(1)}% / 20%</span>
+                {/* 추가 세부 정보 */}
+                {item.title === '총 고객 수' && data.averageClientValue > 0 && (
+                  <div className="mt-4 p-3 bg-muted/20 rounded-lg">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground">
+                        평균 고객 가치
+                      </span>
+                      <span className="font-medium text-foreground">
+                        {(data.averageClientValue / 10000).toFixed(0)}만원
+                      </span>
+                    </div>
                   </div>
-                  <Progress
-                    value={Math.min(data.conversionRate, 20) * 5}
-                    className="h-2"
-                  />
-                </div>
-              )}
-
-              {/* 추가 세부 정보 */}
-              {item.title === '총 고객 수' && data.averageClientValue > 0 && (
-                <div className="mt-4 p-3 bg-muted/20 rounded-lg">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground">
-                      평균 고객 가치
-                    </span>
-                    <span className="font-medium text-foreground">
-                      {(data.averageClientValue / 10000).toFixed(0)}만원
-                    </span>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        );
-      })}
-    </div>
+                )}
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+    </TooltipProvider>
   );
 }
