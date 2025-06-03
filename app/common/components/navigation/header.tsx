@@ -21,6 +21,12 @@ interface HeaderProps {
   className?: string;
   showMenuButton?: boolean;
   onMenuButtonClick?: () => void;
+  currentUser?: {
+    id: string;
+    email: string;
+    name?: string;
+    profileImage?: string;
+  } | null;
 }
 
 // 기본 알림 타입 정의
@@ -38,6 +44,7 @@ export function Header({
   className,
   showMenuButton = false,
   onMenuButtonClick,
+  currentUser,
 }: HeaderProps) {
   const [isLoggingOut, setIsLoggingOut] = React.useState(false);
   const [notifications, setNotifications] = React.useState<BasicNotification[]>(
@@ -313,7 +320,13 @@ export function Header({
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="rounded-full">
               <Avatar className="h-8 w-8">
-                <AvatarFallback className="text-xs">관</AvatarFallback>
+                <AvatarFallback className="text-xs">
+                  {currentUser?.name
+                    ? currentUser.name.charAt(0).toUpperCase()
+                    : currentUser?.email
+                    ? currentUser.email.charAt(0).toUpperCase()
+                    : '사'}
+                </AvatarFallback>
               </Avatar>
               <span className="sr-only">프로필 메뉴</span>
             </Button>
@@ -321,9 +334,11 @@ export function Header({
           <DropdownMenuContent className="w-56" align="end">
             <DropdownMenuLabel>
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium">관리자</p>
+                <p className="text-sm font-medium">
+                  {currentUser?.name || '사용자'}
+                </p>
                 <p className="text-xs text-muted-foreground">
-                  admin@surecrm.com
+                  {currentUser?.email || 'email@example.com'}
                 </p>
               </div>
             </DropdownMenuLabel>

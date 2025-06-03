@@ -297,6 +297,7 @@ export async function loader({ request }: { request: Request }) {
           page: 1,
           totalPages: 0,
         },
+        currentUser: null,
       };
     }
 
@@ -375,6 +376,11 @@ export async function loader({ request }: { request: Request }) {
         totalPages: clientsResponse.totalPages,
       },
       userId: user.id, // 실제 사용자 ID 전달
+      currentUser: {
+        id: user.id,
+        email: user.email,
+        name: user.email.split('@')[0], // 이메일 앞부분을 이름으로 사용
+      },
     };
   } catch (error) {
     console.error('❌ Loader: 데이터 로딩 실패:', error);
@@ -395,6 +401,7 @@ export async function loader({ request }: { request: Request }) {
         page: 1,
         totalPages: 0,
       },
+      currentUser: null,
     };
   }
 }
@@ -1009,7 +1016,7 @@ export default function ClientsPage({ loaderData }: any) {
   );
 
   return (
-    <MainLayout title="고객 관리">
+    <MainLayout title="고객 관리" currentUser={loaderData.currentUser}>
       <div className="space-y-8">
         {/* 🎯 고객 관리 핵심 액션 */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

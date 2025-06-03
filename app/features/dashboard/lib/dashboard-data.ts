@@ -10,6 +10,7 @@ import {
   gte,
   lte,
   sql,
+  ne,
 } from 'drizzle-orm';
 import {
   clients,
@@ -415,7 +416,7 @@ export async function getPipelineData(userId: string) {
       { name: '계약 완료', order: 6 },
     ];
 
-    // 사용자의 파이프라인 단계들을 먼저 조회
+    // 사용자의 파이프라인 단계들을 먼저 조회 (제외됨 단계는 필터링)
     const userStages = await db
       .select({
         id: pipelineStages.id,
@@ -423,7 +424,12 @@ export async function getPipelineData(userId: string) {
         order: pipelineStages.order,
       })
       .from(pipelineStages)
-      .where(eq(pipelineStages.agentId, userId))
+      .where(
+        and(
+          eq(pipelineStages.agentId, userId),
+          ne(pipelineStages.name, '제외됨') // "제외됨" 단계 제외
+        )
+      )
       .orderBy(asc(pipelineStages.order));
 
     // 사용자 단계가 없으면 기본 단계 사용

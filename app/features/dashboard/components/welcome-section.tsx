@@ -6,9 +6,9 @@ import { CalendarIcon, SunIcon, MoonIcon } from '@radix-ui/react-icons';
 interface WelcomeSectionProps {
   userName: string;
   todayStats: {
-    scheduledMeetings: number;
-    pendingTasks: number;
-    newReferrals: number;
+    totalClients: number;
+    totalReferrals: number;
+    monthlyNewClients: number;
   };
 }
 
@@ -74,52 +74,54 @@ export function WelcomeSection({ userName, todayStats }: WelcomeSectionProps) {
           <div className="flex items-center gap-6">
             <div className="text-center">
               <div className="text-2xl font-bold text-primary mb-0.5">
-                {todayStats.scheduledMeetings}
+                {todayStats.totalClients}
               </div>
-              <div className="text-xs text-muted-foreground">활성 고객</div>
+              <div className="text-xs text-muted-foreground">총 고객</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-foreground mb-0.5">
-                {todayStats.pendingTasks}
+                {todayStats.totalReferrals}
               </div>
-              <div className="text-xs text-muted-foreground">소개 대기</div>
+              <div className="text-xs text-muted-foreground">소개 건수</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-foreground mb-0.5">
-                {todayStats.newReferrals}
+                {todayStats.monthlyNewClients}
               </div>
-              <div className="text-xs text-muted-foreground">새 소개</div>
+              <div className="text-xs text-muted-foreground">
+                이번 달 신규 고객
+              </div>
             </div>
           </div>
         </div>
 
-        {(todayStats.scheduledMeetings > 0 ||
-          todayStats.pendingTasks > 0 ||
-          todayStats.newReferrals > 0) && (
+        {(todayStats.totalClients > 0 ||
+          todayStats.totalReferrals > 0 ||
+          todayStats.monthlyNewClients > 0) && (
           <div className="mt-4 pt-3 border-t border-border/30">
             <div className="flex flex-wrap gap-2">
-              {todayStats.scheduledMeetings > 0 && (
+              {todayStats.totalClients > 0 && (
                 <Badge
                   variant="secondary"
                   className="bg-primary/10 text-primary border-primary/20 text-xs"
                 >
-                  👥 활성 고객 {todayStats.scheduledMeetings}명
+                  👤 총 고객 {todayStats.totalClients}명
                 </Badge>
               )}
-              {todayStats.pendingTasks > 0 && (
+              {todayStats.totalReferrals > 0 && (
                 <Badge
                   variant="secondary"
                   className="bg-muted/20 text-muted-foreground border-border/30 text-xs"
                 >
-                  🤝 소개 대기 {todayStats.pendingTasks}건
+                  🔗 소개 건수 {todayStats.totalReferrals}건
                 </Badge>
               )}
-              {todayStats.newReferrals > 0 && (
+              {todayStats.monthlyNewClients > 0 && (
                 <Badge
                   variant="secondary"
                   className="bg-foreground/10 text-foreground border-border/50 text-xs"
                 >
-                  🌟 새로운 소개 {todayStats.newReferrals}건
+                  👤 이번 달 신규 고객 {todayStats.monthlyNewClients}명
                 </Badge>
               )}
             </div>

@@ -9,9 +9,19 @@ import { Menu } from 'lucide-react';
 interface MainLayoutProps {
   children: React.ReactNode;
   title?: string;
+  currentUser?: {
+    id: string;
+    email: string;
+    name?: string;
+    profileImage?: string;
+  } | null;
 }
 
-export function MainLayout({ children, title = '대시보드' }: MainLayoutProps) {
+export function MainLayout({
+  children,
+  title = '대시보드',
+  currentUser,
+}: MainLayoutProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -71,6 +81,7 @@ export function MainLayout({ children, title = '대시보드' }: MainLayoutProps
           title={title}
           showMenuButton={isMobile}
           onMenuButtonClick={() => setIsMobileMenuOpen(true)}
+          currentUser={currentUser}
         />
 
         {/* 메인 콘텐츠 */}

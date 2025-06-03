@@ -85,6 +85,11 @@ export async function loader({ request }: Route.LoaderArgs) {
       clients: allClients,
       totalAllClients, // 🎯 전체 고객 수 추가
       currentUserId: agentId,
+      currentUser: {
+        id: user.id,
+        email: user.email,
+        name: user.email.split('@')[0], // 이메일 앞부분을 이름으로 사용
+      },
     };
   } catch (error) {
     // 🎯 더 상세한 에러 정보와 함께 안전한 fallback 반환
@@ -93,6 +98,7 @@ export async function loader({ request }: Route.LoaderArgs) {
       clients: [],
       totalAllClients: 0,
       currentUserId: null,
+      currentUser: null,
       error:
         error instanceof Error
           ? error.message
@@ -346,7 +352,7 @@ export async function action({ request }: Route.ActionArgs) {
 }
 
 export default function PipelinePage({ loaderData }: Route.ComponentProps) {
-  const { stages, clients, totalAllClients } = loaderData;
+  const { stages, clients, totalAllClients, currentUser } = loaderData;
 
   // 🎯 각 액션별로 별도의 fetcher 사용
   const moveFetcher = useFetcher(); // 드래그 앤 드롭용
@@ -623,7 +629,7 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
   }, [removeFetcher.state, removeFetcher.data?.success]);
 
   return (
-    <MainLayout title="영업 파이프라인">
+    <MainLayout title="영업 파이프라인" currentUser={currentUser}>
       <div className="space-y-6">
         {/* 🎯 MVP 통계 헤더 - sticky로 고정 */}
         <div className="sticky -top-8 z-20 bg-background border-b border-border pb-6">

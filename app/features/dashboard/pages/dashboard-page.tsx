@@ -458,7 +458,14 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
     <MainLayout title="대시보드">
       <div className="space-y-8">
         {/* 환영 섹션 */}
-        <WelcomeSection userName={user.name} todayStats={todayStats} />
+        <WelcomeSection
+          userName={user.name}
+          todayStats={{
+            totalClients: kpiData.totalClients,
+            totalReferrals: kpiData.totalReferrals,
+            monthlyNewClients: kpiData.monthlyNewClients,
+          }}
+        />
 
         {/* 성과 지표 카드 */}
         <PerformanceKPICards data={compatibleKPIData} isLoading={isLoading} />
