@@ -65,6 +65,8 @@ export async function getNetworkData(agentId: string): Promise<{
   stats: NetworkStats;
 }> {
   try {
+    // console.log('🔍 네트워크 데이터 조회 시작:', agentId);
+
     // 에이전트 노드 생성
     const agentProfile = await db
       .select()
@@ -109,83 +111,108 @@ export async function getNetworkData(agentId: string): Promise<{
         )
       );
 
+    // console.log('📊 조회된 고객 수:', directClients.length);
+
+    // 🔥 디버깅: 소개 관계 분석
+    // const referredClients = directClients.filter(({ client }) => client.referredById);
+    // const directOnlyClients = directClients.filter(({ client }) => !client.referredById);
+
+    // console.log('👥 직접 개발 고객:', directOnlyClients.length);
+    // console.log('🔗 소개받은 고객:', referredClients.length);
+
     // 직접 고객 노드 추가
     for (const { client, referralCount } of directClients) {
       nodes.push({
         id: client.id,
         name: client.fullName,
         type: client.referredById ? 'client' : 'client',
-        level: 1,
+        level: client.referredById ? 2 : 1,
         referralCount: Number(referralCount),
         contractValue: Number(client.contractAmount || 0),
         importance: client.importance as 'high' | 'medium' | 'low',
         status: client.status === 'active' ? 'active' : 'inactive',
       });
 
-      // 에이전트와 직접 고객 간의 엣지
-      edges.push({
-        id: `${agentId}-${client.id}`,
-        source: agentId,
-        target: client.id,
-        type: 'direct',
-        strength: calculateConnectionStrength(client),
-        date: client.createdAt.toISOString().split('T')[0],
-      });
-    }
+      // 🔥 핵심 검증: 소개받은 고객의 소개자가 nodes에 있는지 확인
+      if (client.referredById) {
+        const referrerExists = nodes.find((n) => n.id === client.referredById);
 
-    // 추천 관계 조회 (🔥 활성 고객만)
-    const referralRelations = await db
-      .select({
-        referral: referrals,
-        referrer: {
-          id: sql<string>`referrer.id`,
-          name: sql<string>`referrer.full_name`,
-        },
-        referred: {
-          id: sql<string>`referred.id`,
-          name: sql<string>`referred.full_name`,
-        },
-      })
-      .from(referrals)
-      .innerJoin(clients, eq(referrals.referredId, clients.id))
-      .leftJoin(
-        sql`${clients} as referrer`,
-        sql`${referrals.referrerId} = referrer.id`
-      )
-      .leftJoin(
-        sql`${clients} as referred`,
-        sql`${referrals.referredId} = referred.id`
-      )
-      .where(
-        and(
-          eq(clients.agentId, agentId),
-          eq(clients.isActive, true) // 🔥 추가: 활성 고객만
-        )
-      );
+        if (referrerExists) {
+          // console.log('✅ 소개자 확인됨:', client.fullName, '←', referrerExists.name);
+          edges.push({
+            id: `${client.referredById}-${client.id}`,
+            source: client.referredById,
+            target: client.id,
+            type: 'referral',
+            strength: calculateConnectionStrength(client),
+            date: client.createdAt.toISOString().split('T')[0],
+          });
+        } else {
+          // console.warn('⚠️ 소개자를 찾을 수 없음:', {
+          //   고객: client.fullName,
+          //   소개자ID: client.referredById,
+          //   현재노드수: nodes.length
+          // });
 
-    // 추천 관계 엣지 추가
-    for (const relation of referralRelations) {
-      const edgeId = `${relation.referral.referrerId}-${relation.referral.referredId}`;
-
-      if (!edges.find((e) => e.id === edgeId)) {
+          // 🔥 안전장치: 소개자가 없으면 에이전트와 직접 연결
+          edges.push({
+            id: `${agentId}-${client.id}`,
+            source: agentId,
+            target: client.id,
+            type: 'direct',
+            strength: calculateConnectionStrength(client),
+            date: client.createdAt.toISOString().split('T')[0],
+          });
+        }
+      } else {
+        // 직접 개발한 고객만 에이전트와 연결
         edges.push({
-          id: edgeId,
-          source: relation.referral.referrerId,
-          target: relation.referral.referredId,
-          type: 'referral',
-          strength: 0.8,
-          date: relation.referral.createdAt.toISOString().split('T')[0],
+          id: `${agentId}-${client.id}`,
+          source: agentId,
+          target: client.id,
+          type: 'direct',
+          strength: calculateConnectionStrength(client),
+          date: client.createdAt.toISOString().split('T')[0],
         });
       }
     }
 
-    // 2차, 3차 추천 관계 조회 (네트워크 확장)
-    await expandNetworkDepth(agentId, nodes, edges, 2);
+    // 🔥 최종 검증
+    // console.log('📈 최종 데이터:', {
+    //   노드수: nodes.length,
+    //   엣지수: edges.length,
+    //   에이전트노드: nodes.filter(n => n.type === 'agent').length,
+    //   고객노드: nodes.filter(n => n.type === 'client').length
+    // });
+
+    // Edge 무결성 검증
+    const nodeIds = new Set(nodes.map((n) => n.id));
+    const invalidEdges = edges.filter(
+      (e) => !nodeIds.has(e.source) || !nodeIds.has(e.target)
+    );
+
+    if (invalidEdges.length > 0) {
+      // console.error('🚨 무효한 엣지 발견:', invalidEdges);
+      // 무효한 엣지 제거
+      const validEdges = edges.filter(
+        (e) => nodeIds.has(e.source) && nodeIds.has(e.target)
+      );
+      // console.log('✅ 무효한 엣지 제거 후:', validEdges.length);
+    }
+
+    // 2차, 3차 추천 관계 조회 (네트워크 확장) - 임시 비활성화
+    // await expandNetworkDepth(agentId, nodes, edges, 2);
 
     // 네트워크 통계 계산
     const stats = await calculateNetworkStats(agentId, nodes, edges);
 
-    return { nodes, edges, stats };
+    return {
+      nodes,
+      edges: edges.filter(
+        (e) => nodeIds.has(e.source) && nodeIds.has(e.target)
+      ),
+      stats,
+    };
   } catch (error) {
     console.error('네트워크 데이터 조회 오류:', error);
     return {
@@ -217,22 +244,19 @@ async function expandNetworkDepth(
 
     for (const node of currentLevelNodes) {
       if (node.type === 'client') {
-        // 이 고객이 추천한 사람들 조회 (🔥 활성 고객만)
+        // 🔥 수정: clients.referredById를 사용한 더 직접적인 조회
         const referredClients = await db
           .select()
           .from(clients)
-          .innerJoin(referrals, eq(clients.id, referrals.referredId))
           .where(
             and(
-              eq(referrals.referrerId, node.id),
+              eq(clients.referredById, node.id),
               eq(clients.agentId, agentId),
-              eq(clients.isActive, true) // 🔥 추가: 활성 고객만
+              eq(clients.isActive, true) // 🔥 활성 고객만
             )
           );
 
-        for (const referred of referredClients) {
-          const client = referred.clients;
-
+        for (const client of referredClients) {
           // 이미 노드에 있는지 확인
           if (!nodes.find((n) => n.id === client.id)) {
             nodes.push({
@@ -300,24 +324,39 @@ async function calculateNetworkStats(
   edges: NetworkEdge[]
 ): Promise<NetworkStats> {
   try {
-    // 상위 추천자들 (🔥 활성 고객만)
-    const topReferrers = await db
+    // 🔥 수정: clients.referredById를 사용한 상위 추천자들 계산 (활성 고객만)
+    const topReferrersData = await db
       .select({
         id: clients.id,
         name: clients.fullName,
-        referralCount: count(referrals.id),
+        referralCount: sql<number>`(
+          SELECT COUNT(*) 
+          FROM ${clients} as referred_clients 
+          WHERE referred_clients.referred_by_id = ${clients.id} 
+          AND referred_clients.is_active = true
+          AND referred_clients.agent_id = ${agentId}
+        )`,
       })
       .from(clients)
-      .leftJoin(referrals, eq(clients.id, referrals.referrerId))
-      .where(
-        and(
-          eq(clients.agentId, agentId),
-          eq(clients.isActive, true) // 🔥 추가: 활성 고객만
-        )
+      .where(and(eq(clients.agentId, agentId), eq(clients.isActive, true)))
+      .orderBy(
+        desc(sql`(
+          SELECT COUNT(*) 
+          FROM ${clients} as referred_clients 
+          WHERE referred_clients.referred_by_id = ${clients.id} 
+          AND referred_clients.is_active = true
+          AND referred_clients.agent_id = ${agentId}
+        )`)
       )
-      .groupBy(clients.id, clients.fullName)
-      .orderBy(desc(count(referrals.id)))
       .limit(5);
+
+    const topReferrers = topReferrersData
+      .filter((r) => Number(r.referralCount) > 0)
+      .map((r) => ({
+        id: r.id,
+        name: r.name,
+        referralCount: Number(r.referralCount),
+      }));
 
     // 월별 성장 데이터 (최근 6개월) (🔥 활성 고객만)
     const sixMonthsAgo = new Date();
@@ -349,11 +388,7 @@ async function calculateNetworkStats(
       totalEdges: edges.length,
       maxDepth,
       avgReferralsPerNode: Math.round(avgReferralsPerNode * 10) / 10,
-      topReferrers: topReferrers.map((r) => ({
-        id: r.id,
-        name: r.name,
-        referralCount: r.referralCount,
-      })),
+      topReferrers,
       networkGrowth: monthlyGrowth.map((g) => ({
         month: g.month,
         newNodes: g.newNodes,
@@ -397,24 +432,20 @@ export async function getNodeDetails(
       return null;
     }
 
-    // 추천 관계 조회 (🔥 활성 고객만)
+    // 🔥 수정: clients.referredById를 사용한 추천 관계 조회 (활성 고객만)
     const clientReferrals = await db
-      .select({
-        referral: referrals,
-        referred: clients,
-      })
-      .from(referrals)
-      .innerJoin(clients, eq(referrals.referredId, clients.id))
+      .select()
+      .from(clients)
       .where(
         and(
-          eq(referrals.referrerId, nodeId),
-          eq(clients.isActive, true) // 🔥 추가: 활성 고객만
+          eq(clients.referredById, nodeId),
+          eq(clients.isActive, true) // 🔥 활성 고객만
         )
       );
 
     return {
       ...client[0],
-      referrals: clientReferrals.map((r: any) => r.referred),
+      referrals: clientReferrals,
     };
   } catch (error) {
     console.error('노드 상세 정보 조회 오류:', error);

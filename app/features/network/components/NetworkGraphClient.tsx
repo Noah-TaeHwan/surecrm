@@ -145,6 +145,60 @@ export default function NetworkGraphClient({
   graphRef: externalGraphRef,
   highlightedNodeId: externalHighlightedNodeId = null,
 }: NetworkGraphProps) {
+  // 🔥 임시 디버깅 로그 제거 (무한 재렌더링 방지)
+  // console.log('📊 NetworkGraphClient 데이터 검증:', {
+  //   노드수: data?.nodes?.length || 0,
+  //   링크수: data?.links?.length || 0,
+  //   샘플노드: data?.nodes?.[0],
+  //   샘플링크: data?.links?.[0]
+  // });
+
+  // 🔥 안전장치: 데이터가 없거나 잘못된 경우 빈 데이터로 처리
+  const safeData = useMemo(() => {
+    if (!data || !data.nodes || !Array.isArray(data.nodes)) {
+      return { nodes: [], links: [] };
+    }
+
+    if (!data.links || !Array.isArray(data.links)) {
+      return { nodes: data.nodes, links: [] };
+    }
+
+    // 노드 ID 집합 생성
+    const nodeIds = new Set(
+      data.nodes
+        .map((node) => {
+          if (!node || typeof node.id !== 'string') {
+            return null;
+          }
+          return node.id;
+        })
+        .filter(Boolean)
+    );
+
+    // 유효한 링크만 필터링
+    const validLinks = data.links.filter((link) => {
+      if (!link || !link.source || !link.target) {
+        return false;
+      }
+
+      const sourceId =
+        typeof link.source === 'string' ? link.source : link.source.id;
+      const targetId =
+        typeof link.target === 'string' ? link.target : link.target.id;
+
+      if (!nodeIds.has(sourceId) || !nodeIds.has(targetId)) {
+        return false;
+      }
+
+      return true;
+    });
+
+    return {
+      nodes: data.nodes.filter((node) => node && typeof node.id === 'string'),
+      links: validLinks,
+    };
+  }, [data?.nodes, data?.links]); // 🔥 의존성 최적화
+
   // 내부 ref 생성 및 외부 ref 처리
   const internalGraphRef = useRef<any>(null);
   const graphRef = externalGraphRef || internalGraphRef;
@@ -172,10 +226,10 @@ export default function NetworkGraphClient({
             Math.abs(prev.width - newDimensions.width) > 1 ||
             Math.abs(prev.height - newDimensions.height) > 1
           ) {
-            console.log('📏 그래프 컨테이너 크기 변경:', {
-              이전: prev,
-              현재: newDimensions,
-            });
+            // console.log('📏 그래프 컨테이너 크기 변경:', {
+            //   이전: prev,
+            //   현재: newDimensions,
+            // });
             return newDimensions;
           }
           return prev;
@@ -246,36 +300,25 @@ export default function NetworkGraphClient({
 
       // 그래프 크기 강제 업데이트 (다양한 방법으로 시도)
       const updateGraphSize = () => {
-        if (!graphRef.current) return;
+        if (graphRef.current && typeof graphRef.current.width === 'function') {
+          const currentWidth = graphRef.current.width();
+          const currentHeight = graphRef.current.height();
 
-        try {
-          // 방법 1: width/height 함수 호출
-          if (typeof graphRef.current.width === 'function') {
+          if (
+            Math.abs(currentWidth - dimensions.width) > 1 ||
+            Math.abs(currentHeight - dimensions.height) > 1
+          ) {
+            // console.log('🎯 그래프 크기 강제 업데이트:', {
+            //   width: dimensions.width,
+            //   height: dimensions.height,
+            // });
+
+            // 크기 업데이트
             graphRef.current.width(dimensions.width);
-          }
-          if (typeof graphRef.current.height === 'function') {
             graphRef.current.height(dimensions.height);
-          }
 
-          // 방법 2: 직접 속성 설정
-          if (graphRef.current.canvas) {
-            graphRef.current.canvas.width = dimensions.width;
-            graphRef.current.canvas.height = dimensions.height;
+            // console.log('✅ 그래프 크기 업데이트 완료');
           }
-
-          // 방법 3: 다시 그리기 트리거
-          if (typeof graphRef.current.refresh === 'function') {
-            graphRef.current.refresh();
-          }
-
-          // 방법 4: 시뮬레이션 재시작 (포지션 재계산)
-          if (typeof graphRef.current.d3ReheatSimulation === 'function') {
-            graphRef.current.d3ReheatSimulation();
-          }
-
-          console.log('✅ 그래프 크기 업데이트 완료');
-        } catch (error) {
-          console.error('❌ 그래프 크기 업데이트 실패:', error);
         }
       };
 
@@ -368,7 +411,7 @@ export default function NetworkGraphClient({
 
   // 옵시디언 스타일 필터링 및 검색 시스템
   const filteredData = useMemo(() => {
-    let filteredNodes = [...data.nodes];
+    let filteredNodes = [...safeData.nodes];
     let searchResults: string[] = [];
     let highlightedNode: string | null = null;
 
@@ -377,10 +420,10 @@ export default function NetworkGraphClient({
       const normalizedQuery = searchQuery.trim().toLowerCase();
 
       // 정확한 매치 우선, 부분 매치 후순위
-      const exactMatches = data.nodes.filter(
+      const exactMatches = safeData.nodes.filter(
         (node) => node.name.toLowerCase() === normalizedQuery
       );
-      const partialMatches = data.nodes.filter(
+      const partialMatches = safeData.nodes.filter(
         (node) =>
           node.name.toLowerCase().includes(normalizedQuery) &&
           !exactMatches.includes(node)
@@ -396,7 +439,7 @@ export default function NetworkGraphClient({
         const connectedNodeIds = new Set<string>();
         allMatches.forEach((match) => connectedNodeIds.add(match.id));
 
-        data.links.forEach((link) => {
+        safeData.links.forEach((link) => {
           const sourceId =
             typeof link.source === 'string' ? link.source : link.source.id;
           const targetId =
@@ -467,7 +510,7 @@ export default function NetworkGraphClient({
 
       // 1차 연결 (직접 연결)
       const directConnections = new Set<string>();
-      data.links.forEach((link) => {
+      safeData.links.forEach((link) => {
         const sourceId =
           typeof link.source === 'string' ? link.source : link.source.id;
         const targetId =
@@ -568,10 +611,10 @@ export default function NetworkGraphClient({
   // 초기 그래프 데이터 캐시 - 전체 데이터로 한 번만 초기화
   const initialGraphData = useMemo(() => {
     return {
-      nodes: [...data.nodes], // 전체 노드
-      links: [...data.links], // 전체 링크
+      nodes: [...safeData.nodes], // 🔥 safeData 사용
+      links: [...safeData.links], // 🔥 safeData 사용
     };
-  }, [data]);
+  }, [safeData]); // 🔥 의존성 최적화
 
   // 그래프 초기화 - 한 번만 실행되도록 최적화
   useEffect(() => {
@@ -584,7 +627,7 @@ export default function NetworkGraphClient({
     // 실패 감지를 위한 타이머 (시간 단축)
     const failureTimer = setTimeout(() => {
       if (!graphState.initialized) {
-        console.error('그래프 초기화 실패: 시간 초과');
+        // console.error('그래프 초기화 실패: 시간 초과');
         setGraphState((prev) => ({ ...prev, renderingFailed: true }));
       }
     }, 8000); // 8초로 단축
@@ -776,7 +819,7 @@ export default function NetworkGraphClient({
           initAttempted: true,
         }));
 
-        console.log('✅ 옵시디언 스타일 네트워크 그래프 초기화 완료');
+        // console.log('✅ 옵시디언 스타일 네트워크 그래프 초기화 완료');
       } catch (error) {
         console.error('❌ 그래프 초기화 오류:', error);
         setGraphState((prev) => ({
