@@ -48,18 +48,76 @@ export function parseKoreanId(ssn: string): KoreanIdParseResult {
     // 성별 코드 (7번째 자리)
     const genderCode = parseInt(cleanSsn.substring(6, 7));
 
+    // 🔍 성별 코드 유효성 먼저 검사
+    if (![1, 2, 3, 4, 5, 6, 7, 8, 9, 0].includes(genderCode)) {
+      return {
+        isValid: false,
+        errorMessage: '유효하지 않은 성별 코드입니다.',
+      };
+    }
+
     // 연도 계산 (성별 코드로 세기 판단)
     let birthYear: number;
-    if (genderCode === 1 || genderCode === 2) {
+    let expectedGenderCodes: number[];
+
+    if (genderCode === 9 || genderCode === 0) {
+      // 1800년대 출생 (현재 생존자 없음)
+      birthYear = 1800 + birthYY;
+      expectedGenderCodes = [9, 0];
+    } else if (genderCode === 1 || genderCode === 2) {
       // 1900년대 출생
       birthYear = 1900 + birthYY;
+      expectedGenderCodes = [1, 2];
     } else if (genderCode === 3 || genderCode === 4) {
       // 2000년대 출생
       birthYear = 2000 + birthYY;
+      expectedGenderCodes = [3, 4];
+    } else if (genderCode === 5 || genderCode === 6) {
+      // 1900년대 출생 외국인
+      birthYear = 1900 + birthYY;
+      expectedGenderCodes = [5, 6];
+    } else if (genderCode === 7 || genderCode === 8) {
+      // 2000년대 출생 외국인
+      birthYear = 2000 + birthYY;
+      expectedGenderCodes = [7, 8];
     } else {
       return {
         isValid: false,
         errorMessage: '유효하지 않은 성별 코드입니다.',
+      };
+    }
+
+    // 🎯 연도별 성별코드 검증: 입력된 생년월일에 맞는 구체적이고 동적인 안내
+    if (birthYear < 1900 && ![9, 0].includes(genderCode)) {
+      const inputGender = genderCode % 2 === 1 ? '남성' : '여성';
+      const correctCodes = '9(남성) 또는 0(여성)';
+      return {
+        isValid: false,
+        errorMessage: `입력하신 ${birthYear}년 ${birthMM}월 ${birthDD}일생 ${inputGender}은 주민등록번호 뒷자리의 성별코드가 ${correctCodes}이어야 합니다. 입력하신 번호를 다시 확인해주세요.`,
+      };
+    } else if (
+      birthYear >= 1900 &&
+      birthYear < 2000 &&
+      ![1, 2, 5, 6].includes(genderCode)
+    ) {
+      const inputGender = genderCode % 2 === 1 ? '남성' : '여성';
+      const correctCodes =
+        inputGender === '남성'
+          ? '1(내국인) 또는 5(외국인)'
+          : '2(내국인) 또는 6(외국인)';
+      return {
+        isValid: false,
+        errorMessage: `입력하신 ${birthYear}년 ${birthMM}월 ${birthDD}일생 ${inputGender}은 주민등록번호 뒷자리의 성별코드가 ${correctCodes}이어야 합니다. 입력하신 번호를 다시 확인해주세요.`,
+      };
+    } else if (birthYear >= 2000 && ![3, 4, 7, 8].includes(genderCode)) {
+      const inputGender = genderCode % 2 === 1 ? '남성' : '여성';
+      const correctCodes =
+        inputGender === '남성'
+          ? '3(내국인) 또는 7(외국인)'
+          : '4(내국인) 또는 8(외국인)';
+      return {
+        isValid: false,
+        errorMessage: `입력하신 ${birthYear}년 ${birthMM}월 ${birthDD}일생 ${inputGender}은 주민등록번호 뒷자리의 성별코드가 ${correctCodes}이어야 합니다. 입력하신 번호를 다시 확인해주세요.`,
       };
     }
 
@@ -76,7 +134,7 @@ export function parseKoreanId(ssn: string): KoreanIdParseResult {
     ) {
       return {
         isValid: false,
-        errorMessage: '유효하지 않은 생년월일입니다.',
+        errorMessage: `${birthYear}년 ${birthMM}월 ${birthDD}일은 유효하지 않은 날짜입니다.`,
       };
     }
 
@@ -84,7 +142,16 @@ export function parseKoreanId(ssn: string): KoreanIdParseResult {
     if (birthDate > new Date()) {
       return {
         isValid: false,
-        errorMessage: '생년월일이 미래 날짜입니다.',
+        errorMessage: `${birthYear}년 ${birthMM}월 ${birthDD}일은 미래 날짜입니다. 주민등록번호를 다시 확인해주세요.`,
+      };
+    }
+
+    // 🎯 너무 과거 날짜 검사 (1800년대 초 등)
+    const minDate = new Date(1900, 0, 1); // 1900년 1월 1일
+    if (birthDate < minDate) {
+      return {
+        isValid: false,
+        errorMessage: `${birthYear}년은 너무 과거 날짜입니다. 주민등록번호를 다시 확인해주세요.`,
       };
     }
 
@@ -96,7 +163,8 @@ export function parseKoreanId(ssn: string): KoreanIdParseResult {
   } catch (error) {
     return {
       isValid: false,
-      errorMessage: '주민등록번호 파싱 중 오류가 발생했습니다.',
+      errorMessage:
+        '주민등록번호 파싱 중 오류가 발생했습니다. 형식을 확인해주세요.',
     };
   }
 }

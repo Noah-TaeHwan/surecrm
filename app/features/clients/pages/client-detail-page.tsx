@@ -443,6 +443,14 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
   const [isCreatingOpportunity, setIsCreatingOpportunity] = useState(false);
   const [showSaveSuccessModal, setShowSaveSuccessModal] = useState(false);
   const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false);
+  const [showOpportunitySuccessModal, setShowOpportunitySuccessModal] =
+    useState(false); // 🎯 새 영업 기회 성공 모달
+  const [opportunitySuccessData, setOpportunitySuccessData] = useState({
+    // 🎯 성공 데이터
+    clientName: '',
+    insuranceType: '',
+    stageName: '',
+  });
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorModalContent, setErrorModalContent] = useState({
     title: '',
@@ -465,6 +473,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
     ssnBack: '',
     birthDate: '',
     gender: '' as 'male' | 'female' | '',
+    ssnError: undefined as string | undefined, // 🎯 선택적 필드로 주민등록번호 에러 메시지
   });
 
   const navigate = useNavigate();
@@ -636,22 +645,26 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
       fullName: client?.fullName || '',
       phone: client?.phone || '',
       email: client?.email || '',
-      telecomProvider:
-        telecomProviderValue && telecomProviderValue.trim()
-          ? telecomProviderValue
-          : 'none',
+      telecomProvider: telecomProviderValue || 'none',
       address: client?.address || '',
       occupation: client?.occupation || '',
-      height: client?.height ? client.height.toString() : '', // 🔧 숫자 → 문자열 변환
-      weight: client?.weight ? client.weight.toString() : '', // 🔧 숫자 → 문자열 변환
+      height: client?.extendedDetails?.height || '',
+      weight: client?.extendedDetails?.weight || '',
       hasDrivingLicense: client?.hasDrivingLicense || false,
       importance: client?.importance || 'medium',
       notes: client?.notes || '',
       ssn: existingSsn,
-      ssnFront: ssnParts[0] || '',
-      ssnBack: ssnParts[1] || '',
-      birthDate: client?.extendedDetails?.birthDate || '',
+      ssnFront: existingSsn ? existingSsn.split('-')[0] || '' : '',
+      ssnBack: existingSsn ? existingSsn.split('-')[1] || '' : '',
+      birthDate:
+        client?.extendedDetails?.birthDate &&
+        !isNaN(new Date(client.extendedDetails.birthDate).getTime())
+          ? new Date(client.extendedDetails.birthDate)
+              .toISOString()
+              .split('T')[0]
+          : '',
       gender: client?.extendedDetails?.gender || '',
+      ssnError: undefined, // 🎯 에러 메시지 초기화
     });
     setIsEditing(true);
   };
@@ -660,7 +673,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
   const handleSsnChange = async (ssnFront: string, ssnBack: string) => {
     const fullSsn = ssnFront && ssnBack ? `${ssnFront}-${ssnBack}` : '';
 
-    // SSN 파싱 및 생년월일/성별 추출
+    // 🔍 실시간 유효성 검사
     if (fullSsn.length === 14) {
       try {
         const { parseKoreanId } = await import('~/lib/utils/korean-id-utils');
@@ -681,12 +694,14 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
             gender: parseResult.gender!,
           }));
         } else {
-          // 유효하지 않은 경우 SSN만 업데이트
+          // 🎯 유효하지 않은 경우 - 서버 측 파싱 결과만 사용
           setEditFormData((prev) => ({
             ...prev,
             ssn: fullSsn,
             ssnFront,
             ssnBack,
+            ssnError:
+              parseResult.errorMessage || '주민등록번호를 확인해주세요.',
           }));
         }
       } catch (error) {
@@ -695,6 +710,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
           ssn: fullSsn,
           ssnFront,
           ssnBack,
+          ssnError: '주민등록번호 형식을 확인해주세요.',
         }));
       }
     } else {
@@ -703,6 +719,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
         ssn: fullSsn,
         ssnFront,
         ssnBack,
+        ssnError: undefined, // 입력 중일 때는 에러 메시지 제거
       }));
     }
   };
@@ -799,6 +816,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
       ssnBack: '',
       birthDate: '',
       gender: '',
+      ssnError: undefined, // 🎯 에러 메시지 초기화
     });
   };
 
@@ -980,18 +998,14 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
       submit(stageUpdateData, { method: 'post' });
 
       console.log('✅ 영업 기회 생성 완료');
-      alert(
-        `🎉 ${client.fullName} 고객의 새 영업 기회가 생성되었습니다!\n\n` +
-          `📋 상품: ${getInsuranceTypeName(sanitizedData.insuranceType)}\n` +
-          `📈 상태: 영업 파이프라인 '${firstStage.name}' 단계에 추가됨\n\n` +
-          `💡 영업 파이프라인 페이지에서 확인할 수 있습니다.`
-      );
-      setShowOpportunityModal(false);
+      setShowOpportunitySuccessModal(true);
+      setOpportunitySuccessData({
+        clientName: client.fullName,
+        insuranceType: getInsuranceTypeName(sanitizedData.insuranceType), // 🎯 한국어 보험 타입
+        stageName: firstStage.name,
+      });
 
-      // 페이지 새로고침 (데이터 동기화)
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
+      // 🔥 자동 새로고침 제거 - 사용자가 모달 확인 버튼을 눌렀을 때만 새로고침
     } catch (error) {
       console.error('❌ 영업 기회 생성 실패:', error);
 
@@ -1088,7 +1102,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
         {/* 🎯 메인 컨텐츠 - 이력서 스타일 그리드 레이아웃 */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* 왼쪽 사이드바 - 기본 정보 */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 mb-6">
             <div className="relative">
               <Card
                 className={`sticky top-6 border-border/50 ${cardStyle.bgGradient} ${cardStyle.borderClass} overflow-hidden`}
@@ -1671,10 +1685,52 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                               <p>• 입력된 정보는 안전하게 저장됩니다</p>
                             </div>
 
+                            {/* 🚨 에러 메시지 표시 */}
+                            {editFormData.ssnError && (
+                              <div className="mt-2 p-3 bg-red-50/70 border border-red-200/60 rounded-lg dark:bg-red-950/30 dark:border-red-800/50">
+                                <div className="flex items-start gap-2">
+                                  <span className="text-red-500 text-sm">
+                                    ⚠️
+                                  </span>
+                                  <div className="text-xs text-red-800 dark:text-red-300">
+                                    {editFormData.ssnError}
+                                  </div>
+                                </div>
+                                {/* 예시 표시 */}
+                                {(editFormData.ssnError.includes(
+                                  '77년생 남성'
+                                ) ||
+                                  editFormData.ssnError.includes(
+                                    '77년생 여성'
+                                  )) && (
+                                  <div className="mt-2 text-xs text-red-700 dark:text-red-400">
+                                    <div className="font-medium mb-1">
+                                      올바른 예시:
+                                    </div>
+                                    <div>
+                                      • 77년생 남성: 771111-
+                                      <span className="bg-green-100 dark:bg-green-900/50 px-1 rounded">
+                                        1
+                                      </span>
+                                      ●●●●●●
+                                    </div>
+                                    <div>
+                                      • 77년생 여성: 771111-
+                                      <span className="bg-green-100 dark:bg-green-900/50 px-1 rounded">
+                                        2
+                                      </span>
+                                      ●●●●●●
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
                             {/* 추출된 정보 표시 */}
                             {editFormData.ssn.length === 14 &&
                               editFormData.birthDate &&
-                              editFormData.gender && (
+                              editFormData.gender &&
+                              !editFormData.ssnError && (
                                 <div className="mt-3 p-3 bg-blue-50/70 border border-blue-200/60 rounded-lg dark:bg-blue-950/30 dark:border-blue-800/50">
                                   <div className="text-xs font-medium text-blue-800 mb-2 dark:text-blue-300">
                                     추출된 정보
@@ -2092,6 +2148,69 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
           </DialogContent>
         </Dialog>
 
+        {/* 🎉 새 영업 기회 성공 모달 */}
+        <Dialog
+          open={showOpportunitySuccessModal}
+          onOpenChange={setShowOpportunitySuccessModal}
+        >
+          <DialogContent className="max-w-md">
+            <div className="text-center space-y-6">
+              <div className="w-16 h-16 bg-gradient-to-br from-emerald-100 to-green-100 rounded-full flex items-center justify-center mx-auto shadow-lg">
+                <Award className="h-8 w-8 text-emerald-600" />
+              </div>
+              <DialogHeader>
+                <DialogTitle className="text-xl text-emerald-700 dark:text-emerald-400">
+                  🎉 영업 기회 생성 완료!
+                </DialogTitle>
+                <DialogDescription asChild>
+                  <div className="space-y-4">
+                    <div className="bg-emerald-50/80 border border-emerald-200/60 rounded-lg p-4 dark:bg-emerald-950/30 dark:border-emerald-800/50">
+                      <div className="space-y-2 text-sm">
+                        <div className="flex items-center justify-between">
+                          <span className="text-muted-foreground">고객:</span>
+                          <span className="font-semibold text-foreground">
+                            {opportunitySuccessData.clientName}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-muted-foreground">상품:</span>
+                          <span className="font-semibold text-foreground">
+                            {opportunitySuccessData.insuranceType}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-muted-foreground">단계:</span>
+                          <span className="font-semibold text-emerald-700 dark:text-emerald-400">
+                            {opportunitySuccessData.stageName}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      💡 영업 파이프라인 페이지에서 확인할 수 있습니다.
+                    </p>
+                  </div>
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => {
+                    setShowOpportunitySuccessModal(false);
+                    setShowOpportunityModal(false);
+                    // 🎯 사용자가 확인 버튼을 누른 후에만 새로고침
+                    setTimeout(() => {
+                      window.location.reload();
+                    }, 500); // 모달이 닫힌 후 새로고침
+                  }}
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white"
+                >
+                  확인
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
         {/* ❌ 에러 모달 */}
         <Dialog open={showErrorModal} onOpenChange={setShowErrorModal}>
           <DialogContent className="max-w-md">
@@ -2339,9 +2458,33 @@ export async function action({ request, params }: Route.ActionArgs) {
           }
         } else {
           console.warn('⚠️ 주민등록번호 파싱 실패:', parseResult.errorMessage);
-          throw new Error(
-            `주민등록번호 파싱 실패: ${parseResult.errorMessage}`
-          );
+
+          // 🎯 주민등록번호 관련 구체적 에러 메시지 반환
+          let userFriendlyMessage = '주민등록번호를 확인해주세요.';
+
+          if (parseResult.errorMessage?.includes('1977년생은 성별코드가')) {
+            userFriendlyMessage =
+              '77년생의 경우 성별코드는 1(남성) 또는 2(여성)입니다. 입력하신 번호를 다시 확인해주세요.';
+          } else if (parseResult.errorMessage?.includes('성별코드가')) {
+            userFriendlyMessage =
+              '생년과 성별코드가 일치하지 않습니다. 주민등록번호를 다시 확인해주세요.';
+          } else if (parseResult.errorMessage?.includes('미래 날짜')) {
+            userFriendlyMessage =
+              '미래 날짜로 입력되었습니다. 주민등록번호를 다시 확인해주세요.';
+          } else if (parseResult.errorMessage?.includes('유효하지 않은 날짜')) {
+            userFriendlyMessage =
+              '존재하지 않는 날짜입니다. 생년월일 부분을 확인해주세요.';
+          } else if (parseResult.errorMessage?.includes('13자리')) {
+            userFriendlyMessage =
+              '주민등록번호는 13자리여야 합니다. (예: 771111-1234567)';
+          }
+
+          return {
+            success: false,
+            message: userFriendlyMessage,
+            error: parseResult.errorMessage,
+            inputError: true, // 입력 오류임을 표시
+          };
         }
       } else {
         console.log('ℹ️ 주민등록번호 입력되지 않음 - 상세 정보 처리 건너뜀');
