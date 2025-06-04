@@ -44,11 +44,11 @@ export default [
 
   // 📅 일정 관리
   // route('calendar', 'features/calendar/pages/calendar-page.tsx'),
-  route('calendar', 'common/pages/mvp-redirect.tsx'),
+  route('calendar', 'common/pages/calendar-redirect.tsx'),
 
   // ⭐ 소개자 관리
   // route('influencers', 'features/influencers/pages/influencers-page.tsx'),
-  route('influencers', 'common/pages/mvp-redirect.tsx'),
+  route('influencers', 'common/pages/influencers-redirect.tsx'),
 
   // 🎫 초대 및 팀 관리
   route('invitations', 'features/invitations/pages/invitations-page.tsx'),
