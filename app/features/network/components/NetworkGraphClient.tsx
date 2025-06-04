@@ -153,6 +153,19 @@ export default function NetworkGraphClient({
   //   샘플링크: data?.links?.[0]
   // });
 
+  // 초기화 상태 관리 (단일 상태로 통합) - 컴포넌트 시작 부분에 정의
+  const [graphState, setGraphState] = useState({
+    mounted: false,
+    initialized: false,
+    renderingFailed: false,
+    initAttempted: false,
+    showDebug: false,
+    highlightedNodeId: externalHighlightedNodeId,
+    searchResults: [] as string[], // 검색 결과에 해당하는 노드 ID 배열 추가
+    nodeTransitionInProgress: false, // 노드 전환 중인지 추적
+    sidebarResizing: false, // 사이드바 크기 변화 중인지 추적
+  });
+
   // 🔥 안전장치: 데이터가 없거나 잘못된 경우 빈 데이터로 처리
   const safeData = useMemo(() => {
     if (!data || !data.nodes || !Array.isArray(data.nodes)) {
@@ -220,16 +233,19 @@ export default function NetworkGraphClient({
           height: rect.height,
         };
 
-        // 크기가 실제로 변경되었을 때만 업데이트
+        // 크기가 실제로 변경되었을 때만 업데이트 (임계값 증가)
         setDimensions((prev) => {
           if (
-            Math.abs(prev.width - newDimensions.width) > 1 ||
-            Math.abs(prev.height - newDimensions.height) > 1
+            Math.abs(prev.width - newDimensions.width) > 10 ||
+            Math.abs(prev.height - newDimensions.height) > 10
           ) {
-            // console.log('📏 그래프 컨테이너 크기 변경:', {
-            //   이전: prev,
-            //   현재: newDimensions,
-            // });
+            // 크기 변화 로그 간소화
+            console.log('📏 컨테이너 크기 변화:', {
+              이전폭: Math.round(prev.width),
+              현재폭: Math.round(newDimensions.width),
+              이전높이: Math.round(prev.height),
+              현재높이: Math.round(newDimensions.height),
+            });
             return newDimensions;
           }
           return prev;
@@ -240,36 +256,44 @@ export default function NetworkGraphClient({
     // 초기 크기 설정
     updateDimensions();
 
-    // 여러 시점에서 크기 체크 (렌더링 완료 대기)
-    const timeouts = [100, 300, 500, 1000].map((delay) =>
+    // 렌더링 완료 대기를 위한 지연 업데이트 (더 적은 횟수로 최적화)
+    const timeouts = [200, 500].map((delay) =>
       setTimeout(updateDimensions, delay)
     );
 
-    // ResizeObserver로 크기 변화 감지 (가장 확실한 방법)
+    // ResizeObserver로 크기 변화 감지 (디바운싱 추가)
+    let resizeTimeout: ReturnType<typeof setTimeout>;
     const resizeObserver = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        const { width, height } = entry.contentRect;
-        setDimensions((prev) => {
-          if (
-            Math.abs(prev.width - width) > 1 ||
-            Math.abs(prev.height - height) > 1
-          ) {
-            console.log('🔍 ResizeObserver 감지:', { width, height });
-            return { width, height };
-          }
-          return prev;
-        });
-      }
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        for (const entry of entries) {
+          const { width, height } = entry.contentRect;
+          setDimensions((prev) => {
+            if (
+              Math.abs(prev.width - width) > 10 ||
+              Math.abs(prev.height - height) > 10
+            ) {
+              console.log('🔍 ResizeObserver 감지 (디바운스):', {
+                폭: Math.round(width),
+                높이: Math.round(height),
+              });
+              return { width, height };
+            }
+            return prev;
+          });
+        }
+      }, 150); // 150ms 디바운싱
     });
 
     if (containerRef.current) {
       resizeObserver.observe(containerRef.current);
     }
 
-    // MutationObserver로 DOM 변화 감지 (사이드바 열림/닫힘 감지)
+    // MutationObserver로 DOM 변화 감지 (디바운싱 강화)
+    let mutationTimeout: ReturnType<typeof setTimeout>;
     const mutationObserver = new MutationObserver(() => {
-      setTimeout(updateDimensions, 50);
-      setTimeout(updateDimensions, 200);
+      clearTimeout(mutationTimeout);
+      mutationTimeout = setTimeout(updateDimensions, 300); // 300ms 디바운싱
     });
 
     if (containerRef.current?.parentElement) {
@@ -280,13 +304,15 @@ export default function NetworkGraphClient({
       });
     }
 
-    // 윈도우 리사이즈 이벤트도 감지
-    const debouncedResize = debounce(updateDimensions, 100);
+    // 윈도우 리사이즈 이벤트도 감지 (디바운싱 강화)
+    const debouncedResize = debounce(updateDimensions, 200); // 200ms 디바운싱
     window.addEventListener('resize', debouncedResize);
 
     // 정리 함수
     return () => {
       timeouts.forEach(clearTimeout);
+      clearTimeout(resizeTimeout);
+      clearTimeout(mutationTimeout);
       resizeObserver.disconnect();
       mutationObserver.disconnect();
       window.removeEventListener('resize', debouncedResize);
@@ -295,39 +321,45 @@ export default function NetworkGraphClient({
 
   // 컨테이너 크기가 변경되면 그래프 크기 업데이트
   useEffect(() => {
-    if (dimensions.width > 0 && dimensions.height > 0 && graphRef.current) {
-      console.log('🎯 그래프 크기 강제 업데이트:', dimensions);
-
-      // 그래프 크기 강제 업데이트 (다양한 방법으로 시도)
+    if (
+      dimensions.width > 0 &&
+      dimensions.height > 0 &&
+      graphRef.current &&
+      !graphState.sidebarResizing
+    ) {
+      // 🔥 700ms 애니메이션과 완전 동기화된 부드러운 크기 업데이트
       const updateGraphSize = () => {
         if (graphRef.current && typeof graphRef.current.width === 'function') {
           const currentWidth = graphRef.current.width();
           const currentHeight = graphRef.current.height();
 
-          if (
-            Math.abs(currentWidth - dimensions.width) > 1 ||
-            Math.abs(currentHeight - dimensions.height) > 1
-          ) {
-            // console.log('🎯 그래프 크기 강제 업데이트:', {
-            //   width: dimensions.width,
-            //   height: dimensions.height,
-            // });
+          // 의미있는 크기 변화만 감지 (임계값 낮춤)
+          const widthDiff = Math.abs(currentWidth - dimensions.width);
+          const heightDiff = Math.abs(currentHeight - dimensions.height);
 
-            // 크기 업데이트
+          if (widthDiff > 30 || heightDiff > 20) {
+            // CSS 애니메이션과 완전 동기화된 부드러운 크기 변경
             graphRef.current.width(dimensions.width);
             graphRef.current.height(dimensions.height);
 
-            // console.log('✅ 그래프 크기 업데이트 완료');
+            console.log('🎯 그래프 크기 동기화 (700ms):', {
+              폭: `${Math.round(currentWidth)} → ${Math.round(
+                dimensions.width
+              )}`,
+              높이: `${Math.round(currentHeight)} → ${Math.round(
+                dimensions.height
+              )}`,
+            });
           }
         }
       };
 
-      // 즉시 업데이트 + 지연 업데이트 (안전장치)
-      updateGraphSize();
-      setTimeout(updateGraphSize, 100);
-      setTimeout(updateGraphSize, 300);
+      // CSS 애니메이션 완료 후 그래프 크기 조정 (700ms + 50ms 여유)
+      const updateTimeout = setTimeout(updateGraphSize, 750);
+
+      return () => clearTimeout(updateTimeout);
     }
-  }, [dimensions.width, dimensions.height]);
+  }, [dimensions.width, dimensions.height, graphState.sidebarResizing]);
 
   // 브라우저 환경에서만 ForceGraph2D 로드 (동적 import 방식으로 변경)
   useEffect(() => {
@@ -343,18 +375,6 @@ export default function NetworkGraphClient({
         });
     }
   }, [graphComponent]);
-
-  // 초기화 상태 관리 (단일 상태로 통합)
-  const [graphState, setGraphState] = useState({
-    mounted: false,
-    initialized: false,
-    renderingFailed: false,
-    initAttempted: false,
-    showDebug: false,
-    highlightedNodeId: externalHighlightedNodeId,
-    searchResults: [] as string[], // 검색 결과에 해당하는 노드 ID 배열 추가
-    nodeTransitionInProgress: false, // 노드 전환 중인지 추적
-  });
 
   // 마운트 확인
   useEffect(() => {
@@ -381,32 +401,42 @@ export default function NetworkGraphClient({
     setGraphState((prev) => ({
       ...prev,
       highlightedNodeId: externalHighlightedNodeId,
+      sidebarResizing: true, // 사이드바 크기 변화 시작
     }));
 
-    // 사이드바 열림/닫힘으로 인한 레이아웃 변화 감지
-    // 약간의 지연 후 크기 재측정 (CSS 트랜지션 완료 대기)
-    const timeouts = [100, 300, 500].map((delay) =>
-      setTimeout(() => {
-        if (containerRef.current) {
-          const rect = containerRef.current.getBoundingClientRect();
-          setDimensions((prev) => {
-            if (
-              Math.abs(prev.width - rect.width) > 1 ||
-              Math.abs(prev.height - rect.height) > 1
-            ) {
-              console.log('🔄 사이드바 상태 변화로 인한 크기 재측정:', {
-                이전: prev,
-                현재: { width: rect.width, height: rect.height },
-              });
-              return { width: rect.width, height: rect.height };
-            }
-            return prev;
-          });
-        }
-      }, delay)
-    );
+    // 🔥 Flexbox 기반 레이아웃에 최적화된 크기 감지
+    const handleLayoutChange = setTimeout(() => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        const newDimensions = { width: rect.width, height: rect.height };
 
-    return () => timeouts.forEach(clearTimeout);
+        setDimensions((prev) => {
+          // 의미있는 크기 변화만 감지
+          const widthDiff = Math.abs(prev.width - newDimensions.width);
+
+          if (widthDiff > 20) {
+            console.log('📐 Flexbox 레이아웃 변화 감지:', {
+              변화: `${Math.round(prev.width)} → ${Math.round(
+                newDimensions.width
+              )}px`,
+              사이드바상태: externalHighlightedNodeId ? '열림' : '닫힌',
+            });
+            return newDimensions;
+          }
+          return prev;
+        });
+      }
+
+      // 레이아웃 변화 완료
+      setGraphState((prev) => ({
+        ...prev,
+        sidebarResizing: false,
+      }));
+    }, 750); // 700ms 애니메이션 + 50ms 여유
+
+    return () => {
+      clearTimeout(handleLayoutChange);
+    };
   }, [externalHighlightedNodeId]);
 
   // 옵시디언 스타일 필터링 및 검색 시스템

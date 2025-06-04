@@ -523,27 +523,32 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
     );
   };
 
+  // 사이드바 닫기 핸들러 (700ms 애니메이션과 동기화된 지연)
+  const handleCloseSidebar = useCallback(() => {
+    // 닫기 버튼 클릭 효과와 애니메이션 시작을 위한 지연
+    setTimeout(() => {
+      setSelectedNode(null);
+    }, 100); // 클릭 피드백 후 애니메이션 시작
+  }, []);
+
   return (
     <MainLayout title="소개 네트워크">
       <div
         data-network-main
-        className={`grid gap-2 ${
-          selectedNode
-            ? 'grid-cols-1 lg:grid-cols-9' // 노드 선택 시: 필터2 + 그래프5 + 상세2
-            : 'grid-cols-1 lg:grid-cols-7' // 노드 미선택 시: 필터2 + 그래프5
-        }`}
+        className="flex gap-3" // CSS Grid 대신 Flexbox 사용
         style={{
           height: 'calc(100vh - 4rem)',
           maxHeight: 'calc(100vh - 4rem)',
           overflow: 'hidden',
-          padding: '0.75rem', // 적절한 padding
+          padding: '0.75rem',
         }}
       >
-        {/* 필터 사이드바 - 세로 길이 고정, 내용 길어지면 개별 스크롤 */}
+        {/* 필터 사이드바 - 고정 너비 */}
         <div
           data-filter-area
-          className="lg:col-span-2"
+          className="flex-shrink-0"
           style={{
+            width: '280px', // 고정 너비
             height: 'calc(100vh - 5.5rem)',
             maxHeight: 'calc(100vh - 5.5rem)',
             overflow: 'hidden',
@@ -556,19 +561,26 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
           />
         </div>
 
-        {/* 메인 콘텐츠 영역 - 그래프뷰 고정, 세로 길이 고정 */}
+        {/* 메인 콘텐츠 영역 - flex-grow로 남은 공간 차지 */}
         <div
           data-graph-area
-          className="lg:col-span-5"
+          className="flex-grow transition-all duration-700 ease-out"
           style={{
             height: 'calc(100vh - 5.5rem)',
             maxHeight: 'calc(100vh - 5.5rem)',
             overflow: 'hidden',
+            willChange: 'margin-right',
+            // 사이드바 상태에 따라 오른쪽 여백 조정
+            marginRight: selectedNode ? '320px' : '0px',
           }}
         >
           <Card
-            className="h-full flex flex-col graph-card"
-            style={{ overflow: 'hidden', height: '100%' }}
+            className="h-full flex flex-col graph-card transition-all duration-700 ease-out"
+            style={{
+              overflow: 'hidden',
+              height: '100%',
+              willChange: 'transform',
+            }}
           >
             <CardHeader className="flex-shrink-0 pb-2 px-4 pt-3 graph-card-header">
               <CardTitle className="text-lg">소개 네트워크</CardTitle>
@@ -589,12 +601,17 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
 
             <CardContent
               className="flex-1 p-0 overflow-hidden graph-card-content"
-              style={{ overflow: 'hidden', height: '100%' }}
+              style={{
+                overflow: 'hidden',
+                height: '100%',
+              }}
             >
-              {/* 그래프 시각화 - 브라우저 높이에 맞춰 고정, 스크롤 없음 */}
+              {/* 그래프 시각화 */}
               <div
                 className="w-full h-full relative"
-                style={{ overflow: 'hidden' }}
+                style={{
+                  overflow: 'hidden',
+                }}
               >
                 {renderNetworkGraph()}
               </div>
@@ -602,25 +619,54 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
           </Card>
         </div>
 
-        {/* 고객 상세 정보 패널 - 세로 길이 고정, 내용 길어지면 개별 스크롤 */}
-        {selectedNode && (
+        {/* 고객 상세 정보 패널 - 절대 위치로 오버레이 */}
+        <div
+          data-sidebar-area
+          className={`fixed right-0 top-16 transition-all duration-700 ease-out ${
+            selectedNode
+              ? 'translate-x-0 opacity-100'
+              : 'translate-x-full opacity-0'
+          }`}
+          style={{
+            width: '320px', // 고정 너비
+            height: 'calc(100vh - 5.5rem)',
+            maxHeight: 'calc(100vh - 5.5rem)',
+            overflow: 'hidden',
+            zIndex: 50,
+            pointerEvents: selectedNode ? 'auto' : 'none',
+            willChange: 'transform',
+            paddingRight: '0.75rem', // 메인 컨테이너 패딩과 맞춤
+          }}
+        >
+          {/* 배경 블러 효과 */}
           <div
-            data-sidebar-area
-            className="lg:col-span-2"
+            className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+            style={{ borderRadius: '0.5rem' }}
+          />
+
+          {/* 실제 사이드바 콘텐츠 */}
+          <div
+            className={`relative h-full transition-all duration-500 ease-out ${
+              selectedNode
+                ? 'translate-y-0 opacity-100'
+                : 'translate-y-4 opacity-0'
+            }`}
             style={{
-              height: 'calc(100vh - 5.5rem)',
-              maxHeight: 'calc(100vh - 5.5rem)',
-              overflow: 'hidden',
+              transitionDelay: selectedNode ? '200ms' : '0ms',
+              willChange: 'transform',
             }}
           >
-            <NetworkDetailPanel
-              nodeId={selectedNode}
-              data={networkData}
-              onClose={() => setSelectedNode(null)}
-              onNodeSelect={handleNodeSelect}
-            />
+            {/* 항상 렌더링하되 selectedNode가 있을 때만 데이터 전달 */}
+            {selectedNode && (
+              <NetworkDetailPanel
+                nodeId={selectedNode}
+                data={networkData}
+                onClose={handleCloseSidebar}
+                onNodeSelect={handleNodeSelect}
+              />
+            )}
           </div>
-        )}
+        </div>
       </div>
     </MainLayout>
   );

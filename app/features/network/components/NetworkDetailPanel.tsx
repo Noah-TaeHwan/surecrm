@@ -169,8 +169,13 @@ export default function NetworkDetailPanel({
       <div className="p-4 flex-shrink-0">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">고객 정보</h2>
-          <Button variant="ghost" size="icon" onClick={onClose}>
-            <X className="h-4 w-4" />
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            className="transition-all duration-200 hover:scale-110 hover:bg-red-50 hover:text-red-600 active:scale-95"
+          >
+            <X className="h-4 w-4 transition-transform duration-200" />
           </Button>
         </div>
       </div>
