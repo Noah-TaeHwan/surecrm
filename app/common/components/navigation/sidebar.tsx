@@ -41,11 +41,12 @@ export function Sidebar({ className, onClose }: SidebarProps) {
       href: '/network',
       icon: <Network className="h-5 w-5" />,
     },
-    {
-      label: '핵심 소개자',
-      href: '/influencers',
-      icon: <Sparkles className="h-5 w-5" />,
-    },
+    // MVP: 핵심 소개자 기능 비활성화
+    // {
+    //   label: '핵심 소개자',
+    //   href: '/influencers',
+    //   icon: <Sparkles className="h-5 w-5" />,
+    // },
     {
       label: '영업 파이프라인',
       href: '/pipeline',

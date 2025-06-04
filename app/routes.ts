@@ -43,10 +43,12 @@ export default [
   route('clients/edit/:id?', 'features/clients/pages/client-edit-page.tsx'),
 
   // 📅 일정 관리
-  route('calendar', 'features/calendar/pages/calendar-page.tsx'),
+  // route('calendar', 'features/calendar/pages/calendar-page.tsx'),
+  route('calendar', 'common/pages/mvp-redirect.tsx'),
 
   // ⭐ 소개자 관리
-  route('influencers', 'features/influencers/pages/influencers-page.tsx'),
+  // route('influencers', 'features/influencers/pages/influencers-page.tsx'),
+  route('influencers', 'common/pages/mvp-redirect.tsx'),
 
   // 🎫 초대 및 팀 관리
   route('invitations', 'features/invitations/pages/invitations-page.tsx'),

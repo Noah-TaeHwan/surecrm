@@ -95,7 +95,8 @@ export function ReferralInsights({
               </div>
               핵심 소개자 TOP 5
             </CardTitle>
-            <Link to="/influencers">
+            {/* MVP: 핵심 소개자 기능 비활성화 */}
+            {/* <Link to="/influencers">
               <Button
                 variant="ghost"
                 size="sm"
@@ -104,7 +105,7 @@ export function ReferralInsights({
                 전체 보기
                 <ChevronRightIcon className="h-3 w-3 ml-1" />
               </Button>
-            </Link>
+            </Link> */}
           </div>
         </CardHeader>
         <CardContent className="space-y-3">

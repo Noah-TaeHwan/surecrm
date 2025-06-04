@@ -94,7 +94,8 @@ export function TodayAgenda({ meetings }: TodayAgendaProps) {
             </div>
             오늘의 일정
           </CardTitle>
-          <Link to="/calendar">
+          {/* MVP: 캘린더 기능 비활성화 */}
+          {/* <Link to="/calendar">
             <Button
               variant="ghost"
               size="sm"
@@ -103,7 +104,7 @@ export function TodayAgenda({ meetings }: TodayAgendaProps) {
               전체 보기
               <ChevronRightIcon className="h-3 w-3 ml-1" />
             </Button>
-          </Link>
+          </Link> */}
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -163,11 +164,20 @@ export function TodayAgenda({ meetings }: TodayAgendaProps) {
 
             {upcomingMeetings.length > 4 && (
               <div className="text-center pt-2">
-                <Link to="/calendar">
+                {/* MVP: 캘린더 기능 비활성화 */}
+                {/* <Link to="/calendar">
                   <Button variant="outline" size="sm" className="text-xs">
                     +{upcomingMeetings.length - 4}개 더 보기
                   </Button>
-                </Link>
+                </Link> */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-xs"
+                  disabled
+                >
+                  +{upcomingMeetings.length - 4}개 더 보기 (준비 중)
+                </Button>
               </div>
             )}
           </>
@@ -179,11 +189,15 @@ export function TodayAgenda({ meetings }: TodayAgendaProps) {
             <p className="text-sm text-muted-foreground mb-3">
               오늘 예정된 미팅이 없습니다
             </p>
-            <Link to="/calendar">
+            {/* MVP: 캘린더 기능 비활성화 */}
+            {/* <Link to="/calendar">
               <Button size="sm" variant="outline">
                 미팅 예약
               </Button>
-            </Link>
+            </Link> */}
+            <Button size="sm" variant="outline" disabled>
+              미팅 예약 (준비 중)
+            </Button>
           </div>
         )}
       </CardContent>
