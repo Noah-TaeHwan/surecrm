@@ -144,6 +144,273 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
   });
   const [searchQuery, setSearchQuery] = useState('');
 
+  // 🔍 디버깅용: 레이아웃 상태 확인
+  useEffect(() => {
+    // 🎯 HTML과 body 요소의 스크롤 강제 방지
+    const originalHTMLOverflow = document.documentElement.style.overflow;
+    const originalBodyOverflow = document.body.style.overflow;
+    const originalHTMLHeight = document.documentElement.style.height;
+    const originalBodyHeight = document.body.style.height;
+
+    // CSS 강제 적용
+    document.documentElement.style.setProperty(
+      'overflow',
+      'hidden',
+      'important'
+    );
+    document.body.style.setProperty('overflow', 'hidden', 'important');
+    document.documentElement.style.setProperty('height', '100vh', 'important');
+    document.body.style.setProperty('height', '100vh', 'important');
+
+    // 모든 부모 컨테이너들도 강제 제어
+    const mainElement = document.querySelector('main');
+    if (mainElement) {
+      (mainElement as HTMLElement).style.setProperty(
+        'overflow',
+        'hidden',
+        'important'
+      );
+      (mainElement as HTMLElement).style.setProperty(
+        'height',
+        'calc(100vh - 4rem)',
+        'important'
+      );
+    }
+
+    const checkLayout = () => {
+      const body = document.body;
+      const html = document.documentElement;
+      const mainLayout = document.querySelector('main');
+      const mainContainer = document.querySelector('[data-network-main]');
+      const filterArea = document.querySelector('[data-filter-area]');
+      const graphArea = document.querySelector('[data-graph-area]');
+      const sidebarArea = document.querySelector('[data-sidebar-area]');
+
+      // Card 관련 요소들 체크
+      const card = document.querySelector('.graph-card');
+      const cardHeader = document.querySelector('.graph-card-header');
+      const cardContent = document.querySelector('.graph-card-content');
+
+      // 🎯 실제 스크롤 가능 요소 찾기
+      const getAllScrollableElements = () => {
+        const allElements = document.querySelectorAll('*');
+        const scrollableElements: Array<{ element: Element; info: any }> = [];
+
+        allElements.forEach((element) => {
+          const computedStyle = getComputedStyle(element);
+          const hasVerticalScroll = element.scrollHeight > element.clientHeight;
+          const hasHorizontalScroll = element.scrollWidth > element.clientWidth;
+
+          if (hasVerticalScroll || hasHorizontalScroll) {
+            scrollableElements.push({
+              element,
+              info: {
+                tagName: element.tagName,
+                className: element.className,
+                id: element.id,
+                scrollHeight: element.scrollHeight,
+                clientHeight: element.clientHeight,
+                scrollWidth: element.scrollWidth,
+                clientWidth: element.clientWidth,
+                overflowY: computedStyle.overflowY,
+                overflowX: computedStyle.overflowX,
+                hasVerticalScroll,
+                hasHorizontalScroll,
+              },
+            });
+          }
+        });
+
+        return scrollableElements;
+      };
+
+      console.log('🎯 레이아웃 상태 체크:', {
+        viewportHeight: window.innerHeight,
+        html: {
+          hasScroll: html.scrollHeight > html.clientHeight,
+          scrollHeight: html.scrollHeight,
+          clientHeight: html.clientHeight,
+          overflow: getComputedStyle(html).overflow,
+        },
+        body: {
+          hasScroll: body.scrollHeight > body.clientHeight,
+          scrollHeight: body.scrollHeight,
+          clientHeight: body.clientHeight,
+          overflow: getComputedStyle(body).overflow,
+        },
+        mainLayout: mainLayout
+          ? {
+              hasScroll: mainLayout.scrollHeight > mainLayout.clientHeight,
+              scrollHeight: mainLayout.scrollHeight,
+              clientHeight: mainLayout.clientHeight,
+              overflow: getComputedStyle(mainLayout).overflow,
+            }
+          : 'not found',
+        mainContainer: mainContainer
+          ? {
+              height: mainContainer.scrollHeight,
+              clientHeight: mainContainer.clientHeight,
+              hasScroll:
+                mainContainer.scrollHeight > mainContainer.clientHeight,
+              overflow: getComputedStyle(mainContainer).overflow,
+            }
+          : 'not found',
+        graphArea: graphArea
+          ? {
+              height: graphArea.scrollHeight,
+              clientHeight: graphArea.clientHeight,
+              hasScroll: graphArea.scrollHeight > graphArea.clientHeight,
+              overflow: getComputedStyle(graphArea).overflow,
+            }
+          : 'not found',
+        card: card
+          ? {
+              height: card.scrollHeight,
+              clientHeight: card.clientHeight,
+              hasScroll: card.scrollHeight > card.clientHeight,
+              overflow: getComputedStyle(card).overflow,
+            }
+          : 'not found',
+        cardContent: cardContent
+          ? {
+              height: cardContent.scrollHeight,
+              clientHeight: cardContent.clientHeight,
+              hasScroll: cardContent.scrollHeight > cardContent.clientHeight,
+              overflow: getComputedStyle(cardContent).overflow,
+            }
+          : 'not found',
+        filterArea: filterArea
+          ? {
+              height: filterArea.scrollHeight,
+              clientHeight: filterArea.clientHeight,
+              hasScroll: filterArea.scrollHeight > filterArea.clientHeight,
+            }
+          : 'not found',
+        sidebarArea: sidebarArea
+          ? {
+              height: sidebarArea.scrollHeight,
+              clientHeight: sidebarArea.clientHeight,
+              hasScroll: sidebarArea.scrollHeight > sidebarArea.clientHeight,
+            }
+          : 'not found',
+        selectedNode: selectedNode,
+        scrollableElements: getAllScrollableElements(),
+      });
+    };
+
+    // 🎯 스크롤 이벤트 리스너 추가 - 어느 요소에서 스크롤이 발생하는지 추적
+    const handleScroll = (event: Event) => {
+      const target = event.target as Element | Document;
+      const currentTarget = event.currentTarget as Element | Document;
+
+      // document 스크롤은 무시 (버블링된 이벤트)
+      if (target === document) return;
+
+      console.log('🚨 스크롤 이벤트 발생:', {
+        target: {
+          tagName: (target as Element).tagName,
+          className: (target as Element).className,
+          id: (target as Element).id,
+        },
+        currentTarget:
+          currentTarget && currentTarget !== document
+            ? {
+                tagName: (currentTarget as Element).tagName,
+                className: (currentTarget as Element).className,
+                id: (currentTarget as Element).id,
+              }
+            : 'document',
+        scrollTop: (target as Element).scrollTop,
+        scrollLeft: (target as Element).scrollLeft,
+        scrollHeight: (target as Element).scrollHeight,
+        clientHeight: (target as Element).clientHeight,
+        phase:
+          event.eventPhase === 1
+            ? 'capturing'
+            : event.eventPhase === 2
+            ? 'target'
+            : 'bubbling',
+        bubbles: event.bubbles,
+        event: event,
+      });
+    };
+
+    // 🔍 특정 요소들에 개별적으로 스크롤 이벤트 리스너 추가
+    const addSpecificScrollListeners = () => {
+      const elementsToWatch = [
+        document.querySelector('main'),
+        document.querySelector('[data-network-main]'),
+        document.querySelector('[data-filter-area]'),
+        document.querySelector('[data-graph-area]'),
+        document.querySelector('[data-sidebar-area]'),
+        document.querySelector('.graph-card'),
+        document.querySelector('.graph-card-content'),
+        document.body,
+        document.documentElement,
+      ].filter(Boolean) as Element[];
+
+      const listeners: Array<{
+        element: Element;
+        listener: (e: Event) => void;
+      }> = [];
+
+      elementsToWatch.forEach((element) => {
+        const listener = (e: Event) => {
+          console.log(
+            `🎯 ${element.tagName}.${
+              element.className || 'no-class'
+            }에서 스크롤:`,
+            {
+              scrollTop: element.scrollTop,
+              scrollHeight: element.scrollHeight,
+              clientHeight: element.clientHeight,
+              hasScroll: element.scrollHeight > element.clientHeight,
+            }
+          );
+        };
+
+        element.addEventListener('scroll', listener);
+        listeners.push({ element, listener });
+      });
+
+      return listeners;
+    };
+
+    // 모든 요소에 스크롤 이벤트 리스너 추가 (캡처링과 버블링 둘 다)
+    document.addEventListener('scroll', handleScroll, true); // 캡처링
+    document.addEventListener('scroll', handleScroll, false); // 버블링
+
+    const specificListeners = addSpecificScrollListeners();
+
+    // 초기 체크
+    setTimeout(checkLayout, 100);
+
+    // 사이드바 상태 변경 시 체크
+    setTimeout(checkLayout, 500);
+
+    // 윈도우 리사이즈 시 체크
+    window.addEventListener('resize', checkLayout);
+
+    return () => {
+      window.removeEventListener('resize', checkLayout);
+      document.removeEventListener('scroll', handleScroll, true);
+      document.removeEventListener('scroll', handleScroll, false);
+      specificListeners.forEach(({ element, listener }) => {
+        element.removeEventListener('scroll', listener);
+      });
+      document.documentElement.style.overflow = originalHTMLOverflow;
+      document.body.style.overflow = originalBodyOverflow;
+      document.documentElement.style.height = originalHTMLHeight;
+      document.body.style.height = originalBodyHeight;
+
+      const mainElement = document.querySelector('main');
+      if (mainElement) {
+        (mainElement as HTMLElement).style.removeProperty('overflow');
+        (mainElement as HTMLElement).style.removeProperty('height');
+      }
+    };
+  }, [selectedNode]);
+
   // 검색 결과 상태 추가 (옵시디언 스타일)
   const [searchResults, setSearchResults] = useState<
     Array<{
@@ -478,14 +745,29 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
   return (
     <MainLayout title="소개 네트워크">
       <div
-        className={`grid gap-6 h-[calc(100vh-8rem)] ${
+        data-network-main
+        className={`grid gap-2 ${
           selectedNode
             ? 'grid-cols-1 lg:grid-cols-9' // 노드 선택 시: 필터2 + 그래프5 + 상세2
             : 'grid-cols-1 lg:grid-cols-7' // 노드 미선택 시: 필터2 + 그래프5
         }`}
+        style={{
+          height: 'calc(100vh - 4rem)',
+          maxHeight: 'calc(100vh - 4rem)',
+          overflow: 'hidden',
+          padding: '0.75rem', // 적절한 padding
+        }}
       >
-        {/* 필터 사이드바 */}
-        <div className="lg:col-span-2">
+        {/* 필터 사이드바 - 세로 길이 고정, 내용 길어지면 개별 스크롤 */}
+        <div
+          data-filter-area
+          className="lg:col-span-2"
+          style={{
+            height: 'calc(100vh - 5.5rem)',
+            maxHeight: 'calc(100vh - 5.5rem)',
+            overflow: 'hidden',
+          }}
+        >
           <NetworkSidebar
             filters={filterSettings}
             onFilterChange={handleFilterChange}
@@ -493,38 +775,63 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
           />
         </div>
 
-        {/* 메인 콘텐츠 영역 - 사이드바 상태에 따라 크기 조정 */}
+        {/* 메인 콘텐츠 영역 - 그래프뷰 고정, 세로 길이 고정 */}
         <div
-          className={selectedNode ? 'lg:col-span-5 mb-6' : 'lg:col-span-5 mb-6'}
+          data-graph-area
+          className="lg:col-span-5"
+          style={{
+            height: 'calc(100vh - 5.5rem)',
+            maxHeight: 'calc(100vh - 5.5rem)',
+            overflow: 'hidden',
+          }}
         >
-          <Card className="h-full flex flex-col">
-            <CardHeader className="flex-shrink-0 pb-3">
-              <CardTitle>소개 네트워크</CardTitle>
-              <CardDescription>
+          <Card
+            className="h-full flex flex-col graph-card"
+            style={{ overflow: 'hidden', height: '100%' }}
+          >
+            <CardHeader className="flex-shrink-0 pb-2 px-4 pt-3 graph-card-header">
+              <CardTitle className="text-lg">소개 네트워크</CardTitle>
+              <CardDescription className="text-sm">
                 고객 간 소개 관계를 시각화합니다. 노드를 클릭하면 상세 정보를 볼
                 수 있습니다.
               </CardDescription>
 
               {/* 컨트롤 패널 */}
-              <NetworkControls
-                onSearch={handleSearch}
-                searchResults={searchResults}
-                onNodeFocus={handleNodeFocus}
-              />
+              <div className="pt-2">
+                <NetworkControls
+                  onSearch={handleSearch}
+                  searchResults={searchResults}
+                  onNodeFocus={handleNodeFocus}
+                />
+              </div>
             </CardHeader>
 
-            <CardContent className="flex-1 p-0 overflow-hidden">
-              {/* 그래프 시각화 - 전체 영역 꽉 채우기 */}
-              <div className="w-full h-full relative">
+            <CardContent
+              className="flex-1 p-0 overflow-hidden graph-card-content"
+              style={{ overflow: 'hidden', height: '100%' }}
+            >
+              {/* 그래프 시각화 - 브라우저 높이에 맞춰 고정, 스크롤 없음 */}
+              <div
+                className="w-full h-full relative"
+                style={{ overflow: 'hidden' }}
+              >
                 {renderNetworkGraph()}
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* 고객 상세 정보 패널 - 노드 선택했을 때만 표시 */}
+        {/* 고객 상세 정보 패널 - 세로 길이 고정, 내용 길어지면 개별 스크롤 */}
         {selectedNode && (
-          <div className="lg:col-span-2">
+          <div
+            data-sidebar-area
+            className="lg:col-span-2"
+            style={{
+              height: 'calc(100vh - 5.5rem)',
+              maxHeight: 'calc(100vh - 5.5rem)',
+              overflow: 'hidden',
+            }}
+          >
             <NetworkDetailPanel
               nodeId={selectedNode}
               data={networkData}

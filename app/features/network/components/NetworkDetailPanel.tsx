@@ -162,15 +162,25 @@ export default function NetworkDetailPanel({
   };
 
   return (
-    <div className="w-full border-l h-full bg-background overflow-y-auto">
-      <div className="p-4 space-y-4">
+    <div
+      className="w-full border-l h-full bg-background flex flex-col"
+      style={{ maxHeight: '100%' }}
+    >
+      <div className="p-4 flex-shrink-0">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">고객 정보</h2>
           <Button variant="ghost" size="icon" onClick={onClose}>
             <X className="h-4 w-4" />
           </Button>
         </div>
+      </div>
 
+      <div
+        className="flex-1 overflow-y-auto p-4 pt-0"
+        style={{
+          maxHeight: 'calc(100% - 80px)',
+        }}
+      >
         <div className="space-y-4">
           <div className="space-y-2">
             <h3 className="text-2xl font-bold">{selectedNode.name}</h3>

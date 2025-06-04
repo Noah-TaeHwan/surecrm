@@ -110,7 +110,7 @@ export function Sidebar({ className, onClose }: SidebarProps) {
   return (
     <div
       className={cn(
-        'flex flex-col h-full bg-sidebar border-r border-sidebar-border w-64',
+        'flex flex-col h-screen bg-sidebar border-r border-sidebar-border w-64',
         className
       )}
     >

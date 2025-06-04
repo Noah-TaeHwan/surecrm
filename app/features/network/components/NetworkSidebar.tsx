@@ -22,7 +22,6 @@ import {
 } from '~/common/components/ui/dropdown-menu';
 import { Slider } from '~/common/components/ui/slider';
 import { Switch } from '~/common/components/ui/switch';
-import { ScrollArea } from '~/common/components/ui/scroll-area';
 import { cn } from '~/lib/utils';
 import {
   Filter,
@@ -83,12 +82,6 @@ export default function NetworkSidebar({
   // CSS 로딩 상태 추가
   const [cssLoaded, setCssLoaded] = useState(false);
 
-  // 스크롤 위치 저장을 위한 ref 추가
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const scrollPositionRef = useRef<number>(0);
-  // 필터 변경 중인지 추적하는 상태 추가
-  const [isFilterChanging, setIsFilterChanging] = useState(false);
-
   // 컴포넌트가 마운트된 후 CSS가 로드되었다고 표시
   useEffect(() => {
     // 약간의 지연을 두고 CSS가 로드되었다고 표시 (더 안전하게)
@@ -99,57 +92,29 @@ export default function NetworkSidebar({
     return () => clearTimeout(timer);
   }, []);
 
-  // 필터 변경 후 스크롤 위치 즉시 복원
-  useLayoutEffect(() => {
-    if (scrollAreaRef.current && scrollPositionRef.current > 0) {
-      const scrollContainer = scrollAreaRef.current.querySelector(
-        '[data-radix-scroll-area-viewport]'
-      ) as HTMLElement;
-      if (scrollContainer) {
-        scrollContainer.scrollTop = scrollPositionRef.current;
-      }
-    }
-  });
-
-  // 스크롤 위치 저장
-  const saveScrollPosition = useCallback(() => {
-    if (scrollAreaRef.current) {
-      const scrollContainer = scrollAreaRef.current.querySelector(
-        '[data-radix-scroll-area-viewport]'
-      ) as HTMLElement;
-      if (scrollContainer) {
-        scrollPositionRef.current = scrollContainer.scrollTop;
-      }
-    }
-  }, []);
-
   const handleStageFilterChange = useCallback(
     (value: string) => {
-      saveScrollPosition();
       onFilterChange({ ...filters, stageFilter: value });
     },
-    [filters, onFilterChange, saveScrollPosition]
+    [filters, onFilterChange]
   );
 
   const handleDepthFilterChange = useCallback(
     (value: string) => {
-      saveScrollPosition();
       onFilterChange({ ...filters, depthFilter: value });
     },
-    [filters, onFilterChange, saveScrollPosition]
+    [filters, onFilterChange]
   );
 
   const handleImportanceFilterChange = useCallback(
     (value: number) => {
-      saveScrollPosition();
       onFilterChange({ ...filters, importanceFilter: value });
     },
-    [filters, onFilterChange, saveScrollPosition]
+    [filters, onFilterChange]
   );
 
   const handleInfluencersToggle = useCallback(
     (checked: boolean) => {
-      saveScrollPosition();
       if (checked) {
         onFilterChange({
           ...filters,
@@ -160,18 +125,17 @@ export default function NetworkSidebar({
         onFilterChange({ ...filters, showInfluencersOnly: checked });
       }
     },
-    [filters, onFilterChange, saveScrollPosition]
+    [filters, onFilterChange]
   );
 
   const handleResetFilters = useCallback(() => {
-    saveScrollPosition();
     onFilterChange({
       stageFilter: 'all',
       depthFilter: 'all',
       importanceFilter: 0,
       showInfluencersOnly: false,
     });
-  }, [onFilterChange, saveScrollPosition]);
+  }, [onFilterChange]);
 
   // 현재 적용된 필터 수 계산
   const activeFilterCount = [
@@ -249,7 +213,6 @@ export default function NetworkSidebar({
             size="icon"
             className="h-5 w-5 p-0 ml-1 opacity-60 group-hover:opacity-100"
             onClick={() => {
-              saveScrollPosition();
               handleStageFilterChange('all');
             }}
           >
@@ -274,7 +237,6 @@ export default function NetworkSidebar({
             size="icon"
             className="h-5 w-5 p-0 ml-1 opacity-60 group-hover:opacity-100"
             onClick={() => {
-              saveScrollPosition();
               handleDepthFilterChange('all');
             }}
           >
@@ -308,7 +270,6 @@ export default function NetworkSidebar({
             size="icon"
             className="h-5 w-5 p-0 ml-1 opacity-60 group-hover:opacity-100"
             onClick={() => {
-              saveScrollPosition();
               handleImportanceFilterChange(0);
             }}
           >
@@ -332,7 +293,6 @@ export default function NetworkSidebar({
             size="icon"
             className="h-5 w-5 p-0 ml-1 opacity-60 group-hover:opacity-100"
             onClick={() => {
-              saveScrollPosition();
               handleInfluencersToggle(false);
             }}
           >
@@ -369,6 +329,7 @@ export default function NetworkSidebar({
   // 필터 컨텐츠 (데스크톱 및 모바일)
   const FilterContent = () => (
     <>
+      {/* 필터 헤더 */}
       <div className="pb-3 flex items-center justify-between border-b">
         <div className="flex items-center gap-2">
           <Filter size={18} className="text-primary" />
@@ -411,268 +372,245 @@ export default function NetworkSidebar({
         </div>
       )}
 
-      {/* 스크롤바 초기 숨김을 위한 스타일 추가 + ref 추가 */}
-      <div
-        className={cn(
-          'flex-1 pr-3 h-full',
-          cssLoaded ? 'overflow-visible' : 'overflow-hidden'
-        )}
-      >
-        <ScrollArea
-          ref={scrollAreaRef}
-          className={cn(
-            'h-full w-full network-sidebar-scroll',
-            !cssLoaded && 'opacity-0'
-          )}
-          style={{
-            scrollbarWidth: 'none',
-            msOverflowStyle: 'none',
-          }}
-        >
-          <div className="space-y-3 py-2 pb-6">
-            {/* 네트워크 현황 */}
-            <div className="rounded-lg border">
-              <div className="p-3 border-b">
-                <div className="flex items-center gap-2 mb-1">
-                  <Network size={16} className="text-primary" />
-                  <h3 className="text-sm font-medium">네트워크 현황</h3>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  네트워크에 포함된 총 고객 수입니다
-                </p>
+      {/* 스크롤 가능한 필터 콘텐츠 영역 */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="space-y-3 py-2 pb-6">
+          {/* 네트워크 현황 */}
+          <div className="rounded-lg border">
+            <div className="p-3 border-b">
+              <div className="flex items-center gap-2 mb-1">
+                <Network size={16} className="text-primary" />
+                <h3 className="text-sm font-medium">네트워크 현황</h3>
               </div>
-
-              <div className="grid grid-cols-2 divide-x">
-                <div className="p-3 flex flex-col items-center">
-                  <span className="text-2xl font-semibold text-primary">
-                    {stats.filteredNodes}
-                  </span>
-                  <span className="text-sm text-muted-foreground">
-                    필터링 표시
-                  </span>
-                </div>
-                <div className="p-3 flex flex-col items-center">
-                  <span className="text-2xl font-semibold">
-                    {stats.totalNodes}
-                  </span>
-                  <span className="text-sm text-muted-foreground">
-                    전체 고객
-                  </span>
-                </div>
-              </div>
+              <p className="text-sm text-muted-foreground">
+                네트워크에 포함된 총 고객 수입니다
+              </p>
             </div>
 
-            {/* 아코디언 필터 */}
-            <Accordion
-              type="multiple"
-              defaultValue={['importance', 'stage', 'depth', 'influencer']}
-              className="space-y-2 mb-10"
+            <div className="grid grid-cols-2 divide-x">
+              <div className="p-3 flex flex-col items-center">
+                <span className="text-2xl font-semibold text-primary">
+                  {stats.filteredNodes}
+                </span>
+                <span className="text-sm text-muted-foreground">
+                  필터링 표시
+                </span>
+              </div>
+              <div className="p-3 flex flex-col items-center">
+                <span className="text-2xl font-semibold">
+                  {stats.totalNodes}
+                </span>
+                <span className="text-sm text-muted-foreground">전체 고객</span>
+              </div>
+            </div>
+          </div>
+
+          {/* 아코디언 필터 */}
+          <Accordion
+            type="multiple"
+            defaultValue={['importance', 'stage', 'depth', 'influencer']}
+            className="space-y-2 mb-10"
+          >
+            {/* 고객 중요도 필터 */}
+            <AccordionItem
+              value="importance"
+              className="border rounded-lg overflow-hidden"
             >
-              {/* 고객 중요도 필터 */}
-              <AccordionItem
-                value="importance"
-                className="border rounded-lg overflow-hidden"
-              >
-                <AccordionTrigger className="px-3 py-3 text-left hover:no-underline hover:bg-muted/20 [&>svg]:h-5 [&>svg]:w-5 [&>svg]:text-muted-foreground">
-                  <div className="flex items-center gap-2">
-                    <Star size={16} className="text-amber-400" />
-                    <span className="text-sm font-medium">고객 중요도</span>
+              <AccordionTrigger className="px-3 py-3 text-left hover:no-underline hover:bg-muted/20 [&>svg]:h-5 [&>svg]:w-5 [&>svg]:text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <Star size={16} className="text-amber-400" />
+                  <span className="text-sm font-medium">고객 중요도</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="p-4 pt-2 border-t">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">
+                      최소 중요도
+                    </span>
+                    <div className="flex items-center gap-1">
+                      {importanceSliderValue > 0 ? (
+                        <div className="flex">
+                          {Array.from({ length: importanceSliderValue }).map(
+                            (_, i) => (
+                              <Star
+                                key={i}
+                                size={14}
+                                className="fill-amber-400 text-amber-400"
+                              />
+                            )
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-sm text-muted-foreground">
+                          전체
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </AccordionTrigger>
-                <AccordionContent className="p-4 pt-2 border-t">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">
-                        최소 중요도
-                      </span>
-                      <div className="flex items-center gap-1">
-                        {importanceSliderValue > 0 ? (
-                          <div className="flex">
-                            {Array.from({ length: importanceSliderValue }).map(
-                              (_, i) => (
-                                <Star
-                                  key={i}
-                                  size={14}
-                                  className="fill-amber-400 text-amber-400"
-                                />
-                              )
+
+                  <Slider
+                    value={[importanceSliderValue]}
+                    min={0}
+                    max={5}
+                    step={1}
+                    onValueChange={(value) =>
+                      handleImportanceFilterChange(value[0])
+                    }
+                    className="[&>.sliderRange]:bg-primary [&>.sliderThumb]:border-primary"
+                  />
+
+                  <div className="text-sm text-muted-foreground">
+                    <p>중요도가 높은 고객일수록 더 큰 노드로 표시됩니다.</p>
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* 영업 단계 필터 */}
+            <AccordionItem
+              value="stage"
+              className="border rounded-lg overflow-hidden"
+            >
+              <AccordionTrigger className="px-3 py-3 text-left hover:no-underline hover:bg-muted/20 [&>svg]:h-5 [&>svg]:w-5 [&>svg]:text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <BarChart4 size={16} className="text-primary" />
+                  <span className="text-sm font-medium">영업 단계</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="p-4 pt-2 border-t">
+                <div className="space-y-3">
+                  <div className="text-sm text-muted-foreground">
+                    영업 단계별로 고객을 필터링합니다.
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-2">
+                    {stages.map((stage) => (
+                      <Button
+                        key={stage.value}
+                        variant={
+                          filters.stageFilter === stage.value
+                            ? 'secondary'
+                            : 'ghost'
+                        }
+                        className={cn(
+                          'justify-start h-9 text-sm',
+                          filters.stageFilter === stage.value
+                            ? 'font-medium'
+                            : 'font-normal'
+                        )}
+                        onClick={() => handleStageFilterChange(stage.value)}
+                      >
+                        <span
+                          className={`h-3 w-3 rounded-full mr-2 ${stage.color}`}
+                        ></span>
+                        {stage.label}
+                        {filters.stageFilter === stage.value && (
+                          <CheckCircle className="ml-auto h-4 w-4" />
+                        )}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* 소개 관계 범위 필터 */}
+            <AccordionItem
+              value="depth"
+              className="border rounded-lg overflow-hidden"
+            >
+              <AccordionTrigger className="px-3 py-3 text-left hover:no-underline hover:bg-muted/20 [&>svg]:h-5 [&>svg]:w-5 [&>svg]:text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <Users size={16} className="text-primary" />
+                  <span className="text-sm font-medium">소개 관계 범위</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="p-4 pt-2 border-t">
+                <div className="space-y-3">
+                  <div className="text-sm text-muted-foreground">
+                    직접 소개는 1촌 관계, 간접 소개는 2촌 관계까지 표시합니다.
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-2">
+                    {depthOptions.map((option) => (
+                      <Button
+                        key={option.value}
+                        variant={
+                          filters.depthFilter === option.value
+                            ? 'secondary'
+                            : 'ghost'
+                        }
+                        className={cn(
+                          'justify-start h-auto py-2.5 text-sm',
+                          filters.depthFilter === option.value
+                            ? 'font-medium'
+                            : 'font-normal'
+                        )}
+                        onClick={() => handleDepthFilterChange(option.value)}
+                      >
+                        <div className="flex flex-col items-start">
+                          <div className="flex items-center w-full">
+                            <span>{option.label}</span>
+                            {filters.depthFilter === option.value && (
+                              <CheckCircle className="ml-auto h-4 w-4" />
                             )}
                           </div>
-                        ) : (
-                          <span className="text-sm text-muted-foreground">
-                            전체
+                          <span className="text-xs text-muted-foreground font-normal mt-0.5">
+                            {option.description}
                           </span>
-                        )}
-                      </div>
-                    </div>
+                        </div>
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
 
-                    <Slider
-                      value={[importanceSliderValue]}
-                      min={0}
-                      max={5}
-                      step={1}
-                      onValueChange={(value) =>
-                        handleImportanceFilterChange(value[0])
-                      }
-                      className="[&>.sliderRange]:bg-primary [&>.sliderThumb]:border-primary"
+            {/* 핵심 소개자 필터 */}
+            <AccordionItem
+              value="influencer"
+              className="border rounded-lg overflow-hidden"
+            >
+              <AccordionTrigger className="px-3 py-3 text-left hover:no-underline hover:bg-muted/20 [&>svg]:h-5 [&>svg]:w-5 [&>svg]:text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <Sparkles size={16} className="text-primary" />
+                  <span className="text-sm font-medium">핵심 소개자</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="p-4 pt-2 border-t">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1">
+                      <span className="text-sm">핵심 소개자</span>
+                      {filters.showInfluencersOnly && (
+                        <LinkIcon size={12} className="text-primary ml-1" />
+                      )}
+                    </div>
+                    <Switch
+                      checked={filters.showInfluencersOnly}
+                      onCheckedChange={handleInfluencersToggle}
                     />
-
-                    <div className="text-sm text-muted-foreground">
-                      <p>중요도가 높은 고객일수록 더 큰 노드로 표시됩니다.</p>
-                    </div>
                   </div>
-                </AccordionContent>
-              </AccordionItem>
-
-              {/* 영업 단계 필터 */}
-              <AccordionItem
-                value="stage"
-                className="border rounded-lg overflow-hidden"
-              >
-                <AccordionTrigger className="px-3 py-3 text-left hover:no-underline hover:bg-muted/20 [&>svg]:h-5 [&>svg]:w-5 [&>svg]:text-muted-foreground">
-                  <div className="flex items-center gap-2">
-                    <BarChart4 size={16} className="text-primary" />
-                    <span className="text-sm font-medium">영업 단계</span>
+                  <div className="text-sm text-muted-foreground">
+                    <p>
+                      핵심 소개자는 다수의 고객을 소개한 영향력 있는 고객입니다.
+                    </p>
+                    <p
+                      className={
+                        filters.showInfluencersOnly
+                          ? 'text-primary text-xs mt-1.5'
+                          : 'hidden'
+                      }
+                    >
+                      핵심 소개자와 직접 연결된 고객도 함께 표시됩니다
+                    </p>
                   </div>
-                </AccordionTrigger>
-                <AccordionContent className="p-4 pt-2 border-t">
-                  <div className="space-y-3">
-                    <div className="text-sm text-muted-foreground">
-                      영업 단계별로 고객을 필터링합니다.
-                    </div>
-
-                    <div className="grid grid-cols-1 gap-2">
-                      {stages.map((stage) => (
-                        <Button
-                          key={stage.value}
-                          variant={
-                            filters.stageFilter === stage.value
-                              ? 'secondary'
-                              : 'ghost'
-                          }
-                          className={cn(
-                            'justify-start h-9 text-sm',
-                            filters.stageFilter === stage.value
-                              ? 'font-medium'
-                              : 'font-normal'
-                          )}
-                          onClick={() => handleStageFilterChange(stage.value)}
-                        >
-                          <span
-                            className={`h-3 w-3 rounded-full mr-2 ${stage.color}`}
-                          ></span>
-                          {stage.label}
-                          {filters.stageFilter === stage.value && (
-                            <CheckCircle className="ml-auto h-4 w-4" />
-                          )}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-
-              {/* 소개 관계 범위 필터 */}
-              <AccordionItem
-                value="depth"
-                className="border rounded-lg overflow-hidden"
-              >
-                <AccordionTrigger className="px-3 py-3 text-left hover:no-underline hover:bg-muted/20 [&>svg]:h-5 [&>svg]:w-5 [&>svg]:text-muted-foreground">
-                  <div className="flex items-center gap-2">
-                    <Users size={16} className="text-primary" />
-                    <span className="text-sm font-medium">소개 관계 범위</span>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent className="p-4 pt-2 border-t">
-                  <div className="space-y-3">
-                    <div className="text-sm text-muted-foreground">
-                      직접 소개는 1촌 관계, 간접 소개는 2촌 관계까지 표시합니다.
-                    </div>
-
-                    <div className="grid grid-cols-1 gap-2">
-                      {depthOptions.map((option) => (
-                        <Button
-                          key={option.value}
-                          variant={
-                            filters.depthFilter === option.value
-                              ? 'secondary'
-                              : 'ghost'
-                          }
-                          className={cn(
-                            'justify-start h-auto py-2.5 text-sm',
-                            filters.depthFilter === option.value
-                              ? 'font-medium'
-                              : 'font-normal'
-                          )}
-                          onClick={() => handleDepthFilterChange(option.value)}
-                        >
-                          <div className="flex flex-col items-start">
-                            <div className="flex items-center w-full">
-                              <span>{option.label}</span>
-                              {filters.depthFilter === option.value && (
-                                <CheckCircle className="ml-auto h-4 w-4" />
-                              )}
-                            </div>
-                            <span className="text-xs text-muted-foreground font-normal mt-0.5">
-                              {option.description}
-                            </span>
-                          </div>
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-
-              {/* 핵심 소개자 필터 */}
-              <AccordionItem
-                value="influencer"
-                className="border rounded-lg overflow-hidden"
-              >
-                <AccordionTrigger className="px-3 py-3 text-left hover:no-underline hover:bg-muted/20 [&>svg]:h-5 [&>svg]:w-5 [&>svg]:text-muted-foreground">
-                  <div className="flex items-center gap-2">
-                    <Sparkles size={16} className="text-primary" />
-                    <span className="text-sm font-medium">핵심 소개자</span>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent className="p-4 pt-2 border-t">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1">
-                        <span className="text-sm">핵심 소개자</span>
-                        {filters.showInfluencersOnly && (
-                          <LinkIcon size={12} className="text-primary ml-1" />
-                        )}
-                      </div>
-                      <Switch
-                        checked={filters.showInfluencersOnly}
-                        onCheckedChange={handleInfluencersToggle}
-                      />
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      <p>
-                        핵심 소개자는 다수의 고객을 소개한 영향력 있는
-                        고객입니다.
-                      </p>
-                      <p
-                        className={
-                          filters.showInfluencersOnly
-                            ? 'text-primary text-xs mt-1.5'
-                            : 'hidden'
-                        }
-                      >
-                        핵심 소개자와 직접 연결된 고객도 함께 표시됩니다
-                      </p>
-                    </div>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-
-            {/* 추가 여백 - 줄임 */}
-            <div className="h-16" aria-hidden="true"></div>
-          </div>
-        </ScrollArea>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </div>
       </div>
     </>
   );
@@ -689,7 +627,7 @@ export default function NetworkSidebar({
             isFilterOpen ? 'translate-x-0' : '-translate-x-full'
           )}
         >
-          <div className="p-4 flex-1 overflow-hidden flex flex-col h-full">
+          <div className="p-4 flex-1 flex flex-col h-full overflow-hidden">
             <div className="flex items-center justify-between pb-3">
               <h2 className="text-base font-medium">필터</h2>
               <Button
@@ -700,7 +638,7 @@ export default function NetworkSidebar({
                 <X size={18} />
               </Button>
             </div>
-            <div className="flex-1 overflow-hidden flex flex-col h-full">
+            <div className="flex-1 flex flex-col h-full overflow-hidden">
               <FilterContent />
             </div>
           </div>
@@ -721,11 +659,11 @@ export default function NetworkSidebar({
   return (
     <div
       className={cn(
-        'hidden md:flex h-full border-r bg-background overflow-hidden flex-col',
+        'hidden md:flex h-full border-r bg-background flex-col',
         !cssLoaded && 'invisible' // 스타일이 로드될 때까지 일시적으로 감춤
       )}
     >
-      <div className="p-4 flex-1 overflow-hidden flex flex-col h-full">
+      <div className="p-4 flex-1 flex flex-col h-full overflow-hidden">
         <FilterContent />
       </div>
     </div>

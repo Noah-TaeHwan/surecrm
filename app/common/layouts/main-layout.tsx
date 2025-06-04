@@ -130,18 +130,18 @@ export function MainLayout({
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="h-screen bg-background flex overflow-hidden">
       {/* 데스크톱 사이드바 */}
       {!isMobile && (
-        <div className="w-64 border-r border-border bg-muted/30">
+        <div className="w-64 border-r border-border bg-muted/30 flex-shrink-0">
           <Sidebar />
         </div>
       )}
 
       {/* 메인 컨텐츠 영역 */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-w-0">
         {/* 헤더 */}
-        <header className="h-16 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+        <header className="h-16 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex-shrink-0 z-50">
           <div className="h-full px-4 lg:px-6 flex items-center justify-between">
             <div className="flex items-center gap-4">
               {/* 모바일 메뉴 버튼 */}
@@ -163,8 +163,25 @@ export function MainLayout({
           </div>
         </header>
 
-        {/* 페이지 컨텐츠 */}
-        <main className="flex-1 p-4 lg:p-6">{children}</main>
+        {/* 페이지 컨텐츠 - 스크롤 가능한 영역 */}
+        <main
+          className={`flex-1 ${
+            title === '소개 네트워크'
+              ? 'overflow-hidden p-0'
+              : 'overflow-y-auto p-3 lg:p-4'
+          }`}
+          style={
+            title === '소개 네트워크'
+              ? {
+                  height: 'calc(100vh - 4rem)',
+                  maxHeight: 'calc(100vh - 4rem)',
+                  overflow: 'hidden',
+                }
+              : {}
+          }
+        >
+          {children}
+        </main>
       </div>
 
       {/* 모바일 사이드바 */}
