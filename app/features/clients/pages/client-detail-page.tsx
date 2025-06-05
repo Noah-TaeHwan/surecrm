@@ -435,7 +435,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
   const error = data?.error || null;
   const currentUser = data?.currentUser || null;
 
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('notes');
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -1903,6 +1903,41 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                       </div>
                     </div>
                   </div>
+
+                  <Separator />
+
+                  {/* 태그 섹션 */}
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-medium">태그</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {client?.tags && client.tags.length > 0 ? (
+                        client.tags.map((tag: string, index: number) => (
+                          <Badge
+                            key={index}
+                            variant="secondary"
+                            className="text-xs"
+                          >
+                            {tag}
+                          </Badge>
+                        ))
+                      ) : (
+                        <div className="text-center py-3 w-full">
+                          <Target className="h-5 w-5 text-muted-foreground mx-auto mb-2" />
+                          <p className="text-xs text-muted-foreground mb-2">
+                            태그가 없습니다
+                          </p>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-xs h-7"
+                          >
+                            <Plus className="h-3 w-3 mr-1" />
+                            태그 추가
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             </div>
@@ -1915,95 +1950,17 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
               onValueChange={setActiveTab}
               className="space-y-6"
             >
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="overview">개요</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-4 lg:grid-cols-7 h-auto lg:h-9 gap-1 lg:gap-0 p-1">
+                <TabsTrigger value="notes">상담내용</TabsTrigger>
+                <TabsTrigger value="medical">병력사항</TabsTrigger>
+                <TabsTrigger value="checkup">점검목적</TabsTrigger>
+                <TabsTrigger value="interests">관심사항</TabsTrigger>
+                <TabsTrigger value="companions">상담동반자</TabsTrigger>
                 <TabsTrigger value="insurance">보험</TabsTrigger>
                 <TabsTrigger value="family">가족</TabsTrigger>
-                <TabsTrigger value="history">이력</TabsTrigger>
               </TabsList>
 
-              {/* 개요 탭 */}
-              <TabsContent value="overview" className="space-y-6">
-                {/* 메모 섹션 */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <FileText className="h-5 w-5" />
-                      메모 및 특이사항
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-6">
-                    {isEditing ? (
-                      <Textarea
-                        value={editFormData.notes}
-                        onChange={(e) =>
-                          setEditFormData({
-                            ...editFormData,
-                            notes: e.target.value,
-                          })
-                        }
-                        placeholder="고객에 대한 메모를 입력하세요..."
-                        className="min-h-[120px] resize-none"
-                      />
-                    ) : client?.notes ? (
-                      <div className="p-4 bg-muted/20 rounded-lg border">
-                        <p className="text-sm whitespace-pre-wrap leading-relaxed">
-                          {client.notes}
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="text-center py-8">
-                        <FileText className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                        <p className="text-sm text-muted-foreground mb-3">
-                          메모가 없습니다
-                        </p>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={handleEditStart}
-                        >
-                          <Plus className="h-3 w-3 mr-1" />
-                          메모 추가
-                        </Button>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-
-                {/* 태그 섹션 */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <Target className="h-5 w-5" />
-                      태그
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-6">
-                    <div className="flex flex-wrap gap-2">
-                      {client?.tags && client.tags.length > 0 ? (
-                        client.tags.map((tag: string, index: number) => (
-                          <Badge key={index} variant="secondary">
-                            {tag}
-                          </Badge>
-                        ))
-                      ) : (
-                        <div className="text-center py-6 w-full">
-                          <Target className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                          <p className="text-sm text-muted-foreground mb-3">
-                            태그가 없습니다
-                          </p>
-                          <Button variant="outline" size="sm">
-                            <Plus className="h-3 w-3 mr-1" />
-                            태그 추가
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              {/* 나머지 탭들 */}
+              {/* 탭 컨텐츠들 */}
               <TabsContent value="insurance" className="space-y-6">
                 <Card>
                   <CardHeader>
@@ -2042,20 +1999,913 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                 </Card>
               </TabsContent>
 
-              <TabsContent value="history" className="space-y-6">
+              {/* 🆕 병력사항 탭 */}
+              <TabsContent value="medical" className="space-y-6">
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-lg flex items-center gap-2">
-                      <Clock className="h-5 w-5" />
-                      연락 이력
+                      <span className="text-lg">🏥</span>
+                      병력사항
                     </CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      고객의 의료 이력 및 건강 상태 정보를 관리합니다.
+                    </p>
                   </CardHeader>
-                  <CardContent className="p-6">
-                    <div className="text-center py-8">
-                      <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                      <p className="text-sm text-muted-foreground">
-                        연락 이력이 준비 중입니다.
-                      </p>
+                  <CardContent className="p-6 space-y-6">
+                    {/* 3개월 이내 의료사항 */}
+                    <div className="space-y-4">
+                      <h4 className="font-medium text-foreground flex items-center gap-2">
+                        🕐 3개월 이내 의료 관련 사항
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/30 rounded-lg border border-border/50">
+                        {[
+                          {
+                            key: 'hasRecentDiagnosis',
+                            label: '질병 확정진단',
+                            icon: '🔬',
+                          },
+                          {
+                            key: 'hasRecentSuspicion',
+                            label: '질병 의심소견',
+                            icon: '🤔',
+                          },
+                          {
+                            key: 'hasRecentMedication',
+                            label: '투약',
+                            icon: '💊',
+                          },
+                          {
+                            key: 'hasRecentTreatment',
+                            label: '치료',
+                            icon: '🩺',
+                          },
+                          {
+                            key: 'hasRecentHospitalization',
+                            label: '입원',
+                            icon: '🏥',
+                          },
+                          {
+                            key: 'hasRecentSurgery',
+                            label: '수술',
+                            icon: '⚕️',
+                          },
+                        ].map((item) => (
+                          <div
+                            key={item.key}
+                            className="flex items-center space-x-3"
+                          >
+                            <span className="text-lg">{item.icon}</span>
+                            <label className="flex items-center space-x-2 text-sm cursor-pointer">
+                              <input
+                                type="checkbox"
+                                className="rounded border-border"
+                                // TODO: 실제 데이터 연결
+                                disabled
+                              />
+                              <span>{item.label}</span>
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* 1년 이내 재검사 */}
+                    <div className="space-y-4">
+                      <h4 className="font-medium text-foreground flex items-center gap-2">
+                        📅 1년 이내 재검사 관련
+                      </h4>
+                      <div className="grid grid-cols-1 gap-4 p-4 bg-muted/20 rounded-lg border border-border/40">
+                        <div className="flex items-center space-x-3">
+                          <span className="text-lg">🔄</span>
+                          <label className="flex items-center space-x-2 text-sm cursor-pointer">
+                            <input
+                              type="checkbox"
+                              className="rounded border-border"
+                              // TODO: 실제 데이터 연결
+                              disabled
+                            />
+                            <span>
+                              의사로부터 진찰 또는 검사를 통하여
+                              추가검사(재검사) 소견 여부
+                            </span>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 5년 이내 주요 의료 이력 */}
+                    <div className="space-y-4">
+                      <h4 className="font-medium text-foreground flex items-center gap-2">
+                        🗓️ 5년 이내 주요 의료 이력
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-secondary/30 rounded-lg border border-border/60">
+                        {[
+                          {
+                            key: 'hasMajorHospitalization',
+                            label: '입원',
+                            icon: '🏥',
+                          },
+                          { key: 'hasMajorSurgery', label: '수술', icon: '⚕️' },
+                          {
+                            key: 'hasLongTermTreatment',
+                            label: '7일 이상 치료',
+                            icon: '📅',
+                          },
+                          {
+                            key: 'hasLongTermMedication',
+                            label: '30일 이상 투약',
+                            icon: '💊',
+                          },
+                        ].map((item) => (
+                          <div
+                            key={item.key}
+                            className="flex items-center space-x-3"
+                          >
+                            <span className="text-lg">{item.icon}</span>
+                            <label className="flex items-center space-x-2 text-sm cursor-pointer">
+                              <input
+                                type="checkbox"
+                                className="rounded border-border"
+                                // TODO: 실제 데이터 연결
+                                disabled
+                              />
+                              <span>{item.label}</span>
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* 상세 메모 섹션 */}
+                    <div className="space-y-4">
+                      <h4 className="font-medium text-foreground">상세 내용</h4>
+                      <div className="space-y-3">
+                        <div>
+                          <label className="text-sm text-muted-foreground">
+                            3개월 이내 상세 내용
+                          </label>
+                          <textarea
+                            className="w-full mt-1 p-3 border rounded-lg text-sm"
+                            rows={3}
+                            placeholder="3개월 이내 의료 관련 상세 내용을 입력하세요..."
+                            disabled
+                          />
+                        </div>
+                        <div>
+                          <label className="text-sm text-muted-foreground">
+                            5년 이내 상세 내용
+                          </label>
+                          <textarea
+                            className="w-full mt-1 p-3 border rounded-lg text-sm"
+                            rows={3}
+                            placeholder="5년 이내 주요 의료 이력 상세 내용을 입력하세요..."
+                            disabled
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 저장 버튼 */}
+                    <div className="flex justify-end pt-4 border-t">
+                      <Button disabled className="px-6">
+                        병력사항 저장
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* 🆕 점검목적 탭 */}
+              <TabsContent value="checkup" className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <span className="text-lg">🎯</span>
+                      점검 목적
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      고객의 보험 관련 걱정사항과 필요사항을 파악합니다.
+                    </p>
+                  </CardHeader>
+                  <CardContent className="p-6 space-y-6">
+                    {/* 걱정사항 체크리스트 */}
+                    <div className="space-y-4">
+                      <h4 className="font-medium text-foreground flex items-center gap-2">
+                        😟 현재 걱정되는 사항
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/25 rounded-lg border border-border/50">
+                        {[
+                          {
+                            key: 'isInsurancePremiumConcern',
+                            label: '현재 보험료가 걱정되시나요?',
+                            icon: '💰',
+                          },
+                          {
+                            key: 'isCoverageConcern',
+                            label: '현재 보장이 걱정되시나요?',
+                            icon: '🛡️',
+                          },
+                          {
+                            key: 'isMedicalHistoryConcern',
+                            label: '현재 병력이 있어서 걱정되시나요?',
+                            icon: '🏥',
+                          },
+                        ].map((item) => (
+                          <div
+                            key={item.key}
+                            className="flex items-center space-x-3"
+                          >
+                            <span className="text-lg">{item.icon}</span>
+                            <label className="flex items-center space-x-2 text-sm cursor-pointer">
+                              <input
+                                type="checkbox"
+                                className="rounded border-border"
+                                disabled
+                              />
+                              <span>{item.label}</span>
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* 필요사항 체크리스트 */}
+                    <div className="space-y-4">
+                      <h4 className="font-medium text-foreground flex items-center gap-2">
+                        ✅ 필요한 사항
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-accent/25 rounded-lg border border-border/50">
+                        {[
+                          {
+                            key: 'needsDeathBenefit',
+                            label: '현재 사망보험금이 필요하신가요?',
+                            icon: '💼',
+                          },
+                          {
+                            key: 'needsImplantPlan',
+                            label: '2년후 임플란트 계획이 있으신가요?',
+                            icon: '🦷',
+                          },
+                          {
+                            key: 'needsCaregiverInsurance',
+                            label: '현재 간병인 보험이 필요하신가요?',
+                            icon: '👩‍⚕️',
+                          },
+                          {
+                            key: 'needsDementiaInsurance',
+                            label: '현재 치매보험이 필요하신가요?',
+                            icon: '🧠',
+                          },
+                        ].map((item) => (
+                          <div
+                            key={item.key}
+                            className="flex items-center space-x-3"
+                          >
+                            <span className="text-lg">{item.icon}</span>
+                            <label className="flex items-center space-x-2 text-sm cursor-pointer">
+                              <input
+                                type="checkbox"
+                                className="rounded border-border"
+                                disabled
+                              />
+                              <span>{item.label}</span>
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* 저축 현황 (주관식) */}
+                    <div className="space-y-4">
+                      <h4 className="font-medium text-foreground flex items-center gap-2">
+                        💰 저축 현황
+                      </h4>
+                      <div className="p-4 bg-accent/20 rounded-lg border border-border/40">
+                        <label className="block text-sm text-muted-foreground mb-2">
+                          지금 저축은 어디서 하고 계신가요?
+                        </label>
+                        <textarea
+                          className="w-full p-3 border rounded-lg text-sm"
+                          rows={3}
+                          placeholder="저축 현황에 대해 자세히 입력해주세요..."
+                          disabled
+                        />
+                      </div>
+                    </div>
+
+                    {/* 추가 걱정사항 */}
+                    <div className="space-y-4">
+                      <h4 className="font-medium text-foreground">
+                        기타 걱정사항
+                      </h4>
+                      <textarea
+                        className="w-full p-3 border rounded-lg text-sm"
+                        rows={4}
+                        placeholder="기타 걱정사항이나 추가로 논의하고 싶은 내용을 입력해주세요..."
+                        disabled
+                      />
+                    </div>
+
+                    {/* 저장 버튼 */}
+                    <div className="flex justify-end pt-4 border-t">
+                      <Button disabled className="px-6">
+                        점검목적 저장
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* 🆕 관심사항 탭 */}
+              <TabsContent value="interests" className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <span className="text-lg">❓</span>
+                      무엇이든 물어보세요!
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      고객의 관심사항을 체크리스트로 관리합니다.
+                    </p>
+                  </CardHeader>
+                  <CardContent className="p-6 space-y-6">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                      {[
+                        {
+                          key: 'interestedInAutoInsurance',
+                          label: '자동차보험',
+                          icon: '🚗',
+                        },
+                        {
+                          key: 'interestedInDementia',
+                          label: '치매',
+                          icon: '🧠',
+                        },
+                        {
+                          key: 'interestedInDental',
+                          label: '치아(임플란트)',
+                          icon: '🦷',
+                        },
+                        {
+                          key: 'interestedInDriverInsurance',
+                          label: '운전자',
+                          icon: '🚙',
+                        },
+                        {
+                          key: 'interestedInHealthCheckup',
+                          label: '건강검진',
+                          icon: '🏥',
+                        },
+                        {
+                          key: 'interestedInMedicalExpenses',
+                          label: '실비원가',
+                          icon: '💊',
+                        },
+                        {
+                          key: 'interestedInFireInsurance',
+                          label: '화재보험',
+                          icon: '🔥',
+                        },
+                        {
+                          key: 'interestedInCaregiver',
+                          label: '간병인',
+                          icon: '👩‍⚕️',
+                        },
+                        {
+                          key: 'interestedInCancer',
+                          label: '암 (표적항암, 로봇수술)',
+                          icon: '🎗️',
+                        },
+                        {
+                          key: 'interestedInSavings',
+                          label: '저축 (연금, 노후, 목돈)',
+                          icon: '💰',
+                        },
+                        {
+                          key: 'interestedInLiability',
+                          label: '일상배상책임',
+                          icon: '⚖️',
+                        },
+                        {
+                          key: 'interestedInLegalAdvice',
+                          label: '민사소송법률',
+                          icon: '⚖️',
+                        },
+                        {
+                          key: 'interestedInTax',
+                          label: '상속세, 양도세',
+                          icon: '📋',
+                        },
+                        {
+                          key: 'interestedInInvestment',
+                          label: '재테크',
+                          icon: '📈',
+                        },
+                        {
+                          key: 'interestedInPetInsurance',
+                          label: '펫보험',
+                          icon: '🐕',
+                        },
+                        {
+                          key: 'interestedInAccidentInsurance',
+                          label: '상해보험',
+                          icon: '🩹',
+                        },
+                        {
+                          key: 'interestedInTrafficAccident',
+                          label: '교통사고(합의)',
+                          icon: '🚨',
+                        },
+                      ].map((item) => (
+                        <div
+                          key={item.key}
+                          className="p-3 bg-card border border-border/50 rounded-lg hover:bg-accent/10 transition-colors"
+                        >
+                          <label className="flex flex-col items-center text-center cursor-pointer space-y-2">
+                            <span className="text-2xl">{item.icon}</span>
+                            <input
+                              type="checkbox"
+                              className="rounded border-border"
+                              disabled
+                            />
+                            <span className="text-xs text-foreground leading-tight">
+                              {item.label}
+                            </span>
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* 추가 관심사항 */}
+                    <div className="space-y-4">
+                      <h4 className="font-medium text-foreground">
+                        기타 관심사항
+                      </h4>
+                      <textarea
+                        className="w-full p-3 border rounded-lg text-sm"
+                        rows={4}
+                        placeholder="위 목록에 없는 관심사항이나 추가로 알고 싶은 내용을 입력해주세요..."
+                        disabled
+                      />
+                    </div>
+
+                    {/* 저장 버튼 */}
+                    <div className="flex justify-end pt-4 border-t">
+                      <Button disabled className="px-6">
+                        관심사항 저장
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* 🆕 상담동반자 탭 */}
+              <TabsContent value="companions" className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <span className="text-lg">👥</span>
+                      상담 같이 들어야하는 소중한 분
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      상담에 함께 참석할 동반자 정보를 관리합니다.
+                    </p>
+                  </CardHeader>
+                  <CardContent className="p-6 space-y-6">
+                    {/* 동반자 추가 버튼 */}
+                    <div className="flex justify-between items-center">
+                      <h4 className="font-medium text-foreground">
+                        등록된 동반자
+                      </h4>
+                      <Button variant="outline" size="sm" disabled>
+                        <Plus className="h-4 w-4 mr-2" />
+                        동반자 추가
+                      </Button>
+                    </div>
+
+                    {/* 동반자 목록 (예시) */}
+                    <div className="space-y-4">
+                      {/* 예시 동반자 */}
+                      <div className="p-4 bg-muted/20 rounded-lg border border-border/40">
+                        <div className="flex items-start justify-between">
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-3">
+                              <span className="text-lg">👤</span>
+                              <div>
+                                <h5 className="font-medium text-foreground">
+                                  김배우자
+                                </h5>
+                                <span className="text-sm text-muted-foreground">
+                                  배우자
+                                </span>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <Phone className="h-4 w-4" />
+                              <span>010-1234-5678</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
+                                주 동반자
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex gap-1">
+                            <Button variant="ghost" size="sm" disabled>
+                              <Edit2 className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="sm" disabled>
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* 빈 상태 */}
+                      <div className="text-center py-12">
+                        <div className="w-16 h-16 bg-muted/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <span className="text-2xl">👥</span>
+                        </div>
+                        <h4 className="font-medium text-foreground mb-2">
+                          동반자가 없습니다
+                        </h4>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          상담에 함께 참석할 동반자를 추가해보세요.
+                        </p>
+                        <Button variant="outline" disabled>
+                          <Plus className="h-4 w-4 mr-2" />첫 동반자 추가
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* 동반자 추가 폼 (숨김 상태) */}
+                    <div className="hidden p-4 bg-muted/30 rounded-lg border border-border">
+                      <h5 className="font-medium text-foreground mb-4">
+                        새 동반자 추가
+                      </h5>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-muted-foreground mb-1">
+                            성함 *
+                          </label>
+                          <input
+                            type="text"
+                            className="w-full p-2 border rounded-lg text-sm"
+                            placeholder="동반자 성함"
+                            disabled
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-muted-foreground mb-1">
+                            관계 *
+                          </label>
+                          <select
+                            className="w-full p-2 border rounded-lg text-sm"
+                            disabled
+                          >
+                            <option>관계 선택</option>
+                            <option>배우자</option>
+                            <option>자녀</option>
+                            <option>부모</option>
+                            <option>형제/자매</option>
+                            <option>기타</option>
+                          </select>
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="block text-sm font-medium text-muted-foreground mb-1">
+                            연락처 *
+                          </label>
+                          <input
+                            type="tel"
+                            className="w-full p-2 border rounded-lg text-sm"
+                            placeholder="010-0000-0000"
+                            disabled
+                          />
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="flex items-center space-x-2">
+                            <input
+                              type="checkbox"
+                              className="rounded"
+                              disabled
+                            />
+                            <span className="text-sm">주 동반자로 설정</span>
+                          </label>
+                        </div>
+                      </div>
+                      <div className="flex gap-2 mt-4">
+                        <Button size="sm" disabled>
+                          저장
+                        </Button>
+                        <Button variant="outline" size="sm" disabled>
+                          취소
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* 🆕 상담내용 탭 */}
+              <TabsContent value="notes" className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <span className="text-lg">📝</span>
+                      상담 내용 및 계약사항 메모
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      날짜별로 상담 내용과 계약사항을 기록합니다.
+                    </p>
+                  </CardHeader>
+                  <CardContent className="p-6 space-y-6">
+                    {/* 고객 메모 및 특이사항 */}
+                    <div className="space-y-4">
+                      <h4 className="font-medium text-foreground flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        고객 메모 및 특이사항
+                      </h4>
+                      <div className="p-4 bg-muted/20 rounded-lg border border-border/40">
+                        {isEditing ? (
+                          <Textarea
+                            value={editFormData.notes}
+                            onChange={(e) =>
+                              setEditFormData({
+                                ...editFormData,
+                                notes: e.target.value,
+                              })
+                            }
+                            placeholder="고객에 대한 메모를 입력하세요..."
+                            className="min-h-[120px] resize-none border-none p-0 bg-transparent"
+                          />
+                        ) : client?.notes ? (
+                          <p className="text-sm whitespace-pre-wrap leading-relaxed">
+                            {client.notes}
+                          </p>
+                        ) : (
+                          <div className="text-center py-6">
+                            <FileText className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                            <p className="text-sm text-muted-foreground mb-3">
+                              메모가 없습니다
+                            </p>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={handleEditStart}
+                            >
+                              <Plus className="h-3 w-3 mr-1" />
+                              메모 추가
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <Separator />
+
+                    {/* 상담 노트 추가 버튼 */}
+                    <div className="flex justify-between items-center">
+                      <h4 className="font-medium text-foreground">상담 기록</h4>
+                      <Button variant="outline" size="sm" disabled>
+                        <Plus className="h-4 w-4 mr-2" />새 상담 기록
+                      </Button>
+                    </div>
+
+                    {/* 상담 기록 타임라인 */}
+                    <div className="space-y-6">
+                      {/* 예시 상담 기록 */}
+                      <div className="relative pl-8">
+                        <div className="absolute left-0 top-2 w-3 h-3 bg-blue-500 rounded-full"></div>
+                        <div className="absolute left-1.5 top-5 w-0.5 h-full bg-border"></div>
+
+                        <div className="border rounded-lg p-4 shadow-sm">
+                          <div className="flex items-start justify-between mb-3">
+                            <div>
+                              <h5 className="font-medium text-foreground">
+                                초기 상담 - 보험 현황 파악
+                              </h5>
+                              <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
+                                <span>📅 2024.01.15</span>
+                                <span>⏰ 14:30</span>
+                                <span className="bg-primary/10 text-primary px-2 py-0.5 rounded">
+                                  보험 상담
+                                </span>
+                              </div>
+                            </div>
+                            <div className="flex gap-1">
+                              <Button variant="ghost" size="sm" disabled>
+                                <Edit2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+
+                          <div className="space-y-3">
+                            <div>
+                              <h6 className="text-sm font-medium text-muted-foreground mb-1">
+                                상담 내용
+                              </h6>
+                              <p className="text-sm leading-relaxed">
+                                고객의 현재 보험 현황을 파악하고, 보장 공백
+                                부분을 분석했습니다. 특히 의료실비와 암보험
+                                부분에서 보완이 필요한 상황입니다.
+                              </p>
+                            </div>
+
+                            <div>
+                              <h6 className="text-sm font-medium text-muted-foreground mb-1">
+                                계약 관련
+                              </h6>
+                              <div className="bg-accent/20 p-3 rounded border border-border/40">
+                                <div className="grid grid-cols-2 gap-3 text-sm">
+                                  <div>
+                                    <span className="text-muted-foreground">
+                                      상품:
+                                    </span>{' '}
+                                    의료실비보험
+                                  </div>
+                                  <div>
+                                    <span className="text-muted-foreground">
+                                      월 보험료:
+                                    </span>{' '}
+                                    45,000원
+                                  </div>
+                                  <div>
+                                    <span className="text-muted-foreground">
+                                      보장기간:
+                                    </span>{' '}
+                                    80세까지
+                                  </div>
+                                  <div>
+                                    <span className="text-muted-foreground">
+                                      상태:
+                                    </span>{' '}
+                                    <span className="text-blue-600">
+                                      검토 중
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div>
+                              <h6 className="text-sm font-medium text-muted-foreground mb-1">
+                                다음 액션
+                              </h6>
+                              <div className="flex items-center gap-2 text-sm">
+                                <span className="bg-orange-100 text-orange-700 px-2 py-0.5 rounded">
+                                  📞 팔로업
+                                </span>
+                                <span>
+                                  2024.01.22 - 상품 설명서 검토 후 재상담
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* 더 많은 기록들... */}
+                      <div className="relative pl-8">
+                        <div className="absolute left-0 top-2 w-3 h-3 bg-muted-foreground/60 rounded-full"></div>
+
+                        <div className="bg-card border border-border/50 rounded-lg p-4">
+                          <div className="flex items-start justify-between mb-3">
+                            <div>
+                              <h5 className="font-medium text-foreground">
+                                계약 체결
+                              </h5>
+                              <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
+                                <span>📅 2024.01.25</span>
+                                <span>⏰ 16:00</span>
+                                <span className="bg-primary/10 text-primary px-2 py-0.5 rounded">
+                                  계약 완료
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="space-y-3">
+                            <div>
+                              <h6 className="text-sm font-medium text-muted-foreground mb-1">
+                                계약 내용
+                              </h6>
+                              <p className="text-sm leading-relaxed">
+                                의료실비보험 계약이 성공적으로 체결되었습니다.
+                                고객 만족도가 높았으며, 추가로 암보험 가입도
+                                검토하기로 했습니다.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* 빈 상태 (실제로는 이것이 기본) */}
+                      <div className="hidden text-center py-12">
+                        <div className="w-16 h-16 bg-muted/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <span className="text-2xl">📝</span>
+                        </div>
+                        <h4 className="font-medium text-foreground mb-2">
+                          상담 기록이 없습니다
+                        </h4>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          첫 상담 기록을 추가해보세요.
+                        </p>
+                        <Button variant="outline" disabled>
+                          <Plus className="h-4 w-4 mr-2" />첫 상담 기록 작성
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* 새 상담 기록 추가 폼 (숨김 상태) */}
+                    <div className="hidden p-4 bg-muted/30 rounded-lg border border-border">
+                      <h5 className="font-medium text-foreground mb-4">
+                        새 상담 기록 작성
+                      </h5>
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-muted-foreground mb-1">
+                              상담 날짜 *
+                            </label>
+                            <input
+                              type="date"
+                              className="w-full p-2 border rounded-lg text-sm"
+                              disabled
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-muted-foreground mb-1">
+                              유형 *
+                            </label>
+                            <select
+                              className="w-full p-2 border rounded-lg text-sm"
+                              disabled
+                            >
+                              <option>상담 유형 선택</option>
+                              <option>초기 상담</option>
+                              <option>보험 상담</option>
+                              <option>계약 체결</option>
+                              <option>클레임 처리</option>
+                              <option>팔로업</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-muted-foreground mb-1">
+                              중요도
+                            </label>
+                            <select
+                              className="w-full p-2 border rounded-lg text-sm"
+                              disabled
+                            >
+                              <option>보통</option>
+                              <option>높음</option>
+                              <option>낮음</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-muted-foreground mb-1">
+                            제목 *
+                          </label>
+                          <input
+                            type="text"
+                            className="w-full p-2 border rounded-lg text-sm"
+                            placeholder="상담 제목을 입력하세요"
+                            disabled
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-muted-foreground mb-1">
+                            상담 내용 *
+                          </label>
+                          <textarea
+                            className="w-full p-3 border rounded-lg text-sm"
+                            rows={6}
+                            placeholder="상담 내용을 상세히 입력하세요..."
+                            disabled
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-muted-foreground mb-1">
+                            다음 팔로업 날짜
+                          </label>
+                          <input
+                            type="date"
+                            className="w-full p-2 border rounded-lg text-sm"
+                            disabled
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex gap-2 mt-6">
+                        <Button disabled>저장</Button>
+                        <Button variant="outline" disabled>
+                          취소
+                        </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>

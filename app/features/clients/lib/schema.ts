@@ -346,6 +346,257 @@ export const appClientDataBackups = pgTable('app_client_data_backups', {
     .notNull(),
 });
 
+// 🆕 NEW: Client Medical History (병력사항) - 고객 관리 카드 핵심 기능
+export const appClientMedicalHistory = pgTable('app_client_medical_history', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  clientId: uuid('client_id')
+    .notNull()
+    .unique()
+    .references(() => clients.id, { onDelete: 'cascade' }),
+  // 3개월 이내 의료 관련 사항
+  hasRecentDiagnosis: boolean('has_recent_diagnosis').default(false).notNull(), // 질병 확정진단
+  hasRecentSuspicion: boolean('has_recent_suspicion').default(false).notNull(), // 질병 의심소견
+  hasRecentMedication: boolean('has_recent_medication')
+    .default(false)
+    .notNull(), // 투약
+  hasRecentTreatment: boolean('has_recent_treatment').default(false).notNull(), // 치료
+  hasRecentHospitalization: boolean('has_recent_hospitalization')
+    .default(false)
+    .notNull(), // 입원
+  hasRecentSurgery: boolean('has_recent_surgery').default(false).notNull(), // 수술
+  recentMedicalDetails: text('recent_medical_details'), // 상세 내용
+
+  // 1년 이내 재검 관련
+  hasAdditionalExam: boolean('has_additional_exam').default(false).notNull(), // 추가검사(재검사) 소견
+  additionalExamDetails: text('additional_exam_details'), // 상세 내용
+
+  // 5년 이내 주요 의료 이력
+  hasMajorHospitalization: boolean('has_major_hospitalization')
+    .default(false)
+    .notNull(), // 입원
+  hasMajorSurgery: boolean('has_major_surgery').default(false).notNull(), // 수술
+  hasLongTermTreatment: boolean('has_long_term_treatment')
+    .default(false)
+    .notNull(), // 7일 이상 치료
+  hasLongTermMedication: boolean('has_long_term_medication')
+    .default(false)
+    .notNull(), // 30일 이상 투약
+  majorMedicalDetails: text('major_medical_details'), // 상세 내용
+
+  // 메타 정보
+  privacyLevel: appClientPrivacyLevelEnum('privacy_level')
+    .default('confidential')
+    .notNull(),
+  consentDate: timestamp('consent_date', { withTimezone: true }), // 정보 제공 동의일
+  lastUpdatedBy: uuid('last_updated_by')
+    .notNull()
+    .references(() => profiles.id),
+  createdAt: timestamp('created_at', { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+// 🆕 NEW: Client Checkup Purposes (점검 목적) - 고객 관리 카드 핵심 기능
+export const appClientCheckupPurposes = pgTable('app_client_checkup_purposes', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  clientId: uuid('client_id')
+    .notNull()
+    .unique()
+    .references(() => clients.id, { onDelete: 'cascade' }),
+  // 점검 목적별 걱정/필요 사항
+  isInsurancePremiumConcern: boolean('is_insurance_premium_concern')
+    .default(false)
+    .notNull(), // 현재 보험료 걱정
+  isCoverageConcern: boolean('is_coverage_concern').default(false).notNull(), // 현재 보장 걱정
+  isMedicalHistoryConcern: boolean('is_medical_history_concern')
+    .default(false)
+    .notNull(), // 현재 병력 걱정
+  needsDeathBenefit: boolean('needs_death_benefit').default(false).notNull(), // 사망보험금 필요
+  needsImplantPlan: boolean('needs_implant_plan').default(false).notNull(), // 2년후 임플란트 계획
+  needsCaregiverInsurance: boolean('needs_caregiver_insurance')
+    .default(false)
+    .notNull(), // 간병인 보험 필요
+  needsDementiaInsurance: boolean('needs_dementia_insurance')
+    .default(false)
+    .notNull(), // 치매보험 필요
+
+  // 저축 현황 (주관식)
+  currentSavingsLocation: text('current_savings_location'), // 지금 저축은 어디서
+
+  // 추가 상세 정보
+  additionalConcerns: text('additional_concerns'), // 기타 걱정 사항
+  priorityLevel: text('priority_level'), // high, medium, low
+
+  // 메타 정보
+  lastUpdatedBy: uuid('last_updated_by')
+    .notNull()
+    .references(() => profiles.id),
+  createdAt: timestamp('created_at', { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+// 🆕 NEW: Client Interest Categories (무엇이든 물어보세요) - 관심사항 체크리스트
+export const appClientInterestCategories = pgTable(
+  'app_client_interest_categories',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    clientId: uuid('client_id')
+      .notNull()
+      .unique()
+      .references(() => clients.id, { onDelete: 'cascade' }),
+    // 보험 관련 관심사항 체크리스트
+    interestedInAutoInsurance: boolean('interested_in_auto_insurance')
+      .default(false)
+      .notNull(), // 자동차보험
+    interestedInDementia: boolean('interested_in_dementia')
+      .default(false)
+      .notNull(), // 치매
+    interestedInDental: boolean('interested_in_dental')
+      .default(false)
+      .notNull(), // 치아(임플란트)
+    interestedInDriverInsurance: boolean('interested_in_driver_insurance')
+      .default(false)
+      .notNull(), // 운전자
+    interestedInHealthCheckup: boolean('interested_in_health_checkup')
+      .default(false)
+      .notNull(), // 건강검진
+    interestedInMedicalExpenses: boolean('interested_in_medical_expenses')
+      .default(false)
+      .notNull(), // 실비원가
+    interestedInFireInsurance: boolean('interested_in_fire_insurance')
+      .default(false)
+      .notNull(), // 화재보험
+    interestedInCaregiver: boolean('interested_in_caregiver')
+      .default(false)
+      .notNull(), // 간병인
+    interestedInCancer: boolean('interested_in_cancer')
+      .default(false)
+      .notNull(), // 암 (표적항암, 로봇수술)
+    interestedInSavings: boolean('interested_in_savings')
+      .default(false)
+      .notNull(), // 저축 (연금, 노후, 목돈)
+    interestedInLiability: boolean('interested_in_liability')
+      .default(false)
+      .notNull(), // 일상배상책임
+    interestedInLegalAdvice: boolean('interested_in_legal_advice')
+      .default(false)
+      .notNull(), // 민사소송법률
+    interestedInTax: boolean('interested_in_tax').default(false).notNull(), // 상속세, 양도세
+    interestedInInvestment: boolean('interested_in_investment')
+      .default(false)
+      .notNull(), // 재테크
+    interestedInPetInsurance: boolean('interested_in_pet_insurance')
+      .default(false)
+      .notNull(), // 펫보험
+    interestedInAccidentInsurance: boolean('interested_in_accident_insurance')
+      .default(false)
+      .notNull(), // 상해보험
+    interestedInTrafficAccident: boolean('interested_in_traffic_accident')
+      .default(false)
+      .notNull(), // 교통사고(합의)
+
+    // 추가 관심사항
+    additionalInterests: text('additional_interests').array(), // 기타 관심사항들
+    interestNotes: text('interest_notes'), // 관심사항 관련 메모
+
+    // 메타 정보
+    lastUpdatedBy: uuid('last_updated_by')
+      .notNull()
+      .references(() => profiles.id),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  }
+);
+
+// 🆕 NEW: Client Consultation Companions (상담 동반자) - 고객 관리 카드 핵심 기능
+export const appClientConsultationCompanions = pgTable(
+  'app_client_consultation_companions',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    clientId: uuid('client_id')
+      .notNull()
+      .references(() => clients.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(), // 성함
+    phone: text('phone').notNull(), // 연락처
+    relationship: text('relationship').notNull(), // 관계 (배우자, 자녀, 부모 등)
+    isPrimary: boolean('is_primary').default(false).notNull(), // 주 동반자 여부
+    isActive: boolean('is_active').default(true).notNull(), // 활성 상태
+
+    // 개인정보 보호
+    privacyLevel: appClientPrivacyLevelEnum('privacy_level')
+      .default('restricted')
+      .notNull(),
+    consentDate: timestamp('consent_date', { withTimezone: true }), // 정보 제공 동의일
+    consentExpiry: timestamp('consent_expiry', { withTimezone: true }), // 동의 만료일
+
+    // 메타 정보
+    addedBy: uuid('added_by')
+      .notNull()
+      .references(() => profiles.id),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  }
+);
+
+// 🆕 NEW: Client Consultation Notes (상담 내용 및 계약사항 메모) - 날짜별 히스토리
+export const appClientConsultationNotes = pgTable(
+  'app_client_consultation_notes',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    clientId: uuid('client_id')
+      .notNull()
+      .references(() => clients.id, { onDelete: 'cascade' }),
+    agentId: uuid('agent_id')
+      .notNull()
+      .references(() => profiles.id),
+    consultationDate: date('consultation_date').notNull(), // 상담 날짜
+    noteType: text('note_type').notNull(), // consultation, contract, follow_up, etc.
+    title: text('title').notNull(), // 제목
+    content: text('content').notNull(), // 상담 내용
+    contractDetails: jsonb('contract_details'), // 계약 관련 상세 정보 (상품명, 보험료, 기간 등)
+    followUpDate: date('follow_up_date'), // 다음 팔로업 날짜
+    followUpNotes: text('follow_up_notes'), // 팔로업 메모
+
+    // 중요도 및 분류
+    importance: text('importance').default('medium').notNull(), // high, medium, low
+    category: text('category'), // insurance_consultation, contract_signing, claim_process, etc.
+    tags: text('tags').array(), // 태그들
+
+    // 첨부파일 및 참조
+    attachments: jsonb('attachments'), // 첨부파일 정보
+    relatedContacts: text('related_contacts').array(), // 관련 연락처들
+
+    // 보안 및 접근 제어
+    privacyLevel: appClientPrivacyLevelEnum('privacy_level')
+      .default('restricted')
+      .notNull(),
+    isConfidential: boolean('is_confidential').default(false).notNull(),
+    accessibleBy: text('accessible_by').array(), // 접근 가능한 사용자 ID 목록
+
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  }
+);
+
 // 🔗 Relations (관계 정의) - 새로운 테이블명 반영
 export const appClientTagsRelations = relations(
   appClientTags,
@@ -456,6 +707,77 @@ export const appClientStageHistoryRelations = relations(
   })
 );
 
+// 🆕 NEW Relations - 새로운 고객 관리 카드 테이블들
+export const appClientMedicalHistoryRelations = relations(
+  appClientMedicalHistory,
+  ({ one }) => ({
+    client: one(clients, {
+      fields: [appClientMedicalHistory.clientId],
+      references: [clients.id],
+    }),
+    lastUpdatedBy: one(profiles, {
+      fields: [appClientMedicalHistory.lastUpdatedBy],
+      references: [profiles.id],
+    }),
+  })
+);
+
+export const appClientCheckupPurposesRelations = relations(
+  appClientCheckupPurposes,
+  ({ one }) => ({
+    client: one(clients, {
+      fields: [appClientCheckupPurposes.clientId],
+      references: [clients.id],
+    }),
+    lastUpdatedBy: one(profiles, {
+      fields: [appClientCheckupPurposes.lastUpdatedBy],
+      references: [profiles.id],
+    }),
+  })
+);
+
+export const appClientInterestCategoriesRelations = relations(
+  appClientInterestCategories,
+  ({ one }) => ({
+    client: one(clients, {
+      fields: [appClientInterestCategories.clientId],
+      references: [clients.id],
+    }),
+    lastUpdatedBy: one(profiles, {
+      fields: [appClientInterestCategories.lastUpdatedBy],
+      references: [profiles.id],
+    }),
+  })
+);
+
+export const appClientConsultationCompanionsRelations = relations(
+  appClientConsultationCompanions,
+  ({ one }) => ({
+    client: one(clients, {
+      fields: [appClientConsultationCompanions.clientId],
+      references: [clients.id],
+    }),
+    addedBy: one(profiles, {
+      fields: [appClientConsultationCompanions.addedBy],
+      references: [profiles.id],
+    }),
+  })
+);
+
+export const appClientConsultationNotesRelations = relations(
+  appClientConsultationNotes,
+  ({ one }) => ({
+    client: one(clients, {
+      fields: [appClientConsultationNotes.clientId],
+      references: [clients.id],
+    }),
+    agent: one(profiles, {
+      fields: [appClientConsultationNotes.agentId],
+      references: [profiles.id],
+    }),
+  })
+);
+
 export const appClientDataAccessLogsRelations = relations(
   appClientDataAccessLogs,
   ({ one }) => ({
@@ -514,6 +836,32 @@ export type NewAppClientDataAccessLog =
 export type AppClientDataBackup = typeof appClientDataBackups.$inferSelect;
 export type NewAppClientDataBackup = typeof appClientDataBackups.$inferInsert;
 
+// 🆕 NEW Types - 새로운 고객 관리 카드 테이블들
+export type AppClientMedicalHistory =
+  typeof appClientMedicalHistory.$inferSelect;
+export type NewAppClientMedicalHistory =
+  typeof appClientMedicalHistory.$inferInsert;
+
+export type AppClientCheckupPurposes =
+  typeof appClientCheckupPurposes.$inferSelect;
+export type NewAppClientCheckupPurposes =
+  typeof appClientCheckupPurposes.$inferInsert;
+
+export type AppClientInterestCategories =
+  typeof appClientInterestCategories.$inferSelect;
+export type NewAppClientInterestCategories =
+  typeof appClientInterestCategories.$inferInsert;
+
+export type AppClientConsultationCompanion =
+  typeof appClientConsultationCompanions.$inferSelect;
+export type NewAppClientConsultationCompanion =
+  typeof appClientConsultationCompanions.$inferInsert;
+
+export type AppClientConsultationNote =
+  typeof appClientConsultationNotes.$inferSelect;
+export type NewAppClientConsultationNote =
+  typeof appClientConsultationNotes.$inferInsert;
+
 // Enum 타입들
 export type ClientStatus = (typeof appClientStatusEnum.enumValues)[number];
 export type ClientContactMethod =
@@ -536,6 +884,12 @@ export interface ClientOverview {
   recentContacts: AppClientContactHistory[];
   milestones: AppClientMilestone[];
   stageHistory: AppClientStageHistory[];
+  // 🆕 고객 관리 카드 데이터
+  medicalHistory?: AppClientMedicalHistory;
+  checkupPurposes?: AppClientCheckupPurposes;
+  interestCategories?: AppClientInterestCategories;
+  consultationCompanions: AppClientConsultationCompanion[];
+  consultationNotes: AppClientConsultationNote[];
   // 🔒 보안 정보
   accessLevel: ClientPrivacyLevel;
   dataConsents: {
@@ -581,3 +935,10 @@ export type ClientFamilyMember = AppClientFamilyMember;
 export type ClientPreferences = AppClientPreferences;
 /** @deprecated Use AppClientAnalytics instead */
 export type ClientAnalytics = AppClientAnalytics;
+
+// 🆕 고객 관리 카드 타입 aliases (새로운 기능들)
+export type ClientMedicalHistory = AppClientMedicalHistory;
+export type ClientCheckupPurposes = AppClientCheckupPurposes;
+export type ClientInterestCategories = AppClientInterestCategories;
+export type ClientConsultationCompanion = AppClientConsultationCompanion;
+export type ClientConsultationNote = AppClientConsultationNote;
