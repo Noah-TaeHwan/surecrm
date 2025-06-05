@@ -1,4 +1,10 @@
-import type { Route } from './+types/influencers-page';
+// import type { Route } from './+types/influencers-page'; // 현재 라우트로 등록되지 않음
+namespace Route {
+  export type LoaderArgs = any;
+  export type ActionArgs = any;
+  export type MetaArgs = any;
+  export type ComponentProps = any;
+}
 import {
   Select,
   SelectContent,
@@ -194,8 +200,8 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export function meta({ data, params }: Route.MetaArgs) {
-  const totalInfluencers = data?.totalInfluencers || 0;
-  const networkValue = data?.networkAnalysis?.totalNetworkValue || 0;
+  const totalInfluencers = (data as any)?.totalInfluencers || 0;
+  const networkValue = (data as any)?.networkAnalysis?.totalNetworkValue || 0;
   const formattedValue =
     networkValue >= 100000000
       ? `${(networkValue / 100000000).toFixed(1)}억원`
@@ -430,11 +436,13 @@ export default function InfluencersPage({
                     <SelectValue placeholder="기간 선택" />
                   </SelectTrigger>
                   <SelectContent>
-                    {periodOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
+                    {periodOptions.map(
+                      (option: { value: string; label: string }) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      )
+                    )}
                   </SelectContent>
                 </Select>
 

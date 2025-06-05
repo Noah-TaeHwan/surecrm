@@ -1,4 +1,10 @@
-import type { Route } from './+types/calendar-page';
+// import type { Route } from './+types/calendar-page'; // 현재 라우트로 등록되지 않음
+namespace Route {
+  export type LoaderArgs = any;
+  export type ActionArgs = any;
+  export type MetaArgs = any;
+  export type ComponentProps = any;
+}
 import { Button } from '~/common/components/ui/button';
 import {
   Card,

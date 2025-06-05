@@ -154,6 +154,13 @@ export async function loader({ request }: Route.LoaderArgs) {
       meetingsCount: 0,
       activeClients: 0,
       monthlyRecurringRevenue: 0,
+      consultationStats: {
+        totalConsultations: 0,
+        consultationsThisPeriod: 0,
+        averageConsultationsPerClient: 0,
+        mostFrequentNoteType: '상담',
+        consultationGrowth: 0,
+      },
     };
 
     return {
@@ -197,6 +204,13 @@ export default function ReportsPage({ loaderData }: Route.ComponentProps) {
       meetingsCount: 0,
       activeClients: 0,
       monthlyRecurringRevenue: 0,
+      consultationStats: {
+        totalConsultations: 0,
+        consultationsThisPeriod: 0,
+        averageConsultationsPerClient: 0,
+        mostFrequentNoteType: '상담',
+        consultationGrowth: 0,
+      },
     },
     topPerformers: [],
     userGoals: [], // 🔧 추가: 기본 빈 목표 배열
