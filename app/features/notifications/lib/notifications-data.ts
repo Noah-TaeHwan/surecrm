@@ -197,16 +197,29 @@ export async function upsertNotificationSettings(
 
 // 알림 생성
 export async function createNotification(notification: CreateNotificationData) {
-  const result = await db
-    .insert(appNotificationQueue)
-    .values({
-      ...notification,
-      scheduledAt: notification.scheduledAt || new Date(),
-      priority: notification.priority || 'normal',
-    })
-    .returning();
+  try {
+    console.log('🔄 데이터베이스에 알림 생성 시도:', {
+      userId: notification.userId,
+      type: notification.type,
+      title: notification.title,
+    });
 
-  return result[0];
+    const result = await db
+      .insert(appNotificationQueue)
+      .values({
+        ...notification,
+        scheduledAt: notification.scheduledAt || new Date(),
+        priority: notification.priority || 'normal',
+      })
+      .returning();
+
+    console.log('✅ 데이터베이스에 알림 생성 성공:', result[0]?.id);
+    return result[0];
+  } catch (error) {
+    console.error('❌ 데이터베이스 알림 생성 실패:', error);
+    console.error('실패한 알림 데이터:', notification);
+    throw error;
+  }
 }
 
 // 알림 통계 조회

@@ -12,7 +12,8 @@
     "db:push": "drizzle-kit push",
     "db:pull": "drizzle-kit pull",
     "db:studio": "drizzle-kit studio",
-    "db:reset:clean": "tsx scripts/utils/reset-database.ts"
+    "db:reset:clean": "tsx scripts/utils/reset-database.ts",
+    "cron:notifications": "tsx scripts/daily-notification-cron.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",

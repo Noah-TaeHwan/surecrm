@@ -333,14 +333,18 @@ export default function NotificationsPage({
               <Bell className="h-5 w-5" />
               최근 알림
             </CardTitle>
-            {notifications.length > 0 && (
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm">
+            <div className="flex gap-2">
+              {notifications.length > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleMarkAllAsRead}
+                >
                   <CheckCircle className="h-4 w-4 mr-2" />
                   모두 읽음
                 </Button>
-              </div>
-            )}
+              )}
+            </div>
           </CardHeader>
           <CardContent>
             {notifications.length > 0 ? (
@@ -423,6 +427,10 @@ export default function NotificationsPage({
                       }님, 모든 알림을 확인했습니다.`
                     : '새로운 알림이 있으면 여기에 표시됩니다.'}
                 </p>
+                <div className="text-xs text-muted-foreground space-y-1">
+                  <p>🎂 고객 생일, 📈 파이프라인 변화, 📅 미팅 일정 등</p>
+                  <p>중요한 알림들이 자동으로 생성되어 표시됩니다.</p>
+                </div>
               </div>
             )}
           </CardContent>
