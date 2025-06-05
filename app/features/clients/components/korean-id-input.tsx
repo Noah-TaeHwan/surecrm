@@ -122,11 +122,8 @@ export function KoreanIdInput({
       console.error('주민등록번호 검증 오류:', error);
       setParseResult({
         isValid: false,
-        birthDate: null,
-        gender: null,
-        century: null,
-        genderCode: null,
-        maskedId: maskKoreanId(idNumber),
+        birthDate: undefined,
+        gender: undefined,
         errors: ['검증 중 오류가 발생했습니다.'],
       });
     }
@@ -254,7 +251,7 @@ export function KoreanIdInput({
                 </Badge>
               </div>
               <div className="text-sm text-red-600 space-y-1">
-                {parseResult.errors.map((error, index) => (
+                {parseResult.errors?.map((error: string, index: number) => (
                   <div key={index}>• {error}</div>
                 ))}
               </div>

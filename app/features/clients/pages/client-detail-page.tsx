@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate, useFetcher, useSubmit } from 'react-router';
 import type { Route } from './+types/client-detail-page';
 import { MainLayout } from '~/common/layouts/main-layout';
@@ -189,23 +189,33 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       fullName: user.fullName,
     });
 
-    // 🎯 Supabase Admin 클라이언트를 사용하여 직접 조회 (RLS 우회)
-    const { createAdminClient } = await import('~/lib/core/supabase');
-    const supabase = createAdminClient();
+    // 🆕 새로운 API 함수를 사용하여 통합 고객 데이터 조회
+    const { getClientOverview } = await import(
+      '~/features/clients/lib/client-data'
+    );
 
-    // 고객 기본 정보 조회
-    const { data: clientData, error: clientError } = await supabase
-      .from('app_client_profiles')
-      .select('*')
-      .eq('id', clientId)
-      .eq('agent_id', agentId)
-      .eq('is_active', true)
-      .single();
+    // IP 주소 추출 (보안 로깅용)
+    const clientIP =
+      request.headers.get('x-forwarded-for') ||
+      request.headers.get('x-real-ip') ||
+      'unknown';
+    const userAgent = request.headers.get('user-agent') || 'unknown';
 
-    if (clientError || !clientData) {
-      console.log('⚠️ 고객을 찾을 수 없음:', clientError?.message);
+    console.log('📞 통합 고객 데이터 조회 시작:', { clientId, agentId });
+
+    // 통합 고객 개요 데이터 조회
+    const clientOverview = await getClientOverview(
+      clientId,
+      agentId,
+      clientIP,
+      userAgent
+    );
+
+    if (!clientOverview || !clientOverview.client) {
+      console.log('⚠️ 고객을 찾을 수 없음');
       return {
         client: null,
+        clientOverview: null,
         currentUserId: agentId,
         currentUser: {
           id: user.id,
@@ -216,177 +226,35 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       };
     }
 
-    // 🎯 현재 단계 정보 조회
-    let currentStage = null;
-    if (clientData.current_stage_id) {
-      const { data: stageData, error: stageError } = await supabase
-        .from('app_pipeline_stages')
-        .select('id, name, color, "order"') // 🔥 수정: stage_order → order (컬럼명 정확히)
-        .eq('id', clientData.current_stage_id)
-        .eq('agent_id', agentId)
-        .single();
+    console.log('✅ 통합 고객 데이터 조회 완료:', {
+      clientName: clientOverview.client.fullName,
+      hasExtendedData: {
+        medicalHistory: !!clientOverview.medicalHistory,
+        checkupPurposes: !!clientOverview.checkupPurposes,
+        interestCategories: !!clientOverview.interestCategories,
+        companionsCount: clientOverview.consultationCompanions?.length || 0,
+        notesCount: clientOverview.consultationNotes?.length || 0,
+      },
+    });
 
-      if (!stageError && stageData) {
-        currentStage = {
-          id: stageData.id,
-          name: stageData.name,
-          color: stageData.color,
-          order: stageData.order, // 🔥 수정: stage_order → order
-        };
-      }
-    }
+    // 🎯 파이프라인 단계들 조회 (새 영업 기회 생성용)
+    const { createAdminClient } = await import('~/lib/core/supabase');
+    const supabase = createAdminClient();
 
     // 🎯 파이프라인 단계들 조회 (새 영업 기회 생성용)
     const { data: stagesData, error: stagesError } = await supabase
       .from('app_pipeline_stages')
-      .select('id, name, color, "order"') // 🔥 수정: stage_order → order
+      .select('id, name, color, "order"')
       .eq('agent_id', agentId)
       .neq('name', '제외됨') // 제외됨 단계는 숨김
-      .order('order'); // 🔥 수정: stage_order → order
+      .order('order');
 
     const availableStages = stagesData || [];
 
-    // 🎯 소개자 정보 조회 (referred_by_id가 있는 경우)
-    let referredBy = null;
-    if (clientData.referred_by_id) {
-      const { data: referrerData, error: referrerError } = await supabase
-        .from('app_client_profiles')
-        .select('id, full_name')
-        .eq('id', clientData.referred_by_id)
-        .eq('agent_id', agentId)
-        .eq('is_active', true)
-        .single();
-
-      if (!referrerError && referrerData) {
-        referredBy = {
-          id: referrerData.id,
-          name: referrerData.full_name,
-          relationship: '소개자', // 기본 관계
-        };
-      }
-    }
-
-    // 🎯 이 고객이 소개한 사람들의 정보 조회 (이름 포함)
-    const { data: referredClientsData, error: referredClientsError } =
-      await supabase
-        .from('app_client_profiles')
-        .select('id, full_name, created_at')
-        .eq('referred_by_id', clientId)
-        .eq('agent_id', agentId)
-        .eq('is_active', true)
-        .order('created_at', { ascending: false });
-
-    const referredClients = referredClientsData || [];
-    const referralCount = referredClients.length;
-
-    // 🎯 확장된 상세 정보 조회 (app_client_details 테이블에서)
-    console.log('🔍 확장 상세 정보 조회 시작:', { clientId });
-    const { data: detailsData, error: detailsError } = await supabase
-      .from('app_client_details')
-      .select('birth_date, gender, ssn')
-      .eq('client_id', clientId)
-      .maybeSingle(); // 🔧 .single() → .maybeSingle() 변경 (0개 허용)
-
-    console.log('📋 확장 상세 정보 조회 결과:', {
-      hasData: !!detailsData,
-      error: detailsError?.message,
-      dataKeys: detailsData ? Object.keys(detailsData) : [],
-      hasSsn: !!detailsData?.ssn,
-      ssnLength: detailsData?.ssn?.length,
-      hasBirthDate: !!detailsData?.birth_date,
-      hasGender: !!detailsData?.gender,
-    });
-
-    let extendedDetails = null;
-    if (!detailsError && detailsData) {
-      // 🔒 주민등록번호 복호화 처리
-      let decryptedSSN = null;
-      if (detailsData.ssn) {
-        console.log('🔐 SSN 복호화 시작:', {
-          ssnLength: detailsData.ssn.length,
-          isBase64Like: !detailsData.ssn.startsWith('{'),
-        });
-
-        try {
-          // Base64 복호화 (임시 - 나중에 AES-256-GCM으로 업그레이드)
-          console.log('🔄 Base64 복호화 시도...');
-          decryptedSSN = atob(detailsData.ssn);
-          console.log('✅ Base64 복호화 성공:', {
-            ssnMasked: decryptedSSN.replace(
-              /(\d{6})-(\d{1})(\d{6})/,
-              '$1-$2******'
-            ),
-          });
-        } catch (base64Error) {
-          console.warn('⚠️ Base64 복호화 실패:', base64Error);
-        }
-      } else {
-        console.log('ℹ️ SSN 데이터 없음');
-      }
-
-      extendedDetails = {
-        birthDate: detailsData.birth_date,
-        gender: detailsData.gender,
-        ssn: decryptedSSN, // 복호화된 주민등록번호
-      };
-
-      console.log('📊 최종 확장 상세 정보:', {
-        hasBirthDate: !!extendedDetails.birthDate,
-        hasGender: !!extendedDetails.gender,
-        hasDecryptedSsn: !!extendedDetails.ssn,
-        birthDate: extendedDetails.birthDate,
-        gender: extendedDetails.gender,
-        ssnMasked: extendedDetails.ssn
-          ? extendedDetails.ssn.replace(/(\d{6})-(\d{1})(\d{6})/, '$1-$2******')
-          : 'None',
-      });
-    } else {
-      console.log('ℹ️ 확장 상세 정보 없음 또는 오류:', detailsError?.message);
-    }
-
-    // 필드명을 camelCase로 변환
-    const client = {
-      id: clientData.id,
-      agentId: clientData.agent_id,
-      teamId: clientData.team_id,
-      fullName: clientData.full_name,
-      email: clientData.email,
-      phone: clientData.phone,
-      telecomProvider: clientData.telecom_provider,
-      address: clientData.address,
-      occupation: clientData.occupation,
-      hasDrivingLicense: clientData.has_driving_license,
-      height: clientData.height,
-      weight: clientData.weight,
-      tags: clientData.tags,
-      importance: clientData.importance,
-      currentStageId: clientData.current_stage_id,
-      currentStage: currentStage, // 🔥 현재 단계 정보
-      referredById: clientData.referred_by_id,
-      referredBy: referredBy, // 🔥 소개자 정보
-      referralCount: referralCount, // 🔥 이 고객이 소개한 사람 수
-      referredClients: referredClients.map((c) => ({
-        // 🔥 이 고객이 소개한 사람들 목록
-        id: c.id,
-        name: c.full_name,
-        createdAt: c.created_at,
-      })),
-      extendedDetails: extendedDetails, // 🔥 확장 상세 정보
-      notes: clientData.notes,
-      customFields: clientData.custom_fields,
-      isActive: clientData.is_active,
-      createdAt: clientData.created_at,
-      updatedAt: clientData.updated_at,
-    };
-
-    console.log('✅ 고객 정보 로드 완료:', {
-      clientName: client.fullName,
-      currentStage: currentStage?.name || '미설정',
-    });
-
     return {
-      client: client,
-      availableStages: availableStages, // 🔥 파이프라인 단계들 추가
+      client: clientOverview.client,
+      clientOverview: clientOverview, // 🆕 통합 고객 데이터 추가
+      availableStages: availableStages,
       currentUserId: agentId,
       currentUser: {
         id: user.id,
@@ -401,6 +269,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     // 🎯 에러 상태 반환 (서버 에러 대신)
     return {
       client: null,
+      clientOverview: null,
       availableStages: [],
       currentUserId: null,
       currentUser: {
@@ -430,7 +299,8 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
   // 안전한 타입 체크와 기본값 설정
   const data = loaderData as any;
   const client = data?.client || null;
-  const availableStages = data?.availableStages || []; // 🔥 파이프라인 단계들 추가
+  const clientOverview = data?.clientOverview || null; // 🆕 통합 고객 데이터
+  const availableStages = data?.availableStages || [];
   const isEmpty = data?.isEmpty || false;
   const error = data?.error || null;
   const currentUser = data?.currentUser || null;
@@ -456,6 +326,85 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
     title: '',
     message: '',
   });
+
+  // 🆕 새로운 탭들의 폼 상태
+  const [medicalHistory, setMedicalHistory] = useState({
+    // 3개월 이내
+    hasRecentDiagnosis: false,
+    hasRecentSuspicion: false,
+    hasRecentMedication: false,
+    hasRecentTreatment: false,
+    hasRecentHospitalization: false,
+    hasRecentSurgery: false,
+    recentMedicalDetails: '',
+    // 1년 이내 재검사
+    hasAdditionalExam: false,
+    additionalExamDetails: '',
+    // 5년 이내
+    hasMajorHospitalization: false,
+    hasMajorSurgery: false,
+    hasLongTermTreatment: false,
+    hasLongTermMedication: false,
+    majorMedicalDetails: '',
+  });
+
+  const [checkupPurposes, setCheckupPurposes] = useState({
+    // 걱정사항
+    isInsurancePremiumConcern: false,
+    isCoverageConcern: false,
+    isMedicalHistoryConcern: false,
+    // 필요사항
+    needsDeathBenefit: false,
+    needsImplantPlan: false,
+    needsCaregiverInsurance: false,
+    needsDementiaInsurance: false,
+    // 저축 현황
+    currentSavingsLocation: '',
+    additionalConcerns: '',
+  });
+
+  const [interestCategories, setInterestCategories] = useState({
+    interestedInAutoInsurance: false,
+    interestedInDementia: false,
+    interestedInDental: false,
+    interestedInDriverInsurance: false,
+    interestedInHealthCheckup: false,
+    interestedInMedicalExpenses: false,
+    interestedInFireInsurance: false,
+    interestedInCaregiver: false,
+    interestedInCancer: false,
+    interestedInSavings: false,
+    interestedInLiability: false,
+    interestedInLegalAdvice: false,
+    interestedInTax: false,
+    interestedInInvestment: false,
+    interestedInPetInsurance: false,
+    interestedInAccidentInsurance: false,
+    interestedInTrafficAccident: false,
+    interestNotes: '',
+  });
+
+  const [consultationCompanions, setConsultationCompanions] = useState<
+    Array<{
+      id?: string;
+      name: string;
+      phone: string;
+      relationship: string;
+      isPrimary: boolean;
+    }>
+  >([]);
+
+  const [consultationNotes, setConsultationNotes] = useState<
+    Array<{
+      id?: string;
+      consultationDate: string;
+      title: string;
+      content: string;
+      contractInfo?: string;
+      followUpDate?: string;
+      followUpNotes?: string;
+    }>
+  >([]);
   const [editFormData, setEditFormData] = useState({
     fullName: '',
     phone: '',
@@ -479,6 +428,169 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
   const navigate = useNavigate();
   const fetcher = useFetcher();
   const submit = useSubmit();
+
+  // 🆕 상담동반자 관리 상태
+  const [showAddCompanionModal, setShowAddCompanionModal] = useState(false);
+  const [editingCompanion, setEditingCompanion] = useState<{
+    id?: string;
+    name: string;
+    phone: string;
+    relationship: string;
+    isPrimary: boolean;
+  } | null>(null);
+
+  // 🆕 상담내용 관리 상태
+  const [showAddNoteModal, setShowAddNoteModal] = useState(false);
+  const [editingNote, setEditingNote] = useState<{
+    id?: string;
+    consultationDate: string;
+    title: string;
+    content: string;
+    contractInfo?: string;
+    followUpDate?: string;
+    followUpNotes?: string;
+  } | null>(null);
+
+  // 🔄 데이터 초기화 - clientOverview 데이터로 폼 상태 설정
+  useEffect(() => {
+    if (clientOverview) {
+      // 병력사항 초기화
+      if (clientOverview.medicalHistory) {
+        setMedicalHistory({
+          hasRecentDiagnosis:
+            clientOverview.medicalHistory.hasRecentDiagnosis || false,
+          hasRecentSuspicion:
+            clientOverview.medicalHistory.hasRecentSuspicion || false,
+          hasRecentMedication:
+            clientOverview.medicalHistory.hasRecentMedication || false,
+          hasRecentTreatment:
+            clientOverview.medicalHistory.hasRecentTreatment || false,
+          hasRecentHospitalization:
+            clientOverview.medicalHistory.hasRecentHospitalization || false,
+          hasRecentSurgery:
+            clientOverview.medicalHistory.hasRecentSurgery || false,
+          recentMedicalDetails:
+            clientOverview.medicalHistory.recentMedicalDetails || '',
+          hasAdditionalExam:
+            clientOverview.medicalHistory.hasAdditionalExam || false,
+          additionalExamDetails:
+            clientOverview.medicalHistory.additionalExamDetails || '',
+          hasMajorHospitalization:
+            clientOverview.medicalHistory.hasMajorHospitalization || false,
+          hasMajorSurgery:
+            clientOverview.medicalHistory.hasMajorSurgery || false,
+          hasLongTermTreatment:
+            clientOverview.medicalHistory.hasLongTermTreatment || false,
+          hasLongTermMedication:
+            clientOverview.medicalHistory.hasLongTermMedication || false,
+          majorMedicalDetails:
+            clientOverview.medicalHistory.majorMedicalDetails || '',
+        });
+      }
+
+      // 점검목적 초기화
+      if (clientOverview.checkupPurposes) {
+        setCheckupPurposes({
+          isInsurancePremiumConcern:
+            clientOverview.checkupPurposes.isInsurancePremiumConcern || false,
+          isCoverageConcern:
+            clientOverview.checkupPurposes.isCoverageConcern || false,
+          isMedicalHistoryConcern:
+            clientOverview.checkupPurposes.isMedicalHistoryConcern || false,
+          needsDeathBenefit:
+            clientOverview.checkupPurposes.needsDeathBenefit || false,
+          needsImplantPlan:
+            clientOverview.checkupPurposes.needsImplantPlan || false,
+          needsCaregiverInsurance:
+            clientOverview.checkupPurposes.needsCaregiverInsurance || false,
+          needsDementiaInsurance:
+            clientOverview.checkupPurposes.needsDementiaInsurance || false,
+          currentSavingsLocation:
+            clientOverview.checkupPurposes.currentSavingsLocation || '',
+          additionalConcerns:
+            clientOverview.checkupPurposes.additionalConcerns || '',
+        });
+      }
+
+      // 관심사항 초기화
+      if (clientOverview.interestCategories) {
+        setInterestCategories({
+          interestedInAutoInsurance:
+            clientOverview.interestCategories.interestedInAutoInsurance ||
+            false,
+          interestedInDementia:
+            clientOverview.interestCategories.interestedInDementia || false,
+          interestedInDental:
+            clientOverview.interestCategories.interestedInDental || false,
+          interestedInDriverInsurance:
+            clientOverview.interestCategories.interestedInDriverInsurance ||
+            false,
+          interestedInHealthCheckup:
+            clientOverview.interestCategories.interestedInHealthCheckup ||
+            false,
+          interestedInMedicalExpenses:
+            clientOverview.interestCategories.interestedInMedicalExpenses ||
+            false,
+          interestedInFireInsurance:
+            clientOverview.interestCategories.interestedInFireInsurance ||
+            false,
+          interestedInCaregiver:
+            clientOverview.interestCategories.interestedInCaregiver || false,
+          interestedInCancer:
+            clientOverview.interestCategories.interestedInCancer || false,
+          interestedInSavings:
+            clientOverview.interestCategories.interestedInSavings || false,
+          interestedInLiability:
+            clientOverview.interestCategories.interestedInLiability || false,
+          interestedInLegalAdvice:
+            clientOverview.interestCategories.interestedInLegalAdvice || false,
+          interestedInTax:
+            clientOverview.interestCategories.interestedInTax || false,
+          interestedInInvestment:
+            clientOverview.interestCategories.interestedInInvestment || false,
+          interestedInPetInsurance:
+            clientOverview.interestCategories.interestedInPetInsurance || false,
+          interestedInAccidentInsurance:
+            clientOverview.interestCategories.interestedInAccidentInsurance ||
+            false,
+          interestedInTrafficAccident:
+            clientOverview.interestCategories.interestedInTrafficAccident ||
+            false,
+          interestNotes: clientOverview.interestCategories.interestNotes || '',
+        });
+      }
+
+      // 상담동반자 초기화
+      if (clientOverview.consultationCompanions) {
+        setConsultationCompanions(
+          clientOverview.consultationCompanions.map((companion: any) => ({
+            id: companion.id,
+            name: companion.name,
+            phone: companion.phone,
+            relationship: companion.relationship,
+            isPrimary: companion.isPrimary,
+          }))
+        );
+      }
+
+      // 상담내용 초기화
+      if (clientOverview.consultationNotes) {
+        setConsultationNotes(
+          clientOverview.consultationNotes.map((note: any) => ({
+            id: note.id,
+            consultationDate: note.consultationDate,
+            title: note.title,
+            content: note.content,
+            contractInfo: note.contractDetails
+              ? JSON.stringify(note.contractDetails)
+              : '',
+            followUpDate: note.followUpDate,
+            followUpNotes: note.followUpNotes,
+          }))
+        );
+      }
+    }
+  }, [clientOverview]);
 
   // 🎨 중요도별 은은한 색상 스타일 (왼쪽 보더 제거)
   const getClientCardStyle = (importance: string) => {
@@ -1035,6 +1147,130 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
   };
 
   // 보험 타입 이름 변환 함수
+  // 🆕 상담동반자 관리 함수들
+  const handleAddCompanion = () => {
+    setEditingCompanion({
+      name: '',
+      phone: '',
+      relationship: '',
+      isPrimary: false,
+    });
+    setShowAddCompanionModal(true);
+  };
+
+  const handleEditCompanion = (companion: any) => {
+    setEditingCompanion({
+      id: companion.id,
+      name: companion.name,
+      phone: companion.phone,
+      relationship: companion.relationship,
+      isPrimary: companion.isPrimary,
+    });
+    setShowAddCompanionModal(true);
+  };
+
+  const handleSaveCompanion = async () => {
+    if (!editingCompanion) return;
+
+    try {
+      const formData = new FormData();
+
+      if (editingCompanion.id) {
+        // 수정
+        formData.append('intent', 'updateConsultationCompanion');
+        formData.append('companionId', editingCompanion.id);
+      } else {
+        // 추가
+        formData.append('intent', 'createConsultationCompanion');
+      }
+
+      formData.append('companionName', editingCompanion.name);
+      formData.append('companionPhone', editingCompanion.phone);
+      formData.append('companionRelationship', editingCompanion.relationship);
+      formData.append(
+        'companionIsPrimary',
+        editingCompanion.isPrimary.toString()
+      );
+
+      submit(formData, { method: 'post' });
+      setShowAddCompanionModal(false);
+      setEditingCompanion(null);
+    } catch (error) {
+      console.error('상담동반자 저장 실패:', error);
+    }
+  };
+
+  const handleDeleteCompanion = async (companionId: string) => {
+    try {
+      const formData = new FormData();
+      formData.append('intent', 'deleteConsultationCompanion');
+      formData.append('companionId', companionId);
+
+      submit(formData, { method: 'post' });
+    } catch (error) {
+      console.error('상담동반자 삭제 실패:', error);
+    }
+  };
+
+  // 🆕 상담내용 관리 함수들
+  const handleAddNote = () => {
+    setEditingNote({
+      consultationDate: new Date().toISOString().split('T')[0],
+      title: '',
+      content: '',
+      contractInfo: '',
+      followUpDate: '',
+      followUpNotes: '',
+    });
+    setShowAddNoteModal(true);
+  };
+
+  const handleEditNote = (note: any) => {
+    setEditingNote({
+      id: note.id,
+      consultationDate: note.consultationDate,
+      title: note.title,
+      content: note.content,
+      contractInfo:
+        typeof note.contractInfo === 'string'
+          ? note.contractInfo
+          : JSON.stringify(note.contractInfo || {}),
+      followUpDate: note.followUpDate || '',
+      followUpNotes: note.followUpNotes || '',
+    });
+    setShowAddNoteModal(true);
+  };
+
+  const handleSaveNote = async () => {
+    if (!editingNote) return;
+
+    try {
+      const formData = new FormData();
+
+      if (editingNote.id) {
+        // 수정
+        formData.append('intent', 'updateConsultationNote');
+        formData.append('noteId', editingNote.id);
+      } else {
+        // 추가
+        formData.append('intent', 'createConsultationNote');
+      }
+
+      formData.append('consultationDate', editingNote.consultationDate);
+      formData.append('consultationTitle', editingNote.title);
+      formData.append('consultationContent', editingNote.content);
+      formData.append('contractInfo', editingNote.contractInfo || '');
+      formData.append('followUpDate', editingNote.followUpDate || '');
+      formData.append('followUpNotes', editingNote.followUpNotes || '');
+
+      submit(formData, { method: 'post' });
+      setShowAddNoteModal(false);
+      setEditingNote(null);
+    } catch (error) {
+      console.error('상담내용 저장 실패:', error);
+    }
+  };
+
   const getInsuranceTypeName = (type: string) => {
     const typeMap: Record<string, string> = {
       auto: '자동차보험',
@@ -2059,8 +2295,17 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                               <input
                                 type="checkbox"
                                 className="rounded border-border"
-                                // TODO: 실제 데이터 연결
-                                disabled
+                                checked={
+                                  medicalHistory[
+                                    item.key as keyof typeof medicalHistory
+                                  ] as boolean
+                                }
+                                onChange={(e) =>
+                                  setMedicalHistory((prev) => ({
+                                    ...prev,
+                                    [item.key]: e.target.checked,
+                                  }))
+                                }
                               />
                               <span>{item.label}</span>
                             </label>
@@ -2081,8 +2326,13 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                             <input
                               type="checkbox"
                               className="rounded border-border"
-                              // TODO: 실제 데이터 연결
-                              disabled
+                              checked={medicalHistory.hasAdditionalExam}
+                              onChange={(e) =>
+                                setMedicalHistory((prev) => ({
+                                  ...prev,
+                                  hasAdditionalExam: e.target.checked,
+                                }))
+                              }
                             />
                             <span>
                               의사로부터 진찰 또는 검사를 통하여
@@ -2126,8 +2376,17 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                               <input
                                 type="checkbox"
                                 className="rounded border-border"
-                                // TODO: 실제 데이터 연결
-                                disabled
+                                checked={
+                                  medicalHistory[
+                                    item.key as keyof typeof medicalHistory
+                                  ] as boolean
+                                }
+                                onChange={(e) =>
+                                  setMedicalHistory((prev) => ({
+                                    ...prev,
+                                    [item.key]: e.target.checked,
+                                  }))
+                                }
                               />
                               <span>{item.label}</span>
                             </label>
@@ -2148,7 +2407,13 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                             className="w-full mt-1 p-3 border rounded-lg text-sm"
                             rows={3}
                             placeholder="3개월 이내 의료 관련 상세 내용을 입력하세요..."
-                            disabled
+                            value={medicalHistory.recentMedicalDetails}
+                            onChange={(e) =>
+                              setMedicalHistory((prev) => ({
+                                ...prev,
+                                recentMedicalDetails: e.target.value,
+                              }))
+                            }
                           />
                         </div>
                         <div>
@@ -2159,7 +2424,13 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                             className="w-full mt-1 p-3 border rounded-lg text-sm"
                             rows={3}
                             placeholder="5년 이내 주요 의료 이력 상세 내용을 입력하세요..."
-                            disabled
+                            value={medicalHistory.majorMedicalDetails}
+                            onChange={(e) =>
+                              setMedicalHistory((prev) => ({
+                                ...prev,
+                                majorMedicalDetails: e.target.value,
+                              }))
+                            }
                           />
                         </div>
                       </div>
@@ -2167,7 +2438,27 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
 
                     {/* 저장 버튼 */}
                     <div className="flex justify-end pt-4 border-t">
-                      <Button disabled className="px-6">
+                      <Button
+                        type="submit"
+                        className="px-6"
+                        onClick={async () => {
+                          try {
+                            const formData = new FormData();
+                            formData.append('intent', 'updateMedicalHistory');
+
+                            // 병력사항 데이터 추가
+                            Object.entries(medicalHistory).forEach(
+                              ([key, value]) => {
+                                formData.append(key, value.toString());
+                              }
+                            );
+
+                            submit(formData, { method: 'post' });
+                          } catch (error) {
+                            console.error('병력사항 저장 실패:', error);
+                          }
+                        }}
+                      >
                         병력사항 저장
                       </Button>
                     </div>
@@ -2220,7 +2511,17 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                               <input
                                 type="checkbox"
                                 className="rounded border-border"
-                                disabled
+                                checked={
+                                  checkupPurposes[
+                                    item.key as keyof typeof checkupPurposes
+                                  ] as boolean
+                                }
+                                onChange={(e) =>
+                                  setCheckupPurposes((prev) => ({
+                                    ...prev,
+                                    [item.key]: e.target.checked,
+                                  }))
+                                }
                               />
                               <span>{item.label}</span>
                             </label>
@@ -2266,7 +2567,17 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                               <input
                                 type="checkbox"
                                 className="rounded border-border"
-                                disabled
+                                checked={
+                                  checkupPurposes[
+                                    item.key as keyof typeof checkupPurposes
+                                  ] as boolean
+                                }
+                                onChange={(e) =>
+                                  setCheckupPurposes((prev) => ({
+                                    ...prev,
+                                    [item.key]: e.target.checked,
+                                  }))
+                                }
                               />
                               <span>{item.label}</span>
                             </label>
@@ -2288,7 +2599,13 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                           className="w-full p-3 border rounded-lg text-sm"
                           rows={3}
                           placeholder="저축 현황에 대해 자세히 입력해주세요..."
-                          disabled
+                          value={checkupPurposes.currentSavingsLocation}
+                          onChange={(e) =>
+                            setCheckupPurposes((prev) => ({
+                              ...prev,
+                              currentSavingsLocation: e.target.value,
+                            }))
+                          }
                         />
                       </div>
                     </div>
@@ -2302,13 +2619,39 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                         className="w-full p-3 border rounded-lg text-sm"
                         rows={4}
                         placeholder="기타 걱정사항이나 추가로 논의하고 싶은 내용을 입력해주세요..."
-                        disabled
+                        value={checkupPurposes.additionalConcerns}
+                        onChange={(e) =>
+                          setCheckupPurposes((prev) => ({
+                            ...prev,
+                            additionalConcerns: e.target.value,
+                          }))
+                        }
                       />
                     </div>
 
                     {/* 저장 버튼 */}
                     <div className="flex justify-end pt-4 border-t">
-                      <Button disabled className="px-6">
+                      <Button
+                        type="submit"
+                        className="px-6"
+                        onClick={async () => {
+                          try {
+                            const formData = new FormData();
+                            formData.append('intent', 'updateCheckupPurposes');
+
+                            // 점검목적 데이터 추가
+                            Object.entries(checkupPurposes).forEach(
+                              ([key, value]) => {
+                                formData.append(key, value.toString());
+                              }
+                            );
+
+                            submit(formData, { method: 'post' });
+                          } catch (error) {
+                            console.error('점검목적 저장 실패:', error);
+                          }
+                        }}
+                      >
                         점검목적 저장
                       </Button>
                     </div>
@@ -2426,7 +2769,17 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                             <input
                               type="checkbox"
                               className="rounded border-border"
-                              disabled
+                              checked={
+                                interestCategories[
+                                  item.key as keyof typeof interestCategories
+                                ] as boolean
+                              }
+                              onChange={(e) =>
+                                setInterestCategories((prev) => ({
+                                  ...prev,
+                                  [item.key]: e.target.checked,
+                                }))
+                              }
                             />
                             <span className="text-xs text-foreground leading-tight">
                               {item.label}
@@ -2445,13 +2798,42 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                         className="w-full p-3 border rounded-lg text-sm"
                         rows={4}
                         placeholder="위 목록에 없는 관심사항이나 추가로 알고 싶은 내용을 입력해주세요..."
-                        disabled
+                        value={interestCategories.interestNotes}
+                        onChange={(e) =>
+                          setInterestCategories((prev) => ({
+                            ...prev,
+                            interestNotes: e.target.value,
+                          }))
+                        }
                       />
                     </div>
 
                     {/* 저장 버튼 */}
                     <div className="flex justify-end pt-4 border-t">
-                      <Button disabled className="px-6">
+                      <Button
+                        type="submit"
+                        className="px-6"
+                        onClick={async () => {
+                          try {
+                            const formData = new FormData();
+                            formData.append(
+                              'intent',
+                              'updateInterestCategories'
+                            );
+
+                            // 관심사항 데이터 추가
+                            Object.entries(interestCategories).forEach(
+                              ([key, value]) => {
+                                formData.append(key, value.toString());
+                              }
+                            );
+
+                            submit(formData, { method: 'post' });
+                          } catch (error) {
+                            console.error('관심사항 저장 실패:', error);
+                          }
+                        }}
+                      >
                         관심사항 저장
                       </Button>
                     </div>
@@ -2477,65 +2859,97 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                       <h4 className="font-medium text-foreground">
                         등록된 동반자
                       </h4>
-                      <Button variant="outline" size="sm" disabled>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleAddCompanion}
+                      >
                         <Plus className="h-4 w-4 mr-2" />
                         동반자 추가
                       </Button>
                     </div>
 
-                    {/* 동반자 목록 (예시) */}
+                    {/* 동반자 목록 */}
                     <div className="space-y-4">
-                      {/* 예시 동반자 */}
-                      <div className="p-4 bg-muted/20 rounded-lg border border-border/40">
-                        <div className="flex items-start justify-between">
-                          <div className="space-y-2">
-                            <div className="flex items-center gap-3">
-                              <span className="text-lg">👤</span>
-                              <div>
-                                <h5 className="font-medium text-foreground">
-                                  김배우자
-                                </h5>
-                                <span className="text-sm text-muted-foreground">
-                                  배우자
-                                </span>
+                      {consultationCompanions &&
+                      consultationCompanions.length > 0 ? (
+                        consultationCompanions.map((companion) => (
+                          <div
+                            key={companion.id}
+                            className="p-4 bg-muted/20 rounded-lg border border-border/40"
+                          >
+                            <div className="flex items-start justify-between">
+                              <div className="space-y-2">
+                                <div className="flex items-center gap-3">
+                                  <span className="text-lg">👤</span>
+                                  <div>
+                                    <h5 className="font-medium text-foreground">
+                                      {companion.name}
+                                    </h5>
+                                    <span className="text-sm text-muted-foreground">
+                                      {companion.relationship}
+                                    </span>
+                                  </div>
+                                </div>
+                                {companion.phone && (
+                                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                    <Phone className="h-4 w-4" />
+                                    <span>{companion.phone}</span>
+                                  </div>
+                                )}
+                                {companion.isPrimary && (
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
+                                      주 동반자
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                              <div className="flex gap-1">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() =>
+                                    companion.id &&
+                                    handleEditCompanion(companion)
+                                  }
+                                >
+                                  <Edit2 className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() =>
+                                    companion.id &&
+                                    handleDeleteCompanion(companion.id)
+                                  }
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
                               </div>
                             </div>
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                              <Phone className="h-4 w-4" />
-                              <span>010-1234-5678</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
-                                주 동반자
-                              </span>
-                            </div>
                           </div>
-                          <div className="flex gap-1">
-                            <Button variant="ghost" size="sm" disabled>
-                              <Edit2 className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="sm" disabled>
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                        ))
+                      ) : (
+                        /* 빈 상태 */
+                        <div className="text-center py-12">
+                          <div className="w-16 h-16 bg-muted/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span className="text-2xl">👥</span>
                           </div>
+                          <h4 className="font-medium text-foreground mb-2">
+                            동반자가 없습니다
+                          </h4>
+                          <p className="text-sm text-muted-foreground mb-4">
+                            상담에 함께 참석할 동반자를 추가해보세요.
+                          </p>
+                          <Button
+                            variant="outline"
+                            onClick={handleAddCompanion}
+                          >
+                            <Plus className="h-4 w-4 mr-2" />첫 동반자 추가
+                          </Button>
                         </div>
-                      </div>
-
-                      {/* 빈 상태 */}
-                      <div className="text-center py-12">
-                        <div className="w-16 h-16 bg-muted/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                          <span className="text-2xl">👥</span>
-                        </div>
-                        <h4 className="font-medium text-foreground mb-2">
-                          동반자가 없습니다
-                        </h4>
-                        <p className="text-sm text-muted-foreground mb-4">
-                          상담에 함께 참석할 동반자를 추가해보세요.
-                        </p>
-                        <Button variant="outline" disabled>
-                          <Plus className="h-4 w-4 mr-2" />첫 동반자 추가
-                        </Button>
-                      </div>
+                      )}
                     </div>
 
                     {/* 동반자 추가 폼 (숨김 상태) */}
@@ -3449,6 +3863,372 @@ export async function action({ request, params }: Route.ActionArgs) {
       return {
         success: false,
         message: `영업 기회 생성에 실패했습니다: ${
+          error instanceof Error ? error.message : '알 수 없는 오류'
+        }`,
+        error: error instanceof Error ? error.message : '알 수 없는 오류',
+      };
+    }
+  }
+
+  // 🆕 병력사항 업데이트
+  if (intent === 'updateMedicalHistory') {
+    try {
+      // 🆕 새로운 API 함수 import
+      const { updateMedicalHistory } = await import(
+        '~/features/clients/lib/client-data'
+      );
+
+      const medicalData = {
+        // 3개월 이내 항목들
+        diagnosedWithin3Months:
+          formData.get('diagnosedWithin3Months') === 'true',
+        medicatedWithin3Months:
+          formData.get('medicatedWithin3Months') === 'true',
+        treatedWithin3Months: formData.get('treatedWithin3Months') === 'true',
+        hospitalizedWithin3Months:
+          formData.get('hospitalizedWithin3Months') === 'true',
+        surgeriedWithin3Months:
+          formData.get('surgeriedWithin3Months') === 'true',
+        // 1년 이내 항목들
+        diagnosedWithin1Year: formData.get('diagnosedWithin1Year') === 'true',
+        medicatedWithin1Year: formData.get('medicatedWithin1Year') === 'true',
+        treatedWithin1Year: formData.get('treatedWithin1Year') === 'true',
+        hospitalizedWithin1Year:
+          formData.get('hospitalizedWithin1Year') === 'true',
+        surgeriedWithin1Year: formData.get('surgeriedWithin1Year') === 'true',
+        // 5년 이내 항목들
+        diagnosedWithin5Years: formData.get('diagnosedWithin5Years') === 'true',
+        medicatedWithin5Years: formData.get('medicatedWithin5Years') === 'true',
+        treatedWithin5Years: formData.get('treatedWithin5Years') === 'true',
+        hospitalizedWithin5Years:
+          formData.get('hospitalizedWithin5Years') === 'true',
+        surgeriedWithin5Years: formData.get('surgeriedWithin5Years') === 'true',
+        // 상세 내용
+        medicalDetails3Months:
+          formData.get('medicalDetails3Months')?.toString() || null,
+        medicalDetails1Year:
+          formData.get('medicalDetails1Year')?.toString() || null,
+        medicalDetails5Years:
+          formData.get('medicalDetails5Years')?.toString() || null,
+        lastUpdatedBy: agentId,
+      };
+
+      await updateMedicalHistory(clientId, medicalData, agentId);
+
+      return {
+        success: true,
+        message: '병력사항이 성공적으로 업데이트되었습니다.',
+        timestamp: new Date().toISOString(),
+      };
+    } catch (error) {
+      console.error('❌ 병력사항 업데이트 실패:', error);
+      return {
+        success: false,
+        message: `병력사항 업데이트에 실패했습니다: ${
+          error instanceof Error ? error.message : '알 수 없는 오류'
+        }`,
+        error: error instanceof Error ? error.message : '알 수 없는 오류',
+      };
+    }
+  }
+
+  // 🆕 점검목적 업데이트
+  if (intent === 'updateCheckupPurposes') {
+    try {
+      const { updateCheckupPurposes } = await import(
+        '~/features/clients/lib/client-data'
+      );
+
+      const checkupData = {
+        // 걱정 관련 항목들
+        worriesAboutPremium: formData.get('worriesAboutPremium') === 'true',
+        worriesAboutCoverage: formData.get('worriesAboutCoverage') === 'true',
+        worriesAboutMedicalHistory:
+          formData.get('worriesAboutMedicalHistory') === 'true',
+        // 필요 관련 항목들
+        needsDeathBenefit: formData.get('needsDeathBenefit') === 'true',
+        needsImplantPlan: formData.get('needsImplantPlan') === 'true',
+        needsCaregiverInsurance:
+          formData.get('needsCaregiverInsurance') === 'true',
+        needsDementiaInsurance:
+          formData.get('needsDementiaInsurance') === 'true',
+        // 저축 현황
+        currentSavingsDetails:
+          formData.get('currentSavingsDetails')?.toString() || null,
+        lastUpdatedBy: agentId,
+      };
+
+      await updateCheckupPurposes(clientId, checkupData, agentId);
+
+      return {
+        success: true,
+        message: '점검목적이 성공적으로 업데이트되었습니다.',
+        timestamp: new Date().toISOString(),
+      };
+    } catch (error) {
+      console.error('❌ 점검목적 업데이트 실패:', error);
+      return {
+        success: false,
+        message: `점검목적 업데이트에 실패했습니다: ${
+          error instanceof Error ? error.message : '알 수 없는 오류'
+        }`,
+        error: error instanceof Error ? error.message : '알 수 없는 오류',
+      };
+    }
+  }
+
+  // 🆕 관심사항 업데이트
+  if (intent === 'updateInterestCategories') {
+    try {
+      const { updateInterestCategories } = await import(
+        '~/features/clients/lib/client-data'
+      );
+
+      const interestData = {
+        interestedInAutoInsurance:
+          formData.get('interestedInAutoInsurance') === 'true',
+        interestedInDementia: formData.get('interestedInDementia') === 'true',
+        interestedInDental: formData.get('interestedInDental') === 'true',
+        interestedInDriverInsurance:
+          formData.get('interestedInDriverInsurance') === 'true',
+        interestedInHealthCheckup:
+          formData.get('interestedInHealthCheckup') === 'true',
+        interestedInMedicalExpenses:
+          formData.get('interestedInMedicalExpenses') === 'true',
+        interestedInFireInsurance:
+          formData.get('interestedInFireInsurance') === 'true',
+        interestedInCaregiver: formData.get('interestedInCaregiver') === 'true',
+        interestedInCancer: formData.get('interestedInCancer') === 'true',
+        interestedInSavings: formData.get('interestedInSavings') === 'true',
+        interestedInLiability: formData.get('interestedInLiability') === 'true',
+        interestedInLegalAdvice:
+          formData.get('interestedInLegalAdvice') === 'true',
+        interestedInTax: formData.get('interestedInTax') === 'true',
+        interestedInInvestment:
+          formData.get('interestedInInvestment') === 'true',
+        interestedInPetInsurance:
+          formData.get('interestedInPetInsurance') === 'true',
+        interestedInTravel: formData.get('interestedInTravel') === 'true',
+        interestedInGolf: formData.get('interestedInGolf') === 'true',
+        lastUpdatedBy: agentId,
+      };
+
+      await updateInterestCategories(clientId, interestData, agentId);
+
+      return {
+        success: true,
+        message: '관심사항이 성공적으로 업데이트되었습니다.',
+        timestamp: new Date().toISOString(),
+      };
+    } catch (error) {
+      console.error('❌ 관심사항 업데이트 실패:', error);
+      return {
+        success: false,
+        message: `관심사항 업데이트에 실패했습니다: ${
+          error instanceof Error ? error.message : '알 수 없는 오류'
+        }`,
+        error: error instanceof Error ? error.message : '알 수 없는 오류',
+      };
+    }
+  }
+
+  // 🆕 상담동반자 생성
+  if (intent === 'createConsultationCompanion') {
+    try {
+      const { createConsultationCompanion } = await import(
+        '~/features/clients/lib/client-data'
+      );
+
+      const companionData = {
+        name: formData.get('companionName')?.toString() || '',
+        phone: formData.get('companionPhone')?.toString() || '',
+        relationship: formData.get('companionRelationship')?.toString() || '',
+        isPrimary: formData.get('companionIsPrimary') === 'true',
+        addedBy: agentId,
+      };
+
+      if (!companionData.name.trim()) {
+        throw new Error('동반자 이름은 필수입니다.');
+      }
+
+      await createConsultationCompanion(clientId, companionData, agentId);
+
+      return {
+        success: true,
+        message: '상담동반자가 성공적으로 추가되었습니다.',
+        timestamp: new Date().toISOString(),
+      };
+    } catch (error) {
+      console.error('❌ 상담동반자 생성 실패:', error);
+      return {
+        success: false,
+        message: `상담동반자 추가에 실패했습니다: ${
+          error instanceof Error ? error.message : '알 수 없는 오류'
+        }`,
+        error: error instanceof Error ? error.message : '알 수 없는 오류',
+      };
+    }
+  }
+
+  // 🆕 상담동반자 수정
+  if (intent === 'updateConsultationCompanion') {
+    try {
+      const { updateConsultationCompanion } = await import(
+        '~/features/clients/lib/client-data'
+      );
+
+      const companionId = formData.get('companionId')?.toString();
+      if (!companionId) {
+        throw new Error('동반자 ID가 필요합니다.');
+      }
+
+      const companionData = {
+        name: formData.get('companionName')?.toString() || '',
+        phone: formData.get('companionPhone')?.toString() || '',
+        relationship: formData.get('companionRelationship')?.toString() || '',
+        isPrimary: formData.get('companionIsPrimary') === 'true',
+      };
+
+      if (!companionData.name.trim()) {
+        throw new Error('동반자 이름은 필수입니다.');
+      }
+
+      await updateConsultationCompanion(companionId, companionData, agentId);
+
+      return {
+        success: true,
+        message: '상담동반자가 성공적으로 수정되었습니다.',
+        timestamp: new Date().toISOString(),
+      };
+    } catch (error) {
+      console.error('❌ 상담동반자 수정 실패:', error);
+      return {
+        success: false,
+        message: `상담동반자 수정에 실패했습니다: ${
+          error instanceof Error ? error.message : '알 수 없는 오류'
+        }`,
+        error: error instanceof Error ? error.message : '알 수 없는 오류',
+      };
+    }
+  }
+
+  // 🆕 상담동반자 삭제
+  if (intent === 'deleteConsultationCompanion') {
+    try {
+      const { deleteConsultationCompanion } = await import(
+        '~/features/clients/lib/client-data'
+      );
+
+      const companionId = formData.get('companionId')?.toString();
+      if (!companionId) {
+        throw new Error('동반자 ID가 필요합니다.');
+      }
+
+      await deleteConsultationCompanion(companionId, agentId);
+
+      return {
+        success: true,
+        message: '상담동반자가 성공적으로 삭제되었습니다.',
+        timestamp: new Date().toISOString(),
+      };
+    } catch (error) {
+      console.error('❌ 상담동반자 삭제 실패:', error);
+      return {
+        success: false,
+        message: `상담동반자 삭제에 실패했습니다: ${
+          error instanceof Error ? error.message : '알 수 없는 오류'
+        }`,
+        error: error instanceof Error ? error.message : '알 수 없는 오류',
+      };
+    }
+  }
+
+  // 🆕 상담내용 생성
+  if (intent === 'createConsultationNote') {
+    try {
+      const { createConsultationNote } = await import(
+        '~/features/clients/lib/client-data'
+      );
+
+      const noteData = {
+        consultationDate:
+          formData.get('consultationDate')?.toString() ||
+          new Date().toISOString().split('T')[0],
+        noteType: 'consultation',
+        title: formData.get('consultationTitle')?.toString() || '',
+        content: formData.get('consultationContent')?.toString() || '',
+        contractDetails: formData.get('contractInfo')?.toString()
+          ? JSON.parse(formData.get('contractInfo')?.toString() || '{}')
+          : null,
+        followUpDate: formData.get('followUpDate')?.toString() || null,
+        followUpNotes: formData.get('followUpNotes')?.toString() || null,
+      };
+
+      if (!noteData.title.trim() || !noteData.content.trim()) {
+        throw new Error('상담 제목과 내용은 필수입니다.');
+      }
+
+      await createConsultationNote(clientId, noteData, agentId);
+
+      return {
+        success: true,
+        message: '상담내용이 성공적으로 추가되었습니다.',
+        timestamp: new Date().toISOString(),
+      };
+    } catch (error) {
+      console.error('❌ 상담내용 생성 실패:', error);
+      return {
+        success: false,
+        message: `상담내용 추가에 실패했습니다: ${
+          error instanceof Error ? error.message : '알 수 없는 오류'
+        }`,
+        error: error instanceof Error ? error.message : '알 수 없는 오류',
+      };
+    }
+  }
+
+  // 🆕 상담내용 수정
+  if (intent === 'updateConsultationNote') {
+    try {
+      const { updateConsultationNote } = await import(
+        '~/features/clients/lib/client-data'
+      );
+
+      const noteId = formData.get('noteId')?.toString();
+      if (!noteId) {
+        throw new Error('상담 기록 ID가 필요합니다.');
+      }
+
+      const noteData = {
+        consultationDate:
+          formData.get('consultationDate')?.toString() ||
+          new Date().toISOString().split('T')[0],
+        noteType: 'consultation',
+        title: formData.get('consultationTitle')?.toString() || '',
+        content: formData.get('consultationContent')?.toString() || '',
+        contractDetails: formData.get('contractInfo')?.toString()
+          ? JSON.parse(formData.get('contractInfo')?.toString() || '{}')
+          : null,
+        followUpDate: formData.get('followUpDate')?.toString() || null,
+        followUpNotes: formData.get('followUpNotes')?.toString() || null,
+      };
+
+      if (!noteData.title.trim() || !noteData.content.trim()) {
+        throw new Error('상담 제목과 내용은 필수입니다.');
+      }
+
+      await updateConsultationNote(noteId, noteData, agentId);
+
+      return {
+        success: true,
+        message: '상담내용이 성공적으로 수정되었습니다.',
+        timestamp: new Date().toISOString(),
+      };
+    } catch (error) {
+      console.error('❌ 상담내용 수정 실패:', error);
+      return {
+        success: false,
+        message: `상담내용 수정에 실패했습니다: ${
           error instanceof Error ? error.message : '알 수 없는 오류'
         }`,
         error: error instanceof Error ? error.message : '알 수 없는 오류',

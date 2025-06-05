@@ -12,11 +12,12 @@
  * - 접근 권한 엄격 제어
  */
 
-interface KoreanIdParseResult {
+export interface KoreanIdParseResult {
   isValid: boolean;
   birthDate?: Date;
   gender?: 'male' | 'female';
   errorMessage?: string;
+  errors?: string[];
 }
 
 /**

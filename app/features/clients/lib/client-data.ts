@@ -36,6 +36,12 @@ import {
   appClientStageHistory,
   appClientDataAccessLogs,
   appClientDataBackups,
+  // 🆕 고객 관리 카드 테이블들
+  appClientMedicalHistory,
+  appClientCheckupPurposes,
+  appClientInterestCategories,
+  appClientConsultationCompanions,
+  appClientConsultationNotes,
   type AppClientTag,
   type AppClientContactHistory,
   type AppClientFamilyMember,
@@ -44,6 +50,17 @@ import {
   type ClientPrivacyLevel,
   type ClientContactMethod,
   type ClientStatus,
+  // 🆕 고객 관리 카드 타입들
+  type AppClientMedicalHistory,
+  type NewAppClientMedicalHistory,
+  type AppClientCheckupPurposes,
+  type NewAppClientCheckupPurposes,
+  type AppClientInterestCategories,
+  type NewAppClientInterestCategories,
+  type AppClientConsultationCompanion,
+  type NewAppClientConsultationCompanion,
+  type AppClientConsultationNote,
+  type NewAppClientConsultationNote,
 } from './schema';
 
 import type { Client } from '~/lib/schema';
@@ -390,6 +407,12 @@ export async function getClientOverview(
       recentContacts,
       milestones,
       stageHistory,
+      // 🆕 고객 관리 카드 데이터
+      medicalHistory,
+      checkupPurposes,
+      interestCategories,
+      consultationCompanions,
+      consultationNotes,
     ] = await Promise.all([
       // 태그 조회
       db
@@ -469,6 +492,48 @@ export async function getClientOverview(
         )
         .where(eq(appClientStageHistory.clientId, clientId))
         .orderBy(desc(appClientStageHistory.changedAt)),
+
+      // 🆕 병력사항 조회
+      db
+        .select()
+        .from(appClientMedicalHistory)
+        .where(eq(appClientMedicalHistory.clientId, clientId))
+        .limit(1),
+
+      // 🆕 점검목적 조회
+      db
+        .select()
+        .from(appClientCheckupPurposes)
+        .where(eq(appClientCheckupPurposes.clientId, clientId))
+        .limit(1),
+
+      // 🆕 관심사항 조회
+      db
+        .select()
+        .from(appClientInterestCategories)
+        .where(eq(appClientInterestCategories.clientId, clientId))
+        .limit(1),
+
+      // 🆕 상담동반자 조회
+      db
+        .select()
+        .from(appClientConsultationCompanions)
+        .where(eq(appClientConsultationCompanions.clientId, clientId))
+        .orderBy(
+          desc(appClientConsultationCompanions.isPrimary),
+          asc(appClientConsultationCompanions.createdAt)
+        ),
+
+      // 🆕 상담내용 조회 (최근 10개)
+      db
+        .select()
+        .from(appClientConsultationNotes)
+        .where(eq(appClientConsultationNotes.clientId, clientId))
+        .orderBy(
+          desc(appClientConsultationNotes.consultationDate),
+          desc(appClientConsultationNotes.createdAt)
+        )
+        .limit(10),
     ]);
 
     // 🔒 데이터 접근 로그 기록
@@ -517,6 +582,12 @@ export async function getClientOverview(
       }),
       milestones,
       stageHistory,
+      // 🆕 고객 관리 카드 데이터
+      medicalHistory: medicalHistory[0] || null,
+      checkupPurposes: checkupPurposes[0] || null,
+      interestCategories: interestCategories[0] || null,
+      consultationCompanions,
+      consultationNotes,
       // 🔒 보안 정보
       accessLevel,
       dataConsents: {
@@ -1133,6 +1204,703 @@ export async function getClientById(
     return extendedClient;
   } catch (error) {
     console.error('고객 조회 실패:', error);
+    throw error;
+  }
+}
+
+// ======================================================================
+// 🆕 고객 관리 카드 API 함수들 (새로운 기능)
+// ======================================================================
+
+// 🏥 병력사항 관련 함수들
+export async function getMedicalHistory(
+  clientId: string,
+  agentId: string
+): Promise<AppClientMedicalHistory | null> {
+  try {
+    // 권한 검증: 해당 고객이 이 보험설계사의 고객인지 확인
+    const clientCheck = await db
+      .select({ id: clients.id })
+      .from(clients)
+      .where(
+        and(
+          eq(clients.id, clientId),
+          eq(clients.agentId, agentId),
+          eq(clients.isActive, true)
+        )
+      )
+      .limit(1);
+
+    if (clientCheck.length === 0) {
+      throw new Error('권한이 없습니다.');
+    }
+
+    // 병력사항 조회
+    const result = await db
+      .select()
+      .from(appClientMedicalHistory)
+      .where(eq(appClientMedicalHistory.clientId, clientId))
+      .limit(1);
+
+    // 접근 로그
+    await logDataAccess(
+      clientId,
+      agentId,
+      'view',
+      ['medical_history'],
+      undefined,
+      undefined,
+      'Medical history access'
+    );
+
+    return result[0] || null;
+  } catch (error) {
+    console.error('병력사항 조회 실패:', error);
+    throw error;
+  }
+}
+
+export async function updateMedicalHistory(
+  clientId: string,
+  medicalData: Omit<
+    NewAppClientMedicalHistory,
+    'clientId' | 'createdAt' | 'updatedAt'
+  >,
+  agentId: string
+): Promise<AppClientMedicalHistory> {
+  try {
+    // 권한 검증
+    const clientCheck = await db
+      .select({ id: clients.id })
+      .from(clients)
+      .where(
+        and(
+          eq(clients.id, clientId),
+          eq(clients.agentId, agentId),
+          eq(clients.isActive, true)
+        )
+      )
+      .limit(1);
+
+    if (clientCheck.length === 0) {
+      throw new Error('권한이 없습니다.');
+    }
+
+    // 기존 데이터 확인
+    const existing = await db
+      .select({ id: appClientMedicalHistory.id })
+      .from(appClientMedicalHistory)
+      .where(eq(appClientMedicalHistory.clientId, clientId))
+      .limit(1);
+
+    let result: AppClientMedicalHistory;
+
+    if (existing.length > 0) {
+      // 업데이트
+      const [updated] = await db
+        .update(appClientMedicalHistory)
+        .set({
+          ...medicalData,
+          lastUpdatedBy: agentId,
+          updatedAt: new Date(),
+        })
+        .where(eq(appClientMedicalHistory.clientId, clientId))
+        .returning();
+      result = updated;
+    } else {
+      // 신규 생성
+      const [created] = await db
+        .insert(appClientMedicalHistory)
+        .values({
+          clientId,
+          ...medicalData,
+          lastUpdatedBy: agentId,
+        })
+        .returning();
+      result = created;
+    }
+
+    // 접근 로그 및 백업
+    await Promise.all([
+      logDataAccess(
+        clientId,
+        agentId,
+        'edit',
+        ['medical_history'],
+        undefined,
+        undefined,
+        'Medical history update'
+      ),
+      createDataBackup(
+        clientId,
+        agentId,
+        'incremental',
+        'Medical history updated',
+        30
+      ),
+    ]);
+
+    return result;
+  } catch (error) {
+    console.error('병력사항 저장 실패:', error);
+    throw error;
+  }
+}
+
+// 🎯 점검목적 관련 함수들
+export async function getCheckupPurposes(
+  clientId: string,
+  agentId: string
+): Promise<AppClientCheckupPurposes | null> {
+  try {
+    // 권한 검증
+    const clientCheck = await db
+      .select({ id: clients.id })
+      .from(clients)
+      .where(
+        and(
+          eq(clients.id, clientId),
+          eq(clients.agentId, agentId),
+          eq(clients.isActive, true)
+        )
+      )
+      .limit(1);
+
+    if (clientCheck.length === 0) {
+      throw new Error('권한이 없습니다.');
+    }
+
+    // 점검목적 조회
+    const result = await db
+      .select()
+      .from(appClientCheckupPurposes)
+      .where(eq(appClientCheckupPurposes.clientId, clientId))
+      .limit(1);
+
+    // 접근 로그
+    await logDataAccess(
+      clientId,
+      agentId,
+      'view',
+      ['checkup_purposes'],
+      undefined,
+      undefined,
+      'Checkup purposes access'
+    );
+
+    return result[0] || null;
+  } catch (error) {
+    console.error('점검목적 조회 실패:', error);
+    throw error;
+  }
+}
+
+export async function updateCheckupPurposes(
+  clientId: string,
+  checkupData: Omit<
+    NewAppClientCheckupPurposes,
+    'clientId' | 'createdAt' | 'updatedAt'
+  >,
+  agentId: string
+): Promise<AppClientCheckupPurposes> {
+  try {
+    // 권한 검증
+    const clientCheck = await db
+      .select({ id: clients.id })
+      .from(clients)
+      .where(
+        and(
+          eq(clients.id, clientId),
+          eq(clients.agentId, agentId),
+          eq(clients.isActive, true)
+        )
+      )
+      .limit(1);
+
+    if (clientCheck.length === 0) {
+      throw new Error('권한이 없습니다.');
+    }
+
+    // 기존 데이터 확인
+    const existing = await db
+      .select({ id: appClientCheckupPurposes.id })
+      .from(appClientCheckupPurposes)
+      .where(eq(appClientCheckupPurposes.clientId, clientId))
+      .limit(1);
+
+    let result: AppClientCheckupPurposes;
+
+    if (existing.length > 0) {
+      // 업데이트
+      const [updated] = await db
+        .update(appClientCheckupPurposes)
+        .set({
+          ...checkupData,
+          lastUpdatedBy: agentId,
+          updatedAt: new Date(),
+        })
+        .where(eq(appClientCheckupPurposes.clientId, clientId))
+        .returning();
+      result = updated;
+    } else {
+      // 신규 생성
+      const [created] = await db
+        .insert(appClientCheckupPurposes)
+        .values({
+          clientId,
+          ...checkupData,
+          lastUpdatedBy: agentId,
+        })
+        .returning();
+      result = created;
+    }
+
+    // 접근 로그
+    await logDataAccess(
+      clientId,
+      agentId,
+      'edit',
+      ['checkup_purposes'],
+      undefined,
+      undefined,
+      'Checkup purposes update'
+    );
+
+    return result;
+  } catch (error) {
+    console.error('점검목적 저장 실패:', error);
+    throw error;
+  }
+}
+
+// ❓ 관심사항 관련 함수들
+export async function getInterestCategories(
+  clientId: string,
+  agentId: string
+): Promise<AppClientInterestCategories | null> {
+  try {
+    // 권한 검증
+    const clientCheck = await db
+      .select({ id: clients.id })
+      .from(clients)
+      .where(
+        and(
+          eq(clients.id, clientId),
+          eq(clients.agentId, agentId),
+          eq(clients.isActive, true)
+        )
+      )
+      .limit(1);
+
+    if (clientCheck.length === 0) {
+      throw new Error('권한이 없습니다.');
+    }
+
+    // 관심사항 조회
+    const result = await db
+      .select()
+      .from(appClientInterestCategories)
+      .where(eq(appClientInterestCategories.clientId, clientId))
+      .limit(1);
+
+    return result[0] || null;
+  } catch (error) {
+    console.error('관심사항 조회 실패:', error);
+    throw error;
+  }
+}
+
+export async function updateInterestCategories(
+  clientId: string,
+  interestData: Omit<
+    NewAppClientInterestCategories,
+    'clientId' | 'createdAt' | 'updatedAt'
+  >,
+  agentId: string
+): Promise<AppClientInterestCategories> {
+  try {
+    // 권한 검증
+    const clientCheck = await db
+      .select({ id: clients.id })
+      .from(clients)
+      .where(
+        and(
+          eq(clients.id, clientId),
+          eq(clients.agentId, agentId),
+          eq(clients.isActive, true)
+        )
+      )
+      .limit(1);
+
+    if (clientCheck.length === 0) {
+      throw new Error('권한이 없습니다.');
+    }
+
+    // 기존 데이터 확인
+    const existing = await db
+      .select({ id: appClientInterestCategories.id })
+      .from(appClientInterestCategories)
+      .where(eq(appClientInterestCategories.clientId, clientId))
+      .limit(1);
+
+    let result: AppClientInterestCategories;
+
+    if (existing.length > 0) {
+      // 업데이트
+      const [updated] = await db
+        .update(appClientInterestCategories)
+        .set({
+          ...interestData,
+          lastUpdatedBy: agentId,
+          updatedAt: new Date(),
+        })
+        .where(eq(appClientInterestCategories.clientId, clientId))
+        .returning();
+      result = updated;
+    } else {
+      // 신규 생성
+      const [created] = await db
+        .insert(appClientInterestCategories)
+        .values({
+          clientId,
+          ...interestData,
+          lastUpdatedBy: agentId,
+        })
+        .returning();
+      result = created;
+    }
+
+    return result;
+  } catch (error) {
+    console.error('관심사항 저장 실패:', error);
+    throw error;
+  }
+}
+
+// 👥 상담동반자 관련 함수들
+export async function getConsultationCompanions(
+  clientId: string,
+  agentId: string
+): Promise<AppClientConsultationCompanion[]> {
+  try {
+    // 권한 검증
+    const clientCheck = await db
+      .select({ id: clients.id })
+      .from(clients)
+      .where(
+        and(
+          eq(clients.id, clientId),
+          eq(clients.agentId, agentId),
+          eq(clients.isActive, true)
+        )
+      )
+      .limit(1);
+
+    if (clientCheck.length === 0) {
+      throw new Error('권한이 없습니다.');
+    }
+
+    // 상담동반자 목록 조회
+    const result = await db
+      .select()
+      .from(appClientConsultationCompanions)
+      .where(eq(appClientConsultationCompanions.clientId, clientId))
+      .orderBy(
+        desc(appClientConsultationCompanions.isPrimary),
+        asc(appClientConsultationCompanions.createdAt)
+      );
+
+    return result;
+  } catch (error) {
+    console.error('상담동반자 조회 실패:', error);
+    throw error;
+  }
+}
+
+export async function createConsultationCompanion(
+  clientId: string,
+  companionData: Omit<
+    NewAppClientConsultationCompanion,
+    'clientId' | 'createdAt' | 'updatedAt'
+  >,
+  agentId: string
+): Promise<AppClientConsultationCompanion> {
+  try {
+    // 권한 검증
+    const clientCheck = await db
+      .select({ id: clients.id })
+      .from(clients)
+      .where(
+        and(
+          eq(clients.id, clientId),
+          eq(clients.agentId, agentId),
+          eq(clients.isActive, true)
+        )
+      )
+      .limit(1);
+
+    if (clientCheck.length === 0) {
+      throw new Error('권한이 없습니다.');
+    }
+
+    // 주 동반자 설정 시, 기존 주 동반자를 일반으로 변경
+    if (companionData.isPrimary) {
+      await db
+        .update(appClientConsultationCompanions)
+        .set({ isPrimary: false })
+        .where(
+          and(
+            eq(appClientConsultationCompanions.clientId, clientId),
+            eq(appClientConsultationCompanions.isPrimary, true)
+          )
+        );
+    }
+
+    // 새 동반자 추가
+    const [newCompanion] = await db
+      .insert(appClientConsultationCompanions)
+      .values({
+        clientId,
+        ...companionData,
+        addedBy: agentId,
+      })
+      .returning();
+
+    return newCompanion;
+  } catch (error) {
+    console.error('상담동반자 추가 실패:', error);
+    throw error;
+  }
+}
+
+export async function updateConsultationCompanion(
+  companionId: string,
+  companionData: Omit<
+    NewAppClientConsultationCompanion,
+    'clientId' | 'createdAt' | 'updatedAt' | 'addedBy'
+  >,
+  agentId: string
+): Promise<AppClientConsultationCompanion> {
+  try {
+    // 기존 동반자 정보 및 권한 검증
+    const existingCompanion = await db
+      .select({
+        id: appClientConsultationCompanions.id,
+        clientId: appClientConsultationCompanions.clientId,
+      })
+      .from(appClientConsultationCompanions)
+      .innerJoin(
+        clients,
+        eq(appClientConsultationCompanions.clientId, clients.id)
+      )
+      .where(
+        and(
+          eq(appClientConsultationCompanions.id, companionId),
+          eq(clients.agentId, agentId),
+          eq(clients.isActive, true)
+        )
+      )
+      .limit(1);
+
+    if (existingCompanion.length === 0) {
+      throw new Error('권한이 없거나 동반자를 찾을 수 없습니다.');
+    }
+
+    // 주 동반자 설정 시, 같은 고객의 다른 주 동반자를 일반으로 변경
+    if (companionData.isPrimary) {
+      await db
+        .update(appClientConsultationCompanions)
+        .set({ isPrimary: false })
+        .where(
+          and(
+            eq(
+              appClientConsultationCompanions.clientId,
+              existingCompanion[0].clientId
+            ),
+            eq(appClientConsultationCompanions.isPrimary, true),
+            sql`${appClientConsultationCompanions.id} != ${companionId}`
+          )
+        );
+    }
+
+    // 동반자 정보 업데이트
+    const [updatedCompanion] = await db
+      .update(appClientConsultationCompanions)
+      .set({
+        ...companionData,
+        updatedAt: new Date(),
+      })
+      .where(eq(appClientConsultationCompanions.id, companionId))
+      .returning();
+
+    return updatedCompanion;
+  } catch (error) {
+    console.error('상담동반자 수정 실패:', error);
+    throw error;
+  }
+}
+
+export async function deleteConsultationCompanion(
+  companionId: string,
+  agentId: string
+): Promise<void> {
+  try {
+    // 권한 검증
+    const companionCheck = await db
+      .select({ id: appClientConsultationCompanions.id })
+      .from(appClientConsultationCompanions)
+      .innerJoin(
+        clients,
+        eq(appClientConsultationCompanions.clientId, clients.id)
+      )
+      .where(
+        and(
+          eq(appClientConsultationCompanions.id, companionId),
+          eq(clients.agentId, agentId),
+          eq(clients.isActive, true)
+        )
+      )
+      .limit(1);
+
+    if (companionCheck.length === 0) {
+      throw new Error('권한이 없거나 동반자를 찾을 수 없습니다.');
+    }
+
+    // 동반자 삭제
+    await db
+      .delete(appClientConsultationCompanions)
+      .where(eq(appClientConsultationCompanions.id, companionId));
+  } catch (error) {
+    console.error('상담동반자 삭제 실패:', error);
+    throw error;
+  }
+}
+
+// 📝 상담내용 관련 함수들
+export async function getConsultationNotes(
+  clientId: string,
+  agentId: string,
+  limit: number = 50
+): Promise<AppClientConsultationNote[]> {
+  try {
+    // 권한 검증
+    const clientCheck = await db
+      .select({ id: clients.id })
+      .from(clients)
+      .where(
+        and(
+          eq(clients.id, clientId),
+          eq(clients.agentId, agentId),
+          eq(clients.isActive, true)
+        )
+      )
+      .limit(1);
+
+    if (clientCheck.length === 0) {
+      throw new Error('권한이 없습니다.');
+    }
+
+    // 상담 기록 조회 (최신순)
+    const result = await db
+      .select()
+      .from(appClientConsultationNotes)
+      .where(eq(appClientConsultationNotes.clientId, clientId))
+      .orderBy(
+        desc(appClientConsultationNotes.consultationDate),
+        desc(appClientConsultationNotes.createdAt)
+      )
+      .limit(limit);
+
+    return result;
+  } catch (error) {
+    console.error('상담내용 조회 실패:', error);
+    throw error;
+  }
+}
+
+export async function createConsultationNote(
+  clientId: string,
+  noteData: Omit<
+    NewAppClientConsultationNote,
+    'clientId' | 'agentId' | 'createdAt' | 'updatedAt'
+  >,
+  agentId: string
+): Promise<AppClientConsultationNote> {
+  try {
+    // 권한 검증
+    const clientCheck = await db
+      .select({ id: clients.id })
+      .from(clients)
+      .where(
+        and(
+          eq(clients.id, clientId),
+          eq(clients.agentId, agentId),
+          eq(clients.isActive, true)
+        )
+      )
+      .limit(1);
+
+    if (clientCheck.length === 0) {
+      throw new Error('권한이 없습니다.');
+    }
+
+    // 새 상담 기록 추가
+    const [newNote] = await db
+      .insert(appClientConsultationNotes)
+      .values({
+        clientId,
+        agentId,
+        ...noteData,
+      })
+      .returning();
+
+    return newNote;
+  } catch (error) {
+    console.error('상담내용 추가 실패:', error);
+    throw error;
+  }
+}
+
+export async function updateConsultationNote(
+  noteId: string,
+  noteData: Omit<
+    NewAppClientConsultationNote,
+    'clientId' | 'agentId' | 'createdAt' | 'updatedAt'
+  >,
+  agentId: string
+): Promise<AppClientConsultationNote> {
+  try {
+    // 권한 검증
+    const noteCheck = await db
+      .select({ id: appClientConsultationNotes.id })
+      .from(appClientConsultationNotes)
+      .innerJoin(clients, eq(appClientConsultationNotes.clientId, clients.id))
+      .where(
+        and(
+          eq(appClientConsultationNotes.id, noteId),
+          eq(clients.agentId, agentId),
+          eq(clients.isActive, true)
+        )
+      )
+      .limit(1);
+
+    if (noteCheck.length === 0) {
+      throw new Error('권한이 없거나 상담 기록을 찾을 수 없습니다.');
+    }
+
+    // 상담 기록 업데이트
+    const [updatedNote] = await db
+      .update(appClientConsultationNotes)
+      .set({
+        ...noteData,
+        updatedAt: new Date(),
+      })
+      .where(eq(appClientConsultationNotes.id, noteId))
+      .returning();
+
+    return updatedNote;
+  } catch (error) {
+    console.error('상담내용 수정 실패:', error);
     throw error;
   }
 }
