@@ -9,7 +9,10 @@ import {
   referrals,
 } from '~/lib/schema/core';
 import { profiles } from '~/lib/schema/core';
-import { appClientConsultationNotes } from '~/features/clients/lib/schema';
+import {
+  appClientConsultationNotes,
+  appClientInterestCategories,
+} from '~/features/clients/lib/schema';
 
 // Pipeline Stages 관련 함수들
 export async function getPipelineStages(agentId: string) {
@@ -149,6 +152,82 @@ export async function getClientsByStage(agentId: string) {
             lastConsultationDate = null;
           }
 
+          // 관심사항 조회
+          let interestCategories: Array<{ label: string; icon: string }> = [];
+          try {
+            const interests = await db
+              .select()
+              .from(appClientInterestCategories)
+              .where(eq(appClientInterestCategories.clientId, item.client.id))
+              .limit(1);
+
+            if (interests[0]) {
+              // 체크된 관심사항들만 추출
+              const checkedInterests: Array<{ label: string; icon: string }> =
+                [];
+              const interestData = interests[0];
+
+              const interestMap = [
+                {
+                  key: 'interestedInAutoInsurance',
+                  label: '자동차',
+                  icon: '🚗',
+                },
+                { key: 'interestedInDementia', label: '치매', icon: '🧠' },
+                { key: 'interestedInDental', label: '치아', icon: '🦷' },
+                {
+                  key: 'interestedInDriverInsurance',
+                  label: '운전자',
+                  icon: '🚙',
+                },
+                {
+                  key: 'interestedInHealthCheckup',
+                  label: '건강검진',
+                  icon: '🏥',
+                },
+                {
+                  key: 'interestedInMedicalExpenses',
+                  label: '실비',
+                  icon: '💊',
+                },
+                { key: 'interestedInFireInsurance', label: '화재', icon: '🔥' },
+                { key: 'interestedInCaregiver', label: '간병', icon: '👩‍⚕️' },
+                { key: 'interestedInCancer', label: '암', icon: '🎗️' },
+                { key: 'interestedInSavings', label: '저축', icon: '💰' },
+                { key: 'interestedInLiability', label: '배상책임', icon: '⚖️' },
+                { key: 'interestedInLegalAdvice', label: '법률', icon: '⚖️' },
+                { key: 'interestedInTax', label: '세금', icon: '📋' },
+                { key: 'interestedInInvestment', label: '재테크', icon: '📈' },
+                {
+                  key: 'interestedInPetInsurance',
+                  label: '펫보험',
+                  icon: '🐕',
+                },
+                {
+                  key: 'interestedInAccidentInsurance',
+                  label: '상해',
+                  icon: '🩹',
+                },
+                {
+                  key: 'interestedInTrafficAccident',
+                  label: '교통사고',
+                  icon: '🚨',
+                },
+              ];
+
+              interestMap.forEach(({ key, label, icon }) => {
+                if (interestData[key as keyof typeof interestData]) {
+                  checkedInterests.push({ label, icon });
+                }
+              });
+
+              interestCategories = checkedInterests;
+            }
+          } catch (error) {
+            // 관심사항이 없는 경우 빈 배열
+            interestCategories = [];
+          }
+
           // 🎯 파이프라인 타입에 정확히 맞게 필드명 변환
           return {
             id: item.client.id,
@@ -172,6 +251,7 @@ export async function getClientsByStage(agentId: string) {
             meetings: clientMeetings,
             // 추가 필드들
             lastContactDate: lastConsultationDate,
+            interestCategories: interestCategories,
             createdAt: item.client.createdAt?.toISOString(),
           };
         } catch (error) {
@@ -187,6 +267,7 @@ export async function getClientsByStage(agentId: string) {
             stageId: item.client.currentStageId,
             referredBy: null,
             lastContactDate: null, // 에러 시에는 null로 설정
+            interestCategories: [], // 에러 시에는 빈 배열
             createdAt: item.client.createdAt?.toISOString(),
           };
         }

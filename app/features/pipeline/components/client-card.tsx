@@ -115,6 +115,7 @@ interface ClientCardProps {
     name: string;
   };
   insuranceInfo?: InsuranceInfo;
+  interestCategories?: Array<{ label: string; icon: string }>;
   isDragging?: boolean;
   onRemoveFromPipeline?: (clientId: string, clientName: string) => void;
 }
@@ -138,6 +139,7 @@ export function ClientCard({
   lastContactDate,
   referredBy,
   insuranceInfo,
+  interestCategories = [],
   isDragging = false,
   onRemoveFromPipeline,
 }: ClientCardProps) {
@@ -352,9 +354,45 @@ export function ClientCard({
             </div>
           )}
 
+          {/* 🎯 관심사항 표시 */}
+          {interestCategories && interestCategories.length > 0 && (
+            <div className="space-y-1">
+              <div className="flex items-center gap-1">
+                <span className="text-xs text-muted-foreground">관심사항</span>
+              </div>
+              <div className="flex items-center gap-1 flex-wrap">
+                {interestCategories.slice(0, 3).map((interest, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center gap-1 px-1.5 py-0.5 bg-accent/20 rounded text-xs"
+                  >
+                    <span>{interest.icon}</span>
+                    <span className="text-foreground">
+                      {interest.label.length > 4
+                        ? interest.label.slice(0, 4)
+                        : interest.label}
+                    </span>
+                  </div>
+                ))}
+                {interestCategories.length > 3 && (
+                  <div
+                    className="flex items-center px-1.5 py-0.5 bg-muted/30 rounded text-xs"
+                    title={`추가 관심사항: ${interestCategories
+                      .slice(3)
+                      .map((i) => i.label)
+                      .join(', ')}`}
+                  >
+                    <span className="text-muted-foreground">
+                      +{interestCategories.length - 3}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* 🏥 건강 정보 */}
-          {(hasHealthIssues !== undefined ||
-            hasDrivingLicense !== undefined) && (
+          {hasHealthIssues !== undefined && (
             <div className="flex items-center gap-3">
               {hasHealthIssues === false && (
                 <div className="flex items-center gap-1">
@@ -368,14 +406,6 @@ export function ClientCard({
                 <div className="flex items-center gap-1">
                   <AlertTriangle className="h-3.5 w-3.5 text-orange-500" />
                   <span className="text-xs text-orange-600">주의</span>
-                </div>
-              )}
-              {hasDrivingLicense && (
-                <div className="flex items-center gap-1">
-                  <UserCheck className="h-3.5 w-3.5 text-blue-600" />
-                  <span className="text-xs text-blue-700 dark:text-blue-300">
-                    운전
-                  </span>
                 </div>
               )}
             </div>

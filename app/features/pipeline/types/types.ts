@@ -51,6 +51,7 @@ export interface Client {
   tags?: string[];
   stageId: string;
   insuranceInfo?: InsuranceInfo[];
+  interestCategories?: Array<{ label: string; icon: string }>;
   // 개인정보 동의 관련
   consentDate?: string;
   profileImageUrl?: string;
