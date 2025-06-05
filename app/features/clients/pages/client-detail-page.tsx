@@ -604,7 +604,9 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
             title: note.title,
             content: note.content,
             contractInfo: note.contractDetails
-              ? JSON.stringify(note.contractDetails)
+              ? typeof note.contractDetails === 'string'
+                ? note.contractDetails
+                : JSON.stringify(note.contractDetails)
               : '',
             followUpDate: note.followUpDate,
             followUpNotes: note.followUpNotes,
@@ -1269,15 +1271,30 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
   };
 
   const handleEditNote = (note: any) => {
+    // contractInfo가 JSON 문자열로 저장된 경우 파싱해서 처리
+    let contractInfoValue = '';
+    if (note.contractInfo) {
+      if (typeof note.contractInfo === 'string') {
+        try {
+          // JSON 문자열인지 확인하고 파싱 시도
+          const parsed = JSON.parse(note.contractInfo);
+          contractInfoValue =
+            typeof parsed === 'string' ? parsed : note.contractInfo;
+        } catch {
+          // JSON이 아니면 그대로 사용
+          contractInfoValue = note.contractInfo;
+        }
+      } else {
+        contractInfoValue = JSON.stringify(note.contractInfo);
+      }
+    }
+
     setEditingNote({
       id: note.id,
       consultationDate: note.consultationDate,
       title: note.title,
       content: note.content,
-      contractInfo:
-        typeof note.contractInfo === 'string'
-          ? note.contractInfo
-          : JSON.stringify(note.contractInfo || {}),
+      contractInfo: contractInfoValue,
       followUpDate: note.followUpDate || '',
       followUpNotes: note.followUpNotes || '',
     });
@@ -3409,7 +3426,12 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                                     </h6>
                                     <div className="bg-accent/20 p-3 rounded border border-border/40">
                                       <p className="text-sm whitespace-pre-wrap">
-                                        {note.contractInfo}
+                                        {typeof note.contractInfo ===
+                                          'string' &&
+                                        note.contractInfo.startsWith('"') &&
+                                        note.contractInfo.endsWith('"')
+                                          ? note.contractInfo.slice(1, -1) // 양쪽 쌍따옴표 제거
+                                          : note.contractInfo}
                                       </p>
                                     </div>
                                   </div>
