@@ -3,13 +3,17 @@ import {
   X,
   Users,
   TrendingUp,
-  Star,
-  ArrowRight,
   Phone,
   Mail,
-  Calendar,
   UserRound,
   ArrowUpRight,
+  MapPin,
+  Briefcase,
+  Car,
+  Ruler,
+  Weight,
+  Calendar,
+  User,
 } from 'lucide-react';
 import { Button } from '~/common/components/ui/button';
 import { Badge } from '~/common/components/ui/badge';
@@ -28,6 +32,9 @@ interface NetworkDetailPanelProps {
   data: NetworkData;
   onClose: () => void;
   onNodeSelect?: (nodeId: string) => void;
+  clientsData?: any[];
+  stages?: any[];
+  referralData?: any;
 }
 
 export default function NetworkDetailPanel({
@@ -35,11 +42,30 @@ export default function NetworkDetailPanel({
   data,
   onClose,
   onNodeSelect,
+  clientsData = [],
+  stages = [],
+  referralData = {},
 }: NetworkDetailPanelProps) {
   // 선택된 노드 정보
   const selectedNode = useMemo(() => {
     return data.nodes.find((node) => node.id === nodeId);
   }, [data.nodes, nodeId]);
+
+  // 실제 클라이언트 데이터 조회
+  const clientData = useMemo(() => {
+    console.log('🔍 클라이언트 데이터 검색:', {
+      nodeId,
+      clientsDataLength: clientsData.length,
+    });
+    const found = clientsData.find((client) => client.id === nodeId);
+    console.log('🎯 찾은 클라이언트 데이터:', found ? '✅ 발견' : '❌ 없음');
+    return found;
+  }, [clientsData, nodeId]);
+
+  // 소개 관계 데이터
+  const referralInfo = useMemo(() => {
+    return referralData[nodeId] || { referredBy: null, referredClients: [] };
+  }, [referralData, nodeId]);
 
   // 소개한 사람들 (이 노드가 소스인 링크들의 타겟)
   const referredNodes = useMemo(() => {
@@ -59,10 +85,12 @@ export default function NetworkDetailPanel({
           typeof link.target === 'string'
             ? link.target
             : (link.target as NetworkNode).id;
-        return data.nodes.find((node) => node.id === targetId);
+        const node = data.nodes.find((node) => node.id === targetId);
+        const clientInfo = clientsData.find((client) => client.id === targetId);
+        return node && clientInfo ? { ...node, clientInfo } : null;
       })
-      .filter(Boolean) as NetworkNode[];
-  }, [data, nodeId, selectedNode]);
+      .filter(Boolean) as (NetworkNode & { clientInfo: any })[];
+  }, [data, nodeId, selectedNode, clientsData]);
 
   // 소개받은 사람 (이 노드가 타겟인 링크들의 소스)
   const referredByNode = useMemo(() => {
@@ -83,23 +111,26 @@ export default function NetworkDetailPanel({
         ? referredByLink.source
         : (referredByLink.source as NetworkNode).id;
 
-    return data.nodes.find((node) => node.id === sourceId);
-  }, [data, nodeId, selectedNode]);
+    const node = data.nodes.find((node) => node.id === sourceId);
+    const clientInfo = clientsData.find((client) => client.id === sourceId);
+    return node && clientInfo ? { ...node, clientInfo } : null;
+  }, [data, nodeId, selectedNode, clientsData]);
 
-  if (!selectedNode) return null;
+  if (!selectedNode) {
+    console.log('❌ 선택된 노드 없음:', { nodeId });
+    return null;
+  }
+
+  // 클라이언트 데이터가 없는 경우에 대한 안전장치
+  console.log('📊 렌더링 데이터 상태:', {
+    selectedNode: selectedNode?.name,
+    hasClientData: !!clientData,
+    clientsDataLength: clientsData.length,
+    nodeId,
+  });
 
   // 연결된 노드들을 통한 통계 계산
   const connections = referredNodes.length;
-  const totalImportance = referredNodes.reduce(
-    (sum, node) => sum + (node.importance || 0),
-    0
-  );
-
-  const handleContactAction = (action: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    console.log(`${action} 액션 실행:`, selectedNode.name);
-    // 실제 연락 액션 로직 구현
-  };
 
   const handleReferralAction = (nodeId: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -108,9 +139,36 @@ export default function NetworkDetailPanel({
     }
   };
 
+  // 중요도 배지 색상 (VIP, 일반, 관심)
+  const getImportanceBadgeColor = (importance: string | undefined) => {
+    switch (importance) {
+      case 'high':
+        return 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300 border-orange-200';
+      case 'medium':
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 border-blue-200';
+      case 'low':
+        return 'bg-muted text-muted-foreground border-muted-foreground/20';
+      default:
+        return 'bg-muted text-muted-foreground border-muted-foreground/20';
+    }
+  };
+
+  const getImportanceText = (importance: string | undefined) => {
+    switch (importance) {
+      case 'high':
+        return 'VIP';
+      case 'medium':
+        return '일반';
+      case 'low':
+        return '관심';
+      default:
+        return '미설정';
+    }
+  };
+
   // 영업 단계별 배지 색상
-  const getStageBadgeColor = (stage: string | undefined) => {
-    if (!stage) return 'default';
+  const getStageBadgeColor = (stageName: string | undefined) => {
+    if (!stageName) return 'default';
 
     const stageColorMap: Record<string, string> = {
       '첫 상담': 'secondary',
@@ -120,27 +178,37 @@ export default function NetworkDetailPanel({
       '계약 완료': 'default',
     };
 
-    return stageColorMap[stage] || 'default';
+    return stageColorMap[stageName] || 'default';
   };
 
-  // 중요도 별 표시
-  const renderImportance = (importance: number | undefined) => {
-    if (!importance) return null;
+  // 나이 계산 함수
+  const calculateAge = (birthDate: string) => {
+    if (!birthDate) return null;
+    const birth = new Date(birthDate);
+    const today = new Date();
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birth.getDate())
+    ) {
+      age--;
+    }
+    return age;
+  };
 
-    return (
-      <div className="flex">
-        {Array.from({ length: 5 }).map((_, index) => (
-          <span
-            key={index}
-            className={`text-lg ${
-              index < importance ? 'text-primary' : 'text-muted-foreground/50'
-            }`}
-          >
-            ★
-          </span>
-        ))}
-      </div>
-    );
+  // 통신사별 이모지
+  const getTelecomEmoji = (provider: string) => {
+    const telecomMap: Record<string, string> = {
+      SKT: '📱',
+      KT: '📞',
+      'LG U+': '📲',
+      LG유플러스: '📲',
+      '알뜰폰 SKT': '🔹',
+      '알뜰폰 KT': '🔸',
+      '알뜰폰 LG U+': '🔺',
+    };
+    return telecomMap[provider] || '📱';
   };
 
   // 다른 고객 노드를 선택하는 함수
@@ -151,9 +219,6 @@ export default function NetworkDetailPanel({
     // 클릭 효과를 위한 시각적 피드백
     const btn = document.activeElement as HTMLElement;
     if (btn) btn.blur();
-
-    // 사이드바가 바뀌는 것을 좀 더 명확히 보여주기 위한 시각적 표시
-    // 예: 사이드바에 일시적인 로딩 효과나 전환 효과를 추가할 수도 있음
 
     // 노드 선택 및 이동
     if (onNodeSelect) {
@@ -188,36 +253,155 @@ export default function NetworkDetailPanel({
         }}
       >
         <div className="space-y-4">
+          {/* 고객 기본 정보 */}
           <div className="space-y-2">
             <h3 className="text-2xl font-bold">{selectedNode.name}</h3>
-            <div className="flex items-center space-x-2">
-              <Badge variant={getStageBadgeColor(selectedNode.stage) as any}>
-                {selectedNode.stage || '단계 미설정'}
+            <div className="flex items-center flex-wrap gap-2">
+              {/* 영업 단계 배지 */}
+              <Badge variant={getStageBadgeColor(clientData?.stageName) as any}>
+                {clientData?.stageName || '단계 미설정'}
               </Badge>
-              {renderImportance(selectedNode.importance)}
+              {/* 중요도 배지 */}
+              <Badge
+                className={`${getImportanceBadgeColor(
+                  clientData?.importance
+                )} text-xs font-medium`}
+              >
+                {getImportanceText(clientData?.importance)}
+              </Badge>
             </div>
           </div>
 
           <Separator />
 
-          {/* 연락처 정보 (더미 데이터) */}
+          {/* 연락처 정보 */}
           <div className="space-y-3">
-            <div className="flex items-center text-muted-foreground">
-              <Phone className="mr-2 h-4 w-4" />
-              <span>010-1234-5678</span>
+            <h4 className="text-sm font-medium text-muted-foreground">
+              연락처 정보
+            </h4>
+
+            <div className="flex items-center text-sm">
+              <Phone className="mr-2 h-4 w-4 text-muted-foreground" />
+              <span>{clientData?.phone || '미입력'}</span>
+              {clientData?.telecomProvider && (
+                <span className="ml-2 text-muted-foreground">
+                  {getTelecomEmoji(clientData.telecomProvider)}{' '}
+                  {clientData.telecomProvider}
+                </span>
+              )}
             </div>
-            <div className="flex items-center text-muted-foreground">
-              <Mail className="mr-2 h-4 w-4" />
-              <span>{selectedNode.name.replace(/\s+/g, '')}@example.com</span>
+
+            <div className="flex items-center text-sm">
+              <Mail className="mr-2 h-4 w-4 text-muted-foreground" />
+              <span
+                className={clientData?.email ? '' : 'text-muted-foreground'}
+              >
+                {clientData?.email || '미입력'}
+              </span>
             </div>
-            <div className="flex items-center text-muted-foreground">
-              <Calendar className="mr-2 h-4 w-4" />
-              <span>다음 미팅: 5월 25일 14:00</span>
+
+            <div className="flex items-center text-sm">
+              <MapPin className="mr-2 h-4 w-4 text-muted-foreground" />
+              <span
+                className={clientData?.address ? '' : 'text-muted-foreground'}
+              >
+                {clientData?.address || '미입력'}
+              </span>
+            </div>
+
+            <div className="flex items-center text-sm">
+              <Briefcase className="mr-2 h-4 w-4 text-muted-foreground" />
+              <span
+                className={
+                  clientData?.occupation ? '' : 'text-muted-foreground'
+                }
+              >
+                {clientData?.occupation || '미입력'}
+              </span>
+            </div>
+          </div>
+
+          {/* 개인 정보 */}
+          <div className="space-y-3">
+            <h4 className="text-sm font-medium text-muted-foreground">
+              개인 정보
+            </h4>
+
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div className="flex items-center">
+                <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
+                <div>
+                  {clientData?.birthDate ? (
+                    <>
+                      <div>
+                        {new Date(clientData.birthDate).toLocaleDateString(
+                          'ko-KR'
+                        )}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {calculateAge(clientData.birthDate)}세
+                      </div>
+                    </>
+                  ) : (
+                    <span className="text-muted-foreground">미입력</span>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex items-center">
+                <User className="mr-2 h-4 w-4 text-muted-foreground" />
+                <span
+                  className={clientData?.gender ? '' : 'text-muted-foreground'}
+                >
+                  {clientData?.gender === 'male'
+                    ? '남성'
+                    : clientData?.gender === 'female'
+                    ? '여성'
+                    : '미입력'}
+                </span>
+              </div>
+
+              <div className="flex items-center">
+                <Ruler className="mr-2 h-4 w-4 text-muted-foreground" />
+                <span
+                  className={clientData?.height ? '' : 'text-muted-foreground'}
+                >
+                  {clientData?.height ? `${clientData.height}cm` : '미입력'}
+                </span>
+              </div>
+
+              <div className="flex items-center">
+                <Weight className="mr-2 h-4 w-4 text-muted-foreground" />
+                <span
+                  className={clientData?.weight ? '' : 'text-muted-foreground'}
+                >
+                  {clientData?.weight ? `${clientData.weight}kg` : '미입력'}
+                </span>
+              </div>
+
+              <div className="flex items-center">
+                <Car className="mr-2 h-4 w-4 text-muted-foreground" />
+                <span
+                  className={
+                    clientData && clientData.hasDrivingLicense !== null
+                      ? ''
+                      : 'text-muted-foreground'
+                  }
+                >
+                  {clientData && clientData.hasDrivingLicense !== null
+                    ? clientData.hasDrivingLicense
+                      ? '운전가능'
+                      : '운전불가'
+                    : '미입력'}
+                </span>
+              </div>
             </div>
           </div>
 
           <Separator />
-          <div className="space-y-6">
+
+          {/* 빠른 액션 버튼 */}
+          <div className="space-y-2">
             <Link to="/pipeline">
               <Button variant="outline" className="w-full mb-4">
                 <TrendingUp className="mr-2 h-4 w-4" />
@@ -231,118 +415,182 @@ export default function NetworkDetailPanel({
               </Button>
             </Link>
           </div>
+
           <Separator />
 
           {/* 소개자 정보 */}
-          {referredByNode && (
-            <div className="space-y-1.5">
-              <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
-                <UserRound className="h-3.5 w-3.5 text-blue-500" />
-                <span>소개자</span>
-              </h3>
-              <div
-                className="group p-2.5 border border-border bg-card hover:bg-accent/5 rounded-md transition-colors cursor-pointer flex items-center"
+          <div className="space-y-3">
+            <h4 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+              <UserRound className="h-4 w-4 text-blue-500" />
+              소개자
+            </h4>
+
+            {referredByNode ? (
+              <Card
+                className="group cursor-pointer hover:bg-accent/50 transition-all duration-200 border-l-4 border-l-blue-500"
                 onClick={(e) => handleReferralAction(referredByNode.id, e)}
               >
-                <div className="w-1 self-stretch bg-primary/40 rounded-full mr-2.5"></div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-medium text-card-foreground truncate">
-                    {referredByNode.name}
-                  </div>
-                  <div className="mt-0.5 flex items-center gap-3 text-xs text-muted-foreground">
-                    <span>{referredByNode.stage || '단계 미설정'}</span>
-                    {referredByNode.importance && (
-                      <span className="flex">
-                        {Array.from({ length: referredByNode.importance }).map(
-                          (_, i) => (
-                            <Star
-                              key={i}
-                              className="h-2.5 w-2.5 text-primary/60"
-                            />
-                          )
-                        )}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 w-6 p-0 rounded-full text-muted-foreground opacity-60 group-hover:opacity-100"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleReferralAction(referredByNode.id, e);
-                  }}
-                >
-                  <ArrowUpRight className="h-3.5 w-3.5" />
-                  <span className="sr-only">보기</span>
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {/* 소개한 사람들 */}
-          {referredNodes.length > 0 && (
-            <div className="space-y-1.5 mt-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
-                  <Users className="h-3.5 w-3.5 text-orange-500" />
-                  <span>소개한 고객</span>
-                </h3>
-                <Badge
-                  variant="outline"
-                  className="text-xs px-1.5 py-0 h-4 font-normal"
-                >
-                  {referredNodes.length}명
-                </Badge>
-              </div>
-              <div className="space-y-1.5">
-                {referredNodes.map((node) => (
-                  <div
-                    key={node.id}
-                    className="group p-2.5 border border-border bg-card hover:bg-accent/5 rounded-md transition-colors cursor-pointer flex items-center"
-                    onClick={(e) => handleReferralAction(node.id, e)}
-                  >
-                    <div className="w-1 self-stretch bg-orange-500/40 rounded-full mr-2.5"></div>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
                     <div className="flex-1 min-w-0">
-                      <div className="font-medium text-card-foreground truncate">
-                        {node.name}
+                      <div className="font-medium text-base truncate">
+                        {referredByNode.name}
                       </div>
-                      <div className="mt-0.5 flex items-center gap-3 text-xs text-muted-foreground">
-                        <span>{node.stage || '단계 미설정'}</span>
-                        {node.importance && (
-                          <span className="flex">
-                            {Array.from({ length: node.importance }).map(
-                              (_, i) => (
-                                <Star
-                                  key={i}
-                                  className="h-2.5 w-2.5 text-orange-500/60"
-                                />
-                              )
-                            )}
-                          </span>
-                        )}
+
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge
+                          variant={
+                            getStageBadgeColor(
+                              referredByNode.clientInfo?.stageName
+                            ) as any
+                          }
+                          className="text-xs"
+                        >
+                          {referredByNode.clientInfo?.stageName ||
+                            '단계 미설정'}
+                        </Badge>
+                        <Badge
+                          className={`${getImportanceBadgeColor(
+                            referredByNode.clientInfo?.importance
+                          )} text-xs`}
+                        >
+                          {getImportanceText(
+                            referredByNode.clientInfo?.importance
+                          )}
+                        </Badge>
                       </div>
+
+                      {referredByNode.clientInfo?.phone && (
+                        <div className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                          <Phone className="h-3 w-3" />
+                          {referredByNode.clientInfo.phone}
+                        </div>
+                      )}
                     </div>
+
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-6 w-6 p-0 rounded-full text-muted-foreground opacity-60 group-hover:opacity-100"
+                      className="h-8 w-8 p-0 rounded-full text-muted-foreground opacity-60 group-hover:opacity-100"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleReferralAction(node.id, e);
+                        handleReferralAction(referredByNode.id, e);
                       }}
                     >
-                      <ArrowUpRight className="h-3.5 w-3.5" />
+                      <ArrowUpRight className="h-4 w-4" />
                       <span className="sr-only">보기</span>
                     </Button>
                   </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="border-l-4 border-l-muted-foreground/20">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2">
+                    <Users className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">
+                      직접 개발 고객
+                    </span>
+                    <Badge variant="secondary" className="text-xs">
+                      신규 개발
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+
+          {/* 소개한 사람들 */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <Users className="h-4 w-4 text-orange-500" />
+                소개한 고객
+              </h4>
+              <Badge
+                variant="outline"
+                className="text-xs px-2 py-0 h-5 font-normal"
+              >
+                {referredNodes.length}명
+              </Badge>
+            </div>
+
+            {referredNodes.length > 0 ? (
+              <div className="space-y-2">
+                {referredNodes.map((node) => (
+                  <Card
+                    key={node.id}
+                    className="group cursor-pointer hover:bg-accent/50 transition-all duration-200 border-l-4 border-l-orange-500"
+                    onClick={(e) => handleReferralAction(node.id, e)}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-base truncate">
+                            {node.name}
+                          </div>
+
+                          <div className="flex items-center gap-2 mt-1">
+                            <Badge
+                              variant={
+                                getStageBadgeColor(
+                                  node.clientInfo?.stageName
+                                ) as any
+                              }
+                              className="text-xs"
+                            >
+                              {node.clientInfo?.stageName || '단계 미설정'}
+                            </Badge>
+                            <Badge
+                              className={`${getImportanceBadgeColor(
+                                node.clientInfo?.importance
+                              )} text-xs`}
+                            >
+                              {getImportanceText(node.clientInfo?.importance)}
+                            </Badge>
+                          </div>
+
+                          {node.clientInfo?.phone && (
+                            <div className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                              <Phone className="h-3 w-3" />
+                              {node.clientInfo.phone}
+                            </div>
+                          )}
+                        </div>
+
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0 rounded-full text-muted-foreground opacity-60 group-hover:opacity-100"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleReferralAction(node.id, e);
+                          }}
+                        >
+                          <ArrowUpRight className="h-4 w-4" />
+                          <span className="sr-only">보기</span>
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
                 ))}
               </div>
-            </div>
-          )}
-
-          {/* 빠른 액션 버튼 */}
+            ) : (
+              <Card className="border-l-4 border-l-muted-foreground/20">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2">
+                    <UserRound className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">
+                      소개한 고객이 없습니다
+                    </span>
+                    <Badge variant="outline" className="text-xs">
+                      개발 가능
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </div>
       </div>
     </div>

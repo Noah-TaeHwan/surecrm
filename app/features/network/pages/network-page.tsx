@@ -39,11 +39,76 @@ export async function loader({ request }: Route.LoaderArgs) {
     // 실제 네트워크 데이터 조회
     const networkData = await getNetworkData(user.id);
 
+    // 🎯 파이프라인 단계 조회
+    const { getPipelineStages } = await import(
+      '~/features/pipeline/lib/supabase-pipeline-data'
+    );
+    const stages = await getPipelineStages(user.id);
+
+    // 🎯 모든 활성 클라이언트의 상세 정보 조회
+    const { db } = await import('~/lib/core/db');
+    const { clients, clientDetails, pipelineStages } = await import(
+      '~/lib/schema/core'
+    );
+    const { eq, and } = await import('drizzle-orm');
+
+    const clientsWithDetails = await db
+      .select({
+        id: clients.id,
+        fullName: clients.fullName,
+        email: clients.email,
+        phone: clients.phone,
+        telecomProvider: clients.telecomProvider,
+        address: clients.address,
+        occupation: clients.occupation,
+        importance: clients.importance,
+        currentStageId: clients.currentStageId,
+        referredById: clients.referredById,
+        notes: clients.notes,
+        createdAt: clients.createdAt,
+        // 클라이언트 기본 정보 (clients 테이블에 있는 필드)
+        height: clients.height,
+        weight: clients.weight,
+        hasDrivingLicense: clients.hasDrivingLicense,
+        // 클라이언트 상세 정보 (clientDetails 테이블)
+        birthDate: clientDetails.birthDate,
+        gender: clientDetails.gender,
+        // 파이프라인 단계 정보
+        stageName: pipelineStages.name,
+        stageColor: pipelineStages.color,
+      })
+      .from(clients)
+      .leftJoin(clientDetails, eq(clients.id, clientDetails.clientId))
+      .leftJoin(pipelineStages, eq(clients.currentStageId, pipelineStages.id))
+      .where(and(eq(clients.agentId, user.id), eq(clients.isActive, true)));
+
+    // 🎯 소개 관계 데이터 구성
+    const clientMap = new Map();
+    const referralData = new Map();
+
+    for (const client of clientsWithDetails) {
+      clientMap.set(client.id, client);
+
+      // 소개한 고객들 찾기
+      const referredClients = clientsWithDetails.filter(
+        (c) => c.referredById === client.id
+      );
+      referralData.set(client.id, {
+        referredBy: client.referredById
+          ? clientMap.get(client.referredById)
+          : null,
+        referredClients: referredClients,
+      });
+    }
+
     return {
       nodes: networkData.nodes,
       edges: networkData.edges,
       stats: networkData.stats,
       agentId: user.id,
+      stages,
+      clientsData: clientsWithDetails,
+      referralData: Object.fromEntries(referralData),
     };
   } catch (error) {
     console.error('네트워크 데이터 로딩 실패:', error);
@@ -61,6 +126,9 @@ export async function loader({ request }: Route.LoaderArgs) {
         networkGrowth: [],
       },
       agentId: 'fallback-agent-id',
+      stages: [],
+      clientsData: [],
+      referralData: {},
     };
   }
 }
@@ -132,7 +200,8 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 }
 
 export default function NetworkPage({ loaderData }: Route.ComponentProps) {
-  const { nodes, edges, stats, agentId } = loaderData;
+  const { nodes, edges, stats, agentId, stages, clientsData, referralData } =
+    loaderData;
 
   const graphRef = useRef<any>(null);
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
@@ -663,6 +732,9 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
                 data={networkData}
                 onClose={handleCloseSidebar}
                 onNodeSelect={handleNodeSelect}
+                clientsData={clientsData}
+                stages={stages}
+                referralData={referralData}
               />
             )}
           </div>
