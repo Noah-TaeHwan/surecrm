@@ -4,7 +4,7 @@
  * 🧪 테스트 및 개발용 초기 데이터 생성
  */
 
-import { requireSystemAdmin } from './shared/auth';
+import { requireSystemAdmin } from '~/api/shared/auth';
 import {
   createSuccessResponse,
   createErrorResponse,
@@ -14,8 +14,8 @@ import {
   logAPIError,
   getClientIP,
   getUserAgent,
-} from './shared/utils';
-import { ERROR_CODES as EC, HTTP_STATUS as HS } from './shared/types';
+} from '~/api/shared/utils';
+import { ERROR_CODES as EC, HTTP_STATUS as HS } from '~/api/shared/types';
 import { db } from '~/lib/core/db';
 import { invitations, profiles } from '~/lib/schema';
 
@@ -199,8 +199,8 @@ export async function action({ request }: { request: Request }) {
 
       return createSuccessResponse<SeedInvitationsResponse>({
         success: true,
-        message: '초대장 시드 데이터가 성공적으로 생성되었습니다.',
-        environment: process.env.NODE_ENV || 'unknown',
+        message: `시드 데이터 생성이 완료되었습니다. ${createdCount}개의 초대장이 생성되었습니다.`,
+        environment: process.env.NODE_ENV || 'development',
         seedData: {
           createdCount,
           existingCount: 0,
@@ -209,23 +209,18 @@ export async function action({ request }: { request: Request }) {
         },
       });
     } else {
-      // 이미 데이터가 존재하는 경우
-      logAPIRequest(request.method, request.url, authResult.id, {
-        clientIP,
-        userAgent,
-        operation: 'SEED_INVITATIONS_SKIPPED',
-        existingCount: existingInvitations.length,
-      });
+      // 이미 데이터가 있는 경우
+      const codes = existingInvitations.map((inv) => inv.code);
 
       return createSuccessResponse<SeedInvitationsResponse>({
         success: true,
-        message: '이미 초대장 데이터가 존재합니다.',
-        environment: process.env.NODE_ENV || 'unknown',
+        message: `이미 ${existingInvitations.length}개의 초대장이 존재합니다.`,
+        environment: process.env.NODE_ENV || 'development',
         seedData: {
           createdCount: 0,
           existingCount: existingInvitations.length,
           systemProfileCreated: false,
-          invitationCodes: existingInvitations.map((inv) => inv.code),
+          invitationCodes: codes,
         },
       });
     }
@@ -237,7 +232,7 @@ export async function action({ request }: { request: Request }) {
       operation: 'SEED_INVITATIONS_ERROR',
     });
 
-    console.error('[SEED] 초대장 시드 데이터 추가 실패:', error);
+    console.error('[SEED] 시드 데이터 생성 실패:', error);
 
     return createErrorResponse(
       EC.INTERNAL_ERROR,

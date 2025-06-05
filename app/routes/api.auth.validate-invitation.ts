@@ -14,7 +14,7 @@ import {
   validateRequiredFields,
   getClientIP,
   getUserAgent,
-} from './shared/utils';
+} from '~/api/shared/utils';
 import { validateInvitationCode } from '~/lib/auth/validation';
 import type { InvitationValidationResult } from '~/lib/auth/types';
 

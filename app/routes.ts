@@ -4,21 +4,6 @@ export default [
   // 🏠 메인 페이지 (인증 상태에 따른 리다이렉트)
   index('common/pages/_index.tsx'),
 
-  // 🔌 API 라우트
-  route('api/notifications', 'api/notifications.ts'),
-  route('api/validate-invitation', 'api/validate-invitation.ts'),
-  route('api/resend-verification', 'api/resend-verification.ts'),
-  route('api/auth-webhook', 'api/auth-webhook.ts'),
-  route('api/auth-me', 'api/auth-me.ts'),
-  route('api/cleanup-user', 'api/cleanup-user.ts'),
-  route('api/check-email', 'api/check-email.ts'),
-  route('api/seed-invitations', 'api/seed-invitations.ts'),
-  route('api/user.settings', 'api/user.settings.ts'),
-
-  // 🏷️ 태그 관련 API 라우트
-  route('api/clients/tags', 'api/clients/tags/route.ts'),
-  route('api/clients/client-tags', 'api/clients/client-tags.ts'),
-
   // 📊 대시보드
   route('dashboard', 'features/dashboard/pages/dashboard-page.tsx'),
 
@@ -47,11 +32,9 @@ export default [
   route('clients/edit/:id?', 'features/clients/pages/client-edit-page.tsx'),
 
   // 📅 일정 관리
-  // route('calendar', 'features/calendar/pages/calendar-page.tsx'),
   route('calendar', 'common/pages/calendar-redirect.tsx'),
 
   // ⭐ 소개자 관리
-  // route('influencers', 'features/influencers/pages/influencers-page.tsx'),
   route('influencers', 'common/pages/influencers-redirect.tsx'),
 
   // 🎫 초대 및 팀 관리
@@ -87,6 +70,31 @@ export default [
   route('.well-known/*', 'common/pages/well-known-fallback.tsx'),
   route('terms', 'common/pages/terms-page.tsx'),
 
-  // 🚫 Catch-all (404 처리)
+  // 🛠️ API 라우트들
+  route('api/auth/me', 'routes/api.auth.me.ts'),
+  route('api/notifications', 'routes/api.notifications.ts'),
+  route('api/auth/check-email', 'routes/api.auth.check-email.ts'),
+  route(
+    'api/auth/validate-invitation',
+    'routes/api.auth.validate-invitation.ts'
+  ),
+  route('api/auth/webhook', 'routes/api.auth.webhook.ts'),
+  route(
+    'api/auth/resend-verification',
+    'routes/api.auth.resend-verification.ts'
+  ),
+  route('api/user/settings', 'routes/api.user.settings.ts'),
+  route('api/admin/cleanup-user', 'routes/api.admin.cleanup-user.ts'),
+  route('api/admin/seed-invitations', 'routes/api.admin.seed-invitations.ts'),
+  route('api/clients/delete', 'routes/api.clients.delete.ts'),
+  route('api/clients/tags', 'routes/api.clients.tags.ts'),
+  route('api/clients/client-tags', 'routes/api.clients.client-tags.ts'),
+  route('api/clients/stage', 'routes/api.clients.stage.ts'),
+  route('api/clients/update', 'routes/api.clients.update.ts'),
+  route('api/clients/detail', 'routes/api.clients.detail.ts'),
+  route('api/clients/:clientId', 'routes/api.clients.clientId.ts'),
+  route('api/pipeline/stages', 'routes/api.pipeline.stages.ts'),
+
+  // 🚫 Catch-all (404 처리) - API 라우트 이후에 배치
   route('*', 'common/pages/error/not-found-page.tsx'),
 ] satisfies RouteConfig;

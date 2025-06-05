@@ -111,7 +111,7 @@ export default function InviteOnlyPage({ loaderData }: ComponentProps) {
 
     try {
       // 클라이언트 사이드에서 먼저 검증
-      const response = await fetch('/api/validate-invitation', {
+      const response = await fetch('/api/auth/validate-invitation', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

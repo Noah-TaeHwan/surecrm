@@ -13,9 +13,9 @@ import {
   parseJSON,
   logAPIRequest,
   logAPIError,
-} from './shared/utils';
-import { ERROR_CODES, HTTP_STATUS } from './shared/types';
-import { validateWebhookRequest } from './shared/auth';
+} from '~/api/shared/utils';
+import { ERROR_CODES, HTTP_STATUS } from '~/api/shared/types';
+import { validateWebhookRequest } from '~/api/shared/auth';
 import { db } from '~/lib/core/db';
 import { profiles, invitations } from '~/lib/schema';
 import { eq } from 'drizzle-orm';

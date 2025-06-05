@@ -15,7 +15,7 @@ import {
   validateEmail,
   getClientIP,
   getUserAgent,
-} from './shared/utils';
+} from '~/api/shared/utils';
 import { createServerClient } from '~/lib/core/supabase';
 
 // ===== 요청 데이터 타입 =====

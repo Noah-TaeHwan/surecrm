@@ -3,7 +3,7 @@
  * 테마, 언어, 알림 설정 등 사용자 개인 설정 관리
  */
 
-import { requireAuth } from './shared/auth';
+import { requireAuth } from '~/api/shared/auth';
 import {
   createSuccessResponse,
   methodNotAllowed,
@@ -12,7 +12,7 @@ import {
   logAPIRequest,
   logAPIError,
   validateRequiredFields,
-} from './shared/utils';
+} from '~/api/shared/utils';
 import { db } from '~/lib/core/db';
 import { profiles } from '~/lib/schema';
 import { eq } from 'drizzle-orm';

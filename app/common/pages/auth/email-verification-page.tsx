@@ -53,7 +53,7 @@ export default function EmailVerificationPage({ loaderData }: ComponentProps) {
     setResendError(null);
 
     try {
-      const response = await fetch('/api/resend-verification', {
+      const response = await fetch('/api/auth/resend-verification', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

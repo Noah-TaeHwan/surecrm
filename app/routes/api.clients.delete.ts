@@ -1,65 +1,102 @@
-import { deleteClient } from '~/api/shared/clients';
-import { requireAuth } from '~/lib/auth/middleware';
+import { createClient } from '~/lib/core/supabase';
+import { db } from '~/lib/core/db';
+import { clients } from '~/lib/schema/core';
+import { appClientContactHistory } from '~/features/clients/lib/schema';
+import { eq, and } from 'drizzle-orm';
 
 export async function action({ request }: { request: Request }) {
   try {
-    console.log('🗑️ [API Route] 고객 삭제 요청 수신');
+    // 🔐 인증 확인
+    const supabase = createClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
 
-    // 인증 확인
-    const user = await requireAuth(request);
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ success: false, message: '인증이 필요합니다.' }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
 
-    // 요청 데이터 파싱
+    // 📥 FormData에서 데이터 추출
     const formData = await request.formData();
     const clientId = formData.get('clientId') as string;
     const agentId = formData.get('agentId') as string;
 
-    console.log('📋 [API Route] 요청 데이터:', {
-      clientId,
-      agentId,
-      userId: user.id,
+    if (!clientId || !agentId) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          message: '필수 정보가 누락되었습니다.',
+        }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // 🔍 권한 확인 - 해당 고객이 현재 사용자의 고객인지 확인
+    const clientExists = await db
+      .select()
+      .from(clients)
+      .where(
+        and(
+          eq(clients.id, clientId),
+          eq(clients.agentId, agentId),
+          eq(clients.agentId, user.id) // 현재 사용자의 고객인지 확인
+        )
+      )
+      .limit(1);
+
+    if (clientExists.length === 0) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          message: '해당 고객을 찾을 수 없거나 삭제 권한이 없습니다.',
+        }),
+        { status: 404, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // 🗑️ 관련 데이터 삭제 (트랜잭션으로 처리)
+    await db.transaction(async (tx) => {
+      // 1. 고객의 연락 기록 삭제
+      await tx
+        .delete(appClientContactHistory)
+        .where(eq(appClientContactHistory.clientId, clientId));
+
+      // 2. 고객 삭제 (soft delete - isActive를 false로 설정)
+      await tx
+        .update(clients)
+        .set({
+          isActive: false,
+          updatedAt: new Date(),
+        })
+        .where(eq(clients.id, clientId));
     });
 
-    if (!clientId || !agentId) {
-      return Response.json(
-        {
-          success: false,
-          message: '필수 매개변수가 누락되었습니다.',
-        },
-        { status: 400 }
-      );
-    }
+    console.log('✅ 고객 삭제 완료:', { clientId, agentId });
 
-    // 권한 확인 (본인의 고객만 삭제 가능)
-    if (user.id !== agentId) {
-      return Response.json(
-        {
-          success: false,
-          message: '권한이 없습니다.',
-        },
-        { status: 403 }
-      );
-    }
-
-    console.log('🚀 [API Route] 고객 삭제 실행 시작');
-
-    // 클라이언트 삭제 실행
-    const result = await deleteClient(clientId, agentId);
-
-    console.log('✅ [API Route] 고객 삭제 완료:', result);
-
-    return Response.json(result);
+    return new Response(
+      JSON.stringify({
+        success: true,
+        message: '고객이 성공적으로 삭제되었습니다.',
+        data: { clientId },
+      }),
+      { headers: { 'Content-Type': 'application/json' } }
+    );
   } catch (error) {
-    console.error('❌ [API Route] 고객 삭제 오류:', error);
+    console.error('❌ 고객 삭제 API 에러:', error);
 
-    return Response.json(
-      {
+    return new Response(
+      JSON.stringify({
         success: false,
         message:
           error instanceof Error
             ? error.message
-            : '고객 삭제 중 오류가 발생했습니다.',
-      },
-      { status: 500 }
+            : '알 수 없는 오류가 발생했습니다.',
+      }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
 }

@@ -15,7 +15,7 @@ import {
   validateEmail,
   getClientIP,
   getUserAgent,
-} from './shared/utils';
+} from '~/api/shared/utils';
 import { createAdminClient } from '~/lib/core/supabase';
 import { db } from '~/lib/core/db';
 import { profiles } from '~/lib/schema';

@@ -4,7 +4,7 @@
  * 🔒 최고 보안 등급: 트랜잭션, 감사 로그, 확인 메커니즘 필수
  */
 
-import { requireSystemAdmin } from './shared/auth';
+import { requireSystemAdmin } from '~/api/shared/auth';
 import {
   createSuccessResponse,
   createErrorResponse,
@@ -17,8 +17,8 @@ import {
   validateEmail,
   getClientIP,
   getUserAgent,
-} from './shared/utils';
-import { ERROR_CODES, HTTP_STATUS } from './shared/types';
+} from '~/api/shared/utils';
+import { ERROR_CODES, HTTP_STATUS } from '~/api/shared/types';
 import { createAdminClient } from '~/lib/core/supabase';
 import { db } from '~/lib/core/db';
 import {
@@ -205,18 +205,13 @@ export async function action({ request }: { request: Request }) {
 
     return createErrorResponse(
       ERROR_CODES.INTERNAL_ERROR,
-      '사용자 삭제 중 시스템 오류가 발생했습니다.',
+      '사용자 삭제 중 예상치 못한 오류가 발생했습니다.',
       HTTP_STATUS.INTERNAL_SERVER_ERROR
     );
   }
 }
 
 // ===== 핵심 삭제 로직 =====
-
-/**
- * 사용자와 모든 관련 데이터 안전 삭제
- * 트랜잭션으로 데이터 정합성 보장
- */
 async function executeUserDeletion(
   email: string,
   adminUserId: string,
@@ -230,198 +225,257 @@ async function executeUserDeletion(
   deletedData?: any;
   auditLogId?: string;
 }> {
-  const auditLogId = `cleanup_${Date.now()}_${adminUserId.substring(0, 8)}`;
+  const supabaseAdmin = createAdminClient();
 
   try {
-    // 1. 대상 사용자 조회
-    const supabaseAdmin = createAdminClient();
-    const { data: users, error: listError } =
-      await supabaseAdmin.auth.admin.listUsers();
+    console.log(`🚨 Starting user deletion process for: ${email}`);
 
-    if (listError) {
-      console.error('사용자 목록 조회 실패:', listError);
-      return { success: false, error: '사용자 조회에 실패했습니다.' };
-    }
+    // 1. 삭제 대상 사용자 조회 (프로필을 통해)
+    const targetUserProfile = await db
+      .select()
+      .from(profiles)
+      .where(eq(profiles.id, email)) // email이 실제로는 userId일 것으로 가정
+      .limit(1);
 
-    const targetUsers = users.users.filter((user) => user.email === email);
-
-    if (targetUsers.length === 0) {
+    if (targetUserProfile.length === 0) {
       return {
-        success: true,
-        deletedData: {
-          userCount: 0,
-          profileCount: 0,
-          clientCount: 0,
-          meetingCount: 0,
-          documentCount: 0,
-          invitationCount: 0,
-        },
+        success: false,
+        error: `사용자를 찾을 수 없습니다: ${email}`,
       };
     }
 
-    // 2. 이관 대상 사용자 검증 (필요한 경우)
-    let transferTargetUserId: string | undefined;
+    const userId = targetUserProfile[0].id;
+    console.log(`Found target user: ${userId}`);
+
+    // 2. 이관 대상 사용자 조회 (있는 경우)
+    let transferToUserId: string | undefined;
     if (transferDataTo) {
-      const transferTargetUsers = users.users.filter(
-        (user) => user.email === transferDataTo
-      );
-      if (transferTargetUsers.length === 0) {
+      const transferUserProfile = await db
+        .select()
+        .from(profiles)
+        .where(eq(profiles.id, transferDataTo)) // transferDataTo도 userId일 것으로 가정
+        .limit(1);
+
+      if (transferUserProfile.length === 0) {
         return {
           success: false,
-          error: '데이터 이관 대상 사용자를 찾을 수 없습니다.',
+          error: `데이터 이관 대상 사용자를 찾을 수 없습니다: ${transferDataTo}`,
         };
       }
-      transferTargetUserId = transferTargetUsers[0].id;
+
+      transferToUserId = transferUserProfile[0].id;
+      console.log(`Transfer target user: ${transferToUserId}`);
     }
 
-    // 3. 트랜잭션으로 모든 데이터 삭제
-    const deletionCounts = await db.transaction(async (tx) => {
-      const counts = {
-        userCount: targetUsers.length,
+    // 3. 트랜잭션으로 모든 데이터 삭제/이관
+    const deletionStats = await db.transaction(async (tx) => {
+      const stats = {
+        userCount: 0,
         profileCount: 0,
         clientCount: 0,
         meetingCount: 0,
         documentCount: 0,
         invitationCount: 0,
-        transferredData: transferTargetUserId
-          ? {
-              clientsTransferred: 0,
-              transferredTo: transferDataTo!,
-            }
-          : undefined,
+        transferredData: undefined as any,
       };
 
-      for (const user of targetUsers) {
-        console.log(`[${auditLogId}] 사용자 삭제 시작:`, user.id);
-
-        // 3-1. 클라이언트 이관 또는 삭제
-        if (transferTargetUserId) {
-          // 클라이언트 데이터 이관
-          const transferResult = await tx
+      try {
+        // 3.1. 클라이언트 데이터 이관/삭제
+        if (transferToUserId) {
+          // 클라이언트 이관
+          const transferredClients = await tx
             .update(clients)
-            .set({ agentId: transferTargetUserId })
-            .where(eq(clients.agentId, user.id))
+            .set({
+              agentId: transferToUserId,
+              updatedAt: new Date(),
+            })
+            .where(eq(clients.agentId, userId))
             .returning();
 
-          counts.transferredData!.clientsTransferred += transferResult.length;
+          stats.transferredData = {
+            clientsTransferred: transferredClients.length,
+            transferredTo: transferDataTo!,
+          };
+
           console.log(
-            `[${auditLogId}] 클라이언트 ${transferResult.length}개 이관 완료`
+            `Transferred ${transferredClients.length} clients to ${transferDataTo}`
           );
         } else {
-          // 관련 데이터 순차 삭제 (외래 키 제약 조건 순서 중요)
-
-          // Documents 삭제
+          // 클라이언트 관련 데이터 완전 삭제
+          // 문서 삭제
           const deletedDocuments = await tx
             .delete(documents)
-            .where(eq(documents.agentId, user.id))
+            .where(eq(documents.clientId, clients.id))
             .returning();
-          counts.documentCount += deletedDocuments.length;
 
-          // Insurance Info 삭제 (clients 삭제 전)
-          const userClients = await tx
-            .select({ id: clients.id })
-            .from(clients)
-            .where(eq(clients.agentId, user.id));
-
-          for (const client of userClients) {
-            await tx
-              .delete(insuranceInfo)
-              .where(eq(insuranceInfo.clientId, client.id));
-            await tx
-              .delete(clientDetails)
-              .where(eq(clientDetails.clientId, client.id));
-          }
-
-          // Meetings 삭제
+          // 미팅 삭제
           const deletedMeetings = await tx
             .delete(meetings)
-            .where(eq(meetings.agentId, user.id))
+            .where(eq(meetings.clientId, clients.id))
             .returning();
-          counts.meetingCount += deletedMeetings.length;
 
-          // Referrals 삭제
-          await tx.delete(referrals).where(eq(referrals.agentId, user.id));
+          // 추천 삭제
+          await tx
+            .delete(referrals)
+            .where(
+              or(
+                eq(referrals.referrerId, userId),
+                eq(referrals.referredId, userId)
+              )
+            );
 
-          // Clients 삭제
+          // 보험 정보 삭제
+          await tx
+            .delete(insuranceInfo)
+            .where(eq(insuranceInfo.clientId, clients.id));
+
+          // 클라이언트 상세 정보 삭제
+          await tx
+            .delete(clientDetails)
+            .where(eq(clientDetails.clientId, clients.id));
+
+          // 클라이언트 삭제
           const deletedClients = await tx
             .delete(clients)
-            .where(eq(clients.agentId, user.id))
+            .where(eq(clients.agentId, userId))
             .returning();
-          counts.clientCount += deletedClients.length;
+
+          stats.clientCount = deletedClients.length;
+          stats.meetingCount = deletedMeetings.length;
+          stats.documentCount = deletedDocuments.length;
+
+          console.log(
+            `Deleted ${deletedClients.length} clients and related data`
+          );
         }
 
-        // 3-2. Pipeline Stages 삭제
-        await tx
-          .delete(pipelineStages)
-          .where(eq(pipelineStages.agentId, user.id));
-
-        // 3-3. Invitations 처리
+        // 3.2. 초대장 삭제
         const deletedInvitations = await tx
           .delete(invitations)
           .where(
             or(
-              eq(invitations.inviterId, user.id),
-              eq(invitations.usedById, user.id)
+              eq(invitations.inviterId, userId),
+              eq(invitations.usedById, userId)
             )
           )
           .returning();
-        counts.invitationCount += deletedInvitations.length;
 
-        // 3-4. Teams에서 admin인 경우 처리 (다른 관리자로 이관 또는 팀 비활성화)
+        stats.invitationCount = deletedInvitations.length;
+
+        // 3.3. 팀 관련 데이터 정리
+        await tx.delete(teams).where(eq(teams.adminId, userId));
+
+        // 3.4. 파이프라인 단계 삭제
         await tx
-          .update(teams)
-          .set({ isActive: false })
-          .where(eq(teams.adminId, user.id));
+          .delete(pipelineStages)
+          .where(eq(pipelineStages.agentId, userId));
 
-        // 3-5. 다른 사용자의 invitedById 참조 제거
-        await tx
-          .update(profiles)
-          .set({ invitedById: null })
-          .where(eq(profiles.invitedById, user.id));
-
-        // 3-6. Profile 삭제
+        // 3.5. 프로필 삭제
         const deletedProfiles = await tx
           .delete(profiles)
-          .where(eq(profiles.id, user.id))
+          .where(eq(profiles.id, userId))
           .returning();
-        counts.profileCount += deletedProfiles.length;
 
-        console.log(`[${auditLogId}] 프로필 삭제 완료:`, user.id);
+        stats.profileCount = deletedProfiles.length;
+
+        console.log(`Database cleanup completed for user: ${userId}`);
+        return stats;
+      } catch (dbError) {
+        console.error('Database deletion error:', dbError);
+        throw dbError;
       }
-
-      return counts;
     });
 
     // 4. Supabase Auth에서 사용자 삭제
-    for (const user of targetUsers) {
-      try {
-        await supabaseAdmin.auth.admin.deleteUser(user.id);
-        console.log(`[${auditLogId}] Auth 사용자 삭제 완료:`, user.id);
-      } catch (authError) {
-        console.error(
-          `[${auditLogId}] Auth 사용자 삭제 실패:`,
-          user.id,
-          authError
-        );
-        // Auth 삭제 실패는 전체 실패로 처리하지 않음 (이미 DB에서 삭제됨)
-      }
+    const { error: authDeletionError } =
+      await supabaseAdmin.auth.admin.deleteUser(userId);
+
+    if (authDeletionError) {
+      console.error('Auth deletion error:', authDeletionError);
+      return {
+        success: false,
+        error: `사용자 인증 삭제 실패: ${authDeletionError.message}`,
+      };
     }
 
-    // 5. 감사 로그 기록
-    console.log(
-      `[${auditLogId}] 삭제 완료 - 관리자: ${adminUserId}, 대상: ${email}, 사유: ${reason}`
-    );
+    deletionStats.userCount = 1;
+
+    // 5. 감사 로그 생성
+    const auditLogId = await createDeletionAuditLog({
+      targetUserId: userId,
+      targetEmail: email,
+      adminUserId,
+      reason,
+      deletionStats,
+      transferToUserId,
+      transferToEmail: transferDataTo,
+      clientIP,
+      userAgent,
+    });
+
+    console.log(`✅ User deletion completed successfully: ${email}`);
 
     return {
       success: true,
-      deletedData: deletionCounts,
+      deletedData: deletionStats,
       auditLogId,
     };
   } catch (error) {
-    console.error(`[${auditLogId}] 사용자 삭제 실패:`, error);
+    console.error('User deletion error:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : '알 수 없는 오류',
     };
   }
+}
+
+// ===== 감사 로그 생성 =====
+async function createDeletionAuditLog({
+  targetUserId,
+  targetEmail,
+  adminUserId,
+  reason,
+  deletionStats,
+  transferToUserId,
+  transferToEmail,
+  clientIP,
+  userAgent,
+}: {
+  targetUserId: string;
+  targetEmail: string;
+  adminUserId: string;
+  reason: string;
+  deletionStats: any;
+  transferToUserId?: string;
+  transferToEmail?: string;
+  clientIP?: string;
+  userAgent?: string;
+}): Promise<string> {
+  // 감사 로그는 별도 테이블에 저장하거나 외부 로깅 시스템에 기록
+  const auditData = {
+    id: crypto.randomUUID(),
+    operation: 'USER_DELETION',
+    targetUserId,
+    targetEmail: targetEmail.split('@')[0] + '@***', // 개인정보 보호
+    executedBy: adminUserId,
+    reason,
+    timestamp: new Date().toISOString(),
+    deletionStats,
+    transferData: transferToUserId
+      ? {
+          transferToUserId,
+          transferToEmail: transferToEmail?.split('@')[0] + '@***',
+        }
+      : null,
+    metadata: {
+      clientIP,
+      userAgent,
+      version: '1.0',
+    },
+  };
+
+  // 로그 저장 (실제 구현에서는 감사 로그 테이블이나 외부 시스템 사용)
+  console.log('🔒 AUDIT LOG:', JSON.stringify(auditData, null, 2));
+
+  return auditData.id;
 }

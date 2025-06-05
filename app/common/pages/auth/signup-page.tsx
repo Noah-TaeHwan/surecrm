@@ -223,7 +223,7 @@ export default function SignUpPage({ loaderData, actionData }: ComponentProps) {
     const code = form.getValues('invitationCode');
     if (code) {
       try {
-        const response = await fetch('/api/validate-invitation', {
+        const response = await fetch('/api/auth/validate-invitation', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

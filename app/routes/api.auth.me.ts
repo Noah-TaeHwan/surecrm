@@ -1,4 +1,3 @@
-import type { Route } from './+types/auth-me';
 import { requireAuth } from '~/lib/auth/middleware';
 import { createServerClient } from '~/lib/core/supabase';
 

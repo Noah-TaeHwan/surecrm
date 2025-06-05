@@ -50,7 +50,7 @@ export function MainLayout({
         }
 
         // 없으면 API로 직접 가져오기
-        const response = await fetch('/api/auth-me', {
+        const response = await fetch('/api/auth/me', {
           credentials: 'include',
           headers: {
             Accept: 'application/json',
