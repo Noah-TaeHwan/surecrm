@@ -1147,7 +1147,7 @@ export default function NetworkGraphClient({
     return false;
   }
 
-  // 링크의 방향성을 판단하는 헬퍼 함수 (소개 흐름 기준)
+  // 링크의 방향성을 판단하는 헬퍼 함수 (실제 A→B 흐름 기준)
   function getLinkDirection(link: any): 'incoming' | 'outgoing' | 'none' {
     if (!graphState.highlightedNodeId || !isLinkInHighlightPath(link)) {
       return 'none';
@@ -1158,13 +1158,13 @@ export default function NetworkGraphClient({
     const targetId =
       typeof link.target === 'object' ? link.target.id : link.target;
 
-    // 에이전트에서 선택된 노드까지의 메인 경로 찾기
+    // 에이전트에서 선택된 노드까지의 메인 경로 찾기 (순서 중요)
     const agentNode = safeData.nodes.find(
       (node) => node.group === 'influencer'
     );
     if (!agentNode) return 'none';
 
-    // BFS로 에이전트에서 선택된 노드까지의 경로 찾기
+    // BFS로 에이전트에서 선택된 노드까지의 순서있는 경로 찾기
     const queue = [{ nodeId: agentNode.id, path: [agentNode.id] }];
     const visited = new Set([agentNode.id]);
     let mainPath: string[] = [];
@@ -1201,25 +1201,23 @@ export default function NetworkGraphClient({
       }
     }
 
-    // 메인 경로 상의 연결인지 확인 (incoming)
+    // 메인 경로 상의 순차적 연결인지 확인 (A→B→C 순서대로)
     for (let i = 0; i < mainPath.length - 1; i++) {
       const pathNode1 = mainPath[i];
       const pathNode2 = mainPath[i + 1];
 
-      if (
-        (sourceId === pathNode1 && targetId === pathNode2) ||
-        (sourceId === pathNode2 && targetId === pathNode1)
-      ) {
-        return 'incoming'; // 에이전트 → 선택된 노드로의 소개 흐름
+      if (sourceId === pathNode1 && targetId === pathNode2) {
+        return 'incoming'; // 정방향: A → B (소개 흐름 방향)
+      } else if (sourceId === pathNode2 && targetId === pathNode1) {
+        return 'incoming'; // 역방향이지만 같은 경로상의 연결
       }
     }
 
-    // 선택된 노드에서 나가는 연결인지 확인 (outgoing)
-    if (
-      sourceId === graphState.highlightedNodeId ||
-      targetId === graphState.highlightedNodeId
-    ) {
-      return 'outgoing'; // 선택된 노드 → 다른 노드로의 소개 흐름
+    // 선택된 노드에서 다른 노드로 나가는 연결 (선택된 노드가 소개한 경우)
+    if (sourceId === graphState.highlightedNodeId) {
+      return 'outgoing'; // 선택된 노드 → 다른 노드 (정방향)
+    } else if (targetId === graphState.highlightedNodeId) {
+      return 'outgoing'; // 다른 노드 → 선택된 노드 (역방향이지만 outgoing으로 처리)
     }
 
     return 'none';
@@ -1416,42 +1414,80 @@ export default function NetworkGraphClient({
             const direction = getLinkDirection(link);
 
             if (direction === 'incoming' || direction === 'outgoing') {
-              return 4; // 방향성 있는 하이라이트 링크는 더 두껍게
+              return 4; // 방향성 있는 하이라이트 링크 두께 조정 (6 → 4)
             } else if (isLinkInHighlightPath(link)) {
-              return 3; // 기타 하이라이트된 링크
+              return 3; // 기타 하이라이트된 링크 두께 조정 (4 → 3)
             }
           }
 
           return 1; // 기본 링크 굵기
         }}
-        // 소개 흐름 애니메이션 추가
-        linkDirectionalParticles={(link: any) => {
-          if (graphState.highlightedNodeId) {
-            const direction = getLinkDirection(link);
-            if (direction === 'incoming' || direction === 'outgoing') {
-              return 3; // 하이라이트된 링크에 3개의 파티클
+        // 커스텀 링크 렌더링으로 그라디언트 플로우 애니메이션 효과
+        linkCanvasObjectMode={() => 'after'}
+        linkCanvasObject={(link: any, ctx: any) => {
+          if (!graphState.highlightedNodeId) return;
+
+          const direction = getLinkDirection(link);
+          if (direction === 'incoming' || direction === 'outgoing') {
+            const start = link.source;
+            const end = link.target;
+
+            if (
+              !start ||
+              !end ||
+              typeof start.x !== 'number' ||
+              typeof end.x !== 'number'
+            )
+              return;
+
+            // 부드러운 애니메이션을 위한 시간 기반 진행도 (0-1 순환)
+            const progress = (animationTime * 0.02) % 1; // 더 부드러운 애니메이션
+
+            ctx.save();
+
+            // 연결선의 길이와 각도 계산
+            const dx = end.x - start.x;
+            const dy = end.y - start.y;
+            const length = Math.sqrt(dx * dx + dy * dy);
+
+            // 그라디언트가 움직이는 효과를 위한 위치 계산
+            const gradientStart = progress * length;
+            const gradientEnd = gradientStart + length * 0.3; // 그라디언트 폭
+
+            // 선형 그라디언트 생성 (실제 A→B 방향으로)
+            const gradient = ctx.createLinearGradient(
+              start.x + (dx * gradientStart) / length,
+              start.y + (dy * gradientStart) / length,
+              start.x + (dx * gradientEnd) / length,
+              start.y + (dy * gradientEnd) / length
+            );
+
+            // 방향에 따른 색상 설정
+            let baseColor, brightColor;
+            if (direction === 'incoming') {
+              baseColor = 'rgba(66, 165, 245, 0.2)'; // 연한 블루
+              brightColor = 'rgba(66, 165, 245, 0.9)'; // 밝은 블루
+            } else {
+              baseColor = 'rgba(255, 112, 67, 0.2)'; // 연한 오렌지
+              brightColor = 'rgba(255, 112, 67, 0.9)'; // 밝은 오렌지
             }
+
+            gradient.addColorStop(0, baseColor);
+            gradient.addColorStop(0.5, brightColor);
+            gradient.addColorStop(1, baseColor);
+
+            // 그라디언트 플로우 렌더링
+            ctx.strokeStyle = gradient;
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
+
+            ctx.beginPath();
+            ctx.moveTo(start.x, start.y);
+            ctx.lineTo(end.x, end.y);
+            ctx.stroke();
+
+            ctx.restore();
           }
-          return 0; // 기본적으로는 파티클 없음
-        }}
-        linkDirectionalParticleSpeed={(link: any) => {
-          const direction = getLinkDirection(link);
-          if (direction === 'incoming') {
-            return 0.008; // 소개받는 방향은 약간 느리게
-          } else if (direction === 'outgoing') {
-            return 0.012; // 소개하는 방향은 약간 빠르게
-          }
-          return 0.01; // 기본 속도
-        }}
-        linkDirectionalParticleWidth={3}
-        linkDirectionalParticleColor={(link: any) => {
-          const direction = getLinkDirection(link);
-          if (direction === 'incoming') {
-            return '#81D4FA'; // 소개받는 흐름 - 연한 블루 파티클
-          } else if (direction === 'outgoing') {
-            return '#FFAB91'; // 소개하는 흐름 - 연한 오렌지 파티클
-          }
-          return '#ffffff'; // 기본 흰색 파티클
         }}
         // 노드 클릭 이벤트
         onNodeClick={(node: any) => {
@@ -1544,8 +1580,17 @@ export default function NetworkGraphClient({
             (node.importance || 1) * (node.group === 'influencer' ? 2 : 1.5);
           const textY = node.y + nodeRadius + 18 / globalScale;
 
-          // 텍스트 렌더링 (배경 없이 깔끔하게)
-          ctx.fillStyle = '#ffffff'; // 흰색으로 변경
+          // 하이라이트 상태에 따른 텍스트 opacity 적용
+          const isHighlighted = node.id === graphState.highlightedNodeId;
+          const isConnected = isNodeInHighlightPath(node.id);
+
+          if (graphState.highlightedNodeId && !isHighlighted && !isConnected) {
+            // 하이라이트되지 않은 노드의 텍스트도 같은 opacity 적용
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.5)'; // 50% 투명도 (노드와 동일)
+          } else {
+            ctx.fillStyle = '#ffffff'; // 기본 흰색
+          }
+
           ctx.fillText(label, node.x, textY);
         }}
       />
