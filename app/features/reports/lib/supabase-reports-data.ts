@@ -2,7 +2,6 @@ import { db } from '~/lib/core/db';
 import {
   clients,
   meetings,
-  referrals,
   profiles,
   teams,
   pipelineStages,
@@ -96,15 +95,17 @@ export async function getPerformanceData(
         )
       );
 
-    // 추천 수 조회 (날짜 조건 추가)
+    // 🔧 수정: 추천 수 조회 - referrals 테이블 대신 clients.referredById 사용 (대시보드와 동일)
     const totalReferralsResult = await db
       .select({ count: count() })
-      .from(referrals)
+      .from(clients)
       .where(
         and(
-          eq(referrals.agentId, userId),
-          gte(referrals.createdAt, startDate),
-          lte(referrals.createdAt, endDate)
+          eq(clients.agentId, userId),
+          eq(clients.isActive, true), // 활성 고객만
+          sql`${clients.referredById} IS NOT NULL`, // 소개받은 고객만
+          gte(clients.createdAt, startDate),
+          lte(clients.createdAt, endDate)
         )
       );
 
@@ -181,12 +182,14 @@ export async function getPerformanceData(
 
     const prevReferralsResult = await db
       .select({ count: count() })
-      .from(referrals)
+      .from(clients)
       .where(
         and(
-          eq(referrals.agentId, userId),
-          gte(referrals.createdAt, prevStartDate),
-          lte(referrals.createdAt, prevEndDate)
+          eq(clients.agentId, userId),
+          eq(clients.isActive, true), // 활성 고객만
+          sql`${clients.referredById} IS NOT NULL`, // 소개받은 고객만
+          gte(clients.createdAt, prevStartDate),
+          lte(clients.createdAt, prevEndDate)
         )
       );
 
