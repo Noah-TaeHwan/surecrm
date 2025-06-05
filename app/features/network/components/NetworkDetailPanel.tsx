@@ -427,71 +427,42 @@ export default function NetworkDetailPanel({
 
             {referredByNode ? (
               <Card
-                className="group cursor-pointer hover:bg-accent/50 transition-all duration-200 border-l-4 border-l-blue-500"
+                className="group cursor-pointer hover:bg-accent/30 transition-all duration-200 border border-border/50 hover:border-blue-200/50 gap-0 py-0"
                 onClick={(e) => handleReferralAction(referredByNode.id, e)}
               >
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium text-base truncate">
-                        {referredByNode.name}
-                      </div>
-
-                      <div className="flex items-center gap-2 mt-1">
-                        <Badge
-                          variant={
-                            getStageBadgeColor(
-                              referredByNode.clientInfo?.stageName
-                            ) as any
-                          }
-                          className="text-xs"
-                        >
-                          {referredByNode.clientInfo?.stageName ||
-                            '단계 미설정'}
-                        </Badge>
-                        <Badge
-                          className={`${getImportanceBadgeColor(
-                            referredByNode.clientInfo?.importance
-                          )} text-xs`}
-                        >
-                          {getImportanceText(
-                            referredByNode.clientInfo?.importance
-                          )}
-                        </Badge>
-                      </div>
-
-                      {referredByNode.clientInfo?.phone && (
-                        <div className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                          <Phone className="h-3 w-3" />
-                          {referredByNode.clientInfo.phone}
+                <CardContent className="p-3 min-h-[56px] flex items-center">
+                  <div className="flex items-center justify-between gap-3 w-full">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className="w-2 h-2 rounded-full bg-blue-400/60 flex-shrink-0"></div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-sm truncate">
+                          {referredByNode.name}
                         </div>
-                      )}
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground">
+                            {referredByNode.clientInfo?.stageName || '미설정'}
+                          </span>
+                          <span className="text-xs text-blue-600 font-medium">
+                            {getImportanceText(
+                              referredByNode.clientInfo?.importance
+                            )}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 w-8 p-0 rounded-full text-muted-foreground opacity-60 group-hover:opacity-100"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleReferralAction(referredByNode.id, e);
-                      }}
-                    >
-                      <ArrowUpRight className="h-4 w-4" />
-                      <span className="sr-only">보기</span>
-                    </Button>
+                    <ArrowUpRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-muted-foreground transition-colors flex-shrink-0" />
                   </div>
                 </CardContent>
               </Card>
             ) : (
-              <Card className="border-l-4 border-l-muted-foreground/20">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-2">
-                    <Users className="h-4 w-4 text-muted-foreground" />
+              <Card className="border border-border/30 gap-0 py-0">
+                <CardContent className="p-3 min-h-[56px] flex items-center">
+                  <div className="flex items-center gap-3 w-full">
+                    <div className="w-2 h-2 rounded-full bg-muted-foreground/40"></div>
                     <span className="text-sm text-muted-foreground">
                       직접 개발 고객
                     </span>
-                    <Badge variant="secondary" className="text-xs">
+                    <Badge variant="secondary" className="text-xs ml-auto">
                       신규 개발
                     </Badge>
                   </div>
@@ -520,70 +491,42 @@ export default function NetworkDetailPanel({
                 {referredNodes.map((node) => (
                   <Card
                     key={node.id}
-                    className="group cursor-pointer hover:bg-accent/50 transition-all duration-200 border-l-4 border-l-orange-500"
+                    className="group cursor-pointer hover:bg-accent/30 transition-all duration-200 border border-border/50 hover:border-orange-200/50 gap-0 py-0"
                     onClick={(e) => handleReferralAction(node.id, e)}
                   >
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1 min-w-0">
-                          <div className="font-medium text-base truncate">
-                            {node.name}
-                          </div>
-
-                          <div className="flex items-center gap-2 mt-1">
-                            <Badge
-                              variant={
-                                getStageBadgeColor(
-                                  node.clientInfo?.stageName
-                                ) as any
-                              }
-                              className="text-xs"
-                            >
-                              {node.clientInfo?.stageName || '단계 미설정'}
-                            </Badge>
-                            <Badge
-                              className={`${getImportanceBadgeColor(
-                                node.clientInfo?.importance
-                              )} text-xs`}
-                            >
-                              {getImportanceText(node.clientInfo?.importance)}
-                            </Badge>
-                          </div>
-
-                          {node.clientInfo?.phone && (
-                            <div className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                              <Phone className="h-3 w-3" />
-                              {node.clientInfo.phone}
+                    <CardContent className="p-3 min-h-[56px] flex items-center">
+                      <div className="flex items-center justify-between gap-3 w-full">
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          <div className="w-2 h-2 rounded-full bg-orange-400/60 flex-shrink-0"></div>
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium text-sm truncate">
+                              {node.name}
                             </div>
-                          )}
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs text-muted-foreground">
+                                {node.clientInfo?.stageName || '미설정'}
+                              </span>
+                              <span className="text-xs text-orange-600 font-medium">
+                                {getImportanceText(node.clientInfo?.importance)}
+                              </span>
+                            </div>
+                          </div>
                         </div>
-
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 w-8 p-0 rounded-full text-muted-foreground opacity-60 group-hover:opacity-100"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleReferralAction(node.id, e);
-                          }}
-                        >
-                          <ArrowUpRight className="h-4 w-4" />
-                          <span className="sr-only">보기</span>
-                        </Button>
+                        <ArrowUpRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-muted-foreground transition-colors flex-shrink-0" />
                       </div>
                     </CardContent>
                   </Card>
                 ))}
               </div>
             ) : (
-              <Card className="border-l-4 border-l-muted-foreground/20">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-2">
-                    <UserRound className="h-4 w-4 text-muted-foreground" />
+              <Card className="border border-border/30 gap-0 py-0">
+                <CardContent className="p-3 min-h-[56px] flex items-center">
+                  <div className="flex items-center gap-3 w-full">
+                    <div className="w-2 h-2 rounded-full bg-muted-foreground/40"></div>
                     <span className="text-sm text-muted-foreground">
                       소개한 고객이 없습니다
                     </span>
-                    <Badge variant="outline" className="text-xs">
+                    <Badge variant="outline" className="text-xs ml-auto">
                       개발 가능
                     </Badge>
                   </div>
