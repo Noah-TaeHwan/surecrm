@@ -1068,6 +1068,46 @@ export default function NetworkGraphClient({
     return graphState.searchResults.includes(nodeId);
   }
 
+  // 연결된 노드 개수 계산 함수
+  function getNodeConnectionCount(nodeId: string): number {
+    if (!filteredData.links) return 0;
+
+    return filteredData.links.filter((link: any) => {
+      const sourceId =
+        typeof link.source === 'string' ? link.source : link.source.id;
+      const targetId =
+        typeof link.target === 'string' ? link.target : link.target.id;
+      return sourceId === nodeId || targetId === nodeId;
+    }).length;
+  }
+
+  // 연결 개수를 기반으로 노드 크기 계산 (더 명확하게 차이나게)
+  function calculateNodeRadius(
+    node: any,
+    isHighlightNode: boolean,
+    isHighlightRelated: boolean
+  ): number {
+    const connectionCount = getNodeConnectionCount(node.id);
+    const importance = node.importance || 1;
+
+    // 기본 크기에 연결 개수 비례 추가 (더 크게 - 최대 +70% 정도)
+    const connectionBonus = Math.min(connectionCount * 1.5, 8); // 최대 8픽셀 추가
+
+    let baseRadius;
+    if (isHighlightNode) {
+      baseRadius = OBSIDIAN_CONFIG.NODE.HIGHLIGHT_RADIUS + importance * 2;
+    } else if (isHighlightRelated) {
+      baseRadius = OBSIDIAN_CONFIG.NODE.DEFAULT_RADIUS + importance * 1.5;
+    } else {
+      baseRadius = Math.max(
+        OBSIDIAN_CONFIG.NODE.MIN_RADIUS,
+        OBSIDIAN_CONFIG.NODE.DEFAULT_RADIUS + importance
+      );
+    }
+
+    return baseRadius + connectionBonus;
+  }
+
   return (
     <div
       ref={containerRef}
@@ -1093,8 +1133,12 @@ export default function NetworkGraphClient({
         width={dimensions.width || window.innerWidth}
         height={dimensions.height || window.innerHeight - 200}
         nodeVal={(node: any) => {
-          // 노드 크기를 중요도와 그룹에 따라 차별화
-          const baseSize = (node.importance || 1) * 1.8;
+          // 연결 개수를 고려한 노드 크기 계산
+          const connectionCount = getNodeConnectionCount(node.id);
+          const importance = (node.importance || 1) * 1.8;
+          const connectionBonus = Math.min(connectionCount * 0.7, 4); // 더 크게 차이나게
+
+          const baseSize = importance + connectionBonus;
           return node.group === 'influencer' ? baseSize * 1.4 : baseSize;
         }}
         // 배경 클릭 이벤트 핸들러 추가
@@ -1543,21 +1587,12 @@ export default function NetworkGraphClient({
             const isHighlightRelated =
               isHighlightNode || isConnectedNode || isSearchResultNode;
 
-            // 옵시디언 스타일 노드 크기 계산
-            const importance = node.importance || 1;
-            let nodeRadius;
-            if (isHighlightNode) {
-              nodeRadius =
-                OBSIDIAN_CONFIG.NODE.HIGHLIGHT_RADIUS + importance * 2;
-            } else if (isHighlightRelated) {
-              nodeRadius =
-                OBSIDIAN_CONFIG.NODE.DEFAULT_RADIUS + importance * 1.5;
-            } else {
-              nodeRadius = Math.max(
-                OBSIDIAN_CONFIG.NODE.MIN_RADIUS,
-                OBSIDIAN_CONFIG.NODE.DEFAULT_RADIUS + importance
-              );
-            }
+            // 연결 개수를 고려한 노드 크기 계산
+            const nodeRadius = calculateNodeRadius(
+              node,
+              isHighlightNode,
+              isHighlightRelated
+            );
 
             // 옵시디언 스타일 색상 시스템
             let nodeColor = '#64748b'; // 기본 muted-foreground
