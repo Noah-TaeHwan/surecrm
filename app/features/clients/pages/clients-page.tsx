@@ -1,65 +1,4 @@
 import { MainLayout } from '~/common/layouts/main-layout';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '~/common/components/ui/card';
-import { Button } from '~/common/components/ui/button';
-import { Input } from '~/common/components/ui/input';
-import { Badge } from '~/common/components/ui/badge';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '~/common/components/ui/select';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '~/common/components/ui/table';
-import { Avatar, AvatarFallback } from '~/common/components/ui/avatar';
-import { Separator } from '~/common/components/ui/separator';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '~/common/components/ui/dialog';
-import { Label } from '~/common/components/ui/label';
-import { Alert, AlertDescription } from '~/common/components/ui/alert';
-import {
-  Users,
-  Network,
-  TrendingUp,
-  Shield,
-  Search,
-  Filter,
-  Plus,
-  Upload,
-  Download,
-  LayoutGrid,
-  LayoutList,
-  Calendar,
-  Phone,
-  Mail,
-  MapPin,
-  Clock,
-  MessageCircle,
-  Edit2,
-  Trash2,
-  FileDown,
-  DollarSign,
-  Target,
-  Eye,
-  Star,
-} from 'lucide-react';
 import { useState, useMemo, useEffect } from 'react';
 import { useFetcher, useNavigate } from 'react-router';
 import { z } from 'zod';
@@ -74,8 +13,11 @@ import type {
 } from '~/features/clients/lib/schema';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
-import { AddClientModal } from '../components/add-client-modal';
-import { ShineBorder } from '~/common/components/magicui/shine-border';
+
+import { ClientStatsSection } from '../components/client-stats-section';
+import { ClientFiltersSection } from '../components/client-filters-section';
+import { ClientListSection } from '../components/client-list-section';
+import { ClientsPageModals } from '../components/clients-page-modals';
 
 // 🎯 보험설계사 특화 고객 관리 페이지
 // 실제 스키마 타입 사용으로 데이터베이스 연동 준비 완료
@@ -591,61 +533,41 @@ export default function ClientsPage({ loaderData }: any) {
     }
   }, [fetcher.state, fetcher.data]);
 
-  // 🎯 핸들러 함수들
-  const handleClientSubmit = async (
-    clientData: Partial<ClientProfile>,
-    isEdit: boolean = false
-  ) => {
+  // 🎯 핸들러 함수들 (AddClientModal 타입에 맞춰 수정)
+  const handleClientSubmit = async (data: {
+    fullName: string;
+    phone: string;
+    email?: string;
+    telecomProvider?: string;
+    address?: string;
+    occupation?: string;
+    importance: 'high' | 'medium' | 'low';
+    referredById?: string;
+    tags?: string;
+    notes?: string;
+  }) => {
     try {
-      if (isEdit && selectedClient) {
-        // 수정 - 기존 방식 유지 (나중에 action으로 이동)
-        const { updateClient } = await import('~/api/shared/clients');
-        const result = await updateClient(
-          selectedClient.id,
-          clientData,
-          loaderData.userId
-        );
+      // 생성 - React Router Action 사용 (SSR)
+      console.log('🚀 클라이언트: Action으로 고객 생성 요청');
 
-        if (result.success) {
-          console.log('고객 수정 성공:', result.data);
-          // 성공 메시지는 Toast 시스템으로 교체 예정
-          console.log('✅ 고객 정보가 수정되었습니다:', result.message);
-        } else {
-          console.error('고객 수정 실패:', result.message);
-          // 에러 메시지는 별도 에러 처리 시스템으로 교체 예정
-          console.error('❌ 고객 수정 실패:', result.message);
-        }
+      const formData = new FormData();
+      formData.append('intent', 'create-client');
+      formData.append('fullName', data.fullName || '');
+      formData.append('phone', data.phone || '');
+      formData.append('email', data.email || '');
+      formData.append('address', data.address || '');
+      formData.append('occupation', data.occupation || '');
+      formData.append('importance', data.importance || 'medium');
+      formData.append('referredById', data.referredById || '');
+      formData.append('tags', data.tags || '');
+      formData.append('notes', data.notes || '');
 
-        setShowEditClientModal(false);
-        setSelectedClient(null);
-      } else {
-        // 생성 - React Router Action 사용 (SSR)
-        console.log('🚀 클라이언트: Action으로 고객 생성 요청');
+      // React Router Action 호출 (서버사이드에서 처리됨)
+      fetcher.submit(formData, { method: 'POST' });
 
-        const formData = new FormData();
-        formData.append('intent', 'create-client');
-        formData.append('fullName', clientData.fullName || '');
-        formData.append('phone', clientData.phone || '');
-        formData.append('email', clientData.email || '');
-        formData.append('address', clientData.address || '');
-        formData.append('occupation', clientData.occupation || '');
-        formData.append('importance', clientData.importance || 'medium');
-        formData.append('referredById', clientData.referredById || '');
-        formData.append(
-          'tags',
-          Array.isArray(clientData.tags)
-            ? clientData.tags.join(',')
-            : clientData.tags || ''
-        );
-        formData.append('notes', clientData.notes || '');
-
-        // React Router Action 호출 (서버사이드에서 처리됨)
-        fetcher.submit(formData, { method: 'POST' });
-
-        // 모달 닫기 (redirect 시 자동으로 새로고침됨)
-        setShowAddClientModal(false);
-        setSelectedClient(null);
-      }
+      // 모달 닫기 (redirect 시 자동으로 새로고침됨)
+      setShowAddClientModal(false);
+      setSelectedClient(null);
     } catch (error) {
       console.error('클라이언트 처리 중 오류:', error);
       // Alert 대신 콘솔 로그 (모달에서 fetcher.data로 에러 표시됨)
@@ -775,45 +697,6 @@ export default function ClientsPage({ loaderData }: any) {
     return sorted;
   }, [filteredClients, sortBy]);
 
-  // 🎯 헬퍼 함수들 (통일된 디자인 시스템)
-  const getImportanceBadgeColor = (importance: string) => {
-    switch (importance) {
-      case 'high':
-        return 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300 border-orange-200';
-      case 'medium':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 border-blue-200';
-      case 'low':
-        return 'bg-muted text-muted-foreground border-muted-foreground/20';
-      default:
-        return 'bg-muted text-muted-foreground border-muted-foreground/20';
-    }
-  };
-
-  const getImportanceText = (importance: string) => {
-    switch (importance) {
-      case 'high':
-        return 'VIP';
-      case 'medium':
-        return '일반';
-      case 'low':
-        return '관심';
-      default:
-        return '미설정';
-    }
-  };
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('ko-KR', {
-      style: 'currency',
-      currency: 'KRW',
-    }).format(amount);
-  };
-
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return '-';
-    return format(new Date(dateString), 'yyyy.MM.dd', { locale: ko });
-  };
-
   // 🎯 핸들러 함수들 (데이터베이스 연동 고려)
   const handleClientRowClick = (clientId: string) => {
     // 🎯 React Router를 사용한 정확한 라우팅
@@ -828,657 +711,64 @@ export default function ClientsPage({ loaderData }: any) {
     }))
     .sort((a: any, b: any) => a.name.localeCompare(b.name)); // 이름순 정렬
 
-  // 🎯 카드 뷰 렌더링 (영업 파이프라인과 동일한 스타일)
-  const renderCardView = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {sortedClients.map((client: ClientProfile) => {
-        // 중요도별 스타일 (왼쪽 보더 제거)
-        const getClientCardStyle = (importance: string) => {
-          switch (importance) {
-            case 'high':
-              return {
-                bgGradient:
-                  'bg-gradient-to-br from-orange-50/50 to-white dark:from-orange-950/20 dark:to-background',
-                borderClass: 'client-card-vip', // VIP 전용 애니메이션 클래스
-              };
-            case 'medium':
-              return {
-                bgGradient:
-                  'bg-gradient-to-br from-blue-50/50 to-white dark:from-blue-950/20 dark:to-background',
-                borderClass: 'client-card-normal', // 일반 고객 은은한 효과
-              };
-            case 'low':
-              return {
-                bgGradient:
-                  'bg-gradient-to-br from-muted/30 to-white dark:from-muted/10 dark:to-background',
-                borderClass: '', // 효과 없음
-              };
-            default:
-              return {
-                bgGradient:
-                  'bg-gradient-to-br from-muted/30 to-white dark:from-muted/10 dark:to-background',
-                borderClass: '',
-              };
-          }
-        };
-
-        const cardStyle = getClientCardStyle(client.importance);
-
-        return (
-          <div key={client.id} className="relative">
-            <Card
-              className={`group hover:shadow-lg transition-all duration-200 ${cardStyle.bgGradient} ${cardStyle.borderClass} cursor-pointer hover:scale-[1.02] hover:-translate-y-1 h-[320px] flex flex-col relative overflow-hidden`}
-              onClick={() => handleClientRowClick(client.id)}
-            >
-              <CardHeader className="pb-3 flex-shrink-0">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
-                      {client.fullName.charAt(0)}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <CardTitle className="text-lg truncate">
-                        {client.fullName}
-                      </CardTitle>
-                      <p className="text-sm text-muted-foreground truncate">
-                        {client.phone}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2 flex-shrink-0">
-                    <Badge
-                      className={`${getImportanceBadgeColor(
-                        client.importance
-                      )} border text-xs font-medium`}
-                    >
-                      {getImportanceText(client.importance)}
-                    </Badge>
-                    {client.importance === 'high' && (
-                      <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                    )}
-                  </div>
-                </div>
-              </CardHeader>
-
-              <CardContent className="flex-1 flex flex-col justify-between space-y-3 min-h-0">
-                <div className="space-y-3">
-                  {/* 현재 단계 - 항상 표시 */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">
-                      현재 단계
-                    </span>
-                    <Badge
-                      variant="outline"
-                      style={{
-                        borderColor: client.currentStage.color,
-                        color: client.currentStage.color,
-                      }}
-                    >
-                      {client.currentStage.name}
-                    </Badge>
-                  </div>
-
-                  {/* 보험 정보 - 항상 표시 (없으면 "미설정") */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">
-                      보험 종류
-                    </span>
-                    <span className="text-sm font-medium text-right">
-                      {client.insuranceTypes.length > 0 ? (
-                        <>
-                          {client.insuranceTypes.slice(0, 2).join(', ')}
-                          {client.insuranceTypes.length > 2 &&
-                            ` 외 ${client.insuranceTypes.length - 2}개`}
-                        </>
-                      ) : (
-                        <span className="text-muted-foreground">미설정</span>
-                      )}
-                    </span>
-                  </div>
-
-                  {/* 총 보험료 - 항상 표시 */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">
-                      총 보험료
-                    </span>
-                    <span className="text-sm font-semibold text-green-600">
-                      {client.totalPremium > 0
-                        ? formatCurrency(client.totalPremium)
-                        : '미설정'}
-                    </span>
-                  </div>
-
-                  {/* 소개 정보 - 항상 표시 (없으면 "직접 고객") */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">
-                      소개자
-                    </span>
-                    <span className="text-sm">
-                      {client.referredBy ? (
-                        client.referredBy.name
-                      ) : (
-                        <span className="text-muted-foreground">직접 고객</span>
-                      )}
-                    </span>
-                  </div>
-                </div>
-
-                {/* 최근 연락 - 하단 고정 */}
-                <div className="flex items-center justify-between pt-2 border-t border-border/30">
-                  <span className="text-sm text-muted-foreground">
-                    최근 연락
-                  </span>
-                  <span className="text-sm">
-                    {formatDate(client.lastContactDate)}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        );
-      })}
-    </div>
-  );
-
-  // 🎯 테이블 뷰 렌더링
-  const renderTableView = () => (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead className="text-left">고객 정보</TableHead>
-          <TableHead className="text-left">연락처</TableHead>
-          <TableHead className="text-left">소개 관계</TableHead>
-          <TableHead className="text-left">중요도</TableHead>
-          <TableHead className="text-left">영업 단계</TableHead>
-          <TableHead className="text-left">성과</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {sortedClients.map((client) => (
-          <TableRow
-            key={client.id}
-            className="cursor-pointer hover:bg-muted/50"
-            onClick={() => handleClientRowClick(client.id)}
-          >
-            <TableCell>
-              <div className="flex items-center gap-3">
-                <div className="flex -space-x-2">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-sm font-medium">
-                    {client.fullName.charAt(0)}
-                  </div>
-                </div>
-                <div>
-                  <p className="font-medium">{client.fullName}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {client.phone}
-                  </p>
-                </div>
-              </div>
-            </TableCell>
-            <TableCell>
-              <div>
-                <p className="text-sm">{client.occupation || '미입력'}</p>
-                <p className="text-xs text-muted-foreground">
-                  {client.address || '주소 미입력'}
-                </p>
-              </div>
-            </TableCell>
-            <TableCell>
-              {client.referredBy ? (
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="text-xs">
-                    {client.referredBy.name}
-                  </Badge>
-                  <span className="text-xs text-muted-foreground">
-                    ({client.referredBy.relationship})
-                  </span>
-                </div>
-              ) : (
-                <span className="text-sm text-muted-foreground">직접 고객</span>
-              )}
-            </TableCell>
-            <TableCell>
-              <Badge
-                className={`${getImportanceBadgeColor(
-                  client.importance
-                )} border`}
-              >
-                {getImportanceText(client.importance)}
-              </Badge>
-            </TableCell>
-            <TableCell>
-              <div className="flex items-center gap-2">
-                <div
-                  className={`w-2 h-2 rounded-full ${client.currentStage.color}`}
-                />
-                <span className="text-sm">{client.currentStage.name}</span>
-              </div>
-            </TableCell>
-            <TableCell className="text-left">
-              <div className="text-sm">
-                <div className="font-medium">{client.referralCount}명 소개</div>
-                <div className="text-xs text-muted-foreground">
-                  {(client.totalPremium / 10000).toFixed(0)}만원 월납
-                </div>
-              </div>
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-  );
-
   return (
     <MainLayout title="고객 관리">
       <div className="space-y-8">
         {/* 🎯 고객 관리 핵심 액션 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* 빠른 고객 등록 */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Plus className="h-5 w-5 text-green-600" />새 고객 등록
-              </CardTitle>
-              <p className="text-sm text-muted-foreground">
-                새 고객을 빠르게 추가하고 관리를 시작하세요
-              </p>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <Button onClick={handleAddClient} className="w-full h-10">
-                  <Plus className="h-4 w-4 mr-2" />새 고객 추가
-                </Button>
-                <div className="space-y-2">
-                  <Button
-                    variant="outline"
-                    className="w-full h-10 opacity-60 cursor-not-allowed"
-                    disabled
-                  >
-                    <Upload className="h-4 w-4 mr-2" />
-                    엑셀로 가져오기
-                  </Button>
-                  <p className="text-xs text-muted-foreground text-center">
-                    MVP에서는 제공되지 않는 기능입니다
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* 고객 관리 통계 요약 */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5 text-blue-600" />
-                고객 현황 요약
-              </CardTitle>
-              <p className="text-sm text-muted-foreground">
-                현재 관리 중인 고객들의 핵심 지표
-              </p>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">
-                    전체 고객
-                  </span>
-                  <Badge variant="outline" className="b">
-                    {loaderData.stats?.totalClients || 0}명
-                  </Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">
-                    활성 관리 중
-                  </span>
-                  <Badge variant="outline" className="">
-                    {loaderData.stats?.activeClients || 0}명
-                  </Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">
-                    VIP 고객
-                  </span>
-                  <Badge variant="outline" className="">
-                    {loaderData.clients?.filter(
-                      (c: ClientProfile) => c.importance === 'high'
-                    ).length || 0}
-                    명
-                  </Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">
-                    계약 완료
-                  </span>
-                  <Badge variant="outline" className="">
-                    {loaderData.clients?.filter(
-                      (c: ClientProfile) => c.currentStage?.name === '계약 완료'
-                    ).length || 0}
-                    명
-                  </Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">전환율</span>
-                  <Badge variant="outline" className="">
-                    {loaderData.stats?.conversionRate || 0}%
-                  </Badge>
-                </div>
-                <div className="pt-2">
-                  <Button
-                    variant="outline"
-                    className="w-full h-10 opacity-60 cursor-not-allowed"
-                    disabled
-                  >
-                    <Download className="h-4 w-4 mr-2" />
-                    고객 목록 내보내기
-                  </Button>
-                  <p className="text-xs text-muted-foreground text-center mt-2">
-                    MVP에서는 제공되지 않는 기능입니다
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* 🎯 스마트 검색 및 필터 */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>고객 검색 및 필터</CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  {filteredClients.length}명의 고객이 검색되었습니다
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  className="h-10"
-                  onClick={() => setShowFilters(!showFilters)}
-                >
-                  <Filter className="h-4 w-4 mr-2" />
-                  필터 {showFilters ? '숨기기' : '보기'}
-                </Button>
-                <Separator orientation="vertical" className="h-6" />
-                <Button
-                  variant={viewMode === 'cards' ? 'default' : 'outline'}
-                  className="h-10 w-10"
-                  onClick={() => setViewMode('cards')}
-                >
-                  <LayoutGrid className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant={viewMode === 'table' ? 'default' : 'outline'}
-                  className="h-10 w-10"
-                  onClick={() => setViewMode('table')}
-                >
-                  <LayoutList className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {/* 기본 검색 */}
-              <div className="flex gap-4">
-                <div className="flex-1">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="이름, 전화번호, 이메일, 직업, 주소로 검색..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10 h-10"
-                    />
-                  </div>
-                </div>
-                <Select
-                  value={filterImportance}
-                  onValueChange={(value) =>
-                    setFilterImportance(
-                      value as 'all' | 'high' | 'medium' | 'low'
-                    )
-                  }
-                >
-                  <SelectTrigger className="w-[120px] h-10">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">모든 중요도</SelectItem>
-                    <SelectItem value="high">높음</SelectItem>
-                    <SelectItem value="medium">보통</SelectItem>
-                    <SelectItem value="low">낮음</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* 고급 필터 */}
-              {showFilters && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t">
-                  <Select value={filterStage} onValueChange={setFilterStage}>
-                    <SelectTrigger className="h-10">
-                      <SelectValue placeholder="영업 단계" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">모든 단계</SelectItem>
-                      <SelectItem value="첫 상담">첫 상담</SelectItem>
-                      <SelectItem value="니즈 분석">니즈 분석</SelectItem>
-                      <SelectItem value="상품 설명">상품 설명</SelectItem>
-                      <SelectItem value="계약 검토">계약 검토</SelectItem>
-                      <SelectItem value="계약 완료">계약 완료</SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  <Select
-                    value={filterReferralStatus}
-                    onValueChange={setFilterReferralStatus}
-                  >
-                    <SelectTrigger className="h-10">
-                      <SelectValue placeholder="소개 상태" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">모든 고객</SelectItem>
-                      <SelectItem value="has_referrer">
-                        소개받은 고객
-                      </SelectItem>
-                      <SelectItem value="no_referrer">
-                        직접 영업 고객
-                      </SelectItem>
-                      <SelectItem value="top_referrer">
-                        핵심 소개자 (3명+)
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1">
-                      <Button
-                        variant="outline"
-                        className="w-full h-10 opacity-60 cursor-not-allowed"
-                        disabled
-                      >
-                        <Download className="h-4 w-4 mr-2" />
-                        내보내기
-                      </Button>
-                      <p className="text-xs text-muted-foreground text-center mt-1">
-                        MVP에서는 제공되지 않는 기능입니다
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* 🎯 고객 목록 */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5" />
-                  고객 목록
-                  <Badge variant="outline" className="ml-2">
-                    {filteredClients.length}명
-                  </Badge>
-                </CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  {viewMode === 'cards'
-                    ? '카드 뷰로 고객 상세 정보를 확인하세요'
-                    : '테이블 뷰로 고객을 빠르게 비교하세요'}
-                </p>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {filteredClients.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 px-4">
-                <div className="rounded-full bg-primary/10 p-6 mb-6">
-                  <Users className="h-12 w-12 text-primary" />
-                </div>
-                <h3 className="text-xl font-semibold text-foreground mb-2">
-                  검색 결과가 없습니다
-                </h3>
-                <p className="text-muted-foreground text-center max-w-md mb-6">
-                  검색 조건을 변경하거나 새 고객을 추가해보세요.
-                </p>
-                <Button onClick={handleAddClient}>
-                  <Plus className="h-4 w-4 mr-2" />새 고객 추가하기
-                </Button>
-              </div>
-            ) : viewMode === 'cards' ? (
-              renderCardView()
-            ) : (
-              renderTableView()
-            )}
-          </CardContent>
-        </Card>
-
-        {/* 🎯 고객 추가 모달 */}
-        <AddClientModal
-          open={showAddClientModal}
-          onOpenChange={setShowAddClientModal}
-          onSubmit={handleClientSubmit}
-          isSubmitting={fetcher.state === 'submitting'}
-          error={fetcher.data?.success === false ? fetcher.data.message : null}
-          referrers={potentialReferrers}
+        <ClientStatsSection
+          stats={loaderData.stats}
+          clients={loaderData.clients}
+          onAddClient={handleAddClient}
         />
 
-        {/* 🎯 엑셀 가져오기 모달 */}
-        {showImportModal && (
-          <Dialog open={showImportModal} onOpenChange={setShowImportModal}>
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle>엑셀 가져오기</DialogTitle>
-                <DialogDescription>
-                  Phase 3에서 실제 파일 업로드 기능을 구현할 예정입니다.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">
-                  <Upload className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                  <p className="text-sm text-muted-foreground">
-                    CSV 또는 Excel 파일을 드래그하거나 클릭하여 업로드
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => setShowImportModal(false)}
-                  >
-                    취소
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      alert(
-                        'Phase 3에서 실제 파일 업로드 기능을 구현할 예정입니다.'
-                      );
-                      setShowImportModal(false);
-                    }}
-                  >
-                    업로드
-                  </Button>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
-        )}
+        {/* 🎯 스마트 검색 및 필터 */}
+        <ClientFiltersSection
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          filterImportance={filterImportance}
+          setFilterImportance={setFilterImportance}
+          filterStage={filterStage}
+          setFilterStage={setFilterStage}
+          filterReferralStatus={filterReferralStatus}
+          setFilterReferralStatus={setFilterReferralStatus}
+          viewMode={viewMode}
+          setViewMode={setViewMode}
+          showFilters={showFilters}
+          setShowFilters={setShowFilters}
+          filteredClientsCount={filteredClients.length}
+        />
 
-        {/* 🎯 고객 수정 모달 */}
-        {showEditClientModal && (
-          <Dialog
-            open={showEditClientModal}
-            onOpenChange={setShowEditClientModal}
-          >
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle>고객 정보 수정</DialogTitle>
-                <DialogDescription>
-                  Phase 3에서 실제 수정 기능을 구현할 예정입니다.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <Label>이름</Label>
-                  <Input placeholder="고객 이름" />
-                </div>
-                <div>
-                  <Label>전화번호</Label>
-                  <Input placeholder="010-1234-5678" />
-                </div>
-                <div>
-                  <Label>이메일</Label>
-                  <Input placeholder="example@email.com" />
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => setShowEditClientModal(false)}
-                  >
-                    취소
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      alert('Phase 3에서 실제 수정 기능을 구현할 예정입니다.');
-                      setShowEditClientModal(false);
-                    }}
-                  >
-                    수정
-                  </Button>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
-        )}
+        {/* 🎯 고객 목록 */}
+        <ClientListSection
+          filteredClients={sortedClients}
+          viewMode={viewMode}
+          onClientRowClick={handleClientRowClick}
+          onAddClient={handleAddClient}
+        />
 
-        {/* 🎯 고객 삭제 확인 모달 */}
-        {showDeleteConfirmModal && (
-          <Dialog
-            open={showDeleteConfirmModal}
-            onOpenChange={setShowDeleteConfirmModal}
-          >
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle>고객 삭제 확인</DialogTitle>
-                <DialogDescription>
-                  {selectedClient?.fullName} 고객을 정말로 삭제하시겠습니까?
-                </DialogDescription>
-              </DialogHeader>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => setShowDeleteConfirmModal(false)}
-                >
-                  취소
-                </Button>
-                <Button variant="destructive" onClick={handleConfirmDelete}>
-                  삭제
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-        )}
+        {/* 🎯 모든 모달들 */}
+        <ClientsPageModals
+          // Add Client Modal
+          showAddClientModal={showAddClientModal}
+          setShowAddClientModal={setShowAddClientModal}
+          onClientSubmit={handleClientSubmit}
+          isSubmitting={fetcher.state === 'submitting'}
+          submitError={
+            fetcher.data?.success === false ? fetcher.data.message : null
+          }
+          potentialReferrers={potentialReferrers}
+          // Import Modal
+          showImportModal={showImportModal}
+          setShowImportModal={setShowImportModal}
+          // Edit Client Modal
+          showEditClientModal={showEditClientModal}
+          setShowEditClientModal={setShowEditClientModal}
+          // Delete Confirm Modal
+          showDeleteConfirmModal={showDeleteConfirmModal}
+          setShowDeleteConfirmModal={setShowDeleteConfirmModal}
+          selectedClient={selectedClient as any}
+          onConfirmDelete={handleConfirmDelete}
+        />
       </div>
     </MainLayout>
   );
