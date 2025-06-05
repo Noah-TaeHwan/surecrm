@@ -408,9 +408,9 @@ export default function SettingsPage({
           </div>
         </div>
 
-        {/* 설정 섹션들 - 더 모던한 그리드 레이아웃 */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-          {/* 프로필 정보 - 개선된 카드 */}
+        {/* 메인 설정 - 프로필 정보와 보안 설정 */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* 프로필 정보 */}
           <Card className="border bg-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-3 text-lg font-semibold">
@@ -545,72 +545,8 @@ export default function SettingsPage({
             </CardContent>
           </Card>
 
-          {/* 알림 설정 */}
-          <Card className="border bg-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-lg font-semibold">
-                <div className="p-2 bg-muted rounded-lg">
-                  <Bell className="h-5 w-5 text-foreground" />
-                </div>
-                알림 설정
-                <div className="ml-auto">
-                  <Badge
-                    variant={emailNotifications ? 'default' : 'secondary'}
-                    className="text-xs"
-                  >
-                    {emailNotifications ? '활성화' : '비활성화'}
-                  </Badge>
-                </div>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-6 space-y-6">
-              <Form method="post" className="space-y-5">
-                <input
-                  type="hidden"
-                  name="actionType"
-                  value="updateNotifications"
-                />
-                <input
-                  type="hidden"
-                  name="emailNotifications"
-                  value={emailNotifications.toString()}
-                />
-
-                <div className="p-4 rounded-xl bg-muted/50 border">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <Mail className="h-4 w-4 text-foreground" />
-                        <Label
-                          htmlFor="email-notifications"
-                          className="font-medium"
-                        >
-                          이메일 알림
-                        </Label>
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        새로운 고객, 회의 일정 등 중요한 정보를 이메일로
-                        받아보세요
-                      </p>
-                    </div>
-                    <Switch
-                      id="email-notifications"
-                      checked={emailNotifications}
-                      onCheckedChange={setEmailNotifications}
-                    />
-                  </div>
-                </div>
-
-                <Button type="submit" className="w-full">
-                  <Save className="h-4 w-4 mr-2" />
-                  알림 설정 저장
-                </Button>
-              </Form>
-            </CardContent>
-          </Card>
-
           {/* 보안 설정 */}
-          <Card className="border bg-card xl:col-span-2">
+          <Card className="border bg-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-3 text-lg font-semibold">
                 <div className="p-2 bg-muted rounded-lg">
@@ -623,7 +559,7 @@ export default function SettingsPage({
               <Form method="post" className="space-y-5">
                 <input type="hidden" name="actionType" value="changePassword" />
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-4">
                   <div className="space-y-2">
                     <Label className="text-sm font-medium text-foreground">
                       현재 비밀번호
@@ -673,84 +609,149 @@ export default function SettingsPage({
                   </div>
                 </div>
 
-                <Button
-                  type="submit"
-                  variant="destructive"
-                  className="w-full md:w-auto"
-                >
+                <Button type="submit" variant="destructive" className="w-full">
                   <Shield className="h-4 w-4 mr-2" />
                   비밀번호 변경
                 </Button>
               </Form>
+
+              {/* 보안 가이드 */}
+              <div className="mt-6 p-4 bg-muted/50 border rounded-lg">
+                <div className="flex items-start gap-3">
+                  <Shield className="h-4 w-4 text-foreground mt-0.5" />
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium text-foreground">
+                      보안 권장사항
+                    </p>
+                    <ul className="text-xs text-muted-foreground space-y-1">
+                      <li>• 비밀번호는 6자 이상으로 설정하세요</li>
+                      <li>• 정기적으로 비밀번호를 변경하세요</li>
+                      <li>• 다른 서비스와 다른 비밀번호를 사용하세요</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* 계정 정보 */}
-        <Card className="border bg-card">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-3">
-              <div className="p-2 bg-muted rounded-lg">
-                <User className="h-5 w-5 text-foreground" />
-              </div>
-              계정 정보
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-6 relative">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="p-4 rounded-xl bg-muted/50 border space-y-2">
-                <div className="flex items-center gap-2">
-                  <div className="p-1 bg-muted rounded">
-                    <User className="h-3 w-3 text-foreground" />
-                  </div>
-                  <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                    사용자 ID
-                  </Label>
+        {/* 계정 정보 및 시스템 설정 */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* 계정 정보 */}
+          <Card className="border bg-card">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-3 text-lg font-semibold">
+                <div className="p-2 bg-muted rounded-lg">
+                  <User className="h-5 w-5 text-foreground" />
                 </div>
-                <p className="font-mono text-xs text-foreground break-all bg-background p-2 rounded border">
-                  {userProfile.id}
+                계정 정보
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6 space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between py-2 border-b border-border/50">
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">사용자 ID</span>
+                  </div>
+                  <code className="text-xs bg-muted px-2 py-1 rounded font-mono">
+                    {userProfile.id.slice(0, 8)}...
+                  </code>
+                </div>
+
+                <div className="flex items-center justify-between py-2 border-b border-border/50">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">가입일</span>
+                  </div>
+                  <span className="text-sm text-foreground">
+                    {formatJoinDate(userProfile.createdAt)}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between py-2">
+                  <div className="flex items-center gap-2">
+                    <Crown className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">플랜</span>
+                  </div>
+                  <Badge variant="outline" className="text-xs">
+                    MVP 베타
+                  </Badge>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* 도움말 및 가이드 */}
+          <Card className="border bg-card">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-3 text-lg font-semibold">
+                <div className="p-2 bg-muted rounded-lg">
+                  <SettingsIcon className="h-5 w-5 text-foreground" />
+                </div>
+                설정 가이드
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6 space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-start gap-3">
+                  <div className="p-1 bg-primary/10 rounded">
+                    <Save className="h-3 w-3 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-foreground">
+                      설정 저장
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      모든 변경사항은 저장 버튼을 클릭하여 적용됩니다
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="p-1 bg-orange/10 rounded">
+                    <Shield className="h-3 w-3 text-orange-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-foreground">
+                      보안 관리
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      정기적으로 비밀번호를 변경해 계정을 안전하게 유지하세요
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="p-1 bg-blue/10 rounded">
+                    <User className="h-3 w-3 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-foreground">
+                      프로필 관리
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      정확한 정보로 업데이트하여 팀과의 협업을 원활하게 하세요
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* MVP 안내 */}
+              <div className="mt-4 p-3 bg-primary/5 border border-primary/20 rounded-lg">
+                <div className="flex items-center gap-2 mb-1">
+                  <Crown className="h-3 w-3 text-primary" />
+                  <span className="text-xs font-medium text-primary">
+                    MVP 버전
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  현재 베타 버전에서는 기본 설정만 제공됩니다. 추가 기능은 곧
+                  업데이트될 예정입니다.
                 </p>
               </div>
-
-              <div className="p-4 rounded-xl bg-muted/50 border space-y-2">
-                <div className="flex items-center gap-2">
-                  <div className="p-1 bg-muted rounded">
-                    <Calendar className="h-3 w-3 text-foreground" />
-                  </div>
-                  <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                    가입일
-                  </Label>
-                </div>
-                <p className="text-sm font-medium text-foreground">
-                  {formatJoinDate(userProfile.createdAt)}
-                </p>
-              </div>
-
-              <div className="p-4 rounded-xl bg-muted/50 border space-y-2">
-                <div className="flex items-center gap-2">
-                  <div className="p-1 bg-muted rounded">
-                    <Crown className="h-3 w-3 text-foreground" />
-                  </div>
-                  <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                    플랜
-                  </Label>
-                </div>
-                <Badge variant="outline">MVP 베타</Badge>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* 안내 메시지 */}
-        <div className="rounded-xl bg-muted/50 border p-6 text-center">
-          <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-primary/10 border text-primary font-medium text-sm">
-            설정 가이드
-          </div>
-          <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
-            💡 모든 설정 변경사항은{' '}
-            <span className="text-primary font-medium">저장 버튼</span>을
-            클릭하여 즉시 적용됩니다.
-          </p>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </MainLayout>

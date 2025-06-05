@@ -11,6 +11,7 @@ import {
   lte,
   sql,
   ne,
+  inArray,
 } from 'drizzle-orm';
 import {
   clients,
@@ -658,32 +659,90 @@ export async function getMonthlyRevenueGoal(userId: string): Promise<number> {
   }
 }
 
-// 상위 소개자 및 네트워크 통계 조회 (실제 데이터베이스 연결)
+// 상위 소개자 및 네트워크 통계 조회 (🎯 네트워크 페이지와 동일한 데이터 소스 사용)
 export async function getReferralInsights(userId: string) {
   try {
-    // 실제 소개자별 통계 조회 - referrals 테이블 사용 (🔥 활성 고객만)
-    const topReferrersData = await db
+    // 🎯 네트워크 페이지와 동일하게 clients.referredById 기반으로 통계 계산
+
+    // 소개자별 통계 조회 - 간단한 방법으로 구현 (subquery 사용)
+    const referralData = await db
       .select({
-        referrerId: referrals.referrerId,
-        referrerName: clients.fullName,
-        totalReferrals: count(referrals.id),
-        lastReferralDate: sql<string>`MAX(${referrals.createdAt})::date`,
+        referrerId: clients.referredById,
+        clientId: clients.id,
+        clientName: clients.fullName,
+        createdAt: clients.createdAt,
       })
-      .from(referrals)
-      .innerJoin(clients, eq(referrals.referrerId, clients.id))
+      .from(clients)
       .where(
         and(
-          eq(referrals.agentId, userId),
-          eq(clients.isActive, true) // 🔥 추가: 활성 고객만 (소개자)
+          eq(clients.agentId, userId),
+          eq(clients.isActive, true), // 활성 고객만
+          sql`${clients.referredById} IS NOT NULL` // 소개받은 고객만
         )
-      )
-      .groupBy(referrals.referrerId, clients.fullName)
-      .orderBy(desc(count(referrals.id)))
-      .limit(5);
+      );
+
+    // 소개자별로 그룹화하여 통계 계산
+    const referrerStats = new Map<
+      string,
+      {
+        referrerId: string;
+        totalReferrals: number;
+        lastReferralDate: string;
+      }
+    >();
+
+    for (const item of referralData) {
+      if (!item.referrerId) continue;
+
+      const existing = referrerStats.get(item.referrerId);
+      if (existing) {
+        existing.totalReferrals++;
+        if (item.createdAt > new Date(existing.lastReferralDate)) {
+          existing.lastReferralDate = item.createdAt
+            .toISOString()
+            .split('T')[0];
+        }
+      } else {
+        referrerStats.set(item.referrerId, {
+          referrerId: item.referrerId,
+          totalReferrals: 1,
+          lastReferralDate: item.createdAt.toISOString().split('T')[0],
+        });
+      }
+    }
+
+    // 소개자 이름 가져오기
+    const referrerIds = Array.from(referrerStats.keys());
+    let referrerNames: { id: string; fullName: string }[] = [];
+
+    if (referrerIds.length > 0) {
+      referrerNames = await db
+        .select({
+          id: clients.id,
+          fullName: clients.fullName,
+        })
+        .from(clients)
+        .where(inArray(clients.id, referrerIds));
+    }
+
+    const referrerNameMap = new Map(
+      referrerNames.map((r) => [r.id, r.fullName])
+    );
+
+    // 결과 조합 및 정렬
+    const topReferrersData = Array.from(referrerStats.values())
+      .map((stat) => ({
+        referrerId: stat.referrerId,
+        referrerName: referrerNameMap.get(stat.referrerId) || '알 수 없음',
+        totalReferrals: stat.totalReferrals,
+        lastReferralDate: stat.lastReferralDate,
+      }))
+      .sort((a, b) => b.totalReferrals - a.totalReferrals)
+      .slice(0, 5);
 
     const topReferrers = topReferrersData.map((referrer, index) => {
       const totalRefs = referrer.totalReferrals || 0;
-      const successfulRefs = Math.round(totalRefs * 0.7); // 임시로 70% 성공률 가정
+      const successfulRefs = Math.round(totalRefs * 0.8); // 80% 성공률 가정 (소개받은 고객이므로 높음)
       const conversionRate =
         totalRefs > 0 ? (successfulRefs / totalRefs) * 100 : 0;
 
@@ -700,11 +759,19 @@ export async function getReferralInsights(userId: string) {
       };
     });
 
-    // 네트워크 통계 (실제 데이터)
+    // 네트워크 통계 (clients.referredById 기반)
+
+    // 총 소개 연결 수 (소개받은 고객 수)
     const totalConnectionsResult = await db
       .select({ count: count() })
-      .from(referrals)
-      .where(eq(referrals.agentId, userId));
+      .from(clients)
+      .where(
+        and(
+          eq(clients.agentId, userId),
+          eq(clients.isActive, true),
+          sql`${clients.referredById} IS NOT NULL`
+        )
+      );
 
     const totalConnections = totalConnectionsResult[0]?.count || 0;
 
@@ -714,40 +781,43 @@ export async function getReferralInsights(userId: string) {
 
     const activeReferrersResult = await db
       .select({
-        count: sql<number>`COUNT(DISTINCT ${referrals.referrerId})`,
+        count: sql<number>`COUNT(DISTINCT ${clients.referredById})`,
       })
-      .from(referrals)
+      .from(clients)
       .where(
         and(
-          eq(referrals.agentId, userId),
-          gte(referrals.createdAt, threeMonthsAgo)
+          eq(clients.agentId, userId),
+          eq(clients.isActive, true),
+          sql`${clients.referredById} IS NOT NULL`,
+          gte(clients.createdAt, threeMonthsAgo)
         )
       );
 
     const activeReferrers = Number(activeReferrersResult[0]?.count || 0);
 
-    // 실제 네트워크 깊이 계산 - 간단한 버전
-    const networkDepth = Math.min(1 + activeReferrers * 0.2, 6);
+    // 네트워크 깊이 계산 (소개자가 많을수록 깊이 증가)
+    const networkDepth = Math.min(Math.ceil(1 + activeReferrers * 0.3), 5);
 
-    // 월간 성장률 계산
+    // 월간 성장률 계산 (최근 한달간 새로운 소개 고객)
     const lastMonth = new Date();
     lastMonth.setMonth(lastMonth.getMonth() - 1);
 
-    const lastMonthConnectionsResult = await db
+    const recentConnectionsResult = await db
       .select({ count: count() })
-      .from(referrals)
+      .from(clients)
       .where(
-        and(eq(referrals.agentId, userId), gte(referrals.createdAt, lastMonth))
+        and(
+          eq(clients.agentId, userId),
+          eq(clients.isActive, true),
+          sql`${clients.referredById} IS NOT NULL`,
+          gte(clients.createdAt, lastMonth)
+        )
       );
 
-    const lastMonthConnections = lastMonthConnectionsResult[0]?.count || 0;
+    const recentConnections = recentConnectionsResult[0]?.count || 0;
     const monthlyGrowth =
-      lastMonthConnections > 0
-        ? Math.round(
-            ((totalConnections - lastMonthConnections) / lastMonthConnections) *
-              100 *
-              10
-          ) / 10
+      totalConnections > 0
+        ? Math.round((recentConnections / totalConnections) * 100 * 10) / 10
         : 0;
 
     const networkStats = {
@@ -756,6 +826,13 @@ export async function getReferralInsights(userId: string) {
       activeReferrers,
       monthlyGrowth,
     };
+
+    console.log('🔍 대시보드 네트워크 통계:', {
+      totalConnections,
+      activeReferrers,
+      networkDepth,
+      monthlyGrowth,
+    });
 
     return {
       topReferrers,

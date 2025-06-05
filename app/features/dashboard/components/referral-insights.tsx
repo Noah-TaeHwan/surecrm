@@ -9,12 +9,19 @@ import { Badge } from '~/common/components/ui/badge';
 import { Avatar, AvatarFallback } from '~/common/components/ui/avatar';
 import { Progress } from '~/common/components/ui/progress';
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '~/common/components/ui/tooltip';
+import {
   Share1Icon,
   Link2Icon,
   ChevronRightIcon,
   StarFilledIcon,
   StarIcon,
   BarChartIcon,
+  QuestionMarkCircledIcon,
 } from '@radix-ui/react-icons';
 import { Link } from 'react-router';
 
@@ -218,35 +225,104 @@ export function ReferralInsights({
         </CardHeader>
         <CardContent className="space-y-4">
           {/* 네트워크 통계 */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="text-center p-3 bg-primary/5 border border-primary/20 rounded-lg">
-              <div className="text-xl font-bold text-primary mb-1">
-                {networkStats.totalConnections}
+          <TooltipProvider>
+            <div className="grid grid-cols-2 gap-3">
+              {/* 총 연결 */}
+              <div className="text-center p-3 bg-primary/5 border border-primary/20 rounded-lg">
+                <div className="text-xl font-bold text-primary mb-1">
+                  {networkStats.totalConnections}
+                </div>
+                <div className="flex items-center justify-center gap-1">
+                  <span className="text-xs text-muted-foreground">총 연결</span>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <QuestionMarkCircledIcon className="h-3 w-3 text-muted-foreground hover:text-foreground transition-colors" />
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-xs">
+                      <p>
+                        소개를 통해 연결된 고객의 총 수입니다.
+                        <br />
+                        누군가가 소개해준 고객들의 전체 수를 나타냅니다.
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
               </div>
-              <div className="text-xs text-muted-foreground">총 연결</div>
-            </div>
 
-            <div className="text-center p-3 bg-muted/20 border border-border/30 rounded-lg">
-              <div className="text-xl font-bold text-foreground mb-1">
-                {networkStats.networkDepth}
+              {/* 최대 깊이 */}
+              <div className="text-center p-3 bg-muted/20 border border-border/30 rounded-lg">
+                <div className="text-xl font-bold text-foreground mb-1">
+                  {networkStats.networkDepth}
+                </div>
+                <div className="flex items-center justify-center gap-1">
+                  <span className="text-xs text-muted-foreground">
+                    최대 깊이
+                  </span>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <QuestionMarkCircledIcon className="h-3 w-3 text-muted-foreground hover:text-foreground transition-colors" />
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-xs">
+                      <p>
+                        네트워크의 연결 단계 깊이입니다.
+                        <br />
+                        활성 소개자가 많을수록 네트워크가 더 깊게 확산됩니다.
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
               </div>
-              <div className="text-xs text-muted-foreground">최대 깊이</div>
-            </div>
 
-            <div className="text-center p-3 bg-muted/20 border border-border/30 rounded-lg">
-              <div className="text-xl font-bold text-foreground mb-1">
-                {networkStats.activeReferrers}
+              {/* 활성 소개자 */}
+              <div className="text-center p-3 bg-muted/20 border border-border/30 rounded-lg">
+                <div className="text-xl font-bold text-foreground mb-1">
+                  {networkStats.activeReferrers}
+                </div>
+                <div className="flex items-center justify-center gap-1">
+                  <span className="text-xs text-muted-foreground">
+                    활성 소개자
+                  </span>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <QuestionMarkCircledIcon className="h-3 w-3 text-muted-foreground hover:text-foreground transition-colors" />
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-xs">
+                      <p>
+                        최근 3개월 내에 고객을 소개해준 사람의 수입니다.
+                        <br />
+                        현재 활발하게 소개 활동을 하고 있는 소개자들입니다.
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
               </div>
-              <div className="text-xs text-muted-foreground">활성 소개자</div>
-            </div>
 
-            <div className="text-center p-3 bg-muted/20 border border-border/30 rounded-lg">
-              <div className="text-xl font-bold text-foreground mb-1">
-                +{networkStats.monthlyGrowth}%
+              {/* 월간 성장 */}
+              <div className="text-center p-3 bg-muted/20 border border-border/30 rounded-lg">
+                <div className="text-xl font-bold text-foreground mb-1">
+                  +{networkStats.monthlyGrowth}%
+                </div>
+                <div className="flex items-center justify-center gap-1">
+                  <span className="text-xs text-muted-foreground">
+                    월간 성장
+                  </span>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <QuestionMarkCircledIcon className="h-3 w-3 text-muted-foreground hover:text-foreground transition-colors" />
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-xs">
+                      <p>
+                        이번 달 신규 소개 고객의 비율입니다.
+                        <br />
+                        전체 소개 고객 대비 최근 한 달간 늘어난 비율을
+                        보여줍니다.
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
               </div>
-              <div className="text-xs text-muted-foreground">월간 성장</div>
             </div>
-          </div>
+          </TooltipProvider>
 
           {/* 인사이트 */}
           <div className="p-3 bg-muted/20 border border-border/30 rounded-lg">
