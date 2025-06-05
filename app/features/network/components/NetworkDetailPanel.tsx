@@ -605,7 +605,7 @@ export default function NetworkDetailPanel({
             <div className="flex items-center justify-between">
               <h4 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <Users className="h-4 w-4 text-orange-500" />
-                {isAgentNode ? '관리 중인 고객' : '소개한 고객'}
+                {isAgentNode ? '직접 개발한 고객' : '소개한 고객'}
               </h4>
               <Badge
                 variant="outline"
