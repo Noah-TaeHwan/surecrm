@@ -16,8 +16,10 @@ import {
   DollarSign,
   UserPlus,
   ArrowUpRight,
+  MessageSquare,
 } from 'lucide-react';
 import { cn } from '~/lib/utils';
+import type { PerformanceData } from '../lib/supabase-reports-data';
 import type { PerformanceMetricsProps } from '../types';
 
 export function PerformanceMetrics({ performance }: PerformanceMetricsProps) {
@@ -236,6 +238,7 @@ export function PerformanceMetrics({ performance }: PerformanceMetricsProps) {
 
       {/* 추가 인사이트 카드들 */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+        {/* 🚨 MVP: 미팅 기능 주석 처리 
         <Card className="border-slate-200 dark:border-slate-700">
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
@@ -257,6 +260,49 @@ export function PerformanceMetrics({ performance }: PerformanceMetricsProps) {
                   ).toFixed(1)
                 : 0}
               %
+            </div>
+          </CardContent>
+        </Card>
+        */}
+
+        {/* 🆕 상담 효율성 (실제 상담 기록 데이터 활용) */}
+        <Card className="border-slate-200 dark:border-slate-700">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <MessageSquare className="h-4 w-4 text-blue-500" />
+              상담 효율성
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-blue-700 dark:text-blue-400">
+              {performance.consultationStats.consultationsThisPeriod}
+            </div>
+            <p className="text-sm text-muted-foreground">이번 기간 상담 건수</p>
+            <div className="mt-2 space-y-1">
+              <div className="text-xs text-muted-foreground">
+                고객당 평균:{' '}
+                {performance.consultationStats.averageConsultationsPerClient}건
+              </div>
+              <div className="text-xs text-muted-foreground">
+                주요 유형: {performance.consultationStats.mostFrequentNoteType}
+              </div>
+              {performance.consultationStats.consultationGrowth !== 0 && (
+                <div
+                  className={`text-xs flex items-center gap-1 ${
+                    performance.consultationStats.consultationGrowth > 0
+                      ? 'text-green-600'
+                      : 'text-red-600'
+                  }`}
+                >
+                  {performance.consultationStats.consultationGrowth > 0 ? (
+                    <TrendingUp className="h-3 w-3" />
+                  ) : (
+                    <TrendingDown className="h-3 w-3" />
+                  )}
+                  전기간 대비{' '}
+                  {Math.abs(performance.consultationStats.consultationGrowth)}%
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

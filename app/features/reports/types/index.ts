@@ -13,6 +13,13 @@ export interface PerformanceData {
   meetingsCount: number;
   activeClients: number;
   monthlyRecurringRevenue: number;
+  consultationStats: {
+    totalConsultations: number;
+    consultationsThisPeriod: number;
+    averageConsultationsPerClient: number;
+    mostFrequentNoteType: string;
+    consultationGrowth: number;
+  };
 }
 
 export interface TopPerformer {

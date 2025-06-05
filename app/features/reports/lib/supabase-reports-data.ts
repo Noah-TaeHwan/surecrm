@@ -13,6 +13,7 @@ import {
   type ReportDashboard,
 } from './schema';
 import { insuranceInfo } from '~/lib/schema';
+import { appClientConsultationNotes } from '~/features/clients/lib/schema';
 import {
   eq,
   and,
@@ -44,6 +45,14 @@ export interface PerformanceData {
   meetingsCount: number;
   activeClients: number;
   monthlyRecurringRevenue: number;
+  // 🆕 상담 기록 통계 (미팅 대신)
+  consultationStats: {
+    totalConsultations: number;
+    consultationsThisPeriod: number;
+    averageConsultationsPerClient: number;
+    mostFrequentNoteType: string;
+    consultationGrowth: number;
+  };
 }
 
 export interface TopPerformer {
@@ -121,42 +130,6 @@ export async function getPerformanceData(
         )
       );
 
-    // 수익 계산 (🔥 활성 고객만)
-    const revenueResult = await db
-      .select({
-        total: sql<number>`COALESCE(SUM(${insuranceInfo.premium}), 0)`,
-        count: count(),
-      })
-      .from(clients)
-      .innerJoin(insuranceInfo, eq(clients.id, insuranceInfo.clientId))
-      .where(
-        and(
-          eq(clients.agentId, userId),
-          eq(clients.isActive, true), // 🔥 추가: 활성 고객만
-          eq(insuranceInfo.isActive, true),
-          gte(clients.createdAt, startDate),
-          lte(clients.createdAt, endDate)
-        )
-      );
-
-    // 전환율 계산 (🔥 삭제되지 않은 고객만 대상)
-    const conversionResult = await db
-      .select({
-        total: count(),
-        converted: sql<number>`COUNT(CASE WHEN ${clients.isActive} = true THEN 1 END)`,
-        prospects: sql<number>`COUNT(CASE WHEN ${clients.isActive} = false THEN 1 END)`,
-      })
-      .from(clients)
-      .where(
-        and(
-          eq(clients.agentId, userId),
-          // 🔥 주의: 여기서는 실제 is_active 컬럼이 아닌 status 필드로 전환율을 계산
-          // 삭제된 고객은 제외하고 활성/잠재 고객만 포함
-          gte(clients.createdAt, startDate),
-          lte(clients.createdAt, endDate)
-        )
-      );
-
     // 활성 고객 수
     const activeClientsResult = await db
       .select({ count: count() })
@@ -167,6 +140,80 @@ export async function getPerformanceData(
     const periodDiff = endDate.getTime() - startDate.getTime();
     const prevStartDate = new Date(startDate.getTime() - periodDiff);
     const prevEndDate = new Date(endDate.getTime() - periodDiff);
+
+    // 🆕 상담 기록 통계 계산
+    // 전체 상담 기록 수
+    const totalConsultationsResult = await db
+      .select({ count: count() })
+      .from(appClientConsultationNotes)
+      .innerJoin(clients, eq(appClientConsultationNotes.clientId, clients.id))
+      .where(and(eq(clients.agentId, userId), eq(clients.isActive, true)));
+
+    // 해당 기간 상담 기록 수
+    const consultationsThisPeriodResult = await db
+      .select({ count: count() })
+      .from(appClientConsultationNotes)
+      .innerJoin(clients, eq(appClientConsultationNotes.clientId, clients.id))
+      .where(
+        and(
+          eq(clients.agentId, userId),
+          eq(clients.isActive, true),
+          gte(
+            appClientConsultationNotes.consultationDate,
+            startDate.toISOString().split('T')[0]
+          ),
+          lte(
+            appClientConsultationNotes.consultationDate,
+            endDate.toISOString().split('T')[0]
+          )
+        )
+      );
+
+    // 가장 많이 사용되는 상담 유형
+    const noteTypesResult = await db
+      .select({
+        noteType: appClientConsultationNotes.noteType,
+        count: count(),
+      })
+      .from(appClientConsultationNotes)
+      .innerJoin(clients, eq(appClientConsultationNotes.clientId, clients.id))
+      .where(
+        and(
+          eq(clients.agentId, userId),
+          eq(clients.isActive, true),
+          gte(
+            appClientConsultationNotes.consultationDate,
+            startDate.toISOString().split('T')[0]
+          ),
+          lte(
+            appClientConsultationNotes.consultationDate,
+            endDate.toISOString().split('T')[0]
+          )
+        )
+      )
+      .groupBy(appClientConsultationNotes.noteType)
+      .orderBy(desc(count()))
+      .limit(1);
+
+    // 이전 기간 상담 기록 (성장률 계산용)
+    const prevConsultationsResult = await db
+      .select({ count: count() })
+      .from(appClientConsultationNotes)
+      .innerJoin(clients, eq(appClientConsultationNotes.clientId, clients.id))
+      .where(
+        and(
+          eq(clients.agentId, userId),
+          eq(clients.isActive, true),
+          gte(
+            appClientConsultationNotes.consultationDate,
+            prevStartDate.toISOString().split('T')[0]
+          ),
+          lte(
+            appClientConsultationNotes.consultationDate,
+            prevEndDate.toISOString().split('T')[0]
+          )
+        )
+      );
 
     const prevClientsResult = await db
       .select({ count: count() })
@@ -206,6 +253,42 @@ export async function getPerformanceData(
           eq(insuranceInfo.isActive, true),
           gte(clients.createdAt, prevStartDate),
           lte(clients.createdAt, prevEndDate)
+        )
+      );
+
+    // 수익 계산 (🔥 활성 고객만)
+    const revenueResult = await db
+      .select({
+        total: sql<number>`COALESCE(SUM(${insuranceInfo.premium}), 0)`,
+        count: count(),
+      })
+      .from(clients)
+      .innerJoin(insuranceInfo, eq(clients.id, insuranceInfo.clientId))
+      .where(
+        and(
+          eq(clients.agentId, userId),
+          eq(clients.isActive, true), // 🔥 추가: 활성 고객만
+          eq(insuranceInfo.isActive, true),
+          gte(clients.createdAt, startDate),
+          lte(clients.createdAt, endDate)
+        )
+      );
+
+    // 전환율 계산 (🔥 삭제되지 않은 고객만 대상)
+    const conversionResult = await db
+      .select({
+        total: count(),
+        converted: sql<number>`COUNT(CASE WHEN ${clients.isActive} = true THEN 1 END)`,
+        prospects: sql<number>`COUNT(CASE WHEN ${clients.isActive} = false THEN 1 END)`,
+      })
+      .from(clients)
+      .where(
+        and(
+          eq(clients.agentId, userId),
+          // 🔥 주의: 여기서는 실제 is_active 컬럼이 아닌 status 필드로 전환율을 계산
+          // 삭제된 고객은 제외하고 활성/잠재 고객만 포함
+          gte(clients.createdAt, startDate),
+          lte(clients.createdAt, endDate)
         )
       );
 
@@ -254,6 +337,24 @@ export async function getPerformanceData(
       meetingsCount,
       activeClients,
       monthlyRecurringRevenue: Math.round(monthlyRecurringRevenue),
+      consultationStats: {
+        totalConsultations: totalConsultationsResult[0]?.count || 0,
+        consultationsThisPeriod: consultationsThisPeriodResult[0]?.count || 0,
+        averageConsultationsPerClient:
+          totalClients > 0
+            ? Math.round(
+                ((totalConsultationsResult[0]?.count || 0) / totalClients) * 10
+              ) / 10
+            : 0,
+        mostFrequentNoteType: noteTypesResult[0]?.noteType || '상담',
+        consultationGrowth:
+          Math.round(
+            calculateGrowthRate(
+              consultationsThisPeriodResult[0]?.count || 0,
+              prevConsultationsResult[0]?.count || 0
+            ) * 10
+          ) / 10,
+      },
     };
   } catch (error) {
     console.error('Error fetching performance data:', error);
@@ -273,6 +374,13 @@ export async function getPerformanceData(
       meetingsCount: 0,
       activeClients: 0,
       monthlyRecurringRevenue: 0,
+      consultationStats: {
+        totalConsultations: 0,
+        consultationsThisPeriod: 0,
+        averageConsultationsPerClient: 0,
+        mostFrequentNoteType: '',
+        consultationGrowth: 0,
+      },
     };
   }
 }
