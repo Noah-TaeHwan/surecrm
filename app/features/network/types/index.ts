@@ -64,7 +64,7 @@ export interface NetworkData {
 export interface NetworkFilters {
   stageFilter: string;
   depthFilter: string;
-  importanceFilter: number;
+  importanceFilter: number | string;
   showInfluencersOnly?: boolean;
   nodeTypes?: string[];
   strengthRange?: {

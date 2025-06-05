@@ -498,14 +498,20 @@ export default function NetworkGraphClient({
     }
 
     // ⭐ 중요도 필터링 (옵시디언 노드 크기 기반)
-    if (filters.importanceFilter > 0) {
-      filteredNodes = filteredNodes.filter(
-        (node) => (node.importance || 0) >= filters.importanceFilter
-      );
+    if (filters.importanceFilter !== 'all') {
+      filteredNodes = filteredNodes.filter((node) => {
+        const nodeImportance =
+          node.importance === 5
+            ? 'high'
+            : node.importance === 3
+            ? 'medium'
+            : 'low';
+        return nodeImportance === filters.importanceFilter;
+      });
     }
 
-    // 🌟 핵심 소개자 필터링 (옵시디언 허브 노드 중심)
-    if (filters.showInfluencersOnly) {
+    // 🌟 핵심 소개자 필터링 (옵시디언 허브 노드 중심) - 비활성화됨
+    if (false && filters.showInfluencersOnly) {
       const influencerNetwork = new Set<string>();
 
       // 영향력 노드 식별
@@ -534,8 +540,8 @@ export default function NetworkGraphClient({
       );
     }
 
-    // 🔗 소개 깊이 필터링 (옵시디언 연결 레벨)
-    if (filters.depthFilter !== 'all') {
+    // 🔗 소개 깊이 필터링 (옵시디언 연결 레벨) - 비활성화됨
+    if (false && filters.depthFilter !== 'all') {
       const connectionLevels = new Map<string, number>();
 
       // 1차 연결 (직접 연결)

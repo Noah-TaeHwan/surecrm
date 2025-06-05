@@ -248,7 +248,7 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
   const [filterSettings, setFilterSettings] = useState<NetworkFilters>({
     stageFilter: 'all',
     depthFilter: 'all',
-    importanceFilter: 0,
+    importanceFilter: 'all',
     showInfluencersOnly: false,
   });
   const [searchQuery, setSearchQuery] = useState('');
@@ -313,25 +313,36 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
   >([]);
 
   // 실제 네트워크 데이터 사용 - useMemo로 최적화
-  const networkData = useMemo(
-    () => ({
-      nodes: nodes.map((node) => ({
-        id: node.id,
-        name: node.name,
-        type: node.type, // 🔥 중요: 원본 타입 필드 보존
-        group: node.type === 'agent' ? 'influencer' : 'client',
-        importance:
-          node.importance === 'high' ? 5 : node.importance === 'medium' ? 3 : 1,
-        stage: node.status === 'active' ? '계약 완료' : '첫 상담',
-      })),
+  const networkData = useMemo(() => {
+    return {
+      nodes: nodes.map((node) => {
+        // 실제 고객 데이터에서 영업 단계 정보 찾기
+        const clientData = clientsData.find((client) => client.id === node.id);
+
+        return {
+          id: node.id,
+          name: node.name,
+          type: node.type, // 🔥 중요: 원본 타입 필드 보존
+          group: node.type === 'agent' ? 'influencer' : 'client',
+          importance:
+            node.importance === 'high'
+              ? 5
+              : node.importance === 'medium'
+              ? 3
+              : 1,
+          // 🎯 실제 고객의 영업 단계 사용 (fallback: 기존 로직)
+          stage:
+            clientData?.stageName ||
+            (node.status === 'active' ? '계약 완료' : '첫 상담'),
+        };
+      }),
       links: edges.map((edge) => ({
         source: edge.source,
         target: edge.target,
         value: edge.strength,
       })),
-    }),
-    [nodes, edges]
-  );
+    };
+  }, [nodes, edges, clientsData]);
 
   // 에러 상태 관리
   const [graphLoadError, setGraphLoadError] = useState(false);
@@ -376,18 +387,28 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
       // 실시간 검색 - 노드 이름으로 필터링
       const results = nodes
         .filter((node) => node.name.toLowerCase().includes(query.toLowerCase()))
-        .map((node) => ({
-          id: node.id,
-          name: node.name,
-          type: node.type === 'agent' ? 'influencer' : 'client',
-          stage: node.status === 'active' ? '계약 완료' : '첫 상담',
-          importance:
-            node.importance === 'high'
-              ? 5
-              : node.importance === 'medium'
-              ? 3
-              : 1,
-        }))
+        .map((node) => {
+          // 실제 고객 데이터에서 영업 단계 정보 찾기
+          const clientData = clientsData.find(
+            (client) => client.id === node.id
+          );
+
+          return {
+            id: node.id,
+            name: node.name,
+            type: node.type === 'agent' ? 'influencer' : 'client',
+            // 🎯 실제 고객의 영업 단계 사용 (fallback: 기존 로직)
+            stage:
+              clientData?.stageName ||
+              (node.status === 'active' ? '계약 완료' : '첫 상담'),
+            importance:
+              node.importance === 'high'
+                ? 5
+                : node.importance === 'medium'
+                ? 3
+                : 1,
+          };
+        })
         .slice(0, 10); // 최대 10개 결과
 
       setSearchResults(results);
@@ -429,10 +450,16 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
     }
 
     // 중요도 기준 필터링
-    if (filterSettings.importanceFilter > 0) {
-      filteredNodes = filteredNodes.filter(
-        (node) => (node.importance || 0) >= filterSettings.importanceFilter
-      );
+    if (filterSettings.importanceFilter !== 'all') {
+      filteredNodes = filteredNodes.filter((node) => {
+        const nodeImportance =
+          node.importance === 5
+            ? 'high'
+            : node.importance === 3
+            ? 'medium'
+            : 'low';
+        return nodeImportance === filterSettings.importanceFilter;
+      });
     }
 
     // 핵심 소개자 필터링
