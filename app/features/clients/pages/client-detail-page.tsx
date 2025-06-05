@@ -2512,6 +2512,38 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                     <p className="text-sm text-muted-foreground">
                       고객의 의료 이력 및 건강 상태 정보를 관리합니다.
                     </p>
+                    {/* 저장 버튼 */}
+                    <div className="flex justify-end pb-4 border-b">
+                      <Button
+                        type="submit"
+                        className="px-6"
+                        onClick={async () => {
+                          try {
+                            const formData = new FormData();
+                            formData.append('intent', 'updateMedicalHistory');
+
+                            // 병력사항 데이터 추가
+                            Object.entries(medicalHistory).forEach(
+                              ([key, value]) => {
+                                formData.append(key, value.toString());
+                              }
+                            );
+
+                            submit(formData, { method: 'post' });
+
+                            // 성공 모달 표시
+                            setSuccessMessage(
+                              '병력사항이 성공적으로 저장되었습니다.'
+                            );
+                            setShowSuccessModal(true);
+                          } catch (error) {
+                            console.error('병력사항 저장 실패:', error);
+                          }
+                        }}
+                      >
+                        병력사항 저장
+                      </Button>
+                    </div>
                   </CardHeader>
                   <CardContent className="p-6 space-y-6">
                     {/* 3개월 이내 의료사항 */}
@@ -2701,39 +2733,6 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                         </div>
                       </div>
                     </div>
-
-                    {/* 저장 버튼 */}
-                    <div className="flex justify-end pt-4 border-t">
-                      <Button
-                        type="submit"
-                        className="px-6"
-                        onClick={async () => {
-                          try {
-                            const formData = new FormData();
-                            formData.append('intent', 'updateMedicalHistory');
-
-                            // 병력사항 데이터 추가
-                            Object.entries(medicalHistory).forEach(
-                              ([key, value]) => {
-                                formData.append(key, value.toString());
-                              }
-                            );
-
-                            submit(formData, { method: 'post' });
-
-                            // 성공 모달 표시
-                            setSuccessMessage(
-                              '병력사항이 성공적으로 저장되었습니다.'
-                            );
-                            setShowSuccessModal(true);
-                          } catch (error) {
-                            console.error('병력사항 저장 실패:', error);
-                          }
-                        }}
-                      >
-                        병력사항 저장
-                      </Button>
-                    </div>
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -2749,6 +2748,38 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                     <p className="text-sm text-muted-foreground">
                       고객의 보험 관련 걱정사항과 필요사항을 파악합니다.
                     </p>
+                    {/* 저장 버튼 */}
+                    <div className="flex justify-end pb-4 border-b">
+                      <Button
+                        type="submit"
+                        className="px-6"
+                        onClick={async () => {
+                          try {
+                            const formData = new FormData();
+                            formData.append('intent', 'updateCheckupPurposes');
+
+                            // 점검목적 데이터 추가
+                            Object.entries(checkupPurposes).forEach(
+                              ([key, value]) => {
+                                formData.append(key, value.toString());
+                              }
+                            );
+
+                            submit(formData, { method: 'post' });
+
+                            // 성공 모달 표시
+                            setSuccessMessage(
+                              '점검목적이 성공적으로 저장되었습니다.'
+                            );
+                            setShowSuccessModal(true);
+                          } catch (error) {
+                            console.error('점검목적 저장 실패:', error);
+                          }
+                        }}
+                      >
+                        점검목적 저장
+                      </Button>
+                    </div>
                   </CardHeader>
                   <CardContent className="p-6 space-y-6">
                     {/* 걱정사항 체크리스트 */}
@@ -2900,39 +2931,6 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                         }
                       />
                     </div>
-
-                    {/* 저장 버튼 */}
-                    <div className="flex justify-end pt-4 border-t">
-                      <Button
-                        type="submit"
-                        className="px-6"
-                        onClick={async () => {
-                          try {
-                            const formData = new FormData();
-                            formData.append('intent', 'updateCheckupPurposes');
-
-                            // 점검목적 데이터 추가
-                            Object.entries(checkupPurposes).forEach(
-                              ([key, value]) => {
-                                formData.append(key, value.toString());
-                              }
-                            );
-
-                            submit(formData, { method: 'post' });
-
-                            // 성공 모달 표시
-                            setSuccessMessage(
-                              '점검목적이 성공적으로 저장되었습니다.'
-                            );
-                            setShowSuccessModal(true);
-                          } catch (error) {
-                            console.error('점검목적 저장 실패:', error);
-                          }
-                        }}
-                      >
-                        점검목적 저장
-                      </Button>
-                    </div>
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -2948,6 +2946,41 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                     <p className="text-sm text-muted-foreground">
                       고객의 관심사항을 체크리스트로 관리합니다.
                     </p>
+                    {/* 저장 버튼 */}
+                    <div className="flex justify-end pb-4 border-b">
+                      <Button
+                        type="submit"
+                        className="px-6"
+                        onClick={async () => {
+                          try {
+                            const formData = new FormData();
+                            formData.append(
+                              'intent',
+                              'updateInterestCategories'
+                            );
+
+                            // 관심사항 데이터 추가
+                            Object.entries(interestCategories).forEach(
+                              ([key, value]) => {
+                                formData.append(key, value.toString());
+                              }
+                            );
+
+                            submit(formData, { method: 'post' });
+
+                            // 성공 모달 표시
+                            setSuccessMessage(
+                              '관심사항이 성공적으로 저장되었습니다.'
+                            );
+                            setShowSuccessModal(true);
+                          } catch (error) {
+                            console.error('관심사항 저장 실패:', error);
+                          }
+                        }}
+                      >
+                        관심사항 저장
+                      </Button>
+                    </div>
                   </CardHeader>
                   <CardContent className="p-6 space-y-6">
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -3084,42 +3117,6 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                           }))
                         }
                       />
-                    </div>
-
-                    {/* 저장 버튼 */}
-                    <div className="flex justify-end pt-4 border-t">
-                      <Button
-                        type="submit"
-                        className="px-6"
-                        onClick={async () => {
-                          try {
-                            const formData = new FormData();
-                            formData.append(
-                              'intent',
-                              'updateInterestCategories'
-                            );
-
-                            // 관심사항 데이터 추가
-                            Object.entries(interestCategories).forEach(
-                              ([key, value]) => {
-                                formData.append(key, value.toString());
-                              }
-                            );
-
-                            submit(formData, { method: 'post' });
-
-                            // 성공 모달 표시
-                            setSuccessMessage(
-                              '관심사항이 성공적으로 저장되었습니다.'
-                            );
-                            setShowSuccessModal(true);
-                          } catch (error) {
-                            console.error('관심사항 저장 실패:', error);
-                          }
-                        }}
-                      >
-                        관심사항 저장
-                      </Button>
                     </div>
                   </CardContent>
                 </Card>
