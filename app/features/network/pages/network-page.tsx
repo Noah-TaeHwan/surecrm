@@ -590,7 +590,7 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
               </CardDescription>
 
               {/* 컨트롤 패널 */}
-              <div className="pt-2">
+              <div>
                 <NetworkControls
                   onSearch={handleSearch}
                   searchResults={searchResults}
