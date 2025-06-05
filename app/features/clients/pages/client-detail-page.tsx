@@ -70,6 +70,10 @@ import type {
   AppClientContactHistory,
   AppClientAnalytics,
 } from '~/features/clients/lib/schema';
+import type {
+  ClientDetailProfile,
+  ClientDetailLoaderData,
+} from '../types/client-detail';
 import { requireAuth } from '~/lib/auth/middleware';
 import { Input } from '~/common/components/ui/input';
 import { Textarea } from '~/common/components/ui/textarea';
@@ -81,95 +85,30 @@ import {
   SelectValue,
 } from '~/common/components/ui/select';
 import { z } from 'zod';
+import {
+  getClientCardStyle,
+  getImportanceBadge as getImportanceBadgeUtil,
+  getInsuranceTypeName,
+  IMPORTANCE_OPTIONS,
+  TELECOM_PROVIDER_OPTIONS,
+  RELATIONSHIP_OPTIONS,
+  calculateAge,
+  calculateBMI,
+  getBMIStatus,
+  validateForm,
+  ClientValidationSchema,
+} from '../lib/client-detail-utils';
+import { ClientErrorModal } from '../components/client-error-modal';
+import { ClientSuccessModal } from '../components/client-success-modal';
+import { CompanionModal } from '../components/companion-modal';
+import { ClientMemoSection } from '../components/client-memo-section';
+import { ConsultationNoteModal } from '../components/consultation-note-modal';
+import { ConsultationTimeline } from '../components/consultation-timeline';
+import { OpportunitySuccessModal } from '../components/opportunity-success-modal';
 
-// 🎯 확장된 고객 프로필 타입 (상세 페이지용)
-interface ClientDetailProfile extends Client {
-  // 계산 필드들
-  referralCount: number;
-  insuranceTypes: string[];
-  totalPremium: number;
-  currentStage: {
-    id: string;
-    name: string;
-    color: string;
-  };
-  engagementScore: number;
-  conversionProbability: number;
-  lifetimeValue: number;
-  lastContactDate?: string;
-  nextActionDate?: string;
-  upcomingMeeting?: {
-    date: string;
-    type: string;
-  };
-  referredBy?: {
-    id: string;
-    name: string;
-    relationship: string;
-  };
-  // 상세 데이터
-  recentContacts: AppClientContactHistory[];
-  analytics: AppClientAnalytics | null;
-  familyMembers: any[];
-  milestones: any[];
-}
+// ✅ 타입 정의들 분리 완료 - import로 대체
 
-interface LoaderData {
-  client: Client | null;
-  currentUserId: string | null;
-  currentUser: {
-    id: string;
-    email: string;
-    name: string;
-  };
-  isEmpty: boolean;
-  error?: string;
-}
-
-// 🎯 Zod 유효성 검증 스키마
-const ClientValidationSchema = z.object({
-  fullName: z
-    .string()
-    .min(1, '고객명을 입력해주세요')
-    .max(50, '고객명은 50자 이내로 입력해주세요'),
-  phone: z
-    .string()
-    .min(1, '전화번호를 입력해주세요')
-    .regex(
-      /^(01[016789])-?(\d{3,4})-?(\d{4})$/,
-      '올바른 전화번호 형식이 아닙니다 (예: 010-1234-5678)'
-    ),
-  email: z
-    .string()
-    .optional()
-    .refine(
-      (val) => !val || z.string().email().safeParse(val).success,
-      '올바른 이메일 형식이 아닙니다'
-    ),
-  address: z.string().max(200, '주소는 200자 이내로 입력해주세요').optional(),
-  occupation: z.string().max(50, '직업은 50자 이내로 입력해주세요').optional(),
-  height: z
-    .string()
-    .optional()
-    .refine((val) => {
-      if (!val || val.trim() === '') return true;
-      const height = parseInt(val);
-      return !isNaN(height) && height >= 100 && height <= 250;
-    }, '키는 100cm~250cm 사이로 입력해주세요'),
-  weight: z
-    .string()
-    .optional()
-    .refine((val) => {
-      if (!val || val.trim() === '') return true;
-      const weight = parseInt(val);
-      return !isNaN(weight) && weight >= 30 && weight <= 200;
-    }, '몸무게는 30kg~200kg 사이로 입력해주세요'),
-  telecomProvider: z.string().optional(),
-  notes: z.string().max(1000, '메모는 1000자 이내로 입력해주세요').optional(),
-  ssn: z.string().optional(),
-  importance: z.enum(['high', 'medium', 'low']),
-  hasDrivingLicense: z.boolean(),
-});
+// ✅ Zod 스키마 분리 완료 - import로 대체
 
 export async function loader({ request, params }: Route.LoaderArgs) {
   const { id: clientId } = params;
@@ -617,34 +556,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
   }, [clientOverview]);
 
   // 🎨 중요도별 은은한 색상 스타일 (왼쪽 보더 제거)
-  const getClientCardStyle = (importance: string) => {
-    switch (importance) {
-      case 'high':
-        return {
-          bgGradient:
-            'bg-gradient-to-br from-orange-50/50 to-white dark:from-orange-950/20 dark:to-background',
-          borderClass: 'client-card-vip', // VIP 전용 애니메이션 클래스
-        };
-      case 'medium':
-        return {
-          bgGradient:
-            'bg-gradient-to-br from-blue-50/50 to-white dark:from-blue-950/20 dark:to-background',
-          borderClass: 'client-card-normal', // 일반 고객 은은한 효과
-        };
-      case 'low':
-        return {
-          bgGradient:
-            'bg-gradient-to-br from-muted/30 to-white dark:from-muted/10 dark:to-background',
-          borderClass: '', // 효과 없음
-        };
-      default:
-        return {
-          bgGradient:
-            'bg-gradient-to-br from-muted/30 to-white dark:from-muted/10 dark:to-background',
-          borderClass: '',
-        };
-    }
-  };
+  // ✅ 유틸리티 함수 분리 완료 - import로 대체
 
   const cardStyle = getClientCardStyle(client?.importance || 'medium');
 
@@ -738,27 +650,9 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
     }
   };
 
+  // ✅ 분리된 유틸리티 함수로 교체
   const getImportanceBadge = (importance: string) => {
-    // 🎨 중요도별 통일된 색상 시스템 (CSS 변수 사용)
-    const importanceStyles = {
-      high: 'border bg-[var(--importance-high-badge-bg)] text-[var(--importance-high-badge-text)] border-[var(--importance-high-border)]',
-      medium:
-        'border bg-[var(--importance-medium-badge-bg)] text-[var(--importance-medium-badge-text)] border-[var(--importance-medium-border)]',
-      low: 'border bg-[var(--importance-low-badge-bg)] text-[var(--importance-low-badge-text)] border-[var(--importance-low-border)]',
-    };
-
-    const importanceText = {
-      high: 'VIP',
-      medium: '일반',
-      low: '관심',
-    };
-
-    const style =
-      importanceStyles[importance as keyof typeof importanceStyles] ||
-      importanceStyles.medium;
-    const text =
-      importanceText[importance as keyof typeof importanceText] || importance;
-
+    const { style, text } = getImportanceBadgeUtil(importance);
     return <Badge className={style}>{text}</Badge>;
   };
 
@@ -860,65 +754,9 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
     }
   };
 
-  // 🎯 3가지 나이 계산 함수
-  const calculateAge = (
-    birthDate: Date,
-    type: 'standard' | 'korean' | 'insurance'
-  ) => {
-    const today = new Date();
-    const birth = new Date(birthDate);
+  // ✅ 유틸리티 함수 분리 완료 - import로 대체
 
-    switch (type) {
-      case 'standard': // 만 나이
-        let age = today.getFullYear() - birth.getFullYear();
-        const monthDiff = today.getMonth() - birth.getMonth();
-        if (
-          monthDiff < 0 ||
-          (monthDiff === 0 && today.getDate() < birth.getDate())
-        ) {
-          age--;
-        }
-        return age;
-
-      case 'korean': // 한국 나이 (연도 차이 + 1)
-        return today.getFullYear() - birth.getFullYear() + 1;
-
-      case 'insurance': // 보험 나이 (상령일 기준 - 생일이 지나면 +1)
-        let insuranceAge = today.getFullYear() - birth.getFullYear();
-        const birthdayThisYear = new Date(
-          today.getFullYear(),
-          birth.getMonth(),
-          birth.getDate()
-        );
-        if (today >= birthdayThisYear) {
-          insuranceAge++;
-        }
-        return insuranceAge;
-
-      default:
-        return 0;
-    }
-  };
-
-  // 🎯 BMI 계산 함수
-  const calculateBMI = (height: string, weight: string) => {
-    const h = parseFloat(height);
-    const w = parseFloat(weight);
-
-    if (!h || !w || h <= 0 || w <= 0) return null;
-
-    const bmi = w / Math.pow(h / 100, 2);
-    return Math.round(bmi * 10) / 10; // 소수점 1자리
-  };
-
-  // 🎯 BMI 상태 분류 함수
-  const getBMIStatus = (bmi: number) => {
-    if (bmi < 18.5) return { text: '저체중', color: 'text-blue-600' };
-    if (bmi < 23) return { text: '정상', color: 'text-green-600' };
-    if (bmi < 25) return { text: '과체중', color: 'text-yellow-600' };
-    if (bmi < 30) return { text: '비만', color: 'text-orange-600' };
-    return { text: '고도비만', color: 'text-red-600' };
-  };
+  // ✅ 유틸리티 함수 분리 완료 - import로 대체
 
   // 현재 BMI 계산 (읽기 모드용)
   const currentBMI =
@@ -962,49 +800,12 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
     setShowErrorModal(true);
   };
 
-  // 🎯 폼 유효성 검증 함수
-  const validateForm = () => {
-    try {
-      const formData = {
-        fullName: editFormData.fullName,
-        phone: editFormData.phone,
-        email: editFormData.email || undefined,
-        address: editFormData.address || undefined,
-        occupation: editFormData.occupation || undefined,
-        height: editFormData.height || undefined,
-        weight: editFormData.weight || undefined,
-        telecomProvider:
-          editFormData.telecomProvider === 'none'
-            ? undefined
-            : editFormData.telecomProvider,
-        notes: editFormData.notes || undefined,
-        ssn: editFormData.ssn || undefined,
-        importance: editFormData.importance,
-        hasDrivingLicense: editFormData.hasDrivingLicense,
-      };
-
-      ClientValidationSchema.parse(formData);
-      return { isValid: true, errors: [] };
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return {
-          isValid: false,
-          errors: error.errors.map(
-            (err) => `${err.path.join('.')}: ${err.message}`
-          ),
-        };
-      }
-      return {
-        isValid: false,
-        errors: ['알 수 없는 유효성 검사 오류가 발생했습니다.'],
-      };
-    }
-  };
+  // ✅ 유틸리티 함수 분리 완료 - import로 대체
 
   // 수정 저장
   const handleEditSave = async () => {
     // 🎯 유효성 검증 먼저 실행
-    const validation = validateForm();
+    const validation = validateForm(editFormData);
     if (!validation.isValid) {
       showError('입력 정보 확인 필요', validation.errors.join('\n'));
       return;
@@ -1345,16 +1146,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
     }
   };
 
-  const getInsuranceTypeName = (type: string) => {
-    const typeMap: Record<string, string> = {
-      auto: '자동차보험',
-      life: '생명보험',
-      health: '건강보험',
-      home: '주택보험',
-      business: '사업자보험',
-    };
-    return typeMap[type] || type;
-  };
+  // ✅ 유틸리티 함수 분리 완료 - import로 대체
 
   // 🏷️ 태그 관련 함수들
   const loadClientTags = useCallback(async () => {
@@ -1621,9 +1413,14 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                             <SelectValue placeholder="중요도" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="high">VIP</SelectItem>
-                            <SelectItem value="medium">일반</SelectItem>
-                            <SelectItem value="low">관심</SelectItem>
+                            {IMPORTANCE_OPTIONS.map((option) => (
+                              <SelectItem
+                                key={option.value}
+                                value={option.value}
+                              >
+                                {option.label}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </div>
@@ -1774,17 +1571,14 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                             <SelectValue placeholder="통신사 선택" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="none">선택 안함</SelectItem>
-                            <SelectItem value="SKT">SKT</SelectItem>
-                            <SelectItem value="KT">KT</SelectItem>
-                            <SelectItem value="LG U+">LG U+</SelectItem>
-                            <SelectItem value="알뜰폰 SKT">
-                              알뜰폰 SKT
-                            </SelectItem>
-                            <SelectItem value="알뜰폰 KT">알뜰폰 KT</SelectItem>
-                            <SelectItem value="알뜰폰 LG U+">
-                              알뜰폰 LG U+
-                            </SelectItem>
+                            {TELECOM_PROVIDER_OPTIONS.map((option) => (
+                              <SelectItem
+                                key={option.value}
+                                value={option.value}
+                              >
+                                {option.label}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       ) : (
@@ -2056,7 +1850,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                             {
                               getBMIStatus(
                                 isEditing ? editingBMI! : currentBMI!
-                              ).text
+                              ).status
                             }
                           </Badge>
                         </div>
@@ -3315,164 +3109,27 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                   </CardHeader>
                   <CardContent className="p-6 space-y-6">
                     {/* 고객 메모 및 특이사항 */}
-                    <div className="space-y-4">
-                      <h4 className="font-medium text-foreground flex items-center gap-2">
-                        <FileText className="h-5 w-5" />
-                        고객 메모 및 특이사항
-                      </h4>
-                      <div className="p-4 bg-muted/20 rounded-lg border border-border/40">
-                        {isEditing ? (
-                          <Textarea
-                            value={editFormData.notes}
-                            onChange={(e) =>
-                              setEditFormData({
-                                ...editFormData,
-                                notes: e.target.value,
-                              })
-                            }
-                            placeholder="고객에 대한 메모를 입력하세요..."
-                            className="min-h-[120px] resize-none border-none p-0 bg-transparent"
-                          />
-                        ) : client?.notes ? (
-                          <p className="text-sm whitespace-pre-wrap leading-relaxed">
-                            {client.notes}
-                          </p>
-                        ) : (
-                          <div className="text-center py-6">
-                            <FileText className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                            <p className="text-sm text-muted-foreground mb-3">
-                              메모가 없습니다
-                            </p>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={handleEditStart}
-                            >
-                              <Plus className="h-3 w-3 mr-1" />
-                              메모 추가
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
+                    <ClientMemoSection
+                      isEditing={isEditing}
+                      notes={
+                        isEditing ? editFormData.notes : client?.notes || ''
+                      }
+                      onNotesChange={(notes) =>
+                        setEditFormData({
+                          ...editFormData,
+                          notes,
+                        })
+                      }
+                      onEditStart={handleEditStart}
+                    />
 
                     <Separator />
 
-                    {/* 상담 노트 추가 버튼 */}
-                    <div className="flex justify-between items-center">
-                      <h4 className="font-medium text-foreground">상담 기록</h4>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={handleAddNote}
-                      >
-                        <Plus className="h-4 w-4 mr-2" />새 상담 기록
-                      </Button>
-                    </div>
-
-                    {/* 상담 기록 타임라인 */}
-                    <div className="space-y-6">
-                      {consultationNotes && consultationNotes.length > 0 ? (
-                        consultationNotes.map((note, index) => (
-                          <div key={note.id} className="relative pl-8">
-                            <div className="absolute left-0 top-2 w-3 h-3 bg-blue-500 rounded-full"></div>
-                            {index < consultationNotes.length - 1 && (
-                              <div className="absolute left-1.5 top-5 w-0.5 h-full bg-border"></div>
-                            )}
-
-                            <div className="border rounded-lg p-4 shadow-sm">
-                              <div className="flex items-start justify-between mb-3">
-                                <div>
-                                  <h5 className="font-medium text-foreground">
-                                    {note.title}
-                                  </h5>
-                                  <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
-                                    <span>📅 {note.consultationDate}</span>
-                                    <span className="bg-primary/10 text-primary px-2 py-0.5 rounded">
-                                      상담
-                                    </span>
-                                  </div>
-                                </div>
-                                <div className="flex gap-1">
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() =>
-                                      note.id && handleEditNote(note)
-                                    }
-                                  >
-                                    <Edit2 className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                              </div>
-
-                              <div className="space-y-3">
-                                <div>
-                                  <h6 className="text-sm font-medium text-muted-foreground mb-1">
-                                    상담 내용
-                                  </h6>
-                                  <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                                    {note.content}
-                                  </p>
-                                </div>
-
-                                {note.contractInfo && (
-                                  <div>
-                                    <h6 className="text-sm font-medium text-muted-foreground mb-1">
-                                      계약 관련
-                                    </h6>
-                                    <div className="bg-accent/20 p-3 rounded border border-border/40">
-                                      <p className="text-sm whitespace-pre-wrap">
-                                        {typeof note.contractInfo ===
-                                          'string' &&
-                                        note.contractInfo.startsWith('"') &&
-                                        note.contractInfo.endsWith('"')
-                                          ? note.contractInfo.slice(1, -1) // 양쪽 쌍따옴표 제거
-                                          : note.contractInfo}
-                                      </p>
-                                    </div>
-                                  </div>
-                                )}
-
-                                {(note.followUpDate || note.followUpNotes) && (
-                                  <div>
-                                    <h6 className="text-sm font-medium text-muted-foreground mb-1">
-                                      다음 액션
-                                    </h6>
-                                    <div className="flex items-center gap-2 text-sm">
-                                      {note.followUpDate && (
-                                        <span className="bg-orange-900 text-orange-100 px-2 py-1 rounded">
-                                          ✅ {note.followUpDate}
-                                        </span>
-                                      )}
-                                      {note.followUpNotes && (
-                                        <span>{note.followUpNotes}</span>
-                                      )}
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        ))
-                      ) : (
-                        /* 빈 상태 */
-                        <div className="text-center py-12">
-                          <div className="w-16 h-16 bg-muted/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <span className="text-2xl">📝</span>
-                          </div>
-                          <h4 className="font-medium text-foreground mb-2">
-                            상담 기록이 없습니다
-                          </h4>
-                          <p className="text-sm text-muted-foreground mb-4">
-                            첫 상담 기록을 추가해보세요.
-                          </p>
-                          <Button variant="outline" onClick={handleAddNote}>
-                            <Plus className="h-4 w-4 mr-2" />첫 상담 기록 작성
-                          </Button>
-                        </div>
-                      )}
-                    </div>
+                    <ConsultationTimeline
+                      consultationNotes={consultationNotes}
+                      onAddNote={handleAddNote}
+                      onEditNote={handleEditNote}
+                    />
 
                     {/* 새 상담 기록 추가 폼 (숨김 상태) */}
                     <div className="hidden p-4 bg-muted/30 rounded-lg border border-border">
@@ -3657,404 +3314,57 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
         </Dialog>
 
         {/* 🎉 새 영업 기회 성공 모달 */}
-        <Dialog
-          open={showOpportunitySuccessModal}
-          onOpenChange={setShowOpportunitySuccessModal}
-        >
-          <DialogContent className="max-w-md">
-            <div className="text-center space-y-6">
-              <div className="w-16 h-16 bg-gradient-to-br from-emerald-100 to-green-100 rounded-full flex items-center justify-center mx-auto shadow-lg">
-                <Award className="h-8 w-8 text-emerald-600" />
-              </div>
-              <DialogHeader>
-                <DialogTitle className="text-xl text-emerald-700 dark:text-emerald-400">
-                  🎉 영업 기회 생성 완료!
-                </DialogTitle>
-                <DialogDescription asChild>
-                  <div className="space-y-4">
-                    <div className="bg-emerald-50/80 border border-emerald-200/60 rounded-lg p-4 dark:bg-emerald-950/30 dark:border-emerald-800/50">
-                      <div className="space-y-2 text-sm">
-                        <div className="flex items-center justify-between">
-                          <span className="text-muted-foreground">고객:</span>
-                          <span className="font-semibold text-foreground">
-                            {opportunitySuccessData.clientName}
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-muted-foreground">상품:</span>
-                          <span className="font-semibold text-foreground">
-                            {opportunitySuccessData.insuranceType}
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-muted-foreground">단계:</span>
-                          <span className="font-semibold text-emerald-700 dark:text-emerald-400">
-                            {opportunitySuccessData.stageName}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      💡 영업 파이프라인 페이지에서 확인할 수 있습니다.
-                    </p>
-                  </div>
-                </DialogDescription>
-              </DialogHeader>
-              <div className="flex gap-2">
-                <Button
-                  onClick={() => {
-                    setShowOpportunitySuccessModal(false);
-                    setShowOpportunityModal(false);
-                    // 🎯 사용자가 확인 버튼을 누른 후에만 새로고침
-                    setTimeout(() => {
-                      window.location.reload();
-                    }, 500); // 모달이 닫힌 후 새로고침
-                  }}
-                  className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white"
-                >
-                  확인
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <OpportunitySuccessModal
+          isOpen={showOpportunitySuccessModal}
+          onClose={() => setShowOpportunitySuccessModal(false)}
+          data={opportunitySuccessData}
+          onConfirm={() => {
+            setShowOpportunitySuccessModal(false);
+            setShowOpportunityModal(false);
+            // 🎯 사용자가 확인 버튼을 누른 후에만 새로고침
+            setTimeout(() => {
+              window.location.reload();
+            }, 500); // 모달이 닫힌 후 새로고침
+          }}
+        />
 
         {/* ❌ 에러 모달 */}
-        <Dialog open={showErrorModal} onOpenChange={setShowErrorModal}>
-          <DialogContent className="max-w-md">
-            <div className="text-center space-y-4">
-              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto">
-                <X className="h-6 w-6 text-red-600" />
-              </div>
-              <DialogHeader>
-                <DialogTitle>{errorModalContent.title}</DialogTitle>
-                <DialogDescription className="text-left whitespace-pre-wrap">
-                  {errorModalContent.message}
-                </DialogDescription>
-              </DialogHeader>
-              <Button
-                onClick={() => setShowErrorModal(false)}
-                variant="outline"
-                className="w-full"
-              >
-                확인
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <ClientErrorModal
+          isOpen={showErrorModal}
+          onClose={() => setShowErrorModal(false)}
+          content={errorModalContent}
+        />
 
         {/* 🆕 성공 모달 */}
-        <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <span className="text-green-600">✅</span>
-                저장 완료
-              </DialogTitle>
-              <DialogDescription>
-                변경사항이 성공적으로 저장되었습니다.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                <Check className="h-4 w-4 text-green-600" />
-              </div>
-              <p className="text-foreground">{successMessage}</p>
-            </div>
-            <DialogFooter className="flex justify-end pt-4">
-              <Button
-                onClick={() => setShowSuccessModal(false)}
-                className="px-6"
-              >
-                확인
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <ClientSuccessModal
+          isOpen={showSuccessModal}
+          onClose={() => setShowSuccessModal(false)}
+          message={successMessage}
+        />
 
         {/* 🆕 상담동반자 추가/수정 모달 */}
-        <Dialog
-          open={showAddCompanionModal}
-          onOpenChange={setShowAddCompanionModal}
-        >
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <span className="text-lg">👤</span>
-                {editingCompanion?.id ? '동반자 수정' : '동반자 추가'}
-              </DialogTitle>
-              <DialogDescription>
-                상담에 함께 참석할 동반자 정보를 입력하세요.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-muted-foreground mb-1">
-                  성함 *
-                </label>
-                <input
-                  type="text"
-                  className="w-full p-3 border rounded-lg text-sm"
-                  placeholder="동반자 성함"
-                  value={editingCompanion?.name || ''}
-                  onChange={(e) =>
-                    setEditingCompanion((prev) => ({
-                      ...prev!,
-                      name: e.target.value,
-                    }))
-                  }
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-muted-foreground mb-1">
-                  관계 *
-                </label>
-                <Select
-                  value={editingCompanion?.relationship || ''}
-                  onValueChange={(value) =>
-                    setEditingCompanion((prev) => ({
-                      ...prev!,
-                      relationship: value,
-                    }))
-                  }
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="관계 선택" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="배우자">
-                      <div className="flex items-center gap-2">
-                        <span>💑</span>
-                        배우자
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="자녀">
-                      <div className="flex items-center gap-2">
-                        <span>👶</span>
-                        자녀
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="부모">
-                      <div className="flex items-center gap-2">
-                        <span>👨‍👩‍👧‍👦</span>
-                        부모
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="형제/자매">
-                      <div className="flex items-center gap-2">
-                        <span>👫</span>
-                        형제/자매
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="친구">
-                      <div className="flex items-center gap-2">
-                        <span>👭</span>
-                        친구
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="동료">
-                      <div className="flex items-center gap-2">
-                        <span>🤝</span>
-                        동료
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="기타">
-                      <div className="flex items-center gap-2">
-                        <span>👤</span>
-                        기타
-                      </div>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-muted-foreground mb-1">
-                  연락처
-                </label>
-                <input
-                  type="tel"
-                  className="w-full p-3 border rounded-lg text-sm"
-                  placeholder="010-0000-0000"
-                  value={editingCompanion?.phone || ''}
-                  onChange={(e) =>
-                    setEditingCompanion((prev) => ({
-                      ...prev!,
-                      phone: e.target.value,
-                    }))
-                  }
-                />
-              </div>
-              <div>
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    className="rounded"
-                    checked={editingCompanion?.isPrimary || false}
-                    onChange={(e) =>
-                      setEditingCompanion((prev) => ({
-                        ...prev!,
-                        isPrimary: e.target.checked,
-                      }))
-                    }
-                  />
-                  <span className="text-sm">주 동반자로 설정</span>
-                </label>
-                <p className="text-xs text-muted-foreground mt-1">
-                  주 동반자는 상담의 주요 참석자로 표시됩니다.
-                </p>
-              </div>
-            </div>
-            <DialogFooter className="flex gap-2 pt-4">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setShowAddCompanionModal(false);
-                  setEditingCompanion(null);
-                }}
-              >
-                취소
-              </Button>
-              <Button onClick={handleSaveCompanion}>
-                {editingCompanion?.id ? '수정' : '추가'}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <CompanionModal
+          isOpen={showAddCompanionModal}
+          onClose={() => {
+            setShowAddCompanionModal(false);
+            setEditingCompanion(null);
+          }}
+          companion={editingCompanion}
+          onSave={handleSaveCompanion}
+          onCompanionChange={setEditingCompanion}
+        />
 
         {/* 🆕 상담내용 추가/수정 모달 */}
-        <Dialog open={showAddNoteModal} onOpenChange={setShowAddNoteModal}>
-          <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <span className="text-lg">📝</span>
-                {editingNote?.id ? '상담내용 수정' : '상담내용 추가'}
-              </DialogTitle>
-              <DialogDescription>
-                고객과의 상담 내용과 계약사항을 기록하세요.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-muted-foreground mb-1">
-                    상담 날짜 *
-                  </label>
-                  <input
-                    type="date"
-                    className="w-full p-3 border rounded-lg text-sm"
-                    value={editingNote?.consultationDate || ''}
-                    onChange={(e) =>
-                      setEditingNote((prev) => ({
-                        ...prev!,
-                        consultationDate: e.target.value,
-                      }))
-                    }
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-muted-foreground mb-1">
-                    제목 *
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full p-3 border rounded-lg text-sm"
-                    placeholder="상담 제목 (예: 보험 상담, 계약 체결)"
-                    value={editingNote?.title || ''}
-                    onChange={(e) =>
-                      setEditingNote((prev) => ({
-                        ...prev!,
-                        title: e.target.value,
-                      }))
-                    }
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-muted-foreground mb-1">
-                  상담 내용 *
-                </label>
-                <textarea
-                  className="w-full p-3 border rounded-lg text-sm"
-                  rows={6}
-                  placeholder="상담 내용을 자세히 기록하세요..."
-                  value={editingNote?.content || ''}
-                  onChange={(e) =>
-                    setEditingNote((prev) => ({
-                      ...prev!,
-                      content: e.target.value,
-                    }))
-                  }
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-muted-foreground mb-1">
-                  계약 정보
-                </label>
-                <textarea
-                  className="w-full p-3 border rounded-lg text-sm"
-                  rows={3}
-                  placeholder="계약 관련 정보 (보험 종류, 보험료, 보장 내용 등)"
-                  value={editingNote?.contractInfo || ''}
-                  onChange={(e) =>
-                    setEditingNote((prev) => ({
-                      ...prev!,
-                      contractInfo: e.target.value,
-                    }))
-                  }
-                />
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-muted-foreground mb-1">
-                    후속 일정
-                  </label>
-                  <input
-                    type="date"
-                    className="w-full p-3 border rounded-lg text-sm"
-                    value={editingNote?.followUpDate || ''}
-                    onChange={(e) =>
-                      setEditingNote((prev) => ({
-                        ...prev!,
-                        followUpDate: e.target.value,
-                      }))
-                    }
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-muted-foreground mb-1">
-                    후속 메모
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full p-3 border rounded-lg text-sm"
-                    placeholder="후속 조치 사항"
-                    value={editingNote?.followUpNotes || ''}
-                    onChange={(e) =>
-                      setEditingNote((prev) => ({
-                        ...prev!,
-                        followUpNotes: e.target.value,
-                      }))
-                    }
-                  />
-                </div>
-              </div>
-            </div>
-            <DialogFooter className="flex gap-2 pt-4">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setShowAddNoteModal(false);
-                  setEditingNote(null);
-                }}
-              >
-                취소
-              </Button>
-              <Button onClick={handleSaveNote}>
-                {editingNote?.id ? '수정' : '추가'}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <ConsultationNoteModal
+          isOpen={showAddNoteModal}
+          onClose={() => {
+            setShowAddNoteModal(false);
+            setEditingNote(null);
+          }}
+          note={editingNote}
+          onSave={handleSaveNote}
+          onNoteChange={setEditingNote}
+        />
 
         {/* 🏷️ 태그 관리 모달 */}
         <Dialog open={showTagModal} onOpenChange={setShowTagModal}>

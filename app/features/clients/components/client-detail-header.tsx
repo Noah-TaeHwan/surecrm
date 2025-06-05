@@ -53,6 +53,7 @@ import { AddMeetingModal } from './add-meeting-modal';
 import { AddDocumentModal } from './add-document-modal';
 import { ClientGratitudeModal } from './client-gratitude-modal';
 import { logDataAccess as logClientDataAccess } from '../lib/client-data';
+import { ArrowLeft, Edit2, Plus, Save, X, Trash2 } from 'lucide-react';
 
 // 🔧 BadgeVariant 타입 정의
 type BadgeVariant = 'default' | 'secondary' | 'outline' | 'destructive';
@@ -68,6 +69,14 @@ interface ClientDetailHeaderProps {
   insuranceTypes?: string[];
   agentId: string; // 🔒 보안 로깅용
   onDataAccess?: (accessType: string, data: string[]) => void;
+  clientName: string;
+  isEditing: boolean;
+  isDeleting: boolean;
+  onEditStart: () => void;
+  onEditCancel: () => void;
+  onEditSave: () => void;
+  onDeleteClient: () => void;
+  onShowOpportunityModal: () => void;
 }
 
 // 🎨 Avatar 컴포넌트 분리
@@ -112,6 +121,14 @@ export function ClientDetailHeader({
   insuranceTypes = [],
   agentId,
   onDataAccess,
+  clientName,
+  isEditing,
+  isDeleting,
+  onEditStart,
+  onEditCancel,
+  onEditSave,
+  onDeleteClient,
+  onShowOpportunityModal,
 }: ClientDetailHeaderProps) {
   const [isEditingNote, setIsEditingNote] = useState(false);
   const [noteValue, setNoteValue] = useState(client.notes || '');
@@ -271,7 +288,7 @@ export function ClientDetailHeader({
         <div className="flex items-center gap-4">
           <Link to="/clients">
             <Button variant="ghost" size="sm">
-              <ArrowLeftIcon className="mr-2 h-4 w-4" />
+              <ArrowLeft className="h-4 w-4 mr-2" />
               고객 목록
             </Button>
           </Link>
@@ -529,15 +546,30 @@ export function ClientDetailHeader({
                   메모
                 </span>
               </div>
-              {!isEditingNote && (
+              {!isEditing ? (
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
                   onClick={() => setIsEditingNote(true)}
                 >
                   <Pencil1Icon className="h-3 w-3 mr-1" />
                   편집
                 </Button>
+              ) : (
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsEditingNote(false)}
+                  >
+                    <X className="h-4 w-4 mr-2" />
+                    취소
+                  </Button>
+                  <Button onClick={handleSaveNote}>
+                    <Save className="h-4 w-4 mr-2" />
+                    저장
+                  </Button>
+                </div>
               )}
             </div>
 
@@ -550,20 +582,6 @@ export function ClientDetailHeader({
                   className="resize-none"
                   rows={4}
                 />
-                <div className="flex items-center gap-2">
-                  <Button size="sm" onClick={handleSaveNote}>
-                    <CheckIcon className="h-3 w-3 mr-1" />
-                    저장
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleCancelNote}
-                  >
-                    <Cross1Icon className="h-3 w-3 mr-1" />
-                    취소
-                  </Button>
-                </div>
               </div>
             ) : (
               <div className="text-sm text-muted-foreground bg-muted/30 rounded-md p-3 min-h-[60px] flex items-center">
@@ -614,6 +632,22 @@ export function ClientDetailHeader({
         agentId={agentId}
         onGratitudeSent={handleGratitudeSent}
       />
+
+      {/* 🚀 새 영업 기회 추가 (핵심 기능) */}
+      <Button variant="outline" onClick={onShowOpportunityModal}>
+        <Plus className="h-4 w-4 mr-2" />새 영업 기회
+      </Button>
+
+      {/* 🚀 새 영업 기회 추가 (핵심 기능) */}
+      <Button
+        variant="outline"
+        onClick={onDeleteClient}
+        disabled={isDeleting}
+        className="text-red-600 hover:text-red-700 border-red-200 hover:border-red-300"
+      >
+        <Trash2 className="h-4 w-4 mr-2" />
+        {isDeleting ? '삭제 중...' : '삭제'}
+      </Button>
     </>
   );
 }
