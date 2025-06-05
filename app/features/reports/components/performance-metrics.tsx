@@ -229,7 +229,7 @@ export function PerformanceMetrics({ performance }: PerformanceMetricsProps) {
                 고객당 평균: {formatCurrency(performance.averageClientValue)}
               </span>
               <Badge variant="secondary" className="text-xs">
-                {performance.activeClients}명 계약중
+                {performance.activeClients}명 영업 중
               </Badge>
             </div>
           </CardContent>
@@ -318,7 +318,9 @@ export function PerformanceMetrics({ performance }: PerformanceMetricsProps) {
             <div className="text-2xl font-bold text-purple-700 dark:text-purple-400">
               {performance.activeClients}
             </div>
-            <p className="text-sm text-muted-foreground">현재 계약중</p>
+            <p className="text-sm text-muted-foreground">
+              영업 파이프라인 진행 중
+            </p>
             <div className="mt-2 text-xs text-muted-foreground">
               전체 대비:{' '}
               {performance.totalClients > 0

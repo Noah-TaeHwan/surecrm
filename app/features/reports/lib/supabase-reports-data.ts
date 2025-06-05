@@ -26,6 +26,7 @@ import {
   asc,
   sql,
   inArray,
+  ne,
 } from 'drizzle-orm';
 
 // 성과 데이터 인터페이스 (MVP 특화)
@@ -130,11 +131,32 @@ export async function getPerformanceData(
         )
       );
 
-    // 활성 고객 수
-    const activeClientsResult = await db
-      .select({ count: count() })
+    // 🎯 활성 고객 수 (영업 파이프라인 진행 중인 고객만)
+    // 영업 파이프라인 페이지와 동일한 로직 사용
+    const pipelineStagesResult = await db
+      .select()
+      .from(pipelineStages)
+      .where(eq(pipelineStages.agentId, userId));
+
+    // 파이프라인에 있는 모든 활성 클라이언트 조회 (영업 파이프라인 페이지와 동일)
+    const allActiveClientsData = await db
+      .select({
+        id: clients.id,
+        currentStageId: clients.currentStageId,
+      })
       .from(clients)
+      .leftJoin(pipelineStages, eq(clients.currentStageId, pipelineStages.id))
       .where(and(eq(clients.agentId, userId), eq(clients.isActive, true)));
+
+    // JavaScript로 "제외됨" 단계 제외 (영업 파이프라인 페이지와 동일 로직)
+    const activeClientsCount = allActiveClientsData.filter((client) => {
+      const stage = pipelineStagesResult.find(
+        (s) => s.id === client.currentStageId
+      );
+      return stage && stage.name !== '제외됨';
+    }).length;
+
+    const activeClientsResult = [{ count: activeClientsCount }];
 
     // 이전 기간 데이터 (성장률 계산용) - 완전 복원
     const periodDiff = endDate.getTime() - startDate.getTime();
