@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate, useFetcher, useSubmit } from 'react-router';
 import type { Route } from './+types/client-detail-page';
 import { MainLayout } from '~/common/layouts/main-layout';
@@ -349,6 +349,22 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
     hasLongTermMedication: false,
     majorMedicalDetails: '',
   });
+
+  // 🏷️ 태그 관련 상태
+  const [clientTags, setClientTags] = useState<any[]>([]);
+  const [availableTags, setAvailableTags] = useState<any[]>([]);
+  const [showTagModal, setShowTagModal] = useState(false);
+  const [showCreateTagModal, setShowCreateTagModal] = useState(false);
+  const [isLoadingTags, setIsLoadingTags] = useState(false);
+  const [tagForm, setTagForm] = useState({
+    id: '',
+    name: '',
+    color: '#3b82f6',
+    description: '',
+  });
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
+  const [showTagSuccessModal, setShowTagSuccessModal] = useState(false);
+  const [tagSuccessMessage, setTagSuccessMessage] = useState('');
 
   const [checkupPurposes, setCheckupPurposes] = useState({
     // 걱정사항
@@ -1323,6 +1339,171 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
     return typeMap[type] || type;
   };
 
+  // 🏷️ 태그 관련 함수들
+  const loadClientTags = useCallback(async () => {
+    if (!client?.id || !currentUser?.id) return;
+
+    try {
+      setIsLoadingTags(true);
+      const response = await fetch(
+        `/api/clients/client-tags?clientId=${client.id}`,
+        {
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+
+      if (response.ok) {
+        const tags = await response.json();
+        setClientTags(tags);
+      }
+    } catch (error) {
+      console.error('태그 로딩 실패:', error);
+    } finally {
+      setIsLoadingTags(false);
+    }
+  }, [client?.id, currentUser?.id]);
+
+  const loadAvailableTags = useCallback(async () => {
+    if (!currentUser?.id) return;
+
+    try {
+      const response = await fetch('/api/clients/tags', {
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      if (response.ok) {
+        const tags = await response.json();
+        setAvailableTags(tags);
+      }
+    } catch (error) {
+      console.error('사용 가능한 태그 로딩 실패:', error);
+    }
+  }, [currentUser?.id]);
+
+  const handleOpenTagModal = () => {
+    setSelectedTagIds(clientTags.map((tag) => tag.id));
+    setShowTagModal(true);
+    loadAvailableTags();
+  };
+
+  const handleSaveTags = async () => {
+    if (!client?.id) return;
+
+    try {
+      setIsLoadingTags(true);
+
+      const response = await fetch('/api/clients/client-tags', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          clientId: client.id,
+          tagIds: selectedTagIds,
+          action: 'update',
+        }),
+      });
+
+      if (response.ok) {
+        await loadClientTags();
+        setShowTagModal(false);
+        setTagSuccessMessage('태그가 성공적으로 저장되었습니다.');
+        setShowTagSuccessModal(true);
+      } else {
+        const error = await response.json();
+        showError(
+          '태그 저장 실패',
+          error.message || '태그 저장 중 오류가 발생했습니다.'
+        );
+      }
+    } catch (error) {
+      console.error('태그 저장 실패:', error);
+      showError('태그 저장 실패', '네트워크 오류가 발생했습니다.');
+    } finally {
+      setIsLoadingTags(false);
+    }
+  };
+
+  const handleCreateTag = async () => {
+    if (!tagForm.name.trim()) {
+      showError('태그 생성 실패', '태그 이름을 입력해주세요.');
+      return;
+    }
+
+    try {
+      setIsLoadingTags(true);
+
+      const response = await fetch('/api/clients/tags', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: tagForm.name.trim(),
+          color: tagForm.color,
+          description: tagForm.description.trim() || null,
+        }),
+      });
+
+      if (response.ok) {
+        const newTag = await response.json();
+        await loadAvailableTags();
+        setShowCreateTagModal(false);
+        setTagForm({ id: '', name: '', color: '#3b82f6', description: '' });
+        setTagSuccessMessage('새 태그가 성공적으로 생성되었습니다.');
+        setShowTagSuccessModal(true);
+
+        // 새로 생성된 태그를 자동으로 선택상태로 만들기
+        setSelectedTagIds((prev) => [...prev, newTag.id]);
+      } else {
+        const error = await response.json();
+        showError(
+          '태그 생성 실패',
+          error.message || '태그 생성 중 오류가 발생했습니다.'
+        );
+      }
+    } catch (error) {
+      console.error('태그 생성 실패:', error);
+      showError('태그 생성 실패', '네트워크 오류가 발생했습니다.');
+    } finally {
+      setIsLoadingTags(false);
+    }
+  };
+
+  const removeClientTag = async (tagId: string) => {
+    if (!client?.id) return;
+
+    try {
+      const response = await fetch('/api/clients/client-tags', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          clientId: client.id,
+          tagId: tagId,
+          action: 'remove',
+        }),
+      });
+
+      if (response.ok) {
+        await loadClientTags();
+        setTagSuccessMessage('태그가 성공적으로 제거되었습니다.');
+        setShowTagSuccessModal(true);
+      } else {
+        const error = await response.json();
+        showError(
+          '태그 제거 실패',
+          error.message || '태그 제거 중 오류가 발생했습니다.'
+        );
+      }
+    } catch (error) {
+      console.error('태그 제거 실패:', error);
+      showError('태그 제거 실패', '네트워크 오류가 발생했습니다.');
+    }
+  };
+
+  // 🏷️ 페이지 로드 시 태그 데이터 로딩
+  useEffect(() => {
+    if (client?.id && currentUser?.id) {
+      loadClientTags();
+    }
+  }, [client?.id, currentUser?.id, loadClientTags]);
+
   return (
     <MainLayout title={`${client?.fullName || '고객'} - 고객 상세`}>
       <div className="space-y-6">
@@ -2185,16 +2366,42 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
 
                   {/* 태그 섹션 */}
                   <div className="space-y-3">
-                    <h4 className="text-sm font-medium">태그</h4>
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-sm font-medium">태그</h4>
+                      {clientTags.length > 0 && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleOpenTagModal}
+                          className="h-6 text-xs"
+                        >
+                          <Edit2 className="h-3 w-3 mr-1" />
+                          편집
+                        </Button>
+                      )}
+                    </div>
                     <div className="flex flex-wrap gap-2">
-                      {client?.tags && client.tags.length > 0 ? (
-                        client.tags.map((tag: string, index: number) => (
+                      {clientTags.length > 0 ? (
+                        clientTags.map((tag: any) => (
                           <Badge
-                            key={index}
+                            key={tag.id}
                             variant="secondary"
-                            className="text-xs"
+                            className="text-xs cursor-pointer hover:bg-secondary/80 group relative"
+                            style={{
+                              backgroundColor: `${tag.color}20`,
+                              borderColor: tag.color,
+                            }}
                           >
-                            {tag}
+                            <span style={{ color: tag.color }}>{tag.name}</span>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                removeClientTag(tag.id);
+                              }}
+                              className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <X className="h-2 w-2" />
+                            </button>
                           </Badge>
                         ))
                       ) : (
@@ -2207,6 +2414,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                             variant="outline"
                             size="sm"
                             className="text-xs h-7"
+                            onClick={handleOpenTagModal}
                           >
                             <Plus className="h-3 w-3 mr-1" />
                             태그 추가
@@ -3582,25 +3790,63 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                 <label className="block text-sm font-medium text-muted-foreground mb-1">
                   관계 *
                 </label>
-                <select
-                  className="w-full p-3 border rounded-lg text-sm"
+                <Select
                   value={editingCompanion?.relationship || ''}
-                  onChange={(e) =>
+                  onValueChange={(value) =>
                     setEditingCompanion((prev) => ({
                       ...prev!,
-                      relationship: e.target.value,
+                      relationship: value,
                     }))
                   }
                 >
-                  <option value="">관계 선택</option>
-                  <option value="배우자">배우자</option>
-                  <option value="자녀">자녀</option>
-                  <option value="부모">부모</option>
-                  <option value="형제/자매">형제/자매</option>
-                  <option value="친구">친구</option>
-                  <option value="동료">동료</option>
-                  <option value="기타">기타</option>
-                </select>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="관계 선택" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="배우자">
+                      <div className="flex items-center gap-2">
+                        <span>💑</span>
+                        배우자
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="자녀">
+                      <div className="flex items-center gap-2">
+                        <span>👶</span>
+                        자녀
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="부모">
+                      <div className="flex items-center gap-2">
+                        <span>👨‍👩‍👧‍👦</span>
+                        부모
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="형제/자매">
+                      <div className="flex items-center gap-2">
+                        <span>👫</span>
+                        형제/자매
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="친구">
+                      <div className="flex items-center gap-2">
+                        <span>👭</span>
+                        친구
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="동료">
+                      <div className="flex items-center gap-2">
+                        <span>🤝</span>
+                        동료
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="기타">
+                      <div className="flex items-center gap-2">
+                        <span>👤</span>
+                        기타
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-muted-foreground mb-1">
@@ -3786,6 +4032,304 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
               </Button>
               <Button onClick={handleSaveNote}>
                 {editingNote?.id ? '수정' : '추가'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* 🏷️ 태그 관리 모달 */}
+        <Dialog open={showTagModal} onOpenChange={setShowTagModal}>
+          <DialogContent
+            className="sm:max-w-2xl max-h-[85vh] overflow-y-auto"
+            aria-describedby="tag-modal-description"
+          >
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <span className="text-lg" aria-hidden="true">
+                  🏷️
+                </span>
+                태그 관리
+              </DialogTitle>
+              <DialogDescription id="tag-modal-description">
+                고객에게 적용할 태그를 선택하거나 새로운 태그를 생성하세요.
+                체크박스를 통해 태그를 선택하고 적용 버튼을 눌러 저장하세요.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-6">
+              {/* 새 태그 생성 섹션 */}
+              <div className="border rounded-lg p-4 bg-muted/20">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="font-medium text-sm">새 태그 생성</h4>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowCreateTagModal(true)}
+                  >
+                    <Plus className="h-3 w-3 mr-1" />
+                    생성
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  새로운 태그를 생성하여 고객을 분류하고 관리하세요.
+                </p>
+              </div>
+
+              {/* 사용 가능한 태그 목록 */}
+              <div className="space-y-3">
+                <h4 className="font-medium text-sm">사용 가능한 태그</h4>
+                {isLoadingTags ? (
+                  <div className="text-center py-8">
+                    <p className="text-sm text-muted-foreground">
+                      태그를 불러오는 중...
+                    </p>
+                  </div>
+                ) : availableTags.length > 0 ? (
+                  <div className="grid grid-cols-1 gap-2 max-h-60 overflow-y-auto">
+                    {availableTags.map((tag) => (
+                      <label
+                        key={tag.id}
+                        className="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedTagIds.includes(tag.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedTagIds((prev) => [...prev, tag.id]);
+                            } else {
+                              setSelectedTagIds((prev) =>
+                                prev.filter((id) => id !== tag.id)
+                              );
+                            }
+                          }}
+                          className="rounded"
+                        />
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <div
+                              className="w-3 h-3 rounded-full"
+                              style={{ backgroundColor: tag.color }}
+                            />
+                            <span className="font-medium text-sm">
+                              {tag.name}
+                            </span>
+                          </div>
+                          {tag.description && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {tag.description}
+                            </p>
+                          )}
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Target className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground">
+                      사용 가능한 태그가 없습니다.
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      새 태그를 생성해보세요.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <DialogFooter className="flex gap-2 pt-4">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowTagModal(false);
+                  setSelectedTagIds([]);
+                }}
+              >
+                취소
+              </Button>
+              <Button onClick={handleSaveTags} disabled={isLoadingTags}>
+                {isLoadingTags ? '저장 중...' : '적용'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* 🏷️ 새 태그 생성 모달 */}
+        <Dialog open={showCreateTagModal} onOpenChange={setShowCreateTagModal}>
+          <DialogContent
+            className="sm:max-w-md"
+            aria-describedby="create-tag-modal-description"
+          >
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <span className="text-lg" aria-hidden="true">
+                  🎨
+                </span>
+                새 태그 생성
+              </DialogTitle>
+              <DialogDescription id="create-tag-modal-description">
+                새로운 태그를 생성하여 고객을 효율적으로 분류하세요. 태그 이름과
+                색상을 설정할 수 있습니다.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">
+                  태그 이름 *
+                </label>
+                <input
+                  type="text"
+                  className="w-full p-3 border rounded-lg text-sm"
+                  placeholder="예: VIP 고객, 신규 고객, 관심 고객"
+                  value={tagForm.name}
+                  onChange={(e) =>
+                    setTagForm((prev) => ({ ...prev, name: e.target.value }))
+                  }
+                  maxLength={20}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">
+                  태그 색상
+                </label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="color"
+                    value={tagForm.color}
+                    onChange={(e) =>
+                      setTagForm((prev) => ({ ...prev, color: e.target.value }))
+                    }
+                    className="w-12 h-8 rounded border cursor-pointer"
+                  />
+                  <div className="flex gap-2">
+                    {[
+                      '#3b82f6',
+                      '#ef4444',
+                      '#10b981',
+                      '#f59e0b',
+                      '#8b5cf6',
+                      '#f97316',
+                      '#06b6d4',
+                      '#84cc16',
+                    ].map((color) => (
+                      <button
+                        key={color}
+                        type="button"
+                        className="w-6 h-6 rounded border-2 border-border hover:scale-110 transition-transform"
+                        style={{ backgroundColor: color }}
+                        onClick={() =>
+                          setTagForm((prev) => ({ ...prev, color }))
+                        }
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">
+                  설명 (선택사항)
+                </label>
+                <textarea
+                  className="w-full p-3 border rounded-lg text-sm resize-none"
+                  placeholder="태그에 대한 설명을 입력하세요"
+                  rows={3}
+                  value={tagForm.description}
+                  onChange={(e) =>
+                    setTagForm((prev) => ({
+                      ...prev,
+                      description: e.target.value,
+                    }))
+                  }
+                  maxLength={100}
+                />
+              </div>
+
+              {/* 미리보기 */}
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">
+                  미리보기
+                </label>
+                <div className="p-3 border rounded-lg bg-muted/30">
+                  {tagForm.name ? (
+                    <Badge
+                      variant="secondary"
+                      className="text-xs"
+                      style={{
+                        backgroundColor: `${tagForm.color}20`,
+                        borderColor: tagForm.color,
+                        color: tagForm.color,
+                      }}
+                    >
+                      {tagForm.name}
+                    </Badge>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">
+                      태그 이름을 입력하면 미리보기가 표시됩니다.
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+            <DialogFooter className="flex gap-2 pt-4">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowCreateTagModal(false);
+                  setTagForm({
+                    id: '',
+                    name: '',
+                    color: '#3b82f6',
+                    description: '',
+                  });
+                }}
+              >
+                취소
+              </Button>
+              <Button
+                onClick={handleCreateTag}
+                disabled={!tagForm.name.trim() || isLoadingTags}
+              >
+                {isLoadingTags ? '생성 중...' : '생성'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* 🏷️ 태그 성공 모달 */}
+        <Dialog
+          open={showTagSuccessModal}
+          onOpenChange={setShowTagSuccessModal}
+        >
+          <DialogContent
+            className="sm:max-w-md"
+            aria-describedby="tag-success-modal-description"
+          >
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <span className="text-green-600" aria-hidden="true">
+                  ✅
+                </span>
+                태그 저장 완료
+              </DialogTitle>
+              <DialogDescription id="tag-success-modal-description">
+                태그 변경사항이 성공적으로 저장되었습니다.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                <Check className="h-4 w-4 text-green-600" />
+              </div>
+              <p className="text-foreground">{tagSuccessMessage}</p>
+            </div>
+            <DialogFooter className="flex justify-end pt-4">
+              <Button
+                onClick={() => setShowTagSuccessModal(false)}
+                className="px-6"
+              >
+                확인
               </Button>
             </DialogFooter>
           </DialogContent>

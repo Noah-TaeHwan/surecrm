@@ -15,6 +15,10 @@ export default [
   route('api/seed-invitations', 'api/seed-invitations.ts'),
   route('api/user.settings', 'api/user.settings.ts'),
 
+  // 🏷️ 태그 관련 API 라우트
+  route('api/clients/tags', 'api/clients/tags/route.ts'),
+  route('api/clients/client-tags', 'api/clients/client-tags.ts'),
+
   // 📊 대시보드
   route('dashboard', 'features/dashboard/pages/dashboard-page.tsx'),
 

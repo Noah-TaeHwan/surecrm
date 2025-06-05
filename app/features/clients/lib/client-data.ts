@@ -959,6 +959,134 @@ export async function assignTagToClient(
   return assignment;
 }
 
+export async function removeTagFromClient(
+  clientId: string,
+  tagId: string,
+  agentId: string
+) {
+  // 권한 확인 - 클라이언트가 해당 에이전트의 것인지 확인
+  const [client] = await db
+    .select({ agentId: clients.agentId })
+    .from(clients)
+    .where(eq(clients.id, clientId))
+    .limit(1);
+
+  if (!client || client.agentId !== agentId) {
+    throw new Error('권한이 없습니다.');
+  }
+
+  // 태그 할당 삭제
+  await db
+    .delete(appClientTagAssignments)
+    .where(
+      and(
+        eq(appClientTagAssignments.clientId, clientId),
+        eq(appClientTagAssignments.tagId, tagId)
+      )
+    );
+
+  return { success: true };
+}
+
+export async function updateClientTag(
+  tagId: string,
+  updates: Partial<
+    Pick<typeof appClientTags.$inferInsert, 'name' | 'color' | 'description'>
+  >,
+  agentId: string
+) {
+  // 권한 확인
+  const [tag] = await db
+    .select({ agentId: appClientTags.agentId })
+    .from(appClientTags)
+    .where(eq(appClientTags.id, tagId))
+    .limit(1);
+
+  if (!tag || tag.agentId !== agentId) {
+    throw new Error('권한이 없습니다.');
+  }
+
+  const [updatedTag] = await db
+    .update(appClientTags)
+    .set({
+      ...updates,
+      updatedAt: new Date(),
+    })
+    .where(eq(appClientTags.id, tagId))
+    .returning();
+
+  return updatedTag;
+}
+
+export async function deleteClientTag(tagId: string, agentId: string) {
+  // 권한 확인
+  const [tag] = await db
+    .select({ agentId: appClientTags.agentId })
+    .from(appClientTags)
+    .where(eq(appClientTags.id, tagId))
+    .limit(1);
+
+  if (!tag || tag.agentId !== agentId) {
+    throw new Error('권한이 없습니다.');
+  }
+
+  // 먼저 할당된 태그들 삭제
+  await db
+    .delete(appClientTagAssignments)
+    .where(eq(appClientTagAssignments.tagId, tagId));
+
+  // 태그 자체를 삭제하는 대신 비활성화
+  await db
+    .update(appClientTags)
+    .set({
+      isActive: false,
+      updatedAt: new Date(),
+    })
+    .where(eq(appClientTags.id, tagId));
+
+  return { success: true };
+}
+
+export async function getClientTagsWithAssignments(
+  clientId: string,
+  agentId: string
+) {
+  // 권한 확인
+  const [client] = await db
+    .select({ agentId: clients.agentId })
+    .from(clients)
+    .where(eq(clients.id, clientId))
+    .limit(1);
+
+  if (!client || client.agentId !== agentId) {
+    throw new Error('권한이 없습니다.');
+  }
+
+  // 클라이언트에게 할당된 태그들 조회
+  const assignedTags = await db
+    .select({
+      id: appClientTags.id,
+      name: appClientTags.name,
+      color: appClientTags.color,
+      description: appClientTags.description,
+      assignedAt: appClientTagAssignments.assignedAt,
+    })
+    .from(appClientTagAssignments)
+    .innerJoin(
+      appClientTags,
+      eq(appClientTagAssignments.tagId, appClientTags.id)
+    )
+    .where(
+      and(
+        eq(appClientTagAssignments.clientId, clientId),
+        eq(appClientTags.isActive, true)
+      )
+    )
+    .orderBy(asc(appClientTags.name));
+
+  return assignedTags;
+}
+
 // 📞 연락 이력 관련 함수들
 export async function addContactHistory(
   contactData: Omit<
