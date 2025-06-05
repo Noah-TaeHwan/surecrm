@@ -84,9 +84,10 @@ export function ReferralInsights({
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      {/* 핵심 소개자 TOP 5 */}
-      <Card className="border-border/50">
+    // <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="w-full">
+      {/* 핵심 소개자 TOP 5 - 주석처리 */}
+      {/* <Card className="border-border/50">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <CardTitle className="text-base font-medium flex items-center gap-2">
@@ -96,7 +97,7 @@ export function ReferralInsights({
               핵심 소개자 TOP 5
             </CardTitle>
             {/* MVP: 핵심 소개자 기능 비활성화 */}
-            {/* <Link to="/influencers">
+      {/* <Link to="/influencers">
               <Button
                 variant="ghost"
                 size="sm"
@@ -106,7 +107,7 @@ export function ReferralInsights({
                 <ChevronRightIcon className="h-3 w-3 ml-1" />
               </Button>
             </Link> */}
-          </div>
+      {/* </div>
         </CardHeader>
         <CardContent className="space-y-3">
           {topReferrers.length > 0 ? (
@@ -191,7 +192,7 @@ export function ReferralInsights({
             </div>
           )}
         </CardContent>
-      </Card>
+      </Card> */}
 
       {/* 소개 네트워크 현황 */}
       <Card className="border-border/50">

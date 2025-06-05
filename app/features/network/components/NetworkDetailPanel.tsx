@@ -20,6 +20,7 @@ import {
   CardTitle,
 } from '~/common/components/ui/card';
 import { Separator } from '~/common/components/ui/separator';
+import { Link } from 'react-router';
 import type { NetworkNode, NetworkLink, NetworkData } from '../types';
 
 interface NetworkDetailPanelProps {
@@ -216,6 +217,21 @@ export default function NetworkDetailPanel({
           </div>
 
           <Separator />
+          <div className="space-y-6">
+            <Link to="/pipeline">
+              <Button variant="outline" className="w-full mb-4">
+                <TrendingUp className="mr-2 h-4 w-4" />
+                영업 파이프라인 보기
+              </Button>
+            </Link>
+            <Link to={`/clients/${selectedNode.id}`}>
+              <Button variant="outline" className="w-full">
+                <UserRound className="mr-2 h-4 w-4" />
+                {selectedNode.name} 상세 정보
+              </Button>
+            </Link>
+          </div>
+          <Separator />
 
           {/* 소개자 정보 */}
           {referredByNode && (
@@ -326,23 +342,7 @@ export default function NetworkDetailPanel({
             </div>
           )}
 
-          <Separator />
-
           {/* 빠른 액션 버튼 */}
-          <div className="space-y-3">
-            <Button className="w-full">
-              <Calendar className="mr-2 h-4 w-4" />
-              미팅 예약
-            </Button>
-            <Button variant="outline" className="w-full">
-              <Users className="mr-2 h-4 w-4" />
-              파이프라인으로 보기
-            </Button>
-            <Button variant="outline" className="w-full">
-              <UserRound className="mr-2 h-4 w-4" />
-              고객 상세 정보
-            </Button>
-          </div>
         </div>
       </div>
     </div>
