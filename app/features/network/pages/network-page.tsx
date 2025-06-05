@@ -47,7 +47,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 
     // 🎯 모든 활성 클라이언트의 상세 정보 조회
     const { db } = await import('~/lib/core/db');
-    const { clients, clientDetails, pipelineStages } = await import(
+    const { clients, clientDetails, pipelineStages, profiles } = await import(
       '~/lib/schema/core'
     );
     const { eq, and } = await import('drizzle-orm');
@@ -82,6 +82,36 @@ export async function loader({ request }: Route.LoaderArgs) {
       .leftJoin(pipelineStages, eq(clients.currentStageId, pipelineStages.id))
       .where(and(eq(clients.agentId, user.id), eq(clients.isActive, true)));
 
+    // 🎯 에이전트(사용자) 정보 조회 - app_user_profiles 테이블과 auth.users에서
+    const { createAdminClient } = await import('~/lib/core/supabase');
+
+    // app_user_profiles(profiles)에서 프로필 정보 조회
+    const userProfile = await db
+      .select({
+        id: profiles.id,
+        fullName: profiles.fullName,
+        phone: profiles.phone,
+        company: profiles.company,
+        role: profiles.role,
+        createdAt: profiles.createdAt,
+      })
+      .from(profiles)
+      .where(eq(profiles.id, user.id))
+      .limit(1);
+
+    // auth.users에서 이메일 정보 조회
+    const supabaseAdmin = createAdminClient();
+    const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(
+      user.id
+    );
+
+    const agentInfo = userProfile[0]
+      ? {
+          ...userProfile[0],
+          email: authUser.user?.email || '',
+        }
+      : null;
+
     // 🎯 소개 관계 데이터 구성
     const clientMap = new Map();
     const referralData = new Map();
@@ -106,6 +136,7 @@ export async function loader({ request }: Route.LoaderArgs) {
       edges: networkData.edges,
       stats: networkData.stats,
       agentId: user.id,
+      agentInfo,
       stages,
       clientsData: clientsWithDetails,
       referralData: Object.fromEntries(referralData),
@@ -126,6 +157,7 @@ export async function loader({ request }: Route.LoaderArgs) {
         networkGrowth: [],
       },
       agentId: 'fallback-agent-id',
+      agentInfo: null,
       stages: [],
       clientsData: [],
       referralData: {},
@@ -200,8 +232,16 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 }
 
 export default function NetworkPage({ loaderData }: Route.ComponentProps) {
-  const { nodes, edges, stats, agentId, stages, clientsData, referralData } =
-    loaderData;
+  const {
+    nodes,
+    edges,
+    stats,
+    agentId,
+    agentInfo,
+    stages,
+    clientsData,
+    referralData,
+  } = loaderData;
 
   const graphRef = useRef<any>(null);
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
@@ -278,6 +318,7 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
       nodes: nodes.map((node) => ({
         id: node.id,
         name: node.name,
+        type: node.type, // 🔥 중요: 원본 타입 필드 보존
         group: node.type === 'agent' ? 'influencer' : 'client',
         importance:
           node.importance === 'high' ? 5 : node.importance === 'medium' ? 3 : 1,
@@ -735,6 +776,7 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
                 clientsData={clientsData}
                 stages={stages}
                 referralData={referralData}
+                agentInfo={agentInfo}
               />
             )}
           </div>

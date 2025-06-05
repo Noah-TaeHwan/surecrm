@@ -35,6 +35,7 @@ interface NetworkDetailPanelProps {
   clientsData?: any[];
   stages?: any[];
   referralData?: any;
+  agentInfo?: any;
 }
 
 export default function NetworkDetailPanel({
@@ -45,6 +46,7 @@ export default function NetworkDetailPanel({
   clientsData = [],
   stages = [],
   referralData = {},
+  agentInfo = null,
 }: NetworkDetailPanelProps) {
   // 선택된 노드 정보
   const selectedNode = useMemo(() => {
@@ -53,13 +55,7 @@ export default function NetworkDetailPanel({
 
   // 실제 클라이언트 데이터 조회
   const clientData = useMemo(() => {
-    console.log('🔍 클라이언트 데이터 검색:', {
-      nodeId,
-      clientsDataLength: clientsData.length,
-    });
-    const found = clientsData.find((client) => client.id === nodeId);
-    console.log('🎯 찾은 클라이언트 데이터:', found ? '✅ 발견' : '❌ 없음');
-    return found;
+    return clientsData.find((client) => client.id === nodeId);
   }, [clientsData, nodeId]);
 
   // 소개 관계 데이터
@@ -117,17 +113,11 @@ export default function NetworkDetailPanel({
   }, [data, nodeId, selectedNode, clientsData]);
 
   if (!selectedNode) {
-    console.log('❌ 선택된 노드 없음:', { nodeId });
     return null;
   }
 
-  // 클라이언트 데이터가 없는 경우에 대한 안전장치
-  console.log('📊 렌더링 데이터 상태:', {
-    selectedNode: selectedNode?.name,
-    hasClientData: !!clientData,
-    clientsDataLength: clientsData.length,
-    nodeId,
-  });
+  // 노드 타입 확인 (에이전트 vs 클라이언트)
+  const isAgentNode = selectedNode?.type === 'agent';
 
   // 연결된 노드들을 통한 통계 계산
   const connections = referredNodes.length;
@@ -222,7 +212,6 @@ export default function NetworkDetailPanel({
 
     // 노드 선택 및 이동
     if (onNodeSelect) {
-      console.log(`고객 정보가 ${id}로 변경됩니다`);
       onNodeSelect(id);
     }
   };
@@ -234,7 +223,9 @@ export default function NetworkDetailPanel({
     >
       <div className="p-4 flex-shrink-0">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">고객 정보</h2>
+          <h2 className="text-lg font-semibold">
+            {isAgentNode ? '내 정보' : '고객 정보'}
+          </h2>
           <Button
             variant="ghost"
             size="icon"
@@ -253,22 +244,42 @@ export default function NetworkDetailPanel({
         }}
       >
         <div className="space-y-4">
-          {/* 고객 기본 정보 */}
+          {/* 기본 정보 */}
           <div className="space-y-2">
             <h3 className="text-2xl font-bold">{selectedNode.name}</h3>
             <div className="flex items-center flex-wrap gap-2">
-              {/* 영업 단계 배지 */}
-              <Badge variant={getStageBadgeColor(clientData?.stageName) as any}>
-                {clientData?.stageName || '단계 미설정'}
-              </Badge>
-              {/* 중요도 배지 */}
-              <Badge
-                className={`${getImportanceBadgeColor(
-                  clientData?.importance
-                )} text-xs font-medium`}
-              >
-                {getImportanceText(clientData?.importance)}
-              </Badge>
+              {isAgentNode ? (
+                /* 에이전트 정보 */
+                <>
+                  <Badge
+                    variant="default"
+                    className="bg-blue-100 text-blue-800 border-blue-200"
+                  >
+                    에이전트
+                  </Badge>
+                  <Badge variant="outline">
+                    총 {referredNodes.length}명 고객
+                  </Badge>
+                </>
+              ) : (
+                /* 클라이언트 정보 */
+                <>
+                  {/* 영업 단계 배지 */}
+                  <Badge
+                    variant={getStageBadgeColor(clientData?.stageName) as any}
+                  >
+                    {clientData?.stageName || '단계 미설정'}
+                  </Badge>
+                  {/* 중요도 배지 */}
+                  <Badge
+                    className={`${getImportanceBadgeColor(
+                      clientData?.importance
+                    )} text-xs font-medium`}
+                  >
+                    {getImportanceText(clientData?.importance)}
+                  </Badge>
+                </>
+              )}
             </div>
           </div>
 
@@ -282,11 +293,23 @@ export default function NetworkDetailPanel({
 
             <div className="flex items-center text-sm">
               <Phone className="mr-2 h-4 w-4 text-muted-foreground" />
-              <span>{clientData?.phone || '미입력'}</span>
-              {clientData?.telecomProvider && (
+              <span>
+                {isAgentNode
+                  ? agentInfo?.phone || '미입력'
+                  : clientData?.phone || '미입력'}
+              </span>
+              {(isAgentNode
+                ? agentInfo?.telecomProvider
+                : clientData?.telecomProvider) && (
                 <span className="ml-2 text-muted-foreground">
-                  {getTelecomEmoji(clientData.telecomProvider)}{' '}
-                  {clientData.telecomProvider}
+                  {getTelecomEmoji(
+                    isAgentNode
+                      ? agentInfo.telecomProvider
+                      : clientData.telecomProvider
+                  )}{' '}
+                  {isAgentNode
+                    ? agentInfo.telecomProvider
+                    : clientData.telecomProvider}
                 </span>
               )}
             </div>
@@ -294,189 +317,295 @@ export default function NetworkDetailPanel({
             <div className="flex items-center text-sm">
               <Mail className="mr-2 h-4 w-4 text-muted-foreground" />
               <span
-                className={clientData?.email ? '' : 'text-muted-foreground'}
-              >
-                {clientData?.email || '미입력'}
-              </span>
-            </div>
-
-            <div className="flex items-center text-sm">
-              <MapPin className="mr-2 h-4 w-4 text-muted-foreground" />
-              <span
-                className={clientData?.address ? '' : 'text-muted-foreground'}
-              >
-                {clientData?.address || '미입력'}
-              </span>
-            </div>
-
-            <div className="flex items-center text-sm">
-              <Briefcase className="mr-2 h-4 w-4 text-muted-foreground" />
-              <span
                 className={
-                  clientData?.occupation ? '' : 'text-muted-foreground'
+                  (isAgentNode ? agentInfo?.email : clientData?.email)
+                    ? ''
+                    : 'text-muted-foreground'
                 }
               >
-                {clientData?.occupation || '미입력'}
+                {isAgentNode
+                  ? agentInfo?.email || '미입력'
+                  : clientData?.email || '미입력'}
               </span>
             </div>
-          </div>
 
-          {/* 개인 정보 */}
-          <div className="space-y-3">
-            <h4 className="text-sm font-medium text-muted-foreground">
-              개인 정보
-            </h4>
-
-            <div className="grid grid-cols-2 gap-3 text-sm">
-              <div className="flex items-center">
-                <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
-                <div>
-                  {clientData?.birthDate ? (
-                    <>
-                      <div>
-                        {new Date(clientData.birthDate).toLocaleDateString(
-                          'ko-KR'
-                        )}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {calculateAge(clientData.birthDate)}세
-                      </div>
-                    </>
-                  ) : (
-                    <span className="text-muted-foreground">미입력</span>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex items-center">
-                <User className="mr-2 h-4 w-4 text-muted-foreground" />
+            {!isAgentNode && (
+              <div className="flex items-center text-sm">
+                <MapPin className="mr-2 h-4 w-4 text-muted-foreground" />
                 <span
-                  className={clientData?.gender ? '' : 'text-muted-foreground'}
+                  className={clientData?.address ? '' : 'text-muted-foreground'}
                 >
-                  {clientData?.gender === 'male'
-                    ? '남성'
-                    : clientData?.gender === 'female'
-                    ? '여성'
-                    : '미입력'}
+                  {clientData?.address || '미입력'}
                 </span>
               </div>
+            )}
 
-              <div className="flex items-center">
-                <Ruler className="mr-2 h-4 w-4 text-muted-foreground" />
-                <span
-                  className={clientData?.height ? '' : 'text-muted-foreground'}
-                >
-                  {clientData?.height ? `${clientData.height}cm` : '미입력'}
-                </span>
-              </div>
-
-              <div className="flex items-center">
-                <Weight className="mr-2 h-4 w-4 text-muted-foreground" />
-                <span
-                  className={clientData?.weight ? '' : 'text-muted-foreground'}
-                >
-                  {clientData?.weight ? `${clientData.weight}kg` : '미입력'}
-                </span>
-              </div>
-
-              <div className="flex items-center">
-                <Car className="mr-2 h-4 w-4 text-muted-foreground" />
+            {!isAgentNode && (
+              <div className="flex items-center text-sm">
+                <Briefcase className="mr-2 h-4 w-4 text-muted-foreground" />
                 <span
                   className={
-                    clientData && clientData.hasDrivingLicense !== null
-                      ? ''
-                      : 'text-muted-foreground'
+                    clientData?.occupation ? '' : 'text-muted-foreground'
                   }
                 >
-                  {clientData && clientData.hasDrivingLicense !== null
-                    ? clientData.hasDrivingLicense
-                      ? '운전가능'
-                      : '운전불가'
-                    : '미입력'}
+                  {clientData?.occupation || '미입력'}
                 </span>
               </div>
-            </div>
+            )}
+
+            {isAgentNode && (
+              <div className="flex items-center text-sm">
+                <Briefcase className="mr-2 h-4 w-4 text-muted-foreground" />
+                <span
+                  className={agentInfo?.company ? '' : 'text-muted-foreground'}
+                >
+                  {agentInfo?.company || '미입력'}
+                </span>
+              </div>
+            )}
           </div>
+
+          {isAgentNode ? (
+            /* 에이전트 통계 정보 */
+            <div className="space-y-3">
+              <h4 className="text-sm font-medium text-muted-foreground">
+                네트워크 통계
+              </h4>
+
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="flex items-center">
+                  <Users className="mr-2 h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <div className="font-medium">{referredNodes.length}명</div>
+                    <div className="text-xs text-muted-foreground">총 고객</div>
+                  </div>
+                </div>
+
+                <div className="flex items-center">
+                  <TrendingUp className="mr-2 h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <div className="font-medium">{connections}건</div>
+                    <div className="text-xs text-muted-foreground">
+                      소개 관계
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center">
+                  <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
+                  <div>
+                    {agentInfo?.createdAt ? (
+                      <>
+                        <div>
+                          {new Date(agentInfo.createdAt).toLocaleDateString(
+                            'ko-KR'
+                          )}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          가입일
+                        </div>
+                      </>
+                    ) : (
+                      <span className="text-muted-foreground">미입력</span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex items-center">
+                  <Briefcase className="mr-2 h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <div className="font-medium text-blue-600">활성</div>
+                    <div className="text-xs text-muted-foreground">상태</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            /* 클라이언트 개인 정보 */
+            <div className="space-y-3">
+              <h4 className="text-sm font-medium text-muted-foreground">
+                개인 정보
+              </h4>
+
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="flex items-center">
+                  <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
+                  <div>
+                    {clientData?.birthDate ? (
+                      <>
+                        <div>
+                          {new Date(clientData.birthDate).toLocaleDateString(
+                            'ko-KR'
+                          )}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {calculateAge(clientData.birthDate)}세
+                        </div>
+                      </>
+                    ) : (
+                      <span className="text-muted-foreground">미입력</span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex items-center">
+                  <User className="mr-2 h-4 w-4 text-muted-foreground" />
+                  <span
+                    className={
+                      clientData?.gender ? '' : 'text-muted-foreground'
+                    }
+                  >
+                    {clientData?.gender === 'male'
+                      ? '남성'
+                      : clientData?.gender === 'female'
+                      ? '여성'
+                      : '미입력'}
+                  </span>
+                </div>
+
+                <div className="flex items-center">
+                  <Ruler className="mr-2 h-4 w-4 text-muted-foreground" />
+                  <span
+                    className={
+                      clientData?.height ? '' : 'text-muted-foreground'
+                    }
+                  >
+                    {clientData?.height ? `${clientData.height}cm` : '미입력'}
+                  </span>
+                </div>
+
+                <div className="flex items-center">
+                  <Weight className="mr-2 h-4 w-4 text-muted-foreground" />
+                  <span
+                    className={
+                      clientData?.weight ? '' : 'text-muted-foreground'
+                    }
+                  >
+                    {clientData?.weight ? `${clientData.weight}kg` : '미입력'}
+                  </span>
+                </div>
+
+                <div className="flex items-center">
+                  <Car className="mr-2 h-4 w-4 text-muted-foreground" />
+                  <span
+                    className={
+                      clientData && clientData.hasDrivingLicense !== null
+                        ? ''
+                        : 'text-muted-foreground'
+                    }
+                  >
+                    {clientData && clientData.hasDrivingLicense !== null
+                      ? clientData.hasDrivingLicense
+                        ? '운전가능'
+                        : '운전불가'
+                      : '미입력'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
 
           <Separator />
 
           {/* 빠른 액션 버튼 */}
           <div className="space-y-2">
-            <Link to="/pipeline">
-              <Button variant="outline" className="w-full mb-4">
-                <TrendingUp className="mr-2 h-4 w-4" />
-                영업 파이프라인 보기
-              </Button>
-            </Link>
-            <Link to={`/clients/${selectedNode.id}`}>
-              <Button variant="outline" className="w-full">
-                <UserRound className="mr-2 h-4 w-4" />
-                {selectedNode.name} 상세 정보
-              </Button>
-            </Link>
+            {isAgentNode ? (
+              /* 에이전트 버튼들 */
+              <>
+                <Link to="/pipeline">
+                  <Button variant="outline" className="w-full mb-4">
+                    <TrendingUp className="mr-2 h-4 w-4" />
+                    영업 파이프라인 보기
+                  </Button>
+                </Link>
+                <Link to="/settings">
+                  <Button variant="outline" className="w-full">
+                    <UserRound className="mr-2 h-4 w-4" />내 설정
+                  </Button>
+                </Link>
+              </>
+            ) : (
+              /* 클라이언트 버튼들 */
+              <>
+                <Link to="/pipeline">
+                  <Button variant="outline" className="w-full mb-4">
+                    <TrendingUp className="mr-2 h-4 w-4" />
+                    영업 파이프라인 보기
+                  </Button>
+                </Link>
+                <Link to={`/clients/${selectedNode.id}`}>
+                  <Button variant="outline" className="w-full">
+                    <UserRound className="mr-2 h-4 w-4" />
+                    {selectedNode.name} 상세 정보
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
 
           <Separator />
 
-          {/* 소개자 정보 */}
-          <div className="space-y-3">
-            <h4 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <UserRound className="h-4 w-4 text-blue-500" />
-              소개자
-            </h4>
+          {/* 소개자 정보 - 에이전트 노드는 소개자가 없음 */}
+          {!isAgentNode && (
+            <div className="space-y-3">
+              <h4 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <UserRound className="h-4 w-4 text-blue-500" />
+                소개자
+              </h4>
 
-            {referredByNode ? (
-              <Card
-                className="group cursor-pointer hover:bg-accent/30 transition-all duration-200 border border-border/50 hover:border-blue-200/50 gap-0 py-0"
-                onClick={(e) => handleReferralAction(referredByNode.id, e)}
-              >
-                <CardContent className="p-3 min-h-[56px] flex items-center">
-                  <div className="flex items-center justify-between gap-3 w-full">
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <div className="w-2 h-2 rounded-full bg-blue-400/60 flex-shrink-0"></div>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium text-sm truncate">
-                          {referredByNode.name}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-muted-foreground">
-                            {referredByNode.clientInfo?.stageName || '미설정'}
-                          </span>
-                          <span className="text-xs text-blue-600 font-medium">
-                            {getImportanceText(
-                              referredByNode.clientInfo?.importance
-                            )}
-                          </span>
+              {referredByNode ? (
+                <Card
+                  className="group cursor-pointer hover:bg-accent/30 transition-all duration-200 border border-border/50 hover:border-blue-200/50 gap-0 py-0"
+                  onClick={(e) => handleReferralAction(referredByNode.id, e)}
+                >
+                  <CardContent className="p-3 min-h-[56px] flex items-center">
+                    <div className="flex items-center justify-between gap-3 w-full">
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <div className="w-2 h-2 rounded-full bg-blue-400/60 flex-shrink-0"></div>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-sm truncate">
+                            {referredByNode.name}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-muted-foreground">
+                              {referredByNode.clientInfo?.stageName || '미설정'}
+                            </span>
+                            <span className="text-xs text-blue-600 font-medium">
+                              {getImportanceText(
+                                referredByNode.clientInfo?.importance
+                              )}
+                            </span>
+                          </div>
                         </div>
                       </div>
+                      <ArrowUpRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-muted-foreground transition-colors flex-shrink-0" />
                     </div>
-                    <ArrowUpRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-muted-foreground transition-colors flex-shrink-0" />
-                  </div>
-                </CardContent>
-              </Card>
-            ) : (
-              <Card className="border border-border/30 gap-0 py-0">
-                <CardContent className="p-3 min-h-[56px] flex items-center">
-                  <div className="flex items-center gap-3 w-full">
-                    <div className="w-2 h-2 rounded-full bg-muted-foreground/40"></div>
-                    <span className="text-sm text-muted-foreground">
-                      직접 개발 고객
-                    </span>
-                    <Badge variant="secondary" className="text-xs ml-auto">
-                      신규 개발
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                <Card className="border border-border/30 gap-0 py-0">
+                  <CardContent className="p-3 min-h-[56px] flex items-center">
+                    <div className="flex items-center gap-3 w-full">
+                      <div className="w-2 h-2 rounded-full bg-muted-foreground/40"></div>
+                      <span className="text-sm text-muted-foreground">
+                        직접 개발 고객
+                      </span>
+                      <Badge variant="secondary" className="text-xs ml-auto">
+                        신규 개발
+                      </Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          )}
 
           {/* 소개한 사람들 */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <h4 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <Users className="h-4 w-4 text-orange-500" />
-                소개한 고객
+                {isAgentNode ? '관리 중인 고객' : '소개한 고객'}
               </h4>
               <Badge
                 variant="outline"
@@ -524,10 +653,12 @@ export default function NetworkDetailPanel({
                   <div className="flex items-center gap-3 w-full">
                     <div className="w-2 h-2 rounded-full bg-muted-foreground/40"></div>
                     <span className="text-sm text-muted-foreground">
-                      소개한 고객이 없습니다
+                      {isAgentNode
+                        ? '관리 중인 고객이 없습니다'
+                        : '소개한 고객이 없습니다'}
                     </span>
                     <Badge variant="outline" className="text-xs ml-auto">
-                      개발 가능
+                      {isAgentNode ? '신규 개발' : '개발 가능'}
                     </Badge>
                   </div>
                 </CardContent>
