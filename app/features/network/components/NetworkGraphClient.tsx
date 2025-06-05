@@ -646,6 +646,98 @@ export default function NetworkGraphClient({
     };
   }, [safeData]); // 🔥 의존성 최적화
 
+  // 현재 하이라이트된 노드의 확장된 네트워크 경로 계산 (Hook 순서 유지를 위해 여기에 배치)
+  const highlightPath = useMemo(() => {
+    if (!graphState.highlightedNodeId) return [];
+
+    // 에이전트 노드에서 선택된 노드까지의 경로를 찾는 함수
+    const findPathFromAgentToNode = (targetNodeId: string): string[] => {
+      if (!targetNodeId) return [];
+
+      // 에이전트 노드 찾기 (influencer 그룹 또는 중심 노드)
+      const agentNode = safeData.nodes.find(
+        (node) => node.group === 'influencer'
+      );
+      if (!agentNode) return [];
+
+      if (agentNode.id === targetNodeId) return [targetNodeId];
+
+      // BFS를 사용해 최단 경로 찾기
+      const queue = [{ nodeId: agentNode.id, path: [agentNode.id] }];
+      const visited = new Set([agentNode.id]);
+
+      while (queue.length > 0) {
+        const { nodeId: currentId, path } = queue.shift()!;
+
+        // 연결된 모든 노드 확인
+        for (const link of safeData.links) {
+          const sourceId =
+            typeof link.source === 'object' ? link.source.id : link.source;
+          const targetId =
+            typeof link.target === 'object' ? link.target.id : link.target;
+
+          let nextNodeId = null;
+          if (sourceId === currentId && !visited.has(targetId)) {
+            nextNodeId = targetId;
+          } else if (targetId === currentId && !visited.has(sourceId)) {
+            nextNodeId = sourceId;
+          }
+
+          if (nextNodeId) {
+            const newPath = [...path, nextNodeId];
+
+            if (nextNodeId === targetNodeId) {
+              return newPath; // 목표 노드 도달
+            }
+
+            visited.add(nextNodeId);
+            queue.push({ nodeId: nextNodeId, path: newPath });
+          }
+        }
+      }
+
+      return []; // 경로를 찾을 수 없음
+    };
+
+    // 선택된 노드에서 직접 연결된 모든 노드를 찾는 함수
+    const findDirectlyConnectedNodes = (nodeId: string): string[] => {
+      const connectedNodes: string[] = [];
+
+      for (const link of safeData.links) {
+        const sourceId =
+          typeof link.source === 'object' ? link.source.id : link.source;
+        const targetId =
+          typeof link.target === 'object' ? link.target.id : link.target;
+
+        if (sourceId === nodeId) {
+          connectedNodes.push(targetId);
+        } else if (targetId === nodeId) {
+          connectedNodes.push(sourceId);
+        }
+      }
+
+      return connectedNodes;
+    };
+
+    // 1. 에이전트에서 선택된 노드까지의 경로
+    const mainPath = findPathFromAgentToNode(graphState.highlightedNodeId);
+
+    // 2. 선택된 노드에서 직접 연결된 모든 노드들 추가
+    const directConnectedNodes = findDirectlyConnectedNodes(
+      graphState.highlightedNodeId
+    );
+
+    // 3. 경로에 포함되지 않은 직접 연결 노드들을 경로에 추가
+    const extendedPath = [...mainPath];
+    for (const connectedNode of directConnectedNodes) {
+      if (!extendedPath.includes(connectedNode)) {
+        extendedPath.push(connectedNode);
+      }
+    }
+
+    return extendedPath;
+  }, [graphState.highlightedNodeId, safeData]);
+
   // 그래프 초기화 - 한 번만 실행되도록 최적화
   useEffect(() => {
     if (!graphState.mounted || !isBrowser || !graphComponent) return;
@@ -1032,35 +1124,34 @@ export default function NetworkGraphClient({
     return { nodes: [], links: [] } as { nodes: any[]; links: any[] };
   }
 
-  // 하이라이트된 노드와 연결된 노드인지 확인하는 특별 헬퍼 함수
-  function isNodeConnectedToHighlight(nodeId: string): boolean {
-    if (
-      !graphState.highlightedNodeId ||
-      nodeId === graphState.highlightedNodeId
-    ) {
-      return false;
-    }
+  // 노드가 하이라이트 경로에 포함되는지 확인하는 헬퍼 함수
+  function isNodeInHighlightPath(nodeId: string): boolean {
+    return highlightPath.includes(nodeId);
+  }
 
-    // graphData를 직접 가져와서 연결 확인 (graphRef 의존성 제거)
-    const links = filteredData.links;
+  // 링크가 하이라이트 경로에 포함되는지 확인하는 헬퍼 함수 (확장된 경로 지원)
+  function isLinkInHighlightPath(link: any): boolean {
+    if (highlightPath.length < 1) return false;
 
-    // filteredData에서 연결 여부 확인
-    for (const link of links) {
-      const sourceId =
-        typeof link.source === 'object' ? link.source.id : link.source;
-      const targetId =
-        typeof link.target === 'object' ? link.target.id : link.target;
+    const sourceId =
+      typeof link.source === 'object' ? link.source.id : link.source;
+    const targetId =
+      typeof link.target === 'object' ? link.target.id : link.target;
 
-      // 하이라이트 노드와 현재 노드가 연결되어 있는지 확인
-      if (
-        (sourceId === graphState.highlightedNodeId && targetId === nodeId) ||
-        (targetId === graphState.highlightedNodeId && sourceId === nodeId)
-      ) {
-        return true;
-      }
+    // 하이라이트 경로에 포함된 노드들 간의 모든 연결을 확인
+    // (에이전트→A→B→C 경로와 C에서 직접 연결된 D까지 포함)
+    if (highlightPath.includes(sourceId) && highlightPath.includes(targetId)) {
+      return true;
     }
 
     return false;
+  }
+
+  // 하이라이트된 노드와 연결된 노드인지 확인하는 특별 헬퍼 함수 (기존 로직 유지하되 경로 기반으로 수정)
+  function isNodeConnectedToHighlight(nodeId: string): boolean {
+    return (
+      isNodeInHighlightPath(nodeId) && nodeId !== graphState.highlightedNodeId
+    );
   }
 
   // 노드가 검색 결과에 포함되는지 확인하는 헬퍼 함수
@@ -1125,628 +1216,217 @@ export default function NetworkGraphClient({
 
       <GraphComponent
         ref={graphRef}
-        graphData={initialGraphData} // 전체 데이터 사용 (필터링 데이터 대신)
+        graphData={filteredData} // 필터링된 데이터 사용
         nodeId="id"
-        nodeLabel="name"
-        nodeAutoColorBy="group"
-        nodeRelSize={8}
+        nodeLabel={() => ''} // 호버 라벨 완전 비활성화
+        nodeVal={(node: any) => {
+          // 간단한 노드 크기 계산
+          const importance = node.importance || 1;
+          return node.group === 'influencer'
+            ? importance * 2
+            : importance * 1.5;
+        }}
         width={dimensions.width || window.innerWidth}
         height={dimensions.height || window.innerHeight - 200}
-        nodeVal={(node: any) => {
-          // 연결 개수를 고려한 노드 크기 계산
-          const connectionCount = getNodeConnectionCount(node.id);
-          const importance = (node.importance || 1) * 1.8;
-          const connectionBonus = Math.min(connectionCount * 0.7, 4); // 더 크게 차이나게
-
-          const baseSize = importance + connectionBonus;
-          return node.group === 'influencer' ? baseSize * 1.4 : baseSize;
-        }}
-        // 배경 클릭 이벤트 핸들러 추가
-        onBackgroundClick={() => {
-          // 하이라이트 상태가 있을 때만 해제
-          if (graphState.highlightedNodeId) {
-            // 내부 하이라이트 상태 초기화
-            setGraphState((prev) => ({
-              ...prev,
-              highlightedNodeId: null,
-            }));
-
-            // 그래프 전체가 보이도록 줌 아웃
-            if (
-              graphRef.current &&
-              typeof graphRef.current.zoomToFit === 'function'
-            ) {
-              graphRef.current.zoomToFit(1000, 100);
-            }
-          }
-        }}
-        linkWidth={(link: any) => {
-          // 연결선 굵기 강화: 하이라이트된 링크는 훨씬 더 두껍게
-          const sourceNode =
-            typeof link.source === 'object' ? link.source : null;
-          const targetNode =
-            typeof link.target === 'object' ? link.target : null;
-
-          // 하이라이트된 노드와 연결된 링크인지 확인
-          const isHighlighted =
-            graphState.highlightedNodeId &&
-            ((sourceNode && sourceNode.id === graphState.highlightedNodeId) ||
-              (targetNode && targetNode.id === graphState.highlightedNodeId));
-
-          // 일반 링크는 1.5, 하이라이트된 링크는 8로 굵기 대폭 증가
-          return isHighlighted ? 8 : 1.5;
-        }}
-        linkColor={(link: any) => {
-          // 연결선 색상 - 소개 방향에 따라 구분하여 표시
-          const sourceNode =
-            typeof link.source === 'object' ? link.source : null;
-          const targetNode =
-            typeof link.target === 'object' ? link.target : null;
-
-          if (!sourceNode || !targetNode) return OBSIDIAN_COLORS.EDGE.DEFAULT;
-
-          const sourceId = sourceNode.id;
-          const targetId = targetNode.id;
-
-          // 하이라이트된 노드와 연결된 링크인지 확인
-          const isHighlighted =
-            graphState.highlightedNodeId &&
-            (sourceId === graphState.highlightedNodeId ||
-              targetId === graphState.highlightedNodeId);
-
-          // 하이라이트된 노드의 연결선은 더 진한 색상으로 표시
-          if (isHighlighted) {
-            // 소개 방향에 따라 다른 색상 적용
-            const isSourceHighlighted =
-              sourceId === graphState.highlightedNodeId;
-
-            // 하이라이트된 노드가 소스인 경우 (소개한 관계) - 진한 주황색
-            if (isSourceHighlighted) {
-              return OBSIDIAN_COLORS.EDGE.REFERRAL_OUT; // 상수 사용
-            }
-            // 하이라이트된 노드가 타겟인 경우 (소개받은 관계) - 진한 파란색
-            else {
-              return OBSIDIAN_COLORS.EDGE.REFERRAL_IN; // 상수 사용
-            }
-          }
-
-          // 하이라이트된 노드가 있을 때는 비하이라이트 링크를 매우 흐리게
-          if (graphState.highlightedNodeId) {
-            return OBSIDIAN_COLORS.EDGE.DIMMED; // 중립 색상 사용
-          }
-
-          // 하이라이트된 노드가 없을 때는 기본적으로 회색 사용
-          return OBSIDIAN_COLORS.EDGE.DEFAULT;
-        }}
-        linkDirectionalArrowLength={12} // 화살표 길이 증가 (더 뚜렷하게)
-        linkDirectionalArrowRelPos={0.8} // 화살표 위치 조정 (끝에 더 가깝게)
+        // 기본 설정들
+        linkDirectionalArrowLength={6}
+        linkDirectionalArrowRelPos={0.8}
         linkDirectionalArrowColor={(link: any) => {
-          // 모든 링크에 화살표 표시 (소개 관계를 명확히 하기 위해)
-          const sourceNode =
-            typeof link.source === 'object' ? link.source : null;
-          const targetNode =
-            typeof link.target === 'object' ? link.target : null;
-
-          // 하이라이트된 노드와 연결된 링크인지 확인
-          const isHighlighted =
-            graphState.highlightedNodeId &&
-            ((sourceNode && sourceNode.id === graphState.highlightedNodeId) ||
-              (targetNode && targetNode.id === graphState.highlightedNodeId));
-
-          // 하이라이트된 노드의 연결선은 특별한 색상으로 표시 - 항상 완전 불투명하게
-          if (isHighlighted) {
-            // 소개 방향에 따라 다른 색상 적용
-            const isSourceHighlighted =
-              sourceNode && sourceNode.id === graphState.highlightedNodeId;
-
-            // 하이라이트된 노드가 소스인 경우 (소개한 관계) - 주황색
-            if (isSourceHighlighted) {
-              return OBSIDIAN_COLORS.EDGE.REFERRAL_OUT; // 상수 사용
-            }
-            // 하이라이트된 노드가 타겟인 경우 (소개받은 관계) - 파란색
-            else {
-              return OBSIDIAN_COLORS.EDGE.REFERRAL_IN; // 상수 사용
-            }
-          }
-
-          // 하이라이트 되지 않은 일반 화살표도 색상 적용 (소개 관계를 모두 표시)
-          // 소개자(influencer)가 소스인 링크는 선명한 주황색
-          if (sourceNode && sourceNode.group === 'influencer') {
-            return OBSIDIAN_COLORS.EDGE.REFERRAL_OUT; // 약한 주황색
-          }
-
-          // 일반 화살표는 중립 색상
-          return OBSIDIAN_COLORS.EDGE.DEFAULT;
-        }}
-        linkCurvature={0} // 곡률 제거 - 직선으로 변경
-        // 링크 대시 애니메이션 커스텀 렌더링 (모든 링크에 화살표 표시)
-        linkCanvasObjectMode={() => 'after'} // 모든 링크에 커스텀 렌더링 적용
-        linkCanvasObject={(link: any, ctx: any, globalScale: number) => {
-          // 소스와 타겟 노드 가져오기
-          const sourceNode =
-            typeof link.source === 'object' ? link.source : null;
-          const targetNode =
-            typeof link.target === 'object' ? link.target : null;
-
-          if (!sourceNode || !targetNode) return;
-
-          const sourceId = sourceNode.id;
-          const targetId = targetNode.id;
-
-          // 하이라이트된 링크 확인 (더 명확한 로직)
-          const isHighlighted = !!(
-            graphState.highlightedNodeId &&
-            (sourceId === graphState.highlightedNodeId ||
-              targetId === graphState.highlightedNodeId)
-          );
-
-          // 링크 시작점과 끝점
-          const start = { x: link.source.x, y: link.source.y };
-          const end = { x: link.target.x, y: link.target.y };
-
-          // 소개 방향에 따른 색상 설정 (모든 연결선 방향에 따라 색상 구분)
-          let dashColor;
-          if (isHighlighted) {
-            // 하이라이트된 노드가 소스인지 확인
-            const isSourceHighlighted =
-              sourceNode && sourceNode.id === graphState.highlightedNodeId;
-            // 하이라이트된 연결선 색상 - 항상 완전 불투명하게
-            dashColor = isSourceHighlighted
-              ? OBSIDIAN_COLORS.EDGE.REFERRAL_OUT
-              : OBSIDIAN_COLORS.EDGE.REFERRAL_IN; // 상수 사용
-          } else {
-            // 하이라이트되지 않은 링크도 방향에 따라 색상 구분
-            // 소개자(influencer)가 소스인 경우 - 선명한 주황색
-            if (sourceNode && sourceNode.group === 'influencer') {
-              dashColor = OBSIDIAN_COLORS.EDGE.REFERRAL_OUT; // 약한 주황색
-            }
-            // 소개자(influencer)가 타겟인 경우 - 약한 파란색
-            else if (targetNode && targetNode.group === 'influencer') {
-              dashColor = OBSIDIAN_COLORS.EDGE.REFERRAL_IN;
-            }
-            // 일반 노드 간 연결 - 중요도 비교로 방향 추정
-            else if (sourceNode && targetNode) {
-              const sourceImportance = sourceNode.importance || 0;
-              const targetImportance = targetNode.importance || 0;
-
-              if (sourceImportance > targetImportance) {
-                dashColor = OBSIDIAN_COLORS.EDGE.REFERRAL_OUT; // 약한 주황색
-              } else if (targetImportance > sourceImportance) {
-                dashColor = OBSIDIAN_COLORS.EDGE.REFERRAL_IN; // 약한 파란색
-              } else {
-                dashColor = OBSIDIAN_COLORS.EDGE.DEFAULT; // 중립 색상
-              }
+          if (graphState.highlightedNodeId) {
+            // 경로에 포함된 링크인지 확인
+            if (isLinkInHighlightPath(link)) {
+              return '#cccccc'; // 경로에 포함된 화살표는 밝게
             } else {
-              dashColor = OBSIDIAN_COLORS.EDGE.DEFAULT; // 기본 중립 색상
+              return 'rgba(150, 150, 150, 0.3)'; // 경로에 포함되지 않은 화살표는 투명하게
             }
           }
 
-          // 하이라이트된 링크에는 눈에 띄는 애니메이션 효과 적용
-          if (isHighlighted) {
-            // 펄싱 효과 (더 부드러운 애니메이션)
-            const primaryPulse = Math.sin(animationTime * 0.15) * 0.3 + 0.7; // 0~1 사이 펄싱 값 (더 부드럽게)
-            const secondaryPulse =
-              Math.sin(animationTime * 0.25 + 1) * 0.2 + 0.8; // 약간 다른 주기
-            const combinedPulse = primaryPulse * 0.7 + secondaryPulse * 0.3; // 두 펄스 혼합
-
-            // 소개 방향에 따라 색상 선택
-            const isSourceHighlighted =
-              sourceNode && sourceNode.id === graphState.highlightedNodeId;
-            const baseGlowColor = isSourceHighlighted
-              ? OBSIDIAN_COLORS.ANIMATION.PULSE_PRIMARY
-              : OBSIDIAN_COLORS.ANIMATION.PULSE_SECONDARY;
-            const baseSolidColor = isSourceHighlighted
-              ? OBSIDIAN_COLORS.NODE.HIGHLIGHTED
-              : OBSIDIAN_COLORS.NODE.CONNECTED;
-
-            // 외부 발광 효과 (더 넓은 영역)
-            ctx.beginPath();
-            ctx.setLineDash([]); // 실선으로
-            ctx.moveTo(start.x, start.y);
-            ctx.lineTo(end.x, end.y);
-            ctx.lineWidth = (8 + 2 * combinedPulse) / globalScale; // 펄싱 크기 효과
-            ctx.strokeStyle = baseGlowColor;
-            ctx.stroke();
-
-            // 방향을 나타내는 흐르는 화살표 효과 (더 부드럽게)
-            ctx.beginPath();
-            // 짧은 대시, 긴 간격으로 방향성 표현
-            ctx.setLineDash([8, 8]);
-            // 애니메이션 속도 조절 (더 부드럽게)
-            ctx.lineDashOffset = (animationTime % 30) * -1.5;
-            ctx.moveTo(start.x, start.y);
-            ctx.lineTo(end.x, end.y);
-            ctx.strokeStyle = baseSolidColor;
-            ctx.lineWidth = (4 + combinedPulse) / globalScale; // 펄싱에 따라 선 두께 변화
-            ctx.stroke();
-
-            // 화살표 방향 표시를 위한 중간 원 그리기 (펄스/글로우 효과 제거)
-            const t = 0.7; // 선의 70% 지점에 방향 표시 (더 타겟에 가깝게)
-            const midX = start.x + t * (end.x - start.x);
-            const midY = start.y + t * (end.y - start.y);
-
-            // 간소화된 방향 표시 원
-            ctx.beginPath();
-            ctx.arc(midX, midY, 5 / globalScale, 0, 2 * Math.PI);
-            ctx.fillStyle = baseSolidColor;
-            ctx.fill();
-
-            // 방향 표현을 위한 추가 표시 (작은 원 추가)
-            const t2 = 0.4; // 중간 지점에 추가 방향 표시
-            const midX2 = start.x + t2 * (end.x - start.x);
-            const midY2 = start.y + t2 * (end.y - start.y);
-
-            ctx.beginPath();
-            ctx.arc(midX2, midY2, 3 / globalScale, 0, 2 * Math.PI);
-            ctx.fillStyle = baseSolidColor;
-            ctx.fill();
-          } else {
-            // 하이라이트가 있는 경우와 없는 경우 구분
-            if (graphState.highlightedNodeId) {
-              // 하이라이트가 있는 상황에서 하이라이트되지 않은 링크는 매우 희미하게 표시
-              // 투명도를 극히 낮게 설정하여 하이라이트된 링크가 더 강조되도록
-              ctx.globalAlpha = 0.05;
-
-              // 중간 지점 계산
-              const t = 0.7; // 선의 70% 지점에 표시
-              const midX = start.x + t * (end.x - start.x);
-              const midY = start.y + t * (end.y - start.y);
-
-              // 작은 원 그리기 (방향 표시)
-              ctx.beginPath();
-              ctx.arc(midX, midY, 1.5 / globalScale, 0, 2 * Math.PI);
-              ctx.fillStyle = OBSIDIAN_COLORS.NODE.DIMMED;
-              ctx.fill();
-
-              // 그림자 비활성화
-              ctx.shadowColor = 'transparent';
-              ctx.shadowBlur = 0;
-
-              // 투명도 원래대로 복구
-              ctx.globalAlpha = 1;
-            } else {
-              // 하이라이트가 없는 상황에서는 보통 강도로 표시
-              // 중간 지점 계산
-              const t = 0.7; // 선의 70% 지점에 표시
-              const midX = start.x + t * (end.x - start.x);
-              const midY = start.y + t * (end.y - start.y);
-
-              // 작은 원 그리기 (방향 표시)
-              ctx.beginPath();
-              ctx.arc(midX, midY, 3 / globalScale, 0, 2 * Math.PI);
-              ctx.fillStyle = dashColor;
-              ctx.fill();
-            }
-          }
-
-          // 대시 설정 초기화
-          ctx.setLineDash([]);
+          return '#666666'; // 기본 화살표 색상을 더 어둡게 (하이라이트 없을 때)
         }}
+        // 기본 상호작용
         enableZoomInteraction={true}
         enablePanInteraction={true}
         enableNodeDrag={true}
-        cooldownTime={3000}
-        warmupTicks={60}
-        onEngineStop={() => {
-          // 엔진 정지 시 항상 초기화 완료로 표시
-          if (!graphState.initialized) {
-            setGraphState((prev) => ({ ...prev, initialized: true }));
-          }
-        }}
-        onNodeClick={(node: any) => {
-          // 이미 선택된 노드를 다시 클릭하면 무시
-          if (graphState.highlightedNodeId === node.id) {
-            onNodeSelect(node.id);
-            return;
+        // 중요도에 따른 노드 색상 설정
+        nodeColor={(node: any) => {
+          const importance = node.importance || 1;
+
+          // 소개자(influencer)는 별도 색상
+          if (node.group === 'influencer') {
+            if (node.id === graphState.highlightedNodeId) {
+              return '#ff4500'; // 하이라이트된 소개자
+            }
+            if (isNodeConnectedToHighlight(node.id)) {
+              return '#ff7f50'; // 연결된 소개자
+            }
+            return '#ff6b35'; // 기본 소개자 (오렌지)
           }
 
-          // 내부 하이라이트 상태 업데이트
+          // 일반 고객의 중요도별 색상 (고객 카드와 동일한 어두운 은은한 색상)
+          let baseColor;
+          if (importance >= 5) {
+            // VIP (높음) - 어두운 오렌지 계열
+            baseColor = 'oklch(0.35 0.08 35)'; // 어두운 오렌지 톤
+          } else if (importance >= 3) {
+            // 일반 (보통) - 어두운 블루 계열
+            baseColor = 'oklch(0.35 0.06 240)'; // 어두운 블루 톤
+          } else {
+            // 관심 (낮음) - 어두운 회색 계열
+            baseColor = 'oklch(0.30 0.01 285)'; // 어두운 회색 톤
+          }
+
+          // 하이라이트 상태에 따른 색상 조정
+          if (node.id === graphState.highlightedNodeId) {
+            // 하이라이트된 노드는 조금 더 밝게
+            if (importance >= 5) {
+              return 'oklch(0.50 0.12 35)'; // 밝은 오렌지
+            } else if (importance >= 3) {
+              return 'oklch(0.50 0.10 240)'; // 밝은 블루
+            } else {
+              return 'oklch(0.45 0.02 285)'; // 밝은 회색
+            }
+          }
+
+          if (isNodeConnectedToHighlight(node.id)) {
+            // 연결된 노드는 중간 강도
+            if (importance >= 5) {
+              return 'oklch(0.42 0.10 35)'; // 중간 오렌지
+            } else if (importance >= 3) {
+              return 'oklch(0.42 0.08 240)'; // 중간 블루
+            } else {
+              return 'oklch(0.38 0.015 285)'; // 중간 회색
+            }
+          }
+
+          // 하이라이트된 노드가 있지만 연결되지 않은 노드들은 살짝만 어둡게 처리
+          if (graphState.highlightedNodeId) {
+            if (importance >= 5) {
+              return 'oklch(0.28 0.06 35 / 0.8)'; // 살짝 어두운 오렌지 + 약한 투명도
+            } else if (importance >= 3) {
+              return 'oklch(0.28 0.05 240 / 0.8)'; // 살짝 어두운 블루 + 약한 투명도
+            } else {
+              return 'oklch(0.25 0.01 285 / 0.8)'; // 살짝 어두운 회색 + 약한 투명도
+            }
+          }
+
+          return baseColor; // 기본 은은한 색상
+        }}
+        linkColor={(link: any) => {
+          if (graphState.highlightedNodeId) {
+            // 경로에 포함된 링크인지 확인
+            if (isLinkInHighlightPath(link)) {
+              return '#cccccc'; // 경로에 포함된 링크는 밝게
+            } else {
+              return 'rgba(150, 150, 150, 0.3)'; // 경로에 포함되지 않은 링크는 투명하게
+            }
+          }
+
+          return '#666666'; // 기본 링크를 더 어둡게 (하이라이트 없을 때)
+        }}
+        linkWidth={(link: any) => {
+          if (graphState.highlightedNodeId) {
+            // 경로에 포함된 링크인지 확인
+            if (isLinkInHighlightPath(link)) {
+              return 2; // 경로에 포함된 링크는 조금 더 두껍게
+            }
+          }
+
+          return 1; // 기본 링크 굵기
+        }}
+        // 노드 클릭 이벤트
+        onNodeClick={(node: any) => {
           setGraphState((prev) => ({
             ...prev,
             highlightedNodeId: node.id,
-            nodeTransitionInProgress: true,
           }));
 
-          // 노드 및 연결된 노드들을 화면에 적절하게 표시하는 개선된 함수
-          if (graphRef.current) {
-            try {
-              // 연결된 노드들 찾기
-              const connectedNodes: any[] = [];
-              const graphData = safeGraphData();
-
-              if (graphData && graphData.links) {
-                // 현재 하이라이트 노드와 직접 연결된 노드들의 ID와 위치 수집
-                graphData.links.forEach((link: any) => {
-                  const sourceId =
-                    typeof link.source === 'object'
-                      ? link.source.id
-                      : link.source;
-                  const targetId =
-                    typeof link.target === 'object'
-                      ? link.target.id
-                      : link.target;
-
-                  if (sourceId === node.id) {
-                    const targetNode = graphData.nodes.find(
-                      (n: any) => n.id === targetId
-                    );
-                    if (targetNode) connectedNodes.push(targetNode);
-                  } else if (targetId === node.id) {
-                    const sourceNode = graphData.nodes.find(
-                      (n: any) => n.id === sourceId
-                    );
-                    if (sourceNode) connectedNodes.push(sourceNode);
-                  }
-                });
-              }
-
-              // 개선된 두 단계 애니메이션 접근법
-              const animateToNode = () => {
-                if (!graphRef.current) {
-                  setGraphState((prev) => ({
-                    ...prev,
-                    nodeTransitionInProgress: false,
-                  }));
-                  return;
-                }
-
-                try {
-                  if (typeof graphRef.current.centerAt === 'function') {
-                    // 노드 위치 확인
-                    const targetX = node.x || 0;
-                    const targetY = node.y || 0;
-
-                    // 연결된 노드들의 위치 계산 (바운딩 박스 계산용)
-                    const nodePositions = [{ x: targetX, y: targetY }];
-                    connectedNodes.forEach((connNode) => {
-                      if (
-                        connNode.x !== undefined &&
-                        connNode.y !== undefined
-                      ) {
-                        nodePositions.push({ x: connNode.x, y: connNode.y });
-                      }
-                    });
-
-                    // 연결 노드들의 경계 계산
-                    let minX = Infinity,
-                      maxX = -Infinity,
-                      minY = Infinity,
-                      maxY = -Infinity;
-                    nodePositions.forEach((pos) => {
-                      minX = Math.min(minX, pos.x);
-                      maxX = Math.max(maxX, pos.x);
-                      minY = Math.min(minY, pos.y);
-                      maxY = Math.max(maxY, pos.y);
-                    });
-
-                    // 바운딩 박스의 중심 계산
-                    const centerX = (minX + maxX) / 2;
-                    const centerY = (minY + maxY) / 2;
-
-                    // 줌 없이 중심점으로만 이동
-                    graphRef.current.centerAt(centerX, centerY, 1000, () => {
-                      // 애니메이션 완료 후 상태 업데이트
-                      setGraphState((prev) => ({
-                        ...prev,
-                        nodeTransitionInProgress: false,
-                      }));
-                    });
-                  } else {
-                    // 아무 기능도 없는 경우 상태 초기화
-                    setGraphState((prev) => ({
-                      ...prev,
-                      nodeTransitionInProgress: false,
-                    }));
-                  }
-                } catch (err) {
-                  console.error('노드 중앙 이동 오류:', err);
-                  setGraphState((prev) => ({
-                    ...prev,
-                    nodeTransitionInProgress: false,
-                  }));
-                }
-              };
-
-              // 짧은 지연 후 애니메이션 시작
-              setTimeout(animateToNode, 50);
-            } catch (err) {
-              console.error('노드 중앙 이동 오류:', err);
-              setGraphState((prev) => ({
-                ...prev,
-                nodeTransitionInProgress: false,
-              }));
-            }
+          // 클릭한 노드를 화면 중앙으로 이동
+          if (
+            graphRef.current &&
+            typeof graphRef.current.centerAt === 'function'
+          ) {
+            graphRef.current.centerAt(node.x, node.y, 1000); // 1초 동안 부드럽게 이동
           }
 
-          // 노드 선택 콜백 호출
           onNodeSelect(node.id);
         }}
-        onNodeDragEnd={() => {
-          // 노드 드래그 후 간단한 타이머로 안정화
-          setTimeout(() => {
-            if (
-              graphRef.current &&
-              typeof graphRef.current.d3ReheatSimulation === 'function'
-            ) {
-              graphRef.current.d3ReheatSimulation();
-            }
-          }, 300);
+        // 배경 클릭으로 하이라이트 해제
+        onBackgroundClick={() => {
+          setGraphState((prev) => ({
+            ...prev,
+            highlightedNodeId: null,
+          }));
         }}
+        // 노드 위에 고객명 추가로 표시 (노드는 그대로 유지)
+        nodeCanvasObjectMode={() => 'after'}
         nodeCanvasObject={(node: any, ctx: any, globalScale: number) => {
-          try {
-            const label = node.name;
-            // 옵시디언 스타일 폰트 설정
-            const fontSize = Math.max(12, 16 / globalScale);
-            ctx.font = `600 ${fontSize}px 'Inter', -apple-system, BlinkMacSystemFont, sans-serif`;
+          // 하이라이트된 노드에만 은은한 발광 효과 추가
+          if (node.id === graphState.highlightedNodeId) {
+            const nodeRadius = calculateNodeRadius(node, true, false);
 
-            // 필터링 및 하이라이트 상태 확인
-            const isFiltered = node._filtered === true;
-            const isHighlightNode = node.id === graphState.highlightedNodeId;
-            const isSearchResultNode = isNodeInSearchResults(node.id);
-            const isConnectedNode = isNodeConnectedToHighlight(node.id);
-            const isHighlightRelated =
-              isHighlightNode || isConnectedNode || isSearchResultNode;
+            // 애니메이션을 위한 시간 기반 펄스 효과 (더 눈에 띄게)
+            const pulseIntensity = 0.6 + Math.sin(animationTime * 0.03) * 0.3; // 0.3~0.9 범위
 
-            // 연결 개수를 고려한 노드 크기 계산
-            const nodeRadius = calculateNodeRadius(
-              node,
-              isHighlightNode,
-              isHighlightRelated
+            // 발광 효과를 위한 그라디언트 생성 (범위 좁게)
+            const glowRadius = nodeRadius * 1.5; // 노드 크기의 1.5배로 좁게
+            const gradient = ctx.createRadialGradient(
+              node.x,
+              node.y,
+              nodeRadius * 0.6,
+              node.x,
+              node.y,
+              glowRadius
             );
 
-            // 옵시디언 스타일 색상 시스템
-            let nodeColor = '#64748b'; // 기본 muted-foreground
+            // 더 눈에 띄는 발광 색상 (노드 색상 기반)
+            let glowColor;
             if (node.group === 'influencer') {
-              nodeColor = '#a73f03'; // primary
+              glowColor = `rgba(255, 107, 53, ${0.25 * pulseIntensity})`; // 더 눈에 띄는 오렌지 발광
             } else {
-              // 단계별 색상 구분 (옵시디언 스타일)
-              switch (node.stage) {
-                case '첫 상담':
-                  nodeColor = '#64748b';
-                  break; // muted-foreground
-                case '니즈 분석':
-                  nodeColor = '#f59e0b';
-                  break; // amber-500
-                case '상품 설명':
-                  nodeColor = '#3b82f6';
-                  break; // blue-500
-                case '계약 검토':
-                  nodeColor = '#ef4444';
-                  break; // red-500
-                case '계약 완료':
-                  nodeColor = '#22c55e';
-                  break; // green-500
-                default:
-                  nodeColor = '#64748b';
+              const importance = node.importance || 1;
+              if (importance >= 5) {
+                glowColor = `rgba(255, 140, 0, ${0.22 * pulseIntensity})`; // VIP - 더 눈에 띄는 오렌지 발광
+              } else if (importance >= 3) {
+                glowColor = `rgba(70, 130, 255, ${0.2 * pulseIntensity})`; // 일반 - 더 눈에 띄는 블루 발광
+              } else {
+                glowColor = `rgba(150, 150, 150, ${0.18 * pulseIntensity})`; // 관심 - 더 눈에 띄는 회색 발광
               }
             }
 
-            // 투명도 설정 - 옵시디언 스타일
-            if (isFiltered) {
-              ctx.globalAlpha = 0.1;
-            } else if (
-              graphState.highlightedNodeId ||
-              graphState.searchResults.length > 0
-            ) {
-              ctx.globalAlpha = isHighlightRelated ? 1.0 : 0.25;
-            } else {
-              ctx.globalAlpha = 1.0;
-            }
+            gradient.addColorStop(0, glowColor);
+            gradient.addColorStop(
+              0.6,
+              `rgba(255, 255, 255, ${0.08 * pulseIntensity})`
+            );
+            gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
 
-            // 하이라이트된 주요 노드 - 옵시디언 스타일 펄스 효과
-            if (isHighlightNode && !isFiltered) {
-              const time = animationTime * 0.003;
-              const primaryPulse = (Math.sin(time * Math.PI) + 1) * 0.5;
-              const secondaryPulse =
-                (Math.sin(time * Math.PI * 1.618) + 1) * 0.5;
-              const pulse = primaryPulse * 0.7 + secondaryPulse * 0.3;
-
-              // 외부 발광 링 (3단계 - 옵시디언 스타일)
-              for (let i = 3; i >= 1; i--) {
-                ctx.beginPath();
-                ctx.arc(
-                  node.x,
-                  node.y,
-                  nodeRadius * (1.2 + i * 0.3 + pulse * 0.2),
-                  0,
-                  2 * Math.PI
-                );
-                const alpha = (0.15 + pulse * 0.1) / i;
-                ctx.fillStyle = `rgba(167, 63, 3, ${alpha})`;
-                ctx.fill();
-              }
-
-              // 메인 발광 효과
-              ctx.shadowColor = 'rgba(167, 63, 3, 0.6)';
-              ctx.shadowBlur = 20 + pulse * 15;
-              ctx.shadowOffsetX = 0;
-              ctx.shadowOffsetY = 0;
-
-              // 펄스 테두리
-              ctx.strokeStyle = `rgba(167, 63, 3, ${0.8 + pulse * 0.2})`;
-              ctx.lineWidth = (3 + pulse * 2) / globalScale;
-              ctx.stroke();
-            }
-
-            // 연결된 노드 - 서브틀한 강조 (옵시디언 스타일)
-            if (isConnectedNode && !isHighlightNode && !isFiltered) {
-              ctx.beginPath();
-              ctx.arc(node.x, node.y, nodeRadius + 3, 0, 2 * Math.PI);
-              ctx.fillStyle = 'rgba(100, 116, 139, 0.3)';
-              ctx.fill();
-
-              // 연결 표시 테두리
-              ctx.strokeStyle = 'rgba(100, 116, 139, 0.8)';
-              ctx.lineWidth = 2 / globalScale;
-              ctx.stroke();
-            }
-
-            // 검색 결과 노드 강조
-            if (isSearchResultNode && !isHighlightNode && !isFiltered) {
-              ctx.strokeStyle = 'rgba(239, 68, 68, 0.8)'; // red-500
-              ctx.lineWidth = 2 / globalScale;
-              ctx.stroke();
-            }
-
-            // 메인 노드 렌더링
+            // 발광 효과 렌더링
+            ctx.save();
+            ctx.globalCompositeOperation = 'screen'; // 발광 효과를 위한 블렌드 모드
+            ctx.fillStyle = gradient;
             ctx.beginPath();
-            ctx.arc(node.x, node.y, nodeRadius, 0, 2 * Math.PI);
-            ctx.fillStyle = nodeColor;
+            ctx.arc(node.x, node.y, glowRadius, 0, 2 * Math.PI);
             ctx.fill();
-
-            // 노드 테두리 (기본)
-            if (!isHighlightNode && !isConnectedNode && !isSearchResultNode) {
-              ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-              ctx.lineWidth = 1 / globalScale;
-              ctx.stroke();
-            }
-
-            // 라벨 렌더링 - 옵시디언 스타일
-            if (
-              globalScale > 0.6 &&
-              (isHighlightRelated || globalScale > 1.2)
-            ) {
-              const labelY = node.y + nodeRadius + 20 / globalScale;
-
-              // 라벨 배경 (옵시디언 스타일)
-              if (isHighlightRelated) {
-                const textMetrics = ctx.measureText(label);
-                const padding = 6 / globalScale;
-                const bgRadius = 4 / globalScale;
-
-                // 둥근 배경
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
-                ctx.beginPath();
-                ctx.roundRect(
-                  node.x - textMetrics.width / 2 - padding,
-                  labelY - fontSize / 2 - padding,
-                  textMetrics.width + padding * 2,
-                  fontSize + padding * 2,
-                  bgRadius
-                );
-                ctx.fill();
-              }
-
-              // 라벨 텍스트
-              ctx.fillStyle = isHighlightRelated ? '#ffffff' : '#e2e8f0';
-              ctx.textAlign = 'center';
-              ctx.textBaseline = 'middle';
-              ctx.fillText(label, node.x, labelY);
-            }
-
-            // 그림자 및 글로벌 알파 리셋
-            ctx.shadowColor = 'transparent';
-            ctx.shadowBlur = 0;
-            ctx.globalAlpha = 1.0;
-          } catch (err) {
-            console.error('노드 렌더링 오류:', err);
-            // 폴백 렌더링
-            ctx.globalAlpha = 1.0;
-            ctx.fillStyle = '#64748b';
-            ctx.beginPath();
-            ctx.arc(node.x, node.y, 6, 0, 2 * Math.PI);
-            ctx.fill();
+            ctx.restore();
           }
+
+          // 기존 텍스트 렌더링
+          const label = node.name;
+          const fontSize = Math.max(10, 13 / globalScale);
+
+          // 깔끔한 폰트 설정
+          ctx.font = `600 ${fontSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+
+          // 텍스트 위치 계산 (노드 아래쪽)
+          const nodeRadius =
+            (node.importance || 1) * (node.group === 'influencer' ? 2 : 1.5);
+          const textY = node.y + nodeRadius + 18 / globalScale;
+
+          // 텍스트 렌더링 (배경 없이 깔끔하게)
+          ctx.fillStyle = '#ffffff'; // 흰색으로 변경
+          ctx.fillText(label, node.x, textY);
         }}
       />
     </div>
