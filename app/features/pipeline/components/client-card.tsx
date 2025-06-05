@@ -195,8 +195,8 @@ export function ClientCard({
     );
   };
 
-  // 📅 마지막 연락일 계산
-  const getDaysSinceLastContact = () => {
+  // 📅 마지막 상담일 계산
+  const getDaysSinceLastConsultation = () => {
     if (!lastContactDate) return null;
     const lastContact = new Date(lastContactDate);
     const now = new Date();
@@ -206,12 +206,13 @@ export function ClientCard({
   };
 
   const daysInPipeline = getDaysInPipeline();
-  const daysSinceLastContact = getDaysSinceLastContact();
+  const daysSinceLastConsultation = getDaysSinceLastConsultation();
   const expectedPremium = calculateExpectedPremium();
   const expectedCommission = calculateExpectedCommission();
 
-  // 🚨 긴급도 표시 (7일 이상 연락 없음)
-  const isUrgent = daysSinceLastContact !== null && daysSinceLastContact >= 7;
+  // 🚨 긴급도 표시 (7일 이상 상담 없음)
+  const isUrgent =
+    daysSinceLastConsultation !== null && daysSinceLastConsultation >= 7;
   const isStale = daysInPipeline >= 30; // 30일 이상 체류
 
   return (
@@ -318,7 +319,7 @@ export function ClientCard({
               </span>
             </div>
 
-            {daysSinceLastContact !== null && (
+            {daysSinceLastConsultation !== null && (
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Clock
@@ -327,7 +328,7 @@ export function ClientCard({
                     }`}
                   />
                   <span className="text-xs text-muted-foreground">
-                    마지막 연락
+                    마지막 상담
                   </span>
                 </div>
                 <span
@@ -335,7 +336,7 @@ export function ClientCard({
                     isUrgent ? 'text-red-600' : 'text-foreground'
                   }`}
                 >
-                  {daysSinceLastContact}일 전
+                  {daysSinceLastConsultation}일 전
                 </span>
               </div>
             )}

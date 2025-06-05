@@ -9,6 +9,7 @@ import {
   referrals,
 } from '~/lib/schema/core';
 import { profiles } from '~/lib/schema/core';
+import { appClientConsultationNotes } from '~/features/clients/lib/schema';
 
 // Pipeline Stages 관련 함수들
 export async function getPipelineStages(agentId: string) {
@@ -128,6 +129,26 @@ export async function getClientsByStage(agentId: string) {
             .orderBy(desc(meetings.scheduledAt))
             .limit(5);
 
+          // 마지막 상담 날짜 조회
+          let lastConsultationDate = null;
+          try {
+            const lastConsultation = await db
+              .select({
+                consultationDate: appClientConsultationNotes.consultationDate,
+              })
+              .from(appClientConsultationNotes)
+              .where(eq(appClientConsultationNotes.clientId, item.client.id))
+              .orderBy(desc(appClientConsultationNotes.consultationDate))
+              .limit(1);
+
+            if (lastConsultation[0]) {
+              lastConsultationDate = lastConsultation[0].consultationDate;
+            }
+          } catch (error) {
+            // 상담 기록이 없는 경우 null 유지
+            lastConsultationDate = null;
+          }
+
           // 🎯 파이프라인 타입에 정확히 맞게 필드명 변환
           return {
             id: item.client.id,
@@ -150,7 +171,7 @@ export async function getClientsByStage(agentId: string) {
             insuranceInfo: insurance,
             meetings: clientMeetings,
             // 추가 필드들
-            lastContactDate: item.client.updatedAt?.toISOString().split('T')[0],
+            lastContactDate: lastConsultationDate,
             createdAt: item.client.createdAt?.toISOString(),
           };
         } catch (error) {
@@ -165,7 +186,7 @@ export async function getClientsByStage(agentId: string) {
             tags: item.client.tags || [],
             stageId: item.client.currentStageId,
             referredBy: null,
-            lastContactDate: item.client.updatedAt?.toISOString().split('T')[0],
+            lastContactDate: null, // 에러 시에는 null로 설정
             createdAt: item.client.createdAt?.toISOString(),
           };
         }

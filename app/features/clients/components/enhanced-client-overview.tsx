@@ -288,7 +288,7 @@ export function EnhancedClientOverview({
                       {client.lastContactDate && (
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">
-                            마지막 연락
+                            마지막 상담
                           </span>
                           <span>
                             {new Date(
