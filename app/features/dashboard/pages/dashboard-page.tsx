@@ -50,6 +50,11 @@ export async function loader({ request }: Route.LoaderArgs) {
   const user = await requireAuth(request);
 
   try {
+    // 🆕 실제 상품 데이터 추가
+    const { getOpportunityProductStats } = await import(
+      '~/api/shared/opportunity-products'
+    );
+
     // 모든 데이터를 병렬로 조회 (성능 최적화)
     const [
       userInfo,
@@ -60,6 +65,7 @@ export async function loader({ request }: Route.LoaderArgs) {
       recentClientsData,
       referralInsights,
       userGoals,
+      salesStats, // 🆕 실제 영업 상품 통계
     ] = await Promise.all([
       getUserInfo(user.id),
       getTodayStats(user.id),
@@ -69,6 +75,7 @@ export async function loader({ request }: Route.LoaderArgs) {
       getRecentClientsData(user.id),
       getReferralInsights(user.id),
       getUserGoals(user.id),
+      getOpportunityProductStats(user.id), // 🆕 실제 상품 통계 추가
     ]);
 
     return {
@@ -81,6 +88,17 @@ export async function loader({ request }: Route.LoaderArgs) {
       topReferrers: referralInsights.topReferrers,
       networkStats: referralInsights.networkStats,
       userGoals,
+      // 🆕 실제 영업 상품 통계 데이터
+      salesStats: salesStats.success
+        ? salesStats.data
+        : {
+            totalProducts: 0,
+            totalPremium: 0,
+            totalCommission: 0,
+            averagePremium: 0,
+            averageCommission: 0,
+            typeStats: {},
+          },
       // 성능 메트릭 (개발용)
       loadTime: Date.now(),
     };
@@ -262,6 +280,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
     topReferrers,
     networkStats,
     userGoals,
+    salesStats, // 🆕 실제 영업 상품 통계
     error,
   } = loaderData;
 
@@ -468,7 +487,11 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
         />
 
         {/* 성과 지표 카드 */}
-        <PerformanceKPICards data={compatibleKPIData} isLoading={isLoading} />
+        <PerformanceKPICards
+          data={compatibleKPIData}
+          isLoading={isLoading}
+          salesStats={salesStats}
+        />
 
         {/* 오늘의 일정 및 영업 파이프라인 */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

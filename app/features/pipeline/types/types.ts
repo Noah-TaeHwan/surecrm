@@ -56,6 +56,21 @@ export interface Client {
   consentDate?: string;
   profileImageUrl?: string;
   createdAt?: string; // 체류 기간 계산용
+  // 🆕 상품 정보 필드들
+  products?: Array<{
+    id: string;
+    productName: string;
+    insuranceCompany: string;
+    insuranceType: string;
+    monthlyPremium?: string;
+    expectedCommission?: string;
+    notes?: string;
+    status: string;
+    createdAt: string;
+    updatedAt: string;
+  }>;
+  totalMonthlyPremium?: number;
+  totalExpectedCommission?: number;
 }
 
 export interface LoaderData {

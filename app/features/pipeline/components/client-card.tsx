@@ -118,6 +118,21 @@ interface ClientCardProps {
   interestCategories?: Array<{ label: string; icon: string }>;
   isDragging?: boolean;
   onRemoveFromPipeline?: (clientId: string, clientName: string) => void;
+  // 🆕 실제 상품 정보 필드들
+  products?: Array<{
+    id: string;
+    productName: string;
+    insuranceCompany: string;
+    insuranceType: string;
+    monthlyPremium?: string;
+    expectedCommission?: string;
+    notes?: string;
+    status: string;
+    createdAt: string;
+    updatedAt: string;
+  }>;
+  totalMonthlyPremium?: number;
+  totalExpectedCommission?: number;
 }
 
 export function ClientCard({
@@ -142,6 +157,10 @@ export function ClientCard({
   interestCategories = [],
   isDragging = false,
   onRemoveFromPipeline,
+  // 🆕 실제 상품 정보 필드들
+  products = [],
+  totalMonthlyPremium = 0,
+  totalExpectedCommission = 0,
 }: ClientCardProps) {
   // 🎯 중요도별 스타일 (왼쪽 보더 제거)
   const importanceStyles = {
@@ -151,7 +170,7 @@ export function ClientCard({
       badge:
         'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
       icon: 'text-orange-600',
-      borderClass: 'client-card-vip', // VIP 전용 애니메이션 클래스
+      borderClass: 'client-card-keyman', // 키맨 전용 애니메이션 클래스
     },
     medium: {
       bgGradient:
@@ -171,8 +190,12 @@ export function ClientCard({
 
   const styles = importanceStyles[importance];
 
-  // 📊 예상 보험료 계산 (직업 기반)
-  const calculateExpectedPremium = () => {
+  // 📊 실제 월 보험료 (실제 데이터가 없으면 예상값 계산)
+  const getMonthlyPremium = () => {
+    if (totalMonthlyPremium > 0) {
+      return totalMonthlyPremium;
+    }
+    // 실제 데이터가 없으면 예상값 계산 (기존 로직 유지)
     const basePremium = 150000; // 기본 15만원
     const occupationMultiplier =
       occupation?.includes('의사') || occupation?.includes('변호사')
@@ -183,9 +206,13 @@ export function ClientCard({
     return Math.round(basePremium * occupationMultiplier);
   };
 
-  // 💰 예상 연 수수료 계산
-  const calculateExpectedCommission = () => {
-    return Math.round(calculateExpectedPremium() * 12 * 0.15); // 15% 수수료율
+  // 💰 실제 연 수수료 (실제 데이터가 없으면 예상값 계산)
+  const getYearlyCommission = () => {
+    if (totalExpectedCommission > 0) {
+      return totalExpectedCommission * 12; // 월 수수료 × 12개월
+    }
+    // 실제 데이터가 없으면 예상값 계산 (기존 로직 유지)
+    return Math.round(getMonthlyPremium() * 12 * 0.15); // 15% 수수료율
   };
 
   // ⏰ 파이프라인 체류 기간 계산
@@ -209,8 +236,8 @@ export function ClientCard({
 
   const daysInPipeline = getDaysInPipeline();
   const daysSinceLastConsultation = getDaysSinceLastConsultation();
-  const expectedPremium = calculateExpectedPremium();
-  const expectedCommission = calculateExpectedCommission();
+  const monthlyPremium = getMonthlyPremium();
+  const yearlyCommission = getYearlyCommission();
 
   // 🚨 긴급도 표시 (7일 이상 상담 없음)
   const isUrgent =
@@ -257,7 +284,7 @@ export function ClientCard({
               className={`${styles.badge} text-xs font-medium flex-shrink-0`}
             >
               {importance === 'high'
-                ? 'VIP'
+                ? '키맨'
                 : importance === 'medium'
                 ? '일반'
                 : '관심'}
@@ -284,17 +311,23 @@ export function ClientCard({
                 <span className="text-xs text-muted-foreground">월 보험료</span>
               </div>
               <p className="text-sm font-semibold text-foreground text-center">
-                {(expectedPremium / 10000).toFixed(0)}만원
+                {monthlyPremium > 0
+                  ? (monthlyPremium / 10000).toFixed(0) + '만원'
+                  : '미설정'}
               </p>
             </div>
 
             <div className="bg-muted/30 rounded-lg p-3">
               <div className="flex items-center gap-2 mb-1">
                 <TrendingUp className="h-3.5 w-3.5 text-blue-600" />
-                <span className="text-xs text-muted-foreground">연 수수료</span>
+                <span className="text-xs text-muted-foreground">
+                  예상 수수료
+                </span>
               </div>
               <p className="text-sm font-semibold text-foreground text-center">
-                {(expectedCommission / 10000).toFixed(0)}만원
+                {yearlyCommission > 0
+                  ? (yearlyCommission / 10000).toFixed(0) + '만원'
+                  : '미설정'}
               </p>
             </div>
           </div>

@@ -79,7 +79,7 @@ export function EnhancedClientOverview({
         return (
           <Badge variant="destructive" className="gap-1">
             <Star className="h-3 w-3" />
-            VIP 고객
+            키맨 고객
           </Badge>
         );
       case 'medium':

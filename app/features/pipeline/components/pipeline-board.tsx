@@ -334,6 +334,12 @@ export function PipelineBoard({
                           referredBy={client.referredBy || undefined}
                           isDragging={client.id === draggedClientId}
                           onRemoveFromPipeline={onRemoveFromPipeline}
+                          // 🆕 실제 상품 정보 데이터 전달
+                          products={client.products}
+                          totalMonthlyPremium={client.totalMonthlyPremium}
+                          totalExpectedCommission={
+                            client.totalExpectedCommission
+                          }
                         />
                       </div>
                     ))

@@ -89,7 +89,7 @@ const MOCK_CLIENTS: ClientProfile[] = [
     hasDrivingLicense: true,
     height: 175,
     weight: 70,
-    tags: ['VIP', '핵심 소개자', '장기 고객'],
+    tags: ['키맨', '핵심 소개자', '장기 고객'],
     importance: 'high' as Importance,
     currentStageId: 'stage3',
     referredById: null,
@@ -137,7 +137,7 @@ const MOCK_CLIENTS: ClientProfile[] = [
     hasDrivingLicense: true,
     height: 165,
     weight: 55,
-    tags: ['VIP', '고소득', '전문직'],
+    tags: ['키맨', '고소득', '전문직'],
     importance: 'high' as Importance,
     currentStageId: 'stage4',
     referredById: '1', // 김철수가 소개
@@ -278,8 +278,8 @@ export async function loader({ request }: { request: Request }) {
       const clients = clientsResponse.data;
       const totalClients = clients.length;
 
-      // VIP 고객 수
-      const vipClients = clients.filter(
+      // 키맨 고객 수
+      const keyClients = clients.filter(
         (c: any) => c.importance === 'high'
       ).length;
 

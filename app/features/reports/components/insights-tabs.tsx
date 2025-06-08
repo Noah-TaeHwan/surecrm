@@ -711,7 +711,7 @@ export function InsightsTabs({
                         </p>
                         <p className="text-xs text-muted-foreground">
                           {performance.activeClients > 0
-                            ? `VIP 고객 ${Math.min(
+                            ? `키맨 고객 ${Math.min(
                                 5,
                                 performance.activeClients
                               )}명에게 소개 프로그램 안내`

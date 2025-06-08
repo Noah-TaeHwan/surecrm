@@ -222,7 +222,7 @@ const generateMockDataFromFile = (fileName: string) => {
       '팀장',
       '서울시 강남구',
       '건강보험, 자동차보험',
-      'VIP 고객',
+      '키맨 고객',
     ],
     [
       '이철수',
@@ -742,7 +742,7 @@ export function ClientImportModal({
   // 템플릿 다운로드 (더미)
   const handleDownloadTemplate = () => {
     const csvContent =
-      '이름,전화번호,이메일,회사명,직책,주소,메모\n김영희,010-1234-5678,kim@example.com,ABC 회사,팀장,서울시 강남구,VIP 고객';
+      '이름,전화번호,이메일,회사명,직책,주소,메모\n김영희,010-1234-5678,kim@example.com,ABC 회사,팀장,서울시 강남구,키맨 고객';
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);

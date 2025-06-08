@@ -234,7 +234,7 @@ export function ClientEditForm({
                         <SelectItem value="high">
                           <div className="flex items-center gap-2">
                             <Star className="h-4 w-4 text-red-500" />
-                            VIP 고객
+                            키맨 고객
                           </div>
                         </SelectItem>
                         <SelectItem value="medium">

@@ -1352,7 +1352,7 @@ export default function NetworkGraphClient({
           // 일반 고객의 중요도별 색상 (고객 카드와 동일한 어두운 은은한 색상)
           let baseColor;
           if (importance >= 5) {
-            // VIP (높음) - 어두운 오렌지 계열
+            // 키맨 (높음) - 어두운 오렌지 계열
             baseColor = 'oklch(0.35 0.08 35)'; // 어두운 오렌지 톤
           } else if (importance >= 3) {
             // 일반 (보통) - 어두운 블루 계열
@@ -1547,7 +1547,7 @@ export default function NetworkGraphClient({
             } else {
               const importance = node.importance || 1;
               if (importance >= 5) {
-                glowColor = `rgba(255, 140, 0, ${0.22 * pulseIntensity})`; // VIP - 더 눈에 띄는 오렌지 발광
+                glowColor = `rgba(255, 140, 0, ${0.22 * pulseIntensity})`; // 키맨 - 더 눈에 띄는 오렌지 발광
               } else if (importance >= 3) {
                 glowColor = `rgba(70, 130, 255, ${0.2 * pulseIntensity})`; // 일반 - 더 눈에 띄는 블루 발광
               } else {

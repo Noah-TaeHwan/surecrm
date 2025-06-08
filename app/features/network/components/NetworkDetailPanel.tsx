@@ -129,7 +129,7 @@ export default function NetworkDetailPanel({
     }
   };
 
-  // 중요도 배지 색상 (VIP, 일반, 관심)
+  // 중요도 배지 색상 (키맨, 일반, 관심)
   const getImportanceBadgeColor = (importance: string | undefined) => {
     switch (importance) {
       case 'high':
@@ -146,7 +146,7 @@ export default function NetworkDetailPanel({
   const getImportanceText = (importance: string | undefined) => {
     switch (importance) {
       case 'high':
-        return 'VIP';
+        return '키맨';
       case 'medium':
         return '일반';
       case 'low':

@@ -329,6 +329,41 @@ export const documents = pgTable('app_client_documents', {
     .notNull(),
 });
 
+// 🆕 NEW: Opportunity Products 테이블 (영업 기회별 상품 정보)
+export const opportunityProducts = pgTable('app_opportunity_products', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  clientId: uuid('client_id')
+    .notNull()
+    .references(() => clients.id, { onDelete: 'cascade' }),
+  agentId: uuid('agent_id')
+    .notNull()
+    .references(() => profiles.id),
+
+  // 상품 정보
+  productName: text('product_name').notNull(), // 상품명
+  insuranceCompany: text('insurance_company').notNull(), // 보험회사명
+  insuranceType: appInsuranceTypeEnum('insurance_type').notNull(), // 보험 타입
+
+  // 금액 정보
+  monthlyPremium: decimal('monthly_premium', { precision: 12, scale: 2 }), // 월 납입료(보험료)
+  expectedCommission: decimal('expected_commission', {
+    precision: 12,
+    scale: 2,
+  }), // 예상 수수료(매출)
+
+  // 기본 영업 정보
+  notes: text('notes'), // 영업 메모
+  status: text('status').default('active').notNull(), // active, inactive, completed, cancelled
+
+  // 메타데이터
+  createdAt: timestamp('created_at', { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
 // ===== Relations 정의 =====
 
 export const profilesRelations = relations(profiles, ({ many, one }) => ({
@@ -603,3 +638,7 @@ export type ReferralStatus = (typeof appReferralStatusEnum.enumValues)[number];
 export type DocumentType = (typeof appDocumentTypeEnum.enumValues)[number];
 export type InvitationStatus =
   (typeof appInvitationStatusEnum.enumValues)[number];
+
+// Opportunity Products 타입 정의
+export type OpportunityProduct = typeof opportunityProducts.$inferSelect;
+export type NewOpportunityProduct = typeof opportunityProducts.$inferInsert;

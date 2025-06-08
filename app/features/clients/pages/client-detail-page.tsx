@@ -886,6 +886,10 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
   const handleCreateOpportunity = async (data: {
     insuranceType: string;
     notes: string;
+    productName?: string;
+    insuranceCompany?: string;
+    monthlyPremium?: number;
+    expectedCommission?: number;
   }) => {
     setIsCreatingOpportunity(true);
 
@@ -903,6 +907,14 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
       const sanitizedData = {
         insuranceType: String(data.insuranceType).trim(),
         notes: data.notes ? String(data.notes).trim() : '',
+        productName: data.productName
+          ? String(data.productName).trim()
+          : undefined,
+        insuranceCompany: data.insuranceCompany
+          ? String(data.insuranceCompany).trim()
+          : undefined,
+        monthlyPremium: data.monthlyPremium,
+        expectedCommission: data.expectedCommission,
       };
 
       console.log('🚀 영업 기회 생성 시작:', {
@@ -910,6 +922,9 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
         agentId: client.agentId,
         insuranceType: sanitizedData.insuranceType,
         notesLength: sanitizedData.notes.length,
+        hasProductInfo: !!(
+          sanitizedData.productName && sanitizedData.insuranceCompany
+        ),
       });
 
       // 🎯 loader에서 받은 파이프라인 단계 사용
@@ -943,16 +958,72 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
 
       console.log('🎯 선택된 파이프라인 단계:', firstStage.name);
 
+      // 상품 정보를 포함한 영업 메모 생성
+      let opportunityNotes = `[${getInsuranceTypeName(
+        sanitizedData.insuranceType
+      )} 영업]`;
+
+      if (sanitizedData.productName || sanitizedData.insuranceCompany) {
+        opportunityNotes += '\n📦 상품 정보:';
+        if (sanitizedData.productName)
+          opportunityNotes += `\n- 상품명: ${sanitizedData.productName}`;
+        if (sanitizedData.insuranceCompany)
+          opportunityNotes += `\n- 보험회사: ${sanitizedData.insuranceCompany}`;
+        if (sanitizedData.monthlyPremium)
+          opportunityNotes += `\n- 월 납입료: ${sanitizedData.monthlyPremium.toLocaleString()}원`;
+        if (sanitizedData.expectedCommission)
+          opportunityNotes += `\n- 예상 수수료: ${sanitizedData.expectedCommission.toLocaleString()}원`;
+      }
+
+      if (sanitizedData.notes) {
+        opportunityNotes += `\n\n📝 영업 메모:\n${sanitizedData.notes}`;
+      } else {
+        opportunityNotes += '\n\n새로운 영업 기회';
+      }
+
+      // 🆕 상품 정보가 있으면 opportunity_products 테이블에 저장
+      if (sanitizedData.productName && sanitizedData.insuranceCompany) {
+        try {
+          const { createOpportunityProduct } = await import(
+            '~/api/shared/opportunity-products'
+          );
+
+          const productData = {
+            productName: sanitizedData.productName,
+            insuranceCompany: sanitizedData.insuranceCompany,
+            insuranceType: sanitizedData.insuranceType,
+            monthlyPremium: sanitizedData.monthlyPremium,
+            expectedCommission: sanitizedData.expectedCommission,
+            notes: sanitizedData.notes || undefined,
+          };
+
+          const productResult = await createOpportunityProduct(
+            client.id,
+            client.agentId,
+            productData
+          );
+
+          if (!productResult.success) {
+            console.warn(
+              '🔧 상품 정보 저장 실패 (영업 기회는 계속 진행):',
+              productResult.error
+            );
+          } else {
+            console.log('✅ 상품 정보 저장 완료:', productResult.data?.id);
+          }
+        } catch (error) {
+          console.warn(
+            '🔧 상품 정보 저장 중 오류 (영업 기회는 계속 진행):',
+            error
+          );
+        }
+      }
+
       // 🎯 action을 통해 고객 단계 변경
       const stageUpdateData = new FormData();
       stageUpdateData.append('intent', 'updateClientStage');
       stageUpdateData.append('targetStageId', firstStage.id);
-      stageUpdateData.append(
-        'notes',
-        `[${getInsuranceTypeName(sanitizedData.insuranceType)} 영업] ${
-          sanitizedData.notes || '새로운 영업 기회'
-        }`
-      );
+      stageUpdateData.append('notes', opportunityNotes);
 
       // Action 호출
       submit(stageUpdateData, { method: 'post' });

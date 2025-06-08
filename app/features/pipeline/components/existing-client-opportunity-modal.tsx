@@ -31,6 +31,9 @@ import {
   ArrowRight,
   Search,
   User,
+  Building2,
+  DollarSign,
+  Banknote,
 } from 'lucide-react';
 
 interface ExistingClientOpportunityModalProps {
@@ -41,6 +44,10 @@ interface ExistingClientOpportunityModalProps {
     clientName: string;
     insuranceType: string;
     notes: string;
+    productName?: string;
+    insuranceCompany?: string;
+    monthlyPremium?: number;
+    expectedCommission?: number;
   }) => Promise<void>;
   clients: { id: string; name: string; phone: string; currentStage?: string }[];
   isLoading?: boolean;
@@ -100,6 +107,12 @@ export function ExistingClientOpportunityModal({
     'selectClient' | 'selectProduct' | 'details'
   >('selectClient');
 
+  // 🆕 새로운 상품 정보 상태들
+  const [productName, setProductName] = useState('');
+  const [insuranceCompany, setInsuranceCompany] = useState('');
+  const [monthlyPremium, setMonthlyPremium] = useState('');
+  const [expectedCommission, setExpectedCommission] = useState('');
+
   const handleClientNext = () => {
     if (selectedClientId) {
       setStep('selectProduct');
@@ -129,6 +142,14 @@ export function ExistingClientOpportunityModal({
           clientName: selectedClient.name,
           insuranceType: selectedType,
           notes,
+          productName: productName || undefined,
+          insuranceCompany: insuranceCompany || undefined,
+          monthlyPremium: monthlyPremium
+            ? parseFloat(monthlyPremium)
+            : undefined,
+          expectedCommission: expectedCommission
+            ? parseFloat(expectedCommission)
+            : undefined,
         });
         handleClose();
       }
@@ -140,6 +161,10 @@ export function ExistingClientOpportunityModal({
     setClientSearchQuery('');
     setSelectedType('');
     setNotes('');
+    setProductName('');
+    setInsuranceCompany('');
+    setMonthlyPremium('');
+    setExpectedCommission('');
     setStep('selectClient');
     onClose();
   };
@@ -330,10 +355,10 @@ export function ExistingClientOpportunityModal({
             )}
           </div>
         ) : (
-          // 3단계: 상세 정보 입력
+          // 3단계: 상세 정보 입력 (🆕 상품 정보 필드 추가)
           <div className="space-y-6 py-4">
             <div className="space-y-3">
-              <h3 className="text-lg font-semibold">영업 메모 및 상세 정보</h3>
+              <h3 className="text-lg font-semibold">상품 정보 및 영업 메모</h3>
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="gap-2">
                   <User className="h-3 w-3" />
@@ -346,7 +371,79 @@ export function ExistingClientOpportunityModal({
               </div>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-6">
+              {/* 🆕 상품 정보 섹션 */}
+              <div className="space-y-4">
+                <h4 className="text-md font-medium flex items-center gap-2">
+                  <Building2 className="h-4 w-4 text-primary" />
+                  상품 정보
+                </h4>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">
+                      상품명
+                    </label>
+                    <Input
+                      value={productName}
+                      onChange={(e) => setProductName(e.target.value)}
+                      placeholder="예: 무배당 통합보험"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">
+                      보험회사명
+                    </label>
+                    <Input
+                      value={insuranceCompany}
+                      onChange={(e) => setInsuranceCompany(e.target.value)}
+                      placeholder="예: 삼성화재, 현대해상"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium mb-2 block flex items-center gap-2">
+                      <Banknote className="h-4 w-4" />월 납입료 (보험료)
+                    </label>
+                    <div className="relative">
+                      <Input
+                        type="number"
+                        value={monthlyPremium}
+                        onChange={(e) => setMonthlyPremium(e.target.value)}
+                        placeholder="0"
+                        className="pr-8"
+                      />
+                      <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-muted-foreground">
+                        원
+                      </span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium mb-2 block flex items-center gap-2">
+                      <DollarSign className="h-4 w-4" />
+                      예상 수수료 (매출)
+                    </label>
+                    <div className="relative">
+                      <Input
+                        type="number"
+                        value={expectedCommission}
+                        onChange={(e) => setExpectedCommission(e.target.value)}
+                        placeholder="0"
+                        className="pr-8"
+                      />
+                      <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-muted-foreground">
+                        원
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 영업 메모 섹션 */}
               <div>
                 <label className="text-sm font-medium mb-2 block">
                   영업 메모 (선택사항)
@@ -355,27 +452,28 @@ export function ExistingClientOpportunityModal({
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder={`${selectedClient?.name} 고객의 ${selectedInsurance?.name} 영업에 대한 메모를 입력하세요...\n\n예시:\n- 고객 관심사: 보험료 부담 최소화\n- 기존 보험: 타사 자동차보험 가입 중\n- 영업 전략: 기존 보험과 비교 견적 제시\n- 업셀링 포인트: 기존 계약 대비 추가 혜택`}
-                  className="min-h-[120px] resize-none"
+                  className="min-h-[100px] resize-none"
                 />
                 <p className="text-xs text-muted-foreground mt-1">
                   고객의 상황, 관심사, 영업 전략 등을 기록하세요
                 </p>
               </div>
 
-              <div className="p-4 bg-blue-50 dark:bg-blue-900/10 rounded-lg border border-blue-200 dark:border-blue-800">
+              <div className="p-4 bg-emerald-50 dark:bg-emerald-900/10 rounded-lg border border-emerald-200 dark:border-emerald-800">
                 <div className="flex items-start gap-3">
-                  <TrendingUp className="h-5 w-5 text-blue-600 mt-0.5" />
+                  <TrendingUp className="h-5 w-5 text-emerald-600 mt-0.5" />
                   <div>
-                    <h4 className="font-medium text-blue-800 dark:text-blue-200 mb-1">
+                    <h4 className="font-medium text-emerald-800 dark:text-emerald-200 mb-1">
                       영업 파이프라인 진행 과정
                     </h4>
-                    <div className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
+                    <div className="text-sm text-emerald-700 dark:text-emerald-300 space-y-1">
                       <p>
                         ✓ 첫 상담 → 니즈 분석 → 상품 설명 → 계약 검토 → 계약
                         완료
                       </p>
                       <p className="text-xs">
-                        기존 고객이 '첫 상담' 단계에 다시 추가됩니다
+                        이 고객이 '첫 상담' 단계로 이동하여 새로운 영업이
+                        시작됩니다
                       </p>
                     </div>
                   </div>

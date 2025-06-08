@@ -74,7 +74,7 @@ export function ClientListSection({
   const getImportanceText = (importance: string) => {
     switch (importance) {
       case 'high':
-        return 'VIP';
+        return '키맨';
       case 'medium':
         return '일반';
       case 'low':
@@ -103,7 +103,7 @@ export function ClientListSection({
         return {
           bgGradient:
             'bg-gradient-to-br from-orange-50/50 to-white dark:from-orange-950/20 dark:to-background',
-          borderClass: 'client-card-vip', // VIP 전용 애니메이션 클래스
+          borderClass: 'client-card-keyman', // 키맨 전용 애니메이션 클래스
         };
       case 'medium':
         return {

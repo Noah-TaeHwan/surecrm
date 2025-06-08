@@ -163,6 +163,19 @@ export interface TagForm {
 export interface OpportunityData {
   insuranceType: string;
   notes: string;
+  // 🆕 새로운 상품 정보 필드들
+  productName?: string; // 상품명
+  insuranceCompany?: string; // 보험회사명
+  monthlyPremium?: number; // 월 납입료(보험료)
+  expectedCommission?: number; // 예상 수수료(매출)
+}
+
+// 🆕 상품 정보 타입
+export interface ProductInfo {
+  productName: string;
+  insuranceCompany: string;
+  monthlyPremium: number;
+  expectedCommission: number;
 }
 
 // 성공 모달 데이터 타입

@@ -206,7 +206,7 @@ export function ClientTagModal({
               <input
                 type="text"
                 className="w-full p-3 border rounded-lg text-sm"
-                placeholder="예: VIP 고객, 신규 고객, 관심 고객"
+                placeholder="예: 키맨 고객, 신규 고객, 관심 고객"
                 value={tagForm.name}
                 onChange={(e) =>
                   setTagForm((prev) => ({ ...prev, name: e.target.value }))

@@ -15,6 +15,13 @@
       "when": 1749102690099,
       "tag": "0001_curly_demogoblin",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1749358606343,
+      "tag": "0002_common_scarlet_spider",
+      "breakpoints": true
     }
   ]
 }

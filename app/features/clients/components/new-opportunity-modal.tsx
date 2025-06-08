@@ -28,12 +28,23 @@ import {
   Plus,
   Check,
   ArrowRight,
+  Building2,
+  DollarSign,
+  Banknote,
 } from 'lucide-react';
+import { Input } from '~/common/components/ui/input';
 
 interface NewOpportunityModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (data: { insuranceType: string; notes: string }) => Promise<void>;
+  onConfirm: (data: {
+    insuranceType: string;
+    notes: string;
+    productName?: string;
+    insuranceCompany?: string;
+    monthlyPremium?: number;
+    expectedCommission?: number;
+  }) => Promise<void>;
   clientName: string;
   isLoading?: boolean;
 }
@@ -88,6 +99,12 @@ export function NewOpportunityModal({
   const [notes, setNotes] = useState('');
   const [step, setStep] = useState<'select' | 'details'>('select');
 
+  // 🆕 새로운 상품 정보 상태들
+  const [productName, setProductName] = useState('');
+  const [insuranceCompany, setInsuranceCompany] = useState('');
+  const [monthlyPremium, setMonthlyPremium] = useState('');
+  const [expectedCommission, setExpectedCommission] = useState('');
+
   const handleNext = () => {
     if (selectedType) {
       setStep('details');
@@ -103,6 +120,12 @@ export function NewOpportunityModal({
       await onConfirm({
         insuranceType: selectedType,
         notes,
+        productName: productName || undefined,
+        insuranceCompany: insuranceCompany || undefined,
+        monthlyPremium: monthlyPremium ? parseFloat(monthlyPremium) : undefined,
+        expectedCommission: expectedCommission
+          ? parseFloat(expectedCommission)
+          : undefined,
       });
       handleClose();
     }
@@ -111,6 +134,10 @@ export function NewOpportunityModal({
   const handleClose = () => {
     setSelectedType('');
     setNotes('');
+    setProductName('');
+    setInsuranceCompany('');
+    setMonthlyPremium('');
+    setExpectedCommission('');
     setStep('select');
     onClose();
   };
@@ -200,7 +227,7 @@ export function NewOpportunityModal({
           // 2단계: 상세 정보 입력
           <div className="space-y-6 py-4">
             <div className="space-y-3">
-              <h3 className="text-lg font-semibold">영업 메모 및 상세 정보</h3>
+              <h3 className="text-lg font-semibold">상품 정보 및 영업 메모</h3>
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="gap-2">
                   {selectedInsurance?.icon}
@@ -212,7 +239,79 @@ export function NewOpportunityModal({
               </div>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-6">
+              {/* 🆕 상품 정보 섹션 */}
+              <div className="space-y-4">
+                <h4 className="text-md font-medium flex items-center gap-2">
+                  <Building2 className="h-4 w-4 text-primary" />
+                  상품 정보
+                </h4>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">
+                      상품명
+                    </label>
+                    <Input
+                      value={productName}
+                      onChange={(e) => setProductName(e.target.value)}
+                      placeholder="예: 무배당 통합보험"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">
+                      보험회사명
+                    </label>
+                    <Input
+                      value={insuranceCompany}
+                      onChange={(e) => setInsuranceCompany(e.target.value)}
+                      placeholder="예: 삼성화재, 현대해상"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium mb-2 block flex items-center gap-2">
+                      <Banknote className="h-4 w-4" />월 납입료 (보험료)
+                    </label>
+                    <div className="relative">
+                      <Input
+                        type="number"
+                        value={monthlyPremium}
+                        onChange={(e) => setMonthlyPremium(e.target.value)}
+                        placeholder="0"
+                        className="pr-8"
+                      />
+                      <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-muted-foreground">
+                        원
+                      </span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium mb-2 block flex items-center gap-2">
+                      <DollarSign className="h-4 w-4" />
+                      예상 수수료 (매출)
+                    </label>
+                    <div className="relative">
+                      <Input
+                        type="number"
+                        value={expectedCommission}
+                        onChange={(e) => setExpectedCommission(e.target.value)}
+                        placeholder="0"
+                        className="pr-8"
+                      />
+                      <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-muted-foreground">
+                        원
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 영업 메모 섹션 */}
               <div>
                 <label className="text-sm font-medium mb-2 block">
                   영업 메모 (선택사항)
@@ -221,7 +320,7 @@ export function NewOpportunityModal({
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder={`${clientName} 고객의 ${selectedInsurance?.name} 영업에 대한 메모를 입력하세요...\n\n예시:\n- 고객 관심사: 보험료 부담 최소화\n- 기존 보험: 타사 자동차보험 가입 중\n- 영업 전략: 기존 보험과 비교 견적 제시`}
-                  className="min-h-[120px] resize-none"
+                  className="min-h-[100px] resize-none"
                 />
                 <p className="text-xs text-muted-foreground mt-1">
                   고객의 상황, 관심사, 영업 전략 등을 기록하세요

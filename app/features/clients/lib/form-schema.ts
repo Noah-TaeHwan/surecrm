@@ -133,7 +133,7 @@ export const clientFormOptions = {
 
   // 공통 태그 제안
   commonTags: [
-    'VIP',
+    '키맨',
     '기업',
     '개인',
     '잠재',

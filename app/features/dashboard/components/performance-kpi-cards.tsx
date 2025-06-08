@@ -31,12 +31,31 @@ import type { DashboardKPIData } from '../types';
 interface PerformanceKPICardsProps {
   data: DashboardKPIData;
   isLoading?: boolean;
+  // 🆕 실제 영업 상품 통계 추가
+  salesStats?: {
+    totalProducts: number;
+    totalPremium: number;
+    totalCommission: number;
+    averagePremium: number;
+    averageCommission: number;
+    typeStats: Record<
+      string,
+      { count: number; premium: number; commission: number }
+    >;
+  };
 }
 
 export function PerformanceKPICards({
   data,
   isLoading = false,
+  salesStats,
 }: PerformanceKPICardsProps) {
+  // 🆕 실제 영업 데이터를 활용한 KPI 계산
+  const expectedYearlyRevenue = salesStats
+    ? salesStats.totalCommission * 12
+    : 0;
+  const expectedMonthlyRevenue = salesStats ? salesStats.totalCommission : 0;
+
   const kpiItems = [
     {
       title: '총 고객 수',
@@ -47,12 +66,12 @@ export function PerformanceKPICards({
       description: '전체 관리 고객',
     },
     {
-      title: '신규 고객',
-      value: data.monthlyNewClients,
-      change: data.monthlyGrowth.clients,
-      icon: TriangleUpIcon,
+      title: '예상 연간 수수료',
+      value: `${(expectedYearlyRevenue / 10000).toFixed(0)}만원`,
+      change: data.monthlyGrowth.revenue,
+      icon: ActivityLogIcon,
       color: 'success',
-      description: '이번 달 신규',
+      description: `${salesStats?.totalProducts || 0}건 진행 중`,
     },
     {
       title: '소개 네트워크',
@@ -170,7 +189,7 @@ export function PerformanceKPICards({
                       </p>
                       {(item.title === '전환율' ||
                         item.title === '총 고객 수' ||
-                        item.title === '신규 고객' ||
+                        item.title === '예상 연간 수수료' ||
                         item.title === '소개 네트워크') && (
                         <Tooltip>
                           <TooltipTrigger>
@@ -192,11 +211,13 @@ export function PerformanceKPICards({
                                 증가율: 지난 달 대비 신규 고객 증가율
                               </p>
                             )}
-                            {item.title === '신규 고객' && (
+                            {item.title === '예상 연간 수수료' && (
                               <p className="">
-                                이번 달에 새로 등록된 고객 수입니다.
-                                <br />
-                                증가율: 지난 달 대비 신규 고객 증가율
+                                진행 중인 영업 기회들의 예상 연간 수수료
+                                합계입니다.
+                                <br />월 예상 수수료:{' '}
+                                {(expectedMonthlyRevenue / 10000).toFixed(0)}
+                                만원
                               </p>
                             )}
                             {item.title === '소개 네트워크' && (

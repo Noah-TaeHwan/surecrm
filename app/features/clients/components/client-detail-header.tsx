@@ -174,7 +174,7 @@ export function ClientDetailHeader({
   const importanceBadgeClass = currentImportanceStyle.badge;
 
   const importanceText: Record<string, string> = {
-    high: 'VIP',
+    high: '키맨',
     medium: '일반',
     low: '관심',
   };

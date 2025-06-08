@@ -481,7 +481,7 @@ details[open] summary::before {
   --primary-rgb: 167 63 3;
 
   /* 🎨 고객 중요도별 통일 색상 시스템 */
-  /* VIP (높음) - 은은한 오렌지 계열 */
+  /* 키맨 (높음) - 은은한 오렌지 계열 */
   --importance-high-bg: oklch(0.975 0.03 35);
   --importance-high-border: oklch(0.92 0.08 35);
   --importance-high-text: oklch(0.55 0.15 35);
@@ -541,7 +541,7 @@ details[open] summary::before {
   --primary-rgb: 244 115 32;
 
   /* 🎨 고객 중요도별 통일 색상 시스템 (다크 모드) */
-  /* VIP (높음) - 은은한 오렌지 계열 (다크) */
+  /* 키맨 (높음) - 은은한 오렌지 계열 (다크) */
   --importance-high-bg: oklch(0.18 0.05 35);
   --importance-high-border: oklch(0.25 0.1 35);
   --importance-high-text: oklch(0.75 0.15 35);
@@ -749,7 +749,7 @@ textarea {
   }
 
   /* 🎨 고객 카드 보더 애니메이션 */
-  @keyframes vip-border-glow {
+  @keyframes keyman-border-glow {
     0%,
     100% {
       box-shadow: 0 0 0 1px rgba(255, 107, 53, 0.2),
@@ -771,14 +771,14 @@ textarea {
     }
   }
 
-  /* VIP 고객 카드 - 은은한 오렌지 글로우 애니메이션 */
-  .client-card-vip {
+  /* 키맨 고객 카드 - 은은한 오렌지 글로우 애니메이션 */
+  .client-card-keyman {
     position: relative;
-    animation: vip-border-glow 8s ease-in-out infinite;
+    animation: keyman-border-glow 8s ease-in-out infinite;
     border: 1px solid rgba(255, 107, 53, 0.2);
   }
 
-  .client-card-vip::before {
+  .client-card-keyman::before {
     content: '';
     position: absolute;
     inset: -1px;
@@ -792,7 +792,7 @@ textarea {
       rgba(255, 107, 53, 0.3)
     );
     background-size: 300% 300%;
-    animation: vip-gradient-move 12s ease-in-out infinite;
+    animation: keyman-gradient-move 12s ease-in-out infinite;
     mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     mask-composite: exclude;
     -webkit-mask: linear-gradient(#fff 0 0) content-box,
@@ -802,7 +802,7 @@ textarea {
     z-index: -1;
   }
 
-  @keyframes vip-gradient-move {
+  @keyframes keyman-gradient-move {
     0%,
     100% {
       background-position: 0% 50%;
@@ -854,8 +854,8 @@ textarea {
   }
 
   /* 호버 시 효과 강화 */
-  .client-card-vip:hover {
-    animation: vip-border-glow 4s ease-in-out infinite;
+  .client-card-keyman:hover {
+    animation: keyman-border-glow 4s ease-in-out infinite;
   }
 
   .client-card-normal:hover {

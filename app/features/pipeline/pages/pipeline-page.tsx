@@ -67,6 +67,55 @@ export async function loader({ request }: Route.LoaderArgs) {
     try {
       allClients = await getClientsByStage(agentId);
 
+      // 🎯 각 고객의 상품 정보 추가로 가져오기
+      const { getOpportunityProductsByClient } = await import(
+        '~/api/shared/opportunity-products'
+      );
+
+      const clientsWithProducts = await Promise.all(
+        allClients.map(async (client) => {
+          try {
+            const productsResult = await getOpportunityProductsByClient(
+              client.id,
+              agentId
+            );
+            const products = productsResult.success ? productsResult.data : [];
+
+            // 총 월 보험료와 수수료 계산
+            const totalMonthlyPremium = products.reduce(
+              (sum: number, product: any) => {
+                return sum + parseFloat(product.monthlyPremium || '0');
+              },
+              0
+            );
+
+            const totalExpectedCommission = products.reduce(
+              (sum: number, product: any) => {
+                return sum + parseFloat(product.expectedCommission || '0');
+              },
+              0
+            );
+
+            return {
+              ...client,
+              products,
+              totalMonthlyPremium,
+              totalExpectedCommission,
+            };
+          } catch (error) {
+            console.error(`❌ 고객 ${client.id} 상품 정보 조회 실패:`, error);
+            return {
+              ...client,
+              products: [],
+              totalMonthlyPremium: 0,
+              totalExpectedCommission: 0,
+            };
+          }
+        })
+      );
+
+      allClients = clientsWithProducts;
+
       // 🎯 전체 고객 수 조회 (파이프라인에 없는 고객 포함)
       const { getClients } = await import('~/api/shared/clients');
       const allClientsResult = await getClients({
@@ -220,6 +269,12 @@ export async function action({ request }: Route.ActionArgs) {
       const insuranceType = formData.get('insuranceType') as string;
       const notes = formData.get('notes') as string;
 
+      // 🆕 새로운 상품 정보 필드들
+      const productName = formData.get('productName') as string;
+      const insuranceCompany = formData.get('insuranceCompany') as string;
+      const monthlyPremium = formData.get('monthlyPremium') as string;
+      const expectedCommission = formData.get('expectedCommission') as string;
+
       if (!clientId || !insuranceType) {
         return {
           success: false,
@@ -255,9 +310,27 @@ export async function action({ request }: Route.ActionArgs) {
         return typeMap[type] || type;
       };
 
-      const opportunityNotes = `[${getInsuranceTypeName(
-        insuranceType
-      )} 영업] ${notes}`;
+      // 상품 정보를 포함한 영업 메모 생성
+      let opportunityNotes = `[${getInsuranceTypeName(insuranceType)} 영업]`;
+
+      if (productName || insuranceCompany) {
+        opportunityNotes += '\n📦 상품 정보:';
+        if (productName) opportunityNotes += `\n- 상품명: ${productName}`;
+        if (insuranceCompany)
+          opportunityNotes += `\n- 보험회사: ${insuranceCompany}`;
+        if (monthlyPremium)
+          opportunityNotes += `\n- 월 납입료: ${parseFloat(
+            monthlyPremium
+          ).toLocaleString()}원`;
+        if (expectedCommission)
+          opportunityNotes += `\n- 예상 수수료: ${parseFloat(
+            expectedCommission
+          ).toLocaleString()}원`;
+      }
+
+      if (notes) {
+        opportunityNotes += `\n\n📝 영업 메모:\n${notes}`;
+      }
 
       // 현재 고객 정보 조회해서 기존 메모에 추가
       const { getClientById } = await import('~/api/shared/clients');
@@ -270,6 +343,48 @@ export async function action({ request }: Route.ActionArgs) {
       };
 
       await updateClient(clientId, updateData, user.id);
+
+      // 🆕 상품 정보가 있으면 opportunity_products 테이블에 저장
+      if (productName && insuranceCompany) {
+        try {
+          const { createOpportunityProduct } = await import(
+            '~/api/shared/opportunity-products'
+          );
+
+          const productData = {
+            productName,
+            insuranceCompany,
+            insuranceType,
+            monthlyPremium: monthlyPremium
+              ? parseFloat(monthlyPremium)
+              : undefined,
+            expectedCommission: expectedCommission
+              ? parseFloat(expectedCommission)
+              : undefined,
+            notes: notes || undefined,
+          };
+
+          const productResult = await createOpportunityProduct(
+            clientId,
+            user.id,
+            productData
+          );
+
+          if (!productResult.success) {
+            console.warn(
+              '🔧 상품 정보 저장 실패 (영업 기회는 계속 진행):',
+              productResult.error
+            );
+          } else {
+            console.log('✅ 상품 정보 저장 완료:', productResult.data?.id);
+          }
+        } catch (error) {
+          console.warn(
+            '🔧 상품 정보 저장 중 오류 (영업 기회는 계속 진행):',
+            error
+          );
+        }
+      }
 
       // 고객을 첫 상담 단계로 이동
       const result = await updateClientStage(clientId, firstStage.id, user.id);
@@ -432,7 +547,7 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
       return stage && stage.name === '계약 완료';
     }).length;
 
-    // 4. 고가치 고객 (VIP 고객) - 제외됨 단계 제외
+    // 4. 고가치 고객 (키맨 고객) - 제외됨 단계 제외
     const highValueClients = clients.filter((client) => {
       const stage = stages.find((s) => s.id === client.stageId);
       return client.importance === 'high' && stage && stage.name !== '제외됨';
@@ -526,6 +641,10 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
     clientName: string;
     insuranceType: string;
     notes: string;
+    productName?: string;
+    insuranceCompany?: string;
+    monthlyPremium?: number;
+    expectedCommission?: number;
   }) => {
     // 🎯 FormData 생성
     const formData = new FormData();
@@ -534,6 +653,20 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
     formData.append('clientName', data.clientName);
     formData.append('insuranceType', data.insuranceType);
     formData.append('notes', data.notes);
+
+    // 🆕 새로운 상품 정보 필드들 추가
+    if (data.productName) {
+      formData.append('productName', data.productName);
+    }
+    if (data.insuranceCompany) {
+      formData.append('insuranceCompany', data.insuranceCompany);
+    }
+    if (data.monthlyPremium !== undefined) {
+      formData.append('monthlyPremium', data.monthlyPremium.toString());
+    }
+    if (data.expectedCommission !== undefined) {
+      formData.append('expectedCommission', data.expectedCommission.toString());
+    }
 
     // 🎯 action 함수 호출
     opportunityFetcher.submit(formData, { method: 'post' });
@@ -706,7 +839,7 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">
-                  VIP 고객
+                  키맨 고객
                 </p>
                 <p className="text-2xl font-bold text-foreground">
                   {totalStats.highValueClients}

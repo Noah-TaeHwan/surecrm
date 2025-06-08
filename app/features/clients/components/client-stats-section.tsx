@@ -25,8 +25,8 @@ export function ClientStatsSection({
   clients,
   onAddClient,
 }: ClientStatsProps) {
-  // VIP 고객 계산
-  const vipClients =
+  // 키맨 고객 계산
+  const keyClients =
     clients?.filter((c: any) => c.importance === 'high').length || 0;
 
   // 계약 완료 고객 계산
@@ -92,8 +92,8 @@ export function ClientStatsSection({
               <Badge variant="outline">{stats?.activeClients || 0}명</Badge>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">VIP 고객</span>
-              <Badge variant="outline">{vipClients}명</Badge>
+              <span className="text-sm text-muted-foreground">키맨 고객</span>
+              <Badge variant="outline">{keyClients}명</Badge>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">계약 완료</span>

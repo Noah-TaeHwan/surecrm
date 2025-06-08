@@ -138,7 +138,7 @@ export function AddClientModal({
   const importanceOptions = [
     {
       id: 'high',
-      name: 'VIP',
+      name: '키맨',
       description: '우선 관리가 필요한 중요 고객',
       color:
         'bg-orange-50/50 border-orange-200 dark:bg-orange-950/20 dark:border-orange-800/30',
@@ -419,7 +419,7 @@ export function AddClientModal({
                     <FormControl>
                       <Input
                         {...field}
-                        placeholder="VIP, 기업고객, 잠재고객 등 (쉼표로 구분)"
+                        placeholder="키맨, 기업고객, 잠재고객 등 (쉼표로 구분)"
                         className="h-11"
                       />
                     </FormControl>

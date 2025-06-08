@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 // 🎯 상수 정의 (하드코딩 제거)
 export const IMPORTANCE_OPTIONS = [
-  { value: 'high', label: 'VIP' },
+  { value: 'high', label: '키맨' },
   { value: 'medium', label: '일반' },
   { value: 'low', label: '관심' },
 ] as const;
@@ -159,7 +159,7 @@ export function getClientCardStyle(importance: string) {
       return {
         bgGradient:
           'bg-gradient-to-br from-orange-50/50 to-white dark:from-orange-950/20 dark:to-background',
-        borderClass: 'client-card-vip', // VIP 전용 애니메이션 클래스
+        borderClass: 'client-card-keyman', // 키맨 전용 애니메이션 클래스
       };
     case 'medium':
       return {
@@ -193,7 +193,7 @@ export function getImportanceBadge(importance: string) {
   };
 
   const importanceText = {
-    high: 'VIP',
+    high: '키맨',
     medium: '일반',
     low: '관심',
   };

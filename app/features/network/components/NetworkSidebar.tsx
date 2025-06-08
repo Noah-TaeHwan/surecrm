@@ -175,7 +175,7 @@ export default function NetworkSidebar({
 
     if (filters.importanceFilter !== 'all') {
       const importanceLabels = {
-        high: 'VIP',
+        high: '키맨',
         medium: '일반',
         low: '관심',
       };
@@ -369,7 +369,7 @@ export default function NetworkSidebar({
                       onClick={() => handleImportanceFilterChange('high')}
                     >
                       <span className="h-3 w-3 rounded-full mr-2 bg-orange-500"></span>
-                      VIP
+                      키맨
                       {filters.importanceFilter === 'high' && (
                         <CheckCircle className="ml-auto h-4 w-4" />
                       )}
