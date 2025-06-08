@@ -52,7 +52,11 @@ export async function getNotifications(
       .select()
       .from(appNotificationQueue)
       .where(and(...conditions))
-      .orderBy(desc(appNotificationQueue.createdAt))
+      .orderBy(
+        // 🎯 읽지 않은 알림을 맨 위로 정렬 (readAt이 NULL인 것부터)
+        sql`CASE WHEN ${appNotificationQueue.readAt} IS NULL THEN 0 ELSE 1 END`,
+        desc(appNotificationQueue.createdAt)
+      )
       .limit(limit)
       .offset(offset);
 
@@ -107,6 +111,33 @@ export async function markNotificationAsRead(
     return result[0];
   } catch (error) {
     console.error('알림 읽음 처리 실패:', error);
+    return null;
+  }
+}
+
+// 알림 읽지 않음 처리
+export async function markNotificationAsUnread(
+  notificationId: string,
+  userId: string
+) {
+  try {
+    const result = await db
+      .update(appNotificationQueue)
+      .set({
+        readAt: null,
+        status: 'delivered',
+      })
+      .where(
+        and(
+          eq(appNotificationQueue.id, notificationId),
+          eq(appNotificationQueue.userId, userId)
+        )
+      )
+      .returning();
+
+    return result[0];
+  } catch (error) {
+    console.error('알림 읽지 않음 처리 실패:', error);
     return null;
   }
 }

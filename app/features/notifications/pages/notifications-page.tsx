@@ -40,6 +40,7 @@ import {
   getNotifications,
   markAllNotificationsAsRead,
   markNotificationAsRead,
+  markNotificationAsUnread,
   deleteNotification,
 } from '../lib/notifications-data';
 
@@ -139,6 +140,20 @@ export async function action({ request }: Route.ActionArgs) {
           message: '알림을 읽음으로 처리했습니다.',
         };
 
+      case 'markAsUnread':
+        const unreadId = formData.get('notificationId') as string;
+        if (!unreadId) {
+          return {
+            success: false,
+            message: '알림 ID가 필요합니다.',
+          };
+        }
+        await markNotificationAsUnread(unreadId, user.id);
+        return {
+          success: true,
+          message: '알림을 읽지 않음으로 처리했습니다.',
+        };
+
       case 'delete':
         const deleteId = formData.get('notificationId') as string;
         if (!deleteId) {
@@ -212,18 +227,44 @@ function getPriorityColor(priority: string) {
 // 알림 상태별 표시 반환
 function getStatusBadge(status: string, readAt: Date | null) {
   if (readAt) {
-    return <Badge variant="secondary">읽음</Badge>;
+    return (
+      <Badge variant="secondary" className="text-xs">
+        읽음
+      </Badge>
+    );
   }
 
   switch (status) {
     case 'delivered':
-      return <Badge variant="default">새 알림</Badge>;
+      return (
+        <Badge
+          variant="default"
+          className="text-xs bg-blue-500 hover:bg-blue-600"
+        >
+          새 알림
+        </Badge>
+      );
     case 'pending':
-      return <Badge variant="outline">대기중</Badge>;
+      return (
+        <Badge variant="outline" className="text-xs">
+          대기중
+        </Badge>
+      );
     case 'failed':
-      return <Badge variant="destructive">실패</Badge>;
+      return (
+        <Badge variant="destructive" className="text-xs">
+          실패
+        </Badge>
+      );
     default:
-      return <Badge variant="default">새 알림</Badge>;
+      return (
+        <Badge
+          variant="default"
+          className="text-xs bg-blue-500 hover:bg-blue-600"
+        >
+          새 알림
+        </Badge>
+      );
   }
 }
 
@@ -257,6 +298,23 @@ export default function NotificationsPage({
   const handleDelete = (notificationId: string) => {
     const formData = new FormData();
     formData.append('intent', 'delete');
+    formData.append('notificationId', notificationId);
+    fetcher.submit(formData, { method: 'post' });
+  };
+
+  // 알림 읽음/안읽음 토글
+  const handleToggleRead = (
+    notificationId: string,
+    currentReadAt: Date | null
+  ) => {
+    const formData = new FormData();
+    if (currentReadAt) {
+      // 현재 읽음 상태 → 안읽음으로 변경
+      formData.append('intent', 'markAsUnread');
+    } else {
+      // 현재 안읽음 상태 → 읽음으로 변경
+      formData.append('intent', 'markAsRead');
+    }
     formData.append('notificationId', notificationId);
     fetcher.submit(formData, { method: 'post' });
   };
@@ -349,69 +407,186 @@ export default function NotificationsPage({
           <CardContent>
             {notifications.length > 0 ? (
               <div className="space-y-4">
-                {notifications.map((notification) => (
-                  <div
-                    key={notification.id}
-                    className={`flex items-start gap-4 p-4 border rounded-lg transition-colors hover:bg-muted/50 ${
-                      !notification.readAt
-                        ? 'bg-muted/20 border-primary/20'
-                        : ''
-                    }`}
-                  >
-                    {/* 알림 아이콘 */}
-                    <div
-                      className={`p-2 rounded-full ${getPriorityColor(
-                        notification.priority
-                      )}`}
-                    >
-                      {getNotificationIcon(notification.type)}
-                    </div>
+                {/* 🎯 읽지 않은 알림과 읽은 알림을 구분하여 표시 */}
+                {(() => {
+                  const unreadNotifications = notifications.filter(
+                    (n) => !n.readAt
+                  );
+                  const readNotifications = notifications.filter(
+                    (n) => n.readAt
+                  );
 
-                    {/* 알림 내용 */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2">
-                        <h4 className="font-semibold text-sm leading-tight">
-                          {notification.title}
-                        </h4>
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          {getStatusBadge(
-                            notification.status,
-                            notification.readAt
-                          )}
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-6 w-6 p-0"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
+                  return (
+                    <>
+                      {/* 읽지 않은 알림 섹션 */}
+                      {unreadNotifications.length > 0 && (
+                        <div className="space-y-4">
+                          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                            <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+                            읽지 않은 알림 ({unreadNotifications.length}개)
+                          </div>
+                          {unreadNotifications.map((notification) => (
+                            <div
+                              key={notification.id}
+                              className="group flex items-start gap-4 p-4 border rounded-lg transition-all cursor-pointer hover:bg-muted/50 hover:shadow-sm hover:border-primary/40 bg-muted/20 border-primary/20"
+                              onClick={() =>
+                                handleToggleRead(
+                                  notification.id,
+                                  notification.readAt
+                                )
+                              }
+                              title="클릭하여 읽음으로 표시"
+                            >
+                              {/* 알림 아이콘 */}
+                              <div
+                                className={`p-2 rounded-full ${getPriorityColor(
+                                  notification.priority
+                                )}`}
+                              >
+                                {getNotificationIcon(notification.type)}
+                              </div>
+
+                              {/* 알림 내용 */}
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-start justify-between gap-2">
+                                  <h4 className="text-sm leading-tight font-semibold text-foreground">
+                                    {notification.title}
+                                    <span className="ml-2 inline-flex items-center justify-center w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                                  </h4>
+                                  <div className="flex items-center gap-2 flex-shrink-0">
+                                    {getStatusBadge(
+                                      notification.status,
+                                      notification.readAt
+                                    )}
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-6 w-6 p-0"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleDelete(notification.id);
+                                      }}
+                                    >
+                                      <Trash2 className="h-3 w-3" />
+                                    </Button>
+                                  </div>
+                                </div>
+                                <p className="text-sm mt-1 line-clamp-2 text-foreground">
+                                  {notification.message}
+                                </p>
+                                <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+                                  <span className="flex items-center gap-1">
+                                    <Clock className="h-3 w-3" />
+                                    {new Date(
+                                      notification.createdAt
+                                    ).toLocaleDateString('ko-KR', {
+                                      month: 'short',
+                                      day: 'numeric',
+                                      hour: '2-digit',
+                                      minute: '2-digit',
+                                    })}
+                                  </span>
+                                  {notification.channel && (
+                                    <Badge
+                                      variant="outline"
+                                      className="text-xs"
+                                    >
+                                      {notification.channel}
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
                         </div>
-                      </div>
-                      <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                        {notification.message}
-                      </p>
-                      <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          {new Date(notification.createdAt).toLocaleDateString(
-                            'ko-KR',
-                            {
-                              month: 'short',
-                              day: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            }
+                      )}
+
+                      {/* 읽은 알림 섹션 */}
+                      {readNotifications.length > 0 && (
+                        <div className="space-y-4">
+                          {unreadNotifications.length > 0 && (
+                            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground pt-4 border-t">
+                              <CheckCircle className="w-4 h-4" />
+                              읽은 알림 ({readNotifications.length}개)
+                            </div>
                           )}
-                        </span>
-                        {notification.channel && (
-                          <Badge variant="outline" className="text-xs">
-                            {notification.channel}
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                          {readNotifications.map((notification) => (
+                            <div
+                              key={notification.id}
+                              className="group flex items-start gap-4 p-4 border rounded-lg transition-all cursor-pointer hover:bg-muted/50 hover:shadow-sm hover:border-primary/40"
+                              onClick={() =>
+                                handleToggleRead(
+                                  notification.id,
+                                  notification.readAt
+                                )
+                              }
+                              title="클릭하여 읽지 않음으로 표시"
+                            >
+                              {/* 알림 아이콘 */}
+                              <div
+                                className={`p-2 rounded-full ${getPriorityColor(
+                                  notification.priority
+                                )} opacity-75`}
+                              >
+                                {getNotificationIcon(notification.type)}
+                              </div>
+
+                              {/* 알림 내용 */}
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-start justify-between gap-2">
+                                  <h4 className="text-sm leading-tight font-normal text-muted-foreground">
+                                    {notification.title}
+                                  </h4>
+                                  <div className="flex items-center gap-2 flex-shrink-0">
+                                    {getStatusBadge(
+                                      notification.status,
+                                      notification.readAt
+                                    )}
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-6 w-6 p-0"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleDelete(notification.id);
+                                      }}
+                                    >
+                                      <Trash2 className="h-3 w-3" />
+                                    </Button>
+                                  </div>
+                                </div>
+                                <p className="text-sm mt-1 line-clamp-2 text-muted-foreground">
+                                  {notification.message}
+                                </p>
+                                <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+                                  <span className="flex items-center gap-1">
+                                    <Clock className="h-3 w-3" />
+                                    {new Date(
+                                      notification.createdAt
+                                    ).toLocaleDateString('ko-KR', {
+                                      month: 'short',
+                                      day: 'numeric',
+                                      hour: '2-digit',
+                                      minute: '2-digit',
+                                    })}
+                                  </span>
+                                  {notification.channel && (
+                                    <Badge
+                                      variant="outline"
+                                      className="text-xs"
+                                    >
+                                      {notification.channel}
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
               </div>
             ) : (
               // 빈 상태 UI 개선

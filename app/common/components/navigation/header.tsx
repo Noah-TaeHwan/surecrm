@@ -59,21 +59,54 @@ export function Header({
   const fetchNotifications = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch('/api/notifications?limit=5', {
-        credentials: 'include',
-      });
+
+      // 🔧 수정: 읽지 않은 알림을 우선으로 가져오고 전체 읽지 않은 개수 조회
+      const response = await fetch(
+        '/api/notifications?limit=15&sortBy=createdAt&sortOrder=desc',
+        {
+          credentials: 'include',
+        }
+      );
 
       if (response.ok) {
         const data = await response.json();
+        console.log('🔔 헤더 알림 API 응답 전체:', data);
+        console.log('🔔 헤더 알림 데이터:', {
+          총알림: data.notifications?.length || 0,
+          읽지않음: data.unreadCount || 0,
+          success: data.success,
+          message: data.message,
+          알림목록: data.notifications?.map((n: any) => ({
+            id: n.id.slice(0, 8),
+            title: n.title,
+            readAt: n.readAt,
+            isUnread: !n.readAt,
+          })),
+        });
+
         setNotifications(data.notifications || []);
         setUnreadCount(data.unreadCount || 0);
       } else {
+        console.warn(
+          '❌ 알림 API 응답 오류:',
+          response.status,
+          response.statusText
+        );
+
+        // 에러 응답 내용도 확인
+        try {
+          const errorData = await response.text();
+          console.warn('❌ 에러 응답 내용:', errorData);
+        } catch (e) {
+          console.warn('❌ 에러 응답 파싱 실패');
+        }
+
         // 인증 오류 등은 조용히 처리
         setNotifications([]);
         setUnreadCount(0);
       }
     } catch (error) {
-      console.warn('알림 로드 실패:', error);
+      console.warn('❌ 알림 로드 실패:', error);
       setNotifications([]);
       setUnreadCount(0);
     } finally {
@@ -257,38 +290,73 @@ export function Header({
               </div>
             ) : notifications.length > 0 ? (
               <div className="max-h-80 overflow-y-auto">
-                {notifications.map((notification) => (
-                  <DropdownMenuItem
-                    key={notification.id}
-                    className={cn(
-                      'flex items-start p-4 cursor-pointer border-b border-border/50 last:border-b-0',
-                      !notification.readAt && 'bg-muted/30'
-                    )}
-                    onClick={() => handleMarkAsRead(notification.id)}
-                  >
-                    <div className="flex w-full gap-3">
-                      <div className="text-lg">
-                        {getIcon(notification.type)}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between mb-1">
-                          <p className="font-medium text-sm leading-tight">
-                            {notification.title}
-                          </p>
-                          {!notification.readAt && (
-                            <div className="w-2 h-2 bg-primary rounded-full mt-1 ml-2 flex-shrink-0" />
-                          )}
+                {/* 🔧 수정: 읽지 않은 알림을 먼저 표시하고, 읽은 알림과 구분 */}
+                {notifications
+                  .sort((a, b) => {
+                    // 읽지 않은 알림을 먼저 정렬
+                    if (!a.readAt && b.readAt) return -1;
+                    if (a.readAt && !b.readAt) return 1;
+                    // 같은 읽음 상태라면 최신순
+                    return (
+                      new Date(b.createdAt).getTime() -
+                      new Date(a.createdAt).getTime()
+                    );
+                  })
+                  .map((notification) => (
+                    <DropdownMenuItem
+                      key={notification.id}
+                      className={cn(
+                        'flex items-start p-4 cursor-pointer border-b border-border/50 last:border-b-0 transition-colors',
+                        !notification.readAt
+                          ? 'bg-primary/10 border-l-4 border-l-primary hover:bg-primary/15'
+                          : 'hover:bg-muted/50 opacity-75'
+                      )}
+                      onClick={() => handleMarkAsRead(notification.id)}
+                    >
+                      <div className="flex w-full gap-3">
+                        <div className="text-lg">
+                          {getIcon(notification.type)}
                         </div>
-                        <p className="text-xs text-muted-foreground leading-relaxed mb-2">
-                          {notification.message}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {formatTime(notification.createdAt)}
-                        </p>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between mb-1">
+                            <p
+                              className={cn(
+                                'text-sm leading-tight',
+                                !notification.readAt
+                                  ? 'font-semibold text-foreground'
+                                  : 'font-medium text-muted-foreground'
+                              )}
+                            >
+                              {notification.title}
+                            </p>
+                            {!notification.readAt && (
+                              <div className="w-2 h-2 bg-primary rounded-full mt-1 ml-2 flex-shrink-0 animate-pulse" />
+                            )}
+                          </div>
+                          <p
+                            className={cn(
+                              'text-xs leading-relaxed mb-2',
+                              !notification.readAt
+                                ? 'text-muted-foreground'
+                                : 'text-muted-foreground/70'
+                            )}
+                          >
+                            {notification.message}
+                          </p>
+                          <div className="flex items-center justify-between">
+                            <p className="text-xs text-muted-foreground">
+                              {formatTime(notification.createdAt)}
+                            </p>
+                            {!notification.readAt && (
+                              <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-medium">
+                                읽지 않음
+                              </span>
+                            )}
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </DropdownMenuItem>
-                ))}
+                    </DropdownMenuItem>
+                  ))}
               </div>
             ) : (
               <div className="p-8 text-center">
