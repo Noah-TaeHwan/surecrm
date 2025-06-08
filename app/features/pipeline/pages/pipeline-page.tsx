@@ -1,7 +1,7 @@
 import type { Route } from './+types/pipeline-page';
 import { MainLayout } from '~/common/layouts/main-layout';
 import { useState, useEffect } from 'react';
-import { useFetcher } from 'react-router';
+import { useFetcher, useNavigate } from 'react-router';
 import { PipelineBoard } from '~/features/pipeline/components/pipeline-board';
 import { PipelineFilters } from '~/features/pipeline/components/pipeline-filters';
 import { AddClientModal } from '~/features/clients/components/add-client-modal';
@@ -474,6 +474,7 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
   const addClientFetcher = useFetcher(); // 신규 고객 추가용
   const opportunityFetcher = useFetcher(); // 기존 고객 영업 기회용
   const removeFetcher = useFetcher(); // 고객 제거용
+  const navigate = useNavigate(); // 🏢 계약 전환용
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedReferrerId, setSelectedReferrerId] = useState<string | null>(
@@ -702,6 +703,16 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
   const handleCancelRemove = () => {
     setRemoveClientModalOpen(false);
     setClientToRemove(null);
+  };
+
+  // 🏢 계약 전환 핸들러
+  const handleCreateContract = (
+    clientId: string,
+    clientName: string,
+    products: any[]
+  ) => {
+    // React Router navigate를 사용하여 고객 상세 페이지의 보험 계약 탭으로 이동
+    navigate(`/clients/${clientId}?tab=insurance&createContract=true`);
   };
 
   // 필터가 적용되었는지 확인
@@ -986,6 +997,7 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
             onClientMove={handleClientMove}
             onAddClientToStage={handleAddClientToStage}
             onRemoveFromPipeline={handleRemoveFromPipeline}
+            onCreateContract={handleCreateContract} // 🏢 계약 전환 핸들러 전달
           />
         </div>
 

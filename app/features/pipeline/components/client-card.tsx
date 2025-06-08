@@ -118,6 +118,11 @@ interface ClientCardProps {
   interestCategories?: Array<{ label: string; icon: string }>;
   isDragging?: boolean;
   onRemoveFromPipeline?: (clientId: string, clientName: string) => void;
+  onCreateContract?: (
+    clientId: string,
+    clientName: string,
+    products: any[]
+  ) => void; // 🏢 계약 전환 핸들러
   // 🆕 실제 상품 정보 필드들
   products?: Array<{
     id: string;
@@ -157,6 +162,7 @@ export function ClientCard({
   interestCategories = [],
   isDragging = false,
   onRemoveFromPipeline,
+  onCreateContract, // 🏢 계약 전환 핸들러
   // 🆕 실제 상품 정보 필드들
   products = [],
   totalMonthlyPremium = 0,
@@ -445,27 +451,43 @@ export function ClientCard({
             </div>
           )}
 
-          {/* 🎯 가로 배치 버튼들 - 상세보기 + 영업에서 제외 */}
-          <div className="flex gap-2 pt-1">
-            {/* 🔗 상세보기 링크 */}
+          {/* 🎯 가로 배치 버튼들 - 상세보기 + 계약전환 + 영업에서 제외 */}
+          <div className="space-y-2 pt-1">
+            {/* 첫 번째 줄: 상세보기 */}
             <Link
               to={`/clients/${id}`}
-              className="flex items-center justify-center gap-2 flex-1 p-2 text-sm text-primary hover:text-primary/80 hover:bg-primary/5 rounded-lg transition-colors group/link"
+              className="flex items-center justify-center gap-2 w-full p-2 text-sm text-primary hover:text-primary/80 hover:bg-primary/5 rounded-lg transition-colors group/link"
             >
               <span>상세보기</span>
               <ChevronRight className="h-3.5 w-3.5 group-hover/link:translate-x-0.5 transition-transform" />
             </Link>
 
-            {/* 📁 영업에서 보관 버튼 */}
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-1 text-xs text-muted-foreground hover:text-orange-700 hover:bg-orange-50 hover:border-orange-300 transition-colors"
-              onClick={() => onRemoveFromPipeline?.(id, name)}
-            >
-              <Archive className="h-3 w-3 mr-1" />
-              보관
-            </Button>
+            {/* 두 번째 줄: 계약전환 + 보관 */}
+            <div className="flex gap-2">
+              {/* 🏢 계약 전환 버튼 - 상품이 있을 때만 표시 */}
+              {products.length > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 text-xs text-green-700 hover:text-green-800 hover:bg-green-50 hover:border-green-300 transition-colors"
+                  onClick={() => onCreateContract?.(id, name, products)}
+                >
+                  <ShieldCheck className="h-3 w-3 mr-1" />
+                  계약전환
+                </Button>
+              )}
+
+              {/* 📁 영업에서 보관 버튼 */}
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1 text-xs text-muted-foreground hover:text-orange-700 hover:bg-orange-50 hover:border-orange-300 transition-colors"
+                onClick={() => onRemoveFromPipeline?.(id, name)}
+              >
+                <Archive className="h-3 w-3 mr-1" />
+                보관
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>

@@ -48,6 +48,9 @@ import {
 // React Router hooks import
 import { useRevalidator, useFetcher } from 'react-router';
 
+// 커스텀 토스트 import
+import { useToast, ToastContainer } from '~/common/components/ui/toast';
+
 // 📋 보험계약 타입 정의
 interface InsuranceContract {
   id: string;
@@ -84,6 +87,7 @@ interface InsuranceContractsTabProps {
   clientName?: string;
   agentId?: string;
   initialContracts?: InsuranceContract[];
+  shouldOpenModal?: boolean; // 🏢 파이프라인에서 계약 전환 시 모달 자동 열기
 }
 
 // 📝 보험계약 폼 데이터 타입
@@ -108,6 +112,27 @@ interface ContractFormData {
   specialClauses: string;
   notes: string;
 }
+
+// 📁 첨부파일 타입 정의
+interface AttachmentData {
+  id: string;
+  file: File;
+  fileName: string;
+  fileDisplayName: string;
+  documentType: string;
+  description?: string;
+}
+
+// 📂 문서 타입 옵션
+const DOCUMENT_TYPES = [
+  { value: 'contract', label: '계약서' },
+  { value: 'policy', label: '증권' },
+  { value: 'application', label: '청약서' },
+  { value: 'identification', label: '신분증' },
+  { value: 'medical_report', label: '건강검진서' },
+  { value: 'vehicle_registration', label: '자동차등록증' },
+  { value: 'other_document', label: '기타 서류' },
+];
 
 // 🎨 보험 유형별 설정
 const getInsuranceTypeConfig = (type: string) => {
@@ -157,10 +182,17 @@ const getStatusBadge = (status: string) => {
   return <Badge variant={config.variant}>{config.label}</Badge>;
 };
 
-// 💰 금액 포맷팅
-const formatCurrency = (amount?: number) => {
-  if (!amount) return '-';
-  return `₩${amount.toLocaleString()}`;
+// 💰 금액 포맷팅 (한국 원화, 소수점 없음)
+const formatCurrency = (amount?: number | string) => {
+  if (!amount || amount === 0) return '-';
+
+  // 문자열인 경우 숫자로 변환
+  const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
+
+  if (isNaN(numAmount) || numAmount === 0) return '-';
+
+  // 정수로 변환하여 소수점 제거 후 한국식 천단위 구분자 적용
+  return `₩${Math.round(numAmount).toLocaleString('ko-KR')}`;
 };
 
 // 📅 날짜 포맷팅
@@ -209,6 +241,7 @@ export function InsuranceContractsTab({
   clientName = '고객',
   agentId = 'test-agent-id',
   initialContracts = [],
+  shouldOpenModal = false, // 🏢 파이프라인에서 계약 전환 시 모달 자동 열기
 }: InsuranceContractsTabProps) {
   // 📊 실제 데이터 상태
   const [contracts, setContracts] =
@@ -218,6 +251,45 @@ export function InsuranceContractsTab({
   // React Router hooks
   const revalidator = useRevalidator();
   const fetcher = useFetcher();
+
+  // 토스트 알림
+  const toast = useToast();
+
+  // 🏢 파이프라인에서 계약 전환으로 온 경우 모달 자동 열기
+  useEffect(() => {
+    if (shouldOpenModal) {
+      setShowAddModal(true);
+    }
+  }, [shouldOpenModal]);
+
+  // fetcher 상태 모니터링 및 자동 새로고침
+  useEffect(() => {
+    if (fetcher.state === 'idle' && fetcher.data) {
+      const result = fetcher.data;
+
+      if (result?.success) {
+        // 성공 시 토스트 표시 및 자동 새로고침
+        toast.success(
+          '보험계약 등록 완료!',
+          '보험계약이 성공적으로 등록되었습니다.'
+        );
+
+        // 모달 닫기
+        setShowAddModal(false);
+        setIsSubmitting(false);
+
+        // 페이지 데이터 새로고침
+        revalidator.revalidate();
+      } else if (result?.error) {
+        // 에러 시 토스트 표시
+        toast.error(
+          '계약 등록 실패',
+          result.message || '알 수 없는 오류가 발생했습니다.'
+        );
+        setIsSubmitting(false);
+      }
+    }
+  }, [fetcher.state, fetcher.data, toast, revalidator]);
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedContract, setSelectedContract] =
@@ -427,33 +499,48 @@ export function InsuranceContractsTab({
       submitData.append('clientId', clientId);
       submitData.append('agentId', agentId);
 
-      // 계약 데이터 추가
-      Object.entries(formData).forEach(([key, value]) => {
+      // 첨부파일을 제외한 계약 데이터 추가
+      const contractData = { ...formData };
+      if (contractData.attachments) {
+        delete contractData.attachments; // 첨부파일은 별도 처리
+      }
+
+      Object.entries(contractData).forEach(([key, value]) => {
         if (value !== undefined && value !== null && value !== '') {
           submitData.append(key, value.toString());
         }
       });
 
-      console.log('📋 보험계약 저장 중...', formData);
+      // 📁 첨부파일 정보 로깅 (향후 Supabase Storage 연동 예정)
+      if (formData.attachments?.length > 0) {
+        console.log(
+          `📁 첨부파일 ${formData.attachments.length}개 업로드 예정:`,
+          formData.attachments.map((att: any) => ({
+            fileName: att.fileName,
+            displayName: att.fileDisplayName,
+            type: att.documentType,
+            size: att.file.size,
+          }))
+        );
 
-      // React Router fetcher로 action 호출
+        // TODO: Supabase Storage 연동 후 실제 파일 업로드 구현
+        // 현재는 기본 계약 정보만 저장
+      }
+
+      console.log('📋 보험계약 저장 중...', contractData);
+
+      // React Router fetcher로 action 호출 - 응답은 useEffect에서 처리
       fetcher.submit(submitData, { method: 'POST' });
-
-      setShowAddModal(false);
-      setIsSubmitting(false);
-
-      // 성공 알림
-      alert('✅ 보험계약이 성공적으로 등록되었습니다!');
-
-      // 페이지 데이터 새로고침
-      revalidator.revalidate();
     } catch (error) {
       console.error('❌ 보험계약 저장 실패:', error);
       setIsSubmitting(false);
-      alert(
-        `❌ 저장에 실패했습니다: ${
-          error instanceof Error ? error.message : '알 수 없는 오류'
-        }`
+
+      // 에러 토스트 알림 (즉시 표시할 수 있는 클라이언트 에러)
+      toast.error(
+        '계약 등록 실패',
+        error instanceof Error
+          ? error.message
+          : '알 수 없는 오류가 발생했습니다.'
       );
     }
   };
@@ -477,226 +564,237 @@ export function InsuranceContractsTab({
     .reduce((sum, c) => sum + (c.agentCommission || 0), 0);
 
   return (
-    <TabsContent value="insurance" className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <span className="text-lg">📋</span>
-            보험계약 관리
-          </CardTitle>
-          <p className="text-sm text-muted-foreground">
-            {clientName} 고객의 보험계약 현황을 관리하고 관련 서류를 첨부할 수
-            있습니다.
-          </p>
-          <div className="flex justify-end pb-4 border-b">
-            <Button
-              onClick={handleAddContract}
-              className="flex items-center gap-2"
-            >
-              <Plus className="h-4 w-4" />새 계약 등록
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="p-6 space-y-6">
-          {/* 📊 통계 대시보드 */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="p-4 bg-card rounded-lg border  hover:shadow-md transition-shadow">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <FileText className="h-4 w-4 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">총 계약</p>
-                  <p className="text-xl font-bold text-foreground">
-                    {totalContracts}
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="p-4 bg-card rounded-lg border hover:shadow-md transition-shadow">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-green-100 dark:bg-green-900/20 rounded-lg">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">유효 계약</p>
-                  <p className="text-xl font-bold text-foreground">
-                    {activeContracts}
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="p-4 bg-card rounded-lg border  hover:shadow-md transition-shadow">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
-                  <DollarSign className="h-4 w-4 text-blue-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">월 보험료</p>
-                  <p className="text-xl font-bold text-foreground">
-                    {formatCurrency(totalMonthlyPremium)}
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="p-4 bg-card rounded-lg border hover:shadow-md transition-shadow">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-orange-100 dark:bg-orange-900/20 rounded-lg">
-                  <DollarSign className="h-4 w-4 text-orange-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">총 수수료</p>
-                  <p className="text-xl font-bold text-foreground">
-                    {formatCurrency(totalCommission)}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* 📋 계약 목록 */}
-          {contracts.length > 0 ? (
-            <div className="space-y-4">
-              <h4 className="font-medium text-foreground flex items-center gap-2">
-                🗂️ 계약 목록
-              </h4>
-              {contracts.map((contract) => {
-                const typeConfig = getInsuranceTypeConfig(
-                  contract.insuranceType
-                );
-                return (
-                  <div
-                    key={contract.id}
-                    className="p-4 bg-card border rounded-lg hover:shadow-md transition-shadow cursor-pointer"
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl">{typeConfig.icon}</span>
-                        <div>
-                          <h5 className="font-semibold">
-                            {contract.productName}
-                          </h5>
-                          <div className="flex items-center gap-2 mt-1">
-                            <Badge
-                              variant="outline"
-                              className={typeConfig.color}
-                            >
-                              {typeConfig.label}
-                            </Badge>
-                            {getStatusBadge(contract.status)}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleEditContract(contract);
-                          }}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                      <div className="space-y-2">
-                        <div>
-                          <span className="text-muted-foreground">보험사:</span>{' '}
-                          {contract.insuranceCompany}
-                        </div>
-                        {contract.contractNumber && (
-                          <div>
-                            <span className="text-muted-foreground">
-                              계약번호:
-                            </span>{' '}
-                            {contract.contractNumber}
-                          </div>
-                        )}
-                      </div>
-                      <div className="space-y-2">
-                        <div>
-                          <span className="text-muted-foreground">계약일:</span>{' '}
-                          {formatDate(contract.contractDate)}
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">개시일:</span>{' '}
-                          {formatDate(contract.effectiveDate)}
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        {contract.monthlyPremium && (
-                          <div>
-                            <span className="text-muted-foreground">
-                              월 보험료:
-                            </span>
-                            <span className="font-semibold text-blue-600 ml-1">
-                              {formatCurrency(contract.monthlyPremium)}
-                            </span>
-                          </div>
-                        )}
-                        {contract.agentCommission && (
-                          <div>
-                            <span className="text-muted-foreground">
-                              수수료:
-                            </span>
-                            <span className="font-semibold text-green-600 ml-1">
-                              {formatCurrency(contract.agentCommission)}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {contract.attachments &&
-                      contract.attachments.length > 0 && (
-                        <div className="mt-4 pt-4 border-t">
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Paperclip className="h-4 w-4" />
-                            <span>
-                              첨부파일 {contract.attachments.length}개
-                            </span>
-                          </div>
-                        </div>
-                      )}
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <div className="text-muted-foreground mb-4">
-                <FileText className="mx-auto h-12 w-12 text-muted-foreground" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">
-                보험계약이 없습니다
-              </h3>
-              <p className="text-muted-foreground mb-4">
-                {clientName} 고객의 첫 번째 보험계약을 등록해보세요.
-              </p>
-              <Button onClick={handleAddContract}>
-                <Plus className="mr-2 h-4 w-4" />첫 계약 등록하기
+    <>
+      <TabsContent value="insurance" className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <span className="text-lg">📋</span>
+              보험계약 관리
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              {clientName} 고객의 보험계약 현황을 관리하고 관련 서류를 첨부할 수
+              있습니다.
+            </p>
+            <div className="flex justify-end pb-4 border-b">
+              <Button
+                onClick={handleAddContract}
+                className="flex items-center gap-2"
+              >
+                <Plus className="h-4 w-4" />새 계약 등록
               </Button>
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardHeader>
+          <CardContent className="p-6 space-y-6">
+            {/* 📊 통계 대시보드 */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="p-4 bg-card rounded-lg border  hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-primary/10 rounded-lg">
+                    <FileText className="h-4 w-4 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">총 계약</p>
+                    <p className="text-xl font-bold text-foreground">
+                      {totalContracts}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="p-4 bg-card rounded-lg border hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-green-100 dark:bg-green-900/20 rounded-lg">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">유효 계약</p>
+                    <p className="text-xl font-bold text-foreground">
+                      {activeContracts}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="p-4 bg-card rounded-lg border  hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
+                    <DollarSign className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">월 보험료</p>
+                    <p className="text-xl font-bold text-foreground">
+                      {formatCurrency(totalMonthlyPremium)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="p-4 bg-card rounded-lg border hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-orange-100 dark:bg-orange-900/20 rounded-lg">
+                    <DollarSign className="h-4 w-4 text-orange-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">총 수수료</p>
+                    <p className="text-xl font-bold text-foreground">
+                      {formatCurrency(totalCommission)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-      {/* 🎯 보험계약 등록/수정 모달 */}
-      {showAddModal && (
-        <NewContractModal
-          isOpen={showAddModal}
-          onClose={() => setShowAddModal(false)}
-          onConfirm={handleSubmit}
-          clientName={clientName}
-          isLoading={isSubmitting}
-        />
-      )}
-    </TabsContent>
+            <Separator />
+
+            {/* 📋 계약 목록 */}
+            {contracts.length > 0 ? (
+              <div className="space-y-4">
+                <h4 className="font-medium text-foreground flex items-center gap-2">
+                  🗂️ 계약 목록
+                </h4>
+                {contracts.map((contract) => {
+                  const typeConfig = getInsuranceTypeConfig(
+                    contract.insuranceType
+                  );
+                  return (
+                    <div
+                      key={contract.id}
+                      className="p-4 bg-card border rounded-lg hover:shadow-md transition-shadow cursor-pointer"
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <span className="text-2xl">{typeConfig.icon}</span>
+                          <div>
+                            <h5 className="font-semibold">
+                              {contract.productName}
+                            </h5>
+                            <div className="flex items-center gap-2 mt-1">
+                              <Badge
+                                variant="outline"
+                                className={typeConfig.color}
+                              >
+                                {typeConfig.label}
+                              </Badge>
+                              {getStatusBadge(contract.status)}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEditContract(contract);
+                            }}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                        <div className="space-y-2">
+                          <div>
+                            <span className="text-muted-foreground">
+                              보험사:
+                            </span>{' '}
+                            {contract.insuranceCompany}
+                          </div>
+                          {contract.contractNumber && (
+                            <div>
+                              <span className="text-muted-foreground">
+                                계약번호:
+                              </span>{' '}
+                              {contract.contractNumber}
+                            </div>
+                          )}
+                        </div>
+                        <div className="space-y-2">
+                          <div>
+                            <span className="text-muted-foreground">
+                              계약일:
+                            </span>{' '}
+                            {formatDate(contract.contractDate)}
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">
+                              개시일:
+                            </span>{' '}
+                            {formatDate(contract.effectiveDate)}
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          {contract.monthlyPremium && (
+                            <div>
+                              <span className="text-muted-foreground">
+                                월 보험료:
+                              </span>
+                              <span className="font-semibold text-blue-600 ml-1">
+                                {formatCurrency(contract.monthlyPremium)}
+                              </span>
+                            </div>
+                          )}
+                          {contract.agentCommission && (
+                            <div>
+                              <span className="text-muted-foreground">
+                                수수료:
+                              </span>
+                              <span className="font-semibold text-green-600 ml-1">
+                                {formatCurrency(contract.agentCommission)}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {contract.attachments &&
+                        contract.attachments.length > 0 && (
+                          <div className="mt-4 pt-4 border-t">
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <Paperclip className="h-4 w-4" />
+                              <span>
+                                첨부파일 {contract.attachments.length}개
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <div className="text-muted-foreground mb-4">
+                  <FileText className="mx-auto h-12 w-12 text-muted-foreground" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">
+                  보험계약이 없습니다
+                </h3>
+                <p className="text-muted-foreground mb-4">
+                  {clientName} 고객의 첫 번째 보험계약을 등록해보세요.
+                </p>
+                <Button onClick={handleAddContract}>
+                  <Plus className="mr-2 h-4 w-4" />첫 계약 등록하기
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* 🎯 보험계약 등록/수정 모달 */}
+        {showAddModal && (
+          <NewContractModal
+            isOpen={showAddModal}
+            onClose={() => setShowAddModal(false)}
+            onConfirm={handleSubmit}
+            clientName={clientName}
+            isLoading={isSubmitting}
+          />
+        )}
+      </TabsContent>
+
+      {/* 토스트 알림 컨테이너 */}
+      <ToastContainer toasts={toast.toasts} />
+    </>
   );
 }
 
@@ -714,7 +812,7 @@ function NewContractModal({
   clientName: string;
   isLoading?: boolean;
 }) {
-  // 상태 관리
+  // 📋 폼 상태 관리
   const [formData, setFormData] = useState({
     productName: '',
     insuranceCompany: '',
@@ -736,6 +834,10 @@ function NewContractModal({
     specialClauses: '',
     notes: '',
   });
+
+  // 📁 첨부파일 상태 관리
+  const [attachments, setAttachments] = useState<AttachmentData[]>([]);
+  const [isUploadingFile, setIsUploadingFile] = useState(false);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -762,6 +864,7 @@ function NewContractModal({
       specialClauses: '',
       notes: '',
     });
+    setAttachments([]);
     setErrors({});
   };
 
@@ -797,7 +900,10 @@ function NewContractModal({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
-      onConfirm(formData);
+      onConfirm({
+        ...formData,
+        attachments,
+      });
     }
   };
 
@@ -815,6 +921,82 @@ function NewContractModal({
       delete newErrors[field];
       setErrors(newErrors);
     }
+  };
+
+  // 📁 첨부파일 처리 함수들
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const file = files[0];
+
+    // 파일 크기 체크 (10MB 제한)
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      // 여기서는 모달 내부이므로 부모 컴포넌트의 toast를 사용할 수 없음
+      // 간단한 에러 표시만 하거나, props로 toast 함수를 전달받아야 함
+      alert('파일 크기는 10MB 이하로 제한됩니다.');
+      return;
+    }
+
+    // 지원하는 파일 타입 체크
+    const allowedTypes = [
+      'application/pdf',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/msword',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'image/jpeg',
+      'image/png',
+      'image/gif',
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      alert(
+        '지원하지 않는 파일 형식입니다. PDF, Word, Excel, 이미지 파일만 업로드 가능합니다.'
+      );
+      return;
+    }
+
+    // 새 첨부파일 생성
+    const newAttachment: AttachmentData = {
+      id: Date.now().toString(),
+      file,
+      fileName: file.name,
+      fileDisplayName: file.name,
+      documentType: 'other_document',
+      description: '',
+    };
+
+    setAttachments((prev) => [...prev, newAttachment]);
+
+    // input 초기화
+    e.target.value = '';
+  };
+
+  const handleAttachmentUpdate = (
+    id: string,
+    field: keyof AttachmentData,
+    value: string
+  ) => {
+    setAttachments((prev) =>
+      prev.map((attachment) =>
+        attachment.id === id ? { ...attachment, [field]: value } : attachment
+      )
+    );
+  };
+
+  const handleAttachmentRemove = (id: string) => {
+    setAttachments((prev) => prev.filter((attachment) => attachment.id !== id));
+  };
+
+  // 📄 파일 크기 포맷팅
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
   // 보험 종류 옵션
@@ -839,8 +1021,8 @@ function NewContractModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl max-h-[85vh] overflow-hidden flex flex-col">
-        <DialogHeader className="flex-shrink-0">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
+        <DialogHeader className="flex-shrink-0 pb-4">
           <DialogTitle className="flex items-center gap-2 text-xl">
             <FileText className="h-6 w-6 text-primary" />새 보험계약 등록
           </DialogTitle>
@@ -854,7 +1036,7 @@ function NewContractModal({
           onSubmit={handleSubmit}
           className="flex-1 overflow-hidden flex flex-col"
         >
-          <div className="flex-1 overflow-y-auto space-y-6 py-4">
+          <div className="flex-1 overflow-y-auto space-y-6 px-1 py-1">
             {/* 📋 기본 계약 정보 */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold flex items-center gap-2">
@@ -1210,19 +1392,152 @@ function NewContractModal({
               </div>
             </div>
 
-            {/* 📌 안내 메시지 */}
-            <div className="p-4 bg-blue-50 dark:bg-blue-900/10 rounded-lg border border-blue-200 dark:border-blue-800">
-              <div className="flex items-start gap-3">
-                <FileText className="h-5 w-5 text-blue-600 mt-0.5" />
-                <div>
-                  <h4 className="font-medium text-blue-800 dark:text-blue-200 mb-1">
-                    계약 등록 후 진행사항
-                  </h4>
-                  <div className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
-                    <p>✓ 영업 파이프라인에서 "계약 완료" 상태로 업데이트</p>
-                    <p>✓ 대시보드 및 보고서에 수수료 반영</p>
-                    <p>✓ 계약서류 업로드 및 관리 기능 제공</p>
+            {/* 📁 첨부파일 섹션 */}
+            <div className="space-y-3">
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <Paperclip className="h-5 w-5 text-primary" />
+                첨부파일 ({attachments.length}개)
+              </h3>
+
+              {/* 파일 업로드 */}
+              <div className="relative border-2 border-dashed border-muted-foreground/25 rounded-lg p-4 hover:border-muted-foreground/50 transition-colors">
+                <div className="text-center">
+                  <Upload className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium">
+                      파일을 드래그하거나 클릭하여 업로드
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      PDF, Word, Excel, 이미지 파일 (최대 10MB)
+                    </p>
+                    <input
+                      type="file"
+                      onChange={handleFileSelect}
+                      accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif"
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
                   </div>
+                </div>
+              </div>
+
+              {/* 첨부파일 목록 */}
+              {attachments.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="font-medium text-sm">업로드된 파일</h4>
+                  <div className="max-h-60 overflow-y-auto space-y-2">
+                    {attachments.map((attachment) => (
+                      <div
+                        key={attachment.id}
+                        className="p-3 border rounded-lg bg-muted/50 space-y-2"
+                      >
+                        {/* 파일 기본 정보 */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            <FileText className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm font-medium truncate">
+                                {attachment.fileName}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {formatFileSize(attachment.file.size)}
+                              </p>
+                            </div>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() =>
+                              handleAttachmentRemove(attachment.id)
+                            }
+                            className="h-8 w-8 p-0"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+
+                        {/* 파일 메타데이터 - 한 줄로 압축 */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                          <div className="space-y-1">
+                            <Label className="text-xs font-medium">
+                              표시명
+                            </Label>
+                            <Input
+                              value={attachment.fileDisplayName}
+                              onChange={(e) =>
+                                handleAttachmentUpdate(
+                                  attachment.id,
+                                  'fileDisplayName',
+                                  e.target.value
+                                )
+                              }
+                              placeholder="파일 표시명"
+                              className="h-8 text-xs"
+                            />
+                          </div>
+
+                          <div className="space-y-1">
+                            <Label className="text-xs font-medium">
+                              문서 종류
+                            </Label>
+                            <Select
+                              value={attachment.documentType}
+                              onValueChange={(value) =>
+                                handleAttachmentUpdate(
+                                  attachment.id,
+                                  'documentType',
+                                  value
+                                )
+                              }
+                            >
+                              <SelectTrigger className="h-8 text-xs">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {DOCUMENT_TYPES.map((type) => (
+                                  <SelectItem
+                                    key={type.value}
+                                    value={type.value}
+                                  >
+                                    {type.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div className="space-y-1">
+                            <Label className="text-xs font-medium">
+                              설명 (선택사항)
+                            </Label>
+                            <Input
+                              value={attachment.description || ''}
+                              onChange={(e) =>
+                                handleAttachmentUpdate(
+                                  attachment.id,
+                                  'description',
+                                  e.target.value
+                                )
+                              }
+                              placeholder="파일 설명..."
+                              className="h-8 text-xs"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* 📌 안내 메시지 */}
+            <div className="p-3 bg-blue-50 dark:bg-blue-900/10 rounded-lg border border-blue-200 dark:border-blue-800">
+              <div className="flex items-center gap-2">
+                <FileText className="h-4 w-4 text-blue-600" />
+                <div className="text-xs text-blue-700 dark:text-blue-300">
+                  <span className="font-medium">등록 완료 시:</span> 파이프라인
+                  업데이트, 수수료 반영, 서류 관리 제공
                 </div>
               </div>
             </div>

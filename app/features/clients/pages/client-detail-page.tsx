@@ -1,5 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Link, useNavigate, useFetcher, useSubmit } from 'react-router';
+import {
+  Link,
+  useNavigate,
+  useFetcher,
+  useSubmit,
+  useSearchParams,
+} from 'react-router';
 import type { Route } from './+types/client-detail-page';
 import { MainLayout } from '~/common/layouts/main-layout';
 import { Button } from '~/common/components/ui/button';
@@ -297,7 +303,22 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
   const error = data?.error || null;
   const currentUser = data?.currentUser || null;
 
-  const [activeTab, setActiveTab] = useState('notes');
+  // 🏢 URL 파라미터에서 탭 및 계약 생성 플래그 확인 (SSR 안전)
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlTab = searchParams.get('tab');
+  const shouldCreateContract = searchParams.get('createContract') === 'true';
+
+  const [activeTab, setActiveTab] = useState(urlTab || 'notes');
+
+  // 🏢 계약 생성 모달이 열렸다면 URL 파라미터 정리
+  useEffect(() => {
+    if (shouldCreateContract) {
+      const newSearchParams = new URLSearchParams(searchParams);
+      newSearchParams.delete('createContract');
+      setSearchParams(newSearchParams, { replace: true });
+    }
+  }, [shouldCreateContract, searchParams, setSearchParams]);
+
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -1583,6 +1604,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                   clientName={client?.fullName || '고객'}
                   agentId={data?.currentUserId}
                   initialContracts={insuranceContracts}
+                  shouldOpenModal={shouldCreateContract} // 🏢 파이프라인에서 왔을 때 모달 자동 열기
                 />
               </TabsContent>
 
