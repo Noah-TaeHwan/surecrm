@@ -984,33 +984,34 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
       // 🆕 상품 정보가 있으면 opportunity_products 테이블에 저장
       if (sanitizedData.productName && sanitizedData.insuranceCompany) {
         try {
-          const { createOpportunityProduct } = await import(
-            '~/api/shared/opportunity-products'
+          // action을 통해 상품 정보 저장 (dynamic import 문제 해결)
+          const productFormData = new FormData();
+          productFormData.append('intent', 'createOpportunityProduct');
+          productFormData.append('productName', sanitizedData.productName);
+          productFormData.append(
+            'insuranceCompany',
+            sanitizedData.insuranceCompany
           );
-
-          const productData = {
-            productName: sanitizedData.productName,
-            insuranceCompany: sanitizedData.insuranceCompany,
-            insuranceType: sanitizedData.insuranceType,
-            monthlyPremium: sanitizedData.monthlyPremium,
-            expectedCommission: sanitizedData.expectedCommission,
-            notes: sanitizedData.notes || undefined,
-          };
-
-          const productResult = await createOpportunityProduct(
-            client.id,
-            client.agentId,
-            productData
-          );
-
-          if (!productResult.success) {
-            console.warn(
-              '🔧 상품 정보 저장 실패 (영업 기회는 계속 진행):',
-              productResult.error
+          productFormData.append('insuranceType', sanitizedData.insuranceType);
+          if (sanitizedData.monthlyPremium) {
+            productFormData.append(
+              'monthlyPremium',
+              sanitizedData.monthlyPremium.toString()
             );
-          } else {
-            console.log('✅ 상품 정보 저장 완료:', productResult.data?.id);
           }
+          if (sanitizedData.expectedCommission) {
+            productFormData.append(
+              'expectedCommission',
+              sanitizedData.expectedCommission.toString()
+            );
+          }
+          if (sanitizedData.notes) {
+            productFormData.append('productNotes', sanitizedData.notes);
+          }
+
+          // 상품 정보를 action으로 전송
+          await submit(productFormData, { method: 'post' });
+          console.log('✅ 상품 정보 저장 요청 완료');
         } catch (error) {
           console.warn(
             '🔧 상품 정보 저장 중 오류 (영업 기회는 계속 진행):',
@@ -1714,6 +1715,61 @@ export async function action({ request, params }: Route.ActionArgs) {
 
     case 'updateConsultationNote':
       return await updateConsultationNoteAction(request, clientId, formData);
+
+    case 'createOpportunityProduct': {
+      // 🆕 영업 기회 상품 정보 생성
+      const productName = formData.get('productName')?.toString();
+      const insuranceCompany = formData.get('insuranceCompany')?.toString();
+      const insuranceType = formData.get('insuranceType')?.toString();
+      const monthlyPremium = formData.get('monthlyPremium')?.toString();
+      const expectedCommission = formData.get('expectedCommission')?.toString();
+      const productNotes = formData.get('productNotes')?.toString();
+
+      if (!productName || !insuranceCompany || !insuranceType) {
+        return {
+          success: false,
+          message: '필수 정보가 누락되었습니다.',
+        };
+      }
+
+      try {
+        // 사용자 정보 확인
+        const user = await requireAuth(request);
+
+        // static import 사용
+        const { createOpportunityProduct } = await import(
+          '~/api/shared/opportunity-products'
+        );
+
+        const productData = {
+          productName,
+          insuranceCompany,
+          insuranceType,
+          monthlyPremium: monthlyPremium
+            ? parseFloat(monthlyPremium)
+            : undefined,
+          expectedCommission: expectedCommission
+            ? parseFloat(expectedCommission)
+            : undefined,
+          notes: productNotes,
+        };
+
+        const result = await createOpportunityProduct(
+          clientId,
+          user.id,
+          productData
+        );
+
+        return result;
+      } catch (error) {
+        console.error('❌ 상품 정보 생성 실패:', error);
+        return {
+          success: false,
+          message: '상품 정보 생성에 실패했습니다.',
+          error: error instanceof Error ? error.message : '알 수 없는 오류',
+        };
+      }
+    }
 
     default:
       return {

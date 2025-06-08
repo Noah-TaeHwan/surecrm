@@ -50,11 +50,13 @@ export function PerformanceKPICards({
   isLoading = false,
   salesStats,
 }: PerformanceKPICardsProps) {
-  // 🆕 실제 영업 데이터를 활용한 KPI 계산
-  const expectedYearlyRevenue = salesStats
-    ? salesStats.totalCommission * 12
+  // 🆕 실제 영업 데이터를 활용한 KPI 계산 (1건 계약 = 1회성 수수료)
+  const totalExpectedCommission = salesStats ? salesStats.totalCommission : 0;
+  const averageCommissionPerDeal = salesStats
+    ? salesStats.totalProducts > 0
+      ? salesStats.totalCommission / salesStats.totalProducts
+      : 0
     : 0;
-  const expectedMonthlyRevenue = salesStats ? salesStats.totalCommission : 0;
 
   const kpiItems = [
     {
@@ -66,8 +68,8 @@ export function PerformanceKPICards({
       description: '전체 관리 고객',
     },
     {
-      title: '예상 연간 수수료',
-      value: `${(expectedYearlyRevenue / 10000).toFixed(0)}만원`,
+      title: '예상 총 수수료',
+      value: `${(totalExpectedCommission / 10000).toFixed(0)}만원`,
       change: data.monthlyGrowth.revenue,
       icon: ActivityLogIcon,
       color: 'success',
@@ -189,7 +191,7 @@ export function PerformanceKPICards({
                       </p>
                       {(item.title === '전환율' ||
                         item.title === '총 고객 수' ||
-                        item.title === '예상 연간 수수료' ||
+                        item.title === '예상 총 수수료' ||
                         item.title === '소개 네트워크') && (
                         <Tooltip>
                           <TooltipTrigger>
@@ -211,12 +213,13 @@ export function PerformanceKPICards({
                                 증가율: 지난 달 대비 신규 고객 증가율
                               </p>
                             )}
-                            {item.title === '예상 연간 수수료' && (
+                            {item.title === '예상 총 수수료' && (
                               <p className="">
-                                진행 중인 영업 기회들의 예상 연간 수수료
+                                진행 중인 영업 기회들의 예상 계약 수수료
                                 합계입니다.
-                                <br />월 예상 수수료:{' '}
-                                {(expectedMonthlyRevenue / 10000).toFixed(0)}
+                                <br />
+                                평균 계약당 수수료:{' '}
+                                {(averageCommissionPerDeal / 10000).toFixed(0)}
                                 만원
                               </p>
                             )}

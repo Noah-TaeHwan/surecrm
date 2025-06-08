@@ -49,29 +49,7 @@ interface ClientProfile extends Client {
   };
 }
 
-// 🎯 MVP 핵심 통계 (보험설계사 관점)
-const MOCK_STATS = {
-  totalClients: 47,
-  activeClients: 42,
-  inactiveClients: 5,
-  networkStats: {
-    totalReferrals: 28,
-    directReferrers: 12,
-    secondDegreeConnections: 15,
-    networkValue: 8420000,
-  },
-  salesStats: {
-    totalContracts: 23,
-    monthlyPremium: 1240000,
-    averageContractValue: 180000,
-    conversionRate: 48.9,
-  },
-  activityStats: {
-    scheduledMeetings: 8,
-    pendingActions: 6,
-    overdueFollowups: 2,
-  },
-};
+// 🎯 실제 데이터로 대체됨 - 더미 데이터 제거
 
 // 🎯 보험설계사 특화 풍부한 고객 데이터 (실제 스키마 기반)
 const MOCK_CLIENTS: ClientProfile[] = [

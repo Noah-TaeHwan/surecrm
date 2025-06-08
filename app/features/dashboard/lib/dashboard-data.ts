@@ -19,6 +19,7 @@ import {
   referrals,
   pipelineStages,
   insuranceInfo,
+  opportunityProducts,
 } from '~/lib/schema';
 import { profiles } from '~/lib/schema';
 import {
@@ -355,8 +356,8 @@ export async function getKPIData(userId: string): Promise<DashboardKPIData> {
         ? 100
         : 0;
 
-    // 평균 고객 가치 계산 (임시로 고정값 사용, 추후 실제 계약 금액으로 대체)
-    const averageClientValue = contractedClients > 0 ? 1500000 : 0; // 150만원 가정
+    // 평균 고객 가치 계산 (1건 계약당 평균 수수료 기반)
+    const averageClientValue = contractedClients > 0 ? 150000 : 0; // 1건당 평균 수수료 15만원
 
     // 전환율 증가율 계산 (지난 달 대비)
     let revenueGrowthPercentage = 0;
@@ -420,7 +421,7 @@ export async function getKPIData(userId: string): Promise<DashboardKPIData> {
       clientGrowthPercentage: 0,
       referralGrowthPercentage: 0,
       revenueGrowthPercentage: 0,
-      averageClientValue: 0,
+      averageClientValue: 0, // 실제 데이터로 계산됨
     };
   }
 }
@@ -537,11 +538,11 @@ export async function getPipelineData(userId: string) {
             );
 
           clientCount = stageResult[0]?.count || 0;
-          totalValue = clientCount * 1500000; // 임시 평균 가치 (150만원)
+          totalValue = clientCount * 150000; // 1건 계약당 평균 수수료 (15만원)
         } else {
-          // 파이프라인 단계가 없는 경우 임시 데이터
-          clientCount = Math.max(0, Math.floor(Math.random() * 10) - index);
-          totalValue = clientCount * 1500000;
+          // 파이프라인 단계가 없는 경우 0으로 설정 (깜빡거림 방지)
+          clientCount = 0;
+          totalValue = 0;
         }
 
         // 전환율 계산 (실제 데이터 기반)
@@ -988,11 +989,11 @@ export async function getUserGoals(userId: string) {
           // 목표 유형별 실제 데이터 조회
           switch (goal.goalType) {
             case 'revenue':
-              // ✅ 개선된 매출 목표 계산 로직 - "계약 완료" 단계의 고객만 실제 매출로 계산
+              // 🆕 올바른 수수료 기반 매출 목표 계산 - opportunityProducts 테이블 사용
               const goalStartDate = new Date(goal.startDate);
               const goalEndDate = new Date(goal.endDate);
 
-              // 🎯 먼저 "계약 완료" 단계 찾기
+              // 🎯 "계약 완료" 단계에 있는 고객들의 실제 계약 수수료 합계
               const contractCompletedStage = await db
                 .select({
                   id: pipelineStages.id,
@@ -1006,89 +1007,80 @@ export async function getUserGoals(userId: string) {
                 )
                 .limit(1);
 
-              // "계약 완료" 단계가 있는 경우에만 해당 단계 고객들의 보험료 계산
               if (contractCompletedStage.length > 0) {
                 const contractStageId = contractCompletedStage[0].id;
 
-                // 🎯 "계약 완료" 단계에 있는 고객들의 보험료만 실제 매출로 계산
-                const contractedInsuranceResult = await db
+                // 🎯 계약 완료 단계 고객들의 실제 상품 수수료 합계
+                const contractedProductsResult = await db
                   .select({
-                    clientId: insuranceInfo.clientId,
-                    premium: insuranceInfo.premium,
-                    coverageAmount: insuranceInfo.coverageAmount,
-                    clientUpdatedAt: clients.updatedAt,
+                    expectedCommission: opportunityProducts.expectedCommission,
+                    updatedAt: opportunityProducts.updatedAt,
                   })
-                  .from(insuranceInfo)
-                  .innerJoin(clients, eq(insuranceInfo.clientId, clients.id))
+                  .from(opportunityProducts)
+                  .innerJoin(
+                    clients,
+                    eq(opportunityProducts.clientId, clients.id)
+                  )
                   .where(
                     and(
-                      eq(clients.agentId, userId),
+                      eq(opportunityProducts.agentId, userId),
                       eq(clients.currentStageId, contractStageId), // 🎯 계약 완료 단계만!
-                      eq(insuranceInfo.isActive, true), // 활성 보험만
-                      sql`${insuranceInfo.premium} > 0`, // 보험료가 설정된 경우
-                      gte(clients.updatedAt, goalStartDate), // 목표 기간 내 업데이트
+                      eq(opportunityProducts.status, 'active'),
+                      sql`${opportunityProducts.expectedCommission} IS NOT NULL`,
+                      gte(clients.updatedAt, goalStartDate), // 목표 기간 내 계약 완료
                       lte(clients.updatedAt, goalEndDate)
                     )
                   );
 
-                // 실제 보험료 합계 (연간 보험료를 월 단위로 환산)
-                const totalPremium = contractedInsuranceResult.reduce(
-                  (sum, insurance) => {
-                    const monthlyPremium = Number(insurance.premium) || 0;
-                    return sum + monthlyPremium;
+                // 실제 계약 수수료 합계 (1건 계약 = 1회성 수수료)
+                const totalCommission = contractedProductsResult.reduce(
+                  (sum, product) => {
+                    const commission = Number(product.expectedCommission) || 0;
+                    return sum + commission;
                   },
                   0
                 );
 
-                currentValue = Math.round(totalPremium / 10000); // 원을 만원으로 변환
+                currentValue = Math.round(totalCommission / 10000); // 원을 만원으로 변환
 
-                console.log('🎯 매출 목표 달성률 계산:', {
+                console.log('🎯 매출 목표 달성률 계산 (올바른 수수료 기반):', {
                   goalPeriod: `${goal.startDate} ~ ${goal.endDate}`,
-                  contractCompletedClients: contractedInsuranceResult.length,
-                  totalContractedPremium: totalPremium,
+                  contractCompletedProducts: contractedProductsResult.length,
+                  totalCommission,
                   currentValueInTenThousands: currentValue,
                 });
               }
 
-              // 계약 완료 단계가 없거나 보험료 데이터가 없는 경우 기본값 적용
+              // 계약 완료 단계가 없는 경우, 전체 영업 기회 상품의 수수료로 계산
               if (currentValue === 0) {
                 console.log(
-                  '⚠️ 계약 완료 단계 또는 보험료 데이터 없음 - 기본값 적용'
+                  '⚠️ 계약 완료 단계 없음 - 전체 영업 기회 기준으로 계산'
                 );
 
-                // 목표 기간 내 업데이트된 고객 수로 추정 (계약 완료 단계가 있으면 해당 단계만)
-                const fallbackQuery =
-                  contractCompletedStage.length > 0
-                    ? db
-                        .select({ count: count() })
-                        .from(clients)
-                        .where(
-                          and(
-                            eq(clients.agentId, userId),
-                            eq(clients.isActive, true), // 🔥 추가: 활성 고객만
-                            eq(
-                              clients.currentStageId,
-                              contractCompletedStage[0].id
-                            ),
-                            gte(clients.updatedAt, goalStartDate),
-                            lte(clients.updatedAt, goalEndDate)
-                          )
-                        )
-                    : db
-                        .select({ count: count() })
-                        .from(clients)
-                        .where(
-                          and(
-                            eq(clients.agentId, userId),
-                            eq(clients.isActive, true), // 🔥 추가: 활성 고객만
-                            gte(clients.updatedAt, goalStartDate),
-                            lte(clients.updatedAt, goalEndDate)
-                          )
-                        );
+                const allProductsResult = await db
+                  .select({
+                    expectedCommission: opportunityProducts.expectedCommission,
+                  })
+                  .from(opportunityProducts)
+                  .where(
+                    and(
+                      eq(opportunityProducts.agentId, userId),
+                      eq(opportunityProducts.status, 'active'),
+                      sql`${opportunityProducts.expectedCommission} IS NOT NULL`,
+                      gte(opportunityProducts.createdAt, goalStartDate),
+                      lte(opportunityProducts.createdAt, goalEndDate)
+                    )
+                  );
 
-                const updatedClientsResult = await fallbackQuery;
-                const updatedClients = updatedClientsResult[0]?.count || 0;
-                currentValue = updatedClients * 150; // 기본값: 계약 완료 고객당 150만원
+                const totalCommission = allProductsResult.reduce(
+                  (sum, product) => {
+                    const commission = Number(product.expectedCommission) || 0;
+                    return sum + commission;
+                  },
+                  0
+                );
+
+                currentValue = Math.round(totalCommission / 10000);
               }
 
               break;

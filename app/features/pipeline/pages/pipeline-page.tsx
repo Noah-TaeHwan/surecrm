@@ -832,7 +832,7 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
               </div>
             </div>
 
-            {/* 4. VIP 고객 */}
+            {/* 4. 키맨 고객 */}
             <div className="flex items-center space-x-3 p-4 bg-card rounded-lg border">
               <div className="p-2 bg-red-500/10 rounded-lg">
                 <Users className="h-5 w-5 text-red-600" />

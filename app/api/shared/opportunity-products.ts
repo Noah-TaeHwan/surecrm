@@ -354,8 +354,8 @@ export async function getActualRevenue(
       0
     );
 
-    // 연간 수수료를 실제 매출로 계산
-    const totalRevenue = totalExpectedCommission * 12;
+    // 계약 수수료를 실제 매출로 계산 (1건 계약 = 1회성 수수료)
+    const totalRevenue = totalExpectedCommission;
 
     console.log('✅ 실제 매출 계산 완료:', {
       contractedProductsCount: contractedProducts.length,

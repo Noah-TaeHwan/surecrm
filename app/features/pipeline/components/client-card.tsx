@@ -206,13 +206,13 @@ export function ClientCard({
     return Math.round(basePremium * occupationMultiplier);
   };
 
-  // 💰 실제 연 수수료 (실제 데이터가 없으면 예상값 계산)
-  const getYearlyCommission = () => {
+  // 💰 실제 계약 수수료 (1건 계약시 받는 1회성 수수료)
+  const getContractCommission = () => {
     if (totalExpectedCommission > 0) {
-      return totalExpectedCommission * 12; // 월 수수료 × 12개월
+      return totalExpectedCommission; // 실제 계약 수수료
     }
-    // 실제 데이터가 없으면 예상값 계산 (기존 로직 유지)
-    return Math.round(getMonthlyPremium() * 12 * 0.15); // 15% 수수료율
+    // 실제 데이터가 없으면 예상값 계산 (보험료의 월 납입액 기준)
+    return Math.round(getMonthlyPremium() * 0.15); // 15% 수수료율 (1회성)
   };
 
   // ⏰ 파이프라인 체류 기간 계산
@@ -237,7 +237,7 @@ export function ClientCard({
   const daysInPipeline = getDaysInPipeline();
   const daysSinceLastConsultation = getDaysSinceLastConsultation();
   const monthlyPremium = getMonthlyPremium();
-  const yearlyCommission = getYearlyCommission();
+  const contractCommission = getContractCommission();
 
   // 🚨 긴급도 표시 (7일 이상 상담 없음)
   const isUrgent =
@@ -321,12 +321,12 @@ export function ClientCard({
               <div className="flex items-center gap-2 mb-1">
                 <TrendingUp className="h-3.5 w-3.5 text-blue-600" />
                 <span className="text-xs text-muted-foreground">
-                  예상 수수료
+                  계약 수수료
                 </span>
               </div>
               <p className="text-sm font-semibold text-foreground text-center">
-                {yearlyCommission > 0
-                  ? (yearlyCommission / 10000).toFixed(0) + '만원'
+                {contractCommission > 0
+                  ? (contractCommission / 10000).toFixed(0) + '만원'
                   : '미설정'}
               </p>
             </div>
