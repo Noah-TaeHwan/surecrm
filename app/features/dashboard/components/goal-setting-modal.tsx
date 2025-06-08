@@ -357,7 +357,8 @@ export function GoalSettingModal({
                                 goal.progress
                               )}`}
                             >
-                              {Math.round(goal.progress)}%
+                              {goal.progress.toFixed(1)}%{' '}
+                              {/* 🎯 초과 달성률 소수점 표시 */}
                             </Badge>
                             <Button
                               variant="ghost"

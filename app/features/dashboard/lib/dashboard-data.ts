@@ -1149,22 +1149,32 @@ export async function getUserGoals(userId: string) {
               break;
 
             case 'referrals':
-              // 목표 기간에 해당하는 소개 건수
+              // 🎯 목표 기간에 해당하는 소개 건수 (clients.referredById 기반)
               const referralsStartDate = new Date(goal.startDate);
               const referralsEndDate = new Date(goal.endDate);
 
+              // 소개받은 고객 수 계산 (clients 테이블에서 referredById가 있는 고객들)
               const referralsResult = await db
                 .select({ count: count() })
-                .from(referrals)
+                .from(clients)
                 .where(
                   and(
-                    eq(referrals.agentId, userId),
-                    gte(referrals.createdAt, referralsStartDate),
-                    lte(referrals.createdAt, referralsEndDate)
+                    eq(clients.agentId, userId),
+                    eq(clients.isActive, true), // 활성 고객만
+                    sql`${clients.referredById} IS NOT NULL`, // 소개받은 고객만
+                    gte(clients.createdAt, referralsStartDate),
+                    lte(clients.createdAt, referralsEndDate)
                   )
                 );
 
               currentValue = referralsResult[0]?.count || 0;
+              console.log('🎯 소개 목표 달성률 계산:', {
+                goalId: goal.id,
+                startDate: referralsStartDate.toISOString().split('T')[0],
+                endDate: referralsEndDate.toISOString().split('T')[0],
+                currentValue,
+                targetValue: goal.targetValue,
+              });
               break;
 
             default:
@@ -1176,6 +1186,14 @@ export async function getUserGoals(userId: string) {
           const targetValue = Number(goal.targetValue);
           const progress =
             targetValue > 0 ? (currentValue / targetValue) * 100 : 0;
+
+          console.log('🎯 목표 진행률 계산 결과:', {
+            goalId: goal.id,
+            goalType: goal.goalType,
+            targetValue,
+            currentValue,
+            progress: progress.toFixed(2) + '%',
+          });
 
           return {
             ...goal,

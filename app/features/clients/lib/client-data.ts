@@ -594,10 +594,51 @@ export async function getClientOverview(
       .where(eq(clientDetails.clientId, clientId))
       .limit(1);
 
-    // 🎯 client 객체에 extendedDetails 추가
+    // 🔗 소개 관계 정보 조회 추가
+    const [referredByInfo, referredClientsInfo] = await Promise.all([
+      // 이 고객을 소개한 사람 조회
+      client.referredById
+        ? db
+            .select({
+              id: clients.id,
+              name: clients.fullName,
+            })
+            .from(clients)
+            .where(
+              and(
+                eq(clients.id, client.referredById),
+                eq(clients.agentId, agentId),
+                eq(clients.isActive, true)
+              )
+            )
+            .limit(1)
+        : Promise.resolve([]),
+
+      // 이 고객이 소개한 사람들 조회
+      db
+        .select({
+          id: clients.id,
+          name: clients.fullName,
+          createdAt: clients.createdAt,
+        })
+        .from(clients)
+        .where(
+          and(
+            eq(clients.referredById, clientId),
+            eq(clients.agentId, agentId),
+            eq(clients.isActive, true)
+          )
+        )
+        .orderBy(desc(clients.createdAt)),
+    ]);
+
+    // 🎯 client 객체에 extendedDetails와 소개 정보 추가
     const finalClient = {
       ...clientWithCurrentStage,
       extendedDetails: clientExtendedDetails || null,
+      referredBy: referredByInfo[0] || null,
+      referredClients: referredClientsInfo || [],
+      referralCount: referredClientsInfo.length,
     };
 
     return {

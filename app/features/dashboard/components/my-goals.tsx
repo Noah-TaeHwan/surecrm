@@ -298,11 +298,12 @@ export function MyGoals({
                             }
                             className="text-xs"
                           >
-                            {Math.min(100, goal.progress).toFixed(1)}%
+                            {goal.progress.toFixed(1)}%{' '}
+                            {/* 🎯 초과 달성률도 표시 */}
                           </Badge>
                         </div>
                         <Progress
-                          value={Math.min(100, goal.progress)}
+                          value={goal.progress} // 🎯 초과 달성률도 표시
                           className="h-3"
                         />
                       </div>
@@ -310,7 +311,13 @@ export function MyGoals({
                       {goal.progress >= 100 && (
                         <div className="flex items-center gap-1 mt-2 text-xs text-green-600">
                           <TriangleUpIcon className="h-3 w-3" />
-                          <span>목표 달성 완료!</span>
+                          <span>
+                            {goal.progress > 100
+                              ? `목표 초과 달성! (+${Math.round(
+                                  goal.progress - 100
+                                )}%)`
+                              : '목표 달성 완료!'}
+                          </span>
                         </div>
                       )}
                     </div>

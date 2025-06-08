@@ -455,11 +455,12 @@ export function InsightsTabs({
                                 : `${goal.targetValue.toLocaleString()}${
                                     goal.goalType === 'clients' ? '명' : '건'
                                   }`}
-                              ({Math.round(goal.progress)}%)
+                              ({goal.progress.toFixed(1)}%){' '}
+                              {/* 🎯 초과 달성률 소수점 표시 */}
                             </span>
                           </div>
                           <Progress
-                            value={Math.min(100, goal.progress)}
+                            value={goal.progress} // 🎯 초과 달성률도 표시
                             className="h-2"
                           />
                         </div>
@@ -472,17 +473,17 @@ export function InsightsTabs({
                             <span>신규 고객</span>
                             <span className="text-primary font-medium">
                               {performance.newClients}/{nextMonthTarget}명 (
-                              {Math.round(
-                                (performance.newClients / nextMonthTarget) * 100
-                              )}
-                              %)
+                              {(
+                                (performance.newClients / nextMonthTarget) *
+                                100
+                              ).toFixed(1)}
+                              % {/* 🎯 초과 달성률 소수점 표시 */})
                             </span>
                           </div>
                           <Progress
-                            value={Math.min(
-                              100,
+                            value={
                               (performance.newClients / nextMonthTarget) * 100
-                            )}
+                            } // 🎯 초과 달성률도 표시
                             className="h-2"
                           />
                         </div>
@@ -492,24 +493,23 @@ export function InsightsTabs({
                             <span className="text-primary font-medium">
                               {performance.totalReferrals}/
                               {Math.max(10, performance.totalReferrals + 5)}건 (
-                              {Math.round(
+                              {(
                                 (performance.totalReferrals /
                                   Math.max(
                                     10,
                                     performance.totalReferrals + 5
                                   )) *
-                                  100
-                              )}
-                              %)
+                                100
+                              ).toFixed(1)}
+                              % {/* 🎯 초과 달성률 소수점 표시 */})
                             </span>
                           </div>
                           <Progress
-                            value={Math.min(
-                              100,
+                            value={
                               (performance.totalReferrals /
                                 Math.max(10, performance.totalReferrals + 5)) *
-                                100
-                            )}
+                              100
+                            } // 🎯 초과 달성률도 표시
                             className="h-2"
                           />
                         </div>
@@ -525,21 +525,20 @@ export function InsightsTabs({
                                 (performance.revenue * 1.3) / 10000
                               ).toLocaleString()}
                               만원 (
-                              {Math.round(
+                              {(
                                 (performance.revenue /
                                   (performance.revenue * 1.3)) *
-                                  100
-                              )}
-                              %)
+                                100
+                              ).toFixed(1)}
+                              % {/* 🎯 초과 달성률 소수점 표시 */})
                             </span>
                           </div>
                           <Progress
-                            value={Math.min(
-                              100,
+                            value={
                               (performance.revenue /
                                 (performance.revenue * 1.3)) *
-                                100
-                            )}
+                              100
+                            } // 🎯 초과 달성률도 표시
                             className="h-2"
                           />
                         </div>
