@@ -1020,7 +1020,7 @@ export async function updateClientStage(
       };
     }
 
-    // 단계 업데이트
+    // 단계 업데이트 (isActive는 변경하지 않음 - 영업 상태만 변경)
     const [updatedClient] = await db
       .update(clients)
       .set({

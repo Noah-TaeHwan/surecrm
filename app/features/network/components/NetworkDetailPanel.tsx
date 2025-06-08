@@ -129,17 +129,17 @@ export default function NetworkDetailPanel({
     }
   };
 
-  // 중요도 배지 색상 (키맨, 일반, 관심)
+  // 🎨 중요도 배지 색상 (서비스 전체 통일 색상 시스템 사용)
   const getImportanceBadgeColor = (importance: string | undefined) => {
     switch (importance) {
       case 'high':
-        return 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300 border-orange-200';
+        return 'border bg-[var(--importance-high-badge-bg)] text-[var(--importance-high-badge-text)] border-[var(--importance-high-border)]';
       case 'medium':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 border-blue-200';
+        return 'border bg-[var(--importance-medium-badge-bg)] text-[var(--importance-medium-badge-text)] border-[var(--importance-medium-border)]';
       case 'low':
-        return 'bg-muted text-muted-foreground border-muted-foreground/20';
+        return 'border bg-[var(--importance-low-badge-bg)] text-[var(--importance-low-badge-text)] border-[var(--importance-low-border)]';
       default:
-        return 'bg-muted text-muted-foreground border-muted-foreground/20';
+        return 'border bg-[var(--importance-low-badge-bg)] text-[var(--importance-low-badge-text)] border-[var(--importance-low-border)]';
     }
   };
 
@@ -570,11 +570,15 @@ export default function NetworkDetailPanel({
                             <span className="text-xs text-muted-foreground">
                               {referredByNode.clientInfo?.stageName || '미설정'}
                             </span>
-                            <span className="text-xs text-blue-600 font-medium">
+                            <Badge
+                              className={`text-xs px-2 py-0.5 h-auto font-medium ${getImportanceBadgeColor(
+                                referredByNode.clientInfo?.importance
+                              )}`}
+                            >
                               {getImportanceText(
                                 referredByNode.clientInfo?.importance
                               )}
-                            </span>
+                            </Badge>
                           </div>
                         </div>
                       </div>
@@ -635,9 +639,13 @@ export default function NetworkDetailPanel({
                               <span className="text-xs text-muted-foreground">
                                 {node.clientInfo?.stageName || '미설정'}
                               </span>
-                              <span className="text-xs text-orange-600 font-medium">
+                              <Badge
+                                className={`text-xs px-2 py-0.5 h-auto font-medium ${getImportanceBadgeColor(
+                                  node.clientInfo?.importance
+                                )}`}
+                              >
                                 {getImportanceText(node.clientInfo?.importance)}
-                              </span>
+                              </Badge>
                             </div>
                           </div>
                         </div>
