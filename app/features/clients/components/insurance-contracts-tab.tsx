@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '~/common/components/ui/button';
 import {
   Card,
@@ -45,6 +45,9 @@ import {
   DialogTitle,
 } from '~/common/components/ui/dialog';
 
+// React Router hooks import
+import { useRevalidator, useFetcher } from 'react-router';
+
 // 📋 보험계약 타입 정의
 interface InsuranceContract {
   id: string;
@@ -63,7 +66,7 @@ interface InsuranceContract {
   annualPremium?: number;
   coverageAmount?: number;
   agentCommission?: number;
-  status: 'draft' | 'active' | 'cancelled' | 'expired';
+  status: 'draft' | 'active' | 'cancelled' | 'expired' | 'suspended';
   paymentMethod?: string;
   paymentPeriod?: number;
   specialClauses?: string;
@@ -80,6 +83,7 @@ interface InsuranceContractsTabProps {
   clientId?: string;
   clientName?: string;
   agentId?: string;
+  initialContracts?: InsuranceContract[];
 }
 
 // 📝 보험계약 폼 데이터 타입
@@ -146,6 +150,7 @@ const getStatusBadge = (status: string) => {
     active: { label: '유효', variant: 'default' as const },
     cancelled: { label: '해지', variant: 'destructive' as const },
     expired: { label: '만료', variant: 'secondary' as const },
+    suspended: { label: '정지', variant: 'secondary' as const },
   };
   const config =
     statusConfigs[status as keyof typeof statusConfigs] || statusConfigs.draft;
@@ -203,42 +208,16 @@ export function InsuranceContractsTab({
   clientId = 'test-client-id',
   clientName = '고객',
   agentId = 'test-agent-id',
+  initialContracts = [],
 }: InsuranceContractsTabProps) {
-  // 📊 임시 데이터 (실제로는 loader에서 받아올 예정)
-  const [contracts] = useState<InsuranceContract[]>([
-    {
-      id: '1',
-      productName: '무배당 라이프플래너 종신보험',
-      insuranceCompany: '삼성생명',
-      insuranceType: 'life',
-      contractNumber: 'SL-2024-001234',
-      policyNumber: 'P-2024-567890',
-      contractDate: '2024-01-15',
-      effectiveDate: '2024-02-01',
-      expirationDate: '2054-02-01',
-      contractorName: '홍길동',
-      insuredName: '홍길동',
-      monthlyPremium: 150000,
-      coverageAmount: 50000000,
-      agentCommission: 2250000,
-      status: 'active',
-      notes: '건강한 상태에서 가입 완료',
-      attachments: [
-        {
-          id: '1',
-          fileName: 'contract.pdf',
-          fileDisplayName: '계약서.pdf',
-          documentType: 'contract',
-        },
-        {
-          id: '2',
-          fileName: 'policy.pdf',
-          fileDisplayName: '증권.pdf',
-          documentType: 'policy',
-        },
-      ],
-    },
-  ]);
+  // 📊 실제 데이터 상태
+  const [contracts, setContracts] =
+    useState<InsuranceContract[]>(initialContracts);
+  const [isLoadingContracts, setIsLoadingContracts] = useState(false);
+
+  // React Router hooks
+  const revalidator = useRevalidator();
+  const fetcher = useFetcher();
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedContract, setSelectedContract] =
@@ -438,52 +417,44 @@ export function InsuranceContractsTab({
     setAttachments((prev) => prev.filter((att) => att.id !== attachmentId));
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (formData: any) => {
     setIsSubmitting(true);
 
     try {
-      // 🎯 실제 API 호출을 위한 데이터 준비
-      const contractData = {
-        clientId,
-        agentId,
-        productName: formData.productName,
-        insuranceCompany: formData.insuranceCompany,
-        insuranceType: formData.insuranceType,
-        contractDate: formData.contractDate,
-        effectiveDate: formData.effectiveDate,
-        contractorName: formData.contractorName,
-        insuredName: formData.insuredName,
-        monthlyPremium: formData.monthlyPremium
-          ? parseFloat(formData.monthlyPremium)
-          : null,
-        agentCommission: formData.agentCommission
-          ? parseFloat(formData.agentCommission)
-          : null,
-        notes: formData.notes,
-        status: 'active' as const,
-      };
+      // 🎯 Fetcher를 사용한 API 호출
+      const submitData = new FormData();
+      submitData.append('intent', 'createInsuranceContract');
+      submitData.append('clientId', clientId);
+      submitData.append('agentId', agentId);
 
-      console.log('📋 보험계약 저장 중...', contractData);
+      // 계약 데이터 추가
+      Object.entries(formData).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          submitData.append(key, value.toString());
+        }
+      });
 
-      // TODO: 실제 API 함수 호출
-      // import { createInsuranceContract } from '~/api/shared/insurance-contracts';
-      // const result = await createInsuranceContract(contractData);
+      console.log('📋 보험계약 저장 중...', formData);
 
-      // 💡 임시: 저장 시뮬레이션 (실제 API 연동 전까지)
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // React Router fetcher로 action 호출
+      fetcher.submit(submitData, { method: 'POST' });
 
       setShowAddModal(false);
       setIsSubmitting(false);
 
-      // 🎉 성공 알림 - 서비스 톤앤매너에 맞게 개선
+      // 성공 알림
       alert('✅ 보험계약이 성공적으로 등록되었습니다!');
 
-      // TODO: 계약 목록 새로고침
-      // 실제 구현 시에는 상위 컴포넌트의 refetch 함수 호출
+      // 페이지 데이터 새로고침
+      revalidator.revalidate();
     } catch (error) {
       console.error('❌ 보험계약 저장 실패:', error);
       setIsSubmitting(false);
-      alert('❌ 저장에 실패했습니다. 다시 시도해주세요.');
+      alert(
+        `❌ 저장에 실패했습니다: ${
+          error instanceof Error ? error.message : '알 수 없는 오류'
+        }`
+      );
     }
   };
 

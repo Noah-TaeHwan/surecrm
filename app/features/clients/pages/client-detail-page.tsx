@@ -182,6 +182,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       return {
         client: null,
         clientOverview: null,
+        availableStages: [],
+        insuranceContracts: [],
         currentUserId: agentId,
         currentUser: {
           id: user.id,
@@ -217,10 +219,32 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 
     const availableStages = stagesData || [];
 
+    // 🏢 보험 계약 데이터 조회
+    let insuranceContracts: any[] = [];
+    try {
+      const { getClientInsuranceContracts } = await import(
+        '~/api/shared/insurance-contracts'
+      );
+      const contractsResult = await getClientInsuranceContracts(
+        clientId,
+        agentId
+      );
+
+      if (contractsResult.success) {
+        insuranceContracts = contractsResult.data;
+        console.log(`✅ 보험계약 ${insuranceContracts.length}개 로드 완료`);
+      } else {
+        console.error('❌ 보험계약 조회 실패:', contractsResult.error);
+      }
+    } catch (contractError) {
+      console.error('❌ 보험계약 로딩 중 에러:', contractError);
+    }
+
     return {
       client: clientOverview.client,
       clientOverview: clientOverview, // 🆕 통합 고객 데이터 추가
       availableStages: availableStages,
+      insuranceContracts: insuranceContracts, // 🏢 보험 계약 데이터 추가
       currentUserId: agentId,
       currentUser: {
         id: user.id,
@@ -237,6 +261,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       client: null,
       clientOverview: null,
       availableStages: [],
+      insuranceContracts: [],
       currentUserId: null,
       currentUser: {
         id: '',
@@ -267,6 +292,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
   const client = data?.client || null;
   const clientOverview = data?.clientOverview || null; // 🆕 통합 고객 데이터
   const availableStages = data?.availableStages || [];
+  const insuranceContracts = data?.insuranceContracts || []; // 🏢 보험 계약 데이터
   const isEmpty = data?.isEmpty || false;
   const error = data?.error || null;
   const currentUser = data?.currentUser || null;
@@ -1552,7 +1578,12 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
 
               {/* 탭 컨텐츠들 */}
               <TabsContent value="insurance" className="space-y-6">
-                <InsuranceContractsTab />
+                <InsuranceContractsTab
+                  clientId={client?.id}
+                  clientName={client?.fullName || '고객'}
+                  agentId={data?.currentUserId}
+                  initialContracts={insuranceContracts}
+                />
               </TabsContent>
 
               <TabsContent value="family" className="space-y-6">
@@ -1790,6 +1821,60 @@ export async function action({ request, params }: Route.ActionArgs) {
         '../lib/client-actions'
       );
       return await deleteConsultationNoteAction(request, noteId);
+    }
+
+    case 'createInsuranceContract': {
+      // 🏢 보험 계약 생성
+      try {
+        const user = await requireAuth(request);
+
+        const { createInsuranceContract } = await import(
+          '~/api/shared/insurance-contracts'
+        );
+
+        const contractData = {
+          productName: formData.get('productName')?.toString() || '',
+          insuranceCompany: formData.get('insuranceCompany')?.toString() || '',
+          insuranceType: formData.get('insuranceType')?.toString() || '',
+          contractNumber:
+            formData.get('contractNumber')?.toString() || undefined,
+          policyNumber: formData.get('policyNumber')?.toString() || undefined,
+          contractDate: formData.get('contractDate')?.toString() || '',
+          effectiveDate: formData.get('effectiveDate')?.toString() || '',
+          expirationDate:
+            formData.get('expirationDate')?.toString() || undefined,
+          contractorName: formData.get('contractorName')?.toString() || '',
+          insuredName: formData.get('insuredName')?.toString() || '',
+          beneficiaryName:
+            formData.get('beneficiaryName')?.toString() || undefined,
+          monthlyPremium: formData.get('monthlyPremium')?.toString()
+            ? parseFloat(formData.get('monthlyPremium')?.toString() || '0')
+            : undefined,
+          agentCommission: formData.get('agentCommission')?.toString()
+            ? parseFloat(formData.get('agentCommission')?.toString() || '0')
+            : undefined,
+          coverageAmount: formData.get('coverageAmount')?.toString()
+            ? parseFloat(formData.get('coverageAmount')?.toString() || '0')
+            : undefined,
+          paymentMethod: formData.get('paymentMethod')?.toString() || undefined,
+          notes: formData.get('notes')?.toString() || undefined,
+        };
+
+        const result = await createInsuranceContract(
+          clientId,
+          user.id,
+          contractData
+        );
+
+        return result;
+      } catch (error) {
+        console.error('❌ 보험계약 생성 실패:', error);
+        return {
+          success: false,
+          message: '보험계약 생성에 실패했습니다.',
+          error: error instanceof Error ? error.message : '알 수 없는 오류',
+        };
+      }
     }
 
     case 'createOpportunityProduct': {
