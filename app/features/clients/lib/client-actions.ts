@@ -767,3 +767,45 @@ export async function updateConsultationNoteAction(
     };
   }
 }
+
+export async function deleteConsultationNoteAction(
+  request: Request,
+  noteId: string
+) {
+  // 🎯 실제 로그인된 보험설계사 정보 가져오기
+  const user = await requireAuth(request);
+  const agentId = user.id;
+
+  try {
+    // 상담 기록 삭제 함수 구현
+    const { db } = await import('~/lib/core/db');
+    const { appClientConsultationNotes } = await import(
+      '~/features/clients/lib/schema'
+    );
+    const { eq, and } = await import('drizzle-orm');
+
+    const result = await db
+      .delete(appClientConsultationNotes)
+      .where(
+        and(
+          eq(appClientConsultationNotes.id, noteId),
+          eq(appClientConsultationNotes.agentId, agentId)
+        )
+      );
+
+    return {
+      success: true,
+      message: '상담내용이 성공적으로 삭제되었습니다.',
+      timestamp: new Date().toISOString(),
+    };
+  } catch (error) {
+    console.error('❌ 상담내용 삭제 실패:', error);
+    return {
+      success: false,
+      message: `상담내용 삭제에 실패했습니다: ${
+        error instanceof Error ? error.message : '알 수 없는 오류'
+      }`,
+      error: error instanceof Error ? error.message : '알 수 없는 오류',
+    };
+  }
+}

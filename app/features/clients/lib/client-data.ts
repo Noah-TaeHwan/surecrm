@@ -387,7 +387,7 @@ export async function getClientOverview(
       throw new Error('해당 고객 정보에 접근할 권한이 없습니다.');
     }
 
-    // 고객 기본 정보 조회
+    // 🎯 고객 기본 정보 조회 (단순화로 안전성 확보)
     const [client] = await db
       .select()
       .from(clients)
@@ -397,6 +397,34 @@ export async function getClientOverview(
     if (!client) {
       throw new Error('고객 정보를 찾을 수 없습니다.');
     }
+
+    // 🎯 현재 단계 정보 별도 조회 (안전함)
+    let currentStage = null;
+    if (client.currentStageId) {
+      try {
+        const [stage] = await db
+          .select({
+            id: pipelineStages.id,
+            name: pipelineStages.name,
+            color: pipelineStages.color,
+            order: pipelineStages.order,
+          })
+          .from(pipelineStages)
+          .where(eq(pipelineStages.id, client.currentStageId))
+          .limit(1);
+
+        currentStage = stage || null;
+      } catch (error) {
+        console.error('❌ 단계 정보 조회 오류:', error);
+        currentStage = null;
+      }
+    }
+
+    // 🎯 client 객체에 currentStage 추가
+    const clientWithCurrentStage = {
+      ...client,
+      currentStage,
+    };
 
     // 관련 데이터 병렬 조회
     const [
@@ -559,8 +587,21 @@ export async function getClientOverview(
     const accessLevel: ClientPrivacyLevel =
       preferences[0]?.privacyLevel || 'private';
 
+    // 🎯 clientDetails(extendedDetails) 조회 추가
+    const [clientExtendedDetails] = await db
+      .select()
+      .from(clientDetails)
+      .where(eq(clientDetails.clientId, clientId))
+      .limit(1);
+
+    // 🎯 client 객체에 extendedDetails 추가
+    const finalClient = {
+      ...clientWithCurrentStage,
+      extendedDetails: clientExtendedDetails || null,
+    };
+
     return {
-      client,
+      client: finalClient,
       tags: tags.filter((tag) => tag.id), // null 제거
       preferences: preferences[0] || null,
       analytics: analytics[0] || null,

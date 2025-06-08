@@ -1,17 +1,21 @@
 import { Button } from '~/common/components/ui/button';
-import { Plus, Edit2 } from 'lucide-react';
+import { Plus, Edit2, Trash2 } from 'lucide-react';
 import type { ConsultationNote } from '../types/client-detail';
 
 interface ConsultationTimelineProps {
   consultationNotes: ConsultationNote[];
   onAddNote: () => void;
   onEditNote: (note: ConsultationNote) => void;
+  onDeleteNote: (noteId: string) => void;
+  onShowDeleteModal: (note: ConsultationNote) => void;
 }
 
 export function ConsultationTimeline({
   consultationNotes,
   onAddNote,
   onEditNote,
+  onDeleteNote,
+  onShowDeleteModal,
 }: ConsultationTimelineProps) {
   return (
     <>
@@ -53,6 +57,14 @@ export function ConsultationTimeline({
                       onClick={() => note.id && onEditNote(note)}
                     >
                       <Edit2 className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onShowDeleteModal(note)}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    >
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>

@@ -123,8 +123,12 @@ export function calculateAge(
   }
 }
 
-// BMI 계산 함수
-export function calculateBMI(height: string, weight: string): number | null {
+// BMI 계산 함수 (성별 고려 가능)
+export function calculateBMI(
+  height: string,
+  weight: string,
+  gender?: string
+): number | null {
   const h = parseFloat(height);
   const w = parseFloat(weight);
 
@@ -137,19 +141,66 @@ export function calculateBMI(height: string, weight: string): number | null {
   return Math.round((w / (heightInMeters * heightInMeters)) * 10) / 10;
 }
 
-// BMI 상태 가져오기 함수
-export function getBMIStatus(bmi: number): { status: string; color: string } {
+// BMI 상태 가져오기 함수 (성별별 기준 적용)
+export function getBMIStatus(
+  bmi: number,
+  gender?: string
+): { status: string; color: string; detail: string } {
+  // 🎯 성별별 BMI 기준 적용 (한국 보건복지부 기준)
+  const isFemale = gender === 'female';
+
   if (bmi < 18.5) {
-    return { status: '저체중', color: 'text-blue-600' };
-  } else if (bmi < 23) {
-    return { status: '정상체중', color: 'text-green-600' };
-  } else if (bmi < 25) {
-    return { status: '과체중', color: 'text-yellow-600' };
+    return {
+      status: '저체중',
+      color: 'text-blue-600',
+      detail: isFemale ? '여성 기준 저체중' : '남성 기준 저체중',
+    };
+  } else if (bmi < (isFemale ? 22.9 : 24.9)) {
+    return {
+      status: '정상체중',
+      color: 'text-green-600',
+      detail: isFemale ? '여성 기준 정상' : '남성 기준 정상',
+    };
+  } else if (bmi < (isFemale ? 24.9 : 29.9)) {
+    return {
+      status: '과체중',
+      color: 'text-yellow-600',
+      detail: isFemale ? '여성 기준 과체중' : '남성 기준 과체중',
+    };
   } else if (bmi < 30) {
-    return { status: '비만', color: 'text-orange-600' };
+    return {
+      status: '비만',
+      color: 'text-orange-600',
+      detail: '성별 무관 비만',
+    };
   } else {
-    return { status: '고도비만', color: 'text-red-600' };
+    return {
+      status: '고도비만',
+      color: 'text-red-600',
+      detail: '성별 무관 고도비만',
+    };
   }
+}
+
+// 🆕 성별별 이상 체중 범위 계산 함수
+export function getIdealWeightRange(
+  height: string,
+  gender?: string
+): { min: number; max: number } | null {
+  const h = parseFloat(height);
+  if (isNaN(h) || h <= 0) return null;
+
+  const heightInMeters = h / 100;
+  const isFemale = gender === 'female';
+
+  // 정상 BMI 범위로 이상 체중 계산
+  const minBMI = 18.5;
+  const maxBMI = isFemale ? 22.9 : 24.9;
+
+  const minWeight = Math.round(minBMI * heightInMeters * heightInMeters);
+  const maxWeight = Math.round(maxBMI * heightInMeters * heightInMeters);
+
+  return { min: minWeight, max: maxWeight };
 }
 
 // 중요도에 따른 카드 스타일 가져오기 (원본과 동일)

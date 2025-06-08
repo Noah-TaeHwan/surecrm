@@ -448,6 +448,65 @@ export function ClientSidebar({
                   </>
                 )}
               </div>
+
+              {/* 🆕 성별 - 항상 표시 */}
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-muted-foreground min-w-[50px]">
+                  성별
+                </span>
+                {!isEditing ? (
+                  client?.extendedDetails?.gender ? (
+                    <Badge variant="outline" className="text-xs">
+                      {client.extendedDetails.gender === 'male'
+                        ? '남성'
+                        : '여성'}
+                    </Badge>
+                  ) : (
+                    <span
+                      className="text-sm text-muted-foreground italic cursor-pointer hover:text-foreground transition-colors"
+                      onClick={handleEditStart}
+                      title="클릭하여 입력"
+                    >
+                      성별 미입력
+                    </span>
+                  )
+                ) : (
+                  <div className="flex gap-2">
+                    <label className="flex items-center gap-1 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="gender"
+                        value="male"
+                        checked={editFormData.gender === 'male'}
+                        onChange={(e) =>
+                          setEditFormData({
+                            ...editFormData,
+                            gender: e.target.value,
+                          })
+                        }
+                        className="text-xs"
+                      />
+                      <span className="text-xs">남성</span>
+                    </label>
+                    <label className="flex items-center gap-1 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="gender"
+                        value="female"
+                        checked={editFormData.gender === 'female'}
+                        onChange={(e) =>
+                          setEditFormData({
+                            ...editFormData,
+                            gender: e.target.value,
+                          })
+                        }
+                        className="text-xs"
+                      />
+                      <span className="text-xs">여성</span>
+                    </label>
+                  </div>
+                )}
+              </div>
             </div>
 
             <Separator />
@@ -530,22 +589,44 @@ export function ClientSidebar({
                   <span className="text-sm text-muted-foreground min-w-[40px]">
                     BMI
                   </span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium">
-                      {isEditing ? editingBMI : currentBMI}
-                    </span>
-                    <Badge
-                      variant="outline"
-                      className={`text-xs ${
-                        getBMIStatus(isEditing ? editingBMI! : currentBMI!)
-                          .color
-                      }`}
-                    >
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium">
+                        {isEditing ? editingBMI : currentBMI}
+                      </span>
+                      <Badge
+                        variant="outline"
+                        className={`text-xs ${
+                          getBMIStatus(
+                            isEditing ? editingBMI! : currentBMI!,
+                            // 🎯 성별 정보 전달 (수정 중이면 editFormData, 아니면 client에서)
+                            isEditing
+                              ? editFormData.gender
+                              : client?.extendedDetails?.gender
+                          ).color
+                        }`}
+                      >
+                        {
+                          getBMIStatus(
+                            isEditing ? editingBMI! : currentBMI!,
+                            isEditing
+                              ? editFormData.gender
+                              : client?.extendedDetails?.gender
+                          ).status
+                        }
+                      </Badge>
+                    </div>
+                    {/* 🆕 성별별 기준 표시 */}
+                    <div className="text-xs text-muted-foreground">
                       {
-                        getBMIStatus(isEditing ? editingBMI! : currentBMI!)
-                          .status
+                        getBMIStatus(
+                          isEditing ? editingBMI! : currentBMI!,
+                          isEditing
+                            ? editFormData.gender
+                            : client?.extendedDetails?.gender
+                        ).detail
                       }
-                    </Badge>
+                    </div>
                   </div>
                 </div>
               )}

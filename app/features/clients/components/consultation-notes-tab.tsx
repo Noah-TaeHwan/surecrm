@@ -28,6 +28,8 @@ interface ConsultationNotesTabProps {
   consultationNotes: ConsultationNote[];
   onAddNote: () => void;
   onEditNote: (note: ConsultationNote) => void;
+  onDeleteNote: (noteId: string) => void;
+  onShowDeleteModal: (note: ConsultationNote) => void;
 }
 
 export function ConsultationNotesTab({
@@ -38,6 +40,8 @@ export function ConsultationNotesTab({
   consultationNotes,
   onAddNote,
   onEditNote,
+  onDeleteNote,
+  onShowDeleteModal,
 }: ConsultationNotesTabProps) {
   return (
     <TabsContent value="notes" className="space-y-6">
@@ -66,6 +70,8 @@ export function ConsultationNotesTab({
             consultationNotes={consultationNotes}
             onAddNote={onAddNote}
             onEditNote={onEditNote}
+            onDeleteNote={onDeleteNote}
+            onShowDeleteModal={onShowDeleteModal}
           />
 
           {/* 새 상담 기록 추가 폼 (숨김 상태) */}

@@ -114,6 +114,7 @@ import { CompanionsTab } from '../components/companions-tab';
 import { ConsultationNotesTab } from '../components/consultation-notes-tab';
 import { ClientPageHeader } from '../components/client-page-header';
 import { ClientModalsSection } from '../components/client-modals-section';
+import { ConsultationNoteDeleteModal } from '../components/consultation-note-delete-modal';
 import { useClientHandlers } from '../hooks/use-client-handlers';
 import { useCompanionHandlers } from '../hooks/use-companion-handlers';
 import { useNoteHandlers } from '../hooks/use-note-handlers';
@@ -191,7 +192,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     }
 
     console.log('✅ 통합 고객 데이터 조회 완료:', {
-      clientName: clientOverview.client.fullName,
+      clientName: (clientOverview.client as any)?.fullName || '알 수 없음',
       hasExtendedData: {
         medicalHistory: !!clientOverview.medicalHistory,
         checkupPurposes: !!clientOverview.checkupPurposes,
@@ -430,6 +431,15 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
     followUpDate?: string;
     followUpNotes?: string;
   } | null>(null);
+
+  // 🗑️ 상담내용 삭제 확인 모달 상태
+  const [showDeleteNoteModal, setShowDeleteNoteModal] = useState(false);
+  const [noteToDelete, setNoteToDelete] = useState<{
+    id: string;
+    title: string;
+    consultationDate: string;
+  } | null>(null);
+  const [isDeletingNote, setIsDeletingNote] = useState(false);
 
   // 🆕 성공 모달 상태
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -781,16 +791,24 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
 
   // ✅ 유틸리티 함수 분리 완료 - import로 대체
 
-  // 현재 BMI 계산 (읽기 모드용)
+  // 현재 BMI 계산 (읽기 모드용 - 성별 고려)
   const currentBMI =
     client?.height && client?.weight
-      ? calculateBMI(client.height.toString(), client.weight.toString())
+      ? calculateBMI(
+          client.height.toString(),
+          client.weight.toString(),
+          client?.extendedDetails?.gender
+        )
       : null;
 
-  // 수정 중 BMI 계산 (수정 모드용)
+  // 수정 중 BMI 계산 (수정 모드용 - 성별 고려)
   const editingBMI =
     editFormData.height && editFormData.weight
-      ? calculateBMI(editFormData.height, editFormData.weight)
+      ? calculateBMI(
+          editFormData.height,
+          editFormData.weight,
+          editFormData.gender
+        )
       : null;
 
   // 수정 취소
@@ -1166,6 +1184,50 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
     setShowAddNoteModal(true);
   };
 
+  // 🗑️ 삭제 확인 모달 표시
+  const handleShowDeleteModal = (note: any) => {
+    setNoteToDelete({
+      id: note.id,
+      title: note.title,
+      consultationDate: note.consultationDate,
+    });
+    setShowDeleteNoteModal(true);
+  };
+
+  // 🗑️ 실제 상담 기록 삭제
+  const handleDeleteNote = async (noteId: string) => {
+    setIsDeletingNote(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('intent', 'deleteConsultationNote');
+      formData.append('noteId', noteId);
+
+      submit(formData, { method: 'post' });
+
+      // 모달 닫기
+      setShowDeleteNoteModal(false);
+      setNoteToDelete(null);
+
+      // 성공 모달 표시
+      setSuccessMessage('상담 기록이 성공적으로 삭제되었습니다.');
+      setShowSuccessModal(true);
+    } catch (error) {
+      console.error('상담내용 삭제 실패:', error);
+      alert('상담 기록 삭제에 실패했습니다.');
+    } finally {
+      setIsDeletingNote(false);
+    }
+  };
+
+  // 🗑️ 삭제 모달 닫기
+  const handleCloseDeleteModal = () => {
+    if (!isDeletingNote) {
+      setShowDeleteNoteModal(false);
+      setNoteToDelete(null);
+    }
+  };
+
   const handleEditNote = (note: any) => {
     // contractInfo가 JSON 문자열로 저장된 경우 파싱해서 처리
     let contractInfoValue = '';
@@ -1219,9 +1281,10 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
         formData.append('intent', 'createConsultationNote');
       }
 
+      // 🎯 정확한 field 이름 사용 (action과 일치)
       formData.append('consultationDate', editingNote.consultationDate);
-      formData.append('consultationTitle', editingNote.title);
-      formData.append('consultationContent', editingNote.content);
+      formData.append('title', editingNote.title);
+      formData.append('content', editingNote.content);
       formData.append('contractInfo', editingNote.contractInfo || '');
       formData.append('followUpDate', editingNote.followUpDate || '');
       formData.append('followUpNotes', editingNote.followUpNotes || '');
@@ -1570,6 +1633,8 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                 consultationNotes={consultationNotes}
                 onAddNote={handleAddNote}
                 onEditNote={handleEditNote}
+                onDeleteNote={handleDeleteNote}
+                onShowDeleteModal={handleShowDeleteModal}
               />
             </Tabs>
           </div>
@@ -1634,6 +1699,16 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
           showTagSuccessModal={showTagSuccessModal}
           setShowTagSuccessModal={setShowTagSuccessModal}
           tagSuccessMessage={tagSuccessMessage}
+        />
+
+        {/* 🗑️ 상담 기록 삭제 확인 모달 */}
+        <ConsultationNoteDeleteModal
+          isOpen={showDeleteNoteModal}
+          onClose={handleCloseDeleteModal}
+          onConfirm={() => noteToDelete && handleDeleteNote(noteToDelete.id)}
+          noteTitle={noteToDelete?.title || ''}
+          noteDate={noteToDelete?.consultationDate || ''}
+          isDeleting={isDeletingNote}
         />
       </div>
     </MainLayout>
@@ -1715,6 +1790,21 @@ export async function action({ request, params }: Route.ActionArgs) {
 
     case 'updateConsultationNote':
       return await updateConsultationNoteAction(request, clientId, formData);
+
+    case 'deleteConsultationNote': {
+      const noteId = formData.get('noteId')?.toString();
+      if (!noteId) {
+        return {
+          success: false,
+          message: '상담내용 ID가 필요합니다.',
+        };
+      }
+
+      const { deleteConsultationNoteAction } = await import(
+        '../lib/client-actions'
+      );
+      return await deleteConsultationNoteAction(request, noteId);
+    }
 
     case 'createOpportunityProduct': {
       // 🆕 영업 기회 상품 정보 생성
