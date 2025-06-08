@@ -273,7 +273,7 @@ export function NewOpportunityModal({
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm font-medium mb-2 block flex items-center gap-2">
+                    <label className="text-sm font-medium mb-2  items-center gap-2">
                       <Banknote className="h-4 w-4" />월 납입료 (보험료)
                     </label>
                     <div className="relative">
@@ -291,7 +291,7 @@ export function NewOpportunityModal({
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium mb-2 block flex items-center gap-2">
+                    <label className="text-sm font-medium mb-2  items-center gap-2">
                       <DollarSign className="h-4 w-4" />
                       예상 수수료 (매출)
                     </label>

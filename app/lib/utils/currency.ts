@@ -43,33 +43,37 @@ export function formatCurrencyByUnit(
     // 1억원 이상
     const eokValue = numAmount / 100000000;
     if (eokValue >= 10) {
-      return `${Math.round(eokValue)}억원`;
+      return `${Math.round(eokValue).toLocaleString('ko-KR')}억원`;
     } else {
-      return `${Math.round(eokValue * 10) / 10}억원`;
+      return `${(Math.round(eokValue * 10) / 10).toLocaleString('ko-KR')}억원`;
     }
   } else if (absAmount >= 10000000) {
     // 1천만원 이상
     const cheonValue = numAmount / 10000000;
     if (cheonValue >= 10) {
-      return `${Math.round(cheonValue)}천만원`;
+      return `${Math.round(cheonValue).toLocaleString('ko-KR')}천만원`;
     } else {
-      return `${Math.round(cheonValue * 10) / 10}천만원`;
+      return `${(Math.round(cheonValue * 10) / 10).toLocaleString(
+        'ko-KR'
+      )}천만원`;
     }
   } else if (absAmount >= 1000000) {
     // 1백만원 이상
     const baekValue = numAmount / 1000000;
     if (baekValue >= 10) {
-      return `${Math.round(baekValue)}백만원`;
+      return `${Math.round(baekValue).toLocaleString('ko-KR')}백만원`;
     } else {
-      return `${Math.round(baekValue * 10) / 10}백만원`;
+      return `${(Math.round(baekValue * 10) / 10).toLocaleString(
+        'ko-KR'
+      )}백만원`;
     }
   } else if (absAmount >= 10000) {
     // 1만원 이상
     const manValue = numAmount / 10000;
     if (manValue >= 100) {
-      return `${Math.round(manValue)}만원`;
+      return `${Math.round(manValue).toLocaleString('ko-KR')}만원`;
     } else {
-      return `${Math.round(manValue * 10) / 10}만원`;
+      return `${(Math.round(manValue * 10) / 10).toLocaleString('ko-KR')}만원`;
     }
   } else {
     // 1만원 미만은 원 단위 (콤마 포함, 소수점 없음)
@@ -94,39 +98,39 @@ export function formatCurrencyFull(amount: number | string): string {
 }
 
 /**
- * 테이블용 원화 포맷팅 (공간 절약)
- * 예: 13400000 → "1,340만"
+ * 테이블용 원화 포맷팅 (공간 절약하면서 원 단위 포함)
+ * 예: 13400000 → "1,340만원"
  */
 export function formatCurrencyTable(amount: number | string): string {
-  if (!amount || amount === 0) return '0';
+  if (!amount || amount === 0) return '0원';
 
   const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
-  if (isNaN(numAmount) || numAmount === 0) return '0';
+  if (isNaN(numAmount) || numAmount === 0) return '0원';
 
   const absAmount = Math.abs(numAmount);
 
   if (absAmount >= 100000000) {
     const eokValue = numAmount / 100000000;
     return eokValue >= 10
-      ? `${Math.round(eokValue)}억`
-      : `${Math.round(eokValue * 10) / 10}억`;
+      ? `${Math.round(eokValue).toLocaleString('ko-KR')}억원`
+      : `${(Math.round(eokValue * 10) / 10).toLocaleString('ko-KR')}억원`;
   } else if (absAmount >= 10000000) {
     const cheonValue = numAmount / 10000000;
     return cheonValue >= 10
-      ? `${Math.round(cheonValue)}천만`
-      : `${Math.round(cheonValue * 10) / 10}천만`;
+      ? `${Math.round(cheonValue).toLocaleString('ko-KR')}천만원`
+      : `${(Math.round(cheonValue * 10) / 10).toLocaleString('ko-KR')}천만원`;
   } else if (absAmount >= 1000000) {
     const baekValue = numAmount / 1000000;
     return baekValue >= 10
-      ? `${Math.round(baekValue)}백만`
-      : `${Math.round(baekValue * 10) / 10}백만`;
+      ? `${Math.round(baekValue).toLocaleString('ko-KR')}백만원`
+      : `${(Math.round(baekValue * 10) / 10).toLocaleString('ko-KR')}백만원`;
   } else if (absAmount >= 10000) {
     const manValue = numAmount / 10000;
     return manValue >= 100
-      ? `${Math.round(manValue)}만`
-      : `${Math.round(manValue * 10) / 10}만`;
+      ? `${Math.round(manValue).toLocaleString('ko-KR')}만원`
+      : `${(Math.round(manValue * 10) / 10).toLocaleString('ko-KR')}만원`;
   } else {
-    return `${Math.round(numAmount).toLocaleString('ko-KR')}`;
+    return `${Math.round(numAmount).toLocaleString('ko-KR')}원`;
   }
 }
 

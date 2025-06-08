@@ -19,6 +19,7 @@ import {
   MessageSquare,
 } from 'lucide-react';
 import { cn } from '~/lib/utils';
+import { formatCurrencyByUnit } from '~/lib/utils/currency';
 import type { PerformanceData } from '../lib/supabase-reports-data';
 import type { PerformanceMetricsProps } from '../types';
 
@@ -43,16 +44,9 @@ export function PerformanceMetrics({
   };
 
   const periodText = getPeriodText(period?.type);
+  // 통일된 통화 포맷팅 함수 사용
   const formatCurrency = (amount: number) => {
-    if (amount >= 100000000) {
-      return `${Math.round(amount / 100000000)}억원`;
-    } else if (amount >= 10000000) {
-      return `${Math.round(amount / 10000000)}천만원`;
-    } else if (amount >= 1000000) {
-      return `${Math.round(amount / 1000000)}백만원`;
-    } else {
-      return `${amount.toLocaleString()}원`;
-    }
+    return formatCurrencyByUnit(amount);
   };
 
   const formatNumber = (num: number) => {

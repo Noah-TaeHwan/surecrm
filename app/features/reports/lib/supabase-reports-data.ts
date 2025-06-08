@@ -13,6 +13,7 @@ import {
   type ReportDashboard,
 } from './schema';
 import { insuranceInfo, opportunityProducts } from '~/lib/schema';
+import { insuranceContracts } from '~/lib/schema/core';
 import { appClientConsultationNotes } from '~/features/clients/lib/schema';
 import {
   eq,
@@ -264,37 +265,37 @@ export async function getPerformanceData(
 
     const prevCommissionResult = await db
       .select({
-        total: sql<number>`COALESCE(SUM(CAST(${opportunityProducts.expectedCommission} AS NUMERIC)), 0)`,
+        total: sql<number>`COALESCE(SUM(CAST(${insuranceContracts.agentCommission} AS NUMERIC)), 0)`,
       })
-      .from(opportunityProducts)
-      .innerJoin(clients, eq(opportunityProducts.clientId, clients.id))
+      .from(insuranceContracts)
+      .innerJoin(clients, eq(insuranceContracts.clientId, clients.id))
       .where(
         and(
-          eq(opportunityProducts.agentId, userId),
+          eq(insuranceContracts.agentId, userId),
           eq(clients.isActive, true),
-          eq(opportunityProducts.status, 'active'),
-          sql`${opportunityProducts.expectedCommission} IS NOT NULL`,
-          gte(opportunityProducts.createdAt, prevStartDate),
-          lte(opportunityProducts.createdAt, prevEndDate)
+          eq(insuranceContracts.status, 'active'),
+          sql`${insuranceContracts.agentCommission} IS NOT NULL`,
+          gte(insuranceContracts.createdAt, prevStartDate),
+          lte(insuranceContracts.createdAt, prevEndDate)
         )
       );
 
-    // 🆕 실제 수수료 계산 - opportunityProducts 테이블 사용
+    // 🏢 실제 수수료 계산 - 보험계약 테이블 사용 (더 정확함)
     const commissionResult = await db
       .select({
-        total: sql<number>`COALESCE(SUM(CAST(${opportunityProducts.expectedCommission} AS NUMERIC)), 0)`,
+        total: sql<number>`COALESCE(SUM(CAST(${insuranceContracts.agentCommission} AS NUMERIC)), 0)`,
         count: count(),
       })
-      .from(opportunityProducts)
-      .innerJoin(clients, eq(opportunityProducts.clientId, clients.id))
+      .from(insuranceContracts)
+      .innerJoin(clients, eq(insuranceContracts.clientId, clients.id))
       .where(
         and(
-          eq(opportunityProducts.agentId, userId),
+          eq(insuranceContracts.agentId, userId),
           eq(clients.isActive, true),
-          eq(opportunityProducts.status, 'active'),
-          sql`${opportunityProducts.expectedCommission} IS NOT NULL`,
-          gte(opportunityProducts.createdAt, startDate),
-          lte(opportunityProducts.createdAt, endDate)
+          eq(insuranceContracts.status, 'active'),
+          sql`${insuranceContracts.agentCommission} IS NOT NULL`,
+          gte(insuranceContracts.createdAt, startDate),
+          lte(insuranceContracts.createdAt, endDate)
         )
       );
 
@@ -332,29 +333,26 @@ export async function getPerformanceData(
         ? (conversionData.converted / conversionData.total) * 100
         : 0;
 
-    // 🆕 보험설계사 특화: 추가 지표 계산
-    // 평균 고객 가치 = 총 수수료 / 활성 고객 수 (영업 기회가 있는 고객)
-    const clientsWithOpportunities = await db
+    // 🏢 보험설계사 특화: 추가 지표 계산
+    // 평균 고객 가치 = 총 수수료 / 활성 고객 수 (실제 계약이 있는 고객)
+    const clientsWithContracts = await db
       .select({
-        count: sql<number>`COUNT(DISTINCT ${opportunityProducts.clientId})`,
+        count: sql<number>`COUNT(DISTINCT ${insuranceContracts.clientId})`,
       })
-      .from(opportunityProducts)
-      .innerJoin(clients, eq(opportunityProducts.clientId, clients.id))
+      .from(insuranceContracts)
+      .innerJoin(clients, eq(insuranceContracts.clientId, clients.id))
       .where(
         and(
-          eq(opportunityProducts.agentId, userId),
+          eq(insuranceContracts.agentId, userId),
           eq(clients.isActive, true),
-          eq(opportunityProducts.status, 'active'),
-          sql`${opportunityProducts.expectedCommission} IS NOT NULL`
+          eq(insuranceContracts.status, 'active'),
+          sql`${insuranceContracts.agentCommission} IS NOT NULL`
         )
       );
 
-    const clientsWithOpportunitiesCount =
-      clientsWithOpportunities[0]?.count || 0;
+    const clientsWithContractsCount = clientsWithContracts[0]?.count || 0;
     const averageClientValue =
-      clientsWithOpportunitiesCount > 0
-        ? revenue / clientsWithOpportunitiesCount
-        : 0;
+      clientsWithContractsCount > 0 ? revenue / clientsWithContractsCount : 0;
 
     // ✅ 올바른 월 수수료 계산: 실제 수수료는 1회성이므로 월별 분산 불필요
     // 실제로는 revenue 자체가 이미 계약 완료 시 받는 수수료 총액

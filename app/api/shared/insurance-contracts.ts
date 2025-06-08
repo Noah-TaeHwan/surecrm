@@ -1,7 +1,7 @@
 // API 파일
 
 // 🏢 보험계약 관리 API
-import { eq, and, desc } from 'drizzle-orm';
+import { eq, and, desc, count, sql } from 'drizzle-orm';
 import { db } from '~/lib/core/db';
 import {
   insuranceContracts,
@@ -178,7 +178,7 @@ export async function createInsuranceContract(
 }
 
 /**
- * 고객의 보험계약 목록 조회
+ * 고객의 보험계약 목록 조회 (첨부파일 포함)
  */
 export async function getClientInsuranceContracts(
   clientId: string,
@@ -222,10 +222,49 @@ export async function getClientInsuranceContracts(
       )
       .orderBy(desc(insuranceContracts.createdAt));
 
-    console.log(`✅ 보험계약 ${contracts.length}개 조회 완료`);
+    // 📎 각 계약의 첨부파일도 함께 조회
+    const contractsWithAttachments = await Promise.all(
+      contracts.map(async (contract) => {
+        try {
+          const attachments = await db
+            .select({
+              id: contractAttachments.id,
+              fileName: contractAttachments.fileName,
+              fileDisplayName: contractAttachments.fileDisplayName,
+              documentType: contractAttachments.documentType,
+              filePath: contractAttachments.filePath,
+              fileSize: contractAttachments.fileSize,
+              mimeType: contractAttachments.mimeType,
+              description: contractAttachments.description,
+              uploadedAt: contractAttachments.uploadedAt,
+            })
+            .from(contractAttachments)
+            .where(
+              and(
+                eq(contractAttachments.contractId, contract.id),
+                eq(contractAttachments.isActive, true)
+              )
+            )
+            .orderBy(desc(contractAttachments.uploadedAt));
+
+          return {
+            ...contract,
+            attachments,
+          };
+        } catch (error) {
+          console.error(`❌ 계약 ${contract.id} 첨부파일 조회 실패:`, error);
+          return {
+            ...contract,
+            attachments: [],
+          };
+        }
+      })
+    );
+
+    console.log(`✅ 보험계약 ${contracts.length}개 조회 완료 (첨부파일 포함)`);
     return {
       success: true,
-      data: contracts,
+      data: contractsWithAttachments,
     };
   } catch (error) {
     console.error('❌ 보험계약 목록 조회 실패:', error);
@@ -357,6 +396,136 @@ export async function updateInsuranceContract(
       success: true,
       data: updatedContract,
       message: '보험계약이 성공적으로 수정되었습니다.',
+    };
+  } catch (error) {
+    console.error('❌ 보험계약 수정 실패:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : '알 수 없는 오류',
+      message: '보험계약 수정에 실패했습니다.',
+    };
+  }
+}
+
+/**
+ * 보험계약 수정 (첨부파일 포함)
+ */
+export async function updateInsuranceContractWithAttachments(
+  contractId: string,
+  agentId: string,
+  updateData: Partial<{
+    productName: string;
+    insuranceCompany: string;
+    contractNumber: string;
+    policyNumber: string;
+    contractDate: string;
+    effectiveDate: string;
+    expirationDate: string;
+    contractorName: string;
+    insuredName: string;
+    beneficiaryName: string;
+    monthlyPremium: number;
+    annualPremium: number;
+    coverageAmount: number;
+    agentCommission: number;
+    specialClauses: string;
+    paymentMethod: string;
+    paymentPeriod: number;
+    notes: string;
+    status: 'draft' | 'active' | 'cancelled' | 'expired' | 'suspended';
+  }>,
+  newAttachments: Array<{
+    file: File;
+    fileName: string;
+    fileDisplayName: string;
+    documentType: string;
+    description?: string;
+  }> = []
+) {
+  try {
+    console.log('🏢 보험계약 수정 (첨부파일 포함):', {
+      contractId,
+      agentId,
+      updateData,
+    });
+
+    // 1. 보험계약 정보 수정
+    const contractUpdateResult = await updateInsuranceContract(
+      contractId,
+      agentId,
+      updateData
+    );
+
+    if (!contractUpdateResult.success) {
+      return contractUpdateResult;
+    }
+
+    // 2. 새로운 첨부파일 업로드 처리
+    if (newAttachments.length > 0) {
+      console.log(`📎 새 첨부파일 ${newAttachments.length}개 업로드 시작...`);
+
+      const uploadResults = await Promise.allSettled(
+        newAttachments.map(async (attachment) => {
+          try {
+            // Supabase Storage에 파일 업로드
+            const uploadResult = await uploadContractAttachment(
+              attachment.file,
+              contractId,
+              agentId,
+              attachment.documentType
+            );
+
+            if (!uploadResult.success) {
+              throw new Error(uploadResult.error || '파일 업로드 실패');
+            }
+
+            // 데이터베이스에 첨부파일 정보 저장
+            const attachmentRecord: NewContractAttachment = {
+              contractId,
+              agentId,
+              fileName: attachment.fileName,
+              fileDisplayName: attachment.fileDisplayName,
+              filePath: uploadResult.data!.filePath,
+              fileSize: attachment.file.size,
+              mimeType: attachment.file.type,
+              documentType: attachment.documentType as any,
+              description: attachment.description || null,
+            };
+
+            const [savedAttachment] = await db
+              .insert(contractAttachments)
+              .values(attachmentRecord)
+              .returning();
+
+            console.log('✅ 새 첨부파일 업로드 완료:', {
+              id: savedAttachment.id,
+              fileName: attachment.fileName,
+            });
+
+            return savedAttachment;
+          } catch (error) {
+            console.error('❌ 첨부파일 업로드 실패:', {
+              fileName: attachment.fileName,
+              error: error instanceof Error ? error.message : '알 수 없는 오류',
+            });
+            throw error;
+          }
+        })
+      );
+
+      const successfulUploads = uploadResults.filter(
+        (result) => result.status === 'fulfilled'
+      ).length;
+      console.log(`✅ ${successfulUploads}개 새 첨부파일 업로드 성공`);
+    }
+
+    return {
+      success: true,
+      data: contractUpdateResult.data,
+      message:
+        newAttachments.length > 0
+          ? `보험계약과 첨부파일 ${newAttachments.length}개가 성공적으로 수정되었습니다.`
+          : '보험계약이 성공적으로 수정되었습니다.',
     };
   } catch (error) {
     console.error('❌ 보험계약 수정 실패:', error);
@@ -695,6 +864,113 @@ export async function getInsuranceContractStats(agentId: string) {
       success: false,
       error: error instanceof Error ? error.message : '알 수 없는 오류',
       data: null,
+    };
+  }
+}
+
+/**
+ * 🎯 통합 수수료 통계 조회 (대시보드, 보고서, 파이프라인 공통)
+ * 실제 계약 수수료 + 예상 계약 수수료를 통합하여 계산
+ */
+export async function getUnifiedCommissionStats(agentId: string) {
+  try {
+    console.log('📊 통합 수수료 통계 조회 시작:', { agentId });
+
+    // 1. 실제 계약 수수료 (확정된 수익)
+    const actualContracts = await db
+      .select({
+        count: count(),
+        totalCommission: sql<number>`COALESCE(SUM(CAST(${insuranceContracts.agentCommission} AS NUMERIC)), 0)`,
+        totalMonthlyPremium: sql<number>`COALESCE(SUM(CAST(${insuranceContracts.monthlyPremium} AS NUMERIC)), 0)`,
+      })
+      .from(insuranceContracts)
+      .where(
+        and(
+          eq(insuranceContracts.agentId, agentId),
+          eq(insuranceContracts.status, 'active'),
+          sql`${insuranceContracts.agentCommission} IS NOT NULL`
+        )
+      );
+
+    // 2. 예상 계약 수수료 (진행 중인 수익)
+    const { opportunityProducts } = await import('~/lib/schema');
+    const expectedContracts = await db
+      .select({
+        count: count(),
+        totalExpectedCommission: sql<number>`COALESCE(SUM(CAST(${opportunityProducts.expectedCommission} AS NUMERIC)), 0)`,
+        totalExpectedPremium: sql<number>`COALESCE(SUM(CAST(${opportunityProducts.monthlyPremium} AS NUMERIC)), 0)`,
+      })
+      .from(opportunityProducts)
+      .where(
+        and(
+          eq(opportunityProducts.agentId, agentId),
+          eq(opportunityProducts.status, 'active'),
+          sql`${opportunityProducts.expectedCommission} IS NOT NULL`
+        )
+      );
+
+    const actualData = actualContracts[0] || {
+      count: 0,
+      totalCommission: 0,
+      totalMonthlyPremium: 0,
+    };
+    const expectedData = expectedContracts[0] || {
+      count: 0,
+      totalExpectedCommission: 0,
+      totalExpectedPremium: 0,
+    };
+
+    const result = {
+      // 실제 계약 데이터 (확정된 수익)
+      actualContracts: {
+        count: actualData.count,
+        totalCommission: Number(actualData.totalCommission),
+        totalMonthlyPremium: Number(actualData.totalMonthlyPremium),
+      },
+      // 예상 계약 데이터 (진행 중인 수익)
+      expectedContracts: {
+        count: expectedData.count,
+        totalCommission: Number(expectedData.totalExpectedCommission),
+        totalMonthlyPremium: Number(expectedData.totalExpectedPremium),
+      },
+      // 통합 합계
+      total: {
+        contracts: actualData.count + expectedData.count,
+        commission:
+          Number(actualData.totalCommission) +
+          Number(expectedData.totalExpectedCommission),
+        monthlyPremium:
+          Number(actualData.totalMonthlyPremium) +
+          Number(expectedData.totalExpectedPremium),
+      },
+      // 계산된 지표
+      averageCommissionPerContract:
+        actualData.count > 0
+          ? Number(actualData.totalCommission) / actualData.count
+          : 0,
+    };
+
+    console.log('✅ 통합 수수료 통계 조회 완료:', result);
+    return { success: true, data: result };
+  } catch (error) {
+    console.error('❌ 통합 수수료 통계 조회 실패:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : '알 수 없는 오류',
+      data: {
+        actualContracts: {
+          count: 0,
+          totalCommission: 0,
+          totalMonthlyPremium: 0,
+        },
+        expectedContracts: {
+          count: 0,
+          totalCommission: 0,
+          totalMonthlyPremium: 0,
+        },
+        total: { contracts: 0, commission: 0, monthlyPremium: 0 },
+        averageCommissionPerContract: 0,
+      },
     };
   }
 }

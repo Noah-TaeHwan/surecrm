@@ -14,11 +14,13 @@ import {
   TableRow,
 } from '~/common/components/ui/table';
 import { cn } from '~/lib/utils';
+import { formatCurrencyByUnit } from '~/lib/utils/currency';
 import type { TopPerformersProps } from '../types';
 
 export function TopPerformers({ performers }: TopPerformersProps) {
+  // 통일된 통화 포맷팅 함수 사용
   const formatCurrency = (amount: number) => {
-    return `${Math.round(amount / 10000000)}천만원`;
+    return formatCurrencyByUnit(amount);
   };
 
   return (

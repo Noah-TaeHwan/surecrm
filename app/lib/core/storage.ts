@@ -23,29 +23,40 @@ export const STORAGE_CONFIG = {
 /**
  * 파일 유효성 검사
  */
-export function validateFile(file: File) {
+function validateFile(file: File): { isValid: boolean; errors: string[] } {
+  console.log('📁 파일 유효성 검사 시작:', {
+    name: file.name,
+    size: file.size,
+    type: file.type,
+  });
+
   const errors: string[] = [];
 
   // 파일 크기 검사
   if (file.size > STORAGE_CONFIG.MAX_FILE_SIZE) {
     errors.push(
-      `파일 크기는 ${
+      `파일 크기가 너무 큽니다. 최대 ${
         STORAGE_CONFIG.MAX_FILE_SIZE / 1024 / 1024
-      }MB 이하로 제한됩니다.`
+      }MB까지 허용됩니다.`
     );
   }
 
   // MIME 타입 검사
   if (!STORAGE_CONFIG.ALLOWED_MIME_TYPES.includes(file.type)) {
     errors.push(
-      '지원하지 않는 파일 형식입니다. PDF, Word, Excel, 이미지 파일만 업로드 가능합니다.'
+      `지원되지 않는 파일 형식입니다. 허용되는 형식: ${STORAGE_CONFIG.ALLOWED_MIME_TYPES.join(
+        ', '
+      )}`
     );
   }
 
-  return {
-    isValid: errors.length === 0,
+  const isValid = errors.length === 0;
+  console.log(`${isValid ? '✅' : '❌'} 파일 유효성 검사 결과:`, {
+    isValid,
     errors,
-  };
+  });
+
+  return { isValid, errors };
 }
 
 /**
@@ -69,6 +80,9 @@ export async function uploadContractAttachment(
       contractId,
       agentId,
       documentType,
+      fileName: file.name,
+      fileSize: file.size,
+      fileType: file.type,
     });
 
     // 파일 유효성 검사
@@ -80,12 +94,16 @@ export async function uploadContractAttachment(
       };
     }
 
+    console.log('🔑 Admin 클라이언트 생성 시도...');
     const supabase = createAdminClient(); // 관리자 권한으로 업로드
+    console.log('✅ Admin 클라이언트 생성 완료');
+
     const fileExtension = file.name.split('.').pop() || '';
     const fileName = `${uuidv4()}.${fileExtension}`;
     const filePath = `contracts/${contractId}/${fileName}`;
 
-    console.log('📁 Supabase Storage 업로드 중...', {
+    console.log('📁 Supabase Storage 업로드 준비:', {
+      bucket: STORAGE_CONFIG.CONTRACT_ATTACHMENTS_BUCKET,
       filePath,
       fileSize: file.size,
     });
@@ -99,20 +117,27 @@ export async function uploadContractAttachment(
       });
 
     if (uploadError) {
-      console.error('❌ Supabase Storage 업로드 실패:', uploadError);
+      console.error('❌ Supabase Storage 업로드 실패:', {
+        error: uploadError,
+        message: uploadError.message,
+      });
       return {
         success: false,
         error: `파일 업로드 실패: ${uploadError.message}`,
       };
     }
 
+    console.log('✅ Supabase Storage 업로드 성공:', {
+      path: uploadData.path,
+      fullPath: uploadData.fullPath,
+    });
+
     // Public URL 생성
     const { data: urlData } = supabase.storage
       .from(STORAGE_CONFIG.CONTRACT_ATTACHMENTS_BUCKET)
       .getPublicUrl(filePath);
 
-    console.log('✅ 파일 업로드 성공:', {
-      path: uploadData.path,
+    console.log('🔗 Public URL 생성:', {
       publicUrl: urlData.publicUrl,
     });
 
@@ -124,7 +149,11 @@ export async function uploadContractAttachment(
       },
     };
   } catch (error) {
-    console.error('❌ 파일 업로드 중 예외 발생:', error);
+    console.error('❌ 파일 업로드 중 예외 발생:', {
+      error,
+      message: error instanceof Error ? error.message : '알 수 없는 오류',
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     return {
       success: false,
       error:

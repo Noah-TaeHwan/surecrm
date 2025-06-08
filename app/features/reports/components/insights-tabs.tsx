@@ -40,6 +40,7 @@ import {
   Timer,
 } from 'lucide-react';
 import { cn } from '~/lib/utils';
+import { formatCurrencyByUnit } from '~/lib/utils/currency';
 import type { PerformanceData, TopPerformer } from '../types';
 import { Badge } from '~/common/components/ui/badge';
 
@@ -143,15 +144,9 @@ export function InsightsTabs({
     },
   };
 
+  // 통일된 통화 포맷팅 함수 사용
   const formatCurrency = (amount: number) => {
-    if (amount >= 100000000) {
-      return `${Math.round(amount / 100000000)}억원`;
-    } else if (amount >= 10000000) {
-      return `${Math.round(amount / 10000000)}천만원`;
-    } else if (amount >= 1000000) {
-      return `${Math.round(amount / 1000000)}백만원`;
-    }
-    return `${amount.toLocaleString()}원`;
+    return formatCurrencyByUnit(amount);
   };
 
   const formatGoalValue = (value: number, type: string) => {

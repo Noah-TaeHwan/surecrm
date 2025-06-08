@@ -1,5 +1,6 @@
 import { Button } from '~/common/components/ui/button';
 import { Badge } from '~/common/components/ui/badge';
+import { formatCurrencyByUnit } from '~/lib/utils/currency';
 import {
   Card,
   CardContent,
@@ -85,11 +86,9 @@ export function ClientListSection({
     }
   };
 
+  // 통일된 통화 포맷팅 함수 사용
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('ko-KR', {
-      style: 'currency',
-      currency: 'KRW',
-    }).format(amount);
+    return formatCurrencyByUnit(amount);
   };
 
   const formatDate = (dateString?: string) => {

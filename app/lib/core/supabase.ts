@@ -1,33 +1,61 @@
 import { createClient as supabaseCreateClient } from '@supabase/supabase-js';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
-// 환경변수 검증 및 로드
+/**
+ * Supabase 설정 가져오기 (서버사이드용)
+ */
 function getSupabaseConfig() {
   const url = process.env.SUPABASE_URL;
   const anonKey = process.env.SUPABASE_ANON_KEY;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  if (!url || !anonKey) {
-    throw new Error(
-      '필수 Supabase 환경변수가 설정되지 않았습니다. SUPABASE_URL과 SUPABASE_ANON_KEY를 확인해주세요.'
-    );
+  console.log('🔍 Supabase 설정 확인:', {
+    hasUrl: !!url,
+    hasAnonKey: !!anonKey,
+    hasServiceKey: !!serviceKey,
+    url: url || '❌ 없음',
+  });
+
+  if (!url) {
+    throw new Error('SUPABASE_URL 환경변수가 설정되지 않았습니다.');
   }
 
-  return { url, anonKey, serviceKey };
+  if (!anonKey) {
+    throw new Error('SUPABASE_ANON_KEY 환경변수가 설정되지 않았습니다.');
+  }
+
+  return {
+    url,
+    anonKey,
+    serviceKey,
+  };
 }
 
-// 클라이언트 사이드용 환경변수 (VITE_ 접두사)
+/**
+ * 클라이언트사이드 Supabase 설정 가져오기
+ */
 function getSupabaseClientConfig() {
   const url = import.meta.env.VITE_SUPABASE_URL;
   const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-  if (!url || !anonKey) {
-    throw new Error(
-      '클라이언트용 Supabase 환경변수가 설정되지 않았습니다. VITE_SUPABASE_URL과 VITE_SUPABASE_ANON_KEY를 확인해주세요.'
-    );
+  console.log('🔍 클라이언트 Supabase 설정 확인:', {
+    hasUrl: !!url,
+    hasAnonKey: !!anonKey,
+    url: url || '❌ 없음',
+  });
+
+  if (!url) {
+    throw new Error('VITE_SUPABASE_URL 환경변수가 설정되지 않았습니다.');
   }
 
-  return { url, anonKey };
+  if (!anonKey) {
+    throw new Error('VITE_SUPABASE_ANON_KEY 환경변수가 설정되지 않았습니다.');
+  }
+
+  return {
+    url,
+    anonKey,
+  };
 }
 
 /**
@@ -50,6 +78,8 @@ export function createAdminClient() {
     );
   }
 
+  console.log('🔑 Admin 클라이언트 생성 중...');
+
   return supabaseCreateClient(url, serviceKey, {
     auth: {
       autoRefreshToken: false,
@@ -63,6 +93,9 @@ export function createAdminClient() {
  */
 export function createClientSideClient() {
   const { url, anonKey } = getSupabaseClientConfig();
+
+  console.log('🌐 클라이언트 사이드 클라이언트 생성 중...');
+
   return supabaseCreateClient(url, anonKey);
 }
 

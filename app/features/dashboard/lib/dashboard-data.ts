@@ -429,10 +429,21 @@ export async function getKPIData(userId: string): Promise<DashboardKPIData> {
         )
       );
 
-    const contractsStats = contractsStatsResult[0];
-    const totalActiveContracts = contractsStats?.totalContracts || 0;
-    const totalMonthlyPremium = contractsStats?.totalMonthlyPremium || 0;
-    const actualTotalCommission = contractsStats?.totalCommission || 0;
+    // 🏢 통합 수수료 통계 사용
+    const { getUnifiedCommissionStats } = await import(
+      '~/api/shared/insurance-contracts'
+    );
+    const unifiedStats = await getUnifiedCommissionStats(userId);
+
+    const totalActiveContracts = unifiedStats.success
+      ? unifiedStats.data.actualContracts.count
+      : contractsStatsResult[0]?.totalContracts || 0;
+    const totalMonthlyPremium = unifiedStats.success
+      ? unifiedStats.data.actualContracts.totalMonthlyPremium
+      : contractsStatsResult[0]?.totalMonthlyPremium || 0;
+    const actualTotalCommission = unifiedStats.success
+      ? unifiedStats.data.actualContracts.totalCommission
+      : contractsStatsResult[0]?.totalCommission || 0;
 
     return {
       totalClients,

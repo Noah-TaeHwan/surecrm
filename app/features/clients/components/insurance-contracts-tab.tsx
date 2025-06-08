@@ -294,9 +294,16 @@ export function InsuranceContractsTab({
           '보험계약이 성공적으로 등록되었습니다.'
         );
 
-        // 🚀 새로운 계약을 로컬 상태에 즉시 추가 (UI 반응성 개선)
+        // 🚀 새로운 계약을 로컬 상태에 즉시 추가 (중복 방지)
         if (result.data) {
-          setContracts((prev) => [result.data, ...prev]);
+          setContracts((prev) => {
+            const existingIds = prev.map((contract) => contract.id);
+            // 이미 존재하지 않는 경우에만 추가
+            if (!existingIds.includes(result.data.id)) {
+              return [result.data, ...prev];
+            }
+            return prev;
+          });
         }
 
         // 모달 닫기
@@ -529,9 +536,21 @@ export function InsuranceContractsTab({
     try {
       // 🎯 Fetcher를 사용한 API 호출
       const submitData = new FormData();
-      submitData.append('intent', 'createInsuranceContract');
+
+      // 🔧 수정 모드인지 생성 모드인지 판단
+      const isEditMode = selectedContract !== null;
+      const intent = isEditMode
+        ? 'updateInsuranceContract'
+        : 'createInsuranceContract';
+
+      submitData.append('intent', intent);
       submitData.append('clientId', clientId);
       submitData.append('agentId', agentId);
+
+      // 수정 모드일 때는 contractId도 추가
+      if (isEditMode && selectedContract) {
+        submitData.append('contractId', selectedContract.id);
+      }
 
       // 첨부파일을 제외한 계약 데이터 추가
       const contractData = { ...formData };
@@ -545,7 +564,15 @@ export function InsuranceContractsTab({
         }
       });
 
-      // 📁 첨부파일을 FormData에 추가
+      // 📁 첨부파일 디버깅 로그 추가
+      console.log('🔍 첨부파일 디버깅:', {
+        'formData 전체': formData,
+        'attachments 존재여부': !!formData.attachments,
+        'attachments 길이': formData.attachments?.length || 0,
+        'attachments 내용': formData.attachments,
+      });
+
+      // 📁 첨부파일을 FormData에 추가 (NewContractModal에서 전달받은 데이터 사용)
       if (formData.attachments?.length > 0) {
         console.log(
           `📁 첨부파일 ${formData.attachments.length}개 처리 중:`,
@@ -553,35 +580,96 @@ export function InsuranceContractsTab({
             fileName: att.fileName,
             displayName: att.fileDisplayName,
             type: att.documentType,
-            size: att.file.size,
+            size: att.file?.size || 'File 객체 없음',
+            hasFile: !!att.file,
+            fileType: typeof att.file,
           }))
         );
 
         // 각 첨부파일을 FormData에 추가
         formData.attachments.forEach((att: any, index: number) => {
-          submitData.append(`attachment_file_${index}`, att.file);
-          submitData.append(`attachment_fileName_${index}`, att.fileName);
-          submitData.append(
-            `attachment_displayName_${index}`,
-            att.fileDisplayName
-          );
-          submitData.append(
-            `attachment_documentType_${index}`,
-            att.documentType
-          );
-          if (att.description) {
+          console.log(`📎 첨부파일 ${index} 처리:`, {
+            fileName: att.fileName,
+            fileObject: att.file,
+            isFile: att.file instanceof File,
+          });
+
+          if (att.file instanceof File) {
+            submitData.append(`attachment_file_${index}`, att.file);
+            submitData.append(`attachment_fileName_${index}`, att.fileName);
             submitData.append(
-              `attachment_description_${index}`,
-              att.description
+              `attachment_displayName_${index}`,
+              att.fileDisplayName
             );
+            submitData.append(
+              `attachment_documentType_${index}`,
+              att.documentType
+            );
+            if (att.description) {
+              submitData.append(
+                `attachment_description_${index}`,
+                att.description
+              );
+            }
+            console.log(`✅ 첨부파일 ${index} FormData에 추가 완료`);
+          } else {
+            console.error(`❌ 첨부파일 ${index}: File 객체가 아님`, att.file);
           }
         });
+      } else {
+        console.log('📎 첨부파일이 없음 또는 빈 배열');
       }
 
       console.log('📋 보험계약 저장 중...', contractData);
 
-      // React Router fetcher로 action 호출 - 응답은 useEffect에서 처리
-      fetcher.submit(submitData, { method: 'POST' });
+      // 🔧 전용 API 엔드포인트 사용 (React Router의 action 우회)
+      const response = await fetch('/api/insurance-contracts', {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+        },
+        body: submitData,
+      });
+
+      console.log('🔍 응답 상태 확인:', {
+        status: response.status,
+        statusText: response.statusText,
+        headers: Object.fromEntries(response.headers.entries()),
+        url: response.url,
+      });
+
+      const responseText = await response.text();
+      console.log('🔍 응답 내용 (처음 200자):', responseText.substring(0, 200));
+
+      let result;
+      try {
+        result = JSON.parse(responseText);
+        console.log('✅ JSON 파싱 성공:', result);
+      } catch (parseError) {
+        console.error('❌ JSON 파싱 실패:', parseError);
+        console.log('📄 전체 응답 내용:', responseText);
+        const errorMessage =
+          parseError instanceof Error ? parseError.message : '알 수 없는 오류';
+        throw new Error(
+          `서버에서 올바르지 않은 응답을 받았습니다: ${errorMessage}`
+        );
+      }
+
+      // 결과 처리
+      if (result.success) {
+        console.log('✅ 보험계약 저장 성공:', result.message);
+        toast.success('계약 등록 완료', result.message);
+        setShowAddModal(false);
+        setSelectedContract(null);
+        setIsSubmitting(false);
+        // 페이지 새로고침으로 최신 데이터 로드
+        window.location.reload();
+      } else {
+        console.error('❌ 보험계약 저장 실패:', result.error);
+        toast.error('계약 등록 실패', result.error || result.message);
+        setIsSubmitting(false);
+      }
     } catch (error) {
       console.error('❌ 보험계약 저장 실패:', error);
       setIsSubmitting(false);
@@ -1016,10 +1104,15 @@ export function InsuranceContractsTab({
         {showAddModal && (
           <NewContractModal
             isOpen={showAddModal}
-            onClose={() => setShowAddModal(false)}
+            onClose={() => {
+              setSelectedContract(null);
+              setShowAddModal(false);
+            }}
             onConfirm={handleSubmit}
             clientName={clientName}
             isLoading={isSubmitting}
+            editingContract={selectedContract}
+            initialFormData={formData}
           />
         )}
       </TabsContent>
@@ -1037,34 +1130,43 @@ function NewContractModal({
   onConfirm,
   clientName,
   isLoading = false,
+  editingContract = null,
+  initialFormData = null,
 }: {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: (data: any) => void;
   clientName: string;
   isLoading?: boolean;
+  editingContract?: InsuranceContract | null;
+  initialFormData?: ContractFormData | null;
 }) {
   // 📋 폼 상태 관리
-  const [formData, setFormData] = useState({
-    productName: '',
-    insuranceCompany: '',
-    insuranceType: 'life',
-    contractNumber: '',
-    policyNumber: '',
-    contractDate: '',
-    effectiveDate: '',
-    expirationDate: '',
-    contractorName: clientName,
-    insuredName: clientName,
-    beneficiaryName: '',
-    monthlyPremium: '',
-    annualPremium: '',
-    coverageAmount: '',
-    agentCommission: '',
-    paymentMethod: 'monthly',
-    paymentPeriod: '',
-    specialClauses: '',
-    notes: '',
+  const [formData, setFormData] = useState(() => {
+    if (initialFormData) {
+      return initialFormData;
+    }
+    return {
+      productName: '',
+      insuranceCompany: '',
+      insuranceType: 'life',
+      contractNumber: '',
+      policyNumber: '',
+      contractDate: '',
+      effectiveDate: '',
+      expirationDate: '',
+      contractorName: clientName,
+      insuredName: clientName,
+      beneficiaryName: '',
+      monthlyPremium: '',
+      annualPremium: '',
+      coverageAmount: '',
+      agentCommission: '',
+      paymentMethod: 'monthly',
+      paymentPeriod: '',
+      specialClauses: '',
+      notes: '',
+    };
   });
 
   // 📁 첨부파일 상태 관리
@@ -1072,6 +1174,14 @@ function NewContractModal({
   const [isUploadingFile, setIsUploadingFile] = useState(false);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // 🔄 수정 모드일 때 폼 데이터 업데이트
+  useEffect(() => {
+    if (initialFormData && isOpen) {
+      setFormData(initialFormData);
+      setErrors({});
+    }
+  }, [initialFormData, isOpen]);
 
   // 폼 초기화
   const resetForm = () => {
@@ -1190,9 +1300,9 @@ function NewContractModal({
       return;
     }
 
-    // 새 첨부파일 생성
+    // 새 첨부파일 생성 (고유한 ID 보장)
     const newAttachment: AttachmentData = {
-      id: Date.now().toString(),
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       file,
       fileName: file.name,
       fileDisplayName: file.name,
@@ -1256,15 +1366,17 @@ function NewContractModal({
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader className="flex-shrink-0 pb-4">
           <DialogTitle className="flex items-center gap-2 text-xl">
-            <FileText className="h-6 w-6 text-primary" />새 보험계약 등록
+            <FileText className="h-6 w-6 text-primary" />
+            {editingContract ? '보험계약 수정' : '새 보험계약 등록'}
           </DialogTitle>
           <DialogDescription className="text-base">
             <span className="font-medium text-foreground">{clientName}</span>{' '}
-            고객의 보험계약 정보를 등록합니다.
+            고객의 보험계약 정보를 {editingContract ? '수정' : '등록'}합니다.
           </DialogDescription>
         </DialogHeader>
 
         <form
+          id="contract-form"
           onSubmit={handleSubmit}
           className="flex-1 overflow-hidden flex flex-col"
         >
@@ -1780,7 +1892,12 @@ function NewContractModal({
           <Button variant="outline" onClick={handleClose}>
             취소
           </Button>
-          <Button onClick={handleSubmit} disabled={isLoading} className="gap-2">
+          <Button
+            type="submit"
+            form="contract-form"
+            disabled={isLoading}
+            className="gap-2"
+          >
             {isLoading ? (
               <>
                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
@@ -1789,7 +1906,7 @@ function NewContractModal({
             ) : (
               <>
                 <Plus className="h-4 w-4" />
-                계약 등록
+                {editingContract ? '계약 수정' : '계약 등록'}
               </>
             )}
           </Button>

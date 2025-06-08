@@ -78,6 +78,7 @@ export async function loader({ request }: Route.LoaderArgs) {
       getOpportunityProductStats(user.id), // 🆕 실제 상품 통계 추가
     ]);
 
+
     return {
       user: userInfo,
       todayStats,
@@ -88,17 +89,23 @@ export async function loader({ request }: Route.LoaderArgs) {
       topReferrers: referralInsights.topReferrers,
       networkStats: referralInsights.networkStats,
       userGoals,
-      // 🆕 실제 영업 상품 통계 데이터
-      salesStats: salesStats.success
-        ? salesStats.data
-        : {
-            totalProducts: 0,
-            totalPremium: 0,
-            totalCommission: 0,
-            averagePremium: 0,
-            averageCommission: 0,
-            typeStats: {},
-          },
+      // 🆕 통합 수수료 통계 데이터 (실제 계약 기준)
+      salesStats: {
+        totalProducts: kpiData?.totalActiveContracts || 0,
+        totalPremium: kpiData?.totalMonthlyPremium || 0,
+        totalCommission: kpiData?.actualTotalCommission || 0,
+        averagePremium:
+          (kpiData?.totalActiveContracts || 0) > 0
+            ? (kpiData?.totalMonthlyPremium || 0) /
+              (kpiData?.totalActiveContracts || 1)
+            : 0,
+        averageCommission:
+          (kpiData?.totalActiveContracts || 0) > 0
+            ? (kpiData?.actualTotalCommission || 0) /
+              (kpiData?.totalActiveContracts || 1)
+            : 0,
+        typeStats: {}, // 추후 구현 예정
+      },
       // 성능 메트릭 (개발용)
       loadTime: Date.now(),
     };

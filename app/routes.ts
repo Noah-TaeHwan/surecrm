@@ -94,6 +94,7 @@ export default [
   route('api/clients/detail', 'routes/api.clients.detail.ts'),
   route('api/clients/:clientId', 'routes/api.clients.clientId.ts'),
   route('api/pipeline/stages', 'routes/api.pipeline.stages.ts'),
+  route('api/insurance-contracts', 'routes/api.insurance-contracts.ts'),
 
   // 🚫 Catch-all (404 처리) - API 라우트 이후에 배치
   route('*', 'common/pages/error/not-found-page.tsx'),
