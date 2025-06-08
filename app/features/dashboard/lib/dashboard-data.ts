@@ -356,30 +356,29 @@ export async function getKPIData(userId: string): Promise<DashboardKPIData> {
         ? 100
         : 0;
 
-    // 🔧 수정: 실제 영업 기회 상품 수수료 기반 평균 고객 가치 계산
+    // 🏢 수정: 실제 보험계약 수수료 기반 평균 고객 가치 계산
+    const { insuranceContracts } = await import('~/lib/schema/core'); // 동적 import로 보험계약 테이블 가져오기
+
     const averageClientValueResult = await db
       .select({
-        totalCommission: sql<number>`COALESCE(SUM(CAST(${opportunityProducts.expectedCommission} AS NUMERIC)), 0)`,
-        clientCount: sql<number>`COUNT(DISTINCT ${opportunityProducts.clientId})`,
+        totalCommission: sql<number>`COALESCE(SUM(CAST(${insuranceContracts.agentCommission} AS NUMERIC)), 0)`,
+        clientCount: sql<number>`COUNT(DISTINCT ${insuranceContracts.clientId})`,
       })
-      .from(opportunityProducts)
-      .innerJoin(clients, eq(opportunityProducts.clientId, clients.id))
+      .from(insuranceContracts)
+      .innerJoin(clients, eq(insuranceContracts.clientId, clients.id))
       .where(
         and(
-          eq(opportunityProducts.agentId, userId),
+          eq(insuranceContracts.agentId, userId),
           eq(clients.isActive, true),
-          eq(opportunityProducts.status, 'active'),
-          sql`${opportunityProducts.expectedCommission} IS NOT NULL`
+          eq(insuranceContracts.status, 'active'),
+          sql`${insuranceContracts.agentCommission} IS NOT NULL`
         )
       );
 
     const totalCommission = averageClientValueResult[0]?.totalCommission || 0;
-    const clientsWithOpportunities =
-      averageClientValueResult[0]?.clientCount || 0;
+    const clientsWithContracts = averageClientValueResult[0]?.clientCount || 0;
     const averageClientValue =
-      clientsWithOpportunities > 0
-        ? totalCommission / clientsWithOpportunities
-        : 0;
+      clientsWithContracts > 0 ? totalCommission / clientsWithContracts : 0;
 
     // 전환율 증가율 계산 (지난 달 대비)
     let revenueGrowthPercentage = 0;
@@ -413,6 +412,28 @@ export async function getKPIData(userId: string): Promise<DashboardKPIData> {
       }
     }
 
+    // 🏢 추가: 실제 보험계약 통계
+    const contractsStatsResult = await db
+      .select({
+        totalContracts: sql<number>`COUNT(*)`,
+        totalMonthlyPremium: sql<number>`COALESCE(SUM(CAST(${insuranceContracts.monthlyPremium} AS NUMERIC)), 0)`,
+        totalCommission: sql<number>`COALESCE(SUM(CAST(${insuranceContracts.agentCommission} AS NUMERIC)), 0)`,
+      })
+      .from(insuranceContracts)
+      .innerJoin(clients, eq(insuranceContracts.clientId, clients.id))
+      .where(
+        and(
+          eq(insuranceContracts.agentId, userId),
+          eq(clients.isActive, true),
+          eq(insuranceContracts.status, 'active')
+        )
+      );
+
+    const contractsStats = contractsStatsResult[0];
+    const totalActiveContracts = contractsStats?.totalContracts || 0;
+    const totalMonthlyPremium = contractsStats?.totalMonthlyPremium || 0;
+    const actualTotalCommission = contractsStats?.totalCommission || 0;
+
     return {
       totalClients,
       monthlyNewClients,
@@ -427,6 +448,10 @@ export async function getKPIData(userId: string): Promise<DashboardKPIData> {
       referralGrowthPercentage,
       revenueGrowthPercentage,
       averageClientValue,
+      // 🏢 보험계약 관련 KPI 추가
+      totalActiveContracts,
+      totalMonthlyPremium,
+      actualTotalCommission,
     };
   } catch (error) {
     console.error('getKPIData 오류:', error);

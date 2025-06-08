@@ -75,6 +75,10 @@ export interface DashboardKPIData {
   referralGrowthPercentage: number;
   revenueGrowthPercentage: number;
   averageClientValue: number;
+  // 🏢 보험계약 관련 KPI
+  totalActiveContracts?: number;
+  totalMonthlyPremium?: number;
+  actualTotalCommission?: number;
 }
 
 // 오늘의 통계

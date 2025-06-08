@@ -65,10 +65,10 @@ interface InsuranceContract {
   contractorName: string;
   insuredName: string;
   beneficiaryName?: string;
-  monthlyPremium?: number;
-  annualPremium?: number;
-  coverageAmount?: number;
-  agentCommission?: number;
+  monthlyPremium?: string; // 🔧 decimal 타입은 string으로 반환됨
+  annualPremium?: string; // 🔧 decimal 타입은 string으로 반환됨
+  coverageAmount?: string; // 🔧 decimal 타입은 string으로 반환됨
+  agentCommission?: string; // 🔧 decimal 타입은 string으로 반환됨
   status: 'draft' | 'active' | 'cancelled' | 'expired' | 'suspended';
   paymentMethod?: string;
   paymentPeriod?: number;
@@ -255,6 +255,14 @@ export function InsuranceContractsTab({
   // 토스트 알림
   const toast = useToast();
 
+  // 🚀 상태 관리
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [selectedContract, setSelectedContract] =
+    useState<InsuranceContract | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [lastProcessedFetcherData, setLastProcessedFetcherData] =
+    useState<any>(null);
+
   // 🏢 파이프라인에서 계약 전환으로 온 경우 모달 자동 열기
   useEffect(() => {
     if (shouldOpenModal) {
@@ -262,10 +270,20 @@ export function InsuranceContractsTab({
     }
   }, [shouldOpenModal]);
 
-  // fetcher 상태 모니터링 및 자동 새로고침
+  // 🔄 initialContracts 변경 시 로컬 상태 동기화
   useEffect(() => {
-    if (fetcher.state === 'idle' && fetcher.data) {
+    setContracts(initialContracts);
+  }, [initialContracts]);
+
+  // fetcher 상태 모니터링 및 자동 새로고침 (무한루프 방지)
+  useEffect(() => {
+    if (
+      fetcher.state === 'idle' &&
+      fetcher.data &&
+      fetcher.data !== lastProcessedFetcherData
+    ) {
       const result = fetcher.data;
+      setLastProcessedFetcherData(result); // 처리된 데이터 기록
 
       if (result?.success) {
         // 성공 시 토스트 표시 및 자동 새로고침
@@ -274,11 +292,16 @@ export function InsuranceContractsTab({
           '보험계약이 성공적으로 등록되었습니다.'
         );
 
+        // 🚀 새로운 계약을 로컬 상태에 즉시 추가 (UI 반응성 개선)
+        if (result.data) {
+          setContracts((prev) => [result.data, ...prev]);
+        }
+
         // 모달 닫기
         setShowAddModal(false);
         setIsSubmitting(false);
 
-        // 페이지 데이터 새로고침
+        // 페이지 데이터 새로고침 (서버 동기화)
         revalidator.revalidate();
       } else if (result?.error) {
         // 에러 시 토스트 표시
@@ -289,12 +312,8 @@ export function InsuranceContractsTab({
         setIsSubmitting(false);
       }
     }
-  }, [fetcher.state, fetcher.data, toast, revalidator]);
+  }, [fetcher.state, fetcher.data, lastProcessedFetcherData]); // 중복 처리 방지
 
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [selectedContract, setSelectedContract] =
-    useState<InsuranceContract | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
@@ -558,10 +577,10 @@ export function InsuranceContractsTab({
   const activeContracts = contracts.filter((c) => c.status === 'active').length;
   const totalMonthlyPremium = contracts
     .filter((c) => c.status === 'active' && c.monthlyPremium)
-    .reduce((sum, c) => sum + (c.monthlyPremium || 0), 0);
+    .reduce((sum, c) => sum + Number(c.monthlyPremium || 0), 0);
   const totalCommission = contracts
     .filter((c) => c.status === 'active' && c.agentCommission)
-    .reduce((sum, c) => sum + (c.agentCommission || 0), 0);
+    .reduce((sum, c) => sum + Number(c.agentCommission || 0), 0);
 
   return (
     <>
@@ -749,11 +768,38 @@ export function InsuranceContractsTab({
                       {contract.attachments &&
                         contract.attachments.length > 0 && (
                           <div className="mt-4 pt-4 border-t">
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                              <Paperclip className="h-4 w-4" />
-                              <span>
-                                첨부파일 {contract.attachments.length}개
-                              </span>
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <Paperclip className="h-4 w-4" />
+                                <span>
+                                  첨부파일 {contract.attachments.length}개
+                                </span>
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-xs text-muted-foreground hover:text-foreground"
+                              >
+                                전체보기
+                              </Button>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                              {contract.attachments.slice(0, 3).map((att) => (
+                                <div
+                                  key={att.id}
+                                  className="flex items-center gap-1 px-2 py-1 bg-muted rounded text-xs"
+                                >
+                                  <FileText className="h-3 w-3" />
+                                  <span className="truncate max-w-20">
+                                    {att.fileDisplayName || att.fileName}
+                                  </span>
+                                </div>
+                              ))}
+                              {contract.attachments.length > 3 && (
+                                <div className="flex items-center px-2 py-1 bg-muted rounded text-xs text-muted-foreground">
+                                  +{contract.attachments.length - 3}개 더
+                                </div>
+                              )}
                             </div>
                           </div>
                         )}

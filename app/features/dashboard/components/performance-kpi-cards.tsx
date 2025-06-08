@@ -68,29 +68,28 @@ export function PerformanceKPICards({
       description: '전체 관리 고객',
     },
     {
-      title: '예상 총 수수료',
-      value: `${(totalExpectedCommission / 10000).toFixed(0)}만원`,
+      title: '활성 계약',
+      value: data.totalActiveContracts || 0,
       change: data.monthlyGrowth.revenue,
       icon: ActivityLogIcon,
       color: 'success',
-      description: `${salesStats?.totalProducts || 0}건 진행 중`,
+      description: '체결된 보험계약',
     },
     {
-      title: '소개 네트워크',
-      value: data.totalReferrals,
-      change: data.referralGrowthPercentage,
-      icon: Share1Icon,
-      color: 'info',
-      description: '총 소개 건수',
-    },
-    {
-      title: '전환율',
-      value: `${data.conversionRate.toFixed(1)}%`,
+      title: '월 보험료 합계',
+      value: `${((data.totalMonthlyPremium || 0) / 10000).toFixed(0)}만원`,
       change: data.monthlyGrowth.revenue,
       icon: BarChartIcon,
+      color: 'info',
+      description: '고객 월 보험료 총합',
+    },
+    {
+      title: '총 수수료',
+      value: `${((data.actualTotalCommission || 0) / 10000).toFixed(0)}만원`,
+      change: data.monthlyGrowth.revenue,
+      icon: Share1Icon,
       color: 'warning',
-      description: '계약 완료 / 전체 고객',
-      isPercentage: true,
+      description: '실제 계약 수수료',
     },
   ];
 
@@ -266,7 +265,7 @@ export function PerformanceKPICards({
                     </div>
                     <div className="flex items-baseline gap-2">
                       <p className="text-2xl font-bold text-foreground">
-                        {typeof item.value === 'number' && !item.isPercentage
+                        {typeof item.value === 'number'
                           ? item.value.toLocaleString()
                           : item.value}
                       </p>

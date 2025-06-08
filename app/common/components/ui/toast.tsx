@@ -28,11 +28,11 @@ export function Toast({ id, type, title, message, onClose }: ToastProps) {
   const getBgColor = () => {
     switch (type) {
       case 'success':
-        return 'bg-green-50 border-green-200 dark:bg-green-900/10 dark:border-green-800';
+        return 'bg-green-100 border-green-300 dark:bg-green-800/80 dark:border-green-700';
       case 'error':
-        return 'bg-red-50 border-red-200 dark:bg-red-900/10 dark:border-red-800';
+        return 'bg-red-100 border-red-300 dark:bg-red-800/80 dark:border-red-700';
       default:
-        return 'bg-blue-50 border-blue-200 dark:bg-blue-900/10 dark:border-blue-800';
+        return 'bg-blue-100 border-blue-300 dark:bg-blue-800/80 dark:border-blue-700';
     }
   };
 
@@ -49,7 +49,7 @@ export function Toast({ id, type, title, message, onClose }: ToastProps) {
 
   return (
     <div
-      className={`p-4 rounded-lg border shadow-md ${getBgColor()} animate-in slide-in-from-right duration-300`}
+      className={`p-4 rounded-lg border shadow-lg ${getBgColor()} animate-in slide-in-from-right duration-300`}
     >
       <div className="flex items-start justify-between">
         <div className="flex items-start gap-3">
@@ -79,7 +79,7 @@ export function Toast({ id, type, title, message, onClose }: ToastProps) {
 // 토스트 컨테이너 컴포넌트
 export function ToastContainer({ toasts }: { toasts: ToastProps[] }) {
   return (
-    <div className="fixed top-4 right-4 z-50 space-y-2 max-w-sm w-full">
+    <div className="fixed top-6 right-6 z-50 space-y-3 max-w-sm w-full">
       {toasts.map((toast) => (
         <Toast key={toast.id} {...toast} />
       ))}
