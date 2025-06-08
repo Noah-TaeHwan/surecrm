@@ -448,6 +448,13 @@ export const clientsRelations = relations(clients, ({ one, many }) => ({
   meetings: many(meetings, { relationName: 'client_meetings' }),
   referralsAsReferrer: many(referrals, { relationName: 'referrer_referrals' }),
   referralsAsReferred: many(referrals, { relationName: 'referred_referrals' }),
+  // 🆕 보험계약 관계
+  insuranceContracts: many(insuranceContracts, {
+    relationName: 'client_insurance_contracts',
+  }),
+  opportunityProducts: many(opportunityProducts, {
+    relationName: 'client_opportunity_products',
+  }),
 }));
 
 export const clientDetailsRelations = relations(clientDetails, ({ one }) => ({
@@ -639,6 +646,198 @@ export type DocumentType = (typeof appDocumentTypeEnum.enumValues)[number];
 export type InvitationStatus =
   (typeof appInvitationStatusEnum.enumValues)[number];
 
+// Opportunity Products Relations
+export const opportunityProductsRelations = relations(
+  opportunityProducts,
+  ({ one, many }) => ({
+    client: one(clients, {
+      fields: [opportunityProducts.clientId],
+      references: [clients.id],
+      relationName: 'client_opportunity_products',
+    }),
+    agent: one(profiles, {
+      fields: [opportunityProducts.agentId],
+      references: [profiles.id],
+      relationName: 'agent_opportunity_products',
+    }),
+    contracts: many(insuranceContracts, {
+      relationName: 'opportunity_product_contracts',
+    }),
+  })
+);
+
 // Opportunity Products 타입 정의
 export type OpportunityProduct = typeof opportunityProducts.$inferSelect;
 export type NewOpportunityProduct = typeof opportunityProducts.$inferInsert;
+
+// 🆕 보험계약 관련 타입들
+export type InsuranceContract = typeof insuranceContracts.$inferSelect;
+export type NewInsuranceContract = typeof insuranceContracts.$inferInsert;
+export type ContractAttachment = typeof contractAttachments.$inferSelect;
+export type NewContractAttachment = typeof contractAttachments.$inferInsert;
+export type ContractStatus = (typeof appContractStatusEnum.enumValues)[number];
+export type ContractDocumentType =
+  (typeof appContractDocumentTypeEnum.enumValues)[number];
+
+// ===== 🆕 NEW: 보험계약 관리 테이블들 =====
+
+// 보험계약 상태 열거형
+export const appContractStatusEnum = pgEnum('app_contract_status_enum', [
+  'draft', // 초안
+  'active', // 유효
+  'cancelled', // 해지
+  'expired', // 만료
+  'suspended', // 정지
+]);
+
+// 계약 첨부파일 타입 열거형
+export const appContractDocumentTypeEnum = pgEnum(
+  'app_contract_document_type_enum',
+  [
+    'contract', // 계약서
+    'policy', // 증권
+    'application', // 청약서
+    'identification', // 신분증
+    'medical_report', // 건강검진서
+    'vehicle_registration', // 자동차등록증
+    'other_document', // 기타 서류
+  ]
+);
+
+// 보험계약 메인 테이블 (실제 계약 성사된 보험)
+export const insuranceContracts = pgTable('app_client_insurance_contracts', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  clientId: uuid('client_id')
+    .notNull()
+    .references(() => clients.id, { onDelete: 'cascade' }),
+  agentId: uuid('agent_id')
+    .notNull()
+    .references(() => profiles.id),
+
+  // 연동된 영업 기회 (선택사항)
+  opportunityProductId: uuid('opportunity_product_id').references(
+    () => opportunityProducts.id
+  ),
+
+  // 보험 상품 정보
+  productName: text('product_name').notNull(), // 상품명
+  insuranceCompany: text('insurance_company').notNull(), // 보험회사명
+  insuranceType: appInsuranceTypeEnum('insurance_type').notNull(), // 보험 타입
+
+  // 계약 정보
+  contractNumber: text('contract_number'), // 계약번호
+  policyNumber: text('policy_number'), // 증권번호
+  contractDate: date('contract_date').notNull(), // 계약일
+  effectiveDate: date('effective_date').notNull(), // 보험개시일
+  expirationDate: date('expiration_date'), // 만기일
+
+  // 계약자/피보험자 정보
+  contractorName: text('contractor_name').notNull(), // 계약자명
+  insuredName: text('insured_name').notNull(), // 피보험자명
+  beneficiaryName: text('beneficiary_name'), // 수익자명
+
+  // 금액 정보
+  monthlyPremium: decimal('monthly_premium', { precision: 12, scale: 2 }), // 월 보험료
+  annualPremium: decimal('annual_premium', { precision: 12, scale: 2 }), // 연 보험료
+  coverageAmount: decimal('coverage_amount', { precision: 15, scale: 2 }), // 보장금액
+  agentCommission: decimal('agent_commission', { precision: 12, scale: 2 }), // 설계사 수수료
+
+  // 계약 상태 및 관리
+  status: appContractStatusEnum('status').default('active').notNull(),
+  isRenewalContract: boolean('is_renewal_contract').default(false).notNull(), // 갱신 계약 여부
+  parentContractId: uuid('parent_contract_id'), // 원계약 ID (갱신 시)
+
+  // 특약 및 추가 정보
+  specialClauses: text('special_clauses'), // 특약사항
+  paymentMethod: text('payment_method'), // 납입방법 (월납, 연납 등)
+  paymentPeriod: integer('payment_period'), // 납입기간 (년)
+
+  // 메모 및 비고
+  notes: text('notes'), // 메모/비고
+  internalNotes: text('internal_notes'), // 내부 메모 (고객 비공개)
+
+  // 메타 정보
+  createdAt: timestamp('created_at', { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+// 계약 첨부파일 테이블
+export const contractAttachments = pgTable('app_client_contract_attachments', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  contractId: uuid('contract_id')
+    .notNull()
+    .references(() => insuranceContracts.id, { onDelete: 'cascade' }),
+  agentId: uuid('agent_id')
+    .notNull()
+    .references(() => profiles.id),
+
+  // 파일 정보
+  fileName: text('file_name').notNull(), // 원본 파일명
+  fileDisplayName: text('file_display_name').notNull(), // 표시용 파일명
+  filePath: text('file_path').notNull(), // Supabase Storage 경로
+  fileSize: integer('file_size').notNull(), // 파일 크기 (bytes)
+  mimeType: text('mime_type').notNull(), // MIME 타입
+
+  // 문서 분류
+  documentType: appContractDocumentTypeEnum('document_type').notNull(),
+  description: text('description'), // 파일 설명
+
+  // 메타 정보
+  uploadedAt: timestamp('uploaded_at', { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  isActive: boolean('is_active').default(true).notNull(),
+});
+
+// 보험계약 Relations
+export const insuranceContractsRelations = relations(
+  insuranceContracts,
+  ({ one, many }) => ({
+    client: one(clients, {
+      fields: [insuranceContracts.clientId],
+      references: [clients.id],
+      relationName: 'client_insurance_contracts',
+    }),
+    agent: one(profiles, {
+      fields: [insuranceContracts.agentId],
+      references: [profiles.id],
+      relationName: 'agent_insurance_contracts',
+    }),
+    opportunityProduct: one(opportunityProducts, {
+      fields: [insuranceContracts.opportunityProductId],
+      references: [opportunityProducts.id],
+      relationName: 'opportunity_product_contracts',
+    }),
+    parentContract: one(insuranceContracts, {
+      fields: [insuranceContracts.parentContractId],
+      references: [insuranceContracts.id],
+      relationName: 'contract_renewals',
+    }),
+    renewalContracts: many(insuranceContracts, {
+      relationName: 'contract_renewals',
+    }),
+    attachments: many(contractAttachments, {
+      relationName: 'contract_attachments',
+    }),
+  })
+);
+
+export const contractAttachmentsRelations = relations(
+  contractAttachments,
+  ({ one }) => ({
+    contract: one(insuranceContracts, {
+      fields: [contractAttachments.contractId],
+      references: [insuranceContracts.id],
+      relationName: 'contract_attachments',
+    }),
+    agent: one(profiles, {
+      fields: [contractAttachments.agentId],
+      references: [profiles.id],
+      relationName: 'agent_contract_attachments',
+    }),
+  })
+);

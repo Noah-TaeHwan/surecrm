@@ -20,6 +20,10 @@ import {
   invitations,
   documents,
   pipelineStages,
+  // 🆕 보험계약 관련 테이블들
+  opportunityProducts,
+  insuranceContracts,
+  contractAttachments,
   // Admin 테이블들
   adminAuditLogs,
   adminSettings,
@@ -35,6 +39,10 @@ import {
   invitationsRelations,
   documentsRelations,
   pipelineStagesRelations,
+  // 🆕 보험계약 관련 Relations
+  opportunityProductsRelations,
+  insuranceContractsRelations,
+  contractAttachmentsRelations,
   // Admin Relations
   adminAuditLogsRelations,
   adminSettingsRelations,
@@ -268,6 +276,10 @@ export const schema = {
   invitations,
   documents,
   pipelineStages,
+  // 🆕 보험계약 관련 테이블들
+  opportunityProducts,
+  insuranceContracts,
+  contractAttachments,
 
   // ===== Admin 테이블들 =====
   adminAuditLogs,
@@ -381,6 +393,10 @@ export const schema = {
   invitationsRelations,
   documentsRelations,
   pipelineStagesRelations,
+  // 🆕 보험계약 관련 Relations
+  opportunityProductsRelations,
+  insuranceContractsRelations,
+  contractAttachmentsRelations,
   // Admin Relations
   adminAuditLogsRelations,
   adminSettingsRelations,

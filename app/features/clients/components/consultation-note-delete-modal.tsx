@@ -35,17 +35,20 @@ export function ConsultationNoteDeleteModal({
           </div>
           <DialogHeader>
             <DialogTitle className="text-lg">상담 기록 삭제</DialogTitle>
-            <DialogDescription className="text-left space-y-2">
-              <p>다음 상담 기록을 삭제하시겠습니까?</p>
-              <div className="bg-muted p-3 rounded-lg border">
-                <p className="font-medium text-foreground">{noteTitle}</p>
-                <p className="text-sm text-muted-foreground">📅 {noteDate}</p>
-              </div>
-              <p className="text-destructive text-sm">
-                ⚠️ 삭제된 상담 기록은 복구할 수 없습니다.
-              </p>
+            <DialogDescription className="text-left">
+              다음 상담 기록을 삭제하시겠습니까?
             </DialogDescription>
           </DialogHeader>
+
+          <div className="space-y-3">
+            <div className="bg-muted p-3 rounded-lg border">
+              <div className="font-medium text-foreground">{noteTitle}</div>
+              <div className="text-sm text-muted-foreground">📅 {noteDate}</div>
+            </div>
+            <div className="text-destructive text-sm text-center">
+              ⚠️ 삭제된 상담 기록은 복구할 수 없습니다.
+            </div>
+          </div>
           <DialogFooter className="flex gap-2 pt-4">
             <Button
               variant="outline"

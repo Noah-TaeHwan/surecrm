@@ -115,6 +115,7 @@ import { ConsultationNotesTab } from '../components/consultation-notes-tab';
 import { ClientPageHeader } from '../components/client-page-header';
 import { ClientModalsSection } from '../components/client-modals-section';
 import { ConsultationNoteDeleteModal } from '../components/consultation-note-delete-modal';
+import { InsuranceContractsTab } from '../components/insurance-contracts-tab';
 import { useClientHandlers } from '../hooks/use-client-handlers';
 import { useCompanionHandlers } from '../hooks/use-companion-handlers';
 import { useNoteHandlers } from '../hooks/use-note-handlers';
@@ -1545,28 +1546,13 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                 <TabsTrigger value="checkup">점검목적</TabsTrigger>
                 <TabsTrigger value="interests">관심사항</TabsTrigger>
                 <TabsTrigger value="companions">상담동반자</TabsTrigger>
-                <TabsTrigger value="insurance">보험</TabsTrigger>
+                <TabsTrigger value="insurance">보험계약</TabsTrigger>
                 <TabsTrigger value="family">가족</TabsTrigger>
               </TabsList>
 
               {/* 탭 컨텐츠들 */}
               <TabsContent value="insurance" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <Shield className="h-5 w-5" />
-                      보험 정보
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-6">
-                    <div className="text-center py-8">
-                      <Shield className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                      <p className="text-sm text-muted-foreground">
-                        보험 정보가 준비 중입니다.
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
+                <InsuranceContractsTab />
               </TabsContent>
 
               <TabsContent value="family" className="space-y-6">
