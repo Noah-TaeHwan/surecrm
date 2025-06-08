@@ -18,7 +18,7 @@ import type { TopPerformersProps } from '../types';
 
 export function TopPerformers({ performers }: TopPerformersProps) {
   const formatCurrency = (amount: number) => {
-    return `${(amount / 10000000).toFixed(1)}천만원`;
+    return `${Math.round(amount / 10000000)}천만원`;
   };
 
   return (

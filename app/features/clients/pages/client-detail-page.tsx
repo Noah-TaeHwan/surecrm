@@ -1882,10 +1882,53 @@ export async function action({ request, params }: Route.ActionArgs) {
           notes: formData.get('notes')?.toString() || undefined,
         };
 
+        // 📁 첨부파일 처리
+        const attachments: Array<{
+          file: File;
+          fileName: string;
+          fileDisplayName: string;
+          documentType: string;
+          description?: string;
+        }> = [];
+
+        // FormData에서 파일들 추출
+        const entries = Array.from(formData.entries());
+        for (const [key, value] of entries) {
+          if (key.startsWith('attachment_file_') && value instanceof File) {
+            const index = key.split('_')[2]; // attachment_file_0, attachment_file_1, ...
+            const fileName =
+              formData.get(`attachment_fileName_${index}`)?.toString() ||
+              value.name;
+            const fileDisplayName =
+              formData.get(`attachment_displayName_${index}`)?.toString() ||
+              value.name;
+            const documentType =
+              formData.get(`attachment_documentType_${index}`)?.toString() ||
+              'other_document';
+            const description = formData
+              .get(`attachment_description_${index}`)
+              ?.toString();
+
+            attachments.push({
+              file: value,
+              fileName,
+              fileDisplayName,
+              documentType,
+              description,
+            });
+          }
+        }
+
+        console.log(
+          `📎 첨부파일 ${attachments.length}개 발견:`,
+          attachments.map((a) => a.fileName)
+        );
+
         const result = await createInsuranceContract(
           clientId,
           user.id,
-          contractData
+          contractData,
+          attachments
         );
 
         return result;

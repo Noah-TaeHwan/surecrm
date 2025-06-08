@@ -17,6 +17,7 @@ import {
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { Users, Plus, Star } from 'lucide-react';
+import { formatCurrencyTable } from '~/lib/utils/currency';
 
 // 클라이언트 프로필 타입 정의
 interface ClientProfile {
@@ -326,7 +327,7 @@ export function ClientListSection({
               <div className="text-sm">
                 <div className="font-medium">{client.referralCount}명 소개</div>
                 <div className="text-xs text-muted-foreground">
-                  {(client.totalPremium / 10000).toFixed(0)}만원 월납
+                  {formatCurrencyTable(client.totalPremium)} 월납
                 </div>
               </div>
             </TableCell>

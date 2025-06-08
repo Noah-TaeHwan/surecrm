@@ -145,11 +145,11 @@ export function InsightsTabs({
 
   const formatCurrency = (amount: number) => {
     if (amount >= 100000000) {
-      return `${(amount / 100000000).toFixed(1)}억원`;
+      return `${Math.round(amount / 100000000)}억원`;
     } else if (amount >= 10000000) {
-      return `${(amount / 10000000).toFixed(1)}천만원`;
+      return `${Math.round(amount / 10000000)}천만원`;
     } else if (amount >= 1000000) {
-      return `${(amount / 1000000).toFixed(1)}백만원`;
+      return `${Math.round(amount / 1000000)}백만원`;
     }
     return `${amount.toLocaleString()}원`;
   };

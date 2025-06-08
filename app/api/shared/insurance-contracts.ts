@@ -16,8 +16,11 @@ import type {
   ContractAttachment,
 } from '~/lib/schema/core';
 
+// 🔗 Storage 관련 import 추가
+import { uploadContractAttachment } from '~/lib/core/storage';
+
 /**
- * 보험계약 생성
+ * 보험계약 생성 (첨부파일 포함)
  */
 export async function createInsuranceContract(
   clientId: string,
@@ -43,7 +46,14 @@ export async function createInsuranceContract(
     paymentPeriod?: number;
     notes?: string;
     opportunityProductId?: string;
-  }
+  },
+  attachments: Array<{
+    file: File;
+    fileName: string;
+    fileDisplayName: string;
+    documentType: string;
+    description?: string;
+  }> = []
 ) {
   try {
     console.log('🏢 보험계약 생성:', { clientId, agentId, contractData });
@@ -80,10 +90,82 @@ export async function createInsuranceContract(
       .returning();
 
     console.log('✅ 보험계약 생성 완료:', createdContract.id);
+
+    // 📁 첨부파일 업로드 처리
+    if (attachments.length > 0) {
+      console.log(`📎 첨부파일 ${attachments.length}개 업로드 시작...`);
+
+      const uploadResults = await Promise.allSettled(
+        attachments.map(async (attachment) => {
+          try {
+            // 1. Supabase Storage에 파일 업로드
+            const uploadResult = await uploadContractAttachment(
+              attachment.file,
+              createdContract.id,
+              agentId,
+              attachment.documentType
+            );
+
+            if (!uploadResult.success) {
+              throw new Error(uploadResult.error || '파일 업로드 실패');
+            }
+
+            // 2. 데이터베이스에 첨부파일 정보 저장
+            const attachmentRecord: NewContractAttachment = {
+              contractId: createdContract.id,
+              agentId,
+              fileName: attachment.fileName,
+              fileDisplayName: attachment.fileDisplayName,
+              filePath: uploadResult.data!.filePath,
+              fileSize: attachment.file.size,
+              mimeType: attachment.file.type,
+              documentType: attachment.documentType as any,
+              description: attachment.description || null,
+            };
+
+            const [savedAttachment] = await db
+              .insert(contractAttachments)
+              .values(attachmentRecord)
+              .returning();
+
+            console.log('✅ 첨부파일 업로드 완료:', {
+              id: savedAttachment.id,
+              fileName: attachment.fileName,
+            });
+
+            return savedAttachment;
+          } catch (error) {
+            console.error('❌ 첨부파일 업로드 실패:', {
+              fileName: attachment.fileName,
+              error: error instanceof Error ? error.message : '알 수 없는 오류',
+            });
+            throw error;
+          }
+        })
+      );
+
+      // 업로드 결과 검사
+      const failedUploads = uploadResults.filter(
+        (result) => result.status === 'rejected'
+      );
+      if (failedUploads.length > 0) {
+        console.warn(`⚠️ ${failedUploads.length}개 첨부파일 업로드 실패`);
+        // 계약은 성공했지만 일부 첨부파일 실패 시 경고 메시지 포함
+      }
+
+      const successfulUploads = uploadResults.filter(
+        (result) => result.status === 'fulfilled'
+      ).length;
+      console.log(`✅ ${successfulUploads}개 첨부파일 업로드 성공`);
+    }
+
     return {
       success: true,
       data: createdContract,
-      message: '보험계약이 성공적으로 생성되었습니다.',
+      message:
+        attachments.length > 0
+          ? `보험계약과 첨부파일 ${attachments.length}개가 성공적으로 등록되었습니다.`
+          : '보험계약이 성공적으로 생성되었습니다.',
     };
   } catch (error) {
     console.error('❌ 보험계약 생성 실패:', error);

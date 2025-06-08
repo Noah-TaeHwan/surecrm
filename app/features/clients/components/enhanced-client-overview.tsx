@@ -10,6 +10,7 @@ import {
 import { Button } from '~/common/components/ui/button';
 import { Separator } from '~/common/components/ui/separator';
 import { Progress } from '~/common/components/ui/progress';
+import { formatCurrencyTable } from '~/lib/utils/currency';
 import {
   User,
   Phone,
@@ -205,7 +206,7 @@ export function EnhancedClientOverview({
               <p className="text-sm text-muted-foreground">예상 LTV</p>
               <p className="text-lg font-bold text-blue-600">
                 {client.lifetimeValue
-                  ? `${(client.lifetimeValue / 10000).toFixed(0)}만원`
+                  ? formatCurrencyTable(client.lifetimeValue)
                   : '미산출'}
               </p>
             </div>
@@ -332,7 +333,7 @@ export function EnhancedClientOverview({
                             월 보험료
                           </span>
                           <span className="font-medium">
-                            {(client.totalPremium / 10000).toFixed(0)}만원
+                            {formatCurrencyTable(client.totalPremium)}
                           </span>
                         </div>
                       )}

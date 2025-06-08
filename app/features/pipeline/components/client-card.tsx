@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Badge } from '~/common/components/ui/badge';
 import { Button } from '~/common/components/ui/button';
 import { Card, CardContent, CardHeader } from '~/common/components/ui/card';
+import { formatCurrencyTable } from '~/lib/utils/currency';
 import {
   Calendar,
   Users,
@@ -303,7 +304,7 @@ export function ClientCard({
               </div>
               <p className="text-sm font-semibold text-foreground text-center">
                 {monthlyPremium > 0
-                  ? (monthlyPremium / 10000).toFixed(0) + '만원'
+                  ? formatCurrencyTable(monthlyPremium)
                   : '미설정'}
               </p>
             </div>
@@ -317,7 +318,7 @@ export function ClientCard({
               </div>
               <p className="text-sm font-semibold text-foreground text-center">
                 {contractCommission > 0
-                  ? (contractCommission / 10000).toFixed(0) + '만원'
+                  ? formatCurrencyTable(contractCommission)
                   : '미설정'}
               </p>
             </div>

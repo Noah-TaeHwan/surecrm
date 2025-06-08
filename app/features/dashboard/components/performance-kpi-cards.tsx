@@ -24,6 +24,7 @@ import {
   QuestionMarkCircledIcon,
 } from '@radix-ui/react-icons';
 import { cn } from '~/lib/utils';
+import { formatCurrencyTable } from '~/lib/utils/currency';
 
 // 새로운 타입 시스템 사용
 import type { DashboardKPIData } from '../types';
@@ -77,7 +78,7 @@ export function PerformanceKPICards({
     },
     {
       title: '월 보험료 합계',
-      value: `${((data.totalMonthlyPremium || 0) / 10000).toFixed(0)}만원`,
+      value: formatCurrencyTable(data.totalMonthlyPremium || 0),
       change: data.monthlyGrowth.revenue,
       icon: BarChartIcon,
       color: 'info',
@@ -85,7 +86,7 @@ export function PerformanceKPICards({
     },
     {
       title: '총 수수료',
-      value: `${((data.actualTotalCommission || 0) / 10000).toFixed(0)}만원`,
+      value: formatCurrencyTable(data.actualTotalCommission || 0),
       change: data.monthlyGrowth.revenue,
       icon: Share1Icon,
       color: 'warning',
@@ -319,7 +320,7 @@ export function PerformanceKPICards({
                         평균 고객 가치
                       </span>
                       <span className="font-medium text-foreground">
-                        {(data.averageClientValue / 10000).toFixed(0)}만원
+                        {formatCurrencyTable(data.averageClientValue)}
                       </span>
                     </div>
                   </div>
