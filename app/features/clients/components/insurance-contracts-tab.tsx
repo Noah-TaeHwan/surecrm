@@ -32,7 +32,18 @@ import {
   Upload,
   X,
   Save,
+  ChevronLeft,
+  ChevronRight,
+  AlertCircle,
 } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '~/common/components/ui/dialog';
 
 // 📋 보험계약 타입 정의
 interface InsuranceContract {
@@ -233,6 +244,8 @@ export function InsuranceContractsTab({
   const [selectedContract, setSelectedContract] =
     useState<InsuranceContract | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentStep, setCurrentStep] = useState(1);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   // 📝 폼 데이터 상태
   const [formData, setFormData] = useState<ContractFormData>({
@@ -269,6 +282,8 @@ export function InsuranceContractsTab({
 
   const handleAddContract = () => {
     setSelectedContract(null);
+    setCurrentStep(1);
+    setFieldErrors({});
     setFormData({
       productName: '',
       insuranceCompany: '',
@@ -292,6 +307,86 @@ export function InsuranceContractsTab({
     });
     setAttachments([]);
     setShowAddModal(true);
+  };
+
+  // 📝 실시간 필드 검증
+  const validateField = (field: string, value: string) => {
+    const errors: Record<string, string> = { ...fieldErrors };
+
+    switch (field) {
+      case 'productName':
+        if (!value.trim()) {
+          errors[field] = '상품명을 입력해주세요';
+        } else if (value.length < 2) {
+          errors[field] = '상품명은 2글자 이상 입력해주세요';
+        } else {
+          delete errors[field];
+        }
+        break;
+      case 'insuranceCompany':
+        if (!value.trim()) {
+          errors[field] = '보험회사를 선택해주세요';
+        } else {
+          delete errors[field];
+        }
+        break;
+      case 'contractorName':
+      case 'insuredName':
+        if (!value.trim()) {
+          errors[field] = '이름을 입력해주세요';
+        } else if (value.length < 2) {
+          errors[field] = '이름은 2글자 이상 입력해주세요';
+        } else {
+          delete errors[field];
+        }
+        break;
+      case 'contractDate':
+      case 'effectiveDate':
+        if (!value) {
+          errors[field] = '날짜를 선택해주세요';
+        } else {
+          delete errors[field];
+        }
+        break;
+      default:
+        delete errors[field];
+    }
+
+    setFieldErrors(errors);
+  };
+
+  // 📊 진행률 계산
+  const getProgressPercentage = () => {
+    const requiredFields = [
+      'productName',
+      'insuranceCompany',
+      'contractDate',
+      'effectiveDate',
+      'contractorName',
+      'insuredName',
+    ];
+    const completedFields = requiredFields.filter((field) =>
+      formData[field as keyof typeof formData]?.toString().trim()
+    ).length;
+    return Math.round((completedFields / requiredFields.length) * 100);
+  };
+
+  // 🚀 단계별 진행
+  const canProceedToNextStep = (step: number) => {
+    switch (step) {
+      case 1: // 기본 정보
+        return (
+          formData.productName &&
+          formData.insuranceCompany &&
+          formData.insuranceType
+        );
+      case 2: // 계약 정보
+        return formData.contractDate && formData.effectiveDate;
+      case 3: // 계약자 정보
+        return formData.contractorName && formData.insuredName;
+      default:
+        return true;
+    }
   };
 
   const handleEditContract = (contract: InsuranceContract) => {
@@ -322,6 +417,8 @@ export function InsuranceContractsTab({
 
   const handleFormChange = (field: keyof ContractFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    // 실시간 검증
+    validateField(field, value);
   };
 
   const handleFileUpload = (files: FileList | null) => {
@@ -620,326 +717,566 @@ export function InsuranceContractsTab({
 
       {/* 🎯 보험계약 등록/수정 모달 */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-card rounded-lg max-w-6xl w-full mx-4 max-h-[95vh] overflow-y-auto border border-border shadow-lg">
-            <div className="sticky top-0 bg-card border-b border-border p-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold flex items-center gap-2">
-                  <FileText className="h-5 w-5" />
-                  {selectedContract ? '보험계약 수정' : '새 보험계약 등록'}
-                </h2>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowAddModal(false)}
-                  disabled={isSubmitting}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
+        <NewContractModal
+          isOpen={showAddModal}
+          onClose={() => setShowAddModal(false)}
+          onConfirm={handleSubmit}
+          clientName={clientName}
+          isLoading={isSubmitting}
+        />
+      )}
+    </TabsContent>
+  );
+}
+
+// 🆕 보험계약 등록 모달 컴포넌트
+function NewContractModal({
+  isOpen,
+  onClose,
+  onConfirm,
+  clientName,
+  isLoading = false,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: (data: any) => void;
+  clientName: string;
+  isLoading?: boolean;
+}) {
+  // 상태 관리
+  const [formData, setFormData] = useState({
+    productName: '',
+    insuranceCompany: '',
+    insuranceType: 'life',
+    contractNumber: '',
+    policyNumber: '',
+    contractDate: '',
+    effectiveDate: '',
+    expirationDate: '',
+    contractorName: clientName,
+    insuredName: clientName,
+    beneficiaryName: '',
+    monthlyPremium: '',
+    annualPremium: '',
+    coverageAmount: '',
+    agentCommission: '',
+    paymentMethod: 'monthly',
+    paymentPeriod: '',
+    specialClauses: '',
+    notes: '',
+  });
+
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // 폼 초기화
+  const resetForm = () => {
+    setFormData({
+      productName: '',
+      insuranceCompany: '',
+      insuranceType: 'life',
+      contractNumber: '',
+      policyNumber: '',
+      contractDate: '',
+      effectiveDate: '',
+      expirationDate: '',
+      contractorName: clientName,
+      insuredName: clientName,
+      beneficiaryName: '',
+      monthlyPremium: '',
+      annualPremium: '',
+      coverageAmount: '',
+      agentCommission: '',
+      paymentMethod: 'monthly',
+      paymentPeriod: '',
+      specialClauses: '',
+      notes: '',
+    });
+    setErrors({});
+  };
+
+  // 폼 검증
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!formData.productName.trim()) {
+      newErrors.productName = '상품명을 입력해주세요';
+    }
+
+    if (!formData.insuranceCompany.trim()) {
+      newErrors.insuranceCompany = '보험회사를 입력해주세요';
+    }
+
+    if (!formData.contractDate) {
+      newErrors.contractDate = '계약일을 선택해주세요';
+    }
+
+    if (!formData.effectiveDate) {
+      newErrors.effectiveDate = '효력발생일을 선택해주세요';
+    }
+
+    if (!formData.monthlyPremium) {
+      newErrors.monthlyPremium = '월 보험료를 입력해주세요';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // 폼 제출
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (validateForm()) {
+      onConfirm(formData);
+    }
+  };
+
+  // 닫기 핸들러
+  const handleClose = () => {
+    resetForm();
+    onClose();
+  };
+
+  // 필드 업데이트 함수
+  const updateField = (field: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      const newErrors = { ...errors };
+      delete newErrors[field];
+      setErrors(newErrors);
+    }
+  };
+
+  // 보험 종류 옵션
+  const insuranceTypes = [
+    { value: 'life', label: '생명보험' },
+    { value: 'health', label: '건강보험' },
+    { value: 'auto', label: '자동차보험' },
+    { value: 'property', label: '재산보험' },
+    { value: 'travel', label: '여행보험' },
+    { value: 'accident', label: '상해보험' },
+    { value: 'other', label: '기타' },
+  ];
+
+  // 납입 방법 옵션
+  const paymentMethods = [
+    { value: 'monthly', label: '월납' },
+    { value: 'quarterly', label: '분기납' },
+    { value: 'semi-annual', label: '반년납' },
+    { value: 'annual', label: '연납' },
+    { value: 'lump-sum', label: '일시납' },
+  ];
+
+  return (
+    <Dialog open={isOpen} onOpenChange={handleClose}>
+      <DialogContent className="max-w-2xl max-h-[85vh] overflow-hidden flex flex-col">
+        <DialogHeader className="flex-shrink-0">
+          <DialogTitle className="flex items-center gap-2 text-xl">
+            <FileText className="h-6 w-6 text-primary" />새 보험계약 등록
+          </DialogTitle>
+          <DialogDescription className="text-base">
+            <span className="font-medium text-foreground">{clientName}</span>{' '}
+            고객의 보험계약 정보를 등록합니다.
+          </DialogDescription>
+        </DialogHeader>
+
+        <form
+          onSubmit={handleSubmit}
+          className="flex-1 overflow-hidden flex flex-col"
+        >
+          <div className="flex-1 overflow-y-auto space-y-6 py-4">
+            {/* 📋 기본 계약 정보 */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <Shield className="h-5 w-5 text-primary" />
+                기본 계약 정보
+              </h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="productName"
+                    className="flex items-center space-x-1 text-sm font-medium"
+                  >
+                    <span>상품명</span>
+                    <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="productName"
+                    value={formData.productName}
+                    onChange={(e) => updateField('productName', e.target.value)}
+                    placeholder="예: 무배당 종합보험"
+                    className={errors.productName ? 'border-destructive' : ''}
+                  />
+                  {errors.productName && (
+                    <p className="text-xs text-destructive flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3" />
+                      {errors.productName}
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="insuranceCompany"
+                    className="flex items-center space-x-1 text-sm font-medium"
+                  >
+                    <span>보험회사</span>
+                    <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="insuranceCompany"
+                    value={formData.insuranceCompany}
+                    onChange={(e) =>
+                      updateField('insuranceCompany', e.target.value)
+                    }
+                    placeholder="예: 삼성화재, 현대해상"
+                    className={
+                      errors.insuranceCompany ? 'border-destructive' : ''
+                    }
+                  />
+                  {errors.insuranceCompany && (
+                    <p className="text-xs text-destructive flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3" />
+                      {errors.insuranceCompany}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="insuranceType"
+                    className="text-sm font-medium"
+                  >
+                    보험 종류
+                  </Label>
+                  <Select
+                    value={formData.insuranceType}
+                    onValueChange={(value) =>
+                      updateField('insuranceType', value)
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="보험 종류 선택" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {insuranceTypes.map((type) => (
+                        <SelectItem key={type.value} value={type.value}>
+                          {type.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="contractNumber"
+                    className="text-sm font-medium"
+                  >
+                    계약번호
+                  </Label>
+                  <Input
+                    id="contractNumber"
+                    value={formData.contractNumber}
+                    onChange={(e) =>
+                      updateField('contractNumber', e.target.value)
+                    }
+                    placeholder="예: CT2024001234"
+                  />
+                </div>
               </div>
             </div>
 
-            <div className="p-6 space-y-8">
-              {/* 🏢 보험 상품 정보 */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold flex items-center gap-2">
-                  <Shield className="h-5 w-5" />
-                  보험 상품 정보
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="productName">상품명 *</Label>
-                    <Input
-                      id="productName"
-                      value={formData.productName}
-                      onChange={(e) =>
-                        handleFormChange('productName', e.target.value)
-                      }
-                      placeholder="예: 무배당 라이프플래너 종신보험"
-                      disabled={isSubmitting}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="insuranceCompany">보험회사 *</Label>
-                    <Select
-                      value={formData.insuranceCompany}
-                      onValueChange={(value) =>
-                        handleFormChange('insuranceCompany', value)
-                      }
-                      disabled={isSubmitting}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="보험회사 선택" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {INSURANCE_COMPANIES.map((company) => (
-                          <SelectItem key={company} value={company}>
-                            {company}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="insuranceType">보험 유형 *</Label>
-                    <Select
-                      value={formData.insuranceType}
-                      onValueChange={(value) =>
-                        handleFormChange('insuranceType', value)
-                      }
-                      disabled={isSubmitting}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="life">생명보험</SelectItem>
-                        <SelectItem value="health">건강보험</SelectItem>
-                        <SelectItem value="auto">자동차보험</SelectItem>
-                        <SelectItem value="home">주택보험</SelectItem>
-                        <SelectItem value="business">사업자보험</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+            {/* 📅 계약 일정 */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <Calendar className="h-5 w-5 text-primary" />
+                계약 일정
+              </h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="contractDate"
+                    className="flex items-center space-x-1 text-sm font-medium"
+                  >
+                    <span>계약일</span>
+                    <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="contractDate"
+                    type="date"
+                    value={formData.contractDate}
+                    onChange={(e) =>
+                      updateField('contractDate', e.target.value)
+                    }
+                    className={errors.contractDate ? 'border-destructive' : ''}
+                  />
+                  {errors.contractDate && (
+                    <p className="text-xs text-destructive flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3" />
+                      {errors.contractDate}
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="effectiveDate"
+                    className="flex items-center space-x-1 text-sm font-medium"
+                  >
+                    <span>효력발생일</span>
+                    <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="effectiveDate"
+                    type="date"
+                    value={formData.effectiveDate}
+                    onChange={(e) =>
+                      updateField('effectiveDate', e.target.value)
+                    }
+                    className={errors.effectiveDate ? 'border-destructive' : ''}
+                  />
+                  {errors.effectiveDate && (
+                    <p className="text-xs text-destructive flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3" />
+                      {errors.effectiveDate}
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="expirationDate"
+                    className="text-sm font-medium"
+                  >
+                    만료일
+                  </Label>
+                  <Input
+                    id="expirationDate"
+                    type="date"
+                    value={formData.expirationDate}
+                    onChange={(e) =>
+                      updateField('expirationDate', e.target.value)
+                    }
+                  />
                 </div>
               </div>
+            </div>
 
-              <Separator />
+            {/* 💰 금액 정보 */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <DollarSign className="h-5 w-5 text-primary" />
+                금액 정보
+              </h3>
 
-              {/* 📋 계약 정보 */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold flex items-center gap-2">
-                  <FileText className="h-5 w-5" />
-                  계약 정보
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="contractDate">계약일 *</Label>
-                    <Input
-                      id="contractDate"
-                      type="date"
-                      value={formData.contractDate}
-                      onChange={(e) =>
-                        handleFormChange('contractDate', e.target.value)
-                      }
-                      disabled={isSubmitting}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="effectiveDate">보험개시일 *</Label>
-                    <Input
-                      id="effectiveDate"
-                      type="date"
-                      value={formData.effectiveDate}
-                      onChange={(e) =>
-                        handleFormChange('effectiveDate', e.target.value)
-                      }
-                      disabled={isSubmitting}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <Separator />
-
-              {/* 👤 계약자 정보 */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold flex items-center gap-2">
-                  <Building2 className="h-5 w-5" />
-                  계약자 정보
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="contractorName">계약자명 *</Label>
-                    <Input
-                      id="contractorName"
-                      value={formData.contractorName}
-                      onChange={(e) =>
-                        handleFormChange('contractorName', e.target.value)
-                      }
-                      placeholder="계약자 이름"
-                      disabled={isSubmitting}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="insuredName">피보험자명 *</Label>
-                    <Input
-                      id="insuredName"
-                      value={formData.insuredName}
-                      onChange={(e) =>
-                        handleFormChange('insuredName', e.target.value)
-                      }
-                      placeholder="피보험자 이름"
-                      disabled={isSubmitting}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <Separator />
-
-              {/* 💰 금액 정보 */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold flex items-center gap-2">
-                  <DollarSign className="h-5 w-5" />
-                  금액 정보
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="monthlyPremium">월 보험료 (원)</Label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="monthlyPremium"
+                    className="flex items-center space-x-1 text-sm font-medium"
+                  >
+                    <span>월 보험료</span>
+                    <span className="text-destructive">*</span>
+                  </Label>
+                  <div className="relative">
                     <Input
                       id="monthlyPremium"
                       type="number"
                       value={formData.monthlyPremium}
                       onChange={(e) =>
-                        handleFormChange('monthlyPremium', e.target.value)
+                        updateField('monthlyPremium', e.target.value)
                       }
-                      placeholder="예: 150000"
-                      disabled={isSubmitting}
+                      placeholder="0"
+                      className={`pr-8 ${
+                        errors.monthlyPremium ? 'border-destructive' : ''
+                      }`}
                     />
+                    <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-muted-foreground">
+                      원
+                    </span>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="agentCommission">설계사 수수료 (원)</Label>
+                  {errors.monthlyPremium && (
+                    <p className="text-xs text-destructive flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3" />
+                      {errors.monthlyPremium}
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="agentCommission"
+                    className="text-sm font-medium"
+                  >
+                    수수료 (매출)
+                  </Label>
+                  <div className="relative">
                     <Input
                       id="agentCommission"
                       type="number"
                       value={formData.agentCommission}
                       onChange={(e) =>
-                        handleFormChange('agentCommission', e.target.value)
+                        updateField('agentCommission', e.target.value)
                       }
-                      placeholder="예: 2250000"
-                      disabled={isSubmitting}
+                      placeholder="0"
+                      className="pr-8"
                     />
+                    <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-muted-foreground">
+                      원
+                    </span>
                   </div>
                 </div>
               </div>
 
-              <Separator />
-
-              {/* 📎 첨부파일 */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold flex items-center gap-2">
-                  <Paperclip className="h-5 w-5" />
-                  첨부파일 (엑셀, PDF)
-                </h3>
-
-                <div className="border-2 border-dashed border-border/30 rounded-lg p-8 text-center bg-muted/10">
-                  <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                  <p className="text-foreground mb-2">
-                    파일을 드래그하여 업로드하거나 클릭하여 선택하세요
-                  </p>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    지원 형식: .xlsx, .xls, .pdf (최대 10MB)
-                  </p>
-                  <input
-                    type="file"
-                    multiple
-                    accept=".xlsx,.xls,.pdf"
-                    onChange={(e) => handleFileUpload(e.target.files)}
-                    className="hidden"
-                    id="file-upload"
-                    disabled={isSubmitting}
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() =>
-                      document.getElementById('file-upload')?.click()
-                    }
-                    disabled={isSubmitting}
-                  >
-                    파일 선택
-                  </Button>
-                </div>
-
-                {attachments.length > 0 && (
-                  <div className="space-y-2">
-                    <h4 className="font-medium text-sm">
-                      업로드된 파일 ({attachments.length}개)
-                    </h4>
-                    {attachments.map((attachment) => (
-                      <div
-                        key={attachment.id}
-                        className="flex items-center justify-between p-3 bg-muted/20 border border-border/30 rounded-lg"
-                      >
-                        <div className="flex items-center gap-3">
-                          <FileText className="h-5 w-5 text-muted-foreground" />
-                          <div>
-                            <p className="font-medium text-sm text-foreground">
-                              {attachment.name}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {attachment.type} •{' '}
-                              {(attachment.file.size / 1024 / 1024).toFixed(2)}
-                              MB
-                            </p>
-                          </div>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleRemoveAttachment(attachment.id)}
-                          disabled={isSubmitting}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <Separator />
-
-              {/* 📝 메모 */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold">메모</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="notes">기타 메모사항</Label>
-                  <Textarea
-                    id="notes"
-                    value={formData.notes}
-                    onChange={(e) => handleFormChange('notes', e.target.value)}
-                    placeholder="기타 메모사항을 입력하세요"
-                    rows={3}
-                    disabled={isSubmitting}
-                  />
+                  <Label
+                    htmlFor="paymentMethod"
+                    className="text-sm font-medium"
+                  >
+                    납입 방법
+                  </Label>
+                  <Select
+                    value={formData.paymentMethod}
+                    onValueChange={(value) =>
+                      updateField('paymentMethod', value)
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="납입 방법 선택" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {paymentMethods.map((method) => (
+                        <SelectItem key={method.value} value={method.value}>
+                          {method.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="coverageAmount"
+                    className="text-sm font-medium"
+                  >
+                    보장금액
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      id="coverageAmount"
+                      type="number"
+                      value={formData.coverageAmount}
+                      onChange={(e) =>
+                        updateField('coverageAmount', e.target.value)
+                      }
+                      placeholder="0"
+                      className="pr-8"
+                    />
+                    <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-muted-foreground">
+                      원
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* 하단 버튼 */}
-            <div className="sticky bottom-0 bg-card border-t border-border p-6">
-              <div className="flex justify-end gap-3">
-                <Button
-                  variant="outline"
-                  onClick={() => setShowAddModal(false)}
-                  disabled={isSubmitting}
-                >
-                  취소
-                </Button>
-                <Button
-                  onClick={handleSubmit}
-                  disabled={!isFormValid || isSubmitting}
-                  className="flex items-center gap-2"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                      저장 중...
-                    </>
-                  ) : (
-                    <>
-                      <Save className="h-4 w-4" />
-                      {selectedContract ? '수정' : '등록'}
-                    </>
-                  )}
-                </Button>
+            {/* 📝 추가 정보 */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <FileText className="h-5 w-5 text-primary" />
+                추가 정보
+              </h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="beneficiaryName"
+                    className="text-sm font-medium"
+                  >
+                    수익자명
+                  </Label>
+                  <Input
+                    id="beneficiaryName"
+                    value={formData.beneficiaryName}
+                    onChange={(e) =>
+                      updateField('beneficiaryName', e.target.value)
+                    }
+                    placeholder="예: 홍길동 배우자"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="policyNumber" className="text-sm font-medium">
+                    증권번호
+                  </Label>
+                  <Input
+                    id="policyNumber"
+                    value={formData.policyNumber}
+                    onChange={(e) =>
+                      updateField('policyNumber', e.target.value)
+                    }
+                    placeholder="예: PL2024001234"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="notes" className="text-sm font-medium">
+                  메모 (선택사항)
+                </Label>
+                <Textarea
+                  id="notes"
+                  value={formData.notes}
+                  onChange={(e) => updateField('notes', e.target.value)}
+                  placeholder="계약 관련 특이사항, 고객 요청사항 등을 기록하세요..."
+                  className="min-h-[80px] resize-none"
+                />
+              </div>
+            </div>
+
+            {/* 📌 안내 메시지 */}
+            <div className="p-4 bg-blue-50 dark:bg-blue-900/10 rounded-lg border border-blue-200 dark:border-blue-800">
+              <div className="flex items-start gap-3">
+                <FileText className="h-5 w-5 text-blue-600 mt-0.5" />
+                <div>
+                  <h4 className="font-medium text-blue-800 dark:text-blue-200 mb-1">
+                    계약 등록 후 진행사항
+                  </h4>
+                  <div className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
+                    <p>✓ 영업 파이프라인에서 "계약 완료" 상태로 업데이트</p>
+                    <p>✓ 대시보드 및 보고서에 수수료 반영</p>
+                    <p>✓ 계약서류 업로드 및 관리 기능 제공</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
-    </TabsContent>
+        </form>
+
+        <DialogFooter className="flex-shrink-0 gap-2">
+          <Button variant="outline" onClick={handleClose}>
+            취소
+          </Button>
+          <Button onClick={handleSubmit} disabled={isLoading} className="gap-2">
+            {isLoading ? (
+              <>
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
+                등록 중...
+              </>
+            ) : (
+              <>
+                <Plus className="h-4 w-4" />
+                계약 등록
+              </>
+            )}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
