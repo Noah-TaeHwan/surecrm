@@ -12,7 +12,7 @@ import {
   type ReportInstance,
   type ReportDashboard,
 } from './schema';
-import { insuranceInfo } from '~/lib/schema';
+import { insuranceInfo, opportunityProducts } from '~/lib/schema';
 import { appClientConsultationNotes } from '~/features/clients/lib/schema';
 import {
   eq,
@@ -262,37 +262,39 @@ export async function getPerformanceData(
         )
       );
 
-    const prevRevenueResult = await db
+    const prevCommissionResult = await db
       .select({
-        total: sql<number>`COALESCE(SUM(${insuranceInfo.premium}), 0)`,
+        total: sql<number>`COALESCE(SUM(CAST(${opportunityProducts.expectedCommission} AS NUMERIC)), 0)`,
       })
-      .from(clients)
-      .innerJoin(insuranceInfo, eq(clients.id, insuranceInfo.clientId))
+      .from(opportunityProducts)
+      .innerJoin(clients, eq(opportunityProducts.clientId, clients.id))
       .where(
         and(
-          eq(clients.agentId, userId),
-          eq(clients.isActive, true), // 🔥 추가: 활성 고객만
-          eq(insuranceInfo.isActive, true),
-          gte(clients.createdAt, prevStartDate),
-          lte(clients.createdAt, prevEndDate)
+          eq(opportunityProducts.agentId, userId),
+          eq(clients.isActive, true),
+          eq(opportunityProducts.status, 'active'),
+          sql`${opportunityProducts.expectedCommission} IS NOT NULL`,
+          gte(opportunityProducts.createdAt, prevStartDate),
+          lte(opportunityProducts.createdAt, prevEndDate)
         )
       );
 
-    // 수익 계산 (🔥 활성 고객만)
-    const revenueResult = await db
+    // 🆕 실제 수수료 계산 - opportunityProducts 테이블 사용
+    const commissionResult = await db
       .select({
-        total: sql<number>`COALESCE(SUM(${insuranceInfo.premium}), 0)`,
+        total: sql<number>`COALESCE(SUM(CAST(${opportunityProducts.expectedCommission} AS NUMERIC)), 0)`,
         count: count(),
       })
-      .from(clients)
-      .innerJoin(insuranceInfo, eq(clients.id, insuranceInfo.clientId))
+      .from(opportunityProducts)
+      .innerJoin(clients, eq(opportunityProducts.clientId, clients.id))
       .where(
         and(
-          eq(clients.agentId, userId),
-          eq(clients.isActive, true), // 🔥 추가: 활성 고객만
-          eq(insuranceInfo.isActive, true),
-          gte(clients.createdAt, startDate),
-          lte(clients.createdAt, endDate)
+          eq(opportunityProducts.agentId, userId),
+          eq(clients.isActive, true),
+          eq(opportunityProducts.status, 'active'),
+          sql`${opportunityProducts.expectedCommission} IS NOT NULL`,
+          gte(opportunityProducts.createdAt, startDate),
+          lte(opportunityProducts.createdAt, endDate)
         )
       );
 
@@ -318,8 +320,8 @@ export async function getPerformanceData(
     const totalClients = totalClientsResult[0]?.count || 0;
     const newClients = newClientsResult[0]?.count || 0;
     const totalReferrals = totalReferralsResult[0]?.count || 0;
-    const revenue = revenueResult[0]?.total || 0;
-    const revenueCount = revenueResult[0]?.count || 0;
+    const revenue = commissionResult[0]?.total || 0;
+    const revenueCount = commissionResult[0]?.count || 0;
     const meetingsCount = meetingsResult[0]?.count || 0;
     const activeClients = activeClientsResult[0]?.count || 0;
 
@@ -330,14 +332,17 @@ export async function getPerformanceData(
         ? (conversionData.converted / conversionData.total) * 100
         : 0;
 
-    // MVP 특화: 추가 지표 계산
+    // 🆕 보험설계사 특화: 추가 지표 계산
     const averageClientValue = revenueCount > 0 ? revenue / revenueCount : 0;
-    const monthlyRecurringRevenue = revenue * 0.1; // 보험료의 10%를 월 수수료로 가정
+
+    // ✅ 올바른 월 수수료 계산: 실제 수수료는 1회성이므로 월별 분산 불필요
+    // 실제로는 revenue 자체가 이미 계약 완료 시 받는 수수료 총액
+    const monthlyRecurringRevenue = revenue; // 실제 수수료 총액
 
     // 성장률 계산 (MVP: 더 안정적인 계산)
     const prevClients = prevClientsResult[0]?.count || 0;
     const prevReferrals = prevReferralsResult[0]?.count || 0;
-    const prevRevenue = prevRevenueResult[0]?.total || 0;
+    const prevRevenue = prevCommissionResult[0]?.total || 0;
 
     const clientsGrowth = calculateGrowthRate(newClients, prevClients);
     const referralsGrowth = calculateGrowthRate(totalReferrals, prevReferrals);

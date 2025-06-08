@@ -137,7 +137,7 @@ export function PerformanceMetrics({ performance }: PerformanceMetricsProps) {
                 {formatCurrency(performance.revenue)}
               </div>
               <p className="text-sm text-amber-600 dark:text-amber-400">
-                총 수익
+                총 수수료
               </p>
             </div>
           </div>
@@ -215,7 +215,7 @@ export function PerformanceMetrics({ performance }: PerformanceMetricsProps) {
         <Card className="hover:shadow-lg dark:hover:shadow-slate-900/50 transition-shadow border-slate-200 dark:border-slate-700">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardDescription>총 수익</CardDescription>
+              <CardDescription>총 수수료</CardDescription>
               <DollarSign className="h-4 w-4 text-amber-500" />
             </div>
             <CardTitle className="text-2xl text-amber-700 dark:text-amber-400">
@@ -226,7 +226,7 @@ export function PerformanceMetrics({ performance }: PerformanceMetricsProps) {
             <TrendIndicator value={performance.growth.revenue} />
             <div className="flex items-center justify-between mt-2">
               <span className="text-xs text-muted-foreground">
-                고객당 평균: {formatCurrency(performance.averageClientValue)}
+                계약당 평균: {formatCurrency(performance.averageClientValue)}
               </span>
               <Badge variant="secondary" className="text-xs">
                 {performance.activeClients}명 영업 중
@@ -337,16 +337,17 @@ export function PerformanceMetrics({ performance }: PerformanceMetricsProps) {
         <Card className="border-slate-200 dark:border-slate-700">
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-green-500" />월 수수료
+              <TrendingUp className="h-4 w-4 text-green-500" />
+              계약 수수료
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-700 dark:text-green-400">
               {formatCurrency(performance.monthlyRecurringRevenue)}
             </div>
-            <p className="text-sm text-muted-foreground">예상 월수익</p>
+            <p className="text-sm text-muted-foreground">실제 영업 수수료</p>
             <div className="mt-2 text-xs text-muted-foreground">
-              보험료의 약 10% 기준
+              계약 완료 시 받는 1회성 수수료
             </div>
           </CardContent>
         </Card>
