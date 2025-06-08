@@ -22,7 +22,27 @@ import { cn } from '~/lib/utils';
 import type { PerformanceData } from '../lib/supabase-reports-data';
 import type { PerformanceMetricsProps } from '../types';
 
-export function PerformanceMetrics({ performance }: PerformanceMetricsProps) {
+export function PerformanceMetrics({
+  performance,
+  period,
+}: PerformanceMetricsProps) {
+  // 🔥 기간에 맞는 텍스트 생성
+  const getPeriodText = (periodType?: string) => {
+    switch (periodType) {
+      case 'week':
+        return '이번 주';
+      case 'month':
+        return '이번 달';
+      case 'quarter':
+        return '이번 분기';
+      case 'year':
+        return '올해';
+      default:
+        return '이번 달';
+    }
+  };
+
+  const periodText = getPeriodText(period?.type);
   const formatCurrency = (amount: number) => {
     if (amount >= 100000000) {
       return `${(amount / 100000000).toFixed(1)}억원`;
@@ -126,7 +146,7 @@ export function PerformanceMetrics({ performance }: PerformanceMetricsProps) {
       <Card className="bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800/50 dark:to-slate-900/50 border-slate-200 dark:border-slate-700">
         <CardHeader className="pb-3">
           <CardTitle className="text-lg text-slate-900 dark:text-slate-100">
-            이번 달 핵심 성과
+            {periodText} 핵심 성과
           </CardTitle>
           <CardDescription className="text-slate-700 dark:text-slate-300">
             주요 비즈니스 지표 요약
@@ -303,7 +323,9 @@ export function PerformanceMetrics({ performance }: PerformanceMetricsProps) {
             <div className="text-2xl font-bold text-blue-700 dark:text-blue-400">
               {performance.consultationStats.consultationsThisPeriod}
             </div>
-            <p className="text-sm text-muted-foreground">이번 기간 상담 건수</p>
+            <p className="text-sm text-muted-foreground">
+              {periodText} 상담 건수
+            </p>
             <div className="mt-2 space-y-1">
               <div className="text-xs text-muted-foreground">
                 고객당 평균:{' '}

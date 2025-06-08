@@ -96,6 +96,7 @@ export interface KakaoReportProps {
     name: string;
     email?: string;
   };
+  period?: string;
   defaultData?: Partial<KakaoReportData>;
   onDataChange?: (data: KakaoReportData) => void;
 }

@@ -275,7 +275,10 @@ export function InsightsTabs({
                       <TrendingUp className="h-4 w-4 text-green-600" />
                     </div>
                     <CardTitle className="text-2xl">
-                      +{quarterlyGrowth.clients}%
+                      <TrendIndicator
+                        value={quarterlyGrowth.clients}
+                        className="text-sm font-bold"
+                      />
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -292,7 +295,10 @@ export function InsightsTabs({
                       <BarChart3 className="h-4 w-4 text-primary" />
                     </div>
                     <CardTitle className="text-2xl">
-                      +{quarterlyGrowth.revenue}%
+                      <TrendIndicator
+                        value={quarterlyGrowth.revenue}
+                        className="text-sm font-bold"
+                      />
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -309,7 +315,10 @@ export function InsightsTabs({
                       <Users className="h-4 w-4 text-muted-foreground" />
                     </div>
                     <CardTitle className="text-2xl">
-                      +{quarterlyGrowth.referrals}%
+                      <TrendIndicator
+                        value={quarterlyGrowth.referrals}
+                        className="text-sm font-bold"
+                      />
                     </CardTitle>
                   </CardHeader>
                   <CardContent>

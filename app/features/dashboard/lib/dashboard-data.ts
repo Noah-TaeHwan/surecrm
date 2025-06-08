@@ -356,8 +356,30 @@ export async function getKPIData(userId: string): Promise<DashboardKPIData> {
         ? 100
         : 0;
 
-    // 평균 고객 가치 계산 (1건 계약당 평균 수수료 기반)
-    const averageClientValue = contractedClients > 0 ? 150000 : 0; // 1건당 평균 수수료 15만원
+    // 🔧 수정: 실제 영업 기회 상품 수수료 기반 평균 고객 가치 계산
+    const averageClientValueResult = await db
+      .select({
+        totalCommission: sql<number>`COALESCE(SUM(CAST(${opportunityProducts.expectedCommission} AS NUMERIC)), 0)`,
+        clientCount: sql<number>`COUNT(DISTINCT ${opportunityProducts.clientId})`,
+      })
+      .from(opportunityProducts)
+      .innerJoin(clients, eq(opportunityProducts.clientId, clients.id))
+      .where(
+        and(
+          eq(opportunityProducts.agentId, userId),
+          eq(clients.isActive, true),
+          eq(opportunityProducts.status, 'active'),
+          sql`${opportunityProducts.expectedCommission} IS NOT NULL`
+        )
+      );
+
+    const totalCommission = averageClientValueResult[0]?.totalCommission || 0;
+    const clientsWithOpportunities =
+      averageClientValueResult[0]?.clientCount || 0;
+    const averageClientValue =
+      clientsWithOpportunities > 0
+        ? totalCommission / clientsWithOpportunities
+        : 0;
 
     // 전환율 증가율 계산 (지난 달 대비)
     let revenueGrowthPercentage = 0;

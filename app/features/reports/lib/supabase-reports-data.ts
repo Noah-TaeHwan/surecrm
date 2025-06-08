@@ -333,7 +333,28 @@ export async function getPerformanceData(
         : 0;
 
     // 🆕 보험설계사 특화: 추가 지표 계산
-    const averageClientValue = revenueCount > 0 ? revenue / revenueCount : 0;
+    // 평균 고객 가치 = 총 수수료 / 활성 고객 수 (영업 기회가 있는 고객)
+    const clientsWithOpportunities = await db
+      .select({
+        count: sql<number>`COUNT(DISTINCT ${opportunityProducts.clientId})`,
+      })
+      .from(opportunityProducts)
+      .innerJoin(clients, eq(opportunityProducts.clientId, clients.id))
+      .where(
+        and(
+          eq(opportunityProducts.agentId, userId),
+          eq(clients.isActive, true),
+          eq(opportunityProducts.status, 'active'),
+          sql`${opportunityProducts.expectedCommission} IS NOT NULL`
+        )
+      );
+
+    const clientsWithOpportunitiesCount =
+      clientsWithOpportunities[0]?.count || 0;
+    const averageClientValue =
+      clientsWithOpportunitiesCount > 0
+        ? revenue / clientsWithOpportunitiesCount
+        : 0;
 
     // ✅ 올바른 월 수수료 계산: 실제 수수료는 1회성이므로 월별 분산 불필요
     // 실제로는 revenue 자체가 이미 계약 완료 시 받는 수수료 총액

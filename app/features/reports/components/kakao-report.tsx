@@ -35,7 +35,28 @@ import {
 import type { KakaoReportProps, KakaoReportData } from '../types';
 import React from 'react';
 
-export function KakaoReport({ performance, user }: KakaoReportProps) {
+export function KakaoReport({
+  performance,
+  user,
+  period = 'month',
+}: KakaoReportProps) {
+  // 🔥 기간에 맞는 텍스트 생성
+  const getPeriodText = (periodType: string) => {
+    switch (periodType) {
+      case 'week':
+        return '이번 주';
+      case 'month':
+        return '이번 달';
+      case 'quarter':
+        return '이번 분기';
+      case 'year':
+        return '올해';
+      default:
+        return '이번 달';
+    }
+  };
+
+  const periodText = getPeriodText(period);
   const [copiedStates, setCopiedStates] = useState<{
     [key: string]: boolean;
   }>({});
@@ -121,7 +142,7 @@ ${getPerformanceGrade(performance)} ${getImprovementSuggestions(performance)}
     const totalRevenue = performance.revenue || 0;
     const averageClientValue = performance.averageClientValue || 0;
 
-    return `🏆 이번 달 월간 성과 리포트 - ${userName}님
+    return `🏆 ${periodText} 성과 리포트 - ${userName}님
 
 💎 핵심 성과 지표:
 • 총 매출: ${totalRevenue.toLocaleString()}원

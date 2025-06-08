@@ -335,10 +335,22 @@ export default function ReportsPage({ loaderData }: Route.ComponentProps) {
         </div>
 
         {/* 핵심 지표 카드들 */}
-        <PerformanceMetrics performance={performance} />
+        <PerformanceMetrics
+          performance={performance}
+          period={{
+            type: selectedPeriod as any,
+            startDate: new Date(dateRange.start),
+            endDate: new Date(dateRange.end),
+            label: dateRange.formatted,
+          }}
+        />
 
         {/* 카카오톡 업무 보고 양식 */}
-        <KakaoReport performance={performance} user={user} />
+        <KakaoReport
+          performance={performance}
+          user={user}
+          period={selectedPeriod}
+        />
 
         {/* 비즈니스 인사이트 탭 - 🔧 수정: userGoals 전달 */}
         <InsightsTabs
