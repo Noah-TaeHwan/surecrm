@@ -6,9 +6,7 @@ import path from 'path';
 // 환경변수 로드
 const supabaseUrl =
   process.env.SUPABASE_URL || 'https://mzmlolwducobuknsigvz.supabase.co';
-const supabaseServiceKey =
-  process.env.SUPABASE_SERVICE_ROLE_KEY ||
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im16bWxvbHdkdWNvYnVrbnNpZ3Z6Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0ODE5NzEzMiwiZXhwIjoyMDYzNzczMTMyfQ.TWxIq_6UH-1D_3e68KMLK-B9ED95dBdTKjH4J61bBgA';
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey, {
   auth: {

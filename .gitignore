@@ -7,3 +7,20 @@
 
 .cursor/
 .env
+.env.local
+.env.production
+
+# 🚨 보안: 테스트 파일 및 민감한 정보 포함 파일들
+test-*.cjs
+test-*.js
+*-debug.cjs
+fix-*.cjs
+apply-*.cjs
+*.backup
+*.key
+cookies.txt
+
+# 🔒 Storage 관련 테스트 파일들
+test-upload-*.cjs
+test-storage-*.cjs
+test-attachment-*.cjs

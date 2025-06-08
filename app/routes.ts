@@ -96,6 +96,9 @@ export default [
   route('api/pipeline/stages', 'routes/api.pipeline.stages.ts'),
   route('api/insurance-contracts', 'routes/api.insurance-contracts.ts'),
 
+  // 📥 첨부파일 다운로드 API
+  route('api/download-attachment', 'routes/api.download-attachment.ts'),
+
   // 🚫 Catch-all (404 처리) - API 라우트 이후에 배치
   route('*', 'common/pages/error/not-found-page.tsx'),
 ] satisfies RouteConfig;

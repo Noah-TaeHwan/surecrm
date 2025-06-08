@@ -38,6 +38,7 @@ import {
   ChevronUp,
   AlertCircle,
   Eye,
+  Download,
 } from 'lucide-react';
 import {
   Dialog,
@@ -122,11 +123,13 @@ interface ContractFormData {
 // 📁 첨부파일 타입 정의
 interface AttachmentData {
   id: string;
-  file: File;
+  file?: File; // 새 첨부파일의 경우에만 File 객체 존재
   fileName: string;
   fileDisplayName: string;
   documentType: string;
   description?: string;
+  isExisting?: boolean; // 기존 첨부파일 여부
+  fileUrl?: string; // 기존 첨부파일의 URL
 }
 
 // 📂 문서 타입 옵션
@@ -139,6 +142,12 @@ const DOCUMENT_TYPES = [
   { value: 'vehicle_registration', label: '자동차등록증' },
   { value: 'other_document', label: '기타 서류' },
 ];
+
+// 🏷️ 문서 타입 라벨 변환 함수
+const getDocumentTypeLabel = (documentType: string) => {
+  const type = DOCUMENT_TYPES.find((t) => t.value === documentType);
+  return type ? type.label : '기타 서류';
+};
 
 // 🎨 보험 유형별 설정
 const getInsuranceTypeConfig = (type: string) => {
@@ -530,6 +539,65 @@ export function InsuranceContractsTab({
     });
   };
 
+  // 📥 첨부파일 다운로드 함수
+  const handleDownloadAttachment = async (attachmentId: string) => {
+    try {
+      console.log('📥 첨부파일 다운로드 시작:', attachmentId);
+
+      // 다운로드 API 호출
+      const response = await fetch(
+        `/api/download-attachment?id=${attachmentId}`,
+        {
+          method: 'GET',
+          headers: {
+            Accept: 'application/octet-stream',
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || '파일 다운로드에 실패했습니다.');
+      }
+
+      // 파일 다운로드 처리
+      const blob = await response.blob();
+
+      // Content-Disposition 헤더에서 파일명 추출
+      const contentDisposition = response.headers.get('Content-Disposition');
+      let fileName = 'attachment';
+
+      if (contentDisposition) {
+        const matches = contentDisposition.match(
+          /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/
+        );
+        if (matches && matches[1]) {
+          fileName = decodeURIComponent(matches[1].replace(/['"]/g, ''));
+        }
+      }
+
+      // 브라우저에서 파일 다운로드 실행
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      console.log('✅ 파일 다운로드 성공:', fileName);
+      toast.success('다운로드 완료', `${fileName} 파일이 다운로드되었습니다.`);
+    } catch (error) {
+      console.error('❌ 파일 다운로드 실패:', error);
+      toast.error(
+        '다운로드 실패',
+        error instanceof Error ? error.message : '파일 다운로드에 실패했습니다.'
+      );
+    }
+  };
+
   const handleSubmit = async (formData: any) => {
     setIsSubmitting(true);
 
@@ -595,6 +663,7 @@ export function InsuranceContractsTab({
           });
 
           if (att.file instanceof File) {
+            // 새로 추가된 파일인 경우
             submitData.append(`attachment_file_${index}`, att.file);
             submitData.append(`attachment_fileName_${index}`, att.fileName);
             submitData.append(
@@ -612,6 +681,9 @@ export function InsuranceContractsTab({
               );
             }
             console.log(`✅ 첨부파일 ${index} FormData에 추가 완료`);
+          } else if (att.isExisting) {
+            // 기존 첨부파일인 경우 - 서버에서 별도 처리 필요
+            console.log(`📎 기존 첨부파일 ${index}: ${att.fileName} (유지)`);
           } else {
             console.error(`❌ 첨부파일 ${index}: File 객체가 아님`, att.file);
           }
@@ -888,9 +960,9 @@ export function InsuranceContractsTab({
                       {contract.attachments &&
                         contract.attachments.length > 0 && (
                           <div className="mt-4 pt-4 border-t">
-                            <div className="flex items-center justify-between mb-2">
-                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <Paperclip className="h-4 w-4" />
+                            <div className="flex items-center justify-between mb-3">
+                              <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                                <Paperclip className="h-4 w-4 text-primary" />
                                 <span>
                                   첨부파일 {contract.attachments.length}개
                                 </span>
@@ -898,26 +970,96 @@ export function InsuranceContractsTab({
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="text-xs text-muted-foreground hover:text-foreground"
+                                className="text-xs text-primary hover:text-primary/80"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  // TODO: 첨부파일 전체보기 모달 구현
+                                }}
                               >
+                                <Eye className="h-3 w-3 mr-1" />
                                 전체보기
                               </Button>
                             </div>
-                            <div className="flex flex-wrap gap-2">
-                              {contract.attachments.slice(0, 3).map((att) => (
-                                <div
-                                  key={att.id}
-                                  className="flex items-center gap-1 px-2 py-1 bg-muted rounded text-xs"
-                                >
-                                  <FileText className="h-3 w-3" />
-                                  <span className="truncate max-w-20">
-                                    {att.fileDisplayName || att.fileName}
+
+                            {/* 📁 향상된 첨부파일 목록 */}
+                            <div className="space-y-2">
+                              {contract.attachments
+                                .slice(0, 4)
+                                .map((att, index) => (
+                                  <div
+                                    key={att.id}
+                                    className="flex items-center justify-between p-2 bg-muted/30 rounded-md hover:bg-muted/50 transition-colors"
+                                  >
+                                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                                      <div className="flex items-center gap-1">
+                                        <FileText className="h-3 w-3 text-blue-600 flex-shrink-0" />
+                                        <span className="text-xs bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded text-center min-w-fit">
+                                          {getDocumentTypeLabel(
+                                            att.documentType
+                                          )}
+                                        </span>
+                                      </div>
+                                      <div className="min-w-0 flex-1">
+                                        <p
+                                          className="text-xs font-medium truncate"
+                                          title={
+                                            att.fileDisplayName || att.fileName
+                                          }
+                                        >
+                                          {att.fileDisplayName || att.fileName}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground">
+                                          문서
+                                        </p>
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center gap-1 ml-2">
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="h-6 w-6 p-0 text-muted-foreground hover:text-blue-600"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          // TODO: 파일 미리보기/다운로드 기능
+                                        }}
+                                        title="파일 보기"
+                                      >
+                                        <Eye className="h-3 w-3" />
+                                      </Button>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="h-6 w-6 p-0 text-muted-foreground hover:text-green-600"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleDownloadAttachment(att.id);
+                                        }}
+                                        title="파일 다운로드"
+                                      >
+                                        <Download className="h-3 w-3" />
+                                      </Button>
+                                    </div>
+                                  </div>
+                                ))}
+
+                              {/* 더 많은 첨부파일이 있을 때 요약 표시 */}
+                              {contract.attachments.length > 4 && (
+                                <div className="flex items-center justify-center p-2 bg-muted/20 rounded-md border border-dashed">
+                                  <span className="text-xs text-muted-foreground">
+                                    +{contract.attachments.length - 4}개 파일 더
+                                    있음
                                   </span>
-                                </div>
-                              ))}
-                              {contract.attachments.length > 3 && (
-                                <div className="flex items-center px-2 py-1 bg-muted rounded text-xs text-muted-foreground">
-                                  +{contract.attachments.length - 3}개 더
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="ml-2 h-5 px-2 text-xs text-primary hover:text-primary/80"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      // TODO: 전체 첨부파일 보기
+                                    }}
+                                  >
+                                    모두 보기
+                                  </Button>
                                 </div>
                               )}
                             </div>
@@ -1113,6 +1255,7 @@ export function InsuranceContractsTab({
             isLoading={isSubmitting}
             editingContract={selectedContract}
             initialFormData={formData}
+            onDownloadAttachment={handleDownloadAttachment}
           />
         )}
       </TabsContent>
@@ -1132,6 +1275,7 @@ function NewContractModal({
   isLoading = false,
   editingContract = null,
   initialFormData = null,
+  onDownloadAttachment,
 }: {
   isOpen: boolean;
   onClose: () => void;
@@ -1140,6 +1284,7 @@ function NewContractModal({
   isLoading?: boolean;
   editingContract?: InsuranceContract | null;
   initialFormData?: ContractFormData | null;
+  onDownloadAttachment?: (attachmentId: string) => void;
 }) {
   // 📋 폼 상태 관리
   const [formData, setFormData] = useState(() => {
@@ -1182,6 +1327,33 @@ function NewContractModal({
       setErrors({});
     }
   }, [initialFormData, isOpen]);
+
+  // 🔄 수정 모드일 때 기존 첨부파일 로드
+  useEffect(() => {
+    if (editingContract && isOpen) {
+      if (
+        editingContract.attachments &&
+        editingContract.attachments.length > 0
+      ) {
+        const existingAttachments: AttachmentData[] =
+          editingContract.attachments.map((att) => ({
+            id: att.id,
+            fileName: att.fileName,
+            fileDisplayName: att.fileDisplayName,
+            documentType: att.documentType,
+            isExisting: true, // 기존 파일 표시
+            fileUrl: '', // URL은 필요시 추후 생성
+          }));
+        setAttachments(existingAttachments);
+        console.log(`📎 기존 첨부파일 ${existingAttachments.length}개 로드됨`);
+      } else {
+        setAttachments([]);
+      }
+    } else if (!editingContract && isOpen) {
+      // 새 계약 생성 모드일 때는 첨부파일 초기화
+      setAttachments([]);
+    }
+  }, [editingContract, isOpen]);
 
   // 폼 초기화
   const resetForm = () => {
@@ -1772,32 +1944,72 @@ function NewContractModal({
                     {attachments.map((attachment) => (
                       <div
                         key={attachment.id}
-                        className="p-3 border rounded-lg bg-muted/50 space-y-2"
+                        className={`p-3 border rounded-lg space-y-2 ${
+                          attachment.isExisting
+                            ? 'bg-blue-50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800'
+                            : 'bg-muted/50'
+                        }`}
                       >
                         {/* 파일 기본 정보 */}
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2 flex-1 min-w-0">
-                            <FileText className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                            <div className="flex items-center gap-1">
+                              <FileText className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                              {attachment.isExisting && (
+                                <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded">
+                                  기존 파일
+                                </span>
+                              )}
+                            </div>
                             <div className="min-w-0 flex-1">
                               <p className="text-sm font-medium truncate">
                                 {attachment.fileName}
                               </p>
                               <p className="text-xs text-muted-foreground">
-                                {formatFileSize(attachment.file.size)}
+                                {attachment.file
+                                  ? formatFileSize(attachment.file.size)
+                                  : '업로드됨'}
                               </p>
                             </div>
                           </div>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() =>
-                              handleAttachmentRemove(attachment.id)
-                            }
-                            className="h-8 w-8 p-0"
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
+                          <div className="flex items-center gap-1">
+                            {attachment.isExisting && (
+                              <>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700"
+                                  title="기존 파일 미리보기"
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-8 w-8 p-0 text-green-600 hover:text-green-700"
+                                  onClick={() =>
+                                    onDownloadAttachment?.(attachment.id)
+                                  }
+                                  title="파일 다운로드"
+                                >
+                                  <Download className="h-4 w-4" />
+                                </Button>
+                              </>
+                            )}
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() =>
+                                handleAttachmentRemove(attachment.id)
+                              }
+                              className="h-8 w-8 p-0"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </div>
 
                         {/* 파일 메타데이터 - 한 줄로 압축 */}
