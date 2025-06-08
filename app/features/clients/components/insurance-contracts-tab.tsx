@@ -643,59 +643,90 @@ export function InsuranceContractsTab({
       // 📁 첨부파일을 FormData에 추가 (NewContractModal에서 전달받은 데이터 사용)
       if (formData.attachments?.length > 0) {
         console.log(
-          `📁 첨부파일 ${formData.attachments.length}개 처리 중:`,
-          formData.attachments.map((att: any) => ({
+          `📁 [다수파일처리] 첨부파일 ${formData.attachments.length}개 처리 중:`,
+          formData.attachments.map((att: any, idx: number) => ({
+            index: idx,
             fileName: att.fileName,
             displayName: att.fileDisplayName,
             type: att.documentType,
             size: att.file?.size || 'File 객체 없음',
             hasFile: !!att.file,
             fileType: typeof att.file,
+            isExisting: att.isExisting,
           }))
         );
 
+        // 새로운 파일만 FormData에 추가하기 위한 인덱스 카운터
+        let newFileIndex = 0;
+
         // 각 첨부파일을 FormData에 추가
-        formData.attachments.forEach((att: any, index: number) => {
-          console.log(`📎 첨부파일 ${index} 처리:`, {
+        formData.attachments.forEach((att: any, originalIndex: number) => {
+          console.log(`📎 [다수파일처리] 첨부파일 ${originalIndex} 처리:`, {
             fileName: att.fileName,
             fileObject: att.file,
             isFile: att.file instanceof File,
+            isExisting: att.isExisting,
+            willUseIndex: newFileIndex,
           });
 
-          if (att.file instanceof File) {
+          if (att.file instanceof File && !att.isExisting) {
             // 새로 추가된 파일인 경우
-            submitData.append(`attachment_file_${index}`, att.file);
-            submitData.append(`attachment_fileName_${index}`, att.fileName);
+            submitData.append(`attachment_file_${newFileIndex}`, att.file);
             submitData.append(
-              `attachment_displayName_${index}`,
+              `attachment_fileName_${newFileIndex}`,
+              att.fileName
+            );
+            submitData.append(
+              `attachment_displayName_${newFileIndex}`,
               att.fileDisplayName
             );
             submitData.append(
-              `attachment_documentType_${index}`,
+              `attachment_documentType_${newFileIndex}`,
               att.documentType
             );
             if (att.description) {
               submitData.append(
-                `attachment_description_${index}`,
+                `attachment_description_${newFileIndex}`,
                 att.description
               );
             }
-            console.log(`✅ 첨부파일 ${index} FormData에 추가 완료`);
+            console.log(
+              `✅ [다수파일처리] 새 첨부파일 ${originalIndex} → FormData 인덱스 ${newFileIndex} 추가 완료`
+            );
+            newFileIndex++; // 다음 새 파일을 위해 인덱스 증가
           } else if (att.isExisting) {
             // 기존 첨부파일인 경우 - 서버에서 별도 처리 필요
-            console.log(`📎 기존 첨부파일 ${index}: ${att.fileName} (유지)`);
+            console.log(
+              `📎 [다수파일처리] 기존 첨부파일 ${originalIndex}: ${att.fileName} (유지)`
+            );
           } else {
-            console.error(`❌ 첨부파일 ${index}: File 객체가 아님`, att.file);
+            console.error(
+              `❌ [다수파일처리] 첨부파일 ${originalIndex}: File 객체가 아님`,
+              att.file
+            );
           }
         });
+
+        console.log(
+          `📋 [다수파일처리] 최종 결과: 총 ${formData.attachments.length}개 중 ${newFileIndex}개 새 파일을 FormData에 추가`
+        );
       } else {
-        console.log('📎 첨부파일이 없음 또는 빈 배열');
+        console.log('📎 [다수파일처리] 첨부파일이 없음 또는 빈 배열');
       }
 
       console.log('📋 보험계약 저장 중...', contractData);
 
-      // 🔧 전용 API 엔드포인트 사용 (React Router의 action 우회)
-      const response = await fetch('/api/insurance-contracts', {
+      // 🔧 수정/등록에 따른 API 엔드포인트 선택
+      const apiEndpoint = selectedContract
+        ? '/api/update-insurance-contract' // 수정
+        : '/api/insurance-contracts'; // 신규 등록
+
+      // contractId를 FormData에 추가 (수정인 경우)
+      if (selectedContract) {
+        submitData.append('contractId', selectedContract.id);
+      }
+
+      const response = await fetch(apiEndpoint, {
         method: 'POST',
         headers: {
           Accept: 'application/json',
@@ -730,25 +761,31 @@ export function InsuranceContractsTab({
 
       // 결과 처리
       if (result.success) {
-        console.log('✅ 보험계약 저장 성공:', result.message);
-        toast.success('계약 등록 완료', result.message);
+        const isUpdate = !!selectedContract;
+        const actionText = isUpdate ? '수정' : '등록';
+        console.log(`✅ 보험계약 ${actionText} 성공:`, result.message);
+        toast.success(`계약 ${actionText} 완료`, result.message);
         setShowAddModal(false);
         setSelectedContract(null);
         setIsSubmitting(false);
         // 페이지 새로고침으로 최신 데이터 로드
         window.location.reload();
       } else {
-        console.error('❌ 보험계약 저장 실패:', result.error);
-        toast.error('계약 등록 실패', result.error || result.message);
+        const isUpdate = !!selectedContract;
+        const actionText = isUpdate ? '수정' : '등록';
+        console.error(`❌ 보험계약 ${actionText} 실패:`, result.error);
+        toast.error(`계약 ${actionText} 실패`, result.error || result.message);
         setIsSubmitting(false);
       }
     } catch (error) {
-      console.error('❌ 보험계약 저장 실패:', error);
+      const isUpdate = !!selectedContract;
+      const actionText = isUpdate ? '수정' : '등록';
+      console.error(`❌ 보험계약 ${actionText} 실패:`, error);
       setIsSubmitting(false);
 
       // 에러 토스트 알림 (즉시 표시할 수 있는 클라이언트 에러)
       toast.error(
-        '계약 등록 실패',
+        `계약 ${actionText} 실패`,
         error instanceof Error
           ? error.message
           : '알 수 없는 오류가 발생했습니다.'
@@ -984,7 +1021,7 @@ export function InsuranceContractsTab({
                             {/* 📁 향상된 첨부파일 목록 */}
                             <div className="space-y-2">
                               {contract.attachments
-                                .slice(0, 4)
+                                .slice(0, 6) // 6개까지 표시로 증가
                                 .map((att, index) => (
                                   <div
                                     key={att.id}
@@ -1043,10 +1080,10 @@ export function InsuranceContractsTab({
                                 ))}
 
                               {/* 더 많은 첨부파일이 있을 때 요약 표시 */}
-                              {contract.attachments.length > 4 && (
+                              {contract.attachments.length > 6 && (
                                 <div className="flex items-center justify-center p-2 bg-muted/20 rounded-md border border-dashed">
                                   <span className="text-xs text-muted-foreground">
-                                    +{contract.attachments.length - 4}개 파일 더
+                                    +{contract.attachments.length - 6}개 파일 더
                                     있음
                                   </span>
                                   <Button

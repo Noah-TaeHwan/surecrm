@@ -95,6 +95,10 @@ export default [
   route('api/clients/:clientId', 'routes/api.clients.clientId.ts'),
   route('api/pipeline/stages', 'routes/api.pipeline.stages.ts'),
   route('api/insurance-contracts', 'routes/api.insurance-contracts.ts'),
+  route(
+    'api/update-insurance-contract',
+    'routes/api.update-insurance-contract.ts'
+  ),
 
   // 📥 첨부파일 다운로드 API
   route('api/download-attachment', 'routes/api.download-attachment.ts'),
