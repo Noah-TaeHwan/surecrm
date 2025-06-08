@@ -16,8 +16,8 @@ export function EmptyInvitations({ usedCount }: EmptyInvitationsProps) {
             모든 추천 코드를 사용했습니다! 🎉
           </h3>
           <p className="text-sm text-muted-foreground mb-4">
-            SureCRM 프리미엄 멤버십은 가입 시 2개의 추천 코드만 제공됩니다.
-            소중한 동료들에게 잘 사용하셨네요!
+            소중한 동료들에게 추천 코드를 잘 사용하셨네요! 추가 코드가
+            필요하시면 관리자에게 문의해주세요.
           </p>
           <Badge variant="outline" className="gap-1">
             <PersonIcon className="h-3 w-3" />

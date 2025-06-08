@@ -61,7 +61,7 @@ export function InvitationCard({
                 {invitation.invitee.name}님이 가입했습니다
               </div>
               <div className="text-sm text-muted-foreground">
-                {invitation.invitee.joinedAt} 프리미엄 멤버십 가입
+                {invitation.invitee.joinedAt} 가입 완료
               </div>
             </div>
             <Badge variant="secondary">성공</Badge>
@@ -93,8 +93,8 @@ export function InvitationCard({
             </div>
             <div className="text-sm text-muted-foreground bg-muted/30 p-3 rounded-lg border border-border">
               💡 <strong>추천 가이드:</strong> 링크를 복사해서 카카오톡, 이메일,
-              문자로 소중한 동료에게 전송하세요. SureCRM 프리미엄 멤버십의 고급
-              CRM 기능을 함께 활용할 전문가들을 추천해보세요!
+              문자로 소중한 동료에게 전송하세요. SureCRM의 CRM 기능을 함께
+              활용할 전문가들을 추천해보세요!
             </div>
           </div>
         )}

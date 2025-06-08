@@ -134,7 +134,7 @@ export function GoalSettingModal({
             autoTitle = `신규 고객 목표 (${year}년 ${month}월)`;
             break;
           case 'revenue':
-            autoTitle = `매출 목표 (${year}년 ${month}월)`;
+            autoTitle = `수수료 목표 (${year}년 ${month}월)`;
             break;
           default:
             autoTitle = `목표 (${year}년 ${month}월)`;
@@ -192,7 +192,7 @@ export function GoalSettingModal({
   const getGoalTypeLabel = (type: string) => {
     switch (type) {
       case 'revenue':
-        return '매출';
+        return '수수료';
       case 'clients':
         return '고객 수';
       case 'referrals':
@@ -429,7 +429,7 @@ export function GoalSettingModal({
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="revenue" className="text-sm py-2">
-                          💰 매출 목표
+                          💰 수수료 목표
                         </SelectItem>
                         <SelectItem value="clients" className="text-sm py-2">
                           👥 신규 고객 목표

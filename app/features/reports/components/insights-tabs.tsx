@@ -258,7 +258,7 @@ export function InsightsTabs({
           {!hasData ? (
             <NoDataState
               title="성과 트렌드 데이터 없음"
-              description="고객 및 수익 데이터가 쌓이면 트렌드 분석이 가능합니다"
+              description="고객 및 수수료 데이터가 쌓이면 트렌드 분석이 가능합니다"
             />
           ) : (
             <>
@@ -286,7 +286,7 @@ export function InsightsTabs({
                 <Card>
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
-                      <CardDescription>수익 성장률</CardDescription>
+                      <CardDescription>수수료 성장률</CardDescription>
                       <BarChart3 className="h-4 w-4 text-primary" />
                     </div>
                     <CardTitle className="text-2xl">
@@ -298,7 +298,7 @@ export function InsightsTabs({
                   </CardHeader>
                   <CardContent>
                     <p className="text-xs text-muted-foreground">
-                      월간 수익 증가율
+                      월간 수수료 증가율
                     </p>
                   </CardContent>
                 </Card>

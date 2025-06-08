@@ -29,7 +29,7 @@ export function InvitedColleagues({ usedInvitations }: InvitedColleaguesProps) {
                           {invitation.invitee.name}
                         </h4>
                         <Badge variant="secondary" className="text-xs">
-                          프리미엄
+                          가입됨
                         </Badge>
                       </div>
                       <p className="text-sm text-muted-foreground mt-1">

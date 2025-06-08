@@ -21,6 +21,7 @@ import {
   insuranceInfo,
   opportunityProducts,
 } from '~/lib/schema';
+import { insuranceContracts } from '~/lib/schema/core';
 import { profiles } from '~/lib/schema';
 import {
   meetings,
@@ -1078,98 +1079,51 @@ export async function getUserGoals(userId: string) {
           // 목표 유형별 실제 데이터 조회
           switch (goal.goalType) {
             case 'revenue':
-              // 🆕 올바른 수수료 기반 매출 목표 계산 - opportunityProducts 테이블 사용
-              const goalStartDate = new Date(goal.startDate);
-              const goalEndDate = new Date(goal.endDate);
+              // 🎯 대시보드 KPI와 동일한 실제 계약 수수료 계산 (목표 기간 적용)
+              try {
+                const goalStartDate = new Date(goal.startDate);
+                const goalEndDate = new Date(goal.endDate);
 
-              // 🎯 "계약 완료" 단계에 있는 고객들의 실제 계약 수수료 합계
-              const contractCompletedStage = await db
-                .select({
-                  id: pipelineStages.id,
-                })
-                .from(pipelineStages)
-                .where(
-                  and(
-                    eq(pipelineStages.agentId, userId),
-                    eq(pipelineStages.name, '계약 완료')
-                  )
-                )
-                .limit(1);
-
-              if (contractCompletedStage.length > 0) {
-                const contractStageId = contractCompletedStage[0].id;
-
-                // 🎯 계약 완료 단계 고객들의 실제 상품 수수료 합계
-                const contractedProductsResult = await db
+                // 목표 기간 내에 계약된 실제 보험계약들의 수수료 합계
+                const actualContractsInPeriod = await db
                   .select({
-                    expectedCommission: opportunityProducts.expectedCommission,
-                    updatedAt: opportunityProducts.updatedAt,
+                    count: count(),
+                    totalCommission: sql<number>`COALESCE(SUM(CAST(${insuranceContracts.agentCommission} AS NUMERIC)), 0)`,
                   })
-                  .from(opportunityProducts)
-                  .innerJoin(
-                    clients,
-                    eq(opportunityProducts.clientId, clients.id)
-                  )
+                  .from(insuranceContracts)
                   .where(
                     and(
-                      eq(opportunityProducts.agentId, userId),
-                      eq(clients.currentStageId, contractStageId), // 🎯 계약 완료 단계만!
-                      eq(opportunityProducts.status, 'active'),
-                      sql`${opportunityProducts.expectedCommission} IS NOT NULL`,
-                      gte(clients.updatedAt, goalStartDate), // 목표 기간 내 계약 완료
-                      lte(clients.updatedAt, goalEndDate)
+                      eq(insuranceContracts.agentId, userId),
+                      eq(insuranceContracts.status, 'active'),
+                      sql`${insuranceContracts.agentCommission} IS NOT NULL`,
+                      sql`DATE(${insuranceContracts.contractDate}) >= ${
+                        goalStartDate.toISOString().split('T')[0]
+                      }`,
+                      sql`DATE(${insuranceContracts.contractDate}) <= ${
+                        goalEndDate.toISOString().split('T')[0]
+                      }`
                     )
                   );
 
-                // 실제 계약 수수료 합계 (1건 계약 = 1회성 수수료)
-                const totalCommission = contractedProductsResult.reduce(
-                  (sum, product) => {
-                    const commission = Number(product.expectedCommission) || 0;
-                    return sum + commission;
-                  },
-                  0
+                const actualData = actualContractsInPeriod[0] || {
+                  count: 0,
+                  totalCommission: 0,
+                };
+
+                // 실제 계약 수수료를 만원 단위로 변환
+                currentValue = Math.round(
+                  Number(actualData.totalCommission) / 10000
                 );
 
-                currentValue = Math.round(totalCommission / 10000); // 원을 만원으로 변환
-
-                console.log('🎯 매출 목표 달성률 계산 (올바른 수수료 기반):', {
+                console.log('🎯 수수료 목표 달성률 계산 (실제 계약 기반):', {
                   goalPeriod: `${goal.startDate} ~ ${goal.endDate}`,
-                  contractCompletedProducts: contractedProductsResult.length,
-                  totalCommission,
+                  actualContracts: actualData.count,
+                  totalCommission: Number(actualData.totalCommission),
                   currentValueInTenThousands: currentValue,
                 });
-              }
-
-              // 계약 완료 단계가 없는 경우, 전체 영업 기회 상품의 수수료로 계산
-              if (currentValue === 0) {
-                console.log(
-                  '⚠️ 계약 완료 단계 없음 - 전체 영업 기회 기준으로 계산'
-                );
-
-                const allProductsResult = await db
-                  .select({
-                    expectedCommission: opportunityProducts.expectedCommission,
-                  })
-                  .from(opportunityProducts)
-                  .where(
-                    and(
-                      eq(opportunityProducts.agentId, userId),
-                      eq(opportunityProducts.status, 'active'),
-                      sql`${opportunityProducts.expectedCommission} IS NOT NULL`,
-                      gte(opportunityProducts.createdAt, goalStartDate),
-                      lte(opportunityProducts.createdAt, goalEndDate)
-                    )
-                  );
-
-                const totalCommission = allProductsResult.reduce(
-                  (sum, product) => {
-                    const commission = Number(product.expectedCommission) || 0;
-                    return sum + commission;
-                  },
-                  0
-                );
-
-                currentValue = Math.round(totalCommission / 10000);
+              } catch (error) {
+                console.error('수수료 목표 계산 오류:', error);
+                currentValue = 0;
               }
 
               break;
@@ -1227,7 +1181,7 @@ export async function getUserGoals(userId: string) {
             ...goal,
             targetValue,
             currentValue,
-            progress: Math.min(progress, 100), // 100% 초과하지 않도록
+            progress, // 🎯 초과 달성률도 표시
           };
         })
     );

@@ -118,7 +118,7 @@ export function MyGoals({
   const getGoalTypeLabel = (goalType: string) => {
     switch (goalType) {
       case 'revenue':
-        return '매출 목표';
+        return '수수료 목표';
       case 'clients':
         return '신규 고객';
       case 'referrals':

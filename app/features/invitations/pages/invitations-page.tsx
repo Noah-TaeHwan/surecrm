@@ -113,20 +113,10 @@ function EmptyInvitationsState() {
       </div>
       <h3 className="text-lg font-semibold mb-2">추천 코드가 없습니다</h3>
       <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-        SureCRM 프리미엄 멤버십에 가입하시면 2개의 동료 추천 코드가 자동으로
-        발급됩니다. 소중한 동료들을 추천하여 함께 성장하세요!
+        동료 추천 코드를 통해 소중한 동료들을 추천하여 함께 성장하세요!
       </p>
       <div className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-xl mx-auto">
-          <Card className="p-4">
-            <div className="text-center">
-              <Gift className="w-8 h-8 text-blue-500 mx-auto mb-2" />
-              <h4 className="font-medium mb-1">프리미엄 혜택</h4>
-              <p className="text-sm text-muted-foreground">
-                가입 시 2개 코드 제공
-              </p>
-            </div>
-          </Card>
           <Card className="p-4">
             <div className="text-center">
               <Users className="w-8 h-8 text-green-500 mx-auto mb-2" />
@@ -136,11 +126,20 @@ function EmptyInvitationsState() {
               </p>
             </div>
           </Card>
+          <Card className="p-4">
+            <div className="text-center">
+              <TrendingUp className="w-8 h-8 text-blue-500 mx-auto mb-2" />
+              <h4 className="font-medium mb-1">비즈니스 성장</h4>
+              <p className="text-sm text-muted-foreground">
+                함께 발전하는 기회
+              </p>
+            </div>
+          </Card>
         </div>
         <Alert className="max-w-md mx-auto">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            추천 코드는 가입 시 2개만 제공되며, 영구적으로 유효합니다.
+            관리자에게 문의하여 추천 코드를 요청하실 수 있습니다.
           </AlertDescription>
         </Alert>
       </div>
@@ -208,8 +207,8 @@ export default function InvitationsPage({ loaderData }: Route.ComponentProps) {
         {/* 헤더 */}
         <div>
           <p className="text-muted-foreground">
-            소중한 동료들을 SureCRM 프리미엄 멤버십에 추천하고 함께 성장하세요.
-            추천 코드를 통해 전문가 네트워크를 확장하세요.
+            소중한 동료들을 SureCRM에 추천하고 함께 성장하세요. 추천 코드를 통해
+            전문가 네트워크를 확장하세요.
           </p>
         </div>
 
@@ -243,7 +242,7 @@ export default function InvitationsPage({ loaderData }: Route.ComponentProps) {
                 <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                 <h4 className="font-medium mb-2">추천 코드가 없습니다</h4>
                 <p className="text-sm text-muted-foreground mb-4">
-                  SureCRM 프리미엄 멤버십 가입 시 2개의 추천 코드가 제공됩니다.
+                  관리자에게 문의하여 추천 코드를 요청하실 수 있습니다.
                 </p>
               </CardContent>
             </Card>
@@ -289,7 +288,7 @@ export default function InvitationsPage({ loaderData }: Route.ComponentProps) {
             <div className="flex items-start gap-3 p-3 rounded-lg bg-card/50 border border-border/30">
               <div className="w-2 h-2 rounded-full bg-primary/60 mt-2 flex-shrink-0" />
               <p className="text-muted-foreground">
-                프리미엄 멤버십 가입 시 2개의 추천 코드가 제공됩니다
+                추천 코드는 관리자를 통해 발급받을 수 있습니다
               </p>
             </div>
             <div className="flex items-start gap-3 p-3 rounded-lg bg-card/50 border border-border/30">

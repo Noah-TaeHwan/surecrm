@@ -120,6 +120,35 @@ export async function getPerformanceData(
         )
       );
 
+    // 🏢 실제 보험계약 수수료 계산 (대시보드와 동일한 통합 수수료 통계 사용)
+    const { getUnifiedCommissionStats } = await import(
+      '~/api/shared/insurance-contracts'
+    );
+    const unifiedStats = await getUnifiedCommissionStats(userId);
+
+    // 기간별 실제 수수료 (계약일 기준)
+    const periodCommissionResult = await db
+      .select({
+        totalCommission: sum(
+          sql`CAST(${insuranceContracts.agentCommission} AS DECIMAL)`
+        ),
+      })
+      .from(insuranceContracts)
+      .where(
+        and(
+          eq(insuranceContracts.agentId, userId),
+          eq(insuranceContracts.status, 'active'),
+          gte(
+            sql`DATE(${insuranceContracts.contractDate})`,
+            startDate.toISOString().split('T')[0]
+          ),
+          lte(
+            sql`DATE(${insuranceContracts.contractDate})`,
+            endDate.toISOString().split('T')[0]
+          )
+        )
+      );
+
     // 미팅 수 조회 (날짜 조건 추가)
     const meetingsResult = await db
       .select({ count: count() })
@@ -163,6 +192,29 @@ export async function getPerformanceData(
     const periodDiff = endDate.getTime() - startDate.getTime();
     const prevStartDate = new Date(startDate.getTime() - periodDiff);
     const prevEndDate = new Date(endDate.getTime() - periodDiff);
+
+    // 이전 기간 수수료 (성장률 계산용)
+    const prevPeriodCommissionResult = await db
+      .select({
+        totalCommission: sum(
+          sql`CAST(${insuranceContracts.agentCommission} AS DECIMAL)`
+        ),
+      })
+      .from(insuranceContracts)
+      .where(
+        and(
+          eq(insuranceContracts.agentId, userId),
+          eq(insuranceContracts.status, 'active'),
+          gte(
+            sql`DATE(${insuranceContracts.contractDate})`,
+            prevStartDate.toISOString().split('T')[0]
+          ),
+          lte(
+            sql`DATE(${insuranceContracts.contractDate})`,
+            prevEndDate.toISOString().split('T')[0]
+          )
+        )
+      );
 
     // 🆕 상담 기록 통계 계산
     // 전체 상담 기록 수
@@ -321,7 +373,15 @@ export async function getPerformanceData(
     const totalClients = totalClientsResult[0]?.count || 0;
     const newClients = newClientsResult[0]?.count || 0;
     const totalReferrals = totalReferralsResult[0]?.count || 0;
-    const revenue = commissionResult[0]?.total || 0;
+
+    // 🏢 실제 보험계약 수수료 사용 (통합 수수료 통계 우선)
+    const actualTotalCommission = unifiedStats.success
+      ? unifiedStats.data.actualContracts.totalCommission
+      : commissionResult[0]?.total || 0;
+    const periodCommission = periodCommissionResult[0]?.totalCommission || 0;
+
+    const revenue = actualTotalCommission; // 전체 수수료
+    const periodRevenue = Number(periodCommission) || 0; // 기간별 수수료
     const revenueCount = commissionResult[0]?.count || 0;
     const meetingsCount = meetingsResult[0]?.count || 0;
     const activeClients = activeClientsResult[0]?.count || 0;
@@ -361,11 +421,12 @@ export async function getPerformanceData(
     // 성장률 계산 (MVP: 더 안정적인 계산)
     const prevClients = prevClientsResult[0]?.count || 0;
     const prevReferrals = prevReferralsResult[0]?.count || 0;
-    const prevRevenue = prevCommissionResult[0]?.total || 0;
+    const prevRevenue =
+      Number(prevPeriodCommissionResult[0]?.totalCommission) || 0;
 
     const clientsGrowth = calculateGrowthRate(newClients, prevClients);
     const referralsGrowth = calculateGrowthRate(totalReferrals, prevReferrals);
-    const revenueGrowth = calculateGrowthRate(revenue, prevRevenue);
+    const revenueGrowth = calculateGrowthRate(periodRevenue, prevRevenue);
 
     return {
       totalClients,
