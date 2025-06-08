@@ -78,7 +78,6 @@ export async function loader({ request }: Route.LoaderArgs) {
       getOpportunityProductStats(user.id), // 🆕 실제 상품 통계 추가
     ]);
 
-
     return {
       user: userInfo,
       todayStats,
@@ -416,7 +415,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
       ...goal,
       targetValue: Number(goal.targetValue),
       currentValue: Number(goal.currentValue),
-      progress: Math.min(goal.progress || 0, 100),
+      progress: goal.progress || 0, // 🎯 초과 달성률도 표시하도록 제한 제거
     }));
 
   const handleSetGoal = async (goalData: {

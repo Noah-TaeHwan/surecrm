@@ -7,6 +7,7 @@ function Progress({
   ...props
 }: React.HTMLAttributes<HTMLDivElement> & { value?: number }) {
   const progressValue = value || 0;
+  const isExactlyComplete = progressValue === 100;
   const isOverAchieved = progressValue > 100;
   const displayValue = isOverAchieved ? 100 : progressValue; // 바는 최대 100%까지만 표시
 
@@ -22,15 +23,18 @@ function Progress({
       <div
         className={cn(
           'h-full transition-all duration-500 ease-out rounded-full relative',
-          isOverAchieved
-            ? 'bg-gradient-to-r from-green-500 to-green-400' // 🎯 초과 달성 시 그라데이션
-            : 'bg-primary' // 일반 달성 시 기본색
+          isExactlyComplete || isOverAchieved
+            ? 'bg-green-500' // 🎯 100% 달성 또는 초과 달성 시 녹색
+            : 'bg-primary' // 일반 진행 시 기본색
         )}
         style={{ width: `${displayValue}%` }}
       >
-        {/* 100% 초과 시 간단한 시각적 표시 */}
+        {/* 100% 초과 시에만 특별한 시각적 표시 */}
         {isOverAchieved && (
           <>
+            {/* 그라데이션 효과 (초과 달성만) */}
+            <div className="absolute inset-0 bg-gradient-to-r from-green-500 via-green-400 to-green-300 rounded-full" />
+
             {/* 은은한 내부 하이라이트 */}
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-green-300/20 to-green-300/40 rounded-full" />
 
@@ -39,11 +43,6 @@ function Progress({
           </>
         )}
       </div>
-
-      {/* 100% 초과 시 작은 표시 점 */}
-      {isOverAchieved && (
-        <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-green-400 rounded-full border border-background shadow-sm" />
-      )}
     </div>
   );
 }
