@@ -50,11 +50,37 @@ export function PerformanceMetrics({ performance }: PerformanceMetricsProps) {
   }) => {
     const isPositive = value > 0;
     const isZero = value === 0;
+    const isInfinite = !isFinite(value);
 
+    // 0인 경우
     if (isZero) {
       return (
         <Badge variant="secondary" className="text-xs">
           변화없음
+        </Badge>
+      );
+    }
+
+    // Infinity나 NaN인 경우 (처음 생성된 데이터)
+    if (isInfinite) {
+      return (
+        <Badge
+          variant="outline"
+          className="text-xs text-blue-600 dark:text-blue-400"
+        >
+          신규 데이터
+        </Badge>
+      );
+    }
+
+    // 매우 큰 값인 경우 (500% 이상)
+    if (Math.abs(value) >= 500) {
+      return (
+        <Badge
+          variant="outline"
+          className="text-xs text-purple-600 dark:text-purple-400"
+        >
+          {isPositive ? '대폭 증가' : '대폭 감소'}
         </Badge>
       );
     }
@@ -76,7 +102,7 @@ export function PerformanceMetrics({ performance }: PerformanceMetricsProps) {
         )}
         <span>
           {isPositive ? '+' : ''}
-          {Math.abs(value)}
+          {Math.round(Math.abs(value) * 10) / 10}
           {showPercentage ? '%' : ''}
         </span>
       </div>
@@ -287,20 +313,14 @@ export function PerformanceMetrics({ performance }: PerformanceMetricsProps) {
                 주요 유형: {performance.consultationStats.mostFrequentNoteType}
               </div>
               {performance.consultationStats.consultationGrowth !== 0 && (
-                <div
-                  className={`text-xs flex items-center gap-1 ${
-                    performance.consultationStats.consultationGrowth > 0
-                      ? 'text-green-600'
-                      : 'text-red-600'
-                  }`}
-                >
-                  {performance.consultationStats.consultationGrowth > 0 ? (
-                    <TrendingUp className="h-3 w-3" />
-                  ) : (
-                    <TrendingDown className="h-3 w-3" />
-                  )}
-                  전기간 대비{' '}
-                  {Math.abs(performance.consultationStats.consultationGrowth)}%
+                <div className="text-xs">
+                  <TrendIndicator
+                    value={performance.consultationStats.consultationGrowth}
+                    className="justify-start"
+                  />
+                  <span className="text-muted-foreground ml-1">
+                    전기간 대비
+                  </span>
                 </div>
               )}
             </div>

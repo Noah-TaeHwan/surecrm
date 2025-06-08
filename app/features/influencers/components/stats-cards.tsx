@@ -234,7 +234,13 @@ function KPICard({
                 <div className="flex items-center gap-1">
                   {getTrendIcon()}
                   <span className="text-xs font-medium text-muted-foreground">
-                    {Math.abs(change).toFixed(1)}%
+                    {isFinite(change) && !isNaN(change)
+                      ? Math.abs(change) >= 500
+                        ? change > 0
+                          ? '대폭↑'
+                          : '대폭↓'
+                        : `${Math.round(Math.abs(change) * 10) / 10}%`
+                      : '신규'}
                   </span>
                 </div>
               )}

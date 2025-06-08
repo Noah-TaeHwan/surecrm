@@ -412,12 +412,31 @@ export async function getPerformanceData(
   }
 }
 
-// MVP 헬퍼: 안전한 성장률 계산
+// 🆕 UX 친화적: 안전한 성장률 계산
 function calculateGrowthRate(current: number, previous: number): number {
-  if (previous === 0) {
-    return current > 0 ? 100 : 0; // 이전 값이 0이면 100% 성장 또는 0%
+  // 둘 다 0인 경우
+  if (current === 0 && previous === 0) {
+    return 0;
   }
-  return ((current - previous) / previous) * 100;
+
+  // 이전 값이 0이고 현재 값이 있는 경우 (새로운 데이터)
+  if (previous === 0 && current > 0) {
+    return Infinity; // TrendIndicator에서 "신규 데이터"로 표시됨
+  }
+
+  // 현재 값이 0이고 이전 값이 있는 경우 (완전 감소)
+  if (current === 0 && previous > 0) {
+    return -100; // 100% 감소
+  }
+
+  // 정상적인 계산
+  const rate = ((current - previous) / previous) * 100;
+
+  // 극단적인 값 제한 (UI에서 적절히 처리하기 위해)
+  if (rate > 1000) return 1000;
+  if (rate < -100) return -100;
+
+  return rate;
 }
 
 // MVP 특화: 최고 성과자 조회 (보험설계사 특화 지표 포함)

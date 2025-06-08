@@ -41,6 +41,7 @@ import {
 } from 'lucide-react';
 import { cn } from '~/lib/utils';
 import type { PerformanceData, TopPerformer } from '../types';
+import { Badge } from '~/common/components/ui/badge';
 
 interface InsightsTabsProps {
   performance: PerformanceData;
@@ -173,15 +174,36 @@ export function InsightsTabs({
     value: number;
     className?: string;
   }) => {
+    // 🔥 UX 개선: Infinity/NaN 처리
+    if (!isFinite(value) || isNaN(value)) {
+      return (
+        <Badge variant="outline" className={cn('text-xs', className)}>
+          신규 데이터
+        </Badge>
+      );
+    }
+
+    // 극단적 변화 처리
+    if (Math.abs(value) >= 500) {
+      return (
+        <Badge
+          variant={value > 0 ? 'default' : 'destructive'}
+          className={cn('text-xs', className)}
+        >
+          {value > 0 ? '대폭 증가' : '대폭 감소'}
+        </Badge>
+      );
+    }
+
     const isPositive = value > 0;
     return (
       <div
         className={cn(
           'flex items-center gap-1 text-sm',
-          isPositive
+          value === 0
+            ? 'text-muted-foreground'
+            : isPositive
             ? 'text-green-600'
-            : value === 0
-            ? 'text-gray-500'
             : 'text-red-600',
           className
         )}
@@ -195,7 +217,7 @@ export function InsightsTabs({
             ) : (
               <TrendingDown className="h-3 w-3" />
             )}
-            <span>{Math.abs(value)}%</span>
+            <span>{Math.round(Math.abs(value) * 10) / 10}%</span>
           </>
         )}
       </div>

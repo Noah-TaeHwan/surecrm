@@ -131,6 +131,35 @@ function renderNetworkStrength(strength: number, depth: number, width: number) {
 
 // 성장률 표시
 function renderGrowthRate(growthRate: number) {
+  // 🔥 UX 개선: Infinity/NaN 처리
+  if (!isFinite(growthRate) || isNaN(growthRate)) {
+    return (
+      <div className="flex items-center gap-1 text-sm font-medium text-muted-foreground">
+        <div className="h-3 w-3" />
+        <span>신규 데이터</span>
+      </div>
+    );
+  }
+
+  // 극단적 변화 처리
+  if (Math.abs(growthRate) >= 500) {
+    return (
+      <div
+        className={cn(
+          'flex items-center gap-1 text-sm font-medium',
+          growthRate > 0 ? 'text-green-600' : 'text-red-600'
+        )}
+      >
+        {growthRate > 0 ? (
+          <ArrowUpIcon className="h-3 w-3" />
+        ) : (
+          <ArrowDownIcon className="h-3 w-3" />
+        )}
+        <span>{growthRate > 0 ? '대폭 증가' : '대폭 감소'}</span>
+      </div>
+    );
+  }
+
   const isPositive = growthRate > 0;
   const isNeutral = growthRate === 0;
 
@@ -150,7 +179,7 @@ function renderGrowthRate(growthRate: number) {
       ) : (
         <ArrowDownIcon className="h-3 w-3" />
       )}
-      {Math.abs(growthRate).toFixed(1)}%
+      {Math.round(Math.abs(growthRate) * 10) / 10}%
       <span className="text-muted-foreground text-xs">
         {isPositive ? '증가' : isNeutral ? '동일' : '감소'}
       </span>

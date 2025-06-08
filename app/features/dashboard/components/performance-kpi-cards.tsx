@@ -95,12 +95,40 @@ export function PerformanceKPICards({
   ];
 
   const getChangeIndicator = (change: number) => {
+    // Infinity나 NaN 값 처리 (새로운 데이터)
+    if (!isFinite(change)) {
+      return {
+        icon: null,
+        color: 'text-blue-600',
+        bgColor: 'bg-blue-100 dark:bg-blue-900/20',
+        prefix: '',
+        isSpecial: true,
+        label: '신규',
+      };
+    }
+
+    // 매우 큰 변화율 처리 (500% 이상)
+    if (Math.abs(change) >= 500) {
+      return {
+        icon: change > 0 ? ArrowUpIcon : ArrowDownIcon,
+        color: change > 0 ? 'text-green-600' : 'text-red-600',
+        bgColor:
+          change > 0
+            ? 'bg-green-100 dark:bg-green-900/20'
+            : 'bg-red-100 dark:bg-red-900/20',
+        prefix: change > 0 ? '+' : '',
+        isSpecial: true,
+        label: change > 0 ? '대폭증가' : '대폭감소',
+      };
+    }
+
     if (change > 0) {
       return {
         icon: ArrowUpIcon,
         color: 'text-green-600',
         bgColor: 'bg-green-100 dark:bg-green-900/20',
         prefix: '+',
+        isSpecial: false,
       };
     } else if (change < 0) {
       return {
@@ -108,6 +136,7 @@ export function PerformanceKPICards({
         color: 'text-red-600',
         bgColor: 'bg-red-100 dark:bg-red-900/20',
         prefix: '',
+        isSpecial: false,
       };
     } else {
       return {
@@ -115,6 +144,7 @@ export function PerformanceKPICards({
         color: 'text-muted-foreground',
         bgColor: 'bg-muted/20',
         prefix: '',
+        isSpecial: false,
       };
     }
   };
@@ -253,8 +283,15 @@ export function PerformanceKPICards({
                             />
                           )}
                           <span className={changeIndicator.color}>
-                            {changeIndicator.prefix}
-                            {Math.abs(item.change).toFixed(1)}%
+                            {changeIndicator.isSpecial &&
+                            changeIndicator.label ? (
+                              changeIndicator.label
+                            ) : (
+                              <>
+                                {changeIndicator.prefix}
+                                {Math.round(Math.abs(item.change) * 10) / 10}%
+                              </>
+                            )}
                           </span>
                         </div>
                       )}

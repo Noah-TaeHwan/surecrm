@@ -6,7 +6,8 @@ import {
   CardTitle,
 } from '~/common/components/ui/card';
 import { Progress } from '~/common/components/ui/progress';
-import { TrendingUp, TrendingDown } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { Badge } from '~/common/components/ui/badge';
 import { cn } from '~/lib/utils';
 import type { NetworkStatusProps } from '../types';
 
@@ -18,6 +19,41 @@ export function PerformanceSummary({ performance }: NetworkStatusProps) {
     value: number;
     className?: string;
   }) => {
+    // 🔥 UX 개선: Infinity/NaN 처리
+    if (!isFinite(value) || isNaN(value)) {
+      return (
+        <Badge variant="outline" className={cn('text-xs', className)}>
+          신규 데이터
+        </Badge>
+      );
+    }
+
+    if (value === 0) {
+      return (
+        <div
+          className={cn(
+            'flex items-center gap-1 text-sm text-muted-foreground',
+            className
+          )}
+        >
+          <Minus className="h-3 w-3" />
+          <span>변화없음</span>
+        </div>
+      );
+    }
+
+    // 극단적 변화 처리
+    if (Math.abs(value) >= 500) {
+      return (
+        <Badge
+          variant={value > 0 ? 'default' : 'destructive'}
+          className={cn('text-xs', className)}
+        >
+          {value > 0 ? '대폭 증가' : '대폭 감소'}
+        </Badge>
+      );
+    }
+
     const isPositive = value > 0;
     return (
       <div
@@ -32,7 +68,7 @@ export function PerformanceSummary({ performance }: NetworkStatusProps) {
         ) : (
           <TrendingDown className="h-3 w-3" />
         )}
-        <span>{Math.abs(value)}%</span>
+        <span>{Math.round(Math.abs(value) * 10) / 10}%</span>
       </div>
     );
   };
