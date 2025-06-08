@@ -190,29 +190,14 @@ export function ClientCard({
 
   const styles = importanceStyles[importance];
 
-  // 📊 실제 월 보험료 (실제 데이터가 없으면 예상값 계산)
+  // 📊 실제 월 보험료 (실제 데이터만 사용)
   const getMonthlyPremium = () => {
-    if (totalMonthlyPremium > 0) {
-      return totalMonthlyPremium;
-    }
-    // 실제 데이터가 없으면 예상값 계산 (기존 로직 유지)
-    const basePremium = 150000; // 기본 15만원
-    const occupationMultiplier =
-      occupation?.includes('의사') || occupation?.includes('변호사')
-        ? 2.5
-        : occupation?.includes('회사원')
-        ? 1.2
-        : 1.0;
-    return Math.round(basePremium * occupationMultiplier);
+    return totalMonthlyPremium > 0 ? totalMonthlyPremium : 0;
   };
 
-  // 💰 실제 계약 수수료 (1건 계약시 받는 1회성 수수료)
+  // 💰 실제 계약 수수료 (실제 데이터만 사용)
   const getContractCommission = () => {
-    if (totalExpectedCommission > 0) {
-      return totalExpectedCommission; // 실제 계약 수수료
-    }
-    // 실제 데이터가 없으면 예상값 계산 (보험료의 월 납입액 기준)
-    return Math.round(getMonthlyPremium() * 0.15); // 15% 수수료율 (1회성)
+    return totalExpectedCommission > 0 ? totalExpectedCommission : 0;
   };
 
   // ⏰ 파이프라인 체류 기간 계산

@@ -538,7 +538,38 @@ export async function getPipelineData(userId: string) {
             );
 
           clientCount = stageResult[0]?.count || 0;
-          totalValue = clientCount * 150000; // 1건 계약당 평균 수수료 (15만원)
+
+          // 🆕 실제 영업 기회 상품의 수수료 합계 계산
+          const stageOpportunityProducts = await db
+            .select({
+              expectedCommission: opportunityProducts.expectedCommission,
+            })
+            .from(opportunityProducts)
+            .innerJoin(clients, eq(opportunityProducts.clientId, clients.id))
+            .where(
+              and(
+                eq(opportunityProducts.agentId, userId),
+                eq(clients.currentStageId, stage.id),
+                eq(clients.isActive, true),
+                eq(opportunityProducts.status, 'active'),
+                sql`${opportunityProducts.expectedCommission} IS NOT NULL`
+              )
+            );
+
+          // 실제 영업 기회 수수료 합계 (단위: 원)
+          const actualCommissionTotal = stageOpportunityProducts.reduce(
+            (sum, product) => {
+              const commission = Number(product.expectedCommission) || 0;
+              return sum + commission;
+            },
+            0
+          );
+
+          // 실제 데이터가 있으면 사용, 없으면 추정값 사용
+          totalValue =
+            actualCommissionTotal > 0
+              ? actualCommissionTotal
+              : clientCount * 150000; // 추정값: 1건당 15만원
         } else {
           // 파이프라인 단계가 없는 경우 0으로 설정 (깜빡거림 방지)
           clientCount = 0;
