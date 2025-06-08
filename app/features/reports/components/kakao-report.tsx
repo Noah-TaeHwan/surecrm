@@ -57,6 +57,17 @@ export function KakaoReport({
   };
 
   const periodText = getPeriodText(period);
+
+  // 🔧 성장률 안전 표시 함수
+  const formatGrowthRate = (value: number): string => {
+    if (!isFinite(value) || isNaN(value)) {
+      return '신규';
+    }
+    if (Math.abs(value) >= 500) {
+      return value > 0 ? '대폭증가' : '대폭감소';
+    }
+    return `${value > 0 ? '+' : ''}${Math.round(value * 10) / 10}%`;
+  };
   const [copiedStates, setCopiedStates] = useState<{
     [key: string]: boolean;
   }>({});
@@ -72,6 +83,27 @@ export function KakaoReport({
     prospects: 0,
     followUps: 0,
     adminTasks: 0,
+  });
+
+  // 🆕 사용자 커스텀 보고서 템플릿 상태
+  const [customTemplates, setCustomTemplates] = useState({
+    daily: '',
+    weekly: '',
+    monthly: '',
+  });
+
+  // 🆕 편집 모드 상태
+  const [editMode, setEditMode] = useState({
+    daily: false,
+    weekly: false,
+    monthly: false,
+  });
+
+  // 🆕 저장된 템플릿이 있는지 확인
+  const [hasCustomTemplate, setHasCustomTemplate] = useState({
+    daily: false,
+    weekly: false,
+    monthly: false,
   });
 
   const userName = user?.name || '사용자';
@@ -151,9 +183,9 @@ ${getPerformanceGrade(performance)} ${getImprovementSuggestions(performance)}
 • 추천 네트워크: ${performance.totalReferrals || 0}건
 
 📈 성장 지표:
-• 고객 증가율: ${performance.growth?.clients || 0}%
-• 매출 증가율: ${performance.growth?.revenue || 0}%
-• 추천 증가율: ${performance.growth?.referrals || 0}%
+• 고객 증가율: ${formatGrowthRate(performance.growth?.clients || 0)}
+• 매출 증가율: ${formatGrowthRate(performance.growth?.revenue || 0)}
+• 추천 증가율: ${formatGrowthRate(performance.growth?.referrals || 0)}
 
 🎯 월간 활동 요약:
 • 총 미팅: ${reportData.clientMeetings * 20}회
@@ -236,6 +268,107 @@ ${
       [field]: Math.max(0, value),
     }));
   };
+
+  // 🆕 템플릿 관리 함수들
+  const getReportContent = (type: 'daily' | 'weekly' | 'monthly'): string => {
+    if (hasCustomTemplate[type] && customTemplates[type]) {
+      return customTemplates[type];
+    }
+
+    switch (type) {
+      case 'daily':
+        return generateKakaoReport();
+      case 'weekly':
+        return generateWeeklyReport();
+      case 'monthly':
+        return generateMonthlyReport();
+      default:
+        return '';
+    }
+  };
+
+  const handleTemplateEdit = (
+    type: 'daily' | 'weekly' | 'monthly',
+    content: string
+  ) => {
+    setCustomTemplates((prev) => ({
+      ...prev,
+      [type]: content,
+    }));
+  };
+
+  const handleSaveTemplate = (type: 'daily' | 'weekly' | 'monthly') => {
+    // 🔥 로컬 스토리지에 저장
+    const templateKey = `surecrm_template_${type}_${user?.id || 'default'}`;
+    localStorage.setItem(templateKey, customTemplates[type]);
+
+    setHasCustomTemplate((prev) => ({
+      ...prev,
+      [type]: true,
+    }));
+
+    setEditMode((prev) => ({
+      ...prev,
+      [type]: false,
+    }));
+
+    // 성공 메시지 (간단한 state로 처리)
+    setCopiedStates((prev) => ({
+      ...prev,
+      [`saved_${type}`]: true,
+    }));
+
+    setTimeout(() => {
+      setCopiedStates((prev) => ({
+        ...prev,
+        [`saved_${type}`]: false,
+      }));
+    }, 2000);
+  };
+
+  const handleResetTemplate = (type: 'daily' | 'weekly' | 'monthly') => {
+    const templateKey = `surecrm_template_${type}_${user?.id || 'default'}`;
+    localStorage.removeItem(templateKey);
+
+    setCustomTemplates((prev) => ({
+      ...prev,
+      [type]: '',
+    }));
+
+    setHasCustomTemplate((prev) => ({
+      ...prev,
+      [type]: false,
+    }));
+
+    setEditMode((prev) => ({
+      ...prev,
+      [type]: false,
+    }));
+  };
+
+  // 🆕 컴포넌트 마운트 시 저장된 템플릿 로드
+  useEffect(() => {
+    const loadSavedTemplates = () => {
+      ['daily', 'weekly', 'monthly'].forEach((type) => {
+        const templateKey = `surecrm_template_${type}_${user?.id || 'default'}`;
+        const savedTemplate = localStorage.getItem(templateKey);
+
+        if (savedTemplate) {
+          setCustomTemplates((prev) => ({
+            ...prev,
+            [type]: savedTemplate,
+          }));
+
+          setHasCustomTemplate((prev) => ({
+            ...prev,
+            [type]: true,
+          }));
+        }
+      });
+    };
+
+    loadSavedTemplates();
+  }, [user?.id]);
 
   const NumberInput = ({
     label,
@@ -525,88 +658,295 @@ ${
               <TabsContent value="daily" className="space-y-3 mt-4">
                 <div className="p-4 rounded-lg bg-zinc-800/30 border border-zinc-700/50">
                   <Textarea
-                    value={generateKakaoReport()}
-                    readOnly
+                    value={
+                      editMode.daily
+                        ? customTemplates.daily
+                        : getReportContent('daily')
+                    }
+                    onChange={(e) =>
+                      editMode.daily
+                        ? handleTemplateEdit('daily', e.target.value)
+                        : undefined
+                    }
+                    readOnly={!editMode.daily}
                     className="min-h-[320px] text-sm font-mono bg-transparent border-none resize-none focus-visible:ring-0 text-zinc-200"
+                    placeholder={
+                      editMode.daily ? '보고서 내용을 수정하세요...' : ''
+                    }
                   />
                 </div>
-                <Button
-                  onClick={() =>
-                    handleCopyReport('daily', generateKakaoReport())
-                  }
-                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
-                  size="sm"
-                >
-                  {copiedStates.daily ? (
-                    <>
-                      <Check className="mr-2 h-4 w-4" />
-                      복사됨!
-                    </>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() =>
+                      handleCopyReport('daily', getReportContent('daily'))
+                    }
+                    className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white"
+                    size="sm"
+                  >
+                    {copiedStates.daily ? (
+                      <>
+                        <Check className="mr-2 h-4 w-4" />
+                        복사됨!
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="mr-2 h-4 w-4" />
+                        복사
+                      </>
+                    )}
+                  </Button>
+
+                  {!editMode.daily ? (
+                    <Button
+                      onClick={() => {
+                        setEditMode((prev) => ({ ...prev, daily: true }));
+                        if (!hasCustomTemplate.daily) {
+                          setCustomTemplates((prev) => ({
+                            ...prev,
+                            daily: generateKakaoReport(),
+                          }));
+                        }
+                      }}
+                      variant="outline"
+                      size="default"
+                      className="border-zinc-600 text-zinc-300 hover:bg-zinc-700 px-4"
+                    >
+                      양식 수정
+                    </Button>
                   ) : (
                     <>
-                      <Copy className="mr-2 h-4 w-4" />
-                      일일 보고서 복사
+                      <Button
+                        onClick={() => handleSaveTemplate('daily')}
+                        size="sm"
+                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                      >
+                        {copiedStates.saved_daily ? (
+                          <>
+                            <Check className="mr-2 h-4 w-4" />
+                            저장됨!
+                          </>
+                        ) : (
+                          '양식 저장'
+                        )}
+                      </Button>
+                      <Button
+                        onClick={() =>
+                          setEditMode((prev) => ({ ...prev, daily: false }))
+                        }
+                        variant="outline"
+                        size="sm"
+                        className="border-zinc-600 text-zinc-300 hover:bg-zinc-700"
+                      >
+                        취소
+                      </Button>
+                      {hasCustomTemplate.daily && (
+                        <Button
+                          onClick={() => handleResetTemplate('daily')}
+                          variant="destructive"
+                          size="sm"
+                        >
+                          초기화
+                        </Button>
+                      )}
                     </>
                   )}
-                </Button>
+                </div>
               </TabsContent>
 
               <TabsContent value="weekly" className="space-y-3 mt-4">
                 <div className="p-4 rounded-lg bg-zinc-800/30 border border-zinc-700/50">
                   <Textarea
-                    value={generateWeeklyReport()}
-                    readOnly
+                    value={
+                      editMode.weekly
+                        ? customTemplates.weekly
+                        : getReportContent('weekly')
+                    }
+                    onChange={(e) =>
+                      editMode.weekly
+                        ? handleTemplateEdit('weekly', e.target.value)
+                        : undefined
+                    }
+                    readOnly={!editMode.weekly}
                     className="min-h-[320px] text-sm font-mono bg-transparent border-none resize-none focus-visible:ring-0 text-zinc-200"
+                    placeholder={
+                      editMode.weekly ? '보고서 내용을 수정하세요...' : ''
+                    }
                   />
                 </div>
-                <Button
-                  onClick={() =>
-                    handleCopyReport('weekly', generateWeeklyReport())
-                  }
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                  size="sm"
-                >
-                  {copiedStates.weekly ? (
-                    <>
-                      <Check className="mr-2 h-4 w-4" />
-                      복사됨!
-                    </>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() =>
+                      handleCopyReport('weekly', getReportContent('weekly'))
+                    }
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                    size="sm"
+                  >
+                    {copiedStates.weekly ? (
+                      <>
+                        <Check className="mr-2 h-4 w-4" />
+                        복사됨!
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="mr-2 h-4 w-4" />
+                        복사
+                      </>
+                    )}
+                  </Button>
+
+                  {!editMode.weekly ? (
+                    <Button
+                      onClick={() => {
+                        setEditMode((prev) => ({ ...prev, weekly: true }));
+                        if (!hasCustomTemplate.weekly) {
+                          setCustomTemplates((prev) => ({
+                            ...prev,
+                            weekly: generateWeeklyReport(),
+                          }));
+                        }
+                      }}
+                      variant="outline"
+                      size="default"
+                      className="border-zinc-600 text-zinc-300 hover:bg-zinc-700 px-4"
+                    >
+                      양식 수정
+                    </Button>
                   ) : (
                     <>
-                      <Copy className="mr-2 h-4 w-4" />
-                      주간 보고서 복사
+                      <Button
+                        onClick={() => handleSaveTemplate('weekly')}
+                        size="sm"
+                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                      >
+                        {copiedStates.saved_weekly ? (
+                          <>
+                            <Check className="mr-2 h-4 w-4" />
+                            저장됨!
+                          </>
+                        ) : (
+                          '양식 저장'
+                        )}
+                      </Button>
+                      <Button
+                        onClick={() =>
+                          setEditMode((prev) => ({ ...prev, weekly: false }))
+                        }
+                        variant="outline"
+                        size="sm"
+                        className="border-zinc-600 text-zinc-300 hover:bg-zinc-700"
+                      >
+                        취소
+                      </Button>
+                      {hasCustomTemplate.weekly && (
+                        <Button
+                          onClick={() => handleResetTemplate('weekly')}
+                          variant="destructive"
+                          size="sm"
+                        >
+                          초기화
+                        </Button>
+                      )}
                     </>
                   )}
-                </Button>
+                </div>
               </TabsContent>
 
               <TabsContent value="monthly" className="space-y-3 mt-4">
                 <div className="p-4 rounded-lg bg-zinc-800/30 border border-zinc-700/50">
                   <Textarea
-                    value={generateMonthlyReport()}
-                    readOnly
+                    value={
+                      editMode.monthly
+                        ? customTemplates.monthly
+                        : getReportContent('monthly')
+                    }
+                    onChange={(e) =>
+                      editMode.monthly
+                        ? handleTemplateEdit('monthly', e.target.value)
+                        : undefined
+                    }
+                    readOnly={!editMode.monthly}
                     className="min-h-[320px] text-sm font-mono bg-transparent border-none resize-none focus-visible:ring-0 text-zinc-200"
+                    placeholder={
+                      editMode.monthly ? '보고서 내용을 수정하세요...' : ''
+                    }
                   />
                 </div>
-                <Button
-                  onClick={() =>
-                    handleCopyReport('monthly', generateMonthlyReport())
-                  }
-                  className="w-full bg-purple-600 hover:bg-purple-700 text-white"
-                  size="sm"
-                >
-                  {copiedStates.monthly ? (
-                    <>
-                      <Check className="mr-2 h-4 w-4" />
-                      복사됨!
-                    </>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() =>
+                      handleCopyReport('monthly', getReportContent('monthly'))
+                    }
+                    className="flex-1 bg-purple-600 hover:bg-purple-700 text-white"
+                    size="sm"
+                  >
+                    {copiedStates.monthly ? (
+                      <>
+                        <Check className="mr-2 h-4 w-4" />
+                        복사됨!
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="mr-2 h-4 w-4" />
+                        복사
+                      </>
+                    )}
+                  </Button>
+
+                  {!editMode.monthly ? (
+                    <Button
+                      onClick={() => {
+                        setEditMode((prev) => ({ ...prev, monthly: true }));
+                        if (!hasCustomTemplate.monthly) {
+                          setCustomTemplates((prev) => ({
+                            ...prev,
+                            monthly: generateMonthlyReport(),
+                          }));
+                        }
+                      }}
+                      variant="outline"
+                      size="default"
+                      className="border-zinc-600 text-zinc-300 hover:bg-zinc-700 px-4"
+                    >
+                      양식 수정
+                    </Button>
                   ) : (
                     <>
-                      <Copy className="mr-2 h-4 w-4" />
-                      월간 보고서 복사
+                      <Button
+                        onClick={() => handleSaveTemplate('monthly')}
+                        size="sm"
+                        className="bg-purple-600 hover:bg-purple-700 text-white"
+                      >
+                        {copiedStates.saved_monthly ? (
+                          <>
+                            <Check className="mr-2 h-4 w-4" />
+                            저장됨!
+                          </>
+                        ) : (
+                          '양식 저장'
+                        )}
+                      </Button>
+                      <Button
+                        onClick={() =>
+                          setEditMode((prev) => ({ ...prev, monthly: false }))
+                        }
+                        variant="outline"
+                        size="sm"
+                        className="border-zinc-600 text-zinc-300 hover:bg-zinc-700"
+                      >
+                        취소
+                      </Button>
+                      {hasCustomTemplate.monthly && (
+                        <Button
+                          onClick={() => handleResetTemplate('monthly')}
+                          variant="destructive"
+                          size="sm"
+                        >
+                          초기화
+                        </Button>
+                      )}
                     </>
                   )}
-                </Button>
+                </div>
               </TabsContent>
             </Tabs>
           </div>
