@@ -439,6 +439,17 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
   }) => {
     setIsLoading(true);
 
+    // 🎯 극한 분석: 목표 설정 이벤트 추적
+    InsuranceAgentEvents.kpiGoalSet(
+      goalData.goalType,
+      goalData.targetValue,
+      goalData.goalType === 'revenue'
+        ? salesStats?.totalPremium || 0
+        : goalData.goalType === 'clients'
+        ? kpiData?.totalClients || 0
+        : kpiData?.totalReferrals || 0
+    );
+
     const formData = new FormData();
     formData.append('intent', 'setGoal');
     formData.append('goalType', goalData.goalType);
@@ -460,6 +471,9 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
     if (!goalId) return;
 
     setIsLoading(true);
+
+    // 🎯 극한 분석: 목표 삭제 이벤트 추적
+    InsuranceAgentEvents.kpiGoalDelete(goalId);
 
     const formData = new FormData();
     formData.append('intent', 'deleteGoal');

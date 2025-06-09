@@ -25,6 +25,7 @@ import {
 } from '@radix-ui/react-icons';
 import { cn } from '~/lib/utils';
 import { formatCurrencyTable } from '~/lib/utils/currency';
+import { InsuranceAgentEvents } from '~/lib/utils/analytics';
 
 // 새로운 타입 시스템 사용
 import type { DashboardKPIData } from '../types';
@@ -210,7 +211,15 @@ export function PerformanceKPICards({
           return (
             <Card
               key={index}
-              className="hover:shadow-md transition-all duration-200 border-border/50 hover:border-border"
+              className="hover:shadow-md transition-all duration-200 border-border/50 hover:border-border cursor-pointer"
+              onClick={() => {
+                // 🎯 극한 분석: KPI 카드 클릭 이벤트 추적
+                InsuranceAgentEvents.dashboardCardClick(item.title, {
+                  value: item.value,
+                  change: item.change,
+                  cardIndex: index,
+                });
+              }}
             >
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">

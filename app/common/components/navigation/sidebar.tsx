@@ -16,6 +16,7 @@ import {
 import { cn } from '~/lib/utils';
 import { Separator } from '~/common/components/ui/separator';
 import { VersionDisplay } from '~/common/components/navigation/version-display';
+import { InsuranceAgentEvents } from '~/lib/utils/analytics';
 
 interface SidebarProps {
   className?: string;
@@ -102,7 +103,10 @@ export function Sidebar({ className, onClose }: SidebarProps) {
     return location.pathname.startsWith(href);
   };
 
-  const handleNavigation = (href: string) => {
+  const handleNavigation = (href: string, label: string) => {
+    // 🎯 극한 분석: 네비게이션 클릭 이벤트 추적
+    InsuranceAgentEvents.navigationClick(label, location.pathname);
+
     if (onClose && window.innerWidth < 1024) {
       onClose();
     }
@@ -118,7 +122,7 @@ export function Sidebar({ className, onClose }: SidebarProps) {
       <div className="p-4 border-b border-sidebar-border">
         <Link
           to="/dashboard"
-          onClick={() => handleNavigation('/dashboard')}
+          onClick={() => handleNavigation('/dashboard', 'SureCRM 로고')}
           className="text-xl font-bold text-sidebar-foreground flex justify-center cursor-pointer hover:text-sidebar-primary transition-colors"
         >
           SureCRM
@@ -134,7 +138,7 @@ export function Sidebar({ className, onClose }: SidebarProps) {
                 <li key={item.href}>
                   <Link
                     to={item.href}
-                    onClick={() => handleNavigation(item.href)}
+                    onClick={() => handleNavigation(item.href, item.label)}
                     className={cn(
                       // Button 스타일을 직접 적용
                       'inline-flex items-center justify-start gap-3 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',

@@ -1,5 +1,5 @@
-// GA4 측정 ID (환경변수에서 가져옴)
-const GA_MEASUREMENT_ID = 'G-SZW1G856L5';
+// GA4 측정 ID (환경변수에서 안전하게 가져옴)
+const GA_MEASUREMENT_ID = import.meta.env.VITE_GA_MEASUREMENT_ID;
 
 // gtag 함수 타입 정의
 declare global {
@@ -67,7 +67,10 @@ export function trackPageView({ path, title }: PageViewProps): void {
     page_path: path,
   });
 
-  console.log('📊 페이지 뷰 추적:', path);
+  // 개발 환경에서만 상세 로그
+  if (import.meta.env.DEV) {
+    console.log('📊 Page View:', path);
+  }
 }
 
 // 커스텀 이벤트 추적
@@ -93,13 +96,11 @@ export function trackEvent({
   };
 
   window.gtag('event', action, eventData);
-  console.log('🎯 이벤트 추적:', {
-    action,
-    category,
-    label,
-    value,
-    custom_parameters,
-  });
+
+  // 개발 환경에서만 상세 로그
+  if (import.meta.env.DEV) {
+    console.log('🎯 Event:', { action, category, label });
+  }
 }
 
 // 🏢 SureCRM 보험설계사 전용 극한 분석 이벤트들
@@ -132,6 +133,16 @@ export const InsuranceAgentEvents = {
           currentValue > 0
             ? ((targetValue - currentValue) / targetValue) * 100
             : 0,
+      },
+    }),
+
+  kpiGoalDelete: (goalId: string) =>
+    trackEvent({
+      action: 'delete_kpi_goal',
+      category: 'Performance',
+      label: goalId,
+      custom_parameters: {
+        goal_id: goalId,
       },
     }),
 
@@ -653,6 +664,710 @@ export const InsuranceAgentEvents = {
       custom_parameters: {
         milestone_type: milestoneType, // 'first_contract', '10_clients', '1M_premium', etc.
         milestone_value: value,
+      },
+    }),
+
+  // === 📊 대시보드 인터랙션 이벤트 ===
+  dashboardCardClick: (cardType: string, cardData?: any) =>
+    trackEvent({
+      action: 'click_dashboard_card',
+      category: 'Dashboard',
+      label: cardType,
+      custom_parameters: {
+        card_type: cardType,
+        card_value: cardData?.value,
+        timestamp: Date.now(),
+      },
+    }),
+
+  dashboardRefresh: () =>
+    trackEvent({
+      action: 'refresh_dashboard',
+      category: 'Dashboard',
+      label: 'manual_refresh',
+      custom_parameters: {
+        refresh_time: new Date().toISOString(),
+      },
+    }),
+
+  dashboardSearch: (searchTerm: string, resultsCount?: number) =>
+    trackEvent({
+      action: 'search_dashboard',
+      category: 'Dashboard',
+      label: searchTerm,
+      custom_parameters: {
+        search_term: searchTerm,
+        results_count: resultsCount || 0,
+        search_length: searchTerm.length,
+      },
+    }),
+
+  // === 🎯 파이프라인 상세 이벤트 ===
+  pipelineStageClick: (stageName: string, clientCount: number) =>
+    trackEvent({
+      action: 'click_pipeline_stage',
+      category: 'Sales Pipeline',
+      label: stageName,
+      custom_parameters: {
+        stage_name: stageName,
+        client_count: clientCount,
+      },
+    }),
+
+  pipelineCardExpand: (stageName: string) =>
+    trackEvent({
+      action: 'expand_pipeline_card',
+      category: 'Sales Pipeline',
+      label: stageName,
+      custom_parameters: {
+        stage_name: stageName,
+      },
+    }),
+
+  // === 📋 고객 리스트 이벤트 ===
+  clientListView: (filterType?: string, sortType?: string) =>
+    trackEvent({
+      action: 'view_client_list',
+      category: 'Client Management',
+      label: 'client_list',
+      custom_parameters: {
+        filter_type: filterType,
+        sort_type: sortType,
+      },
+    }),
+
+  clientListFilter: (filterType: string, filterValue: string) =>
+    trackEvent({
+      action: 'filter_client_list',
+      category: 'Client Management',
+      label: filterType,
+      custom_parameters: {
+        filter_type: filterType,
+        filter_value: filterValue,
+      },
+    }),
+
+  clientListSort: (sortField: string, sortDirection: string) =>
+    trackEvent({
+      action: 'sort_client_list',
+      category: 'Client Management',
+      label: sortField,
+      custom_parameters: {
+        sort_field: sortField,
+        sort_direction: sortDirection,
+      },
+    }),
+
+  clientCardClick: (clientId: string, cardPosition: number) =>
+    trackEvent({
+      action: 'click_client_card',
+      category: 'Client Management',
+      label: clientId,
+      custom_parameters: {
+        client_id: clientId,
+        card_position: cardPosition,
+      },
+    }),
+
+  // === 📱 UI/UX 인터랙션 이벤트 ===
+  navigationClick: (menuItem: string, currentPage: string) =>
+    trackEvent({
+      action: 'navigate',
+      category: 'Navigation',
+      label: menuItem,
+      custom_parameters: {
+        menu_item: menuItem,
+        from_page: currentPage,
+      },
+    }),
+
+  modalOpen: (modalType: string, context?: string) =>
+    trackEvent({
+      action: 'open_modal',
+      category: 'UI Interaction',
+      label: modalType,
+      custom_parameters: {
+        modal_type: modalType,
+        context: context,
+      },
+    }),
+
+  modalClose: (modalType: string, closeMethod: string) =>
+    trackEvent({
+      action: 'close_modal',
+      category: 'UI Interaction',
+      label: modalType,
+      custom_parameters: {
+        modal_type: modalType,
+        close_method: closeMethod, // 'button', 'escape', 'overlay'
+      },
+    }),
+
+  buttonClick: (buttonText: string, buttonType: string, pageContext: string) =>
+    trackEvent({
+      action: 'click_button',
+      category: 'UI Interaction',
+      label: buttonText,
+      custom_parameters: {
+        button_text: buttonText,
+        button_type: buttonType,
+        page_context: pageContext,
+      },
+    }),
+
+  tooltipHover: (tooltipContent: string, elementType: string) =>
+    trackEvent({
+      action: 'hover_tooltip',
+      category: 'UI Interaction',
+      label: tooltipContent,
+      custom_parameters: {
+        tooltip_content: tooltipContent,
+        element_type: elementType,
+      },
+    }),
+
+  // === 📊 보고서 상세 이벤트 ===
+  reportFilterChange: (filterType: string, filterValue: string) =>
+    trackEvent({
+      action: 'change_report_filter',
+      category: 'Reports',
+      label: filterType,
+      custom_parameters: {
+        filter_type: filterType,
+        filter_value: filterValue,
+      },
+    }),
+
+  reportDateRangeChange: (startDate: string, endDate: string) =>
+    trackEvent({
+      action: 'change_date_range',
+      category: 'Reports',
+      label: 'date_range',
+      custom_parameters: {
+        start_date: startDate,
+        end_date: endDate,
+        days_span: Math.floor(
+          (new Date(endDate).getTime() - new Date(startDate).getTime()) /
+            (1000 * 60 * 60 * 24)
+        ),
+      },
+    }),
+
+  chartInteraction: (
+    chartType: string,
+    interactionType: string,
+    dataPoint?: string
+  ) =>
+    trackEvent({
+      action: 'interact_chart',
+      category: 'Data Visualization',
+      label: chartType,
+      custom_parameters: {
+        chart_type: chartType,
+        interaction_type: interactionType, // 'hover', 'click', 'zoom', 'drill-down'
+        data_point: dataPoint,
+      },
+    }),
+
+  // === 🔍 검색 & 탐색 이벤트 ===
+  searchGlobal: (
+    searchTerm: string,
+    searchType: string,
+    resultsCount: number
+  ) =>
+    trackEvent({
+      action: 'search_global',
+      category: 'Search',
+      label: searchTerm,
+      custom_parameters: {
+        search_term: searchTerm,
+        search_type: searchType,
+        results_count: resultsCount,
+        search_length: searchTerm.length,
+      },
+    }),
+
+  searchResultClick: (
+    searchTerm: string,
+    resultType: string,
+    resultPosition: number
+  ) =>
+    trackEvent({
+      action: 'click_search_result',
+      category: 'Search',
+      label: resultType,
+      custom_parameters: {
+        search_term: searchTerm,
+        result_type: resultType,
+        result_position: resultPosition,
+      },
+    }),
+
+  // === 💾 데이터 관리 이벤트 ===
+  dataExport: (dataType: string, exportFormat: string, recordCount: number) =>
+    trackEvent({
+      action: 'export_data',
+      category: 'Data Management',
+      label: dataType,
+      custom_parameters: {
+        data_type: dataType,
+        export_format: exportFormat,
+        record_count: recordCount,
+      },
+    }),
+
+  dataImport: (dataType: string, importFormat: string, recordCount: number) =>
+    trackEvent({
+      action: 'import_data',
+      category: 'Data Management',
+      label: dataType,
+      custom_parameters: {
+        data_type: dataType,
+        import_format: importFormat,
+        record_count: recordCount,
+      },
+    }),
+
+  // === 🔧 설정 상세 이벤트 ===
+  settingsView: (settingsCategory: string) =>
+    trackEvent({
+      action: 'view_settings',
+      category: 'Settings',
+      label: settingsCategory,
+      custom_parameters: {
+        settings_category: settingsCategory,
+      },
+    }),
+
+  notificationToggle: (notificationType: string, isEnabled: boolean) =>
+    trackEvent({
+      action: 'toggle_notification',
+      category: 'Notifications',
+      label: notificationType,
+      custom_parameters: {
+        notification_type: notificationType,
+        is_enabled: isEnabled,
+      },
+    }),
+
+  // === ⚡ 성능 & 사용성 이벤트 ===
+  pageLoadTime: (pageName: string, loadTime: number) =>
+    trackEvent({
+      action: 'page_load_time',
+      category: 'Performance',
+      label: pageName,
+      value: loadTime,
+      custom_parameters: {
+        page_name: pageName,
+        load_time_ms: loadTime,
+        is_slow_load: loadTime > 3000,
+      },
+    }),
+
+  errorEncounter: (
+    errorType: string,
+    errorMessage: string,
+    pageContext: string
+  ) =>
+    trackEvent({
+      action: 'encounter_error',
+      category: 'Error Tracking',
+      label: errorType,
+      custom_parameters: {
+        error_type: errorType,
+        error_message: errorMessage,
+        page_context: pageContext,
+        timestamp: Date.now(),
+      },
+    }),
+
+  featureUsage: (
+    featureName: string,
+    usageContext: string,
+    isFirstTime?: boolean
+  ) =>
+    trackEvent({
+      action: 'use_feature',
+      category: 'Feature Usage',
+      label: featureName,
+      custom_parameters: {
+        feature_name: featureName,
+        usage_context: usageContext,
+        is_first_time: isFirstTime || false,
+      },
+    }),
+
+  // === 📱 모바일 특화 이벤트 ===
+  mobileSwipe: (swipeDirection: string, elementType: string) =>
+    trackEvent({
+      action: 'swipe_mobile',
+      category: 'Mobile Interaction',
+      label: swipeDirection,
+      custom_parameters: {
+        swipe_direction: swipeDirection,
+        element_type: elementType,
+      },
+    }),
+
+  mobileOrientation: (orientation: string) =>
+    trackEvent({
+      action: 'change_orientation',
+      category: 'Mobile Interaction',
+      label: orientation,
+      custom_parameters: {
+        orientation: orientation,
+      },
+    }),
+
+  // === 🕵️‍♂️ 감시자본주의 수준 극한 추적 이벤트 ===
+
+  // 사용자 의도 분석
+  userIntentAnalysis: (intent: string, hesitations: number, velocity: number) =>
+    trackEvent({
+      action: 'analyze_user_intent',
+      category: 'Behavioral Analysis',
+      label: intent,
+      custom_parameters: {
+        intent_type: intent,
+        hesitation_count: hesitations,
+        mouse_velocity: velocity,
+        confidence_level:
+          hesitations < 2 ? 'high' : hesitations < 5 ? 'medium' : 'low',
+      },
+    }),
+
+  // 감정 상태 분석
+  emotionalStateAnalysis: (
+    frustration: number,
+    engagement: number,
+    confidence: number
+  ) =>
+    trackEvent({
+      action: 'analyze_emotional_state',
+      category: 'Psychological Analysis',
+      label: 'emotional_profile',
+      custom_parameters: {
+        frustration_score: frustration,
+        engagement_score: engagement,
+        confidence_score: confidence,
+        emotional_state:
+          frustration > 5
+            ? 'frustrated'
+            : engagement > 5
+            ? 'engaged'
+            : 'neutral',
+        user_satisfaction: Math.max(0, engagement - frustration),
+      },
+    }),
+
+  // 타이핑 속도 및 패턴 분석
+  typingSpeedAnalysis: (wpm: number, keyCount: number) =>
+    trackEvent({
+      action: 'analyze_typing_pattern',
+      category: 'Behavioral Analysis',
+      label: 'typing_biometrics',
+      custom_parameters: {
+        words_per_minute: wpm,
+        key_count: keyCount,
+        typing_proficiency:
+          wpm > 60
+            ? 'expert'
+            : wpm > 40
+            ? 'proficient'
+            : wpm > 20
+            ? 'average'
+            : 'beginner',
+        input_method: 'keyboard',
+      },
+    }),
+
+  // 페이지 성능 상세 분석
+  pagePerformanceAnalysis: (
+    loadTime: number,
+    domTime: number,
+    responseTime: number
+  ) =>
+    trackEvent({
+      action: 'analyze_page_performance',
+      category: 'Performance Analysis',
+      label: 'load_metrics',
+      value: loadTime,
+      custom_parameters: {
+        load_time_ms: loadTime,
+        dom_content_loaded_ms: domTime,
+        response_time_ms: responseTime,
+        performance_grade:
+          loadTime < 1000
+            ? 'excellent'
+            : loadTime < 3000
+            ? 'good'
+            : loadTime < 5000
+            ? 'average'
+            : 'poor',
+        user_experience_impact: loadTime > 3000 ? 'negative' : 'positive',
+      },
+    }),
+
+  // 리소스 로딩 성능
+  resourceLoadPerformance: (resource: string, duration: number, size: number) =>
+    trackEvent({
+      action: 'analyze_resource_performance',
+      category: 'Performance Analysis',
+      label: resource,
+      value: duration,
+      custom_parameters: {
+        resource_name: resource,
+        load_duration_ms: duration,
+        transfer_size_bytes: size,
+        resource_type: resource.split('.').pop() || 'unknown',
+      },
+    }),
+
+  // 생체인식 패턴 분석
+  biometricSignature: (type: string, signature: string) =>
+    trackEvent({
+      action: 'analyze_biometric_pattern',
+      category: 'Biometric Analysis',
+      label: type,
+      custom_parameters: {
+        biometric_type: type,
+        signature_hash: signature,
+        analysis_timestamp: Date.now(),
+      },
+    }),
+
+  // 마우스 히트맵 데이터
+  mouseHeatmapData: (
+    x: number,
+    y: number,
+    intensity: number,
+    elementType?: string
+  ) =>
+    trackEvent({
+      action: 'track_mouse_heatmap',
+      category: 'User Interface Analysis',
+      label: 'mouse_tracking',
+      custom_parameters: {
+        mouse_x: x,
+        mouse_y: y,
+        heat_intensity: intensity,
+        element_type: elementType,
+        viewport_width: window.innerWidth,
+        viewport_height: window.innerHeight,
+      },
+    }),
+
+  // 스크롤 깊이 분석
+  scrollDepthAnalysis: (
+    depth: number,
+    readingTime: number,
+    pausePoints: number
+  ) =>
+    trackEvent({
+      action: 'analyze_scroll_depth',
+      category: 'Content Engagement',
+      label: 'scroll_behavior',
+      value: depth,
+      custom_parameters: {
+        scroll_depth_percentage: depth,
+        reading_time_seconds: readingTime,
+        pause_points_count: pausePoints,
+        reading_speed: readingTime > 0 ? depth / readingTime : 0,
+        engagement_level: depth > 80 ? 'high' : depth > 50 ? 'medium' : 'low',
+      },
+    }),
+
+  // 주의집중 패턴
+  attentionPatternAnalysis: (
+    focusTime: number,
+    blurTime: number,
+    tabSwitches: number
+  ) =>
+    trackEvent({
+      action: 'analyze_attention_pattern',
+      category: 'Cognitive Analysis',
+      label: 'attention_metrics',
+      custom_parameters: {
+        focus_time_ms: focusTime,
+        blur_time_ms: blurTime,
+        tab_switches_count: tabSwitches,
+        attention_ratio: focusTime / (focusTime + blurTime),
+        multitasking_level:
+          tabSwitches > 10 ? 'high' : tabSwitches > 5 ? 'medium' : 'low',
+      },
+    }),
+
+  // 의사결정 패턴 분석
+  decisionMakingPattern: (
+    elementType: string,
+    hesitationTime: number,
+    clickDelay: number
+  ) =>
+    trackEvent({
+      action: 'analyze_decision_pattern',
+      category: 'Decision Analysis',
+      label: elementType,
+      custom_parameters: {
+        element_type: elementType,
+        hesitation_time_ms: hesitationTime,
+        click_delay_ms: clickDelay,
+        decision_confidence:
+          clickDelay < 1000
+            ? 'confident'
+            : clickDelay < 3000
+            ? 'hesitant'
+            : 'uncertain',
+        cognitive_load:
+          hesitationTime > 2000
+            ? 'high'
+            : hesitationTime > 1000
+            ? 'medium'
+            : 'low',
+      },
+    }),
+
+  // 사용자 세그멘테이션 분석
+  userSegmentAnalysis: (
+    segment: string,
+    characteristics: Record<string, any>
+  ) =>
+    trackEvent({
+      action: 'analyze_user_segment',
+      category: 'User Segmentation',
+      label: segment,
+      custom_parameters: {
+        user_segment: segment,
+        ...characteristics,
+        segmentation_timestamp: Date.now(),
+      },
+    }),
+
+  // 예측 행동 분석
+  predictiveBehaviorAnalysis: (
+    predictedAction: string,
+    confidence: number,
+    context: string
+  ) =>
+    trackEvent({
+      action: 'analyze_predictive_behavior',
+      category: 'Predictive Analytics',
+      label: predictedAction,
+      custom_parameters: {
+        predicted_action: predictedAction,
+        prediction_confidence: confidence,
+        prediction_context: context,
+        model_version: '1.0',
+      },
+    }),
+
+  // 개인화 적용 추적
+  personalizationApplied: (
+    personalizationType: string,
+    userId: string,
+    effectiveness?: number
+  ) =>
+    trackEvent({
+      action: 'apply_personalization',
+      category: 'Personalization Engine',
+      label: personalizationType,
+      custom_parameters: {
+        personalization_type: personalizationType,
+        user_id_hash: userId.substring(0, 8), // 개인정보 보호를 위한 해시
+        effectiveness_score: effectiveness,
+        application_timestamp: Date.now(),
+      },
+    }),
+
+  // 사용자 여정 분석
+  userJourneyAnalysis: (
+    journeyStage: string,
+    timeSpent: number,
+    conversionProbability: number
+  ) =>
+    trackEvent({
+      action: 'analyze_user_journey',
+      category: 'Journey Analytics',
+      label: journeyStage,
+      custom_parameters: {
+        journey_stage: journeyStage,
+        time_spent_ms: timeSpent,
+        conversion_probability: conversionProbability,
+        journey_completion_rate: conversionProbability * 100,
+      },
+    }),
+
+  // A/B 테스트 참여 추적
+  abTestParticipation: (
+    testName: string,
+    variant: string,
+    userCharacteristics: Record<string, any>
+  ) =>
+    trackEvent({
+      action: 'participate_ab_test',
+      category: 'A/B Testing',
+      label: testName,
+      custom_parameters: {
+        test_name: testName,
+        test_variant: variant,
+        ...userCharacteristics,
+        test_start_time: Date.now(),
+      },
+    }),
+
+  // 사용자 가치 계산
+  userBusinessValueCalculation: (
+    businessValue: number,
+    factors: Record<string, number>
+  ) =>
+    trackEvent({
+      action: 'calculate_business_value',
+      category: 'Business Intelligence',
+      label: 'user_value_calculation',
+      value: businessValue,
+      custom_parameters: {
+        calculated_business_value: businessValue,
+        ...factors,
+        calculation_timestamp: Date.now(),
+        value_tier:
+          businessValue > 1000
+            ? 'high_value'
+            : businessValue > 500
+            ? 'medium_value'
+            : 'low_value',
+      },
+    }),
+
+  // 실시간 행동 클러스터링
+  behaviorClustering: (
+    clusterName: string,
+    clusterCharacteristics: Record<string, any>
+  ) =>
+    trackEvent({
+      action: 'classify_behavior_cluster',
+      category: 'Behavioral Clustering',
+      label: clusterName,
+      custom_parameters: {
+        cluster_name: clusterName,
+        ...clusterCharacteristics,
+        clustering_algorithm: 'k_means',
+        cluster_confidence: clusterCharacteristics.confidence || 0,
+      },
+    }),
+
+  // 디바이스 사용 패턴
+  deviceUsagePattern: (
+    deviceInfo: Record<string, any>,
+    usageMetrics: Record<string, any>
+  ) =>
+    trackEvent({
+      action: 'analyze_device_usage',
+      category: 'Device Analytics',
+      label: 'usage_pattern',
+      custom_parameters: {
+        ...deviceInfo,
+        ...usageMetrics,
+        device_fingerprint: deviceInfo.fingerprint,
+        usage_intensity: usageMetrics.intensity || 'normal',
       },
     }),
 };

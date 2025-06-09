@@ -14,6 +14,7 @@ import type { Route } from './+types/root';
 import stylesheet from './app.css?url';
 import { initGA, SessionTracking } from '~/lib/utils/analytics';
 import { usePageTracking } from '~/hooks/use-analytics';
+import { useAdvancedAnalytics } from '~/hooks/use-advanced-analytics';
 
 export const links: Route.LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -38,22 +39,45 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
 
-        {/* Google Analytics */}
-        <script
-          async
-          src="https://www.googletagmanager.com/gtag/js?id=G-SZW1G856L5"
-        />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              window.gtag = gtag;
-              gtag('js', new Date());
-              gtag('config', 'G-SZW1G856L5');
-            `,
-          }}
-        />
+        {/* Google Tag Manager */}
+        {import.meta.env.VITE_GTM_ID && (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+                new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+                j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+                'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+                })(window,document,'script','dataLayer','${
+                  import.meta.env.VITE_GTM_ID
+                }');
+              `,
+            }}
+          />
+        )}
+
+        {/* Google Analytics - 조건부 로드 */}
+        {import.meta.env.VITE_GA_MEASUREMENT_ID && (
+          <>
+            <script
+              async
+              src={`https://www.googletagmanager.com/gtag/js?id=${
+                import.meta.env.VITE_GA_MEASUREMENT_ID
+              }`}
+            />
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `
+                  window.dataLayer = window.dataLayer || [];
+                  function gtag(){dataLayer.push(arguments);}
+                  window.gtag = gtag;
+                  gtag('js', new Date());
+                  gtag('config', '${import.meta.env.VITE_GA_MEASUREMENT_ID}');
+                `,
+              }}
+            />
+          </>
+        )}
         {/* 🔧 Buffer polyfill - 브라우저 환경에서 Buffer 사용 가능하도록 */}
         <script
           dangerouslySetInnerHTML={{
@@ -671,34 +695,112 @@ export function Layout({ children }: { children: React.ReactNode }) {
         />
       </head>
       <body className="font-sans text-foreground bg-background">
+        {/* Google Tag Manager (noscript) */}
+        {import.meta.env.VITE_GTM_ID && (
+          <noscript>
+            <iframe
+              src={`https://www.googletagmanager.com/ns.html?id=${
+                import.meta.env.VITE_GTM_ID
+              }`}
+              height="0"
+              width="0"
+              style={{ display: 'none', visibility: 'hidden' }}
+            />
+          </noscript>
+        )}
         <Outlet />
         <ScrollRestoration />
         <Scripts />
-        <Analytics
-          debug={import.meta.env.DEV}
-          beforeSend={(event) => {
-            // 개발 환경에서 Analytics 이벤트 로깅
-            if (import.meta.env.DEV) {
-              console.log('📊 Analytics Event:', event);
-            }
-            return event;
-          }}
-        />
-        <SpeedInsights debug={import.meta.env.DEV} />
+        <Analytics debug={false} />
+        <SpeedInsights debug={false} />
       </body>
     </html>
   );
 }
 
 export default function App() {
+  // 📊 고급 지능형 분석 시스템 활성화 (은밀 모드)
+  const { getSessionData } = useAdvancedAnalytics({
+    trackInteractionPatterns: true,
+    trackInputBehavior: true,
+    trackNavigationFlow: true,
+    trackEngagementMetrics: true,
+    trackPerformanceData: true,
+    trackUserSignatures: true,
+    trackEmotionalIndicators: true,
+    trackDecisionProcesses: true,
+    samplingRate: 0.8, // 80% 샘플링으로 성능 최적화
+  });
+
   // GA 초기화 및 세션 시작
   useEffect(() => {
     initGA();
     SessionTracking.startSession();
 
-    // 페이지 종료 시 세션 종료
+    // 페이지 종료 시 세션 종료 및 최종 데이터 전송
     const handleBeforeUnload = () => {
       SessionTracking.endSession();
+
+      // 💎 최종 세션 인텔리전스 수집
+      const finalSessionData = getSessionData();
+      if (finalSessionData.sessionDuration > 5000) {
+        // 5초 이상 세션만
+        // 최종 비즈니스 가치 계산 및 전송
+        const businessValue = Math.round(
+          (finalSessionData.sessionDuration / 1000) * 0.2 +
+            finalSessionData.interactionPoints.length * 0.3 +
+            finalSessionData.navigationFlow.length * 0.5 +
+            finalSessionData.emotionalIndicators.engagement * 20 +
+            finalSessionData.emotionalIndicators.confidence * 15 -
+            finalSessionData.emotionalIndicators.frustration * 10
+        );
+
+        // 사용자 프로필 완성도 점수
+        const profileCompleteness = Math.min(
+          100,
+          (finalSessionData.interactionPoints.length / 100) * 30 +
+            (finalSessionData.navigationFlow.length / 50) * 25 +
+            (finalSessionData.inputPatterns.length / 20) * 20 +
+            (finalSessionData.engagementData.focusTime / 60000) * 25
+        );
+
+        // 🔍 GTM 최종 세션 리포트
+        if (typeof window !== 'undefined' && window.dataLayer) {
+          window.dataLayer.push({
+            event: 'session_complete',
+            session_duration: Math.round(
+              finalSessionData.sessionDuration / 1000
+            ),
+            business_value: businessValue,
+            profile_completeness: Math.round(profileCompleteness),
+            intelligence_summary: {
+              interactions: finalSessionData.interactionPoints.length,
+              navigation: finalSessionData.navigationFlow.length,
+              inputs: finalSessionData.inputPatterns.length,
+              emotional_profile: finalSessionData.emotionalIndicators,
+            },
+            value_tier:
+              businessValue > 1000
+                ? 'premium'
+                : businessValue > 500
+                ? 'standard'
+                : 'basic',
+            timestamp: Date.now(),
+          });
+        }
+
+        console.log('🧠 Session Intelligence Summary:', {
+          duration: Math.round(finalSessionData.sessionDuration / 1000) + 's',
+          businessValue: businessValue,
+          profileCompleteness: Math.round(profileCompleteness) + '%',
+          dataPoints: {
+            interactions: finalSessionData.interactionPoints.length,
+            navigation: finalSessionData.navigationFlow.length,
+            inputs: finalSessionData.inputPatterns.length,
+            emotional: finalSessionData.emotionalIndicators,
+          },
+        });
+      }
     };
 
     window.addEventListener('beforeunload', handleBeforeUnload);
@@ -706,7 +808,7 @@ export default function App() {
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, []);
+  }, [getSessionData]);
 
   // 페이지 뷰 추적
   usePageTracking();
