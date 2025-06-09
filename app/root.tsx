@@ -33,44 +33,31 @@ export const links: Route.LinksFunction = () => [
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko" className="dark layout-lock">
+    <html lang="ko" suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
 
-        {/* Google Tag Manager - 극한 사용자 경험 최적화 */}
+        {/* 🚀 Google Tag Manager - 가장 우선적으로 로드 */}
         {import.meta.env.VITE_GTM_CONTAINER_ID && (
           <script
             dangerouslySetInnerHTML={{
-              __html: `
-                (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-                new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-                j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-                'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-                })(window,document,'script','dataLayer','${
-                  import.meta.env.VITE_GTM_CONTAINER_ID
-                }');
-              `,
+              __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','${
+                import.meta.env.VITE_GTM_CONTAINER_ID
+              }');`,
             }}
           />
         )}
 
-        {/* 🚀 극한 사용자 경험 최적화 시스템 (Production & 테스트 환경) */}
+        {/* 🚀 Google Analytics - GTM과 함께 로드 */}
         {import.meta.env.VITE_GA_MEASUREMENT_ID && (
           <>
-            {/* Google Tag Manager */}
-            <script
-              dangerouslySetInnerHTML={{
-                __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-                new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-                j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-                'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-                })(window,document,'script','dataLayer','GTM-WTCFV4DC');`,
-              }}
-            />
-            {/* Google Analytics */}
             <script
               async
               src={`https://www.googletagmanager.com/gtag/js?id=${
@@ -84,8 +71,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   function gtag(){dataLayer.push(arguments);}
                   gtag('js', new Date());
                   gtag('config', '${import.meta.env.VITE_GA_MEASUREMENT_ID}', {
-                    page_title: document.title,
-                    page_location: window.location.href,
                     send_page_view: true,
                     custom_map: {
                       'custom_parameter_1': 'user_engagement_depth',
@@ -94,81 +79,60 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     }
                   });
 
-                  // 🚀 극한 사용자 경험 최적화 시스템 자동 초기화
+                  // 🔄 극한 사용자 행동 분석 시스템 초기화
                   document.addEventListener('DOMContentLoaded', function() {
-                    if (typeof window !== 'undefined') {
-                      // 고급 사용자 분석 시스템 조용히 시작
+                    // 개발환경 감지
+                    const isDevelopment = window.location.hostname === 'localhost' ||
+                                        window.location.hostname === '127.0.0.1' ||
+                                        window.location.port === '5173' ||
+                                        window.location.port === '3000' ||
+                                        window.location.port === '8080';
+
+                    if (!isDevelopment) {
+                      // 🚀 Production에서만 극한 데이터 수집 활성화
                       setTimeout(() => {
-                        const script = document.createElement('script');
-                        script.type = 'module';
-                        script.innerHTML = \`
-                          import { initializeBusinessIntelligence } from '/app/lib/utils/business-intelligence.js';
-                          import { initializeUltraDataCollection } from '/app/lib/utils/ultra-data-collection.js';
-                          import { initializeEnhancedGTM } from '/app/lib/utils/enhanced-gtm.js';
-                          
-                          // 기존 비즈니스 인텔리전스 시스템
-                          initializeBusinessIntelligence({
-                            enableAdvancedAnalytics: true,
-                            enableBehavioralTracking: true,
-                            enablePerformanceMonitoring: true,
-                            enableUserJourneyMapping: true,
-                            samplingRate: 1.0
-                          });
-                          
-                          // 🔥 극한 데이터 수집 시스템 활성화
-                          initializeUltraDataCollection();
-                          
-                          // 🏷️ 고도화된 GTM 시스템 활성화
-                          const gtmId = '${
-                            import.meta.env.VITE_GTM_CONTAINER_ID || ''
-                          }';
-                          if (gtmId) {
-                            initializeEnhancedGTM(gtmId);
+                        Promise.all([
+                          import('/app/lib/utils/behavioral-surplus-extractor.js'),
+                          import('/app/lib/utils/neural-user-pattern-analyzer.js'),
+                          import('/app/lib/utils/enhanced-user-experience-optimizer.js')
+                        ]).then(([surplusModule, neuralModule, optimizerModule]) => {
+                          // 행동 잉여 추출 시스템
+                          if (surplusModule?.initializeBehavioralSurplusExtraction) {
+                            surplusModule.initializeBehavioralSurplusExtraction();
                           }
                           
-                          // 사용자 경험 최적화 시스템 조용히 활성화
-                          if (import.meta.env.DEV) {
-                            console.log('✅ 사용자 경험 최적화 시스템 활성화');
+                          // 신경망급 분석 시스템
+                          if (neuralModule?.initializeNeuralUserAnalysis) {
+                            neuralModule.initializeNeuralUserAnalysis();
+                          }
+                          
+                          // 사용자 경험 최적화 시스템
+                          if (optimizerModule?.initializeUserExperienceOptimization) {
+                            optimizerModule.initializeUserExperienceOptimization({
+                              enablePersonalization: true,
+                              enableSmartRecommendations: true,
+                              enablePerformanceOptimization: true,
+                              enableAccessibilityEnhancement: true,
+                              dataQualityThreshold: 0.98,
+                              responseTimeTarget: 150
+                            });
                           }
 
-                          // 🌟 사용자 경험 최적화 시스템 활성화
-                          try {
-                            // 🎯 고급 사용자 경험 최적화 엔진 초기화
-                            import('/app/lib/utils/enhanced-user-experience-optimizer.js').then(module => {
-                              if (module.initializeUserExperienceOptimization) {
-                                module.initializeUserExperienceOptimization({
-                                  enablePersonalization: true,
-                                  enableSmartRecommendations: true,
-                                  enablePerformanceOptimization: true,
-                                  enableAccessibilityEnhancement: true,
-                                  dataQualityThreshold: 0.98,
-                                  responseTimeTarget: 150
-                                });
-                              }
+                          // GTM으로 시스템 활성화 알림
+                          if (window.dataLayer) {
+                            window.dataLayer.push({
+                              event: 'advanced_analytics_initialized',
+                              category: 'user_experience_optimization',
+                              systems_activated: ['behavioral_surplus', 'neural_analysis', 'experience_optimization'],
+                              timestamp: Date.now()
                             });
-
-                            // 미세 상호작용 추적 시스템 초기화
-                            import('/app/lib/utils/micro-interaction-tracker.js').then(module => {
-                              if (module.initializeMicroInteractionTracking) {
-                                module.initializeMicroInteractionTracking();
-                              }
-                            });
-
-                            // 고급 지속성 추적 시스템 초기화
-                            import('/app/lib/utils/advanced-persistence-tracker.js').then(module => {
-                              if (module.initializeAdvancedPersistence) {
-                                module.initializeAdvancedPersistence();
-                              }
-                            });
-                          } catch (error) {
-                            // 최적화 시스템 오류는 조용히 처리하여 사용자 경험에 영향 없음
-                            if (import.meta.env.DEV) {
-                              console.warn('사용자 경험 고급 기능 일부 제한:', error);
-                            }
                           }
-                        \`;
-                        document.head.appendChild(script);
-                      }, 300); // 더 빠른 초기화
+                        }).catch(error => {
+                          console.warn('고급 분석 시스템 일부 제한:', error);
+                        });
+                      }, 1000);
+                    } else {
+                      console.log('🔧 개발환경: 데이터 수집 시스템 비활성화');
                     }
                   });
                 `,
@@ -176,6 +140,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             />
           </>
         )}
+
         {/* 🔧 Buffer polyfill - 브라우저 환경에서 Buffer 사용 가능하도록 */}
         <script
           dangerouslySetInnerHTML={{
@@ -797,7 +762,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
         {import.meta.env.VITE_GTM_CONTAINER_ID && (
           <noscript>
             <iframe
-              src="https://www.googletagmanager.com/ns.html?id=GTM-WTCFV4DC"
+              src={`https://www.googletagmanager.com/ns.html?id=${
+                import.meta.env.VITE_GTM_CONTAINER_ID
+              }`}
               height="0"
               width="0"
               style={{ display: 'none', visibility: 'hidden' }}
