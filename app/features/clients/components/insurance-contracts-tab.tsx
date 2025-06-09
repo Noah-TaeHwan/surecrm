@@ -39,6 +39,7 @@ import {
   AlertCircle,
   Eye,
   Download,
+  Users,
 } from 'lucide-react';
 import {
   Dialog,
@@ -64,20 +65,28 @@ interface InsuranceContract {
   productName: string;
   insuranceCompany: string;
   insuranceType: string;
+  insuranceCode?: string; // 🆕 보종코드
   contractNumber?: string;
   policyNumber?: string;
   contractDate: string;
   effectiveDate: string;
   expirationDate?: string;
+  paymentDueDate?: string; // 🆕 납기일
   contractorName: string;
+  contractorSsn?: string; // 🆕 계약자 주민번호
+  contractorPhone?: string; // 🆕 계약자 연락처
   insuredName: string;
+  insuredSsn?: string; // 🆕 피보험자 주민번호
+  insuredPhone?: string; // 🆕 피보험자 연락처
   beneficiaryName?: string;
+  premiumAmount?: string; // 🆕 납입보험료 (통합)
   monthlyPremium?: string; // 🔧 decimal 타입은 string으로 반환됨
   annualPremium?: string; // 🔧 decimal 타입은 string으로 반환됨
   coverageAmount?: string; // 🔧 decimal 타입은 string으로 반환됨
   agentCommission?: string; // 🔧 decimal 타입은 string으로 반환됨
   status: 'draft' | 'active' | 'cancelled' | 'expired' | 'suspended';
   paymentMethod?: string;
+  paymentCycle?: string; // 🆕 납입주기
   paymentPeriod?: number;
   specialClauses?: string;
   notes?: string;
@@ -102,19 +111,27 @@ interface ContractFormData {
   productName: string;
   insuranceCompany: string;
   insuranceType: string;
+  insuranceCode: string; // 🆕 보종코드
   contractNumber: string;
   policyNumber: string;
   contractDate: string;
   effectiveDate: string;
   expirationDate: string;
+  paymentDueDate: string; // 🆕 납기일
   contractorName: string;
+  contractorSsn: string; // 🆕 계약자 주민번호
+  contractorPhone: string; // 🆕 계약자 연락처
   insuredName: string;
+  insuredSsn: string; // 🆕 피보험자 주민번호
+  insuredPhone: string; // 🆕 피보험자 연락처
   beneficiaryName: string;
+  premiumAmount: string; // 🆕 납입보험료 (통합)
   monthlyPremium: string;
   annualPremium: string;
   coverageAmount: string;
   agentCommission: string;
   paymentMethod: string;
+  paymentCycle: string; // 🆕 납입주기
   paymentPeriod: string;
   specialClauses: string;
   notes: string;
@@ -340,19 +357,27 @@ export function InsuranceContractsTab({
     productName: '',
     insuranceCompany: '',
     insuranceType: 'life',
+    insuranceCode: '',
     contractNumber: '',
     policyNumber: '',
     contractDate: new Date().toISOString().split('T')[0],
     effectiveDate: new Date().toISOString().split('T')[0],
     expirationDate: '',
+    paymentDueDate: '',
     contractorName: clientName || '',
+    contractorSsn: '',
+    contractorPhone: '',
     insuredName: clientName || '',
+    insuredSsn: '',
+    insuredPhone: '',
     beneficiaryName: '',
+    premiumAmount: '',
     monthlyPremium: '',
     annualPremium: '',
     coverageAmount: '',
     agentCommission: '',
     paymentMethod: '월납',
+    paymentCycle: '',
     paymentPeriod: '',
     specialClauses: '',
     notes: '',
@@ -376,19 +401,27 @@ export function InsuranceContractsTab({
       productName: '',
       insuranceCompany: '',
       insuranceType: 'life',
+      insuranceCode: '',
       contractNumber: '',
       policyNumber: '',
       contractDate: new Date().toISOString().split('T')[0],
       effectiveDate: new Date().toISOString().split('T')[0],
       expirationDate: '',
+      paymentDueDate: '',
       contractorName: clientName || '',
+      contractorSsn: '',
+      contractorPhone: '',
       insuredName: clientName || '',
+      insuredSsn: '',
+      insuredPhone: '',
       beneficiaryName: '',
+      premiumAmount: '',
       monthlyPremium: '',
       annualPremium: '',
       coverageAmount: '',
       agentCommission: '',
       paymentMethod: '월납',
+      paymentCycle: '',
       paymentPeriod: '',
       specialClauses: '',
       notes: '',
@@ -483,19 +516,27 @@ export function InsuranceContractsTab({
       productName: contract.productName,
       insuranceCompany: contract.insuranceCompany,
       insuranceType: contract.insuranceType,
+      insuranceCode: contract.insuranceCode || '',
       contractNumber: contract.contractNumber || '',
       policyNumber: contract.policyNumber || '',
       contractDate: contract.contractDate,
       effectiveDate: contract.effectiveDate,
       expirationDate: contract.expirationDate || '',
+      paymentDueDate: contract.paymentDueDate || '',
       contractorName: contract.contractorName,
+      contractorSsn: contract.contractorSsn || '',
+      contractorPhone: contract.contractorPhone || '',
       insuredName: contract.insuredName,
+      insuredSsn: contract.insuredSsn || '',
+      insuredPhone: contract.insuredPhone || '',
       beneficiaryName: contract.beneficiaryName || '',
+      premiumAmount: contract.premiumAmount?.toString() || '',
       monthlyPremium: contract.monthlyPremium?.toString() || '',
       annualPremium: contract.annualPremium?.toString() || '',
       coverageAmount: contract.coverageAmount?.toString() || '',
       agentCommission: contract.agentCommission?.toString() || '',
       paymentMethod: contract.paymentMethod || '월납',
+      paymentCycle: contract.paymentCycle || '',
       paymentPeriod: contract.paymentPeriod?.toString() || '',
       specialClauses: contract.specialClauses || '',
       notes: contract.notes || '',
@@ -939,6 +980,42 @@ export function InsuranceContractsTab({
                         </div>
                       </div>
 
+                      {/* 🔄 계약자/피보험자 정보 섹션 추가 */}
+                      <div className="mb-4 p-3 bg-muted/30 rounded-lg">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <span className="text-xs text-muted-foreground font-medium">
+                              계약자:
+                            </span>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className="font-medium">
+                                {contract.contractorName}
+                              </span>
+                              {contract.contractorPhone && (
+                                <span className="text-muted-foreground text-xs">
+                                  {contract.contractorPhone}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <div>
+                            <span className="text-xs text-muted-foreground font-medium">
+                              피보험자:
+                            </span>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className="font-medium">
+                                {contract.insuredName}
+                              </span>
+                              {contract.insuredPhone && (
+                                <span className="text-muted-foreground text-xs">
+                                  {contract.insuredPhone}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                         <div className="space-y-2">
                           <div>
@@ -955,6 +1032,24 @@ export function InsuranceContractsTab({
                               {contract.contractNumber}
                             </div>
                           )}
+                          {contract.policyNumber && (
+                            <div>
+                              <span className="text-muted-foreground">
+                                증권번호:
+                              </span>{' '}
+                              {contract.policyNumber}
+                            </div>
+                          )}
+                          {contract.insuranceCode && (
+                            <div>
+                              <span className="text-muted-foreground">
+                                보종코드:
+                              </span>{' '}
+                              <span className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded">
+                                {contract.insuranceCode}
+                              </span>
+                            </div>
+                          )}
                         </div>
                         <div className="space-y-2">
                           <div>
@@ -969,8 +1064,36 @@ export function InsuranceContractsTab({
                             </span>{' '}
                             {formatDate(contract.effectiveDate)}
                           </div>
+                          {contract.paymentDueDate && (
+                            <div>
+                              <span className="text-muted-foreground">
+                                납기일:
+                              </span>{' '}
+                              {formatDate(contract.paymentDueDate)}
+                            </div>
+                          )}
+                          {contract.paymentCycle && (
+                            <div>
+                              <span className="text-muted-foreground">
+                                납입주기:
+                              </span>{' '}
+                              <Badge variant="outline" className="text-xs">
+                                {contract.paymentCycle}
+                              </Badge>
+                            </div>
+                          )}
                         </div>
                         <div className="space-y-2">
+                          {contract.premiumAmount && (
+                            <div>
+                              <span className="text-muted-foreground">
+                                납입보험료:
+                              </span>
+                              <span className="font-semibold text-purple-600 ml-1">
+                                {formatCurrency(contract.premiumAmount)}
+                              </span>
+                            </div>
+                          )}
                           {contract.monthlyPremium && (
                             <div>
                               <span className="text-muted-foreground">
@@ -1332,19 +1455,27 @@ function NewContractModal({
       productName: '',
       insuranceCompany: '',
       insuranceType: 'life',
+      insuranceCode: '',
       contractNumber: '',
       policyNumber: '',
       contractDate: '',
       effectiveDate: '',
       expirationDate: '',
+      paymentDueDate: '',
       contractorName: clientName,
+      contractorSsn: '',
+      contractorPhone: '',
       insuredName: clientName,
+      insuredSsn: '',
+      insuredPhone: '',
       beneficiaryName: '',
+      premiumAmount: '',
       monthlyPremium: '',
       annualPremium: '',
       coverageAmount: '',
       agentCommission: '',
       paymentMethod: 'monthly',
+      paymentCycle: '',
       paymentPeriod: '',
       specialClauses: '',
       notes: '',
@@ -1398,19 +1529,27 @@ function NewContractModal({
       productName: '',
       insuranceCompany: '',
       insuranceType: 'life',
+      insuranceCode: '',
       contractNumber: '',
       policyNumber: '',
       contractDate: '',
       effectiveDate: '',
       expirationDate: '',
+      paymentDueDate: '',
       contractorName: clientName,
+      contractorSsn: '',
+      contractorPhone: '',
       insuredName: clientName,
+      insuredSsn: '',
+      insuredPhone: '',
       beneficiaryName: '',
+      premiumAmount: '',
       monthlyPremium: '',
       annualPremium: '',
       coverageAmount: '',
       agentCommission: '',
       paymentMethod: 'monthly',
+      paymentCycle: '',
       paymentPeriod: '',
       specialClauses: '',
       notes: '',
@@ -1439,8 +1578,16 @@ function NewContractModal({
       newErrors.effectiveDate = '효력발생일을 선택해주세요';
     }
 
-    if (!formData.monthlyPremium) {
-      newErrors.monthlyPremium = '월 보험료를 입력해주세요';
+    if (!formData.contractorName.trim()) {
+      newErrors.contractorName = '계약자명을 입력해주세요';
+    }
+
+    if (!formData.insuredName.trim()) {
+      newErrors.insuredName = '피보험자명을 입력해주세요';
+    }
+
+    if (!formData.premiumAmount) {
+      newErrors.premiumAmount = '납입보험료를 입력해주세요';
     }
 
     setErrors(newErrors);
@@ -1678,6 +1825,25 @@ function NewContractModal({
 
                 <div className="space-y-2">
                   <Label
+                    htmlFor="insuranceCode"
+                    className="text-sm font-medium"
+                  >
+                    보종코드
+                  </Label>
+                  <Input
+                    id="insuranceCode"
+                    value={formData.insuranceCode}
+                    onChange={(e) =>
+                      updateField('insuranceCode', e.target.value)
+                    }
+                    placeholder="예: 01-01-01"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label
                     htmlFor="contractNumber"
                     className="text-sm font-medium"
                   >
@@ -1692,6 +1858,20 @@ function NewContractModal({
                     placeholder="예: CT2024001234"
                   />
                 </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="policyNumber" className="text-sm font-medium">
+                    증권번호
+                  </Label>
+                  <Input
+                    id="policyNumber"
+                    value={formData.policyNumber}
+                    onChange={(e) =>
+                      updateField('policyNumber', e.target.value)
+                    }
+                    placeholder="예: PL2024001234"
+                  />
+                </div>
               </div>
             </div>
 
@@ -1702,7 +1882,8 @@ function NewContractModal({
                 계약 일정
               </h3>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* 🔄 2x2 레이아웃으로 변경 */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label
                     htmlFor="contractDate"
@@ -1769,6 +1950,23 @@ function NewContractModal({
                     }
                   />
                 </div>
+
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="paymentDueDate"
+                    className="text-sm font-medium"
+                  >
+                    납기일
+                  </Label>
+                  <Input
+                    id="paymentDueDate"
+                    type="date"
+                    value={formData.paymentDueDate}
+                    onChange={(e) =>
+                      updateField('paymentDueDate', e.target.value)
+                    }
+                  />
+                </div>
               </div>
             </div>
 
@@ -1782,11 +1980,43 @@ function NewContractModal({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label
+                    htmlFor="premiumAmount"
+                    className="flex items-center space-x-1 text-sm font-medium"
+                  >
+                    <span>납입보험료</span>
+                    <span className="text-destructive">*</span>
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      id="premiumAmount"
+                      type="number"
+                      value={formData.premiumAmount}
+                      onChange={(e) =>
+                        updateField('premiumAmount', e.target.value)
+                      }
+                      placeholder="0"
+                      className={`pr-8 ${
+                        errors.premiumAmount ? 'border-destructive' : ''
+                      }`}
+                    />
+                    <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-muted-foreground">
+                      원
+                    </span>
+                  </div>
+                  {errors.premiumAmount && (
+                    <p className="text-xs text-destructive flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3" />
+                      {errors.premiumAmount}
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label
                     htmlFor="monthlyPremium"
                     className="flex items-center space-x-1 text-sm font-medium"
                   >
                     <span>월 보험료</span>
-                    <span className="text-destructive">*</span>
                   </Label>
                   <div className="relative">
                     <Input
@@ -1797,22 +2027,16 @@ function NewContractModal({
                         updateField('monthlyPremium', e.target.value)
                       }
                       placeholder="0"
-                      className={`pr-8 ${
-                        errors.monthlyPremium ? 'border-destructive' : ''
-                      }`}
+                      className="pr-8"
                     />
                     <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-muted-foreground">
                       원
                     </span>
                   </div>
-                  {errors.monthlyPremium && (
-                    <p className="text-xs text-destructive flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3" />
-                      {errors.monthlyPremium}
-                    </p>
-                  )}
                 </div>
+              </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label
                     htmlFor="agentCommission"
@@ -1836,9 +2060,7 @@ function NewContractModal({
                     </span>
                   </div>
                 </div>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label
                     htmlFor="paymentMethod"
@@ -1864,7 +2086,66 @@ function NewContractModal({
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="paymentCycle" className="text-sm font-medium">
+                    납입주기
+                  </Label>
+                  <Select
+                    value={formData.paymentCycle}
+                    onValueChange={(value) =>
+                      updateField('paymentCycle', value)
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="납입주기 선택" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {['월', '분기', '반기', '연'].map((cycle) => (
+                        <SelectItem key={cycle} value={cycle}>
+                          {cycle}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="paymentPeriod"
+                    className="text-sm font-medium"
+                  >
+                    납입기간
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      id="paymentPeriod"
+                      type="number"
+                      value={formData.paymentPeriod}
+                      onChange={(e) =>
+                        updateField('paymentPeriod', e.target.value)
+                      }
+                      placeholder="0"
+                      className={`pr-8 ${
+                        errors.paymentPeriod ? 'border-destructive' : ''
+                      }`}
+                    />
+                    <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-muted-foreground">
+                      년
+                    </span>
+                  </div>
+                  {errors.paymentPeriod && (
+                    <p className="text-xs text-destructive flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3" />
+                      {errors.paymentPeriod}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label
                     htmlFor="coverageAmount"
@@ -2131,6 +2412,149 @@ function NewContractModal({
                 <div className="text-xs text-blue-700 dark:text-blue-300">
                   <span className="font-medium">등록 완료 시:</span> 파이프라인
                   업데이트, 수수료 반영, 서류 관리 제공
+                </div>
+              </div>
+            </div>
+
+            {/* 👥 계약자/피보험자 정보 */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <Users className="h-5 w-5 text-primary" />
+                계약자/피보험자 정보
+              </h3>
+
+              {/* 계약자 정보 */}
+              <div className="space-y-4 p-4 border rounded-lg bg-muted/30">
+                <h4 className="font-medium text-sm text-muted-foreground">
+                  계약자 정보
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="contractorName"
+                      className="flex items-center space-x-1 text-sm font-medium"
+                    >
+                      <span>계약자명</span>
+                      <span className="text-destructive">*</span>
+                    </Label>
+                    <Input
+                      id="contractorName"
+                      value={formData.contractorName}
+                      onChange={(e) =>
+                        updateField('contractorName', e.target.value)
+                      }
+                      placeholder="홍길동"
+                      className={
+                        errors.contractorName ? 'border-destructive' : ''
+                      }
+                    />
+                    {errors.contractorName && (
+                      <p className="text-xs text-destructive flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {errors.contractorName}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="contractorSsn"
+                      className="text-sm font-medium"
+                    >
+                      계약자 주민번호
+                    </Label>
+                    <Input
+                      id="contractorSsn"
+                      value={formData.contractorSsn}
+                      onChange={(e) =>
+                        updateField('contractorSsn', e.target.value)
+                      }
+                      placeholder="000000-0000000"
+                      maxLength={14}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="contractorPhone"
+                      className="text-sm font-medium"
+                    >
+                      계약자 연락처
+                    </Label>
+                    <Input
+                      id="contractorPhone"
+                      value={formData.contractorPhone}
+                      onChange={(e) =>
+                        updateField('contractorPhone', e.target.value)
+                      }
+                      placeholder="010-0000-0000"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* 피보험자 정보 */}
+              <div className="space-y-4 p-4 border rounded-lg bg-muted/30">
+                <h4 className="font-medium text-sm text-muted-foreground">
+                  피보험자 정보
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="insuredName"
+                      className="flex items-center space-x-1 text-sm font-medium"
+                    >
+                      <span>피보험자명</span>
+                      <span className="text-destructive">*</span>
+                    </Label>
+                    <Input
+                      id="insuredName"
+                      value={formData.insuredName}
+                      onChange={(e) =>
+                        updateField('insuredName', e.target.value)
+                      }
+                      placeholder="홍길동"
+                      className={errors.insuredName ? 'border-destructive' : ''}
+                    />
+                    {errors.insuredName && (
+                      <p className="text-xs text-destructive flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {errors.insuredName}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="insuredSsn" className="text-sm font-medium">
+                      피보험자 주민번호
+                    </Label>
+                    <Input
+                      id="insuredSsn"
+                      value={formData.insuredSsn}
+                      onChange={(e) =>
+                        updateField('insuredSsn', e.target.value)
+                      }
+                      placeholder="000000-0000000"
+                      maxLength={14}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="insuredPhone"
+                      className="text-sm font-medium"
+                    >
+                      피보험자 연락처
+                    </Label>
+                    <Input
+                      id="insuredPhone"
+                      value={formData.insuredPhone}
+                      onChange={(e) =>
+                        updateField('insuredPhone', e.target.value)
+                      }
+                      placeholder="010-0000-0000"
+                    />
+                  </div>
                 </div>
               </div>
             </div>

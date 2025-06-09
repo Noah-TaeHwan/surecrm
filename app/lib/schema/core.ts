@@ -96,6 +96,15 @@ export const appInvitationStatusEnum = pgEnum('app_invitation_status_enum', [
 
 export const appThemeEnum = pgEnum('app_theme_enum', ['light', 'dark']);
 
+// 🆕 납입주기 열거형 추가
+export const appPaymentCycleEnum = pgEnum('app_payment_cycle_enum', [
+  'monthly', // 월납
+  'quarterly', // 분기납
+  'semi-annual', // 반년납
+  'annual', // 연납
+  'lump-sum', // 일시납
+]);
+
 // ===== 핵심 공유 테이블들 =====
 
 // Profiles 테이블 (auth.users 확장)
@@ -678,6 +687,7 @@ export type NewContractAttachment = typeof contractAttachments.$inferInsert;
 export type ContractStatus = (typeof appContractStatusEnum.enumValues)[number];
 export type ContractDocumentType =
   (typeof appContractDocumentTypeEnum.enumValues)[number];
+export type PaymentCycle = (typeof appPaymentCycleEnum.enumValues)[number]; // 🆕 납입주기 타입
 
 // ===== 🆕 NEW: 보험계약 관리 테이블들 =====
 
@@ -723,6 +733,7 @@ export const insuranceContracts = pgTable('app_client_insurance_contracts', {
   productName: text('product_name').notNull(), // 상품명
   insuranceCompany: text('insurance_company').notNull(), // 보험회사명
   insuranceType: appInsuranceTypeEnum('insurance_type').notNull(), // 보험 타입
+  insuranceCode: text('insurance_code'), // 🆕 보종코드
 
   // 계약 정보
   contractNumber: text('contract_number'), // 계약번호
@@ -730,13 +741,19 @@ export const insuranceContracts = pgTable('app_client_insurance_contracts', {
   contractDate: date('contract_date').notNull(), // 계약일
   effectiveDate: date('effective_date').notNull(), // 보험개시일
   expirationDate: date('expiration_date'), // 만기일
+  paymentDueDate: date('payment_due_date'), // 🆕 납기일
 
   // 계약자/피보험자 정보
   contractorName: text('contractor_name').notNull(), // 계약자명
+  contractorSsn: text('contractor_ssn'), // 🆕 계약자 주민번호 (암호화 저장)
+  contractorPhone: text('contractor_phone'), // 🆕 계약자 연락처
   insuredName: text('insured_name').notNull(), // 피보험자명
+  insuredSsn: text('insured_ssn'), // 🆕 피보험자 주민번호 (암호화 저장)
+  insuredPhone: text('insured_phone'), // 🆕 피보험자 연락처
   beneficiaryName: text('beneficiary_name'), // 수익자명
 
   // 금액 정보
+  premiumAmount: decimal('premium_amount', { precision: 12, scale: 2 }), // 🆕 납입보험료 (통합)
   monthlyPremium: decimal('monthly_premium', { precision: 12, scale: 2 }), // 월 보험료
   annualPremium: decimal('annual_premium', { precision: 12, scale: 2 }), // 연 보험료
   coverageAmount: decimal('coverage_amount', { precision: 15, scale: 2 }), // 보장금액
@@ -750,6 +767,7 @@ export const insuranceContracts = pgTable('app_client_insurance_contracts', {
   // 특약 및 추가 정보
   specialClauses: text('special_clauses'), // 특약사항
   paymentMethod: text('payment_method'), // 납입방법 (월납, 연납 등)
+  paymentCycle: appPaymentCycleEnum('payment_cycle'), // 🆕 납입주기 (열거형)
   paymentPeriod: integer('payment_period'), // 납입기간 (년)
 
   // 메모 및 비고

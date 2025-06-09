@@ -29,20 +29,28 @@ export async function createInsuranceContract(
     productName: string;
     insuranceCompany: string;
     insuranceType: string;
+    insuranceCode?: string;
     contractNumber?: string;
     policyNumber?: string;
     contractDate: string;
     effectiveDate: string;
     expirationDate?: string;
+    paymentDueDate?: string;
     contractorName: string;
+    contractorSsn?: string;
+    contractorPhone?: string;
     insuredName: string;
+    insuredSsn?: string;
+    insuredPhone?: string;
     beneficiaryName?: string;
+    premiumAmount?: number;
     monthlyPremium?: number;
     annualPremium?: number;
     coverageAmount?: number;
     agentCommission?: number;
     specialClauses?: string;
     paymentMethod?: string;
+    paymentCycle?: string;
     paymentPeriod?: number;
     notes?: string;
     opportunityProductId?: string;
@@ -65,20 +73,28 @@ export async function createInsuranceContract(
       productName: contractData.productName,
       insuranceCompany: contractData.insuranceCompany,
       insuranceType: contractData.insuranceType as any,
+      insuranceCode: contractData.insuranceCode || null,
       contractNumber: contractData.contractNumber || null,
       policyNumber: contractData.policyNumber || null,
       contractDate: contractData.contractDate,
       effectiveDate: contractData.effectiveDate,
       expirationDate: contractData.expirationDate || null,
+      paymentDueDate: contractData.paymentDueDate || null,
       contractorName: contractData.contractorName,
+      contractorSsn: contractData.contractorSsn || null,
+      contractorPhone: contractData.contractorPhone || null,
       insuredName: contractData.insuredName,
+      insuredSsn: contractData.insuredSsn || null,
+      insuredPhone: contractData.insuredPhone || null,
       beneficiaryName: contractData.beneficiaryName || null,
+      premiumAmount: contractData.premiumAmount?.toString() || null,
       monthlyPremium: contractData.monthlyPremium?.toString() || null,
       annualPremium: contractData.annualPremium?.toString() || null,
       coverageAmount: contractData.coverageAmount?.toString() || null,
       agentCommission: contractData.agentCommission?.toString() || null,
       specialClauses: contractData.specialClauses || null,
       paymentMethod: contractData.paymentMethod || null,
+      paymentCycle: contractData.paymentCycle as any,
       paymentPeriod: contractData.paymentPeriod || null,
       notes: contractData.notes || null,
       status: 'active',
@@ -193,20 +209,28 @@ export async function getClientInsuranceContracts(
         productName: insuranceContracts.productName,
         insuranceCompany: insuranceContracts.insuranceCompany,
         insuranceType: insuranceContracts.insuranceType,
+        insuranceCode: insuranceContracts.insuranceCode,
         contractNumber: insuranceContracts.contractNumber,
         policyNumber: insuranceContracts.policyNumber,
         contractDate: insuranceContracts.contractDate,
         effectiveDate: insuranceContracts.effectiveDate,
         expirationDate: insuranceContracts.expirationDate,
+        paymentDueDate: insuranceContracts.paymentDueDate,
         contractorName: insuranceContracts.contractorName,
+        contractorSsn: insuranceContracts.contractorSsn,
+        contractorPhone: insuranceContracts.contractorPhone,
         insuredName: insuranceContracts.insuredName,
+        insuredSsn: insuranceContracts.insuredSsn,
+        insuredPhone: insuranceContracts.insuredPhone,
         beneficiaryName: insuranceContracts.beneficiaryName,
+        premiumAmount: insuranceContracts.premiumAmount,
         monthlyPremium: insuranceContracts.monthlyPremium,
         annualPremium: insuranceContracts.annualPremium,
         coverageAmount: insuranceContracts.coverageAmount,
         agentCommission: insuranceContracts.agentCommission,
         status: insuranceContracts.status,
         paymentMethod: insuranceContracts.paymentMethod,
+        paymentCycle: insuranceContracts.paymentCycle,
         paymentPeriod: insuranceContracts.paymentPeriod,
         specialClauses: insuranceContracts.specialClauses,
         notes: insuranceContracts.notes,
@@ -344,20 +368,28 @@ export async function updateInsuranceContract(
   updateData: Partial<{
     productName: string;
     insuranceCompany: string;
+    insuranceCode: string;
     contractNumber: string;
     policyNumber: string;
     contractDate: string;
     effectiveDate: string;
     expirationDate: string;
+    paymentDueDate: string;
     contractorName: string;
+    contractorSsn: string;
+    contractorPhone: string;
     insuredName: string;
+    insuredSsn: string;
+    insuredPhone: string;
     beneficiaryName: string;
+    premiumAmount: number;
     monthlyPremium: number;
     annualPremium: number;
     coverageAmount: number;
     agentCommission: number;
     specialClauses: string;
     paymentMethod: string;
+    paymentCycle: string;
     paymentPeriod: number;
     notes: string;
     status: 'draft' | 'active' | 'cancelled' | 'expired' | 'suspended';
@@ -370,10 +402,12 @@ export async function updateInsuranceContract(
       .update(insuranceContracts)
       .set({
         ...updateData,
+        premiumAmount: updateData.premiumAmount?.toString(),
         monthlyPremium: updateData.monthlyPremium?.toString(),
         annualPremium: updateData.annualPremium?.toString(),
         coverageAmount: updateData.coverageAmount?.toString(),
         agentCommission: updateData.agentCommission?.toString(),
+        paymentCycle: updateData.paymentCycle as any,
         updatedAt: new Date(),
       })
       .where(
@@ -416,20 +450,28 @@ export async function updateInsuranceContractWithAttachments(
   updateData: Partial<{
     productName: string;
     insuranceCompany: string;
+    insuranceCode: string;
     contractNumber: string;
     policyNumber: string;
     contractDate: string;
     effectiveDate: string;
     expirationDate: string;
+    paymentDueDate: string;
     contractorName: string;
+    contractorSsn: string;
+    contractorPhone: string;
     insuredName: string;
+    insuredSsn: string;
+    insuredPhone: string;
     beneficiaryName: string;
+    premiumAmount: number;
     monthlyPremium: number;
     annualPremium: number;
     coverageAmount: number;
     agentCommission: number;
     specialClauses: string;
     paymentMethod: string;
+    paymentCycle: string;
     paymentPeriod: number;
     notes: string;
     status: 'draft' | 'active' | 'cancelled' | 'expired' | 'suspended';

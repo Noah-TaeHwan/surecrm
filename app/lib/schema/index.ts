@@ -48,6 +48,17 @@ import {
   adminSettingsRelations,
 } from './core';
 
+// 🆕 보험계약 관련 타입들 (type-only import)
+import type {
+  InsuranceContract,
+  NewInsuranceContract,
+  ContractAttachment,
+  NewContractAttachment,
+  ContractStatus,
+  ContractDocumentType,
+  PaymentCycle,
+} from './core';
+
 import {
   // Public 테이블들
   publicContents,
