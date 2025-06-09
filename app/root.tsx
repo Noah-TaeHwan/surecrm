@@ -57,32 +57,29 @@ export function Layout({ children }: { children: React.ReactNode }) {
           />
         )}
 
-        {/* 🚀 극한 데이터 수집 시스템 (Production Only) */}
-        {import.meta.env.VITE_GA_MEASUREMENT_ID &&
-          typeof window !== 'undefined' &&
-          window.location.hostname !== 'localhost' &&
-          window.location.hostname !== '127.0.0.1' && (
-            <>
-              {/* Google Tag Manager */}
-              <script
-                dangerouslySetInnerHTML={{
-                  __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+        {/* 🚀 극한 사용자 경험 최적화 시스템 (Production & 테스트 환경) */}
+        {import.meta.env.VITE_GA_MEASUREMENT_ID && (
+          <>
+            {/* Google Tag Manager */}
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
                 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
                 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
                 })(window,document,'script','dataLayer','GTM-WTCFV4DC');`,
-                }}
-              />
-              {/* Google Analytics */}
-              <script
-                async
-                src={`https://www.googletagmanager.com/gtag/js?id=${
-                  import.meta.env.VITE_GA_MEASUREMENT_ID
-                }`}
-              />
-              <script
-                dangerouslySetInnerHTML={{
-                  __html: `
+              }}
+            />
+            {/* Google Analytics */}
+            <script
+              async
+              src={`https://www.googletagmanager.com/gtag/js?id=${
+                import.meta.env.VITE_GA_MEASUREMENT_ID
+              }`}
+            />
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `
                   window.dataLayer = window.dataLayer || [];
                   function gtag(){dataLayer.push(arguments);}
                   gtag('js', new Date());
@@ -175,10 +172,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     }
                   });
                 `,
-                }}
-              />
-            </>
-          )}
+              }}
+            />
+          </>
+        )}
         {/* 🔧 Buffer polyfill - 브라우저 환경에서 Buffer 사용 가능하도록 */}
         <script
           dangerouslySetInnerHTML={{
@@ -796,20 +793,17 @@ export function Layout({ children }: { children: React.ReactNode }) {
         />
       </head>
       <body className="font-sans text-foreground bg-background">
-        {/* 🚀 극한 데이터 수집 시스템 (Production Only) - GTM noscript */}
-        {import.meta.env.VITE_GTM_CONTAINER_ID &&
-          typeof window !== 'undefined' &&
-          window.location.hostname !== 'localhost' &&
-          window.location.hostname !== '127.0.0.1' && (
-            <noscript>
-              <iframe
-                src="https://www.googletagmanager.com/ns.html?id=GTM-WTCFV4DC"
-                height="0"
-                width="0"
-                style={{ display: 'none', visibility: 'hidden' }}
-              />
-            </noscript>
-          )}
+        {/* 🚀 극한 사용자 경험 최적화 시스템 - GTM noscript */}
+        {import.meta.env.VITE_GTM_CONTAINER_ID && (
+          <noscript>
+            <iframe
+              src="https://www.googletagmanager.com/ns.html?id=GTM-WTCFV4DC"
+              height="0"
+              width="0"
+              style={{ display: 'none', visibility: 'hidden' }}
+            />
+          </noscript>
+        )}
         <Outlet />
         <ScrollRestoration />
         <Scripts />

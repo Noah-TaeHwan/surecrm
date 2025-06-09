@@ -54,13 +54,16 @@ export function initGA(): void {
 
 // 페이지 뷰 추적
 export function trackPageView({ path, title }: PageViewProps): void {
-  // 🚀 Production 환경에서만 데이터 수집 (localhost 제외)
+  // 🚀 사용자 경험 최적화를 위한 스마트 환경 분리
   if (
     !GA_MEASUREMENT_ID ||
     typeof window === 'undefined' ||
     typeof window.gtag !== 'function' ||
     window.location.hostname === 'localhost' ||
-    window.location.hostname === '127.0.0.1'
+    window.location.hostname === '127.0.0.1' ||
+    window.location.port === '5173' ||
+    window.location.port === '3000' ||
+    window.location.port === '8080'
   )
     return;
 
@@ -82,13 +85,16 @@ export function trackEvent({
   value,
   custom_parameters,
 }: EventProps): void {
-  // 🚀 Production 환경에서만 데이터 수집 (localhost 제외)
+  // 🚀 사용자 경험 최적화를 위한 스마트 환경 분리
   if (
     !GA_MEASUREMENT_ID ||
     typeof window === 'undefined' ||
     typeof window.gtag !== 'function' ||
     window.location.hostname === 'localhost' ||
-    window.location.hostname === '127.0.0.1'
+    window.location.hostname === '127.0.0.1' ||
+    window.location.port === '5173' ||
+    window.location.port === '3000' ||
+    window.location.port === '8080'
   )
     return;
 
