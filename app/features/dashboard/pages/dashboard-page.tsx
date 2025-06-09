@@ -290,8 +290,9 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
     error,
   } = loaderData;
 
-  // Analytics 추적 - 극한 KPI 데이터와 함께
+  // 🔥 극한 사용자 경험 최적화 시스템 활성화
   useEffect(() => {
+    // 기존 Analytics 추적
     const analyticsKpiData = {
       totalClients: kpiData?.totalClients || 0,
       monthlyNewClients: kpiData?.monthlyNewClients || 0,
@@ -299,7 +300,113 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
       totalPremium: salesStats?.totalPremium || 0,
     };
     InsuranceAgentEvents.dashboardView(analyticsKpiData);
-  }, [kpiData, pipelineData, salesStats]);
+
+    // 🚀 극한 데이터 수집 - 대시보드 진입 시 모든 데이터 수집
+    if (typeof window !== 'undefined' && window.gtag) {
+      // 상세한 사용자 컨텍스트 수집
+      window.gtag('event', 'dashboard_detailed_view', {
+        event_category: 'dashboard_analytics',
+        user_role: user?.role || 'agent',
+        total_clients: kpiData?.totalClients || 0,
+        monthly_new_clients: kpiData?.monthlyNewClients || 0,
+        total_referrals: kpiData?.totalReferrals || 0,
+        conversion_rate: pipelineData?.stages?.[0]?.conversionRate || 0,
+        total_premium: salesStats?.totalPremium || 0,
+        total_commission: salesStats?.totalCommission || 0,
+        pipeline_stages_count: pipelineData?.stages?.length || 0,
+        recent_clients_count: recentClientsData?.recentClients?.length || 0,
+        active_goals_count: userGoals?.length || 0,
+        meetings_today: todayStats?.scheduledMeetings || 0,
+        pending_tasks: todayStats?.pendingTasks || 0,
+        network_connections: networkStats?.totalConnections || 0,
+
+        // 사용자 행동 패턴 예측
+        engagement_level:
+          (kpiData?.totalClients || 0) > 20
+            ? 'high'
+            : (kpiData?.totalClients || 0) > 5
+            ? 'medium'
+            : 'low',
+        business_maturity:
+          (salesStats?.totalPremium || 0) > 10000000
+            ? 'enterprise'
+            : (salesStats?.totalPremium || 0) > 1000000
+            ? 'professional'
+            : 'starter',
+        activity_score: Math.min(
+          100,
+          (todayStats?.scheduledMeetings || 0) * 20 +
+            (kpiData?.monthlyNewClients || 0) * 10
+        ),
+
+        // 시간 컨텍스트
+        access_time: new Date().toISOString(),
+        day_of_week: new Date().getDay(),
+        hour_of_day: new Date().getHours(),
+        is_weekend: [0, 6].includes(new Date().getDay()),
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+
+        // 페이지 로딩 성능
+        load_time: Date.now(),
+
+        // 맞춤형 차원
+        custom_dimension_user_segment:
+          (kpiData?.totalClients || 0) > 20 ? 'power_user' : 'regular_user',
+        custom_dimension_business_value: salesStats?.totalPremium || 0,
+        custom_dimension_growth_trend: kpiData?.clientGrowthPercentage || 0,
+      });
+    }
+
+    // GTM DataLayer에 상세 컨텍스트 푸시
+    if (typeof window !== 'undefined' && window.dataLayer) {
+      window.dataLayer.push({
+        event: 'dashboard_ultra_context',
+        page_name: 'dashboard',
+        user_context: {
+          user_id: user?.id,
+          user_role: user?.role,
+          user_preferences: user?.preferences,
+          business_metrics: {
+            clients: kpiData?.totalClients || 0,
+            referrals: kpiData?.totalReferrals || 0,
+            revenue: salesStats?.totalPremium || 0,
+            commission: salesStats?.totalCommission || 0,
+          },
+          activity_metrics: {
+            meetings_today: todayStats?.scheduledMeetings || 0,
+            pending_tasks: todayStats?.pendingTasks || 0,
+            urgent_notifications: todayStats?.urgentNotifications || 0,
+          },
+          performance_indicators: {
+            conversion_rate: pipelineData?.stages?.[0]?.conversionRate || 0,
+            client_growth: kpiData?.clientGrowthPercentage || 0,
+            revenue_growth: kpiData?.revenueGrowthPercentage || 0,
+          },
+          session_quality: {
+            page_load_time: Date.now(),
+            data_completeness:
+              ([kpiData, pipelineData, recentClientsData, todayStats].filter(
+                Boolean
+              ).length /
+                4) *
+              100,
+            error_status: error ? 'has_error' : 'clean',
+          },
+        },
+        timestamp: Date.now(),
+      });
+    }
+  }, [
+    kpiData,
+    pipelineData,
+    salesStats,
+    user,
+    recentClientsData,
+    todayStats,
+    userGoals,
+    networkStats,
+    error,
+  ]);
 
   const fetcher = useFetcher();
   const revalidator = useRevalidator();

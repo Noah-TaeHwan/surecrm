@@ -476,6 +476,444 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
   const removeFetcher = useFetcher(); // 고객 제거용
   const navigate = useNavigate(); // 🏢 계약 전환용
 
+  // === 🎯 사용자 경험 향상을 위한 파이프라인 페이지 고급 분석 시스템 ===
+  useEffect(() => {
+    const pageLoadTime = performance.now();
+
+    // 파이프라인 구조 분석
+    const pipelineAnalysis = {
+      pipeline_structure: {
+        total_stages: stages.length,
+        stage_names: stages.map((s: any) => s.name),
+        stage_distribution: stages.map((stage: any) => ({
+          stage_name: stage.name,
+          client_count: clients.filter((c: any) => c.stageId === stage.id)
+            .length,
+          stage_order: stage.order || 0,
+        })),
+      },
+      clients_analysis: {
+        total_in_pipeline: clients.length,
+        total_all_clients: totalAllClients,
+        pipeline_penetration:
+          totalAllClients > 0 ? (clients.length / totalAllClients) * 100 : 0,
+        importance_breakdown: {
+          high: clients.filter((c: any) => c.importance === 'high').length,
+          medium: clients.filter((c: any) => c.importance === 'medium').length,
+          low: clients.filter((c: any) => c.importance === 'low').length,
+        },
+      },
+      revenue_analysis: {
+        total_monthly_premium: clients.reduce(
+          (sum: number, c: any) => sum + (c.totalMonthlyPremium || 0),
+          0
+        ),
+        total_expected_commission: clients.reduce(
+          (sum: number, c: any) => sum + (c.totalExpectedCommission || 0),
+          0
+        ),
+        avg_client_value:
+          clients.length > 0
+            ? clients.reduce(
+                (sum: number, c: any) => sum + (c.totalExpectedCommission || 0),
+                0
+              ) / clients.length
+            : 0,
+        high_value_deals: clients.filter(
+          (c: any) => (c.totalExpectedCommission || 0) > 100000
+        ).length,
+      },
+      conversion_metrics: {
+        bottleneck_stage:
+          stages.length > 0
+            ? stages.reduce((max: any, stage: any) => {
+                const stageClients = clients.filter(
+                  (c: any) => c.stageId === stage.id
+                ).length;
+                const maxClients = clients.filter(
+                  (c: any) => c.stageId === max.id
+                ).length;
+                return stageClients > maxClients ? stage : max;
+              }, stages[0])?.name || 'unknown'
+            : 'no_stages',
+        pipeline_velocity: calculatePipelineVelocity(clients, stages),
+        stage_conversion_rates: calculateStageConversionRates(clients, stages),
+      },
+      workflow_efficiency: {
+        product_diversification: calculateProductDiversification(clients),
+        referral_in_pipeline: clients.filter((c: any) => c.referredBy).length,
+        active_opportunities: clients.filter(
+          (c: any) => c.products && c.products.length > 0
+        ).length,
+      },
+    };
+
+    // GA4 파이프라인 포괄 분석
+    if (typeof window !== 'undefined' && window.gtag) {
+      window.gtag('event', 'pipeline_access_comprehensive', {
+        event_category: 'sales_pipeline_intelligence',
+        pipeline_health_score: calculatePipelineHealthScore(pipelineAnalysis),
+        total_pipeline_value:
+          pipelineAnalysis.revenue_analysis.total_expected_commission,
+        pipeline_size: clients.length,
+        stage_count: stages.length,
+        penetration_rate:
+          pipelineAnalysis.clients_analysis.pipeline_penetration,
+        bottleneck_identified:
+          pipelineAnalysis.conversion_metrics.bottleneck_stage,
+        avg_deal_size: pipelineAnalysis.revenue_analysis.avg_client_value,
+        high_value_deals_count:
+          pipelineAnalysis.revenue_analysis.high_value_deals,
+        conversion_optimization_opportunity:
+          identifyOptimizationOpportunities(pipelineAnalysis),
+        session_context: {
+          user_expertise:
+            stages.length > 5
+              ? 'advanced'
+              : stages.length > 2
+              ? 'intermediate'
+              : 'beginner',
+          pipeline_maturity:
+            clients.length > 50
+              ? 'mature'
+              : clients.length > 20
+              ? 'growing'
+              : 'early',
+        },
+      });
+    }
+
+    // GTM DataLayer 정밀 파이프라인 분석
+    if (typeof window !== 'undefined' && window.dataLayer) {
+      window.dataLayer.push({
+        event: 'pipeline_deep_intelligence',
+        pipeline_analytics: {
+          structural_analysis: pipelineAnalysis.pipeline_structure,
+          client_composition: pipelineAnalysis.clients_analysis,
+          revenue_intelligence: pipelineAnalysis.revenue_analysis,
+          performance_metrics: pipelineAnalysis.conversion_metrics,
+          operational_insights: pipelineAnalysis.workflow_efficiency,
+        },
+        business_strategy: {
+          growth_indicators: {
+            pipeline_capacity: (clients.length / totalAllClients) * 100,
+            revenue_concentration:
+              pipelineAnalysis.revenue_analysis.high_value_deals /
+              clients.length,
+            stage_utilization:
+              stages.length > 0
+                ? stages.filter((s: any) =>
+                    clients.some((c: any) => c.stageId === s.id)
+                  ).length / stages.length
+                : 0,
+          },
+          optimization_signals: {
+            bottleneck_severity: calculateBottleneckSeverity(pipelineAnalysis),
+            conversion_gaps: identifyConversionGaps(pipelineAnalysis),
+            revenue_leakage_risk: calculateRevenueLeakageRisk(pipelineAnalysis),
+          },
+          competitive_positioning: {
+            pipeline_sophistication_score:
+              stages.length * 20 + clients.length * 2,
+            process_maturity:
+              stages.length >= 5
+                ? 'advanced'
+                : stages.length >= 3
+                ? 'standard'
+                : 'basic',
+            scale_readiness:
+              clients.length > 100
+                ? 'enterprise'
+                : clients.length > 30
+                ? 'growth'
+                : 'startup',
+          },
+        },
+        user_intelligence: {
+          interaction_intent: 'pipeline_management',
+          expected_workflows: [
+            'client_progression',
+            'deal_closing',
+            'pipeline_optimization',
+          ],
+          session_complexity: calculateSessionComplexity(
+            clients.length,
+            stages.length
+          ),
+          feature_utilization_prediction: predictFeatureUsage(pipelineAnalysis),
+        },
+        timestamp: Date.now(),
+        session_id: `pipeline_${Date.now()}_${Math.random()
+          .toString(36)
+          .substr(2, 9)}`,
+      });
+    }
+
+    // 실시간 파이프라인 상호작용 추적 설정
+    const setupPipelineInteractionTracking = () => {
+      // 클라이언트 이동 추적
+      const trackClientMove = (
+        clientId: string,
+        fromStage: string,
+        toStage: string
+      ) => {
+        const client = clients.find((c: any) => c.id === clientId);
+        if (client && window.gtag) {
+          window.gtag('event', 'pipeline_client_movement', {
+            event_category: 'pipeline_workflow',
+            client_importance: client.importance,
+            from_stage: fromStage,
+            to_stage: toStage,
+            client_value: client.totalExpectedCommission || 0,
+            move_direction: getPipelineDirection(fromStage, toStage, stages),
+            stage_progression_score: calculateStageProgressionScore(
+              fromStage,
+              toStage,
+              stages
+            ),
+          });
+        }
+      };
+
+      // 단계별 필터링 추적
+      const trackStageFilter = (stageId: string, stageName: string) => {
+        if (window.gtag) {
+          window.gtag('event', 'pipeline_stage_focus', {
+            event_category: 'pipeline_navigation',
+            focused_stage: stageName,
+            stage_client_count: clients.filter(
+              (c: any) => c.stageId === stageId
+            ).length,
+            stage_value: clients
+              .filter((c: any) => c.stageId === stageId)
+              .reduce(
+                (sum: number, c: any) => sum + (c.totalExpectedCommission || 0),
+                0
+              ),
+          });
+        }
+      };
+
+      // 전역 함수 등록
+      (window as any).trackClientMove = trackClientMove;
+      (window as any).trackStageFilter = trackStageFilter;
+    };
+
+    setupPipelineInteractionTracking();
+
+    // 페이지 이탈 시 파이프라인 세션 분석
+    const handlePageUnload = () => {
+      const sessionDuration = Date.now() - pageLoadTime;
+      if (window.gtag) {
+        window.gtag('event', 'pipeline_session_analysis', {
+          event_category: 'session_intelligence',
+          session_duration: sessionDuration,
+          clients_interacted: (window as any).pipelineClientsInteracted || 0,
+          stages_reviewed: (window as any).pipelineStagesReviewed || 0,
+          moves_performed: (window as any).pipelineMovesPerformed || 0,
+          final_pipeline_state: {
+            total_value:
+              pipelineAnalysis.revenue_analysis.total_expected_commission,
+            client_distribution:
+              pipelineAnalysis.pipeline_structure.stage_distribution,
+          },
+        });
+      }
+    };
+
+    window.addEventListener('beforeunload', handlePageUnload);
+    return () => window.removeEventListener('beforeunload', handlePageUnload);
+
+    // === 🎯 파이프라인 분석 유틸리티 함수들 ===
+    function calculatePipelineVelocity(clients: any[], stages: any[]) {
+      // 파이프라인 속도 계산 (평균 단계 진행 시간)
+      if (clients.length === 0) return 0;
+      return (
+        clients.reduce((sum: number, client: any) => {
+          const daysInStage = client.updatedAt
+            ? Math.floor(
+                (Date.now() - new Date(client.updatedAt).getTime()) /
+                  (1000 * 60 * 60 * 24)
+              )
+            : 0;
+          return sum + daysInStage;
+        }, 0) / clients.length
+      );
+    }
+
+    function calculateStageConversionRates(clients: any[], stages: any[]) {
+      return stages.map((stage: any, index: number) => {
+        const currentStageClients = clients.filter(
+          (c: any) => c.stageId === stage.id
+        ).length;
+        const nextStage = stages[index + 1];
+        const nextStageClients = nextStage
+          ? clients.filter((c: any) => c.stageId === nextStage.id).length
+          : 0;
+
+        return {
+          stage: stage.name,
+          conversion_rate:
+            currentStageClients > 0
+              ? (nextStageClients / currentStageClients) * 100
+              : 0,
+        };
+      });
+    }
+
+    function calculateProductDiversification(clients: any[]) {
+      const allProducts = clients.flatMap((c: any) => c.products || []);
+      const uniqueProducts = new Set(
+        allProducts.map((p: any) => p.productName || p.insuranceType)
+      );
+      return uniqueProducts.size;
+    }
+
+    function calculatePipelineHealthScore(analysis: any) {
+      const valueScore =
+        Math.min(
+          analysis.revenue_analysis.total_expected_commission / 1000000,
+          1
+        ) * 30;
+      const distributionScore =
+        analysis.pipeline_structure.total_stages > 0
+          ? (1 -
+              Math.abs(
+                analysis.clients_analysis.total_in_pipeline /
+                  analysis.pipeline_structure.total_stages -
+                  5
+              ) /
+                10) *
+            25
+          : 0;
+      const penetrationScore =
+        analysis.clients_analysis.pipeline_penetration * 0.25;
+      const diversificationScore =
+        Math.min(analysis.workflow_efficiency.product_diversification / 10, 1) *
+        20;
+
+      return Math.round(
+        valueScore + distributionScore + penetrationScore + diversificationScore
+      );
+    }
+
+    function identifyOptimizationOpportunities(analysis: any) {
+      const opportunities = [];
+
+      if (analysis.conversion_metrics.bottleneck_stage !== 'no_stages') {
+        opportunities.push('bottleneck_resolution');
+      }
+      if (analysis.clients_analysis.pipeline_penetration < 50) {
+        opportunities.push('pipeline_expansion');
+      }
+      if (
+        analysis.revenue_analysis.high_value_deals /
+          analysis.clients_analysis.total_in_pipeline <
+        0.2
+      ) {
+        opportunities.push('deal_value_optimization');
+      }
+      if (
+        analysis.workflow_efficiency.referral_in_pipeline /
+          analysis.clients_analysis.total_in_pipeline <
+        0.3
+      ) {
+        opportunities.push('referral_program_enhancement');
+      }
+
+      return opportunities;
+    }
+
+    function calculateBottleneckSeverity(analysis: any) {
+      const stageDistribution = analysis.pipeline_structure.stage_distribution;
+      if (stageDistribution.length === 0) return 0;
+
+      const maxClients = Math.max(
+        ...stageDistribution.map((s: any) => s.client_count)
+      );
+      const avgClients =
+        stageDistribution.reduce(
+          (sum: number, s: any) => sum + s.client_count,
+          0
+        ) / stageDistribution.length;
+
+      return maxClients > 0
+        ? ((maxClients - avgClients) / maxClients) * 100
+        : 0;
+    }
+
+    function identifyConversionGaps(analysis: any) {
+      return analysis.conversion_metrics.stage_conversion_rates
+        .filter((rate: any) => rate.conversion_rate < 50)
+        .map((rate: any) => rate.stage);
+    }
+
+    function calculateRevenueLeakageRisk(analysis: any) {
+      const lowValueDeals =
+        analysis.clients_analysis.total_in_pipeline -
+        analysis.revenue_analysis.high_value_deals;
+      return analysis.clients_analysis.total_in_pipeline > 0
+        ? (lowValueDeals / analysis.clients_analysis.total_in_pipeline) * 100
+        : 0;
+    }
+
+    function calculateSessionComplexity(
+      clientCount: number,
+      stageCount: number
+    ) {
+      if (clientCount > 100 || stageCount > 6) return 'high';
+      if (clientCount > 30 || stageCount > 4) return 'medium';
+      return 'low';
+    }
+
+    function predictFeatureUsage(analysis: any) {
+      const predictions = [];
+
+      if (analysis.clients_analysis.total_in_pipeline > 20) {
+        predictions.push('advanced_filtering');
+      }
+      if (analysis.revenue_analysis.high_value_deals > 5) {
+        predictions.push('deal_management');
+      }
+      if (analysis.workflow_efficiency.referral_in_pipeline > 10) {
+        predictions.push('referral_tracking');
+      }
+
+      return predictions;
+    }
+
+    function getPipelineDirection(
+      fromStage: string,
+      toStage: string,
+      stages: any[]
+    ) {
+      const fromIndex = stages.findIndex((s: any) => s.name === fromStage);
+      const toIndex = stages.findIndex((s: any) => s.name === toStage);
+
+      if (fromIndex === -1 || toIndex === -1) return 'unknown';
+      if (toIndex > fromIndex) return 'forward';
+      if (toIndex < fromIndex) return 'backward';
+      return 'same';
+    }
+
+    function calculateStageProgressionScore(
+      fromStage: string,
+      toStage: string,
+      stages: any[]
+    ) {
+      const direction = getPipelineDirection(fromStage, toStage, stages);
+      const fromIndex = stages.findIndex((s: any) => s.name === fromStage);
+      const toIndex = stages.findIndex((s: any) => s.name === toStage);
+
+      if (direction === 'forward') {
+        return Math.min((toIndex - fromIndex) * 20, 100);
+      } else if (direction === 'backward') {
+        return Math.max((fromIndex - toIndex) * -10, -50);
+      }
+      return 0;
+    }
+  }, [stages, clients, totalAllClients]);
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedReferrerId, setSelectedReferrerId] = useState<string | null>(
     null

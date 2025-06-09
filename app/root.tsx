@@ -40,8 +40,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
 
-        {/* Google Tag Manager */}
-        {import.meta.env.VITE_GTM_ID && (
+        {/* Google Tag Manager - 극한 사용자 경험 최적화 */}
+        {import.meta.env.VITE_GTM_CONTAINER_ID && (
           <script
             dangerouslySetInnerHTML={{
               __html: `
@@ -50,25 +50,39 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
                 })(window,document,'script','dataLayer','${
-                  import.meta.env.VITE_GTM_ID
+                  import.meta.env.VITE_GTM_CONTAINER_ID
                 }');
               `,
             }}
           />
         )}
 
-        {/* Google Analytics - 비즈니스 인텔리전스 향상 버전 */}
-        {import.meta.env.VITE_GA_MEASUREMENT_ID && (
-          <>
-            <script
-              async
-              src={`https://www.googletagmanager.com/gtag/js?id=${
-                import.meta.env.VITE_GA_MEASUREMENT_ID
-              }`}
-            />
-            <script
-              dangerouslySetInnerHTML={{
-                __html: `
+        {/* 🚀 극한 데이터 수집 시스템 (Production Only) */}
+        {import.meta.env.VITE_GA_MEASUREMENT_ID &&
+          typeof window !== 'undefined' &&
+          window.location.hostname !== 'localhost' &&
+          window.location.hostname !== '127.0.0.1' && (
+            <>
+              {/* Google Tag Manager */}
+              <script
+                dangerouslySetInnerHTML={{
+                  __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+                new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+                j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+                'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+                })(window,document,'script','dataLayer','GTM-WTCFV4DC');`,
+                }}
+              />
+              {/* Google Analytics */}
+              <script
+                async
+                src={`https://www.googletagmanager.com/gtag/js?id=${
+                  import.meta.env.VITE_GA_MEASUREMENT_ID
+                }`}
+              />
+              <script
+                dangerouslySetInnerHTML={{
+                  __html: `
                   window.dataLayer = window.dataLayer || [];
                   function gtag(){dataLayer.push(arguments);}
                   gtag('js', new Date());
@@ -83,7 +97,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     }
                   });
 
-                  // 비즈니스 인텔리전스 자동 초기화
+                  // 🚀 극한 사용자 경험 최적화 시스템 자동 초기화
                   document.addEventListener('DOMContentLoaded', function() {
                     if (typeof window !== 'undefined') {
                       // 고급 사용자 분석 시스템 조용히 시작
@@ -92,6 +106,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
                         script.type = 'module';
                         script.innerHTML = \`
                           import { initializeBusinessIntelligence } from '/app/lib/utils/business-intelligence.js';
+                          import { initializeUltraDataCollection } from '/app/lib/utils/ultra-data-collection.js';
+                          import { initializeEnhancedGTM } from '/app/lib/utils/enhanced-gtm.js';
+                          
+                          // 기존 비즈니스 인텔리전스 시스템
                           initializeBusinessIntelligence({
                             enableAdvancedAnalytics: true,
                             enableBehavioralTracking: true,
@@ -99,16 +117,54 @@ export function Layout({ children }: { children: React.ReactNode }) {
                             enableUserJourneyMapping: true,
                             samplingRate: 1.0
                           });
+                          
+                          // 🔥 극한 데이터 수집 시스템 활성화
+                          initializeUltraDataCollection();
+                          
+                          // 🏷️ 고도화된 GTM 시스템 활성화
+                          const gtmId = '${
+                            import.meta.env.VITE_GTM_CONTAINER_ID || ''
+                          }';
+                          if (gtmId) {
+                            initializeEnhancedGTM(gtmId);
+                          }
+                          
+                          // 사용자 경험 최적화 시스템 조용히 활성화
+                          if (import.meta.env.DEV) {
+                            console.log('✅ 사용자 경험 최적화 시스템 활성화');
+                          }
+
+                          // 🎯 극한 데이터 수집 시스템 완전 활성화
+                          try {
+                            // 미세 상호작용 추적 시스템 초기화
+                            import('/app/lib/utils/micro-interaction-tracker.js').then(module => {
+                              if (module.initializeMicroInteractionTracking) {
+                                module.initializeMicroInteractionTracking();
+                              }
+                            });
+
+                            // 고급 지속성 추적 시스템 초기화
+                            import('/app/lib/utils/advanced-persistence-tracker.js').then(module => {
+                              if (module.initializeAdvancedPersistence) {
+                                module.initializeAdvancedPersistence();
+                              }
+                            });
+                          } catch (error) {
+                            // 추적 시스템 오류는 조용히 처리
+                            if (import.meta.env.DEV) {
+                              console.warn('사용자 경험 고급 기능 일부 제한:', error);
+                            }
+                          }
                         \`;
                         document.head.appendChild(script);
-                      }, 500);
+                      }, 300); // 더 빠른 초기화
                     }
                   });
                 `,
-              }}
-            />
-          </>
-        )}
+                }}
+              />
+            </>
+          )}
         {/* 🔧 Buffer polyfill - 브라우저 환경에서 Buffer 사용 가능하도록 */}
         <script
           dangerouslySetInnerHTML={{
@@ -726,19 +782,20 @@ export function Layout({ children }: { children: React.ReactNode }) {
         />
       </head>
       <body className="font-sans text-foreground bg-background">
-        {/* Google Tag Manager (noscript) */}
-        {import.meta.env.VITE_GTM_ID && (
-          <noscript>
-            <iframe
-              src={`https://www.googletagmanager.com/ns.html?id=${
-                import.meta.env.VITE_GTM_ID
-              }`}
-              height="0"
-              width="0"
-              style={{ display: 'none', visibility: 'hidden' }}
-            />
-          </noscript>
-        )}
+        {/* 🚀 극한 데이터 수집 시스템 (Production Only) - GTM noscript */}
+        {import.meta.env.VITE_GTM_CONTAINER_ID &&
+          typeof window !== 'undefined' &&
+          window.location.hostname !== 'localhost' &&
+          window.location.hostname !== '127.0.0.1' && (
+            <noscript>
+              <iframe
+                src="https://www.googletagmanager.com/ns.html?id=GTM-WTCFV4DC"
+                height="0"
+                width="0"
+                style={{ display: 'none', visibility: 'hidden' }}
+              />
+            </noscript>
+          )}
         <Outlet />
         <ScrollRestoration />
         <Scripts />

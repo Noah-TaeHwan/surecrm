@@ -54,10 +54,13 @@ export function initGA(): void {
 
 // 페이지 뷰 추적
 export function trackPageView({ path, title }: PageViewProps): void {
+  // 🚀 Production 환경에서만 데이터 수집 (localhost 제외)
   if (
     !GA_MEASUREMENT_ID ||
     typeof window === 'undefined' ||
-    typeof window.gtag !== 'function'
+    typeof window.gtag !== 'function' ||
+    window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1'
   )
     return;
 
@@ -67,10 +70,8 @@ export function trackPageView({ path, title }: PageViewProps): void {
     page_path: path,
   });
 
-  // 개발 환경에서만 상세 로그
-  if (import.meta.env.DEV) {
-    console.log('📊 Page View:', path);
-  }
+  // Production 환경에서만 데이터 수집
+  // 개발 환경에서는 조용히 동작 (콘솔 로그 없음)
 }
 
 // 커스텀 이벤트 추적
@@ -81,10 +82,13 @@ export function trackEvent({
   value,
   custom_parameters,
 }: EventProps): void {
+  // 🚀 Production 환경에서만 데이터 수집 (localhost 제외)
   if (
     !GA_MEASUREMENT_ID ||
     typeof window === 'undefined' ||
-    typeof window.gtag !== 'function'
+    typeof window.gtag !== 'function' ||
+    window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1'
   )
     return;
 
@@ -97,9 +101,10 @@ export function trackEvent({
 
   window.gtag('event', action, eventData);
 
-  // 개발 환경에서만 상세 로그
-  if (import.meta.env.DEV) {
-    console.log('🎯 Event:', { action, category, label });
+  // Production 환경에서만 데이터 수집
+  // 개발 환경에서는 조용히 동작 (콘솔 로그 없음)
+  if (!import.meta.env.DEV && window.location.hostname !== 'localhost') {
+    // Production 환경에서만 조용히 로그
   }
 }
 

@@ -18,6 +18,15 @@ import { Badge } from '~/common/components/ui/badge';
 import { Progress } from '~/common/components/ui/progress';
 import { useBusinessIntelligence } from '~/hooks/use-business-intelligence';
 import { InsuranceAgentEvents } from '~/lib/utils/analytics';
+import {
+  getUltraDataSystem,
+  initializeUltraDataCollection,
+} from '~/lib/utils/ultra-data-collection';
+import {
+  getGTMSystem,
+  initializeEnhancedGTM,
+  SureCRMGTMEvents,
+} from '~/lib/utils/enhanced-gtm';
 
 export function meta() {
   return [
@@ -46,6 +55,17 @@ export default function AnalyticsTestPage() {
   const [predictions, setPredictions] = useState<any>(null);
   const [recommendations, setRecommendations] = useState<any[]>([]);
 
+  // 🔥 극한 데이터 수집 시스템 상태
+  const [ultraDataActive, setUltraDataActive] = useState(false);
+  const [ultraCollectedData, setUltraCollectedData] = useState<any>(null);
+  const [gtmDataLayer, setGtmDataLayer] = useState<any[]>([]);
+  const [realTimeMetrics, setRealTimeMetrics] = useState<any>({
+    totalEvents: 0,
+    dataPointsPerSecond: 0,
+    sessionDuration: 0,
+    behaviorScore: 0,
+  });
+
   // 실시간 데이터 스트림 업데이트
   useEffect(() => {
     if (!isActive) return;
@@ -72,6 +92,41 @@ export default function AnalyticsTestPage() {
     predictUserBehavior,
     getPersonalizedRecommendations,
   ]);
+
+  // 🚀 극한 데이터 수집 시스템 업데이트
+  useEffect(() => {
+    if (!ultraDataActive) return;
+
+    const interval = setInterval(() => {
+      const ultraSystem = getUltraDataSystem();
+      const gtmSystem = getGTMSystem();
+
+      if (ultraSystem) {
+        const collectedData = ultraSystem.getCollectedData();
+        setUltraCollectedData(collectedData);
+
+        // 실시간 메트릭 계산
+        setRealTimeMetrics({
+          totalEvents: collectedData.dataPoints?.length || 0,
+          dataPointsPerSecond: Math.round(
+            (collectedData.dataPoints?.length || 0) /
+              ((Date.now() - collectedData.sessionStartTime) / 1000)
+          ),
+          sessionDuration: Math.round(
+            (Date.now() - collectedData.sessionStartTime) / 1000
+          ),
+          behaviorScore: collectedData.businessMetrics?.satisfactionScore || 0,
+        });
+      }
+
+      if (gtmSystem) {
+        const dataLayer = gtmSystem.getDataLayer();
+        setGtmDataLayer(dataLayer.slice(-10)); // 최근 10개만 표시
+      }
+    }, 500); // 더 빠른 업데이트
+
+    return () => clearInterval(interval);
+  }, [ultraDataActive]);
 
   // 테스트 이벤트 함수들
   const testEvents = {
@@ -112,6 +167,88 @@ export default function AnalyticsTestPage() {
         monthlyGrowth: 12.5,
         conversionRate: 8.3,
       });
+    },
+  };
+
+  // 🔥 극한 데이터 수집 테스트 함수들
+  const ultraTestEvents = {
+    activateUltraCollection: () => {
+      initializeUltraDataCollection();
+      initializeEnhancedGTM('GTM-WTCFV4DC');
+      setUltraDataActive(true);
+    },
+
+    deactivateUltraCollection: () => {
+      setUltraDataActive(false);
+    },
+
+    generateMouseHeatmap: () => {
+      // 가상의 마우스 클릭 데이터 생성
+      for (let i = 0; i < 20; i++) {
+        setTimeout(() => {
+          const x = Math.random() * window.innerWidth;
+          const y = Math.random() * window.innerHeight;
+          document.dispatchEvent(
+            new MouseEvent('click', {
+              clientX: x,
+              clientY: y,
+              bubbles: true,
+            })
+          );
+        }, i * 100);
+      }
+    },
+
+    simulateTypingPattern: () => {
+      // 타이핑 패턴 시뮬레이션
+      const keys = ['a', 'b', 'c', 'd', 'e', 'f'];
+      keys.forEach((key, index) => {
+        setTimeout(() => {
+          document.dispatchEvent(
+            new KeyboardEvent('keydown', {
+              key: key,
+              bubbles: true,
+            })
+          );
+        }, index * 200);
+      });
+    },
+
+    triggerScrollEvents: () => {
+      // 스크롤 이벤트 시뮬레이션
+      let scrollPosition = 0;
+      const scrollInterval = setInterval(() => {
+        scrollPosition += 100;
+        window.scrollTo(0, scrollPosition);
+        if (scrollPosition > 500) {
+          clearInterval(scrollInterval);
+          window.scrollTo(0, 0);
+        }
+      }, 100);
+    },
+
+    sendCustomGTMEvent: () => {
+      SureCRMGTMEvents.dashboardView({
+        testEvent: true,
+        timestamp: Date.now(),
+        userAction: 'manual_test',
+      });
+    },
+
+    testConversionTracking: () => {
+      const ultraSystem = getUltraDataSystem();
+      if (ultraSystem) {
+        ultraSystem.trackConversion('test_conversion', 1000);
+        ultraSystem.setCustomDimension('test_dimension', 'ultra_test_value');
+      }
+    },
+
+    generateBehaviorPattern: () => {
+      // 복잡한 사용자 행동 패턴 시뮬레이션
+      ultraTestEvents.generateMouseHeatmap();
+      setTimeout(() => ultraTestEvents.simulateTypingPattern(), 1000);
+      setTimeout(() => ultraTestEvents.triggerScrollEvents(), 2000);
+      setTimeout(() => ultraTestEvents.sendCustomGTMEvent(), 3000);
     },
   };
 

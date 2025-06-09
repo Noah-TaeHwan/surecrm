@@ -479,6 +479,265 @@ export default function ClientsPage({ loaderData }: any) {
     'name' | 'stage' | 'importance' | 'premium' | 'lastContact' | 'createdAt'
   >('createdAt');
 
+  // === 🎯 사용자 경험 향상을 위한 클라이언트 페이지 행동 분석 시스템 ===
+  useEffect(() => {
+    const clients = loaderData?.clients || MOCK_CLIENTS;
+    const stats = loaderData?.stats || {
+      totalClients: MOCK_CLIENTS.length,
+      newThisMonth: 5,
+      activePipeline: 12,
+      conversionRate: 68,
+    };
+
+    // 페이지 진입 시 포괄적인 컨텍스트 정보 수집
+    const pageLoadTime = performance.now();
+    const sessionContext = {
+      page: 'clients_management',
+      user_context: {
+        total_clients: clients?.length || 0,
+        has_active_pipeline: (stats?.activePipeline || 0) > 0,
+        conversion_rate: stats?.conversionRate || 0,
+        new_clients_this_month: stats?.newThisMonth || 0,
+      },
+      interaction_intent: 'client_management_access',
+      business_context: {
+        client_base_size: clients?.length || 0,
+        pipeline_health: stats?.activePipeline || 0,
+        growth_indicator: stats?.newThisMonth || 0,
+        performance_metric: stats?.conversionRate || 0,
+      },
+      technical_metrics: {
+        page_load_time: pageLoadTime,
+        initial_render_timestamp: Date.now(),
+        device_capabilities: {
+          memory: (navigator as any).deviceMemory || 'unknown',
+          cores: navigator.hardwareConcurrency || 'unknown',
+          connection: (navigator as any).connection?.effectiveType || 'unknown',
+        },
+      },
+    };
+
+    // 클라이언트 데이터 구조 분석
+    if (clients && clients.length > 0) {
+      const clientAnalysis = {
+        importance_distribution: {
+          high: clients.filter((c: ClientProfile) => c.importance === 'high')
+            .length,
+          medium: clients.filter(
+            (c: ClientProfile) => c.importance === 'medium'
+          ).length,
+          low: clients.filter((c: ClientProfile) => c.importance === 'low')
+            .length,
+        },
+        stage_distribution: clients.reduce(
+          (acc: any, client: ClientProfile) => {
+            const stage = client.currentStage?.name || 'unknown';
+            acc[stage] = (acc[stage] || 0) + 1;
+            return acc;
+          },
+          {}
+        ),
+        engagement_metrics: {
+          high_engagement: clients.filter(
+            (c: ClientProfile) => c.engagementScore > 8
+          ).length,
+          avg_engagement:
+            clients.reduce(
+              (sum: number, c: ClientProfile) => sum + (c.engagementScore || 0),
+              0
+            ) / clients.length,
+          high_conversion_probability: clients.filter(
+            (c: ClientProfile) => c.conversionProbability > 80
+          ).length,
+        },
+        revenue_potential: {
+          total_lifetime_value: clients.reduce(
+            (sum: number, c: ClientProfile) => sum + (c.lifetimeValue || 0),
+            0
+          ),
+          avg_premium:
+            clients.reduce(
+              (sum: number, c: ClientProfile) => sum + (c.totalPremium || 0),
+              0
+            ) / clients.length,
+          high_value_clients: clients.filter(
+            (c: ClientProfile) => (c.lifetimeValue || 0) > 3000000
+          ).length,
+        },
+        network_insights: {
+          referral_generators: clients.filter(
+            (c: ClientProfile) => (c.referralCount || 0) > 0
+          ).length,
+          total_referrals: clients.reduce(
+            (sum: number, c: ClientProfile) => sum + (c.referralCount || 0),
+            0
+          ),
+          referral_chain_depth: Math.max(
+            ...clients.map((c: ClientProfile) => c.referralCount || 0)
+          ),
+        },
+      };
+
+      // GA4 향상된 클라이언트 관리 분석
+      if (typeof window !== 'undefined' && window.gtag) {
+        window.gtag('event', 'client_management_access', {
+          event_category: 'client_portfolio_analysis',
+          ...sessionContext.user_context,
+          client_analysis: JSON.stringify(clientAnalysis),
+          business_performance: {
+            portfolio_health_score:
+              (stats?.conversionRate || 0) * 0.6 +
+              (clientAnalysis.engagement_metrics.avg_engagement || 0) * 0.4,
+            growth_momentum: stats?.newThisMonth || 0,
+            revenue_concentration:
+              clientAnalysis.revenue_potential.high_value_clients /
+              (clients.length || 1),
+          },
+          operational_insights: {
+            client_diversity: Object.keys(clientAnalysis.stage_distribution)
+              .length,
+            referral_efficiency:
+              clientAnalysis.network_insights.total_referrals /
+              (clients.length || 1),
+            engagement_quality:
+              clientAnalysis.engagement_metrics.high_engagement /
+              (clients.length || 1),
+          },
+          session_intelligence: {
+            access_pattern: 'direct_navigation',
+            user_expertise_level:
+              clients.length > 50
+                ? 'expert'
+                : clients.length > 20
+                ? 'intermediate'
+                : 'beginner',
+            portfolio_complexity: clientAnalysis.stage_distribution,
+          },
+        });
+      }
+
+      // GTM DataLayer 정밀 분석
+      if (typeof window !== 'undefined' && window.dataLayer) {
+        window.dataLayer.push({
+          event: 'client_portfolio_deep_analysis',
+          page_context: {
+            section: 'client_management',
+            subsection: 'client_overview',
+            action_capability: 'full_client_operations',
+          },
+          business_intelligence: {
+            portfolio_composition: clientAnalysis,
+            performance_indicators: {
+              conversion_health: stats?.conversionRate || 0,
+              growth_velocity: stats?.newThisMonth || 0,
+              pipeline_strength: stats?.activePipeline || 0,
+              total_portfolio_size: clients.length,
+            },
+            strategic_insights: {
+              high_value_concentration:
+                (clientAnalysis.revenue_potential.high_value_clients /
+                  (clients.length || 1)) *
+                100,
+              referral_network_strength:
+                clientAnalysis.network_insights.total_referrals,
+              engagement_distribution: clientAnalysis.engagement_metrics,
+              market_penetration_indicators:
+                clientAnalysis.importance_distribution,
+            },
+            operational_efficiency: {
+              avg_client_value: clientAnalysis.revenue_potential.avg_premium,
+              portfolio_diversification:
+                Object.keys(clientAnalysis.stage_distribution).length / 6, // 가정: 6개 단계
+              referral_multiplication_factor:
+                clientAnalysis.network_insights.total_referrals /
+                (clients.length || 1),
+            },
+          },
+          user_behavior_context: {
+            page_access_intent: 'portfolio_management',
+            expected_actions: [
+              'client_review',
+              'contact_planning',
+              'pipeline_optimization',
+            ],
+            session_complexity:
+              clients.length > 100
+                ? 'high'
+                : clients.length > 50
+                ? 'medium'
+                : 'low',
+          },
+          timestamp: Date.now(),
+          session_id: `client_mgmt_${Date.now()}_${Math.random()
+            .toString(36)
+            .substr(2, 8)}`,
+        });
+      }
+    }
+
+    // 클라이언트 개별 분석 및 액션 예측
+    const setupClientInteractionTracking = () => {
+      // 클라이언트 행 클릭 추적
+      const trackClientInteraction = (clientId: string, action: string) => {
+        const client = clients.find((c: ClientProfile) => c.id === clientId);
+        if (client && window.gtag) {
+          window.gtag('event', 'client_interaction', {
+            event_category: 'client_individual_analysis',
+            client_importance: client.importance,
+            client_stage: client.currentStage?.name,
+            client_engagement: client.engagementScore,
+            conversion_probability: client.conversionProbability,
+            interaction_type: action,
+            client_lifetime_value: client.lifetimeValue,
+            referral_potential: client.referralCount,
+            premium_value: client.totalPremium,
+            last_contact_recency: client.lastContactDate
+              ? Math.floor(
+                  (Date.now() - new Date(client.lastContactDate).getTime()) /
+                    (1000 * 60 * 60 * 24)
+                )
+              : null,
+          });
+        }
+      };
+
+      // 필터 사용 추적
+      const trackFilterUsage = (filterType: string, filterValue: string) => {
+        if (window.gtag) {
+          window.gtag('event', 'client_filter_applied', {
+            event_category: 'portfolio_navigation',
+            filter_type: filterType,
+            filter_value: filterValue,
+            current_client_count: clients.length,
+            session_context: 'client_management',
+          });
+        }
+      };
+
+      // 전역에 함수 등록
+      (window as any).trackClientInteraction = trackClientInteraction;
+      (window as any).trackFilterUsage = trackFilterUsage;
+    };
+
+    setupClientInteractionTracking();
+
+    // 페이지 이탈 시 세션 분석
+    const handlePageUnload = () => {
+      const sessionDuration = Date.now() - pageLoadTime;
+      if (window.gtag) {
+        window.gtag('event', 'client_management_session_end', {
+          event_category: 'session_analysis',
+          session_duration: sessionDuration,
+          clients_reviewed: (window as any).clientsReviewedCount || 0,
+          actions_performed: (window as any).actionsPerformedCount || 0,
+        });
+      }
+    };
+
+    window.addEventListener('beforeunload', handlePageUnload);
+    return () => window.removeEventListener('beforeunload', handlePageUnload);
+  }, [loaderData]);
+
   // 🎯 모달 상태 관리
   const [showAddClientModal, setShowAddClientModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);

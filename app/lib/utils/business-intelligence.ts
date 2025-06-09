@@ -318,7 +318,7 @@ class BusinessIntelligenceSystem {
       }
     };
 
-    // History API 감시
+    // History API 추적
     const originalPushState = history.pushState;
     const originalReplaceState = history.replaceState;
 
@@ -337,20 +337,27 @@ class BusinessIntelligenceSystem {
 
   // === 🧠 지속적 분석 시스템 ===
   private startContinuousAnalysis(): void {
-    // 실시간 행동 분석
-    setInterval(() => {
-      this.analyzeCurrentBehavior();
-    }, this.analysisInterval);
+    // 🚀 Production 환경에서만 극한 분석 실행
+    if (
+      typeof window !== 'undefined' &&
+      window.location.hostname !== 'localhost' &&
+      window.location.hostname !== '127.0.0.1'
+    ) {
+      // 실시간 행동 분석
+      setInterval(() => {
+        this.analyzeCurrentBehavior();
+      }, this.analysisInterval);
 
-    // 예측 모델 업데이트
-    setInterval(() => {
-      this.updatePredictiveModels();
-    }, this.analysisInterval * 2);
+      // 예측 모델 업데이트
+      setInterval(() => {
+        this.updatePredictiveModels();
+      }, this.analysisInterval * 2);
 
-    // 사용자 세그먼테이션 업데이트
-    setInterval(() => {
-      this.updateUserSegmentation();
-    }, this.analysisInterval * 4);
+      // 사용자 세그먼테이션 업데이트
+      setInterval(() => {
+        this.updateUserSegmentation();
+      }, this.analysisInterval * 4);
+    }
   }
 
   // === 📊 행동 분석 메서드들 ===
@@ -384,12 +391,19 @@ class BusinessIntelligenceSystem {
       return curr.timestamp - prev.timestamp > 500; // 500ms 이상 정지
     }).length;
 
-    // 사용자 의도 분석 전송
-    InsuranceAgentEvents.userIntentAnalysis(
-      this.predictUserIntent(velocity, hesitations),
-      hesitations,
-      velocity
-    );
+    // 🚀 Production 환경에서만 데이터 전송
+    if (
+      typeof window !== 'undefined' &&
+      window.location.hostname !== 'localhost' &&
+      window.location.hostname !== '127.0.0.1'
+    ) {
+      // 사용자 의도 분석 전송
+      InsuranceAgentEvents.userIntentAnalysis(
+        this.predictUserIntent(velocity, hesitations),
+        hesitations,
+        velocity
+      );
+    }
   }
 
   private analyzeTypingPattern(): void {
@@ -403,11 +417,18 @@ class BusinessIntelligenceSystem {
     const avgInterval = intervals.reduce((a, b) => a + b, 0) / intervals.length;
     const wpm = Math.round(60000 / (avgInterval * 5)); // 대략적 WPM 계산
 
-    InsuranceAgentEvents.typingSpeedAnalysis(wpm, recentKeystrokes.length);
+    // 🚀 Production 환경에서만 데이터 전송
+    if (
+      typeof window !== 'undefined' &&
+      window.location.hostname !== 'localhost' &&
+      window.location.hostname !== '127.0.0.1'
+    ) {
+      InsuranceAgentEvents.typingSpeedAnalysis(wpm, recentKeystrokes.length);
 
-    // 생체인식 서명 생성
-    const signature = this.generateBiometricSignature(intervals);
-    InsuranceAgentEvents.biometricSignature('typing_rhythm', signature);
+      // 생체인식 서명 생성
+      const signature = this.generateBiometricSignature(intervals);
+      InsuranceAgentEvents.biometricSignature('typing_rhythm', signature);
+    }
   }
 
   private analyzeCurrentBehavior(): void {
@@ -422,12 +443,19 @@ class BusinessIntelligenceSystem {
     // 신뢰도 점수
     const confidenceLevel = this.calculateConfidenceLevel();
 
-    // 감정 상태 분석 전송
-    InsuranceAgentEvents.emotionalStateAnalysis(
-      frustrationLevel,
-      engagementScore,
-      confidenceLevel
-    );
+    // 🚀 Production 환경에서만 데이터 전송
+    if (
+      typeof window !== 'undefined' &&
+      window.location.hostname !== 'localhost' &&
+      window.location.hostname !== '127.0.0.1'
+    ) {
+      // 감정 상태 분석 전송
+      InsuranceAgentEvents.emotionalStateAnalysis(
+        frustrationLevel,
+        engagementScore,
+        confidenceLevel
+      );
+    }
 
     // 세션 인텔리전스 업데이트
     this.sessionIntelligence = {
@@ -451,11 +479,18 @@ class BusinessIntelligenceSystem {
     const avgTimePerPage =
       pathHistory.reduce((sum, p) => sum + p.duration, 0) / pathHistory.length;
 
-    InsuranceAgentEvents.userIntentAnalysis(
-      `journey_${journeyPattern.replace(/\//g, '_')}`,
-      pathHistory.filter((p) => p.duration < 3000).length, // 빠른 이탈 페이지 수
-      avgTimePerPage
-    );
+    // 🚀 Production 환경에서만 데이터 전송
+    if (
+      typeof window !== 'undefined' &&
+      window.location.hostname !== 'localhost' &&
+      window.location.hostname !== '127.0.0.1'
+    ) {
+      InsuranceAgentEvents.userIntentAnalysis(
+        `journey_${journeyPattern.replace(/\//g, '_')}`,
+        pathHistory.filter((p) => p.duration < 3000).length, // 빠른 이탈 페이지 수
+        avgTimePerPage
+      );
+    }
   }
 
   // === 🔮 예측 및 분석 헬퍼 메서드들 ===
