@@ -257,10 +257,27 @@ export default function DebugAnalyticsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <Button onClick={runTests}>전체 테스트 실행</Button>
             <Button variant="outline" onClick={updateStatus}>
               상태 새로고침
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                // 로그 캐시 초기화
+                localStorage.removeItem('surecrm_admin_login_logged');
+                if (typeof window !== 'undefined') {
+                  (window as any).__gtm_dev_logged = false;
+                  (window as any).__gtm_success_logged = false;
+                  (window as any).__ga_dev_logged = false;
+                  (window as any).__ga_success_logged = false;
+                  (window as any).__analytics_dev_logged = false;
+                }
+                console.log('🔄 로그 캐시 초기화 완료');
+              }}
+            >
+              로그 캐시 초기화
             </Button>
           </div>
 

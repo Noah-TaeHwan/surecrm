@@ -2,12 +2,13 @@ import {
   shouldCollectAnalytics,
   logAnalyticsStatus,
   analyticsConfig,
+  analytics_log,
 } from './analytics-config';
 
 // GA4 측정 ID (환경변수에서 안전하게 가져옴)
 const GA_MEASUREMENT_ID = analyticsConfig.GA_MEASUREMENT_ID;
 
-// gtag 함수 타입 정의
+// gtag 함수 및 로그 플래그 타입 정의
 declare global {
   interface Window {
     gtag: (
@@ -16,6 +17,12 @@ declare global {
       config?: any
     ) => void;
     dataLayer: any[];
+    // 로그 중복 방지 플래그들
+    __gtm_dev_logged?: boolean;
+    __gtm_success_logged?: boolean;
+    __ga_dev_logged?: boolean;
+    __ga_success_logged?: boolean;
+    __analytics_dev_logged?: boolean;
   }
 }
 
@@ -35,13 +42,13 @@ interface EventProps {
 // GA 초기화 확인
 export function initGA(): void {
   if (!GA_MEASUREMENT_ID) {
-    console.warn('⚠️ Google Analytics 측정 ID가 설정되지 않았습니다.');
+    analytics_log.warn('Google Analytics 측정 ID가 설정되지 않았습니다.');
     return;
   }
 
   // gtag가 로드되었는지 확인
   if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
-    console.log('✅ Google Analytics 초기화 완료:', GA_MEASUREMENT_ID);
+    analytics_log.info(`Google Analytics 초기화 완료: ${GA_MEASUREMENT_ID}`);
 
     // 커스텀 차원 설정
     window.gtag('config', GA_MEASUREMENT_ID, {
@@ -54,7 +61,7 @@ export function initGA(): void {
       },
     });
   } else {
-    console.warn('⚠️ gtag가 아직 로드되지 않았습니다.');
+    analytics_log.debug('gtag가 아직 로드되지 않았습니다.');
   }
 }
 
@@ -62,7 +69,8 @@ export function initGA(): void {
 export function trackPageView({ path, title }: PageViewProps): void {
   // 🔒 통합 분석 환경 설정 확인
   if (!shouldCollectAnalytics()) {
-    logAnalyticsStatus('페이지 뷰 추적');
+    // DEBUG 레벨에서만 로그 출력 (너무 많은 로그 방지)
+    logAnalyticsStatus('페이지 뷰 추적', 4); // DEBUG level
     return;
   }
 
@@ -80,7 +88,8 @@ export function trackPageView({ path, title }: PageViewProps): void {
     page_path: path,
   });
 
-  logAnalyticsStatus('페이지 뷰 추적');
+  // DEBUG 레벨에서만 성공 로그 출력
+  logAnalyticsStatus('페이지 뷰 추적', 4); // DEBUG level
 }
 
 // 커스텀 이벤트 추적
@@ -93,7 +102,8 @@ export function trackEvent({
 }: EventProps): void {
   // 🔒 통합 분석 환경 설정 확인
   if (!shouldCollectAnalytics()) {
-    logAnalyticsStatus(`이벤트 추적: ${action}`);
+    // DEBUG 레벨에서만 로그 출력
+    logAnalyticsStatus(`이벤트 추적: ${action}`, 4); // DEBUG level
     return;
   }
 
@@ -113,7 +123,15 @@ export function trackEvent({
   };
 
   window.gtag('event', action, eventData);
-  logAnalyticsStatus(`이벤트 추적: ${action}`);
+
+  // INFO 레벨에서 중요한 이벤트만 로그 출력
+  const importantEvents = [
+    'create_client',
+    'dashboard_view',
+    'contract_signed',
+  ];
+  const logLevel = importantEvents.includes(action) ? 3 : 4; // INFO : DEBUG
+  logAnalyticsStatus(`이벤트 추적: ${action}`, logLevel);
 }
 
 // 🏢 SureCRM 보험설계사 전용 극한 분석 이벤트들

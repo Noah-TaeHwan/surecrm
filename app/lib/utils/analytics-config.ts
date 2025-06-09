@@ -109,10 +109,53 @@ export const analyticsConfig = {
   isSystemAdmin: () => isSystemAdminUser(getCurrentUserRole()),
 };
 
+// 로그 레벨 설정
+const LOG_LEVELS = {
+  NONE: 0, // 로그 없음
+  ERROR: 1, // 에러만
+  WARN: 2, // 경고 이상
+  INFO: 3, // 정보 이상
+  DEBUG: 4, // 모든 로그
+} as const;
+
+// 현재 로그 레벨 (환경에 따라 자동 설정)
+const getCurrentLogLevel = (): number => {
+  // 개발 환경에서는 디버그 레벨
+  if (isDevelopmentEnvironment()) {
+    return LOG_LEVELS.DEBUG;
+  }
+
+  // 프로덕션에서는 로그 완전 차단 (보안 및 성능)
+  return LOG_LEVELS.NONE;
+};
+
+// 로그 출력 빈도 제한을 위한 캐시
+const logCache = new Map<string, number>();
+const LOG_THROTTLE_MS = 30000; // 30초마다 같은 로그 허용
+
 /**
- * 로그 헬퍼 함수
+ * 스마트 로그 헬퍼 함수
  */
-export function logAnalyticsStatus(action: string): void {
+export function logAnalyticsStatus(
+  action: string,
+  level: number = LOG_LEVELS.INFO
+): void {
+  const currentLevel = getCurrentLogLevel();
+
+  // 로그 레벨 확인
+  if (level > currentLevel) return;
+
+  // 같은 로그 반복 방지 (30초 throttle)
+  const logKey = `${action}_${level}`;
+  const now = Date.now();
+  const lastLogged = logCache.get(logKey);
+
+  if (lastLogged && now - lastLogged < LOG_THROTTLE_MS) {
+    return; // 같은 로그가 너무 자주 호출되면 무시
+  }
+
+  logCache.set(logKey, now);
+
   if (!shouldCollectAnalytics()) {
     const reason = isDevelopmentEnvironment()
       ? '개발환경'
@@ -120,9 +163,44 @@ export function logAnalyticsStatus(action: string): void {
       ? '시스템 관리자'
       : '설정 미완료';
 
-    console.log(`🚫 ${action} 건너뛰기: ${reason}`);
+    // DEBUG 레벨에서만 차단 로그 출력
+    if (level >= LOG_LEVELS.DEBUG) {
+      console.log(`🚫 ${action} 건너뛰기: ${reason}`);
+    }
     return;
   }
 
-  console.log(`✅ ${action} 실행`);
+  // INFO 레벨에서만 성공 로그 출력
+  if (level >= LOG_LEVELS.INFO) {
+    console.log(`✅ ${action} 실행`);
+  }
 }
+
+/**
+ * 로그 레벨별 헬퍼 함수들
+ */
+export const analytics_log = {
+  error: (message: string) => {
+    if (getCurrentLogLevel() >= LOG_LEVELS.ERROR) {
+      console.error(`🔴 [Analytics Error] ${message}`);
+    }
+  },
+
+  warn: (message: string) => {
+    if (getCurrentLogLevel() >= LOG_LEVELS.WARN) {
+      console.warn(`🟡 [Analytics Warning] ${message}`);
+    }
+  },
+
+  info: (message: string) => {
+    if (getCurrentLogLevel() >= LOG_LEVELS.INFO) {
+      console.log(`ℹ️ [Analytics Info] ${message}`);
+    }
+  },
+
+  debug: (message: string) => {
+    if (getCurrentLogLevel() >= LOG_LEVELS.DEBUG) {
+      console.log(`🐛 [Analytics Debug] ${message}`);
+    }
+  },
+};

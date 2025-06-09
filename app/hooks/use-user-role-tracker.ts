@@ -38,11 +38,30 @@ export function useUserRoleTracker() {
 
           // 분석 설정 업데이트 (필요 시)
           if (profiles.role === 'system_admin') {
-            console.log('👑 시스템 관리자 로그인: 분석 데이터 수집 비활성화');
+            // 개발환경에서만 로그 출력
+            const isDev =
+              window.location.hostname === 'localhost' ||
+              window.location.hostname === '127.0.0.1' ||
+              window.location.port === '5173' ||
+              window.location.port === '3000' ||
+              window.location.port === '8080';
+
+            if (isDev) {
+              const hasLoggedBefore = localStorage.getItem(
+                'surecrm_admin_login_logged'
+              );
+              if (!hasLoggedBefore) {
+                console.log(
+                  '👑 시스템 관리자 로그인: 분석 데이터 수집 비활성화'
+                );
+                localStorage.setItem('surecrm_admin_login_logged', 'true');
+              }
+            }
           }
         }
       } catch (error) {
-        console.error('사용자 역할 정보 업데이트 실패:', error);
+        // 에러 로그만 출력 (너무 자주 호출되므로)
+        console.debug('사용자 역할 정보 업데이트 실패:', error);
       }
     }
 

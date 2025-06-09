@@ -71,7 +71,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
                                window.location.port === '8080';
                   
                   if (isDev) {
-                    console.log('🔧 개발환경: GTM 로딩 건너뛰기');
+                    // 한 번만 로그 출력 (페이지 로드마다 반복 방지)
+                    if (!window.__gtm_dev_logged) {
+                      console.log('🔧 개발환경: GTM 로딩 건너뛰기');
+                      window.__gtm_dev_logged = true;
+                    }
                     return;
                   }
                   
@@ -88,7 +92,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     import.meta.env.VITE_GTM_CONTAINER_ID
                   }');
                   
-                  console.log('✅ GTM 로딩 완료');
+                  // 로딩 완료 플래그만 설정 (프로덕션에서는 로그 없음)
+                  if (!window.__gtm_success_logged) {
+                    window.__gtm_success_logged = true;
+                  }
                 })();
               `,
             }}
@@ -111,7 +118,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
                                  window.location.port === '8080';
                     
                     if (isDev) {
-                      console.log('🔧 개발환경: GA 로딩 건너뛰기');
+                      // 한 번만 로그 출력
+                      if (!window.__ga_dev_logged) {
+                        console.log('🔧 개발환경: GA 로딩 건너뛰기');
+                        window.__ga_dev_logged = true;
+                      }
                       return;
                     }
                     
@@ -139,7 +150,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
                       }
                     });
                     
-                    console.log('✅ GA 로딩 완료');
+                    // 로딩 완료 플래그만 설정 (프로덕션에서는 로그 없음)
+                    if (!window.__ga_success_logged) {
+                      window.__ga_success_logged = true;
+                    }
                   })();
 
                   // 🔄 사용자 행동 분석 시스템 초기화
@@ -201,7 +215,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
                         });
                       }, 1000);
                     } else {
-                      console.log('🔧 개발환경: 데이터 수집 시스템 비활성화');
+                      // 한 번만 로그 출력
+                      if (!window.__analytics_dev_logged) {
+                        console.log('🔧 개발환경: 데이터 수집 시스템 비활성화');
+                        window.__analytics_dev_logged = true;
+                      }
                     }
                   });
                 `,
