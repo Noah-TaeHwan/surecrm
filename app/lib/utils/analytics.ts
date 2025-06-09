@@ -620,22 +620,6 @@ export const InsuranceAgentEvents = {
       },
     }),
 
-  errorEncounter: (
-    errorType: string,
-    errorCode?: string,
-    userAction?: string
-  ) =>
-    trackEvent({
-      action: 'encounter_error',
-      category: 'Error Tracking',
-      label: errorType,
-      custom_parameters: {
-        error_type: errorType,
-        error_code: errorCode,
-        user_action_when_error: userAction,
-      },
-    }),
-
   // === 🎯 성과 & 목표 이벤트 ===
   goalAchievement: (
     goalType: string,
@@ -964,23 +948,6 @@ export const InsuranceAgentEvents = {
       },
     }),
 
-  errorEncounter: (
-    errorType: string,
-    errorMessage: string,
-    pageContext: string
-  ) =>
-    trackEvent({
-      action: 'encounter_error',
-      category: 'Error Tracking',
-      label: errorType,
-      custom_parameters: {
-        error_type: errorType,
-        error_message: errorMessage,
-        page_context: pageContext,
-        timestamp: Date.now(),
-      },
-    }),
-
   featureUsage: (
     featureName: string,
     usageContext: string,
@@ -1019,7 +986,7 @@ export const InsuranceAgentEvents = {
       },
     }),
 
-  // === 🕵️‍♂️ 감시자본주의 수준 극한 추적 이벤트 ===
+  // === 🔬 사용자 행동 심층 분석 이벤트 ===
 
   // 사용자 의도 분석
   userIntentAnalysis: (intent: string, hesitations: number, velocity: number) =>

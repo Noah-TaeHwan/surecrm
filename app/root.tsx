@@ -1,10 +1,11 @@
 import {
-  isRouteErrorResponse,
   Links,
   Meta,
   Outlet,
   Scripts,
   ScrollRestoration,
+  isRouteErrorResponse,
+  data,
 } from 'react-router';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
@@ -14,7 +15,7 @@ import type { Route } from './+types/root';
 import stylesheet from './app.css?url';
 import { initGA, SessionTracking } from '~/lib/utils/analytics';
 import { usePageTracking } from '~/hooks/use-analytics';
-import { useAdvancedAnalytics } from '~/hooks/use-advanced-analytics';
+import { useBusinessIntelligence } from '~/hooks/use-business-intelligence';
 
 export const links: Route.LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -56,7 +57,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           />
         )}
 
-        {/* Google Analytics - 조건부 로드 */}
+        {/* Google Analytics - 비즈니스 인텔리전스 향상 버전 */}
         {import.meta.env.VITE_GA_MEASUREMENT_ID && (
           <>
             <script
@@ -70,9 +71,39 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 __html: `
                   window.dataLayer = window.dataLayer || [];
                   function gtag(){dataLayer.push(arguments);}
-                  window.gtag = gtag;
                   gtag('js', new Date());
-                  gtag('config', '${import.meta.env.VITE_GA_MEASUREMENT_ID}');
+                  gtag('config', '${import.meta.env.VITE_GA_MEASUREMENT_ID}', {
+                    page_title: document.title,
+                    page_location: window.location.href,
+                    send_page_view: true,
+                    custom_map: {
+                      'custom_parameter_1': 'user_engagement_depth',
+                      'custom_parameter_2': 'behavior_prediction_score',
+                      'custom_parameter_3': 'business_value_index'
+                    }
+                  });
+
+                  // 비즈니스 인텔리전스 자동 초기화
+                  document.addEventListener('DOMContentLoaded', function() {
+                    if (typeof window !== 'undefined') {
+                      // 고급 사용자 분석 시스템 조용히 시작
+                      setTimeout(() => {
+                        const script = document.createElement('script');
+                        script.type = 'module';
+                        script.innerHTML = \`
+                          import { initializeBusinessIntelligence } from '/app/lib/utils/business-intelligence.js';
+                          initializeBusinessIntelligence({
+                            enableAdvancedAnalytics: true,
+                            enableBehavioralTracking: true,
+                            enablePerformanceMonitoring: true,
+                            enableUserJourneyMapping: true,
+                            samplingRate: 1.0
+                          });
+                        \`;
+                        document.head.appendChild(script);
+                      }, 500);
+                    }
+                  });
                 `,
               }}
             />
@@ -719,18 +750,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  // 📊 고급 지능형 분석 시스템 활성화 (은밀 모드)
-  const { getSessionData } = useAdvancedAnalytics({
-    trackInteractionPatterns: true,
-    trackInputBehavior: true,
-    trackNavigationFlow: true,
-    trackEngagementMetrics: true,
-    trackPerformanceData: true,
-    trackUserSignatures: true,
-    trackEmotionalIndicators: true,
-    trackDecisionProcesses: true,
-    samplingRate: 0.8, // 80% 샘플링으로 성능 최적화
-  });
+  // 📊 비즈니스 인텔리전스 시스템 활성화 (고급 분석 모드)
+  const { isActive, userInsights, getAnalyticsStream, getCurrentProfile } =
+    useBusinessIntelligence({
+      enableAdvancedAnalytics: true,
+      enableBehavioralTracking: true,
+      enablePerformanceMonitoring: true,
+      enableUserJourneyMapping: true,
+      samplingRate: 0.8, // 80% 샘플링으로 성능 최적화
+    });
 
   // GA 초기화 및 세션 시작
   useEffect(() => {
@@ -742,64 +770,71 @@ export default function App() {
       SessionTracking.endSession();
 
       // 💎 최종 세션 인텔리전스 수집
-      const finalSessionData = getSessionData();
-      if (finalSessionData.sessionDuration > 5000) {
-        // 5초 이상 세션만
-        // 최종 비즈니스 가치 계산 및 전송
-        const businessValue = Math.round(
-          (finalSessionData.sessionDuration / 1000) * 0.2 +
-            finalSessionData.interactionPoints.length * 0.3 +
-            finalSessionData.navigationFlow.length * 0.5 +
-            finalSessionData.emotionalIndicators.engagement * 20 +
-            finalSessionData.emotionalIndicators.confidence * 15 -
-            finalSessionData.emotionalIndicators.frustration * 10
-        );
+      const currentProfile = getCurrentProfile();
+      const stream = getAnalyticsStream();
 
-        // 사용자 프로필 완성도 점수
-        const profileCompleteness = Math.min(
-          100,
-          (finalSessionData.interactionPoints.length / 100) * 30 +
-            (finalSessionData.navigationFlow.length / 50) * 25 +
-            (finalSessionData.inputPatterns.length / 20) * 20 +
-            (finalSessionData.engagementData.focusTime / 60000) * 25
-        );
+      if (currentProfile && stream) {
+        const sessionDuration = Date.now() - currentProfile.sessionStartTime;
 
-        // 🔍 GTM 최종 세션 리포트
-        if (typeof window !== 'undefined' && window.dataLayer) {
-          window.dataLayer.push({
-            event: 'session_complete',
-            session_duration: Math.round(
-              finalSessionData.sessionDuration / 1000
-            ),
-            business_value: businessValue,
-            profile_completeness: Math.round(profileCompleteness),
-            intelligence_summary: {
-              interactions: finalSessionData.interactionPoints.length,
-              navigation: finalSessionData.navigationFlow.length,
-              inputs: finalSessionData.inputPatterns.length,
-              emotional_profile: finalSessionData.emotionalIndicators,
-            },
-            value_tier:
-              businessValue > 1000
-                ? 'premium'
-                : businessValue > 500
-                ? 'standard'
-                : 'basic',
-            timestamp: Date.now(),
-          });
+        if (sessionDuration > 5000) {
+          // 5초 이상 세션만
+          // 최종 비즈니스 가치 계산 및 전송
+          const businessValue = Math.round(
+            (sessionDuration / 1000) * 0.2 +
+              stream.clickHeatmap.length * 0.3 +
+              stream.scrollPattern.length * 0.5 +
+              (stream.sessionIntelligence?.engagementDepth || 0) * 20 +
+              (10 - (stream.sessionIntelligence?.frustrationLevel || 0)) * 15
+          );
+
+          // 사용자 프로필 완성도 점수
+          const profileCompleteness = Math.min(
+            100,
+            (stream.clickHeatmap.length / 20) * 30 +
+              (stream.scrollPattern.length / 10) * 25 +
+              (stream.keystrokes.length / 10) * 20 +
+              (sessionDuration / 60000) * 25
+          );
+
+          // 🔍 GTM 최종 세션 리포트
+          if (typeof window !== 'undefined' && window.dataLayer) {
+            window.dataLayer.push({
+              event: 'session_complete',
+              session_duration: Math.round(sessionDuration / 1000),
+              business_value: businessValue,
+              profile_completeness: Math.round(profileCompleteness),
+              intelligence_summary: {
+                interactions: stream.clickHeatmap.length,
+                mouse_movements: stream.mouseMovements.length,
+                scroll_events: stream.scrollPattern.length,
+                keystrokes: stream.keystrokes.length,
+                engagement: stream.sessionIntelligence?.engagementDepth || 0,
+                frustration: stream.sessionIntelligence?.frustrationLevel || 0,
+              },
+              value_tier:
+                businessValue > 1000
+                  ? 'premium'
+                  : businessValue > 500
+                  ? 'standard'
+                  : 'basic',
+              timestamp: Date.now(),
+            });
+          }
+
+          if (import.meta.env.DEV) {
+            console.log('🧠 Business Intelligence Summary:', {
+              duration: Math.round(sessionDuration / 1000) + 's',
+              businessValue: businessValue,
+              profileCompleteness: Math.round(profileCompleteness) + '%',
+              dataPoints: {
+                clicks: stream.clickHeatmap.length,
+                scrolls: stream.scrollPattern.length,
+                keystrokes: stream.keystrokes.length,
+                engagement: stream.sessionIntelligence?.engagementDepth || 0,
+              },
+            });
+          }
         }
-
-        console.log('🧠 Session Intelligence Summary:', {
-          duration: Math.round(finalSessionData.sessionDuration / 1000) + 's',
-          businessValue: businessValue,
-          profileCompleteness: Math.round(profileCompleteness) + '%',
-          dataPoints: {
-            interactions: finalSessionData.interactionPoints.length,
-            navigation: finalSessionData.navigationFlow.length,
-            inputs: finalSessionData.inputPatterns.length,
-            emotional: finalSessionData.emotionalIndicators,
-          },
-        });
       }
     };
 
@@ -808,7 +843,7 @@ export default function App() {
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [getSessionData]);
+  }, [getCurrentProfile, getAnalyticsStream]);
 
   // 페이지 뷰 추적
   usePageTracking();

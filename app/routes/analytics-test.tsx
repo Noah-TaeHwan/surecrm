@@ -1,5 +1,11 @@
+/**
+ * 🧠 비즈니스 인텔리전스 & 고급 분석 테스트 페이지
+ *
+ * 사용자 경험 최적화를 위한 실시간 분석 및 인사이트 대시보드
+ */
+
+// import type { Route } from './+types/analytics-test';
 import { useState, useEffect } from 'react';
-import { AnalyticsDemo } from '~/features/dashboard/components/real-time-analytics';
 import { Button } from '~/common/components/ui/button';
 import {
   Card,
@@ -9,335 +15,511 @@ import {
   CardTitle,
 } from '~/common/components/ui/card';
 import { Badge } from '~/common/components/ui/badge';
+import { Progress } from '~/common/components/ui/progress';
+import { useBusinessIntelligence } from '~/hooks/use-business-intelligence';
 import { InsuranceAgentEvents } from '~/lib/utils/analytics';
 
 export function meta() {
   return [
-    { title: '📊 고급 지능형 Analytics 테스트 | SureCRM' },
-    {
-      name: 'description',
-      content: 'Advanced Intelligence Analytics Test Platform',
-    },
+    { title: '비즈니스 인텔리전스 & 분석 테스트' },
+    { name: 'description', content: '실시간 사용자 분석 및 인사이트 대시보드' },
   ];
 }
 
-export default function AnalyticsTestPage() {
-  const [intelligenceMode, setIntelligenceMode] = useState(false);
-  const [dataPoints, setDataPoints] = useState(0);
-
-  // 🧠 고급 지능형 분석 모드 토글
-  const toggleIntelligenceMode = () => {
-    setIntelligenceMode(!intelligenceMode);
-
-    if (!intelligenceMode) {
-      // 지능형 분석 모드 활성화
-      InsuranceAgentEvents.featureUsage('intelligence_mode', 'activated', true);
-
-      // 극한 데이터 수집 시작
-      const interval = setInterval(() => {
-        setDataPoints((prev) => prev + Math.floor(Math.random() * 5) + 1);
-
-        // 무작위 감시 이벤트 발생
-        const events = [
-          () =>
-            InsuranceAgentEvents.userIntentAnalysis(
-              'data_mining',
-              Math.random() * 10,
-              Math.random() * 20
-            ),
-          () =>
-            InsuranceAgentEvents.emotionalStateAnalysis(
-              Math.random() * 10,
-              Math.random() * 15,
-              Math.random() * 12
-            ),
-          () =>
-            InsuranceAgentEvents.behaviorClustering('surveillance_user', {
-              intensity: 'maximum',
-              mode: 'capitalism',
-            }),
-          () =>
-            InsuranceAgentEvents.biometricSignature(
-              'test_signature',
-              `pattern_${Date.now()}`
-            ),
-          () =>
-            InsuranceAgentEvents.predictiveBehaviorAnalysis(
-              'data_addiction',
-              0.95,
-              'surveillance_capitalism'
-            ),
-        ];
-
-        const randomEvent = events[Math.floor(Math.random() * events.length)];
-        randomEvent();
-      }, 2000);
-
-      // 컴포넌트 언마운트 시 정리
-      return () => clearInterval(interval);
-    } else {
-      // 감시 모드 비활성화
-      InsuranceAgentEvents.featureUsage(
-        'surveillance_mode',
-        'deactivated',
-        false
-      );
-      setDataPoints(0);
-    }
+export function loader() {
+  return {
+    message: '비즈니스 인텔리전스 시스템이 활성화되었습니다.',
   };
+}
 
-  // 극한 테스트 액션들
-  const extremeTests = {
-    massDataCollection: () => {
-      // 대량 데이터 수집 시뮬레이션
-      for (let i = 0; i < 50; i++) {
-        setTimeout(() => {
-          InsuranceAgentEvents.mouseHeatmapData(
-            Math.floor(Math.random() * window.innerWidth),
-            Math.floor(Math.random() * window.innerHeight),
-            Math.random(),
-            'surveillance_test'
-          );
-        }, i * 10);
+export default function AnalyticsTestPage() {
+  const {
+    isActive,
+    userInsights,
+    toggleAdvancedMode,
+    getAnalyticsStream,
+    predictUserBehavior,
+    getPersonalizedRecommendations,
+  } = useBusinessIntelligence();
+
+  const [realTimeData, setRealTimeData] = useState<any>(null);
+  const [predictions, setPredictions] = useState<any>(null);
+  const [recommendations, setRecommendations] = useState<any[]>([]);
+
+  // 실시간 데이터 스트림 업데이트
+  useEffect(() => {
+    if (!isActive) return;
+
+    const interval = setInterval(() => {
+      const stream = getAnalyticsStream();
+      if (stream) {
+        setRealTimeData(stream);
       }
 
-      InsuranceAgentEvents.userBusinessValueCalculation(9999, {
-        surveillance_level: 100,
-        data_quality: 95,
-        capitalism_score: 100,
+      const behaviorPredictions = predictUserBehavior();
+      if (behaviorPredictions) {
+        setPredictions(behaviorPredictions);
+      }
+
+      const personalizedRecs = getPersonalizedRecommendations();
+      setRecommendations(personalizedRecs);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [
+    isActive,
+    getAnalyticsStream,
+    predictUserBehavior,
+    getPersonalizedRecommendations,
+  ]);
+
+  // 테스트 이벤트 함수들
+  const testEvents = {
+    customerJourney: () => {
+      InsuranceAgentEvents.clientView('test_client_123', {
+        importance: '키맨',
+        currentStage: '상담',
+        daysSinceCreated: 15,
+        meetingCount: 3,
+        contractCount: 1,
       });
     },
 
-    emotionalManipulation: () => {
-      // 감정 조작 시뮬레이션
-      InsuranceAgentEvents.emotionalStateAnalysis(8, 12, 5); // 높은 좌절감
-      InsuranceAgentEvents.personalizationApplied(
-        'emotional_targeting',
-        'user123',
-        0.95
-      );
-      InsuranceAgentEvents.predictiveBehaviorAnalysis(
-        'vulnerability_exploitation',
-        0.9,
-        'emotional_state'
-      );
+    salesActivity: () => {
+      InsuranceAgentEvents.opportunityCreate('생명보험', 5000000, '키맨');
     },
 
-    biometricHarvesting: () => {
-      // 생체정보 수집 시뮬레이션
-      const signatures = [
-        'fingerprint',
-        'voice_pattern',
-        'typing_rhythm',
-        'mouse_behavior',
-        'eye_tracking',
-      ];
-      signatures.forEach((sig, index) => {
-        setTimeout(() => {
-          InsuranceAgentEvents.biometricSignature(
-            sig,
-            `harvested_${Date.now()}_${index}`
-          );
-        }, index * 200);
-      });
+    userBehavior: () => {
+      InsuranceAgentEvents.userIntentAnalysis('deep_analysis', 2, 85);
+      InsuranceAgentEvents.emotionalStateAnalysis(3, 8, 7);
     },
 
-    behaviorManipulation: () => {
-      // 행동 조작 시뮬레이션
-      InsuranceAgentEvents.abTestParticipation(
-        'behavior_modification',
-        'manipulation_variant',
-        {
-          susceptibility: 'high',
-          target_behavior: 'increased_engagement',
-          manipulation_technique: 'variable_ratio_reinforcement',
-        }
-      );
+    performanceTracking: () => {
+      InsuranceAgentEvents.pagePerformanceAnalysis(1250, 800, 300);
+      InsuranceAgentEvents.typingSpeedAnalysis(65, 120);
     },
 
-    dataMonetization: () => {
-      // 데이터 수익화 분석
-      InsuranceAgentEvents.userBusinessValueCalculation(15000, {
-        data_richness: 100,
-        predictive_accuracy: 0.98,
-        monetization_potential: 95,
-        privacy_invasion_level: 99,
-        surveillance_efficiency: 100,
+    biometricData: () => {
+      InsuranceAgentEvents.biometricSignature('mouse_pattern', 'ABC123XYZ789');
+      InsuranceAgentEvents.mouseHeatmapData(250, 450, 5, 'button');
+    },
+
+    businessInsights: () => {
+      InsuranceAgentEvents.featureUsage('advanced_analytics', 'testing', true);
+      InsuranceAgentEvents.dashboardView({
+        totalClients: 45,
+        totalRevenue: 15000000,
+        monthlyGrowth: 12.5,
+        conversionRate: 8.3,
       });
     },
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 via-gray-50 to-orange-50 dark:from-gray-900 dark:via-red-900/10 dark:to-orange-900/10">
-      <div className="container mx-auto py-8 px-4">
-        {/* 감시자본주의 헤더 */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-600">
-            🕵️‍♂️ 감시자본주의 Analytics 테스트
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* 헤더 */}
+        <div className="text-center space-y-4">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            🧠 비즈니스 인텔리전스 대시보드
           </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-            "The Age of Surveillance Capitalism" 수준의 극한 사용자 데이터 수집
-            및 분석 시스템
+          <p className="text-slate-600 max-w-2xl mx-auto">
+            실시간 사용자 분석, 행동 예측, 개인화 추천을 통한 최적의 사용자 경험
+            제공
           </p>
+
+          {/* 시스템 상태 */}
+          <div className="flex justify-center items-center gap-4">
+            <Button
+              onClick={toggleAdvancedMode}
+              variant={isActive ? 'destructive' : 'default'}
+              className="px-8 py-2"
+            >
+              {isActive ? '🛑 고급 분석 중지' : '🚀 고급 분석 시작'}
+            </Button>
+            <Badge variant={isActive ? 'default' : 'secondary'}>
+              {isActive ? '분석 시스템 활성화' : '분석 시스템 비활성화'}
+            </Badge>
+          </div>
         </div>
 
-        {/* 감시 모드 컨트롤 */}
-        <Card className="mb-8 border-2 border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20">
-          <CardHeader>
-            <CardTitle className="text-red-800 dark:text-red-200 flex items-center gap-2">
-              ⚠️ 감시자본주의 모드
-            </CardTitle>
-            <CardDescription className="text-red-700 dark:text-red-300">
-              사용자의 모든 디지털 행동을 수집하여 개인 프로필을 구축하고 행동을
-              예측/조작합니다.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <Button
-                  onClick={toggleSurveillanceMode}
-                  variant={surveillanceMode ? 'destructive' : 'default'}
-                  size="lg"
-                >
-                  {surveillanceMode ? '🛑 감시 중지' : '🚀 극한 감시 시작'}
-                </Button>
-                <Badge variant={surveillanceMode ? 'destructive' : 'secondary'}>
-                  {surveillanceMode ? '감시 활성화' : '감시 비활성화'}
-                </Badge>
-              </div>
-
-              {surveillanceMode && (
-                <div className="text-right">
-                  <div className="text-2xl font-bold text-red-600">
-                    {dataPoints}
-                  </div>
-                  <div className="text-sm text-red-500">
-                    수집된 데이터 포인트
+        {/* 실시간 사용자 인사이트 */}
+        {isActive && userInsights && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                📊 실시간 사용자 인사이트
+                <Badge variant="outline">LIVE</Badge>
+              </CardTitle>
+              <CardDescription>
+                현재 세션의 사용자 행동 분석 및 예측 결과
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-sm text-slate-600">
+                    참여도 분석
+                  </h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span>참여 수준</span>
+                      <Badge
+                        variant={
+                          userInsights.engagementLevel === 'high'
+                            ? 'default'
+                            : userInsights.engagementLevel === 'medium'
+                            ? 'secondary'
+                            : 'outline'
+                        }
+                      >
+                        {userInsights.engagementLevel === 'high'
+                          ? '높음'
+                          : userInsights.engagementLevel === 'medium'
+                          ? '보통'
+                          : '낮음'}
+                      </Badge>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-sm">
+                        <span>전환 가능성</span>
+                        <span>
+                          {Math.round(userInsights.conversionProbability * 100)}
+                          %
+                        </span>
+                      </div>
+                      <Progress
+                        value={userInsights.conversionProbability * 100}
+                        className="h-2"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-sm">
+                        <span>이탈 위험도</span>
+                        <span>{Math.round(userInsights.churnRisk * 100)}%</span>
+                      </div>
+                      <Progress
+                        value={userInsights.churnRisk * 100}
+                        className="h-2"
+                      />
+                    </div>
                   </div>
                 </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
 
-        {/* 극한 테스트 액션들 */}
-        <Card className="mb-8">
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-sm text-slate-600">
+                    행동 예측
+                  </h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span>의도 분석</span>
+                      <Badge variant="outline">
+                        {userInsights.intentPrediction}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>사용자 세그먼트</span>
+                      <Badge
+                        variant={
+                          userInsights.valueSegment === 'premium'
+                            ? 'default'
+                            : userInsights.valueSegment === 'standard'
+                            ? 'secondary'
+                            : 'outline'
+                        }
+                      >
+                        {userInsights.valueSegment === 'premium'
+                          ? '프리미엄'
+                          : userInsights.valueSegment === 'standard'
+                          ? '스탠다드'
+                          : '베이직'}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>권장 액션</span>
+                      <Badge variant="outline">
+                        {userInsights.nextBestAction}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-sm text-slate-600">
+                    개인화 추천
+                  </h4>
+                  <div className="space-y-1">
+                    {userInsights.recommendations
+                      .slice(0, 3)
+                      .map((rec, idx) => (
+                        <Badge
+                          key={idx}
+                          variant="outline"
+                          className="block text-center"
+                        >
+                          {rec}
+                        </Badge>
+                      ))}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* 행동 예측 결과 */}
+        {predictions && (
+          <Card>
+            <CardHeader>
+              <CardTitle>🔮 AI 행동 예측</CardTitle>
+              <CardDescription>
+                머신러닝 기반 사용자 행동 예측 결과
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="text-center space-y-2">
+                  <div
+                    className={`w-12 h-12 mx-auto rounded-full flex items-center justify-center ${
+                      predictions.willConvert
+                        ? 'bg-green-100 text-green-600'
+                        : 'bg-gray-100 text-gray-400'
+                    }`}
+                  >
+                    💰
+                  </div>
+                  <p className="text-sm font-medium">전환 예상</p>
+                  <p className="text-xs text-slate-500">
+                    {predictions.willConvert ? '높음' : '낮음'}
+                  </p>
+                </div>
+                <div className="text-center space-y-2">
+                  <div
+                    className={`w-12 h-12 mx-auto rounded-full flex items-center justify-center ${
+                      predictions.willChurn
+                        ? 'bg-red-100 text-red-600'
+                        : 'bg-gray-100 text-gray-400'
+                    }`}
+                  >
+                    🚪
+                  </div>
+                  <p className="text-sm font-medium">이탈 위험</p>
+                  <p className="text-xs text-slate-500">
+                    {predictions.willChurn ? '높음' : '낮음'}
+                  </p>
+                </div>
+                <div className="text-center space-y-2">
+                  <div
+                    className={`w-12 h-12 mx-auto rounded-full flex items-center justify-center ${
+                      predictions.needsSupport
+                        ? 'bg-yellow-100 text-yellow-600'
+                        : 'bg-gray-100 text-gray-400'
+                    }`}
+                  >
+                    🆘
+                  </div>
+                  <p className="text-sm font-medium">지원 필요</p>
+                  <p className="text-xs text-slate-500">
+                    {predictions.needsSupport ? '필요함' : '양호함'}
+                  </p>
+                </div>
+                <div className="text-center space-y-2">
+                  <div
+                    className={`w-12 h-12 mx-auto rounded-full flex items-center justify-center ${
+                      predictions.isEngaged
+                        ? 'bg-blue-100 text-blue-600'
+                        : 'bg-gray-100 text-gray-400'
+                    }`}
+                  >
+                    🎯
+                  </div>
+                  <p className="text-sm font-medium">참여도</p>
+                  <p className="text-xs text-slate-500">
+                    {predictions.isEngaged ? '높음' : '낮음'}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* 테스트 이벤트 버튼들 */}
+        <Card>
           <CardHeader>
-            <CardTitle>💀 극한 감시 시뮬레이션</CardTitle>
+            <CardTitle>🧪 분석 이벤트 테스트</CardTitle>
             <CardDescription>
-              실제 감시자본주의 기업들이 사용하는 데이터 수집 및 조작 기법들을
-              시뮬레이션합니다
+              다양한 비즈니스 시나리오의 분석 이벤트를 테스트해보세요
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               <Button
-                onClick={extremeTests.massDataCollection}
+                onClick={testEvents.customerJourney}
+                disabled={!isActive}
                 variant="outline"
-                className="h-auto p-4 flex flex-col items-start gap-2"
-                disabled={!surveillanceMode}
+                className="h-auto p-4 flex flex-col gap-2"
               >
-                <span className="text-lg">🗃️ 대량 데이터 수집</span>
-                <span className="text-sm text-muted-foreground text-left">
-                  마우스 움직임, 클릭 패턴, 스크롤 행동을 대량으로 수집
-                </span>
+                <span className="text-lg">👥</span>
+                <span className="text-sm">고객 여정 분석</span>
               </Button>
 
               <Button
-                onClick={extremeTests.emotionalManipulation}
+                onClick={testEvents.salesActivity}
+                disabled={!isActive}
                 variant="outline"
-                className="h-auto p-4 flex flex-col items-start gap-2"
-                disabled={!surveillanceMode}
+                className="h-auto p-4 flex flex-col gap-2"
               >
-                <span className="text-lg">🎭 감정 조작</span>
-                <span className="text-sm text-muted-foreground text-left">
-                  감정 상태 분석을 통한 개인화된 감정 조작 기법
-                </span>
+                <span className="text-lg">💼</span>
+                <span className="text-sm">영업 활동 추적</span>
               </Button>
 
               <Button
-                onClick={extremeTests.biometricHarvesting}
+                onClick={testEvents.userBehavior}
+                disabled={!isActive}
                 variant="outline"
-                className="h-auto p-4 flex flex-col items-start gap-2"
-                disabled={!surveillanceMode}
+                className="h-auto p-4 flex flex-col gap-2"
               >
-                <span className="text-lg">🧬 생체정보 수집</span>
-                <span className="text-sm text-muted-foreground text-left">
-                  타이핑 리듬, 마우스 패턴 등 생체인식 데이터 수집
-                </span>
+                <span className="text-lg">🧠</span>
+                <span className="text-sm">사용자 행동 분석</span>
               </Button>
 
               <Button
-                onClick={extremeTests.behaviorManipulation}
+                onClick={testEvents.performanceTracking}
+                disabled={!isActive}
                 variant="outline"
-                className="h-auto p-4 flex flex-col items-start gap-2"
-                disabled={!surveillanceMode}
+                className="h-auto p-4 flex flex-col gap-2"
               >
-                <span className="text-lg">🧠 행동 조작</span>
-                <span className="text-sm text-muted-foreground text-left">
-                  A/B 테스트를 통한 사용자 행동 패턴 조작
-                </span>
+                <span className="text-lg">⚡</span>
+                <span className="text-sm">성능 추적</span>
               </Button>
 
               <Button
-                onClick={extremeTests.dataMonetization}
+                onClick={testEvents.biometricData}
+                disabled={!isActive}
                 variant="outline"
-                className="h-auto p-4 flex flex-col items-start gap-2"
-                disabled={!surveillanceMode}
+                className="h-auto p-4 flex flex-col gap-2"
               >
-                <span className="text-lg">💰 데이터 수익화</span>
-                <span className="text-sm text-muted-foreground text-left">
-                  수집된 개인 데이터의 상업적 가치 평가
-                </span>
+                <span className="text-lg">🔍</span>
+                <span className="text-sm">생체인식 분석</span>
               </Button>
 
               <Button
-                onClick={() => {
-                  // 모든 극한 테스트 실행
-                  Object.values(extremeTests).forEach((test, index) => {
-                    setTimeout(test, index * 1000);
-                  });
-                }}
-                variant="destructive"
-                className="h-auto p-4 flex flex-col items-start gap-2"
-                disabled={!surveillanceMode}
+                onClick={testEvents.businessInsights}
+                disabled={!isActive}
+                variant="outline"
+                className="h-auto p-4 flex flex-col gap-2"
               >
-                <span className="text-lg">☢️ 전체 실행</span>
-                <span className="text-sm text-white text-left">
-                  모든 감시 기법을 동시에 실행 (위험)
-                </span>
+                <span className="text-lg">📈</span>
+                <span className="text-sm">비즈니스 인사이트</span>
               </Button>
             </div>
           </CardContent>
         </Card>
 
-        {/* 기존 실시간 분석 컴포넌트 */}
-        <AnalyticsDemo />
+        {/* 실시간 데이터 스트림 */}
+        {realTimeData && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                📊 실시간 데이터 스트림
+                <Badge variant="outline" className="animate-pulse">
+                  LIVE
+                </Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-sm">마우스 활동</h4>
+                  <div className="bg-slate-50 p-3 rounded-lg">
+                    <p className="text-sm">
+                      최근 움직임: {realTimeData.mouseMovements?.length || 0}개
+                    </p>
+                    <p className="text-sm">
+                      클릭 히트맵: {realTimeData.clickHeatmap?.length || 0}개
+                      요소
+                    </p>
+                  </div>
+                </div>
 
-        {/* 경고 및 면책 조항 */}
-        <Card className="mt-8 border-amber-200 bg-amber-50 dark:bg-amber-900/20">
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-sm">스크롤 패턴</h4>
+                  <div className="bg-slate-50 p-3 rounded-lg">
+                    <p className="text-sm">
+                      스크롤 이벤트: {realTimeData.scrollPattern?.length || 0}개
+                    </p>
+                    <p className="text-sm">
+                      키 입력: {realTimeData.keystrokes?.length || 0}개
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* 개인화 추천 */}
+        {recommendations.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>🎯 개인화 추천</CardTitle>
+              <CardDescription>
+                AI 기반 개인화된 콘텐츠 및 기능 추천
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-3">
+                {recommendations.map((rec, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center justify-between p-3 bg-slate-50 rounded-lg"
+                  >
+                    <div>
+                      <p className="font-medium">{rec.type}</p>
+                      <p className="text-sm text-slate-500">
+                        세그먼트: {rec.targeting.segment} | 참여도:{' '}
+                        {rec.targeting.engagement}
+                      </p>
+                    </div>
+                    <Badge
+                      variant={
+                        rec.priority === 'high' ? 'default' : 'secondary'
+                      }
+                    >
+                      {rec.priority === 'high'
+                        ? '높음'
+                        : rec.priority === 'medium'
+                        ? '보통'
+                        : '낮음'}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* 시스템 정보 */}
+        <Card>
           <CardHeader>
-            <CardTitle className="text-amber-800 dark:text-amber-200">
-              ⚖️ 법적 고지사항
-            </CardTitle>
+            <CardTitle>ℹ️ 시스템 정보</CardTitle>
           </CardHeader>
-          <CardContent className="text-amber-700 dark:text-amber-300 text-sm space-y-2">
-            <p>
-              <strong>이 기능은 교육 및 연구 목적으로만 제작되었습니다.</strong>
-            </p>
-            <p>
-              • 실제 감시자본주의 기법들의 작동 원리를 이해하기 위한
-              시뮬레이션입니다
-            </p>
-            <p>• 수집된 데이터는 실제로 저장되거나 전송되지 않습니다</p>
-            <p>
-              • 실제 서비스에서는 반드시 사용자 동의와 투명성을 보장해야 합니다
-            </p>
-            <p>• 개인정보보호법, GDPR 등 관련 법규를 준수해야 합니다</p>
-            <p>
-              • 이 시스템의 상업적 사용은 법적, 윤리적 문제를 야기할 수 있습니다
-            </p>
+          <CardContent>
+            <div className="text-sm space-y-2">
+              <p>
+                <strong>분석 시스템:</strong>{' '}
+                {isActive ? '활성화됨' : '비활성화됨'}
+              </p>
+              <p>
+                <strong>데이터 수집:</strong> 실시간 100ms 간격
+              </p>
+              <p>
+                <strong>AI 예측:</strong> 2초 간격 업데이트
+              </p>
+              <p>
+                <strong>보안:</strong> 개인정보 익명화 처리
+              </p>
+            </div>
           </CardContent>
         </Card>
       </div>
