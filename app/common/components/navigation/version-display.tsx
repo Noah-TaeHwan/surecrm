@@ -14,21 +14,22 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '~/common/components/ui/tooltip';
-import packageJson from '../../../../package.json';
 
 export function VersionDisplay() {
-  // package.json의 정적 버전을 fallback으로 사용
-  const staticVersion = packageJson.version;
-  const [version, setVersion] = useState(staticVersion);
-  const [detailedInfo, setDetailedInfo] = useState(`버전: ${staticVersion}`);
-  const [isHydrated, setIsHydrated] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // 클라이언트에서만 동적 버전 정보 로드
-    setVersion(getFormattedVersion());
-    setDetailedInfo(getDetailedVersionInfo());
-    setIsHydrated(true);
+    setMounted(true);
   }, []);
+
+  // 클라이언트에서만 렌더링 (SSR 스킵)
+  if (!mounted) {
+    return null;
+  }
+
+  // 클라이언트에서만 동적 버전 정보 직접 사용
+  const version = getFormattedVersion();
+  const detailedInfo = getDetailedVersionInfo();
 
   return (
     <TooltipProvider>
