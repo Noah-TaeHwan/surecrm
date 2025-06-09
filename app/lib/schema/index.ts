@@ -507,8 +507,8 @@ BEGIN
   -- 초대장 코드 생성 (8자리 랜덤 코드)
   invitation_code := upper(substr(md5(random()::text), 1, 8));
 
-  -- 초대장 생성 (5개 기본 제공)
-  FOR i IN 1..5 LOOP
+  -- 초대장 생성 (2개 기본 제공)
+  FOR i IN 1..2 LOOP
     INSERT INTO public.app_user_invitations (inviter_id, code, status, created_at)
     VALUES (
       NEW.id,

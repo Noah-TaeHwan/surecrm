@@ -15,8 +15,8 @@ BEGIN
     -- 초대장 코드 생성 (8자리 랜덤 코드)
     invitation_code := upper(substr(md5(random()::text || user_record.id::text), 1, 8));
 
-    -- 초대장 5개 생성
-    FOR i IN 1..5 LOOP
+    -- 초대장 2개 생성
+    FOR i IN 1..2 LOOP
       INSERT INTO public.app_user_invitations (inviter_id, code, status, created_at)
       VALUES (
         user_record.id,
@@ -26,7 +26,7 @@ BEGIN
       );
     END LOOP;
 
-    RAISE NOTICE '사용자 %에게 초대장 5개 생성됨 (코드: %)', user_record.full_name, invitation_code;
+    RAISE NOTICE '사용자 %에게 초대장 2개 생성됨 (코드: %)', user_record.full_name, invitation_code;
   END LOOP;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
