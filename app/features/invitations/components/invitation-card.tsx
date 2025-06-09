@@ -11,6 +11,7 @@ import { Input } from '~/common/components/ui/input';
 import { Avatar, AvatarFallback } from '~/common/components/ui/avatar';
 import { CopyIcon, CheckCircledIcon, TimerIcon } from '@radix-ui/react-icons';
 import type { InvitationCardProps } from '../types';
+import { getInvitationLink } from '~/lib/utils/url';
 
 export function InvitationCard({
   invitation,
@@ -74,7 +75,7 @@ export function InvitationCard({
               </label>
               <div className="flex items-center gap-2 mt-1">
                 <Input
-                  value={`https://surecrm.com/invite/${invitation.code}`}
+                  value={getInvitationLink(invitation.code)}
                   readOnly
                   className="font-mono text-sm"
                 />

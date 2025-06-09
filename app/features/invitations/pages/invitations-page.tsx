@@ -39,6 +39,7 @@ import {
   getUserInvitations,
   getInvitedColleagues,
 } from '../lib/invitations-data';
+import { getInvitationLink } from '~/lib/utils/url';
 
 // 초대장 페이지 로더 - 모든 데이터를 실제 데이터베이스에서 로딩
 export async function loader({ request }: Route.LoaderArgs) {
@@ -171,13 +172,15 @@ export default function InvitationsPage({ loaderData }: Route.ComponentProps) {
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
   const availableInvitations = myInvitations.filter(
-    (inv) => inv.status === 'available'
+    (inv: Invitation) => inv.status === 'available'
   );
-  const usedInvitations = myInvitations.filter((inv) => inv.status === 'used');
+  const usedInvitations = myInvitations.filter(
+    (inv: Invitation) => inv.status === 'used'
+  );
 
   // 추천 링크 복사
   const copyInviteLink = (code: string) => {
-    const link = `https://surecrm.com/invite/${code}`;
+    const link = getInvitationLink(code);
     navigator.clipboard.writeText(link);
     setCopiedCode(code);
     setTimeout(() => setCopiedCode(null), 2000);
@@ -227,7 +230,7 @@ export default function InvitationsPage({ loaderData }: Route.ComponentProps) {
 
           {myInvitations.length > 0 ? (
             <div className="grid gap-4">
-              {myInvitations.map((invitation) => (
+              {myInvitations.map((invitation: Invitation) => (
                 <InvitationCard
                   key={invitation.id}
                   invitation={invitation}
