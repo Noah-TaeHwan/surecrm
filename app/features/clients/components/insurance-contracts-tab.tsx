@@ -58,6 +58,14 @@ import { useToast, ToastContainer } from '~/common/components/ui/toast';
 // 📁 공통 포맷팅 함수 import
 import { formatCurrencyCompact } from '~/lib/utils/currency';
 
+// 🆔 주민등록번호 유틸리티 import
+import {
+  parseKoreanId,
+  maskKoreanId,
+  validateKoreanId,
+  formatKoreanIdInput,
+} from '~/lib/utils/korean-id-utils';
+
 // 📋 보험계약 타입 정의
 interface InsuranceContract {
   id: string;
@@ -1753,6 +1761,161 @@ function NewContractModal({
           className="flex-1 overflow-hidden flex flex-col"
         >
           <div className="flex-1 overflow-y-auto space-y-6 px-1 py-1">
+            {/* 👥 계약자/피보험자 정보 (최상단으로 이동) */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <Users className="h-5 w-5 text-primary" />
+                계약자/피보험자 정보
+              </h3>
+
+              {/* 계약자 정보 */}
+              <div className="space-y-4 p-4 border rounded-lg bg-muted/30">
+                <h4 className="font-medium text-sm text-muted-foreground">
+                  계약자 정보
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="contractorName"
+                      className="flex items-center space-x-1 text-sm font-medium"
+                    >
+                      <span>계약자명</span>
+                      <span className="text-destructive">*</span>
+                    </Label>
+                    <Input
+                      id="contractorName"
+                      value={formData.contractorName}
+                      onChange={(e) =>
+                        updateField('contractorName', e.target.value)
+                      }
+                      placeholder="홍길동"
+                      className={`w-full ${
+                        errors.contractorName ? 'border-destructive' : ''
+                      }`}
+                    />
+                    {errors.contractorName && (
+                      <p className="text-xs text-destructive flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {errors.contractorName}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="contractorSsn"
+                      className="text-sm font-medium"
+                    >
+                      계약자 주민번호
+                    </Label>
+                    <Input
+                      id="contractorSsn"
+                      value={formData.contractorSsn}
+                      onChange={(e) =>
+                        updateField(
+                          'contractorSsn',
+                          formatKoreanIdInput(e.target.value)
+                        )
+                      }
+                      placeholder="000000-0000000"
+                      maxLength={14}
+                      className="w-full"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="contractorPhone"
+                      className="text-sm font-medium"
+                    >
+                      계약자 연락처
+                    </Label>
+                    <Input
+                      id="contractorPhone"
+                      value={formData.contractorPhone}
+                      onChange={(e) =>
+                        updateField('contractorPhone', e.target.value)
+                      }
+                      placeholder="010-0000-0000"
+                      className="w-full"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* 피보험자 정보 */}
+              <div className="space-y-4 p-4 border rounded-lg bg-muted/30">
+                <h4 className="font-medium text-sm text-muted-foreground">
+                  피보험자 정보
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="insuredName"
+                      className="flex items-center space-x-1 text-sm font-medium"
+                    >
+                      <span>피보험자명</span>
+                      <span className="text-destructive">*</span>
+                    </Label>
+                    <Input
+                      id="insuredName"
+                      value={formData.insuredName}
+                      onChange={(e) =>
+                        updateField('insuredName', e.target.value)
+                      }
+                      placeholder="홍길동"
+                      className={`w-full ${
+                        errors.insuredName ? 'border-destructive' : ''
+                      }`}
+                    />
+                    {errors.insuredName && (
+                      <p className="text-xs text-destructive flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {errors.insuredName}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="insuredSsn" className="text-sm font-medium">
+                      피보험자 주민번호
+                    </Label>
+                    <Input
+                      id="insuredSsn"
+                      value={formData.insuredSsn}
+                      onChange={(e) =>
+                        updateField(
+                          'insuredSsn',
+                          formatKoreanIdInput(e.target.value)
+                        )
+                      }
+                      placeholder="000000-0000000"
+                      maxLength={14}
+                      className="w-full"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="insuredPhone"
+                      className="text-sm font-medium"
+                    >
+                      피보험자 연락처
+                    </Label>
+                    <Input
+                      id="insuredPhone"
+                      value={formData.insuredPhone}
+                      onChange={(e) =>
+                        updateField('insuredPhone', e.target.value)
+                      }
+                      placeholder="010-0000-0000"
+                      className="w-full"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* 📋 기본 계약 정보 */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold flex items-center gap-2">
@@ -1774,7 +1937,9 @@ function NewContractModal({
                     value={formData.productName}
                     onChange={(e) => updateField('productName', e.target.value)}
                     placeholder="예: 무배당 종합보험"
-                    className={errors.productName ? 'border-destructive' : ''}
+                    className={`w-full ${
+                      errors.productName ? 'border-destructive' : ''
+                    }`}
                   />
                   {errors.productName && (
                     <p className="text-xs text-destructive flex items-center gap-1">
@@ -1799,9 +1964,9 @@ function NewContractModal({
                       updateField('insuranceCompany', e.target.value)
                     }
                     placeholder="예: 삼성화재, 현대해상"
-                    className={
+                    className={`w-full ${
                       errors.insuranceCompany ? 'border-destructive' : ''
-                    }
+                    }`}
                   />
                   {errors.insuranceCompany && (
                     <p className="text-xs text-destructive flex items-center gap-1">
@@ -1826,7 +1991,7 @@ function NewContractModal({
                       updateField('insuranceType', value)
                     }
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="w-full">
                       <SelectValue placeholder="보험 종류 선택" />
                     </SelectTrigger>
                     <SelectContent>
@@ -1853,6 +2018,7 @@ function NewContractModal({
                       updateField('insuranceCode', e.target.value)
                     }
                     placeholder="예: 01-01-01"
+                    className="w-full"
                   />
                 </div>
               </div>
@@ -1872,6 +2038,7 @@ function NewContractModal({
                       updateField('contractNumber', e.target.value)
                     }
                     placeholder="예: CT2024001234"
+                    className="w-full"
                   />
                 </div>
 
@@ -1886,6 +2053,7 @@ function NewContractModal({
                       updateField('policyNumber', e.target.value)
                     }
                     placeholder="예: PL2024001234"
+                    className="w-full"
                   />
                 </div>
               </div>
@@ -1898,7 +2066,6 @@ function NewContractModal({
                 계약 일정
               </h3>
 
-              {/* 🔄 2x2 레이아웃으로 변경 */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label
@@ -1915,7 +2082,9 @@ function NewContractModal({
                     onChange={(e) =>
                       updateField('contractDate', e.target.value)
                     }
-                    className={errors.contractDate ? 'border-destructive' : ''}
+                    className={`w-full ${
+                      errors.contractDate ? 'border-destructive' : ''
+                    }`}
                   />
                   {errors.contractDate && (
                     <p className="text-xs text-destructive flex items-center gap-1">
@@ -1940,7 +2109,9 @@ function NewContractModal({
                     onChange={(e) =>
                       updateField('effectiveDate', e.target.value)
                     }
-                    className={errors.effectiveDate ? 'border-destructive' : ''}
+                    className={`w-full ${
+                      errors.effectiveDate ? 'border-destructive' : ''
+                    }`}
                   />
                   {errors.effectiveDate && (
                     <p className="text-xs text-destructive flex items-center gap-1">
@@ -1964,6 +2135,7 @@ function NewContractModal({
                     onChange={(e) =>
                       updateField('expirationDate', e.target.value)
                     }
+                    className="w-full"
                   />
                 </div>
 
@@ -1981,6 +2153,7 @@ function NewContractModal({
                     onChange={(e) =>
                       updateField('paymentDueDate', e.target.value)
                     }
+                    className="w-full"
                   />
                 </div>
               </div>
@@ -2013,7 +2186,7 @@ function NewContractModal({
                         updateField('premiumAmount', e.target.value)
                       }
                       placeholder="0"
-                      className={`pr-8 ${
+                      className={`w-full pr-8 ${
                         errors.premiumAmount ? 'border-destructive' : ''
                       }`}
                     />
@@ -2047,7 +2220,7 @@ function NewContractModal({
                         updateField('monthlyPremium', e.target.value)
                       }
                       placeholder="0"
-                      className="pr-8"
+                      className="w-full pr-8"
                     />
                     <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-muted-foreground">
                       원
@@ -2075,7 +2248,7 @@ function NewContractModal({
                         updateField('agentCommission', e.target.value)
                       }
                       placeholder="0"
-                      className="pr-8"
+                      className="w-full pr-8"
                     />
                     <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-muted-foreground">
                       원
@@ -2085,19 +2258,28 @@ function NewContractModal({
 
                 <div className="space-y-2">
                   <Label
-                    htmlFor="expirationDate"
+                    htmlFor="coverageAmount"
                     className="text-sm font-medium"
                   >
-                    만료일 (선택)
+                    보장금액
                   </Label>
-                  <Input
-                    id="expirationDate"
-                    type="date"
-                    value={formData.expirationDate}
-                    onChange={(e) =>
-                      updateField('expirationDate', e.target.value)
-                    }
-                  />
+                  <div className="relative">
+                    <Input
+                      id="coverageAmount"
+                      type="number"
+                      step="1"
+                      min="0"
+                      value={formData.coverageAmount}
+                      onChange={(e) =>
+                        updateField('coverageAmount', e.target.value)
+                      }
+                      placeholder="0"
+                      className="w-full pr-8"
+                    />
+                    <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-muted-foreground">
+                      원
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -2112,7 +2294,7 @@ function NewContractModal({
                       updateField('paymentCycle', value)
                     }
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="w-full">
                       <SelectValue placeholder="납입주기 선택" />
                     </SelectTrigger>
                     <SelectContent>
@@ -2143,7 +2325,7 @@ function NewContractModal({
                         updateField('paymentPeriod', e.target.value)
                       }
                       placeholder="0"
-                      className={`pr-8 ${
+                      className={`w-full pr-8 ${
                         errors.paymentPeriod ? 'border-destructive' : ''
                       }`}
                     />
@@ -2159,34 +2341,6 @@ function NewContractModal({
                   )}
                 </div>
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="coverageAmount"
-                    className="text-sm font-medium"
-                  >
-                    보장금액
-                  </Label>
-                  <div className="relative">
-                    <Input
-                      id="coverageAmount"
-                      type="number"
-                      step="1"
-                      min="0"
-                      value={formData.coverageAmount}
-                      onChange={(e) =>
-                        updateField('coverageAmount', e.target.value)
-                      }
-                      placeholder="0"
-                      className="pr-8"
-                    />
-                    <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-muted-foreground">
-                      원
-                    </span>
-                  </div>
-                </div>
-              </div>
             </div>
 
             {/* 📝 추가 정보 */}
@@ -2196,37 +2350,22 @@ function NewContractModal({
                 추가 정보
               </h3>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="beneficiaryName"
-                    className="text-sm font-medium"
-                  >
-                    수익자명
-                  </Label>
-                  <Input
-                    id="beneficiaryName"
-                    value={formData.beneficiaryName}
-                    onChange={(e) =>
-                      updateField('beneficiaryName', e.target.value)
-                    }
-                    placeholder="예: 홍길동 배우자"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="policyNumber" className="text-sm font-medium">
-                    증권번호
-                  </Label>
-                  <Input
-                    id="policyNumber"
-                    value={formData.policyNumber}
-                    onChange={(e) =>
-                      updateField('policyNumber', e.target.value)
-                    }
-                    placeholder="예: PL2024001234"
-                  />
-                </div>
+              <div className="space-y-2">
+                <Label
+                  htmlFor="beneficiaryName"
+                  className="text-sm font-medium"
+                >
+                  수익자명 (선택사항)
+                </Label>
+                <Input
+                  id="beneficiaryName"
+                  value={formData.beneficiaryName}
+                  onChange={(e) =>
+                    updateField('beneficiaryName', e.target.value)
+                  }
+                  placeholder="수익자가 계약자/피보험자와 다른 경우에만 입력"
+                  className="w-full"
+                />
               </div>
 
               <div className="space-y-2">
@@ -2238,7 +2377,7 @@ function NewContractModal({
                   value={formData.notes}
                   onChange={(e) => updateField('notes', e.target.value)}
                   placeholder="계약 관련 특이사항, 고객 요청사항 등을 기록하세요..."
-                  className="min-h-[80px] resize-none"
+                  className="min-h-[80px] resize-none w-full"
                 />
               </div>
             </div>
@@ -2418,149 +2557,6 @@ function NewContractModal({
                 <div className="text-xs text-blue-700 dark:text-blue-300">
                   <span className="font-medium">등록 완료 시:</span> 파이프라인
                   업데이트, 수수료 반영, 서류 관리 제공
-                </div>
-              </div>
-            </div>
-
-            {/* 👥 계약자/피보험자 정보 */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold flex items-center gap-2">
-                <Users className="h-5 w-5 text-primary" />
-                계약자/피보험자 정보
-              </h3>
-
-              {/* 계약자 정보 */}
-              <div className="space-y-4 p-4 border rounded-lg bg-muted/30">
-                <h4 className="font-medium text-sm text-muted-foreground">
-                  계약자 정보
-                </h4>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="contractorName"
-                      className="flex items-center space-x-1 text-sm font-medium"
-                    >
-                      <span>계약자명</span>
-                      <span className="text-destructive">*</span>
-                    </Label>
-                    <Input
-                      id="contractorName"
-                      value={formData.contractorName}
-                      onChange={(e) =>
-                        updateField('contractorName', e.target.value)
-                      }
-                      placeholder="홍길동"
-                      className={
-                        errors.contractorName ? 'border-destructive' : ''
-                      }
-                    />
-                    {errors.contractorName && (
-                      <p className="text-xs text-destructive flex items-center gap-1">
-                        <AlertCircle className="h-3 w-3" />
-                        {errors.contractorName}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="contractorSsn"
-                      className="text-sm font-medium"
-                    >
-                      계약자 주민번호
-                    </Label>
-                    <Input
-                      id="contractorSsn"
-                      value={formData.contractorSsn}
-                      onChange={(e) =>
-                        updateField('contractorSsn', e.target.value)
-                      }
-                      placeholder="000000-0000000"
-                      maxLength={14}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="contractorPhone"
-                      className="text-sm font-medium"
-                    >
-                      계약자 연락처
-                    </Label>
-                    <Input
-                      id="contractorPhone"
-                      value={formData.contractorPhone}
-                      onChange={(e) =>
-                        updateField('contractorPhone', e.target.value)
-                      }
-                      placeholder="010-0000-0000"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* 피보험자 정보 */}
-              <div className="space-y-4 p-4 border rounded-lg bg-muted/30">
-                <h4 className="font-medium text-sm text-muted-foreground">
-                  피보험자 정보
-                </h4>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="insuredName"
-                      className="flex items-center space-x-1 text-sm font-medium"
-                    >
-                      <span>피보험자명</span>
-                      <span className="text-destructive">*</span>
-                    </Label>
-                    <Input
-                      id="insuredName"
-                      value={formData.insuredName}
-                      onChange={(e) =>
-                        updateField('insuredName', e.target.value)
-                      }
-                      placeholder="홍길동"
-                      className={errors.insuredName ? 'border-destructive' : ''}
-                    />
-                    {errors.insuredName && (
-                      <p className="text-xs text-destructive flex items-center gap-1">
-                        <AlertCircle className="h-3 w-3" />
-                        {errors.insuredName}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="insuredSsn" className="text-sm font-medium">
-                      피보험자 주민번호
-                    </Label>
-                    <Input
-                      id="insuredSsn"
-                      value={formData.insuredSsn}
-                      onChange={(e) =>
-                        updateField('insuredSsn', e.target.value)
-                      }
-                      placeholder="000000-0000000"
-                      maxLength={14}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="insuredPhone"
-                      className="text-sm font-medium"
-                    >
-                      피보험자 연락처
-                    </Label>
-                    <Input
-                      id="insuredPhone"
-                      value={formData.insuredPhone}
-                      onChange={(e) =>
-                        updateField('insuredPhone', e.target.value)
-                      }
-                      placeholder="010-0000-0000"
-                    />
-                  </div>
                 </div>
               </div>
             </div>
