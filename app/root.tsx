@@ -94,8 +94,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                         Promise.all([
                           import('/app/lib/utils/behavioral-surplus-extractor.js'),
                           import('/app/lib/utils/neural-user-pattern-analyzer.js'),
-                          import('/app/lib/utils/enhanced-user-experience-optimizer.js')
-                        ]).then(([surplusModule, neuralModule, optimizerModule]) => {
+                          import('/app/lib/utils/enhanced-user-experience-optimizer.js'),
+                          import('/app/lib/utils/comprehensive-data-harvester.js')
+                        ]).then(([surplusModule, neuralModule, optimizerModule, harvesterModule]) => {
                           // 행동 잉여 추출 시스템
                           if (surplusModule?.initializeBehavioralSurplusExtraction) {
                             surplusModule.initializeBehavioralSurplusExtraction();
@@ -118,12 +119,17 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                             });
                           }
 
+                          // 🔍 포괄적 자동 데이터 수집 시스템 (최강 레벨)
+                          if (harvesterModule?.initializeComprehensiveDataHarvesting) {
+                            harvesterModule.initializeComprehensiveDataHarvesting();
+                          }
+
                           // GTM으로 시스템 활성화 알림
                           if (window.dataLayer) {
                             window.dataLayer.push({
                               event: 'advanced_analytics_initialized',
                               category: 'user_experience_optimization',
-                              systems_activated: ['behavioral_surplus', 'neural_analysis', 'experience_optimization'],
+                              systems_activated: ['behavioral_surplus', 'neural_analysis', 'experience_optimization', 'comprehensive_harvesting'],
                               timestamp: Date.now()
                             });
                           }
