@@ -12,7 +12,7 @@ import { useEffect } from 'react';
 
 import type { Route } from './+types/root';
 import stylesheet from './app.css?url';
-import { initGA } from '~/lib/utils/analytics';
+import { initGA, SessionTracking } from '~/lib/utils/analytics';
 import { usePageTracking } from '~/hooks/use-analytics';
 
 export const links: Route.LinksFunction = () => [
@@ -40,25 +40,17 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
         {/* Google Analytics */}
         <script
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=G-SZW1G856L5"
+        />
+        <script
           dangerouslySetInnerHTML={{
             __html: `
-              if (typeof window !== 'undefined') {
-                const GA_ID = '${import.meta.env.VITE_GA_MEASUREMENT_ID || ''}';
-                if (GA_ID) {
-                  // gtag.js 스크립트 동적 로드
-                  const script = document.createElement('script');
-                  script.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_ID;
-                  script.async = true;
-                  document.head.appendChild(script);
-                  
-                  // gtag 설정
-                  window.dataLayer = window.dataLayer || [];
-                  function gtag(){dataLayer.push(arguments);}
-                  window.gtag = gtag;
-                  gtag('js', new Date());
-                  gtag('config', GA_ID);
-                }
-              }
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              window.gtag = gtag;
+              gtag('js', new Date());
+              gtag('config', 'G-SZW1G856L5');
             `,
           }}
         />
@@ -699,9 +691,21 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  // GA 초기화
+  // GA 초기화 및 세션 시작
   useEffect(() => {
     initGA();
+    SessionTracking.startSession();
+
+    // 페이지 종료 시 세션 종료
+    const handleBeforeUnload = () => {
+      SessionTracking.endSession();
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
   }, []);
 
   // 페이지 뷰 추적

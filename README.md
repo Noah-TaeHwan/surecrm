@@ -404,6 +404,88 @@ npm run db:reset:clean
 - 테스트 사용자 생성
 - 초대 시스템 관리 도구
 
+## 🚀 극한 Google Analytics 연동
+
+SureCRM은 **Google Analytics 4 (GA4)**를 활용하여 보험설계사의 모든 업무 프로세스를 극한까지 추적하고 데이터 기반 의사결정을 지원합니다.
+
+### 🎯 추적되는 핵심 이벤트들 (50+개)
+
+#### 📈 대시보드 & KPI 분석
+
+- **dashboardView**: KPI 데이터 (총 고객 수, 신규 고객, 전환율, 총 보험료)
+- **kpiGoalSet**: 목표 설정 (목표 유형, 목표값, 현재값, 갭 분석)
+- **goalAchievement**: 목표 달성 (달성률, 소요 기간, 초과 달성 여부)
+
+#### 👥 고객 관리 (CRM Core)
+
+- **clientCreate**: 고객 생성 (중요도, 소개자 여부, 통신사, 운전 여부)
+- **clientView**: 고객 상세보기 (생성 후 경과일, 미팅 수, 계약 수)
+- **clientStageChange**: 영업 단계 변경 (진행/후퇴, 단계별 체류 기간)
+- **clientImportanceChange**: 고객 중요도 변경 (업그레이드/다운그레이드)
+
+#### 🚀 영업 파이프라인
+
+- **pipelineView**: 파이프라인 조회 (총 기회, 가치, 전환율)
+- **opportunityCreate**: 영업 기회 생성 (보험 유형, 예상 가치, 고객 중요도)
+- **opportunityConvert**: 영업 기회 성사 (실제 가치, 영업 사이클 기간)
+
+#### 📋 보험계약 관리
+
+- **contractCreate**: 계약 생성 (보험 유형, 보험사, 납입료, 수수료, 첨부파일)
+- **contractStatusChange**: 계약 상태 변경 (성공/실패, 보험료 금액)
+- **attachmentUpload**: 첨부파일 업로드 (문서 유형, 파일 크기, 고객 중요도)
+
+#### 🌐 네트워크 & 소개 관리
+
+- **networkView**: 네트워크 그래프 조회 (연결 수, 깊이, 전환율)
+- **referralCreate**: 소개 관계 생성 (소개자/피소개자 중요도, 품질 점수)
+- **vipClientInteraction**: VIP 고객 상호작용 (선물 발송, 미팅 등)
+
+#### 📅 일정 & 미팅 관리
+
+- **meetingSchedule**: 미팅 일정 생성 (유형, 고객 중요도, 반복 여부)
+- **meetingComplete**: 미팅 완료 (소요 시간, 결과, 다음 액션)
+- **calendarSync**: 구글 캘린더 동기화 (동기화된 이벤트 수)
+
+#### 🔔 알림 & 성과 관리
+
+- **notificationReceive**: 알림 수신 (유형, 긴급도)
+- **milestoneReach**: 마일스톤 달성 (첫 계약, 10명 고객, 1억 보험료 등)
+
+### 🎨 커스텀 차원 (Custom Dimensions)
+
+1. **user_role**: 사용자 역할 (agent, team_admin, system_admin)
+2. **team_size**: 팀 크기
+3. **insurance_company**: 소속 보험회사
+4. **client_count**: 담당 고객 수
+5. **pipeline_stage**: 현재 영업 단계
+
+### 📊 실시간 분석 & 테스트
+
+#### Analytics 테스트 페이지
+
+- **URL**: `/analytics-test`
+- **기능**: 실시간 GA 이벤트 모니터링 및 테스트
+- **활용**: 개발 중 이벤트 추적 확인, 실시간 데이터 시각화
+
+#### 주요 분석 지표
+
+- **영업 성과**: 고객 전환율, 평균 영업 사이클, 계약 성공률
+- **사용자 행동**: 기능별 사용률, 사용자 여정 분석, 이탈 지점
+- **팀 성과**: 팀별 효율성, 개인별 성과, 소개 네트워크 활용
+- **비즈니스 임팩트**: 월별 신규 고객, 총 보험료, 수수료 수익
+
+### 📈 데이터 활용 시나리오
+
+1. **고객 여정 최적화**: 첫 상담 → 제안 → 계약 단계별 전환율 분석
+2. **기능 개선**: 사용률 낮은 기능의 UX/UI 개선 우선순위 결정
+3. **영업 전략**: 고객 중요도별 맞춤 영업 프로세스 최적화
+4. **예측 분석**: 고객 이탈 예측, 계약 성사 확률, 최적 영업 타이밍
+
+📋 **상세 가이드**: [극한 Analytics 활용 가이드](docs/GOOGLE_ANALYTICS_ADVANCED_GUIDE.md)
+
+---
+
 ## 🚀 배포
 
 ### 프로덕션 빌드
@@ -514,23 +596,5 @@ npm run db:seed
 # 데이터베이스 스키마 업데이트
 npm run db:generate && npm run db:migrate
 ```
-
----
-
-## 📋 **다음 Feature 작업 순서**
-
-Calendar feature 완성 후, abc 순서대로 진행:
-
-1. ✅ **@calendar** - 완료!
-2. 🔄 **@clients** - 다음 작업 대상
-3. ⏳ **@dashboard**
-4. ⏳ **@influencers**
-5. ⏳ **@invitations**
-6. ⏳ **@network**
-7. ⏳ **@notifications**
-8. ⏳ **@pipeline**
-9. ⏳ **@reports**
-10. ⏳ **@settings**
-11. ⏳ **@team**
 
 ---

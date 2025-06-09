@@ -6,7 +6,7 @@ import {
   useSubmit,
   useSearchParams,
 } from 'react-router';
-import { CRMEvents } from '~/lib/utils/analytics';
+import { InsuranceAgentEvents } from '~/lib/utils/analytics';
 import type { Route } from './+types/client-detail-page';
 import { MainLayout } from '~/common/layouts/main-layout';
 import { Button } from '~/common/components/ui/button';
@@ -304,12 +304,24 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
   const error = data?.error || null;
   const currentUser = data?.currentUser || null;
 
-  // Analytics 추적
+  // Analytics 추적 - 극한 고객 분석
   useEffect(() => {
     if (client?.id) {
-      CRMEvents.clientView(client.id);
+      const clientAnalyticsData = {
+        importance: client.importance,
+        currentStage: client.currentStage || client.stageName,
+        daysSinceCreated: client.createdAt
+          ? Math.floor(
+              (Date.now() - new Date(client.createdAt).getTime()) /
+                (1000 * 60 * 60 * 24)
+            )
+          : 0,
+        meetingCount: client.meetingCount || 0,
+        contractCount: insuranceContracts?.length || 0,
+      };
+      InsuranceAgentEvents.clientView(client.id, clientAnalyticsData);
     }
-  }, [client?.id]);
+  }, [client, insuranceContracts]);
 
   // 🏢 URL 파라미터에서 탭 및 계약 생성 플래그 확인 (SSR 안전)
   const [searchParams, setSearchParams] = useSearchParams();
@@ -1104,6 +1116,14 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
       submit(stageUpdateData, { method: 'post' });
 
       console.log('✅ 영업 기회 생성 완료');
+
+      // 🎯 극한 분석: 영업 기회 생성 이벤트 추적
+      InsuranceAgentEvents.opportunityCreate(
+        sanitizedData.insuranceType,
+        sanitizedData.expectedCommission,
+        client.importance
+      );
+
       setShowOpportunitySuccessModal(true);
       setOpportunitySuccessData({
         clientName: client.fullName,

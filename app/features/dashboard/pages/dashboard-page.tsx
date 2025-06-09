@@ -23,7 +23,7 @@ import {
 } from '../lib/dashboard-data';
 import { requireAuth } from '~/lib/auth/middleware';
 import { useFetcher, useRevalidator } from 'react-router';
-import { CRMEvents } from '~/lib/utils/analytics';
+import { InsuranceAgentEvents } from '~/lib/utils/analytics';
 
 // 새로운 타입 시스템 import
 import type {
@@ -290,10 +290,16 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
     error,
   } = loaderData;
 
-  // Analytics 추적
+  // Analytics 추적 - 극한 KPI 데이터와 함께
   useEffect(() => {
-    CRMEvents.dashboardView();
-  }, []);
+    const analyticsKpiData = {
+      totalClients: kpiData?.totalClients || 0,
+      monthlyNewClients: kpiData?.monthlyNewClients || 0,
+      conversionRate: pipelineData?.stages?.[0]?.conversionRate || 0,
+      totalPremium: salesStats?.totalPremium || 0,
+    };
+    InsuranceAgentEvents.dashboardView(analyticsKpiData);
+  }, [kpiData, pipelineData, salesStats]);
 
   const fetcher = useFetcher();
   const revalidator = useRevalidator();
