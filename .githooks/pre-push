@@ -1,0 +1,58 @@
+#!/bin/bash
+
+# 🚀 SureCRM 자동 패치 버전 업데이트 Hook
+# Git push 시 패치 버전을 자동으로 증가시킵니다.
+
+set -e
+
+echo "🏷️ 자동 패치 버전 업데이트 중..."
+
+# 현재 브랜치 확인
+current_branch=$(git rev-parse --abbrev-ref HEAD)
+
+# master 브랜치가 아니면 스킵
+if [ "$current_branch" != "master" ]; then
+    echo "✅ $current_branch 브랜치는 버전 업데이트를 스킵합니다."
+    exit 0
+fi
+
+# package.json에서 현재 버전 읽기
+current_version=$(node -p "require('./package.json').version")
+echo "📦 현재 버전: $current_version"
+
+# 버전이 이미 변경되었는지 확인 (수동 업데이트 감지)
+last_commit_msg=$(git log -1 --pretty=%B)
+if [[ $last_commit_msg == *"[version-update]"* ]]; then
+    echo "✅ 이미 버전이 업데이트된 커밋입니다. 스킵합니다."
+    exit 0
+fi
+
+# 작업 디렉토리가 깨끗한지 확인
+if ! git diff --quiet || ! git diff --cached --quiet; then
+    echo "❌ 커밋되지 않은 변경사항이 있습니다. 먼저 커밋해주세요."
+    exit 1
+fi
+
+# 패치 버전 자동 증가
+echo "🔄 패치 버전 자동 증가 중..."
+npm version patch --no-git-tag-version > /dev/null
+
+# 새 버전 읽기
+new_version=$(node -p "require('./package.json').version")
+echo "🎉 새 버전: $new_version"
+
+# 변경사항 커밋
+git add package.json
+git commit -m "🏷️ Auto-increment patch version to $new_version [version-update]
+
+- 자동 패치 버전 업데이트
+- 이전 버전: $current_version
+- 새 버전: $new_version
+- 시간: $(date '+%Y-%m-%d %H:%M:%S')"
+
+# Git tag 생성
+git tag "v$new_version"
+
+echo "✅ 버전 업데이트 완료: $current_version → $new_version"
+echo "🏷️ Git tag 생성: v$new_version"
+echo "�� 푸시를 계속 진행합니다..." 
