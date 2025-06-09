@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -51,6 +51,7 @@ interface ExistingClientOpportunityModalProps {
   }) => Promise<void>;
   clients: { id: string; name: string; phone: string; currentStage?: string }[];
   isLoading?: boolean;
+  preSelectedClientId?: string; // 🎯 특정 고객 자동 선택
 }
 
 // 보험 상품 타입 정의 (새 영업 기회 모달과 동일)
@@ -98,20 +99,48 @@ export function ExistingClientOpportunityModal({
   onConfirm,
   clients,
   isLoading = false,
+  preSelectedClientId, // 🎯 특정 고객 자동 선택
 }: ExistingClientOpportunityModalProps) {
-  const [selectedClientId, setSelectedClientId] = useState<string>('');
+  const [selectedClientId, setSelectedClientId] = useState<string>(
+    preSelectedClientId || ''
+  );
   const [clientSearchQuery, setClientSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState<string>('');
   const [notes, setNotes] = useState('');
   const [step, setStep] = useState<
     'selectClient' | 'selectProduct' | 'details'
-  >('selectClient');
+  >('selectClient'); // 🎯 항상 1단계부터 시작 (미리 선택된 고객이 있으면 1단계에서 선택된 상태로 표시)
 
   // 🆕 새로운 상품 정보 상태들
   const [productName, setProductName] = useState('');
   const [insuranceCompany, setInsuranceCompany] = useState('');
   const [monthlyPremium, setMonthlyPremium] = useState('');
   const [expectedCommission, setExpectedCommission] = useState('');
+
+  // 선택된 고객 카드에 대한 ref
+  const selectedClientRef = useRef<HTMLDivElement>(null);
+
+  // 🎯 preSelectedClientId가 변경될 때마다 selectedClientId 동기화
+  useEffect(() => {
+    if (preSelectedClientId) {
+      setSelectedClientId(preSelectedClientId);
+    }
+  }, [preSelectedClientId, isOpen]); // isOpen도 의존성에 추가하여 모달이 열릴 때마다 동기화
+
+  // 🎯 선택된 고객 카드로 자동 스크롤
+  useEffect(() => {
+    if (isOpen && preSelectedClientId && selectedClientRef.current) {
+      // 약간의 지연을 두어 DOM 렌더링 완료 후 스크롤
+      const timer = setTimeout(() => {
+        selectedClientRef.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
+      }, 100);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, preSelectedClientId]); // 모달이 열리고 선택된 고객이 있을 때 스크롤
 
   const handleClientNext = () => {
     if (selectedClientId) {
@@ -157,7 +186,7 @@ export function ExistingClientOpportunityModal({
   };
 
   const handleClose = () => {
-    setSelectedClientId('');
+    setSelectedClientId(preSelectedClientId || '');
     setClientSearchQuery('');
     setSelectedType('');
     setNotes('');
@@ -165,16 +194,26 @@ export function ExistingClientOpportunityModal({
     setInsuranceCompany('');
     setMonthlyPremium('');
     setExpectedCommission('');
-    setStep('selectClient');
+    setStep('selectClient'); // 🎯 항상 1단계로 복원
     onClose();
   };
 
-  // 고객 필터링
-  const filteredClients = clients.filter(
-    (client) =>
-      client.name.toLowerCase().includes(clientSearchQuery.toLowerCase()) ||
-      client.phone.includes(clientSearchQuery)
-  );
+  // 고객 필터링 및 정렬 (선택된 고객을 맨 위로)
+  const filteredClients = clients
+    .filter(
+      (client) =>
+        client.name.toLowerCase().includes(clientSearchQuery.toLowerCase()) ||
+        client.phone.includes(clientSearchQuery)
+    )
+    .sort((a, b) => {
+      // 🎯 파이프라인에서 선택된 고객을 맨 위로 정렬
+      if (preSelectedClientId) {
+        if (a.id === preSelectedClientId) return -1; // a가 선택된 고객이면 맨 위로
+        if (b.id === preSelectedClientId) return 1; // b가 선택된 고객이면 맨 위로
+      }
+      // 나머지는 이름순 정렬
+      return a.name.localeCompare(b.name);
+    });
 
   const selectedClient = clients.find((c) => c.id === selectedClientId);
   const selectedInsurance = insuranceTypes.find(
@@ -199,9 +238,20 @@ export function ExistingClientOpportunityModal({
           <div className="space-y-6 py-4">
             <div className="space-y-3">
               <h3 className="text-lg font-semibold">고객을 선택하세요</h3>
-              <p className="text-sm text-muted-foreground">
-                기존 고객 중에서 새로운 보험 영업을 진행할 고객을 선택하세요.
-              </p>
+              {preSelectedClientId ? (
+                <div className="p-3  border rounded-lg">
+                  <p className="text-sm text-muted-foreground font-medium">
+                    🎯 파이프라인에서 선택된 고객이 있습니다.
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    주황색으로 표시된 고객을 선택하여 영업 기회를 추가하세요.
+                  </p>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  기존 고객 중에서 새로운 보험 영업을 진행할 고객을 선택하세요.
+                </p>
+              )}
             </div>
 
             {/* 고객 검색 */}
@@ -223,9 +273,16 @@ export function ExistingClientOpportunityModal({
                 filteredClients.map((client) => (
                   <Card
                     key={client.id}
+                    ref={
+                      client.id === preSelectedClientId
+                        ? selectedClientRef
+                        : null
+                    } // 🎯 선택된 고객에게 ref 추가
                     className={`p-2 m-2 cursor-pointer transition-all duration-200 hover:shadow-md ${
                       selectedClientId === client.id
                         ? 'ring-2 ring-primary border-primary bg-primary/5'
+                        : client.id === preSelectedClientId
+                        ? 'ring-2 ring-orange-400 border-orange-400 bg-orange-50 shadow-lg'
                         : 'hover:border-border'
                     }`}
                     onClick={() => setSelectedClientId(client.id)}
@@ -233,11 +290,30 @@ export function ExistingClientOpportunityModal({
                     <CardContent className="py-2 px-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className="p-2 bg-primary/10 rounded-lg">
-                            <User className="h-4 w-4 text-primary" />
+                          <div
+                            className={`p-2 rounded-lg ${
+                              client.id === preSelectedClientId
+                                ? 'bg-primary/10 border-2 border-primary'
+                                : 'bg-primary/10'
+                            }`}
+                          >
+                            <User
+                              className={`h-4 w-4 ${
+                                client.id === preSelectedClientId
+                                  ? 'text-orange-600'
+                                  : 'text-primary'
+                              }`}
+                            />
                           </div>
-                          <div>
-                            <h4 className="font-medium">{client.name}</h4>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-medium">{client.name}</h4>
+                              {client.id === preSelectedClientId && (
+                                <Badge className="bg-primary/10 text-primary border-primary text-xs">
+                                  🎯 파이프라인에서 선택됨
+                                </Badge>
+                              )}
+                            </div>
                             <p className="text-sm text-muted-foreground">
                               {client.phone}
                             </p>

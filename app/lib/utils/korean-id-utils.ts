@@ -125,12 +125,14 @@ export function parseKoreanId(ssn: string): KoreanIdParseResult {
     // 성별 판단
     const gender: 'male' | 'female' = genderCode % 2 === 1 ? 'male' : 'female';
 
-    // 날짜 유효성 검사
-    const birthDate = new Date(birthYear, birthMM - 1, birthDD);
+    // 🔧 수정: 시간대 문제 해결 - 한국 기준 생년월일로 정확하게 생성
+    // Date 객체를 로컬 타임존으로 생성하여 날짜가 정확하게 유지되도록 함
+    const birthDate = new Date(birthYear, birthMM - 1, birthDD, 12, 0, 0); // 정오로 설정하여 시간대 문제 방지
 
+    // 날짜가 제대로 설정되었는지 확인
     if (
       birthDate.getFullYear() !== birthYear ||
-      birthDate.getMonth() !== birthMM - 1 ||
+      birthDate.getMonth() !== birthMM - 1 || // JavaScript month는 0부터 시작
       birthDate.getDate() !== birthDD
     ) {
       return {

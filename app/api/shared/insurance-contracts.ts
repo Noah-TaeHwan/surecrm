@@ -107,6 +107,49 @@ export async function createInsuranceContract(
 
     console.log('✅ 보험계약 생성 완료:', createdContract.id);
 
+    // 🎯 파이프라인 자동 이동: 계약 완료 단계로 이동
+    try {
+      const { getPipelineStages } = await import(
+        '~/features/pipeline/lib/supabase-pipeline-data'
+      );
+      const { updateClientStage } = await import('~/api/shared/clients');
+
+      // 에이전트의 파이프라인 단계 조회
+      const stages = await getPipelineStages(agentId);
+
+      // "계약 완료" 단계 찾기
+      const completedStage = stages.find((stage) => stage.name === '계약 완료');
+
+      if (completedStage) {
+        // 고객을 "계약 완료" 단계로 자동 이동
+        const stageUpdateResult = await updateClientStage(
+          clientId,
+          completedStage.id,
+          agentId
+        );
+
+        if (stageUpdateResult.success) {
+          console.log('✅ 고객이 계약 완료 단계로 자동 이동되었습니다:', {
+            clientId,
+            stageName: completedStage.name,
+            stageId: completedStage.id,
+          });
+        } else {
+          console.warn(
+            '⚠️ 계약 완료 단계 이동 실패:',
+            stageUpdateResult.message
+          );
+        }
+      } else {
+        console.warn(
+          '⚠️ "계약 완료" 단계를 찾을 수 없습니다. 파이프라인 설정을 확인해주세요.'
+        );
+      }
+    } catch (pipelineError) {
+      console.warn('⚠️ 파이프라인 자동 이동 중 오류:', pipelineError);
+      // 파이프라인 이동 실패는 계약 생성 성공에 영향주지 않음
+    }
+
     // 📁 첨부파일 업로드 처리
     if (attachments.length > 0) {
       console.log(`📎 첨부파일 ${attachments.length}개 업로드 시작...`);

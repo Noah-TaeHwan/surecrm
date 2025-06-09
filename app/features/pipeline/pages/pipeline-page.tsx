@@ -923,6 +923,11 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
   >('all');
   const [addClientOpen, setAddClientOpen] = useState(false);
   const [existingClientModalOpen, setExistingClientModalOpen] = useState(false);
+  // 🎯 영업 기회 모달에서 자동 선택할 고객 정보
+  const [selectedOpportunityClient, setSelectedOpportunityClient] = useState<{
+    clientId: string;
+    clientName: string;
+  } | null>(null);
 
   // 🗑️ 영업에서 제외 관련 상태
   const [removeClientModalOpen, setRemoveClientModalOpen] = useState(false);
@@ -992,10 +997,25 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
       return client.importance === 'high' && stage && stage.name !== '제외됨';
     }).length;
 
-    // 5. 전환율 계산 (계약 완료 / 전체 파이프라인 고객)
+    // 5. 전환율 계산 (보고서와 동일한 로직: 실제 계약이 있는 고객 / 영업 기회가 있는 고객)
+    const clientsWithOpportunities = clients.filter((client) => {
+      const stage = stages.find((s) => s.id === client.stageId);
+      return (
+        stage &&
+        stage.name !== '제외됨' &&
+        client.products &&
+        client.products.length > 0
+      );
+    }).length;
+
+    const clientsWithContracts = clients.filter((client) => {
+      const stage = stages.find((s) => s.id === client.stageId);
+      return stage && stage.name === '계약 완료';
+    }).length;
+
     const conversionRate =
-      pipelineClients > 0
-        ? Math.round((contractedClients / pipelineClients) * 100)
+      clientsWithOpportunities > 0
+        ? Math.round((clientsWithContracts / clientsWithOpportunities) * 100)
         : 0;
 
     // 6. 활성 단계 수
@@ -1149,8 +1169,20 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
     clientName: string,
     products: any[]
   ) => {
-    // React Router navigate를 사용하여 고객 상세 페이지의 보험 계약 탭으로 이동
-    navigate(`/clients/${clientId}?tab=insurance&createContract=true`);
+    // 🏢 파이프라인에서 계약 완료 처리
+    // 1. 파이프라인 상태를 "계약완료" 단계로 이동
+    // 2. 고객 상세 페이지의 보험 계약 탭으로 이동하여 계약 등록
+    navigate(
+      `/clients/${clientId}?tab=insurance&createContract=true&fromPipeline=true&products=${JSON.stringify(
+        products
+      )}`
+    );
+  };
+
+  // 🏢 영업 기회 편집 핸들러 (기존 고객 영업 기회 모달 재사용)
+  const handleEditOpportunity = (clientId: string, clientName: string) => {
+    setSelectedOpportunityClient({ clientId, clientName }); // 🎯 선택된 고객 정보 저장
+    setExistingClientModalOpen(true);
   };
 
   // 필터가 적용되었는지 확인
@@ -1436,6 +1468,7 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
             onAddClientToStage={handleAddClientToStage}
             onRemoveFromPipeline={handleRemoveFromPipeline}
             onCreateContract={handleCreateContract} // 🏢 계약 전환 핸들러 전달
+            onEditOpportunity={handleEditOpportunity} // 🏢 영업 기회 편집 핸들러 전달
           />
         </div>
 
@@ -1477,10 +1510,14 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
       {/* 🚀 기존 고객 새 영업 기회 모달 */}
       <ExistingClientOpportunityModal
         isOpen={existingClientModalOpen}
-        onClose={() => setExistingClientModalOpen(false)}
+        onClose={() => {
+          setExistingClientModalOpen(false);
+          setSelectedOpportunityClient(null); // 🎯 모달 닫힐 때 선택된 고객 정보 초기화
+        }}
         onConfirm={handleExistingClientOpportunity}
         clients={existingClientsForOpportunity}
         isLoading={opportunityFetcher.state === 'submitting'}
+        preSelectedClientId={selectedOpportunityClient?.clientId} // 🎯 특정 고객 자동 선택
       />
 
       {/* 🗑️ 영업에서 제외 모달 */}

@@ -124,6 +124,7 @@ interface ClientCardProps {
     clientName: string,
     products: any[]
   ) => void; // 🏢 계약 전환 핸들러
+  onEditOpportunity?: (clientId: string, clientName: string) => void; // 🏢 영업 기회 편집 핸들러
   // 🆕 실제 상품 정보 필드들
   products?: Array<{
     id: string;
@@ -164,6 +165,7 @@ export function ClientCard({
   isDragging = false,
   onRemoveFromPipeline,
   onCreateContract, // 🏢 계약 전환 핸들러
+  onEditOpportunity, // 🏢 영업 기회 편집 핸들러
   // 🆕 실제 상품 정보 필드들
   products = [],
   totalMonthlyPremium = 0,
@@ -297,19 +299,31 @@ export function ClientCard({
         <CardContent className="pt-0 space-y-4">
           {/* 💰 예상 수익 정보 */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-muted/30 rounded-lg p-3">
+            <div
+              className="bg-muted/30 rounded-lg p-3 cursor-pointer hover:bg-muted/40 transition-colors"
+              onClick={() => onEditOpportunity?.(id, name)}
+              title="클릭하여 월 보험료 설정"
+            >
               <div className="flex items-center gap-2 mb-1">
                 <DollarSign className="h-3.5 w-3.5 text-green-600" />
                 <span className="text-xs text-muted-foreground">월 보험료</span>
               </div>
               <p className="text-sm font-semibold text-foreground text-center">
-                {monthlyPremium > 0
-                  ? formatCurrencyTable(monthlyPremium)
-                  : '미설정'}
+                {monthlyPremium > 0 ? (
+                  formatCurrencyTable(monthlyPremium)
+                ) : (
+                  <span className="text-muted-foreground hover:text-foreground transition-colors">
+                    미설정 (클릭)
+                  </span>
+                )}
               </p>
             </div>
 
-            <div className="bg-muted/30 rounded-lg p-3">
+            <div
+              className="bg-muted/30 rounded-lg p-3 cursor-pointer hover:bg-muted/40 transition-colors"
+              onClick={() => onEditOpportunity?.(id, name)}
+              title="클릭하여 계약 수수료 설정"
+            >
               <div className="flex items-center gap-2 mb-1">
                 <TrendingUp className="h-3.5 w-3.5 text-blue-600" />
                 <span className="text-xs text-muted-foreground">
@@ -317,9 +331,13 @@ export function ClientCard({
                 </span>
               </div>
               <p className="text-sm font-semibold text-foreground text-center">
-                {contractCommission > 0
-                  ? formatCurrencyTable(contractCommission)
-                  : '미설정'}
+                {contractCommission > 0 ? (
+                  formatCurrencyTable(contractCommission)
+                ) : (
+                  <span className="text-muted-foreground hover:text-foreground transition-colors">
+                    미설정 (클릭)
+                  </span>
+                )}
               </p>
             </div>
           </div>
@@ -465,18 +483,16 @@ export function ClientCard({
 
             {/* 두 번째 줄: 계약전환 + 보관 */}
             <div className="flex gap-2">
-              {/* 🏢 계약 전환 버튼 - 상품이 있을 때만 표시 */}
-              {products.length > 0 && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex-1 text-xs text-green-700 hover:text-green-800 hover:bg-green-50 hover:border-green-300 transition-colors"
-                  onClick={() => onCreateContract?.(id, name, products)}
-                >
-                  <ShieldCheck className="h-3 w-3 mr-1" />
-                  계약전환
-                </Button>
-              )}
+              {/* 🏢 계약 전환 버튼 - 항상 표시 */}
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1 text-xs text-green-700 hover:text-green-800 hover:bg-green-50 hover:border-green-300 transition-colors"
+                onClick={() => onCreateContract?.(id, name, products)}
+              >
+                <ShieldCheck className="h-3 w-3 mr-1" />
+                계약전환
+              </Button>
 
               {/* 📁 영업에서 보관 버튼 */}
               <Button

@@ -351,23 +351,63 @@ export async function getPerformanceData(
         )
       );
 
-    // 전환율 계산 (🔥 삭제되지 않은 고객만 대상)
-    const conversionResult = await db
+    // 🎯 파이프라인과 동일한 전환율 계산: "계약 완료" 단계 고객 / 영업 기회가 있는 고객
+    // 먼저 파이프라인 단계들을 조회
+    const userPipelineStages = await db
       .select({
-        total: count(),
-        converted: sql<number>`COUNT(CASE WHEN ${clients.isActive} = true THEN 1 END)`,
-        prospects: sql<number>`COUNT(CASE WHEN ${clients.isActive} = false THEN 1 END)`,
+        id: pipelineStages.id,
+        name: pipelineStages.name,
       })
+      .from(pipelineStages)
+      .where(eq(pipelineStages.agentId, userId));
+
+    // "계약 완료" 단계 찾기
+    const completedStage = userPipelineStages.find(
+      (stage) => stage.name === '계약 완료'
+    );
+
+    // 영업 기회가 있는 고객 수 (제외됨 단계 제외)
+    const totalPipelineClients = await db
+      .select({ count: sql<number>`COUNT(DISTINCT ${clients.id})` })
       .from(clients)
+      .leftJoin(
+        opportunityProducts,
+        eq(clients.id, opportunityProducts.clientId)
+      )
+      .leftJoin(pipelineStages, eq(clients.currentStageId, pipelineStages.id))
       .where(
         and(
           eq(clients.agentId, userId),
-          // 🔥 주의: 여기서는 실제 is_active 컬럼이 아닌 status 필드로 전환율을 계산
-          // 삭제된 고객은 제외하고 활성/잠재 고객만 포함
+          eq(clients.isActive, true),
+          // 영업 기회가 있는 고객만
+          sql`${opportunityProducts.clientId} IS NOT NULL`,
+          // "제외됨" 단계가 아닌 고객만
+          sql`${pipelineStages.name} != '제외됨'`,
           gte(clients.createdAt, startDate),
           lte(clients.createdAt, endDate)
         )
       );
+
+    // "계약 완료" 단계에 있는 고객 수
+    const convertedClients = await db
+      .select({ count: sql<number>`COUNT(DISTINCT ${clients.id})` })
+      .from(clients)
+      .where(
+        and(
+          eq(clients.agentId, userId),
+          eq(clients.isActive, true),
+          completedStage
+            ? eq(clients.currentStageId, completedStage.id)
+            : sql`false`,
+          gte(clients.createdAt, startDate),
+          lte(clients.createdAt, endDate)
+        )
+      );
+
+    const pipelineConversionData = {
+      total: totalPipelineClients[0]?.count || 0,
+      converted: convertedClients[0]?.count || 0,
+    };
 
     // 데이터 추출 및 계산
     const totalClients = totalClientsResult[0]?.count || 0;
@@ -377,20 +417,20 @@ export async function getPerformanceData(
     // 🏢 실제 보험계약 수수료 사용 (통합 수수료 통계 우선)
     const actualTotalCommission = unifiedStats.success
       ? unifiedStats.data.actualContracts.totalCommission
-      : commissionResult[0]?.total || 0;
+      : 0; // commissionResult 제거로 인한 fallback
     const periodCommission = periodCommissionResult[0]?.totalCommission || 0;
 
     const revenue = actualTotalCommission; // 전체 수수료
     const periodRevenue = Number(periodCommission) || 0; // 기간별 수수료
-    const revenueCount = commissionResult[0]?.count || 0;
+    const revenueCount = 0; // commissionResult 제거로 인한 기본값
     const meetingsCount = meetingsResult[0]?.count || 0;
     const activeClients = activeClientsResult[0]?.count || 0;
 
     // MVP 특화: 전환율 계산 (더 정확한 로직)
-    const conversionData = conversionResult[0];
     const conversionRate =
-      conversionData?.total > 0
-        ? (conversionData.converted / conversionData.total) * 100
+      pipelineConversionData.total > 0
+        ? (pipelineConversionData.converted / pipelineConversionData.total) *
+          100
         : 0;
 
     // 🏢 보험설계사 특화: 추가 지표 계산

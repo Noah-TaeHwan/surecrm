@@ -31,6 +31,7 @@ interface PipelineBoardProps {
     clientName: string,
     products: any[]
   ) => void; // 🏢 계약 전환 핸들러
+  onEditOpportunity?: (clientId: string, clientName: string) => void; // 🏢 영업 기회 편집 핸들러
 }
 
 export function PipelineBoard({
@@ -40,6 +41,7 @@ export function PipelineBoard({
   onAddClientToStage,
   onRemoveFromPipeline,
   onCreateContract, // 🏢 계약 전환 핸들러
+  onEditOpportunity, // 🏢 영업 기회 편집 핸들러
 }: PipelineBoardProps) {
   const [draggedClientId, setDraggedClientId] = useState<string | null>(null);
   const dragSourceStageId = useRef<string | null>(null);
@@ -341,6 +343,7 @@ export function PipelineBoard({
                           isDragging={client.id === draggedClientId}
                           onRemoveFromPipeline={onRemoveFromPipeline}
                           onCreateContract={onCreateContract} // 🏢 계약 전환 핸들러 전달
+                          onEditOpportunity={onEditOpportunity} // 🏢 영업 기회 편집 핸들러 전달
                           // 🆕 실제 상품 정보 데이터 전달
                           products={client.products}
                           totalMonthlyPremium={client.totalMonthlyPremium}
