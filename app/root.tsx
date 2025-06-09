@@ -134,8 +134,22 @@ export function Layout({ children }: { children: React.ReactNode }) {
                             console.log('✅ 사용자 경험 최적화 시스템 활성화');
                           }
 
-                          // 🎯 극한 데이터 수집 시스템 완전 활성화
+                          // 🌟 사용자 경험 최적화 시스템 활성화
                           try {
+                            // 🎯 고급 사용자 경험 최적화 엔진 초기화
+                            import('/app/lib/utils/enhanced-user-experience-optimizer.js').then(module => {
+                              if (module.initializeUserExperienceOptimization) {
+                                module.initializeUserExperienceOptimization({
+                                  enablePersonalization: true,
+                                  enableSmartRecommendations: true,
+                                  enablePerformanceOptimization: true,
+                                  enableAccessibilityEnhancement: true,
+                                  dataQualityThreshold: 0.98,
+                                  responseTimeTarget: 150
+                                });
+                              }
+                            });
+
                             // 미세 상호작용 추적 시스템 초기화
                             import('/app/lib/utils/micro-interaction-tracker.js').then(module => {
                               if (module.initializeMicroInteractionTracking) {
@@ -150,7 +164,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                               }
                             });
                           } catch (error) {
-                            // 추적 시스템 오류는 조용히 처리
+                            // 최적화 시스템 오류는 조용히 처리하여 사용자 경험에 영향 없음
                             if (import.meta.env.DEV) {
                               console.warn('사용자 경험 고급 기능 일부 제한:', error);
                             }
