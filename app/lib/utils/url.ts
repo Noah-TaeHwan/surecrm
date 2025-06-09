@@ -16,5 +16,5 @@ export function getBaseUrl(): string {
  * Generate an invitation link with the current base URL
  */
 export function getInvitationLink(code: string): string {
-  return `${getBaseUrl()}/invite/${code}`;
+  return `${getBaseUrl()}/auth/signup?code=${code}`;
 }

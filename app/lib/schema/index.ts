@@ -493,13 +493,31 @@ export const authTriggerSQL = `
 -- 새 사용자가 auth.users에 생성될 때 app_user_profiles 테이블에 자동으로 레코드 생성
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
+DECLARE
+  invitation_code TEXT;
 BEGIN
+  -- 사용자 프로필 생성
   INSERT INTO public.app_user_profiles (id, full_name, role)
   VALUES (
     NEW.id,
     COALESCE(NEW.raw_user_meta_data->>'full_name', NEW.email),
     'agent'
   );
+
+  -- 초대장 코드 생성 (8자리 랜덤 코드)
+  invitation_code := upper(substr(md5(random()::text), 1, 8));
+
+  -- 초대장 생성 (5개 기본 제공)
+  FOR i IN 1..5 LOOP
+    INSERT INTO public.app_invitations (agent_id, code, status, created_at)
+    VALUES (
+      NEW.id,
+      invitation_code || '_' || i::text,
+      'available',
+      NOW()
+    );
+  END LOOP;
+
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
