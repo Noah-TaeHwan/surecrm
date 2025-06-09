@@ -654,8 +654,17 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Outlet />
         <ScrollRestoration />
         <Scripts />
-        <Analytics />
-        <SpeedInsights />
+        <Analytics
+          debug={import.meta.env.DEV}
+          beforeSend={(event) => {
+            // 개발 환경에서 Analytics 이벤트 로깅
+            if (import.meta.env.DEV) {
+              console.log('📊 Analytics Event:', event);
+            }
+            return event;
+          }}
+        />
+        <SpeedInsights debug={import.meta.env.DEV} />
       </body>
     </html>
   );

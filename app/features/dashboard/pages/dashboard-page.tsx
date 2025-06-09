@@ -23,6 +23,7 @@ import {
 } from '../lib/dashboard-data';
 import { requireAuth } from '~/lib/auth/middleware';
 import { useFetcher, useRevalidator } from 'react-router';
+import { trackPageView } from '~/lib/utils/analytics';
 
 // 새로운 타입 시스템 import
 import type {
@@ -288,6 +289,11 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
     salesStats, // 🆕 실제 영업 상품 통계
     error,
   } = loaderData;
+
+  // Analytics 추적
+  useEffect(() => {
+    trackPageView('/dashboard');
+  }, []);
 
   const fetcher = useFetcher();
   const revalidator = useRevalidator();
