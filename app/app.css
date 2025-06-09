@@ -771,11 +771,11 @@ textarea {
     }
   }
 
-  /* 키맨 고객 카드 - 은은한 오렌지 글로우 애니메이션 */
+  /* 키맨 고객 카드 - 은은한 오렌지 글로우 애니메이션 (연하게 수정) */
   .client-card-keyman {
     position: relative !important;
     animation: keyman-border-glow 8s ease-in-out infinite !important;
-    border: 1px solid rgba(255, 107, 53, 0.2) !important;
+    border: 1px solid rgba(255, 107, 53, 0.15) !important;
     overflow: hidden !important;
   }
 
@@ -794,15 +794,15 @@ textarea {
     border-radius: inherit !important;
     background: linear-gradient(
       45deg,
-      rgba(255, 107, 53, 0.4),
-      rgba(255, 143, 101, 0.3),
-      rgba(255, 184, 149, 0.2),
-      rgba(255, 107, 53, 0.4)
+      rgba(255, 107, 53, 0.25),
+      rgba(255, 143, 101, 0.18),
+      rgba(255, 184, 149, 0.12),
+      rgba(255, 107, 53, 0.25)
     ) !important;
     background-size: 300% 300% !important;
     animation: keyman-gradient-move 12s ease-in-out infinite !important;
     z-index: -2 !important;
-    opacity: 0.7 !important;
+    opacity: 0.4 !important;
     filter: blur(1px) !important;
   }
 
@@ -828,7 +828,7 @@ textarea {
     }
   }
 
-  /* 일반 고객 카드 - 매우 은은한 블루 효과 */
+  /* 일반 고객 카드 - 매우 은은한 블루 효과 (유지) */
   .client-card-normal {
     position: relative !important;
     animation: normal-border-subtle 20s ease-in-out infinite !important;
@@ -885,6 +885,73 @@ textarea {
     }
   }
 
+  /* 관심 고객 카드 - 은은한 회색 효과 (새로 추가) */
+  .client-card-low {
+    position: relative !important;
+    animation: low-border-gentle 30s ease-in-out infinite !important;
+    border: 1px solid rgba(120, 120, 120, 0.2) !important;
+    overflow: hidden !important;
+  }
+
+  .client-card-low > * {
+    position: relative !important;
+    z-index: 1 !important;
+  }
+
+  .client-card-low::before {
+    content: '' !important;
+    position: absolute !important;
+    top: -1px !important;
+    left: -1px !important;
+    right: -1px !important;
+    bottom: -1px !important;
+    border-radius: inherit !important;
+    background: linear-gradient(
+      45deg,
+      rgba(120, 120, 120, 0.12),
+      rgba(140, 140, 140, 0.1),
+      rgba(160, 160, 160, 0.08),
+      rgba(120, 120, 120, 0.12)
+    ) !important;
+    background-size: 150% 150% !important;
+    animation: low-gradient-move 35s ease-in-out infinite !important;
+    z-index: -2 !important;
+    opacity: 0.3 !important;
+    filter: blur(0.3px) !important;
+  }
+
+  .client-card-low::after {
+    content: '' !important;
+    position: absolute !important;
+    top: 1px !important;
+    left: 1px !important;
+    right: 1px !important;
+    bottom: 1px !important;
+    background: inherit !important;
+    border-radius: inherit !important;
+    z-index: -1 !important;
+  }
+
+  @keyframes low-border-gentle {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0.5px rgba(120, 120, 120, 0.1);
+    }
+    50% {
+      box-shadow: 0 0 0 0.5px rgba(120, 120, 120, 0.18);
+    }
+  }
+
+  @keyframes low-gradient-move {
+    0%,
+    100% {
+      background-position: 0% 20% !important;
+    }
+    50% {
+      background-position: 100% 80% !important;
+    }
+  }
+
   /* 호버 시 효과 강화 */
   .client-card-keyman:hover {
     animation: keyman-border-glow 4s ease-in-out infinite !important;
@@ -892,5 +959,9 @@ textarea {
 
   .client-card-normal:hover {
     animation: normal-border-subtle 10s ease-in-out infinite !important;
+  }
+
+  .client-card-low:hover {
+    animation: low-border-gentle 15s ease-in-out infinite !important;
   }
 }

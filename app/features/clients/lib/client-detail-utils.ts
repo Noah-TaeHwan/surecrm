@@ -222,7 +222,7 @@ export function getClientCardStyle(importance: string) {
       return {
         bgGradient:
           'bg-gradient-to-br from-muted/30 to-white dark:from-muted/10 dark:to-background',
-        borderClass: '', // 효과 없음
+        borderClass: 'client-card-low', // 은은한 회색 효과
       };
     default:
       return {
