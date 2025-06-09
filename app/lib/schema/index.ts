@@ -509,11 +509,11 @@ BEGIN
 
   -- 초대장 생성 (5개 기본 제공)
   FOR i IN 1..5 LOOP
-    INSERT INTO public.app_invitations (agent_id, code, status, created_at)
+    INSERT INTO public.app_user_invitations (inviter_id, code, status, created_at)
     VALUES (
       NEW.id,
       invitation_code || '_' || i::text,
-      'available',
+      'pending',
       NOW()
     );
   END LOOP;

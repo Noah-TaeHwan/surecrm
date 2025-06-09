@@ -9,19 +9,19 @@ BEGIN
   FOR user_record IN 
     SELECT up.id, up.full_name 
     FROM public.app_user_profiles up
-    LEFT JOIN public.app_invitations inv ON up.id = inv.agent_id
-    WHERE inv.agent_id IS NULL
+    LEFT JOIN public.app_user_invitations inv ON up.id = inv.inviter_id
+    WHERE inv.inviter_id IS NULL
   LOOP
     -- 초대장 코드 생성 (8자리 랜덤 코드)
     invitation_code := upper(substr(md5(random()::text || user_record.id::text), 1, 8));
 
     -- 초대장 5개 생성
     FOR i IN 1..5 LOOP
-      INSERT INTO public.app_invitations (agent_id, code, status, created_at)
+      INSERT INTO public.app_user_invitations (inviter_id, code, status, created_at)
       VALUES (
         user_record.id,
         invitation_code || '_' || i::text,
-        'available',
+        'pending',
         NOW()
       );
     END LOOP;
