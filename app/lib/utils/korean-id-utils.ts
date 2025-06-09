@@ -296,3 +296,62 @@ export function debugKoreanIdParse(idNumber: string): void {
     errorMessage: result.errorMessage,
   });
 }
+
+/**
+ * 주민등록번호 암호화 (AES-256-GCM)
+ * 환경변수 ENCRYPTION_KEY 필요
+ *
+ * ⚠️ 서버 사이드 전용 함수입니다. 클라이언트에서는 사용하지 마세요.
+ */
+export async function encryptKoreanId(ssn: string): Promise<string | null> {
+  // 🔧 클라이언트 사이드에서는 암호화 처리하지 않음
+  if (typeof window !== 'undefined') {
+    console.warn('⚠️ 암호화는 서버에서만 처리됩니다.');
+    return null;
+  }
+
+  // 서버 사이드에서만 실행
+  return null; // 임시로 null 반환, 실제 구현은 서버 API에서 처리
+}
+
+/**
+ * 주민등록번호 복호화
+ *
+ * ⚠️ 서버 사이드 전용 함수입니다.
+ */
+export async function decryptKoreanId(
+  encryptedSsn: string
+): Promise<string | null> {
+  // 🔧 클라이언트 사이드에서는 복호화 처리하지 않음
+  if (typeof window !== 'undefined') {
+    console.warn('⚠️ 복호화는 서버에서만 처리됩니다.');
+    return null;
+  }
+
+  // 서버 사이드에서만 실행
+  return null; // 임시로 null 반환, 실제 구현은 서버 API에서 처리
+}
+
+/**
+ * 주민등록번호 해시 생성 (검색용)
+ * 실제 주민등록번호는 복구할 수 없지만, 같은 번호인지 비교 가능
+ */
+export function hashKoreanId(ssn: string): string {
+  try {
+    if (typeof window !== 'undefined') {
+      // 클라이언트에서는 해싱하지 않음
+      return '';
+    }
+
+    const crypto = require('crypto');
+    const salt = process.env.HASH_SALT || 'default-salt-korean-id';
+
+    return crypto
+      .createHash('sha256')
+      .update(ssn + salt)
+      .digest('hex');
+  } catch (error) {
+    console.error('❌ 주민등록번호 해싱 실패:', error);
+    return '';
+  }
+}

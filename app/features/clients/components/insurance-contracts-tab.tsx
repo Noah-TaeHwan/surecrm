@@ -314,6 +314,12 @@ export function InsuranceContractsTab({
   // 👁️ 주민등록번호 마스킹 해제 상태 관리
   const [visibleSsns, setVisibleSsns] = useState<Set<string>>(new Set());
 
+  // 🗑️ 삭제 관련 상태 관리
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [contractToDelete, setContractToDelete] =
+    useState<InsuranceContract | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   // 🏢 파이프라인에서 계약 전환으로 온 경우 모달 자동 열기
   useEffect(() => {
     if (shouldOpenModal) {
@@ -903,6 +909,66 @@ export function InsuranceContractsTab({
     .filter((c) => c.status === 'active' && c.agentCommission)
     .reduce((sum, c) => sum + Number(c.agentCommission || 0), 0);
 
+  // 🗑️ 보험계약 삭제 관련 함수들
+  const handleDeleteContract = (contract: InsuranceContract) => {
+    setContractToDelete(contract);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!contractToDelete) return;
+
+    setIsDeleting(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('actionType', 'delete');
+      formData.append('contractId', contractToDelete.id);
+
+      const response = await fetch('/api/insurance-contracts', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // 성공 시 로컬 상태에서 계약 제거
+        setContracts((prev) =>
+          prev.filter((c) => c.id !== contractToDelete.id)
+        );
+
+        toast.success(
+          '계약 삭제 완료',
+          `${contractToDelete.productName} 계약이 삭제되었습니다.`
+        );
+
+        setShowDeleteModal(false);
+        setContractToDelete(null);
+
+        // 페이지 데이터 새로고침
+        revalidator.revalidate();
+      } else {
+        throw new Error(result.message || '계약 삭제에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('❌ 보험계약 삭제 실패:', error);
+      toast.error(
+        '계약 삭제 실패',
+        error instanceof Error
+          ? error.message
+          : '알 수 없는 오류가 발생했습니다.'
+      );
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false);
+    setContractToDelete(null);
+  };
+
   return (
     <>
       <TabsContent value="insurance" className="space-y-6">
@@ -1030,6 +1096,16 @@ export function InsuranceContractsTab({
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteContract(contract);
+                            }}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
                         </div>
                       </div>
 
@@ -1148,7 +1224,7 @@ export function InsuranceContractsTab({
                             )}
                             {contract.paymentCycle && (
                               <div className="flex justify-between items-center py-1.5">
-                                <span className="text-xs text-slate-500 dark:text-slate-500">
+                                <span className="text-sm text-slate-700 dark:text-slate-300">
                                   납입주기
                                 </span>
                                 <Badge
@@ -1589,6 +1665,81 @@ export function InsuranceContractsTab({
             onDownloadAttachment={handleDownloadAttachment}
           />
         )}
+
+        {/* 🗑️ 삭제 확인 모달 */}
+        {showDeleteModal && contractToDelete && (
+          <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2 text-red-600">
+                  <AlertCircle className="h-5 w-5" />
+                  보험계약 삭제 확인
+                </DialogTitle>
+              </DialogHeader>
+              <div className="space-y-3 pt-2">
+                <div className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                  <div className="text-sm text-red-800 dark:text-red-200 font-medium mb-2">
+                    다음 보험계약을 정말 삭제하시겠습니까?
+                  </div>
+                  <div className="space-y-1 text-sm">
+                    <div>
+                      <span className="font-medium">상품명:</span>{' '}
+                      {contractToDelete.productName}
+                    </div>
+                    <div>
+                      <span className="font-medium">보험회사:</span>{' '}
+                      {contractToDelete.insuranceCompany}
+                    </div>
+                    <div>
+                      <span className="font-medium">계약자:</span>{' '}
+                      {contractToDelete.contractorName}
+                    </div>
+                    {contractToDelete.policyNumber && (
+                      <div>
+                        <span className="font-medium">증권번호:</span>{' '}
+                        {contractToDelete.policyNumber}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
+                  <div className="text-sm text-orange-800 dark:text-orange-200">
+                    ⚠️ <span className="font-medium">주의:</span> 삭제된 계약
+                    정보는 복구할 수 없습니다. 관련된 첨부파일과 데이터도 함께
+                    삭제됩니다.
+                  </div>
+                </div>
+              </div>
+              <DialogFooter className="gap-2">
+                <Button
+                  variant="outline"
+                  onClick={handleDeleteCancel}
+                  disabled={isDeleting}
+                >
+                  취소
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={handleDeleteConfirm}
+                  disabled={isDeleting}
+                  className="gap-2"
+                >
+                  {isDeleting ? (
+                    <>
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
+                      삭제 중...
+                    </>
+                  ) : (
+                    <>
+                      <X className="h-4 w-4" />
+                      삭제 확인
+                    </>
+                  )}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
       </TabsContent>
 
       {/* 토스트 알림 컨테이너 */}
@@ -1780,6 +1931,25 @@ function NewContractModal({
 
     if (!formData.premiumAmount) {
       newErrors.premiumAmount = '납입보험료를 입력해주세요';
+    }
+
+    // 🆔 주민등록번호 유효성 검사
+    if (formData.contractorSsn.trim()) {
+      const contractorSsnValidation = validateKoreanId(formData.contractorSsn);
+      if (!contractorSsnValidation) {
+        const parseResult = parseKoreanId(formData.contractorSsn);
+        newErrors.contractorSsn =
+          parseResult.errorMessage || '유효하지 않은 주민등록번호입니다';
+      }
+    }
+
+    if (formData.insuredSsn.trim()) {
+      const insuredSsnValidation = validateKoreanId(formData.insuredSsn);
+      if (!insuredSsnValidation) {
+        const parseResult = parseKoreanId(formData.insuredSsn);
+        newErrors.insuredSsn =
+          parseResult.errorMessage || '유효하지 않은 주민등록번호입니다';
+      }
     }
 
     setErrors(newErrors);
@@ -1979,16 +2149,55 @@ function NewContractModal({
                     <Input
                       id="contractorSsn"
                       value={formData.contractorSsn}
-                      onChange={(e) =>
-                        updateField(
-                          'contractorSsn',
-                          formatKoreanIdInput(e.target.value)
-                        )
-                      }
+                      onChange={(e) => {
+                        const formatted = formatKoreanIdInput(e.target.value);
+                        updateField('contractorSsn', formatted);
+                      }}
+                      onBlur={(e) => {
+                        const value = e.target.value.trim();
+                        if (value && !validateKoreanId(value)) {
+                          const parseResult = parseKoreanId(value);
+                          setErrors((prev) => ({
+                            ...prev,
+                            contractorSsn:
+                              parseResult.errorMessage ||
+                              '유효하지 않은 주민등록번호입니다',
+                          }));
+                        } else {
+                          setErrors((prev) => {
+                            const newErrors = { ...prev };
+                            delete newErrors.contractorSsn;
+                            return newErrors;
+                          });
+                        }
+                      }}
                       placeholder="000000-0000000"
                       maxLength={14}
-                      className="w-full"
+                      className={`w-full ${
+                        errors.contractorSsn
+                          ? 'border-destructive'
+                          : formData.contractorSsn &&
+                            validateKoreanId(formData.contractorSsn)
+                          ? 'border-green-500'
+                          : ''
+                      }`}
                     />
+                    <div className="flex items-center justify-between">
+                      {errors.contractorSsn && (
+                        <p className="text-xs text-destructive flex items-center gap-1">
+                          <AlertCircle className="h-3 w-3" />
+                          {errors.contractorSsn}
+                        </p>
+                      )}
+                      {!errors.contractorSsn &&
+                        formData.contractorSsn &&
+                        validateKoreanId(formData.contractorSsn) && (
+                          <p className="text-xs text-green-600 flex items-center gap-1">
+                            <CheckCircle className="h-3 w-3" />
+                            유효한 주민등록번호입니다
+                          </p>
+                        )}
+                    </div>
                   </div>
 
                   <div className="space-y-2">
@@ -2051,16 +2260,55 @@ function NewContractModal({
                     <Input
                       id="insuredSsn"
                       value={formData.insuredSsn}
-                      onChange={(e) =>
-                        updateField(
-                          'insuredSsn',
-                          formatKoreanIdInput(e.target.value)
-                        )
-                      }
+                      onChange={(e) => {
+                        const formatted = formatKoreanIdInput(e.target.value);
+                        updateField('insuredSsn', formatted);
+                      }}
+                      onBlur={(e) => {
+                        const value = e.target.value.trim();
+                        if (value && !validateKoreanId(value)) {
+                          const parseResult = parseKoreanId(value);
+                          setErrors((prev) => ({
+                            ...prev,
+                            insuredSsn:
+                              parseResult.errorMessage ||
+                              '유효하지 않은 주민등록번호입니다',
+                          }));
+                        } else {
+                          setErrors((prev) => {
+                            const newErrors = { ...prev };
+                            delete newErrors.insuredSsn;
+                            return newErrors;
+                          });
+                        }
+                      }}
                       placeholder="000000-0000000"
                       maxLength={14}
-                      className="w-full"
+                      className={`w-full ${
+                        errors.insuredSsn
+                          ? 'border-destructive'
+                          : formData.insuredSsn &&
+                            validateKoreanId(formData.insuredSsn)
+                          ? 'border-green-500'
+                          : ''
+                      }`}
                     />
+                    <div className="flex items-center justify-between">
+                      {errors.insuredSsn && (
+                        <p className="text-xs text-destructive flex items-center gap-1">
+                          <AlertCircle className="h-3 w-3" />
+                          {errors.insuredSsn}
+                        </p>
+                      )}
+                      {!errors.insuredSsn &&
+                        formData.insuredSsn &&
+                        validateKoreanId(formData.insuredSsn) && (
+                          <p className="text-xs text-green-600 flex items-center gap-1">
+                            <CheckCircle className="h-3 w-3" />
+                            유효한 주민등록번호입니다
+                          </p>
+                        )}
+                    </div>
                   </div>
 
                   <div className="space-y-2">

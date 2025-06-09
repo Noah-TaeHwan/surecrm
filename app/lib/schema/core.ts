@@ -746,9 +746,11 @@ export const insuranceContracts = pgTable('app_client_insurance_contracts', {
   // 계약자/피보험자 정보
   contractorName: text('contractor_name').notNull(), // 계약자명
   contractorSsn: text('contractor_ssn'), // 🆕 계약자 주민번호 (암호화 저장)
+  contractorSsnEncrypted: text('contractor_ssn_encrypted'), // 🔒 계약자 주민번호 (AES-256-GCM 암호화)
   contractorPhone: text('contractor_phone'), // 🆕 계약자 연락처
   insuredName: text('insured_name').notNull(), // 피보험자명
   insuredSsn: text('insured_ssn'), // 🆕 피보험자 주민번호 (암호화 저장)
+  insuredSsnEncrypted: text('insured_ssn_encrypted'), // 🔒 피보험자 주민번호 (AES-256-GCM 암호화)
   insuredPhone: text('insured_phone'), // 🆕 피보험자 연락처
   beneficiaryName: text('beneficiary_name'), // 수익자명
 

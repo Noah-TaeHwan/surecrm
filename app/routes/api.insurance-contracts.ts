@@ -6,10 +6,60 @@ export async function action({ request }: { request: Request }) {
   }
 
   try {
-    console.log('🏢 [API Route] 보험계약 생성 요청 수신');
-
     const user = await requireAuth(request);
     const formData = await request.formData();
+
+    // �� 액션 타입 확인 (생성 vs 삭제 vs 첨부파일 삭제)
+    const actionType = formData.get('actionType')?.toString();
+
+    if (actionType === 'delete') {
+      console.log('🗑️ [API Route] 보험계약 삭제 요청 수신');
+
+      const contractId = formData.get('contractId')?.toString();
+      if (!contractId) {
+        return Response.json(
+          {
+            success: false,
+            message: '계약 ID가 필요합니다.',
+          },
+          { status: 400 }
+        );
+      }
+
+      const { deleteInsuranceContract } = await import(
+        '~/api/shared/insurance-contracts'
+      );
+
+      const result = await deleteInsuranceContract(contractId, user.id);
+      console.log('🎯 [API Route] 보험계약 삭제 결과:', result);
+      return Response.json(result);
+    }
+
+    if (actionType === 'deleteAttachment') {
+      console.log('📎 [API Route] 첨부파일 삭제 요청 수신');
+
+      const attachmentId = formData.get('attachmentId')?.toString();
+      if (!attachmentId) {
+        return Response.json(
+          {
+            success: false,
+            message: '첨부파일 ID가 필요합니다.',
+          },
+          { status: 400 }
+        );
+      }
+
+      const { deleteContractAttachment } = await import(
+        '~/api/shared/insurance-contracts'
+      );
+
+      const result = await deleteContractAttachment(attachmentId, user.id);
+      console.log('🎯 [API Route] 첨부파일 삭제 결과:', result);
+      return Response.json(result);
+    }
+
+    // 기본: 보험계약 생성
+    console.log('🏢 [API Route] 보험계약 생성 요청 수신');
 
     const clientId = formData.get('clientId')?.toString();
     if (!clientId) {
@@ -116,12 +166,12 @@ export async function action({ request }: { request: Request }) {
 
     return Response.json(result);
   } catch (error) {
-    console.error('❌ [API Route] 보험계약 생성 실패:', error);
+    console.error('❌ [API Route] 보험계약 처리 실패:', error);
 
     return Response.json(
       {
         success: false,
-        message: '보험계약 생성에 실패했습니다.',
+        message: '요청 처리에 실패했습니다.',
         error: error instanceof Error ? error.message : '알 수 없는 오류',
       },
       { status: 500 }

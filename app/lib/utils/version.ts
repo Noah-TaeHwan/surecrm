@@ -26,8 +26,8 @@ export function getVersionInfo(): VersionInfo {
   const commitHash =
     process.env.REACT_APP_GIT_COMMIT || process.env.VITE_GIT_COMMIT;
 
-  // Git tag가 있으면 우선 사용, 없으면 package.json 버전 사용
-  const version = gitTag || baseVersion;
+  // 🔧 항상 package.json 버전을 기준으로 사용하여 동기화
+  const version = baseVersion;
 
   return {
     version,

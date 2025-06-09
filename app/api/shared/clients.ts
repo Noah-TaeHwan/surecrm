@@ -19,7 +19,7 @@ import {
   type AppClientAnalytics,
   type AppClientMilestone,
 } from '~/features/clients/lib/schema';
-import { eq, and, or, desc, count, sum, avg, sql } from 'drizzle-orm';
+import { eq, and, or, desc, count, sql } from 'drizzle-orm';
 
 // 🎯 고객 프로필 확장 인터페이스
 interface ClientProfile extends Client {

@@ -1,7 +1,7 @@
 // API 파일
 
 // 🏢 보험계약 관리 API
-import { eq, and, desc, count, sql } from 'drizzle-orm';
+import { eq, and, desc, count, sql, not } from 'drizzle-orm';
 import { db } from '~/lib/core/db';
 import {
   insuranceContracts,
@@ -241,7 +241,9 @@ export async function getClientInsuranceContracts(
       .where(
         and(
           eq(insuranceContracts.clientId, clientId),
-          eq(insuranceContracts.agentId, agentId)
+          eq(insuranceContracts.agentId, agentId),
+          // 🔍 삭제되지 않은 (cancelled 상태가 아닌) 계약만 조회
+          not(eq(insuranceContracts.status, 'cancelled'))
         )
       )
       .orderBy(desc(insuranceContracts.createdAt));
@@ -580,43 +582,124 @@ export async function updateInsuranceContractWithAttachments(
 }
 
 /**
- * 보험계약 삭제 (상태 변경)
+ * 보험계약 완전 삭제 (하드 삭제 + Storage 첨부파일 삭제)
  */
 export async function deleteInsuranceContract(
   contractId: string,
   agentId: string
 ) {
   try {
-    console.log('🏢 보험계약 삭제:', { contractId, agentId });
+    console.log('🏢 보험계약 완전 삭제 시작:', { contractId, agentId });
 
-    const [deletedContract] = await db
-      .update(insuranceContracts)
-      .set({
-        status: 'cancelled',
-        updatedAt: new Date(),
-      })
+    // 1. 삭제할 계약 존재 여부 확인
+    const [existingContract] = await db
+      .select()
+      .from(insuranceContracts)
       .where(
         and(
           eq(insuranceContracts.id, contractId),
           eq(insuranceContracts.agentId, agentId)
         )
       )
-      .returning();
+      .limit(1);
 
-    if (!deletedContract) {
+    if (!existingContract) {
       return {
         success: false,
         error: '보험계약을 찾을 수 없습니다.',
       };
     }
 
-    console.log('✅ 보험계약 삭제 완료');
+    // 2. 관련 첨부파일들 조회
+    const attachments = await db
+      .select()
+      .from(contractAttachments)
+      .where(eq(contractAttachments.contractId, contractId));
+
+    console.log(`📎 삭제할 첨부파일: ${attachments.length}개`);
+
+    // 3. 트랜잭션으로 안전하게 삭제
+    const deletionResult = await db.transaction(async (tx) => {
+      // 3.1. 첨부파일 레코드 삭제
+      if (attachments.length > 0) {
+        await tx
+          .delete(contractAttachments)
+          .where(eq(contractAttachments.contractId, contractId));
+        console.log('✅ 첨부파일 레코드 삭제 완료');
+      }
+
+      // 3.2. 보험계약 삭제
+      const [deletedContract] = await tx
+        .delete(insuranceContracts)
+        .where(
+          and(
+            eq(insuranceContracts.id, contractId),
+            eq(insuranceContracts.agentId, agentId)
+          )
+        )
+        .returning();
+
+      console.log('✅ 보험계약 레코드 삭제 완료');
+      return deletedContract;
+    });
+
+    // 4. Storage에서 첨부파일들 실제 삭제
+    if (attachments.length > 0) {
+      const { deleteFile } = await import('~/lib/core/storage');
+
+      const deletionPromises = attachments.map(async (attachment) => {
+        try {
+          const result = await deleteFile(
+            'contract-attachments',
+            attachment.filePath
+          );
+          if (result.success) {
+            console.log(`✅ Storage 파일 삭제 성공: ${attachment.fileName}`);
+          } else {
+            console.warn(
+              `⚠️ Storage 파일 삭제 실패: ${attachment.fileName}`,
+              result.error
+            );
+          }
+          return result;
+        } catch (error) {
+          console.error(
+            `❌ Storage 파일 삭제 오류: ${attachment.fileName}`,
+            error
+          );
+          return { success: false, error: '파일 삭제 중 오류' };
+        }
+      });
+
+      const storageResults = await Promise.allSettled(deletionPromises);
+      const failedDeletions = storageResults.filter(
+        (result) =>
+          result.status === 'rejected' ||
+          (result.status === 'fulfilled' && !result.value.success)
+      );
+
+      if (failedDeletions.length > 0) {
+        console.warn(
+          `⚠️ ${failedDeletions.length}개 파일의 Storage 삭제 실패 (DB는 정상 삭제됨)`
+        );
+      }
+    }
+
+    console.log('✅ 보험계약 완전 삭제 완료:', {
+      contractId,
+      deletedAttachments: attachments.length,
+    });
+
     return {
       success: true,
-      message: '보험계약이 성공적으로 삭제되었습니다.',
+      message: '보험계약과 관련 파일이 완전히 삭제되었습니다.',
+      deletedData: {
+        contractId,
+        attachmentsDeleted: attachments.length,
+      },
     };
   } catch (error) {
-    console.error('❌ 보험계약 삭제 실패:', error);
+    console.error('❌ 보험계약 완전 삭제 실패:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : '알 수 없는 오류',
@@ -682,20 +765,43 @@ export async function addContractAttachment(
 }
 
 /**
- * 계약 첨부파일 삭제
+ * 계약 첨부파일 완전 삭제 (하드 삭제 + Storage 파일 삭제)
  */
 export async function deleteContractAttachment(
   attachmentId: string,
   agentId: string
 ) {
   try {
-    console.log('📎 계약 첨부파일 삭제:', { attachmentId, agentId });
+    console.log('📎 계약 첨부파일 완전 삭제 시작:', { attachmentId, agentId });
 
+    // 1. 삭제할 첨부파일 조회
+    const [existingAttachment] = await db
+      .select()
+      .from(contractAttachments)
+      .where(
+        and(
+          eq(contractAttachments.id, attachmentId),
+          eq(contractAttachments.agentId, agentId),
+          eq(contractAttachments.isActive, true)
+        )
+      )
+      .limit(1);
+
+    if (!existingAttachment) {
+      return {
+        success: false,
+        error: '첨부파일을 찾을 수 없습니다.',
+      };
+    }
+
+    console.log('📂 삭제할 파일 정보:', {
+      fileName: existingAttachment.fileName,
+      filePath: existingAttachment.filePath,
+    });
+
+    // 2. 데이터베이스에서 첨부파일 레코드 삭제
     const [deletedAttachment] = await db
-      .update(contractAttachments)
-      .set({
-        isActive: false,
-      })
+      .delete(contractAttachments)
       .where(
         and(
           eq(contractAttachments.id, attachmentId),
@@ -704,20 +810,45 @@ export async function deleteContractAttachment(
       )
       .returning();
 
-    if (!deletedAttachment) {
-      return {
-        success: false,
-        error: '첨부파일을 찾을 수 없습니다.',
-      };
+    console.log('✅ 첨부파일 레코드 삭제 완료');
+
+    // 3. Storage에서 실제 파일 삭제
+    try {
+      const { deleteFile } = await import('~/lib/core/storage');
+      const storageResult = await deleteFile(
+        'contract-attachments',
+        existingAttachment.filePath
+      );
+
+      if (storageResult.success) {
+        console.log(
+          `✅ Storage 파일 삭제 성공: ${existingAttachment.fileName}`
+        );
+      } else {
+        console.warn(
+          `⚠️ Storage 파일 삭제 실패: ${existingAttachment.fileName}`,
+          storageResult.error
+        );
+        // Storage 삭제 실패해도 DB는 이미 삭제되었으므로 성공으로 처리
+      }
+    } catch (storageError) {
+      console.error(
+        `❌ Storage 파일 삭제 오류: ${existingAttachment.fileName}`,
+        storageError
+      );
+      // Storage 삭제 실패해도 DB는 이미 삭제되었으므로 성공으로 처리
     }
 
-    console.log('✅ 계약 첨부파일 삭제 완료');
     return {
       success: true,
-      message: '첨부파일이 성공적으로 삭제되었습니다.',
+      message: '첨부파일이 완전히 삭제되었습니다.',
+      deletedData: {
+        fileName: existingAttachment.fileName,
+        filePath: existingAttachment.filePath,
+      },
     };
   } catch (error) {
-    console.error('❌ 계약 첨부파일 삭제 실패:', error);
+    console.error('❌ 계약 첨부파일 완전 삭제 실패:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : '알 수 없는 오류',
