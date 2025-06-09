@@ -1,5 +1,11 @@
+import {
+  shouldCollectAnalytics,
+  logAnalyticsStatus,
+  analyticsConfig,
+} from './analytics-config';
+
 // GA4 측정 ID (환경변수에서 안전하게 가져옴)
-const GA_MEASUREMENT_ID = import.meta.env.VITE_GA_MEASUREMENT_ID;
+const GA_MEASUREMENT_ID = analyticsConfig.GA_MEASUREMENT_ID;
 
 // gtag 함수 타입 정의
 declare global {
@@ -54,18 +60,19 @@ export function initGA(): void {
 
 // 페이지 뷰 추적
 export function trackPageView({ path, title }: PageViewProps): void {
-  // 🚀 사용자 경험 최적화를 위한 스마트 환경 분리
+  // 🔒 통합 분석 환경 설정 확인
+  if (!shouldCollectAnalytics()) {
+    logAnalyticsStatus('페이지 뷰 추적');
+    return;
+  }
+
   if (
     !GA_MEASUREMENT_ID ||
     typeof window === 'undefined' ||
-    typeof window.gtag !== 'function' ||
-    window.location.hostname === 'localhost' ||
-    window.location.hostname === '127.0.0.1' ||
-    window.location.port === '5173' ||
-    window.location.port === '3000' ||
-    window.location.port === '8080'
-  )
+    typeof window.gtag !== 'function'
+  ) {
     return;
+  }
 
   window.gtag('event', 'page_view', {
     page_title: title || document.title,
@@ -73,8 +80,7 @@ export function trackPageView({ path, title }: PageViewProps): void {
     page_path: path,
   });
 
-  // Production 환경에서만 데이터 수집
-  // 개발 환경에서는 조용히 동작 (콘솔 로그 없음)
+  logAnalyticsStatus('페이지 뷰 추적');
 }
 
 // 커스텀 이벤트 추적
@@ -85,18 +91,19 @@ export function trackEvent({
   value,
   custom_parameters,
 }: EventProps): void {
-  // 🚀 사용자 경험 최적화를 위한 스마트 환경 분리
+  // 🔒 통합 분석 환경 설정 확인
+  if (!shouldCollectAnalytics()) {
+    logAnalyticsStatus(`이벤트 추적: ${action}`);
+    return;
+  }
+
   if (
     !GA_MEASUREMENT_ID ||
     typeof window === 'undefined' ||
-    typeof window.gtag !== 'function' ||
-    window.location.hostname === 'localhost' ||
-    window.location.hostname === '127.0.0.1' ||
-    window.location.port === '5173' ||
-    window.location.port === '3000' ||
-    window.location.port === '8080'
-  )
+    typeof window.gtag !== 'function'
+  ) {
     return;
+  }
 
   const eventData: any = {
     event_category: category,
@@ -106,12 +113,7 @@ export function trackEvent({
   };
 
   window.gtag('event', action, eventData);
-
-  // Production 환경에서만 데이터 수집
-  // 개발 환경에서는 조용히 동작 (콘솔 로그 없음)
-  if (!import.meta.env.DEV && window.location.hostname !== 'localhost') {
-    // Production 환경에서만 조용히 로그
-  }
+  logAnalyticsStatus(`이벤트 추적: ${action}`);
 }
 
 // 🏢 SureCRM 보험설계사 전용 극한 분석 이벤트들

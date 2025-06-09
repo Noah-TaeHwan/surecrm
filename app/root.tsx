@@ -16,6 +16,7 @@ import stylesheet from './app.css?url';
 import { initGA, SessionTracking } from '~/lib/utils/analytics';
 import { usePageTracking } from '~/hooks/use-analytics';
 import { useBusinessIntelligence } from '~/hooks/use-business-intelligence';
+import { useUserRoleTracker } from '~/hooks/use-user-role-tracker';
 
 export const links: Route.LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -40,46 +41,108 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
 
-        {/* 🚀 Google Tag Manager - 가장 우선적으로 로드 */}
+        {/* 🚀 Google Tag Manager - 조건부 로드 */}
         {import.meta.env.VITE_GTM_CONTAINER_ID && (
           <script
             dangerouslySetInnerHTML={{
-              __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','${
-                import.meta.env.VITE_GTM_CONTAINER_ID
-              }');`,
+              __html: `
+                // 🔒 분석 수집 환경 확인
+                (function() {
+                  // 개발 환경 감지
+                  const isDev = window.location.hostname === 'localhost' ||
+                               window.location.hostname === '127.0.0.1' ||
+                               window.location.hostname.includes('.local') ||
+                               window.location.port === '5173' ||
+                               window.location.port === '5174' ||
+                               window.location.port === '5175' ||
+                               window.location.port === '5176' ||
+                               window.location.port === '5177' ||
+                               window.location.port === '5178' ||
+                               window.location.port === '5179' ||
+                               window.location.port === '5180' ||
+                               window.location.port === '5181' ||
+                               window.location.port === '5182' ||
+                               window.location.port === '5183' ||
+                               window.location.port === '5184' ||
+                               window.location.port === '5185' ||
+                               window.location.port === '5186' ||
+                               window.location.port === '5187' ||
+                               window.location.port === '3000' ||
+                               window.location.port === '8080';
+                  
+                  if (isDev) {
+                    console.log('🔧 개발환경: GTM 로딩 건너뛰기');
+                    return;
+                  }
+                  
+                  // GTM 로드
+                  (function(w,d,s,l,i){
+                    w[l]=w[l]||[];
+                    w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});
+                    var f=d.getElementsByTagName(s)[0],
+                        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';
+                    j.async=true;
+                    j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;
+                    f.parentNode.insertBefore(j,f);
+                  })(window,document,'script','dataLayer','${
+                    import.meta.env.VITE_GTM_CONTAINER_ID
+                  }');
+                  
+                  console.log('✅ GTM 로딩 완료');
+                })();
+              `,
             }}
           />
         )}
 
-        {/* 🚀 Google Analytics - GTM과 함께 로드 */}
+        {/* 🚀 Google Analytics - 조건부 로드 */}
         {import.meta.env.VITE_GA_MEASUREMENT_ID && (
           <>
             <script
-              async
-              src={`https://www.googletagmanager.com/gtag/js?id=${
-                import.meta.env.VITE_GA_MEASUREMENT_ID
-              }`}
-            />
-            <script
               dangerouslySetInnerHTML={{
                 __html: `
-                  window.dataLayer = window.dataLayer || [];
-                  function gtag(){dataLayer.push(arguments);}
-                  gtag('js', new Date());
-                  gtag('config', '${import.meta.env.VITE_GA_MEASUREMENT_ID}', {
-                    send_page_view: true,
-                    custom_map: {
-                      'custom_parameter_1': 'user_engagement_depth',
-                      'custom_parameter_2': 'behavior_prediction_score',
-                      'custom_parameter_3': 'business_value_index'
+                  // 🔒 분석 수집 환경 확인
+                  (function() {
+                    // 개발 환경 감지
+                    const isDev = window.location.hostname === 'localhost' ||
+                                 window.location.hostname === '127.0.0.1' ||
+                                 window.location.port === '5173' ||
+                                 window.location.port === '3000' ||
+                                 window.location.port === '8080';
+                    
+                    if (isDev) {
+                      console.log('🔧 개발환경: GA 로딩 건너뛰기');
+                      return;
                     }
-                  });
+                    
+                    // GA 스크립트 동적 로드
+                    const script = document.createElement('script');
+                    script.async = true;
+                    script.src = 'https://www.googletagmanager.com/gtag/js?id=${
+                      import.meta.env.VITE_GA_MEASUREMENT_ID
+                    }';
+                    document.head.appendChild(script);
+                    
+                    // GA 초기화
+                    window.dataLayer = window.dataLayer || [];
+                    function gtag(){dataLayer.push(arguments);}
+                    window.gtag = gtag;
+                    gtag('js', new Date());
+                    gtag('config', '${
+                      import.meta.env.VITE_GA_MEASUREMENT_ID
+                    }', {
+                      send_page_view: true,
+                      custom_map: {
+                        'custom_parameter_1': 'user_engagement_depth',
+                        'custom_parameter_2': 'behavior_prediction_score',
+                        'custom_parameter_3': 'business_value_index'
+                      }
+                    });
+                    
+                    console.log('✅ GA 로딩 완료');
+                  })();
 
-                  // 🔄 극한 사용자 행동 분석 시스템 초기화
+                  // 🔄 사용자 행동 분석 시스템 초기화
                   document.addEventListener('DOMContentLoaded', function() {
                     // 개발환경 감지
                     const isDevelopment = window.location.hostname === 'localhost' ||
@@ -89,7 +152,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                                         window.location.port === '8080';
 
                     if (!isDevelopment) {
-                      // 🚀 Production에서만 극한 데이터 수집 활성화
+                      // 🚀 Production에서만 데이터 수집 활성화
                       setTimeout(() => {
                         Promise.all([
                           import('/app/lib/utils/behavioral-surplus-extractor.js'),
@@ -764,7 +827,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         />
       </head>
       <body className="font-sans text-foreground bg-background">
-        {/* 🚀 극한 사용자 경험 최적화 시스템 - GTM noscript */}
+        {/* 🚀 GTM noscript - 프로덕션에서만 */}
         {import.meta.env.VITE_GTM_CONTAINER_ID && (
           <noscript>
             <iframe
@@ -788,6 +851,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 }
 
 export default function App() {
+  // 🔒 사용자 역할 추적 (system_admin 사용자 제외용)
+  useUserRoleTracker();
+
   // 📊 비즈니스 인텔리전스 시스템 활성화 (고급 분석 모드)
   const { isActive, userInsights, getAnalyticsStream, getCurrentProfile } =
     useBusinessIntelligence({
