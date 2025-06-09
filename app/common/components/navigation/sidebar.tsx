@@ -14,17 +14,8 @@ import {
   Bell,
 } from 'lucide-react';
 import { cn } from '~/lib/utils';
-import {
-  getFormattedVersion,
-  getDetailedVersionInfo,
-} from '~/lib/utils/version';
 import { Separator } from '~/common/components/ui/separator';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '~/common/components/ui/tooltip';
+import { VersionDisplay } from '~/common/components/navigation/version-display';
 
 interface SidebarProps {
   className?: string;
@@ -167,20 +158,7 @@ export function Sidebar({ className, onClose }: SidebarProps) {
       <Separator className="bg-sidebar-border" />
 
       <div className="p-4 text-center">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <p className="text-xs text-sidebar-foreground/60 cursor-help hover:text-sidebar-foreground/80 transition-colors">
-                {getFormattedVersion()}
-              </p>
-            </TooltipTrigger>
-            <TooltipContent side="right" className="max-w-xs">
-              <pre className="text-xs whitespace-pre-line">
-                {getDetailedVersionInfo()}
-              </pre>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <VersionDisplay />
       </div>
     </div>
   );

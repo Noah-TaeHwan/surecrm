@@ -39,15 +39,25 @@ export function getVersionInfo(): VersionInfo {
 }
 
 /**
- * 현재 환경을 판단합니다
+ * 현재 환경을 판단합니다 (SSR 안전)
  */
 function getEnvironment(): 'development' | 'production' | 'staging' {
+  // 🔧 빌드 타임에 주입된 환경변수 우선 사용 (SSR 안전)
+  const buildEnv = process.env.NODE_ENV;
+  const isProduction = buildEnv === 'production';
+
+  // 서버사이드 또는 환경변수 기반 판단
   if (typeof window === 'undefined') {
-    // 서버 사이드
-    return process.env.NODE_ENV === 'production' ? 'production' : 'development';
+    // 서버사이드: 빌드 환경 기준
+    return isProduction ? 'production' : 'development';
   }
 
-  // 클라이언트 사이드
+  // 클라이언트사이드: 서버와 동일한 로직으로 통일
+  if (!isProduction) {
+    return 'development';
+  }
+
+  // 프로덕션 빌드에서만 hostname 기반 세분화
   if (
     window.location.hostname === 'localhost' ||
     window.location.hostname === '127.0.0.1'
@@ -55,10 +65,7 @@ function getEnvironment(): 'development' | 'production' | 'staging' {
     return 'development';
   }
 
-  if (
-    window.location.hostname.includes('staging') ||
-    window.location.hostname.includes('vercel.app')
-  ) {
+  if (window.location.hostname.includes('vercel.app')) {
     return 'staging';
   }
 
