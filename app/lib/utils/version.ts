@@ -72,14 +72,14 @@ export function getFormattedVersion(): string {
   const info = getVersionInfo();
 
   if (info.environment === 'development') {
-    return `v${info.version}-dev`;
+    return `${info.version}-dev`;
   }
 
   if (info.commitHash && info.environment === 'staging') {
-    return `v${info.version}-${info.commitHash}`;
+    return `${info.version}-${info.commitHash}`;
   }
 
-  return `v${info.version}`;
+  return `${info.version}`;
 }
 
 /**

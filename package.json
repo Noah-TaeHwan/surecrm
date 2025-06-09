@@ -14,7 +14,11 @@
     "db:pull": "drizzle-kit pull",
     "db:studio": "drizzle-kit studio",
     "db:reset:clean": "tsx scripts/utils/reset-database.ts",
-    "cron:notifications": "tsx scripts/daily-notification-cron.ts"
+    "cron:notifications": "tsx scripts/daily-notification-cron.ts",
+    "version:patch": "npm version patch && git push origin master --tags",
+    "version:minor": "npm version minor && git push origin master --tags",
+    "version:major": "npm version major && git push origin master --tags",
+    "version:info": "tsx scripts/utils/version-info.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
