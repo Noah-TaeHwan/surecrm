@@ -9,7 +9,7 @@ BEGIN
   FOR user_record IN 
     SELECT up.id, up.full_name 
     FROM public.app_user_profiles up
-    LEFT JOIN public.app_user_invitations inv ON up.id = inv.inviter_id
+    LEFT JOIN public.app_invitations inv ON up.id = inv.inviter_id
     WHERE inv.inviter_id IS NULL
   LOOP
     -- 초대장 코드 생성 (8자리 랜덤 코드)
@@ -17,12 +17,13 @@ BEGIN
 
     -- 초대장 2개 생성
     FOR i IN 1..2 LOOP
-      INSERT INTO public.app_user_invitations (inviter_id, code, status, created_at)
+      INSERT INTO public.app_invitations (inviter_id, code, status, created_at, expires_at)
       VALUES (
         user_record.id,
         invitation_code || '_' || i::text,
         'pending',
-        NOW()
+        NOW(),
+        '2099-12-31'::timestamp  -- 실질적으로 만료되지 않음
       );
     END LOOP;
 

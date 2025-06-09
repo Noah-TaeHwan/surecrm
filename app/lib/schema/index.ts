@@ -509,12 +509,13 @@ BEGIN
 
   -- 초대장 생성 (2개 기본 제공)
   FOR i IN 1..2 LOOP
-    INSERT INTO public.app_user_invitations (inviter_id, code, status, created_at)
+    INSERT INTO public.app_invitations (inviter_id, code, status, created_at, expires_at)
     VALUES (
       NEW.id,
       invitation_code || '_' || i::text,
       'pending',
-      NOW()
+      NOW(),
+      '2099-12-31'::timestamp  -- 실질적으로 만료되지 않음
     );
   END LOOP;
 
