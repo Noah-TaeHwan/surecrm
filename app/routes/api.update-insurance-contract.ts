@@ -75,6 +75,14 @@ export async function action({ request }: { request: Request }) {
       description?: string;
     }> = [];
 
+    // 📎 기존 첨부파일 메타데이터 수정 처리
+    const existingAttachmentUpdates: Array<{
+      id: string;
+      documentType?: string;
+      description?: string;
+      fileDisplayName?: string;
+    }> = [];
+
     // FormData에서 파일들 추출
     const entries = Array.from(formData.entries());
     for (const [key, value] of entries) {
@@ -101,11 +109,71 @@ export async function action({ request }: { request: Request }) {
           description,
         });
       }
+      // 🔧 기존 첨부파일 메타데이터 수정 처리
+      else if (key.startsWith('existing_attachment_')) {
+        const [, , type, id] = key.split('_');
+        if (
+          type === 'documentType' ||
+          type === 'description' ||
+          type === 'displayName'
+        ) {
+          const existingUpdate = existingAttachmentUpdates.find(
+            (item) => item.id === id
+          ) || { id };
+          if (type === 'documentType') {
+            existingUpdate.documentType = value.toString();
+          } else if (type === 'description') {
+            existingUpdate.description = value.toString();
+          } else if (type === 'displayName') {
+            existingUpdate.fileDisplayName = value.toString();
+          }
+
+          if (!existingAttachmentUpdates.find((item) => item.id === id)) {
+            existingAttachmentUpdates.push(existingUpdate);
+          }
+        }
+      }
     }
 
     console.log(
-      `📎 [API Route] 수정 시 새 첨부파일 ${newAttachments.length}개 발견`
+      `📎 [API Route] 수정 시 새 첨부파일 ${newAttachments.length}개 발견, 기존 첨부파일 수정 ${existingAttachmentUpdates.length}개`
     );
+
+    // 📎 기존 첨부파일 메타데이터 업데이트 처리
+    if (existingAttachmentUpdates.length > 0) {
+      const { updateContractAttachmentMetadata } = await import(
+        '~/api/shared/insurance-contracts'
+      );
+
+      await Promise.allSettled(
+        existingAttachmentUpdates.map(async (update) => {
+          try {
+            const result = await updateContractAttachmentMetadata(
+              update.id,
+              user.id,
+              {
+                documentType: update.documentType,
+                description: update.description,
+                fileDisplayName: update.fileDisplayName,
+              }
+            );
+            if (!result.success) {
+              console.error(
+                `❌ 첨부파일 ${update.id} 메타데이터 수정 실패:`,
+                result.error
+              );
+            } else {
+              console.log(`✅ 첨부파일 ${update.id} 메타데이터 수정 완료`);
+            }
+          } catch (error) {
+            console.error(
+              `❌ 첨부파일 ${update.id} 메타데이터 수정 에러:`,
+              error
+            );
+          }
+        })
+      );
+    }
 
     const result = await updateInsuranceContractWithAttachments(
       contractId,

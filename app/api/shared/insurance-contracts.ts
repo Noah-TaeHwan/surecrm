@@ -727,6 +727,70 @@ export async function deleteContractAttachment(
 }
 
 /**
+ * 계약 첨부파일 메타데이터 수정
+ */
+export async function updateContractAttachmentMetadata(
+  attachmentId: string,
+  agentId: string,
+  updateData: {
+    documentType?: string;
+    description?: string;
+    fileDisplayName?: string;
+  }
+) {
+  try {
+    console.log('📎 첨부파일 메타데이터 수정:', {
+      attachmentId,
+      agentId,
+      updateData,
+    });
+
+    const [updatedAttachment] = await db
+      .update(contractAttachments)
+      .set({
+        ...(updateData.documentType && {
+          documentType: updateData.documentType as any,
+        }),
+        ...(updateData.description !== undefined && {
+          description: updateData.description,
+        }),
+        ...(updateData.fileDisplayName && {
+          fileDisplayName: updateData.fileDisplayName,
+        }),
+      })
+      .where(
+        and(
+          eq(contractAttachments.id, attachmentId),
+          eq(contractAttachments.agentId, agentId),
+          eq(contractAttachments.isActive, true)
+        )
+      )
+      .returning();
+
+    if (!updatedAttachment) {
+      return {
+        success: false,
+        error: '첨부파일을 찾을 수 없습니다.',
+      };
+    }
+
+    console.log('✅ 첨부파일 메타데이터 수정 완료');
+    return {
+      success: true,
+      data: updatedAttachment,
+      message: '첨부파일 정보가 성공적으로 수정되었습니다.',
+    };
+  } catch (error) {
+    console.error('❌ 첨부파일 메타데이터 수정 실패:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : '알 수 없는 오류',
+      message: '첨부파일 수정에 실패했습니다.',
+    };
+  }
+}
+
+/**
  * 영업 파이프라인과 연동된 계약 생성
  * (영업 기회가 성사될 때 자동으로 계약 템플릿 생성)
  */
