@@ -773,92 +773,96 @@ textarea {
 
   /* 키맨 고객 카드 - 은은한 오렌지 글로우 애니메이션 */
   .client-card-keyman {
-    position: relative;
-    animation: keyman-border-glow 8s ease-in-out infinite;
-    border: 1px solid rgba(255, 107, 53, 0.2);
+    position: relative !important;
+    animation: keyman-border-glow 8s ease-in-out infinite !important;
+    border: 1px solid rgba(255, 107, 53, 0.2) !important;
   }
 
   .client-card-keyman::before {
-    content: '';
-    position: absolute;
-    inset: -1px;
-    border-radius: inherit;
-    padding: 1px;
+    content: '' !important;
+    position: absolute !important;
+    inset: -1px !important;
+    border-radius: inherit !important;
+    padding: 1px !important;
     background: linear-gradient(
       45deg,
       rgba(255, 107, 53, 0.3),
       rgba(255, 143, 101, 0.2),
       rgba(255, 184, 149, 0.1),
       rgba(255, 107, 53, 0.3)
-    );
-    background-size: 300% 300%;
-    animation: keyman-gradient-move 12s ease-in-out infinite;
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    mask-composite: exclude;
+    ) !important;
+    background-size: 300% 300% !important;
+    animation: keyman-gradient-move 12s ease-in-out infinite !important;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0) !important;
+    mask-composite: exclude !important;
     -webkit-mask: linear-gradient(#fff 0 0) content-box,
-      linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    pointer-events: none;
-    z-index: -1;
+      linear-gradient(#fff 0 0) !important;
+    -webkit-mask-composite: xor !important;
+    pointer-events: none !important;
+    z-index: -1 !important;
+    opacity: 1 !important;
+    display: block !important;
   }
 
   @keyframes keyman-gradient-move {
     0%,
     100% {
-      background-position: 0% 50%;
+      background-position: 0% 50% !important;
     }
     50% {
-      background-position: 100% 50%;
+      background-position: 100% 50% !important;
     }
   }
 
   /* 일반 고객 카드 - 매우 은은한 블루 효과 */
   .client-card-normal {
-    position: relative;
-    animation: normal-border-subtle 20s ease-in-out infinite;
-    border: 1px solid rgba(74, 144, 226, 0.15);
+    position: relative !important;
+    animation: normal-border-subtle 20s ease-in-out infinite !important;
+    border: 1px solid rgba(74, 144, 226, 0.15) !important;
   }
 
   .client-card-normal::before {
-    content: '';
-    position: absolute;
-    inset: -0.5px;
-    border-radius: inherit;
-    padding: 0.5px;
+    content: '' !important;
+    position: absolute !important;
+    inset: -0.5px !important;
+    border-radius: inherit !important;
+    padding: 0.5px !important;
     background: linear-gradient(
       45deg,
       rgba(74, 144, 226, 0.1),
       rgba(107, 163, 232, 0.08),
       rgba(139, 182, 238, 0.06),
       rgba(74, 144, 226, 0.1)
-    );
-    background-size: 200% 200%;
-    animation: normal-gradient-move 25s ease-in-out infinite;
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    mask-composite: exclude;
+    ) !important;
+    background-size: 200% 200% !important;
+    animation: normal-gradient-move 25s ease-in-out infinite !important;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0) !important;
+    mask-composite: exclude !important;
     -webkit-mask: linear-gradient(#fff 0 0) content-box,
-      linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    pointer-events: none;
-    z-index: -1;
+      linear-gradient(#fff 0 0) !important;
+    -webkit-mask-composite: xor !important;
+    pointer-events: none !important;
+    z-index: -1 !important;
+    opacity: 1 !important;
+    display: block !important;
   }
 
   @keyframes normal-gradient-move {
     0%,
     100% {
-      background-position: 0% 25%;
+      background-position: 0% 25% !important;
     }
     50% {
-      background-position: 100% 75%;
+      background-position: 100% 75% !important;
     }
   }
 
   /* 호버 시 효과 강화 */
   .client-card-keyman:hover {
-    animation: keyman-border-glow 4s ease-in-out infinite;
+    animation: keyman-border-glow 4s ease-in-out infinite !important;
   }
 
   .client-card-normal:hover {
-    animation: normal-border-subtle 10s ease-in-out infinite;
+    animation: normal-border-subtle 10s ease-in-out infinite !important;
   }
 }
