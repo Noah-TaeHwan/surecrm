@@ -6,6 +6,7 @@ import {
   useSubmit,
   useSearchParams,
 } from 'react-router';
+import { CRMEvents } from '~/lib/utils/analytics';
 import type { Route } from './+types/client-detail-page';
 import { MainLayout } from '~/common/layouts/main-layout';
 import { Button } from '~/common/components/ui/button';
@@ -302,6 +303,13 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
   const isEmpty = data?.isEmpty || false;
   const error = data?.error || null;
   const currentUser = data?.currentUser || null;
+
+  // Analytics 추적
+  useEffect(() => {
+    if (client?.id) {
+      CRMEvents.clientView(client.id);
+    }
+  }, [client?.id]);
 
   // 🏢 URL 파라미터에서 탭 및 계약 생성 플래그 확인 (SSR 안전)
   const [searchParams, setSearchParams] = useSearchParams();

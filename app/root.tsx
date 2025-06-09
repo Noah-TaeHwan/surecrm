@@ -8,9 +8,12 @@ import {
 } from 'react-router';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
+import { useEffect } from 'react';
 
 import type { Route } from './+types/root';
 import stylesheet from './app.css?url';
+import { initGA } from '~/lib/utils/analytics';
+import { usePageTracking } from '~/hooks/use-analytics';
 
 export const links: Route.LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -34,6 +37,31 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
+
+        {/* Google Analytics */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if (typeof window !== 'undefined') {
+                const GA_ID = '${import.meta.env.VITE_GA_MEASUREMENT_ID || ''}';
+                if (GA_ID) {
+                  // gtag.js 스크립트 동적 로드
+                  const script = document.createElement('script');
+                  script.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_ID;
+                  script.async = true;
+                  document.head.appendChild(script);
+                  
+                  // gtag 설정
+                  window.dataLayer = window.dataLayer || [];
+                  function gtag(){dataLayer.push(arguments);}
+                  window.gtag = gtag;
+                  gtag('js', new Date());
+                  gtag('config', GA_ID);
+                }
+              }
+            `,
+          }}
+        />
         {/* 🔧 Buffer polyfill - 브라우저 환경에서 Buffer 사용 가능하도록 */}
         <script
           dangerouslySetInnerHTML={{
@@ -671,6 +699,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  // GA 초기화
+  useEffect(() => {
+    initGA();
+  }, []);
+
+  // 페이지 뷰 추적
+  usePageTracking();
+
   return <Outlet />;
 }
 

@@ -154,8 +154,80 @@ npm run dev
 - **Backend**: Node.js, React Router
 - **Database**: Supabase (PostgreSQL)
 - **UI Components**: Shadcn UI, Radix UI
+- **Analytics**: Google Analytics 4, Vercel Analytics
 - **Deployment**: Vercel
 - **Version Control**: Git with automated versioning
+
+## 📊 Google Analytics 설정
+
+SureCRM은 Google Analytics 4 (GA4)를 통해 사용자 행동과 앱 성능을 추적합니다.
+
+### 1. GA4 속성 생성
+
+1. [Google Analytics](https://analytics.google.com/)에 접속
+2. 새로운 GA4 속성을 생성
+3. 웹 스트림을 추가하고 측정 ID (G-XXXXXXXXXX) 복사
+
+### 2. 환경변수 설정
+
+`.env` 파일에 GA4 측정 ID를 추가하세요:
+
+```bash
+# Google Analytics 설정
+VITE_GA_MEASUREMENT_ID=G-SZW1G856L5
+```
+
+> **참고**: 위의 측정 ID는 이미 설정되어 있습니다. 다른 GA 속성을 사용하려면 측정 ID를 변경하세요.
+
+### 3. 추적되는 이벤트
+
+#### 자동 추적
+
+- **페이지 뷰**: 모든 페이지 방문 자동 추적
+- **세션 데이터**: 사용자 세션 및 참여도
+
+#### 커스텀 이벤트
+
+- **대시보드**: 대시보드 조회
+- **고객 관리**: 고객 생성/조회/편집/삭제
+- **파이프라인**: 파이프라인 조회, 단계 변경
+- **보험 계약**: 계약 생성/업데이트
+- **네트워크**: 네트워크 그래프 조회
+- **보고서**: 보고서 생성/내보내기
+- **인증**: 로그인/회원가입/로그아웃
+- **팀 관리**: 팀원 초대/가입
+- **설정**: 설정 업데이트
+
+### 4. Google Tag (gtag.js) 사용
+
+SureCRM은 Google이 공식 제공하는 네이티브 gtag.js를 사용합니다:
+
+- **자동 로드**: 측정 ID가 설정되면 gtag.js가 자동으로 로드됩니다
+- **최신 기능**: GA4의 모든 최신 기능을 지원합니다
+- **안정성**: Google이 직접 관리하는 공식 라이브러리입니다
+
+### 5. 개발 환경에서의 GA
+
+개발 환경에서도 실제 GA에 데이터가 전송됩니다. 콘솔에서 추적 이벤트를 확인할 수 있습니다.
+
+### 6. 사용법 예시
+
+```typescript
+import { CRMEvents } from '~/lib/utils/analytics';
+
+// 고객 조회 이벤트 추적
+CRMEvents.clientView(clientId);
+
+// 커스텀 이벤트 추적
+import { trackEvent } from '~/lib/utils/analytics';
+
+trackEvent({
+  action: 'custom_action',
+  category: 'Custom Category',
+  label: 'custom_label',
+  value: 100,
+});
+```
 
 ## 🏗️ 프로젝트 구조
 

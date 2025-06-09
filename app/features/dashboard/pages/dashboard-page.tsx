@@ -23,7 +23,7 @@ import {
 } from '../lib/dashboard-data';
 import { requireAuth } from '~/lib/auth/middleware';
 import { useFetcher, useRevalidator } from 'react-router';
-import { trackPageView } from '~/lib/utils/analytics';
+import { CRMEvents } from '~/lib/utils/analytics';
 
 // 새로운 타입 시스템 import
 import type {
@@ -292,7 +292,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
 
   // Analytics 추적
   useEffect(() => {
-    trackPageView('/dashboard');
+    CRMEvents.dashboardView();
   }, []);
 
   const fetcher = useFetcher();
