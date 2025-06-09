@@ -105,8 +105,7 @@ export async function loader({ request }: Route.LoaderArgs) {
             : 0,
         typeStats: {}, // 추후 구현 예정
       },
-      // 성능 메트릭 (개발용)
-      loadTime: Date.now(),
+      // 성능 메트릭 제거 (Hydration 오류 방지)
     };
   } catch (error) {
     console.error('Dashboard 페이지 로더 오류:', error);

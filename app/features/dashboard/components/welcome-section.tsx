@@ -13,9 +13,14 @@ interface WelcomeSectionProps {
 }
 
 export function WelcomeSection({ userName, todayStats }: WelcomeSectionProps) {
-  const [currentTime, setCurrentTime] = useState(new Date());
+  const [currentTime, setCurrentTime] = useState<Date | null>(null);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    // 클라이언트 사이드에서만 시간 설정 (Hydration 오류 방지)
+    setIsClient(true);
+    setCurrentTime(new Date());
+
     const timer = setInterval(() => {
       setCurrentTime(new Date());
     }, 60000);
@@ -24,6 +29,7 @@ export function WelcomeSection({ userName, todayStats }: WelcomeSectionProps) {
   }, []);
 
   const getGreeting = () => {
+    if (!currentTime) return '안녕하세요';
     const hour = currentTime.getHours();
     if (hour < 12) return '좋은 아침입니다';
     if (hour < 18) return '좋은 오후입니다';
@@ -31,13 +37,15 @@ export function WelcomeSection({ userName, todayStats }: WelcomeSectionProps) {
   };
 
   const getTimeIcon = () => {
+    if (!currentTime) return <SunIcon className="h-5 w-5 text-primary" />;
     const hour = currentTime.getHours();
     if (hour < 6 || hour >= 19)
       return <MoonIcon className="h-5 w-5 text-muted-foreground" />;
     return <SunIcon className="h-5 w-5 text-primary" />;
   };
 
-  const formatDate = (date: Date) => {
+  const formatDate = (date: Date | null) => {
+    if (!date) return '로딩 중...';
     return date.toLocaleDateString('ko-KR', {
       year: 'numeric',
       month: 'long',
@@ -63,10 +71,12 @@ export function WelcomeSection({ userName, todayStats }: WelcomeSectionProps) {
               <span className="text-sm">{formatDate(currentTime)}</span>
               <span className="text-sm">•</span>
               <span className="text-sm font-medium">
-                {currentTime.toLocaleTimeString('ko-KR', {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
+                {currentTime
+                  ? currentTime.toLocaleTimeString('ko-KR', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })
+                  : '--:--'}
               </span>
             </div>
           </div>

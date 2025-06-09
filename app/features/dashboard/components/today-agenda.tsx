@@ -15,6 +15,7 @@ import {
   BellIcon,
 } from '@radix-ui/react-icons';
 import { Link } from 'react-router';
+import { useEffect, useState } from 'react';
 
 interface TodayMeeting {
   id: string;
@@ -32,7 +33,12 @@ interface TodayAgendaProps {
 }
 
 export function TodayAgenda({ meetings }: TodayAgendaProps) {
+  const [isClient, setIsClient] = useState(false);
   const upcomingMeetings = meetings.filter((m) => m.status === 'upcoming');
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const getMeetingTypeColor = (type: string) => {
     switch (type) {
@@ -77,11 +83,20 @@ export function TodayAgenda({ meetings }: TodayAgendaProps) {
   };
 
   const formatTime = (time: string) => {
-    return new Date(`2024-01-01 ${time}`).toLocaleTimeString('ko-KR', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-    });
+    // Hydration 오류 방지: 클라이언트에서만 포맷팅
+    if (!isClient) {
+      return time; // 서버에서는 원본 시간 반환
+    }
+
+    try {
+      return new Date(`2024-01-01 ${time}`).toLocaleTimeString('ko-KR', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+      });
+    } catch (error) {
+      return time; // 오류 시 원본 반환
+    }
   };
 
   return (
