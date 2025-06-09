@@ -60,9 +60,9 @@ export function Header({
     try {
       setIsLoading(true);
 
-      // 🔧 수정: 읽지 않은 알림을 우선으로 가져오고 전체 읽지 않은 개수 조회
+      // 읽지 않은 알림만 가져오기 (헤더에서는 읽지 않은 알림만 표시)
       const response = await fetch(
-        '/api/notifications?limit=15&sortBy=createdAt&sortOrder=desc',
+        '/api/notifications?limit=15&sortBy=createdAt&sortOrder=desc&unreadOnly=true',
         {
           credentials: 'include',
         }
@@ -70,22 +70,14 @@ export function Header({
 
       if (response.ok) {
         const data = await response.json();
-        console.log('🔔 헤더 알림 API 응답 전체:', data);
-        console.log('🔔 헤더 알림 데이터:', {
-          총알림: data.notifications?.length || 0,
-          읽지않음: data.unreadCount || 0,
-          success: data.success,
-          message: data.message,
-          알림목록: data.notifications?.map((n: any) => ({
-            id: n.id.slice(0, 8),
-            title: n.title,
-            readAt: n.readAt,
-            isUnread: !n.readAt,
-          })),
-        });
 
-        setNotifications(data.notifications || []);
-        setUnreadCount(data.unreadCount || 0);
+        // API 응답 구조에 맞게 데이터 추출
+        const responseData = data.data || data; // data.data가 없으면 data 직접 사용
+        const notificationsArray = responseData.notifications || [];
+        const unreadCountValue = responseData.unreadCount || 0;
+
+        setNotifications(notificationsArray);
+        setUnreadCount(unreadCountValue);
       } else {
         console.warn(
           '❌ 알림 API 응답 오류:',
@@ -362,7 +354,7 @@ export function Header({
               <div className="p-8 text-center">
                 <Bell className="h-12 w-12 mx-auto mb-4 text-muted-foreground/30" />
                 <p className="text-sm font-medium text-foreground mb-1">
-                  새로운 알림이 없습니다
+                  읽지 않은 알림이 없습니다
                 </p>
                 <p className="text-xs text-muted-foreground">
                   새로운 알림이 도착하면 여기에 표시됩니다

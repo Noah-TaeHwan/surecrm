@@ -55,13 +55,10 @@ export function meta(): any {
 export async function loader({
   request,
 }: Route.LoaderArgs): Promise<NotificationPageData> {
-  console.log('알림 페이지 로드 시작');
-
   try {
     // 인증 확인
     const user = await getCurrentUser(request);
     if (!user) {
-      console.log('인증 실패 - 로그인이 필요합니다');
       return {
         notifications: [],
         unreadCount: 0,
@@ -75,8 +72,6 @@ export async function loader({
       getNotifications(user.id, { limit: 50 }),
     ]);
 
-    console.log('알림 페이지 데이터 로딩 완료');
-
     return {
       notifications,
       unreadCount,
@@ -88,9 +83,6 @@ export async function loader({
     };
   } catch (error) {
     console.error('알림 페이지 로드 실패:', error);
-
-    const errorMessage =
-      error instanceof Error ? error.message : '알 수 없는 오류';
 
     // 에러 시 빈 데이터 반환
     return {
