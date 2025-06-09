@@ -30,16 +30,28 @@ export async function action({ request }: { request: Request }) {
       productName: formData.get('productName')?.toString() || '',
       insuranceCompany: formData.get('insuranceCompany')?.toString() || '',
       insuranceType: formData.get('insuranceType')?.toString() || '',
+      insuranceCode: formData.get('insuranceCode')?.toString() || undefined, // 🆕 보종코드
       contractNumber: formData.get('contractNumber')?.toString() || undefined,
       policyNumber: formData.get('policyNumber')?.toString() || undefined,
       contractDate: formData.get('contractDate')?.toString() || '',
       effectiveDate: formData.get('effectiveDate')?.toString() || '',
       expirationDate: formData.get('expirationDate')?.toString() || undefined,
+      paymentDueDate: formData.get('paymentDueDate')?.toString() || undefined, // 🆕 납기일
       contractorName: formData.get('contractorName')?.toString() || '',
+      contractorSsn: formData.get('contractorSsn')?.toString() || undefined, // 🆕 계약자 주민번호
+      contractorPhone: formData.get('contractorPhone')?.toString() || undefined, // 🆕 계약자 연락처
       insuredName: formData.get('insuredName')?.toString() || '',
+      insuredSsn: formData.get('insuredSsn')?.toString() || undefined, // 🆕 피보험자 주민번호
+      insuredPhone: formData.get('insuredPhone')?.toString() || undefined, // 🆕 피보험자 연락처
       beneficiaryName: formData.get('beneficiaryName')?.toString() || undefined,
+      premiumAmount: formData.get('premiumAmount')?.toString() // 🆕 납입보험료 (통합)
+        ? parseFloat(formData.get('premiumAmount')?.toString() || '0')
+        : undefined,
       monthlyPremium: formData.get('monthlyPremium')?.toString()
         ? parseFloat(formData.get('monthlyPremium')?.toString() || '0')
+        : undefined,
+      annualPremium: formData.get('annualPremium')?.toString() // 🆕 연 보험료
+        ? parseFloat(formData.get('annualPremium')?.toString() || '0')
         : undefined,
       agentCommission: formData.get('agentCommission')?.toString()
         ? parseFloat(formData.get('agentCommission')?.toString() || '0')
@@ -47,7 +59,10 @@ export async function action({ request }: { request: Request }) {
       coverageAmount: formData.get('coverageAmount')?.toString()
         ? parseFloat(formData.get('coverageAmount')?.toString() || '0')
         : undefined,
-      paymentMethod: formData.get('paymentMethod')?.toString() || undefined,
+      paymentCycle: formData.get('paymentCycle')?.toString() || undefined, // 🆕 납입주기
+      paymentPeriod: formData.get('paymentPeriod')?.toString() // 🆕 납입기간
+        ? parseInt(formData.get('paymentPeriod')?.toString() || '0')
+        : undefined,
       notes: formData.get('notes')?.toString() || undefined,
     };
 

@@ -37,7 +37,6 @@ import {
   ChevronDown,
   ChevronUp,
   AlertCircle,
-  Eye,
   Download,
   Users,
 } from 'lucide-react';
@@ -130,8 +129,7 @@ interface ContractFormData {
   annualPremium: string;
   coverageAmount: string;
   agentCommission: string;
-  paymentMethod: string;
-  paymentCycle: string; // 🆕 납입주기
+  paymentCycle: string; // 🆕 납입주기 (납입방법)
   paymentPeriod: string;
   specialClauses: string;
   notes: string;
@@ -228,6 +226,18 @@ const formatDate = (dateStr?: string) => {
   } catch {
     return dateStr;
   }
+};
+
+// 💰 납입주기 한국어 변환 함수
+const getPaymentCycleLabel = (cycle?: string) => {
+  const cycleMap: { [key: string]: string } = {
+    monthly: '월납',
+    quarterly: '분기납',
+    'semi-annual': '반년납',
+    annual: '연납',
+    'lump-sum': '일시납',
+  };
+  return cycle ? cycleMap[cycle] || cycle : '';
 };
 
 // 🏢 보험회사 목록
@@ -376,8 +386,7 @@ export function InsuranceContractsTab({
     annualPremium: '',
     coverageAmount: '',
     agentCommission: '',
-    paymentMethod: '월납',
-    paymentCycle: '',
+    paymentCycle: 'monthly',
     paymentPeriod: '',
     specialClauses: '',
     notes: '',
@@ -420,8 +429,7 @@ export function InsuranceContractsTab({
       annualPremium: '',
       coverageAmount: '',
       agentCommission: '',
-      paymentMethod: '월납',
-      paymentCycle: '',
+      paymentCycle: 'monthly', // 기본값 설정
       paymentPeriod: '',
       specialClauses: '',
       notes: '',
@@ -535,8 +543,7 @@ export function InsuranceContractsTab({
       annualPremium: contract.annualPremium?.toString() || '',
       coverageAmount: contract.coverageAmount?.toString() || '',
       agentCommission: contract.agentCommission?.toString() || '',
-      paymentMethod: contract.paymentMethod || '월납',
-      paymentCycle: contract.paymentCycle || '',
+      paymentCycle: contract.paymentCycle || 'monthly',
       paymentPeriod: contract.paymentPeriod?.toString() || '',
       specialClauses: contract.specialClauses || '',
       notes: contract.notes || '',
@@ -1016,129 +1023,117 @@ export function InsuranceContractsTab({
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                        <div className="space-y-2">
-                          <div>
-                            <span className="text-muted-foreground">
-                              보험사:
-                            </span>{' '}
-                            {contract.insuranceCompany}
-                          </div>
-                          {contract.contractNumber && (
-                            <div>
+                      {/* 🎯 핵심 정보만 기본 표시 */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-3">
+                          <h6 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                            📋 계약 정보
+                          </h6>
+                          <div className="space-y-1.5 text-sm">
+                            <div className="flex justify-between">
                               <span className="text-muted-foreground">
-                                계약번호:
-                              </span>{' '}
-                              {contract.contractNumber}
-                            </div>
-                          )}
-                          {contract.policyNumber && (
-                            <div>
-                              <span className="text-muted-foreground">
-                                증권번호:
-                              </span>{' '}
-                              {contract.policyNumber}
-                            </div>
-                          )}
-                          {contract.insuranceCode && (
-                            <div>
-                              <span className="text-muted-foreground">
-                                보종코드:
-                              </span>{' '}
-                              <span className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded">
-                                {contract.insuranceCode}
+                                보험사:
+                              </span>
+                              <span className="font-medium">
+                                {contract.insuranceCompany}
                               </span>
                             </div>
-                          )}
+                            {contract.policyNumber && (
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">
+                                  증권번호:
+                                </span>
+                                <span className="font-mono text-xs bg-blue-50 dark:bg-blue-950 px-2 py-1 rounded">
+                                  {contract.policyNumber}
+                                </span>
+                              </div>
+                            )}
+                            {contract.insuranceCode && (
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">
+                                  보종코드:
+                                </span>
+                                <span className="font-mono text-xs bg-muted px-2 py-1 rounded">
+                                  {contract.insuranceCode}
+                                </span>
+                              </div>
+                            )}
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">
+                                계약일:
+                              </span>
+                              <span>{formatDate(contract.contractDate)}</span>
+                            </div>
+                            {contract.paymentDueDate && (
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">
+                                  납기일:
+                                </span>
+                                <span>
+                                  {formatDate(contract.paymentDueDate)}
+                                </span>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                        <div className="space-y-2">
-                          <div>
-                            <span className="text-muted-foreground">
-                              계약일:
-                            </span>{' '}
-                            {formatDate(contract.contractDate)}
+
+                        <div className="space-y-3">
+                          <h6 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                            💰 보험료 정보
+                          </h6>
+                          <div className="space-y-1.5 text-sm">
+                            {contract.premiumAmount && (
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">
+                                  납입보험료:
+                                </span>
+                                <span className="font-semibold text-purple-600">
+                                  {formatCurrency(contract.premiumAmount)}
+                                </span>
+                              </div>
+                            )}
+                            {contract.paymentCycle && (
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">
+                                  납입주기:
+                                </span>
+                                <Badge variant="outline" className="text-xs">
+                                  {getPaymentCycleLabel(contract.paymentCycle)}
+                                </Badge>
+                              </div>
+                            )}
+                            {contract.agentCommission && (
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">
+                                  수수료:
+                                </span>
+                                <span className="font-semibold text-green-600">
+                                  {formatCurrency(contract.agentCommission)}
+                                </span>
+                              </div>
+                            )}
+                            {contract.coverageAmount && (
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">
+                                  보장금액:
+                                </span>
+                                <span className="font-semibold text-orange-600">
+                                  {formatCurrency(contract.coverageAmount)}
+                                </span>
+                              </div>
+                            )}
                           </div>
-                          <div>
-                            <span className="text-muted-foreground">
-                              개시일:
-                            </span>{' '}
-                            {formatDate(contract.effectiveDate)}
-                          </div>
-                          {contract.paymentDueDate && (
-                            <div>
-                              <span className="text-muted-foreground">
-                                납기일:
-                              </span>{' '}
-                              {formatDate(contract.paymentDueDate)}
-                            </div>
-                          )}
-                          {contract.paymentCycle && (
-                            <div>
-                              <span className="text-muted-foreground">
-                                납입주기:
-                              </span>{' '}
-                              <Badge variant="outline" className="text-xs">
-                                {contract.paymentCycle}
-                              </Badge>
-                            </div>
-                          )}
-                        </div>
-                        <div className="space-y-2">
-                          {contract.premiumAmount && (
-                            <div>
-                              <span className="text-muted-foreground">
-                                납입보험료:
-                              </span>
-                              <span className="font-semibold text-purple-600 ml-1">
-                                {formatCurrency(contract.premiumAmount)}
-                              </span>
-                            </div>
-                          )}
-                          {contract.monthlyPremium && (
-                            <div>
-                              <span className="text-muted-foreground">
-                                월 보험료:
-                              </span>
-                              <span className="font-semibold text-blue-600 ml-1">
-                                {formatCurrency(contract.monthlyPremium)}
-                              </span>
-                            </div>
-                          )}
-                          {contract.agentCommission && (
-                            <div>
-                              <span className="text-muted-foreground">
-                                수수료:
-                              </span>
-                              <span className="font-semibold text-green-600 ml-1">
-                                {formatCurrency(contract.agentCommission)}
-                              </span>
-                            </div>
-                          )}
                         </div>
                       </div>
 
                       {contract.attachments &&
                         contract.attachments.length > 0 && (
                           <div className="mt-4 pt-4 border-t">
-                            <div className="flex items-center justify-between mb-3">
-                              <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-                                <Paperclip className="h-4 w-4 text-primary" />
-                                <span>
-                                  첨부파일 {contract.attachments.length}개
-                                </span>
-                              </div>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="text-xs text-primary hover:text-primary/80"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  // TODO: 첨부파일 전체보기 모달 구현
-                                }}
-                              >
-                                <Eye className="h-3 w-3 mr-1" />
-                                전체보기
-                              </Button>
+                            <div className="flex items-center gap-2 text-sm font-medium text-foreground mb-3">
+                              <Paperclip className="h-4 w-4 text-primary" />
+                              <span>
+                                첨부파일 {contract.attachments.length}개
+                              </span>
                             </div>
 
                             {/* 📁 향상된 첨부파일 목록 */}
@@ -1174,18 +1169,6 @@ export function InsuranceContractsTab({
                                       </div>
                                     </div>
                                     <div className="flex items-center gap-1 ml-2">
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="h-6 w-6 p-0 text-muted-foreground hover:text-blue-600"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          // TODO: 파일 미리보기/다운로드 기능
-                                        }}
-                                        title="파일 보기"
-                                      >
-                                        <Eye className="h-3 w-3" />
-                                      </Button>
                                       <Button
                                         variant="ghost"
                                         size="sm"
@@ -1238,7 +1221,6 @@ export function InsuranceContractsTab({
                             onClick={() => toggleContractDetails(contract.id)}
                             className="text-xs text-muted-foreground hover:text-foreground"
                           >
-                            <Eye className="h-3 w-3 mr-1" />
                             {expandedContracts.has(contract.id)
                               ? '접기'
                               : '상세보기'}
@@ -1253,98 +1235,134 @@ export function InsuranceContractsTab({
                         {/* 상세 정보 펼침 영역 */}
                         {expandedContracts.has(contract.id) && (
                           <div className="mt-4 space-y-4 p-4 bg-muted/20 rounded-lg">
-                            {/* 계약 기본 정보 */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                              <div className="space-y-2">
-                                <h4 className="font-semibold text-foreground">
-                                  계약 정보
+                            {/* 📋 상세 정보 - 기본에서 표시되지 않는 정보들만 */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+                              <div className="space-y-3">
+                                <h4 className="font-semibold text-foreground flex items-center gap-2">
+                                  📄 추가 계약 정보
                                 </h4>
-                                {contract.policyNumber && (
+                                <div className="space-y-2">
+                                  {contract.contractNumber && (
+                                    <div className="flex justify-between">
+                                      <span className="text-muted-foreground">
+                                        계약번호:
+                                      </span>
+                                      <span className="font-mono text-xs bg-muted px-2 py-1 rounded">
+                                        {contract.contractNumber}
+                                      </span>
+                                    </div>
+                                  )}
                                   <div className="flex justify-between">
                                     <span className="text-muted-foreground">
-                                      증권번호:
-                                    </span>
-                                    <span>{contract.policyNumber}</span>
-                                  </div>
-                                )}
-                                {contract.expirationDate && (
-                                  <div className="flex justify-between">
-                                    <span className="text-muted-foreground">
-                                      만료일:
+                                      효력발생일:
                                     </span>
                                     <span>
-                                      {formatDate(contract.expirationDate)}
+                                      {formatDate(contract.effectiveDate)}
                                     </span>
                                   </div>
-                                )}
-                                {contract.paymentMethod && (
-                                  <div className="flex justify-between">
-                                    <span className="text-muted-foreground">
-                                      납입방법:
-                                    </span>
-                                    <span>{contract.paymentMethod}</span>
-                                  </div>
-                                )}
-                                {contract.paymentPeriod && (
-                                  <div className="flex justify-between">
-                                    <span className="text-muted-foreground">
-                                      납입기간:
-                                    </span>
-                                    <span>{contract.paymentPeriod}년</span>
-                                  </div>
-                                )}
+                                  {contract.expirationDate && (
+                                    <div className="flex justify-between">
+                                      <span className="text-muted-foreground">
+                                        만료일:
+                                      </span>
+                                      <span className="text-red-600 font-medium">
+                                        {formatDate(contract.expirationDate)}
+                                      </span>
+                                    </div>
+                                  )}
+                                  {contract.paymentPeriod && (
+                                    <div className="flex justify-between">
+                                      <span className="text-muted-foreground">
+                                        납입기간:
+                                      </span>
+                                      <span>{contract.paymentPeriod}년</span>
+                                    </div>
+                                  )}
+                                </div>
                               </div>
 
-                              <div className="space-y-2">
-                                <h4 className="font-semibold text-foreground">
-                                  계약자 정보
+                              <div className="space-y-3">
+                                <h4 className="font-semibold text-foreground flex items-center gap-2">
+                                  👥 인적사항 상세
                                 </h4>
-                                <div className="flex justify-between">
-                                  <span className="text-muted-foreground">
-                                    계약자:
-                                  </span>
-                                  <span>{contract.contractorName}</span>
+                                <div className="space-y-2">
+                                  {contract.contractorSsn && (
+                                    <div className="flex justify-between">
+                                      <span className="text-muted-foreground">
+                                        계약자 주민번호:
+                                      </span>
+                                      <span className="font-mono text-xs">
+                                        {contract.contractorSsn.replace(
+                                          /(\d{6})\d{7}/,
+                                          '$1-*******'
+                                        )}
+                                      </span>
+                                    </div>
+                                  )}
+                                  {contract.contractorPhone && (
+                                    <div className="flex justify-between">
+                                      <span className="text-muted-foreground">
+                                        계약자 연락처:
+                                      </span>
+                                      <span>{contract.contractorPhone}</span>
+                                    </div>
+                                  )}
+                                  {contract.insuredSsn && (
+                                    <div className="flex justify-between">
+                                      <span className="text-muted-foreground">
+                                        피보험자 주민번호:
+                                      </span>
+                                      <span className="font-mono text-xs">
+                                        {contract.insuredSsn.replace(
+                                          /(\d{6})\d{7}/,
+                                          '$1-*******'
+                                        )}
+                                      </span>
+                                    </div>
+                                  )}
+                                  {contract.insuredPhone && (
+                                    <div className="flex justify-between">
+                                      <span className="text-muted-foreground">
+                                        피보험자 연락처:
+                                      </span>
+                                      <span>{contract.insuredPhone}</span>
+                                    </div>
+                                  )}
+                                  {contract.beneficiaryName && (
+                                    <div className="flex justify-between">
+                                      <span className="text-muted-foreground">
+                                        수익자:
+                                      </span>
+                                      <span>{contract.beneficiaryName}</span>
+                                    </div>
+                                  )}
                                 </div>
-                                <div className="flex justify-between">
-                                  <span className="text-muted-foreground">
-                                    피보험자:
-                                  </span>
-                                  <span>{contract.insuredName}</span>
-                                </div>
-                                {contract.beneficiaryName && (
-                                  <div className="flex justify-between">
-                                    <span className="text-muted-foreground">
-                                      수익자:
-                                    </span>
-                                    <span>{contract.beneficiaryName}</span>
-                                  </div>
-                                )}
                               </div>
                             </div>
 
-                            {/* 금액 정보 */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                              <div className="space-y-2">
-                                <h4 className="font-semibold text-foreground">
-                                  보험료 정보
-                                </h4>
-                                {contract.annualPremium && (
-                                  <div className="flex justify-between">
+                            {/* 💰 세부 보험료 정보 */}
+                            <div className="space-y-3 text-sm">
+                              <h4 className="font-semibold text-foreground flex items-center gap-2">
+                                💰 세부 보험료 정보
+                              </h4>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {contract.monthlyPremium && (
+                                  <div className="flex justify-between p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
                                     <span className="text-muted-foreground">
-                                      연 보험료:
+                                      월 보험료:
                                     </span>
                                     <span className="font-semibold text-blue-600">
-                                      {formatCurrency(contract.annualPremium)}
+                                      {formatCurrency(contract.monthlyPremium)}
                                     </span>
                                   </div>
                                 )}
-                                {contract.coverageAmount && (
-                                  <div className="flex justify-between">
+                                {contract.annualPremium && (
+                                  <div className="flex justify-between p-3 bg-purple-50 dark:bg-purple-950/20 rounded-lg">
                                     <span className="text-muted-foreground">
-                                      보장금액:
+                                      연 보험료:
                                     </span>
-                                    <span className="font-semibold text-orange-600">
-                                      {formatCurrency(contract.coverageAmount)}
+                                    <span className="font-semibold text-purple-600">
+                                      {formatCurrency(contract.annualPremium)}
                                     </span>
                                   </div>
                                 )}
@@ -1474,8 +1492,7 @@ function NewContractModal({
       annualPremium: '',
       coverageAmount: '',
       agentCommission: '',
-      paymentMethod: 'monthly',
-      paymentCycle: '',
+      paymentCycle: 'monthly',
       paymentPeriod: '',
       specialClauses: '',
       notes: '',
@@ -1548,8 +1565,7 @@ function NewContractModal({
       annualPremium: '',
       coverageAmount: '',
       agentCommission: '',
-      paymentMethod: 'monthly',
-      paymentCycle: '',
+      paymentCycle: 'monthly',
       paymentPeriod: '',
       specialClauses: '',
       notes: '',
@@ -1990,6 +2006,8 @@ function NewContractModal({
                     <Input
                       id="premiumAmount"
                       type="number"
+                      step="1"
+                      min="0"
                       value={formData.premiumAmount}
                       onChange={(e) =>
                         updateField('premiumAmount', e.target.value)
@@ -2022,6 +2040,8 @@ function NewContractModal({
                     <Input
                       id="monthlyPremium"
                       type="number"
+                      step="1"
+                      min="0"
                       value={formData.monthlyPremium}
                       onChange={(e) =>
                         updateField('monthlyPremium', e.target.value)
@@ -2048,6 +2068,8 @@ function NewContractModal({
                     <Input
                       id="agentCommission"
                       type="number"
+                      step="1"
+                      min="0"
                       value={formData.agentCommission}
                       onChange={(e) =>
                         updateField('agentCommission', e.target.value)
@@ -2063,35 +2085,26 @@ function NewContractModal({
 
                 <div className="space-y-2">
                   <Label
-                    htmlFor="paymentMethod"
+                    htmlFor="expirationDate"
                     className="text-sm font-medium"
                   >
-                    납입 방법
+                    만료일 (선택)
                   </Label>
-                  <Select
-                    value={formData.paymentMethod}
-                    onValueChange={(value) =>
-                      updateField('paymentMethod', value)
+                  <Input
+                    id="expirationDate"
+                    type="date"
+                    value={formData.expirationDate}
+                    onChange={(e) =>
+                      updateField('expirationDate', e.target.value)
                     }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="납입 방법 선택" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {paymentMethods.map((method) => (
-                        <SelectItem key={method.value} value={method.value}>
-                          {method.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="paymentCycle" className="text-sm font-medium">
-                    납입주기
+                    납입주기 (납입방법)
                   </Label>
                   <Select
                     value={formData.paymentCycle}
@@ -2103,9 +2116,9 @@ function NewContractModal({
                       <SelectValue placeholder="납입주기 선택" />
                     </SelectTrigger>
                     <SelectContent>
-                      {['월', '분기', '반기', '연'].map((cycle) => (
-                        <SelectItem key={cycle} value={cycle}>
-                          {cycle}
+                      {paymentMethods.map((method) => (
+                        <SelectItem key={method.value} value={method.value}>
+                          {method.label}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -2123,6 +2136,8 @@ function NewContractModal({
                     <Input
                       id="paymentPeriod"
                       type="number"
+                      step="1"
+                      min="0"
                       value={formData.paymentPeriod}
                       onChange={(e) =>
                         updateField('paymentPeriod', e.target.value)
@@ -2157,6 +2172,8 @@ function NewContractModal({
                     <Input
                       id="coverageAmount"
                       type="number"
+                      step="1"
+                      min="0"
                       value={formData.coverageAmount}
                       onChange={(e) =>
                         updateField('coverageAmount', e.target.value)
@@ -2292,29 +2309,18 @@ function NewContractModal({
                           </div>
                           <div className="flex items-center gap-1">
                             {attachment.isExisting && (
-                              <>
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="sm"
-                                  className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700"
-                                  title="기존 파일 미리보기"
-                                >
-                                  <Eye className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="sm"
-                                  className="h-8 w-8 p-0 text-green-600 hover:text-green-700"
-                                  onClick={() =>
-                                    onDownloadAttachment?.(attachment.id)
-                                  }
-                                  title="파일 다운로드"
-                                >
-                                  <Download className="h-4 w-4" />
-                                </Button>
-                              </>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 w-8 p-0 text-green-600 hover:text-green-700"
+                                onClick={() =>
+                                  onDownloadAttachment?.(attachment.id)
+                                }
+                                title="파일 다운로드"
+                              >
+                                <Download className="h-4 w-4" />
+                              </Button>
                             )}
                             <Button
                               type="button"
