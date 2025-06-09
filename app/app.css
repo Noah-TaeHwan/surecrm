@@ -776,32 +776,46 @@ textarea {
     position: relative !important;
     animation: keyman-border-glow 8s ease-in-out infinite !important;
     border: 1px solid rgba(255, 107, 53, 0.2) !important;
+    overflow: hidden !important;
+  }
+
+  .client-card-keyman > * {
+    position: relative !important;
+    z-index: 1 !important;
   }
 
   .client-card-keyman::before {
     content: '' !important;
     position: absolute !important;
-    inset: -1px !important;
+    top: -2px !important;
+    left: -2px !important;
+    right: -2px !important;
+    bottom: -2px !important;
     border-radius: inherit !important;
-    padding: 1px !important;
     background: linear-gradient(
       45deg,
-      rgba(255, 107, 53, 0.3),
-      rgba(255, 143, 101, 0.2),
-      rgba(255, 184, 149, 0.1),
-      rgba(255, 107, 53, 0.3)
+      rgba(255, 107, 53, 0.4),
+      rgba(255, 143, 101, 0.3),
+      rgba(255, 184, 149, 0.2),
+      rgba(255, 107, 53, 0.4)
     ) !important;
     background-size: 300% 300% !important;
     animation: keyman-gradient-move 12s ease-in-out infinite !important;
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0) !important;
-    mask-composite: exclude !important;
-    -webkit-mask: linear-gradient(#fff 0 0) content-box,
-      linear-gradient(#fff 0 0) !important;
-    -webkit-mask-composite: xor !important;
-    pointer-events: none !important;
+    z-index: -2 !important;
+    opacity: 0.7 !important;
+    filter: blur(1px) !important;
+  }
+
+  .client-card-keyman::after {
+    content: '' !important;
+    position: absolute !important;
+    top: 1px !important;
+    left: 1px !important;
+    right: 1px !important;
+    bottom: 1px !important;
+    background: inherit !important;
+    border-radius: inherit !important;
     z-index: -1 !important;
-    opacity: 1 !important;
-    display: block !important;
   }
 
   @keyframes keyman-gradient-move {
@@ -819,32 +833,46 @@ textarea {
     position: relative !important;
     animation: normal-border-subtle 20s ease-in-out infinite !important;
     border: 1px solid rgba(74, 144, 226, 0.15) !important;
+    overflow: hidden !important;
+  }
+
+  .client-card-normal > * {
+    position: relative !important;
+    z-index: 1 !important;
   }
 
   .client-card-normal::before {
     content: '' !important;
     position: absolute !important;
-    inset: -0.5px !important;
+    top: -1px !important;
+    left: -1px !important;
+    right: -1px !important;
+    bottom: -1px !important;
     border-radius: inherit !important;
-    padding: 0.5px !important;
     background: linear-gradient(
       45deg,
-      rgba(74, 144, 226, 0.1),
-      rgba(107, 163, 232, 0.08),
-      rgba(139, 182, 238, 0.06),
-      rgba(74, 144, 226, 0.1)
+      rgba(74, 144, 226, 0.15),
+      rgba(107, 163, 232, 0.12),
+      rgba(139, 182, 238, 0.1),
+      rgba(74, 144, 226, 0.15)
     ) !important;
     background-size: 200% 200% !important;
     animation: normal-gradient-move 25s ease-in-out infinite !important;
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0) !important;
-    mask-composite: exclude !important;
-    -webkit-mask: linear-gradient(#fff 0 0) content-box,
-      linear-gradient(#fff 0 0) !important;
-    -webkit-mask-composite: xor !important;
-    pointer-events: none !important;
+    z-index: -2 !important;
+    opacity: 0.5 !important;
+    filter: blur(0.5px) !important;
+  }
+
+  .client-card-normal::after {
+    content: '' !important;
+    position: absolute !important;
+    top: 1px !important;
+    left: 1px !important;
+    right: 1px !important;
+    bottom: 1px !important;
+    background: inherit !important;
+    border-radius: inherit !important;
     z-index: -1 !important;
-    opacity: 1 !important;
-    display: block !important;
   }
 
   @keyframes normal-gradient-move {
