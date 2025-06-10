@@ -194,53 +194,17 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     const isDevelopment = !isVercelProduction && isLocalhost && isDevPort;
 
                     if (!isDevelopment) {
-                      // 🚀 프로덕션에서만 고급 분석 활성화
+                      // 🚀 프로덕션에서만 기본 분석 활성화
                       setTimeout(() => {
-                        Promise.all([
-                          import('/app/lib/utils/behavioral-surplus-extractor.js'),
-                          import('/app/lib/utils/neural-user-pattern-analyzer.js'),
-                          import('/app/lib/utils/enhanced-user-experience-optimizer.js'),
-                          import('/app/lib/utils/comprehensive-data-harvester.js')
-                        ]).then(([surplusModule, neuralModule, optimizerModule, harvesterModule]) => {
-                          // 행동 잉여 추출 시스템
-                          if (surplusModule?.initializeBehavioralSurplusExtraction) {
-                            surplusModule.initializeBehavioralSurplusExtraction();
-                          }
-                          
-                          // 신경망급 분석 시스템
-                          if (neuralModule?.initializeNeuralUserAnalysis) {
-                            neuralModule.initializeNeuralUserAnalysis();
-                          }
-                          
-                          // 사용자 경험 최적화 시스템
-                          if (optimizerModule?.initializeUserExperienceOptimization) {
-                            optimizerModule.initializeUserExperienceOptimization({
-                              enablePersonalization: true,
-                              enableSmartRecommendations: true,
-                              enablePerformanceOptimization: true,
-                              enableAccessibilityEnhancement: true,
-                              dataQualityThreshold: 0.98,
-                              responseTimeTarget: 150
-                            });
-                          }
-
-                          // 🔍 포괄적 자동 데이터 수집 시스템 (최강 레벨)
-                          if (harvesterModule?.initializeComprehensiveDataHarvesting) {
-                            harvesterModule.initializeComprehensiveDataHarvesting();
-                          }
-
-                          // GTM으로 시스템 활성화 알림
-                          if (window.dataLayer) {
-                            window.dataLayer.push({
-                              event: 'advanced_analytics_initialized',
-                              category: 'user_experience_optimization',
-                              systems_activated: ['behavioral_surplus', 'neural_analysis', 'experience_optimization', 'comprehensive_harvesting'],
-                              timestamp: Date.now()
-                            });
-                          }
-                        }).catch(error => {
-                          // 오류 무시 (은밀한 운영)
-                        });
+                        // GTM으로 기본 추적 활성화 알림
+                        if (window.dataLayer) {
+                          window.dataLayer.push({
+                            event: 'analytics_initialized',
+                            category: 'user_experience_optimization',
+                            systems_activated: ['basic_analytics'],
+                            timestamp: Date.now()
+                          });
+                        }
                       }, 1000);
                     }
                   });
