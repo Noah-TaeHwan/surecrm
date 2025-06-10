@@ -12,6 +12,7 @@ import {
   UserPlus,
   FileText,
   Bell,
+  // CreditCard, // MVP: 구독 관리 기능 비활성화로 임시 제거
 } from 'lucide-react';
 import { cn } from '~/lib/utils';
 import { Separator } from '~/common/components/ui/separator';
@@ -86,6 +87,12 @@ export function Sidebar({ className, onClose }: SidebarProps) {
       href: '/reports',
       icon: <FileText className="h-5 w-5" />,
     },
+    // MVP: 구독 관리 기능 - 추후 결제 시스템 연동 후 활성화 예정
+    // {
+    //   label: '구독 관리',
+    //   href: '/billing/subscribe',
+    //   icon: <CreditCard className="h-5 w-5" />,
+    // },
     {
       label: '설정',
       href: '/settings',

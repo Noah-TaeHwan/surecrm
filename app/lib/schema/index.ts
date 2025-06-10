@@ -6,6 +6,9 @@ export * from './core';
 // ===== Public Schema (공개 페이지 관련) =====
 export * from './public';
 
+// ===== Billing Schema (구독 결제 관련) =====
+export * from './billing';
+
 // ===== 통합 스키마 객체 (Drizzle 설정용) =====
 import {
   // Core 테이블들
@@ -273,6 +276,26 @@ import {
   appTeamTrainingRecordsRelations,
 } from '~/features/team/lib/schema';
 
+// Billing 기능 전용 테이블들 import
+import {
+  // Billing 테이블들
+  appBillingPlans,
+  appBillingCustomerKeys,
+  appBillingPaymentMethods,
+  appBillingSubscriptions,
+  appBillingPayments,
+  appBillingUsageRecords,
+  appBillingWebhookLogs,
+  appBillingAuditLogs,
+  // Billing Relations
+  appBillingCustomerKeysRelations,
+  appBillingPaymentMethodsRelations,
+  appBillingSubscriptionsRelations,
+  appBillingPaymentsRelations,
+  appBillingUsageRecordsRelations,
+  appBillingPlansRelations,
+} from './billing';
+
 // Drizzle 설정용 통합 스키마
 export const schema = {
   // ===== Core 테이블들 =====
@@ -385,6 +408,16 @@ export const schema = {
   appTeamCommunicationChannels,
   appTeamTrainingRecords,
 
+  // ===== Billing 기능 전용 테이블들 =====
+  appBillingPlans,
+  appBillingCustomerKeys,
+  appBillingPaymentMethods,
+  appBillingSubscriptions,
+  appBillingPayments,
+  appBillingUsageRecords,
+  appBillingWebhookLogs,
+  appBillingAuditLogs,
+
   // ===== Public 테이블들 =====
   publicContents,
   faqs,
@@ -494,6 +527,13 @@ export const schema = {
   appTeamActivityLogsRelations,
   appTeamCommunicationChannelsRelations,
   appTeamTrainingRecordsRelations,
+  // Billing Relations
+  appBillingCustomerKeysRelations,
+  appBillingPaymentMethodsRelations,
+  appBillingSubscriptionsRelations,
+  appBillingPaymentsRelations,
+  appBillingUsageRecordsRelations,
+  appBillingPlansRelations,
 };
 
 // 타입 정의

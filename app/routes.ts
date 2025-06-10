@@ -44,6 +44,7 @@ export default [
 
   // 📈 보고서 & 설정
   route('reports', 'features/reports/pages/reports-page.tsx'),
+  route('billing/subscribe', 'routes/billing.subscribe.tsx'),
   route('settings', 'features/settings/pages/settings-page.tsx'),
   route('notifications', 'features/notifications/pages/notifications-page.tsx'),
 
