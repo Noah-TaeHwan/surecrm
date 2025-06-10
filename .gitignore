@@ -25,3 +25,5 @@ test-upload-*.cjs
 test-storage-*.cjs
 test-attachment-*.cjs
 .vercel
+.vercel.json
+vercel.json
