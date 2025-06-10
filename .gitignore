@@ -24,3 +24,4 @@ cookies.txt
 test-upload-*.cjs
 test-storage-*.cjs
 test-attachment-*.cjs
+.vercel
