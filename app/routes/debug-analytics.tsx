@@ -36,6 +36,10 @@ interface AnalyticsStatus {
   gaLoaded: boolean;
   dataLayerExists: boolean;
   localStorageRole: string | null;
+  currentHostname: string;
+  currentPort: string;
+  isVercelProduction: boolean;
+  userAgent: string;
 }
 
 export function meta() {
@@ -74,6 +78,14 @@ export default function DebugAnalyticsPage() {
         typeof window !== 'undefined'
           ? localStorage.getItem('surecrm_user_role')
           : null,
+      currentHostname:
+        typeof window !== 'undefined' ? window.location.hostname : 'SSR',
+      currentPort: typeof window !== 'undefined' ? window.location.port : 'SSR',
+      isVercelProduction:
+        typeof window !== 'undefined'
+          ? window.location.hostname.includes('.vercel.app')
+          : false,
+      userAgent: typeof window !== 'undefined' ? navigator.userAgent : 'SSR',
     };
     setStatus(newStatus);
   };
@@ -209,6 +221,50 @@ export default function DebugAnalyticsPage() {
             <span>로컬 스토리지 역할:</span>
             <Badge variant={status.localStorageRole ? 'default' : 'outline'}>
               {status.localStorageRole || '없음'}
+            </Badge>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 🚀 환경 진단 정보 */}
+      <Card>
+        <CardHeader>
+          <CardTitle>🌍 환경 진단</CardTitle>
+          <CardDescription>
+            현재 접속 환경 및 Vercel 배포 상태를 진단합니다.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="flex justify-between items-center">
+            <span>현재 도메인:</span>
+            <Badge variant="outline" className="font-mono text-xs">
+              {status.currentHostname}
+            </Badge>
+          </div>
+          <div className="flex justify-between items-center">
+            <span>현재 포트:</span>
+            <Badge variant="outline" className="font-mono text-xs">
+              {status.currentPort || '443 (HTTPS)'}
+            </Badge>
+          </div>
+          <div className="flex justify-between items-center">
+            <span>Vercel 프로덕션:</span>
+            <Badge
+              variant={status.isVercelProduction ? 'default' : 'secondary'}
+            >
+              {status.isVercelProduction ? '✅ 맞음' : '❌ 아님'}
+            </Badge>
+          </div>
+          <div className="flex justify-between items-center">
+            <span>개발 환경 감지:</span>
+            <Badge variant={status.isDevelopment ? 'destructive' : 'default'}>
+              {status.isDevelopment ? '🔧 개발환경' : '🚀 프로덕션'}
+            </Badge>
+          </div>
+          <div className="flex justify-between items-center">
+            <span>분석 수집 허용:</span>
+            <Badge variant={status.shouldCollect ? 'default' : 'destructive'}>
+              {status.shouldCollect ? '✅ 허용됨' : '🚫 차단됨'}
             </Badge>
           </div>
         </CardContent>

@@ -15,29 +15,44 @@ const GTM_CONTAINER_ID = import.meta.env.VITE_GTM_CONTAINER_ID;
 export function isDevelopmentEnvironment(): boolean {
   if (typeof window === 'undefined') return false;
 
-  return (
+  // 🔧 개발 환경 조건들
+  const isLocalhost =
     window.location.hostname === 'localhost' ||
     window.location.hostname === '127.0.0.1' ||
-    window.location.hostname.includes('.local') ||
-    window.location.port === '5173' ||
-    window.location.port === '5174' ||
-    window.location.port === '5175' ||
-    window.location.port === '5176' ||
-    window.location.port === '5177' ||
-    window.location.port === '5178' ||
-    window.location.port === '5179' ||
-    window.location.port === '5180' ||
-    window.location.port === '5181' ||
-    window.location.port === '5182' ||
-    window.location.port === '5183' ||
-    window.location.port === '5184' ||
-    window.location.port === '5185' ||
-    window.location.port === '5186' ||
-    window.location.port === '5187' ||
-    window.location.port === '3000' ||
-    window.location.port === '8080' ||
-    import.meta.env.DEV === true
-  );
+    window.location.hostname.includes('.local');
+
+  const isDevPort = [
+    '5173',
+    '5174',
+    '5175',
+    '5176',
+    '5177',
+    '5178',
+    '5179',
+    '5180',
+    '5181',
+    '5182',
+    '5183',
+    '5184',
+    '5185',
+    '5186',
+    '5187',
+    '3000',
+    '8080',
+  ].includes(window.location.port);
+
+  // 🚀 Vercel 프로덕션 환경 명시적 제외
+  const isVercelProduction =
+    window.location.hostname.includes('.vercel.app') ||
+    window.location.hostname.includes('surecrm-sigma.vercel.app');
+
+  // Vercel 프로덕션이면 무조건 개발환경 아님
+  if (isVercelProduction) {
+    return false;
+  }
+
+  // 개발 환경 조건: localhost + dev port 조합
+  return isLocalhost && (isDevPort || import.meta.env.DEV === true);
 }
 
 /**

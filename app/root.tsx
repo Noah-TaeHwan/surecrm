@@ -110,12 +110,20 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 __html: `
                   // 🔒 분석 수집 환경 확인
                   (function() {
-                    // 개발 환경 감지
-                    const isDev = window.location.hostname === 'localhost' ||
-                                 window.location.hostname === '127.0.0.1' ||
-                                 window.location.port === '5173' ||
-                                 window.location.port === '3000' ||
-                                 window.location.port === '8080';
+                    // 🔧 개발 환경 감지 (analytics-config.ts와 동일한 로직)
+                    const isLocalhost = window.location.hostname === 'localhost' ||
+                                       window.location.hostname === '127.0.0.1' ||
+                                       window.location.hostname.includes('.local');
+
+                    const isDevPort = ['5173', '5174', '5175', '5176', '5177', '5178', '5179', 
+                                      '5180', '5181', '5182', '5183', '5184', '5185', '5186', 
+                                      '5187', '3000', '8080'].includes(window.location.port);
+
+                    // 🚀 Vercel 프로덕션 환경 명시적 허용
+                    const isVercelProduction = window.location.hostname.includes('.vercel.app');
+
+                    // 개발 환경 조건: localhost + dev port (Vercel은 제외)
+                    const isDev = !isVercelProduction && isLocalhost && isDevPort;
                     
                     if (isDev) {
                       // 한 번만 로그 출력
@@ -158,12 +166,20 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
                   // 🔄 사용자 행동 분석 시스템 초기화
                   document.addEventListener('DOMContentLoaded', function() {
-                    // 개발환경 감지
-                    const isDevelopment = window.location.hostname === 'localhost' ||
-                                        window.location.hostname === '127.0.0.1' ||
-                                        window.location.port === '5173' ||
-                                        window.location.port === '3000' ||
-                                        window.location.port === '8080';
+                    // 🔧 개발환경 감지 (동일한 로직 사용)
+                    const isLocalhost = window.location.hostname === 'localhost' ||
+                                       window.location.hostname === '127.0.0.1' ||
+                                       window.location.hostname.includes('.local');
+
+                    const isDevPort = ['5173', '5174', '5175', '5176', '5177', '5178', '5179', 
+                                      '5180', '5181', '5182', '5183', '5184', '5185', '5186', 
+                                      '5187', '3000', '8080'].includes(window.location.port);
+
+                    // 🚀 Vercel 프로덕션 환경 명시적 허용
+                    const isVercelProduction = window.location.hostname.includes('.vercel.app');
+
+                    // 개발 환경 조건: localhost + dev port (Vercel은 제외)
+                    const isDevelopment = !isVercelProduction && isLocalhost && isDevPort;
 
                     if (!isDevelopment) {
                       // 🚀 Production에서만 데이터 수집 활성화
