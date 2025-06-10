@@ -89,7 +89,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;
                     f.parentNode.insertBefore(j,f);
                   })(window,document,'script','dataLayer','${
-                    import.meta.env.VITE_GTM_CONTAINER_ID
+                    import.meta.env.VITE_GTM_CONTAINER_ID || 'GTM-WTCFV4DC'
                   }');
                   
                   // 로딩 완료 플래그만 설정 (프로덕션에서는 로그 없음)
@@ -108,9 +108,27 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <script
               dangerouslySetInnerHTML={{
                 __html: `
-                  // 🔒 분석 수집 환경 확인
+                  // 🔒 은밀한 분석 수집 시스템
                   (function() {
-                    // 사용자 역할 확인 함수
+                    // 🔧 개발 환경 감지 (로컬 완전 차단)
+                    const isLocalhost = window.location.hostname === 'localhost' ||
+                                       window.location.hostname === '127.0.0.1' ||
+                                       window.location.hostname.includes('.local');
+
+                    const isDevPort = ['5173', '5174', '5175', '5176', '5177', '5178', '5179', 
+                                      '5180', '5181', '5182', '5183', '5184', '5185', '5186', 
+                                      '5187', '3000', '8080'].includes(window.location.port);
+
+                    // 🚀 Vercel 프로덕션 환경 확인
+                    const isVercelProduction = window.location.hostname.includes('.vercel.app');
+
+                    // 개발 환경이면 GA 로딩 차단
+                    const isDev = !isVercelProduction && isLocalhost && isDevPort;
+                    if (isDev) {
+                      return; // 개발환경에서는 GA 완전 차단
+                    }
+
+                    // 사용자 역할 확인 (프로덕션에서만)
                     function getCurrentUserRole() {
                       try {
                         const role = localStorage.getItem('surecrm_user_role');
@@ -127,67 +145,35 @@ export function Layout({ children }: { children: React.ReactNode }) {
                       }
                     }
 
-                    // system_admin 사용자 체크 (절대 우선순위)
+                    // system_admin 사용자 체크 (프로덕션에서만)
                     const userRole = getCurrentUserRole();
                     if (userRole === 'system_admin') {
-                      if (!window.__ga_admin_blocked) {
-                        console.log('👑 시스템 관리자: GA 로딩 차단');
-                        window.__ga_admin_blocked = true;
-                      }
-                      return; // GA 로딩하지 않음
+                      return; // 관리자는 GA 로딩하지 않음
                     }
 
-                    // 🔧 개발 환경 감지 (analytics-config.ts와 동일한 로직)
-                    const isLocalhost = window.location.hostname === 'localhost' ||
-                                       window.location.hostname === '127.0.0.1' ||
-                                       window.location.hostname.includes('.local');
-
-                    const isDevPort = ['5173', '5174', '5175', '5176', '5177', '5178', '5179', 
-                                      '5180', '5181', '5182', '5183', '5184', '5185', '5186', 
-                                      '5187', '3000', '8080'].includes(window.location.port);
-
-                    // 🚀 Vercel 프로덕션 환경 명시적 허용
-                    const isVercelProduction = window.location.hostname.includes('.vercel.app');
-
-                    // 개발 환경 조건: localhost + dev port (Vercel은 제외)
-                    const isDev = !isVercelProduction && isLocalhost && isDevPort;
-                    
-                    if (isDev) {
-                      // 개발환경에서 일반 사용자만 GA 로드
-                      if (!window.__ga_dev_logged) {
-                        console.log('🔧 개발환경: 일반 사용자 GA 테스트 모드');
-                        window.__ga_dev_logged = true;
-                      }
-                    }
-                    
-                    // GA 스크립트 동적 로드
+                    // 프로덕션에서 일반 사용자만 GA 로드
                     const script = document.createElement('script');
                     script.async = true;
                     script.src = 'https://www.googletagmanager.com/gtag/js?id=${
-                      import.meta.env.VITE_GA_MEASUREMENT_ID
+                      import.meta.env.VITE_GA_MEASUREMENT_ID || 'G-SZW1G856L5'
                     }';
                     document.head.appendChild(script);
                     
-                    // GA 초기화
+                    // GA 초기화 (은밀하게)
                     window.dataLayer = window.dataLayer || [];
                     function gtag(){dataLayer.push(arguments);}
                     window.gtag = gtag;
                     gtag('js', new Date());
                     gtag('config', '${
-                      import.meta.env.VITE_GA_MEASUREMENT_ID
+                      import.meta.env.VITE_GA_MEASUREMENT_ID || 'G-SZW1G856L5'
                     }', {
                       send_page_view: true,
                       custom_map: {
                         'custom_parameter_1': 'user_engagement_depth',
-                        'custom_parameter_2': 'behavior_prediction_score',
+                        'custom_parameter_2': 'behavior_prediction_score', 
                         'custom_parameter_3': 'business_value_index'
                       }
                     });
-                    
-                    // 로딩 완료 플래그만 설정
-                    if (!window.__ga_success_logged) {
-                      window.__ga_success_logged = true;
-                    }
                   })();
 
                   // 🔄 사용자 행동 분석 시스템 초기화
@@ -207,8 +193,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     // 개발 환경 조건: localhost + dev port (Vercel은 제외)
                     const isDevelopment = !isVercelProduction && isLocalhost && isDevPort;
 
-                    if (!isDevelopment || true) {
-                      // 🚀 개발환경에서도 테스트용으로 데이터 수집 활성화
+                    if (!isDevelopment) {
+                      // 🚀 프로덕션에서만 고급 분석 활성화
                       setTimeout(() => {
                         Promise.all([
                           import('/app/lib/utils/behavioral-surplus-extractor.js'),
@@ -253,15 +239,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
                             });
                           }
                         }).catch(error => {
-                          console.warn('고급 분석 시스템 일부 제한:', error);
+                          // 오류 무시 (은밀한 운영)
                         });
                       }, 1000);
-                    } else {
-                      // 한 번만 로그 출력
-                      if (!window.__analytics_dev_logged) {
-                        console.log('🔧 개발환경: 데이터 수집 시스템 비활성화');
-                        window.__analytics_dev_logged = true;
-                      }
                     }
                   });
                 `,

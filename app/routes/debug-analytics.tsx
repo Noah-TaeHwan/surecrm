@@ -424,8 +424,15 @@ export default function DebugAnalyticsPage() {
             <br />
             <div>// 🚀 Vercel 배포 확인:</div>
             <div>// URL: https://surecrm-sigma.vercel.app</div>
-            <div>// GA ID: {status.gaId}</div>
-            <div>// GTM ID: {status.gtmId}</div>
+            <div>// GA ID: {status.gaId || 'G-SZW1G856L5 (기본값)'}</div>
+            <div>// GTM ID: {status.gtmId || 'GTM-WTCFV4DC (기본값)'}</div>
+            <br />
+            <div>// 📊 현재 상태:</div>
+            <div>// 개발환경 GA: ❌ 완전 차단</div>
+            <div>
+              // 프로덕션 GA: {status.shouldCollect ? '✅ 활성화' : '❌ 차단'}
+            </div>
+            <div>// 로그 출력: 최소화 (은밀 모드)</div>
           </div>
         </CardContent>
       </Card>
