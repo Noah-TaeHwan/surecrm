@@ -111,7 +111,7 @@ export function ClientEditForm({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-base font-medium">
-                        전화번호 *
+                        전화번호 (선택사항)
                       </FormLabel>
                       <FormControl>
                         <Input

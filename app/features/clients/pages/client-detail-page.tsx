@@ -191,6 +191,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
         clientOverview: null,
         availableStages: [],
         insuranceContracts: [],
+        availableReferrers: [], // 🆕 빈 배열 추가
         currentUserId: agentId,
         currentUser: {
           id: user.id,
@@ -247,11 +248,33 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       console.error('❌ 보험계약 로딩 중 에러:', contractError);
     }
 
+    // 🆕 소개자 변경을 위한 다른 고객 목록 조회
+    let availableReferrers: Array<{ id: string; name: string }> = [];
+    try {
+      const { data: otherClients } = await supabase
+        .from('app_client_profiles')
+        .select('id, full_name')
+        .eq('agent_id', agentId)
+        .eq('is_active', true)
+        .neq('id', clientId) // 현재 고객 제외
+        .order('full_name');
+
+      availableReferrers = (otherClients || []).map((client) => ({
+        id: client.id,
+        name: client.full_name,
+      }));
+
+      console.log(`✅ 소개자 후보 ${availableReferrers.length}명 로드 완료`);
+    } catch (referrerError) {
+      console.error('❌ 소개자 목록 조회 실패:', referrerError);
+    }
+
     return {
       client: clientOverview.client,
       clientOverview: clientOverview, // 🆕 통합 고객 데이터 추가
       availableStages: availableStages,
       insuranceContracts: insuranceContracts, // 🏢 보험 계약 데이터 추가
+      availableReferrers: availableReferrers, // 🆕 소개자 후보 목록 추가
       currentUserId: agentId,
       currentUser: {
         id: user.id,
@@ -269,6 +292,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       clientOverview: null,
       availableStages: [],
       insuranceContracts: [],
+      availableReferrers: [], // 🆕 빈 배열 추가
       currentUserId: null,
       currentUser: {
         id: '',
@@ -300,6 +324,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
   const clientOverview = data?.clientOverview || null; // 🆕 통합 고객 데이터
   const availableStages = data?.availableStages || [];
   const insuranceContracts = data?.insuranceContracts || []; // 🏢 보험 계약 데이터
+  const availableReferrers = data?.availableReferrers || []; // 🆕 소개자 후보 목록
   const isEmpty = data?.isEmpty || false;
   const error = data?.error || null;
   const currentUser = data?.currentUser || null;
@@ -471,6 +496,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
     ssnBack: '',
     birthDate: '',
     gender: '' as 'male' | 'female' | '',
+    referredById: undefined as string | undefined, // 🆕 소개자 ID 필드
     ssnError: undefined as string | undefined, // 🎯 선택적 필드로 주민등록번호 에러 메시지
   });
 
@@ -795,6 +821,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
               .split('T')[0]
           : '',
       gender: client?.extendedDetails?.gender || '',
+      referredById: client?.referredBy?.id || undefined, // 🆕 소개자 ID 추가
       ssnError: undefined, // 🎯 에러 메시지 초기화
     });
     setIsEditing(true);
@@ -899,6 +926,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
       ssnBack: '',
       birthDate: '',
       gender: '',
+      referredById: undefined, // 🆕 소개자 ID 필드
       ssnError: undefined, // 🎯 에러 메시지 초기화
     });
   };
@@ -943,6 +971,11 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
       if (editFormData.ssnFront && editFormData.ssnBack) {
         formData.append('ssnFront', editFormData.ssnFront);
         formData.append('ssnBack', editFormData.ssnBack);
+      }
+
+      // 🆕 소개자 ID 필드 추가
+      if (editFormData.referredById !== undefined) {
+        formData.append('referredById', editFormData.referredById || '');
       }
 
       // Action 호출
@@ -1606,6 +1639,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
             clientTags={clientTags}
             handleOpenTagModal={handleOpenTagModal}
             removeClientTag={removeClientTag}
+            availableReferrers={availableReferrers} // 🆕 소개자 후보 목록 전달
           />
 
           {/* 오른쪽 메인 컨텐츠 */}

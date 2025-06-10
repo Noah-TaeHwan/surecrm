@@ -14,7 +14,7 @@ import { AddClientModal } from './add-client-modal';
 // AddClientModal 타입과 일치하도록 수정
 interface ClientFormData {
   fullName: string;
-  phone: string;
+  phone?: string; // 전화번호를 선택사항으로 변경
   email?: string;
   telecomProvider?: string;
   address?: string;

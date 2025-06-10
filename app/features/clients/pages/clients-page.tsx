@@ -773,7 +773,7 @@ export default function ClientsPage({ loaderData }: any) {
   // 🎯 핸들러 함수들 (AddClientModal 타입에 맞춰 수정)
   const handleClientSubmit = async (data: {
     fullName: string;
-    phone: string;
+    phone?: string; // 전화번호를 선택사항으로 변경
     email?: string;
     telecomProvider?: string;
     address?: string;

@@ -120,25 +120,61 @@ export async function getNetworkData(agentId: string): Promise<{
     // console.log('👥 직접 개발 고객:', directOnlyClients.length);
     // console.log('🔗 소개받은 고객:', referredClients.length);
 
-    // 직접 고객 노드 추가
+    // 🎯 개선된 소개 체인 분석 및 노드/엣지 구성
+    // 1단계: 모든 고객 노드를 우선 추가 (소개 관계와 상관없이)
+    const clientMap = new Map();
     for (const { client, referralCount } of directClients) {
-      nodes.push({
+      const clientNode = {
         id: client.id,
         name: client.fullName,
-        type: client.referredById ? 'client' : 'client',
-        level: client.referredById ? 2 : 1,
+        type: 'client' as const,
+        level: 1, // 기본값, 나중에 소개 체인 분석으로 재계산
         referralCount: Number(referralCount),
         contractValue: Number(client.contractAmount || 0),
         importance: client.importance as 'high' | 'medium' | 'low',
-        status: client.status === 'active' ? 'active' : 'inactive',
-      });
+        status: (client.status === 'active' ? 'active' : 'inactive') as
+          | 'active'
+          | 'inactive'
+          | 'prospect',
+        referredById: client.referredById,
+      };
 
-      // 🔥 핵심 검증: 소개받은 고객의 소개자가 nodes에 있는지 확인
+      nodes.push(clientNode);
+      clientMap.set(client.id, clientNode);
+    }
+
+    // 2단계: 소개 체인 분석으로 레벨 계산
+    function calculateNodeLevel(nodeId: string, visited = new Set()): number {
+      if (visited.has(nodeId)) return 1; // 순환 참조 방지
+      visited.add(nodeId);
+
+      const client = clientMap.get(nodeId);
+      if (!client || !client.referredById) {
+        return 1; // 직접 개발 고객 (에이전트와 직접 연결)
+      }
+
+      const referrer = clientMap.get(client.referredById);
+      if (!referrer) {
+        return 1; // 소개자가 현재 고객 목록에 없으면 직접 연결로 처리
+      }
+
+      return calculateNodeLevel(client.referredById, visited) + 1;
+    }
+
+    // 3단계: 모든 노드의 레벨을 다시 계산
+    for (const node of nodes) {
+      if (node.type === 'client') {
+        node.level = calculateNodeLevel(node.id);
+      }
+    }
+
+    // 4단계: 엣지 생성 (개선된 로직)
+    for (const { client } of directClients) {
       if (client.referredById) {
-        const referrerExists = nodes.find((n) => n.id === client.referredById);
+        const referrer = clientMap.get(client.referredById);
 
-        if (referrerExists) {
-          // console.log('✅ 소개자 확인됨:', client.fullName, '←', referrerExists.name);
+        if (referrer) {
+          // ✅ 소개자가 존재하는 경우: 소개 관계 엣지 생성
           edges.push({
             id: `${client.referredById}-${client.id}`,
             source: client.referredById,
@@ -148,13 +184,7 @@ export async function getNetworkData(agentId: string): Promise<{
             date: client.createdAt.toISOString().split('T')[0],
           });
         } else {
-          // console.warn('⚠️ 소개자를 찾을 수 없음:', {
-          //   고객: client.fullName,
-          //   소개자ID: client.referredById,
-          //   현재노드수: nodes.length
-          // });
-
-          // 🔥 안전장치: 소개자가 없으면 에이전트와 직접 연결
+          // ⚠️ 소개자가 현재 고객 목록에 없는 경우: 에이전트와 직접 연결
           edges.push({
             id: `${agentId}-${client.id}`,
             source: agentId,
@@ -165,7 +195,7 @@ export async function getNetworkData(agentId: string): Promise<{
           });
         }
       } else {
-        // 직접 개발한 고객만 에이전트와 연결
+        // 직접 개발한 고객: 에이전트와 직접 연결
         edges.push({
           id: `${agentId}-${client.id}`,
           source: agentId,
@@ -176,6 +206,25 @@ export async function getNetworkData(agentId: string): Promise<{
         });
       }
     }
+
+    // 🎯 디버깅: 소개 체인 분석 결과
+    const directClients_count = nodes.filter(
+      (n) => n.type === 'client' && n.level === 1
+    ).length;
+    const referredClients_count = nodes.filter(
+      (n) => n.type === 'client' && n.level > 1
+    ).length;
+    const maxLevel = Math.max(
+      ...nodes.filter((n) => n.type === 'client').map((n) => n.level)
+    );
+
+    console.log('🔗 소개 체인 분석 결과:', {
+      총_노드: nodes.length,
+      직접_고객: directClients_count,
+      소개_고객: referredClients_count,
+      최대_레벨: maxLevel,
+      총_엣지: edges.length,
+    });
 
     // 🔥 최종 검증
     // console.log('📈 최종 데이터:', {

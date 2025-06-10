@@ -41,11 +41,11 @@ export const ClientValidationSchema = z.object({
     .max(50, '고객명은 50자 이내로 입력해주세요'),
   phone: z
     .string()
-    .min(1, '전화번호를 입력해주세요')
-    .regex(
-      /^(01[016789])-?(\d{3,4})-?(\d{4})$/,
-      '올바른 전화번호 형식이 아닙니다 (예: 010-1234-5678)'
-    ),
+    .optional()
+    .refine((val) => {
+      if (!val || val.trim() === '') return true; // 빈 값 허용
+      return /^(01[016789])-?(\d{3,4})-?(\d{4})$/.test(val); // 값이 있으면 형식 검증
+    }, '올바른 전화번호 형식이 아닙니다 (예: 010-1234-5678)'),
   email: z
     .string()
     .optional()

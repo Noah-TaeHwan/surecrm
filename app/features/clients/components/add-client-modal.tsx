@@ -43,7 +43,7 @@ import * as z from 'zod';
 // 📋 고객 생성 스키마 (Supabase 테이블 구조에 맞춤)
 const clientSchema = z.object({
   fullName: z.string().min(1, '이름을 입력하세요'),
-  phone: z.string().min(1, '전화번호를 입력하세요'),
+  phone: z.string().optional(),
   email: z
     .string()
     .email('올바른 이메일 형식이 아닙니다')
@@ -84,7 +84,7 @@ export function AddClientModal({
     resolver: zodResolver(clientSchema),
     defaultValues: {
       fullName: '',
-      phone: '',
+      phone: undefined, // phone이 optional이므로 undefined로 변경
       email: '',
       telecomProvider: '',
       address: '',
@@ -101,7 +101,7 @@ export function AddClientModal({
     if (open) {
       form.reset({
         fullName: '',
-        phone: '',
+        phone: undefined, // phone이 optional이므로 undefined로 변경
         email: '',
         telecomProvider: '',
         address: '',
@@ -232,7 +232,7 @@ export function AddClientModal({
                   name="phone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>전화번호</FormLabel>
+                      <FormLabel>전화번호 (선택사항)</FormLabel>
                       <FormControl>
                         <Input
                           {...field}

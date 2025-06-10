@@ -1063,7 +1063,7 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
   // 새 고객 추가 처리 함수 (useFetcher 사용)
   const handleAddClient = async (clientData: {
     fullName: string;
-    phone: string;
+    phone?: string; // 전화번호를 선택사항으로 변경
     email?: string;
     telecomProvider?: string;
     address?: string;
@@ -1077,7 +1077,7 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
     const formData = new FormData();
     formData.append('intent', 'addClient');
     formData.append('fullName', clientData.fullName);
-    formData.append('phone', clientData.phone);
+    if (clientData.phone) formData.append('phone', clientData.phone); // phone이 optional이므로 조건부 추가
     if (clientData.email) formData.append('email', clientData.email);
     if (clientData.telecomProvider)
       formData.append('telecomProvider', clientData.telecomProvider);

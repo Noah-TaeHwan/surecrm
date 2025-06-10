@@ -7,10 +7,11 @@ export const clientFormSchema = z.object({
   fullName: z.string().min(2, '이름은 2자 이상이어야 합니다'), // schema와 일치
   phone: z
     .string()
-    .regex(
-      /^010-\d{4}-\d{4}$/,
-      '올바른 전화번호 형식이 아닙니다 (010-0000-0000)'
-    ),
+    .optional()
+    .refine((val) => {
+      if (!val || val.trim() === '') return true; // 빈 값 허용
+      return /^010-\d{4}-\d{4}$/.test(val); // 값이 있으면 형식 검증
+    }, '올바른 전화번호 형식이 아닙니다 (010-0000-0000)'),
   email: z
     .string()
     .email('올바른 이메일 형식이 아닙니다')
@@ -43,7 +44,11 @@ export const clientBasicInfoSchema = z.object({
   fullName: z.string().min(2, '이름은 2자 이상이어야 합니다'),
   phone: z
     .string()
-    .regex(/^010-\d{4}-\d{4}$/, '올바른 전화번호 형식이 아닙니다'),
+    .optional()
+    .refine((val) => {
+      if (!val || val.trim() === '') return true; // 빈 값 허용
+      return /^010-\d{4}-\d{4}$/.test(val); // 값이 있으면 형식 검증
+    }, '올바른 전화번호 형식이 아닙니다'),
   email: z
     .string()
     .email('올바른 이메일 형식이 아닙니다')

@@ -565,18 +565,71 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
     };
   }, [networkData, filterSettings, searchQuery]);
 
-  // 네트워크 데이터 통계 상태 - useMemo로 최적화
-  const networkStats = useMemo(
-    () => ({
-      totalNodes: networkData.nodes.length,
+  // 🎯 개선된 네트워크 데이터 통계 상태 - useMemo로 최적화
+  const networkStats = useMemo(() => {
+    const nodes = networkData.nodes;
+    const links = networkData.links;
+
+    // 에이전트 노드 제외한 실제 고객 노드들
+    const clientNodes = nodes.filter(
+      (n) => n.type !== 'agent' && n.group !== 'influencer'
+    );
+
+    // 최대 레벨 계산 (소개 체인 깊이)
+    const maxLevel = clientNodes.reduce(
+      (max, node) => Math.max(max, (node as any).level || 1),
+      1
+    );
+
+    // 평균 소개 수 계산 (각 노드가 소개한 평균 고객 수)
+    const totalReferrals = links.length;
+    const avgReferralsPerNode =
+      clientNodes.length > 0
+        ? totalReferrals / Math.max(clientNodes.length, 1)
+        : 0;
+
+    // 탑 소개자 분석 (각 노드가 소개한 고객 수 기준)
+    const referralCounts = new Map();
+
+    // 각 노드의 소개 횟수 계산
+    links.forEach((link) => {
+      const sourceId =
+        typeof link.source === 'string' ? link.source : (link.source as any).id;
+      const sourceName =
+        nodes.find((n) => n.id === sourceId)?.name || '알 수 없음';
+
+      // 에이전트가 아닌 경우만 카운트
+      if (nodes.find((n) => n.id === sourceId)?.type !== 'agent') {
+        referralCounts.set(sourceId, {
+          id: sourceId,
+          name: sourceName,
+          referralCount: (referralCounts.get(sourceId)?.referralCount || 0) + 1,
+        });
+      }
+    });
+
+    // 소개 횟수 기준으로 정렬하여 TOP 소개자 선별
+    const topReferrers = Array.from(referralCounts.values())
+      .sort((a, b) => b.referralCount - a.referralCount)
+      .slice(0, 5); // TOP 5까지
+
+    return {
+      totalNodes: nodes.length,
       filteredNodes: filteredData.nodes.length,
       influencerCount: filteredData.nodes.filter(
-        (n) => n.group === 'influencer'
+        (n) => n.group === 'influencer' || n.type === 'agent'
       ).length,
       connectionCount: filteredData.links.length,
-    }),
-    [networkData.nodes.length, filteredData.nodes, filteredData.links.length]
-  );
+      maxDepth: maxLevel,
+      avgReferralsPerNode,
+      topReferrers,
+    };
+  }, [
+    networkData.nodes,
+    networkData.links,
+    filteredData.nodes,
+    filteredData.links,
+  ]);
 
   // 필터 변경 시 통계 업데이트
   const handleFilterChange = useCallback((newFilters: NetworkFilters) => {

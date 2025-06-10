@@ -48,6 +48,7 @@ interface ClientSidebarProps {
   clientTags: any[];
   handleOpenTagModal: () => void;
   removeClientTag: (tagId: string) => void;
+  availableReferrers?: Array<{ id: string; name: string }>; // 🆕 소개자 후보 목록
 }
 
 export function ClientSidebar({
@@ -60,6 +61,7 @@ export function ClientSidebar({
   clientTags,
   handleOpenTagModal,
   removeClientTag,
+  availableReferrers = [], // 🆕 소개자 후보 목록
 }: ClientSidebarProps) {
   const cardStyle = getClientCardStyle(client?.importance || 'medium');
 
@@ -757,7 +759,44 @@ export function ClientSidebar({
                   <div className="text-xs text-muted-foreground mb-1">
                     이 고객을 소개한 사람
                   </div>
-                  {client?.referredBy ? (
+                  {isEditing ? (
+                    <div className="space-y-2">
+                      <Select
+                        value={editFormData.referredById || 'none'}
+                        onValueChange={(value) => {
+                          const actualValue =
+                            value === 'none' ? undefined : value;
+                          setEditFormData({
+                            ...editFormData,
+                            referredById: actualValue,
+                          });
+                        }}
+                      >
+                        <SelectTrigger className="w-full text-sm">
+                          <SelectValue placeholder="소개자 선택" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">
+                            직접 개발 (소개자 없음)
+                          </SelectItem>
+                          {/* 🆕 실제 고객 목록 렌더링 */}
+                          {availableReferrers.map((referrer) => (
+                            <SelectItem key={referrer.id} value={referrer.id}>
+                              {referrer.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <div className="text-xs text-muted-foreground bg-blue-50 dark:bg-blue-900/20 p-2 rounded border border-blue-200 dark:border-blue-800">
+                        <div className="flex items-center gap-1">
+                          <span>💡</span>
+                          <span>
+                            소개자를 변경하면 소개 네트워크가 업데이트됩니다.
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ) : client?.referredBy ? (
                     <div className="flex items-center gap-2">
                       <Link
                         to={`/clients/${client.referredBy.id}`}

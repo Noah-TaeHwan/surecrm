@@ -25,6 +25,7 @@ export async function updateClientAction(
     const importance = formData.get('importance')?.toString();
     const notes = formData.get('notes')?.toString();
     const hasDrivingLicense = formData.get('hasDrivingLicense') === 'true';
+    const referredById = formData.get('referredById')?.toString(); // 🆕 소개자 ID
 
     // 🔒 주민등록번호 관련 필드들 추가
     const ssnFront = formData.get('ssnFront')?.toString();
@@ -46,6 +47,9 @@ export async function updateClientAction(
     if (notes !== undefined) updateData.notes = notes || null;
     if (hasDrivingLicense !== undefined)
       updateData.has_driving_license = hasDrivingLicense;
+    if (referredById !== undefined) {
+      updateData.referred_by_id = referredById === '' ? null : referredById; // 🆕 소개자 ID 처리
+    }
 
     updateData.updated_at = new Date().toISOString();
 

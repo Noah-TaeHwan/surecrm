@@ -1164,66 +1164,54 @@ export default function NetworkGraphClient({
     const targetId =
       typeof link.target === 'object' ? link.target.id : link.target;
 
-    // 에이전트에서 선택된 노드까지의 메인 경로 찾기 (순서 중요)
+    // 🎯 핵심 개선: 실제 소개 관계 방향성을 더 명확하게 표시
+    // 에이전트 노드 찾기
     const agentNode = safeData.nodes.find(
-      (node) => node.group === 'influencer'
+      (node) => node.group === 'influencer' || node.type === 'agent'
     );
     if (!agentNode) return 'none';
 
-    // BFS로 에이전트에서 선택된 노드까지의 순서있는 경로 찾기
-    const queue = [{ nodeId: agentNode.id, path: [agentNode.id] }];
-    const visited = new Set([agentNode.id]);
-    let mainPath: string[] = [];
-
-    while (queue.length > 0) {
-      const { nodeId: currentId, path } = queue.shift()!;
-
-      if (currentId === graphState.highlightedNodeId) {
-        mainPath = path;
-        break;
+    // 선택된 노드가 에이전트인 경우 - 모든 직접 연결은 outgoing
+    if (graphState.highlightedNodeId === agentNode.id) {
+      if (sourceId === agentNode.id) {
+        return 'outgoing'; // 에이전트 → 고객 (직접 개발)
+      } else if (targetId === agentNode.id) {
+        return 'incoming'; // 일반적으로 불가능하지만 안전장치
       }
-
-      for (const pathLink of safeData.links) {
-        const pathSourceId =
-          typeof pathLink.source === 'object'
-            ? pathLink.source.id
-            : pathLink.source;
-        const pathTargetId =
-          typeof pathLink.target === 'object'
-            ? pathLink.target.id
-            : pathLink.target;
-
-        let nextNodeId = null;
-        if (pathSourceId === currentId && !visited.has(pathTargetId)) {
-          nextNodeId = pathTargetId;
-        } else if (pathTargetId === currentId && !visited.has(pathSourceId)) {
-          nextNodeId = pathSourceId;
-        }
-
-        if (nextNodeId) {
-          visited.add(nextNodeId);
-          queue.push({ nodeId: nextNodeId, path: [...path, nextNodeId] });
-        }
-      }
+      return 'none';
     }
 
-    // 메인 경로 상의 순차적 연결인지 확인 (A→B→C 순서대로)
-    for (let i = 0; i < mainPath.length - 1; i++) {
-      const pathNode1 = mainPath[i];
-      const pathNode2 = mainPath[i + 1];
-
-      if (sourceId === pathNode1 && targetId === pathNode2) {
-        return 'incoming'; // 정방향: A → B (소개 흐름 방향)
-      } else if (sourceId === pathNode2 && targetId === pathNode1) {
-        return 'incoming'; // 역방향이지만 같은 경로상의 연결
-      }
+    // 일반 고객 노드가 선택된 경우
+    // 1. 에이전트에서 선택된 노드로 오는 연결 (직접 개발)
+    if (
+      sourceId === agentNode.id &&
+      targetId === graphState.highlightedNodeId
+    ) {
+      return 'incoming'; // 에이전트 → 선택된 고객 (소개받음 - 에이전트로부터)
     }
 
-    // 선택된 노드에서 다른 노드로 나가는 연결 (선택된 노드가 소개한 경우)
-    if (sourceId === graphState.highlightedNodeId) {
-      return 'outgoing'; // 선택된 노드 → 다른 노드 (정방향)
-    } else if (targetId === graphState.highlightedNodeId) {
-      return 'outgoing'; // 다른 노드 → 선택된 노드 (역방향이지만 outgoing으로 처리)
+    // 2. 다른 고객에서 선택된 노드로 오는 연결 (소개받음)
+    if (
+      targetId === graphState.highlightedNodeId &&
+      sourceId !== agentNode.id
+    ) {
+      return 'incoming'; // A고객 → 선택된 고객 (A고객으로부터 소개받음)
+    }
+
+    // 3. 선택된 노드에서 다른 고객으로 나가는 연결 (소개함)
+    if (
+      sourceId === graphState.highlightedNodeId &&
+      targetId !== agentNode.id
+    ) {
+      return 'outgoing'; // 선택된 고객 → B고객 (선택된 고객이 B고객을 소개함)
+    }
+
+    // 4. 선택된 노드에서 에이전트로 가는 연결 (일반적으로 불가능)
+    if (
+      sourceId === graphState.highlightedNodeId &&
+      targetId === agentNode.id
+    ) {
+      return 'outgoing'; // 역방향이지만 outgoing으로 처리
     }
 
     return 'none';
@@ -1310,110 +1298,119 @@ export default function NetworkGraphClient({
         }}
         width={dimensions.width || window.innerWidth}
         height={dimensions.height || window.innerHeight - 200}
-        // 기본 설정들
-        linkDirectionalArrowLength={6}
-        linkDirectionalArrowRelPos={0.8}
-        linkDirectionalArrowColor={(link: any) => {
-          if (graphState.highlightedNodeId) {
-            const direction = getLinkDirection(link);
-
-            if (direction === 'incoming') {
-              return '#4FC3F7'; // 소개받는 흐름 - 밝은 블루
-            } else if (direction === 'outgoing') {
-              return '#FF8A65'; // 소개하는 흐름 - 밝은 오렌지
-            } else if (isLinkInHighlightPath(link)) {
-              return '#cccccc'; // 기타 하이라이트된 링크
-            } else {
-              return 'rgba(150, 150, 150, 0.3)'; // 경로에 포함되지 않은 화살표는 투명하게
-            }
-          }
-
-          return '#666666'; // 기본 화살표 색상을 더 어둡게 (하이라이트 없을 때)
-        }}
+        // 화살표 제거
+        linkDirectionalArrowLength={0}
+        linkDirectionalArrowRelPos={0}
+        linkDirectionalParticles={0}
         // 기본 상호작용
         enableZoomInteraction={true}
         enablePanInteraction={true}
         enableNodeDrag={true}
-        // 중요도에 따른 노드 색상 설정
+        // 중요도에 따른 노드 색상 설정 (기존 방식)
         nodeColor={(node: any) => {
-          const importance = node.importance || 1;
+          // 🎯 연결 개수에 따른 시각적 차별화
+          const connectionCount = getNodeConnectionCount(node.id);
+          const isHighConnector = connectionCount >= 3; // 3개 이상 연결된 노드는 특별 표시
 
-          // 소개자(influencer)는 별도 색상
-          if (node.group === 'influencer') {
+          // 소개자(에이전트)는 별도 색상
+          if (node.group === 'influencer' || node.type === 'agent') {
             if (node.id === graphState.highlightedNodeId) {
-              return '#ff4500'; // 하이라이트된 소개자
+              return '#ff4500'; // 하이라이트된 에이전트 - 오렌지
             }
             if (isNodeConnectedToHighlight(node.id)) {
-              return '#ff7f50'; // 연결된 소개자
+              return '#ff7f50'; // 연결된 에이전트 - 연한 오렌지
             }
-            return '#ff6b35'; // 기본 소개자 (오렌지)
+            return '#ff6b35'; // 기본 에이전트 - 주황색
           }
 
-          // 일반 고객의 중요도별 색상 (고객 카드와 동일한 어두운 은은한 색상)
+          // 🎯 중요도별 색상 시스템 (기존 방식)
           let baseColor;
-          if (importance >= 5) {
-            // 키맨 (높음) - 어두운 오렌지 계열
-            baseColor = 'oklch(0.35 0.08 35)'; // 어두운 오렌지 톤
-          } else if (importance >= 3) {
-            // 일반 (보통) - 어두운 블루 계열
-            baseColor = 'oklch(0.35 0.06 240)'; // 어두운 블루 톤
+
+          // importance 값 변환 (숫자 → 문자열)
+          let importanceLevel;
+          if (typeof node.importance === 'number') {
+            // 숫자인 경우 변환: 5=high, 3=medium, 1=low
+            if (node.importance >= 5) {
+              importanceLevel = 'high';
+            } else if (node.importance >= 3) {
+              importanceLevel = 'medium';
+            } else {
+              importanceLevel = 'low';
+            }
           } else {
-            // 관심 (낮음) - 어두운 회색 계열
-            baseColor = 'oklch(0.30 0.01 285)'; // 어두운 회색 톤
+            // 이미 문자열인 경우 그대로 사용
+            importanceLevel = node.importance || 'medium';
+          }
+
+          if (importanceLevel === 'high') {
+            // 키맨 - 오렌지 계열
+            baseColor = isHighConnector
+              ? '#ff4500' // 높은 연결수: 더 강한 오렌지
+              : '#ff6b35'; // 기본 오렌지
+          } else if (importanceLevel === 'medium') {
+            // 일반 - 블루 계열 (더 선명하게)
+            baseColor = isHighConnector
+              ? '#2196F3' // 높은 연결수: 더 강한 블루
+              : '#42A5F5'; // 기본 블루 (더 선명)
+          } else {
+            // 관심 - 회색 계열 (더 밝게)
+            baseColor = isHighConnector
+              ? '#616161' // 높은 연결수: 더 강한 회색
+              : '#9E9E9E'; // 기본 회색
           }
 
           // 하이라이트 상태에 따른 색상 조정
           if (node.id === graphState.highlightedNodeId) {
-            // 하이라이트된 노드는 조금 더 밝게
-            if (importance >= 5) {
-              return 'oklch(0.50 0.12 35)'; // 밝은 오렌지
-            } else if (importance >= 3) {
-              return 'oklch(0.50 0.10 240)'; // 밝은 블루
+            // 하이라이트된 노드는 더 선명하게
+            if (importanceLevel === 'high') {
+              return '#ff4500'; // 밝은 오렌지
+            } else if (importanceLevel === 'medium') {
+              return '#2196F3'; // 밝은 블루
             } else {
-              return 'oklch(0.45 0.02 285)'; // 밝은 회색
+              return '#616161'; // 밝은 회색
             }
           }
 
           if (isNodeConnectedToHighlight(node.id)) {
             // 연결된 노드는 중간 강도
-            if (importance >= 5) {
-              return 'oklch(0.42 0.10 35)'; // 중간 오렌지
-            } else if (importance >= 3) {
-              return 'oklch(0.42 0.08 240)'; // 중간 블루
+            if (importanceLevel === 'high') {
+              return '#ff7f50'; // 중간 오렌지
+            } else if (importanceLevel === 'medium') {
+              return '#64B5F6'; // 중간 블루
             } else {
-              return 'oklch(0.38 0.015 285)'; // 중간 회색
+              return '#9E9E9E'; // 중간 회색
             }
           }
 
           // 하이라이트된 노드가 있지만 연결되지 않은 노드들은 살짝만 어둡게 처리
           if (graphState.highlightedNodeId) {
-            if (importance >= 5) {
-              return 'oklch(0.28 0.06 35 / 0.8)'; // 살짝 어두운 오렌지 + 약한 투명도
-            } else if (importance >= 3) {
-              return 'oklch(0.28 0.05 240 / 0.8)'; // 살짝 어두운 블루 + 약한 투명도
+            if (importanceLevel === 'high') {
+              return 'rgba(255, 107, 53, 0.6)'; // 살짝 어두운 오렌지 + 투명도
+            } else if (importanceLevel === 'medium') {
+              return 'rgba(74, 144, 226, 0.6)'; // 살짝 어두운 블루 + 투명도
             } else {
-              return 'oklch(0.25 0.01 285 / 0.8)'; // 살짝 어두운 회색 + 약한 투명도
+              return 'rgba(158, 158, 158, 0.6)'; // 살짝 어두운 회색 + 투명도
             }
           }
 
-          return baseColor; // 기본 은은한 색상
+          return baseColor; // 기본 색상
         }}
         linkColor={(link: any) => {
           if (graphState.highlightedNodeId) {
             const direction = getLinkDirection(link);
 
             if (direction === 'incoming') {
-              return '#29B6F6'; // 소개받는 흐름 - 블루 계열
+              return '#2196F3'; // 소개받는 흐름 - 블루
             } else if (direction === 'outgoing') {
-              return '#FF7043'; // 소개하는 흐름 - 오렌지 계열
+              return '#FF5722'; // 소개하는 흐름 - 오렌지레드
             } else if (isLinkInHighlightPath(link)) {
-              return '#cccccc'; // 기타 하이라이트된 링크
+              return '#9E9E9E'; // 기타 하이라이트된 링크 - 회색
             } else {
-              return 'rgba(150, 150, 150, 0.3)'; // 경로에 포함되지 않은 링크는 투명하게
+              return 'rgba(150, 150, 150, 0.2)'; // 경로에 포함되지 않은 링크는 더 투명하게
             }
           }
 
-          return '#666666'; // 기본 링크를 더 어둡게 (하이라이트 없을 때)
+          return '#757575'; // 기본 링크 (하이라이트 없을 때)
         }}
         linkWidth={(link: any) => {
           if (graphState.highlightedNodeId) {
@@ -1426,7 +1423,7 @@ export default function NetworkGraphClient({
             }
           }
 
-          return 1; // 기본 링크 굵기
+          return 2; // 기본 링크 굵기 (1 → 2로 증가)
         }}
         // 커스텀 링크 렌더링으로 그라디언트 플로우 애니메이션 효과
         linkCanvasObjectMode={() => 'after'}
@@ -1497,6 +1494,45 @@ export default function NetworkGraphClient({
         }}
         // 노드 클릭 이벤트
         onNodeClick={(node: any) => {
+          console.log('🎯 노드 클릭:', {
+            name: node.name,
+            id: node.id,
+            type: node.type,
+            group: node.group,
+            importance: node.importance,
+          });
+
+          // 선택된 노드와 연결된 관계 분석
+          const connectedLinks = safeData.links.filter((link: any) => {
+            const sourceId =
+              typeof link.source === 'object' ? link.source.id : link.source;
+            const targetId =
+              typeof link.target === 'object' ? link.target.id : link.target;
+            return sourceId === node.id || targetId === node.id;
+          });
+
+          console.log(
+            '🔗 연결된 관계:',
+            connectedLinks.map((link) => {
+              const sourceId =
+                typeof link.source === 'object' ? link.source.id : link.source;
+              const targetId =
+                typeof link.target === 'object' ? link.target.id : link.target;
+              const sourceName =
+                safeData.nodes.find((n) => n.id === sourceId)?.name ||
+                '알 수 없음';
+              const targetName =
+                safeData.nodes.find((n) => n.id === targetId)?.name ||
+                '알 수 없음';
+
+              if (sourceId === node.id) {
+                return `${sourceName} → ${targetName} (${node.name}이(가) ${targetName}을(를) 소개)`;
+              } else {
+                return `${sourceName} → ${targetName} (${sourceName}이(가) ${node.name}을(를) 소개)`;
+              }
+            })
+          );
+
           setGraphState((prev) => ({
             ...prev,
             highlightedNodeId: node.id,

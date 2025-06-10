@@ -139,12 +139,14 @@ export function AddClientModal({
   // 폼 완성도 계산
   const getFormProgress = () => {
     let completed = 0;
-    let total = 4; // 필수 항목들
+    let total = 3; // 필수 항목들 (이름, 단계, 중요도)
 
     if (name.trim()) completed++;
-    if (phone.trim()) completed++;
     if (stageId) completed++;
     if (importance) completed++;
+
+    // 전화번호는 선택사항이지만 입력 시 완성도에 기여
+    if (phone.trim()) completed += 0.5;
 
     // 선택 항목들 (가중치 낮음)
     if (email) total++;
@@ -166,9 +168,11 @@ export function AddClientModal({
       newErrors.name = '고객명을 입력해주세요';
     }
 
-    if (!phone.trim()) {
-      newErrors.phone = '전화번호를 입력해주세요';
-    } else if (!/^01[0-9]-?[0-9]{4}-?[0-9]{4}$/.test(phone.replace(/-/g, ''))) {
+    // 전화번호는 선택사항으로 변경 - 값이 있을 때만 형식 검증
+    if (
+      phone.trim() &&
+      !/^01[0-9]-?[0-9]{4}-?[0-9]{4}$/.test(phone.replace(/-/g, ''))
+    ) {
       newErrors.phone = '올바른 전화번호 형식이 아닙니다';
     }
 
@@ -294,7 +298,7 @@ export function AddClientModal({
   const getTabStatus = (tabValue: string) => {
     switch (tabValue) {
       case 'basic':
-        return name && phone && !errors.name && !errors.phone && !errors.email;
+        return name && !errors.name && !errors.phone && !errors.email; // 전화번호 필수 조건 제거
       case 'personal':
         return true; // 개인 정보는 모두 선택사항
       case 'insurance':
@@ -418,12 +422,8 @@ export function AddClientModal({
                     )}
                   </div>
                   <div className="space-y-2">
-                    <Label
-                      htmlFor="phone"
-                      className="flex items-center space-x-1 text-sm font-medium"
-                    >
-                      <span>전화번호</span>
-                      <span className="text-destructive">*</span>
+                    <Label htmlFor="phone" className="text-sm font-medium">
+                      전화번호 (선택사항)
                     </Label>
                     <Input
                       id="phone"

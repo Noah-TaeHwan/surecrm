@@ -58,6 +58,13 @@ interface NetworkSidebarProps {
     filteredNodes?: number;
     influencerCount?: number;
     connectionCount?: number;
+    maxDepth?: number;
+    avgReferralsPerNode?: number;
+    topReferrers?: Array<{
+      id: string;
+      name: string;
+      referralCount: number;
+    }>;
   };
 }
 
@@ -279,7 +286,7 @@ export default function NetworkSidebar({
       {/* 스크롤 가능한 필터 콘텐츠 영역 */}
       <div className="flex-1 overflow-y-auto">
         <div className="space-y-3 py-2 pb-6">
-          {/* 네트워크 현황 */}
+          {/* 🎯 개선된 네트워크 현황 */}
           <div className="rounded-lg border">
             <div className="p-3 border-b">
               <div className="flex items-center gap-2 mb-1">
@@ -287,11 +294,12 @@ export default function NetworkSidebar({
                 <h3 className="text-sm font-medium">네트워크 현황</h3>
               </div>
               <p className="text-sm text-muted-foreground">
-                네트워크에 포함된 총 고객 수입니다
+                소개 네트워크 분석 결과입니다
               </p>
             </div>
 
-            <div className="grid grid-cols-2 divide-x">
+            {/* 기본 통계 */}
+            <div className="grid grid-cols-2 divide-x border-b">
               <div className="p-3 flex flex-col items-center">
                 <span className="text-2xl font-semibold text-primary">
                   {Math.max(0, (stats.filteredNodes || 0) - 1)}
@@ -307,6 +315,79 @@ export default function NetworkSidebar({
                 <span className="text-sm text-muted-foreground">전체 고객</span>
               </div>
             </div>
+
+            {/* 🎯 소개 체인 분석 */}
+            <div className="p-3 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">
+                  소개 체인 깊이
+                </span>
+                <span className="text-sm font-medium">
+                  최대 {stats.maxDepth || 1}단계
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">
+                  평균 소개 수
+                </span>
+                <span className="text-sm font-medium">
+                  {(stats.avgReferralsPerNode || 0).toFixed(1)}명
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">
+                  총 연결 수
+                </span>
+                <span className="text-sm font-medium">
+                  {stats.connectionCount || 0}개
+                </span>
+              </div>
+            </div>
+
+            {/* 🎯 탑 소개자 순위 */}
+            {stats.topReferrers && stats.topReferrers.length > 0 && (
+              <div className="border-t">
+                <div className="p-3 border-b">
+                  <h4 className="text-sm font-medium flex items-center gap-2">
+                    <BarChart4 size={14} className="text-amber-500" />
+                    활발한 소개자 TOP 3
+                  </h4>
+                </div>
+                <div className="p-3 space-y-2">
+                  {stats.topReferrers.slice(0, 3).map((referrer, index) => (
+                    <div
+                      key={referrer.id}
+                      className="flex items-center justify-between text-sm"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`
+                          flex items-center justify-center w-5 h-5 rounded-full text-xs font-medium
+                          ${
+                            index === 0
+                              ? 'bg-amber-100 text-amber-700'
+                              : index === 1
+                              ? 'bg-gray-100 text-gray-700'
+                              : 'bg-orange-100 text-orange-700'
+                          }
+                        `}
+                        >
+                          {index + 1}
+                        </span>
+                        <span className="font-medium truncate max-w-32">
+                          {referrer.name}
+                        </span>
+                      </div>
+                      <Badge variant="outline" className="text-xs">
+                        {referrer.referralCount}명
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* 아코디언 필터 */}
