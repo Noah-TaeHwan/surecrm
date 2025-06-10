@@ -3,8 +3,8 @@ import { vercelPreset } from '@vercel/react-router/vite';
 
 export default {
   // Config options...
-  // Server-side render by default, to enable SPA mode set this to `false`
-  ssr: true,
+  // SPA 모드로 변경 (Vercel 배포 안정성을 위해)
+  ssr: false,
   presets: [vercelPreset],
   // 🔄 파일 기반 라우팅 활성화
   // routes.ts 파일 없이 app/routes/ 폴더의 파일들로 라우팅
