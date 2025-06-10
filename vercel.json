@@ -1,13 +1,5 @@
 {
-  "buildCommand": "npm ci && npm run build",
-  "outputDirectory": "build/client",
-  "framework": "vite",
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
-  ],
+  "framework": "react-router",
   "headers": [
     {
       "source": "/(.*)",
