@@ -2,12 +2,13 @@
   "buildCommand": "npm ci && npm run build",
   "outputDirectory": "build/client",
   "framework": "vite",
-  "env": {
-    "VITE_GA_MEASUREMENT_ID": "G-SZW1G856L5",
-    "VITE_GTM_CONTAINER_ID": "GTM-WTCFV4DC",
-    "VITE_SUPABASE_URL": "https://mzmlolwducobuknsigvz.supabase.co",
-    "VITE_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im16bWxvbHdkdWNvYnVrbnNpZ3Z6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxOTcxMzIsImV4cCI6MjA2Mzc3MzEzMn0.hODGYkSnJUaYGQazm1wPg4AU0oIadnSbJeiNPM-Pkkk"
-  },
+
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",

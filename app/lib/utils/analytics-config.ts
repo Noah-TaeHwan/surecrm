@@ -5,11 +5,9 @@
  * 구글 애널리틱스/GTM 데이터 오염을 방지합니다.
  */
 
-// 환경 변수 가져오기 (폴백 포함)
-const GA_MEASUREMENT_ID =
-  import.meta.env.VITE_GA_MEASUREMENT_ID || 'G-SZW1G856L5';
-const GTM_CONTAINER_ID =
-  import.meta.env.VITE_GTM_CONTAINER_ID || 'GTM-WTCFV4DC';
+// 환경 변수 가져오기 (프로덕션에서만 설정)
+const GA_MEASUREMENT_ID = import.meta.env.VITE_GA_MEASUREMENT_ID;
+const GTM_CONTAINER_ID = import.meta.env.VITE_GTM_CONTAINER_ID;
 
 /**
  * 개발 환경 감지

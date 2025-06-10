@@ -89,7 +89,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;
                     f.parentNode.insertBefore(j,f);
                   })(window,document,'script','dataLayer','${
-                    import.meta.env.VITE_GTM_CONTAINER_ID || 'GTM-WTCFV4DC'
+                    import.meta.env.VITE_GTM_CONTAINER_ID
                   }');
                   
                   // 로딩 완료 플래그만 설정 (프로덕션에서는 로그 없음)
@@ -155,7 +155,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     const script = document.createElement('script');
                     script.async = true;
                     script.src = 'https://www.googletagmanager.com/gtag/js?id=${
-                      import.meta.env.VITE_GA_MEASUREMENT_ID || 'G-SZW1G856L5'
+                      import.meta.env.VITE_GA_MEASUREMENT_ID
                     }';
                     document.head.appendChild(script);
                     
@@ -165,7 +165,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     window.gtag = gtag;
                     gtag('js', new Date());
                     gtag('config', '${
-                      import.meta.env.VITE_GA_MEASUREMENT_ID || 'G-SZW1G856L5'
+                      import.meta.env.VITE_GA_MEASUREMENT_ID
                     }', {
                       send_page_view: true,
                       custom_map: {
