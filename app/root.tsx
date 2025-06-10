@@ -110,6 +110,33 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 __html: `
                   // 🔒 분석 수집 환경 확인
                   (function() {
+                    // 사용자 역할 확인 함수
+                    function getCurrentUserRole() {
+                      try {
+                        const role = localStorage.getItem('surecrm_user_role');
+                        if (role && role.trim() !== '') return role;
+                        
+                        const userSession = localStorage.getItem('supabase.auth.token');
+                        if (userSession) {
+                          const sessionData = JSON.parse(userSession);
+                          return sessionData?.user?.user_metadata?.role || null;
+                        }
+                        return null;
+                      } catch (error) {
+                        return null;
+                      }
+                    }
+
+                    // system_admin 사용자 체크 (절대 우선순위)
+                    const userRole = getCurrentUserRole();
+                    if (userRole === 'system_admin') {
+                      if (!window.__ga_admin_blocked) {
+                        console.log('👑 시스템 관리자: GA 로딩 차단');
+                        window.__ga_admin_blocked = true;
+                      }
+                      return; // GA 로딩하지 않음
+                    }
+
                     // 🔧 개발 환경 감지 (analytics-config.ts와 동일한 로직)
                     const isLocalhost = window.location.hostname === 'localhost' ||
                                        window.location.hostname === '127.0.0.1' ||
@@ -126,12 +153,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     const isDev = !isVercelProduction && isLocalhost && isDevPort;
                     
                     if (isDev) {
-                      // 한 번만 로그 출력
+                      // 개발환경에서 일반 사용자만 GA 로드
                       if (!window.__ga_dev_logged) {
-                        console.log('🔧 개발환경: GA 로딩 건너뛰기');
+                        console.log('🔧 개발환경: 일반 사용자 GA 테스트 모드');
                         window.__ga_dev_logged = true;
                       }
-                      return;
                     }
                     
                     // GA 스크립트 동적 로드
@@ -158,7 +184,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                       }
                     });
                     
-                    // 로딩 완료 플래그만 설정 (프로덕션에서는 로그 없음)
+                    // 로딩 완료 플래그만 설정
                     if (!window.__ga_success_logged) {
                       window.__ga_success_logged = true;
                     }
@@ -181,8 +207,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     // 개발 환경 조건: localhost + dev port (Vercel은 제외)
                     const isDevelopment = !isVercelProduction && isLocalhost && isDevPort;
 
-                    if (!isDevelopment) {
-                      // 🚀 Production에서만 데이터 수집 활성화
+                    if (!isDevelopment || true) {
+                      // 🚀 개발환경에서도 테스트용으로 데이터 수집 활성화
                       setTimeout(() => {
                         Promise.all([
                           import('/app/lib/utils/behavioral-surplus-extractor.js'),

@@ -103,11 +103,17 @@ export default function DebugAnalyticsPage() {
 
     // 3. system_admin 테스트
     const isAdmin = isSystemAdminUser(userRole);
-    results.push(`✅ 시스템 관리자: ${isAdmin ? '예' : '아니오'}`);
+    results.push(
+      `✅ 시스템 관리자: ${isAdmin ? '예 (GA 차단됨)' : '아니오 (GA 허용)'}`
+    );
 
     // 4. 분석 수집 허용 테스트
     const shouldCollect = shouldCollectAnalytics();
-    results.push(`✅ 분석 수집 허용: ${shouldCollect ? '예' : '아니오'}`);
+    results.push(
+      `${shouldCollect ? '✅' : '❌'} 분석 수집 허용: ${
+        shouldCollect ? '예' : '아니오'
+      }`
+    );
 
     // 5. 이벤트 추적 테스트
     try {
@@ -116,8 +122,13 @@ export default function DebugAnalyticsPage() {
         category: 'debugging',
         label: 'analytics_test',
         value: 1,
+        custom_parameters: {
+          test_environment: isDevTest ? 'development' : 'production',
+          user_role: userRole,
+          timestamp: Date.now(),
+        },
       });
-      results.push('✅ 이벤트 추적 테스트: 성공');
+      results.push('✅ 이벤트 추적 테스트: 성공 (콘솔에서 GA 요청 확인 가능)');
     } catch (error) {
       results.push(`❌ 이벤트 추적 테스트: 실패 - ${error}`);
     }
@@ -130,11 +141,28 @@ export default function DebugAnalyticsPage() {
           timestamp: Date.now(),
           page: 'debug-analytics',
           user_role: userRole,
+          environment: isDevTest ? 'development' : 'production',
+          analytics_allowed: shouldCollect,
         },
       });
       results.push('✅ GTM DataLayer 푸시: 성공');
     } else {
       results.push('❌ GTM DataLayer: 없음');
+    }
+
+    // 7. 실제 GA 네트워크 요청 테스트
+    if (typeof window !== 'undefined' && window.gtag) {
+      window.gtag('event', 'debug_network_test', {
+        event_category: 'debug_testing',
+        value: 1,
+        debug: true,
+        send_to: analyticsConfig.GA_MEASUREMENT_ID,
+      });
+      results.push(
+        '✅ GA 네트워크 테스트: 전송됨 (브라우저 개발자도구 > 네트워크에서 google-analytics.com 요청 확인)'
+      );
+    } else {
+      results.push('❌ GA 네트워크 테스트: gtag 함수 없음');
     }
 
     setTestResults(results);
@@ -359,24 +387,45 @@ export default function DebugAnalyticsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="bg-black text-green-400 p-4 rounded-lg font-mono text-sm">
+          <div className="bg-black text-green-400 p-4 rounded-lg font-mono text-sm overflow-x-auto">
             <div>// 브라우저 개발자 도구 → 콘솔에서 확인:</div>
             <div>// 1. localStorage.getItem('surecrm_user_role')</div>
             <div>// 2. window.dataLayer</div>
             <div>// 3. window.gtag</div>
             <div>// 4. window.google_tag_manager</div>
             <br />
-            <div>// 분석 수집 허용: {status.shouldCollect ? '✅' : '❌'}</div>
+            <div>// 🎯 현재 상태 요약:</div>
+            <div>// 환경: {status.isDevelopment ? '개발환경' : '프로덕션'}</div>
+            <div>// 역할: {status.userRole || '일반사용자/로그인안함'}</div>
+            <div>
+              // 관리자:{' '}
+              {status.isSystemAdmin ? '예 (GA 차단됨)' : '아니오 (GA 허용)'}
+            </div>
+            <div>
+              // 분석 수집: {status.shouldCollect ? '✅ 허용' : '❌ 차단'}
+            </div>
+            <div>
+              // GA 로딩: {status.gaLoaded ? '✅ 로딩됨' : '❌ 로딩 안됨'}
+            </div>
             {!status.shouldCollect && (
               <div>
                 // 차단 이유:{' '}
-                {status.isDevelopment
-                  ? '개발환경'
-                  : status.isSystemAdmin
-                  ? '시스템관리자'
+                {status.isSystemAdmin
+                  ? '시스템 관리자'
+                  : !status.gaId && !status.gtmId
+                  ? '분석 ID 미설정'
                   : '기타'}
               </div>
             )}
+            <br />
+            <div>// 🔍 실시간 네트워크 확인:</div>
+            <div>{'// 개발자도구 > 네트워크 > "google-analytics" 검색'}</div>
+            <div>// GA4 요청이 보이면 정상 작동 중</div>
+            <br />
+            <div>// 🚀 Vercel 배포 확인:</div>
+            <div>// URL: https://surecrm-sigma.vercel.app</div>
+            <div>// GA ID: {status.gaId}</div>
+            <div>// GTM ID: {status.gtmId}</div>
           </div>
         </CardContent>
       </Card>

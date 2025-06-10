@@ -69,20 +69,37 @@ export function getCurrentUserRole(): string | null {
   if (typeof window === 'undefined') return null;
 
   try {
-    // useUserRoleTracker에서 저장한 역할 정보 확인
+    // 1차: useUserRoleTracker에서 저장한 역할 정보 확인
     const role = localStorage.getItem('surecrm_user_role');
-    if (role) return role;
+    if (role && role.trim() !== '') {
+      console.debug(`🔍 사용자 역할 확인: ${role}`);
+      return role;
+    }
 
-    // 백업: 세션에서 사용자 정보 확인
-    const userSession = localStorage.getItem('supabase.auth.token');
-    if (!userSession) return null;
+    // 2차: Supabase 세션에서 사용자 정보 확인
+    try {
+      const userSession = localStorage.getItem('supabase.auth.token');
+      if (userSession) {
+        const sessionData = JSON.parse(userSession);
+        const userMetadata = sessionData?.user?.user_metadata;
+        const sessionRole = userMetadata?.role;
 
-    const sessionData = JSON.parse(userSession);
-    const userMetadata = sessionData?.user?.user_metadata;
+        if (sessionRole) {
+          console.debug(`🔍 세션에서 역할 확인: ${sessionRole}`);
+          // 로컬 스토리지에도 저장
+          localStorage.setItem('surecrm_user_role', sessionRole);
+          return sessionRole;
+        }
+      }
+    } catch (sessionError) {
+      console.debug('세션 역할 확인 실패:', sessionError);
+    }
 
-    return userMetadata?.role || null;
+    // 3차: 모든 방법 실패 시 null 반환
+    console.debug('🔍 사용자 역할 없음 - 일반 사용자로 간주');
+    return null;
   } catch (error) {
-    console.debug('사용자 역할 확인 실패:', error);
+    console.debug('사용자 역할 확인 중 오류:', error);
     return null;
   }
 }
@@ -91,25 +108,28 @@ export function getCurrentUserRole(): string | null {
  * 분석 데이터 수집 허용 여부 확인
  */
 export function shouldCollectAnalytics(): boolean {
-  // 1. 개발 환경 체크
-  if (isDevelopmentEnvironment()) {
-    console.log('🔧 개발환경: 분석 데이터 수집 비활성화');
-    return false;
-  }
-
-  // 2. system_admin 사용자 체크
-  const userRole = getCurrentUserRole();
-  if (isSystemAdminUser(userRole)) {
-    console.log('👑 시스템 관리자: 분석 데이터 수집 비활성화');
-    return false;
-  }
-
-  // 3. 필수 설정 확인
+  // 1. 필수 설정 확인 먼저
   if (!GA_MEASUREMENT_ID && !GTM_CONTAINER_ID) {
     console.log('⚠️ 분석 ID 미설정: 분석 데이터 수집 비활성화');
     return false;
   }
 
+  // 2. system_admin 사용자 체크 (절대 우선순위)
+  const userRole = getCurrentUserRole();
+  if (isSystemAdminUser(userRole)) {
+    console.log('👑 시스템 관리자: 분석 데이터 수집 비활성화 (환경 무관)');
+    return false;
+  }
+
+  // 3. 환경별 정책
+  if (isDevelopmentEnvironment()) {
+    // 개발환경에서는 일반 사용자만 테스트용 추적
+    console.log('🔧 개발환경: 일반 사용자 테스트 모드 활성화');
+    return true;
+  }
+
+  // 4. 프로덕션 환경에서는 일반 사용자 추적 허용
+  console.log('🚀 프로덕션: 일반 사용자 분석 데이터 수집 활성화');
   return true;
 }
 
@@ -135,13 +155,13 @@ const LOG_LEVELS = {
 
 // 현재 로그 레벨 (환경에 따라 자동 설정)
 const getCurrentLogLevel = (): number => {
-  // 개발 환경에서는 디버그 레벨
+  // 개발 환경에서는 중요한 정보만 (INFO 레벨)
   if (isDevelopmentEnvironment()) {
-    return LOG_LEVELS.DEBUG;
+    return LOG_LEVELS.INFO;
   }
 
-  // 프로덕션에서는 로그 완전 차단 (보안 및 성능)
-  return LOG_LEVELS.NONE;
+  // 프로덕션에서는 에러만 출력
+  return LOG_LEVELS.ERROR;
 };
 
 // 로그 출력 빈도 제한을 위한 캐시
