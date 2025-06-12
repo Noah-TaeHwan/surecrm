@@ -11,7 +11,7 @@ import { Avatar, AvatarFallback } from '~/common/components/ui/avatar';
 import { Badge } from '~/common/components/ui/badge';
 import { Label } from '~/common/components/ui/label';
 import { CheckIcon, Pencil1Icon, PersonIcon } from '@radix-ui/react-icons';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Form, useSubmit } from 'react-router';
 import type { ProfileSectionProps } from '../types';
 
@@ -19,19 +19,11 @@ export function ProfileSection({ profile, onUpdate }: ProfileSectionProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // 🕐 클라이언트 사이드 시간 표시 (Hydration 오류 방지)
-  const [lastLoginDisplay, setLastLoginDisplay] = useState<string>('미설정');
-  const [isMounted, setIsMounted] = useState(false);
-
-  // 클라이언트에서만 마지막 로그인 시간 포맷팅
-  useEffect(() => {
-    setIsMounted(true);
-    if (profile.lastLoginAt) {
-      setLastLoginDisplay(
-        new Date(profile.lastLoginAt).toLocaleString('ko-KR')
-      );
-    }
-  }, [profile.lastLoginAt]);
+  // 🕐 시간 포맷팅 함수 (suppressHydrationWarning 사용)
+  const formatLastLogin = (dateString?: string) => {
+    if (!dateString) return '미설정';
+    return new Date(dateString).toLocaleString('ko-KR');
+  };
   const submit = useSubmit();
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -136,7 +128,10 @@ export function ProfileSection({ profile, onUpdate }: ProfileSectionProps) {
             )}
             {profile.lastLoginAt && (
               <p className="text-sm text-muted-foreground">
-                🕐 마지막 로그인: {isMounted ? lastLoginDisplay : '미설정'}
+                🕐 마지막 로그인:{' '}
+                <span suppressHydrationWarning>
+                  {formatLastLogin(profile.lastLoginAt)}
+                </span>
               </p>
             )}
           </div>
