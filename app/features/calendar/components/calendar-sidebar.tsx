@@ -28,19 +28,11 @@ import {
   ReloadIcon,
 } from '@radix-ui/react-icons';
 import { cn } from '~/lib/utils';
-import { meetingTypeColors, type Meeting } from '../types/types';
-
-// 🌍 한국어 미팅 타입 매핑 (MVP 한국어 UI)
-const meetingTypeKoreanMap = {
-  consultation: '상담',
-  follow_up: '후속 상담',
-  presentation: '설명회',
-  contract_signing: '계약 체결',
-  claim_support: '보험금 청구',
-  renewal: '갱신 상담',
-  other: '기타',
-  google: '구글 일정',
-} as const;
+import {
+  meetingTypeColors,
+  meetingTypeKoreanMap,
+  type Meeting,
+} from '../types/types';
 
 interface CalendarSidebarProps {
   meetings: Meeting[];

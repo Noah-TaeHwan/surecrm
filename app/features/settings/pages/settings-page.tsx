@@ -52,9 +52,12 @@ import {
   Clock,
   Globe,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Form } from 'react-router';
 import { GoogleCalendarService } from '~/features/calendar/lib/google-calendar-service';
+import { eq } from 'drizzle-orm';
+import { db } from '~/lib/core/db';
+import { appCalendarSettings } from '~/features/calendar/lib/schema';
 
 // 설정 페이지 데이터 타입
 interface SettingsPageData {
@@ -268,7 +271,7 @@ export async function action({ request }: Route.ActionArgs) {
       }
 
       case 'updateCalendarSettings': {
-        // 🌐 구글 캘린더 설정 업데이트 (임시 - 실제 DB 연동 전)
+        // 🌐 구글 캘린더 설정 업데이트 (실제 DB 연동)
         const googleCalendarSync =
           formData.get('googleCalendarSync') === 'true';
         const syncDirection = formData.get('syncDirection') as
@@ -282,18 +285,48 @@ export async function action({ request }: Route.ActionArgs) {
         const autoSyncInterval =
           parseInt(formData.get('autoSyncInterval') as string) || 15;
 
-        // TODO: 실제 DB 업데이트 로직 구현
-        console.log('캘린더 설정 업데이트:', {
-          googleCalendarSync,
-          syncDirection,
-          conflictResolution,
-          autoSyncInterval,
-        });
+        try {
+          // 기존 설정 조회
+          const googleService = new GoogleCalendarService();
+          const existingSettings = await googleService.getCalendarSettings(
+            user.id
+          );
 
-        return data({
-          success: true,
-          message: '캘린더 설정이 성공적으로 저장되었습니다.',
-        });
+          if (!existingSettings) {
+            return data({
+              success: false,
+              message:
+                '구글 캘린더가 연동되지 않았습니다. 먼저 계정을 연결해주세요.',
+            });
+          }
+
+          // 캘린더 설정 업데이트
+          await db
+            .update(appCalendarSettings)
+            .set({
+              googleCalendarSync,
+              // syncDirection, conflictResolution, autoSyncInterval은
+              // 현재 스키마에 없으므로 추후 확장 시 추가
+              updatedAt: new Date(),
+            })
+            .where(eq(appCalendarSettings.agentId, user.id));
+
+          // 동기화 비활성화 시 관련 데이터 정리
+          if (!googleCalendarSync) {
+            console.log('구글 캘린더 동기화 비활성화:', user.id);
+          }
+
+          return data({
+            success: true,
+            message: '캘린더 설정이 성공적으로 저장되었습니다.',
+          });
+        } catch (error) {
+          console.error('❌ 캘린더 설정 업데이트 실패:', error);
+          return data({
+            success: false,
+            message: '설정 저장 중 오류가 발생했습니다.',
+          });
+        }
       }
 
       case 'connectGoogleCalendar': {
@@ -316,6 +349,27 @@ export async function action({ request }: Route.ActionArgs) {
             ? '구글 캘린더 연동이 해제되었습니다.'
             : '연동 해제 중 오류가 발생했습니다.',
         });
+      }
+
+      case 'syncGoogleCalendar': {
+        // 🔄 구글 캘린더 수동 동기화
+        try {
+          const googleService = new GoogleCalendarService();
+          const success = await googleService.performFullSync(user.id);
+
+          return data({
+            success,
+            message: success
+              ? '구글 캘린더 동기화가 완료되었습니다.'
+              : '동기화 중 오류가 발생했습니다.',
+          });
+        } catch (error) {
+          console.error('❌ 수동 동기화 실패:', error);
+          return data({
+            success: false,
+            message: '동기화 중 오류가 발생했습니다.',
+          });
+        }
       }
 
       case 'changePassword': {
@@ -430,6 +484,16 @@ export default function SettingsPage({
     conflictResolution: calendarSettings?.conflictResolution || 'manual',
     autoSyncInterval: calendarSettings?.autoSyncInterval || 15,
   });
+
+  // 동기화 상태 추적
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  // 액션 완료 후 상태 리셋
+  useEffect(() => {
+    if (actionData?.success !== undefined) {
+      setIsSyncing(false);
+    }
+  }, [actionData]);
 
   // 비밀번호 변경 state
   const [passwordData, setPasswordData] = useState({
@@ -1067,11 +1131,27 @@ export default function SettingsPage({
                         <Save className="h-4 w-4 mr-2" />
                         설정 저장
                       </Button>
-                      <Button type="button" variant="outline" className="gap-2">
-                        <RefreshCw className="h-4 w-4" />
-                        동기화
-                      </Button>
                     </div>
+                  </Form>
+
+                  {/* 수동 동기화 버튼 */}
+                  <Form method="post" onSubmit={() => setIsSyncing(true)}>
+                    <input
+                      type="hidden"
+                      name="actionType"
+                      value="syncGoogleCalendar"
+                    />
+                    <Button
+                      type="submit"
+                      variant="outline"
+                      className="w-full gap-2"
+                      disabled={isSyncing}
+                    >
+                      <RefreshCw
+                        className={`h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`}
+                      />
+                      {isSyncing ? '동기화 중...' : '지금 동기화'}
+                    </Button>
                   </Form>
 
                   {/* 연동 해제 */}

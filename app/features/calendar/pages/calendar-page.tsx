@@ -33,6 +33,10 @@ import { DayView } from '../components/day-view';
 import { CalendarSidebar } from '../components/calendar-sidebar';
 import { AddMeetingModal } from '../components/add-meeting-modal';
 import { MeetingDetailModal } from '../components/meeting-detail-modal';
+import {
+  ConflictResolutionModal,
+  type ConflictData,
+} from '../components/conflict-resolution-modal';
 import { type Meeting, type Client, type ViewMode } from '../types/types';
 
 export default function CalendarPage({
@@ -46,6 +50,10 @@ export default function CalendarPage({
   const [isAddMeetingOpen, setIsAddMeetingOpen] = useState(false);
   const [selectedMeeting, setSelectedMeeting] = useState<Meeting | null>(null);
   const [filteredTypes, setFilteredTypes] = useState<string[]>([]);
+
+  // 충돌 관리 상태
+  const [conflicts, setConflicts] = useState<ConflictData[]>([]);
+  const [isConflictModalOpen, setIsConflictModalOpen] = useState(false);
 
   // 캘린더 네비게이션
   const navigateCalendar = (direction: 'prev' | 'next') => {
@@ -71,6 +79,62 @@ export default function CalendarPage({
     console.log('새 미팅:', data);
     // Form 제출은 AddMeetingModal에서 처리
     setIsAddMeetingOpen(false);
+  };
+
+  // 충돌 해결 핸들러
+  const handleResolveConflict = async (
+    eventId: string,
+    resolution: 'local' | 'google'
+  ) => {
+    try {
+      // GoogleCalendarService를 사용하여 충돌 해결
+      const { GoogleCalendarService } = await import(
+        '../lib/google-calendar-service'
+      );
+      const googleService = new GoogleCalendarService();
+
+      const success = await googleService.resolveConflict(
+        loaderData.agentId || 'unknown',
+        eventId,
+        resolution
+      );
+
+      if (success) {
+        // 해결된 충돌을 목록에서 제거
+        setConflicts((prev) => prev.filter((c) => c.eventId !== eventId));
+        console.log(`✅ 충돌 해결 완료: ${eventId} -> ${resolution}`);
+      } else {
+        console.error('충돌 해결 실패');
+      }
+    } catch (error) {
+      console.error('충돌 해결 중 오류:', error);
+    }
+  };
+
+  // 모든 충돌 일괄 해결 핸들러
+  const handleResolveAllConflicts = async (resolution: 'local' | 'google') => {
+    try {
+      const { GoogleCalendarService } = await import(
+        '../lib/google-calendar-service'
+      );
+      const googleService = new GoogleCalendarService();
+
+      const success = await googleService.resolveAllConflicts(
+        loaderData.agentId || 'unknown',
+        resolution
+      );
+
+      if (success) {
+        // 모든 충돌 해결 완료
+        setConflicts([]);
+        setIsConflictModalOpen(false);
+        console.log(`✅ 모든 충돌 일괄 해결 완료 -> ${resolution}`);
+      } else {
+        console.error('일괄 충돌 해결 실패');
+      }
+    } catch (error) {
+      console.error('일괄 충돌 해결 중 오류:', error);
+    }
   };
 
   // 체크리스트 토글
@@ -297,6 +361,14 @@ export default function CalendarPage({
           meeting={selectedMeeting}
           onClose={() => setSelectedMeeting(null)}
           onToggleChecklist={toggleChecklist}
+        />
+
+        <ConflictResolutionModal
+          isOpen={isConflictModalOpen}
+          onClose={() => setIsConflictModalOpen(false)}
+          conflicts={conflicts}
+          onResolveConflict={handleResolveConflict}
+          onResolveAll={handleResolveAllConflicts}
         />
       </div>
     </MainLayout>

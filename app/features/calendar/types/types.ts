@@ -14,6 +14,18 @@ export const meetingTypeColors = {
 
 export type MeetingType = keyof typeof meetingTypeColors;
 
+// 🌍 한국어 미팅 타입 매핑 (MVP 한국어 UI)
+export const meetingTypeKoreanMap = {
+  consultation: '상담',
+  follow_up: '후속 상담',
+  presentation: '설명회',
+  contract_signing: '계약 체결',
+  claim_support: '보험금 청구',
+  renewal: '갱신 상담',
+  other: '기타',
+  google: '구글 일정',
+} as const;
+
 // 🎨 이벤트 소스별 스타일링 시스템
 export const eventSourceStyles = {
   surecrm: {
