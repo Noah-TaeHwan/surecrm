@@ -7,13 +7,9 @@ export const meetingTypeColors = {
   claim_support: 'bg-red-500 hover:bg-red-600',
   renewal: 'bg-teal-500 hover:bg-teal-600',
   other: 'bg-gray-500 hover:bg-gray-600',
-  // 🌐 구글 캘린더 이벤트 구분 색상 (SureCRM 디자인 시스템 기반)
-  google_event:
+  // 🌐 구글 캘린더 이벤트 색상
+  google:
     'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700',
-  google_meeting:
-    'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700',
-  google_personal:
-    'bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700',
 } as const;
 
 export type MeetingType = keyof typeof meetingTypeColors;

@@ -9,7 +9,7 @@ import {
   getNotificationSettings,
   upsertNotificationSettings,
 } from '~/features/notifications/lib/notifications-data';
-import { data } from 'react-router';
+import { data, redirect } from 'react-router';
 import { createServerClient, createAdminClient } from '~/lib/core/supabase';
 import {
   Card,
@@ -54,6 +54,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { Form } from 'react-router';
+import { GoogleCalendarService } from '~/features/calendar/lib/google-calendar-service';
 
 // 설정 페이지 데이터 타입
 interface SettingsPageData {
@@ -129,11 +130,22 @@ export async function loader({
 
     console.log('인증 성공:', user.email);
 
-    // 모든 설정 데이터를 병렬로 로딩
-    const [userProfileData, notificationSettingsData] = await Promise.all([
-      getUserProfile(user.id),
-      getNotificationSettings(user.id),
-    ]);
+    // 모든 설정 데이터를 병렬로 로딩 (구글 캘린더 설정 포함)
+    const [userProfileData, notificationSettingsData, googleCalendarSettings] =
+      await Promise.all([
+        getUserProfile(user.id),
+        getNotificationSettings(user.id),
+        // 구글 캘린더 설정 조회
+        (async () => {
+          try {
+            const googleService = new GoogleCalendarService();
+            return await googleService.getCalendarSettings(user.id);
+          } catch (error) {
+            console.error('구글 캘린더 설정 조회 실패:', error);
+            return null;
+          }
+        })(),
+      ]);
 
     console.log('설정 페이지 데이터 로딩 완료');
 
@@ -151,14 +163,16 @@ export async function loader({
         emailNotifications:
           notificationSettingsData?.emailNotifications ?? true,
       },
-      // 🌐 구글 캘린더 설정 (임시 mock 데이터 - 실제 DB 연동 전)
+      // 🌐 구글 캘린더 설정 (실제 DB 데이터)
       calendarSettings: {
-        googleCalendarSync: false,
+        googleCalendarSync: googleCalendarSettings?.googleCalendarSync ?? false,
         syncDirection: 'bidirectional' as const,
         conflictResolution: 'manual' as const,
         autoSyncInterval: 15,
-        lastSyncAt: undefined,
-        syncStatus: 'disconnected' as const,
+        lastSyncAt: googleCalendarSettings?.lastSyncAt?.toISOString(),
+        syncStatus: googleCalendarSettings?.googleAccessToken
+          ? 'connected'
+          : ('disconnected' as const),
       },
       user: {
         id: user.id,
@@ -283,24 +297,24 @@ export async function action({ request }: Route.ActionArgs) {
       }
 
       case 'connectGoogleCalendar': {
-        // 🔗 구글 캘린더 연동 시작
-        // TODO: OAuth 플로우 시작
-        console.log('구글 캘린더 연동 시작');
+        // 🔗 구글 캘린더 연동 시작 - OAuth URL로 리다이렉트
+        const googleService = new GoogleCalendarService();
+        const authUrl = googleService.getAuthUrl(user.id);
 
-        return data({
-          success: true,
-          message: '구글 캘린더 연동을 시작합니다.',
-        });
+        // OAuth URL로 리다이렉트
+        return redirect(authUrl);
       }
 
       case 'disconnectGoogleCalendar': {
         // 🔌 구글 캘린더 연동 해제
-        // TODO: 연동 해제 로직
-        console.log('구글 캘린더 연동 해제');
+        const googleService = new GoogleCalendarService();
+        const success = await googleService.disconnectCalendar(user.id);
 
         return data({
-          success: true,
-          message: '구글 캘린더 연동이 해제되었습니다.',
+          success,
+          message: success
+            ? '구글 캘린더 연동이 해제되었습니다.'
+            : '연동 해제 중 오류가 발생했습니다.',
         });
       }
 

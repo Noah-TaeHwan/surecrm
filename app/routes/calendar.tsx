@@ -28,18 +28,100 @@ export async function loader({ request }: Route.LoaderArgs) {
     const currentMonth = today.getMonth() + 1; // 1-12
     const currentYear = today.getFullYear();
 
-    // 실제 데이터베이스에서 데이터 조회
-    const [meetings, clients] = await Promise.allSettled([
+    // 실제 데이터베이스에서 데이터 조회 + 구글 캘린더 이벤트
+    const startOfMonth = new Date(currentYear, currentMonth - 1, 1);
+    const endOfMonth = new Date(currentYear, currentMonth, 0);
+
+    const [meetings, clients, googleData] = await Promise.allSettled([
       getMeetingsByMonth(agentId, currentYear, currentMonth),
       getClientsByAgent(agentId),
+      // 구글 캘린더 설정 및 이벤트 조회 (실패해도 기본값 반환)
+      (async () => {
+        try {
+          const { GoogleCalendarService } = await import(
+            '~/features/calendar/lib/google-calendar-service'
+          );
+          const googleService = new GoogleCalendarService();
+
+          // 설정 정보 조회
+          const settings = await googleService.getCalendarSettings(agentId);
+          const isConnected = !!settings?.googleAccessToken;
+
+          // 연동된 경우에만 이벤트 조회
+          let events: any[] = [];
+          if (isConnected) {
+            events = await googleService.fetchEvents(
+              agentId,
+              startOfMonth,
+              endOfMonth
+            );
+          }
+
+          return {
+            settings: {
+              isConnected,
+              lastSyncAt: settings?.updatedAt,
+              googleEventsCount: events.length,
+            },
+            events,
+          };
+        } catch (error) {
+          console.log('구글 캘린더 데이터 조회 실패 (무시):', error);
+          return {
+            settings: { isConnected: false },
+            events: [],
+          };
+        }
+      })(),
     ]);
 
+    // 구글 데이터 추출
+    const googleResult =
+      googleData.status === 'fulfilled'
+        ? googleData.value
+        : {
+            settings: { isConnected: false },
+            events: [],
+          };
+
+    // 구글 이벤트를 SureCRM 미팅 형식으로 변환
+    const googleMeetings = googleResult.events.map((event: any) => ({
+      id: event.id,
+      title: event.title,
+      client: { id: 'google', name: '구글 캘린더', phone: '' },
+      date: event.startTime.toISOString().split('T')[0],
+      time: event.startTime.toTimeString().slice(0, 5),
+      duration: Math.floor(
+        (event.endTime.getTime() - event.startTime.getTime()) / (1000 * 60)
+      ),
+      type: 'google',
+      location: event.location || '',
+      description: event.description,
+      status: 'scheduled' as const,
+      checklist: [],
+      notes: [],
+      syncInfo: {
+        status: event.syncStatus,
+        externalSource: 'google_calendar' as const,
+        externalEventId: event.googleEventId,
+        lastSyncAt: event.lastSyncAt.toISOString(),
+      },
+    }));
+
+    // SureCRM 미팅과 구글 이벤트 병합
+    const allMeetings = [
+      ...(meetings.status === 'fulfilled' ? meetings.value : []),
+      ...googleMeetings,
+    ];
+
     return {
-      meetings: meetings.status === 'fulfilled' ? meetings.value : [],
+      meetings: allMeetings,
       clients: clients.status === 'fulfilled' ? clients.value : [],
+      googleCalendarSettings: googleResult.settings,
       currentMonth,
       currentYear,
       agentId,
+      googleEventsCount: googleMeetings.length,
     };
   } catch (error) {
     console.error('📅 Calendar 데이터 로딩 실패:', error);

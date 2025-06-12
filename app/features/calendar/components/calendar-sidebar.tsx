@@ -21,6 +21,9 @@ import {
   ResetIcon,
   ExclamationTriangleIcon,
   InfoCircledIcon,
+  CheckCircledIcon,
+  GearIcon,
+  UpdateIcon,
 } from '@radix-ui/react-icons';
 import { cn } from '~/lib/utils';
 import { meetingTypeColors, type Meeting } from '../types/types';
@@ -30,6 +33,12 @@ interface CalendarSidebarProps {
   onMeetingClick: (meeting: Meeting) => void;
   filteredTypes: string[];
   onFilterChange: (types: string[]) => void;
+  // 구글 캘린더 연동 상태 정보 추가
+  googleCalendarSettings?: {
+    isConnected: boolean;
+    lastSyncAt?: string;
+    googleEventsCount?: number;
+  };
 }
 
 export function CalendarSidebar({
@@ -37,6 +46,7 @@ export function CalendarSidebar({
   onMeetingClick,
   filteredTypes,
   onFilterChange,
+  googleCalendarSettings,
 }: CalendarSidebarProps) {
   const formatDate = (date: Date) => {
     return date.toISOString().split('T')[0];
@@ -87,34 +97,100 @@ export function CalendarSidebar({
 
   return (
     <div className="space-y-4">
-      {/* 🌐 Google Calendar 연동 상태 (MVP 안내) */}
+      {/* 🌐 Google Calendar 연동 상태 */}
       <Card className="shadow-lg border border-border/50 bg-gradient-to-br from-card/90 to-card/70 backdrop-blur-sm">
         <CardHeader className="pb-3">
           <CardTitle className="text-lg flex items-center gap-2">
-            <div className="p-1.5 bg-orange-500/10 rounded-lg">
-              <CalendarIcon className="h-4 w-4 text-orange-500" />
+            <div
+              className={`p-1.5 rounded-lg ${
+                googleCalendarSettings?.isConnected
+                  ? 'bg-green-500/10'
+                  : 'bg-orange-500/10'
+              }`}
+            >
+              <CalendarIcon
+                className={`h-4 w-4 ${
+                  googleCalendarSettings?.isConnected
+                    ? 'text-green-500'
+                    : 'text-orange-500'
+                }`}
+              />
             </div>
             구글 캘린더 연동
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-0">
-          <Alert className="border-orange-200 bg-orange-50/50">
-            <InfoCircledIcon className="h-4 w-4 text-orange-600" />
-            <AlertDescription className="text-sm text-orange-700">
-              <div className="space-y-2">
-                <p className="font-medium">
-                  MVP에서는 구글 캘린더 연동이 제공되지 않습니다
-                </p>
-                <p className="text-xs">
-                  현재 개발 중이며, 향후 업데이트에서 제공될 예정입니다.
-                </p>
+          {googleCalendarSettings?.isConnected ? (
+            // 연동된 상태
+            <div className="space-y-3">
+              <Alert className="border-green-200 bg-green-50/50">
+                <CheckCircledIcon className="h-4 w-4 text-green-600" />
+                <AlertDescription className="text-sm text-green-700">
+                  <div className="space-y-1">
+                    <p className="font-medium">구글 캘린더가 연결되었습니다</p>
+                    {googleCalendarSettings.googleEventsCount !== undefined && (
+                      <p className="text-xs">
+                        이번 달 구글 이벤트:{' '}
+                        {googleCalendarSettings.googleEventsCount}개
+                      </p>
+                    )}
+                    {googleCalendarSettings.lastSyncAt && (
+                      <p className="text-xs">
+                        마지막 동기화:{' '}
+                        {new Date(
+                          googleCalendarSettings.lastSyncAt
+                        ).toLocaleString('ko-KR')}
+                      </p>
+                    )}
+                  </div>
+                </AlertDescription>
+              </Alert>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1"
+                  onClick={() => (window.location.href = '/settings')}
+                >
+                  <GearIcon className="h-4 w-4 mr-2" />
+                  설정
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1"
+                  onClick={() => window.location.reload()}
+                >
+                  <UpdateIcon className="h-4 w-4 mr-2" />
+                  새로고침
+                </Button>
               </div>
-            </AlertDescription>
-          </Alert>
-          <Button variant="outline" size="sm" className="w-full mt-3" disabled>
-            <CalendarIcon className="h-4 w-4 mr-2" />
-            구글 캘린더 연결 (개발 중)
-          </Button>
+            </div>
+          ) : (
+            // 연동되지 않은 상태
+            <div className="space-y-3">
+              <Alert className="border-orange-200 bg-orange-50/50">
+                <InfoCircledIcon className="h-4 w-4 text-orange-600" />
+                <AlertDescription className="text-sm text-orange-700">
+                  <div className="space-y-2">
+                    <p className="font-medium">구글 캘린더를 연결해보세요</p>
+                    <p className="text-xs">
+                      구글 캘린더 일정을 SureCRM에서 함께 확인할 수 있습니다.
+                    </p>
+                  </div>
+                </AlertDescription>
+              </Alert>
+              <Button
+                variant="default"
+                size="sm"
+                className="w-full"
+                onClick={() => (window.location.href = '/settings')}
+              >
+                <CalendarIcon className="h-4 w-4 mr-2" />
+                구글 캘린더 연결하기
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -177,19 +253,33 @@ export function CalendarSidebar({
                       </div>
                       <div className="flex items-center gap-2">
                         {/* 🌐 Google Calendar 동기화 상태 표시 */}
-                        <div
-                          className="w-2 h-2 rounded-full bg-gray-400"
-                          title="로컬 전용 (동기화 미지원)"
-                        />
+                        {meeting.type === 'google' ? (
+                          <div
+                            className="w-2 h-2 rounded-full bg-blue-500"
+                            title="구글 캘린더 연동"
+                          />
+                        ) : meeting.syncInfo ? (
+                          <div
+                            className="w-2 h-2 rounded-full bg-green-500"
+                            title="동기화됨"
+                          />
+                        ) : (
+                          <div
+                            className="w-2 h-2 rounded-full bg-gray-400"
+                            title="로컬 전용"
+                          />
+                        )}
                         <Badge
                           className={cn(
                             'text-white text-xs group-hover:scale-105 transition-transform shadow-sm',
-                            meetingTypeColors[
-                              meeting.type as keyof typeof meetingTypeColors
-                            ]
+                            meeting.type === 'google'
+                              ? 'bg-gradient-to-r from-blue-500 to-blue-600'
+                              : meetingTypeColors[
+                                  meeting.type as keyof typeof meetingTypeColors
+                                ]
                           )}
                         >
-                          {meeting.type}
+                          {meeting.type === 'google' ? '📅 구글' : meeting.type}
                         </Badge>
                       </div>
                     </div>

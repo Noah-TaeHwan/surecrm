@@ -39,7 +39,7 @@ export default function CalendarPage({
   loaderData,
   actionData,
 }: CalendarPageProps) {
-  const { meetings, clients } = loaderData;
+  const { meetings, clients, googleCalendarSettings } = loaderData;
 
   const [viewMode, setViewMode] = useState<ViewMode>('month');
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -279,6 +279,7 @@ export default function CalendarPage({
               onMeetingClick={setSelectedMeeting}
               filteredTypes={filteredTypes}
               onFilterChange={setFilteredTypes}
+              googleCalendarSettings={googleCalendarSettings}
             />
           </div>
         )}

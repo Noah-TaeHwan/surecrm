@@ -104,6 +104,12 @@ export default [
   // 📥 첨부파일 다운로드 API
   route('api/download-attachment', 'routes/api.download-attachment.ts'),
 
+  // 📅 구글 캘린더 연동 API
+  route(
+    'api/google/calendar/callback',
+    'routes/api.google.calendar.callback.ts'
+  ),
+
   // 🚫 Catch-all (404 처리) - API 라우트 이후에 배치
   route('*', 'common/pages/error/not-found-page.tsx'),
 ] satisfies RouteConfig;
