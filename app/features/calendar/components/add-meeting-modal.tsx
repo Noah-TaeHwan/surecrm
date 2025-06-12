@@ -9,6 +9,7 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -27,6 +28,7 @@ import { Button } from '~/common/components/ui/button';
 import { Alert, AlertDescription } from '~/common/components/ui/alert';
 import { Checkbox } from '~/common/components/ui/checkbox';
 import { Badge } from '~/common/components/ui/badge';
+import { Switch } from '~/common/components/ui/switch';
 import {
   CalendarIcon,
   InfoCircledIcon,
@@ -36,6 +38,7 @@ import {
   BellIcon,
   FileTextIcon,
 } from '@radix-ui/react-icons';
+import { CheckCircle } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -60,7 +63,7 @@ const meetingSchema = z.object({
   description: z.string().optional(),
   reminder: z.string(),
   repeat: z.string(),
-  // 🌐 Google Calendar 연동 옵션 (MVP에서는 optional & disabled)
+  // 🌐 Google Calendar 연동 옵션
   syncToGoogle: z.boolean().optional(),
   googleMeetLink: z.boolean().optional(),
 });
@@ -72,6 +75,7 @@ interface AddMeetingModalProps {
   onClose: () => void;
   clients: Client[];
   onSubmit: (data: MeetingFormData) => void;
+  googleCalendarConnected?: boolean;
 }
 
 export function AddMeetingModal({
@@ -79,6 +83,7 @@ export function AddMeetingModal({
   onClose,
   clients,
   onSubmit,
+  googleCalendarConnected = false,
 }: AddMeetingModalProps) {
   const form = useForm<MeetingFormData>({
     resolver: zodResolver(meetingSchema),
@@ -93,7 +98,7 @@ export function AddMeetingModal({
       description: '',
       reminder: '30_minutes',
       repeat: 'none',
-      syncToGoogle: undefined,
+      syncToGoogle: false,
       googleMeetLink: undefined,
     },
   });
@@ -402,13 +407,62 @@ export function AddMeetingModal({
               />
             </div>
 
-            {/* Google Calendar 안내 */}
-            <Alert className="bg-muted/20">
-              <InfoCircledIcon className="h-4 w-4" />
-              <AlertDescription className="text-sm">
-                Google Calendar 연동은 MVP에서 제공되지 않습니다.
-              </AlertDescription>
-            </Alert>
+            {/* Google Calendar 동기화 설정 */}
+            <div className="space-y-4">
+              <h4 className="font-medium text-sm">구글 캘린더 연동</h4>
+
+              {googleCalendarConnected ? (
+                <>
+                  <FormField
+                    control={form.control}
+                    name="syncToGoogle"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-950/20 dark:to-blue-900/20 border-blue-200 dark:border-blue-800">
+                        <div className="space-y-0.5">
+                          <FormLabel className="text-base font-medium flex items-center gap-2">
+                            📅 구글 캘린더에 자동 추가
+                          </FormLabel>
+                          <FormDescription className="text-sm text-muted-foreground">
+                            이 미팅을 구글 캘린더에도 동시에 생성합니다
+                          </FormDescription>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+
+                  {form.watch('syncToGoogle') && (
+                    <Alert className="bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800">
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      <AlertDescription className="text-sm text-green-700 dark:text-green-300">
+                        미팅이 SureCRM과 구글 캘린더 양쪽에 모두 저장됩니다.
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                </>
+              ) : (
+                <Alert className="bg-amber-50 border-amber-200 dark:bg-amber-950/20 dark:border-amber-800">
+                  <InfoCircledIcon className="h-4 w-4 text-amber-600" />
+                  <AlertDescription className="text-sm text-amber-700 dark:text-amber-300">
+                    구글 캘린더 연동이 설정되지 않았습니다.{' '}
+                    <Button
+                      type="button"
+                      variant="link"
+                      size="sm"
+                      asChild
+                      className="h-auto p-0 text-amber-700 underline"
+                    >
+                      <Link to="/settings">설정에서 연동하기</Link>
+                    </Button>
+                  </AlertDescription>
+                </Alert>
+              )}
+            </div>
 
             {/* 메모 */}
             <FormField

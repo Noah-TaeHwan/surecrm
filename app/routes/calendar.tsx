@@ -160,6 +160,7 @@ export async function action({ request }: Route.ActionArgs) {
         const meetingType = formData.get('type') as string;
         const location = formData.get('location') as string;
         const description = formData.get('description') as string;
+        const syncToGoogle = formData.get('syncToGoogle') === 'true';
 
         // 예약 시간 계산 (scheduledAt 필드 사용)
         const [year, month, day] = date.split('-').map(Number);
@@ -167,7 +168,8 @@ export async function action({ request }: Route.ActionArgs) {
 
         const scheduledAt = new Date(year, month - 1, day, hour, minute);
 
-        await createMeeting(agentId, {
+        // SureCRM에서 미팅 생성
+        const meeting = await createMeeting(agentId, {
           title,
           clientId,
           scheduledAt,
@@ -177,7 +179,42 @@ export async function action({ request }: Route.ActionArgs) {
           description,
         });
 
-        return { success: true, message: '미팅이 성공적으로 생성되었습니다.' };
+        // 🌐 구글 캘린더 동기화 (옵션이 활성화된 경우)
+        let googleEventId = null;
+        if (syncToGoogle && meeting) {
+          try {
+            const { GoogleCalendarService } = await import(
+              '~/features/calendar/lib/google-calendar-service'
+            );
+            const googleService = new GoogleCalendarService();
+
+            // 구글 캘린더에 이벤트 생성
+            googleEventId = await googleService.createEventFromMeeting(
+              agentId,
+              meeting
+            );
+
+            if (googleEventId) {
+              console.log('✅ 구글 캘린더 동기화 성공:', googleEventId);
+            }
+          } catch (error) {
+            console.error('❌ 구글 캘린더 동기화 실패:', error);
+            // 구글 캘린더 연동 실패해도 SureCRM 미팅 생성은 성공으로 처리
+          }
+        }
+
+        const successMessage =
+          syncToGoogle && googleEventId
+            ? '미팅이 SureCRM과 구글 캘린더에 모두 생성되었습니다.'
+            : syncToGoogle && !googleEventId
+            ? '미팅은 SureCRM에 생성되었으나 구글 캘린더 동기화에 실패했습니다.'
+            : '미팅이 성공적으로 생성되었습니다.';
+
+        return {
+          success: true,
+          message: successMessage,
+          googleSynced: !!googleEventId,
+        };
       }
 
       case 'updateMeeting': {

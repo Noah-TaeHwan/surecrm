@@ -290,6 +290,7 @@ export default function CalendarPage({
           onClose={() => setIsAddMeetingOpen(false)}
           clients={clients}
           onSubmit={onSubmitMeeting}
+          googleCalendarConnected={googleCalendarSettings?.isConnected}
         />
 
         <MeetingDetailModal
