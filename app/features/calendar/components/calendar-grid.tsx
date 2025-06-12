@@ -64,7 +64,7 @@ function EventCard({
   onClick: (e: React.MouseEvent) => void;
 }) {
   const source = (meeting.syncInfo?.externalSource || 'surecrm') as EventSource;
-  const sourceStyle = eventSourceStyles[source];
+  const sourceStyle = eventSourceStyles[source] || eventSourceStyles.surecrm; // 안전 장치 추가
   const syncStatus = meeting.syncInfo?.syncStatus;
 
   return (
