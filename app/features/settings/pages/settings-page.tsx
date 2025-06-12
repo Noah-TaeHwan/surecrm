@@ -1200,11 +1200,11 @@ export default function SettingsPage({
                   </Form>
 
                   {/* 🔔 실시간 동기화 설정 */}
-                  <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg">
+                  <div className="p-4 bg-muted/50 border rounded-lg">
                     <div className="flex items-center justify-between mb-3">
                       <div className="space-y-1">
                         <h4 className="text-sm font-medium flex items-center gap-2">
-                          <Bell className="h-4 w-4 text-blue-600" />
+                          <Bell className="h-4 w-4 text-foreground" />
                           실시간 동기화
                         </h4>
                         <p className="text-xs text-muted-foreground">
