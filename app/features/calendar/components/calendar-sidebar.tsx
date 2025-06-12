@@ -108,9 +108,9 @@ export function CalendarSidebar({
     (m) => (m as any)?.priority === 'high'
   ).length;
 
-  // 미팅 유형별 통계 (구글 일정 제외하고 의미있는 것만)
+  // 미팅 유형별 통계 (구글에서 가져온 일정과 SureCRM 생성 일정 모두 포함, 의미있는 것만)
   const meaningfulStats = Object.entries(meetingTypeColors)
-    .filter(([type]) => type !== 'google') // 구글 일정 제외
+    .filter(([type]) => type !== 'google' && type !== 'google_imported') // 구글 관련 필터 완전 제거
     .map(([type, color]) => ({
       type,
       koreanName:
@@ -121,8 +121,10 @@ export function CalendarSidebar({
     .filter((stat) => stat.count > 0) // 0개인 항목 제외
     .sort((a, b) => b.count - a.count); // 많은 순으로 정렬
 
-  // 필터 관련 함수
-  const allMeetingTypes = Object.keys(meetingTypeColors);
+  // 필터 관련 함수 (구글 관련 타입 제외)
+  const allMeetingTypes = Object.keys(meetingTypeColors).filter(
+    (type) => type !== 'google' && type !== 'google_imported'
+  );
 
   const toggleFilter = (type: string) => {
     if (filteredTypes.includes(type)) {

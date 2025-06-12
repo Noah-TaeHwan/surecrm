@@ -56,6 +56,7 @@ import {
   type ChecklistItem,
 } from '../types/types';
 import { useState } from 'react';
+import { DeleteMeetingModal } from './delete-meeting-modal';
 
 // 🎯 영업 정보 관련 데이터 (새 미팅 예약 모달과 동일)
 const priorityOptions = [
@@ -106,6 +107,9 @@ export function MeetingDetailModal({
   const [notes, setNotes] = useState<MeetingNote[]>(meeting?.notes || []);
   const [newNote, setNewNote] = useState('');
   const [isAddingNote, setIsAddingNote] = useState(false);
+
+  // 삭제 모달 상태
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   // 체크리스트 관리 상태
   const [checklist, setChecklist] = useState<ChecklistItem[]>(
@@ -346,30 +350,33 @@ export function MeetingDetailModal({
   };
 
   const handleDeleteMeeting = () => {
-    if (confirm('정말로 이 미팅을 삭제하시겠습니까?')) {
-      // 실제 form 제출로 미팅 삭제
-      const formElement = document.createElement('form');
-      formElement.method = 'POST';
-      formElement.style.display = 'none';
+    // 🎨 커스텀 삭제 모달 표시
+    setIsDeleteModalOpen(true);
+  };
 
-      // actionType 추가
-      const actionInput = document.createElement('input');
-      actionInput.name = 'actionType';
-      actionInput.value = 'deleteMeeting';
-      formElement.appendChild(actionInput);
+  const handleConfirmDelete = () => {
+    // 🗑️ 실제 form 제출로 미팅 삭제 (구글 캘린더 연동 포함)
+    const formElement = document.createElement('form');
+    formElement.method = 'POST';
+    formElement.style.display = 'none';
 
-      // meetingId 추가
-      const meetingIdInput = document.createElement('input');
-      meetingIdInput.name = 'meetingId';
-      meetingIdInput.value = meeting.id;
-      formElement.appendChild(meetingIdInput);
+    // actionType 추가
+    const actionInput = document.createElement('input');
+    actionInput.name = 'actionType';
+    actionInput.value = 'deleteMeeting';
+    formElement.appendChild(actionInput);
 
-      document.body.appendChild(formElement);
-      formElement.submit();
-      document.body.removeChild(formElement);
+    // meetingId 추가
+    const meetingIdInput = document.createElement('input');
+    meetingIdInput.name = 'meetingId';
+    meetingIdInput.value = meeting.id;
+    formElement.appendChild(meetingIdInput);
 
-      onClose();
-    }
+    document.body.appendChild(formElement);
+    formElement.submit();
+    document.body.removeChild(formElement);
+
+    onClose();
   };
 
   const meetingTypes = Object.keys(meetingTypeColors);
@@ -1347,6 +1354,14 @@ export function MeetingDetailModal({
           </div>
         </div>
       </DialogContent>
+
+      {/* 🗑️ 삭제 확인 모달 */}
+      <DeleteMeetingModal
+        meeting={meeting}
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+      />
     </Dialog>
   );
 }

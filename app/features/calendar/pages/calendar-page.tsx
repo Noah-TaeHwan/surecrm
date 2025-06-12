@@ -272,8 +272,44 @@ export default function CalendarPage({
           </div>
         </div>
 
-        {/* 데이터가 없는 경우 빈 상태 표시 */}
-        {meetings.length === 0 && clients.length === 0 ? (
+        {/* 🔒 구글 캘린더 연동이 필요한 경우 */}
+        {loaderData.requiresGoogleConnection ? (
+          <div className="text-center py-16">
+            <Card className="max-w-lg mx-auto shadow-lg border ">
+              <CardContent className="pt-8 pb-8">
+                <div className="p-6  rounded-full w-fit mx-auto mb-6">
+                  <CalendarIcon className="w-16 h-16" />
+                </div>
+                <h3 className="text-2xl font-bold text-foreground mb-3">
+                  구글 캘린더 연동이 필요합니다
+                </h3>
+                <p className="700 mb-6 leading-relaxed">
+                  SureCRM의 일정 관리 기능을 사용하려면
+                  <br />
+                  구글 캘린더와의 연동이 필요합니다.
+                  <br />
+                  연동 후 모든 일정이 자동으로 동기화됩니다.
+                </p>
+                <div className="space-y-3">
+                  <form method="POST">
+                    <input
+                      type="hidden"
+                      name="actionType"
+                      value="connectGoogleCalendar"
+                    />
+                    <Button type="submit" className="w-full " size="lg">
+                      <CalendarIcon className="mr-2 h-5 w-5" />
+                      구글 캘린더 연동하기
+                    </Button>
+                  </form>
+                  <p className="text-xs text-amber-600">
+                    연동 후 새로고침하면 일정 관리 기능을 사용할 수 있습니다.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        ) : meetings.length === 0 && clients.length === 0 ? (
           <div className="text-center py-16">
             <Card className="max-w-md mx-auto shadow-lg border border-border/50 bg-gradient-to-br from-card/90 to-card/70 backdrop-blur-sm">
               <CardContent className="pt-8 pb-8">

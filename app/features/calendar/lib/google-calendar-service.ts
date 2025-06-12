@@ -285,6 +285,75 @@ export class GoogleCalendarService {
   }
 
   // 6. SureCRM Meeting → Google Event 생성
+  // SureCRM 미팅 정보를 구글 캘린더 메모로 포맷팅
+  private formatMeetingForGoogleCalendar(meeting: any): string {
+    const sections = [];
+
+    // 기본 설명
+    if (meeting.description) {
+      sections.push(`📋 미팅 설명:\n${meeting.description}`);
+    }
+
+    // 영업 정보 섹션
+    const salesInfo = [];
+    if ((meeting as any).priority) {
+      const priorityMap: any = {
+        urgent: '🔴 긴급',
+        high: '🟠 높음',
+        medium: '🟡 보통',
+        low: '🟢 낮음',
+      };
+      salesInfo.push(
+        `우선순위: ${
+          priorityMap[(meeting as any).priority] || (meeting as any).priority
+        }`
+      );
+    }
+
+    if ((meeting as any).expectedOutcome) {
+      salesInfo.push(`예상 결과: ${(meeting as any).expectedOutcome}`);
+    }
+
+    if ((meeting as any).contactMethod) {
+      const methodMap: any = {
+        phone: '📞 전화',
+        in_person: '👥 대면',
+        video_call: '📹 화상통화',
+        email: '📧 이메일',
+      };
+      salesInfo.push(
+        `연락 방법: ${
+          methodMap[(meeting as any).contactMethod] ||
+          (meeting as any).contactMethod
+        }`
+      );
+    }
+
+    if ((meeting as any).estimatedCommission) {
+      salesInfo.push(
+        `예상 수수료: ${(
+          meeting as any
+        ).estimatedCommission.toLocaleString()}원`
+      );
+    }
+
+    if ((meeting as any).productInterest) {
+      salesInfo.push(`관심 상품: ${(meeting as any).productInterest}`);
+    }
+
+    if (salesInfo.length > 0) {
+      sections.push(
+        `💼 영업 정보:\n${salesInfo.map((info) => `• ${info}`).join('\n')}`
+      );
+    }
+
+    // 시스템 정보
+    sections.push(`\n🔗 SureCRM에서 생성된 미팅`);
+    sections.push(`생성 시간: ${new Date().toLocaleString('ko-KR')}`);
+
+    return sections.join('\n\n');
+  }
+
   async createEventFromMeeting(
     agentId: string,
     meeting: Meeting
@@ -296,9 +365,11 @@ export class GoogleCalendarService {
         auth: this.oauth2Client,
       });
 
+      const formattedDescription = this.formatMeetingForGoogleCalendar(meeting);
+
       const event: calendar_v3.Schema$Event = {
         summary: meeting.title,
-        description: meeting.description || '',
+        description: formattedDescription,
         location: meeting.location || '',
         start: {
           dateTime: meeting.scheduledAt.toISOString(),
@@ -344,9 +415,11 @@ export class GoogleCalendarService {
         auth: this.oauth2Client,
       });
 
+      const formattedDescription = this.formatMeetingForGoogleCalendar(meeting);
+
       const event: calendar_v3.Schema$Event = {
         summary: meeting.title,
-        description: meeting.description || '',
+        description: formattedDescription,
         location: meeting.location || '',
         start: {
           dateTime: meeting.scheduledAt.toISOString(),
@@ -383,21 +456,86 @@ export class GoogleCalendarService {
   // 8. 구글 이벤트 삭제
   async deleteEvent(agentId: string, googleEventId: string): Promise<boolean> {
     try {
+      console.log('🗑️ 구글 캘린더 이벤트 삭제 시작:', {
+        agentId,
+        googleEventId,
+        timestamp: new Date().toISOString(),
+      });
+
       await this.setupAuthClient(agentId);
       const calendar = google.calendar({
         version: 'v3',
         auth: this.oauth2Client,
       });
 
-      await calendar.events.delete({
+      // 삭제 전 이벤트 존재 여부 확인
+      try {
+        const existingEvent = await calendar.events.get({
+          calendarId: 'primary',
+          eventId: googleEventId,
+        });
+        console.log('📍 삭제 대상 이벤트 확인:', {
+          eventId: googleEventId,
+          title: existingEvent.data.summary,
+          status: existingEvent.data.status,
+        });
+      } catch (getError: any) {
+        if (getError.code === 404) {
+          console.log(
+            '⚠️ 삭제하려는 이벤트가 이미 존재하지 않음:',
+            googleEventId
+          );
+          return true; // 이미 삭제된 것으로 간주
+        }
+        console.log(
+          '🔍 이벤트 존재 확인 실패 (삭제 계속 진행):',
+          getError.message
+        );
+      }
+
+      // 실제 삭제 실행
+      const deleteResponse = await calendar.events.delete({
         calendarId: 'primary',
         eventId: googleEventId,
       });
 
-      await this.logSyncSuccess(agentId, null, 'to_google', googleEventId);
-      return true;
-    } catch (error) {
-      console.error('❌ 구글 이벤트 삭제 실패:', error);
+      console.log('✅ 구글 캘린더 삭제 API 응답:', {
+        status: deleteResponse.status,
+        statusText: deleteResponse.statusText,
+        data: deleteResponse.data,
+        eventId: googleEventId,
+      });
+
+      // 삭제 후 확인 (삭제되었다면 404 에러가 발생해야 함)
+      try {
+        await calendar.events.get({
+          calendarId: 'primary',
+          eventId: googleEventId,
+        });
+        console.log('⚠️ 삭제 후에도 이벤트가 여전히 존재함:', googleEventId);
+        return false;
+      } catch (verifyError: any) {
+        if (verifyError.code === 404) {
+          console.log(
+            '✅ 삭제 확인됨 - 이벤트가 더 이상 존재하지 않음:',
+            googleEventId
+          );
+          await this.logSyncSuccess(agentId, null, 'to_google', googleEventId);
+          return true;
+        } else {
+          console.log('🔍 삭제 확인 중 예상치 못한 오류:', verifyError.message);
+          // 삭제 API가 성공했으므로 true 반환
+          await this.logSyncSuccess(agentId, null, 'to_google', googleEventId);
+          return true;
+        }
+      }
+    } catch (error: any) {
+      console.error('❌ 구글 이벤트 삭제 실패:', {
+        eventId: googleEventId,
+        error: error.message,
+        code: error.code,
+        details: error,
+      });
       await this.logSyncError(agentId, 'to_google', error);
       return false;
     }

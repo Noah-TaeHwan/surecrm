@@ -15,6 +15,7 @@ import {
   deleteMeeting,
   toggleChecklistItem,
 } from '~/features/calendar/lib/calendar-data';
+import { data } from 'react-router';
 
 // 캘린더 페이지 loader
 export async function loader({ request }: Route.LoaderArgs) {
@@ -22,6 +23,32 @@ export async function loader({ request }: Route.LoaderArgs) {
     // 인증 확인
     const user = await requireAuth(request);
     const agentId = user.id;
+
+    // 🔒 구글 캘린더 연동 필수 확인
+    let googleSettings;
+    try {
+      const { GoogleCalendarService } = await import(
+        '~/features/calendar/lib/google-calendar-service'
+      );
+      const googleService = new GoogleCalendarService();
+      googleSettings = await googleService.getCalendarSettings(agentId);
+    } catch (error) {
+      console.log('구글 캘린더 설정 조회 실패:', error);
+      googleSettings = null;
+    }
+
+    // 연동되지 않은 경우도 페이지는 접근 가능하되 빈 데이터와 연동 필요 플래그 반환
+    if (!googleSettings?.googleAccessToken) {
+      return {
+        requiresGoogleConnection: true,
+        meetings: [],
+        clients: [],
+        googleCalendarSettings: { isConnected: false },
+        currentMonth: new Date().getMonth() + 1,
+        currentYear: new Date().getFullYear(),
+        agentId,
+      };
+    }
 
     // 현재 날짜 정보
     const today = new Date();
@@ -43,24 +70,18 @@ export async function loader({ request }: Route.LoaderArgs) {
           );
           const googleService = new GoogleCalendarService();
 
-          // 설정 정보 조회
-          const settings = await googleService.getCalendarSettings(agentId);
-          const isConnected = !!settings?.googleAccessToken;
-
           // 연동된 경우에만 이벤트 조회
           let events: any[] = [];
-          if (isConnected) {
-            events = await googleService.fetchEvents(
-              agentId,
-              startOfMonth,
-              endOfMonth
-            );
-          }
+          events = await googleService.fetchEvents(
+            agentId,
+            startOfMonth,
+            endOfMonth
+          );
 
           return {
             settings: {
-              isConnected,
-              lastSyncAt: settings?.updatedAt,
+              isConnected: true,
+              lastSyncAt: googleSettings?.updatedAt,
               googleEventsCount: events.length,
             },
             events,
@@ -68,7 +89,7 @@ export async function loader({ request }: Route.LoaderArgs) {
         } catch (error) {
           console.log('구글 캘린더 데이터 조회 실패 (무시):', error);
           return {
-            settings: { isConnected: false },
+            settings: { isConnected: true },
             events: [],
           };
         }
@@ -80,7 +101,7 @@ export async function loader({ request }: Route.LoaderArgs) {
       googleData.status === 'fulfilled'
         ? googleData.value
         : {
-            settings: { isConnected: false },
+            settings: { isConnected: true },
             events: [],
           };
 
@@ -94,7 +115,7 @@ export async function loader({ request }: Route.LoaderArgs) {
       duration: Math.floor(
         (event.endTime.getTime() - event.startTime.getTime()) / (1000 * 60)
       ),
-      type: 'google',
+      type: 'google_imported', // 구글에서 가져온 일정 구분
       location: event.location || '',
       description: event.description,
       status: 'scheduled' as const,
@@ -115,6 +136,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     ];
 
     return {
+      requiresGoogleConnection: false,
       meetings: allMeetings,
       clients: clients.status === 'fulfilled' ? clients.value : [],
       googleCalendarSettings: googleResult.settings,
@@ -129,6 +151,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     // 에러 시 빈 배열 반환
     const today = new Date();
     return {
+      requiresGoogleConnection: false,
       meetings: [],
       clients: [],
       currentMonth: today.getMonth() + 1,
@@ -340,9 +363,146 @@ export async function action({ request }: Route.ActionArgs) {
       case 'deleteMeeting': {
         const meetingId = formData.get('meetingId') as string;
 
-        await deleteMeeting(meetingId, agentId);
+        try {
+          // 🔍 구글 캘린더 이벤트 여부 확인
+          if (meetingId.startsWith('google_')) {
+            // 📅 구글 캘린더 이벤트 삭제
+            const googleEventId = meetingId.replace('google_', '');
 
-        return { success: true, message: '미팅이 성공적으로 삭제되었습니다.' };
+            try {
+              const { GoogleCalendarService } = await import(
+                '~/features/calendar/lib/google-calendar-service'
+              );
+              const googleService = new GoogleCalendarService();
+
+              // 구글 캘린더 연동 상태 확인
+              const settings = await googleService.getCalendarSettings(agentId);
+
+              if (settings?.googleAccessToken) {
+                // 🎯 구글 캘린더에서 직접 삭제
+                const deleteSuccess = await googleService.deleteEvent(
+                  agentId,
+                  googleEventId
+                );
+
+                if (deleteSuccess) {
+                  return {
+                    success: true,
+                    message: '구글 캘린더 이벤트가 삭제되었습니다.',
+                  };
+                } else {
+                  return {
+                    success: false,
+                    message: '구글 캘린더 이벤트 삭제에 실패했습니다.',
+                  };
+                }
+              } else {
+                return {
+                  success: false,
+                  message: '구글 캘린더 연결이 필요합니다.',
+                };
+              }
+            } catch (googleError) {
+              console.error('❌ 구글 캘린더 이벤트 삭제 실패:', googleError);
+              return {
+                success: false,
+                message: '구글 캘린더 이벤트 삭제 중 오류가 발생했습니다.',
+              };
+            }
+          }
+
+          // 📝 UUID 형식 검증 (SureCRM 미팅만)
+          const uuidRegex =
+            /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+          if (!uuidRegex.test(meetingId)) {
+            console.error('❌ 잘못된 미팅 ID 형식:', meetingId);
+            return {
+              success: false,
+              message: '잘못된 미팅 ID 형식입니다.',
+            };
+          }
+
+          // 🔍 SureCRM 미팅 정보와 구글 이벤트 ID 조회 (삭제 전)
+          const { getMeetingsByMonth } = await import(
+            '~/features/calendar/lib/calendar-data'
+          );
+          const currentDate = new Date();
+          const year = currentDate.getFullYear();
+          const month = currentDate.getMonth() + 1;
+
+          // 현재 월 미팅들 조회하여 해당 미팅 찾기
+          const meetings = await getMeetingsByMonth(agentId, year, month);
+          const targetMeeting = meetings.find((m) => m.id === meetingId);
+
+          let googleEventId = null;
+          if (targetMeeting?.syncInfo?.externalEventId) {
+            googleEventId = targetMeeting.syncInfo.externalEventId;
+          }
+
+          // 🗑️ SureCRM에서 미팅 삭제
+          await deleteMeeting(meetingId, agentId);
+
+          // 🌐 연동된 구글 캘린더 이벤트도 삭제 시도
+          if (googleEventId) {
+            try {
+              const { GoogleCalendarService } = await import(
+                '~/features/calendar/lib/google-calendar-service'
+              );
+              const googleService = new GoogleCalendarService();
+
+              // 구글 캘린더 연동 상태 확인
+              const settings = await googleService.getCalendarSettings(agentId);
+
+              if (settings?.googleAccessToken) {
+                // 🎯 실제 구글 이벤트 ID로 삭제
+                const deleteSuccess = await googleService.deleteEvent(
+                  agentId,
+                  googleEventId
+                );
+
+                if (deleteSuccess) {
+                  return {
+                    success: true,
+                    message:
+                      '미팅이 삭제되었고 구글 캘린더에서도 제거되었습니다.',
+                  };
+                } else {
+                  return {
+                    success: true,
+                    message:
+                      '미팅은 삭제되었으나 구글 캘린더에서 제거하지 못했습니다.',
+                  };
+                }
+              } else {
+                return {
+                  success: true,
+                  message: '미팅이 성공적으로 삭제되었습니다.',
+                };
+              }
+            } catch (googleError) {
+              console.error('❌ 구글 캘린더 삭제 실패:', googleError);
+              return {
+                success: true,
+                message:
+                  '미팅은 삭제되었으나 구글 캘린더 동기화에 문제가 있었습니다.',
+              };
+            }
+          } else {
+            return {
+              success: true,
+              message: '미팅이 성공적으로 삭제되었습니다.',
+            };
+          }
+        } catch (error) {
+          console.error('❌ 미팅 삭제 실패:', error);
+          return {
+            success: false,
+            message:
+              error instanceof Error
+                ? error.message
+                : '미팅 삭제 중 오류가 발생했습니다.',
+          };
+        }
       }
 
       case 'toggleChecklist': {
@@ -383,5 +543,6 @@ export default function Calendar({
   loaderData,
   actionData,
 }: Route.ComponentProps) {
+  // 💫 페이지 접근은 항상 가능, 연동 상태만 전달
   return <CalendarPage loaderData={loaderData} actionData={actionData} />;
 }

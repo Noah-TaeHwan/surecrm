@@ -7,9 +7,11 @@ export const meetingTypeColors = {
   contract_signing: 'bg-green-600 hover:bg-green-700',
   claim_support: 'bg-red-500 hover:bg-red-600',
   other: 'bg-gray-500 hover:bg-gray-600',
-  // 🌐 구글 캘린더 이벤트 색상 (구분용)
+  // 🌐 구글 캘린더 이벤트 색상 (구분용 - 필터에서 제외됨)
   google:
     'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700',
+  google_imported:
+    'bg-gradient-to-r from-blue-400 to-blue-500 hover:from-blue-500 hover:to-blue-600',
 } as const;
 
 export type MeetingType = keyof typeof meetingTypeColors;
@@ -24,6 +26,7 @@ export const meetingTypeKoreanMap = {
   claim_support: '보험금 청구 지원',
   other: '기타',
   google: '구글 일정',
+  google_imported: '구글에서 가져온 일정',
 } as const;
 
 // 🎯 미팅 유형별 상세 정보 (새 미팅 예약 모달과 동일)
@@ -87,6 +90,14 @@ export const meetingTypeDetails = {
   google: {
     label: '구글 일정',
     description: '구글 캘린더에서 가져온 이벤트',
+    icon: '📅',
+    googleCategory: 'imported',
+    expectedDuration: 60,
+    priority: 'medium' as const,
+  },
+  google_imported: {
+    label: '구글에서 가져온 일정',
+    description: '구글 캘린더에서 동기화된 이벤트',
     icon: '📅',
     googleCategory: 'imported',
     expectedDuration: 60,
