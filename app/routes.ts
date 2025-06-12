@@ -32,7 +32,7 @@ export default [
   route('clients/edit/:id?', 'features/clients/pages/client-edit-page.tsx'),
 
   // 📅 일정 관리
-  route('calendar', 'common/pages/calendar-redirect.tsx'),
+  route('calendar', 'routes/calendar.tsx'),
 
   // ⭐ 소개자 관리
   route('influencers', 'common/pages/influencers-redirect.tsx'),

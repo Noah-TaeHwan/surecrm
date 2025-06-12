@@ -16,6 +16,7 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  CardDescription,
 } from '~/common/components/ui/card';
 import { Button } from '~/common/components/ui/button';
 import { Switch } from '~/common/components/ui/switch';
@@ -23,6 +24,14 @@ import { Input } from '~/common/components/ui/input';
 import { Label } from '~/common/components/ui/label';
 import { Separator } from '~/common/components/ui/separator';
 import { Badge } from '~/common/components/ui/badge';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '~/common/components/ui/select';
+import { RadioGroup, RadioGroupItem } from '~/common/components/ui/radio-group';
 import {
   User,
   Bell,
@@ -36,6 +45,12 @@ import {
   AlertCircle,
   Calendar,
   Crown,
+  LinkIcon,
+  RefreshCw,
+  CheckCircle,
+  XCircle,
+  Clock,
+  Globe,
 } from 'lucide-react';
 import { useState } from 'react';
 import { Form } from 'react-router';
@@ -53,6 +68,14 @@ interface SettingsPageData {
   };
   notificationSettings: {
     emailNotifications: boolean;
+  };
+  calendarSettings?: {
+    googleCalendarSync: boolean;
+    syncDirection: 'read_only' | 'write_only' | 'bidirectional';
+    conflictResolution: 'google_wins' | 'local_wins' | 'manual';
+    autoSyncInterval: number;
+    lastSyncAt?: string;
+    syncStatus: 'connected' | 'disconnected' | 'error';
   };
   user: {
     id: string;
@@ -92,6 +115,14 @@ export async function loader({
         notificationSettings: {
           emailNotifications: false,
         },
+        calendarSettings: {
+          googleCalendarSync: false,
+          syncDirection: 'bidirectional' as const,
+          conflictResolution: 'manual' as const,
+          autoSyncInterval: 15,
+          lastSyncAt: undefined,
+          syncStatus: 'disconnected' as const,
+        },
         user: null,
       };
     }
@@ -120,6 +151,15 @@ export async function loader({
         emailNotifications:
           notificationSettingsData?.emailNotifications ?? true,
       },
+      // 🌐 구글 캘린더 설정 (임시 mock 데이터 - 실제 DB 연동 전)
+      calendarSettings: {
+        googleCalendarSync: false,
+        syncDirection: 'bidirectional' as const,
+        conflictResolution: 'manual' as const,
+        autoSyncInterval: 15,
+        lastSyncAt: undefined,
+        syncStatus: 'disconnected' as const,
+      },
       user: {
         id: user.id,
         email: user.email,
@@ -142,6 +182,14 @@ export async function loader({
       },
       notificationSettings: {
         emailNotifications: false,
+      },
+      calendarSettings: {
+        googleCalendarSync: false,
+        syncDirection: 'bidirectional' as const,
+        conflictResolution: 'manual' as const,
+        autoSyncInterval: 15,
+        lastSyncAt: undefined,
+        syncStatus: 'disconnected' as const,
       },
       user: null,
     };
@@ -203,6 +251,57 @@ export async function action({ request }: Route.ActionArgs) {
             error: '알림 설정 저장에 실패했습니다.',
           });
         }
+      }
+
+      case 'updateCalendarSettings': {
+        // 🌐 구글 캘린더 설정 업데이트 (임시 - 실제 DB 연동 전)
+        const googleCalendarSync =
+          formData.get('googleCalendarSync') === 'true';
+        const syncDirection = formData.get('syncDirection') as
+          | 'read_only'
+          | 'write_only'
+          | 'bidirectional';
+        const conflictResolution = formData.get('conflictResolution') as
+          | 'google_wins'
+          | 'local_wins'
+          | 'manual';
+        const autoSyncInterval =
+          parseInt(formData.get('autoSyncInterval') as string) || 15;
+
+        // TODO: 실제 DB 업데이트 로직 구현
+        console.log('캘린더 설정 업데이트:', {
+          googleCalendarSync,
+          syncDirection,
+          conflictResolution,
+          autoSyncInterval,
+        });
+
+        return data({
+          success: true,
+          message: '캘린더 설정이 성공적으로 저장되었습니다.',
+        });
+      }
+
+      case 'connectGoogleCalendar': {
+        // 🔗 구글 캘린더 연동 시작
+        // TODO: OAuth 플로우 시작
+        console.log('구글 캘린더 연동 시작');
+
+        return data({
+          success: true,
+          message: '구글 캘린더 연동을 시작합니다.',
+        });
+      }
+
+      case 'disconnectGoogleCalendar': {
+        // 🔌 구글 캘린더 연동 해제
+        // TODO: 연동 해제 로직
+        console.log('구글 캘린더 연동 해제');
+
+        return data({
+          success: true,
+          message: '구글 캘린더 연동이 해제되었습니다.',
+        });
       }
 
       case 'changePassword': {
@@ -294,9 +393,10 @@ export default function SettingsPage({
   loaderData,
   actionData,
 }: Route.ComponentProps) {
-  const { userProfile, notificationSettings, user } = loaderData;
+  const { userProfile, notificationSettings, calendarSettings, user } =
+    loaderData;
 
-  // State 관리
+  // 프로필 정보 state
   const [profileData, setProfileData] = useState({
     name: userProfile.name,
     email: userProfile.email,
@@ -308,6 +408,14 @@ export default function SettingsPage({
   const [emailNotifications, setEmailNotifications] = useState(
     notificationSettings.emailNotifications
   );
+
+  // 🌐 구글 캘린더 설정 state
+  const [calendarData, setCalendarData] = useState({
+    googleCalendarSync: calendarSettings?.googleCalendarSync || false,
+    syncDirection: calendarSettings?.syncDirection || 'bidirectional',
+    conflictResolution: calendarSettings?.conflictResolution || 'manual',
+    autoSyncInterval: calendarSettings?.autoSyncInterval || 15,
+  });
 
   // 비밀번호 변경 state
   const [passwordData, setPasswordData] = useState({
@@ -327,6 +435,17 @@ export default function SettingsPage({
   // 비밀번호 변경 핸들러
   const handlePasswordChange = (field: string, value: string) => {
     setPasswordData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  // 🌐 캘린더 설정 변경 핸들러
+  const handleCalendarChange = (
+    field: string,
+    value: string | boolean | number
+  ) => {
+    setCalendarData((prev) => ({
       ...prev,
       [field]: value,
     }));
@@ -627,6 +746,355 @@ export default function SettingsPage({
                       <li>• 비밀번호는 6자 이상으로 설정하세요</li>
                       <li>• 정기적으로 비밀번호를 변경하세요</li>
                       <li>• 다른 서비스와 다른 비밀번호를 사용하세요</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* 🌐 연동 설정 - 알림 및 구글 캘린더 */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* 알림 설정 */}
+          <Card className="border bg-card">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-3 text-lg font-semibold">
+                <div className="p-2 bg-muted rounded-lg">
+                  <Bell className="h-5 w-5 text-foreground" />
+                </div>
+                알림 설정
+              </CardTitle>
+              <CardDescription>
+                이메일 및 시스템 알림 설정을 관리하세요
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-6 space-y-6">
+              <Form method="post" className="space-y-5">
+                <input
+                  type="hidden"
+                  name="actionType"
+                  value="updateNotifications"
+                />
+
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <Label
+                        htmlFor="emailNotifications"
+                        className="text-sm font-medium"
+                      >
+                        이메일 알림
+                      </Label>
+                      <p className="text-xs text-muted-foreground">
+                        미팅 일정, 수수료 정보 등의 알림을 이메일로 받습니다
+                      </p>
+                    </div>
+                    <Switch
+                      id="emailNotifications"
+                      name="emailNotifications"
+                      checked={emailNotifications}
+                      onCheckedChange={setEmailNotifications}
+                    />
+                  </div>
+                </div>
+
+                <Button type="submit" className="w-full">
+                  <Save className="h-4 w-4 mr-2" />
+                  알림 설정 저장
+                </Button>
+              </Form>
+
+              {/* 알림 가이드 */}
+              <div className="mt-6 p-4 bg-muted/50 border rounded-lg">
+                <div className="flex items-start gap-3">
+                  <Bell className="h-4 w-4 text-foreground mt-0.5" />
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium text-foreground">
+                      알림 정보
+                    </p>
+                    <ul className="text-xs text-muted-foreground space-y-1">
+                      <li>• 중요한 일정과 업무 소식을 놓치지 마세요</li>
+                      <li>• 언제든지 알림 설정을 변경할 수 있습니다</li>
+                      <li>• 스팸함도 확인해 주세요</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* 🌐 구글 캘린더 연동 설정 */}
+          <Card className="border bg-card">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-3 text-lg font-semibold">
+                <div className="p-2 bg-muted rounded-lg">
+                  <Calendar className="h-5 w-5 text-foreground" />
+                </div>
+                구글 캘린더 연동
+              </CardTitle>
+              <CardDescription>
+                구글 캘린더와 SureCRM을 연동하여 일정을 통합 관리하세요
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-6 space-y-6">
+              {/* 연동 상태 표시 */}
+              <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border">
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`p-2 rounded-full ${
+                      calendarSettings?.syncStatus === 'connected'
+                        ? 'bg-green-100 text-green-600'
+                        : calendarSettings?.syncStatus === 'error'
+                        ? 'bg-red-100 text-red-600'
+                        : 'bg-gray-100 text-gray-600'
+                    }`}
+                  >
+                    {calendarSettings?.syncStatus === 'connected' ? (
+                      <CheckCircle className="h-4 w-4" />
+                    ) : calendarSettings?.syncStatus === 'error' ? (
+                      <XCircle className="h-4 w-4" />
+                    ) : (
+                      <Globe className="h-4 w-4" />
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">
+                      {calendarSettings?.syncStatus === 'connected'
+                        ? '연동됨'
+                        : calendarSettings?.syncStatus === 'error'
+                        ? '연동 오류'
+                        : '연동 안됨'}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {calendarSettings?.syncStatus === 'connected'
+                        ? `마지막 동기화: ${
+                            calendarSettings.lastSyncAt
+                              ? new Date(
+                                  calendarSettings.lastSyncAt
+                                ).toLocaleString('ko-KR')
+                              : '정보 없음'
+                          }`
+                        : calendarSettings?.syncStatus === 'error'
+                        ? '연동에 문제가 발생했습니다'
+                        : '구글 계정을 연결하여 캘린더를 동기화하세요'}
+                    </p>
+                  </div>
+                </div>
+                <Badge
+                  variant={
+                    calendarSettings?.syncStatus === 'connected'
+                      ? 'default'
+                      : 'secondary'
+                  }
+                  className="text-xs"
+                >
+                  {calendarSettings?.syncStatus === 'connected'
+                    ? '활성'
+                    : '비활성'}
+                </Badge>
+              </div>
+
+              {/* 연동 제어 버튼 */}
+              {calendarSettings?.syncStatus !== 'connected' ? (
+                <Form method="post">
+                  <input
+                    type="hidden"
+                    name="actionType"
+                    value="connectGoogleCalendar"
+                  />
+                  <Button type="submit" className="w-full">
+                    <LinkIcon className="h-4 w-4 mr-2" />
+                    구글 계정 연결
+                  </Button>
+                </Form>
+              ) : (
+                <div className="space-y-4">
+                  {/* 연동 설정 */}
+                  <Form method="post" className="space-y-4">
+                    <input
+                      type="hidden"
+                      name="actionType"
+                      value="updateCalendarSettings"
+                    />
+
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <Label
+                          htmlFor="googleCalendarSync"
+                          className="text-sm font-medium"
+                        >
+                          캘린더 동기화 활성화
+                        </Label>
+                        <p className="text-xs text-muted-foreground">
+                          SureCRM과 구글 캘린더 간 자동 동기화
+                        </p>
+                      </div>
+                      <Switch
+                        id="googleCalendarSync"
+                        name="googleCalendarSync"
+                        checked={calendarData.googleCalendarSync}
+                        onCheckedChange={(checked) =>
+                          handleCalendarChange('googleCalendarSync', checked)
+                        }
+                      />
+                    </div>
+
+                    {calendarData.googleCalendarSync && (
+                      <>
+                        <div className="space-y-3">
+                          <Label className="text-sm font-medium">
+                            동기화 방향
+                          </Label>
+                          <Select
+                            name="syncDirection"
+                            value={calendarData.syncDirection}
+                            onValueChange={(value) =>
+                              handleCalendarChange('syncDirection', value)
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="동기화 방향 선택" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="read_only">
+                                <div className="flex items-center gap-2">
+                                  <span>📥</span>
+                                  <span>구글 → SureCRM (읽기 전용)</span>
+                                </div>
+                              </SelectItem>
+                              <SelectItem value="write_only">
+                                <div className="flex items-center gap-2">
+                                  <span>📤</span>
+                                  <span>SureCRM → 구글 (쓰기 전용)</span>
+                                </div>
+                              </SelectItem>
+                              <SelectItem value="bidirectional">
+                                <div className="flex items-center gap-2">
+                                  <span>🔄</span>
+                                  <span>양방향 동기화</span>
+                                </div>
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="space-y-3">
+                          <Label className="text-sm font-medium">
+                            충돌 해결 방식
+                          </Label>
+                          <RadioGroup
+                            name="conflictResolution"
+                            value={calendarData.conflictResolution}
+                            onValueChange={(value) =>
+                              handleCalendarChange('conflictResolution', value)
+                            }
+                          >
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem
+                                value="google_wins"
+                                id="google_wins"
+                              />
+                              <Label htmlFor="google_wins" className="text-sm">
+                                구글 캘린더 우선
+                              </Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem
+                                value="local_wins"
+                                id="local_wins"
+                              />
+                              <Label htmlFor="local_wins" className="text-sm">
+                                SureCRM 우선
+                              </Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="manual" id="manual" />
+                              <Label htmlFor="manual" className="text-sm">
+                                수동 선택
+                              </Label>
+                            </div>
+                          </RadioGroup>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label
+                            htmlFor="autoSyncInterval"
+                            className="text-sm font-medium"
+                          >
+                            자동 동기화 간격 (분)
+                          </Label>
+                          <Select
+                            name="autoSyncInterval"
+                            value={calendarData.autoSyncInterval.toString()}
+                            onValueChange={(value) =>
+                              handleCalendarChange(
+                                'autoSyncInterval',
+                                parseInt(value)
+                              )
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="5">5분</SelectItem>
+                              <SelectItem value="15">15분</SelectItem>
+                              <SelectItem value="30">30분</SelectItem>
+                              <SelectItem value="60">1시간</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </>
+                    )}
+
+                    <div className="flex gap-2">
+                      <Button type="submit" className="flex-1">
+                        <Save className="h-4 w-4 mr-2" />
+                        설정 저장
+                      </Button>
+                      <Button type="button" variant="outline" className="gap-2">
+                        <RefreshCw className="h-4 w-4" />
+                        동기화
+                      </Button>
+                    </div>
+                  </Form>
+
+                  {/* 연동 해제 */}
+                  <Separator />
+                  <Form method="post">
+                    <input
+                      type="hidden"
+                      name="actionType"
+                      value="disconnectGoogleCalendar"
+                    />
+                    <Button
+                      type="submit"
+                      variant="destructive"
+                      size="sm"
+                      className="w-full"
+                    >
+                      <XCircle className="h-4 w-4 mr-2" />
+                      구글 캘린더 연동 해제
+                    </Button>
+                  </Form>
+                </div>
+              )}
+
+              {/* 캘린더 연동 가이드 */}
+              <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <Calendar className="h-4 w-4 text-blue-600 mt-0.5" />
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium text-blue-900">
+                      캘린더 연동 안내
+                    </p>
+                    <ul className="text-xs text-blue-700 space-y-1">
+                      <li>• 구글 계정 권한이 필요합니다</li>
+                      <li>
+                        • 양방향 동기화 시 데이터 충돌이 발생할 수 있습니다
+                      </li>
+                      <li>• 언제든지 연동을 해제할 수 있습니다</li>
                     </ul>
                   </div>
                 </div>

@@ -1,5 +1,20 @@
 import { cn } from '~/lib/utils';
-import { meetingTypeColors, type Meeting } from '../types/types';
+import {
+  meetingTypeColors,
+  eventSourceIcons,
+  eventSourceStyles,
+  syncStatusStyles,
+  type Meeting,
+  type EventSource,
+  type SyncStatus,
+} from '../types/types';
+import {
+  CheckCircle,
+  Loader2,
+  AlertTriangle,
+  XCircle,
+  Circle,
+} from 'lucide-react';
 
 interface CalendarGridProps {
   selectedDate: Date;
@@ -7,6 +22,139 @@ interface CalendarGridProps {
   onMeetingClick: (meeting: Meeting) => void;
   filteredTypes?: string[];
   onDateClick?: (date: Date) => void;
+}
+
+// 🎨 동기화 상태 표시기 컴포넌트
+function SyncStatusIndicator({ status }: { status?: SyncStatus }) {
+  if (!status || status === 'not_synced') return null;
+
+  const style = syncStatusStyles[status];
+  const IconComponent = {
+    CheckCircle,
+    Loader2,
+    AlertTriangle,
+    XCircle,
+    Circle,
+  }[style.icon];
+
+  return (
+    <div
+      className={cn(
+        'flex items-center gap-1 text-xs px-1.5 py-0.5 rounded-full backdrop-blur-sm border border-white/20',
+        style.bgColor,
+        style.color
+      )}
+      title={style.label}
+    >
+      <IconComponent
+        className={cn('h-3 w-3', 'animate' in style ? style.animate : '')}
+      />
+    </div>
+  );
+}
+
+// 🎯 개선된 이벤트 카드 컴포넌트
+function EventCard({
+  meeting,
+  compact = false,
+  onClick,
+}: {
+  meeting: Meeting;
+  compact?: boolean;
+  onClick: (e: React.MouseEvent) => void;
+}) {
+  const source = (meeting.syncInfo?.externalSource || 'surecrm') as EventSource;
+  const sourceStyle = eventSourceStyles[source];
+  const syncStatus = meeting.syncInfo?.syncStatus;
+
+  return (
+    <div
+      className={cn(
+        'rounded cursor-pointer transition-all duration-200 relative overflow-hidden group',
+        'hover:scale-105 hover:shadow-sm backdrop-blur-sm text-white font-medium',
+        compact ? 'text-xs p-1.5' : 'text-xs p-2',
+        `bg-gradient-to-r ${sourceStyle.gradient}`,
+        `border ${sourceStyle.border}`,
+        sourceStyle.textColor,
+        // 호버 효과 강화
+        'hover:brightness-110 hover:shadow-lg transition-all duration-300'
+      )}
+      onClick={onClick}
+      title={`${meeting.time} - ${meeting.client.name} (${meeting.type}) - ${source}`}
+    >
+      {/* 상단: 시간 & 상태 */}
+      <div className="flex items-center justify-between mb-1">
+        <div className="flex items-center gap-1.5">
+          <span className="text-sm">{sourceStyle.icon}</span>
+          <span
+            className={cn('font-semibold', compact ? 'text-xs' : 'text-xs')}
+          >
+            {meeting.time}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-1">
+          <SyncStatusIndicator status={syncStatus} />
+          {!compact && (
+            <div className="w-1.5 h-1.5 bg-white/80 rounded-full"></div>
+          )}
+        </div>
+      </div>
+
+      {/* 중앙: 고객명 */}
+      <div
+        className={cn(
+          'truncate font-medium',
+          compact ? 'text-xs' : 'text-xs mb-1'
+        )}
+      >
+        {meeting.client.name}
+      </div>
+
+      {/* 하단: 미팅 타입 (compact가 아닐 때만) */}
+      {!compact && (
+        <div className="text-xs opacity-90 truncate">{meeting.type}</div>
+      )}
+
+      {/* 충돌 상태 특별 표시 */}
+      {syncStatus === 'conflict' && (
+        <div className="absolute top-1 right-1 w-2 h-2 rounded-full bg-red-400 border border-white/70 animate-pulse"></div>
+      )}
+
+      {/* 동기화됨 상태 표시 */}
+      {syncStatus === 'synced' && source !== 'surecrm' && (
+        <div className="absolute top-1 right-1 w-2 h-2 rounded-full bg-green-400 border border-white/50"></div>
+      )}
+
+      {/* 호버 시 추가 정보 표시 */}
+      <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded flex items-center justify-center">
+        <div className="text-xs text-white/90 text-center">
+          <div>{source === 'surecrm' ? 'SureCRM' : '구글 캘린더'}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// 🚀 더보기 버튼 컴포넌트
+function MoreButton({
+  count,
+  onClick,
+}: {
+  count: number;
+  onClick: (e: React.MouseEvent) => void;
+}) {
+  return (
+    <div
+      className="text-xs text-foreground bg-gradient-to-r from-primary/20 to-primary/30 p-2 rounded cursor-pointer hover:from-primary/30 hover:to-primary/40 transition-all duration-200 border border-primary/30 backdrop-blur-sm font-semibold"
+      onClick={onClick}
+    >
+      <div className="flex items-center gap-2">
+        <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></div>
+        <span>+{count}개 더 보기</span>
+      </div>
+    </div>
+  );
 }
 
 export function CalendarGrid({
@@ -119,6 +267,13 @@ export function CalendarGrid({
         day
       );
 
+      // 📊 이벤트 소스별 카운트
+      const sourceCount = dayMeetings.reduce((acc, meeting) => {
+        const source = meeting.syncInfo?.externalSource || 'surecrm';
+        acc[source] = (acc[source] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+
       days.push(
         <div
           key={day}
@@ -144,122 +299,94 @@ export function CalendarGrid({
             >
               {day}
             </span>
+
+            {/* 🎯 개선된 이벤트 카운터 */}
             {dayMeetings.length > 0 && (
-              <div className="text-xs text-muted-foreground bg-accent/40 px-2 py-1 rounded-full border border-border/30 backdrop-blur-sm">
-                {dayMeetings.length}
+              <div className="flex items-center gap-1">
+                {Object.entries(sourceCount).map(([source, count]) => {
+                  const sourceStyle =
+                    eventSourceStyles[source as EventSource] ||
+                    eventSourceStyles.surecrm;
+                  return (
+                    <div
+                      key={source}
+                      className={cn(
+                        'text-xs px-2 py-1 rounded-full border backdrop-blur-sm font-medium',
+                        `bg-gradient-to-r ${sourceStyle.gradient}`,
+                        `${sourceStyle.border}`,
+                        sourceStyle.textColor
+                      )}
+                      title={`${
+                        source === 'surecrm' ? 'SureCRM' : '구글 캘린더'
+                      }: ${count}개`}
+                    >
+                      <span className="mr-1">{sourceStyle.icon}</span>
+                      {count}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
 
-          {/* 미팅 리스트 - 새로운 레이아웃 */}
+          {/* 🎨 미팅 리스트 - 완전히 새로운 레이아웃 */}
           <div className="space-y-1.5">
             {dayMeetings.length <= 3 ? (
               // 3개 이하일 때: 풀 디스플레이
-              dayMeetings.map((meeting, index) => (
-                <div
+              dayMeetings.map((meeting) => (
+                <EventCard
                   key={meeting.id}
-                  className={cn(
-                    'text-xs p-2 rounded border border-white/20 cursor-pointer transition-all duration-200',
-                    'hover:scale-105 hover:shadow-sm backdrop-blur-sm text-white font-medium',
-                    meetingTypeColors[
-                      meeting.type as keyof typeof meetingTypeColors
-                    ]
-                  )}
+                  meeting={meeting}
+                  compact={false}
                   onClick={(e) => {
                     e.stopPropagation();
                     onMeetingClick(meeting);
                   }}
-                  title={`${meeting.time} - ${meeting.client.name} (${meeting.type})`}
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-semibold">
-                      {meeting.time}
-                    </span>
-                    <div className="w-1.5 h-1.5 bg-white/80 rounded-full"></div>
-                  </div>
-                  <div className="text-xs truncate font-medium">
-                    {meeting.client.name}
-                  </div>
-                </div>
+                />
               ))
             ) : dayMeetings.length === 4 ? (
               // 4개일 때: 3개 표시 + 1개 더보기
               <>
-                {dayMeetings.slice(0, 3).map((meeting, index) => (
-                  <div
+                {dayMeetings.slice(0, 3).map((meeting) => (
+                  <EventCard
                     key={meeting.id}
-                    className={cn(
-                      'text-xs p-1.5 rounded border border-white/20 cursor-pointer transition-all duration-200',
-                      'hover:scale-105 backdrop-blur-sm text-white font-medium',
-                      meetingTypeColors[
-                        meeting.type as keyof typeof meetingTypeColors
-                      ]
-                    )}
+                    meeting={meeting}
+                    compact={true}
                     onClick={(e) => {
                       e.stopPropagation();
                       onMeetingClick(meeting);
                     }}
-                  >
-                    <div className="flex items-center gap-1">
-                      <span className="text-xs font-semibold">
-                        {meeting.time}
-                      </span>
-                      <span className="text-xs truncate">
-                        {meeting.client.name}
-                      </span>
-                    </div>
-                  </div>
+                  />
                 ))}
-                <div
-                  className="text-xs text-muted-foreground bg-accent/60 p-1.5 rounded cursor-pointer hover:bg-accent/80 transition-colors border border-border/30 backdrop-blur-sm"
+                <MoreButton
+                  count={1}
                   onClick={(e) => {
                     e.stopPropagation();
                     onDateClick?.(cellDate);
                   }}
-                >
-                  <span className="font-medium">+1개 더</span>
-                </div>
+                />
               </>
             ) : (
               // 5개 이상일 때: 2개 표시 + n개 더보기
               <>
-                {dayMeetings.slice(0, 2).map((meeting, index) => (
-                  <div
+                {dayMeetings.slice(0, 2).map((meeting) => (
+                  <EventCard
                     key={meeting.id}
-                    className={cn(
-                      'text-xs p-1.5 rounded border border-white/20 cursor-pointer transition-all duration-200',
-                      'hover:scale-105 backdrop-blur-sm text-white font-medium',
-                      meetingTypeColors[
-                        meeting.type as keyof typeof meetingTypeColors
-                      ]
-                    )}
+                    meeting={meeting}
+                    compact={true}
                     onClick={(e) => {
                       e.stopPropagation();
                       onMeetingClick(meeting);
                     }}
-                  >
-                    <div className="flex items-center gap-1">
-                      <span className="text-xs font-semibold">
-                        {meeting.time}
-                      </span>
-                      <span className="text-xs truncate">
-                        {meeting.client.name}
-                      </span>
-                    </div>
-                  </div>
+                  />
                 ))}
-                <div
-                  className="text-xs text-foreground bg-gradient-to-r from-primary/20 to-primary/30 p-2 rounded cursor-pointer hover:from-primary/30 hover:to-primary/40 transition-all duration-200 border border-primary/30 backdrop-blur-sm font-semibold"
+                <MoreButton
+                  count={dayMeetings.length - 2}
                   onClick={(e) => {
                     e.stopPropagation();
                     onDateClick?.(cellDate);
                   }}
-                >
-                  <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></div>
-                    <span>+{dayMeetings.length - 2}개 더 보기</span>
-                  </div>
-                </div>
+                />
               </>
             )}
           </div>
@@ -267,6 +394,14 @@ export function CalendarGrid({
           {/* 오늘 표시 효과 */}
           {isToday && (
             <div className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full animate-pulse shadow-sm" />
+          )}
+
+          {/* 🔄 동기화 충돌 전체 표시 */}
+          {dayMeetings.some((m) => m.syncInfo?.syncStatus === 'conflict') && (
+            <div
+              className="absolute bottom-2 right-2 w-3 h-3 bg-red-500 rounded-full animate-pulse border-2 border-white shadow-lg"
+              title="동기화 충돌이 있는 이벤트가 있습니다"
+            />
           )}
         </div>
       );
