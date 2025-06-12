@@ -66,12 +66,12 @@ export function Sidebar({ className, onClose }: SidebarProps) {
     //   href: '/team',
     //   icon: <UserPlus className="h-5 w-5" />,
     // },
-    // 🗓️ 일정 관리 - 구글 캘린더 연동 후 활성화 예정
-    // {
-    //   label: '일정 관리',
-    //   href: '/calendar',
-    //   icon: <Calendar className="h-5 w-5" />,
-    // },
+    // 🗓️ 일정 관리 - 구글 캘린더 연동 활성화
+    {
+      label: '일정 관리',
+      href: '/calendar',
+      icon: <Calendar className="h-5 w-5" />,
+    },
     {
       label: '초대장 관리',
       href: '/invitations',

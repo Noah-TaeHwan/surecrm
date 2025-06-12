@@ -1,10 +1,9 @@
-// import type { Route } from './+types/calendar-page'; // 현재 라우트로 등록되지 않음
-namespace Route {
-  export type LoaderArgs = any;
-  export type ActionArgs = any;
-  export type MetaArgs = any;
-  export type ComponentProps = any;
+// 라우트 타입 - calendar.tsx에서 사용
+interface CalendarPageProps {
+  loaderData: any;
+  actionData?: any;
 }
+
 import { Button } from '~/common/components/ui/button';
 import {
   Card,
@@ -14,59 +13,18 @@ import {
   CardTitle,
 } from '~/common/components/ui/card';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '~/common/components/ui/dialog';
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '~/common/components/ui/form';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '~/common/components/ui/select';
-import { Input } from '~/common/components/ui/input';
-import { Textarea } from '~/common/components/ui/textarea';
-import { Badge } from '~/common/components/ui/badge';
-import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from '~/common/components/ui/tabs';
-import { Label } from '~/common/components/ui/label';
-import { Checkbox } from '~/common/components/ui/checkbox';
-import { Avatar, AvatarFallback } from '~/common/components/ui/avatar';
 import {
   CalendarIcon,
-  ClockIcon,
-  PersonIcon,
   PlusIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  CheckIcon,
-  Cross2Icon,
-  BellIcon,
-  FileTextIcon,
 } from '@radix-ui/react-icons';
-import { Link, redirect } from 'react-router';
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
 import { MainLayout } from '~/common/layouts/main-layout';
 import { cn } from '~/lib/utils';
 import { CalendarGrid } from '../components/calendar-grid';
@@ -77,181 +35,10 @@ import { AddMeetingModal } from '../components/add-meeting-modal';
 import { MeetingDetailModal } from '../components/meeting-detail-modal';
 import { type Meeting, type Client, type ViewMode } from '../types/types';
 
-// 실제 데이터베이스 연결 함수들 import
-import {
-  getMeetingsByMonth,
-  getClientsByAgent,
-  createMeeting,
-  updateMeeting,
-  deleteMeeting,
-  toggleChecklistItem,
-  type CalendarMeeting,
-  type CalendarClient,
-} from '../lib/calendar-data';
-import { requireAuth } from '~/lib/auth/middleware';
-
-// 미팅 폼 스키마
-const meetingSchema = z.object({
-  title: z.string().min(1, '제목을 입력하세요'),
-  clientId: z.string().min(1, '고객을 선택하세요'),
-  date: z.string(),
-  time: z.string(),
-  duration: z.number().min(15).max(480),
-  type: z.string(),
-  location: z.string(),
-  description: z.string().optional(),
-  reminder: z.string(),
-  repeat: z.string(),
-});
-
-type MeetingFormData = z.infer<typeof meetingSchema>;
-
-export async function loader({ request }: Route.LoaderArgs) {
-  try {
-    // 인증 확인
-    const user = await requireAuth(request);
-    const agentId = user.id;
-
-    // 현재 날짜 정보
-    const today = new Date();
-    const currentMonth = today.getMonth() + 1; // 1-12
-    const currentYear = today.getFullYear();
-
-    // 실제 데이터베이스에서 데이터 조회
-    const [meetings, clients] = await Promise.all([
-      getMeetingsByMonth(agentId, currentYear, currentMonth),
-      getClientsByAgent(agentId),
-    ]);
-
-    return {
-      meetings: meetings,
-      clients: clients,
-      currentMonth,
-      currentYear,
-      agentId,
-    };
-  } catch (error) {
-    console.error('Calendar 데이터 로딩 실패:', error);
-
-    // 에러 시 빈 배열 반환
-    const today = new Date();
-    return {
-      meetings: [],
-      clients: [],
-      currentMonth: today.getMonth() + 1,
-      currentYear: today.getFullYear(),
-      agentId: 'error-fallback',
-    };
-  }
-}
-
-export async function action({ request }: Route.ActionArgs) {
-  try {
-    // 인증 확인
-    const user = await requireAuth(request);
-    const agentId = user.id;
-
-    const formData = await request.formData();
-    const actionType = formData.get('actionType') as string;
-
-    switch (actionType) {
-      case 'createMeeting': {
-        const title = formData.get('title') as string;
-        const clientId = formData.get('clientId') as string;
-        const date = formData.get('date') as string;
-        const time = formData.get('time') as string;
-        const duration = parseInt(formData.get('duration') as string);
-        const meetingType = formData.get('type') as string;
-        const location = formData.get('location') as string;
-        const description = formData.get('description') as string;
-
-        // 예약 시간 계산 (scheduledAt 필드 사용)
-        const [year, month, day] = date.split('-').map(Number);
-        const [hour, minute] = time.split(':').map(Number);
-
-        const scheduledAt = new Date(year, month - 1, day, hour, minute);
-
-        await createMeeting(agentId, {
-          title,
-          clientId,
-          scheduledAt,
-          duration, // 분 단위로 전달
-          location,
-          meetingType,
-          description,
-        });
-
-        return { success: true, message: '미팅이 성공적으로 생성되었습니다.' };
-      }
-
-      case 'updateMeeting': {
-        const meetingId = formData.get('meetingId') as string;
-        const title = formData.get('title') as string;
-        const date = formData.get('date') as string;
-        const time = formData.get('time') as string;
-        const duration = parseInt(formData.get('duration') as string);
-        const location = formData.get('location') as string;
-        const description = formData.get('description') as string;
-        const status = formData.get('status') as string;
-
-        // 예약 시간 계산 (scheduledAt 필드 사용)
-        const [year, month, day] = date.split('-').map(Number);
-        const [hour, minute] = time.split(':').map(Number);
-
-        const scheduledAt = new Date(year, month - 1, day, hour, minute);
-
-        await updateMeeting(meetingId, agentId, {
-          title,
-          scheduledAt,
-          duration, // 분 단위로 전달
-          location,
-          description,
-          status: status as any,
-        });
-
-        return { success: true, message: '미팅이 성공적으로 수정되었습니다.' };
-      }
-
-      case 'deleteMeeting': {
-        const meetingId = formData.get('meetingId') as string;
-
-        await deleteMeeting(meetingId, agentId);
-
-        return { success: true, message: '미팅이 성공적으로 삭제되었습니다.' };
-      }
-
-      case 'toggleChecklist': {
-        const meetingId = formData.get('meetingId') as string;
-        const checklistId = formData.get('checklistId') as string;
-
-        await toggleChecklistItem(checklistId, meetingId, agentId);
-
-        return { success: true, message: '체크리스트가 업데이트되었습니다.' };
-      }
-
-      default:
-        return { success: false, message: '알 수 없는 액션입니다.' };
-    }
-  } catch (error) {
-    console.error('Calendar 액션 실행 실패:', error);
-    return {
-      success: false,
-      message: '작업 중 오류가 발생했습니다. 다시 시도해주세요.',
-    };
-  }
-}
-
-export function meta({ data, params }: Route.MetaArgs) {
-  return [
-    { title: '일정 관리 - SureCRM' },
-    { name: 'description', content: '고객 미팅과 일정을 관리합니다' },
-  ];
-}
-
 export default function CalendarPage({
   loaderData,
   actionData,
-}: Route.ComponentProps) {
+}: CalendarPageProps) {
   const { meetings, clients } = loaderData;
 
   const [viewMode, setViewMode] = useState<ViewMode>('month');
@@ -411,14 +198,13 @@ export default function CalendarPage({
               </TabsList>
             </Tabs>
 
-            <Dialog open={isAddMeetingOpen} onOpenChange={setIsAddMeetingOpen}>
-              <DialogTrigger asChild>
-                <Button className="shadow-sm">
-                  <PlusIcon className="mr-2 h-4 w-4" />
-                  미팅 예약
-                </Button>
-              </DialogTrigger>
-            </Dialog>
+            <Button
+              className="shadow-sm"
+              onClick={() => setIsAddMeetingOpen(true)}
+            >
+              <PlusIcon className="mr-2 h-4 w-4" />
+              미팅 예약
+            </Button>
           </div>
         </div>
 
@@ -445,35 +231,10 @@ export default function CalendarPage({
                   >
                     <PlusIcon className="mr-2 h-5 w-5" />첫 미팅 예약하기
                   </Button>
-                  <Button variant="outline" asChild className="w-full">
-                    <Link to="/clients">고객 등록하기</Link>
+                  <Button variant="outline" className="w-full">
+                    고객 등록하기
                   </Button>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-        ) : meetings.length === 0 ? (
-          <div className="text-center py-16">
-            <Card className="max-w-md mx-auto shadow-lg border border-border/50 bg-gradient-to-br from-card/90 to-card/70 backdrop-blur-sm">
-              <CardContent className="pt-8 pb-8">
-                <div className="p-6 bg-muted/20 rounded-full w-fit mx-auto mb-6">
-                  <BellIcon className="w-16 h-16 text-muted-foreground/50" />
-                </div>
-                <h3 className="text-2xl font-bold text-foreground mb-3">
-                  예정된 미팅이 없습니다
-                </h3>
-                <p className="text-muted-foreground mb-6 leading-relaxed">
-                  등록된 고객은 {clients.length}명이지만,
-                  <br />
-                  예정된 미팅이 없습니다. 새로운 미팅을 예약해보세요.
-                </p>
-                <Button
-                  onClick={() => setIsAddMeetingOpen(true)}
-                  className="w-full"
-                  size="lg"
-                >
-                  <PlusIcon className="mr-2 h-5 w-5" />새 미팅 예약하기
-                </Button>
               </CardContent>
             </Card>
           </div>
