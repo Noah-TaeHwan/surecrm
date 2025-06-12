@@ -531,6 +531,18 @@ export default function SettingsPage({
   const [realtimeSync, setRealtimeSync] = useState(false);
   const [isTogglingRealtime, setIsTogglingRealtime] = useState(false);
 
+  // 🕐 클라이언트 사이드 시간 표시 (Hydration 오류 방지)
+  const [clientDateTime, setClientDateTime] = useState<string | null>(null);
+
+  // 클라이언트에서만 시간 포맷팅
+  useEffect(() => {
+    if (calendarSettings?.lastSyncAt) {
+      setClientDateTime(
+        new Date(calendarSettings.lastSyncAt).toLocaleString('ko-KR')
+      );
+    }
+  }, [calendarSettings?.lastSyncAt]);
+
   // 액션 완료 후 상태 리셋
   useEffect(() => {
     if (actionData?.success !== undefined) {
@@ -991,13 +1003,7 @@ export default function SettingsPage({
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {calendarSettings?.syncStatus === 'connected'
-                        ? `마지막 동기화: ${
-                            calendarSettings.lastSyncAt
-                              ? new Date(
-                                  calendarSettings.lastSyncAt
-                                ).toLocaleString('ko-KR')
-                              : '정보 없음'
-                          }`
+                        ? `마지막 동기화: ${clientDateTime || '정보 없음'}`
                         : calendarSettings?.syncStatus === 'error'
                         ? '연동에 문제가 발생했습니다'
                         : '구글 계정을 연결하여 캘린더를 동기화하세요'}

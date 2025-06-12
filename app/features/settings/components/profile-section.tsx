@@ -11,13 +11,25 @@ import { Avatar, AvatarFallback } from '~/common/components/ui/avatar';
 import { Badge } from '~/common/components/ui/badge';
 import { Label } from '~/common/components/ui/label';
 import { CheckIcon, Pencil1Icon, PersonIcon } from '@radix-ui/react-icons';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Form, useSubmit } from 'react-router';
 import type { ProfileSectionProps } from '../types';
 
 export function ProfileSection({ profile, onUpdate }: ProfileSectionProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // 🕐 클라이언트 사이드 시간 표시 (Hydration 오류 방지)
+  const [lastLoginDisplay, setLastLoginDisplay] = useState<string | null>(null);
+
+  // 클라이언트에서만 마지막 로그인 시간 포맷팅
+  useEffect(() => {
+    if (profile.lastLoginAt) {
+      setLastLoginDisplay(
+        new Date(profile.lastLoginAt).toLocaleString('ko-KR')
+      );
+    }
+  }, [profile.lastLoginAt]);
   const submit = useSubmit();
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -120,10 +132,9 @@ export function ProfileSection({ profile, onUpdate }: ProfileSectionProps) {
                 📍 {profile.company}
               </p>
             )}
-            {profile.lastLoginAt && (
+            {lastLoginDisplay && (
               <p className="text-sm text-muted-foreground">
-                🕐 마지막 로그인:{' '}
-                {new Date(profile.lastLoginAt).toLocaleString('ko-KR')}
+                🕐 마지막 로그인: {lastLoginDisplay}
               </p>
             )}
           </div>
