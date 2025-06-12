@@ -130,7 +130,7 @@ export function MainLayout({
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
   return (
-    <div className="h-screen bg-background flex overflow-hidden">
+    <div className="fixed inset-0 bg-background flex overflow-hidden">
       {/* 데스크톱 사이드바 */}
       {!isMobile && (
         <div className="w-64 border-r border-border bg-muted/30 flex-shrink-0">
