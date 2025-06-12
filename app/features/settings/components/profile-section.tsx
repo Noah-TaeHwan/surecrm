@@ -20,10 +20,12 @@ export function ProfileSection({ profile, onUpdate }: ProfileSectionProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // 🕐 클라이언트 사이드 시간 표시 (Hydration 오류 방지)
-  const [lastLoginDisplay, setLastLoginDisplay] = useState<string | null>(null);
+  const [lastLoginDisplay, setLastLoginDisplay] = useState<string>('미설정');
+  const [isMounted, setIsMounted] = useState(false);
 
   // 클라이언트에서만 마지막 로그인 시간 포맷팅
   useEffect(() => {
+    setIsMounted(true);
     if (profile.lastLoginAt) {
       setLastLoginDisplay(
         new Date(profile.lastLoginAt).toLocaleString('ko-KR')
@@ -132,9 +134,9 @@ export function ProfileSection({ profile, onUpdate }: ProfileSectionProps) {
                 📍 {profile.company}
               </p>
             )}
-            {lastLoginDisplay && (
+            {profile.lastLoginAt && (
               <p className="text-sm text-muted-foreground">
-                🕐 마지막 로그인: {lastLoginDisplay}
+                🕐 마지막 로그인: {isMounted ? lastLoginDisplay : '미설정'}
               </p>
             )}
           </div>
