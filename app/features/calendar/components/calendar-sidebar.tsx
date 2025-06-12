@@ -73,17 +73,53 @@ export function CalendarSidebar({
     return meetingDate >= weekStart && meetingDate <= weekEnd;
   });
 
-  const meetingStats = Object.entries(meetingTypeColors).map(
-    ([type, color]) => ({
+  // 🎯 의미있는 비즈니스 KPI 계산
+  const totalThisWeek = thisWeekMeetings.length;
+  const completedMeetings = thisWeekMeetings.filter(
+    (m) => m.status === 'completed'
+  ).length;
+  const contractMeetings = thisWeekMeetings.filter(
+    (m) => m.type === 'contract_signing' || m.type === 'contract_review'
+  ).length;
+
+  // 계약 전환율 계산 (초회 상담 → 계약 체결)
+  const consultationMeetings = thisWeekMeetings.filter(
+    (m) => m.type === 'first_consultation'
+  ).length;
+  const contractSuccessRate =
+    consultationMeetings > 0
+      ? Math.round((contractMeetings / consultationMeetings) * 100)
+      : 0;
+
+  // 평균 미팅 소요 시간
+  const avgDuration =
+    totalThisWeek > 0
+      ? Math.round(
+          thisWeekMeetings.reduce((sum, m) => sum + m.duration, 0) /
+            totalThisWeek
+        )
+      : 0;
+
+  // 우선순위별 분포 (priority 필드 활용)
+  const urgentMeetings = thisWeekMeetings.filter(
+    (m) => (m as any)?.priority === 'urgent'
+  ).length;
+  const highPriorityMeetings = thisWeekMeetings.filter(
+    (m) => (m as any)?.priority === 'high'
+  ).length;
+
+  // 미팅 유형별 통계 (구글 일정 제외하고 의미있는 것만)
+  const meaningfulStats = Object.entries(meetingTypeColors)
+    .filter(([type]) => type !== 'google') // 구글 일정 제외
+    .map(([type, color]) => ({
       type,
       koreanName:
         meetingTypeKoreanMap[type as keyof typeof meetingTypeKoreanMap] || type,
       color,
       count: thisWeekMeetings.filter((m) => m.type === type).length,
-    })
-  );
-
-  const totalThisWeek = thisWeekMeetings.length;
+    }))
+    .filter((stat) => stat.count > 0) // 0개인 항목 제외
+    .sort((a, b) => b.count - a.count); // 많은 순으로 정렬
 
   // 필터 관련 함수
   const allMeetingTypes = Object.keys(meetingTypeColors);
@@ -255,47 +291,101 @@ export function CalendarSidebar({
         </CardContent>
       </Card>
 
-      {/* 이번 주 통계 */}
+      {/* 🎯 이번 주 성과 지표 */}
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-base flex items-center gap-2">
             <BarChartIcon className="h-4 w-4 text-primary" />
-            <span>이번 주 통계</span>
+            <span>이번 주 성과</span>
           </CardTitle>
           <CardDescription className="text-sm">
-            총 {totalThisWeek}개 미팅 예정
+            총 {totalThisWeek}개 미팅 • {completedMeetings}개 완료
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-0">
-          <div className="space-y-3">
-            {meetingStats
-              .filter((stat) => stat.count > 0)
-              .map((stat) => (
-                <div key={stat.type} className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className={cn('w-3 h-3 rounded-full', stat.color)} />
-                      <span className="text-sm">{stat.koreanName}</span>
-                    </div>
-                    <span className="text-sm font-medium">{stat.count}개</span>
+          {totalThisWeek > 0 ? (
+            <div className="space-y-4">
+              {/* 핵심 KPI 그리드 */}
+              <div className="grid grid-cols-2 gap-3 text-center">
+                <div className="p-3 bg-green-50 rounded-lg border border-green-100">
+                  <div className="text-lg font-bold text-green-700">
+                    {contractSuccessRate}%
                   </div>
-                  <Progress
-                    value={
-                      totalThisWeek > 0 ? (stat.count / totalThisWeek) * 100 : 0
-                    }
-                    className="h-2"
-                  />
+                  <div className="text-xs text-green-600">계약 전환율</div>
                 </div>
-              ))}
-            {totalThisWeek === 0 && (
-              <div className="text-center py-6">
-                <ActivityLogIcon className="mx-auto h-6 w-6 text-muted-foreground mb-2" />
-                <p className="text-xs text-muted-foreground">
-                  이번 주 예정된 미팅이 없습니다
-                </p>
+                <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
+                  <div className="text-lg font-bold text-blue-700">
+                    {avgDuration}분
+                  </div>
+                  <div className="text-xs text-blue-600">평균 소요시간</div>
+                </div>
               </div>
-            )}
-          </div>
+
+              {/* 우선순위별 현황 */}
+              {(urgentMeetings > 0 || highPriorityMeetings > 0) && (
+                <div className="space-y-2">
+                  <div className="text-sm font-medium text-muted-foreground">
+                    우선순위별 현황
+                  </div>
+                  {urgentMeetings > 0 && (
+                    <div className="flex items-center justify-between p-2 bg-red-50 rounded">
+                      <div className="flex items-center gap-2 text-sm">
+                        <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                        <span className="text-red-700">긴급</span>
+                      </div>
+                      <span className="text-sm font-medium text-red-700">
+                        {urgentMeetings}개
+                      </span>
+                    </div>
+                  )}
+                  {highPriorityMeetings > 0 && (
+                    <div className="flex items-center justify-between p-2 bg-orange-50 rounded">
+                      <div className="flex items-center gap-2 text-sm">
+                        <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                        <span className="text-orange-700">높음</span>
+                      </div>
+                      <span className="text-sm font-medium text-orange-700">
+                        {highPriorityMeetings}개
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* 미팅 유형별 TOP 3 */}
+              {meaningfulStats.length > 0 && (
+                <div className="space-y-2">
+                  <div className="text-sm font-medium text-muted-foreground">
+                    주요 미팅 유형
+                  </div>
+                  {meaningfulStats.slice(0, 3).map((stat) => (
+                    <div
+                      key={stat.type}
+                      className="flex items-center justify-between text-sm"
+                    >
+                      <div className="flex items-center gap-2">
+                        <div
+                          className={cn('w-2 h-2 rounded-full', stat.color)}
+                        />
+                        <span>{stat.koreanName}</span>
+                      </div>
+                      <span className="font-medium">{stat.count}개</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="text-center py-6">
+              <ActivityLogIcon className="mx-auto h-6 w-6 text-muted-foreground mb-2" />
+              <p className="text-sm text-muted-foreground mb-1">
+                이번 주 예정된 미팅이 없습니다
+              </p>
+              <p className="text-xs text-muted-foreground">
+                새로운 미팅을 예약하여 성과를 관리하세요
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
 

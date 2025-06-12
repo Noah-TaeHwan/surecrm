@@ -1,29 +1,97 @@
-// 미팅 유형별 색상
+// 🎯 통일된 미팅 유형 정의 (새 미팅 예약 모달과 필터 동기화)
 export const meetingTypeColors = {
-  consultation: 'bg-blue-500 hover:bg-blue-600',
-  follow_up: 'bg-green-500 hover:bg-green-600',
-  presentation: 'bg-purple-500 hover:bg-purple-600',
-  contract_signing: 'bg-orange-500 hover:bg-orange-600',
+  first_consultation: 'bg-emerald-500 hover:bg-emerald-600',
+  follow_up: 'bg-blue-500 hover:bg-blue-600',
+  product_explanation: 'bg-purple-500 hover:bg-purple-600',
+  contract_review: 'bg-orange-500 hover:bg-orange-600',
+  contract_signing: 'bg-green-600 hover:bg-green-700',
   claim_support: 'bg-red-500 hover:bg-red-600',
-  renewal: 'bg-teal-500 hover:bg-teal-600',
   other: 'bg-gray-500 hover:bg-gray-600',
-  // 🌐 구글 캘린더 이벤트 색상
+  // 🌐 구글 캘린더 이벤트 색상 (구분용)
   google:
     'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700',
 } as const;
 
 export type MeetingType = keyof typeof meetingTypeColors;
 
-// 🌍 한국어 미팅 타입 매핑 (MVP 한국어 UI)
+// 🌍 통일된 한국어 미팅 타입 매핑 (MVP 한국어 UI)
 export const meetingTypeKoreanMap = {
-  consultation: '상담',
+  first_consultation: '초회 상담',
   follow_up: '후속 상담',
-  presentation: '설명회',
+  product_explanation: '상품 설명',
+  contract_review: '계약 검토',
   contract_signing: '계약 체결',
-  claim_support: '보험금 청구',
-  renewal: '갱신 상담',
+  claim_support: '보험금 청구 지원',
   other: '기타',
   google: '구글 일정',
+} as const;
+
+// 🎯 미팅 유형별 상세 정보 (새 미팅 예약 모달과 동일)
+export const meetingTypeDetails = {
+  first_consultation: {
+    label: '초회 상담',
+    description: '신규 고객과의 첫 상담',
+    icon: '🤝',
+    googleCategory: 'consultation',
+    expectedDuration: 60,
+    priority: 'high' as const,
+  },
+  follow_up: {
+    label: '후속 상담',
+    description: '기존 고객 후속 미팅',
+    icon: '📞',
+    googleCategory: 'follow-up',
+    expectedDuration: 45,
+    priority: 'medium' as const,
+  },
+  product_explanation: {
+    label: '상품 설명',
+    description: '보험 상품 상세 설명',
+    icon: '📋',
+    googleCategory: 'presentation',
+    expectedDuration: 90,
+    priority: 'high' as const,
+  },
+  contract_review: {
+    label: '계약 검토',
+    description: '계약서 검토 및 서명 준비',
+    icon: '📄',
+    googleCategory: 'contract',
+    expectedDuration: 60,
+    priority: 'high' as const,
+  },
+  contract_signing: {
+    label: '계약 체결',
+    description: '최종 계약 체결 미팅',
+    icon: '✍️',
+    googleCategory: 'contract',
+    expectedDuration: 90,
+    priority: 'urgent' as const,
+  },
+  claim_support: {
+    label: '보험금 청구 지원',
+    description: '보험금 청구 관련 상담',
+    icon: '🆘',
+    googleCategory: 'support',
+    expectedDuration: 75,
+    priority: 'urgent' as const,
+  },
+  other: {
+    label: '기타',
+    description: '기타 미팅',
+    icon: '📝',
+    googleCategory: 'other',
+    expectedDuration: 60,
+    priority: 'medium' as const,
+  },
+  google: {
+    label: '구글 일정',
+    description: '구글 캘린더에서 가져온 이벤트',
+    icon: '📅',
+    googleCategory: 'imported',
+    expectedDuration: 60,
+    priority: 'medium' as const,
+  },
 } as const;
 
 // 🎨 이벤트 소스별 스타일링 시스템

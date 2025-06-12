@@ -46,6 +46,7 @@ import {
   VideoIcon,
   MobileIcon,
 } from '@radix-ui/react-icons';
+import { MapPin } from 'lucide-react';
 import { Link } from 'react-router';
 import { cn } from '~/lib/utils';
 import {
@@ -144,14 +145,50 @@ export function MeetingDetailModal({
   const progressPercentage =
     totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
 
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      weekday: 'long',
-    });
+  const formatDate = (dateStr: string, endDateStr?: string) => {
+    const startDate = new Date(dateStr);
+
+    // 단일 날짜인 경우
+    if (!endDateStr) {
+      return startDate.toLocaleDateString('ko-KR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        weekday: 'long',
+      });
+    }
+
+    // 날짜 범위인 경우 (예: 2024년 1월 1일 ~ 3일)
+    const endDate = new Date(endDateStr);
+    const isSameMonth = startDate.getMonth() === endDate.getMonth();
+    const isSameYear = startDate.getFullYear() === endDate.getFullYear();
+
+    if (isSameYear && isSameMonth) {
+      return `${startDate.toLocaleDateString('ko-KR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })} ~ ${endDate.getDate()}일`;
+    } else if (isSameYear) {
+      return `${startDate.toLocaleDateString('ko-KR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })} ~ ${endDate.toLocaleDateString('ko-KR', {
+        month: 'long',
+        day: 'numeric',
+      })}`;
+    } else {
+      return `${startDate.toLocaleDateString('ko-KR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })} ~ ${endDate.toLocaleDateString('ko-KR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })}`;
+    }
   };
 
   const getDurationText = (duration: number) => {
@@ -162,6 +199,12 @@ export function MeetingDetailModal({
     }
     return `${minutes}분`;
   };
+
+  // 🌐 구글 캘린더 연동 상태 확인
+  const isGoogleSynced =
+    (meeting as any)?.syncToGoogle ||
+    (meeting as any)?.syncInfo?.externalSource === 'google_calendar';
+  const googleSyncStatus = (meeting as any)?.syncInfo?.status || 'not_synced';
 
   // 노트 관리 함수
   const handleAddNote = () => {
@@ -357,6 +400,28 @@ export function MeetingDetailModal({
               <DialogDescription className="text-base text-muted-foreground">
                 미팅 상세 정보 및 체크리스트
               </DialogDescription>
+
+              {/* 🌐 구글 캘린더 연동 상태 뱃지 */}
+              <div className="flex items-center gap-2">
+                {isGoogleSynced && (
+                  <Badge
+                    variant="secondary"
+                    className="bg-green-100 text-green-800 border-green-200 hover:bg-green-200 transition-colors"
+                  >
+                    <GlobeIcon className="w-3 h-3 mr-1" />
+                    구글 캘린더 연동됨
+                  </Badge>
+                )}
+                {(meeting as any)?.syncInfo?.externalSource ===
+                  'google_calendar' && (
+                  <Badge
+                    variant="outline"
+                    className="bg-blue-50 text-blue-700 border-blue-200"
+                  >
+                    구글에서 가져온 미팅
+                  </Badge>
+                )}
+              </div>
             </div>
             {isEditingMeeting ? (
               <Select
@@ -392,7 +457,7 @@ export function MeetingDetailModal({
         </DialogHeader>
 
         <div className="space-y-8">
-          {/* 기본 정보 */}
+          {/* 기본 정보 - 개선된 표시 */}
           <div className="grid grid-cols-2 gap-6">
             <div className="space-y-3">
               <div className="flex items-center gap-3 text-sm text-muted-foreground">
@@ -412,8 +477,53 @@ export function MeetingDetailModal({
                   className="font-semibold text-lg pl-8"
                 />
               ) : (
-                <div className="font-semibold text-lg pl-8">
-                  {formatDate(meeting.date)}
+                <div className="pl-8 space-y-2">
+                  {meeting.date ? (
+                    <>
+                      <div className="font-semibold text-lg">
+                        {formatDate(meeting.date)}
+                      </div>
+                      {/* 미팅 상태 표시 */}
+                      <div className="flex items-center gap-2">
+                        {meeting.status === 'scheduled' && (
+                          <Badge
+                            variant="outline"
+                            className="text-xs bg-blue-50 text-blue-700 border-blue-200"
+                          >
+                            📅 예정됨
+                          </Badge>
+                        )}
+                        {meeting.status === 'completed' && (
+                          <Badge
+                            variant="outline"
+                            className="text-xs bg-green-50 text-green-700 border-green-200"
+                          >
+                            ✅ 완료됨
+                          </Badge>
+                        )}
+                        {meeting.status === 'cancelled' && (
+                          <Badge
+                            variant="outline"
+                            className="text-xs bg-red-50 text-red-700 border-red-200"
+                          >
+                            ❌ 취소됨
+                          </Badge>
+                        )}
+                        {meeting.status === 'rescheduled' && (
+                          <Badge
+                            variant="outline"
+                            className="text-xs bg-orange-50 text-orange-700 border-orange-200"
+                          >
+                            🔄 일정 변경됨
+                          </Badge>
+                        )}
+                      </div>
+                    </>
+                  ) : (
+                    <span className="text-muted-foreground italic font-semibold text-lg">
+                      날짜 미설정
+                    </span>
+                  )}
                 </div>
               )}
             </div>
@@ -459,13 +569,19 @@ export function MeetingDetailModal({
                 </div>
               ) : (
                 <div className="font-semibold text-lg pl-8">
-                  {meeting.time} ({getDurationText(meeting.duration)})
+                  {meeting.time ? (
+                    `${meeting.time} (${getDurationText(meeting.duration)})`
+                  ) : (
+                    <span className="text-muted-foreground italic">
+                      시간 미설정
+                    </span>
+                  )}
                 </div>
               )}
             </div>
             <div className="space-y-3">
               <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                <GlobeIcon className="w-5 h-5" />
+                <MapPin className="w-5 h-5" />
                 <span className="font-medium">장소</span>
               </div>
               {isEditingMeeting ? (
@@ -482,7 +598,13 @@ export function MeetingDetailModal({
                 />
               ) : (
                 <div className="font-semibold text-lg pl-8">
-                  {meeting.location}
+                  {meeting.location && meeting.location.trim() ? (
+                    meeting.location
+                  ) : (
+                    <span className="text-muted-foreground italic">
+                      장소 미설정
+                    </span>
+                  )}
                 </div>
               )}
             </div>
@@ -492,14 +614,36 @@ export function MeetingDetailModal({
                 <span className="font-medium">고객</span>
               </div>
               <div className="flex items-center gap-3 pl-8">
-                <Avatar className="h-8 w-8">
-                  <AvatarFallback className="text-sm font-medium">
-                    {meeting.client.name[0]}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="font-semibold text-lg">
-                  {meeting.client.name}
-                </span>
+                {meeting.client && meeting.client.id ? (
+                  <>
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback className="text-sm font-medium">
+                        {meeting.client.name ? meeting.client.name[0] : '?'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col">
+                      <span className="font-semibold text-lg">
+                        {meeting.client.name || '고객명 없음'}
+                      </span>
+                      {meeting.client.phone && (
+                        <span className="text-sm text-muted-foreground">
+                          {meeting.client.phone}
+                        </span>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback className="text-sm font-medium bg-muted">
+                        ?
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="font-semibold text-lg text-muted-foreground italic">
+                      고객 미설정
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -740,7 +884,31 @@ export function MeetingDetailModal({
               <CardTitle className="text-lg flex items-center gap-2">
                 <GlobeIcon className="h-5 w-5" />
                 구글 캘린더 연동
+                {/* 연동 상태 표시 */}
+                {isGoogleSynced && (
+                  <Badge
+                    variant="secondary"
+                    className="ml-2 bg-green-100 text-green-800 text-xs"
+                  >
+                    연동됨
+                  </Badge>
+                )}
+                {(meeting as any)?.syncInfo?.externalSource ===
+                  'google_calendar' && (
+                  <Badge
+                    variant="outline"
+                    className="ml-2 bg-blue-50 text-blue-700 text-xs"
+                  >
+                    구글에서 가져옴
+                  </Badge>
+                )}
               </CardTitle>
+              {/* 연동 상태 설명 */}
+              <p className="text-sm text-muted-foreground mt-1">
+                {isGoogleSynced
+                  ? '이 미팅은 구글 캘린더와 자동으로 동기화됩니다'
+                  : '구글 캘린더 연동이 비활성화되어 있습니다'}
+              </p>
             </CardHeader>
             <CardContent className="space-y-3 px-4">
               <div className="grid grid-cols-3 gap-4">

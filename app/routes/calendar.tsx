@@ -224,8 +224,10 @@ export async function action({ request }: Route.ActionArgs) {
           reminder,
         });
 
-        // 🌐 구글 캘린더 동기화 (옵션이 활성화된 경우)
+        // 🌐 구글 캘린더 동기화 (중복 생성 방지)
         let googleEventId = null;
+        let syncResult = 'local_only';
+
         if (syncToGoogle && meeting) {
           try {
             const { GoogleCalendarService } = await import(
@@ -233,27 +235,46 @@ export async function action({ request }: Route.ActionArgs) {
             );
             const googleService = new GoogleCalendarService();
 
-            // 구글 캘린더에 이벤트 생성
-            googleEventId = await googleService.createEventFromMeeting(
-              agentId,
-              meeting
-            );
+            // 구글 캘린더 연동 상태 확인
+            const settings = await googleService.getCalendarSettings(agentId);
 
-            if (googleEventId) {
-              console.log('✅ 구글 캘린더 동기화 성공:', googleEventId);
+            if (settings?.googleAccessToken) {
+              // 구글 캘린더에 단일 이벤트로 생성 (중복 방지)
+              googleEventId = await googleService.createEventFromMeeting(
+                agentId,
+                meeting
+              );
+
+              if (googleEventId) {
+                syncResult = 'synced';
+                console.log('✅ 구글 캘린더 단일 동기화 성공:', googleEventId);
+              } else {
+                syncResult = 'sync_failed';
+              }
+            } else {
+              syncResult = 'not_connected';
             }
           } catch (error) {
             console.error('❌ 구글 캘린더 동기화 실패:', error);
-            // 구글 캘린더 연동 실패해도 SureCRM 미팅 생성은 성공으로 처리
+            syncResult = 'sync_failed';
           }
         }
 
-        const successMessage =
-          syncToGoogle && googleEventId
-            ? '미팅이 SureCRM과 구글 캘린더에 모두 생성되었습니다.'
-            : syncToGoogle && !googleEventId
-            ? '미팅은 SureCRM에 생성되었으나 구글 캘린더 동기화에 실패했습니다.'
-            : '미팅이 성공적으로 생성되었습니다.';
+        // 사용자 친화적 메시지
+        const getSuccessMessage = (result: string) => {
+          switch (result) {
+            case 'synced':
+              return '미팅이 생성되고 구글 캘린더에 자동 동기화되었습니다.';
+            case 'sync_failed':
+              return '미팅은 생성되었으나 구글 캘린더 동기화에 실패했습니다. 설정을 확인해주세요.';
+            case 'not_connected':
+              return '미팅이 생성되었습니다. 구글 캘린더 연동을 원하시면 설정에서 연결해주세요.';
+            default:
+              return '미팅이 성공적으로 생성되었습니다.';
+          }
+        };
+
+        const successMessage = getSuccessMessage(syncResult);
 
         return {
           success: true,

@@ -47,7 +47,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Link } from 'react-router';
-import { type Client } from '../types/types';
+import { type Client, meetingTypeDetails } from '../types/types';
 import {
   Card,
   CardContent,
@@ -83,65 +83,18 @@ const meetingSchema = z.object({
 
 type MeetingFormData = z.infer<typeof meetingSchema>;
 
-// 🎨 미팅 유형 정의 - 구글 캘린더 연동 최적화
-const meetingTypes = [
-  {
-    value: 'first_consultation',
-    label: '초회 상담',
-    description: '신규 고객과의 첫 상담',
-    color: 'bg-emerald-500',
-    googleCategory: 'consultation',
-    icon: '🤝',
-  },
-  {
-    value: 'follow_up',
-    label: '후속 상담',
-    description: '기존 고객 후속 미팅',
-    color: 'bg-blue-500',
-    googleCategory: 'follow-up',
-    icon: '📞',
-  },
-  {
-    value: 'product_explanation',
-    label: '상품 설명',
-    description: '보험 상품 상세 설명',
-    color: 'bg-purple-500',
-    googleCategory: 'presentation',
-    icon: '📋',
-  },
-  {
-    value: 'contract_review',
-    label: '계약 검토',
-    description: '계약서 검토 및 서명',
-    color: 'bg-orange-500',
-    googleCategory: 'contract',
-    icon: '📄',
-  },
-  {
-    value: 'contract_signing',
-    label: '계약 체결',
-    description: '최종 계약 체결 미팅',
-    color: 'bg-green-600',
-    googleCategory: 'contract',
-    icon: '✍️',
-  },
-  {
-    value: 'claim_support',
-    label: '보험금 청구 지원',
-    description: '보험금 청구 관련 상담',
-    color: 'bg-red-500',
-    googleCategory: 'support',
-    icon: '🆘',
-  },
-  {
-    value: 'other',
-    label: '기타',
-    description: '기타 미팅',
-    color: 'bg-gray-500',
-    googleCategory: 'other',
-    icon: '📝',
-  },
-];
+// 🎨 미팅 유형 배열 (통일된 정의 사용)
+const meetingTypes = Object.entries(meetingTypeDetails)
+  .filter(([key]) => key !== 'google') // 구글 이벤트는 생성 시 제외
+  .map(([value, details]) => ({
+    value,
+    label: details.label,
+    description: details.description,
+    icon: details.icon,
+    googleCategory: details.googleCategory,
+    expectedDuration: details.expectedDuration,
+    priority: details.priority,
+  }));
 
 // ⏰ 알림 옵션
 const reminderOptions = [
