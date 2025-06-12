@@ -120,6 +120,12 @@ export function ProfileSection({ profile, onUpdate }: ProfileSectionProps) {
                 📍 {profile.company}
               </p>
             )}
+            {profile.lastLoginAt && (
+              <p className="text-sm text-muted-foreground">
+                🕐 마지막 로그인:{' '}
+                {new Date(profile.lastLoginAt).toLocaleString('ko-KR')}
+              </p>
+            )}
           </div>
         </div>
 

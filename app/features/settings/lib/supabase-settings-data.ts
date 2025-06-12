@@ -10,6 +10,7 @@ export interface UserProfile {
   phone: string;
   company: string;
   position: string;
+  lastLoginAt?: string; // 마지막 로그인 시간
   createdAt?: string;
   team?: {
     id: string;
@@ -100,6 +101,7 @@ export async function getUserProfile(
         company: profiles.company,
         role: profiles.role,
         settings: profiles.settings,
+        lastLoginAt: profiles.lastLoginAt,
         createdAt: profiles.createdAt,
       })
       .from(profiles)
@@ -129,6 +131,7 @@ export async function getUserProfile(
       phone: userProfile.phone || '',
       company: userProfile.company || INSURANCE_AGENT_DEFAULTS.company,
       position: getRoleDisplayName(userProfile.role),
+      lastLoginAt: userProfile.lastLoginAt?.toString(),
       createdAt: userProfile.createdAt?.toString() || new Date().toISOString(),
       // TODO: 팀 정보는 추후 구현
     };

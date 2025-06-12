@@ -166,6 +166,45 @@ export async function sendMagicLink(
 }
 
 /**
+ * 마지막 로그인 시간 업데이트
+ */
+async function updateLastLoginTime(userId: string): Promise<void> {
+  try {
+    await db
+      .update(profiles)
+      .set({
+        lastLoginAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(profiles.id, userId));
+
+    console.log('마지막 로그인 시간 업데이트 완료:', userId);
+  } catch (error) {
+    console.error('마지막 로그인 시간 업데이트 실패:', userId, error);
+  }
+}
+
+/**
+ * 사용자 활동 시간 업데이트 (외부에서 호출 가능)
+ * 예: 중요한 액션 수행 시 호출하여 마지막 활동 시간을 기록
+ */
+export async function updateUserActivity(userId: string): Promise<void> {
+  try {
+    await db
+      .update(profiles)
+      .set({
+        lastLoginAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(profiles.id, userId));
+
+    console.log('사용자 활동 시간 업데이트 완료:', userId);
+  } catch (error) {
+    console.error('사용자 활동 시간 업데이트 실패:', userId, error);
+  }
+}
+
+/**
  * 매직링크 검증 및 로그인 처리
  */
 export async function verifyMagicLink(
@@ -225,6 +264,9 @@ export async function verifyMagicLink(
         error: '비활성화된 계정입니다. 관리자에게 문의하세요.',
       };
     }
+
+    // 4. 마지막 로그인 시간 업데이트
+    await updateLastLoginTime(profile.id);
 
     console.log('매직링크 로그인 성공:', profile.fullName);
 
@@ -307,6 +349,9 @@ export async function authenticateUser(
         error: '비활성화된 계정입니다. 관리자에게 문의하세요.',
       };
     }
+
+    // 4. 마지막 로그인 시간 업데이트
+    await updateLastLoginTime(profile.id);
 
     console.log('로그인 성공:', profile.fullName);
 

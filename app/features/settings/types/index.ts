@@ -5,6 +5,7 @@ export interface UserProfile {
   phone: string;
   company: string;
   position: string;
+  lastLoginAt?: string; // 마지막 로그인 시간
   team?: {
     id: string;
     name: string;
