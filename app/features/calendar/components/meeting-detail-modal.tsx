@@ -21,6 +21,12 @@ import {
   SelectValue,
 } from '~/common/components/ui/select';
 import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '~/common/components/ui/card';
+import {
   CalendarIcon,
   ClockIcon,
   PersonIcon,
@@ -33,6 +39,12 @@ import {
   ArrowRightIcon,
   TrashIcon,
   Pencil1Icon,
+  TargetIcon,
+  ChatBubbleIcon,
+  StarFilledIcon,
+  LightningBoltIcon,
+  VideoIcon,
+  MobileIcon,
 } from '@radix-ui/react-icons';
 import { Link } from 'react-router';
 import { cn } from '~/lib/utils';
@@ -43,6 +55,41 @@ import {
   type ChecklistItem,
 } from '../types/types';
 import { useState } from 'react';
+
+// 🎯 영업 정보 관련 데이터 (새 미팅 예약 모달과 동일)
+const priorityOptions = [
+  { value: 'low', label: '낮음', color: 'bg-gray-500' },
+  { value: 'medium', label: '보통', color: 'bg-blue-500' },
+  { value: 'high', label: '높음', color: 'bg-orange-500' },
+  { value: 'urgent', label: '긴급', color: 'bg-red-500' },
+];
+
+const expectedOutcomes = [
+  { value: 'consultation', label: '상담 진행', icon: '💬' },
+  { value: 'proposal', label: '제안서 제출', icon: '📋' },
+  { value: 'contract', label: '계약 체결', icon: '✍️' },
+  { value: 'contract_completion', label: '계약 완료', icon: '✅' },
+  { value: 'claim_support', label: '보험금 청구 지원', icon: '🛡️' },
+  { value: 'relationship_maintenance', label: '관계 유지', icon: '🤝' },
+];
+
+const contactMethods = [
+  { value: 'phone', label: '전화', icon: '📞' },
+  { value: 'video', label: '화상통화', icon: '💻' },
+  { value: 'in_person', label: '대면', icon: '👥' },
+  { value: 'hybrid', label: '혼합', icon: '🔄' },
+];
+
+const productInterests = [
+  { value: 'life_insurance', label: '생명보험', icon: '❤️' },
+  { value: 'health_insurance', label: '건강보험', icon: '🏥' },
+  { value: 'car_insurance', label: '자동차보험', icon: '🚗' },
+  { value: 'maternity_insurance', label: '태아보험', icon: '👶' },
+  { value: 'property_insurance', label: '재산보험', icon: '🏠' },
+  { value: 'pension_insurance', label: '연금보험', icon: '💰' },
+  { value: 'investment_insurance', label: '투자형 보험', icon: '📈' },
+  { value: 'comprehensive', label: '복합 상품', icon: '🎯' },
+];
 
 interface MeetingDetailModalProps {
   meeting: Meeting | null;
@@ -68,7 +115,7 @@ export function MeetingDetailModal({
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [editingText, setEditingText] = useState('');
 
-  // 미팅 정보 편집 상태
+  // 미팅 정보 편집 상태 (🎯 영업 정보 필드 추가)
   const [isEditingMeeting, setIsEditingMeeting] = useState(false);
   const [editedMeeting, setEditedMeeting] = useState({
     title: meeting?.title || '',
@@ -78,6 +125,16 @@ export function MeetingDetailModal({
     location: meeting?.location || '',
     description: meeting?.description || '',
     type: meeting?.type || '',
+    // 🎯 새로운 영업 정보 필드들
+    priority: (meeting as any)?.priority || 'medium',
+    expectedOutcome: (meeting as any)?.expectedOutcome || '',
+    contactMethod: (meeting as any)?.contactMethod || 'in_person',
+    estimatedCommission: (meeting as any)?.estimatedCommission || 0,
+    productInterest: (meeting as any)?.productInterest || '',
+    // 🌐 구글 캘린더 연동 정보
+    syncToGoogle: (meeting as any)?.syncToGoogle || false,
+    sendClientInvite: (meeting as any)?.sendClientInvite || false,
+    reminder: (meeting as any)?.reminder || '30_minutes',
   });
 
   if (!meeting) return null;
@@ -186,6 +243,14 @@ export function MeetingDetailModal({
       location: meeting.location,
       description: meeting.description || '',
       type: meeting.type,
+      priority: (meeting as any)?.priority || 'medium',
+      expectedOutcome: (meeting as any)?.expectedOutcome || '',
+      contactMethod: (meeting as any)?.contactMethod || 'in_person',
+      estimatedCommission: (meeting as any)?.estimatedCommission || 0,
+      productInterest: (meeting as any)?.productInterest || '',
+      syncToGoogle: (meeting as any)?.syncToGoogle || false,
+      sendClientInvite: (meeting as any)?.sendClientInvite || false,
+      reminder: (meeting as any)?.reminder || '30_minutes',
     });
   };
 
@@ -207,11 +272,16 @@ export function MeetingDetailModal({
     meetingIdInput.value = meeting.id;
     formElement.appendChild(meetingIdInput);
 
-    // 편집된 데이터 추가
+    // 편집된 데이터 추가 (🎯 영업 정보 포함)
     Object.entries(editedMeeting).forEach(([key, value]) => {
       const input = document.createElement('input');
       input.name = key;
-      input.value = String(value);
+      // estimatedCommission은 숫자에서 콤마 제거 후 전송
+      if (key === 'estimatedCommission') {
+        input.value = value ? String(value).replace(/[^0-9]/g, '') : '0';
+      } else {
+        input.value = String(value);
+      }
       formElement.appendChild(input);
     });
 
@@ -434,11 +504,352 @@ export function MeetingDetailModal({
             </div>
           </div>
 
+          {/* 🎯 영업 정보 섹션 */}
+          <Separator />
+          <Card className="bg-card text-card-foreground flex flex-col rounded-xl border shadow-sm">
+            <CardHeader className="pb-1 px-4">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <TargetIcon className="h-5 w-5" />
+                영업 정보
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 px-4">
+              <div className="grid grid-cols-2 gap-4">
+                {/* 우선순위 */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">우선순위</label>
+                  {isEditingMeeting ? (
+                    <Select
+                      value={editedMeeting.priority}
+                      onValueChange={(value) =>
+                        setEditedMeeting((prev) => ({
+                          ...prev,
+                          priority: value,
+                        }))
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {priorityOptions.map((priority) => (
+                          <SelectItem
+                            key={priority.value}
+                            value={priority.value}
+                          >
+                            <div className="flex items-center gap-2">
+                              <div
+                                className={cn(
+                                  'w-2 h-2 rounded-full',
+                                  priority.color
+                                )}
+                              />
+                              <span>{priority.label}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <div
+                        className={cn(
+                          'w-2 h-2 rounded-full',
+                          priorityOptions.find(
+                            (p) => p.value === (meeting as any)?.priority
+                          )?.color || 'bg-blue-500'
+                        )}
+                      />
+                      <span className="font-medium">
+                        {priorityOptions.find(
+                          (p) => p.value === (meeting as any)?.priority
+                        )?.label || '보통'}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* 연락 방법 */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">연락 방법</label>
+                  {isEditingMeeting ? (
+                    <Select
+                      value={editedMeeting.contactMethod}
+                      onValueChange={(value) =>
+                        setEditedMeeting((prev) => ({
+                          ...prev,
+                          contactMethod: value,
+                        }))
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {contactMethods.map((method) => (
+                          <SelectItem key={method.value} value={method.value}>
+                            <div className="flex items-center gap-2">
+                              <span>{method.icon}</span>
+                              <span>{method.label}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <span>
+                        {contactMethods.find(
+                          (m) => m.value === (meeting as any)?.contactMethod
+                        )?.icon || '👥'}
+                      </span>
+                      <span className="font-medium">
+                        {contactMethods.find(
+                          (m) => m.value === (meeting as any)?.contactMethod
+                        )?.label || '대면'}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* 기대 성과 */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">기대 성과</label>
+                  {isEditingMeeting ? (
+                    <Select
+                      value={editedMeeting.expectedOutcome}
+                      onValueChange={(value) =>
+                        setEditedMeeting((prev) => ({
+                          ...prev,
+                          expectedOutcome: value,
+                        }))
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="성과 선택" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {expectedOutcomes.map((outcome) => (
+                          <SelectItem key={outcome.value} value={outcome.value}>
+                            <div className="flex items-center gap-2">
+                              <span>{outcome.icon}</span>
+                              <span>{outcome.label}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <span>
+                        {expectedOutcomes.find(
+                          (o) => o.value === (meeting as any)?.expectedOutcome
+                        )?.icon || '💬'}
+                      </span>
+                      <span className="font-medium">
+                        {expectedOutcomes.find(
+                          (o) => o.value === (meeting as any)?.expectedOutcome
+                        )?.label || '상담 진행'}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* 관심 상품 */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">관심 상품</label>
+                  {isEditingMeeting ? (
+                    <Select
+                      value={editedMeeting.productInterest}
+                      onValueChange={(value) =>
+                        setEditedMeeting((prev) => ({
+                          ...prev,
+                          productInterest: value,
+                        }))
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="상품 선택" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {productInterests.map((product) => (
+                          <SelectItem key={product.value} value={product.value}>
+                            <div className="flex items-center gap-2">
+                              <span>{product.icon}</span>
+                              <span>{product.label}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <span>
+                        {productInterests.find(
+                          (p) => p.value === (meeting as any)?.productInterest
+                        )?.icon || '🎯'}
+                      </span>
+                      <span className="font-medium">
+                        {productInterests.find(
+                          (p) => p.value === (meeting as any)?.productInterest
+                        )?.label || '복합 상품'}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* 예상 수수료 */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">예상 수수료 (원)</label>
+                {isEditingMeeting ? (
+                  <Input
+                    type="text"
+                    placeholder="100,000"
+                    value={
+                      editedMeeting.estimatedCommission
+                        ? Number(
+                            editedMeeting.estimatedCommission
+                          ).toLocaleString('ko-KR')
+                        : ''
+                    }
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/[^0-9]/g, '');
+                      setEditedMeeting((prev) => ({
+                        ...prev,
+                        estimatedCommission: value ? Number(value) : 0,
+                      }));
+                    }}
+                  />
+                ) : (
+                  <div className="font-medium text-lg">
+                    {(meeting as any)?.estimatedCommission
+                      ? `${Number(
+                          (meeting as any).estimatedCommission
+                        ).toLocaleString('ko-KR')}원`
+                      : '미정'}
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* 🌐 구글 캘린더 연동 정보 */}
+          <Card className="bg-card text-card-foreground flex flex-col rounded-xl border shadow-sm">
+            <CardHeader className="pb-1 px-4">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <GlobeIcon className="h-5 w-5" />
+                구글 캘린더 연동
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 px-4">
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">자동 동기화</label>
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      checked={
+                        isEditingMeeting
+                          ? editedMeeting.syncToGoogle
+                          : (meeting as any)?.syncToGoogle
+                      }
+                      onCheckedChange={(checked) =>
+                        isEditingMeeting &&
+                        setEditedMeeting((prev) => ({
+                          ...prev,
+                          syncToGoogle: !!checked,
+                        }))
+                      }
+                      disabled={!isEditingMeeting}
+                    />
+                    <span className="text-sm">
+                      {(
+                        isEditingMeeting
+                          ? editedMeeting.syncToGoogle
+                          : (meeting as any)?.syncToGoogle
+                      )
+                        ? '켜짐'
+                        : '꺼짐'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">고객 초대</label>
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      checked={
+                        isEditingMeeting
+                          ? editedMeeting.sendClientInvite
+                          : (meeting as any)?.sendClientInvite
+                      }
+                      onCheckedChange={(checked) =>
+                        isEditingMeeting &&
+                        setEditedMeeting((prev) => ({
+                          ...prev,
+                          sendClientInvite: !!checked,
+                        }))
+                      }
+                      disabled={!isEditingMeeting}
+                    />
+                    <span className="text-sm">
+                      {(
+                        isEditingMeeting
+                          ? editedMeeting.sendClientInvite
+                          : (meeting as any)?.sendClientInvite
+                      )
+                        ? '발송'
+                        : '미발송'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">알림</label>
+                  {isEditingMeeting ? (
+                    <Select
+                      value={editedMeeting.reminder}
+                      onValueChange={(value) =>
+                        setEditedMeeting((prev) => ({
+                          ...prev,
+                          reminder: value,
+                        }))
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="15_minutes">15분 전</SelectItem>
+                        <SelectItem value="30_minutes">30분 전</SelectItem>
+                        <SelectItem value="1_hour">1시간 전</SelectItem>
+                        <SelectItem value="1_day">1일 전</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <span className="text-sm font-medium">
+                      {((meeting as any)?.reminder === '15_minutes' &&
+                        '15분 전') ||
+                        ((meeting as any)?.reminder === '30_minutes' &&
+                          '30분 전') ||
+                        ((meeting as any)?.reminder === '1_hour' &&
+                          '1시간 전') ||
+                        ((meeting as any)?.reminder === '1_day' && '1일 전') ||
+                        '30분 전'}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {(meeting.description || isEditingMeeting) && (
             <>
               <Separator />
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-foreground">설명</h3>
+                <h3 className="text-lg font-semibold text-foreground">
+                  미팅 설명
+                </h3>
                 {isEditingMeeting ? (
                   <Textarea
                     value={editedMeeting.description}

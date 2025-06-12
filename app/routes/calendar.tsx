@@ -180,7 +180,20 @@ export async function action({ request }: Route.ActionArgs) {
         const meetingType = formData.get('type') as string;
         const location = formData.get('location') as string;
         const description = formData.get('description') as string;
+
+        // 🎯 영업 정보 필드들
+        const priority = formData.get('priority') as string;
+        const expectedOutcome = formData.get('expectedOutcome') as string;
+        const contactMethod = formData.get('contactMethod') as string;
+        const estimatedCommission = formData.get(
+          'estimatedCommission'
+        ) as string;
+        const productInterest = formData.get('productInterest') as string;
+
+        // 🌐 구글 캘린더 연동 옵션들
         const syncToGoogle = formData.get('syncToGoogle') === 'true';
+        const sendClientInvite = formData.get('sendClientInvite') === 'true';
+        const reminder = formData.get('reminder') as string;
 
         // 예약 시간 계산 (scheduledAt 필드 사용)
         const [year, month, day] = date.split('-').map(Number);
@@ -197,6 +210,18 @@ export async function action({ request }: Route.ActionArgs) {
           location,
           meetingType,
           description,
+          // 🎯 새로운 영업 정보 필드들
+          priority,
+          expectedOutcome,
+          contactMethod,
+          estimatedCommission: estimatedCommission
+            ? Number(estimatedCommission.replace(/[^0-9]/g, ''))
+            : undefined,
+          productInterest,
+          // 🌐 구글 캘린더 연동 옵션들
+          syncToGoogle,
+          sendClientInvite,
+          reminder,
         });
 
         // 🌐 구글 캘린더 동기화 (옵션이 활성화된 경우)
@@ -247,6 +272,20 @@ export async function action({ request }: Route.ActionArgs) {
         const description = formData.get('description') as string;
         const status = formData.get('status') as string;
 
+        // 🎯 영업 정보 필드들
+        const priority = formData.get('priority') as string;
+        const expectedOutcome = formData.get('expectedOutcome') as string;
+        const contactMethod = formData.get('contactMethod') as string;
+        const estimatedCommission = formData.get(
+          'estimatedCommission'
+        ) as string;
+        const productInterest = formData.get('productInterest') as string;
+
+        // 🌐 구글 캘린더 연동 옵션들
+        const syncToGoogle = formData.get('syncToGoogle') === 'true';
+        const sendClientInvite = formData.get('sendClientInvite') === 'true';
+        const reminder = formData.get('reminder') as string;
+
         // 예약 시간 계산 (scheduledAt 필드 사용)
         const [year, month, day] = date.split('-').map(Number);
         const [hour, minute] = time.split(':').map(Number);
@@ -260,6 +299,18 @@ export async function action({ request }: Route.ActionArgs) {
           location,
           description,
           status: status as any,
+          // 🎯 새로운 영업 정보 필드들
+          priority,
+          expectedOutcome,
+          contactMethod,
+          estimatedCommission: estimatedCommission
+            ? Number(estimatedCommission.replace(/[^0-9]/g, ''))
+            : undefined,
+          productInterest,
+          // 🌐 구글 캘린더 연동 옵션들
+          syncToGoogle,
+          sendClientInvite,
+          reminder,
         });
 
         return { success: true, message: '미팅이 성공적으로 수정되었습니다.' };

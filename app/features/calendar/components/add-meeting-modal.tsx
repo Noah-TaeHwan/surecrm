@@ -77,7 +77,7 @@ const meetingSchema = z.object({
   expectedOutcome: z.string().optional(),
   contactMethod: z.string(),
   // 💰 영업 관련 (보험설계사 특화)
-  estimatedDealValue: z.number().optional(),
+  estimatedCommission: z.number().optional(),
   productInterest: z.string().optional(),
 });
 
@@ -230,6 +230,45 @@ const productInterests = [
   { value: 'multiple', label: '복합 상품', icon: '🎯' },
 ];
 
+// 🎯 미팅 유형별 기본 체크리스트 반환 (calendar-data.ts와 동일)
+function getDefaultChecklistByType(meetingType: string): string[] {
+  const checklistMap: Record<string, string[]> = {
+    first_consultation: [
+      '고객 정보 확인',
+      '상담 자료 준비',
+      '니즈 분석 시트 작성',
+      '다음 미팅 일정 협의',
+    ],
+    product_explanation: [
+      '상품 설명서 준비',
+      '견적서 작성',
+      '비교 상품 자료 준비',
+      '고객 질문 사항 정리',
+    ],
+    contract_review: [
+      '계약서 검토',
+      '약관 설명',
+      '서명 및 날인',
+      '초회 보험료 수납',
+    ],
+    follow_up: ['이전 미팅 내용 검토', '진행 사항 확인', '추가 요청 사항 파악'],
+    contract_signing: [
+      '최종 계약서 확인',
+      '보험료 납입 안내',
+      '증권 발급 절차 설명',
+      '사후 서비스 안내',
+    ],
+    claim_support: [
+      '청구 서류 확인',
+      '청구 절차 안내',
+      '필요 서류 안내',
+      '진행 상황 업데이트',
+    ],
+  };
+
+  return checklistMap[meetingType] || [];
+}
+
 interface AddMeetingModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -265,7 +304,7 @@ export function AddMeetingModal({
       priority: 'medium',
       expectedOutcome: '',
       contactMethod: 'in_person',
-      estimatedDealValue: undefined,
+      estimatedCommission: undefined,
       productInterest: '',
     },
   });
@@ -301,6 +340,9 @@ export function AddMeetingModal({
     } else if (contactMethod === 'phone') {
       form.setValue('googleMeetLink', false);
       form.setValue('location', '전화 상담');
+    } else if (contactMethod === 'in_person' || contactMethod === 'hybrid') {
+      form.setValue('googleMeetLink', false);
+      form.setValue('location', ''); // 대면/혼합인 경우 빈 값
     }
   }, [contactMethod, form]);
 
@@ -871,25 +913,26 @@ export function AddMeetingModal({
 
                 <FormField
                   control={form.control}
-                  name="estimatedDealValue"
+                  name="estimatedCommission"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-xs">
-                        예상 거래액 (원)
+                        예상 수수료 (원)
                       </FormLabel>
                       <FormControl>
                         <Input
-                          {...field}
-                          type="number"
-                          placeholder="1000000"
+                          type="text"
+                          placeholder="100,000"
                           className="h-9"
-                          onChange={(e) =>
-                            field.onChange(
-                              e.target.value
-                                ? parseInt(e.target.value)
-                                : undefined
-                            )
+                          value={
+                            field.value
+                              ? Number(field.value).toLocaleString('ko-KR')
+                              : ''
                           }
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/[^0-9]/g, '');
+                            field.onChange(value ? Number(value) : undefined);
+                          }}
                         />
                       </FormControl>
                       <FormMessage />
@@ -907,7 +950,7 @@ export function AddMeetingModal({
                   메모 & 준비사항
                 </CardTitle>
               </CardHeader>
-              <CardContent className="px-4">
+              <CardContent className="space-y-3 px-4">
                 <FormField
                   control={form.control}
                   name="description"
@@ -926,6 +969,36 @@ export function AddMeetingModal({
                     </FormItem>
                   )}
                 />
+
+                {/* 🎯 미팅 유형별 자동 체크리스트 미리보기 */}
+                {selectedMeetingType && (
+                  <div className="space-y-2">
+                    <FormLabel className="text-xs">
+                      기본 체크리스트 (미팅 생성 후 자동 추가됨)
+                    </FormLabel>
+                    <div className="bg-muted/30 p-3 rounded-lg space-y-2">
+                      {getDefaultChecklistByType(selectedMeetingType.value).map(
+                        (item, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center gap-2 text-xs text-muted-foreground"
+                          >
+                            <div className="w-3 h-3 border border-muted-foreground rounded-sm flex items-center justify-center">
+                              <div className="w-1 h-1 bg-muted-foreground rounded-full" />
+                            </div>
+                            <span>{item}</span>
+                          </div>
+                        )
+                      )}
+                      {getDefaultChecklistByType(selectedMeetingType.value)
+                        .length === 0 && (
+                        <p className="text-xs text-muted-foreground italic">
+                          이 미팅 유형에는 기본 체크리스트가 없습니다.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
 

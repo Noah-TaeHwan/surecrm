@@ -42,6 +42,12 @@ export interface CalendarMeeting {
     createdAt: string;
     updatedAt?: string;
   }>;
+  // 🎯 영업 정보 필드들 추가
+  priority?: string;
+  expectedOutcome?: string;
+  contactMethod?: string;
+  estimatedCommission?: number;
+  productInterest?: string;
   // 🌐 Google Calendar 연동 정보 추가
   syncInfo?: {
     status: CalendarSyncStatus;
@@ -49,6 +55,9 @@ export interface CalendarMeeting {
     externalEventId?: string;
     lastSyncAt?: string;
   };
+  syncToGoogle?: boolean;
+  sendClientInvite?: boolean;
+  reminder?: string;
 }
 
 // Calendar 페이지용 Client 타입
@@ -148,6 +157,14 @@ export async function getMeetingsByMonth(
             createdAt: note.createdAt.toISOString(),
             updatedAt: note.updatedAt?.toISOString(),
           })),
+          // 🎯 영업 정보 필드들
+          priority: meeting.priority || undefined,
+          expectedOutcome: meeting.expectedOutcome || undefined,
+          contactMethod: meeting.contactMethod || undefined,
+          estimatedCommission: meeting.estimatedCommission
+            ? Number(meeting.estimatedCommission)
+            : undefined,
+          productInterest: meeting.productInterest || undefined,
           // 🌐 Google Calendar 동기화 정보
           syncInfo: latestSyncLog
             ? {
@@ -157,6 +174,9 @@ export async function getMeetingsByMonth(
                 lastSyncAt: latestSyncLog.createdAt.toISOString(),
               }
             : undefined,
+          syncToGoogle: meeting.syncToGoogle || undefined,
+          sendClientInvite: meeting.sendClientInvite || undefined,
+          reminder: meeting.reminder || undefined,
         };
       })
     );
@@ -254,6 +274,14 @@ export async function getMeetingsByDateRange(
             createdAt: note.createdAt.toISOString(),
             updatedAt: note.updatedAt?.toISOString(),
           })),
+          // 🎯 영업 정보 필드들
+          priority: meeting.priority || undefined,
+          expectedOutcome: meeting.expectedOutcome || undefined,
+          contactMethod: meeting.contactMethod || undefined,
+          estimatedCommission: meeting.estimatedCommission
+            ? Number(meeting.estimatedCommission)
+            : undefined,
+          productInterest: meeting.productInterest || undefined,
           // 🌐 Google Calendar 동기화 정보
           syncInfo: latestSyncLog
             ? {
@@ -263,6 +291,9 @@ export async function getMeetingsByDateRange(
                 lastSyncAt: latestSyncLog.createdAt.toISOString(),
               }
             : undefined,
+          syncToGoogle: meeting.syncToGoogle || undefined,
+          sendClientInvite: meeting.sendClientInvite || undefined,
+          reminder: meeting.reminder || undefined,
         };
       })
     );
@@ -315,6 +346,16 @@ export async function createMeeting(
     location?: string;
     meetingType: string;
     description?: string;
+    // 🎯 영업 정보 필드들 추가
+    priority?: string;
+    expectedOutcome?: string;
+    contactMethod?: string;
+    estimatedCommission?: number;
+    productInterest?: string;
+    // 🌐 구글 캘린더 연동 옵션들
+    syncToGoogle?: boolean;
+    sendClientInvite?: boolean;
+    reminder?: string;
   }
 ) {
   try {
@@ -330,6 +371,17 @@ export async function createMeeting(
         meetingType: meetingData.meetingType as any,
         description: meetingData.description,
         status: 'scheduled',
+        // 🎯 새로운 영업 정보 필드들 저장
+        priority: meetingData.priority,
+        expectedOutcome: meetingData.expectedOutcome,
+        contactMethod: meetingData.contactMethod,
+        estimatedCommission: meetingData.estimatedCommission
+          ? meetingData.estimatedCommission.toString()
+          : null,
+        productInterest: meetingData.productInterest,
+        syncToGoogle: meetingData.syncToGoogle || false,
+        sendClientInvite: meetingData.sendClientInvite || false,
+        reminder: meetingData.reminder,
       })
       .returning();
 
@@ -371,6 +423,16 @@ export async function updateMeeting(
     location: string;
     description: string;
     status: MeetingStatus;
+    // 🎯 영업 정보 필드들 추가
+    priority: string;
+    expectedOutcome: string;
+    contactMethod: string;
+    estimatedCommission: number;
+    productInterest: string;
+    // 🌐 구글 캘린더 연동 옵션들
+    syncToGoogle: boolean;
+    sendClientInvite: boolean;
+    reminder: string;
   }>
 ) {
   try {
@@ -378,6 +440,10 @@ export async function updateMeeting(
       .update(meetings)
       .set({
         ...updateData,
+        // estimatedCommission은 decimal 타입이므로 문자열로 변환
+        estimatedCommission: updateData.estimatedCommission
+          ? updateData.estimatedCommission.toString()
+          : null,
         updatedAt: new Date(),
       })
       .where(and(eq(meetings.id, meetingId), eq(meetings.agentId, agentId)))

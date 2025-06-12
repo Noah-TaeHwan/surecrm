@@ -287,6 +287,19 @@ export const meetings = pgTable('app_client_meetings', {
   location: text('location'),
   googleMeetLink: text('google_meet_link'),
   notes: text('notes'),
+  // 🎯 영업 정보 필드 추가
+  priority: text('priority').default('medium'), // low, medium, high, urgent
+  expectedOutcome: text('expected_outcome'), // 기대 성과
+  contactMethod: text('contact_method').default('in_person'), // phone, video, in_person, hybrid
+  estimatedCommission: decimal('estimated_commission', {
+    precision: 12,
+    scale: 0,
+  }), // 예상 수수료 (원, 소수점 없음)
+  productInterest: text('product_interest'), // 관심 상품
+  // 구글 캘린더 연동 정보
+  syncToGoogle: boolean('sync_to_google').default(false),
+  sendClientInvite: boolean('send_client_invite').default(false),
+  reminder: text('reminder').default('30_minutes'), // 알림 설정
   createdAt: timestamp('created_at', { withTimezone: true })
     .defaultNow()
     .notNull(),
