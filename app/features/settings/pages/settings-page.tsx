@@ -51,6 +51,8 @@ import {
   XCircle,
   Clock,
   Globe,
+  Loader,
+  Zap,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Form } from 'react-router';
@@ -372,6 +374,43 @@ export async function action({ request }: Route.ActionArgs) {
         }
       }
 
+      case 'toggleRealtimeSync': {
+        // 🔔 실시간 동기화 웹훅 설정/해제
+        const enableRealtime = formData.get('enableRealtime') === 'true';
+
+        try {
+          const googleService = new GoogleCalendarService();
+
+          if (enableRealtime) {
+            // 웹훅 채널 생성
+            const success = await googleService.createWebhookChannel(user.id);
+
+            return data({
+              success,
+              message: success
+                ? '실시간 동기화가 활성화되었습니다. 구글 캘린더 변경사항이 즉시 반영됩니다.'
+                : '실시간 동기화 설정 중 오류가 발생했습니다.',
+            });
+          } else {
+            // 웹훅 채널 삭제
+            const success = await googleService.deleteWebhookChannel(user.id);
+
+            return data({
+              success,
+              message: success
+                ? '실시간 동기화가 비활성화되었습니다.'
+                : '실시간 동기화 해제 중 오류가 발생했습니다.',
+            });
+          }
+        } catch (error) {
+          console.error('❌ 실시간 동기화 토글 실패:', error);
+          return data({
+            success: false,
+            message: '실시간 동기화 설정 중 오류가 발생했습니다.',
+          });
+        }
+      }
+
       case 'changePassword': {
         const currentPassword = formData.get('currentPassword') as string;
         const newPassword = formData.get('newPassword') as string;
@@ -488,10 +527,15 @@ export default function SettingsPage({
   // 동기화 상태 추적
   const [isSyncing, setIsSyncing] = useState(false);
 
+  // 🔔 실시간 동기화 상태 추적
+  const [realtimeSync, setRealtimeSync] = useState(false);
+  const [isTogglingRealtime, setIsTogglingRealtime] = useState(false);
+
   // 액션 완료 후 상태 리셋
   useEffect(() => {
     if (actionData?.success !== undefined) {
       setIsSyncing(false);
+      setIsTogglingRealtime(false);
     }
   }, [actionData]);
 
@@ -856,8 +900,8 @@ export default function SettingsPage({
                 />
 
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-1">
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-1 flex-1 mr-4">
                       <Label
                         htmlFor="emailNotifications"
                         className="text-sm font-medium"
@@ -873,6 +917,7 @@ export default function SettingsPage({
                       name="emailNotifications"
                       checked={emailNotifications}
                       onCheckedChange={setEmailNotifications}
+                      className="flex-shrink-0"
                     />
                   </div>
                 </div>
@@ -1154,6 +1199,62 @@ export default function SettingsPage({
                     </Button>
                   </Form>
 
+                  {/* 🔔 실시간 동기화 설정 */}
+                  <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="space-y-1">
+                        <h4 className="text-sm font-medium flex items-center gap-2">
+                          <Bell className="h-4 w-4 text-blue-600" />
+                          실시간 동기화
+                        </h4>
+                        <p className="text-xs text-muted-foreground">
+                          구글 캘린더 변경사항을 즉시 SureCRM에 반영
+                        </p>
+                      </div>
+                      <Form
+                        method="post"
+                        onSubmit={() => setIsTogglingRealtime(true)}
+                      >
+                        <input
+                          type="hidden"
+                          name="actionType"
+                          value="toggleRealtimeSync"
+                        />
+                        <input
+                          type="hidden"
+                          name="enableRealtime"
+                          value={realtimeSync ? 'false' : 'true'}
+                        />
+                        <Button
+                          type="submit"
+                          variant={realtimeSync ? 'default' : 'outline'}
+                          size="sm"
+                          disabled={isTogglingRealtime}
+                          className="gap-2"
+                        >
+                          {isTogglingRealtime ? (
+                            <RefreshCw className="h-3 w-3 animate-spin" />
+                          ) : (
+                            <Bell className="h-3 w-3" />
+                          )}
+                          {realtimeSync ? '비활성화' : '활성화'}
+                        </Button>
+                      </Form>
+                    </div>
+
+                    {realtimeSync ? (
+                      <div className="flex items-center gap-2 text-xs text-green-700">
+                        <CheckCircle className="h-3 w-3" />
+                        실시간 동기화 활성화됨
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <Clock className="h-3 w-3" />
+                        수동 동기화만 사용 중
+                      </div>
+                    )}
+                  </div>
+
                   {/* 연동 해제 */}
                   <Separator />
                   <Form method="post">
@@ -1176,14 +1277,14 @@ export default function SettingsPage({
               )}
 
               {/* 캘린더 연동 가이드 */}
-              <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="mt-6 p-4 bg-muted/50 border rounded-lg">
                 <div className="flex items-start gap-3">
-                  <Calendar className="h-4 w-4 text-blue-600 mt-0.5" />
+                  <Calendar className="h-4 w-4 text-foreground mt-0.5" />
                   <div className="space-y-1">
-                    <p className="text-sm font-medium text-blue-900">
+                    <p className="text-sm font-medium text-foreground">
                       캘린더 연동 안내
                     </p>
-                    <ul className="text-xs text-blue-700 space-y-1">
+                    <ul className="text-xs text-muted-foreground space-y-1">
                       <li>• 구글 계정 권한이 필요합니다</li>
                       <li>
                         • 양방향 동기화 시 데이터 충돌이 발생할 수 있습니다

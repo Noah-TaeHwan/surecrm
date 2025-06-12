@@ -43,6 +43,13 @@
       "when": 1749460785766,
       "tag": "0005_mushy_vulcan",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1749717705306,
+      "tag": "0006_strong_felicia_hardy",
+      "breakpoints": true
     }
   ]
 }

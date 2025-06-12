@@ -52,13 +52,63 @@ export class GoogleCalendarService {
 
   // 2. 사용자의 캘린더 설정 조회
   async getCalendarSettings(agentId: string) {
-    const settings = await db
-      .select()
-      .from(appCalendarSettings)
-      .where(eq(appCalendarSettings.agentId, agentId))
-      .limit(1);
+    try {
+      const settings = await db
+        .select()
+        .from(appCalendarSettings)
+        .where(eq(appCalendarSettings.agentId, agentId))
+        .limit(1);
 
-    return settings[0] || null;
+      return settings[0] || null;
+    } catch (error: any) {
+      // 웹훅 필드가 없을 때 발생하는 에러를 안전하게 처리
+      if (
+        error.message?.includes('webhook_channel_id') ||
+        (error.message?.includes('column') &&
+          error.message?.includes('does not exist'))
+      ) {
+        console.warn(
+          '⚠️ 웹훅 필드가 아직 마이그레이션되지 않음, 기존 설정만 조회'
+        );
+
+        // 웹훅 필드 없이 기본 설정만 조회
+        try {
+          const basicSettings = await db
+            .select({
+              agentId: appCalendarSettings.agentId,
+              googleAccessToken: appCalendarSettings.googleAccessToken,
+              googleRefreshToken: appCalendarSettings.googleRefreshToken,
+              googleTokenExpiresAt: appCalendarSettings.googleTokenExpiresAt,
+              googleCalendarSync: appCalendarSettings.googleCalendarSync,
+              syncStatus: appCalendarSettings.syncStatus,
+              lastSyncAt: appCalendarSettings.lastSyncAt,
+              createdAt: appCalendarSettings.createdAt,
+              updatedAt: appCalendarSettings.updatedAt,
+            })
+            .from(appCalendarSettings)
+            .where(eq(appCalendarSettings.agentId, agentId))
+            .limit(1);
+
+          const setting = basicSettings[0];
+          if (setting) {
+            // 웹훅 필드를 null로 추가하여 호환성 유지
+            return {
+              ...setting,
+              webhookChannelId: null,
+              webhookResourceId: null,
+              webhookExpiresAt: null,
+            };
+          }
+          return null;
+        } catch (basicError) {
+          console.error('기본 설정 조회도 실패:', basicError);
+          return null;
+        }
+      }
+
+      // 다른 에러는 그대로 throw
+      throw error;
+    }
   }
 
   // 3. 토큰 복호화 및 OAuth 클라이언트 설정
@@ -769,6 +819,230 @@ export class GoogleCalendarService {
     } catch (error) {
       console.error('특정 이벤트 SureCRM→구글 동기화 실패:', error);
       throw error;
+    }
+  }
+
+  // 🔔 **웹훅 채널 관리**
+
+  // 웹훅 채널 생성
+  async createWebhookChannel(agentId: string): Promise<boolean> {
+    try {
+      await this.setupAuthClient(agentId);
+      const calendar = google.calendar({
+        version: 'v3',
+        auth: this.oauth2Client,
+      });
+
+      const channelId = `surecrm_calendar_${agentId}_${Date.now()}`;
+      const webhookUrl = `${
+        process.env.VITE_APP_URL || 'https://surecrm.vercel.app'
+      }/api/google/calendar/webhook`;
+
+      console.log('🔔 웹훅 채널 생성 시작:', { channelId, webhookUrl });
+
+      const response = await calendar.events.watch({
+        calendarId: 'primary',
+        requestBody: {
+          id: channelId,
+          type: 'web_hook',
+          address: webhookUrl,
+          token:
+            process.env.GOOGLE_WEBHOOK_VERIFY_TOKEN ||
+            'surecrm_calendar_webhook',
+          params: {
+            ttl: '86400', // 24시간
+          },
+        },
+      });
+
+      if (response.data) {
+        // 채널 정보를 설정에 저장
+        await db
+          .update(appCalendarSettings)
+          .set({
+            webhookChannelId: channelId,
+            webhookResourceId: response.data.resourceId,
+            webhookExpiresAt: response.data.expiration
+              ? new Date(parseInt(response.data.expiration))
+              : new Date(Date.now() + 24 * 60 * 60 * 1000), // 24시간 후
+            updatedAt: new Date(),
+          })
+          .where(eq(appCalendarSettings.agentId, agentId));
+
+        console.log('✅ 웹훅 채널 생성 완료:', channelId);
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      console.error('❌ 웹훅 채널 생성 실패:', error);
+      return false;
+    }
+  }
+
+  // 웹훅 채널 삭제
+  async deleteWebhookChannel(agentId: string): Promise<boolean> {
+    try {
+      const settings = await this.getCalendarSettings(agentId);
+
+      if (!settings?.webhookChannelId || !settings?.webhookResourceId) {
+        console.log('🔔 삭제할 웹훅 채널이 없음');
+        return true;
+      }
+
+      await this.setupAuthClient(agentId);
+      const calendar = google.calendar({
+        version: 'v3',
+        auth: this.oauth2Client,
+      });
+
+      console.log('🔔 웹훅 채널 삭제 시작:', settings.webhookChannelId);
+
+      await calendar.channels.stop({
+        requestBody: {
+          id: settings.webhookChannelId,
+          resourceId: settings.webhookResourceId,
+        },
+      });
+
+      // 설정에서 채널 정보 제거
+      await db
+        .update(appCalendarSettings)
+        .set({
+          webhookChannelId: null,
+          webhookResourceId: null,
+          webhookExpiresAt: null,
+          updatedAt: new Date(),
+        })
+        .where(eq(appCalendarSettings.agentId, agentId));
+
+      console.log('✅ 웹훅 채널 삭제 완료');
+      return true;
+    } catch (error) {
+      console.error('❌ 웹훅 채널 삭제 실패:', error);
+      return false;
+    }
+  }
+
+  // 웹훅 채널 갱신 (만료 전 자동 갱신)
+  async renewWebhookChannel(agentId: string): Promise<boolean> {
+    try {
+      console.log('🔄 웹훅 채널 갱신 시작');
+
+      // 기존 채널 삭제
+      await this.deleteWebhookChannel(agentId);
+
+      // 새 채널 생성
+      const success = await this.createWebhookChannel(agentId);
+
+      if (success) {
+        console.log('✅ 웹훅 채널 갱신 완료');
+      } else {
+        console.error('❌ 웹훅 채널 갱신 실패');
+      }
+
+      return success;
+    } catch (error) {
+      console.error('❌ 웹훅 채널 갱신 실패:', error);
+      return false;
+    }
+  }
+
+  // 웹훅 채널 상태 확인
+  async checkWebhookStatus(agentId: string): Promise<{
+    isActive: boolean;
+    channelId?: string;
+    expiresAt?: Date;
+    needsRenewal: boolean;
+  }> {
+    try {
+      const settings = await this.getCalendarSettings(agentId);
+
+      if (!settings?.webhookChannelId || !settings?.webhookExpiresAt) {
+        return {
+          isActive: false,
+          needsRenewal: true,
+        };
+      }
+
+      const now = new Date();
+      const expiresAt = new Date(settings.webhookExpiresAt);
+      const hoursUntilExpiry =
+        (expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60);
+
+      return {
+        isActive: expiresAt > now,
+        channelId: settings.webhookChannelId,
+        expiresAt: expiresAt,
+        needsRenewal: hoursUntilExpiry < 2, // 2시간 전에 갱신
+      };
+    } catch (error) {
+      console.error('❌ 웹훅 상태 확인 실패:', error);
+      return {
+        isActive: false,
+        needsRenewal: true,
+      };
+    }
+  }
+
+  // 🔔 실시간 알림 처리 (웹훅 수신 시 호출)
+  async handleWebhookNotification(
+    channelId: string,
+    resourceId: string,
+    resourceState: string
+  ): Promise<boolean> {
+    try {
+      // 채널 ID에서 agentId 추출
+      const agentIdMatch = channelId.match(/^surecrm_calendar_([^_]+)_\d+$/);
+
+      if (!agentIdMatch) {
+        console.warn('⚠️ 유효하지 않은 채널 ID:', channelId);
+        return false;
+      }
+
+      const agentId = agentIdMatch[1];
+
+      console.log('🔔 실시간 알림 처리:', {
+        agentId,
+        resourceState,
+        channelId,
+      });
+
+      // 변경사항에 따른 동기화 실행
+      switch (resourceState) {
+        case 'exists':
+          // 캘린더 변경사항 발생 → 즉시 동기화
+          await this.performFullSync(agentId);
+          break;
+
+        case 'not_exists':
+          // 리소스 삭제 → 로컬 정리
+          console.log('📝 구글 이벤트 삭제 감지');
+          break;
+
+        default:
+          console.log('🔄 기타 웹훅 상태:', resourceState);
+      }
+
+      // 웹훅 처리 로그
+      await db.insert(appCalendarSyncLogs).values({
+        agentId,
+        syncDirection: 'from_google',
+        syncStatus: 'synced',
+        externalSource: 'google_calendar',
+        syncResult: {
+          webhookProcessing: true,
+          resourceState,
+          channelId,
+          resourceId,
+          processedAt: new Date(),
+        },
+      });
+
+      return true;
+    } catch (error) {
+      console.error('❌ 웹훅 알림 처리 실패:', error);
+      return false;
     }
   }
 }

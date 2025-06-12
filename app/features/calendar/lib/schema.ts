@@ -215,6 +215,10 @@ export const appCalendarSettings = pgTable('app_calendar_settings', {
   syncStatus: appCalendarSyncStatusEnum('sync_status')
     .default('not_synced')
     .notNull(),
+  // 🔔 웹훅 관련 필드 추가
+  webhookChannelId: text('webhook_channel_id'),
+  webhookResourceId: text('webhook_resource_id'),
+  webhookExpiresAt: timestamp('webhook_expires_at', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true })
     .defaultNow()
     .notNull(),

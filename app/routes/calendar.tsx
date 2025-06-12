@@ -151,6 +151,26 @@ export async function action({ request }: Route.ActionArgs) {
     const actionType = formData.get('actionType') as string;
 
     switch (actionType) {
+      case 'connectGoogleCalendar': {
+        // 🔗 구글 캘린더 연동 시작 - OAuth URL로 리다이렉트
+        try {
+          const { GoogleCalendarService } = await import(
+            '~/features/calendar/lib/google-calendar-service'
+          );
+          const googleService = new GoogleCalendarService();
+          const authUrl = googleService.getAuthUrl(user.id);
+
+          // OAuth URL로 리다이렉트
+          return Response.redirect(authUrl, 302);
+        } catch (error) {
+          console.error('❌ 구글 연동 실패:', error);
+          return {
+            success: false,
+            message: '구글 캘린더 연동을 시작할 수 없습니다.',
+          };
+        }
+      }
+
       case 'createMeeting': {
         const title = formData.get('title') as string;
         const clientId = formData.get('clientId') as string;

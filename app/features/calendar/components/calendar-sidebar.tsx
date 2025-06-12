@@ -6,6 +6,7 @@ import {
   CardTitle,
 } from '~/common/components/ui/card';
 import { Button } from '~/common/components/ui/button';
+import { Form } from 'react-router';
 import { Badge } from '~/common/components/ui/badge';
 import { Progress } from '~/common/components/ui/progress';
 import { Checkbox } from '~/common/components/ui/checkbox';
@@ -165,14 +166,17 @@ export function CalendarSidebar({
               <p className="text-sm text-muted-foreground">
                 구글 캘린더와 연동하여 일정을 통합 관리하세요
               </p>
-              <Button
-                size="sm"
-                className="w-full"
-                onClick={() => (window.location.href = '/settings')}
-              >
-                <Link2Icon className="h-3 w-3 mr-2" />
-                연결하기
-              </Button>
+              <Form method="post">
+                <input
+                  type="hidden"
+                  name="actionType"
+                  value="connectGoogleCalendar"
+                />
+                <Button type="submit" size="sm" className="w-full">
+                  <Link2Icon className="h-3 w-3 mr-2" />
+                  연결하기
+                </Button>
+              </Form>
             </div>
           )}
         </CardContent>
