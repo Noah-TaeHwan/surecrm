@@ -79,6 +79,13 @@ export default defineConfig(({ mode }) => {
         'postgres',
         'drizzle-orm/postgres-js',
         'drizzle-orm',
+        // 🔌 구글 API 관련 패키지 제외
+        'googleapis',
+        'gcp-metadata',
+        'google-auth-library',
+        'gtoken',
+        'jws',
+        'google-p12-pem',
       ],
       include: ['buffer'],
     },
@@ -132,6 +139,13 @@ export default defineConfig(({ mode }) => {
           'postgres',
           'drizzle-orm/postgres-js',
           'drizzle-orm',
+          // 🔌 구글 API 관련 패키지를 외부 의존성으로 처리
+          'googleapis',
+          'gcp-metadata',
+          'google-auth-library',
+          'gtoken',
+          'jws',
+          'google-p12-pem',
         ],
         output: {
           globals: {
