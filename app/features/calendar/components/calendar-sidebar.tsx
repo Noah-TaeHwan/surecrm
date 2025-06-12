@@ -24,6 +24,8 @@ import {
   CheckCircledIcon,
   GearIcon,
   UpdateIcon,
+  Link2Icon,
+  ReloadIcon,
 } from '@radix-ui/react-icons';
 import { cn } from '~/lib/utils';
 import { meetingTypeColors, type Meeting } from '../types/types';
@@ -96,60 +98,90 @@ export function CalendarSidebar({
   };
 
   return (
-    <div className="space-y-4">
-      {/* 🌐 Google Calendar 연동 상태 */}
-      <Card className="shadow-lg border border-border/50 bg-gradient-to-br from-card/90 to-card/70 backdrop-blur-sm">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg flex items-center gap-2">
+    <div className="space-y-6 p-1">
+      {/* 🌐 Google Calendar 연동 상태 - SureCRM 톤앤매너 적용 */}
+      <Card className="relative overflow-hidden border border-border/60 bg-card/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-blue-500/5" />
+        <CardHeader className="relative pb-4">
+          <CardTitle className="text-lg flex items-center gap-3">
             <div
-              className={`p-1.5 rounded-lg ${
+              className={`p-2 rounded-xl shadow-sm transition-all duration-300 ${
                 googleCalendarSettings?.isConnected
-                  ? 'bg-green-500/10'
-                  : 'bg-orange-500/10'
+                  ? 'bg-gradient-to-br from-green-500/20 to-emerald-500/20 text-green-700 dark:text-green-400'
+                  : 'bg-gradient-to-br from-orange-500/20 to-amber-500/20 text-orange-700 dark:text-orange-400'
               }`}
             >
-              <CalendarIcon
-                className={`h-4 w-4 ${
-                  googleCalendarSettings?.isConnected
-                    ? 'text-green-500'
-                    : 'text-orange-500'
-                }`}
-              />
+              <CalendarIcon className="h-5 w-5" />
             </div>
-            구글 캘린더 연동
+            <span className="text-foreground font-semibold">
+              구글 캘린더 연동
+            </span>
           </CardTitle>
         </CardHeader>
-        <CardContent className="pt-0">
+        <CardContent className="relative pt-0 space-y-4">
           {googleCalendarSettings?.isConnected ? (
-            // 연동된 상태
-            <div className="space-y-3">
-              <Alert className="border-green-200 bg-green-50/50">
-                <CheckCircledIcon className="h-4 w-4 text-green-600" />
-                <AlertDescription className="text-sm text-green-700">
-                  <div className="space-y-1">
-                    <p className="font-medium">구글 캘린더가 연결되었습니다</p>
-                    {googleCalendarSettings.googleEventsCount !== undefined && (
-                      <p className="text-xs">
-                        이번 달 구글 이벤트:{' '}
-                        {googleCalendarSettings.googleEventsCount}개
-                      </p>
-                    )}
-                    {googleCalendarSettings.lastSyncAt && (
-                      <p className="text-xs">
-                        마지막 동기화:{' '}
-                        {new Date(
-                          googleCalendarSettings.lastSyncAt
-                        ).toLocaleString('ko-KR')}
-                      </p>
+            // 연동된 상태 - 우아한 연결됨 표시
+            <div className="space-y-4">
+              <div className="p-4 rounded-xl bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 border border-green-200/60 dark:border-green-800/40">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-1.5 bg-green-500/20 rounded-lg">
+                    <CheckCircledIcon className="h-4 w-4 text-green-600 dark:text-green-400" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-green-800 dark:text-green-200 text-sm">
+                      연결되었습니다
+                    </p>
+                    <p className="text-xs text-green-600 dark:text-green-400">
+                      구글 캘린더와 동기화 중
+                    </p>
+                  </div>
+                </div>
+
+                {/* 동기화 통계 */}
+                <div className="grid grid-cols-2 gap-3 text-xs">
+                  {googleCalendarSettings.googleEventsCount !== undefined && (
+                    <div className="text-center p-2 bg-white/50 dark:bg-gray-800/50 rounded-lg">
+                      <div className="font-semibold text-green-700 dark:text-green-300">
+                        {googleCalendarSettings.googleEventsCount}
+                      </div>
+                      <div className="text-green-600 dark:text-green-400">
+                        구글 이벤트
+                      </div>
+                    </div>
+                  )}
+                  <div className="text-center p-2 bg-white/50 dark:bg-gray-800/50 rounded-lg">
+                    <div className="font-semibold text-green-700 dark:text-green-300">
+                      {meetings.filter((m) => m.type === 'google').length}
+                    </div>
+                    <div className="text-green-600 dark:text-green-400">
+                      동기화됨
+                    </div>
+                  </div>
+                </div>
+
+                {googleCalendarSettings.lastSyncAt && (
+                  <div className="mt-3 text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
+                    <ReloadIcon className="h-3 w-3" />
+                    마지막 동기화:{' '}
+                    {new Date(googleCalendarSettings.lastSyncAt).toLocaleString(
+                      'ko-KR',
+                      {
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      }
                     )}
                   </div>
-                </AlertDescription>
-              </Alert>
-              <div className="flex gap-2">
+                )}
+              </div>
+
+              {/* 액션 버튼들 */}
+              <div className="grid grid-cols-2 gap-3">
                 <Button
                   variant="outline"
                   size="sm"
-                  className="flex-1"
+                  className="border-border/60 hover:border-primary/40 hover:bg-primary/5 transition-all duration-200"
                   onClick={() => (window.location.href = '/settings')}
                 >
                   <GearIcon className="h-4 w-4 mr-2" />
@@ -158,7 +190,7 @@ export function CalendarSidebar({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="flex-1"
+                  className="border-border/60 hover:border-blue-500/40 hover:bg-blue-500/5 transition-all duration-200"
                   onClick={() => window.location.reload()}
                 >
                   <UpdateIcon className="h-4 w-4 mr-2" />
@@ -167,26 +199,46 @@ export function CalendarSidebar({
               </div>
             </div>
           ) : (
-            // 연동되지 않은 상태
-            <div className="space-y-3">
-              <Alert className="border-orange-200 bg-orange-50/50">
-                <InfoCircledIcon className="h-4 w-4 text-orange-600" />
-                <AlertDescription className="text-sm text-orange-700">
-                  <div className="space-y-2">
-                    <p className="font-medium">구글 캘린더를 연결해보세요</p>
-                    <p className="text-xs">
-                      구글 캘린더 일정을 SureCRM에서 함께 확인할 수 있습니다.
+            // 연동되지 않은 상태 - 매력적인 연결 유도
+            <div className="space-y-4">
+              <div className="p-4 rounded-xl bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/30 border border-orange-200/60 dark:border-orange-800/40">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-1.5 bg-orange-500/20 rounded-lg">
+                    <InfoCircledIcon className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-orange-800 dark:text-orange-200 text-sm">
+                      구글 캘린더 연동 대기 중
+                    </p>
+                    <p className="text-xs text-orange-600 dark:text-orange-400">
+                      구글 일정을 SureCRM에서 함께 관리하세요
                     </p>
                   </div>
-                </AlertDescription>
-              </Alert>
+                </div>
+
+                {/* 연동 혜택 */}
+                <div className="space-y-2 text-xs text-orange-700 dark:text-orange-300">
+                  <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 bg-orange-500 rounded-full" />
+                    <span>구글 캘린더 일정 자동 동기화</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 bg-orange-500 rounded-full" />
+                    <span>SureCRM 통합 일정 관리</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 bg-orange-500 rounded-full" />
+                    <span>실시간 양방향 업데이트</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 연동 버튼 */}
               <Button
-                variant="default"
-                size="sm"
-                className="w-full"
+                className="w-full bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
                 onClick={() => (window.location.href = '/settings')}
               >
-                <CalendarIcon className="h-4 w-4 mr-2" />
+                <Link2Icon className="h-4 w-4 mr-2" />
                 구글 캘린더 연결하기
               </Button>
             </div>
@@ -195,15 +247,15 @@ export function CalendarSidebar({
       </Card>
 
       {/* 오늘의 일정 */}
-      <Card className="shadow-lg border border-border/50 bg-gradient-to-br from-card/90 to-card/70 backdrop-blur-sm">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <div className="p-1.5 bg-primary/10 rounded-lg">
-              <CalendarIcon className="h-4 w-4 text-primary" />
+      <Card className="border border-border/60 bg-card/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg flex items-center gap-3">
+            <div className="p-2 bg-gradient-to-br from-primary/20 to-primary/30 rounded-xl shadow-sm">
+              <CalendarIcon className="h-5 w-5 text-primary" />
             </div>
-            오늘의 일정
+            <span className="text-foreground font-semibold">오늘의 일정</span>
           </CardTitle>
-          <CardDescription className="text-sm">
+          <CardDescription className="text-sm text-muted-foreground">
             {today.toLocaleDateString('ko-KR', {
               month: 'long',
               day: 'numeric',
@@ -211,39 +263,39 @@ export function CalendarSidebar({
             })}
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-3 pt-0">
+        <CardContent className="space-y-4 pt-0">
           {todayMeetings.length > 0 ? (
             <>
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-medium text-muted-foreground">
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-sm font-medium text-muted-foreground">
                   총 {todayMeetings.length}개 미팅
                 </span>
                 <Badge
                   variant="secondary"
-                  className="bg-primary/10 text-primary text-xs"
+                  className="bg-primary/10 text-primary text-xs font-medium px-3 py-1"
                 >
                   진행 중
                 </Badge>
               </div>
 
-              <div className="space-y-2 max-h-64 overflow-y-auto custom-scrollbar">
+              <div className="space-y-3 max-h-64 overflow-y-auto custom-scrollbar">
                 {todayMeetings.map((meeting, index) => (
                   <div
                     key={meeting.id}
-                    className="p-3 border border-border/40 rounded-lg cursor-pointer hover:bg-accent/40 hover:shadow-md hover:border-accent/60 transition-all duration-300 group bg-card/50 backdrop-blur-sm transform hover:-translate-y-0.5"
+                    className="p-4 border border-border/50 rounded-xl cursor-pointer hover:bg-accent/30 hover:shadow-md hover:border-accent/60 transition-all duration-300 group bg-card/60 backdrop-blur-sm transform hover:-translate-y-1"
                     style={{
                       animationDelay: `${index * 100}ms`,
                       animation: 'slideInFromRight 0.5s ease-out forwards',
                     }}
                     onClick={() => onMeetingClick(meeting)}
                   >
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <div className="p-1.5 bg-primary/10 rounded group-hover:bg-primary/20 transition-colors">
-                          <ClockIcon className="h-3 w-3 text-primary" />
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
+                          <ClockIcon className="h-4 w-4 text-primary" />
                         </div>
                         <div>
-                          <div className="font-semibold text-xs text-foreground">
+                          <div className="font-semibold text-sm text-foreground">
                             {meeting.time}
                           </div>
                           <div className="text-xs text-muted-foreground">
@@ -255,23 +307,23 @@ export function CalendarSidebar({
                         {/* 🌐 Google Calendar 동기화 상태 표시 */}
                         {meeting.type === 'google' ? (
                           <div
-                            className="w-2 h-2 rounded-full bg-blue-500"
+                            className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-sm"
                             title="구글 캘린더 연동"
                           />
                         ) : meeting.syncInfo ? (
                           <div
-                            className="w-2 h-2 rounded-full bg-green-500"
+                            className="w-2.5 h-2.5 rounded-full bg-green-500 shadow-sm"
                             title="동기화됨"
                           />
                         ) : (
                           <div
-                            className="w-2 h-2 rounded-full bg-gray-400"
+                            className="w-2.5 h-2.5 rounded-full bg-gray-400 shadow-sm"
                             title="로컬 전용"
                           />
                         )}
                         <Badge
                           className={cn(
-                            'text-white text-xs group-hover:scale-105 transition-transform shadow-sm',
+                            'text-white text-xs group-hover:scale-105 transition-transform shadow-sm font-medium px-2 py-1',
                             meeting.type === 'google'
                               ? 'bg-gradient-to-r from-blue-500 to-blue-600'
                               : meetingTypeColors[
@@ -283,9 +335,9 @@ export function CalendarSidebar({
                         </Badge>
                       </div>
                     </div>
-                    <div className="space-y-1.5">
+                    <div className="space-y-2">
                       <div className="font-semibold text-sm text-foreground flex items-center gap-2">
-                        <PersonIcon className="h-3 w-3 text-muted-foreground" />
+                        <PersonIcon className="h-4 w-4 text-muted-foreground" />
                         {meeting.client.name}
                       </div>
                       <div className="text-xs text-muted-foreground flex items-center gap-2">
@@ -299,7 +351,7 @@ export function CalendarSidebar({
             </>
           ) : (
             <div className="text-center py-8">
-              <div className="p-3 bg-muted/30 rounded-full w-fit mx-auto mb-3">
+              <div className="p-4 bg-muted/20 rounded-full w-fit mx-auto mb-4">
                 <BellIcon className="mx-auto h-8 w-8 text-muted-foreground" />
               </div>
               <p className="text-sm text-muted-foreground font-medium mb-1">
@@ -314,29 +366,29 @@ export function CalendarSidebar({
       </Card>
 
       {/* 이번 주 통계 */}
-      <Card className="shadow-lg border border-border/50 bg-gradient-to-br from-card/90 to-card/70 backdrop-blur-sm">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <div className="p-1.5 bg-blue-500/10 rounded-lg">
-              <BarChartIcon className="h-4 w-4 text-blue-500" />
+      <Card className="border border-border/60 bg-card/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg flex items-center gap-3">
+            <div className="p-2 bg-gradient-to-br from-blue-500/20 to-blue-600/30 rounded-xl shadow-sm">
+              <BarChartIcon className="h-5 w-5 text-blue-500" />
             </div>
-            이번 주 통계
+            <span className="text-foreground font-semibold">이번 주 통계</span>
           </CardTitle>
-          <CardDescription className="text-sm">
+          <CardDescription className="text-sm text-muted-foreground">
             총 {totalThisWeek}개 미팅 예정
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-0">
-          <div className="space-y-3">
+          <div className="space-y-4">
             {meetingStats
               .filter((stat) => stat.count > 0)
               .map((stat) => (
-                <div key={stat.type} className="space-y-1.5">
+                <div key={stat.type} className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
                       <div
                         className={cn(
-                          'w-3 h-3 rounded-full shadow-sm border-2 border-white/30',
+                          'w-3 h-3 rounded-full shadow-sm border-2 border-white/50',
                           stat.color
                         )}
                       />
@@ -352,13 +404,13 @@ export function CalendarSidebar({
                     value={
                       totalThisWeek > 0 ? (stat.count / totalThisWeek) * 100 : 0
                     }
-                    className="h-1.5"
+                    className="h-2"
                   />
                 </div>
               ))}
             {totalThisWeek === 0 && (
-              <div className="text-center py-4">
-                <ActivityLogIcon className="mx-auto h-6 w-6 text-muted-foreground mb-2" />
+              <div className="text-center py-6">
+                <ActivityLogIcon className="mx-auto h-6 w-6 text-muted-foreground mb-3" />
                 <p className="text-xs text-muted-foreground">
                   이번 주 예정된 미팅이 없습니다
                 </p>
@@ -369,21 +421,21 @@ export function CalendarSidebar({
       </Card>
 
       {/* 미팅 필터 */}
-      <Card className="shadow-lg border border-border/50 bg-gradient-to-br from-card/90 to-card/70 backdrop-blur-sm">
-        <CardHeader className="pb-3">
+      <Card className="border border-border/60 bg-card/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300">
+        <CardHeader className="pb-4">
           <CardTitle className="text-lg flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 bg-purple-500/10 rounded-lg">
-                <MixerHorizontalIcon className="h-4 w-4 text-purple-500" />
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-purple-500/20 to-purple-600/30 rounded-xl shadow-sm">
+                <MixerHorizontalIcon className="h-5 w-5 text-purple-500" />
               </div>
-              미팅 필터
+              <span className="text-foreground font-semibold">미팅 필터</span>
             </div>
-            <div className="flex gap-1">
+            <div className="flex gap-2">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={selectAllFilters}
-                className="text-xs h-6 px-2"
+                className="text-xs h-7 px-3 hover:bg-primary/10"
               >
                 전체
               </Button>
@@ -391,18 +443,18 @@ export function CalendarSidebar({
                 variant="ghost"
                 size="sm"
                 onClick={clearFilters}
-                className="text-xs h-6 px-2"
+                className="text-xs h-7 px-2 hover:bg-destructive/10"
               >
                 <ResetIcon className="h-3 w-3" />
               </Button>
             </div>
           </CardTitle>
-          <CardDescription className="text-sm">
+          <CardDescription className="text-sm text-muted-foreground">
             보고 싶은 미팅 유형을 선택하세요
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-0">
-          <div className="space-y-2">
+          <div className="space-y-3">
             {allMeetingTypes.map((type) => {
               const isChecked =
                 filteredTypes.length === 0 || filteredTypes.includes(type);
@@ -413,7 +465,7 @@ export function CalendarSidebar({
               return (
                 <div
                   key={type}
-                  className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent/20 transition-all duration-200 group border border-transparent hover:border-border/40 cursor-pointer"
+                  className="flex items-center gap-3 p-3 rounded-xl hover:bg-accent/20 transition-all duration-200 group border border-transparent hover:border-border/50 cursor-pointer"
                   onClick={() => toggleFilter(type)}
                 >
                   <Checkbox
@@ -431,7 +483,7 @@ export function CalendarSidebar({
                     <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
                       {type}
                     </span>
-                    <span className="text-xs text-muted-foreground bg-muted/40 px-2 py-0.5 rounded-full">
+                    <span className="text-xs text-muted-foreground bg-muted/40 px-2 py-1 rounded-full font-medium">
                       {meetingCount}
                     </span>
                   </div>
@@ -441,10 +493,10 @@ export function CalendarSidebar({
           </div>
 
           {filteredTypes.length > 0 && (
-            <div className="mt-3 pt-3 border-t border-border/30">
+            <div className="mt-4 pt-4 border-t border-border/30">
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <span>필터 적용됨:</span>
-                <Badge variant="secondary" className="text-xs">
+                <Badge variant="secondary" className="text-xs font-medium">
                   {filteredTypes.length}개 유형
                 </Badge>
               </div>
