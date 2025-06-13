@@ -2,10 +2,18 @@ import { redirect } from 'react-router';
 import SignupPage from '~/common/pages/auth/signup-page';
 import { checkAuthStatus } from '~/lib/auth/core';
 import { signUpUser } from '~/lib/auth/registration';
-import type { Route } from './+types/auth.signup';
+
+// 직접 타입 정의
+interface LoaderArgs {
+  request: Request;
+}
+
+interface ActionArgs {
+  request: Request;
+}
 
 // Loader function - redirect if already authenticated
-export async function loader({ request }: Route.LoaderArgs) {
+export async function loader({ request }: LoaderArgs) {
   const isAuthenticated = await checkAuthStatus(request);
 
   // If already logged in, redirect to dashboard
@@ -24,7 +32,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 // Action function - handle signup form submission
-export async function action({ request }: Route.ActionArgs) {
+export async function action({ request }: ActionArgs) {
   const formData = await request.formData();
 
   const signUpData = {
