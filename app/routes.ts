@@ -71,8 +71,13 @@ export default [
   route('.well-known/*', 'common/pages/well-known-fallback.tsx'),
   route('terms', 'common/pages/terms-page.tsx'),
 
+  // 📧 이메일 테스트 페이지
+  route('email-test', 'routes/email-test.tsx'),
+
   // 🛠️ API 라우트들
   route('api/auth/me', 'routes/api.auth.me.ts'),
+  route('api/email/send-test', 'routes/api.email.send-test.ts'),
+  route('api/email/welcome-preview', 'routes/api.email.welcome-preview.ts'),
   route('api/notifications', 'routes/api.notifications.ts'),
   route('api/auth/check-email', 'routes/api.auth.check-email.ts'),
   route(
