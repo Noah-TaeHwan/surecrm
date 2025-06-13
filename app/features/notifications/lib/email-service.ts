@@ -8,8 +8,10 @@ interface WelcomeEmailData {
   dashboardUrl?: string;
 }
 
-// Resend 클라이언트 초기화
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Resend 클라이언트 초기화 (안전한 방식)
+const resend = process.env.RESEND_API_KEY
+  ? new Resend(process.env.RESEND_API_KEY)
+  : null;
 
 /**
  * 웰컴 이메일 HTML 생성
@@ -76,7 +78,7 @@ export async function sendWelcomeEmail({
     }
 
     // 운영 환경에서는 실제 이메일 발송
-    if (!process.env.RESEND_API_KEY) {
+    if (!process.env.RESEND_API_KEY || !resend) {
       throw new Error('RESEND_API_KEY가 설정되지 않았습니다.');
     }
 
