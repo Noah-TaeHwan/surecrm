@@ -325,14 +325,14 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
           (kpiData?.totalClients || 0) > 20
             ? 'high'
             : (kpiData?.totalClients || 0) > 5
-            ? 'medium'
-            : 'low',
+              ? 'medium'
+              : 'low',
         business_maturity:
           (salesStats?.totalPremium || 0) > 10000000
             ? 'enterprise'
             : (salesStats?.totalPremium || 0) > 1000000
-            ? 'professional'
-            : 'starter',
+              ? 'professional'
+              : 'starter',
         activity_score: Math.min(
           100,
           (todayStats?.scheduledMeetings || 0) * 20 +
@@ -441,10 +441,10 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
         meeting.status === 'scheduled'
           ? ('upcoming' as const)
           : meeting.status === 'in_progress'
-          ? ('in-progress' as const)
-          : meeting.status === 'completed'
-          ? ('completed' as const)
-          : ('cancelled' as const),
+            ? ('in-progress' as const)
+            : meeting.status === 'completed'
+              ? ('completed' as const)
+              : ('cancelled' as const),
       reminderSent: false, // TODO: 실제 알림 상태로 대체
     })
   );
@@ -553,8 +553,8 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
       goalData.goalType === 'revenue'
         ? salesStats?.totalPremium || 0
         : goalData.goalType === 'clients'
-        ? kpiData?.totalClients || 0
-        : kpiData?.totalReferrals || 0
+          ? kpiData?.totalClients || 0
+          : kpiData?.totalReferrals || 0
     );
 
     const formData = new FormData();

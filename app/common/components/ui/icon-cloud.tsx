@@ -53,7 +53,7 @@ export function IconCloud({
     window.addEventListener('resize', setCanvasSize);
 
     // Generate random positions for icons
-    iconRefs.current = icons.map((word) => {
+    iconRefs.current = icons.map(word => {
       const alpha = Math.acos(2 * Math.random() - 1) - Math.PI / 2;
       const beta = 2 * Math.PI * Math.random();
       const color = randomColor
@@ -100,7 +100,7 @@ export function IconCloud({
         : mouseX * 0.00008 * speed;
 
       // Update positions
-      iconRefs.current.forEach((icon) => {
+      iconRefs.current.forEach(icon => {
         // Apply rotation - simple 3D matrix rotation around X and Y
         const x = icon.x;
         const y = icon.y * Math.cos(rotationX) - icon.z * Math.sin(rotationX);

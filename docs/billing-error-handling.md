@@ -617,8 +617,7 @@ export class DatabaseConnectionManager {
     ];
 
     return connectionErrors.some(
-      (errorCode) =>
-        error.code === errorCode || error.message.includes(errorCode)
+      errorCode => error.code === errorCode || error.message.includes(errorCode)
     );
   }
 }

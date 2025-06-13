@@ -94,7 +94,7 @@ export async function getTeamMembers(userId: string): Promise<TeamMember[]> {
       );
 
     // 활성 멤버들을 TeamMember 형식으로 변환
-    const teamMembers: TeamMember[] = activeMembers.map((member) => ({
+    const teamMembers: TeamMember[] = activeMembers.map(member => ({
       id: member.id,
       name: member.fullName || '이름 없음',
       email: '', // 이메일은 auth.users에서 가져와야 함
@@ -110,18 +110,16 @@ export async function getTeamMembers(userId: string): Promise<TeamMember[]> {
     }));
 
     // 대기 중인 초대들을 TeamMember 형식으로 변환
-    const pendingMembers: TeamMember[] = pendingInvitations.map(
-      (invitation) => ({
-        id: invitation.id,
-        email: invitation.inviteeEmail || '',
-        position: '설계사',
-        role: 'member',
-        status: 'pending' as const,
-        invitedAt: invitation.createdAt?.toISOString().split('T')[0] || '',
-        clients: 0,
-        conversions: 0,
-      })
-    );
+    const pendingMembers: TeamMember[] = pendingInvitations.map(invitation => ({
+      id: invitation.id,
+      email: invitation.inviteeEmail || '',
+      position: '설계사',
+      role: 'member',
+      status: 'pending' as const,
+      invitedAt: invitation.createdAt?.toISOString().split('T')[0] || '',
+      clients: 0,
+      conversions: 0,
+    }));
 
     return [...teamMembers, ...pendingMembers];
   } catch (error) {

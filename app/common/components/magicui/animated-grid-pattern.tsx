@@ -54,8 +54,8 @@ export function AnimatedGridPattern({
 
   // Function to update a single square's position
   const updateSquarePosition = (id: number) => {
-    setSquares((currentSquares) =>
-      currentSquares.map((sq) =>
+    setSquares(currentSquares =>
+      currentSquares.map(sq =>
         sq.id === id
           ? {
               ...sq,
@@ -75,7 +75,7 @@ export function AnimatedGridPattern({
 
   // Resize observer to update container dimensions
   useEffect(() => {
-    const resizeObserver = new ResizeObserver((entries) => {
+    const resizeObserver = new ResizeObserver(entries => {
       for (let entry of entries) {
         setDimensions({
           width: entry.contentRect.width,

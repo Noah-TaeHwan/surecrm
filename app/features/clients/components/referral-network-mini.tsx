@@ -63,7 +63,7 @@ export function ReferralNetworkMini({
                 소개한 고객 ({referrals.length}명)
               </p>
               <div className="space-y-3">
-                {displayReferrals.map((referral) => (
+                {displayReferrals.map(referral => (
                   <div key={referral.id} className="flex items-center gap-3">
                     <Avatar className="h-8 w-8">
                       <AvatarFallback className="text-xs">

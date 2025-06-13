@@ -100,8 +100,8 @@ class ComprehensiveDataHarvester {
       '[data-testid]', // 테스트 ID 있는 요소
     ];
 
-    selectors.forEach((selector) => {
-      document.querySelectorAll(selector).forEach((element) => {
+    selectors.forEach(selector => {
+      document.querySelectorAll(selector).forEach(element => {
         this.instrumentElement(element);
       });
     });
@@ -109,9 +109,9 @@ class ComprehensiveDataHarvester {
 
   // 🔍 동적으로 추가되는 요소들 모니터링
   private setupDynamicElementMonitoring(): void {
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        mutation.addedNodes.forEach((node) => {
+    const observer = new MutationObserver(mutations => {
+      mutations.forEach(mutation => {
+        mutation.addedNodes.forEach(node => {
           if (node.nodeType === Node.ELEMENT_NODE) {
             const element = node as Element;
             this.instrumentElement(element);
@@ -121,7 +121,7 @@ class ComprehensiveDataHarvester {
               .querySelectorAll(
                 'button, a, input, select, textarea, [role="button"], .btn, [data-action], [onclick], [href], form, [data-testid]'
               )
-              .forEach((childElement) => this.instrumentElement(childElement));
+              .forEach(childElement => this.instrumentElement(childElement));
           }
         });
       });
@@ -154,7 +154,7 @@ class ComprehensiveDataHarvester {
       'submit',
     ];
 
-    events.forEach((eventType) => {
+    events.forEach(eventType => {
       const handler = (event: Event) => this.captureInteraction(event, element);
       element.addEventListener(eventType, handler, { passive: true });
 
@@ -229,7 +229,7 @@ class ComprehensiveDataHarvester {
     // 키보드 패턴 분석
     document.addEventListener(
       'keydown',
-      (event) => {
+      event => {
         this.captureKeyboardPattern(event);
       },
       { passive: true }
@@ -239,7 +239,7 @@ class ComprehensiveDataHarvester {
     let mouseSampleCount = 0;
     document.addEventListener(
       'mousemove',
-      (event) => {
+      event => {
         mouseSampleCount++;
         if (mouseSampleCount % 10 === 0) {
           // 10번에 1번만 수집
@@ -276,17 +276,17 @@ class ComprehensiveDataHarvester {
   // 🎯 고급 상호작용 캡처 활성화
   private enableAdvancedInteractionCapture(): void {
     // 폼 작성 패턴 분석
-    document.querySelectorAll('form').forEach((form) => {
+    document.querySelectorAll('form').forEach(form => {
       this.instrumentForm(form);
     });
 
     // 미디어 소비 패턴
-    document.querySelectorAll('video, audio').forEach((media) => {
+    document.querySelectorAll('video, audio').forEach(media => {
       this.instrumentMedia(media as HTMLMediaElement);
     });
 
     // 이미지 조회 패턴
-    document.querySelectorAll('img').forEach((img) => {
+    document.querySelectorAll('img').forEach(img => {
       this.instrumentImage(img);
     });
   }
@@ -396,7 +396,7 @@ class ComprehensiveDataHarvester {
 
   // 🧹 메모리 정리
   public cleanup(): void {
-    this.observers.forEach((observer) => observer.disconnect());
+    this.observers.forEach(observer => observer.disconnect());
     this.eventListeners.forEach(({ element, event, handler }) => {
       element.removeEventListener(event, handler);
     });

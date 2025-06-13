@@ -425,7 +425,7 @@ export function ClientImportModal({
       sensitiveDataDetected,
     };
 
-    setSecurityLogs((prev) => [...prev, log]);
+    setSecurityLogs(prev => [...prev, log]);
 
     if (onSecurityAudit) {
       onSecurityAudit(log);
@@ -496,7 +496,7 @@ export function ClientImportModal({
     data.forEach((row, rowIndex) => {
       let rowPrivacyLevel: ClientPrivacyLevel = 'public';
 
-      Object.values(row).forEach((value) => {
+      Object.values(row).forEach(value => {
         if (typeof value === 'string') {
           const detection = detectPersonalInfo(value);
           if (detection.detected) {
@@ -596,7 +596,7 @@ export function ClientImportModal({
     setUploadProgress(0);
 
     const interval = setInterval(() => {
-      setUploadProgress((prev) => {
+      setUploadProgress(prev => {
         if (prev >= 100) {
           clearInterval(interval);
           setIsUploading(false);
@@ -609,7 +609,7 @@ export function ClientImportModal({
 
           // 자동으로 필드 매핑 시도
           const autoMapping: Record<string, string> = {};
-          columns.forEach((col) => {
+          columns.forEach(col => {
             const lowerCol = col.toLowerCase();
             if (lowerCol.includes('이름') || lowerCol.includes('name')) {
               autoMapping['name'] = col;
@@ -693,7 +693,7 @@ export function ClientImportModal({
   const handleMappingComplete = () => {
     // 필수 필드 체크 - "__none__" 값 제외
     const requiredMapped = fieldMappings.required.every(
-      (field) =>
+      field =>
         columnMapping[field.key] && columnMapping[field.key] !== '__none__'
     );
 
@@ -823,10 +823,10 @@ export function ClientImportModal({
                       isDragOver
                         ? 'border-primary bg-primary/5 scale-[1.01]'
                         : isUploading
-                        ? 'border-muted-foreground/25 bg-muted/20'
-                        : selectedFile
-                        ? 'border-primary/50 bg-primary/5'
-                        : 'border-muted-foreground/25 hover:border-muted-foreground/50 hover:bg-muted/20'
+                          ? 'border-muted-foreground/25 bg-muted/20'
+                          : selectedFile
+                            ? 'border-primary/50 bg-primary/5'
+                            : 'border-muted-foreground/25 hover:border-muted-foreground/50 hover:bg-muted/20'
                     }`}
                     onDragOver={handleDragOver}
                     onDragLeave={handleDragLeave}
@@ -862,7 +862,7 @@ export function ClientImportModal({
                           </div>
                         </div>
                         <Button
-                          onClick={(e) => {
+                          onClick={e => {
                             e.stopPropagation();
                             setSelectedFile(null);
                             setPreviewData([]);
@@ -999,7 +999,7 @@ export function ClientImportModal({
                           필수 필드
                         </h4>
                         <div className="space-y-2">
-                          {fieldMappings.required.map((field) => (
+                          {fieldMappings.required.map(field => (
                             <div
                               key={field.key}
                               className="flex flex-col sm:flex-row sm:items-center gap-2 p-2 border rounded bg-destructive/5 border-destructive/20"
@@ -1018,8 +1018,8 @@ export function ClientImportModal({
                               <div className="flex-1">
                                 <Select
                                   value={columnMapping[field.key] || ''}
-                                  onValueChange={(value) =>
-                                    setColumnMapping((prev) => ({
+                                  onValueChange={value =>
+                                    setColumnMapping(prev => ({
                                       ...prev,
                                       [field.key]:
                                         value === 'none' ? '' : value,
@@ -1036,7 +1036,7 @@ export function ClientImportModal({
                                     >
                                       선택 안함
                                     </SelectItem>
-                                    {detectedColumns.map((col) => (
+                                    {detectedColumns.map(col => (
                                       <SelectItem
                                         key={col}
                                         value={col}
@@ -1060,7 +1060,7 @@ export function ClientImportModal({
                           선택 필드
                         </h4>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                          {fieldMappings.optional.map((field) => (
+                          {fieldMappings.optional.map(field => (
                             <div
                               key={field.key}
                               className="flex flex-col gap-1 p-2 border rounded bg-muted/20"
@@ -1078,8 +1078,8 @@ export function ClientImportModal({
                               </div>
                               <Select
                                 value={columnMapping[field.key] || ''}
-                                onValueChange={(value) =>
-                                  setColumnMapping((prev) => ({
+                                onValueChange={value =>
+                                  setColumnMapping(prev => ({
                                     ...prev,
                                     [field.key]: value === 'none' ? '' : value,
                                   }))
@@ -1095,7 +1095,7 @@ export function ClientImportModal({
                                   >
                                     선택 안함
                                   </SelectItem>
-                                  {detectedColumns.map((col) => (
+                                  {detectedColumns.map(col => (
                                     <SelectItem
                                       key={col}
                                       value={col}
@@ -1138,9 +1138,8 @@ export function ClientImportModal({
                     <div className="p-4 border rounded-lg text-center bg-card border-border">
                       <div className="text-2xl font-bold text-primary">
                         {previewData.length -
-                          validationResults.filter(
-                            (r) => r.severity === 'error'
-                          ).length}
+                          validationResults.filter(r => r.severity === 'error')
+                            .length}
                       </div>
                       <div className="text-sm text-muted-foreground">
                         정상 데이터
@@ -1150,7 +1149,7 @@ export function ClientImportModal({
                       <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
                         {
                           validationResults.filter(
-                            (r) => r.severity === 'warning'
+                            r => r.severity === 'warning'
                           ).length
                         }
                       </div>
@@ -1159,9 +1158,8 @@ export function ClientImportModal({
                     <div className="p-4 border rounded-lg text-center bg-card border-border">
                       <div className="text-2xl font-bold text-destructive">
                         {
-                          validationResults.filter(
-                            (r) => r.severity === 'error'
-                          ).length
+                          validationResults.filter(r => r.severity === 'error')
+                            .length
                         }
                       </div>
                       <div className="text-sm text-muted-foreground">오류</div>
@@ -1254,7 +1252,7 @@ export function ClientImportModal({
                       이전
                     </Button>
                     <Button onClick={handleImportComplete}>
-                      {validationResults.filter((r) => r.severity === 'error')
+                      {validationResults.filter(r => r.severity === 'error')
                         .length > 0
                         ? '오류 제외하고 임포트'
                         : '임포트 실행'}
@@ -1278,17 +1276,16 @@ export function ClientImportModal({
                     </h3>
                     <p className="text-muted-foreground text-lg mt-3">
                       {previewData.length -
-                        validationResults.filter((r) => r.severity === 'error')
+                        validationResults.filter(r => r.severity === 'error')
                           .length}
                       명의 고객이 성공적으로 추가되었습니다
                     </p>
-                    {validationResults.filter((r) => r.severity === 'error')
+                    {validationResults.filter(r => r.severity === 'error')
                       .length > 0 && (
                       <p className="text-sm text-muted-foreground mt-2">
                         {
-                          validationResults.filter(
-                            (r) => r.severity === 'error'
-                          ).length
+                          validationResults.filter(r => r.severity === 'error')
+                            .length
                         }
                         개의 오류가 있어 건너뛰어졌습니다
                       </p>
@@ -1302,7 +1299,7 @@ export function ClientImportModal({
                         <div className="text-lg font-bold text-primary">
                           {previewData.length -
                             validationResults.filter(
-                              (r) => r.severity === 'error'
+                              r => r.severity === 'error'
                             ).length}
                         </div>
                         <div className="text-xs text-muted-foreground">
@@ -1313,7 +1310,7 @@ export function ClientImportModal({
                         <div className="text-lg font-bold text-destructive">
                           {
                             validationResults.filter(
-                              (r) => r.severity === 'error'
+                              r => r.severity === 'error'
                             ).length
                           }
                         </div>
@@ -1350,7 +1347,7 @@ export function ClientImportModal({
       {/* 알림 모달 */}
       <Dialog
         open={alertModal.open}
-        onOpenChange={(open) => setAlertModal((prev) => ({ ...prev, open }))}
+        onOpenChange={open => setAlertModal(prev => ({ ...prev, open }))}
       >
         <DialogContent className="max-w-md">
           <DialogHeader>

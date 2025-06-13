@@ -49,7 +49,7 @@ const signUpSchema = z
     phone: z.string().optional(),
     company: z.string().optional(),
   })
-  .refine((data) => data.password === data.confirmPassword, {
+  .refine(data => data.password === data.confirmPassword, {
     message: '비밀번호가 일치하지 않습니다',
     path: ['confirmPassword'],
   });
@@ -359,8 +359,8 @@ export default function SignUpPage({ loaderData, actionData }: ComponentProps) {
                           invitationValid === true
                             ? 'border-green-500'
                             : invitationValid === false
-                            ? 'border-red-500'
-                            : ''
+                              ? 'border-red-500'
+                              : ''
                         }
                       />
                     </FormControl>

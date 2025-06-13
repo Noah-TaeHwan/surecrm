@@ -20,7 +20,7 @@ async function createMoreTestNotifications() {
 
     console.log(
       '👥 활성 사용자 목록:',
-      users.map((u) => ({
+      users.map(u => ({
         id: u.id.slice(0, 8) + '...',
         name: u.fullName,
         email: u.id,
@@ -270,17 +270,20 @@ async function createMoreTestNotifications() {
     });
 
     // 4. 읽지 않은 알림 수 확인
-    const unreadCount = insertedNotifications.filter((n) => !n.readAt).length;
+    const unreadCount = insertedNotifications.filter(n => !n.readAt).length;
     console.log(`🔔 읽지 않은 알림: ${unreadCount}개`);
     console.log(
       `📖 읽은 알림: ${insertedNotifications.length - unreadCount}개`
     );
 
     // 5. 우선순위별 분포
-    const priorityCount = insertedNotifications.reduce((acc, n) => {
-      acc[n.priority] = (acc[n.priority] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const priorityCount = insertedNotifications.reduce(
+      (acc, n) => {
+        acc[n.priority] = (acc[n.priority] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
 
     console.log('📊 우선순위별 분포:');
     Object.entries(priorityCount).forEach(([priority, count]) => {
@@ -288,10 +291,10 @@ async function createMoreTestNotifications() {
         priority === 'urgent'
           ? '🔴'
           : priority === 'high'
-          ? '🟠'
-          : priority === 'normal'
-          ? '🔵'
-          : '⚪';
+            ? '🟠'
+            : priority === 'normal'
+              ? '🔵'
+              : '⚪';
       console.log(`     ${emoji} ${priority}: ${count}개`);
     });
 
@@ -312,7 +315,7 @@ createMoreTestNotifications()
     console.log('🏁 추가 알림 생성 스크립트 실행 완료');
     process.exit(0);
   })
-  .catch((error) => {
+  .catch(error => {
     console.error('💥 스크립트 실행 실패:', error);
     process.exit(1);
   });

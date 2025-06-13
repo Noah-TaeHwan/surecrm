@@ -213,7 +213,7 @@ export function GratitudeModal({
 
   // 선물 유형 변경 시 기본 비용 설정
   const handleGiftTypeChange = (giftType: GiftType) => {
-    const option = giftTypeOptions.find((opt) => opt.value === giftType);
+    const option = giftTypeOptions.find(opt => opt.value === giftType);
     if (option) {
       form.setValue('cost', option.defaultCost);
     }
@@ -305,7 +305,7 @@ export function GratitudeModal({
                       감사 표현 유형
                     </FormLabel>
                     <div className="grid grid-cols-2 gap-3">
-                      {gratitudeTypeOptions.map((option) => (
+                      {gratitudeTypeOptions.map(option => (
                         <div
                           key={option.value}
                           className={`p-3 border rounded-lg cursor-pointer transition-colors ${
@@ -357,7 +357,7 @@ export function GratitudeModal({
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {giftTypeOptions.map((option) => (
+                            {giftTypeOptions.map(option => (
                               <SelectItem
                                 key={option.value}
                                 value={option.value}
@@ -502,7 +502,7 @@ export function GratitudeModal({
                     <strong>유형:</strong>{' '}
                     {
                       gratitudeTypeOptions.find(
-                        (opt) => opt.value === watchedType
+                        opt => opt.value === watchedType
                       )?.label
                     }
                   </div>
@@ -511,7 +511,7 @@ export function GratitudeModal({
                       <strong>선물:</strong>{' '}
                       {
                         giftTypeOptions.find(
-                          (opt) => opt.value === watchedGiftType
+                          opt => opt.value === watchedGiftType
                         )?.label
                       }
                     </div>

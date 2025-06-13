@@ -160,7 +160,7 @@ export function EnhancedPlanSelection({
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {keyFeatures.map((feature) => (
+          {keyFeatures.map(feature => (
             <Card
               key={feature.id}
               className={`cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${

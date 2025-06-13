@@ -34,7 +34,7 @@ interface TodayAgendaProps {
 
 export function TodayAgenda({ meetings }: TodayAgendaProps) {
   const [isClient, setIsClient] = useState(false);
-  const upcomingMeetings = meetings.filter((m) => m.status === 'upcoming');
+  const upcomingMeetings = meetings.filter(m => m.status === 'upcoming');
 
   useEffect(() => {
     setIsClient(true);
@@ -125,7 +125,7 @@ export function TodayAgenda({ meetings }: TodayAgendaProps) {
       <CardContent className="space-y-3">
         {upcomingMeetings.length > 0 ? (
           <>
-            {upcomingMeetings.slice(0, 4).map((meeting) => (
+            {upcomingMeetings.slice(0, 4).map(meeting => (
               <div
                 key={meeting.id}
                 className="flex items-start gap-3 p-3 border border-border/30 rounded-lg hover:bg-accent/20 transition-all duration-200"

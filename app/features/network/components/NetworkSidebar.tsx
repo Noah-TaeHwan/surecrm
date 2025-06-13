@@ -153,7 +153,7 @@ export default function NetworkSidebar({
     const activeFilters = [];
 
     if (filters.stageFilter !== 'all') {
-      const stage = stages.find((s) => s.value === filters.stageFilter);
+      const stage = stages.find(s => s.value === filters.stageFilter);
       activeFilters.push(
         <Badge
           key="stage"
@@ -369,8 +369,8 @@ export default function NetworkSidebar({
                             index === 0
                               ? 'bg-amber-100 text-amber-700'
                               : index === 1
-                              ? 'bg-gray-100 text-gray-700'
-                              : 'bg-orange-100 text-orange-700'
+                                ? 'bg-gray-100 text-gray-700'
+                                : 'bg-orange-100 text-orange-700'
                           }
                         `}
                         >
@@ -524,7 +524,7 @@ export default function NetworkSidebar({
                   </div>
 
                   <div className="grid grid-cols-1 gap-2">
-                    {stages.map((stage) => (
+                    {stages.map(stage => (
                       <Button
                         key={stage.value}
                         variant={

@@ -58,7 +58,7 @@ export function CompanionModal({
               className="w-full p-3 border rounded-lg text-sm"
               placeholder="동반자 성함"
               value={companion?.name || ''}
-              onChange={(e) =>
+              onChange={e =>
                 onCompanionChange({
                   ...companion!,
                   name: e.target.value,
@@ -72,7 +72,7 @@ export function CompanionModal({
             </label>
             <Select
               value={companion?.relationship || ''}
-              onValueChange={(value) =>
+              onValueChange={value =>
                 onCompanionChange({
                   ...companion!,
                   relationship: value,
@@ -83,7 +83,7 @@ export function CompanionModal({
                 <SelectValue placeholder="관계 선택" />
               </SelectTrigger>
               <SelectContent>
-                {RELATIONSHIP_OPTIONS.map((option) => (
+                {RELATIONSHIP_OPTIONS.map(option => (
                   <SelectItem key={option.value} value={option.value}>
                     <div className="flex items-center gap-2">
                       <span>{option.icon}</span>
@@ -103,7 +103,7 @@ export function CompanionModal({
               className="w-full p-3 border rounded-lg text-sm"
               placeholder="010-0000-0000"
               value={companion?.phone || ''}
-              onChange={(e) =>
+              onChange={e =>
                 onCompanionChange({
                   ...companion!,
                   phone: e.target.value,
@@ -117,7 +117,7 @@ export function CompanionModal({
                 type="checkbox"
                 className="rounded"
                 checked={companion?.isPrimary || false}
-                onChange={(e) =>
+                onChange={e =>
                   onCompanionChange({
                     ...companion!,
                     isPrimary: e.target.checked,

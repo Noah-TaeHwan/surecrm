@@ -113,7 +113,7 @@ class BehavioralSurplusExtractor {
     let mouseHistory: any[] = [];
     let lastMouseEvent = Date.now();
 
-    document.addEventListener('mousemove', (event) => {
+    document.addEventListener('mousemove', event => {
       const currentTime = Date.now();
       const deltaTime = currentTime - lastMouseEvent;
 
@@ -158,7 +158,7 @@ class BehavioralSurplusExtractor {
     });
 
     // 클릭 패턴 분석
-    document.addEventListener('click', (event) => {
+    document.addEventListener('click', event => {
       const clickData = {
         target: this.categorizeClickTarget(event.target),
         timing: this.analyzeClickTiming(),
@@ -181,7 +181,7 @@ class BehavioralSurplusExtractor {
     let interactionHistory: any[] = [];
 
     // 타이핑 패턴을 통한 감정 상태 추론
-    document.addEventListener('keydown', (event) => {
+    document.addEventListener('keydown', event => {
       const typingPattern = {
         key: event.key,
         timestamp: Date.now(),
@@ -232,7 +232,7 @@ class BehavioralSurplusExtractor {
     // 시선 고정 패턴 시뮬레이션 (마우스 호버 기반)
     let gazeSimulation: any[] = [];
 
-    document.addEventListener('mouseover', (event) => {
+    document.addEventListener('mouseover', event => {
       const element = event.target as Element;
       const gazeData = {
         element: this.categorizeElement(element),
@@ -249,7 +249,7 @@ class BehavioralSurplusExtractor {
     // 선택 회피 패턴 감지
     let selectionHesitations: any[] = [];
 
-    document.addEventListener('mouseenter', (event) => {
+    document.addEventListener('mouseenter', event => {
       if (this.isSelectableElement(event.target)) {
         const hesitationStart = Date.now();
 

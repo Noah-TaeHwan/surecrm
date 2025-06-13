@@ -88,7 +88,7 @@ export function TeamMemberList({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {members.map((member) => (
+              {members.map(member => (
                 <TableRow key={member.id}>
                   <TableCell>
                     <div className="flex items-center gap-3">

@@ -554,7 +554,7 @@ export default function SettingsPage({
 
   // 프로필 정보 변경 핸들러
   const handleProfileChange = (field: string, value: string) => {
-    setProfileData((prev) => ({
+    setProfileData(prev => ({
       ...prev,
       [field]: value,
     }));
@@ -562,7 +562,7 @@ export default function SettingsPage({
 
   // 비밀번호 변경 핸들러
   const handlePasswordChange = (field: string, value: string) => {
-    setPasswordData((prev) => ({
+    setPasswordData(prev => ({
       ...prev,
       [field]: value,
     }));
@@ -573,7 +573,7 @@ export default function SettingsPage({
     field: string,
     value: string | boolean | number
   ) => {
-    setCalendarData((prev) => ({
+    setCalendarData(prev => ({
       ...prev,
       [field]: value,
     }));
@@ -684,7 +684,7 @@ export default function SettingsPage({
                         id="name"
                         name="name"
                         value={profileData.name}
-                        onChange={(e) =>
+                        onChange={e =>
                           handleProfileChange('name', e.target.value)
                         }
                         placeholder="이름을 입력하세요"
@@ -751,7 +751,7 @@ export default function SettingsPage({
                       id="phone"
                       name="phone"
                       value={profileData.phone}
-                      onChange={(e) =>
+                      onChange={e =>
                         handleProfileChange('phone', e.target.value)
                       }
                       placeholder="전화번호를 입력하세요"
@@ -774,7 +774,7 @@ export default function SettingsPage({
                       id="company"
                       name="company"
                       value={profileData.company}
-                      onChange={(e) =>
+                      onChange={e =>
                         handleProfileChange('company', e.target.value)
                       }
                       placeholder="회사명을 입력하세요"
@@ -815,7 +815,7 @@ export default function SettingsPage({
                       type="password"
                       name="currentPassword"
                       value={passwordData.currentPassword}
-                      onChange={(e) =>
+                      onChange={e =>
                         handlePasswordChange('currentPassword', e.target.value)
                       }
                       placeholder="현재 비밀번호를 입력하세요"
@@ -831,7 +831,7 @@ export default function SettingsPage({
                       type="password"
                       name="newPassword"
                       value={passwordData.newPassword}
-                      onChange={(e) =>
+                      onChange={e =>
                         handlePasswordChange('newPassword', e.target.value)
                       }
                       placeholder="새 비밀번호를 입력하세요 (6자 이상)"
@@ -847,7 +847,7 @@ export default function SettingsPage({
                       type="password"
                       name="confirmPassword"
                       value={passwordData.confirmPassword}
-                      onChange={(e) =>
+                      onChange={e =>
                         handlePasswordChange('confirmPassword', e.target.value)
                       }
                       placeholder="새 비밀번호를 다시 입력하세요"
@@ -975,8 +975,8 @@ export default function SettingsPage({
                       calendarSettings?.syncStatus === 'connected'
                         ? 'bg-green-100 text-green-600'
                         : calendarSettings?.syncStatus === 'error'
-                        ? 'bg-red-100 text-red-600'
-                        : 'bg-gray-100 text-gray-600'
+                          ? 'bg-red-100 text-red-600'
+                          : 'bg-gray-100 text-gray-600'
                     }`}
                   >
                     {calendarSettings?.syncStatus === 'connected' ? (
@@ -992,8 +992,8 @@ export default function SettingsPage({
                       {calendarSettings?.syncStatus === 'connected'
                         ? '연동됨'
                         : calendarSettings?.syncStatus === 'error'
-                        ? '연동 오류'
-                        : '연동 안됨'}
+                          ? '연동 오류'
+                          : '연동 안됨'}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {calendarSettings?.syncStatus === 'connected' ? (
@@ -1062,7 +1062,7 @@ export default function SettingsPage({
                         id="googleCalendarSync"
                         name="googleCalendarSync"
                         checked={calendarData.googleCalendarSync}
-                        onCheckedChange={(checked) =>
+                        onCheckedChange={checked =>
                           handleCalendarChange('googleCalendarSync', checked)
                         }
                       />
@@ -1077,7 +1077,7 @@ export default function SettingsPage({
                           <Select
                             name="syncDirection"
                             value={calendarData.syncDirection}
-                            onValueChange={(value) =>
+                            onValueChange={value =>
                               handleCalendarChange('syncDirection', value)
                             }
                           >
@@ -1114,7 +1114,7 @@ export default function SettingsPage({
                           <RadioGroup
                             name="conflictResolution"
                             value={calendarData.conflictResolution}
-                            onValueChange={(value) =>
+                            onValueChange={value =>
                               handleCalendarChange('conflictResolution', value)
                             }
                           >
@@ -1155,7 +1155,7 @@ export default function SettingsPage({
                           <Select
                             name="autoSyncInterval"
                             value={calendarData.autoSyncInterval.toString()}
-                            onValueChange={(value) =>
+                            onValueChange={value =>
                               handleCalendarChange(
                                 'autoSyncInterval',
                                 parseInt(value)

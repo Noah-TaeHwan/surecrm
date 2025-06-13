@@ -111,7 +111,7 @@ export function ClientTagModal({
                 </div>
               ) : availableTags.length > 0 ? (
                 <div className="grid grid-cols-1 gap-2 max-h-60 overflow-y-auto">
-                  {availableTags.map((tag) => (
+                  {availableTags.map(tag => (
                     <label
                       key={tag.id}
                       className="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
@@ -119,12 +119,12 @@ export function ClientTagModal({
                       <input
                         type="checkbox"
                         checked={selectedTagIds.includes(tag.id)}
-                        onChange={(e) => {
+                        onChange={e => {
                           if (e.target.checked) {
-                            setSelectedTagIds((prev) => [...prev, tag.id]);
+                            setSelectedTagIds(prev => [...prev, tag.id]);
                           } else {
-                            setSelectedTagIds((prev) =>
-                              prev.filter((id) => id !== tag.id)
+                            setSelectedTagIds(prev =>
+                              prev.filter(id => id !== tag.id)
                             );
                           }
                         }}
@@ -208,8 +208,8 @@ export function ClientTagModal({
                 className="w-full p-3 border rounded-lg text-sm"
                 placeholder="예: 키맨 고객, 신규 고객, 관심 고객"
                 value={tagForm.name}
-                onChange={(e) =>
-                  setTagForm((prev) => ({ ...prev, name: e.target.value }))
+                onChange={e =>
+                  setTagForm(prev => ({ ...prev, name: e.target.value }))
                 }
                 maxLength={20}
               />
@@ -223,8 +223,8 @@ export function ClientTagModal({
                 <input
                   type="color"
                   value={tagForm.color}
-                  onChange={(e) =>
-                    setTagForm((prev) => ({ ...prev, color: e.target.value }))
+                  onChange={e =>
+                    setTagForm(prev => ({ ...prev, color: e.target.value }))
                   }
                   className="w-12 h-8 rounded border cursor-pointer"
                 />
@@ -238,13 +238,13 @@ export function ClientTagModal({
                     '#f97316',
                     '#06b6d4',
                     '#84cc16',
-                  ].map((color) => (
+                  ].map(color => (
                     <button
                       key={color}
                       type="button"
                       className="w-6 h-6 rounded border-2 border-border hover:scale-110 transition-transform"
                       style={{ backgroundColor: color }}
-                      onClick={() => setTagForm((prev) => ({ ...prev, color }))}
+                      onClick={() => setTagForm(prev => ({ ...prev, color }))}
                     />
                   ))}
                 </div>
@@ -260,8 +260,8 @@ export function ClientTagModal({
                 placeholder="태그에 대한 설명을 입력하세요"
                 rows={3}
                 value={tagForm.description}
-                onChange={(e) =>
-                  setTagForm((prev) => ({
+                onChange={e =>
+                  setTagForm(prev => ({
                     ...prev,
                     description: e.target.value,
                   }))

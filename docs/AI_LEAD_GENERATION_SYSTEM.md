@@ -1737,7 +1737,7 @@ interface Q1_OKR {
         target: '25만원 (MVP 손익분기점)';
         current: 0;
         tracking: 'MRR dashboard';
-      }
+      },
     ];
   };
 
@@ -1761,7 +1761,7 @@ interface Q1_OKR {
         target: '핵심 기능 80% 사용';
         current: 0;
         tracking: 'Feature adoption analytics';
-      }
+      },
     ];
   };
 }
@@ -1836,7 +1836,7 @@ interface MonthlyImprovementCycle {
       '핵심 메트릭 vs 목표 비교 분석',
       '사용자 행동 패턴 변화 감지',
       '기능별 사용률 및 이탈 지점 분석',
-      '고객 피드백 정성 분석'
+      '고객 피드백 정성 분석',
     ];
     deliverables: ['Performance Report', 'User Behavior Insights'];
   };
@@ -1846,7 +1846,7 @@ interface MonthlyImprovementCycle {
       '개선 가설 수립 (3-5개)',
       'A/B 테스트 설계',
       '우선순위 매트릭스 작성',
-      '리소스 할당 계획'
+      '리소스 할당 계획',
     ];
     deliverables: ['Improvement Hypotheses', 'A/B Test Plans'];
   };
@@ -1856,7 +1856,7 @@ interface MonthlyImprovementCycle {
       '개선 사항 개발 및 배포',
       'A/B 테스트 실행',
       '실시간 모니터링',
-      '이상 징후 대응'
+      '이상 징후 대응',
     ];
     deliverables: ['Feature Updates', 'Running A/B Tests'];
   };
@@ -1866,7 +1866,7 @@ interface MonthlyImprovementCycle {
       'A/B 테스트 결과 분석',
       '통계적 유의성 검증',
       '개선 효과 측정',
-      '다음 달 계획 수립'
+      '다음 달 계획 수립',
     ];
     deliverables: ['Test Results', 'Next Month Roadmap'];
   };
@@ -2067,7 +2067,7 @@ interface HubSpotLessons {
         '월간 보험 트렌드 리포트',
         'AI 활용 영업 가이드',
         '성공 사례 웨비나',
-        '업계 네트워킹 이벤트'
+        '업계 네트워킹 이벤트',
       ];
       distribution: ['LinkedIn', '보험 커뮤니티', '업계 매체'];
       roi: 'CAC 50% 절감 예상';
@@ -2080,7 +2080,7 @@ interface HubSpotLessons {
       freeFeatures: [
         '월 10건 리드 스코링',
         '기본 대시보드',
-        '주간 인사이트 리포트'
+        '주간 인사이트 리포트',
       ];
       conversionTrigger: '월 10건 한도 도달시 업그레이드 유도';
       expectedConversion: '25-30% 프리미엄 전환';
@@ -2327,7 +2327,7 @@ interface EventTrackingImplementation {
       'profile_completed',
       'first_dashboard_view',
       'tutorial_completed',
-      'first_lead_viewed'
+      'first_lead_viewed',
     ];
 
     coreWorkflow: [
@@ -2336,7 +2336,7 @@ interface EventTrackingImplementation {
       'lead_contacted', // 사용자가 리드에 연락
       'meeting_scheduled', // 미팅 일정 등록
       'contract_signed', // 계약 성사
-      'referral_generated' // 추가 리드 생성
+      'referral_generated', // 추가 리드 생성
     ];
 
     engagement: [
@@ -2345,7 +2345,7 @@ interface EventTrackingImplementation {
       'notification_clicked',
       'feature_used',
       'session_duration',
-      'report_generated'
+      'report_generated',
     ];
   };
 
@@ -2355,14 +2355,14 @@ interface EventTrackingImplementation {
       'subscription_started',
       'payment_successful',
       'upgrade_completed',
-      'churn_occurred'
+      'churn_occurred',
     ];
 
     ai_performance: [
       'prediction_made',
       'prediction_accuracy_measured',
       'false_positive_detected',
-      'user_feedback_received'
+      'user_feedback_received',
     ];
   };
 
@@ -2412,12 +2412,12 @@ interface MonthlyImprovementCycle {
       '사용자 행동 패턴 분석',
       'AI 모델 성능 평가',
       '고객 피드백 정리',
-      'A/B 테스트 결과 리뷰'
+      'A/B 테스트 결과 리뷰',
     ];
     deliverables: [
       '월간 성과 리포트',
       '개선 기회 식별',
-      '다음 달 실험 후보 리스트'
+      '다음 달 실험 후보 리스트',
     ];
   };
 
@@ -2427,7 +2427,7 @@ interface MonthlyImprovementCycle {
       '실험 설계 및 우선순위',
       '성공 지표 정의',
       '실험 리소스 계획',
-      '팀 내 실험 계획 공유'
+      '팀 내 실험 계획 공유',
     ];
     deliverables: ['실험 백로그', '실험별 성공 기준', '실험 일정표'];
   };
@@ -2438,12 +2438,12 @@ interface MonthlyImprovementCycle {
       '기능 플래그 설정',
       '실험 그룹 분할',
       '데이터 수집 시작',
-      '초기 결과 모니터링'
+      '초기 결과 모니터링',
     ];
     deliverables: [
       '실행 중인 실험 현황',
       '예상 vs 실제 지표 비교',
-      '실험 조기 종료 여부 판단'
+      '실험 조기 종료 여부 판단',
     ];
   };
 
@@ -2453,12 +2453,12 @@ interface MonthlyImprovementCycle {
       '통계적 유의성 검증',
       '비즈니스 임팩트 평가',
       '학습 내용 정리',
-      '다음 달 계획 수립'
+      '다음 달 계획 수립',
     ];
     deliverables: [
       '실험 결과 보고서',
       '기능 출시/롤백 결정',
-      '다음 달 실험 로드맵'
+      '다음 달 실험 로드맵',
     ];
   };
 
@@ -2515,7 +2515,7 @@ interface ModernScrumFramework {
     '오늘 계획한 작업',
     '블로커 및 AI 모델 학습 상태',
     '데이터 품질 이슈',
-    '모델 성능 변화'
+    '모델 성능 변화',
   ];
 
   // 특성 개발 분해 구조
@@ -2583,7 +2583,7 @@ interface CriticalPathAnalysis {
   parallelizable: [
     ['프론트엔드 UI 개발', '백엔드 API 개발'],
     ['AI 모델 학습', '데이터 파이프라인 구축'],
-    ['테스트 자동화', '문서화 작업']
+    ['테스트 자동화', '문서화 작업'],
   ];
 }
 ```
@@ -2601,7 +2601,7 @@ interface WeeklyExecutionCycle {
       '현재 워크플로우 관찰 및 분석',
       '페인 포인트 우선순위 매트릭스 작성',
       '문제 정의서 작성 (Jobs-to-be-Done 프레임워크)',
-      '경쟁사 솔루션 분석'
+      '경쟁사 솔루션 분석',
     ];
     deliverable: '검증된 문제 정의서 + 페인 포인트 맵';
     success_criteria: '80% 이상이 동일한 주요 문제 언급';
@@ -2614,7 +2614,7 @@ interface WeeklyExecutionCycle {
       'Figma 빠른 프로토타입 제작',
       '보험설계사 5명과 프로토타입 테스트',
       '핵심 가설 검증 (A/B 테스트 설계)',
-      'MVP 기능 우선순위 결정 (ICE Score)'
+      'MVP 기능 우선순위 결정 (ICE Score)',
     ];
     deliverable: '검증된 MVP 프로토타입 + 기능 우선순위';
     success_criteria: '테스트 참가자 70% 이상이 문제 해결 가능성 인정';
@@ -2704,7 +2704,7 @@ interface CorePlatformEpic {
       'OAuth 2.0 인증 구현',
       '역할 기반 접근 제어 (RBAC)',
       '비밀번호 정책 시행',
-      'MFA 지원'
+      'MFA 지원',
     ];
 
     developmentTasks: {
@@ -2777,12 +2777,12 @@ interface Phase1Implementation {
       'AWS EKS 클러스터 설정',
       'PostgreSQL 클러스터 구성',
       'Redis 캐시 클러스터 설정',
-      'Kafka 스트리밍 파이프라인 구축'
+      'Kafka 스트리밍 파이프라인 구축',
     ];
     deliverables: [
       'Production-ready Kubernetes cluster',
       'Multi-AZ database setup',
-      'Monitoring & logging infrastructure'
+      'Monitoring & logging infrastructure',
     ];
     cost: '월 500만원 (인프라 비용)';
     team: '인프라 엔지니어 2명, DevOps 1명';
@@ -2794,12 +2794,12 @@ interface Phase1Implementation {
       'MCP 표준 데이터 커넥터 개발',
       '공공데이터 API 연동 (12개 소스)',
       'PIPA 준수 데이터 수집 프레임워크',
-      '실시간 데이터 품질 검증 시스템'
+      '실시간 데이터 품질 검증 시스템',
     ];
     deliverables: [
       'Daily 100GB+ data processing capability',
       'GDPR/PIPA compliant data pipeline',
-      'Real-time data quality monitoring'
+      'Real-time data quality monitoring',
     ];
     validation: '99.5% 데이터 품질 달성';
   };
@@ -2810,12 +2810,12 @@ interface Phase1Implementation {
       '리드 스코링 모델 학습 (85% 정확도 1차 목표)',
       '라이프 이벤트 감지 알고리즘',
       '실시간 예측 API 개발',
-      'A/B 테스트 프레임워크 구축'
+      'A/B 테스트 프레임워크 구축',
     ];
     deliverables: [
       'Production ML model with 85%+ accuracy (현실적 목표)',
       'Real-time prediction API (<100ms)',
-      'Automated model retraining pipeline'
+      'Automated model retraining pipeline',
     ];
     success_metrics: '예측 정확도 85% 이상 (업계 우수 수준)';
   };
@@ -2832,12 +2832,12 @@ interface Phase2Implementation {
       'React Router + TypeScript 대시보드',
       '실시간 알림 시스템 (WebSocket)',
       '모바일 반응형 UI',
-      'Shadcn UI 컴포넌트 라이브러리 적용'
+      'Shadcn UI 컴포넌트 라이브러리 적용',
     ];
     deliverables: [
       'Intuitive dashboard with <2s load time',
       'Real-time notifications',
-      'Mobile-first responsive design'
+      'Mobile-first responsive design',
     ];
     user_testing: '보험설계사 20명 베타 테스트';
   };
@@ -2848,12 +2848,12 @@ interface Phase2Implementation {
       'AI 액션 추천 엔진',
       '개인화 접근 전략 생성',
       '성과 추적 및 분석',
-      '경쟁사 동향 분석'
+      '경쟁사 동향 분석',
     ];
     deliverables: [
       'Personalized action recommendations',
       'ROI tracking and analytics',
-      'Competitor intelligence system'
+      'Competitor intelligence system',
     ];
     target_conversion: '기존 대비 300% 리드 발굴 증가';
   };
@@ -2870,7 +2870,7 @@ interface Phase3Launch {
       '다층 캐싱 시스템 구현',
       'GPU 기반 모델 추론 최적화',
       '자동 스케일링 설정',
-      'CDN 및 엣지 컴퓨팅 적용'
+      'CDN 및 엣지 컴퓨팅 적용',
     ];
     targets: {
       latency: '<100ms API response';
@@ -2885,7 +2885,7 @@ interface Phase3Launch {
       '보안 및 컴플라이언스 감사',
       '사용자 온보딩 시스템',
       '고객 지원 시스템',
-      '결제 및 구독 관리'
+      '결제 및 구독 관리',
     ];
     launch_strategy: {
       beta_users: 100; // 초기 베타 사용자
@@ -3067,7 +3067,7 @@ interface Week1_Foundation {
       owner: '데이터 엔지니어';
       deliverable: '실시간 분석 대시보드';
       success: '핵심 이벤트 추적 100% 설정';
-    }
+    },
   ];
 
   risks: {
@@ -3107,7 +3107,7 @@ interface Week2_Development {
       owner: 'DevOps';
       deliverable: 'CI/CD 파이프라인';
       success: '배포시간 15분 미만';
-    }
+    },
   ];
 }
 ```
@@ -3122,7 +3122,7 @@ interface Week3to4_BrandAndPartnerships {
       '브랜드 아이덴티티 및 메시징 확정',
       '초기 콘텐츠 라이브러리 생성 (블로그 8개, 백서 2개)',
       '영업 자료 개발 (데모 스크립트, 사례 연구)',
-      '가격대별 랜딩 페이지 구축'
+      '가격대별 랜딩 페이지 구축',
     ];
     deliverables: ['Brand Guide', 'Content Library', 'Sales Materials'];
   };
@@ -3133,7 +3133,7 @@ interface Week3to4_BrandAndPartnerships {
       '20개 잠재적 통합 파트너 식별 및 연락',
       '3개 전략적 파트너십 계약 체결',
       '파트너 추천 프로그램 개발',
-      '공동 마케팅 자료 생성'
+      '공동 마케팅 자료 생성',
     ];
     deliverables: ['3 Signed Partnerships', 'Referral Program'];
   };
@@ -3149,7 +3149,7 @@ interface Week5to8_Infrastructure {
       'CRM 및 영업 자동화 설정 (HubSpot)',
       '이메일 마케팅 시퀀스 생성',
       '고객 온보딩 워크플로우 구축',
-      '고객 성공 플레이북 개발'
+      '고객 성공 플레이북 개발',
     ];
   };
 
@@ -3162,7 +3162,7 @@ interface Week5to8_Infrastructure {
       '고품질 블로그 포스트 8개 게시',
       '리드 마그넷 생성 (전자책, 템플릿)',
       '타겟 키워드 웹사이트 최적화',
-      '소셜 미디어 프레즌스 런칭'
+      '소셜 미디어 프레즌스 런칭',
     ];
   };
 
@@ -3172,7 +3172,7 @@ interface Week5to8_Infrastructure {
       '베타를 25명 사용자로 확장',
       '사용자 피드백 수집 및 분석',
       '중요한 기능 개선 사항 구현',
-      '베타 사용자 사례 연구 개발'
+      '베타 사용자 사례 연구 개발',
     ];
   };
 
@@ -3182,7 +3182,7 @@ interface Week5to8_Infrastructure {
       '가격 및 패키징 확정',
       '영업팀 교육 완료',
       '고객 지원 시스템 설정',
-      '출시 캠페인 자료 준비'
+      '출시 캠페인 자료 준비',
     ];
   };
 }
@@ -3202,7 +3202,7 @@ interface Week9_SoftLaunch {
       actions: [
         '베타 사용자 30명에게 프리미엄 액세스 제공',
         '사용자 추천 프로그램 런칭',
-        '성공 사례 소셜 미디어 공유'
+        '성공 사례 소셜 미디어 공유',
       ];
     };
 
@@ -3211,7 +3211,7 @@ interface Week9_SoftLaunch {
       actions: [
         '100명 타겟 리스트 콜드 아웃리치',
         '파트너십 채널 활성화',
-        '초기 피드백 수집 및 빠른 개선'
+        '초기 피드백 수집 및 빠른 개선',
       ];
     };
 
@@ -3281,7 +3281,7 @@ interface Week11_PerformanceAnalysis {
       improvements: [
         '사용률 낮은 기능 개선',
         '온보딩 프로세스 최적화',
-        '이탈 지점 해결'
+        '이탈 지점 해결',
       ];
     };
 
@@ -3328,12 +3328,12 @@ interface Week12_ScaleAndGrowth {
     triggerPoints: [
       '8주 후 CAC > $500',
       '12주 후 전환율 < 15%',
-      '16주 후 유료 고객 < 100명'
+      '16주 후 유료 고객 < 100명',
     ];
     pivotOptions: [
       '타겟 고객군 변경 (대형 보험사 → 소규모 에이전트)',
       '비즈니스 모델 조정 (SaaS → 수수료 기반)',
-      '제품 포지셔닝 변경 (AI 도구 → 교육 플랫폼)'
+      '제품 포지셔닝 변경 (AI 도구 → 교육 플랫폼)',
     ];
   };
 }
@@ -4086,7 +4086,7 @@ interface EveningWrapUp {
         opportunity: '보장성보험 업그레이드';
         bestContactTime: '내일 오전 10시';
         successProbability: 75;
-      }
+      },
     ];
 
     weeklyGoals: {
@@ -4675,7 +4675,7 @@ interface DevelopmentTeam {
       responsibilities: ['사용자 경험 설계', 'UI 디자인', '사용성 테스트'];
       monthlySalary: 5000000; // 500만원
       duration: 10;
-    }
+    },
   ];
 
   totalMonthlyCost: 31500000; // 3,150만원/월
@@ -4937,7 +4937,7 @@ interface Phase1_ProvenTechnology {
       '기존 CRM 데이터',
       '공공데이터포털 API',
       '금융감독원 공개 데이터',
-      '보험개발원 통계'
+      '보험개발원 통계',
     ];
   };
 
@@ -4948,7 +4948,7 @@ interface Phase1_ProvenTechnology {
       '고객 기본 정보',
       '보험 가입 이력',
       '접촉 이력',
-      '라이프스테이지 분석'
+      '라이프스테이지 분석',
     ];
   };
 
@@ -4958,7 +4958,7 @@ interface Phase1_ProvenTechnology {
       'XAI(설명가능 AI) 기술 도입',
       '개인정보보호 영향평가 체계',
       '알고리즘 공정성 검증',
-      '투명성 보고서 자동 생성'
+      '투명성 보고서 자동 생성',
     ];
   };
 }
@@ -4978,7 +4978,7 @@ interface LegalRiskMitigation {
         'XAI 기술 필수 구현',
         '알고리즘 영향평가 체계 구축',
         '투명성 보고서 자동화',
-        '정기적 공정성 감사'
+        '정기적 공정성 감사',
       ];
       timeline: '2025년 하반기부터 준비 시작';
     };
@@ -4990,7 +4990,7 @@ interface LegalRiskMitigation {
         '개인정보 영향평가 의무화',
         '가명처리 기술 도입',
         '동의 철회 시 즉시 삭제',
-        '최소 수집 원칙 철저 준수'
+        '최소 수집 원칙 철저 준수',
       ];
       timeline: '개발 초기부터 적용';
     };
@@ -5004,7 +5004,7 @@ interface LegalRiskMitigation {
         '해외 인재 적극 영입',
         '주식 옵션 제공',
         '원격 근무 허용',
-        '전문 헤드헌팅 활용'
+        '전문 헤드헌팅 활용',
       ];
     };
 
@@ -5014,7 +5014,7 @@ interface LegalRiskMitigation {
         '단계적 목표 설정 (85%→87%→90%)',
         '다양한 모델 앙상블',
         '지속적 성능 모니터링',
-        '외부 전문가 컨설팅'
+        '외부 전문가 컨설팅',
       ];
     };
   };
@@ -5040,7 +5040,7 @@ interface RealisticSuccessMetrics {
         '고객 성공 프로그램',
         '지속적 교육 컨텐츠',
         '커뮤니티 네트워킹',
-        '성과 기반 인센티브'
+        '성과 기반 인센티브',
       ];
     };
   };
@@ -5635,7 +5635,7 @@ interface RiskMitigationPlan {
         '더 많은 훈련 데이터 확보',
         '앙상블 모델 적용',
         '도메인 전문가 피드백 반영',
-        '점진적 모델 개선 (70% → 75% → 80% → 85%)'
+        '점진적 모델 개선 (70% → 75% → 80% → 85%)',
       ];
       contingency: '규칙 기반 시스템과 하이브리드 운영';
     };
@@ -5648,7 +5648,7 @@ interface RiskMitigationPlan {
         '부하 테스트 조기 실시',
         '캐싱 전략 다층화',
         '데이터베이스 최적화',
-        '오토스케일링 미리 구현'
+        '오토스케일링 미리 구현',
       ];
       contingency: '클라우드 인프라 즉시 확장';
     };
@@ -5663,7 +5663,7 @@ interface RiskMitigationPlan {
         '베타 테스트 그룹 확대 (30명 → 100명)',
         '무료 체험 기간 연장 (2주 → 1개월)',
         '직접적인 ROI 증명 케이스 스터디 확보',
-        '보험설계사 커뮤니티 활용'
+        '보험설계사 커뮤니티 활용',
       ];
       contingency: 'Product-Market Fit 재검증 및 피벗';
     };
@@ -5676,7 +5676,7 @@ interface RiskMitigationPlan {
         '특허 출원 (AI 알고리즘)',
         '네트워크 효과 강화',
         '고객 스위칭 비용 증대',
-        '지속적인 기능 혁신'
+        '지속적인 기능 혁신',
       ];
       contingency: '차별화 포인트 재정의 및 강화';
     };
@@ -5691,7 +5691,7 @@ interface RiskMitigationPlan {
         'PIPA 컴플라이언스 철저 준수',
         '개인정보 담당자 지정',
         '데이터 최소화 원칙 적용',
-        '정기적 법무 검토'
+        '정기적 법무 검토',
       ];
       contingency: '즉시 데이터 처리 중단 및 법적 대응';
     };
@@ -5713,7 +5713,7 @@ interface RiskMitigationPlan {
       trigger: '경쟁 심화';
       pivotTo: 'B2B SaaS (보험사 대상) 전환';
       timeline: '12주 내 제품 재설계';
-    }
+    },
   ];
 }
 ```

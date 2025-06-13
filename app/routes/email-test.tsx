@@ -107,7 +107,7 @@ export default function EmailTestPage() {
                   type="email"
                   placeholder="your@email.com"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={e => setEmail(e.target.value)}
                   className="w-full"
                 />
               </div>
@@ -120,7 +120,7 @@ export default function EmailTestPage() {
                   type="text"
                   placeholder="홍길동"
                   value={userName}
-                  onChange={(e) => setUserName(e.target.value)}
+                  onChange={e => setUserName(e.target.value)}
                   className="w-full"
                 />
               </div>

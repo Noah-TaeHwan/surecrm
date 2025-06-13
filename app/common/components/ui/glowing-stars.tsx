@@ -110,14 +110,14 @@ export function GlowingStars({
               star.size === 'large'
                 ? '6px'
                 : star.size === 'medium'
-                ? '4px'
-                : '2px',
+                  ? '4px'
+                  : '2px',
             height:
               star.size === 'large'
                 ? '6px'
                 : star.size === 'medium'
-                ? '4px'
-                : '2px',
+                  ? '4px'
+                  : '2px',
             backgroundColor: star.color,
             borderRadius: '50%',
             filter: `blur(${star.size === 'large' ? '1px' : '0.5px'})`,
@@ -125,8 +125,8 @@ export function GlowingStars({
               star.size === 'large'
                 ? '10px'
                 : star.size === 'medium'
-                ? '6px'
-                : '4px'
+                  ? '6px'
+                  : '4px'
             } ${star.color}`,
             animation: star.animate,
             opacity:

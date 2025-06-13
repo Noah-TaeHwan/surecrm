@@ -51,8 +51,8 @@ export function TopPerformers({ performers }: TopPerformersProps) {
                         index === 0
                           ? 'bg-yellow-500'
                           : index === 1
-                          ? 'bg-gray-400'
-                          : 'bg-orange-500'
+                            ? 'bg-gray-400'
+                            : 'bg-orange-500'
                       )}
                     >
                       {index + 1}

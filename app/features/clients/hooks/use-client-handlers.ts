@@ -201,7 +201,7 @@ export function useClientHandlers({
 
       if (!validationResult.success) {
         const errors = validationResult.error.errors
-          .map((err) => `${err.path.join('.')}: ${err.message}`)
+          .map(err => `${err.path.join('.')}: ${err.message}`)
           .join('\n');
         showError('입력 오류', `다음 항목을 확인해주세요:\n${errors}`);
         return;

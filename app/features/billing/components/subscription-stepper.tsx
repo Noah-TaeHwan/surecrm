@@ -56,7 +56,7 @@ export function SubscriptionStepper({ currentStep }: SubscriptionStepperProps) {
   ];
 
   const completedSteps = steps.filter(
-    (step) => step.status === 'completed'
+    step => step.status === 'completed'
   ).length;
   const totalSteps = steps.length;
   const progressPercentage = (completedSteps / totalSteps) * 100;
@@ -70,7 +70,7 @@ export function SubscriptionStepper({ currentStep }: SubscriptionStepperProps) {
           <Clock className="w-4 h-4" />
           <span>
             약{' '}
-            {steps.find((s) => s.status === 'current')?.estimatedTime || '완료'}{' '}
+            {steps.find(s => s.status === 'current')?.estimatedTime || '완료'}{' '}
             남음
           </span>
           <span>•</span>
@@ -105,8 +105,8 @@ export function SubscriptionStepper({ currentStep }: SubscriptionStepperProps) {
                       step.status === 'completed'
                         ? 'bg-green-500 text-white shadow-lg'
                         : step.status === 'current'
-                        ? 'bg-primary text-primary-foreground shadow-lg ring-4 ring-primary/20'
-                        : 'bg-muted text-muted-foreground'
+                          ? 'bg-primary text-primary-foreground shadow-lg ring-4 ring-primary/20'
+                          : 'bg-muted text-muted-foreground'
                     }
                   `}
                   >
@@ -131,8 +131,8 @@ export function SubscriptionStepper({ currentStep }: SubscriptionStepperProps) {
                         step.status === 'current'
                           ? 'text-foreground'
                           : step.status === 'completed'
-                          ? 'text-green-600'
-                          : 'text-muted-foreground'
+                            ? 'text-green-600'
+                            : 'text-muted-foreground'
                       }`}
                     >
                       {step.title}
@@ -156,8 +156,8 @@ export function SubscriptionStepper({ currentStep }: SubscriptionStepperProps) {
                       step.status === 'completed'
                         ? 'bg-green-500'
                         : step.status === 'current'
-                        ? 'bg-primary'
-                        : 'bg-muted'
+                          ? 'bg-primary'
+                          : 'bg-muted'
                     }`}
                   />
                 )}
@@ -172,7 +172,7 @@ export function SubscriptionStepper({ currentStep }: SubscriptionStepperProps) {
         <div className="text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium">
             <Circle className="w-4 h-4 fill-current" />
-            {steps.find((s) => s.status === 'current')?.title} 진행 중
+            {steps.find(s => s.status === 'current')?.title} 진행 중
           </div>
         </div>
       )}

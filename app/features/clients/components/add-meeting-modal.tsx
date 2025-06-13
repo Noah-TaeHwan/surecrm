@@ -284,7 +284,7 @@ export function AddMeetingModal({
   // 🔒 **미팅 타입 변경 핸들러**
   const handleMeetingTypeChange = (type: string) => {
     setSelectedMeetingType(type);
-    const meetingTypeInfo = secureMeetingTypes.find((t) => t.value === type);
+    const meetingTypeInfo = secureMeetingTypes.find(t => t.value === type);
 
     if (meetingTypeInfo) {
       form.setValue('meetingPrivacyLevel', meetingTypeInfo.privacyLevel);
@@ -306,7 +306,7 @@ export function AddMeetingModal({
     location: string
   ): { isSecure: boolean; warning?: string } => {
     const locationInfo = secureLocationOptions.find(
-      (loc) => loc.value === location
+      loc => loc.value === location
     );
 
     if (!locationInfo?.isSecure) {
@@ -397,7 +397,7 @@ export function AddMeetingModal({
     const newMeeting = {
       id: Date.now().toString(),
       title: data.title,
-      client: availableClients.find((c) => c.id === data.clientId) || {
+      client: availableClients.find(c => c.id === data.clientId) || {
         id: data.clientId,
         name: clientName || '알 수 없음',
       },
@@ -475,7 +475,7 @@ export function AddMeetingModal({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {availableClients.map((client) => (
+                        {availableClients.map(client => (
                           <SelectItem key={client.id} value={client.id}>
                             {client.name}
                           </SelectItem>
@@ -500,7 +500,7 @@ export function AddMeetingModal({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {secureMeetingTypes.map((type) => (
+                        {secureMeetingTypes.map(type => (
                           <SelectItem key={type.value} value={type.value}>
                             {type.label}
                           </SelectItem>
@@ -553,7 +553,7 @@ export function AddMeetingModal({
                   <FormItem>
                     <FormLabel>소요 시간 (분)</FormLabel>
                     <Select
-                      onValueChange={(value) => field.onChange(parseInt(value))}
+                      onValueChange={value => field.onChange(parseInt(value))}
                       value={field.value?.toString()}
                     >
                       <FormControl>
@@ -627,7 +627,7 @@ export function AddMeetingModal({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {secureReminderOptions.map((option) => (
+                        {secureReminderOptions.map(option => (
                           <SelectItem key={option.value} value={option.value}>
                             {option.label}
                           </SelectItem>
@@ -651,7 +651,7 @@ export function AddMeetingModal({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {secureRepeatOptions.map((option) => (
+                        {secureRepeatOptions.map(option => (
                           <SelectItem key={option.value} value={option.value}>
                             {option.label}
                           </SelectItem>

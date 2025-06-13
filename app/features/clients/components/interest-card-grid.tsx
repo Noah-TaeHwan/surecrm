@@ -21,7 +21,7 @@ export function InterestCardGrid({
 }: InterestCardGridProps) {
   return (
     <div className={`grid ${gridCols} gap-4`}>
-      {items.map((item) => (
+      {items.map(item => (
         <div
           key={item.key}
           className="p-3 bg-card border border-border/50 rounded-lg hover:bg-accent/10 transition-colors"
@@ -32,7 +32,7 @@ export function InterestCardGrid({
               type="checkbox"
               className="rounded border-border"
               checked={values[item.key] || false}
-              onChange={(e) => onChange(item.key, e.target.checked)}
+              onChange={e => onChange(item.key, e.target.checked)}
             />
             <span className="text-xs text-foreground leading-tight">
               {item.label}

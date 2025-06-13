@@ -260,7 +260,7 @@ export function ClientInsuranceInfoForm({
                 <Checkbox
                   id="healthInfoConsent"
                   checked={healthInfoConsent}
-                  onCheckedChange={(checked) => {
+                  onCheckedChange={checked => {
                     setHealthInfoConsent(checked === true);
                     handleSecurityAudit(
                       'health_consent_changed',
@@ -301,7 +301,7 @@ export function ClientInsuranceInfoForm({
                   )}
               </FormLabel>
               <Select
-                onValueChange={(value) =>
+                onValueChange={value =>
                   handleFieldChange('insuranceType', value, field.onChange)
                 }
                 defaultValue={field.value}
@@ -312,7 +312,7 @@ export function ClientInsuranceInfoForm({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {insuranceTypeOptions.map((option) => (
+                  {insuranceTypeOptions.map(option => (
                     <SelectItem key={option.value} value={option.value}>
                       <div className="flex items-center gap-2">
                         {option.label}
@@ -372,7 +372,7 @@ export function ClientInsuranceInfoForm({
                       placeholder={
                         shouldMaskInsuranceField('familyMembers') ? '***' : '4'
                       }
-                      onChange={(e) => {
+                      onChange={e => {
                         const value = parseInt(e.target.value) || 1;
                         handleFieldChange('familySize', value, field.onChange);
                       }}
@@ -400,7 +400,7 @@ export function ClientInsuranceInfoForm({
                     size="sm"
                     onClick={() => {
                       setFamilyMembers(
-                        familyMembers.filter((m) => m.id !== member.id)
+                        familyMembers.filter(m => m.id !== member.id)
                       );
                       handleSecurityAudit('family_member_removed', member.id);
                     }}
@@ -519,7 +519,7 @@ export function ClientInsuranceInfoForm({
                 <FormItem>
                   <FormLabel>주차량 종류</FormLabel>
                   <Select
-                    onValueChange={(value) =>
+                    onValueChange={value =>
                       handleFieldChange('vehicleType', value, field.onChange)
                     }
                     defaultValue={field.value}
@@ -530,7 +530,7 @@ export function ClientInsuranceInfoForm({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {vehicleTypeOptions.map((option) => (
+                      {vehicleTypeOptions.map(option => (
                         <SelectItem key={option.value} value={option.value}>
                           {option.label}
                         </SelectItem>
@@ -555,7 +555,7 @@ export function ClientInsuranceInfoForm({
                       placeholder={
                         shouldMaskInsuranceField('vehicleInfo') ? '**' : '5'
                       }
-                      onChange={(e) => {
+                      onChange={e => {
                         const value = parseInt(e.target.value) || 0;
                         handleFieldChange(
                           'drivingExperience',
@@ -676,9 +676,7 @@ export function ClientInsuranceInfoForm({
                         size="sm"
                         onClick={() => {
                           setHealthConditions(
-                            healthConditions.filter(
-                              (c) => c.id !== condition.id
-                            )
+                            healthConditions.filter(c => c.id !== condition.id)
                           );
                           handleSecurityAudit(
                             'health_condition_removed',

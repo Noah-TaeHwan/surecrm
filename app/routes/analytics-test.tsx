@@ -306,15 +306,15 @@ export default function AnalyticsTestPage() {
                           userInsights.engagementLevel === 'high'
                             ? 'default'
                             : userInsights.engagementLevel === 'medium'
-                            ? 'secondary'
-                            : 'outline'
+                              ? 'secondary'
+                              : 'outline'
                         }
                       >
                         {userInsights.engagementLevel === 'high'
                           ? '높음'
                           : userInsights.engagementLevel === 'medium'
-                          ? '보통'
-                          : '낮음'}
+                            ? '보통'
+                            : '낮음'}
                       </Badge>
                     </div>
                     <div className="space-y-1">
@@ -361,15 +361,15 @@ export default function AnalyticsTestPage() {
                           userInsights.valueSegment === 'premium'
                             ? 'default'
                             : userInsights.valueSegment === 'standard'
-                            ? 'secondary'
-                            : 'outline'
+                              ? 'secondary'
+                              : 'outline'
                         }
                       >
                         {userInsights.valueSegment === 'premium'
                           ? '프리미엄'
                           : userInsights.valueSegment === 'standard'
-                          ? '스탠다드'
-                          : '베이직'}
+                            ? '스탠다드'
+                            : '베이직'}
                       </Badge>
                     </div>
                     <div className="flex justify-between">
@@ -626,8 +626,8 @@ export default function AnalyticsTestPage() {
                       {rec.priority === 'high'
                         ? '높음'
                         : rec.priority === 'medium'
-                        ? '보통'
-                        : '낮음'}
+                          ? '보통'
+                          : '낮음'}
                     </Badge>
                   </div>
                 ))}

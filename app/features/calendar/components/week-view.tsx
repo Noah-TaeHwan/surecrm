@@ -18,7 +18,7 @@ export function WeekView({
   // 필터링된 미팅
   const filteredMeetings =
     filteredTypes.length > 0
-      ? meetings.filter((meeting) => filteredTypes.includes(meeting.type))
+      ? meetings.filter(meeting => filteredTypes.includes(meeting.type))
       : meetings;
 
   // 필터링된 결과가 없는 경우 빈 상태 표시
@@ -105,8 +105,8 @@ export function WeekView({
               index === 0
                 ? 'text-red-500'
                 : index === 6
-                ? 'text-blue-500'
-                : 'text-foreground/80',
+                  ? 'text-blue-500'
+                  : 'text-foreground/80',
               isToday(date) && 'bg-primary/10 text-primary font-bold'
             )}
           >
@@ -127,7 +127,7 @@ export function WeekView({
 
       {/* 시간대별 그리드 */}
       <div className="grid grid-cols-8 bg-gradient-to-br from-background/60 to-background/40">
-        {timeSlots.map((hour) => (
+        {timeSlots.map(hour => (
           <Fragment key={hour}>
             {/* 시간 라벨 */}
             <div className="p-3 text-sm font-semibold text-muted-foreground border-r border-b border-border/20 bg-muted/20 text-center">
@@ -137,7 +137,7 @@ export function WeekView({
             {/* 각 요일별 시간 슬롯 */}
             {weekDates.map((date, dayIndex) => {
               const dateStr = formatDate(date);
-              const dayMeetings = filteredMeetings.filter((meeting) => {
+              const dayMeetings = filteredMeetings.filter(meeting => {
                 if (meeting.date !== dateStr) return false;
 
                 const meetingHour = parseInt(meeting.time.split(':')[0]);
@@ -154,7 +154,7 @@ export function WeekView({
                     dayIndex === 6 && 'bg-blue-50/30 dark:bg-blue-950/20'
                   )}
                 >
-                  {dayMeetings.map((meeting) => (
+                  {dayMeetings.map(meeting => (
                     <div
                       key={meeting.id}
                       className={cn(

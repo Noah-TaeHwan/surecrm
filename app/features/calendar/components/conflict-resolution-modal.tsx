@@ -135,7 +135,7 @@ export function ConflictResolutionModal({
 
         {/* 개별 충돌 카드들 */}
         <div className="space-y-4">
-          {conflicts.map((conflict) => (
+          {conflicts.map(conflict => (
             <Card key={conflict.eventId} className="border-amber-200">
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
@@ -148,7 +148,7 @@ export function ConflictResolutionModal({
                         충돌 감지: {formatDateTime(conflict.detectedAt)}
                       </Badge>
                       <div className="flex flex-wrap gap-1">
-                        {conflict.conflictFields.map((field) => (
+                        {conflict.conflictFields.map(field => (
                           <Badge
                             key={field}
                             variant="destructive"

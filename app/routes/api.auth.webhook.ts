@@ -208,7 +208,7 @@ async function handleEmailConfirmation(user: UserRecord) {
     }
 
     // 트랜잭션으로 초대장 사용 처리 및 새 초대장 생성
-    await db.transaction(async (tx) => {
+    await db.transaction(async tx => {
       // 초대장 사용 처리
       await tx
         .update(invitations)

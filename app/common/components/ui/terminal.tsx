@@ -61,7 +61,7 @@ export function TypingAnimation({
       } else if (contentIndex < childrenArray.length - 1) {
         // 다음 콘텐츠로 이동
         timeoutId = setTimeout(() => {
-          setContentIndex((i) => i + 1);
+          setContentIndex(i => i + 1);
           setDisplayedContent('');
         }, 1000);
       }

@@ -90,7 +90,7 @@ async function setupInitialUser() {
       console.log(`✅ 기존 초대장 ${existingInvitations.length}개 발견`);
 
       const pendingInvitations = existingInvitations.filter(
-        (inv) => inv.status === 'pending'
+        inv => inv.status === 'pending'
       );
       if (pendingInvitations.length > 0) {
         console.log('\n🎯 사용 가능한 초대장:');

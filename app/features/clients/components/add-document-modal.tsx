@@ -96,7 +96,7 @@ export function AddDocumentModal({
 
   // 파일 제거 핸들러
   const removeFile = (index: number) => {
-    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -152,7 +152,7 @@ export function AddDocumentModal({
       // 업로드 진행 시뮬레이션
       for (let i = 0; i <= 100; i += 10) {
         setUploadProgress(i);
-        await new Promise((resolve) => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 100));
       }
 
       const newDocument = {
@@ -399,7 +399,7 @@ export function AddDocumentModal({
                                 연결 안함
                               </span>
                             </SelectItem>
-                            {insuranceTypes.map((type) => (
+                            {insuranceTypes.map(type => (
                               <SelectItem key={type} value={type}>
                                 <div className="flex items-center gap-2">
                                   {insuranceTypeConfig[type]?.icon}

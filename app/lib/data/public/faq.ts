@@ -43,7 +43,7 @@ export async function getFAQs(): Promise<FAQCategory[]> {
 
     // 카테고리별로 그룹화
     const groupedFAQs = faqData.reduce((acc, faq) => {
-      const existingCategory = acc.find((cat) => cat.category === faq.category);
+      const existingCategory = acc.find(cat => cat.category === faq.category);
       const faqWithDefaults = {
         ...faq,
         isPublished: true,

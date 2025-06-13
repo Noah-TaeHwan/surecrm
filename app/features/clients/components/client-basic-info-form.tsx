@@ -186,7 +186,7 @@ export function ClientBasicInfoForm({
                 <Checkbox
                   id="dataProcessingConsent"
                   checked={dataProcessingConsent}
-                  onCheckedChange={(checked) => {
+                  onCheckedChange={checked => {
                     setDataProcessingConsent(checked === true);
                     handleSecurityAudit(
                       'consent_changed',
@@ -216,7 +216,7 @@ export function ClientBasicInfoForm({
                       {...field}
                       className="pl-10"
                       placeholder="홍길동"
-                      onChange={(e) =>
+                      onChange={e =>
                         handleFieldChange(
                           'fullName',
                           e.target.value,
@@ -254,7 +254,7 @@ export function ClientBasicInfoForm({
                           : '010-0000-0000'
                       }
                       type={shouldMaskField('phone') ? 'password' : 'text'}
-                      onChange={(e) =>
+                      onChange={e =>
                         handleFieldChange(
                           'phone',
                           e.target.value,
@@ -297,7 +297,7 @@ export function ClientBasicInfoForm({
                           ? '***@****.***'
                           : 'example@email.com'
                       }
-                      onChange={(e) =>
+                      onChange={e =>
                         handleFieldChange(
                           'email',
                           e.target.value,
@@ -335,7 +335,7 @@ export function ClientBasicInfoForm({
                           : '서울시 강남구...'
                       }
                       type={shouldMaskField('address') ? 'password' : 'text'}
-                      onChange={(e) =>
+                      onChange={e =>
                         handleFieldChange(
                           'address',
                           e.target.value,
@@ -359,7 +359,7 @@ export function ClientBasicInfoForm({
                   <Input
                     {...field}
                     placeholder="회사원, 자영업자 등"
-                    onChange={(e) =>
+                    onChange={e =>
                       handleFieldChange(
                         'occupation',
                         e.target.value,

@@ -94,14 +94,14 @@ export function ClientFiltersSection({
                 <Input
                   placeholder="이름, 전화번호, 이메일, 직업, 주소로 검색..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={e => setSearchQuery(e.target.value)}
                   className="pl-10 h-10"
                 />
               </div>
             </div>
             <Select
               value={filterImportance}
-              onValueChange={(value) =>
+              onValueChange={value =>
                 setFilterImportance(value as 'all' | 'high' | 'medium' | 'low')
               }
             >

@@ -21,7 +21,7 @@ export default function NetworkGraph(props: NetworkGraphProps) {
     setIsMounted(true);
 
     // 클라이언트 사이드에서만 dynamic import
-    import('./NetworkGraphClient').then((module) => {
+    import('./NetworkGraphClient').then(module => {
       setNetworkGraphClient(() => module.default);
     });
   }, []);

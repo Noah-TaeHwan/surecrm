@@ -113,7 +113,7 @@ export function ClientMeetingsTab({
 
   // 🔒 미팅 필터링 (상태 및 보안 레벨)
   const filterMeetings = (meetings: Meeting[]) => {
-    return meetings.filter((meeting) => {
+    return meetings.filter(meeting => {
       // 상태 필터
       if (filterStatus !== 'all' && meeting.status !== filterStatus) {
         return false;
@@ -274,7 +274,7 @@ export function ClientMeetingsTab({
                 <Switch
                   id="show-confidential-meetings"
                   checked={showConfidentialData}
-                  onCheckedChange={(checked) => {
+                  onCheckedChange={checked => {
                     setShowConfidentialData(checked);
                     handleDataAccess(
                       checked ? '기밀정보 표시' : '기밀정보 숨김',
@@ -347,7 +347,7 @@ export function ClientMeetingsTab({
                 </Button>
               </div>
             ) : (
-              filteredMeetings.map((meeting) => {
+              filteredMeetings.map(meeting => {
                 const config = meetingStatusConfig[meeting.status];
 
                 return (
@@ -495,7 +495,7 @@ export function ClientMeetingsTab({
                         <div className="mt-2 text-xs text-muted-foreground">
                           진행률:{' '}
                           {Math.round(
-                            (meeting.checklist.filter((item) => item.completed)
+                            (meeting.checklist.filter(item => item.completed)
                               .length /
                               meeting.checklist.length) *
                               100
@@ -545,19 +545,13 @@ export function ClientMeetingsTab({
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-green-600">
-                {
-                  filteredMeetings.filter((m) => m.status === 'completed')
-                    .length
-                }
+                {filteredMeetings.filter(m => m.status === 'completed').length}
               </div>
               <div className="text-sm text-muted-foreground">완료</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-yellow-600">
-                {
-                  filteredMeetings.filter((m) => m.status === 'scheduled')
-                    .length
-                }
+                {filteredMeetings.filter(m => m.status === 'scheduled').length}
               </div>
               <div className="text-sm text-muted-foreground">예정</div>
             </div>

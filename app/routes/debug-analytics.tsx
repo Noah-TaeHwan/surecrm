@@ -413,8 +413,8 @@ export default function DebugAnalyticsPage() {
                 {status.isSystemAdmin
                   ? '시스템 관리자'
                   : !status.gaId && !status.gtmId
-                  ? '분석 ID 미설정'
-                  : '기타'}
+                    ? '분석 ID 미설정'
+                    : '기타'}
               </div>
             )}
             <br />

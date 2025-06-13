@@ -539,7 +539,7 @@ export const appAdminSessions = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     unique('app_admin_sessions_session_token_unique').on(table.sessionToken),
   ]
 );
@@ -597,7 +597,7 @@ export const appClientDocuments = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.agentId],
       foreignColumns: [appUserProfiles.id],
@@ -641,7 +641,7 @@ export const appPipelineAutomations = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.stageId],
       foreignColumns: [appPipelineStages.id],
@@ -685,7 +685,7 @@ export const appPipelineGoals = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.stageId],
       foreignColumns: [appPipelineStages.id],
@@ -721,7 +721,7 @@ export const appPipelineStageHistory = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.changedBy],
       foreignColumns: [appUserProfiles.id],
@@ -765,7 +765,7 @@ export const appPipelineStageTemplates = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.teamId],
       foreignColumns: [appUserTeams.id],
@@ -805,7 +805,7 @@ export const appPipelineViews = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.teamId],
       foreignColumns: [appUserTeams.id],
@@ -856,7 +856,7 @@ export const appClientInsuranceContracts = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.agentId],
       foreignColumns: [appUserProfiles.id],
@@ -893,7 +893,7 @@ export const appClientContractAttachments = pgTable(
       .notNull(),
     isActive: boolean('is_active').default(true).notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.agentId],
       foreignColumns: [appUserProfiles.id],
@@ -932,7 +932,7 @@ export const appClientMeetings = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.agentId],
       foreignColumns: [appUserProfiles.id],
@@ -963,7 +963,7 @@ export const appClientReferrals = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.agentId],
       foreignColumns: [appUserProfiles.id],
@@ -1003,7 +1003,7 @@ export const appClientInsurance = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.clientId],
       foreignColumns: [appClientProfiles.id],
@@ -1031,7 +1031,7 @@ export const appClientDetails = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.clientId],
       foreignColumns: [appClientProfiles.id],
@@ -1087,7 +1087,7 @@ export const appOpportunityProducts = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.agentId],
       foreignColumns: [appUserProfiles.id],
@@ -1120,7 +1120,7 @@ export const appCalendarMeetingAttendees = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.agentId],
       foreignColumns: [appUserProfiles.id],
@@ -1154,7 +1154,7 @@ export const appCalendarMeetingChecklists = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.meetingId],
       foreignColumns: [appClientMeetings.id],
@@ -1178,7 +1178,7 @@ export const appCalendarMeetingNotes = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.agentId],
       foreignColumns: [appUserProfiles.id],
@@ -1209,7 +1209,7 @@ export const appCalendarMeetingReminders = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.meetingId],
       foreignColumns: [appClientMeetings.id],
@@ -1239,7 +1239,7 @@ export const appCalendarRecurringMeetings = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.parentMeetingId],
       foreignColumns: [appClientMeetings.id],
@@ -1264,7 +1264,7 @@ export const appCalendarSyncLogs = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.agentId],
       foreignColumns: [appUserProfiles.id],
@@ -1314,7 +1314,7 @@ export const appInfluencerGratitudeHistory = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.agentId],
       foreignColumns: [appUserProfiles.id],
@@ -1363,7 +1363,7 @@ export const appClientProfiles = pgTable(
       .notNull(),
     stageOrder: integer('stage_order').default(0).notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.agentId],
       foreignColumns: [appUserProfiles.id],
@@ -1403,7 +1403,7 @@ export const appUserInvitations = pgTable(
     expiresAt: timestamp('expires_at', { withTimezone: true, mode: 'string' }),
     usedAt: timestamp('used_at', { withTimezone: true, mode: 'string' }),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.inviterId],
       foreignColumns: [appUserProfiles.id],
@@ -1435,7 +1435,7 @@ export const appPipelineStages = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.agentId],
       foreignColumns: [appUserProfiles.id],
@@ -1480,7 +1480,7 @@ export const appClientAnalytics = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.clientId],
       foreignColumns: [appClientProfiles.id],
@@ -1516,7 +1516,7 @@ export const appClientContactHistory = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.agentId],
       foreignColumns: [appUserProfiles.id],
@@ -1547,7 +1547,7 @@ export const appClientDataAccessLogs = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.accessedBy],
       foreignColumns: [appUserProfiles.id],
@@ -1581,7 +1581,7 @@ export const appClientDataBackups = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.clientId],
       foreignColumns: [appClientProfiles.id],
@@ -1628,7 +1628,7 @@ export const appClientFamilyMembers = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.clientId],
       foreignColumns: [appClientProfiles.id],
@@ -1657,7 +1657,7 @@ export const appClientMilestones = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.agentId],
       foreignColumns: [appUserProfiles.id],
@@ -1705,7 +1705,7 @@ export const appClientPreferences = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.clientId],
       foreignColumns: [appClientProfiles.id],
@@ -1729,7 +1729,7 @@ export const appClientStageHistory = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.agentId],
       foreignColumns: [appUserProfiles.id],
@@ -1764,7 +1764,7 @@ export const appClientTagAssignments = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.assignedBy],
       foreignColumns: [appUserProfiles.id],
@@ -1846,7 +1846,7 @@ export const appInfluencerProfiles = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.agentId],
       foreignColumns: [appUserProfiles.id],
@@ -1879,7 +1879,7 @@ export const appInvitationUsageLogs = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.invitationId],
       foreignColumns: [appUserInvitations.id],
@@ -1925,7 +1925,7 @@ export const appNetworkNodes = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.agentId],
       foreignColumns: [appUserProfiles.id],
@@ -1959,7 +1959,7 @@ export const appPipelineAnalytics = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.stageId],
       foreignColumns: [appPipelineStages.id],
@@ -2009,7 +2009,7 @@ export const appClientCheckupPurposes = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.clientId],
       foreignColumns: [appClientProfiles.id],
@@ -2053,7 +2053,7 @@ export const appClientConsultationCompanions = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.addedBy],
       foreignColumns: [appUserProfiles.id],
@@ -2097,7 +2097,7 @@ export const appClientConsultationNotes = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.agentId],
       foreignColumns: [appUserProfiles.id],
@@ -2175,7 +2175,7 @@ export const appClientInterestCategories = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.clientId],
       foreignColumns: [appClientProfiles.id],
@@ -2242,7 +2242,7 @@ export const appClientMedicalHistory = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.clientId],
       foreignColumns: [appClientProfiles.id],
@@ -2277,7 +2277,7 @@ export const appInfluencerActivityLogs = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.agentId],
       foreignColumns: [appUserProfiles.id],
@@ -2317,7 +2317,7 @@ export const appNetworkEdges = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.agentId],
       foreignColumns: [appUserProfiles.id],
@@ -2364,7 +2364,7 @@ export const appNetworkOpportunities = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.agentId],
       foreignColumns: [appUserProfiles.id],
@@ -2406,7 +2406,7 @@ export const appNetworkInteractions = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.agentId],
       foreignColumns: [appUserProfiles.id],
@@ -2447,7 +2447,7 @@ export const appUserProfiles = pgTable(
       mode: 'string',
     }),
   },
-  (table) => [
+  table => [
     // 🔧 users.id 참조 제거 - Supabase auth.users는 RLS로 관리됨
   ]
 );
@@ -2468,7 +2468,7 @@ export const appUserTeams = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.adminId],
       foreignColumns: [appUserProfiles.id],
@@ -2501,7 +2501,7 @@ export const publicSiteAnnouncements = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.authorId],
       foreignColumns: [appUserProfiles.id],
@@ -2529,7 +2529,7 @@ export const publicSiteFaqs = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.authorId],
       foreignColumns: [appUserProfiles.id],
@@ -2552,7 +2552,7 @@ export const publicSiteAnalytics = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.userId],
       foreignColumns: [appUserProfiles.id],
@@ -2588,7 +2588,7 @@ export const publicSiteContents = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.authorId],
       foreignColumns: [appUserProfiles.id],
@@ -2614,7 +2614,7 @@ export const publicSiteSettings = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.updatedBy],
       foreignColumns: [appUserProfiles.id],
@@ -2646,7 +2646,7 @@ export const publicSiteTestimonials = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.authorId],
       foreignColumns: [appUserProfiles.id],
@@ -2674,7 +2674,7 @@ export const appCalendarMeetingTemplates = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.agentId],
       foreignColumns: [appUserProfiles.id],
@@ -2721,7 +2721,7 @@ export const appCalendarSettings = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.agentId],
       foreignColumns: [appUserProfiles.id],
@@ -2750,7 +2750,7 @@ export const appClientTags = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.agentId],
       foreignColumns: [appUserProfiles.id],
@@ -2777,7 +2777,7 @@ export const appDashboardActivityLogs = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.userId],
       foreignColumns: [appUserProfiles.id],
@@ -2822,7 +2822,7 @@ export const appDashboardGoals = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.agentId],
       foreignColumns: [appUserProfiles.id],
@@ -2857,7 +2857,7 @@ export const appDashboardNotifications = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.userId],
       foreignColumns: [appUserProfiles.id],
@@ -2907,7 +2907,7 @@ export const appDashboardPerformanceMetrics = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.agentId],
       foreignColumns: [appUserProfiles.id],
@@ -2943,7 +2943,7 @@ export const appDashboardQuickActions = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.userId],
       foreignColumns: [appUserProfiles.id],
@@ -2975,7 +2975,7 @@ export const appDashboardWidgets = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.userId],
       foreignColumns: [appUserProfiles.id],
@@ -3007,7 +3007,7 @@ export const appInfluencerGratitudeTemplates = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.agentId],
       foreignColumns: [appUserProfiles.id],
@@ -3092,7 +3092,7 @@ export const appInfluencerNetworkAnalysis = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.agentId],
       foreignColumns: [appUserProfiles.id],
@@ -3142,7 +3142,7 @@ export const appNetworkStats = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.agentId],
       foreignColumns: [appUserProfiles.id],
@@ -3183,7 +3183,7 @@ export const appNotificationHistory = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.queueId],
       foreignColumns: [appNotificationQueue.id],
@@ -3228,7 +3228,7 @@ export const appNotificationQueue = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.templateId],
       foreignColumns: [appNotificationTemplates.id],
@@ -3266,7 +3266,7 @@ export const appNotificationRules = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.teamId],
       foreignColumns: [appUserTeams.id],
@@ -3309,7 +3309,7 @@ export const appNotificationSettings = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.userId],
       foreignColumns: [appUserProfiles.id],
@@ -3336,7 +3336,7 @@ export const appNotificationSubscriptions = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.userId],
       foreignColumns: [appUserProfiles.id],
@@ -3367,7 +3367,7 @@ export const appNotificationTemplates = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.teamId],
       foreignColumns: [appUserTeams.id],
@@ -3407,7 +3407,7 @@ export const appReportDashboards = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.teamId],
       foreignColumns: [appUserTeams.id],
@@ -3440,7 +3440,7 @@ export const appReportExports = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.reportInstanceId],
       foreignColumns: [appReportInstances.id],
@@ -3481,7 +3481,7 @@ export const appReportInstances = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.scheduleId],
       foreignColumns: [appReportSchedules.id],
@@ -3516,7 +3516,7 @@ export const appReportMetrics = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.teamId],
       foreignColumns: [appUserTeams.id],
@@ -3554,7 +3554,7 @@ export const appReportSchedules = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.teamId],
       foreignColumns: [appUserTeams.id],
@@ -3592,7 +3592,7 @@ export const appReportSubscriptions = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.templateId],
       foreignColumns: [appReportTemplates.id],
@@ -3630,7 +3630,7 @@ export const appReportTemplates = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.teamId],
       foreignColumns: [appUserTeams.id],
@@ -3656,7 +3656,7 @@ export const appSettingsBackups = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.userId],
       foreignColumns: [appUserProfiles.id],
@@ -3681,7 +3681,7 @@ export const appSettingsChangeLogs = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.userId],
       foreignColumns: [appUserProfiles.id],
@@ -3714,7 +3714,7 @@ export const appSettingsIntegrations = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.userId],
       foreignColumns: [appUserProfiles.id],
@@ -3739,7 +3739,7 @@ export const appSettingsSecurityLogs = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.userId],
       foreignColumns: [appUserProfiles.id],
@@ -3767,7 +3767,7 @@ export const appSettingsThemePreferences = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.userId],
       foreignColumns: [appUserProfiles.id],
@@ -3824,7 +3824,7 @@ export const appSettingsUserProfiles = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.userId],
       foreignColumns: [appUserProfiles.id],
@@ -3848,7 +3848,7 @@ export const appTeamActivityLogs = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.teamId],
       foreignColumns: [appUserTeams.id],
@@ -3886,7 +3886,7 @@ export const appTeamCommunicationChannels = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.createdBy],
       foreignColumns: [appUserProfiles.id],
@@ -3935,7 +3935,7 @@ export const appTeamGoals = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.createdBy],
       foreignColumns: [appUserProfiles.id],
@@ -3973,7 +3973,7 @@ export const appTeamMembers = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.invitedBy],
       foreignColumns: [appUserProfiles.id],
@@ -4017,7 +4017,7 @@ export const appTeamPerformanceMetrics = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.memberId],
       foreignColumns: [appUserProfiles.id],
@@ -4047,7 +4047,7 @@ export const appTeamStatsCache = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.teamId],
       foreignColumns: [appUserTeams.id],
@@ -4083,7 +4083,7 @@ export const appTeamTrainingRecords = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
+  table => [
     foreignKey({
       columns: [table.memberId],
       foreignColumns: [appUserProfiles.id],
@@ -4118,7 +4118,7 @@ export const adminSystemSettings = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [unique('admin_system_settings_key_unique').on(table.key)]
+  table => [unique('admin_system_settings_key_unique').on(table.key)]
 );
 
 export const adminSystemStatsCache = pgTable(
@@ -4138,7 +4138,7 @@ export const adminSystemStatsCache = pgTable(
       mode: 'string',
     }).notNull(),
   },
-  (table) => [
+  table => [
     unique('admin_system_stats_cache_stat_type_unique').on(table.statType),
   ]
 );

@@ -923,8 +923,8 @@ export default function App() {
                 businessValue > 1000
                   ? 'premium'
                   : businessValue > 500
-                  ? 'standard'
-                  : 'basic',
+                    ? 'standard'
+                    : 'basic',
               timestamp: Date.now(),
             });
           }

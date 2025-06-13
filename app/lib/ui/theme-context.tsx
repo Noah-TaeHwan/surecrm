@@ -62,7 +62,7 @@ export function ThemeProvider({
   };
 
   const toggleDarkMode = () => {
-    setIsDarkMode((prev) => !prev);
+    setIsDarkMode(prev => !prev);
   };
 
   const setDarkMode = (isDark: boolean) => {

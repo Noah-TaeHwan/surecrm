@@ -39,9 +39,8 @@ export async function getCurrentUser(request: Request): Promise<User | null> {
 
     // Supabase Auth에서 이메일 정보 가져오기
     const supabaseAdmin = createAdminClient();
-    const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(
-      userId
-    );
+    const { data: authUser } =
+      await supabaseAdmin.auth.admin.getUserById(userId);
 
     return {
       id: profile.id,
@@ -98,9 +97,7 @@ export async function sendMagicLink(
     }
 
     // 이메일로 사용자 찾기
-    const existingUser = users.users.find(
-      (user) => user.email === request.email
-    );
+    const existingUser = users.users.find(user => user.email === request.email);
 
     if (!existingUser) {
       return {

@@ -196,7 +196,7 @@ export async function getClients(params: {
 
     // 각 고객에 대한 추가 계산 데이터 조회
     const enrichedClients: ClientProfile[] = await Promise.all(
-      clientsData.map(async (client) => {
+      clientsData.map(async client => {
         // 소개 횟수 계산
         const [referralCountResult] = await db
           .select({ count: count() })
@@ -232,7 +232,7 @@ export async function getClients(params: {
         return {
           ...client,
           referralCount: referralCountResult.count,
-          insuranceTypes: insurances.map((ins) => ins.insuranceType),
+          insuranceTypes: insurances.map(ins => ins.insuranceType),
           totalPremium: insurances.reduce(
             (sum, ins) => sum + parseFloat(ins.premium || '0'),
             0
@@ -389,7 +389,7 @@ export async function getClientById(
       0
     );
     const insuranceTypes = insurances.map(
-      (ins) => ins.insuranceType || '알 수 없음'
+      ins => ins.insuranceType || '알 수 없음'
     );
 
     // 참여도 점수 계산 (연락 빈도 기반)
@@ -397,7 +397,7 @@ export async function getClientById(
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
     const recentContactsCount = recentContacts.filter(
-      (contact) =>
+      contact =>
         contact.createdAt && new Date(contact.createdAt) > thirtyDaysAgo
     ).length;
 
@@ -755,24 +755,24 @@ export async function getClientStats(
     // );
 
     // 제외됨 단계 찾기
-    const excludedStage = stages.find((s) => s.name === '제외됨');
-    const contractStage = stages.find((s) => s.name === '계약 완료');
+    const excludedStage = stages.find(s => s.name === '제외됨');
+    const contractStage = stages.find(s => s.name === '계약 완료');
 
     // 활성 고객 (제외됨이 아닌 고객) 계산
     const activeClients = excludedStage
-      ? allActiveClients.filter((c) => c.currentStageId !== excludedStage.id)
+      ? allActiveClients.filter(c => c.currentStageId !== excludedStage.id)
           .length
       : allActiveClients.length;
 
     // 계약 완료 고객 계산
     const contractedClients = contractStage
-      ? allActiveClients.filter((c) => c.currentStageId === contractStage.id)
+      ? allActiveClients.filter(c => c.currentStageId === contractStage.id)
           .length
       : 0;
 
     // 비활성 고객 (제외됨 단계) 계산
     const inactiveClients = excludedStage
-      ? allActiveClients.filter((c) => c.currentStageId === excludedStage.id)
+      ? allActiveClients.filter(c => c.currentStageId === excludedStage.id)
           .length
       : 0;
 
@@ -781,7 +781,7 @@ export async function getClientStats(
     currentMonth.setDate(1);
     currentMonth.setHours(0, 0, 0, 0);
 
-    const newThisMonth = allActiveClients.filter((client) => {
+    const newThisMonth = allActiveClients.filter(client => {
       // createdAt 필드가 있다면 비교, 없으면 0
       // 실제로는 전체 client 정보를 가져와야 하지만 일단 간단히
       return true; // 임시로 모든 고객을 이번 달로 계산

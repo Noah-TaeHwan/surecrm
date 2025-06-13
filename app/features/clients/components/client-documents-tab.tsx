@@ -123,7 +123,7 @@ export function ClientDocumentsTab({
 
   // 🔒 문서 필터링 (타입 및 보안 레벨)
   const filterDocuments = (documents: Document[]) => {
-    return documents.filter((document) => {
+    return documents.filter(document => {
       // 타입 필터
       if (filterType !== 'all' && document.type !== filterType) {
         return false;
@@ -196,7 +196,7 @@ export function ClientDocumentsTab({
   const filteredDocuments = filterDocuments(documents);
 
   // 고유 문서 타입 목록
-  const documentTypes = Array.from(new Set(documents.map((doc) => doc.type)));
+  const documentTypes = Array.from(new Set(documents.map(doc => doc.type)));
 
   return (
     <div className="space-y-6">
@@ -224,7 +224,7 @@ export function ClientDocumentsTab({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">전체 타입</SelectItem>
-                    {documentTypes.map((type) => (
+                    {documentTypes.map(type => (
                       <SelectItem key={type} value={type}>
                         {documentTypeConfig[type]?.label || type}
                       </SelectItem>
@@ -262,7 +262,7 @@ export function ClientDocumentsTab({
                 <Switch
                   id="show-confidential-docs"
                   checked={showConfidentialData}
-                  onCheckedChange={(checked) => {
+                  onCheckedChange={checked => {
                     setShowConfidentialData(checked);
                     handleDataAccess(
                       checked ? '기밀정보 표시' : '기밀정보 숨김',
@@ -315,7 +315,7 @@ export function ClientDocumentsTab({
         <CardContent>
           {filteredDocuments.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredDocuments.map((document) => {
+              {filteredDocuments.map(document => {
                 const config = documentTypeConfig[document.type] || {
                   label: document.type,
                   icon: <FileTextIcon className="h-4 w-4" />,
@@ -504,13 +504,13 @@ export function ClientDocumentsTab({
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-green-600">
-                {filteredDocuments.filter((d) => d.encrypted).length}
+                {filteredDocuments.filter(d => d.encrypted).length}
               </div>
               <div className="text-sm text-muted-foreground">암호화</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-purple-600">
-                {new Set(filteredDocuments.map((d) => d.type)).size}
+                {new Set(filteredDocuments.map(d => d.type)).size}
               </div>
               <div className="text-sm text-muted-foreground">문서 유형</div>
             </div>
@@ -518,7 +518,7 @@ export function ClientDocumentsTab({
               <div className="text-2xl font-bold text-orange-600">
                 {
                   filteredDocuments.filter(
-                    (d) => d.confidentialityLevel === 'confidential'
+                    d => d.confidentialityLevel === 'confidential'
                   ).length
                 }
               </div>

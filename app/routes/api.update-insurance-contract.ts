@@ -118,7 +118,7 @@ export async function action({ request }: { request: Request }) {
           type === 'displayName'
         ) {
           const existingUpdate = existingAttachmentUpdates.find(
-            (item) => item.id === id
+            item => item.id === id
           ) || { id };
           if (type === 'documentType') {
             existingUpdate.documentType = value.toString();
@@ -128,7 +128,7 @@ export async function action({ request }: { request: Request }) {
             existingUpdate.fileDisplayName = value.toString();
           }
 
-          if (!existingAttachmentUpdates.find((item) => item.id === id)) {
+          if (!existingAttachmentUpdates.find(item => item.id === id)) {
             existingAttachmentUpdates.push(existingUpdate);
           }
         }
@@ -146,7 +146,7 @@ export async function action({ request }: { request: Request }) {
       );
 
       await Promise.allSettled(
-        existingAttachmentUpdates.map(async (update) => {
+        existingAttachmentUpdates.map(async update => {
           try {
             const result = await updateContractAttachmentMetadata(
               update.id,

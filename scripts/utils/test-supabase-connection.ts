@@ -152,7 +152,7 @@ testSupabaseConnection()
     console.log('\n✅ 연결 테스트 완료');
     process.exit(0);
   })
-  .catch((error) => {
+  .catch(error => {
     console.error('\n❌ 테스트 실행 중 오류:', error);
     process.exit(1);
   });

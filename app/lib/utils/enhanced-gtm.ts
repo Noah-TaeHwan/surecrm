@@ -268,7 +268,7 @@ class EnhancedGTMSystem {
     });
 
     // 에러 추적
-    window.addEventListener('error', (e) => {
+    window.addEventListener('error', e => {
       this.pushToDataLayer({
         event: 'javascript_error',
         error_message: e.message,
@@ -281,7 +281,7 @@ class EnhancedGTMSystem {
     });
 
     // Promise 에러 추적
-    window.addEventListener('unhandledrejection', (e) => {
+    window.addEventListener('unhandledrejection', e => {
       this.pushToDataLayer({
         event: 'promise_rejection',
         rejection_reason: e.reason,

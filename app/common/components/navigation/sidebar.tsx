@@ -139,7 +139,7 @@ export function Sidebar({ className, onClose }: SidebarProps) {
       <div className="flex-1 overflow-y-auto p-4">
         <nav>
           <ul className="space-y-2">
-            {navItems.map((item) => {
+            {navItems.map(item => {
               const isActive = isActiveRoute(item.href);
               return (
                 <li key={item.href}>

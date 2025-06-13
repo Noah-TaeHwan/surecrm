@@ -113,7 +113,7 @@ export function ClientHistoryTab({
   const filterBySecurityLevel = (items: (Meeting | StageHistory)[]) => {
     if (filterLevel === 'all' && showConfidentialData) return items;
 
-    return items.filter((item) => {
+    return items.filter(item => {
       const itemLevel = item.confidentialityLevel || 'public';
 
       switch (filterLevel) {
@@ -178,11 +178,11 @@ export function ClientHistoryTab({
 
   // 미팅과 진행 내역을 합쳐서 날짜순으로 정렬
   const timelineItems: TimelineItem[] = [
-    ...filteredMeetings.map((item) => ({
+    ...filteredMeetings.map(item => ({
       ...item,
       itemType: 'meeting' as const,
     })),
-    ...filteredStageHistory.map((item) => ({
+    ...filteredStageHistory.map(item => ({
       ...item,
       itemType: 'stage' as const,
     })),
@@ -253,7 +253,7 @@ export function ClientHistoryTab({
                 <LockClosedIcon className="h-4 w-4 text-amber-600" />
                 <span className="text-sm font-medium">이력 보기 레벨:</span>
                 <div className="flex gap-1">
-                  {(['public', 'business', 'all'] as const).map((level) => (
+                  {(['public', 'business', 'all'] as const).map(level => (
                     <Button
                       key={level}
                       variant={filterLevel === level ? 'default' : 'outline'}
@@ -268,8 +268,8 @@ export function ClientHistoryTab({
                       {level === 'public'
                         ? '공개'
                         : level === 'business'
-                        ? '업무'
-                        : '전체'}
+                          ? '업무'
+                          : '전체'}
                     </Button>
                   ))}
                 </div>
@@ -284,7 +284,7 @@ export function ClientHistoryTab({
                 <Switch
                   id="show-confidential-history"
                   checked={showConfidentialData}
-                  onCheckedChange={(checked) => {
+                  onCheckedChange={checked => {
                     setShowConfidentialData(checked);
                     handleDataAccess(
                       checked ? '기밀정보 표시' : '기밀정보 숨김',
@@ -520,10 +520,7 @@ export function ClientHistoryTab({
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-green-600">
-                {
-                  filteredMeetings.filter((m) => m.status === 'completed')
-                    .length
-                }
+                {filteredMeetings.filter(m => m.status === 'completed').length}
               </div>
               <div className="text-sm text-muted-foreground">완료된 미팅</div>
             </div>
@@ -536,7 +533,7 @@ export function ClientHistoryTab({
             <div className="text-center">
               <div className="text-2xl font-bold text-orange-600">
                 {Math.round(
-                  (filteredMeetings.filter((m) => m.status === 'completed')
+                  (filteredMeetings.filter(m => m.status === 'completed')
                     .length /
                     Math.max(filteredMeetings.length, 1)) *
                     100

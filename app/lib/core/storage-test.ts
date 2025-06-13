@@ -43,7 +43,7 @@ async function testStorageConnection() {
     const existingBuckets =
       buckets?.map((bucket: { name: string }) => bucket.name) || [];
     const missingBuckets = requiredBuckets.filter(
-      (bucket) => !existingBuckets.includes(bucket)
+      bucket => !existingBuckets.includes(bucket)
     );
 
     if (missingBuckets.length > 0) {
@@ -53,7 +53,7 @@ async function testStorageConnection() {
 -- 누락된 버킷 생성
 ${missingBuckets
   .map(
-    (bucket) => `
+    bucket => `
 INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 VALUES (
   '${bucket}',
@@ -162,12 +162,12 @@ export async function testStorageUpload() {
 
     console.log(
       '📂 존재하는 버킷들:',
-      buckets?.map((b) => b.name)
+      buckets?.map(b => b.name)
     );
 
     // 2. contract-attachments 버킷 존재 확인
     const contractBucket = buckets?.find(
-      (b) => b.name === STORAGE_CONFIG.CONTRACT_ATTACHMENTS_BUCKET
+      b => b.name === STORAGE_CONFIG.CONTRACT_ATTACHMENTS_BUCKET
     );
     if (!contractBucket) {
       console.error('❌ contract-attachments 버킷이 없습니다!');

@@ -50,7 +50,7 @@ export function ConsultationNoteModal({
                 type="date"
                 className="w-full p-3 border rounded-lg text-sm"
                 value={note?.consultationDate || ''}
-                onChange={(e) =>
+                onChange={e =>
                   onNoteChange({
                     ...note!,
                     consultationDate: e.target.value,
@@ -67,7 +67,7 @@ export function ConsultationNoteModal({
                 className="w-full p-3 border rounded-lg text-sm"
                 placeholder="상담 제목 (예: 보험 상담, 계약 체결)"
                 value={note?.title || ''}
-                onChange={(e) =>
+                onChange={e =>
                   onNoteChange({
                     ...note!,
                     title: e.target.value,
@@ -85,7 +85,7 @@ export function ConsultationNoteModal({
               rows={6}
               placeholder="상담 내용을 자세히 기록하세요..."
               value={note?.content || ''}
-              onChange={(e) =>
+              onChange={e =>
                 onNoteChange({
                   ...note!,
                   content: e.target.value,
@@ -102,7 +102,7 @@ export function ConsultationNoteModal({
               rows={3}
               placeholder="계약 관련 정보 (보험 종류, 보험료, 보장 내용 등)"
               value={note?.contractInfo || ''}
-              onChange={(e) =>
+              onChange={e =>
                 onNoteChange({
                   ...note!,
                   contractInfo: e.target.value,
@@ -119,7 +119,7 @@ export function ConsultationNoteModal({
                 type="date"
                 className="w-full p-3 border rounded-lg text-sm"
                 value={note?.followUpDate || ''}
-                onChange={(e) =>
+                onChange={e =>
                   onNoteChange({
                     ...note!,
                     followUpDate: e.target.value,
@@ -136,7 +136,7 @@ export function ConsultationNoteModal({
                 className="w-full p-3 border rounded-lg text-sm"
                 placeholder="후속 조치 사항"
                 value={note?.followUpNotes || ''}
-                onChange={(e) =>
+                onChange={e =>
                   onNoteChange({
                     ...note!,
                     followUpNotes: e.target.value,

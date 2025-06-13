@@ -123,28 +123,28 @@ export async function getTodayStats(
       );
 
     const scheduledMeetings = meetingsToday.filter(
-      (m) => m.status === 'scheduled'
+      m => m.status === 'scheduled'
     ).length;
     const completedMeetings = meetingsToday.filter(
-      (m) => m.status === 'completed'
+      m => m.status === 'completed'
     ).length;
-    const missedMeetings = meetingsToday.filter((m) => {
+    const missedMeetings = meetingsToday.filter(m => {
       const meetingTime = new Date(m.scheduledAt);
       return m.status === 'scheduled' && meetingTime < new Date();
     }).length;
 
     // 시간대별 미팅 분석
-    const morningMeetings = meetingsToday.filter((m) => {
+    const morningMeetings = meetingsToday.filter(m => {
       const hour = new Date(m.scheduledAt).getHours();
       return hour >= 6 && hour < 12;
     }).length;
 
-    const afternoonMeetings = meetingsToday.filter((m) => {
+    const afternoonMeetings = meetingsToday.filter(m => {
       const hour = new Date(m.scheduledAt).getHours();
       return hour >= 12 && hour < 18;
     }).length;
 
-    const eveningMeetings = meetingsToday.filter((m) => {
+    const eveningMeetings = meetingsToday.filter(m => {
       const hour = new Date(m.scheduledAt).getHours();
       return hour >= 18 && hour < 24;
     }).length;
@@ -347,15 +347,15 @@ export async function getKPIData(userId: string): Promise<DashboardKPIData> {
       lastMonthClients > 0
         ? ((monthlyNewClients - lastMonthClients) / lastMonthClients) * 100
         : monthlyNewClients > 0
-        ? 100
-        : 0;
+          ? 100
+          : 0;
 
     const referralGrowthPercentage =
       lastMonthReferrals > 0
         ? ((totalReferrals - lastMonthReferrals) / lastMonthReferrals) * 100
         : totalReferrals > 0
-        ? 100
-        : 0;
+          ? 100
+          : 0;
 
     // 🏢 수정: 실제 보험계약 수수료 기반 평균 고객 가치 계산
     const { insuranceContracts } = await import('~/lib/schema/core'); // 동적 import로 보험계약 테이블 가져오기
@@ -522,7 +522,7 @@ export async function getTodayMeetings(
       .orderBy(asc(meetings.scheduledAt));
 
     // TODO: 향후 미팅과 고객 정보 조인 및 체크리스트 추가 로직 구현
-    return todayMeetings.map((meeting) => ({
+    return todayMeetings.map(meeting => ({
       id: meeting.id,
       title: meeting.title,
       clientName: '미팅 고객', // TODO: 실제 고객명으로 대체
@@ -816,13 +816,11 @@ export async function getReferralInsights(userId: string) {
         .where(inArray(clients.id, referrerIds));
     }
 
-    const referrerNameMap = new Map(
-      referrerNames.map((r) => [r.id, r.fullName])
-    );
+    const referrerNameMap = new Map(referrerNames.map(r => [r.id, r.fullName]));
 
     // 결과 조합 및 정렬
     const topReferrersData = Array.from(referrerStats.values())
-      .map((stat) => ({
+      .map(stat => ({
         referrerId: stat.referrerId,
         referrerName: referrerNameMap.get(stat.referrerId) || '알 수 없음',
         totalReferrals: stat.totalReferrals,
@@ -1072,8 +1070,8 @@ export async function getUserGoals(userId: string) {
     // 각 목표의 실제 달성률 계산
     const goalsWithProgress = await Promise.all(
       userGoals
-        .filter((goal) => goal.goalType !== 'meetings') // 미팅 목표 제외
-        .map(async (goal) => {
+        .filter(goal => goal.goalType !== 'meetings') // 미팅 목표 제외
+        .map(async goal => {
           let currentValue = 0;
 
           // 목표 유형별 실제 데이터 조회
@@ -1246,7 +1244,7 @@ export async function getRecentClientsData(userId: string) {
 
     const totalClients = totalClientsResult[0]?.count || 0;
 
-    const formattedClients = recentClients.map((client) => {
+    const formattedClients = recentClients.map(client => {
       // 상태 매핑 (임시로 생성 일자 기준)
       let status: 'prospect' | 'contacted' | 'proposal' | 'contracted';
       const daysSinceCreated = Math.floor(

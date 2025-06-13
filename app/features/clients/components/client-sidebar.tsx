@@ -97,7 +97,7 @@ export function ClientSidebar({
                   </label>
                   <Input
                     value={editFormData.fullName}
-                    onChange={(e) =>
+                    onChange={e =>
                       setEditFormData({
                         ...editFormData,
                         fullName: e.target.value,
@@ -124,7 +124,7 @@ export function ClientSidebar({
                       <SelectValue placeholder="중요도" />
                     </SelectTrigger>
                     <SelectContent>
-                      {IMPORTANCE_OPTIONS.map((option) => (
+                      {IMPORTANCE_OPTIONS.map(option => (
                         <SelectItem key={option.value} value={option.value}>
                           {option.label}
                         </SelectItem>
@@ -158,7 +158,7 @@ export function ClientSidebar({
                 {isEditing ? (
                   <Input
                     value={editFormData.phone}
-                    onChange={(e) =>
+                    onChange={e =>
                       setEditFormData({
                         ...editFormData,
                         phone: e.target.value,
@@ -180,7 +180,7 @@ export function ClientSidebar({
                 {isEditing ? (
                   <Input
                     value={editFormData.email}
-                    onChange={(e) =>
+                    onChange={e =>
                       setEditFormData({
                         ...editFormData,
                         email: e.target.value,
@@ -211,7 +211,7 @@ export function ClientSidebar({
                 {isEditing ? (
                   <Input
                     value={editFormData.address}
-                    onChange={(e) =>
+                    onChange={e =>
                       setEditFormData({
                         ...editFormData,
                         address: e.target.value,
@@ -241,7 +241,7 @@ export function ClientSidebar({
                 {isEditing ? (
                   <Input
                     value={editFormData.occupation}
-                    onChange={(e) =>
+                    onChange={e =>
                       setEditFormData({
                         ...editFormData,
                         occupation: e.target.value,
@@ -273,7 +273,7 @@ export function ClientSidebar({
                 {isEditing ? (
                   <Select
                     value={editFormData.telecomProvider || 'none'}
-                    onValueChange={(value) =>
+                    onValueChange={value =>
                       setEditFormData({
                         ...editFormData,
                         telecomProvider: value,
@@ -284,7 +284,7 @@ export function ClientSidebar({
                       <SelectValue placeholder="통신사 선택" />
                     </SelectTrigger>
                     <SelectContent>
-                      {TELECOM_PROVIDER_OPTIONS.map((option) => (
+                      {TELECOM_PROVIDER_OPTIONS.map(option => (
                         <SelectItem key={option.value} value={option.value}>
                           {option.label}
                         </SelectItem>
@@ -392,7 +392,7 @@ export function ClientSidebar({
                       <Input
                         type="date"
                         value={editFormData.birthDate}
-                        onChange={(e) =>
+                        onChange={e =>
                           setEditFormData({
                             ...editFormData,
                             birthDate: e.target.value,
@@ -480,7 +480,7 @@ export function ClientSidebar({
                         name="gender"
                         value="male"
                         checked={editFormData.gender === 'male'}
-                        onChange={(e) =>
+                        onChange={e =>
                           setEditFormData({
                             ...editFormData,
                             gender: e.target.value,
@@ -496,7 +496,7 @@ export function ClientSidebar({
                         name="gender"
                         value="female"
                         checked={editFormData.gender === 'female'}
-                        onChange={(e) =>
+                        onChange={e =>
                           setEditFormData({
                             ...editFormData,
                             gender: e.target.value,
@@ -526,7 +526,7 @@ export function ClientSidebar({
                   <Input
                     type="number"
                     value={editFormData.height}
-                    onChange={(e) =>
+                    onChange={e =>
                       setEditFormData({
                         ...editFormData,
                         height: e.target.value,
@@ -560,7 +560,7 @@ export function ClientSidebar({
                   <Input
                     type="number"
                     value={editFormData.weight}
-                    onChange={(e) =>
+                    onChange={e =>
                       setEditFormData({
                         ...editFormData,
                         weight: e.target.value,
@@ -643,7 +643,7 @@ export function ClientSidebar({
                     <input
                       type="checkbox"
                       checked={editFormData.hasDrivingLicense}
-                      onChange={(e) =>
+                      onChange={e =>
                         setEditFormData({
                           ...editFormData,
                           hasDrivingLicense: e.target.checked,
@@ -695,7 +695,7 @@ export function ClientSidebar({
                           type="text"
                           placeholder="YYMMDD"
                           value={editFormData.ssnFront}
-                          onChange={(e) => {
+                          onChange={e => {
                             const value = e.target.value
                               .replace(/\D/g, '')
                               .slice(0, 6);
@@ -711,7 +711,7 @@ export function ClientSidebar({
                           type="text"
                           placeholder="1●●●●●●"
                           value={editFormData.ssnBack}
-                          onChange={(e) => {
+                          onChange={e => {
                             const value = e.target.value
                               .replace(/\D/g, '')
                               .slice(0, 7);
@@ -763,7 +763,7 @@ export function ClientSidebar({
                     <div className="space-y-2">
                       <Select
                         value={editFormData.referredById || 'none'}
-                        onValueChange={(value) => {
+                        onValueChange={value => {
                           const actualValue =
                             value === 'none' ? undefined : value;
                           setEditFormData({
@@ -780,7 +780,7 @@ export function ClientSidebar({
                             직접 개발 (소개자 없음)
                           </SelectItem>
                           {/* 🆕 실제 고객 목록 렌더링 */}
-                          {availableReferrers.map((referrer) => (
+                          {availableReferrers.map(referrer => (
                             <SelectItem key={referrer.id} value={referrer.id}>
                               {referrer.name}
                             </SelectItem>
@@ -912,7 +912,7 @@ export function ClientSidebar({
                     >
                       <span style={{ color: tag.color }}>{tag.name}</span>
                       <button
-                        onClick={(e) => {
+                        onClick={e => {
                           e.stopPropagation();
                           removeClientTag(tag.id);
                         }}

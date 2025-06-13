@@ -221,7 +221,7 @@ export function UseCasesSection() {
           </TabsList>
 
           <div className="relative">
-            {useCases.map((useCase) => (
+            {useCases.map(useCase => (
               <TabsContent key={useCase.id} value={useCase.id} className="mt-0">
                 <UseCaseTab
                   icon={useCase.icon}

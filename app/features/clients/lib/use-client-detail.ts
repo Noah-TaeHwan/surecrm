@@ -193,13 +193,13 @@ export function useClientDetail({
 
   // 편집 폼 데이터 변경
   const handleEditFormChange = useCallback((data: Partial<EditFormData>) => {
-    setEditFormData((prev) => ({ ...prev, ...data }));
+    setEditFormData(prev => ({ ...prev, ...data }));
   }, []);
 
   // 주민등록번호 변경
   const handleSsnChange = useCallback(
     async (ssnFront: string, ssnBack: string) => {
-      setEditFormData((prev) => ({
+      setEditFormData(prev => ({
         ...prev,
         ssnFront,
         ssnBack,
@@ -218,9 +218,9 @@ export function useClientDetail({
           const result = await response.json();
 
           if (!response.ok) {
-            setEditFormData((prev) => ({ ...prev, ssnError: result.error }));
+            setEditFormData(prev => ({ ...prev, ssnError: result.error }));
           } else {
-            setEditFormData((prev) => ({
+            setEditFormData(prev => ({
               ...prev,
               birthDate: result.birthDate,
               gender: result.gender,

@@ -17,7 +17,7 @@ export function DayView({
   // 필터링된 미팅
   const filteredMeetings =
     filteredTypes.length > 0
-      ? meetings.filter((meeting) => filteredTypes.includes(meeting.type))
+      ? meetings.filter(meeting => filteredTypes.includes(meeting.type))
       : meetings;
 
   const today = new Date();
@@ -26,11 +26,11 @@ export function DayView({
 
   // 해당 날짜의 미팅들
   const dayMeetings = filteredMeetings.filter(
-    (meeting) => meeting.date === dateStr
+    meeting => meeting.date === dateStr
   );
 
   // 해당 날짜의 전체 미팅들 (필터링 전)
-  const allDayMeetings = meetings.filter((meeting) => meeting.date === dateStr);
+  const allDayMeetings = meetings.filter(meeting => meeting.date === dateStr);
 
   // 시간대 생성 (6시부터 23시까지)
   const timeSlots = [];
@@ -82,8 +82,8 @@ export function DayView({
       <div className="max-h-[600px] overflow-y-auto">
         {dayMeetings.length > 0 ? (
           <div className="bg-gradient-to-br from-background/60 to-background/40">
-            {timeSlots.map((hour) => {
-              const hourMeetings = dayMeetings.filter((meeting) => {
+            {timeSlots.map(hour => {
+              const hourMeetings = dayMeetings.filter(meeting => {
                 const meetingHour = parseInt(meeting.time.split(':')[0]);
                 return meetingHour === hour;
               });
@@ -107,7 +107,7 @@ export function DayView({
                   <div className="flex-1 p-4">
                     {hourMeetings.length > 0 ? (
                       <div className="space-y-3">
-                        {hourMeetings.map((meeting) => (
+                        {hourMeetings.map(meeting => (
                           <div
                             key={meeting.id}
                             className={cn(

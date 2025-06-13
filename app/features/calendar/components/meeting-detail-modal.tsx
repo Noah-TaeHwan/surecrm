@@ -144,7 +144,7 @@ export function MeetingDetailModal({
 
   if (!meeting) return null;
 
-  const completedTasks = checklist.filter((item) => item.completed).length;
+  const completedTasks = checklist.filter(item => item.completed).length;
   const totalTasks = checklist.length;
   const progressPercentage =
     totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
@@ -225,13 +225,13 @@ export function MeetingDetailModal({
   };
 
   const handleDeleteNote = (noteId: string) => {
-    setNotes(notes.filter((note) => note.id !== noteId));
+    setNotes(notes.filter(note => note.id !== noteId));
   };
 
   // 체크리스트 관리 함수
   const handleToggleChecklistItem = (itemId: string) => {
-    setChecklist((prev) =>
-      prev.map((item) =>
+    setChecklist(prev =>
+      prev.map(item =>
         item.id === itemId ? { ...item, completed: !item.completed } : item
       )
     );
@@ -252,7 +252,7 @@ export function MeetingDetailModal({
   };
 
   const handleDeleteChecklistItem = (itemId: string) => {
-    setChecklist((prev) => prev.filter((item) => item.id !== itemId));
+    setChecklist(prev => prev.filter(item => item.id !== itemId));
   };
 
   const handleStartEditingItem = (item: ChecklistItem) => {
@@ -262,8 +262,8 @@ export function MeetingDetailModal({
 
   const handleSaveEditingItem = () => {
     if (editingText.trim() && editingItemId) {
-      setChecklist((prev) =>
-        prev.map((item) =>
+      setChecklist(prev =>
+        prev.map(item =>
           item.id === editingItemId
             ? { ...item, text: editingText.trim() }
             : item
@@ -390,8 +390,8 @@ export function MeetingDetailModal({
               {isEditingMeeting ? (
                 <Input
                   value={editedMeeting.title}
-                  onChange={(e) =>
-                    setEditedMeeting((prev) => ({
+                  onChange={e =>
+                    setEditedMeeting(prev => ({
                       ...prev,
                       title: e.target.value,
                     }))
@@ -433,15 +433,15 @@ export function MeetingDetailModal({
             {isEditingMeeting ? (
               <Select
                 value={editedMeeting.type}
-                onValueChange={(value) =>
-                  setEditedMeeting((prev) => ({ ...prev, type: value }))
+                onValueChange={value =>
+                  setEditedMeeting(prev => ({ ...prev, type: value }))
                 }
               >
                 <SelectTrigger className="w-32">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {meetingTypes.map((type) => (
+                  {meetingTypes.map(type => (
                     <SelectItem key={type} value={type}>
                       {type}
                     </SelectItem>
@@ -475,8 +475,8 @@ export function MeetingDetailModal({
                 <Input
                   type="date"
                   value={editedMeeting.date}
-                  onChange={(e) =>
-                    setEditedMeeting((prev) => ({
+                  onChange={e =>
+                    setEditedMeeting(prev => ({
                       ...prev,
                       date: e.target.value,
                     }))
@@ -544,8 +544,8 @@ export function MeetingDetailModal({
                   <Input
                     type="time"
                     value={editedMeeting.time}
-                    onChange={(e) =>
-                      setEditedMeeting((prev) => ({
+                    onChange={e =>
+                      setEditedMeeting(prev => ({
                         ...prev,
                         time: e.target.value,
                       }))
@@ -554,8 +554,8 @@ export function MeetingDetailModal({
                   />
                   <Select
                     value={editedMeeting.duration.toString()}
-                    onValueChange={(value) =>
-                      setEditedMeeting((prev) => ({
+                    onValueChange={value =>
+                      setEditedMeeting(prev => ({
                         ...prev,
                         duration: parseInt(value),
                       }))
@@ -594,8 +594,8 @@ export function MeetingDetailModal({
               {isEditingMeeting ? (
                 <Input
                   value={editedMeeting.location}
-                  onChange={(e) =>
-                    setEditedMeeting((prev) => ({
+                  onChange={e =>
+                    setEditedMeeting(prev => ({
                       ...prev,
                       location: e.target.value,
                     }))
@@ -672,8 +672,8 @@ export function MeetingDetailModal({
                   {isEditingMeeting ? (
                     <Select
                       value={editedMeeting.priority}
-                      onValueChange={(value) =>
-                        setEditedMeeting((prev) => ({
+                      onValueChange={value =>
+                        setEditedMeeting(prev => ({
                           ...prev,
                           priority: value,
                         }))
@@ -683,7 +683,7 @@ export function MeetingDetailModal({
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {priorityOptions.map((priority) => (
+                        {priorityOptions.map(priority => (
                           <SelectItem
                             key={priority.value}
                             value={priority.value}
@@ -707,13 +707,13 @@ export function MeetingDetailModal({
                         className={cn(
                           'w-2 h-2 rounded-full',
                           priorityOptions.find(
-                            (p) => p.value === (meeting as any)?.priority
+                            p => p.value === (meeting as any)?.priority
                           )?.color || 'bg-blue-500'
                         )}
                       />
                       <span className="font-medium">
                         {priorityOptions.find(
-                          (p) => p.value === (meeting as any)?.priority
+                          p => p.value === (meeting as any)?.priority
                         )?.label || '보통'}
                       </span>
                     </div>
@@ -726,8 +726,8 @@ export function MeetingDetailModal({
                   {isEditingMeeting ? (
                     <Select
                       value={editedMeeting.contactMethod}
-                      onValueChange={(value) =>
-                        setEditedMeeting((prev) => ({
+                      onValueChange={value =>
+                        setEditedMeeting(prev => ({
                           ...prev,
                           contactMethod: value,
                         }))
@@ -737,7 +737,7 @@ export function MeetingDetailModal({
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {contactMethods.map((method) => (
+                        {contactMethods.map(method => (
                           <SelectItem key={method.value} value={method.value}>
                             <div className="flex items-center gap-2">
                               <span>{method.icon}</span>
@@ -751,12 +751,12 @@ export function MeetingDetailModal({
                     <div className="flex items-center gap-2">
                       <span>
                         {contactMethods.find(
-                          (m) => m.value === (meeting as any)?.contactMethod
+                          m => m.value === (meeting as any)?.contactMethod
                         )?.icon || '👥'}
                       </span>
                       <span className="font-medium">
                         {contactMethods.find(
-                          (m) => m.value === (meeting as any)?.contactMethod
+                          m => m.value === (meeting as any)?.contactMethod
                         )?.label || '대면'}
                       </span>
                     </div>
@@ -769,8 +769,8 @@ export function MeetingDetailModal({
                   {isEditingMeeting ? (
                     <Select
                       value={editedMeeting.expectedOutcome}
-                      onValueChange={(value) =>
-                        setEditedMeeting((prev) => ({
+                      onValueChange={value =>
+                        setEditedMeeting(prev => ({
                           ...prev,
                           expectedOutcome: value,
                         }))
@@ -780,7 +780,7 @@ export function MeetingDetailModal({
                         <SelectValue placeholder="성과 선택" />
                       </SelectTrigger>
                       <SelectContent>
-                        {expectedOutcomes.map((outcome) => (
+                        {expectedOutcomes.map(outcome => (
                           <SelectItem key={outcome.value} value={outcome.value}>
                             <div className="flex items-center gap-2">
                               <span>{outcome.icon}</span>
@@ -794,12 +794,12 @@ export function MeetingDetailModal({
                     <div className="flex items-center gap-2">
                       <span>
                         {expectedOutcomes.find(
-                          (o) => o.value === (meeting as any)?.expectedOutcome
+                          o => o.value === (meeting as any)?.expectedOutcome
                         )?.icon || '💬'}
                       </span>
                       <span className="font-medium">
                         {expectedOutcomes.find(
-                          (o) => o.value === (meeting as any)?.expectedOutcome
+                          o => o.value === (meeting as any)?.expectedOutcome
                         )?.label || '상담 진행'}
                       </span>
                     </div>
@@ -812,8 +812,8 @@ export function MeetingDetailModal({
                   {isEditingMeeting ? (
                     <Select
                       value={editedMeeting.productInterest}
-                      onValueChange={(value) =>
-                        setEditedMeeting((prev) => ({
+                      onValueChange={value =>
+                        setEditedMeeting(prev => ({
                           ...prev,
                           productInterest: value,
                         }))
@@ -823,7 +823,7 @@ export function MeetingDetailModal({
                         <SelectValue placeholder="상품 선택" />
                       </SelectTrigger>
                       <SelectContent>
-                        {productInterests.map((product) => (
+                        {productInterests.map(product => (
                           <SelectItem key={product.value} value={product.value}>
                             <div className="flex items-center gap-2">
                               <span>{product.icon}</span>
@@ -837,12 +837,12 @@ export function MeetingDetailModal({
                     <div className="flex items-center gap-2">
                       <span>
                         {productInterests.find(
-                          (p) => p.value === (meeting as any)?.productInterest
+                          p => p.value === (meeting as any)?.productInterest
                         )?.icon || '🎯'}
                       </span>
                       <span className="font-medium">
                         {productInterests.find(
-                          (p) => p.value === (meeting as any)?.productInterest
+                          p => p.value === (meeting as any)?.productInterest
                         )?.label || '복합 상품'}
                       </span>
                     </div>
@@ -864,9 +864,9 @@ export function MeetingDetailModal({
                           ).toLocaleString('ko-KR')
                         : ''
                     }
-                    onChange={(e) => {
+                    onChange={e => {
                       const value = e.target.value.replace(/[^0-9]/g, '');
-                      setEditedMeeting((prev) => ({
+                      setEditedMeeting(prev => ({
                         ...prev,
                         estimatedCommission: value ? Number(value) : 0,
                       }));
@@ -928,9 +928,9 @@ export function MeetingDetailModal({
                           ? editedMeeting.syncToGoogle
                           : (meeting as any)?.syncToGoogle
                       }
-                      onCheckedChange={(checked) =>
+                      onCheckedChange={checked =>
                         isEditingMeeting &&
-                        setEditedMeeting((prev) => ({
+                        setEditedMeeting(prev => ({
                           ...prev,
                           syncToGoogle: !!checked,
                         }))
@@ -958,9 +958,9 @@ export function MeetingDetailModal({
                           ? editedMeeting.sendClientInvite
                           : (meeting as any)?.sendClientInvite
                       }
-                      onCheckedChange={(checked) =>
+                      onCheckedChange={checked =>
                         isEditingMeeting &&
-                        setEditedMeeting((prev) => ({
+                        setEditedMeeting(prev => ({
                           ...prev,
                           sendClientInvite: !!checked,
                         }))
@@ -984,8 +984,8 @@ export function MeetingDetailModal({
                   {isEditingMeeting ? (
                     <Select
                       value={editedMeeting.reminder}
-                      onValueChange={(value) =>
-                        setEditedMeeting((prev) => ({
+                      onValueChange={value =>
+                        setEditedMeeting(prev => ({
                           ...prev,
                           reminder: value,
                         }))
@@ -1028,8 +1028,8 @@ export function MeetingDetailModal({
                 {isEditingMeeting ? (
                   <Textarea
                     value={editedMeeting.description}
-                    onChange={(e) =>
-                      setEditedMeeting((prev) => ({
+                    onChange={e =>
+                      setEditedMeeting(prev => ({
                         ...prev,
                         description: e.target.value,
                       }))
@@ -1096,7 +1096,7 @@ export function MeetingDetailModal({
             <Progress value={progressPercentage} className="h-3" />
 
             <div className="space-y-3">
-              {checklist.map((item) => (
+              {checklist.map(item => (
                 <div
                   key={item.id}
                   className="flex items-center gap-4 p-4 rounded-xl border bg-card/50 group hover:shadow-md transition-all duration-200"
@@ -1113,10 +1113,10 @@ export function MeetingDetailModal({
                       <div className="flex items-center gap-2">
                         <Input
                           value={editingText}
-                          onChange={(e) => setEditingText(e.target.value)}
+                          onChange={e => setEditingText(e.target.value)}
                           className="flex-1"
                           autoFocus
-                          onKeyDown={(e) => {
+                          onKeyDown={e => {
                             if (e.key === 'Enter') handleSaveEditingItem();
                             if (e.key === 'Escape') handleCancelEditing();
                           }}
@@ -1173,10 +1173,10 @@ export function MeetingDetailModal({
                   <Input
                     placeholder="새 체크리스트 항목을 입력하세요..."
                     value={newChecklistItem}
-                    onChange={(e) => setNewChecklistItem(e.target.value)}
+                    onChange={e => setNewChecklistItem(e.target.value)}
                     className="flex-1"
                     autoFocus
-                    onKeyDown={(e) => {
+                    onKeyDown={e => {
                       if (e.key === 'Enter') handleAddChecklistItem();
                       if (e.key === 'Escape') {
                         setIsAddingChecklistItem(false);
@@ -1237,7 +1237,7 @@ export function MeetingDetailModal({
 
             {notes.length > 0 ? (
               <div className="space-y-4 max-h-64 overflow-y-auto">
-                {notes.map((note) => (
+                {notes.map(note => (
                   <div
                     key={note.id}
                     className="p-5 border rounded-xl group hover:shadow-md transition-all duration-200 bg-card/50"
@@ -1278,7 +1278,7 @@ export function MeetingDetailModal({
                 <Textarea
                   placeholder="미팅 기록을 작성하세요..."
                   value={newNote}
-                  onChange={(e) => setNewNote(e.target.value)}
+                  onChange={e => setNewNote(e.target.value)}
                   rows={4}
                   className="resize-none"
                 />

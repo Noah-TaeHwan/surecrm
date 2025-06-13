@@ -280,8 +280,8 @@ export function ClientCard({
               {importance === 'high'
                 ? '키맨'
                 : importance === 'medium'
-                ? '일반'
-                : '관심'}
+                  ? '일반'
+                  : '관심'}
             </Badge>
           </div>
 
@@ -422,7 +422,7 @@ export function ClientCard({
                     className="flex items-center px-1.5 py-0.5 bg-muted/30 rounded text-xs"
                     title={`추가 관심사항: ${interestCategories
                       .slice(3)
-                      .map((i) => i.label)
+                      .map(i => i.label)
                       .join(', ')}`}
                   >
                     <span className="text-muted-foreground">

@@ -643,10 +643,10 @@ export async function getClientOverview(
 
     return {
       client: finalClient,
-      tags: tags.filter((tag) => tag.id), // null 제거
+      tags: tags.filter(tag => tag.id), // null 제거
       preferences: preferences[0] || null,
       analytics: analytics[0] || null,
-      familyMembers: familyMembers.filter((member) => {
+      familyMembers: familyMembers.filter(member => {
         // 개인정보 보호 레벨에 따른 접근 제한
         if (member.privacyLevel === 'confidential') {
           return (
@@ -658,7 +658,7 @@ export async function getClientOverview(
         }
         return true;
       }),
-      recentContacts: recentContacts.filter((contact) => {
+      recentContacts: recentContacts.filter(contact => {
         // 기밀 연락 이력 필터링
         return !contact.isConfidential || contact.agentId === agentId;
       }),
@@ -735,7 +735,7 @@ export async function createClient(
     }
 
     // 🔄 트랜잭션으로 고객 생성
-    const result = await db.transaction(async (tx) => {
+    const result = await db.transaction(async tx => {
       // 고객 기본 정보 생성
       const [newClient] = await tx
         .insert(clients)
@@ -853,7 +853,7 @@ export async function updateClient(
     // );
 
     // 🔄 트랜잭션으로 업데이트
-    const result = await db.transaction(async (tx) => {
+    const result = await db.transaction(async tx => {
       const [updatedClient] = await tx
         .update(clients)
         .set({ ...updates, updatedAt: new Date() })
@@ -916,7 +916,7 @@ export async function deleteClient(
     // );
 
     // 🔄 논리적 삭제 (실제 데이터는 보관)
-    const result = await db.transaction(async (tx) => {
+    const result = await db.transaction(async tx => {
       const [deletedClient] = await tx
         .update(clients)
         .set({
@@ -1401,7 +1401,7 @@ export async function getClientById(
       ...(clientDetailResult[0] || {}),
 
       // 태그 정보
-      tags: tagsResult.map((t) => t.tag.name),
+      tags: tagsResult.map(t => t.tag.name),
 
       // 소개자 정보
       referredBy: referredByResult[0] || null,

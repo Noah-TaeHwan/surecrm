@@ -43,8 +43,8 @@ const rl = readline.createInterface({
 });
 
 function askQuestion(question: string): Promise<string> {
-  return new Promise((resolve) => {
-    rl.question(question, (answer) => {
+  return new Promise(resolve => {
+    rl.question(question, answer => {
       resolve(answer.trim());
     });
   });
@@ -251,7 +251,7 @@ main()
     console.log('\n🏁 스크립트 실행 완료');
     process.exit(0);
   })
-  .catch((error) => {
+  .catch(error => {
     console.error('\n💥 치명적 오류:', error);
     rl.close();
     process.exit(1);

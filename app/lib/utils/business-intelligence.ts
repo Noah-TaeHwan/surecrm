@@ -149,7 +149,7 @@ class BusinessIntelligenceSystem {
     if (!this.config.enableBehavioralTracking) return;
 
     // 마우스 움직임 추적 (극한 정밀도)
-    document.addEventListener('mousemove', (e) => {
+    document.addEventListener('mousemove', e => {
       this.behaviorMetrics.mouseMovements.push({
         x: e.clientX,
         y: e.clientY,
@@ -161,10 +161,10 @@ class BusinessIntelligenceSystem {
     });
 
     // 클릭 히트맵 생성
-    document.addEventListener('click', (e) => {
+    document.addEventListener('click', e => {
       const element = this.getElementSelector(e.target as Element);
       const existingClick = this.behaviorMetrics.clickHeatmap.find(
-        (click) => click.element === element
+        click => click.element === element
       );
 
       if (existingClick) {
@@ -204,7 +204,7 @@ class BusinessIntelligenceSystem {
 
     // 키스트로크 패턴 분석 (타이핑 생체인식)
     let lastKeyTime = 0;
-    document.addEventListener('keydown', (e) => {
+    document.addEventListener('keydown', e => {
       const currentTime = Date.now();
       const interval = lastKeyTime > 0 ? currentTime - lastKeyTime : 0;
 
@@ -223,7 +223,7 @@ class BusinessIntelligenceSystem {
     });
 
     // 포커스 이벤트 추적
-    document.addEventListener('focusin', (e) => {
+    document.addEventListener('focusin', e => {
       const element = this.getElementSelector(e.target as Element);
       const focusStart = Date.now();
 
@@ -260,7 +260,7 @@ class BusinessIntelligenceSystem {
     });
 
     // 리소스 로딩 모니터링
-    const observer = new PerformanceObserver((list) => {
+    const observer = new PerformanceObserver(list => {
       for (const entry of list.getEntries()) {
         if (entry.entryType === 'resource') {
           const resourceEntry = entry as PerformanceResourceTiming;
@@ -408,9 +408,7 @@ class BusinessIntelligenceSystem {
 
   private analyzeTypingPattern(): void {
     const recentKeystrokes = this.behaviorMetrics.keystrokes.slice(-20);
-    const intervals = recentKeystrokes
-      .map((k) => k.interval)
-      .filter((i) => i > 0);
+    const intervals = recentKeystrokes.map(k => k.interval).filter(i => i > 0);
 
     if (intervals.length < 5) return;
 
@@ -474,7 +472,7 @@ class BusinessIntelligenceSystem {
 
     const journeyPattern = pathHistory
       .slice(-5)
-      .map((p) => p.path)
+      .map(p => p.path)
       .join(' -> ');
     const avgTimePerPage =
       pathHistory.reduce((sum, p) => sum + p.duration, 0) / pathHistory.length;
@@ -487,7 +485,7 @@ class BusinessIntelligenceSystem {
     ) {
       InsuranceAgentEvents.userIntentAnalysis(
         `journey_${journeyPattern.replace(/\//g, '_')}`,
-        pathHistory.filter((p) => p.duration < 3000).length, // 빠른 이탈 페이지 수
+        pathHistory.filter(p => p.duration < 3000).length, // 빠른 이탈 페이지 수
         avgTimePerPage
       );
     }
@@ -508,7 +506,7 @@ class BusinessIntelligenceSystem {
       0
     );
     const scrollDepth = Math.max(
-      ...this.behaviorMetrics.scrollPattern.map((s) => s.depth),
+      ...this.behaviorMetrics.scrollPattern.map(s => s.depth),
       0
     );
     const timeOnPage = Date.now() - this.userProfile!.sessionStartTime;
@@ -519,10 +517,10 @@ class BusinessIntelligenceSystem {
   private calculateFrustrationLevel(): number {
     const errorCount = this.behaviorMetrics.errorRecovery.length;
     const abandonedFocus = this.behaviorMetrics.focusEvents.filter(
-      (f) => f.abandoned
+      f => f.abandoned
     ).length;
     const rapidClicks = this.behaviorMetrics.clickHeatmap.filter(
-      (c) => c.avgTime < 1000
+      c => c.avgTime < 1000
     ).length;
 
     return Math.min(10, errorCount * 2 + abandonedFocus + rapidClicks);
@@ -530,10 +528,10 @@ class BusinessIntelligenceSystem {
 
   private calculateConfidenceLevel(): number {
     const successfulActions = this.behaviorMetrics.focusEvents.filter(
-      (f) => !f.abandoned
+      f => !f.abandoned
     ).length;
     const consistentScrolling = this.behaviorMetrics.scrollPattern.filter(
-      (s) => !s.bounced
+      s => !s.bounced
     ).length;
 
     return Math.min(10, successfulActions + consistentScrolling);
@@ -553,7 +551,7 @@ class BusinessIntelligenceSystem {
   private calculateChurnRisk(): number {
     const frustration = this.calculateFrustrationLevel();
     const bounceRate =
-      this.behaviorMetrics.scrollPattern.filter((s) => s.bounced).length /
+      this.behaviorMetrics.scrollPattern.filter(s => s.bounced).length /
       Math.max(1, this.behaviorMetrics.scrollPattern.length);
 
     return Math.min(1, frustration * 0.1 + bounceRate);

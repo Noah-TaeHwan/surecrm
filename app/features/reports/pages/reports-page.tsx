@@ -261,10 +261,10 @@ export default function ReportsPage({ loaderData }: Route.ComponentProps) {
         selectedPeriod === 'week'
           ? '이번 주'
           : selectedPeriod === 'month'
-          ? '이번 달'
-          : selectedPeriod === 'quarter'
-          ? '이번 분기'
-          : '올해',
+            ? '이번 달'
+            : selectedPeriod === 'quarter'
+              ? '이번 분기'
+              : '올해',
       조회기간: dateRange.formatted,
       총고객수: performance.totalClients,
       신규고객: performance.newClients,

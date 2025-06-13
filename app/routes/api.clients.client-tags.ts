@@ -69,13 +69,13 @@ export async function action({ request }: { request: Request }) {
     } else if (actionType === 'update' && Array.isArray(tagIds)) {
       // 태그 일괄 업데이트
       const currentTags = await getClientTagsWithAssignments(clientId, agentId);
-      const currentTagIds = currentTags.map((tag) => tag.id);
+      const currentTagIds = currentTags.map(tag => tag.id);
 
       // 추가할 태그들
-      const tagsToAdd = tagIds.filter((id) => !currentTagIds.includes(id));
+      const tagsToAdd = tagIds.filter(id => !currentTagIds.includes(id));
 
       // 제거할 태그들
-      const tagsToRemove = currentTagIds.filter((id) => !tagIds.includes(id));
+      const tagsToRemove = currentTagIds.filter(id => !tagIds.includes(id));
 
       // 태그 할당
       for (const id of tagsToAdd) {

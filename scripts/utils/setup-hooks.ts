@@ -28,7 +28,7 @@ function setupGitHooks() {
     // hooks 파일들에 실행 권한 부여
     const hookFiles = ['.githooks/pre-push'];
 
-    hookFiles.forEach((hookFile) => {
+    hookFiles.forEach(hookFile => {
       if (existsSync(hookFile)) {
         execSync(`chmod +x ${hookFile}`, { encoding: 'utf8' });
         console.log(`✅ 실행 권한 부여: ${hookFile}`);

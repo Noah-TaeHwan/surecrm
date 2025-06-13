@@ -176,9 +176,7 @@ async function checkDatabaseStatus() {
   }
 
   // 4. 사용 가능한 초대 코드 확인
-  const invitationSummary = summaries.find(
-    (s) => s.tableName === 'invitations'
-  );
+  const invitationSummary = summaries.find(s => s.tableName === 'invitations');
   if (
     invitationSummary &&
     !invitationSummary.error &&
@@ -223,7 +221,7 @@ async function checkDatabaseStatus() {
     (sum, s) => sum + (s.error ? 0 : s.count),
     0
   );
-  const healthyTables = summaries.filter((s) => !s.error).length;
+  const healthyTables = summaries.filter(s => !s.error).length;
   const totalTables = summaries.length;
 
   console.log(`   📊 총 레코드: ${totalRecords}개`);
@@ -244,7 +242,7 @@ checkDatabaseStatus()
   .then(() => {
     console.log('\n✅ 데이터베이스 상태 확인 완료');
   })
-  .catch((error) => {
+  .catch(error => {
     console.error('\n❌ 상태 확인 중 오류:', error);
     process.exit(1);
   });

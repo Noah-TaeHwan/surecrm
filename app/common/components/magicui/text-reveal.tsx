@@ -62,8 +62,8 @@ export function TextReveal({
       threshold,
     };
 
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
         if (entry.isIntersecting) {
           setIsRevealed(true);
           if (triggerOnce) {

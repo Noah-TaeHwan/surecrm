@@ -253,7 +253,7 @@ export function AddInsuranceModal({
       'tuberculosis',
     ];
 
-    const isSensitive = sensitiveConditions.some((keyword) =>
+    const isSensitive = sensitiveConditions.some(keyword =>
       condition.toLowerCase().includes(keyword.toLowerCase())
     );
 
@@ -280,7 +280,7 @@ export function AddInsuranceModal({
 
   // 건강 상태 제거
   const removeHealthCondition = (condition: string) => {
-    setHealthConditions(healthConditions.filter((c) => c !== condition));
+    setHealthConditions(healthConditions.filter(c => c !== condition));
   };
 
   // 복용 약물 추가
@@ -296,7 +296,7 @@ export function AddInsuranceModal({
 
   // 복용 약물 제거
   const removeMedication = (medication: string) => {
-    setMedications(medications.filter((m) => m !== medication));
+    setMedications(medications.filter(m => m !== medication));
   };
 
   const onSubmit = (data: SecureInsuranceFormData) => {
@@ -425,7 +425,7 @@ export function AddInsuranceModal({
                         type="number"
                         placeholder="2000000"
                         {...field}
-                        onChange={(e) =>
+                        onChange={e =>
                           field.onChange(Number(e.target.value) || undefined)
                         }
                       />
@@ -574,7 +574,7 @@ export function AddInsuranceModal({
                                 type="number"
                                 placeholder="2023"
                                 {...field}
-                                onChange={(e) =>
+                                onChange={e =>
                                   field.onChange(
                                     Number(e.target.value) || undefined
                                   )
@@ -625,7 +625,7 @@ export function AddInsuranceModal({
                                 type="number"
                                 placeholder="1600"
                                 {...field}
-                                onChange={(e) =>
+                                onChange={e =>
                                   field.onChange(
                                     Number(e.target.value) || undefined
                                   )
@@ -725,11 +725,11 @@ export function AddInsuranceModal({
                           <div className="flex gap-2">
                             <Input
                               value={healthConditionInput}
-                              onChange={(e) =>
+                              onChange={e =>
                                 setHealthConditionInput(e.target.value)
                               }
                               placeholder="질환명 입력"
-                              onKeyDown={(e) => {
+                              onKeyDown={e => {
                                 if (e.key === 'Enter') {
                                   e.preventDefault();
                                   addHealthCondition();
@@ -771,11 +771,9 @@ export function AddInsuranceModal({
                           <div className="flex gap-2">
                             <Input
                               value={medicationInput}
-                              onChange={(e) =>
-                                setMedicationInput(e.target.value)
-                              }
+                              onChange={e => setMedicationInput(e.target.value)}
                               placeholder="약물명 입력"
-                              onKeyDown={(e) => {
+                              onKeyDown={e => {
                                 if (e.key === 'Enter') {
                                   e.preventDefault();
                                   addMedication();

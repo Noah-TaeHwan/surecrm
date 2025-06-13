@@ -89,7 +89,7 @@ class NeuralUserPatternAnalyzer {
     let accelerationHistory: number[] = [];
     let clickPressureHistory: number[] = [];
 
-    document.addEventListener('mousemove', (event) => {
+    document.addEventListener('mousemove', event => {
       const currentTime = Date.now();
       const deltaTime = currentTime - lastTimestamp;
 
@@ -123,7 +123,7 @@ class NeuralUserPatternAnalyzer {
       lastTimestamp = currentTime;
     });
 
-    document.addEventListener('mousedown', (event) => {
+    document.addEventListener('mousedown', event => {
       const pressure = this.estimateClickPressure(event);
       clickPressureHistory.push(pressure);
 
@@ -144,7 +144,7 @@ class NeuralUserPatternAnalyzer {
     let lastKeyTime = 0;
     let typingRhythm: number[] = [];
 
-    document.addEventListener('keydown', (event) => {
+    document.addEventListener('keydown', event => {
       const currentTime = Date.now();
 
       if (lastKeyTime > 0) {
@@ -179,7 +179,7 @@ class NeuralUserPatternAnalyzer {
     let scrollHistory: any[] = [];
     let readingPatterns: any[] = [];
 
-    document.addEventListener('scroll', (event) => {
+    document.addEventListener('scroll', event => {
       const scrollData = {
         position: window.scrollY,
         timestamp: Date.now(),
@@ -230,7 +230,7 @@ class NeuralUserPatternAnalyzer {
     };
 
     // 작업 수행 시간 기반 인지 부하 추론
-    document.addEventListener('click', (event) => {
+    document.addEventListener('click', event => {
       const currentTime = Date.now();
       const taskDuration = currentTime - taskStartTime;
       const pageComplexity = measurePageComplexity();
@@ -285,7 +285,7 @@ class NeuralUserPatternAnalyzer {
     };
 
     // 중요한 의사결정 포인트 감지
-    document.addEventListener('click', (event) => {
+    document.addEventListener('click', event => {
       const target = event.target as Element;
 
       if (
@@ -315,7 +315,7 @@ class NeuralUserPatternAnalyzer {
     };
 
     // 좌절감 감지 (빠른 클릭, 뒤로가기 등)
-    document.addEventListener('click', (event) => {
+    document.addEventListener('click', event => {
       const clickSpeed = this.getLastClickSpeed();
       if (clickSpeed > 0.8) {
         emotionalIndicators.frustration += 0.1;
@@ -433,7 +433,7 @@ class NeuralUserPatternAnalyzer {
 
   private generateNeuralSignature(): string {
     // 사용자 고유의 "신경 지문" 생성
-    const behaviorMetrics = this.behaviorBuffer.map((data) => ({
+    const behaviorMetrics = this.behaviorBuffer.map(data => ({
       type: data.type,
       timing: data.timestamp,
       magnitude: data.value || 1,

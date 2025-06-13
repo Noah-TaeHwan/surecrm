@@ -80,7 +80,7 @@ export function Toast({ id, type, title, message, onClose }: ToastProps) {
 export function ToastContainer({ toasts }: { toasts: ToastProps[] }) {
   return (
     <div className="fixed top-6 right-6 z-50 space-y-3 max-w-sm w-full">
-      {toasts.map((toast) => (
+      {toasts.map(toast => (
         <Toast key={toast.id} {...toast} />
       ))}
     </div>
@@ -99,7 +99,7 @@ export function useToast() {
       onClose: () => removeToast(id),
     };
 
-    setToasts((prev) => [...prev, newToast]);
+    setToasts(prev => [...prev, newToast]);
 
     // 자동 닫기 (기본 5초)
     const duration = toast.duration || 5000;
@@ -109,7 +109,7 @@ export function useToast() {
   };
 
   const removeToast = (id: string) => {
-    setToasts((prev) => prev.filter((toast) => toast.id !== id));
+    setToasts(prev => prev.filter(toast => toast.id !== id));
   };
 
   const success = (title: string, message?: string, duration?: number) => {

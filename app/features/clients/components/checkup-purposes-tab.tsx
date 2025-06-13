@@ -69,7 +69,7 @@ export function CheckupPurposesTab({
             ]}
             values={checkupPurposes}
             onChange={(key, checked) =>
-              setCheckupPurposes((prev) => ({
+              setCheckupPurposes(prev => ({
                 ...prev,
                 [key]: checked,
               }))
@@ -106,7 +106,7 @@ export function CheckupPurposesTab({
             ]}
             values={checkupPurposes}
             onChange={(key, checked) =>
-              setCheckupPurposes((prev) => ({
+              setCheckupPurposes(prev => ({
                 ...prev,
                 [key]: checked,
               }))
@@ -121,8 +121,8 @@ export function CheckupPurposesTab({
             label="💰 저축 현황"
             boxLabel="지금 저축은 어디서 하고 계신가요?"
             value={checkupPurposes.currentSavingsLocation}
-            onChange={(value) =>
-              setCheckupPurposes((prev) => ({
+            onChange={value =>
+              setCheckupPurposes(prev => ({
                 ...prev,
                 currentSavingsLocation: value,
               }))
@@ -135,8 +135,8 @@ export function CheckupPurposesTab({
           <TextareaField
             label="기타 걱정사항"
             value={checkupPurposes.additionalConcerns}
-            onChange={(value) =>
-              setCheckupPurposes((prev) => ({
+            onChange={value =>
+              setCheckupPurposes(prev => ({
                 ...prev,
                 additionalConcerns: value,
               }))

@@ -109,7 +109,7 @@ export function GoalSettingModal({
   const selectedYear = parseInt(form.watch('targetYear'));
   const selectedMonth = parseInt(form.watch('targetMonth'));
 
-  const filteredGoals = currentGoals.filter((goal) => {
+  const filteredGoals = currentGoals.filter(goal => {
     const goalStartDate = new Date(goal.startDate);
     const goalYear = goalStartDate.getFullYear();
     const goalMonth = goalStartDate.getMonth() + 1;
@@ -334,7 +334,7 @@ export function GoalSettingModal({
                   🎯 현재 설정된 목표
                 </h4>
                 <div className="space-y-3">
-                  {filteredGoals.map((goal) => (
+                  {filteredGoals.map(goal => (
                     <Card
                       key={goal.id}
                       className="border-border/50 hover:border-border transition-colors"
@@ -523,8 +523,8 @@ export function GoalSettingModal({
                 {isLoading
                   ? '저장 중...'
                   : editingGoal
-                  ? '목표 수정'
-                  : '목표 설정'}
+                    ? '목표 수정'
+                    : '목표 설정'}
               </Button>
             </DialogFooter>
           </form>

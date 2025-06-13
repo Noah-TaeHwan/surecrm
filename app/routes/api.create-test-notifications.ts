@@ -130,7 +130,7 @@ export async function action({ request }: { request: Request }) {
       JSON.stringify({
         success: true,
         message: `${createdNotifications.length}개의 테스트 알림이 생성되었습니다`,
-        notifications: createdNotifications.map((n) => ({
+        notifications: createdNotifications.map(n => ({
           id: n.id,
           title: n.title,
           readAt: n.readAt,

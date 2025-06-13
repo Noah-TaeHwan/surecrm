@@ -609,8 +609,8 @@ export default function ClientsPage({ loaderData }: any) {
               clients.length > 50
                 ? 'expert'
                 : clients.length > 20
-                ? 'intermediate'
-                : 'beginner',
+                  ? 'intermediate'
+                  : 'beginner',
             portfolio_complexity: clientAnalysis.stage_distribution,
           },
         });
@@ -664,8 +664,8 @@ export default function ClientsPage({ loaderData }: any) {
               clients.length > 100
                 ? 'high'
                 : clients.length > 50
-                ? 'medium'
-                : 'low',
+                  ? 'medium'
+                  : 'low',
           },
           timestamp: Date.now(),
           session_id: `client_mgmt_${Date.now()}_${Math.random()

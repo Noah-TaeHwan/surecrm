@@ -114,7 +114,7 @@ export function RecentClients({
           </h4>
           {recentClients.length > 0 ? (
             <>
-              {recentClients.slice(0, 5).map((client) => (
+              {recentClients.slice(0, 5).map(client => (
                 <Link
                   to={`/clients/${client.id}`}
                   key={client.id}

@@ -61,7 +61,7 @@ export default function NetworkControls({
     const query = searchTerm.toLowerCase();
 
     return searchResults
-      .map((result) => {
+      .map(result => {
         const name = result.name.toLowerCase();
         let score = 0;
 
@@ -80,7 +80,7 @@ export default function NetworkControls({
 
         return { ...result, _score: score };
       })
-      .filter((result) => result._score > 0)
+      .filter(result => result._score > 0)
       .sort((a, b) => b._score - a._score)
       .slice(0, 8); // 최대 8개 결과만 표시
   }, [searchTerm, searchResults]);
@@ -115,13 +115,13 @@ export default function NetworkControls({
       switch (e.key) {
         case 'ArrowDown':
           e.preventDefault();
-          setSelectedIndex((prev) =>
+          setSelectedIndex(prev =>
             prev < sortedResults.length - 1 ? prev + 1 : 0
           );
           break;
         case 'ArrowUp':
           e.preventDefault();
-          setSelectedIndex((prev) =>
+          setSelectedIndex(prev =>
             prev > 0 ? prev - 1 : sortedResults.length - 1
           );
           break;
@@ -242,12 +242,12 @@ export default function NetworkControls({
                           result.stage === '계약 완료'
                             ? 'bg-green-500'
                             : result.stage === '계약 검토'
-                            ? 'bg-red-500'
-                            : result.stage === '상품 설명'
-                            ? 'bg-blue-500'
-                            : result.stage === '니즈 분석'
-                            ? 'bg-amber-500'
-                            : 'bg-muted-foreground'
+                              ? 'bg-red-500'
+                              : result.stage === '상품 설명'
+                                ? 'bg-blue-500'
+                                : result.stage === '니즈 분석'
+                                  ? 'bg-amber-500'
+                                  : 'bg-muted-foreground'
                         )}
                       />
                     )}

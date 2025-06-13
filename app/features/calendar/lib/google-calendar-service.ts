@@ -247,9 +247,7 @@ export class GoogleCalendarService {
 
       const events = response.data.items || [];
 
-      return events.map((event) =>
-        this.convertGoogleEventToCalendarEvent(event)
-      );
+      return events.map(event => this.convertGoogleEventToCalendarEvent(event));
     } catch (error) {
       console.error('❌ 구글 캘린더 이벤트 조회 실패:', error);
       await this.logSyncError(agentId, 'from_google', error);
@@ -343,7 +341,7 @@ export class GoogleCalendarService {
 
     if (salesInfo.length > 0) {
       sections.push(
-        `💼 영업 정보:\n${salesInfo.map((info) => `• ${info}`).join('\n')}`
+        `💼 영업 정보:\n${salesInfo.map(info => `• ${info}`).join('\n')}`
       );
     }
 
@@ -812,7 +810,7 @@ export class GoogleCalendarService {
         )
         .orderBy(desc(appCalendarSyncLogs.createdAt));
 
-      return conflictLogs.map((log) => ({
+      return conflictLogs.map(log => ({
         eventId: log.externalEventId || log.meetingId || 'unknown',
         syncLogId: log.id,
         conflictData: log.syncResult,
@@ -877,13 +875,13 @@ export class GoogleCalendarService {
       );
 
       const results = await Promise.allSettled(
-        conflicts.map((conflict) =>
+        conflicts.map(conflict =>
           this.resolveConflict(agentId, conflict.eventId, resolution)
         )
       );
 
       const successCount = results.filter(
-        (r) => r.status === 'fulfilled' && r.value === true
+        r => r.status === 'fulfilled' && r.value === true
       ).length;
 
       console.log(
@@ -933,7 +931,7 @@ export class GoogleCalendarService {
         today.getMonth() + 1
       );
 
-      const meeting = meetings.find((m) => m.id === meetingId);
+      const meeting = meetings.find(m => m.id === meetingId);
       if (!meeting) {
         throw new Error('미팅을 찾을 수 없습니다');
       }

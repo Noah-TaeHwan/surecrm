@@ -179,7 +179,7 @@ export default function NetworkGraphClient({
     // 노드 ID 집합 생성
     const nodeIds = new Set(
       data.nodes
-        .map((node) => {
+        .map(node => {
           if (!node || typeof node.id !== 'string') {
             return null;
           }
@@ -189,7 +189,7 @@ export default function NetworkGraphClient({
     );
 
     // 유효한 링크만 필터링
-    const validLinks = data.links.filter((link) => {
+    const validLinks = data.links.filter(link => {
       if (!link || !link.source || !link.target) {
         return false;
       }
@@ -207,7 +207,7 @@ export default function NetworkGraphClient({
     });
 
     return {
-      nodes: data.nodes.filter((node) => node && typeof node.id === 'string'),
+      nodes: data.nodes.filter(node => node && typeof node.id === 'string'),
       links: validLinks,
     };
   }, [data?.nodes, data?.links]); // 🔥 의존성 최적화
@@ -234,7 +234,7 @@ export default function NetworkGraphClient({
         };
 
         // 크기가 실제로 변경되었을 때만 업데이트 (임계값 증가)
-        setDimensions((prev) => {
+        setDimensions(prev => {
           if (
             Math.abs(prev.width - newDimensions.width) > 10 ||
             Math.abs(prev.height - newDimensions.height) > 10
@@ -257,18 +257,18 @@ export default function NetworkGraphClient({
     updateDimensions();
 
     // 렌더링 완료 대기를 위한 지연 업데이트 (더 적은 횟수로 최적화)
-    const timeouts = [200, 500].map((delay) =>
+    const timeouts = [200, 500].map(delay =>
       setTimeout(updateDimensions, delay)
     );
 
     // ResizeObserver로 크기 변화 감지 (디바운싱 추가)
     let resizeTimeout: ReturnType<typeof setTimeout>;
-    const resizeObserver = new ResizeObserver((entries) => {
+    const resizeObserver = new ResizeObserver(entries => {
       clearTimeout(resizeTimeout);
       resizeTimeout = setTimeout(() => {
         for (const entry of entries) {
           const { width, height } = entry.contentRect;
-          setDimensions((prev) => {
+          setDimensions(prev => {
             if (
               Math.abs(prev.width - width) > 10 ||
               Math.abs(prev.height - height) > 10
@@ -366,20 +366,20 @@ export default function NetworkGraphClient({
     if (isBrowser && !graphComponent) {
       // 동적 import 사용
       import('react-force-graph-2d')
-        .then((module) => {
+        .then(module => {
           setGraphComponent(() => module.default);
         })
-        .catch((err) => {
+        .catch(err => {
           console.error('ForceGraph2D 로딩 실패:', err);
-          setGraphState((prev) => ({ ...prev, renderingFailed: true }));
+          setGraphState(prev => ({ ...prev, renderingFailed: true }));
         });
     }
   }, [graphComponent]);
 
   // 마운트 확인
   useEffect(() => {
-    setGraphState((prev) => ({ ...prev, mounted: true }));
-    return () => setGraphState((prev) => ({ ...prev, mounted: false }));
+    setGraphState(prev => ({ ...prev, mounted: true }));
+    return () => setGraphState(prev => ({ ...prev, mounted: false }));
   }, []);
 
   // 상태 관리
@@ -390,7 +390,7 @@ export default function NetworkGraphClient({
     if (!isBrowser) return;
 
     const timer = setInterval(() => {
-      setAnimationTime((prev) => prev + 1);
+      setAnimationTime(prev => prev + 1);
     }, 50); // 50ms마다 업데이트하여 부드러운 애니메이션 효과
 
     return () => clearInterval(timer);
@@ -398,7 +398,7 @@ export default function NetworkGraphClient({
 
   // 외부 highlightedNodeId가 변경되면 상태 업데이트
   useEffect(() => {
-    setGraphState((prev) => ({
+    setGraphState(prev => ({
       ...prev,
       highlightedNodeId: externalHighlightedNodeId,
       sidebarResizing: true, // 사이드바 크기 변화 시작
@@ -410,7 +410,7 @@ export default function NetworkGraphClient({
         const rect = containerRef.current.getBoundingClientRect();
         const newDimensions = { width: rect.width, height: rect.height };
 
-        setDimensions((prev) => {
+        setDimensions(prev => {
           // 의미있는 크기 변화만 감지
           const widthDiff = Math.abs(prev.width - newDimensions.width);
 
@@ -428,7 +428,7 @@ export default function NetworkGraphClient({
       }
 
       // 레이아웃 변화 완료
-      setGraphState((prev) => ({
+      setGraphState(prev => ({
         ...prev,
         sidebarResizing: false,
       }));
@@ -451,25 +451,25 @@ export default function NetworkGraphClient({
 
       // 정확한 매치 우선, 부분 매치 후순위
       const exactMatches = safeData.nodes.filter(
-        (node) => node.name.toLowerCase() === normalizedQuery
+        node => node.name.toLowerCase() === normalizedQuery
       );
       const partialMatches = safeData.nodes.filter(
-        (node) =>
+        node =>
           node.name.toLowerCase().includes(normalizedQuery) &&
           !exactMatches.includes(node)
       );
 
       const allMatches = [...exactMatches, ...partialMatches];
-      searchResults = allMatches.map((node) => node.id);
+      searchResults = allMatches.map(node => node.id);
 
       if (allMatches.length > 0) {
         highlightedNode = allMatches[0].id;
 
         // 검색 시에는 연결된 노드들도 함께 표시 (옵시디언 스타일)
         const connectedNodeIds = new Set<string>();
-        allMatches.forEach((match) => connectedNodeIds.add(match.id));
+        allMatches.forEach(match => connectedNodeIds.add(match.id));
 
-        safeData.links.forEach((link) => {
+        safeData.links.forEach(link => {
           const sourceId =
             typeof link.source === 'string' ? link.source : link.source.id;
           const targetId =
@@ -484,7 +484,7 @@ export default function NetworkGraphClient({
         });
 
         // 검색 결과와 연결된 노드들만 표시
-        filteredNodes = data.nodes.filter((node) =>
+        filteredNodes = data.nodes.filter(node =>
           connectedNodeIds.has(node.id)
         );
       }
@@ -493,19 +493,19 @@ export default function NetworkGraphClient({
     // 🎯 영업 단계 필터링 (옵시디언 클러스터 스타일)
     if (filters.stageFilter !== 'all') {
       filteredNodes = filteredNodes.filter(
-        (node) => node.stage === filters.stageFilter
+        node => node.stage === filters.stageFilter
       );
     }
 
     // ⭐ 중요도 필터링 (옵시디언 노드 크기 기반)
     if (filters.importanceFilter !== 'all') {
-      filteredNodes = filteredNodes.filter((node) => {
+      filteredNodes = filteredNodes.filter(node => {
         const nodeImportance =
           node.importance === 5
             ? 'high'
             : node.importance === 3
-            ? 'medium'
-            : 'low';
+              ? 'medium'
+              : 'low';
         return nodeImportance === filters.importanceFilter;
       });
     }
@@ -516,26 +516,26 @@ export default function NetworkGraphClient({
 
       // 영향력 노드 식별
       const influencers = data.nodes.filter(
-        (node) => node.group === 'influencer'
+        node => node.group === 'influencer'
       );
-      influencers.forEach((inf) => influencerNetwork.add(inf.id));
+      influencers.forEach(inf => influencerNetwork.add(inf.id));
 
       // 영향력 노드와 직접 연결된 모든 노드 포함
-      data.links.forEach((link) => {
+      data.links.forEach(link => {
         const sourceId =
           typeof link.source === 'string' ? link.source : link.source.id;
         const targetId =
           typeof link.target === 'string' ? link.target : link.target.id;
 
-        if (influencers.some((inf) => inf.id === sourceId)) {
+        if (influencers.some(inf => inf.id === sourceId)) {
           influencerNetwork.add(targetId);
         }
-        if (influencers.some((inf) => inf.id === targetId)) {
+        if (influencers.some(inf => inf.id === targetId)) {
           influencerNetwork.add(sourceId);
         }
       });
 
-      filteredNodes = filteredNodes.filter((node) =>
+      filteredNodes = filteredNodes.filter(node =>
         influencerNetwork.has(node.id)
       );
     }
@@ -546,7 +546,7 @@ export default function NetworkGraphClient({
 
       // 1차 연결 (직접 연결)
       const directConnections = new Set<string>();
-      safeData.links.forEach((link) => {
+      safeData.links.forEach(link => {
         const sourceId =
           typeof link.source === 'string' ? link.source : link.source.id;
         const targetId =
@@ -568,8 +568,8 @@ export default function NetworkGraphClient({
       if (filters.depthFilter === 'indirect') {
         const indirectConnections = new Set<string>();
 
-        directConnections.forEach((nodeId) => {
-          data.links.forEach((link) => {
+        directConnections.forEach(nodeId => {
+          data.links.forEach(link => {
             const sourceId =
               typeof link.source === 'string' ? link.source : link.source.id;
             const targetId =
@@ -595,12 +595,12 @@ export default function NetworkGraphClient({
 
       // 필터 적용
       if (filters.depthFilter === 'direct') {
-        filteredNodes = filteredNodes.filter((node) =>
+        filteredNodes = filteredNodes.filter(node =>
           directConnections.has(node.id)
         );
       } else if (filters.depthFilter === 'indirect') {
         filteredNodes = filteredNodes.filter(
-          (node) =>
+          node =>
             directConnections.has(node.id) ||
             connectionLevels.get(node.id) === 2
         );
@@ -608,8 +608,8 @@ export default function NetworkGraphClient({
     }
 
     // 📊 필터링된 노드 기반 링크 계산
-    const filteredNodeIds = new Set(filteredNodes.map((node) => node.id));
-    const filteredLinks = data.links.filter((link) => {
+    const filteredNodeIds = new Set(filteredNodes.map(node => node.id));
+    const filteredLinks = data.links.filter(link => {
       const sourceId =
         typeof link.source === 'string' ? link.source : link.source.id;
       const targetId =
@@ -619,13 +619,13 @@ export default function NetworkGraphClient({
 
     // 🎯 상태 업데이트 (옵시디언 스타일)
     if (searchQuery && searchQuery.trim()) {
-      setGraphState((prev) => ({
+      setGraphState(prev => ({
         ...prev,
         highlightedNodeId: highlightedNode,
         searchResults: searchResults,
       }));
     } else if (!externalHighlightedNodeId) {
-      setGraphState((prev) => ({
+      setGraphState(prev => ({
         ...prev,
         highlightedNodeId: null,
         searchResults: [],
@@ -662,7 +662,7 @@ export default function NetworkGraphClient({
 
       // 에이전트 노드 찾기 (influencer 그룹 또는 중심 노드)
       const agentNode = safeData.nodes.find(
-        (node) => node.group === 'influencer'
+        node => node.group === 'influencer'
       );
       if (!agentNode) return [];
 
@@ -750,13 +750,13 @@ export default function NetworkGraphClient({
     if (graphState.initialized) return;
 
     // 초기화 상태 업데이트
-    setGraphState((prev) => ({ ...prev, initAttempted: true }));
+    setGraphState(prev => ({ ...prev, initAttempted: true }));
 
     // 실패 감지를 위한 타이머 (시간 단축)
     const failureTimer = setTimeout(() => {
       if (!graphState.initialized) {
         // console.error('그래프 초기화 실패: 시간 초과');
-        setGraphState((prev) => ({ ...prev, renderingFailed: true }));
+        setGraphState(prev => ({ ...prev, renderingFailed: true }));
       }
     }, 8000); // 8초로 단축
 
@@ -774,10 +774,10 @@ export default function NetworkGraphClient({
 
         // 영향력 기반 계층 구조 (옵시디언 스타일)
         const influencers = initialGraphData.nodes.filter(
-          (n) => n.group === 'influencer'
+          n => n.group === 'influencer'
         );
         const clients = initialGraphData.nodes.filter(
-          (n) => n.group !== 'influencer'
+          n => n.group !== 'influencer'
         );
 
         const nodePositions = new Map();
@@ -883,7 +883,7 @@ export default function NetworkGraphClient({
         }
 
         // 노드 위치 적용
-        initialGraphData.nodes.forEach((node) => {
+        initialGraphData.nodes.forEach(node => {
           const pos = nodePositions.get(node.id);
           if (pos) {
             node.x = pos.x;
@@ -941,7 +941,7 @@ export default function NetworkGraphClient({
         }
 
         // 초기화 완료 표시
-        setGraphState((prev) => ({
+        setGraphState(prev => ({
           ...prev,
           initialized: true,
           initAttempted: true,
@@ -950,7 +950,7 @@ export default function NetworkGraphClient({
         // console.log('✅ 옵시디언 스타일 네트워크 그래프 초기화 완료');
       } catch (error) {
         console.error('❌ 그래프 초기화 오류:', error);
-        setGraphState((prev) => ({
+        setGraphState(prev => ({
           ...prev,
           renderingFailed: true,
           initAttempted: true,
@@ -979,7 +979,7 @@ export default function NetworkGraphClient({
 
     try {
       // 필터링된 노드 ID 셋
-      const filteredNodeIds = new Set(filteredData.nodes.map((n) => n.id));
+      const filteredNodeIds = new Set(filteredData.nodes.map(n => n.id));
 
       // 현재 그래프 데이터 가져오기
       const currentGraphData = safeGraphData();
@@ -994,7 +994,7 @@ export default function NetworkGraphClient({
 
         // 링크 가시성도 업데이트
         const filteredLinkSet = new Set(
-          filteredData.links.map((link) => {
+          filteredData.links.map(link => {
             const sourceId =
               typeof link.source === 'string' ? link.source : link.source.id;
             const targetId =
@@ -1066,7 +1066,7 @@ export default function NetworkGraphClient({
         // 타겟 노드와 연결된 노드들의 바운딩 박스 계산
         const allRelevantNodes = [targetNode, ...connectedNodes];
         const validNodes = allRelevantNodes.filter(
-          (node) =>
+          node =>
             node && typeof node.x === 'number' && typeof node.y === 'number'
         );
 
@@ -1167,7 +1167,7 @@ export default function NetworkGraphClient({
     // 🎯 핵심 개선: 실제 소개 관계 방향성을 더 명확하게 표시
     // 에이전트 노드 찾기
     const agentNode = safeData.nodes.find(
-      (node) => node.group === 'influencer' || node.type === 'agent'
+      node => node.group === 'influencer' || node.type === 'agent'
     );
     if (!agentNode) return 'none';
 
@@ -1513,16 +1513,16 @@ export default function NetworkGraphClient({
 
           console.log(
             '🔗 연결된 관계:',
-            connectedLinks.map((link) => {
+            connectedLinks.map(link => {
               const sourceId =
                 typeof link.source === 'object' ? link.source.id : link.source;
               const targetId =
                 typeof link.target === 'object' ? link.target.id : link.target;
               const sourceName =
-                safeData.nodes.find((n) => n.id === sourceId)?.name ||
+                safeData.nodes.find(n => n.id === sourceId)?.name ||
                 '알 수 없음';
               const targetName =
-                safeData.nodes.find((n) => n.id === targetId)?.name ||
+                safeData.nodes.find(n => n.id === targetId)?.name ||
                 '알 수 없음';
 
               if (sourceId === node.id) {
@@ -1533,7 +1533,7 @@ export default function NetworkGraphClient({
             })
           );
 
-          setGraphState((prev) => ({
+          setGraphState(prev => ({
             ...prev,
             highlightedNodeId: node.id,
           }));
@@ -1550,7 +1550,7 @@ export default function NetworkGraphClient({
         }}
         // 배경 클릭으로 하이라이트 해제
         onBackgroundClick={() => {
-          setGraphState((prev) => ({
+          setGraphState(prev => ({
             ...prev,
             highlightedNodeId: null,
           }));

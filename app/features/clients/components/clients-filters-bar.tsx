@@ -111,8 +111,8 @@ export function ClientsFiltersBar({
             <Input
               placeholder="이름, 전화번호, 이메일로 검색..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              onChange={e => setSearchQuery(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleSearch()}
               className="pl-10"
             />
           </div>
@@ -133,7 +133,7 @@ export function ClientsFiltersBar({
             <DropdownMenuLabel>영업 단계</DropdownMenuLabel>
             <Select
               value={filterStage}
-              onValueChange={(value) => {
+              onValueChange={value => {
                 setFilterStage(value);
                 handleFilterChange('stageId', value);
               }}
@@ -155,7 +155,7 @@ export function ClientsFiltersBar({
             <DropdownMenuLabel>중요도</DropdownMenuLabel>
             <Select
               value={filterImportance}
-              onValueChange={(value) => {
+              onValueChange={value => {
                 setFilterImportance(value);
                 handleFilterChange('importance', value);
               }}

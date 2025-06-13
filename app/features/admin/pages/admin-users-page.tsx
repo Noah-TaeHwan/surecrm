@@ -61,7 +61,7 @@ export async function loader({ request }: Route['LoaderArgs']) {
       db
         .select({ count: count() })
         .from(profiles)
-        .then(async (result) => {
+        .then(async result => {
           const total = result[0]?.count || 0;
           const [active, inactive, admins, withTeam] = await Promise.all([
             db

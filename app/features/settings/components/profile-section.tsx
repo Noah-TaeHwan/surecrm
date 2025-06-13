@@ -55,7 +55,7 @@ export function ProfileSection({ profile, onUpdate }: ProfileSectionProps) {
       profile.company,
     ];
     const filledFields = fields.filter(
-      (field) => field && field.trim() !== ''
+      field => field && field.trim() !== ''
     ).length;
     return Math.round((filledFields / fields.length) * 100);
   };

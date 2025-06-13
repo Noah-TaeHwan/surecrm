@@ -143,9 +143,7 @@
         "admin_system_settings_key_unique": {
           "name": "admin_system_settings_key_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "key"
-          ]
+          "columns": ["key"]
         }
       },
       "policies": {},
@@ -196,9 +194,7 @@
         "admin_system_stats_cache_stat_type_unique": {
           "name": "admin_system_stats_cache_stat_type_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "stat_type"
-          ]
+          "columns": ["stat_type"]
         }
       },
       "policies": {},
@@ -365,12 +361,8 @@
           "name": "app_client_details_client_id_app_client_profiles_id_fk",
           "tableFrom": "app_client_details",
           "tableTo": "app_client_profiles",
-          "columnsFrom": [
-            "client_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["client_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -380,9 +372,7 @@
         "app_client_details_client_id_unique": {
           "name": "app_client_details_client_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "client_id"
-          ]
+          "columns": ["client_id"]
         }
       },
       "policies": {},
@@ -532,12 +522,8 @@
           "name": "app_client_profiles_agent_id_app_user_profiles_id_fk",
           "tableFrom": "app_client_profiles",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "agent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["agent_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -545,12 +531,8 @@
           "name": "app_client_profiles_team_id_app_user_teams_id_fk",
           "tableFrom": "app_client_profiles",
           "tableTo": "app_user_teams",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -558,12 +540,8 @@
           "name": "app_client_profiles_current_stage_id_app_pipeline_stages_id_fk",
           "tableFrom": "app_client_profiles",
           "tableTo": "app_pipeline_stages",
-          "columnsFrom": [
-            "current_stage_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["current_stage_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -571,12 +549,8 @@
           "name": "app_client_profiles_referred_by_id_app_client_profiles_id_fk",
           "tableFrom": "app_client_profiles",
           "tableTo": "app_client_profiles",
-          "columnsFrom": [
-            "referred_by_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["referred_by_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -674,12 +648,8 @@
           "name": "app_client_contract_attachments_contract_id_app_client_insurance_contracts_id_fk",
           "tableFrom": "app_client_contract_attachments",
           "tableTo": "app_client_insurance_contracts",
-          "columnsFrom": [
-            "contract_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["contract_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -687,12 +657,8 @@
           "name": "app_client_contract_attachments_agent_id_app_user_profiles_id_fk",
           "tableFrom": "app_client_contract_attachments",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "agent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["agent_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -797,12 +763,8 @@
           "name": "app_client_documents_client_id_app_client_profiles_id_fk",
           "tableFrom": "app_client_documents",
           "tableTo": "app_client_profiles",
-          "columnsFrom": [
-            "client_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["client_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -810,12 +772,8 @@
           "name": "app_client_documents_insurance_info_id_app_client_insurance_id_fk",
           "tableFrom": "app_client_documents",
           "tableTo": "app_client_insurance",
-          "columnsFrom": [
-            "insurance_info_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["insurance_info_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -823,12 +781,8 @@
           "name": "app_client_documents_agent_id_app_user_profiles_id_fk",
           "tableFrom": "app_client_documents",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "agent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["agent_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1092,12 +1046,8 @@
           "name": "app_client_insurance_contracts_client_id_app_client_profiles_id_fk",
           "tableFrom": "app_client_insurance_contracts",
           "tableTo": "app_client_profiles",
-          "columnsFrom": [
-            "client_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["client_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1105,12 +1055,8 @@
           "name": "app_client_insurance_contracts_agent_id_app_user_profiles_id_fk",
           "tableFrom": "app_client_insurance_contracts",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "agent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["agent_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1118,12 +1064,8 @@
           "name": "app_client_insurance_contracts_opportunity_product_id_app_opportunity_products_id_fk",
           "tableFrom": "app_client_insurance_contracts",
           "tableTo": "app_opportunity_products",
-          "columnsFrom": [
-            "opportunity_product_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["opportunity_product_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1228,12 +1170,8 @@
           "name": "app_client_insurance_client_id_app_client_profiles_id_fk",
           "tableFrom": "app_client_insurance",
           "tableTo": "app_client_profiles",
-          "columnsFrom": [
-            "client_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["client_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1319,12 +1257,8 @@
           "name": "app_user_invitations_inviter_id_app_user_profiles_id_fk",
           "tableFrom": "app_user_invitations",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "inviter_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["inviter_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1332,12 +1266,8 @@
           "name": "app_user_invitations_used_by_id_app_user_profiles_id_fk",
           "tableFrom": "app_user_invitations",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "used_by_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["used_by_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1347,9 +1277,7 @@
         "app_user_invitations_code_unique": {
           "name": "app_user_invitations_code_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "code"
-          ]
+          "columns": ["code"]
         }
       },
       "policies": {},
@@ -1458,12 +1386,8 @@
           "name": "app_client_meetings_client_id_app_client_profiles_id_fk",
           "tableFrom": "app_client_meetings",
           "tableTo": "app_client_profiles",
-          "columnsFrom": [
-            "client_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["client_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1471,12 +1395,8 @@
           "name": "app_client_meetings_agent_id_app_user_profiles_id_fk",
           "tableFrom": "app_client_meetings",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "agent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["agent_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1575,12 +1495,8 @@
           "name": "app_opportunity_products_client_id_app_client_profiles_id_fk",
           "tableFrom": "app_opportunity_products",
           "tableTo": "app_client_profiles",
-          "columnsFrom": [
-            "client_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["client_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1588,12 +1504,8 @@
           "name": "app_opportunity_products_agent_id_app_user_profiles_id_fk",
           "tableFrom": "app_opportunity_products",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "agent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["agent_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1673,12 +1585,8 @@
           "name": "app_pipeline_stages_agent_id_app_user_profiles_id_fk",
           "tableFrom": "app_pipeline_stages",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "agent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["agent_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1686,12 +1594,8 @@
           "name": "app_pipeline_stages_team_id_app_user_teams_id_fk",
           "tableFrom": "app_pipeline_stages",
           "tableTo": "app_user_teams",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1818,12 +1722,8 @@
           "tableFrom": "app_user_profiles",
           "tableTo": "users",
           "schemaTo": "auth",
-          "columnsFrom": [
-            "id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1905,12 +1805,8 @@
           "name": "app_client_referrals_referrer_id_app_client_profiles_id_fk",
           "tableFrom": "app_client_referrals",
           "tableTo": "app_client_profiles",
-          "columnsFrom": [
-            "referrer_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["referrer_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1918,12 +1814,8 @@
           "name": "app_client_referrals_referred_id_app_client_profiles_id_fk",
           "tableFrom": "app_client_referrals",
           "tableTo": "app_client_profiles",
-          "columnsFrom": [
-            "referred_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["referred_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1931,12 +1823,8 @@
           "name": "app_client_referrals_agent_id_app_user_profiles_id_fk",
           "tableFrom": "app_client_referrals",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "agent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["agent_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2010,12 +1898,8 @@
           "name": "app_user_teams_admin_id_app_user_profiles_id_fk",
           "tableFrom": "app_user_teams",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "admin_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["admin_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2124,12 +2008,8 @@
           "name": "public_site_announcements_author_id_app_user_profiles_id_fk",
           "tableFrom": "public_site_announcements",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "author_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["author_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2226,12 +2106,8 @@
           "name": "public_site_faqs_author_id_app_user_profiles_id_fk",
           "tableFrom": "public_site_faqs",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "author_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["author_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2303,12 +2179,8 @@
           "name": "public_site_analytics_user_id_app_user_profiles_id_fk",
           "tableFrom": "public_site_analytics",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2417,12 +2289,8 @@
           "name": "public_site_contents_author_id_app_user_profiles_id_fk",
           "tableFrom": "public_site_contents",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "author_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["author_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2503,12 +2371,8 @@
           "name": "public_site_settings_updated_by_app_user_profiles_id_fk",
           "tableFrom": "public_site_settings",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "updated_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["updated_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2518,9 +2382,7 @@
         "public_site_settings_key_unique": {
           "name": "public_site_settings_key_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "key"
-          ]
+          "columns": ["key"]
         }
       },
       "policies": {},
@@ -2631,12 +2493,8 @@
           "name": "public_site_testimonials_author_id_app_user_profiles_id_fk",
           "tableFrom": "public_site_testimonials",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "author_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["author_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2870,9 +2728,7 @@
         "app_admin_sessions_session_token_unique": {
           "name": "app_admin_sessions_session_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "session_token"
-          ]
+          "columns": ["session_token"]
         }
       },
       "policies": {},
@@ -2953,12 +2809,8 @@
           "name": "app_calendar_meeting_attendees_meeting_id_app_client_meetings_id_fk",
           "tableFrom": "app_calendar_meeting_attendees",
           "tableTo": "app_client_meetings",
-          "columnsFrom": [
-            "meeting_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["meeting_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2966,12 +2818,8 @@
           "name": "app_calendar_meeting_attendees_client_id_app_client_profiles_id_fk",
           "tableFrom": "app_calendar_meeting_attendees",
           "tableTo": "app_client_profiles",
-          "columnsFrom": [
-            "client_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["client_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2979,12 +2827,8 @@
           "name": "app_calendar_meeting_attendees_agent_id_app_user_profiles_id_fk",
           "tableFrom": "app_calendar_meeting_attendees",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "agent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["agent_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3052,12 +2896,8 @@
           "name": "app_calendar_meeting_checklists_meeting_id_app_client_meetings_id_fk",
           "tableFrom": "app_calendar_meeting_checklists",
           "tableTo": "app_client_meetings",
-          "columnsFrom": [
-            "meeting_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["meeting_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -3125,12 +2965,8 @@
           "name": "app_calendar_meeting_notes_meeting_id_app_client_meetings_id_fk",
           "tableFrom": "app_calendar_meeting_notes",
           "tableTo": "app_client_meetings",
-          "columnsFrom": [
-            "meeting_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["meeting_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -3138,12 +2974,8 @@
           "name": "app_calendar_meeting_notes_agent_id_app_user_profiles_id_fk",
           "tableFrom": "app_calendar_meeting_notes",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "agent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["agent_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3217,12 +3049,8 @@
           "name": "app_calendar_meeting_reminders_meeting_id_app_client_meetings_id_fk",
           "tableFrom": "app_calendar_meeting_reminders",
           "tableTo": "app_client_meetings",
-          "columnsFrom": [
-            "meeting_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["meeting_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -3315,12 +3143,8 @@
           "name": "app_calendar_meeting_templates_agent_id_app_user_profiles_id_fk",
           "tableFrom": "app_calendar_meeting_templates",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "agent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["agent_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3407,12 +3231,8 @@
           "name": "app_calendar_recurring_meetings_parent_meeting_id_app_client_meetings_id_fk",
           "tableFrom": "app_calendar_recurring_meetings",
           "tableTo": "app_client_meetings",
-          "columnsFrom": [
-            "parent_meeting_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["parent_meeting_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3542,12 +3362,8 @@
           "name": "app_calendar_settings_agent_id_app_user_profiles_id_fk",
           "tableFrom": "app_calendar_settings",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "agent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["agent_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3557,9 +3373,7 @@
         "app_calendar_settings_agent_id_unique": {
           "name": "app_calendar_settings_agent_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "agent_id"
-          ]
+          "columns": ["agent_id"]
         }
       },
       "policies": {},
@@ -3641,12 +3455,8 @@
           "name": "app_calendar_sync_logs_agent_id_app_user_profiles_id_fk",
           "tableFrom": "app_calendar_sync_logs",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "agent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["agent_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3654,12 +3464,8 @@
           "name": "app_calendar_sync_logs_meeting_id_app_client_meetings_id_fk",
           "tableFrom": "app_calendar_sync_logs",
           "tableTo": "app_client_meetings",
-          "columnsFrom": [
-            "meeting_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["meeting_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -3770,12 +3576,8 @@
           "name": "app_client_analytics_client_id_app_client_profiles_id_fk",
           "tableFrom": "app_client_analytics",
           "tableTo": "app_client_profiles",
-          "columnsFrom": [
-            "client_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["client_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -3785,9 +3587,7 @@
         "app_client_analytics_client_id_unique": {
           "name": "app_client_analytics_client_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "client_id"
-          ]
+          "columns": ["client_id"]
         }
       },
       "policies": {},
@@ -3905,12 +3705,8 @@
           "name": "app_client_checkup_purposes_client_id_app_client_profiles_id_fk",
           "tableFrom": "app_client_checkup_purposes",
           "tableTo": "app_client_profiles",
-          "columnsFrom": [
-            "client_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["client_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -3918,12 +3714,8 @@
           "name": "app_client_checkup_purposes_last_updated_by_app_user_profiles_id_fk",
           "tableFrom": "app_client_checkup_purposes",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "last_updated_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["last_updated_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3933,9 +3725,7 @@
         "app_client_checkup_purposes_client_id_unique": {
           "name": "app_client_checkup_purposes_client_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "client_id"
-          ]
+          "columns": ["client_id"]
         }
       },
       "policies": {},
@@ -4038,12 +3828,8 @@
           "name": "app_client_consultation_companions_client_id_app_client_profiles_id_fk",
           "tableFrom": "app_client_consultation_companions",
           "tableTo": "app_client_profiles",
-          "columnsFrom": [
-            "client_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["client_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -4051,12 +3837,8 @@
           "name": "app_client_consultation_companions_added_by_app_user_profiles_id_fk",
           "tableFrom": "app_client_consultation_companions",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "added_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["added_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -4205,12 +3987,8 @@
           "name": "app_client_consultation_notes_client_id_app_client_profiles_id_fk",
           "tableFrom": "app_client_consultation_notes",
           "tableTo": "app_client_profiles",
-          "columnsFrom": [
-            "client_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["client_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -4218,12 +3996,8 @@
           "name": "app_client_consultation_notes_agent_id_app_user_profiles_id_fk",
           "tableFrom": "app_client_consultation_notes",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "agent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["agent_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -4341,12 +4115,8 @@
           "name": "app_client_contact_history_client_id_app_client_profiles_id_fk",
           "tableFrom": "app_client_contact_history",
           "tableTo": "app_client_profiles",
-          "columnsFrom": [
-            "client_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["client_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -4354,12 +4124,8 @@
           "name": "app_client_contact_history_agent_id_app_user_profiles_id_fk",
           "tableFrom": "app_client_contact_history",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "agent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["agent_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -4450,12 +4216,8 @@
           "name": "app_client_data_access_logs_client_id_app_client_profiles_id_fk",
           "tableFrom": "app_client_data_access_logs",
           "tableTo": "app_client_profiles",
-          "columnsFrom": [
-            "client_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["client_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -4463,12 +4225,8 @@
           "name": "app_client_data_access_logs_accessed_by_app_user_profiles_id_fk",
           "tableFrom": "app_client_data_access_logs",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "accessed_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["accessed_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -4559,12 +4317,8 @@
           "name": "app_client_data_backups_client_id_app_client_profiles_id_fk",
           "tableFrom": "app_client_data_backups",
           "tableTo": "app_client_profiles",
-          "columnsFrom": [
-            "client_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["client_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -4572,12 +4326,8 @@
           "name": "app_client_data_backups_triggered_by_app_user_profiles_id_fk",
           "tableFrom": "app_client_data_backups",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "triggered_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["triggered_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -4707,12 +4457,8 @@
           "name": "app_client_family_members_client_id_app_client_profiles_id_fk",
           "tableFrom": "app_client_family_members",
           "tableTo": "app_client_profiles",
-          "columnsFrom": [
-            "client_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["client_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -4898,12 +4644,8 @@
           "name": "app_client_interest_categories_client_id_app_client_profiles_id_fk",
           "tableFrom": "app_client_interest_categories",
           "tableTo": "app_client_profiles",
-          "columnsFrom": [
-            "client_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["client_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -4911,12 +4653,8 @@
           "name": "app_client_interest_categories_last_updated_by_app_user_profiles_id_fk",
           "tableFrom": "app_client_interest_categories",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "last_updated_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["last_updated_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -4926,9 +4664,7 @@
         "app_client_interest_categories_client_id_unique": {
           "name": "app_client_interest_categories_client_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "client_id"
-          ]
+          "columns": ["client_id"]
         }
       },
       "policies": {},
@@ -5088,12 +4824,8 @@
           "name": "app_client_medical_history_client_id_app_client_profiles_id_fk",
           "tableFrom": "app_client_medical_history",
           "tableTo": "app_client_profiles",
-          "columnsFrom": [
-            "client_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["client_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -5101,12 +4833,8 @@
           "name": "app_client_medical_history_last_updated_by_app_user_profiles_id_fk",
           "tableFrom": "app_client_medical_history",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "last_updated_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["last_updated_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -5116,9 +4844,7 @@
         "app_client_medical_history_client_id_unique": {
           "name": "app_client_medical_history_client_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "client_id"
-          ]
+          "columns": ["client_id"]
         }
       },
       "policies": {},
@@ -5205,12 +4931,8 @@
           "name": "app_client_milestones_client_id_app_client_profiles_id_fk",
           "tableFrom": "app_client_milestones",
           "tableTo": "app_client_profiles",
-          "columnsFrom": [
-            "client_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["client_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -5218,12 +4940,8 @@
           "name": "app_client_milestones_agent_id_app_user_profiles_id_fk",
           "tableFrom": "app_client_milestones",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "agent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["agent_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -5363,12 +5081,8 @@
           "name": "app_client_preferences_client_id_app_client_profiles_id_fk",
           "tableFrom": "app_client_preferences",
           "tableTo": "app_client_profiles",
-          "columnsFrom": [
-            "client_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["client_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -5378,9 +5092,7 @@
         "app_client_preferences_client_id_unique": {
           "name": "app_client_preferences_client_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "client_id"
-          ]
+          "columns": ["client_id"]
         }
       },
       "policies": {},
@@ -5448,12 +5160,8 @@
           "name": "app_client_stage_history_client_id_app_client_profiles_id_fk",
           "tableFrom": "app_client_stage_history",
           "tableTo": "app_client_profiles",
-          "columnsFrom": [
-            "client_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["client_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -5461,12 +5169,8 @@
           "name": "app_client_stage_history_agent_id_app_user_profiles_id_fk",
           "tableFrom": "app_client_stage_history",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "agent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["agent_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -5474,12 +5178,8 @@
           "name": "app_client_stage_history_from_stage_id_app_pipeline_stages_id_fk",
           "tableFrom": "app_client_stage_history",
           "tableTo": "app_pipeline_stages",
-          "columnsFrom": [
-            "from_stage_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["from_stage_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -5487,12 +5187,8 @@
           "name": "app_client_stage_history_to_stage_id_app_pipeline_stages_id_fk",
           "tableFrom": "app_client_stage_history",
           "tableTo": "app_pipeline_stages",
-          "columnsFrom": [
-            "to_stage_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["to_stage_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -5546,12 +5242,8 @@
           "name": "app_client_tag_assignments_client_id_app_client_profiles_id_fk",
           "tableFrom": "app_client_tag_assignments",
           "tableTo": "app_client_profiles",
-          "columnsFrom": [
-            "client_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["client_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -5559,12 +5251,8 @@
           "name": "app_client_tag_assignments_tag_id_app_client_tags_id_fk",
           "tableFrom": "app_client_tag_assignments",
           "tableTo": "app_client_tags",
-          "columnsFrom": [
-            "tag_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["tag_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -5572,12 +5260,8 @@
           "name": "app_client_tag_assignments_assigned_by_app_user_profiles_id_fk",
           "tableFrom": "app_client_tag_assignments",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "assigned_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["assigned_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -5659,12 +5343,8 @@
           "name": "app_client_tags_agent_id_app_user_profiles_id_fk",
           "tableFrom": "app_client_tags",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "agent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["agent_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -5761,12 +5441,8 @@
           "name": "app_dashboard_activity_logs_user_id_app_user_profiles_id_fk",
           "tableFrom": "app_dashboard_activity_logs",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -5905,12 +5581,8 @@
           "name": "app_dashboard_goals_agent_id_app_user_profiles_id_fk",
           "tableFrom": "app_dashboard_goals",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "agent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["agent_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -5918,12 +5590,8 @@
           "name": "app_dashboard_goals_team_id_app_user_teams_id_fk",
           "tableFrom": "app_dashboard_goals",
           "tableTo": "app_user_teams",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -6029,12 +5697,8 @@
           "name": "app_dashboard_notifications_user_id_app_user_profiles_id_fk",
           "tableFrom": "app_dashboard_notifications",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -6193,12 +5857,8 @@
           "name": "app_dashboard_performance_metrics_agent_id_app_user_profiles_id_fk",
           "tableFrom": "app_dashboard_performance_metrics",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "agent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["agent_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -6206,12 +5866,8 @@
           "name": "app_dashboard_performance_metrics_team_id_app_user_teams_id_fk",
           "tableFrom": "app_dashboard_performance_metrics",
           "tableTo": "app_user_teams",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -6323,12 +5979,8 @@
           "name": "app_dashboard_quick_actions_user_id_app_user_profiles_id_fk",
           "tableFrom": "app_dashboard_quick_actions",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -6429,12 +6081,8 @@
           "name": "app_dashboard_widgets_user_id_app_user_profiles_id_fk",
           "tableFrom": "app_dashboard_widgets",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -6543,12 +6191,8 @@
           "name": "app_influencer_activity_logs_influencer_id_app_influencer_profiles_id_fk",
           "tableFrom": "app_influencer_activity_logs",
           "tableTo": "app_influencer_profiles",
-          "columnsFrom": [
-            "influencer_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["influencer_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -6556,12 +6200,8 @@
           "name": "app_influencer_activity_logs_agent_id_app_user_profiles_id_fk",
           "tableFrom": "app_influencer_activity_logs",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "agent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["agent_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -6763,12 +6403,8 @@
           "name": "app_influencer_gratitude_history_influencer_id_app_influencer_profiles_id_fk",
           "tableFrom": "app_influencer_gratitude_history",
           "tableTo": "app_influencer_profiles",
-          "columnsFrom": [
-            "influencer_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["influencer_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -6776,12 +6412,8 @@
           "name": "app_influencer_gratitude_history_agent_id_app_user_profiles_id_fk",
           "tableFrom": "app_influencer_gratitude_history",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "agent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["agent_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -6789,12 +6421,8 @@
           "name": "app_influencer_gratitude_history_referral_id_app_client_referrals_id_fk",
           "tableFrom": "app_influencer_gratitude_history",
           "tableTo": "app_client_referrals",
-          "columnsFrom": [
-            "referral_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["referral_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -6915,12 +6543,8 @@
           "name": "app_influencer_gratitude_templates_agent_id_app_user_profiles_id_fk",
           "tableFrom": "app_influencer_gratitude_templates",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "agent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["agent_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -7096,12 +6720,8 @@
           "name": "app_influencer_network_analysis_agent_id_app_user_profiles_id_fk",
           "tableFrom": "app_influencer_network_analysis",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "agent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["agent_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -7109,12 +6729,8 @@
           "name": "app_influencer_network_analysis_team_id_app_user_teams_id_fk",
           "tableFrom": "app_influencer_network_analysis",
           "tableTo": "app_user_teams",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -7312,12 +6928,8 @@
           "name": "app_influencer_profiles_client_id_app_client_profiles_id_fk",
           "tableFrom": "app_influencer_profiles",
           "tableTo": "app_client_profiles",
-          "columnsFrom": [
-            "client_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["client_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -7325,12 +6937,8 @@
           "name": "app_influencer_profiles_agent_id_app_user_profiles_id_fk",
           "tableFrom": "app_influencer_profiles",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "agent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["agent_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -7338,12 +6946,8 @@
           "name": "app_influencer_profiles_verified_by_app_user_profiles_id_fk",
           "tableFrom": "app_influencer_profiles",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "verified_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["verified_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -7353,9 +6957,7 @@
         "app_influencer_profiles_client_id_unique": {
           "name": "app_influencer_profiles_client_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "client_id"
-          ]
+          "columns": ["client_id"]
         }
       },
       "policies": {},
@@ -7418,12 +7020,8 @@
           "name": "app_invitation_usage_logs_invitation_id_app_user_invitations_id_fk",
           "tableFrom": "app_invitation_usage_logs",
           "tableTo": "app_user_invitations",
-          "columnsFrom": [
-            "invitation_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["invitation_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -7431,12 +7029,8 @@
           "name": "app_invitation_usage_logs_user_id_app_user_profiles_id_fk",
           "tableFrom": "app_invitation_usage_logs",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -7556,12 +7150,8 @@
           "name": "app_network_edges_agent_id_app_user_profiles_id_fk",
           "tableFrom": "app_network_edges",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "agent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["agent_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -7569,12 +7159,8 @@
           "name": "app_network_edges_source_node_id_app_network_nodes_id_fk",
           "tableFrom": "app_network_edges",
           "tableTo": "app_network_nodes",
-          "columnsFrom": [
-            "source_node_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["source_node_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -7582,12 +7168,8 @@
           "name": "app_network_edges_target_node_id_app_network_nodes_id_fk",
           "tableFrom": "app_network_edges",
           "tableTo": "app_network_nodes",
-          "columnsFrom": [
-            "target_node_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["target_node_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -7678,12 +7260,8 @@
           "name": "app_network_interactions_agent_id_app_user_profiles_id_fk",
           "tableFrom": "app_network_interactions",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "agent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["agent_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -7691,12 +7269,8 @@
           "name": "app_network_interactions_edge_id_app_network_edges_id_fk",
           "tableFrom": "app_network_interactions",
           "tableTo": "app_network_edges",
-          "columnsFrom": [
-            "edge_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["edge_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -7834,12 +7408,8 @@
           "name": "app_network_nodes_agent_id_app_user_profiles_id_fk",
           "tableFrom": "app_network_nodes",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "agent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["agent_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -7847,12 +7417,8 @@
           "name": "app_network_nodes_client_id_app_client_profiles_id_fk",
           "tableFrom": "app_network_nodes",
           "tableTo": "app_client_profiles",
-          "columnsFrom": [
-            "client_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["client_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -7981,12 +7547,8 @@
           "name": "app_network_opportunities_agent_id_app_user_profiles_id_fk",
           "tableFrom": "app_network_opportunities",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "agent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["agent_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -7994,12 +7556,8 @@
           "name": "app_network_opportunities_source_node_id_app_network_nodes_id_fk",
           "tableFrom": "app_network_opportunities",
           "tableTo": "app_network_nodes",
-          "columnsFrom": [
-            "source_node_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["source_node_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -8007,12 +7565,8 @@
           "name": "app_network_opportunities_target_node_id_app_network_nodes_id_fk",
           "tableFrom": "app_network_opportunities",
           "tableTo": "app_network_nodes",
-          "columnsFrom": [
-            "target_node_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["target_node_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -8139,12 +7693,8 @@
           "name": "app_network_stats_agent_id_app_user_profiles_id_fk",
           "tableFrom": "app_network_stats",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "agent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["agent_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -8152,12 +7702,8 @@
           "name": "app_network_stats_team_id_app_user_teams_id_fk",
           "tableFrom": "app_network_stats",
           "tableTo": "app_user_teams",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -8274,12 +7820,8 @@
           "name": "app_notification_history_user_id_app_user_profiles_id_fk",
           "tableFrom": "app_notification_history",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -8287,12 +7829,8 @@
           "name": "app_notification_history_queue_id_app_notification_queue_id_fk",
           "tableFrom": "app_notification_history",
           "tableTo": "app_notification_queue",
-          "columnsFrom": [
-            "queue_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["queue_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -8438,12 +7976,8 @@
           "name": "app_notification_queue_user_id_app_user_profiles_id_fk",
           "tableFrom": "app_notification_queue",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -8451,12 +7985,8 @@
           "name": "app_notification_queue_template_id_app_notification_templates_id_fk",
           "tableFrom": "app_notification_queue",
           "tableTo": "app_notification_templates",
-          "columnsFrom": [
-            "template_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["template_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -8561,12 +8091,8 @@
           "name": "app_notification_rules_user_id_app_user_profiles_id_fk",
           "tableFrom": "app_notification_rules",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -8574,12 +8100,8 @@
           "name": "app_notification_rules_team_id_app_user_teams_id_fk",
           "tableFrom": "app_notification_rules",
           "tableTo": "app_user_teams",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -8733,12 +8255,8 @@
           "name": "app_notification_settings_user_id_app_user_profiles_id_fk",
           "tableFrom": "app_notification_settings",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -8748,9 +8266,7 @@
         "app_notification_settings_user_id_unique": {
           "name": "app_notification_settings_user_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "user_id"
-          ]
+          "columns": ["user_id"]
         }
       },
       "policies": {},
@@ -8827,12 +8343,8 @@
           "name": "app_notification_subscriptions_user_id_app_user_profiles_id_fk",
           "tableFrom": "app_notification_subscriptions",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -8946,12 +8458,8 @@
           "name": "app_notification_templates_user_id_app_user_profiles_id_fk",
           "tableFrom": "app_notification_templates",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -8959,12 +8467,8 @@
           "name": "app_notification_templates_team_id_app_user_teams_id_fk",
           "tableFrom": "app_notification_templates",
           "tableTo": "app_user_teams",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -9057,12 +8561,8 @@
           "name": "app_pipeline_analytics_user_id_app_user_profiles_id_fk",
           "tableFrom": "app_pipeline_analytics",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -9070,12 +8570,8 @@
           "name": "app_pipeline_analytics_team_id_app_user_teams_id_fk",
           "tableFrom": "app_pipeline_analytics",
           "tableTo": "app_user_teams",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -9083,12 +8579,8 @@
           "name": "app_pipeline_analytics_stage_id_app_pipeline_stages_id_fk",
           "tableFrom": "app_pipeline_analytics",
           "tableTo": "app_pipeline_stages",
-          "columnsFrom": [
-            "stage_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["stage_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -9200,12 +8692,8 @@
           "name": "app_pipeline_automations_user_id_app_user_profiles_id_fk",
           "tableFrom": "app_pipeline_automations",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -9213,12 +8701,8 @@
           "name": "app_pipeline_automations_team_id_app_user_teams_id_fk",
           "tableFrom": "app_pipeline_automations",
           "tableTo": "app_user_teams",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -9226,12 +8710,8 @@
           "name": "app_pipeline_automations_stage_id_app_pipeline_stages_id_fk",
           "tableFrom": "app_pipeline_automations",
           "tableTo": "app_pipeline_stages",
-          "columnsFrom": [
-            "stage_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["stage_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -9348,12 +8828,8 @@
           "name": "app_pipeline_goals_user_id_app_user_profiles_id_fk",
           "tableFrom": "app_pipeline_goals",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -9361,12 +8837,8 @@
           "name": "app_pipeline_goals_team_id_app_user_teams_id_fk",
           "tableFrom": "app_pipeline_goals",
           "tableTo": "app_user_teams",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -9374,12 +8846,8 @@
           "name": "app_pipeline_goals_stage_id_app_pipeline_stages_id_fk",
           "tableFrom": "app_pipeline_goals",
           "tableTo": "app_pipeline_stages",
-          "columnsFrom": [
-            "stage_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["stage_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -9470,12 +8938,8 @@
           "name": "app_pipeline_stage_history_client_id_app_client_profiles_id_fk",
           "tableFrom": "app_pipeline_stage_history",
           "tableTo": "app_client_profiles",
-          "columnsFrom": [
-            "client_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["client_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -9483,12 +8947,8 @@
           "name": "app_pipeline_stage_history_from_stage_id_app_pipeline_stages_id_fk",
           "tableFrom": "app_pipeline_stage_history",
           "tableTo": "app_pipeline_stages",
-          "columnsFrom": [
-            "from_stage_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["from_stage_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -9496,12 +8956,8 @@
           "name": "app_pipeline_stage_history_to_stage_id_app_pipeline_stages_id_fk",
           "tableFrom": "app_pipeline_stage_history",
           "tableTo": "app_pipeline_stages",
-          "columnsFrom": [
-            "to_stage_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["to_stage_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -9509,12 +8965,8 @@
           "name": "app_pipeline_stage_history_changed_by_app_user_profiles_id_fk",
           "tableFrom": "app_pipeline_stage_history",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "changed_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["changed_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -9614,12 +9066,8 @@
           "name": "app_pipeline_stage_templates_user_id_app_user_profiles_id_fk",
           "tableFrom": "app_pipeline_stage_templates",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -9627,12 +9075,8 @@
           "name": "app_pipeline_stage_templates_team_id_app_user_teams_id_fk",
           "tableFrom": "app_pipeline_stage_templates",
           "tableTo": "app_user_teams",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -9772,12 +9216,8 @@
           "name": "app_pipeline_views_user_id_app_user_profiles_id_fk",
           "tableFrom": "app_pipeline_views",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -9785,12 +9225,8 @@
           "name": "app_pipeline_views_team_id_app_user_teams_id_fk",
           "tableFrom": "app_pipeline_views",
           "tableTo": "app_user_teams",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -9909,12 +9345,8 @@
           "name": "app_report_dashboards_user_id_app_user_profiles_id_fk",
           "tableFrom": "app_report_dashboards",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -9922,12 +9354,8 @@
           "name": "app_report_dashboards_team_id_app_user_teams_id_fk",
           "tableFrom": "app_report_dashboards",
           "tableTo": "app_user_teams",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -10013,12 +9441,8 @@
           "name": "app_report_exports_user_id_app_user_profiles_id_fk",
           "tableFrom": "app_report_exports",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -10026,12 +9450,8 @@
           "name": "app_report_exports_report_instance_id_app_report_instances_id_fk",
           "tableFrom": "app_report_exports",
           "tableTo": "app_report_instances",
-          "columnsFrom": [
-            "report_instance_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["report_instance_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -10168,12 +9588,8 @@
           "name": "app_report_instances_user_id_app_user_profiles_id_fk",
           "tableFrom": "app_report_instances",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -10181,12 +9597,8 @@
           "name": "app_report_instances_template_id_app_report_templates_id_fk",
           "tableFrom": "app_report_instances",
           "tableTo": "app_report_templates",
-          "columnsFrom": [
-            "template_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["template_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -10194,12 +9606,8 @@
           "name": "app_report_instances_schedule_id_app_report_schedules_id_fk",
           "tableFrom": "app_report_instances",
           "tableTo": "app_report_schedules",
-          "columnsFrom": [
-            "schedule_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["schedule_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -10283,12 +9691,8 @@
           "name": "app_report_metrics_user_id_app_user_profiles_id_fk",
           "tableFrom": "app_report_metrics",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -10296,12 +9700,8 @@
           "name": "app_report_metrics_team_id_app_user_teams_id_fk",
           "tableFrom": "app_report_metrics",
           "tableTo": "app_user_teams",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -10427,12 +9827,8 @@
           "name": "app_report_schedules_user_id_app_user_profiles_id_fk",
           "tableFrom": "app_report_schedules",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -10440,12 +9836,8 @@
           "name": "app_report_schedules_team_id_app_user_teams_id_fk",
           "tableFrom": "app_report_schedules",
           "tableTo": "app_user_teams",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -10453,12 +9845,8 @@
           "name": "app_report_schedules_template_id_app_report_templates_id_fk",
           "tableFrom": "app_report_schedules",
           "tableTo": "app_report_templates",
-          "columnsFrom": [
-            "template_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["template_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -10553,12 +9941,8 @@
           "name": "app_report_subscriptions_user_id_app_user_profiles_id_fk",
           "tableFrom": "app_report_subscriptions",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -10566,12 +9950,8 @@
           "name": "app_report_subscriptions_template_id_app_report_templates_id_fk",
           "tableFrom": "app_report_subscriptions",
           "tableTo": "app_report_templates",
-          "columnsFrom": [
-            "template_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["template_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -10696,12 +10076,8 @@
           "name": "app_report_templates_user_id_app_user_profiles_id_fk",
           "tableFrom": "app_report_templates",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -10709,12 +10085,8 @@
           "name": "app_report_templates_team_id_app_user_teams_id_fk",
           "tableFrom": "app_report_templates",
           "tableTo": "app_user_teams",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -10775,12 +10147,8 @@
           "name": "app_settings_backups_user_id_app_user_profiles_id_fk",
           "tableFrom": "app_settings_backups",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -10865,12 +10233,8 @@
           "name": "app_settings_change_logs_user_id_app_user_profiles_id_fk",
           "tableFrom": "app_settings_change_logs",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -10978,12 +10342,8 @@
           "name": "app_settings_integrations_user_id_app_user_profiles_id_fk",
           "tableFrom": "app_settings_integrations",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -11068,12 +10428,8 @@
           "name": "app_settings_security_logs_user_id_app_user_profiles_id_fk",
           "tableFrom": "app_settings_security_logs",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -11171,12 +10527,8 @@
           "name": "app_settings_theme_preferences_user_id_app_user_profiles_id_fk",
           "tableFrom": "app_settings_theme_preferences",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -11186,9 +10538,7 @@
         "app_settings_theme_preferences_user_id_unique": {
           "name": "app_settings_theme_preferences_user_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "user_id"
-          ]
+          "columns": ["user_id"]
         }
       },
       "policies": {},
@@ -11268,12 +10618,8 @@
           "name": "app_settings_user_profiles_user_id_app_user_profiles_id_fk",
           "tableFrom": "app_settings_user_profiles",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -11283,9 +10629,7 @@
         "app_settings_user_profiles_user_id_unique": {
           "name": "app_settings_user_profiles_user_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "user_id"
-          ]
+          "columns": ["user_id"]
         }
       },
       "policies": {},
@@ -11355,12 +10699,8 @@
           "name": "app_team_activity_logs_team_id_app_user_teams_id_fk",
           "tableFrom": "app_team_activity_logs",
           "tableTo": "app_user_teams",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -11368,12 +10708,8 @@
           "name": "app_team_activity_logs_user_id_app_user_profiles_id_fk",
           "tableFrom": "app_team_activity_logs",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -11481,12 +10817,8 @@
           "name": "app_team_communication_channels_team_id_app_user_teams_id_fk",
           "tableFrom": "app_team_communication_channels",
           "tableTo": "app_user_teams",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -11494,12 +10826,8 @@
           "name": "app_team_communication_channels_created_by_app_user_profiles_id_fk",
           "tableFrom": "app_team_communication_channels",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "created_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -11623,12 +10951,8 @@
           "name": "app_team_goals_team_id_app_user_teams_id_fk",
           "tableFrom": "app_team_goals",
           "tableTo": "app_user_teams",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -11636,12 +10960,8 @@
           "name": "app_team_goals_created_by_app_user_profiles_id_fk",
           "tableFrom": "app_team_goals",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "created_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -11737,12 +11057,8 @@
           "name": "app_team_members_team_id_app_user_teams_id_fk",
           "tableFrom": "app_team_members",
           "tableTo": "app_user_teams",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -11750,12 +11066,8 @@
           "name": "app_team_members_user_id_app_user_profiles_id_fk",
           "tableFrom": "app_team_members",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -11763,12 +11075,8 @@
           "name": "app_team_members_invited_by_app_user_profiles_id_fk",
           "tableFrom": "app_team_members",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "invited_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["invited_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -11891,12 +11199,8 @@
           "name": "app_team_performance_metrics_team_id_app_user_teams_id_fk",
           "tableFrom": "app_team_performance_metrics",
           "tableTo": "app_user_teams",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -11904,12 +11208,8 @@
           "name": "app_team_performance_metrics_member_id_app_user_profiles_id_fk",
           "tableFrom": "app_team_performance_metrics",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "member_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["member_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -11979,12 +11279,8 @@
           "name": "app_team_stats_cache_team_id_app_user_teams_id_fk",
           "tableFrom": "app_team_stats_cache",
           "tableTo": "app_user_teams",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -11994,9 +11290,7 @@
         "app_team_stats_cache_team_id_unique": {
           "name": "app_team_stats_cache_team_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "team_id"
-          ]
+          "columns": ["team_id"]
         }
       },
       "policies": {},
@@ -12108,12 +11402,8 @@
           "name": "app_team_training_records_team_id_app_user_teams_id_fk",
           "tableFrom": "app_team_training_records",
           "tableTo": "app_user_teams",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -12121,12 +11411,8 @@
           "name": "app_team_training_records_member_id_app_user_profiles_id_fk",
           "tableFrom": "app_team_training_records",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "member_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["member_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -12134,12 +11420,8 @@
           "name": "app_team_training_records_trainer_id_app_user_profiles_id_fk",
           "tableFrom": "app_team_training_records",
           "tableTo": "app_user_profiles",
-          "columnsFrom": [
-            "trainer_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["trainer_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -12168,13 +11450,7 @@
     "public.app_contract_status_enum": {
       "name": "app_contract_status_enum",
       "schema": "public",
-      "values": [
-        "draft",
-        "active",
-        "cancelled",
-        "expired",
-        "suspended"
-      ]
+      "values": ["draft", "active", "cancelled", "expired", "suspended"]
     },
     "public.app_document_type_enum": {
       "name": "app_document_type_enum",
@@ -12194,51 +11470,27 @@
     "public.app_gender_enum": {
       "name": "app_gender_enum",
       "schema": "public",
-      "values": [
-        "male",
-        "female"
-      ]
+      "values": ["male", "female"]
     },
     "public.app_importance_enum": {
       "name": "app_importance_enum",
       "schema": "public",
-      "values": [
-        "high",
-        "medium",
-        "low"
-      ]
+      "values": ["high", "medium", "low"]
     },
     "public.app_insurance_type_enum": {
       "name": "app_insurance_type_enum",
       "schema": "public",
-      "values": [
-        "life",
-        "health",
-        "auto",
-        "prenatal",
-        "property",
-        "other"
-      ]
+      "values": ["life", "health", "auto", "prenatal", "property", "other"]
     },
     "public.app_invitation_status_enum": {
       "name": "app_invitation_status_enum",
       "schema": "public",
-      "values": [
-        "pending",
-        "used",
-        "expired",
-        "cancelled"
-      ]
+      "values": ["pending", "used", "expired", "cancelled"]
     },
     "public.app_meeting_status_enum": {
       "name": "app_meeting_status_enum",
       "schema": "public",
-      "values": [
-        "scheduled",
-        "completed",
-        "cancelled",
-        "rescheduled"
-      ]
+      "values": ["scheduled", "completed", "cancelled", "rescheduled"]
     },
     "public.app_meeting_type_enum": {
       "name": "app_meeting_type_enum",
@@ -12254,47 +11506,27 @@
     "public.app_payment_cycle_enum": {
       "name": "app_payment_cycle_enum",
       "schema": "public",
-      "values": [
-        "monthly",
-        "quarterly",
-        "semi-annual",
-        "annual",
-        "lump-sum"
-      ]
+      "values": ["monthly", "quarterly", "semi-annual", "annual", "lump-sum"]
     },
     "public.app_referral_status_enum": {
       "name": "app_referral_status_enum",
       "schema": "public",
-      "values": [
-        "active",
-        "inactive"
-      ]
+      "values": ["active", "inactive"]
     },
     "public.app_theme_enum": {
       "name": "app_theme_enum",
       "schema": "public",
-      "values": [
-        "light",
-        "dark"
-      ]
+      "values": ["light", "dark"]
     },
     "public.app_user_role_enum": {
       "name": "app_user_role_enum",
       "schema": "public",
-      "values": [
-        "agent",
-        "team_admin",
-        "system_admin"
-      ]
+      "values": ["agent", "team_admin", "system_admin"]
     },
     "public.public_content_status_enum": {
       "name": "public_content_status_enum",
       "schema": "public",
-      "values": [
-        "draft",
-        "published",
-        "archived"
-      ]
+      "values": ["draft", "published", "archived"]
     },
     "public.public_content_type_enum": {
       "name": "public_content_type_enum",
@@ -12310,32 +11542,17 @@
     "public.public_language_enum": {
       "name": "public_language_enum",
       "schema": "public",
-      "values": [
-        "ko",
-        "en",
-        "ja",
-        "zh"
-      ]
+      "values": ["ko", "en", "ja", "zh"]
     },
     "public.app_calendar_external_source_enum": {
       "name": "app_calendar_external_source_enum",
       "schema": "public",
-      "values": [
-        "local",
-        "google_calendar",
-        "outlook",
-        "apple_calendar"
-      ]
+      "values": ["local", "google_calendar", "outlook", "apple_calendar"]
     },
     "public.app_calendar_meeting_status_enum": {
       "name": "app_calendar_meeting_status_enum",
       "schema": "public",
-      "values": [
-        "scheduled",
-        "completed",
-        "cancelled",
-        "rescheduled"
-      ]
+      "values": ["scheduled", "completed", "cancelled", "rescheduled"]
     },
     "public.app_calendar_meeting_type_enum": {
       "name": "app_calendar_meeting_type_enum",
@@ -12351,13 +11568,7 @@
     "public.app_calendar_recurrence_type_enum": {
       "name": "app_calendar_recurrence_type_enum",
       "schema": "public",
-      "values": [
-        "none",
-        "daily",
-        "weekly",
-        "monthly",
-        "yearly"
-      ]
+      "values": ["none", "daily", "weekly", "monthly", "yearly"]
     },
     "public.app_calendar_reminder_type_enum": {
       "name": "app_calendar_reminder_type_enum",
@@ -12385,45 +11596,22 @@
     "public.app_calendar_view_enum": {
       "name": "app_calendar_view_enum",
       "schema": "public",
-      "values": [
-        "month",
-        "week",
-        "day",
-        "agenda"
-      ]
+      "values": ["month", "week", "day", "agenda"]
     },
     "public.app_client_contact_method_enum": {
       "name": "app_client_contact_method_enum",
       "schema": "public",
-      "values": [
-        "phone",
-        "email",
-        "kakao",
-        "sms",
-        "in_person",
-        "video_call"
-      ]
+      "values": ["phone", "email", "kakao", "sms", "in_person", "video_call"]
     },
     "public.app_client_data_access_log_type_enum": {
       "name": "app_client_data_access_log_type_enum",
       "schema": "public",
-      "values": [
-        "view",
-        "edit",
-        "export",
-        "share",
-        "delete"
-      ]
+      "values": ["view", "edit", "export", "share", "delete"]
     },
     "public.app_client_privacy_level_enum": {
       "name": "app_client_privacy_level_enum",
       "schema": "public",
-      "values": [
-        "public",
-        "restricted",
-        "private",
-        "confidential"
-      ]
+      "values": ["public", "restricted", "private", "confidential"]
     },
     "public.app_client_source_enum": {
       "name": "app_client_source_enum",
@@ -12473,11 +11661,7 @@
     "public.app_dashboard_goal_period_enum": {
       "name": "app_dashboard_goal_period_enum",
       "schema": "public",
-      "values": [
-        "monthly",
-        "quarterly",
-        "yearly"
-      ]
+      "values": ["monthly", "quarterly", "yearly"]
     },
     "public.app_dashboard_goal_type_enum": {
       "name": "app_dashboard_goal_type_enum",
@@ -12493,23 +11677,12 @@
     "public.app_dashboard_metric_period_enum": {
       "name": "app_dashboard_metric_period_enum",
       "schema": "public",
-      "values": [
-        "daily",
-        "weekly",
-        "monthly",
-        "quarterly",
-        "yearly"
-      ]
+      "values": ["daily", "weekly", "monthly", "quarterly", "yearly"]
     },
     "public.app_dashboard_notification_priority_enum": {
       "name": "app_dashboard_notification_priority_enum",
       "schema": "public",
-      "values": [
-        "low",
-        "normal",
-        "high",
-        "urgent"
-      ]
+      "values": ["low", "normal", "high", "urgent"]
     },
     "public.app_dashboard_notification_type_enum": {
       "name": "app_dashboard_notification_type_enum",
@@ -12567,12 +11740,7 @@
     "public.app_influencer_data_source_enum": {
       "name": "app_influencer_data_source_enum",
       "schema": "public",
-      "values": [
-        "direct_input",
-        "auto_calculated",
-        "imported",
-        "api_sync"
-      ]
+      "values": ["direct_input", "auto_calculated", "imported", "api_sync"]
     },
     "public.app_influencer_gift_type_enum": {
       "name": "app_influencer_gift_type_enum",
@@ -12618,13 +11786,7 @@
     "public.app_influencer_tier_enum": {
       "name": "app_influencer_tier_enum",
       "schema": "public",
-      "values": [
-        "bronze",
-        "silver",
-        "gold",
-        "platinum",
-        "diamond"
-      ]
+      "values": ["bronze", "silver", "gold", "platinum", "diamond"]
     },
     "public.invitation_source": {
       "name": "invitation_source",
@@ -12641,32 +11803,17 @@
     "public.invitation_type": {
       "name": "invitation_type",
       "schema": "public",
-      "values": [
-        "standard",
-        "premium",
-        "team_admin",
-        "beta_tester"
-      ]
+      "values": ["standard", "premium", "team_admin", "beta_tester"]
     },
     "public.usage_action": {
       "name": "usage_action",
       "schema": "public",
-      "values": [
-        "viewed",
-        "clicked",
-        "registered",
-        "completed"
-      ]
+      "values": ["viewed", "clicked", "registered", "completed"]
     },
     "public.waitlist_status": {
       "name": "waitlist_status",
       "schema": "public",
-      "values": [
-        "waiting",
-        "invited",
-        "registered",
-        "rejected"
-      ]
+      "values": ["waiting", "invited", "registered", "rejected"]
     },
     "public.app_network_analysis_type_enum": {
       "name": "app_network_analysis_type_enum",
@@ -12694,46 +11841,22 @@
     "public.app_network_node_type_enum": {
       "name": "app_network_node_type_enum",
       "schema": "public",
-      "values": [
-        "client",
-        "prospect",
-        "influencer",
-        "partner",
-        "external"
-      ]
+      "values": ["client", "prospect", "influencer", "partner", "external"]
     },
     "public.app_notification_channel_enum": {
       "name": "app_notification_channel_enum",
       "schema": "public",
-      "values": [
-        "in_app",
-        "email",
-        "sms",
-        "push",
-        "kakao"
-      ]
+      "values": ["in_app", "email", "sms", "push", "kakao"]
     },
     "public.app_notification_priority_enum": {
       "name": "app_notification_priority_enum",
       "schema": "public",
-      "values": [
-        "low",
-        "normal",
-        "high",
-        "urgent"
-      ]
+      "values": ["low", "normal", "high", "urgent"]
     },
     "public.app_notification_status_enum": {
       "name": "app_notification_status_enum",
       "schema": "public",
-      "values": [
-        "pending",
-        "sent",
-        "delivered",
-        "read",
-        "failed",
-        "cancelled"
-      ]
+      "values": ["pending", "sent", "delivered", "read", "failed", "cancelled"]
     },
     "public.app_notification_type_enum": {
       "name": "app_notification_type_enum",
@@ -12791,13 +11914,7 @@
     "public.app_pipeline_view_type_enum": {
       "name": "app_pipeline_view_type_enum",
       "schema": "public",
-      "values": [
-        "kanban",
-        "list",
-        "table",
-        "timeline",
-        "funnel"
-      ]
+      "values": ["kanban", "list", "table", "timeline", "funnel"]
     },
     "public.app_chart_type_enum": {
       "name": "app_chart_type_enum",
@@ -12816,13 +11933,7 @@
     "public.app_report_format_enum": {
       "name": "app_report_format_enum",
       "schema": "public",
-      "values": [
-        "pdf",
-        "excel",
-        "csv",
-        "json",
-        "html"
-      ]
+      "values": ["pdf", "excel", "csv", "json", "html"]
     },
     "public.app_report_frequency_enum": {
       "name": "app_report_frequency_enum",
@@ -12839,13 +11950,7 @@
     "public.app_report_status_enum": {
       "name": "app_report_status_enum",
       "schema": "public",
-      "values": [
-        "pending",
-        "generating",
-        "completed",
-        "failed",
-        "cancelled"
-      ]
+      "values": ["pending", "generating", "completed", "failed", "cancelled"]
     },
     "public.app_report_type_enum": {
       "name": "app_report_type_enum",
@@ -12876,32 +11981,17 @@
     "public.app_settings_integration_status": {
       "name": "app_settings_integration_status",
       "schema": "public",
-      "values": [
-        "active",
-        "inactive",
-        "error",
-        "pending"
-      ]
+      "values": ["active", "inactive", "error", "pending"]
     },
     "public.app_settings_integration_type": {
       "name": "app_settings_integration_type",
       "schema": "public",
-      "values": [
-        "kakao_talk",
-        "google_calendar",
-        "email",
-        "sms"
-      ]
+      "values": ["kakao_talk", "google_calendar", "email", "sms"]
     },
     "public.app_settings_notification_channel": {
       "name": "app_settings_notification_channel",
       "schema": "public",
-      "values": [
-        "email",
-        "sms",
-        "push",
-        "kakao"
-      ]
+      "values": ["email", "sms", "push", "kakao"]
     },
     "public.app_team_activity_type_enum": {
       "name": "app_team_activity_type_enum",
@@ -12920,20 +12010,12 @@
     "public.app_team_member_role_enum": {
       "name": "app_team_member_role_enum",
       "schema": "public",
-      "values": [
-        "member",
-        "manager",
-        "admin"
-      ]
+      "values": ["member", "manager", "admin"]
     },
     "public.app_team_member_status_enum": {
       "name": "app_team_member_status_enum",
       "schema": "public",
-      "values": [
-        "active",
-        "inactive",
-        "pending"
-      ]
+      "values": ["active", "inactive", "pending"]
     }
   },
   "schemas": {

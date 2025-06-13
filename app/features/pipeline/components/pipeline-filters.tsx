@@ -77,12 +77,12 @@ export function PipelineFilters({
         <CardContent>
           <RadioGroup
             value={selectedImportance}
-            onValueChange={(value) =>
+            onValueChange={value =>
               onImportanceChange(value as 'all' | 'high' | 'medium' | 'low')
             }
             className="space-y-3"
           >
-            {['all', 'high', 'medium', 'low'].map((importance) => (
+            {['all', 'high', 'medium', 'low'].map(importance => (
               <div key={importance} className="flex items-center space-x-2">
                 <RadioGroupItem
                   value={importance}
@@ -98,8 +98,8 @@ export function PipelineFilters({
                         importance === 'high'
                           ? 'bg-red-500'
                           : importance === 'medium'
-                          ? 'bg-yellow-500'
-                          : 'bg-blue-500'
+                            ? 'bg-yellow-500'
+                            : 'bg-blue-500'
                       }`}
                     />
                   )}
@@ -130,7 +130,7 @@ export function PipelineFilters({
                 <AccordionContent>
                   <RadioGroup
                     value={selectedReferrerId || 'all'}
-                    onValueChange={(value) =>
+                    onValueChange={value =>
                       onReferrerChange(value === 'all' ? null : value)
                     }
                     className="space-y-3"
@@ -139,7 +139,7 @@ export function PipelineFilters({
                       <RadioGroupItem value="all" id="referrer-all" />
                       <Label htmlFor="referrer-all">모든 고객</Label>
                     </div>
-                    {referrers.map((referrer) => (
+                    {referrers.map(referrer => (
                       <div
                         key={referrer.id}
                         className="flex items-center space-x-2"

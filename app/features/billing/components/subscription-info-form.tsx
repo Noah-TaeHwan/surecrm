@@ -131,7 +131,7 @@ export function SubscriptionInfoForm({
     field: keyof SubscriptionInfoData,
     value: string | boolean
   ) => {
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
       [field]: value,
     }));
@@ -153,7 +153,7 @@ export function SubscriptionInfoForm({
     ];
 
     let hasErrors = false;
-    requiredFields.forEach((field) => {
+    requiredFields.forEach(field => {
       if (!formData[field] || (formData[field] as string).trim() === '') {
         validateField(field, '');
         hasErrors = true;
@@ -235,7 +235,7 @@ export function SubscriptionInfoForm({
                     type="text"
                     placeholder="홍길동"
                     value={formData.fullName}
-                    onChange={(e) =>
+                    onChange={e =>
                       handleInputChange('fullName', e.target.value)
                     }
                     className={`pl-10 ${
@@ -260,7 +260,7 @@ export function SubscriptionInfoForm({
                     type="tel"
                     placeholder="010-1234-5678"
                     value={formData.phone}
-                    onChange={(e) => handleInputChange('phone', e.target.value)}
+                    onChange={e => handleInputChange('phone', e.target.value)}
                     className={`pl-10 ${
                       errors.phone ? 'border-destructive' : ''
                     }`}
@@ -284,7 +284,7 @@ export function SubscriptionInfoForm({
                   type="email"
                   placeholder="hong@example.com"
                   value={formData.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
+                  onChange={e => handleInputChange('email', e.target.value)}
                   className={`pl-10 ${
                     errors.email ? 'border-destructive' : ''
                   }`}
@@ -322,7 +322,7 @@ export function SubscriptionInfoForm({
                     type="text"
                     placeholder="(주)보험설계사무소"
                     value={formData.companyName}
-                    onChange={(e) =>
+                    onChange={e =>
                       handleInputChange('companyName', e.target.value)
                     }
                     className={`pl-10 ${
@@ -349,7 +349,7 @@ export function SubscriptionInfoForm({
                     type="text"
                     placeholder="보험설계사"
                     value={formData.position}
-                    onChange={(e) =>
+                    onChange={e =>
                       handleInputChange('position', e.target.value)
                     }
                     className="pl-10"
@@ -388,7 +388,7 @@ export function SubscriptionInfoForm({
                       type="text"
                       placeholder="123-45-67890"
                       value={formData.businessNumber}
-                      onChange={(e) =>
+                      onChange={e =>
                         handleInputChange('businessNumber', e.target.value)
                       }
                     />
@@ -405,7 +405,7 @@ export function SubscriptionInfoForm({
                         type="text"
                         placeholder="서울시 강남구 테헤란로 123"
                         value={formData.address}
-                        onChange={(e) =>
+                        onChange={e =>
                           handleInputChange('address', e.target.value)
                         }
                         className="pl-10"
@@ -432,7 +432,7 @@ export function SubscriptionInfoForm({
                 <Checkbox
                   id="agreeToTerms"
                   checked={formData.agreeToTerms}
-                  onCheckedChange={(checked) =>
+                  onCheckedChange={checked =>
                     handleInputChange('agreeToTerms', checked as boolean)
                   }
                 />
@@ -458,7 +458,7 @@ export function SubscriptionInfoForm({
                 <Checkbox
                   id="agreeToPrivacy"
                   checked={formData.agreeToPrivacy}
-                  onCheckedChange={(checked) =>
+                  onCheckedChange={checked =>
                     handleInputChange('agreeToPrivacy', checked as boolean)
                   }
                 />
@@ -484,7 +484,7 @@ export function SubscriptionInfoForm({
                 <Checkbox
                   id="agreeToMarketing"
                   checked={formData.agreeToMarketing}
-                  onCheckedChange={(checked) =>
+                  onCheckedChange={checked =>
                     handleInputChange('agreeToMarketing', checked as boolean)
                   }
                 />

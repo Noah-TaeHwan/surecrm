@@ -432,7 +432,7 @@ export async function action({ request }: Route.ActionArgs) {
 
           // 현재 월 미팅들 조회하여 해당 미팅 찾기
           const meetings = await getMeetingsByMonth(agentId, year, month);
-          const targetMeeting = meetings.find((m) => m.id === meetingId);
+          const targetMeeting = meetings.find(m => m.id === meetingId);
 
           let googleEventId = null;
           if (targetMeeting?.syncInfo?.externalEventId) {

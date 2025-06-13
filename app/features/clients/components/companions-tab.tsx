@@ -54,7 +54,7 @@ export function CompanionsTab({
           {/* 동반자 목록 */}
           <div className="space-y-4">
             {consultationCompanions && consultationCompanions.length > 0 ? (
-              consultationCompanions.map((companion) => (
+              consultationCompanions.map(companion => (
                 <div
                   key={companion.id}
                   className="p-4 bg-muted/20 rounded-lg border border-border/40"

@@ -128,12 +128,12 @@ export function Header({
       });
 
       // 성공 시 로컬 상태 업데이트
-      setNotifications((prev) =>
-        prev.map((n) =>
+      setNotifications(prev =>
+        prev.map(n =>
           n.id === id ? { ...n, readAt: new Date().toISOString() } : n
         )
       );
-      setUnreadCount((prev) => Math.max(0, prev - 1));
+      setUnreadCount(prev => Math.max(0, prev - 1));
     } catch (error) {
       console.error('알림 읽음 처리 실패:', error);
     }
@@ -151,8 +151,8 @@ export function Header({
       });
 
       // 성공 시 로컬 상태 업데이트
-      setNotifications((prev) =>
-        prev.map((n) => ({ ...n, readAt: new Date().toISOString() }))
+      setNotifications(prev =>
+        prev.map(n => ({ ...n, readAt: new Date().toISOString() }))
       );
       setUnreadCount(0);
     } catch (error) {
@@ -294,7 +294,7 @@ export function Header({
                       new Date(a.createdAt).getTime()
                     );
                   })
-                  .map((notification) => (
+                  .map(notification => (
                     <DropdownMenuItem
                       key={notification.id}
                       className={cn(
@@ -386,8 +386,8 @@ export function Header({
                     {currentUser?.name
                       ? currentUser.name.charAt(0).toUpperCase()
                       : currentUser?.email
-                      ? currentUser.email.charAt(0).toUpperCase()
-                      : '사'}
+                        ? currentUser.email.charAt(0).toUpperCase()
+                        : '사'}
                   </AvatarFallback>
                 )}
               </Avatar>

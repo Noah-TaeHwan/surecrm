@@ -179,7 +179,7 @@ export function ClientOverviewTab({
                 <Switch
                   id="show-confidential-overview"
                   checked={showConfidentialData}
-                  onCheckedChange={(checked) => {
+                  onCheckedChange={checked => {
                     setShowConfidentialData(checked);
                     handleDataAccess(
                       checked ? '기밀정보 표시' : '기밀정보 숨김',
@@ -234,7 +234,7 @@ export function ClientOverviewTab({
           <CardContent>
             <div className="space-y-4">
               {/* 최근 미팅 활동 */}
-              {meetings.slice(0, 2).map((meeting) => {
+              {meetings.slice(0, 2).map(meeting => {
                 const config = meetingStatusConfig[meeting.status];
                 return (
                   <div
@@ -331,7 +331,7 @@ export function ClientOverviewTab({
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {insuranceInfo.map((insurance) => {
+            {insuranceInfo.map(insurance => {
               const config = insuranceTypeConfig[insurance.type] || {
                 label: insurance.type,
                 icon: <FileTextIcon className="h-4 w-4" />,

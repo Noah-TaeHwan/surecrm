@@ -71,8 +71,8 @@ export const Marquee = ({
               ? 'animate-marquee-vertical-reverse'
               : 'animate-marquee-reverse'
             : vertical
-            ? 'animate-marquee-vertical'
-            : 'animate-marquee'
+              ? 'animate-marquee-vertical'
+              : 'animate-marquee'
         )}
         style={{
           ['--duration' as string]: `${duration}s`,
@@ -91,8 +91,8 @@ export const Marquee = ({
               ? 'animate-marquee-vertical-reverse'
               : 'animate-marquee-reverse'
             : vertical
-            ? 'animate-marquee-vertical'
-            : 'animate-marquee'
+              ? 'animate-marquee-vertical'
+              : 'animate-marquee'
         )}
         style={{
           ['--duration' as string]: `${duration}s`,

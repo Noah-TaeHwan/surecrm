@@ -178,7 +178,7 @@ export function ClientSalesInfoForm({
                 <Checkbox
                   id="salesInfoConsent"
                   checked={salesInfoConsent}
-                  onCheckedChange={(checked) => {
+                  onCheckedChange={checked => {
                     setSalesInfoConsent(checked === true);
                     handleSecurityAudit(
                       'sales_consent_changed',
@@ -220,7 +220,7 @@ export function ClientSalesInfoForm({
                   )}
                 </FormLabel>
                 <Select
-                  onValueChange={(value) =>
+                  onValueChange={value =>
                     handleFieldChange('currentStageId', value, field.onChange)
                   }
                   defaultValue={field.value}
@@ -231,7 +231,7 @@ export function ClientSalesInfoForm({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {stageOptions.map((option) => (
+                    {stageOptions.map(option => (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}
                         {getStageSensitivity(option.value) && ' 🔒'}
@@ -256,7 +256,7 @@ export function ClientSalesInfoForm({
               <FormItem>
                 <FormLabel>중요도 *</FormLabel>
                 <Select
-                  onValueChange={(value) =>
+                  onValueChange={value =>
                     handleFieldChange('importance', value, field.onChange)
                   }
                   defaultValue={field.value}
@@ -267,7 +267,7 @@ export function ClientSalesInfoForm({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {importanceOptions.map((option) => (
+                    {importanceOptions.map(option => (
                       <SelectItem key={option.value} value={option.value}>
                         <div className="flex items-center gap-2">
                           <StarIcon className="h-3 w-3" />
@@ -295,7 +295,7 @@ export function ClientSalesInfoForm({
                   )}
                 </FormLabel>
                 <Select
-                  onValueChange={(value) =>
+                  onValueChange={value =>
                     handleFieldChange('referredById', value, field.onChange)
                   }
                   defaultValue={field.value}
@@ -313,7 +313,7 @@ export function ClientSalesInfoForm({
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="">없음</SelectItem>
-                    {referrers.map((referrer) => (
+                    {referrers.map(referrer => (
                       <SelectItem key={referrer.id} value={referrer.id}>
                         <div className="flex items-center gap-2">
                           {shouldMaskSalesField('referredById')
@@ -371,7 +371,7 @@ export function ClientSalesInfoForm({
                         ? maskAmount(field.value)
                         : field.value || ''
                     }
-                    onChange={(e) => {
+                    onChange={e => {
                       const value = e.target.value
                         ? parseInt(e.target.value.replace(/,/g, ''))
                         : undefined;
@@ -418,7 +418,7 @@ export function ClientSalesInfoForm({
           </div>
           <TagManager
             tags={tags}
-            onTagsChange={(newTags) => {
+            onTagsChange={newTags => {
               handleSecurityAudit('tags_modified', `count:${newTags.length}`);
               onTagsChange(newTags);
             }}
@@ -457,7 +457,7 @@ export function ClientSalesInfoForm({
                       ? '기밀 메모 - 민감한 영업정보 포함...'
                       : '고객에 대한 특이사항이나 중요한 정보를 입력하세요...'
                   }
-                  onChange={(e) =>
+                  onChange={e =>
                     handleFieldChange('notes', e.target.value, field.onChange)
                   }
                 />

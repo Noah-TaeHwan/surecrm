@@ -33,7 +33,7 @@ export function CheckboxGroup({
       <div
         className={`grid grid-cols-1 md:${gridCols} gap-4 p-4 ${bgColor} rounded-lg border ${borderColor}`}
       >
-        {items.map((item) => (
+        {items.map(item => (
           <div key={item.key} className="flex items-center space-x-3">
             <span className="text-lg">{item.icon}</span>
             <label className="flex items-center space-x-2 text-sm cursor-pointer">
@@ -41,7 +41,7 @@ export function CheckboxGroup({
                 type="checkbox"
                 className="rounded border-border"
                 checked={values[item.key] || false}
-                onChange={(e) => onChange(item.key, e.target.checked)}
+                onChange={e => onChange(item.key, e.target.checked)}
               />
               <span>{item.label}</span>
             </label>

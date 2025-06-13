@@ -70,8 +70,8 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
 
       if (result.success) {
         // 로컬 상태 업데이트
-        setNotifications((prev) =>
-          prev.map((notification) =>
+        setNotifications(prev =>
+          prev.map(notification =>
             notification.id === notificationId
               ? {
                   ...notification,
@@ -83,7 +83,7 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
         );
 
         // 읽지 않은 알림 수 감소
-        setUnreadCount((prev) => Math.max(0, prev - 1));
+        setUnreadCount(prev => Math.max(0, prev - 1));
       }
     } catch (err) {
       console.error('알림 읽음 처리 실패:', err);
@@ -105,8 +105,8 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
 
       if (result.success) {
         // 로컬 상태 업데이트
-        setNotifications((prev) =>
-          prev.map((notification) => ({
+        setNotifications(prev =>
+          prev.map(notification => ({
             ...notification,
             readAt: new Date(),
             status: 'read' as const,

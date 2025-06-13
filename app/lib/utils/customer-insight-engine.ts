@@ -198,9 +198,9 @@ class CustomerInsightEngine {
     this.dataCollectors.push(new ErrorBehaviorCollector());
 
     // 모든 데이터 수집기 활성화
-    this.dataCollectors.forEach((collector) => {
+    this.dataCollectors.forEach(collector => {
       collector.start(this.config.dataCollectionFrequency);
-      collector.onDataCollected = (data) => this.processCollectedData(data);
+      collector.onDataCollected = data => this.processCollectedData(data);
     });
   }
 
@@ -690,7 +690,7 @@ class CustomerInsightEngine {
 
   public stopAnalysis(): void {
     this.isAnalyzing = false;
-    this.dataCollectors.forEach((collector) => collector.stop());
+    this.dataCollectors.forEach(collector => collector.stop());
   }
 }
 

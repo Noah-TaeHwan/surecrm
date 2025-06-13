@@ -27,7 +27,7 @@ export function TextareaField({
         rows={rows}
         placeholder={placeholder}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={e => onChange(e.target.value)}
       />
     </div>
   );
@@ -65,7 +65,7 @@ export function BoxedTextareaField({
           rows={props.rows || 3}
           placeholder={props.placeholder}
           value={props.value}
-          onChange={(e) => props.onChange(e.target.value)}
+          onChange={e => props.onChange(e.target.value)}
         />
       </div>
     </div>

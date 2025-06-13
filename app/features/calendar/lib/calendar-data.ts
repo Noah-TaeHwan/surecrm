@@ -102,7 +102,7 @@ export async function getMeetingsByMonth(
 
     // 각 미팅의 체크리스트, 노트, 동기화 정보를 병렬로 조회
     const meetingsWithDetails = await Promise.all(
-      dbMeetings.map(async (row) => {
+      dbMeetings.map(async row => {
         const meeting = row.meeting;
         const scheduledTime = new Date(meeting.scheduledAt);
         const duration = meeting.duration; // 이미 분 단위로 저장됨
@@ -146,12 +146,12 @@ export async function getMeetingsByMonth(
           location: meeting.location || '',
           description: meeting.description || undefined,
           status: meeting.status as CalendarMeeting['status'],
-          checklist: checklists.map((item) => ({
+          checklist: checklists.map(item => ({
             id: item.id,
             text: item.text,
             completed: item.completed,
           })),
-          notes: notes.map((note) => ({
+          notes: notes.map(note => ({
             id: note.id,
             content: note.content,
             createdAt: note.createdAt.toISOString(),
@@ -219,7 +219,7 @@ export async function getMeetingsByDateRange(
 
     // 각 미팅의 체크리스트, 노트, 동기화 정보를 병렬로 조회
     const meetingsWithDetails = await Promise.all(
-      dbMeetings.map(async (row) => {
+      dbMeetings.map(async row => {
         const meeting = row.meeting;
         const scheduledTime = new Date(meeting.scheduledAt);
         const duration = meeting.duration; // 이미 분 단위로 저장됨
@@ -263,12 +263,12 @@ export async function getMeetingsByDateRange(
           location: meeting.location || '',
           description: meeting.description || undefined,
           status: meeting.status as CalendarMeeting['status'],
-          checklist: checklists.map((item) => ({
+          checklist: checklists.map(item => ({
             id: item.id,
             text: item.text,
             completed: item.completed,
           })),
-          notes: notes.map((note) => ({
+          notes: notes.map(note => ({
             id: note.id,
             content: note.content,
             createdAt: note.createdAt.toISOString(),
@@ -322,7 +322,7 @@ export async function getClientsByAgent(
       .where(eq(clients.agentId, agentId))
       .orderBy(asc(clients.fullName));
 
-    return dbClients.map((client) => ({
+    return dbClients.map(client => ({
       id: client.id,
       name: client.name,
       phone: client.phone || undefined,

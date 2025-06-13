@@ -228,7 +228,7 @@ export async function completeOTPVerification(
       // 기존 등록 로직이 성공한 후
       // 웰컴 이메일 발송 (비동기, 실패해도 등록은 완료)
       triggerWelcomeEmailOnSignup(signUpData.email, signUpData.fullName).catch(
-        (error) => {
+        error => {
           console.error('웰컴 이메일 발송 실패 (무시):', error);
         }
       );
@@ -338,7 +338,7 @@ export async function completeUserRegistration(
     // 기존 등록 로직이 성공한 후
     // 웰컴 이메일 발송 (비동기, 실패해도 등록은 완료)
     triggerWelcomeEmailOnSignup(signUpData.email, signUpData.fullName).catch(
-      (error) => {
+      error => {
         console.error('웰컴 이메일 발송 실패 (무시):', error);
       }
     );

@@ -29,7 +29,7 @@ export function NotificationFilters({
               <Input
                 placeholder="알림 검색..."
                 value={searchQuery}
-                onChange={(e) => onSearchChange(e.target.value)}
+                onChange={e => onSearchChange(e.target.value)}
                 className="pl-10 bg-background border-border"
               />
             </div>
@@ -39,7 +39,7 @@ export function NotificationFilters({
           <div className="flex gap-2">
             <Select
               value={statusFilter}
-              onValueChange={(value) => onStatusFilterChange(value as any)}
+              onValueChange={value => onStatusFilterChange(value as any)}
             >
               <SelectTrigger className="w-32 bg-background border-border">
                 <SelectValue placeholder="상태" />
@@ -57,7 +57,7 @@ export function NotificationFilters({
 
             <Select
               value={typeFilter}
-              onValueChange={(value) => onTypeFilterChange(value as any)}
+              onValueChange={value => onTypeFilterChange(value as any)}
             >
               <SelectTrigger className="w-32 bg-background border-border">
                 <SelectValue placeholder="유형" />

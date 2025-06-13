@@ -42,7 +42,7 @@ export const ClientValidationSchema = z.object({
   phone: z
     .string()
     .optional()
-    .refine((val) => {
+    .refine(val => {
       if (!val || val.trim() === '') return true; // 빈 값 허용
       return /^(01[016789])-?(\d{3,4})-?(\d{4})$/.test(val); // 값이 있으면 형식 검증
     }, '올바른 전화번호 형식이 아닙니다 (예: 010-1234-5678)'),
@@ -50,7 +50,7 @@ export const ClientValidationSchema = z.object({
     .string()
     .optional()
     .refine(
-      (val) => !val || z.string().email().safeParse(val).success,
+      val => !val || z.string().email().safeParse(val).success,
       '올바른 이메일 형식이 아닙니다'
     ),
   address: z.string().max(200, '주소는 200자 이내로 입력해주세요').optional(),
@@ -58,7 +58,7 @@ export const ClientValidationSchema = z.object({
   height: z
     .string()
     .optional()
-    .refine((val) => {
+    .refine(val => {
       if (!val || val.trim() === '') return true;
       const height = parseInt(val);
       return !isNaN(height) && height >= 100 && height <= 250;
@@ -66,7 +66,7 @@ export const ClientValidationSchema = z.object({
   weight: z
     .string()
     .optional()
-    .refine((val) => {
+    .refine(val => {
       if (!val || val.trim() === '') return true;
       const weight = parseInt(val);
       return !isNaN(weight) && weight >= 30 && weight <= 200;
@@ -301,7 +301,7 @@ export function validateForm(editFormData: EditFormData): {
       return {
         isValid: false,
         errors: error.errors.map(
-          (err) => `${err.path.join('.')}: ${err.message}`
+          err => `${err.path.join('.')}: ${err.message}`
         ),
       };
     }
@@ -333,7 +333,7 @@ export function validateClientForm(formData: EditFormData): string[] {
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return error.errors.map((err) => err.message);
+      return error.errors.map(err => err.message);
     }
   }
 

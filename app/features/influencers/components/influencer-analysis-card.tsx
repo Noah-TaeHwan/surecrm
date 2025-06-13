@@ -48,7 +48,7 @@ function renderReferralPatternChart(
     );
   }
 
-  const maxCount = Math.max(...trends.map((t) => t.count));
+  const maxCount = Math.max(...trends.map(t => t.count));
 
   return (
     <div className="space-y-2">
@@ -100,10 +100,10 @@ function renderNetworkStrength(strength: number, depth: number, width: number) {
     strength >= 8
       ? 'text-green-600'
       : strength >= 6
-      ? 'text-blue-600'
-      : strength >= 4
-      ? 'text-yellow-600'
-      : 'text-red-600';
+        ? 'text-blue-600'
+        : strength >= 4
+          ? 'text-yellow-600'
+          : 'text-red-600';
 
   return (
     <div className="space-y-3">

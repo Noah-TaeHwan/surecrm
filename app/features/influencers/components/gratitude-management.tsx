@@ -173,7 +173,7 @@ export function GratitudeManagement({
 
   // 감사 표현이 필요한 소개자들 필터링 (우선순위 기준)
   const needsGratitude = influencers
-    .filter((influencer) => {
+    .filter(influencer => {
       const daysSinceLastGratitude = influencer.lastGratitude
         ? Math.floor(
             (Date.now() - new Date(influencer.lastGratitude).getTime()) /
@@ -182,7 +182,7 @@ export function GratitudeManagement({
         : 365;
       return daysSinceLastGratitude > 30; // 30일 이상 지난 경우
     })
-    .map((influencer) => ({
+    .map(influencer => ({
       ...influencer,
       priority: calculateGratitudePriority(influencer),
       daysSinceLastGratitude: influencer.lastGratitude
@@ -201,7 +201,7 @@ export function GratitudeManagement({
 
   // 감사 히스토리 필터링
   const filteredHistory = gratitudeHistory
-    .filter((item) => {
+    .filter(item => {
       if (statusFilter !== 'all' && item.status !== statusFilter) return false;
       if (typeFilter !== 'all' && item.type !== typeFilter) return false;
       if (
@@ -219,10 +219,9 @@ export function GratitudeManagement({
 
   // 통계 계산
   const stats = {
-    totalSent: gratitudeHistory.filter((item) => item.status === 'sent').length,
-    totalScheduled: gratitudeHistory.filter(
-      (item) => item.status === 'scheduled'
-    ).length,
+    totalSent: gratitudeHistory.filter(item => item.status === 'sent').length,
+    totalScheduled: gratitudeHistory.filter(item => item.status === 'scheduled')
+      .length,
     totalNeedsGratitude: needsGratitude.length,
     totalInfluencers: influencers.length,
   };
@@ -329,13 +328,13 @@ export function GratitudeManagement({
             <CardContent>
               {needsGratitude.length > 0 ? (
                 <div className="space-y-3">
-                  {needsGratitude.slice(0, 10).map((influencer) => {
+                  {needsGratitude.slice(0, 10).map(influencer => {
                     const urgencyLevel =
                       influencer.daysSinceLastGratitude > 90
                         ? 'high'
                         : influencer.daysSinceLastGratitude > 60
-                        ? 'medium'
-                        : 'low';
+                          ? 'medium'
+                          : 'low';
 
                     return (
                       <div
@@ -502,7 +501,7 @@ export function GratitudeManagement({
                   <Input
                     placeholder="소개자 검색..."
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={e => setSearchQuery(e.target.value)}
                     className="pl-9"
                   />
                 </div>
@@ -544,7 +543,7 @@ export function GratitudeManagement({
             <CardContent>
               {filteredHistory.length > 0 ? (
                 <div className="space-y-3 max-h-96 overflow-y-auto">
-                  {filteredHistory.map((item) => {
+                  {filteredHistory.map(item => {
                     const typeInfo = getGratitudeTypeInfo(item.type);
                     const statusInfo = getStatusInfo(item.status);
 

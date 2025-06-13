@@ -240,7 +240,10 @@ export class TossPaymentsAPI {
 }
 
 export class TossPaymentError extends Error {
-  constructor(public code: string, message: string) {
+  constructor(
+    public code: string,
+    message: string
+  ) {
     super(message);
     this.name = 'TossPaymentError';
   }

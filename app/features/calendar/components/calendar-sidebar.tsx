@@ -60,7 +60,7 @@ export function CalendarSidebar({
   };
 
   const today = new Date();
-  const todayMeetings = meetings.filter((m) => m.date === formatDate(today));
+  const todayMeetings = meetings.filter(m => m.date === formatDate(today));
 
   // 이번 주 통계
   const weekStart = new Date(today);
@@ -68,7 +68,7 @@ export function CalendarSidebar({
   const weekEnd = new Date(weekStart);
   weekEnd.setDate(weekStart.getDate() + 6);
 
-  const thisWeekMeetings = meetings.filter((meeting) => {
+  const thisWeekMeetings = meetings.filter(meeting => {
     const meetingDate = new Date(meeting.date);
     return meetingDate >= weekStart && meetingDate <= weekEnd;
   });
@@ -76,15 +76,15 @@ export function CalendarSidebar({
   // 🎯 의미있는 비즈니스 KPI 계산
   const totalThisWeek = thisWeekMeetings.length;
   const completedMeetings = thisWeekMeetings.filter(
-    (m) => m.status === 'completed'
+    m => m.status === 'completed'
   ).length;
   const contractMeetings = thisWeekMeetings.filter(
-    (m) => m.type === 'contract_signing' || m.type === 'contract_review'
+    m => m.type === 'contract_signing' || m.type === 'contract_review'
   ).length;
 
   // 계약 전환율 계산 (초회 상담 → 계약 체결)
   const consultationMeetings = thisWeekMeetings.filter(
-    (m) => m.type === 'first_consultation'
+    m => m.type === 'first_consultation'
   ).length;
   const contractSuccessRate =
     consultationMeetings > 0
@@ -102,10 +102,10 @@ export function CalendarSidebar({
 
   // 우선순위별 분포 (priority 필드 활용)
   const urgentMeetings = thisWeekMeetings.filter(
-    (m) => (m as any)?.priority === 'urgent'
+    m => (m as any)?.priority === 'urgent'
   ).length;
   const highPriorityMeetings = thisWeekMeetings.filter(
-    (m) => (m as any)?.priority === 'high'
+    m => (m as any)?.priority === 'high'
   ).length;
 
   // 미팅 유형별 통계 (구글에서 가져온 일정과 SureCRM 생성 일정 모두 포함, 의미있는 것만)
@@ -116,19 +116,19 @@ export function CalendarSidebar({
       koreanName:
         meetingTypeKoreanMap[type as keyof typeof meetingTypeKoreanMap] || type,
       color,
-      count: thisWeekMeetings.filter((m) => m.type === type).length,
+      count: thisWeekMeetings.filter(m => m.type === type).length,
     }))
-    .filter((stat) => stat.count > 0) // 0개인 항목 제외
+    .filter(stat => stat.count > 0) // 0개인 항목 제외
     .sort((a, b) => b.count - a.count); // 많은 순으로 정렬
 
   // 필터 관련 함수 (구글 관련 타입 제외)
   const allMeetingTypes = Object.keys(meetingTypeColors).filter(
-    (type) => type !== 'google' && type !== 'google_imported'
+    type => type !== 'google' && type !== 'google_imported'
   );
 
   const toggleFilter = (type: string) => {
     if (filteredTypes.includes(type)) {
-      onFilterChange(filteredTypes.filter((t) => t !== type));
+      onFilterChange(filteredTypes.filter(t => t !== type));
     } else {
       onFilterChange([...filteredTypes, type]);
     }
@@ -173,7 +173,7 @@ export function CalendarSidebar({
                 )}
                 <div className="text-center p-2 bg-muted/50 rounded">
                   <div className="font-medium">
-                    {meetings.filter((m) => m.type === 'google').length}
+                    {meetings.filter(m => m.type === 'google').length}
                   </div>
                   <div className="text-muted-foreground">동기화</div>
                 </div>
@@ -246,7 +246,7 @@ export function CalendarSidebar({
               </div>
 
               <div className="space-y-2 max-h-64 overflow-y-auto">
-                {todayMeetings.map((meeting) => (
+                {todayMeetings.map(meeting => (
                   <div
                     key={meeting.id}
                     className="p-3 border rounded-lg cursor-pointer hover:bg-accent/50 transition-colors"
@@ -360,7 +360,7 @@ export function CalendarSidebar({
                   <div className="text-sm font-medium text-muted-foreground">
                     주요 미팅 유형
                   </div>
-                  {meaningfulStats.slice(0, 3).map((stat) => (
+                  {meaningfulStats.slice(0, 3).map(stat => (
                     <div
                       key={stat.type}
                       className="flex items-center justify-between text-sm"
@@ -421,12 +421,10 @@ export function CalendarSidebar({
         </CardHeader>
         <CardContent className="pt-0">
           <div className="space-y-2">
-            {allMeetingTypes.map((type) => {
+            {allMeetingTypes.map(type => {
               const isChecked =
                 filteredTypes.length === 0 || filteredTypes.includes(type);
-              const meetingCount = meetings.filter(
-                (m) => m.type === type
-              ).length;
+              const meetingCount = meetings.filter(m => m.type === type).length;
               const koreanName =
                 meetingTypeKoreanMap[
                   type as keyof typeof meetingTypeKoreanMap

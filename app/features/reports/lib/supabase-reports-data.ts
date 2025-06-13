@@ -179,9 +179,9 @@ export async function getPerformanceData(
       .where(and(eq(clients.agentId, userId), eq(clients.isActive, true)));
 
     // JavaScript로 "제외됨" 단계 제외 (영업 파이프라인 페이지와 동일 로직)
-    const activeClientsCount = allActiveClientsData.filter((client) => {
+    const activeClientsCount = allActiveClientsData.filter(client => {
       const stage = pipelineStagesResult.find(
-        (s) => s.id === client.currentStageId
+        s => s.id === client.currentStageId
       );
       return stage && stage.name !== '제외됨';
     }).length;
@@ -363,7 +363,7 @@ export async function getPerformanceData(
 
     // "계약 완료" 단계 찾기
     const completedStage = userPipelineStages.find(
-      (stage) => stage.name === '계약 완료'
+      stage => stage.name === '계약 완료'
     );
 
     // 영업 기회가 있는 고객 수 (제외됨 단계 제외)
@@ -601,7 +601,7 @@ export async function getTopPerformers(
       )
       .limit(limit);
 
-    return performersData.map((performer) => {
+    return performersData.map(performer => {
       const conversionRate =
         performer.totalClients > 0
           ? (performer.activeClients / performer.totalClients) * 100

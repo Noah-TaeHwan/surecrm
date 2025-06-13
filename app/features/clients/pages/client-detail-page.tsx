@@ -259,7 +259,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
         .neq('id', clientId) // 현재 고객 제외
         .order('full_name');
 
-      availableReferrers = (otherClients || []).map((client) => ({
+      availableReferrers = (otherClients || []).map(client => ({
         id: client.id,
         name: client.full_name,
       }));
@@ -843,7 +843,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
           parseResult.gender
         ) {
           // 자동으로 생년월일과 성별 업데이트
-          setEditFormData((prev) => ({
+          setEditFormData(prev => ({
             ...prev,
             ssn: fullSsn,
             ssnFront,
@@ -853,7 +853,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
           }));
         } else {
           // 🎯 유효하지 않은 경우 - 서버 측 파싱 결과만 사용
-          setEditFormData((prev) => ({
+          setEditFormData(prev => ({
             ...prev,
             ssn: fullSsn,
             ssnFront,
@@ -863,7 +863,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
           }));
         }
       } catch (error) {
-        setEditFormData((prev) => ({
+        setEditFormData(prev => ({
           ...prev,
           ssn: fullSsn,
           ssnFront,
@@ -872,7 +872,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
         }));
       }
     } else {
-      setEditFormData((prev) => ({
+      setEditFormData(prev => ({
         ...prev,
         ssn: fullSsn,
         ssnFront,
@@ -1457,7 +1457,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
   }, [currentUser?.id]);
 
   const handleOpenTagModal = () => {
-    setSelectedTagIds(clientTags.map((tag) => tag.id));
+    setSelectedTagIds(clientTags.map(tag => tag.id));
     setShowTagModal(true);
     loadAvailableTags();
   };
@@ -1526,7 +1526,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
         setShowTagSuccessModal(true);
 
         // 새로 생성된 태그를 자동으로 선택상태로 만들기
-        setSelectedTagIds((prev) => [...prev, newTag.id]);
+        setSelectedTagIds(prev => [...prev, newTag.id]);
       } else {
         const error = await response.json();
         showError(
@@ -1724,7 +1724,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
               <ConsultationNotesTab
                 isEditing={isEditing}
                 notes={isEditing ? editFormData.notes : client?.notes || ''}
-                onNotesChange={(notes) =>
+                onNotesChange={notes =>
                   setEditFormData({
                     ...editFormData,
                     notes,
@@ -2014,7 +2014,7 @@ export async function action({ request, params }: Route.ActionArgs) {
 
         console.log(
           `📎 첨부파일 ${attachments.length}개 발견:`,
-          attachments.map((a) => a.fileName)
+          attachments.map(a => a.fileName)
         );
 
         const result = await createInsuranceContract(
@@ -2121,7 +2121,7 @@ export async function action({ request, params }: Route.ActionArgs) {
 
         console.log(
           `📎 수정 시 새 첨부파일 ${newAttachments.length}개 발견:`,
-          newAttachments.map((a) => a.fileName)
+          newAttachments.map(a => a.fileName)
         );
 
         const result = await updateInsuranceContractWithAttachments(

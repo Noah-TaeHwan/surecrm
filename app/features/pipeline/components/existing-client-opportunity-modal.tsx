@@ -164,7 +164,7 @@ export function ExistingClientOpportunityModal({
 
   const handleConfirm = async () => {
     if (selectedClientId && selectedType) {
-      const selectedClient = clients.find((c) => c.id === selectedClientId);
+      const selectedClient = clients.find(c => c.id === selectedClientId);
       if (selectedClient) {
         await onConfirm({
           clientId: selectedClientId,
@@ -201,7 +201,7 @@ export function ExistingClientOpportunityModal({
   // 고객 필터링 및 정렬 (선택된 고객을 맨 위로)
   const filteredClients = clients
     .filter(
-      (client) =>
+      client =>
         client.name.toLowerCase().includes(clientSearchQuery.toLowerCase()) ||
         client.phone.includes(clientSearchQuery)
     )
@@ -215,9 +215,9 @@ export function ExistingClientOpportunityModal({
       return a.name.localeCompare(b.name);
     });
 
-  const selectedClient = clients.find((c) => c.id === selectedClientId);
+  const selectedClient = clients.find(c => c.id === selectedClientId);
   const selectedInsurance = insuranceTypes.find(
-    (type) => type.id === selectedType
+    type => type.id === selectedType
   );
 
   return (
@@ -261,7 +261,7 @@ export function ExistingClientOpportunityModal({
                 <Input
                   placeholder="고객명 또는 전화번호로 검색..."
                   value={clientSearchQuery}
-                  onChange={(e) => setClientSearchQuery(e.target.value)}
+                  onChange={e => setClientSearchQuery(e.target.value)}
                   className="pl-10"
                 />
               </div>
@@ -270,7 +270,7 @@ export function ExistingClientOpportunityModal({
             {/* 고객 목록 */}
             <div className="max-h-120 overflow-y-auto space-y-2">
               {filteredClients.length > 0 ? (
-                filteredClients.map((client) => (
+                filteredClients.map(client => (
                   <Card
                     key={client.id}
                     ref={
@@ -282,8 +282,8 @@ export function ExistingClientOpportunityModal({
                       selectedClientId === client.id
                         ? 'ring-2 ring-primary border-primary bg-primary/5'
                         : client.id === preSelectedClientId
-                        ? 'ring-2 ring-orange-400 border-orange-400 bg-orange-50 shadow-lg'
-                        : 'hover:border-border'
+                          ? 'ring-2 ring-orange-400 border-orange-400 bg-orange-50 shadow-lg'
+                          : 'hover:border-border'
                     }`}
                     onClick={() => setSelectedClientId(client.id)}
                   >
@@ -380,7 +380,7 @@ export function ExistingClientOpportunityModal({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {insuranceTypes.map((insurance) => (
+              {insuranceTypes.map(insurance => (
                 <Card
                   key={insurance.id}
                   className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
@@ -462,7 +462,7 @@ export function ExistingClientOpportunityModal({
                     </label>
                     <Input
                       value={productName}
-                      onChange={(e) => setProductName(e.target.value)}
+                      onChange={e => setProductName(e.target.value)}
                       placeholder="예: 무배당 통합보험"
                     />
                   </div>
@@ -473,7 +473,7 @@ export function ExistingClientOpportunityModal({
                     </label>
                     <Input
                       value={insuranceCompany}
-                      onChange={(e) => setInsuranceCompany(e.target.value)}
+                      onChange={e => setInsuranceCompany(e.target.value)}
                       placeholder="예: 삼성화재, 현대해상"
                     />
                   </div>
@@ -488,7 +488,7 @@ export function ExistingClientOpportunityModal({
                       <Input
                         type="number"
                         value={monthlyPremium}
-                        onChange={(e) => setMonthlyPremium(e.target.value)}
+                        onChange={e => setMonthlyPremium(e.target.value)}
                         placeholder="0"
                         className="pr-8"
                       />
@@ -507,7 +507,7 @@ export function ExistingClientOpportunityModal({
                       <Input
                         type="number"
                         value={expectedCommission}
-                        onChange={(e) => setExpectedCommission(e.target.value)}
+                        onChange={e => setExpectedCommission(e.target.value)}
                         placeholder="0"
                         className="pr-8"
                       />
@@ -526,7 +526,7 @@ export function ExistingClientOpportunityModal({
                 </label>
                 <Textarea
                   value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
+                  onChange={e => setNotes(e.target.value)}
                   placeholder={`${selectedClient?.name} 고객의 ${selectedInsurance?.name} 영업에 대한 메모를 입력하세요...\n\n예시:\n- 고객 관심사: 보험료 부담 최소화\n- 기존 보험: 타사 자동차보험 가입 중\n- 영업 전략: 기존 보험과 비교 견적 제시\n- 업셀링 포인트: 기존 계약 대비 추가 혜택`}
                   className="min-h-[100px] resize-none"
                 />

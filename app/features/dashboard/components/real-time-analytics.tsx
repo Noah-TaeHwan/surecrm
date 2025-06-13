@@ -45,7 +45,7 @@ export function RealTimeAnalytics() {
             details: parameters,
           };
 
-          setEvents((prev) => [newEvent, ...prev.slice(0, 49)]); // 최근 50개만 유지
+          setEvents(prev => [newEvent, ...prev.slice(0, 49)]); // 최근 50개만 유지
         }
       };
 
@@ -167,13 +167,13 @@ export function RealTimeAnalytics() {
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-green-600">
-                {new Set(events.map((e) => e.category)).size}
+                {new Set(events.map(e => e.category)).size}
               </div>
               <div className="text-sm text-gray-600">카테고리</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-purple-600">
-                {events.filter((e) => e.value).length}
+                {events.filter(e => e.value).length}
               </div>
               <div className="text-sm text-gray-600">가치 있는 이벤트</div>
             </div>

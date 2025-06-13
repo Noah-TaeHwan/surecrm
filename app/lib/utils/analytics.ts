@@ -1052,8 +1052,8 @@ export const InsuranceAgentEvents = {
           frustration > 5
             ? 'frustrated'
             : engagement > 5
-            ? 'engaged'
-            : 'neutral',
+              ? 'engaged'
+              : 'neutral',
         user_satisfaction: Math.max(0, engagement - frustration),
       },
     }),
@@ -1071,10 +1071,10 @@ export const InsuranceAgentEvents = {
           wpm > 60
             ? 'expert'
             : wpm > 40
-            ? 'proficient'
-            : wpm > 20
-            ? 'average'
-            : 'beginner',
+              ? 'proficient'
+              : wpm > 20
+                ? 'average'
+                : 'beginner',
         input_method: 'keyboard',
       },
     }),
@@ -1098,10 +1098,10 @@ export const InsuranceAgentEvents = {
           loadTime < 1000
             ? 'excellent'
             : loadTime < 3000
-            ? 'good'
-            : loadTime < 5000
-            ? 'average'
-            : 'poor',
+              ? 'good'
+              : loadTime < 5000
+                ? 'average'
+                : 'poor',
         user_experience_impact: loadTime > 3000 ? 'negative' : 'positive',
       },
     }),
@@ -1213,14 +1213,14 @@ export const InsuranceAgentEvents = {
           clickDelay < 1000
             ? 'confident'
             : clickDelay < 3000
-            ? 'hesitant'
-            : 'uncertain',
+              ? 'hesitant'
+              : 'uncertain',
         cognitive_load:
           hesitationTime > 2000
             ? 'high'
             : hesitationTime > 1000
-            ? 'medium'
-            : 'low',
+              ? 'medium'
+              : 'low',
       },
     }),
 
@@ -1330,8 +1330,8 @@ export const InsuranceAgentEvents = {
           businessValue > 1000
             ? 'high_value'
             : businessValue > 500
-            ? 'medium_value'
-            : 'low_value',
+              ? 'medium_value'
+              : 'low_value',
       },
     }),
 

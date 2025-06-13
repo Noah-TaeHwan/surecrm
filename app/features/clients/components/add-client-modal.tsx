@@ -56,7 +56,7 @@ const clientSchema = z.object({
   referredById: z
     .string()
     .optional()
-    .transform((val) => (val === 'none' ? undefined : val)),
+    .transform(val => (val === 'none' ? undefined : val)),
   tags: z.string().optional(),
   notes: z.string().optional(),
 });
@@ -280,7 +280,7 @@ export function AddClientModal({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {telecomProviders.map((provider) => (
+                          {telecomProviders.map(provider => (
                             <SelectItem key={provider} value={provider}>
                               {provider}
                             </SelectItem>
@@ -314,7 +314,7 @@ export function AddClientModal({
                           <SelectItem value="none">
                             직접 개발 (소개자 없음)
                           </SelectItem>
-                          {referrers.map((referrer) => (
+                          {referrers.map(referrer => (
                             <SelectItem key={referrer.id} value={referrer.id}>
                               {referrer.name}
                             </SelectItem>
@@ -379,7 +379,7 @@ export function AddClientModal({
                         value={field.value}
                         className="space-y-2"
                       >
-                        {importanceOptions.map((option) => (
+                        {importanceOptions.map(option => (
                           <Label
                             key={option.id}
                             htmlFor={option.id}

@@ -186,8 +186,8 @@ export function logAnalyticsStatus(
     const reason = isDevelopmentEnvironment()
       ? '개발환경'
       : isSystemAdminUser(getCurrentUserRole())
-      ? '시스템 관리자'
-      : '설정 미완료';
+        ? '시스템 관리자'
+        : '설정 미완료';
 
     // DEBUG 레벨에서만 차단 로그 출력
     if (level >= LOG_LEVELS.DEBUG) {

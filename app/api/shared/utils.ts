@@ -161,7 +161,7 @@ export function validateRequiredFields(
   data: Record<string, any>,
   requiredFields: string[]
 ): { isValid: boolean; missingFields: string[] } {
-  const missingFields = requiredFields.filter((field) => {
+  const missingFields = requiredFields.filter(field => {
     const value = data[field];
     return value === undefined || value === null || value === '';
   });

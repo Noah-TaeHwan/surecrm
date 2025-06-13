@@ -133,7 +133,7 @@ export async function getTopInfluencers(
       return [];
     }
 
-    const clientIds = topReferrers.map((r) => r.clientId);
+    const clientIds = topReferrers.map(r => r.clientId);
 
     // 🔄 병렬로 추가 데이터 조회 (성능 최적화)
     const [
@@ -163,19 +163,17 @@ export async function getTopInfluencers(
     const influencers: InfluencerDisplayData[] = await Promise.all(
       topReferrers.map(async (referrer, index) => {
         const profile = influencerProfiles.find(
-          (p) => p.clientId === referrer.clientId
+          p => p.clientId === referrer.clientId
         );
         const gratitude = gratitudeHistory.find(
-          (g) => g.clientId === referrer.clientId
+          g => g.clientId === referrer.clientId
         );
-        const network = networkData.find(
-          (n) => n.clientId === referrer.clientId
-        );
+        const network = networkData.find(n => n.clientId === referrer.clientId);
         const monthly = monthlyReferrals.find(
-          (m) => m.clientId === referrer.clientId
+          m => m.clientId === referrer.clientId
         );
         const activities = activityLogs.filter(
-          (a) => a.clientId === referrer.clientId
+          a => a.clientId === referrer.clientId
         );
 
         // 💎 전환율 계산
@@ -340,21 +338,21 @@ export async function getNetworkAnalysis(
           ? networkValue.total / totalInfluencers.count
           : 0,
       trends: {
-        referrals: trends.referrals.map((t) => ({
+        referrals: trends.referrals.map(t => ({
           month: t.month,
           count: t.count,
         })),
-        conversions: trends.conversions.map((t) => ({
+        conversions: trends.conversions.map(t => ({
           month: t.month,
           rate: t.rate,
         })),
-        value: trends.value.map((t) => ({ month: t.month, amount: t.amount })),
-        gratitude: trends.gratitude.map((t) => ({
+        value: trends.value.map(t => ({ month: t.month, amount: t.amount })),
+        gratitude: trends.gratitude.map(t => ({
           month: t.month,
           sent: t.sent,
         })),
       },
-      monthlyTrends: trends.referrals.map((t) => ({
+      monthlyTrends: trends.referrals.map(t => ({
         month: t.month,
         count: t.count,
       })),
@@ -412,7 +410,7 @@ export async function getGratitudeHistory(
       .orderBy(desc(appInfluencerGratitudeHistory.createdAt))
       .limit(limit);
 
-    return gratitudeData.map((item) => ({
+    return gratitudeData.map(item => ({
       id: item.id,
       influencerId: item.influencerId,
       influencerName: item.influencerName || '이름 없음',
@@ -476,7 +474,7 @@ export async function createGratitude(
     }
 
     // 💾 트랜잭션으로 감사 표현 생성
-    const result = await db.transaction(async (tx) => {
+    const result = await db.transaction(async tx => {
       // 감사 표현 이력 생성
       const newGratitude: NewInfluencerGratitudeHistory = {
         influencerId: data.influencerId,
@@ -670,8 +668,10 @@ function calculateEnhancedRelationshipStrength(
   score += Math.min(conversionRate * 0.05, 3); // 최대 3점
 
   // 계약 가치 가산점
-  if (totalValue > 50000000) score += 1.5; // 5천만원 이상
-  else if (totalValue > 10000000) score += 1; // 1천만원 이상
+  if (totalValue > 50000000)
+    score += 1.5; // 5천만원 이상
+  else if (totalValue > 10000000)
+    score += 1; // 1천만원 이상
   else if (totalValue > 1000000) score += 0.5; // 100만원 이상
 
   // 최근 활동 점수
@@ -883,7 +883,7 @@ function invalidateUserCaches(userId: string) {
     }
   }
 
-  keysToDelete.forEach((key) => dataCache.delete(key));
+  keysToDelete.forEach(key => dataCache.delete(key));
 }
 
 // 😊 감정 분석 (간단한 버전)
@@ -896,10 +896,10 @@ function analyzeSentiment(
   const negativeWords = ['불만', '싫어', '나빠', '최악', '별로'];
 
   const lowerFeedback = feedback.toLowerCase();
-  const positiveCount = positiveWords.filter((word) =>
+  const positiveCount = positiveWords.filter(word =>
     lowerFeedback.includes(word)
   ).length;
-  const negativeCount = negativeWords.filter((word) =>
+  const negativeCount = negativeWords.filter(word =>
     lowerFeedback.includes(word)
   ).length;
 
@@ -914,7 +914,7 @@ function analyzeSentiment(
 async function getMonthlyReferralPatterns(clientIds: string[], months: number) {
   try {
     const patterns = await Promise.all(
-      clientIds.map(async (clientId) => {
+      clientIds.map(async clientId => {
         const monthlyData = [];
         const now = new Date();
 
@@ -947,7 +947,7 @@ async function getMonthlyReferralPatterns(clientIds: string[], months: number) {
     return patterns;
   } catch (error) {
     console.error('getMonthlyReferralPatterns 오류:', error);
-    return clientIds.map((clientId) => ({
+    return clientIds.map(clientId => ({
       clientId,
       monthlyData: Array(months).fill(0),
     }));
@@ -958,7 +958,7 @@ async function getMonthlyReferralPatterns(clientIds: string[], months: number) {
 async function getNetworkDataForClients(clientIds: string[]) {
   try {
     const networkData = await Promise.all(
-      clientIds.map(async (clientId) => {
+      clientIds.map(async clientId => {
         // 직접 소개한 사람들
         const directReferrals = await db
           .select({ referredId: referrals.referredId })
@@ -971,7 +971,7 @@ async function getNetworkDataForClients(clientIds: string[]) {
         let depth = 1;
         if (width > 0) {
           const secondLevelCounts = await Promise.all(
-            directReferrals.map(async (ref) => {
+            directReferrals.map(async ref => {
               const countResult: { count: number }[] = await db
                 .select({ count: count() })
                 .from(referrals)
@@ -980,7 +980,7 @@ async function getNetworkDataForClients(clientIds: string[]) {
             })
           );
 
-          const hasSecondLevel = secondLevelCounts.some((count) => count > 0);
+          const hasSecondLevel = secondLevelCounts.some(count => count > 0);
           if (hasSecondLevel) {
             depth = 2;
             // 간단히 3단계까지만 확인
@@ -990,7 +990,7 @@ async function getNetworkDataForClients(clientIds: string[]) {
               .where(
                 inArray(
                   referrals.referrerId,
-                  directReferrals.map((r) => r.referredId)
+                  directReferrals.map(r => r.referredId)
                 )
               );
             if ((hasThirdLevel[0]?.count || 0) > 0) {
@@ -1006,7 +1006,7 @@ async function getNetworkDataForClients(clientIds: string[]) {
     return networkData;
   } catch (error) {
     console.error('getNetworkDataForClients 오류:', error);
-    return clientIds.map((clientId) => ({ clientId, width: 0, depth: 1 }));
+    return clientIds.map(clientId => ({ clientId, width: 0, depth: 1 }));
   }
 }
 

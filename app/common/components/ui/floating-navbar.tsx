@@ -30,7 +30,7 @@ export function FloatingNavbar({
 
       // 현재 활성 섹션 확인
       const sections = items
-        .map((item) => {
+        .map(item => {
           const element = document.getElementById(item.href.substring(1));
           if (element) {
             const rect = element.getBoundingClientRect();
@@ -69,7 +69,7 @@ export function FloatingNavbar({
         } else {
           // 일반적인 경우: 현재 화면에 보이는 섹션 중 가장 위에 있는 섹션 찾기
           const visibleSections = sections.filter(
-            (section) => section && section.top < 200 && section.bottom > 0
+            section => section && section.top < 200 && section.bottom > 0
           );
 
           if (visibleSections.length > 0) {
@@ -111,7 +111,7 @@ export function FloatingNavbar({
     <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50 bg-background/80 backdrop-blur-lg rounded-full border border-border shadow-lg">
       <div className="flex items-center px-2 h-12">
         <ul className="flex space-x-1">
-          {items.map((item) => (
+          {items.map(item => (
             <li key={item.href}>
               <Button
                 variant="ghost"
@@ -125,7 +125,7 @@ export function FloatingNavbar({
               >
                 <a
                   href={item.href}
-                  onClick={(e) => {
+                  onClick={e => {
                     e.preventDefault();
                     const element = document.getElementById(
                       item.href.substring(1)

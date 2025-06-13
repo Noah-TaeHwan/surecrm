@@ -203,7 +203,7 @@ export function ClientInsuranceTab({
 
   // 🔒 보험 정보 필터링 (상태 및 보안 레벨)
   const filterInsurance = (insuranceList: InsuranceInfo[]) => {
-    return insuranceList.filter((insurance) => {
+    return insuranceList.filter(insurance => {
       // 상태 필터
       if (filterStatus !== 'all' && insurance.status !== filterStatus) {
         return false;
@@ -347,7 +347,7 @@ export function ClientInsuranceTab({
                 <Switch
                   id="show-confidential-insurance"
                   checked={showConfidentialData}
-                  onCheckedChange={(checked) => {
+                  onCheckedChange={checked => {
                     setShowConfidentialData(checked);
                     handleDataAccess(
                       checked ? '기밀정보 표시' : '기밀정보 숨김',
@@ -401,7 +401,7 @@ export function ClientInsuranceTab({
 
       {/* 보험 정보 카드들 */}
       {filteredInsurance.length > 0 ? (
-        filteredInsurance.map((insurance) => {
+        filteredInsurance.map(insurance => {
           const config = insuranceTypeConfig[insurance.type] || {
             label: insurance.type,
             icon: <LayersIcon className="h-4 w-4" />,
@@ -447,8 +447,8 @@ export function ClientInsuranceTab({
                         {insurance.premium && showConfidentialData
                           ? `₩${insurance.premium.toLocaleString()}`
                           : insurance.premium
-                          ? '₩***,***'
-                          : '미정'}
+                            ? '₩***,***'
+                            : '미정'}
                       </div>
                     </div>
 
@@ -684,7 +684,7 @@ export function ClientInsuranceTab({
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-green-600">
-                {filteredInsurance.filter((i) => i.status === 'active').length}
+                {filteredInsurance.filter(i => i.status === 'active').length}
               </div>
               <div className="text-sm text-muted-foreground">활성 보험</div>
             </div>
@@ -702,7 +702,7 @@ export function ClientInsuranceTab({
               <div className="text-2xl font-bold text-orange-600">
                 {
                   filteredInsurance.filter(
-                    (i) => i.confidentialityLevel === 'confidential'
+                    i => i.confidentialityLevel === 'confidential'
                   ).length
                 }
               </div>

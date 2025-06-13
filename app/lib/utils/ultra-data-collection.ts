@@ -246,7 +246,7 @@ class UltraDataCollectionSystem {
       return;
 
     // 모든 클릭 이벤트 극한 추적
-    document.addEventListener('click', (e) => {
+    document.addEventListener('click', e => {
       const target = e.target as HTMLElement;
       const elementData = this.getElementData(target);
 
@@ -305,7 +305,7 @@ class UltraDataCollectionSystem {
 
     // 마우스 움직임 극한 추적 (샘플링)
     let mouseTrackingInterval = 0;
-    document.addEventListener('mousemove', (e) => {
+    document.addEventListener('mousemove', e => {
       mouseTrackingInterval++;
       if (mouseTrackingInterval % 10 === 0 && window.gtag) {
         // 10번 중 1번만 전송
@@ -322,7 +322,7 @@ class UltraDataCollectionSystem {
 
     // 키보드 입력 패턴 추적
     let keySequence: number[] = [];
-    document.addEventListener('keydown', (e) => {
+    document.addEventListener('keydown', e => {
       keySequence.push(Date.now());
 
       if (window.gtag) {
@@ -559,7 +559,7 @@ class UltraDataCollectionSystem {
       className: element.className || '',
       dataset: JSON.stringify(element.dataset),
       attributes: Array.from(element.attributes)
-        .map((attr) => `${attr.name}=${attr.value}`)
+        .map(attr => `${attr.name}=${attr.value}`)
         .join(';'),
     };
   }
@@ -582,7 +582,7 @@ class UltraDataCollectionSystem {
 
   private calculateInteractionDepth(): number {
     return this.dataPoints.filter(
-      (dp) => dp.mouse_activity || dp.keyboard_activity
+      dp => dp.mouse_activity || dp.keyboard_activity
     ).length;
   }
 
@@ -605,7 +605,7 @@ class UltraDataCollectionSystem {
   private calculateEngagementLevel(): string {
     const recentActivity = this.dataPoints.slice(-10);
     const activityScore = recentActivity.filter(
-      (dp) => dp.mouse_activity || dp.keyboard_activity
+      dp => dp.mouse_activity || dp.keyboard_activity
     ).length;
 
     if (activityScore > 7) return 'highly_engaged';
@@ -648,10 +648,10 @@ class UltraDataCollectionSystem {
     return element.tagName === 'INPUT'
       ? 'form_input'
       : element.tagName === 'TEXTAREA'
-      ? 'text_area'
-      : element.isContentEditable
-      ? 'content_editable'
-      : 'other';
+        ? 'text_area'
+        : element.isContentEditable
+          ? 'content_editable'
+          : 'other';
   }
 
   private analyzeInputPattern(sequence: number[]): string {

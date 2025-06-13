@@ -188,7 +188,7 @@ export async function triggerContractUrgentNotifications() {
     // 모든 에이전트의 계약 단계 찾기
     const allStages = await db.select().from(pipelineStages);
     const contractStages = allStages.filter(
-      (stage) =>
+      stage =>
         stage.name.includes('계약') ||
         stage.name.includes('체결') ||
         stage.name.includes('완료')

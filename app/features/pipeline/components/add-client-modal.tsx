@@ -217,7 +217,7 @@ export function AddClientModal({
   };
 
   const removeTag = (tagToRemove: string) => {
-    setTags(tags.filter((tag) => tag !== tagToRemove));
+    setTags(tags.filter(tag => tag !== tagToRemove));
   };
 
   const addInsurance = (type: InsuranceInfo['type']) => {
@@ -230,12 +230,12 @@ export function AddClientModal({
   };
 
   const removeInsurance = (id: string) => {
-    setInsuranceInfo(insuranceInfo.filter((ins) => ins.id !== id));
+    setInsuranceInfo(insuranceInfo.filter(ins => ins.id !== id));
   };
 
   const updateInsuranceDetails = (id: string, field: string, value: any) => {
     setInsuranceInfo(
-      insuranceInfo.map((ins) =>
+      insuranceInfo.map(ins =>
         ins.id === id
           ? { ...ins, details: { ...ins.details, [field]: value } }
           : ins
@@ -403,7 +403,7 @@ export function AddClientModal({
                     <Input
                       id="name"
                       value={name}
-                      onChange={(e) => {
+                      onChange={e => {
                         setName(e.target.value);
                         if (errors.name) {
                           const newErrors = { ...errors };
@@ -428,7 +428,7 @@ export function AddClientModal({
                     <Input
                       id="phone"
                       value={phone}
-                      onChange={(e) => {
+                      onChange={e => {
                         setPhone(e.target.value);
                         if (errors.phone) {
                           const newErrors = { ...errors };
@@ -457,7 +457,7 @@ export function AddClientModal({
                       id="email"
                       type="email"
                       value={email}
-                      onChange={(e) => {
+                      onChange={e => {
                         setEmail(e.target.value);
                         if (errors.email) {
                           const newErrors = { ...errors };
@@ -487,7 +487,7 @@ export function AddClientModal({
                         <SelectValue placeholder="통신사 선택" />
                       </SelectTrigger>
                       <SelectContent>
-                        {telecomProviders.map((provider) => (
+                        {telecomProviders.map(provider => (
                           <SelectItem key={provider} value={provider}>
                             {provider}
                           </SelectItem>
@@ -504,7 +504,7 @@ export function AddClientModal({
                   <Input
                     id="address"
                     value={address}
-                    onChange={(e) => setAddress(e.target.value)}
+                    onChange={e => setAddress(e.target.value)}
                     placeholder="서울시 강남구..."
                   />
                 </div>
@@ -518,7 +518,7 @@ export function AddClientModal({
                   <Input
                     id="occupation"
                     value={occupation}
-                    onChange={(e) => setOccupation(e.target.value)}
+                    onChange={e => setOccupation(e.target.value)}
                     placeholder="회사원, 자영업 등"
                   />
                 </div>
@@ -532,7 +532,7 @@ export function AddClientModal({
                       id="height"
                       type="number"
                       value={height || ''}
-                      onChange={(e) =>
+                      onChange={e =>
                         setHeight(
                           e.target.value ? parseInt(e.target.value) : undefined
                         )
@@ -548,7 +548,7 @@ export function AddClientModal({
                       id="weight"
                       type="number"
                       value={weight || ''}
-                      onChange={(e) =>
+                      onChange={e =>
                         setWeight(
                           e.target.value ? parseInt(e.target.value) : undefined
                         )
@@ -565,7 +565,7 @@ export function AddClientModal({
                       <Checkbox
                         id="driving-yes"
                         checked={hasDrivingLicense === true}
-                        onCheckedChange={(checked) =>
+                        onCheckedChange={checked =>
                           setHasDrivingLicense(checked ? true : undefined)
                         }
                       />
@@ -577,7 +577,7 @@ export function AddClientModal({
                       <Checkbox
                         id="driving-no"
                         checked={hasDrivingLicense === false}
-                        onCheckedChange={(checked) =>
+                        onCheckedChange={checked =>
                           setHasDrivingLicense(checked ? false : undefined)
                         }
                       />
@@ -593,7 +593,7 @@ export function AddClientModal({
                 <div className="flex items-center justify-between">
                   <Label className="text-sm font-medium">보험 정보</Label>
                   <Select
-                    onValueChange={(value) =>
+                    onValueChange={value =>
                       addInsurance(value as InsuranceInfo['type'])
                     }
                   >
@@ -611,7 +611,7 @@ export function AddClientModal({
                   </Select>
                 </div>
 
-                {insuranceInfo.map((insurance) => (
+                {insuranceInfo.map(insurance => (
                   <Card key={insurance.id} className="border-border">
                     <CardHeader className="pb-3">
                       <div className="flex items-center justify-between">
@@ -637,7 +637,7 @@ export function AddClientModal({
                               <Input
                                 type="date"
                                 value={insurance.details.dueDate || ''}
-                                onChange={(e) =>
+                                onChange={e =>
                                   updateInsuranceDetails(
                                     insurance.id!,
                                     'dueDate',
@@ -650,7 +650,7 @@ export function AddClientModal({
                               <Label className="text-xs">임신 방법</Label>
                               <Select
                                 value={insurance.details.conceptionMethod || ''}
-                                onValueChange={(value) =>
+                                onValueChange={value =>
                                   updateInsuranceDetails(
                                     insurance.id!,
                                     'conceptionMethod',
@@ -678,7 +678,7 @@ export function AddClientModal({
                                   insurance.details.abortionPreventionMeds ||
                                   false
                                 }
-                                onCheckedChange={(checked) =>
+                                onCheckedChange={checked =>
                                   updateInsuranceDetails(
                                     insurance.id!,
                                     'abortionPreventionMeds',
@@ -699,7 +699,7 @@ export function AddClientModal({
                                 checked={
                                   insurance.details.abnormalFindings || false
                                 }
-                                onCheckedChange={(checked) =>
+                                onCheckedChange={checked =>
                                   updateInsuranceDetails(
                                     insurance.id!,
                                     'abnormalFindings',
@@ -721,7 +721,7 @@ export function AddClientModal({
                                   insurance.details.disabilityTestFindings ||
                                   false
                                 }
-                                onCheckedChange={(checked) =>
+                                onCheckedChange={checked =>
                                   updateInsuranceDetails(
                                     insurance.id!,
                                     'disabilityTestFindings',
@@ -746,7 +746,7 @@ export function AddClientModal({
                             <Label className="text-xs">차량번호</Label>
                             <Input
                               value={insurance.details.vehicleNumber || ''}
-                              onChange={(e) =>
+                              onChange={e =>
                                 updateInsuranceDetails(
                                   insurance.id!,
                                   'vehicleNumber',
@@ -760,7 +760,7 @@ export function AddClientModal({
                             <Label className="text-xs">차량 소유자</Label>
                             <Input
                               value={insurance.details.ownerName || ''}
-                              onChange={(e) =>
+                              onChange={e =>
                                 updateInsuranceDetails(
                                   insurance.id!,
                                   'ownerName',
@@ -774,7 +774,7 @@ export function AddClientModal({
                             <Label className="text-xs">차종</Label>
                             <Input
                               value={insurance.details.vehicleType || ''}
-                              onChange={(e) =>
+                              onChange={e =>
                                 updateInsuranceDetails(
                                   insurance.id!,
                                   'vehicleType',
@@ -788,7 +788,7 @@ export function AddClientModal({
                             <Label className="text-xs">제조사</Label>
                             <Input
                               value={insurance.details.manufacturer || ''}
-                              onChange={(e) =>
+                              onChange={e =>
                                 updateInsuranceDetails(
                                   insurance.id!,
                                   'manufacturer',
@@ -817,7 +817,7 @@ export function AddClientModal({
                     </Label>
                     <Select
                       value={stageId}
-                      onValueChange={(value) => {
+                      onValueChange={value => {
                         setStageId(value);
                         if (errors.stageId) {
                           const newErrors = { ...errors };
@@ -834,7 +834,7 @@ export function AddClientModal({
                       <SelectContent>
                         <SelectGroup>
                           <SelectLabel>영업 단계</SelectLabel>
-                          {stages.map((stage) => (
+                          {stages.map(stage => (
                             <SelectItem key={stage.id} value={stage.id}>
                               {stage.name}
                             </SelectItem>
@@ -855,7 +855,7 @@ export function AddClientModal({
                     </Label>
                     <Select
                       value={importance}
-                      onValueChange={(val) =>
+                      onValueChange={val =>
                         setImportance(val as 'high' | 'medium' | 'low')
                       }
                     >
@@ -885,7 +885,7 @@ export function AddClientModal({
                     <SelectContent>
                       <SelectGroup>
                         <SelectLabel>소개자</SelectLabel>
-                        {referrers.map((referrer) => (
+                        {referrers.map(referrer => (
                           <SelectItem key={referrer.id} value={referrer.id}>
                             {referrer.name}
                           </SelectItem>
@@ -898,7 +898,7 @@ export function AddClientModal({
                 <div className="space-y-3">
                   <Label className="text-sm font-medium">태그</Label>
                   <div className="flex flex-wrap gap-2 mb-2">
-                    {tags.map((tag) => (
+                    {tags.map(tag => (
                       <Badge
                         key={tag}
                         variant="secondary"
@@ -915,9 +915,9 @@ export function AddClientModal({
                   <div className="flex gap-2">
                     <Input
                       value={newTag}
-                      onChange={(e) => setNewTag(e.target.value)}
+                      onChange={e => setNewTag(e.target.value)}
                       placeholder="태그 입력"
-                      onKeyPress={(e) => {
+                      onKeyPress={e => {
                         if (e.key === 'Enter') {
                           e.preventDefault();
                           addTag();
@@ -937,7 +937,7 @@ export function AddClientModal({
                   <Textarea
                     id="note"
                     value={note}
-                    onChange={(e) => setNote(e.target.value)}
+                    onChange={e => setNote(e.target.value)}
                     placeholder="고객에 대한 메모를 입력하세요"
                     className="resize-none"
                     rows={3}

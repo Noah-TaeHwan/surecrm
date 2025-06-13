@@ -47,7 +47,7 @@ export const appBillingPlans = pgTable(
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },
-  (table) => ({
+  table => ({
     activeIdx: index('billing_plans_active_idx').on(table.isActive),
     popularIdx: index('billing_plans_popular_idx').on(table.isPopular),
   })
@@ -74,7 +74,7 @@ export const appBillingCustomerKeys = pgTable(
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },
-  (table) => ({
+  table => ({
     userIdIdx: index('billing_customer_keys_user_id_idx').on(table.userId),
     activeIdx: index('billing_customer_keys_active_idx').on(table.isActive),
   })
@@ -114,7 +114,7 @@ export const appBillingPaymentMethods = pgTable(
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },
-  (table) => ({
+  table => ({
     customerKeyIdIdx: index('billing_payment_methods_customer_key_id_idx').on(
       table.customerKeyId
     ),
@@ -175,7 +175,7 @@ export const appBillingSubscriptions = pgTable(
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },
-  (table) => ({
+  table => ({
     userIdIdx: index('billing_subscriptions_user_id_idx').on(table.userId),
     statusIdx: index('billing_subscriptions_status_idx').on(table.status),
     billingDateIdx: index('billing_subscriptions_billing_date_idx').on(
@@ -255,7 +255,7 @@ export const appBillingPayments = pgTable(
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },
-  (table) => ({
+  table => ({
     subscriptionIdIdx: index('billing_payments_subscription_id_idx').on(
       table.subscriptionId
     ),
@@ -297,7 +297,7 @@ export const appBillingUsageRecords = pgTable(
     metadata: json('metadata'),
     recordedAt: timestamp('recorded_at').defaultNow().notNull(),
   },
-  (table) => ({
+  table => ({
     subscriptionIdIdx: index('billing_usage_records_subscription_id_idx').on(
       table.subscriptionId
     ),
@@ -348,7 +348,7 @@ export const appBillingWebhookLogs = pgTable(
     receivedAt: timestamp('received_at').defaultNow().notNull(),
     processedAt: timestamp('processed_at'),
   },
-  (table) => ({
+  table => ({
     eventTypeIdx: index('billing_webhook_logs_event_type_idx').on(
       table.eventType
     ),
@@ -393,7 +393,7 @@ export const appBillingAuditLogs = pgTable(
     metadata: json('metadata'),
     createdAt: timestamp('created_at').defaultNow().notNull(),
   },
-  (table) => ({
+  table => ({
     entityIdx: index('billing_audit_logs_entity_idx').on(
       table.entityType,
       table.entityId

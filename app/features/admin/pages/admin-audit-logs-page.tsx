@@ -62,7 +62,7 @@ export async function loader({ request }: Route['LoaderArgs']) {
       db
         .select({ count: count() })
         .from(adminAuditLogs)
-        .then(async (result) => {
+        .then(async result => {
           const total = result[0]?.count || 0;
           const [today, errors, unauthorized, admins] = await Promise.all([
             db

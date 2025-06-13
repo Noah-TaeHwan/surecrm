@@ -175,7 +175,7 @@ export function ClientsTableView({
   // 전체 선택/해제
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      onSelectedClientsChange(clients.map((client) => client.id));
+      onSelectedClientsChange(clients.map(client => client.id));
     } else {
       onSelectedClientsChange([]);
     }
@@ -186,7 +186,7 @@ export function ClientsTableView({
     if (checked) {
       onSelectedClientsChange([...selectedClients, clientId]);
     } else {
-      onSelectedClientsChange(selectedClients.filter((id) => id !== clientId));
+      onSelectedClientsChange(selectedClients.filter(id => id !== clientId));
     }
   };
 
@@ -226,7 +226,7 @@ export function ClientsTableView({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {clients.map((client) => {
+              {clients.map(client => {
                 const privacyLevel = (client.accessLevel ||
                   client.privacyLevel ||
                   'private') as ClientPrivacyLevel;
@@ -236,7 +236,7 @@ export function ClientsTableView({
                     <TableCell>
                       <Checkbox
                         checked={selectedClients.includes(client.id)}
-                        onCheckedChange={(checked) =>
+                        onCheckedChange={checked =>
                           handleSelectClient(client.id, checked === true)
                         }
                       />
@@ -439,7 +439,7 @@ export function ClientsTableView({
                     <PaginationPrevious href="#" />
                   </PaginationItem>
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                    (page) => (
+                    page => (
                       <PaginationItem key={page}>
                         <PaginationLink
                           href="#"

@@ -50,12 +50,12 @@ export default function NetworkDetailPanel({
 }: NetworkDetailPanelProps) {
   // 선택된 노드 정보
   const selectedNode = useMemo(() => {
-    return data.nodes.find((node) => node.id === nodeId);
+    return data.nodes.find(node => node.id === nodeId);
   }, [data.nodes, nodeId]);
 
   // 실제 클라이언트 데이터 조회
   const clientData = useMemo(() => {
-    return clientsData.find((client) => client.id === nodeId);
+    return clientsData.find(client => client.id === nodeId);
   }, [clientsData, nodeId]);
 
   // 소개 관계 데이터
@@ -67,7 +67,7 @@ export default function NetworkDetailPanel({
   const referredNodes = useMemo(() => {
     if (!selectedNode) return [];
 
-    const referredLinks = data.links.filter((link) => {
+    const referredLinks = data.links.filter(link => {
       const sourceId =
         typeof link.source === 'string'
           ? link.source
@@ -76,13 +76,13 @@ export default function NetworkDetailPanel({
     });
 
     return referredLinks
-      .map((link) => {
+      .map(link => {
         const targetId =
           typeof link.target === 'string'
             ? link.target
             : (link.target as NetworkNode).id;
-        const node = data.nodes.find((node) => node.id === targetId);
-        const clientInfo = clientsData.find((client) => client.id === targetId);
+        const node = data.nodes.find(node => node.id === targetId);
+        const clientInfo = clientsData.find(client => client.id === targetId);
         return node && clientInfo ? { ...node, clientInfo } : null;
       })
       .filter(Boolean) as (NetworkNode & { clientInfo: any })[];
@@ -92,7 +92,7 @@ export default function NetworkDetailPanel({
   const referredByNode = useMemo(() => {
     if (!selectedNode) return null;
 
-    const referredByLink = data.links.find((link) => {
+    const referredByLink = data.links.find(link => {
       const targetId =
         typeof link.target === 'string'
           ? link.target
@@ -107,8 +107,8 @@ export default function NetworkDetailPanel({
         ? referredByLink.source
         : (referredByLink.source as NetworkNode).id;
 
-    const node = data.nodes.find((node) => node.id === sourceId);
-    const clientInfo = clientsData.find((client) => client.id === sourceId);
+    const node = data.nodes.find(node => node.id === sourceId);
+    const clientInfo = clientsData.find(client => client.id === sourceId);
     return node && clientInfo ? { ...node, clientInfo } : null;
   }, [data, nodeId, selectedNode, clientsData]);
 
@@ -458,8 +458,8 @@ export default function NetworkDetailPanel({
                     {clientData?.gender === 'male'
                       ? '남성'
                       : clientData?.gender === 'female'
-                      ? '여성'
-                      : '미입력'}
+                        ? '여성'
+                        : '미입력'}
                   </span>
                 </div>
 
@@ -556,7 +556,7 @@ export default function NetworkDetailPanel({
               {referredByNode ? (
                 <Card
                   className="group cursor-pointer hover:bg-accent/30 transition-all duration-200 border border-border/50 hover:border-blue-200/50 gap-0 py-0"
-                  onClick={(e) => handleReferralAction(referredByNode.id, e)}
+                  onClick={e => handleReferralAction(referredByNode.id, e)}
                 >
                   <CardContent className="p-3 min-h-[56px] flex items-center">
                     <div className="flex items-center justify-between gap-3 w-full">
@@ -621,11 +621,11 @@ export default function NetworkDetailPanel({
 
             {referredNodes.length > 0 ? (
               <div className="space-y-2">
-                {referredNodes.map((node) => (
+                {referredNodes.map(node => (
                   <Card
                     key={node.id}
                     className="group cursor-pointer hover:bg-accent/30 transition-all duration-200 border border-border/50 hover:border-orange-200/50 gap-0 py-0"
-                    onClick={(e) => handleReferralAction(node.id, e)}
+                    onClick={e => handleReferralAction(node.id, e)}
                   >
                     <CardContent className="p-3 min-h-[56px] flex items-center">
                       <div className="flex items-center justify-between gap-3 w-full">

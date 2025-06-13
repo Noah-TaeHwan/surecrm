@@ -82,8 +82,8 @@ export function InsightsTabs({
 }: InsightsTabsProps) {
   // 🎯 실제 사용자 목표 데이터 활용
   const currentMonthGoals = userGoals
-    .filter((goal) => goal.goalType !== 'meetings') // meetings 타입 제외
-    .filter((goal) => {
+    .filter(goal => goal.goalType !== 'meetings') // meetings 타입 제외
+    .filter(goal => {
       const goalStart = new Date(goal.startDate);
       const goalEnd = new Date(goal.endDate);
       const now = new Date();
@@ -92,13 +92,13 @@ export function InsightsTabs({
 
   // 목표별 데이터 매핑
   const revenueGoal = currentMonthGoals.find(
-    (goal) => goal.goalType === 'revenue'
+    goal => goal.goalType === 'revenue'
   );
   const clientsGoal = currentMonthGoals.find(
-    (goal) => goal.goalType === 'clients'
+    goal => goal.goalType === 'clients'
   );
   const referralsGoal = currentMonthGoals.find(
-    (goal) => goal.goalType === 'referrals'
+    goal => goal.goalType === 'referrals'
   );
 
   const conversionRate = performance.conversionRate || 0;
@@ -198,8 +198,8 @@ export function InsightsTabs({
           value === 0
             ? 'text-muted-foreground'
             : isPositive
-            ? 'text-green-600'
-            : 'text-red-600',
+              ? 'text-green-600'
+              : 'text-red-600',
           className
         )}
       >
@@ -433,7 +433,7 @@ export function InsightsTabs({
                   <CardContent className="space-y-4">
                     {/* 🎯 실제 사용자 목표 표시 */}
                     {currentMonthGoals.length > 0 ? (
-                      currentMonthGoals.map((goal) => (
+                      currentMonthGoals.map(goal => (
                         <div key={goal.id} className="space-y-2">
                           <div className="flex justify-between text-sm">
                             <span>{goal.title}</span>
@@ -549,10 +549,10 @@ export function InsightsTabs({
                         {currentMonthGoals.length > 0
                           ? '💡 설정된 목표를 기반으로 진행률을 표시합니다'
                           : performance.newClients > 0 &&
-                            performance.totalReferrals > 0 &&
-                            performance.revenue > 0
-                          ? '💡 꾸준한 성장 패턴을 보이고 있습니다'
-                          : '💡 목표 달성을 위한 추가 활동이 필요합니다'}
+                              performance.totalReferrals > 0 &&
+                              performance.revenue > 0
+                            ? '💡 꾸준한 성장 패턴을 보이고 있습니다'
+                            : '💡 목표 달성을 위한 추가 활동이 필요합니다'}
                       </p>
                     </div>
                   </CardContent>
@@ -791,8 +791,8 @@ export function InsightsTabs({
                         {conversionRate > 15
                           ? '우수한 성과를 유지하고 있습니다'
                           : conversionRate > 5
-                          ? '양호한 성과입니다'
-                          : '개선의 여지가 있습니다'}
+                            ? '양호한 성과입니다'
+                            : '개선의 여지가 있습니다'}
                       </p>
                     </div>
 
@@ -807,8 +807,8 @@ export function InsightsTabs({
                         {performance.totalReferrals > performance.newClients
                           ? '소개를 통한 고객 확보가 활발합니다. 소개 고객의 전환율 최적화에 집중하세요.'
                           : performance.newClients > 0
-                          ? '직접 영업 활동이 활발합니다. 기존 고객을 통한 소개 확대로 시너지를 창출하세요.'
-                          : '신규 고객 확보 활동을 늘리고 소개 네트워크 구축에 집중하세요.'}
+                            ? '직접 영업 활동이 활발합니다. 기존 고객을 통한 소개 확대로 시너지를 창출하세요.'
+                            : '신규 고객 확보 활동을 늘리고 소개 네트워크 구축에 집중하세요.'}
                       </p>
                       <p className="text-xs text-primary font-medium">
                         →{' '}

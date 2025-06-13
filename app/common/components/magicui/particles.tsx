@@ -91,7 +91,7 @@ export function Particles({
 
       ctx.clearRect(0, 0, dimensions.width, dimensions.height);
 
-      particlesRef.current = particlesRef.current.map((particle) => {
+      particlesRef.current = particlesRef.current.map(particle => {
         // Draw particle
         ctx.beginPath();
         ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);

@@ -120,7 +120,7 @@ export function TagManager({
       };
 
     // 금지된 단어 검사
-    const hasRestrictedWord = restrictedWords.some((word) =>
+    const hasRestrictedWord = restrictedWords.some(word =>
       tag.toLowerCase().includes(word.toLowerCase())
     );
     if (hasRestrictedWord)
@@ -136,7 +136,7 @@ export function TagManager({
       /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/, // 이메일
     ];
 
-    const hasPersonalInfo = personalInfoPatterns.some((pattern) =>
+    const hasPersonalInfo = personalInfoPatterns.some(pattern =>
       pattern.test(tag)
     );
     if (hasPersonalInfo)
@@ -179,13 +179,13 @@ export function TagManager({
   // 태그 제거 (보안 강화)
   const removeTag = (tagToRemove: string) => {
     if (enableSecurity) {
-      const secureTag = secureTags.find((t) => t.text === tagToRemove);
+      const secureTag = secureTags.find(t => t.text === tagToRemove);
       if (secureTag && !hasAccessToLevel(secureTag.privacyLevel)) {
         alert('이 태그를 삭제할 권한이 없습니다.');
         return;
       }
 
-      setSecureTags(secureTags.filter((t) => t.text !== tagToRemove));
+      setSecureTags(secureTags.filter(t => t.text !== tagToRemove));
       logSecurityAction(
         'tag_removed',
         tagToRemove,
@@ -193,7 +193,7 @@ export function TagManager({
       );
     }
 
-    onTagsChange(tags.filter((tag) => tag !== tagToRemove));
+    onTagsChange(tags.filter(tag => tag !== tagToRemove));
   };
 
   // 🔒 **추천 태그 추가**
@@ -218,8 +218,8 @@ export function TagManager({
   const getFilteredTags = () => {
     if (!enableSecurity || filterLevel === 'all') return tags;
 
-    return tags.filter((tag) => {
-      const secureTag = secureTags.find((st) => st.text === tag);
+    return tags.filter(tag => {
+      const secureTag = secureTags.find(st => st.text === tag);
       return (
         secureTag?.privacyLevel === filterLevel &&
         hasAccessToLevel(secureTag.privacyLevel)
@@ -231,7 +231,7 @@ export function TagManager({
   const getSecurityBadge = (tag: string) => {
     if (!enableSecurity) return null;
 
-    const secureTag = secureTags.find((st) => st.text === tag);
+    const secureTag = secureTags.find(st => st.text === tag);
     if (!secureTag) return null;
 
     const badges = {
@@ -248,7 +248,7 @@ export function TagManager({
   const getCategoryBadge = (tag: string) => {
     if (!enableSecurity) return null;
 
-    const secureTag = secureTags.find((st) => st.text === tag);
+    const secureTag = secureTags.find(st => st.text === tag);
     if (!secureTag?.category || secureTag.category === 'other') return null;
 
     const categoryIcons = {
@@ -382,7 +382,7 @@ export function TagManager({
                   <span
                     className={
                       enableSecurity &&
-                      secureTags.find((st) => st.text === tag)?.isEncrypted
+                      secureTags.find(st => st.text === tag)?.isEncrypted
                         ? 'blur-sm hover:blur-none'
                         : ''
                     }
@@ -400,12 +400,12 @@ export function TagManager({
                   <div className="text-xs">
                     <div>
                       레벨:{' '}
-                      {secureTags.find((st) => st.text === tag)?.privacyLevel ||
+                      {secureTags.find(st => st.text === tag)?.privacyLevel ||
                         'public'}
                     </div>
                     <div>
                       카테고리:{' '}
-                      {secureTags.find((st) => st.text === tag)?.category ||
+                      {secureTags.find(st => st.text === tag)?.category ||
                         'other'}
                     </div>
                   </div>
@@ -420,7 +420,7 @@ export function TagManager({
       <div className="flex gap-2">
         <Input
           value={newTag}
-          onChange={(e) => setNewTag(e.target.value)}
+          onChange={e => setNewTag(e.target.value)}
           placeholder={placeholder}
           onKeyPress={handleKeyPress}
           className="max-w-xs"
@@ -443,7 +443,7 @@ export function TagManager({
           <Label className="text-sm text-muted-foreground">추천 태그</Label>
           <div className="flex flex-wrap gap-1">
             {suggestedTags
-              .filter((tag) => !tags.includes(tag))
+              .filter(tag => !tags.includes(tag))
               .slice(0, 10)
               .map((tag, index) => (
                 <Button

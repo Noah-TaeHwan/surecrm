@@ -33,8 +33,8 @@ SureCRM은 하이브리드 인증 시스템을 사용합니다:
     <title>SureCRM 회원가입 인증</title>
     <style>
       body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
-          sans-serif;
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
         line-height: 1.6;
         color: #333;
         max-width: 600px;
@@ -137,8 +137,8 @@ SureCRM은 하이브리드 인증 시스템을 사용합니다:
     <title>SureCRM 로그인 링크</title>
     <style>
       body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
-          sans-serif;
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
         line-height: 1.6;
         color: #333;
         max-width: 600px;

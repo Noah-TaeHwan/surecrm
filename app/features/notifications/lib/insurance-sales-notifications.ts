@@ -22,7 +22,7 @@ export async function createContractClosingAlerts(agentId: string) {
       .where(eq(pipelineStages.agentId, agentId));
 
     const contractStage = stages.find(
-      (s) =>
+      s =>
         s.name.includes('계약') ||
         s.name.includes('체결') ||
         s.name.includes('완료')
@@ -121,7 +121,7 @@ export async function createHotLeadAlerts(agentId: string) {
       .where(eq(pipelineStages.agentId, agentId));
 
     const contractStage = stages.find(
-      (s) =>
+      s =>
         s.name.includes('계약') ||
         s.name.includes('체결') ||
         s.name.includes('완료')
@@ -205,7 +205,7 @@ export async function createMonthEndPressureAlerts(agentId: string) {
       .where(eq(pipelineStages.agentId, agentId));
 
     const contractStage = stages.find(
-      (s) =>
+      s =>
         s.name.includes('계약') ||
         s.name.includes('체결') ||
         s.name.includes('완료')
@@ -242,7 +242,7 @@ export async function createMonthEndPressureAlerts(agentId: string) {
         );
 
       nearContractClients = allActiveClients.filter(
-        (c) => c.currentStageId !== contractStage.id
+        c => c.currentStageId !== contractStage.id
       ).length;
     }
 
@@ -310,7 +310,7 @@ export async function createExistingClientCareAlerts(agentId: string) {
       .where(eq(pipelineStages.agentId, agentId));
 
     const contractStage = stages.find(
-      (s) =>
+      s =>
         s.name.includes('계약') ||
         s.name.includes('체결') ||
         s.name.includes('완료')
@@ -403,8 +403,8 @@ export async function createExistingClientCareAlerts(agentId: string) {
             careType: title.includes('생일')
               ? 'birthday'
               : title.includes('갱신')
-              ? 'renewal'
-              : 'relationship',
+                ? 'renewal'
+                : 'relationship',
           },
         });
       }

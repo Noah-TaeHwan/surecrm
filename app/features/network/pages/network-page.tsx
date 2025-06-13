@@ -121,7 +121,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 
       // 소개한 고객들 찾기
       const referredClients = clientsWithDetails.filter(
-        (c) => c.referredById === client.id
+        c => c.referredById === client.id
       );
       referralData.set(client.id, {
         referredBy: client.referredById
@@ -315,9 +315,9 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
   // 실제 네트워크 데이터 사용 - useMemo로 최적화
   const networkData = useMemo(() => {
     return {
-      nodes: nodes.map((node) => {
+      nodes: nodes.map(node => {
         // 실제 고객 데이터에서 영업 단계 정보 찾기
-        const clientData = clientsData.find((client) => client.id === node.id);
+        const clientData = clientsData.find(client => client.id === node.id);
 
         return {
           id: node.id,
@@ -328,15 +328,15 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
             node.importance === 'high'
               ? 5
               : node.importance === 'medium'
-              ? 3
-              : 1,
+                ? 3
+                : 1,
           // 🎯 실제 고객의 영업 단계 사용 (fallback: 기존 로직)
           stage:
             clientData?.stageName ||
             (node.status === 'active' ? '계약 완료' : '첫 상담'),
         };
       }),
-      links: edges.map((edge) => ({
+      links: edges.map(edge => ({
         source: edge.source,
         target: edge.target,
         value: edge.strength,
@@ -358,10 +358,10 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
     if (isBrowser && !NetworkGraphComponent) {
       // 동적 import 사용 (브라우저 환경에서 작동)
       import('../components/NetworkGraphClient')
-        .then((module) => {
+        .then(module => {
           setNetworkGraphComponent(() => module.default);
         })
-        .catch((err) => {
+        .catch(err => {
           console.error('네트워크 그래프 로딩 실패:', err);
           setGraphLoadError(true);
         });
@@ -386,12 +386,10 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
 
       // 실시간 검색 - 노드 이름으로 필터링
       const results = nodes
-        .filter((node) => node.name.toLowerCase().includes(query.toLowerCase()))
-        .map((node) => {
+        .filter(node => node.name.toLowerCase().includes(query.toLowerCase()))
+        .map(node => {
           // 실제 고객 데이터에서 영업 단계 정보 찾기
-          const clientData = clientsData.find(
-            (client) => client.id === node.id
-          );
+          const clientData = clientsData.find(client => client.id === node.id);
 
           return {
             id: node.id,
@@ -405,8 +403,8 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
               node.importance === 'high'
                 ? 5
                 : node.importance === 'medium'
-                ? 3
-                : 1,
+                  ? 3
+                  : 1,
           };
         })
         .slice(0, 10); // 최대 10개 결과
@@ -423,7 +421,7 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
 
       // 그래프에서 해당 노드로 이동
       if (graphRef.current && typeof graphRef.current.centerAt === 'function') {
-        const node = nodes.find((n) => n.id === nodeId);
+        const node = nodes.find(n => n.id === nodeId);
         if (node && node.position) {
           // 노드 위치로 부드럽게 이동
           graphRef.current.centerAt(node.position.x, node.position.y, 1000);
@@ -445,19 +443,19 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
     // 영업 단계별 필터링
     if (filterSettings.stageFilter !== 'all') {
       filteredNodes = filteredNodes.filter(
-        (node) => node.stage === filterSettings.stageFilter
+        node => node.stage === filterSettings.stageFilter
       );
     }
 
     // 중요도 기준 필터링
     if (filterSettings.importanceFilter !== 'all') {
-      filteredNodes = filteredNodes.filter((node) => {
+      filteredNodes = filteredNodes.filter(node => {
         const nodeImportance =
           node.importance === 5
             ? 'high'
             : node.importance === 3
-            ? 'medium'
-            : 'low';
+              ? 'medium'
+              : 'low';
         return nodeImportance === filterSettings.importanceFilter;
       });
     }
@@ -468,9 +466,9 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
 
       // 우선 모든 영향력 있는 사용자(influencer) 식별
       const influencers = networkData.nodes.filter(
-        (node) => node.group === 'influencer'
+        node => node.group === 'influencer'
       );
-      influencers.forEach((influencer) =>
+      influencers.forEach(influencer =>
         influencersAndConnections.add(influencer.id)
       );
 
@@ -482,18 +480,18 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
           typeof link.target === 'string' ? link.target : link.target.id;
 
         // 소스가 influencer인 경우 타겟 노드 추가
-        if (influencers.some((inf) => inf.id === sourceId)) {
+        if (influencers.some(inf => inf.id === sourceId)) {
           influencersAndConnections.add(targetId);
         }
 
         // 타겟이 influencer인 경우 소스 노드 추가
-        if (influencers.some((inf) => inf.id === targetId)) {
+        if (influencers.some(inf => inf.id === targetId)) {
           influencersAndConnections.add(sourceId);
         }
       });
 
       // 핵심 소개자와 그들의 연결 노드만 남김
-      filteredNodes = filteredNodes.filter((node) =>
+      filteredNodes = filteredNodes.filter(node =>
         influencersAndConnections.has(node.id)
       );
     }
@@ -521,7 +519,7 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
         const directConnectionNodes = new Set();
 
         // 영향력 있는 사용자(influencer)와 그들의 직접 연결 노드만 선택
-        filteredNodes.forEach((node) => {
+        filteredNodes.forEach(node => {
           if (node.group === 'influencer') {
             directConnectionNodes.add(node.id);
             const connections = nodeConnections.get(node.id);
@@ -533,7 +531,7 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
           }
         });
 
-        filteredNodes = filteredNodes.filter((node) =>
+        filteredNodes = filteredNodes.filter(node =>
           directConnectionNodes.has(node.id)
         );
       }
@@ -542,13 +540,13 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
     // 검색어 필터링 (검색어가 있는 경우)
     if (searchQuery.trim()) {
       const lowerQuery = searchQuery.toLowerCase().trim();
-      filteredNodes = filteredNodes.filter((node) =>
+      filteredNodes = filteredNodes.filter(node =>
         node.name.toLowerCase().includes(lowerQuery)
       );
     }
 
     // 필터링된 노드ID 목록
-    const filteredNodeIds = new Set(filteredNodes.map((node) => node.id));
+    const filteredNodeIds = new Set(filteredNodes.map(node => node.id));
 
     // 링크 필터링 (양쪽 노드가 모두 필터링된 결과에 있는 경우만 포함)
     const filteredLinks = networkData.links.filter((link: NetworkLink) => {
@@ -572,7 +570,7 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
 
     // 에이전트 노드 제외한 실제 고객 노드들
     const clientNodes = nodes.filter(
-      (n) => n.type !== 'agent' && n.group !== 'influencer'
+      n => n.type !== 'agent' && n.group !== 'influencer'
     );
 
     // 최대 레벨 계산 (소개 체인 깊이)
@@ -592,14 +590,14 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
     const referralCounts = new Map();
 
     // 각 노드의 소개 횟수 계산
-    links.forEach((link) => {
+    links.forEach(link => {
       const sourceId =
         typeof link.source === 'string' ? link.source : (link.source as any).id;
       const sourceName =
-        nodes.find((n) => n.id === sourceId)?.name || '알 수 없음';
+        nodes.find(n => n.id === sourceId)?.name || '알 수 없음';
 
       // 에이전트가 아닌 경우만 카운트
-      if (nodes.find((n) => n.id === sourceId)?.type !== 'agent') {
+      if (nodes.find(n => n.id === sourceId)?.type !== 'agent') {
         referralCounts.set(sourceId, {
           id: sourceId,
           name: sourceName,
@@ -617,7 +615,7 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
       totalNodes: nodes.length,
       filteredNodes: filteredData.nodes.length,
       influencerCount: filteredData.nodes.filter(
-        (n) => n.group === 'influencer' || n.type === 'agent'
+        n => n.group === 'influencer' || n.type === 'agent'
       ).length,
       connectionCount: filteredData.links.length,
       maxDepth: maxLevel,

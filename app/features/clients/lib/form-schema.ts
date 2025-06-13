@@ -8,7 +8,7 @@ export const clientFormSchema = z.object({
   phone: z
     .string()
     .optional()
-    .refine((val) => {
+    .refine(val => {
       if (!val || val.trim() === '') return true; // 빈 값 허용
       return /^010-\d{4}-\d{4}$/.test(val); // 값이 있으면 형식 검증
     }, '올바른 전화번호 형식이 아닙니다 (010-0000-0000)'),
@@ -45,7 +45,7 @@ export const clientBasicInfoSchema = z.object({
   phone: z
     .string()
     .optional()
-    .refine((val) => {
+    .refine(val => {
       if (!val || val.trim() === '') return true; // 빈 값 허용
       return /^010-\d{4}-\d{4}$/.test(val); // 값이 있으면 형식 검증
     }, '올바른 전화번호 형식이 아닙니다'),
@@ -191,15 +191,13 @@ export const clientFormOptions = {
 
 // 기존 호환성을 위한 export
 export const formOptions = clientFormOptions;
-export const stageOptions = clientFormOptions.stages.map((stage) => ({
+export const stageOptions = clientFormOptions.stages.map(stage => ({
   value: stage,
   label: stage,
 }));
 export const importanceOptions = clientFormOptions.importance;
 export const insuranceTypeOptions = clientFormOptions.insuranceTypes;
-export const vehicleTypeOptions = clientFormOptions.vehicleTypes.map(
-  (type) => ({
-    value: type.toLowerCase().replace(/\s+/g, '_'),
-    label: type,
-  })
-);
+export const vehicleTypeOptions = clientFormOptions.vehicleTypes.map(type => ({
+  value: type.toLowerCase().replace(/\s+/g, '_'),
+  label: type,
+}));

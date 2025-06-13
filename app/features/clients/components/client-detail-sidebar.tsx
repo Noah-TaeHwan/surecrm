@@ -100,9 +100,7 @@ export function ClientDetailSidebar({
                 </label>
                 <Input
                   value={editFormData.fullName}
-                  onChange={(e) =>
-                    onEditFormChange({ fullName: e.target.value })
-                  }
+                  onChange={e => onEditFormChange({ fullName: e.target.value })}
                   className="text-center text-lg font-semibold"
                   placeholder="고객명"
                 />
@@ -121,7 +119,7 @@ export function ClientDetailSidebar({
                     <SelectValue placeholder="중요도" />
                   </SelectTrigger>
                   <SelectContent>
-                    {IMPORTANCE_OPTIONS.map((option) => (
+                    {IMPORTANCE_OPTIONS.map(option => (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}
                       </SelectItem>
@@ -153,7 +151,7 @@ export function ClientDetailSidebar({
               {isEditing ? (
                 <Input
                   value={editFormData.phone}
-                  onChange={(e) => onEditFormChange({ phone: e.target.value })}
+                  onChange={e => onEditFormChange({ phone: e.target.value })}
                   placeholder="전화번호"
                   className="text-sm"
                 />
@@ -168,7 +166,7 @@ export function ClientDetailSidebar({
               {isEditing ? (
                 <Input
                   value={editFormData.email}
-                  onChange={(e) => onEditFormChange({ email: e.target.value })}
+                  onChange={e => onEditFormChange({ email: e.target.value })}
                   placeholder="email@example.com"
                   type="email"
                   className="text-sm"
@@ -194,9 +192,7 @@ export function ClientDetailSidebar({
               {isEditing ? (
                 <Textarea
                   value={editFormData.address}
-                  onChange={(e) =>
-                    onEditFormChange({ address: e.target.value })
-                  }
+                  onChange={e => onEditFormChange({ address: e.target.value })}
                   placeholder="주소를 입력하세요"
                   className="text-sm min-h-[60px] resize-none"
                 />
@@ -221,7 +217,7 @@ export function ClientDetailSidebar({
               {isEditing ? (
                 <Input
                   value={editFormData.occupation}
-                  onChange={(e) =>
+                  onChange={e =>
                     onEditFormChange({ occupation: e.target.value })
                   }
                   placeholder="직업"
@@ -249,7 +245,7 @@ export function ClientDetailSidebar({
               {isEditing ? (
                 <Select
                   value={editFormData.telecomProvider}
-                  onValueChange={(value) =>
+                  onValueChange={value =>
                     onEditFormChange({ telecomProvider: value })
                   }
                 >
@@ -271,16 +267,16 @@ export function ClientDetailSidebar({
                   {client?.telecomProvider === 'skt'
                     ? 'SKT'
                     : client?.telecomProvider === 'kt'
-                    ? 'KT'
-                    : client?.telecomProvider === 'lgu'
-                    ? 'LG U+'
-                    : client?.telecomProvider === 'skt-budget'
-                    ? 'SKT 알뜰폰'
-                    : client?.telecomProvider === 'kt-budget'
-                    ? 'KT 알뜰폰'
-                    : client?.telecomProvider === 'lgu-budget'
-                    ? 'LG U+ 알뜰폰'
-                    : '정보 없음'}
+                      ? 'KT'
+                      : client?.telecomProvider === 'lgu'
+                        ? 'LG U+'
+                        : client?.telecomProvider === 'skt-budget'
+                          ? 'SKT 알뜰폰'
+                          : client?.telecomProvider === 'kt-budget'
+                            ? 'KT 알뜰폰'
+                            : client?.telecomProvider === 'lgu-budget'
+                              ? 'LG U+ 알뜰폰'
+                              : '정보 없음'}
                 </span>
               )}
             </div>
@@ -317,7 +313,7 @@ export function ClientDetailSidebar({
                 <Input
                   type="number"
                   value={editFormData.height}
-                  onChange={(e) => onEditFormChange({ height: e.target.value })}
+                  onChange={e => onEditFormChange({ height: e.target.value })}
                   placeholder="170"
                   className="text-sm"
                 />
@@ -346,7 +342,7 @@ export function ClientDetailSidebar({
                 <Input
                   type="number"
                   value={editFormData.weight}
-                  onChange={(e) => onEditFormChange({ weight: e.target.value })}
+                  onChange={e => onEditFormChange({ weight: e.target.value })}
                   placeholder="70"
                   className="text-sm"
                 />
@@ -398,7 +394,7 @@ export function ClientDetailSidebar({
                   <input
                     type="checkbox"
                     checked={editFormData.hasDrivingLicense}
-                    onChange={(e) =>
+                    onChange={e =>
                       onEditFormChange({ hasDrivingLicense: e.target.checked })
                     }
                     className="rounded"
@@ -445,7 +441,7 @@ export function ClientDetailSidebar({
                         type="text"
                         placeholder="YYMMDD"
                         value={editFormData.ssnFront}
-                        onChange={(e) => {
+                        onChange={e => {
                           const value = e.target.value
                             .replace(/\D/g, '')
                             .slice(0, 6);
@@ -461,7 +457,7 @@ export function ClientDetailSidebar({
                         type="text"
                         placeholder="1●●●●●●"
                         value={editFormData.ssnBack}
-                        onChange={(e) => {
+                        onChange={e => {
                           const value = e.target.value
                             .replace(/\D/g, '')
                             .slice(0, 7);
@@ -523,7 +519,7 @@ export function ClientDetailSidebar({
             {isEditing ? (
               <Textarea
                 value={editFormData.notes}
-                onChange={(e) => onEditFormChange({ notes: e.target.value })}
+                onChange={e => onEditFormChange({ notes: e.target.value })}
                 placeholder="고객에 대한 메모를 입력하세요..."
                 className="min-h-[80px] text-sm resize-none"
               />

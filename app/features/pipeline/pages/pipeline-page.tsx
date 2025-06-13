@@ -73,7 +73,7 @@ export async function loader({ request }: Route.LoaderArgs) {
       );
 
       const clientsWithProducts = await Promise.all(
-        allClients.map(async (client) => {
+        allClients.map(async client => {
           try {
             const productsResult = await getOpportunityProductsByClient(
               client.id,
@@ -179,15 +179,15 @@ export async function action({ request }: Route.ActionArgs) {
         tags: formData.get('tags')
           ? (formData.get('tags') as string)
               .split(',')
-              .map((tag) => tag.trim())
-              .filter((tag) => tag.length > 0)
+              .map(tag => tag.trim())
+              .filter(tag => tag.length > 0)
           : [],
         notes: (formData.get('notes') as string) || undefined,
       };
 
       // 첫 상담 단계 찾기
       const stages = await getPipelineStages(user.id);
-      const firstStage = stages.find((s) => s.name === '첫 상담') || stages[0];
+      const firstStage = stages.find(s => s.name === '첫 상담') || stages[0];
 
       if (!firstStage) {
         return {
@@ -284,7 +284,7 @@ export async function action({ request }: Route.ActionArgs) {
 
       // 첫 상담 단계 찾기
       const stages = await getPipelineStages(user.id);
-      const firstStage = stages.find((s) => s.name === '첫 상담') || stages[0];
+      const firstStage = stages.find(s => s.name === '첫 상담') || stages[0];
 
       if (!firstStage) {
         return {
@@ -416,7 +416,7 @@ export async function action({ request }: Route.ActionArgs) {
 
       // 🎯 "제외됨" 단계 찾기 또는 생성
       const stages = await getPipelineStages(user.id);
-      let excludedStage = stages.find((s) => s.name === '제외됨');
+      let excludedStage = stages.find(s => s.name === '제외됨');
 
       if (!excludedStage) {
         // "제외됨" 단계가 없으면 생성
@@ -571,14 +571,14 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
             stages.length > 5
               ? 'advanced'
               : stages.length > 2
-              ? 'intermediate'
-              : 'beginner',
+                ? 'intermediate'
+                : 'beginner',
           pipeline_maturity:
             clients.length > 50
               ? 'mature'
               : clients.length > 20
-              ? 'growing'
-              : 'early',
+                ? 'growing'
+                : 'early',
         },
       });
     }
@@ -619,14 +619,14 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
               stages.length >= 5
                 ? 'advanced'
                 : stages.length >= 3
-                ? 'standard'
-                : 'basic',
+                  ? 'standard'
+                  : 'basic',
             scale_readiness:
               clients.length > 100
                 ? 'enterprise'
                 : clients.length > 30
-                ? 'growth'
-                : 'startup',
+                  ? 'growth'
+                  : 'startup',
           },
         },
         user_intelligence: {
@@ -941,9 +941,9 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
   const submitError = addClientFetcher.data?.error || null;
 
   // 필터링된 고객 목록
-  const filteredClients = clients.filter((client) => {
+  const filteredClients = clients.filter(client => {
     // "제외됨" 단계의 고객들은 칸반보드에 표시하지 않음
-    const stage = stages.find((s) => s.id === client.stageId);
+    const stage = stages.find(s => s.id === client.stageId);
     if (stage && stage.name === '제외됨') {
       return false;
     }
@@ -968,7 +968,7 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
 
   // 소개자 후보 목록 생성 (모든 기존 고객이 소개자가 될 수 있음)
   const potentialReferrers = clients
-    .map((client) => ({
+    .map(client => ({
       id: client.id,
       name: client.name,
     }))
@@ -980,26 +980,26 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
     const totalAllClientsCount = totalAllClients; // 파이프라인에 없는 고객 포함
 
     // 2. 영업 파이프라인 관리 중인 고객 (제외됨 단계 제외)
-    const pipelineClients = clients.filter((client) => {
-      const stage = stages.find((s) => s.id === client.stageId);
+    const pipelineClients = clients.filter(client => {
+      const stage = stages.find(s => s.id === client.stageId);
       return stage && stage.name !== '제외됨';
     }).length;
 
     // 3. 계약 완료 고객 (실제 성과) - 제외됨 단계 제외
-    const contractedClients = clients.filter((client) => {
-      const stage = stages.find((s) => s.id === client.stageId);
+    const contractedClients = clients.filter(client => {
+      const stage = stages.find(s => s.id === client.stageId);
       return stage && stage.name === '계약 완료';
     }).length;
 
     // 4. 고가치 고객 (키맨 고객) - 제외됨 단계 제외
-    const highValueClients = clients.filter((client) => {
-      const stage = stages.find((s) => s.id === client.stageId);
+    const highValueClients = clients.filter(client => {
+      const stage = stages.find(s => s.id === client.stageId);
       return client.importance === 'high' && stage && stage.name !== '제외됨';
     }).length;
 
     // 5. 전환율 계산 (보고서와 동일한 로직: 실제 계약이 있는 고객 / 영업 기회가 있는 고객)
-    const clientsWithOpportunities = clients.filter((client) => {
-      const stage = stages.find((s) => s.id === client.stageId);
+    const clientsWithOpportunities = clients.filter(client => {
+      const stage = stages.find(s => s.id === client.stageId);
       return (
         stage &&
         stage.name !== '제외됨' &&
@@ -1008,8 +1008,8 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
       );
     }).length;
 
-    const clientsWithContracts = clients.filter((client) => {
-      const stage = stages.find((s) => s.id === client.stageId);
+    const clientsWithContracts = clients.filter(client => {
+      const stage = stages.find(s => s.id === client.stageId);
       return stage && stage.name === '계약 완료';
     }).length;
 
@@ -1034,11 +1034,11 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
   // 각 단계별 고객 수와 중요 고객 수 계산
   const getStageStats = (stageId: string) => {
     const stageClients = filteredClients.filter(
-      (client) => client.stageId === stageId
+      client => client.stageId === stageId
     );
     const clientCount = stageClients.length;
     const highImportanceCount = stageClients.filter(
-      (client) => client.importance === 'high'
+      client => client.importance === 'high'
     ).length;
 
     return { clientCount, highImportanceCount };
@@ -1194,11 +1194,11 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
   const totalStats = getTotalStats();
 
   // 기존 고객 목록 (영업 기회 생성용)
-  const existingClientsForOpportunity = clients.map((client) => ({
+  const existingClientsForOpportunity = clients.map(client => ({
     id: client.id,
     name: client.name,
     phone: client.phone,
-    currentStage: stages.find((s) => s.id === client.stageId)?.name,
+    currentStage: stages.find(s => s.id === client.stageId)?.name,
   }));
 
   // 🎯 모달 제출 완료 후 모달 닫기 (성공한 새 제출에 대해서만)
@@ -1359,7 +1359,7 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
                   type="search"
                   placeholder="고객명, 전화번호 검색..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={e => setSearchQuery(e.target.value)}
                   className="pl-10 w-full"
                   autoComplete="off"
                 />
@@ -1381,8 +1381,8 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
                       {selectedImportance === 'high'
                         ? '높음'
                         : selectedImportance === 'medium'
-                        ? '보통'
-                        : '낮음'}
+                          ? '보통'
+                          : '낮음'}
                     </Badge>
                   )}
                   {selectedReferrerId && (
@@ -1390,7 +1390,7 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
                       소개자:{' '}
                       {
                         potentialReferrers.find(
-                          (r) => r.id === selectedReferrerId
+                          r => r.id === selectedReferrerId
                         )?.name
                       }
                     </Badge>
@@ -1459,7 +1459,7 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
         {/* 🎯 칸반보드 메인 콘텐츠 */}
         <div className="min-h-[600px]">
           <PipelineBoard
-            stages={stages.map((stage) => ({
+            stages={stages.map(stage => ({
               ...stage,
               stats: getStageStats(stage.id),
             }))}

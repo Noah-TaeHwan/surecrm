@@ -101,7 +101,7 @@ export default function CalendarPage({
 
       if (success) {
         // 해결된 충돌을 목록에서 제거
-        setConflicts((prev) => prev.filter((c) => c.eventId !== eventId));
+        setConflicts(prev => prev.filter(c => c.eventId !== eventId));
         console.log(`✅ 충돌 해결 완료: ${eventId} -> ${resolution}`);
       } else {
         console.error('충돌 해결 실패');
@@ -253,7 +253,7 @@ export default function CalendarPage({
           <div className="flex items-center gap-4">
             <Tabs
               value={viewMode}
-              onValueChange={(v) => setViewMode(v as ViewMode)}
+              onValueChange={v => setViewMode(v as ViewMode)}
             >
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="month">월</TabsTrigger>

@@ -286,10 +286,10 @@ function KPICard({
                       achievementRate >= 100
                         ? 'text-green-600'
                         : achievementRate >= 80
-                        ? 'text-blue-600'
-                        : achievementRate >= 60
-                        ? 'text-yellow-600'
-                        : 'text-red-600'
+                          ? 'text-blue-600'
+                          : achievementRate >= 60
+                            ? 'text-yellow-600'
+                            : 'text-red-600'
                     )}
                   >
                     목표: {formatValue(target)}

@@ -56,8 +56,8 @@ export function useBusinessIntelligence(config: Partial<BusinessConfig> = {}) {
             intelligence.engagementDepth > 7
               ? 'high'
               : intelligence.engagementDepth > 4
-              ? 'medium'
-              : 'low',
+                ? 'medium'
+                : 'low',
           intentPrediction: intelligence.intentPrediction,
           valueSegment: profile.valueSegment,
           churnRisk: intelligence.churnRisk,
@@ -129,14 +129,14 @@ export function useBusinessIntelligence(config: Partial<BusinessConfig> = {}) {
 
     if (!intelligence || !profile) return [];
 
-    return intelligence.personalizedRecommendations.map((rec) => ({
+    return intelligence.personalizedRecommendations.map(rec => ({
       type: rec,
       priority:
         profile.valueSegment === 'premium'
           ? 'high'
           : profile.valueSegment === 'standard'
-          ? 'medium'
-          : 'low',
+            ? 'medium'
+            : 'low',
       targeting: {
         segment: profile.valueSegment,
         engagement: intelligence.engagementDepth,

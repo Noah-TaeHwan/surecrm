@@ -143,7 +143,7 @@ export function NewOpportunityModal({
   };
 
   const selectedInsurance = insuranceTypes.find(
-    (type) => type.id === selectedType
+    type => type.id === selectedType
   );
 
   return (
@@ -173,7 +173,7 @@ export function NewOpportunityModal({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {insuranceTypes.map((insurance) => (
+              {insuranceTypes.map(insurance => (
                 <Card
                   key={insurance.id}
                   className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
@@ -254,7 +254,7 @@ export function NewOpportunityModal({
                     </label>
                     <Input
                       value={productName}
-                      onChange={(e) => setProductName(e.target.value)}
+                      onChange={e => setProductName(e.target.value)}
                       placeholder="예: 무배당 통합보험"
                     />
                   </div>
@@ -265,7 +265,7 @@ export function NewOpportunityModal({
                     </label>
                     <Input
                       value={insuranceCompany}
-                      onChange={(e) => setInsuranceCompany(e.target.value)}
+                      onChange={e => setInsuranceCompany(e.target.value)}
                       placeholder="예: 삼성화재, 현대해상"
                     />
                   </div>
@@ -280,7 +280,7 @@ export function NewOpportunityModal({
                       <Input
                         type="number"
                         value={monthlyPremium}
-                        onChange={(e) => setMonthlyPremium(e.target.value)}
+                        onChange={e => setMonthlyPremium(e.target.value)}
                         placeholder="0"
                         className="pr-8"
                       />
@@ -299,7 +299,7 @@ export function NewOpportunityModal({
                       <Input
                         type="number"
                         value={expectedCommission}
-                        onChange={(e) => setExpectedCommission(e.target.value)}
+                        onChange={e => setExpectedCommission(e.target.value)}
                         placeholder="0"
                         className="pr-8"
                       />
@@ -318,7 +318,7 @@ export function NewOpportunityModal({
                 </label>
                 <Textarea
                   value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
+                  onChange={e => setNotes(e.target.value)}
                   placeholder={`${clientName} 고객의 ${selectedInsurance?.name} 영업에 대한 메모를 입력하세요...\n\n예시:\n- 고객 관심사: 보험료 부담 최소화\n- 기존 보험: 타사 자동차보험 가입 중\n- 영업 전략: 기존 보험과 비교 견적 제시`}
                   className="min-h-[100px] resize-none"
                 />

@@ -28,7 +28,7 @@ const passwordSchema = z
     newPassword: z.string().min(8, '새 비밀번호는 8자 이상이어야 합니다'),
     confirmPassword: z.string(),
   })
-  .refine((data) => data.newPassword === data.confirmPassword, {
+  .refine(data => data.newPassword === data.confirmPassword, {
     message: '비밀번호가 일치하지 않습니다',
     path: ['confirmPassword'],
   });

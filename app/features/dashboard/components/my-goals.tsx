@@ -65,7 +65,7 @@ export function MyGoals({
   const currentYear = new Date().getFullYear();
 
   // 보고 있는 월의 목표 필터링
-  const viewingMonthGoals = currentGoals.filter((goal) => {
+  const viewingMonthGoals = currentGoals.filter(goal => {
     const goalYear = new Date(goal.startDate).getFullYear();
     const goalMonth = new Date(goal.startDate).getMonth() + 1;
     return goalYear === viewingYear && goalMonth === viewingMonth;
@@ -247,7 +247,7 @@ export function MyGoals({
                         : `${viewingYear}년 ${viewingMonth}월 목표`}
                     </span>
                   </div>
-                  {viewingMonthGoals.map((goal) => (
+                  {viewingMonthGoals.map(goal => (
                     <div
                       key={goal.id}
                       className={`p-3 border rounded-lg transition-colors ${
@@ -340,7 +340,7 @@ export function MyGoals({
                       <p className="text-lg text-muted-foreground">달성 완료</p>
                       <p className="text-lg font-medium text-green-600">
                         {
-                          viewingMonthGoals.filter((g) => g.progress >= 100)
+                          viewingMonthGoals.filter(g => g.progress >= 100)
                             .length
                         }
                         개
@@ -351,10 +351,7 @@ export function MyGoals({
                         {isCurrentMonth ? '진행 중' : '미달성'}
                       </p>
                       <p className="text-lg font-medium text-primary">
-                        {
-                          viewingMonthGoals.filter((g) => g.progress < 100)
-                            .length
-                        }
+                        {viewingMonthGoals.filter(g => g.progress < 100).length}
                         개
                       </p>
                     </div>

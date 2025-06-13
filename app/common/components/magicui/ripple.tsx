@@ -59,7 +59,7 @@ export function Ripple({
       const rippleSize = size > 0 ? size : containerSize * 2;
 
       // Add a new ripple
-      setRipples((prevRipples) => [
+      setRipples(prevRipples => [
         ...prevRipples,
         { x, y, size: rippleSize, id: nextId.current },
       ]);
@@ -78,7 +78,7 @@ export function Ripple({
     if (ripples.length === 0) return;
 
     const timeoutId = setTimeout(() => {
-      setRipples((prevRipples) => prevRipples.slice(1));
+      setRipples(prevRipples => prevRipples.slice(1));
     }, duration);
 
     return () => clearTimeout(timeoutId);
@@ -90,7 +90,7 @@ export function Ripple({
       className={cn('absolute inset-0 overflow-hidden', className)}
       style={{ WebkitTapHighlightColor: 'transparent' }}
     >
-      {ripples.map((ripple) => (
+      {ripples.map(ripple => (
         <span
           key={ripple.id}
           style={{

@@ -303,8 +303,8 @@ export function ClientDetailHeader({
                   privacyLevel === 'confidential'
                     ? 'destructive'
                     : privacyLevel === 'private'
-                    ? 'default'
-                    : 'outline'
+                      ? 'default'
+                      : 'outline'
                 }
                 className="text-xs"
               >
@@ -577,7 +577,7 @@ export function ClientDetailHeader({
               <div className="space-y-3">
                 <Textarea
                   value={noteValue}
-                  onChange={(e) => setNoteValue(e.target.value)}
+                  onChange={e => setNoteValue(e.target.value)}
                   placeholder="고객에 대한 메모를 입력하세요..."
                   className="resize-none"
                   rows={4}

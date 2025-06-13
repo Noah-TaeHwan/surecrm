@@ -159,7 +159,7 @@ export function AdvancedCalendarSettings({
                     id="pastDays"
                     type="number"
                     value={settings.syncDateRange.pastDays}
-                    onChange={(e) =>
+                    onChange={e =>
                       updateSettings({
                         syncDateRange: {
                           ...settings.syncDateRange,
@@ -181,7 +181,7 @@ export function AdvancedCalendarSettings({
                     id="futureDays"
                     type="number"
                     value={settings.syncDateRange.futureDays}
-                    onChange={(e) =>
+                    onChange={e =>
                       updateSettings({
                         syncDateRange: {
                           ...settings.syncDateRange,
@@ -216,8 +216,8 @@ export function AdvancedCalendarSettings({
                   <Input
                     placeholder="예: 개인, private, 휴가"
                     value={newExcludePattern}
-                    onChange={(e) => setNewExcludePattern(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && addExcludePattern()}
+                    onChange={e => setNewExcludePattern(e.target.value)}
+                    onKeyPress={e => e.key === 'Enter' && addExcludePattern()}
                   />
                   <Button size="sm" onClick={addExcludePattern}>
                     <PlusIcon className="h-4 w-4" />
@@ -249,8 +249,8 @@ export function AdvancedCalendarSettings({
                   <Input
                     placeholder="예: 미팅, 상담, 회의"
                     value={newIncludePattern}
-                    onChange={(e) => setNewIncludePattern(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && addIncludePattern()}
+                    onChange={e => setNewIncludePattern(e.target.value)}
+                    onKeyPress={e => e.key === 'Enter' && addIncludePattern()}
                   />
                   <Button size="sm" onClick={addIncludePattern}>
                     <PlusIcon className="h-4 w-4" />
@@ -282,7 +282,7 @@ export function AdvancedCalendarSettings({
                 </div>
                 <Switch
                   checked={settings.excludeAllDayEvents}
-                  onCheckedChange={(checked) =>
+                  onCheckedChange={checked =>
                     updateSettings({ excludeAllDayEvents: checked })
                   }
                 />
@@ -308,7 +308,7 @@ export function AdvancedCalendarSettings({
                 </div>
                 <Switch
                   checked={settings.showGoogleEventsOnCalendar}
-                  onCheckedChange={(checked) =>
+                  onCheckedChange={checked =>
                     updateSettings({ showGoogleEventsOnCalendar: checked })
                   }
                 />
@@ -353,7 +353,7 @@ export function AdvancedCalendarSettings({
                 </div>
                 <Switch
                   checked={settings.notifyOnSyncConflicts}
-                  onCheckedChange={(checked) =>
+                  onCheckedChange={checked =>
                     updateSettings({ notifyOnSyncConflicts: checked })
                   }
                 />
@@ -368,7 +368,7 @@ export function AdvancedCalendarSettings({
                 </div>
                 <Switch
                   checked={settings.notifyOnSyncErrors}
-                  onCheckedChange={(checked) =>
+                  onCheckedChange={checked =>
                     updateSettings({ notifyOnSyncErrors: checked })
                   }
                 />
@@ -389,7 +389,7 @@ export function AdvancedCalendarSettings({
                 <Label htmlFor="autoSyncInterval">자동 동기화 간격 (분)</Label>
                 <Select
                   value={settings.autoSyncInterval.toString()}
-                  onValueChange={(value) =>
+                  onValueChange={value =>
                     updateSettings({ autoSyncInterval: parseInt(value) })
                   }
                 >
@@ -415,7 +415,7 @@ export function AdvancedCalendarSettings({
                   id="maxEventsPerSync"
                   type="number"
                   value={settings.maxEventsPerSync}
-                  onChange={(e) =>
+                  onChange={e =>
                     updateSettings({
                       maxEventsPerSync: parseInt(e.target.value) || 250,
                     })

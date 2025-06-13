@@ -135,7 +135,7 @@ function MoreButton({
   // 남은 미팅들의 시간 미리보기
   const previewTimes = meetings
     .slice(0, 3)
-    .map((m) => m.time)
+    .map(m => m.time)
     .join(', ');
 
   return (
@@ -162,7 +162,7 @@ export function CalendarGrid({
   // 필터링된 미팅
   const filteredMeetings =
     filteredTypes.length > 0
-      ? meetings.filter((meeting) => filteredTypes.includes(meeting.type))
+      ? meetings.filter(meeting => filteredTypes.includes(meeting.type))
       : meetings;
 
   // 필터링된 결과가 없는 경우 빈 상태 표시
@@ -242,7 +242,7 @@ export function CalendarGrid({
       const dateStr = `${selectedDate.getFullYear()}-${String(
         selectedDate.getMonth() + 1
       ).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-      const dayMeetings = filteredMeetings.filter((m) => m.date === dateStr);
+      const dayMeetings = filteredMeetings.filter(m => m.date === dateStr);
       const isToday = isCurrentMonth && today.getDate() === day;
       const isWeekend =
         new Date(
@@ -263,11 +263,14 @@ export function CalendarGrid({
       );
 
       // 📊 이벤트 소스별 카운트
-      const sourceCount = dayMeetings.reduce((acc, meeting) => {
-        const source = meeting.syncInfo?.externalSource || 'surecrm';
-        acc[source] = (acc[source] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>);
+      const sourceCount = dayMeetings.reduce(
+        (acc, meeting) => {
+          const source = meeting.syncInfo?.externalSource || 'surecrm';
+          acc[source] = (acc[source] || 0) + 1;
+          return acc;
+        },
+        {} as Record<string, number>
+      );
 
       days.push(
         <div
@@ -282,10 +285,10 @@ export function CalendarGrid({
             dayMeetings.length === 0
               ? 'h-32'
               : dayMeetings.length === 1
-              ? 'h-36'
-              : dayMeetings.length <= 3
-              ? 'h-40'
-              : 'h-44',
+                ? 'h-36'
+                : dayMeetings.length <= 3
+                  ? 'h-40'
+                  : 'h-44',
             dayMeetings.length > 0 && 'hover:scale-[1.01]'
           )}
           onClick={() => onDateClick?.(cellDate)}
@@ -338,19 +341,19 @@ export function CalendarGrid({
                 key={dayMeetings[0].id}
                 meeting={dayMeetings[0]}
                 compact={false}
-                onClick={(e) => {
+                onClick={e => {
                   e.stopPropagation();
                   onMeetingClick(dayMeetings[0]);
                 }}
               />
             ) : dayMeetings.length === 2 ? (
               // 2개: 둘 다 컴팩트로 표시
-              dayMeetings.map((meeting) => (
+              dayMeetings.map(meeting => (
                 <EventCard
                   key={meeting.id}
                   meeting={meeting}
                   compact={true}
-                  onClick={(e) => {
+                  onClick={e => {
                     e.stopPropagation();
                     onMeetingClick(meeting);
                   }}
@@ -360,12 +363,12 @@ export function CalendarGrid({
               // 3개: 시간순 정렬 후 모두 컴팩트로 표시
               dayMeetings
                 .sort((a, b) => a.time.localeCompare(b.time))
-                .map((meeting) => (
+                .map(meeting => (
                   <EventCard
                     key={meeting.id}
                     meeting={meeting}
                     compact={true}
-                    onClick={(e) => {
+                    onClick={e => {
                       e.stopPropagation();
                       onMeetingClick(meeting);
                     }}
@@ -377,12 +380,12 @@ export function CalendarGrid({
                 {dayMeetings
                   .sort((a, b) => a.time.localeCompare(b.time))
                   .slice(0, 2)
-                  .map((meeting) => (
+                  .map(meeting => (
                     <EventCard
                       key={meeting.id}
                       meeting={meeting}
                       compact={true}
-                      onClick={(e) => {
+                      onClick={e => {
                         e.stopPropagation();
                         onMeetingClick(meeting);
                       }}
@@ -391,7 +394,7 @@ export function CalendarGrid({
                 <MoreButton
                   count={dayMeetings.length - 2}
                   meetings={dayMeetings.slice(2)}
-                  onClick={(e) => {
+                  onClick={e => {
                     e.stopPropagation();
                     onDateClick?.(cellDate);
                   }}
@@ -406,7 +409,7 @@ export function CalendarGrid({
           )}
 
           {/* 🔄 동기화 충돌 전체 표시 */}
-          {dayMeetings.some((m) => m.syncInfo?.syncStatus === 'conflict') && (
+          {dayMeetings.some(m => m.syncInfo?.syncStatus === 'conflict') && (
             <div
               className="absolute bottom-2 right-2 w-3 h-3 bg-red-500 rounded-full animate-pulse border-2 border-white shadow-lg"
               title="동기화 충돌이 있는 이벤트가 있습니다"
@@ -453,8 +456,8 @@ export function CalendarGrid({
                 index === 0
                   ? 'text-red-500'
                   : index === 6
-                  ? 'text-blue-500'
-                  : 'text-foreground/80'
+                    ? 'text-blue-500'
+                    : 'text-foreground/80'
               )}
             >
               <div className="hidden lg:block">{day}</div>

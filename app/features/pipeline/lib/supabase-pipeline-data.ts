@@ -24,7 +24,7 @@ export async function getPipelineStages(agentId: string) {
       .orderBy(pipelineStages.order);
 
     // 🎯 "제외됨" 단계는 파이프라인 보드에서 숨김
-    return stages.filter((stage) => stage.name !== '제외됨');
+    return stages.filter(stage => stage.name !== '제외됨');
   } catch (error) {
     throw new Error('파이프라인 단계를 가져오는데 실패했습니다.');
   }
@@ -100,7 +100,7 @@ export async function getClientsByStage(agentId: string) {
 
     // 각 고객의 추가 정보 조회
     const enrichedClients = await Promise.all(
-      clientsData.map(async (item) => {
+      clientsData.map(async item => {
         try {
           // 추천인 정보
           let referredBy = null;

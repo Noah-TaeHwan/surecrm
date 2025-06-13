@@ -72,7 +72,7 @@ export default function BillingSubscribePage({
       console.log('구독 시작:', planId);
 
       // 임시 지연 (실제 API 호출 시뮬레이션)
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
       // 성공 후 대시보드로 이동 또는 성공 페이지 표시
       window.location.href = '/dashboard';

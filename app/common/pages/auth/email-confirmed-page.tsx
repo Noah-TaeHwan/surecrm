@@ -60,9 +60,8 @@ export async function loader({ request }: LoaderArgs) {
         if (invitationCode) {
           try {
             // 초대장 검증
-            const invitationValidation = await validateInvitationCode(
-              invitationCode
-            );
+            const invitationValidation =
+              await validateInvitationCode(invitationCode);
 
             if (invitationValidation.valid) {
               // 사용자 프로필 완성

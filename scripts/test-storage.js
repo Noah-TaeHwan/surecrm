@@ -29,12 +29,12 @@ async function testStorageConnection() {
       return false;
     }
 
-    console.log('✅ 버킷 목록:', buckets?.map((b) => b.name) || []);
+    console.log('✅ 버킷 목록:', buckets?.map(b => b.name) || []);
 
     const requiredBuckets = ['contract-attachments', 'client-documents'];
-    const existingBuckets = buckets?.map((b) => b.name) || [];
+    const existingBuckets = buckets?.map(b => b.name) || [];
     const missingBuckets = requiredBuckets.filter(
-      (bucket) => !existingBuckets.includes(bucket)
+      bucket => !existingBuckets.includes(bucket)
     );
 
     if (missingBuckets.length > 0) {
@@ -44,7 +44,7 @@ async function testStorageConnection() {
 -- 누락된 버킷 생성
 ${missingBuckets
   .map(
-    (bucket) => `
+    bucket => `
 INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 VALUES (
   '${bucket}',
@@ -87,7 +87,7 @@ VALUES (
     if (listError) {
       console.error('❌ 파일 목록 조회 실패:', listError);
     } else {
-      console.log('📂 파일 목록:', files?.map((f) => f.name) || []);
+      console.log('📂 파일 목록:', files?.map(f => f.name) || []);
     }
 
     // 4. 테스트 파일 삭제

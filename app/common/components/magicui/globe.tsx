@@ -76,7 +76,7 @@ export function Globe({
         width: globeWidth,
         height: globeHeight,
         ...globeConfig,
-        onRender: (state) => {
+        onRender: state => {
           // This is called every frame. Used to update phi.
           state.phi = phi.current.get();
           fadeInAnimationRef.current += 1;

@@ -130,7 +130,7 @@ export async function createFollowUpNotifications(agentId: string) {
       .from(pipelineStages)
       .where(eq(pipelineStages.agentId, agentId));
 
-    const excludedStage = pipelineStagesResult.find((s) => s.name === '제외됨');
+    const excludedStage = pipelineStagesResult.find(s => s.name === '제외됨');
 
     const activeClientsConditions = [
       eq(clients.agentId, agentId),
@@ -309,7 +309,7 @@ export async function createMonthlyPerformanceNotification(agentId: string) {
       .where(eq(pipelineStages.agentId, agentId));
 
     const completedStage = pipelineStagesResult.find(
-      (s) => s.name === '계약 완료'
+      s => s.name === '계약 완료'
     );
     let contractedClientsThisMonth = 0;
 

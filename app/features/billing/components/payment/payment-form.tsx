@@ -70,7 +70,7 @@ export function PaymentForm({
     field: keyof PaymentFormData,
     value: string | boolean
   ) => {
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
       [field]: value,
     }));
@@ -159,7 +159,7 @@ export function PaymentForm({
                     type="text"
                     placeholder="홍길동"
                     value={formData.customerName}
-                    onChange={(e) =>
+                    onChange={e =>
                       handleInputChange('customerName', e.target.value)
                     }
                     className="pl-10"
@@ -179,7 +179,7 @@ export function PaymentForm({
                     type="tel"
                     placeholder="010-1234-5678"
                     value={formData.customerPhone}
-                    onChange={(e) =>
+                    onChange={e =>
                       handleInputChange('customerPhone', e.target.value)
                     }
                     className="pl-10"
@@ -200,7 +200,7 @@ export function PaymentForm({
                   type="email"
                   placeholder="hong@example.com"
                   value={formData.customerEmail}
-                  onChange={(e) =>
+                  onChange={e =>
                     handleInputChange('customerEmail', e.target.value)
                   }
                   className="pl-10"
@@ -220,7 +220,7 @@ export function PaymentForm({
                   type="text"
                   placeholder="(주)보험설계사무소"
                   value={formData.companyName}
-                  onChange={(e) =>
+                  onChange={e =>
                     handleInputChange('companyName', e.target.value)
                   }
                   className="pl-10"
@@ -239,7 +239,7 @@ export function PaymentForm({
                   <Checkbox
                     id="agreeToTerms"
                     checked={formData.agreeToTerms}
-                    onCheckedChange={(checked) =>
+                    onCheckedChange={checked =>
                       handleInputChange('agreeToTerms', checked as boolean)
                     }
                   />
@@ -259,7 +259,7 @@ export function PaymentForm({
                   <Checkbox
                     id="agreeToPrivacy"
                     checked={formData.agreeToPrivacy}
-                    onCheckedChange={(checked) =>
+                    onCheckedChange={checked =>
                       handleInputChange('agreeToPrivacy', checked as boolean)
                     }
                   />
@@ -279,7 +279,7 @@ export function PaymentForm({
                   <Checkbox
                     id="agreeToMarketing"
                     checked={formData.agreeToMarketing}
-                    onCheckedChange={(checked) =>
+                    onCheckedChange={checked =>
                       handleInputChange('agreeToMarketing', checked as boolean)
                     }
                   />

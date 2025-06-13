@@ -35,7 +35,7 @@ export async function getUserInvitations(userId: string) {
       .where(eq(invitations.inviterId, userId))
       .orderBy(desc(invitations.createdAt));
 
-    return userInvitations.map((invitation) => ({
+    return userInvitations.map(invitation => ({
       id: invitation.id,
       code: invitation.code,
       status: (invitation.status === 'used' ? 'used' : 'available') as
@@ -277,7 +277,7 @@ export async function getInvitedColleagues(userId: string) {
       )
       .orderBy(desc(invitations.usedAt));
 
-    return colleagues.map((colleague) => ({
+    return colleagues.map(colleague => ({
       id: colleague.invitationId,
       code: colleague.invitationCode,
       status: 'used' as const,

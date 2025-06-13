@@ -59,7 +59,7 @@ export function calculateProfileCompletion(profile: UserProfile): {
 
   const missingFields: string[] = [];
 
-  requiredFields.forEach((field) => {
+  requiredFields.forEach(field => {
     const value = profile[field.key as keyof UserProfile];
     if (!value || (typeof value === 'string' && value.trim() === '')) {
       missingFields.push(field.label);
@@ -323,7 +323,7 @@ function validateUserSettings(settings: any): any {
       'weekendNotifications',
     ];
 
-    notificationKeys.forEach((key) => {
+    notificationKeys.forEach(key => {
       if (typeof notifications[key] !== 'boolean') {
         notifications[key] =
           defaultNotifications[key as keyof typeof defaultNotifications];

@@ -54,7 +54,7 @@ createMissingInvitations()
     console.log('스크립트 종료');
     process.exit(0);
   })
-  .catch((error) => {
+  .catch(error => {
     console.error('스크립트 실행 중 오류:', error);
     process.exit(1);
   });

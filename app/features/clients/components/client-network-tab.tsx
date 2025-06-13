@@ -117,7 +117,7 @@ export function ClientNetworkTab({
 
   // 🔒 소개 고객 필터링 (단계 및 보안 레벨)
   const filterReferrals = (referrals: Referral[]) => {
-    return referrals.filter((referral) => {
+    return referrals.filter(referral => {
       // 단계 필터
       if (filterStage !== 'all' && referral.currentStage !== filterStage) {
         return false;
@@ -213,16 +213,14 @@ export function ClientNetworkTab({
 
   // 고유 단계 목록
   const stages = Array.from(
-    new Set(
-      referralNetwork.referrals.map((r) => r.currentStage).filter(Boolean)
-    )
+    new Set(referralNetwork.referrals.map(r => r.currentStage).filter(Boolean))
   );
 
   // 🔒 필터링된 통계 재계산
   const filteredStats = {
     totalReferred: filteredReferrals.length,
     totalContracts: filteredReferrals.filter(
-      (r) => r.currentStage === '계약 완료'
+      r => r.currentStage === '계약 완료'
     ).length,
     totalValue: filteredReferrals.reduce(
       (sum, r) => sum + (r.contractAmount || 0),
@@ -231,18 +229,18 @@ export function ClientNetworkTab({
     conversionRate:
       filteredReferrals.length > 0
         ? Math.round(
-            (filteredReferrals.filter((r) => r.currentStage === '계약 완료')
+            (filteredReferrals.filter(r => r.currentStage === '계약 완료')
               .length /
               filteredReferrals.length) *
               100
           )
         : 0,
     averageContractValue:
-      filteredReferrals.filter((r) => r.contractAmount > 0).length > 0
+      filteredReferrals.filter(r => r.contractAmount > 0).length > 0
         ? filteredReferrals.reduce(
             (sum, r) => sum + (r.contractAmount || 0),
             0
-          ) / filteredReferrals.filter((r) => r.contractAmount > 0).length
+          ) / filteredReferrals.filter(r => r.contractAmount > 0).length
         : 0,
   };
 
@@ -272,7 +270,7 @@ export function ClientNetworkTab({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">전체 단계</SelectItem>
-                    {stages.map((stage) => (
+                    {stages.map(stage => (
                       <SelectItem key={stage} value={stage!}>
                         {stage}
                       </SelectItem>
@@ -310,7 +308,7 @@ export function ClientNetworkTab({
                 <Switch
                   id="show-confidential-network"
                   checked={showConfidentialData}
-                  onCheckedChange={(checked) => {
+                  onCheckedChange={checked => {
                     setShowConfidentialData(checked);
                     handleDataAccess(
                       checked ? '기밀정보 표시' : '기밀정보 숨김',
@@ -367,7 +365,7 @@ export function ClientNetworkTab({
                     </p>
                   </div>
                 ) : (
-                  filteredReferrals.map((referral) => (
+                  filteredReferrals.map(referral => (
                     <div
                       key={referral.id}
                       className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/30 transition-colors cursor-pointer"
@@ -547,7 +545,7 @@ export function ClientNetworkTab({
                   <span className="text-sm">활성 관계</span>
                   <Badge variant="default" className="text-xs">
                     {
-                      filteredReferrals.filter((r) => r.status === 'active')
+                      filteredReferrals.filter(r => r.status === 'active')
                         .length
                     }
                     명
@@ -558,7 +556,7 @@ export function ClientNetworkTab({
                   <Badge variant="default" className="text-xs">
                     {
                       filteredReferrals.filter(
-                        (r) => r.importanceLevel === 'high'
+                        r => r.importanceLevel === 'high'
                       ).length
                     }
                     명
@@ -568,7 +566,7 @@ export function ClientNetworkTab({
                   <span className="text-sm">최근 30일 소개</span>
                   <Badge variant="outline" className="text-xs">
                     {
-                      filteredReferrals.filter((r) => {
+                      filteredReferrals.filter(r => {
                         if (!r.referredAt) return false;
                         const thirtyDaysAgo = new Date();
                         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);

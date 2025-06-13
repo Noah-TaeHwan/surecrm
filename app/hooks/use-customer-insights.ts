@@ -177,8 +177,8 @@ export function useCustomerInsights(
               emotions.interest > 70
                 ? 'increasing'
                 : emotions.interest < 30
-                ? 'decreasing'
-                : 'stable',
+                  ? 'decreasing'
+                  : 'stable',
           },
           behavior: {
             pattern: profile.behaviorSignature,
@@ -196,7 +196,7 @@ export function useCustomerInsights(
           intent: {
             predicted: profile.intentSignals[0]?.predictedAction || 'exploring',
             confidence: Math.round(profile.intentSignals[0]?.confidence || 50),
-            signals: profile.intentSignals.map((signal) => ({
+            signals: profile.intentSignals.map(signal => ({
               type: signal.type,
               strength: Math.round(signal.strength),
               timestamp: signal.timestamp,
@@ -220,13 +220,13 @@ export function useCustomerInsights(
             currentSession: Math.round(profile.lifetimeValue),
             estimated: Math.round(profile.lifetimeValue * 1.5),
             segment: profile.valueSegment,
-            potentialActions: recommendations.map((rec) => rec.content),
+            potentialActions: recommendations.map(rec => rec.content),
           },
         };
 
         // 개인화 제안 생성
         const personalizationSuggestions: PersonalizationSuggestions = {
-          content: recommendations.map((rec) => ({
+          content: recommendations.map(rec => ({
             type: rec.type,
             title: rec.content,
             description: `맞춤형 ${rec.type} 제안`,
@@ -274,8 +274,8 @@ export function useCustomerInsights(
               emotions.confusion > 60
                 ? 'clarification'
                 : emotions.confidence < 40
-                ? 'reassurance'
-                : 'guidance',
+                  ? 'reassurance'
+                  : 'guidance',
             suggestedApproach:
               emotions.confidence > 70 ? 'direct' : 'supportive',
             estimatedResolutionTime: emotions.confusion > 70 ? 300 : 120, // 초
@@ -294,15 +294,15 @@ export function useCustomerInsights(
               emotions.satisfaction > 70
                 ? 'improving'
                 : emotions.satisfaction < 40
-                ? 'declining'
-                : 'stable',
+                  ? 'declining'
+                  : 'stable',
             keyInfluencers: ['response_time', 'clarity', 'personalization'],
             improvementOpportunities:
               emotions.confusion > 50
                 ? ['provide_clearer_guidance']
                 : emotions.confidence < 50
-                ? ['boost_confidence']
-                : [],
+                  ? ['boost_confidence']
+                  : [],
           },
         };
 
@@ -378,12 +378,10 @@ export function useCustomerInsights(
     if (!personalization || !analytics) return null;
 
     return {
-      immediate: personalization.content.filter(
-        (c) => c.timing === 'immediate'
-      ),
-      scheduled: personalization.content.filter((c) => c.timing === 'delayed'),
+      immediate: personalization.content.filter(c => c.timing === 'immediate'),
+      scheduled: personalization.content.filter(c => c.timing === 'delayed'),
       contextual: personalization.content.filter(
-        (c) => c.timing === 'contextual'
+        c => c.timing === 'contextual'
       ),
       uiOptimizations: personalization.ui,
       messagingStrategy: personalization.messaging,
@@ -585,7 +583,7 @@ function analyzeEmotionalTrends(insights: any[]): any {
   if (insights.length < 5) return { trend: 'insufficient_data' };
 
   const recent = insights.slice(-10);
-  const emotions = recent.map((i) => i.emotion);
+  const emotions = recent.map(i => i.emotion);
 
   // 감정 트렌드 분석 로직
   return {

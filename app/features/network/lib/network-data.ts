@@ -209,13 +209,13 @@ export async function getNetworkData(agentId: string): Promise<{
 
     // 🎯 디버깅: 소개 체인 분석 결과
     const directClients_count = nodes.filter(
-      (n) => n.type === 'client' && n.level === 1
+      n => n.type === 'client' && n.level === 1
     ).length;
     const referredClients_count = nodes.filter(
-      (n) => n.type === 'client' && n.level > 1
+      n => n.type === 'client' && n.level > 1
     ).length;
     const maxLevel = Math.max(
-      ...nodes.filter((n) => n.type === 'client').map((n) => n.level)
+      ...nodes.filter(n => n.type === 'client').map(n => n.level)
     );
 
     console.log('🔗 소개 체인 분석 결과:', {
@@ -235,16 +235,16 @@ export async function getNetworkData(agentId: string): Promise<{
     // });
 
     // Edge 무결성 검증
-    const nodeIds = new Set(nodes.map((n) => n.id));
+    const nodeIds = new Set(nodes.map(n => n.id));
     const invalidEdges = edges.filter(
-      (e) => !nodeIds.has(e.source) || !nodeIds.has(e.target)
+      e => !nodeIds.has(e.source) || !nodeIds.has(e.target)
     );
 
     if (invalidEdges.length > 0) {
       // console.error('🚨 무효한 엣지 발견:', invalidEdges);
       // 무효한 엣지 제거
       const validEdges = edges.filter(
-        (e) => nodeIds.has(e.source) && nodeIds.has(e.target)
+        e => nodeIds.has(e.source) && nodeIds.has(e.target)
       );
       // console.log('✅ 무효한 엣지 제거 후:', validEdges.length);
     }
@@ -257,9 +257,7 @@ export async function getNetworkData(agentId: string): Promise<{
 
     return {
       nodes,
-      edges: edges.filter(
-        (e) => nodeIds.has(e.source) && nodeIds.has(e.target)
-      ),
+      edges: edges.filter(e => nodeIds.has(e.source) && nodeIds.has(e.target)),
       stats,
     };
   } catch (error) {
@@ -289,7 +287,7 @@ async function expandNetworkDepth(
   maxDepth: number
 ): Promise<void> {
   for (let depth = 2; depth <= maxDepth; depth++) {
-    const currentLevelNodes = nodes.filter((n) => n.level === depth - 1);
+    const currentLevelNodes = nodes.filter(n => n.level === depth - 1);
 
     for (const node of currentLevelNodes) {
       if (node.type === 'client') {
@@ -307,7 +305,7 @@ async function expandNetworkDepth(
 
         for (const client of referredClients) {
           // 이미 노드에 있는지 확인
-          if (!nodes.find((n) => n.id === client.id)) {
+          if (!nodes.find(n => n.id === client.id)) {
             nodes.push({
               id: client.id,
               name: client.fullName,
@@ -400,8 +398,8 @@ async function calculateNetworkStats(
       .limit(5);
 
     const topReferrers = topReferrersData
-      .filter((r) => Number(r.referralCount) > 0)
-      .map((r) => ({
+      .filter(r => Number(r.referralCount) > 0)
+      .map(r => ({
         id: r.id,
         name: r.name,
         referralCount: Number(r.referralCount),
@@ -427,7 +425,7 @@ async function calculateNetworkStats(
       .groupBy(sql`TO_CHAR(${clients.createdAt}, 'YYYY-MM')`)
       .orderBy(sql`TO_CHAR(${clients.createdAt}, 'YYYY-MM')`);
 
-    const maxDepth = Math.max(...nodes.map((n) => n.level), 0);
+    const maxDepth = Math.max(...nodes.map(n => n.level), 0);
     const totalReferrals = nodes.reduce((sum, n) => sum + n.referralCount, 0);
     const avgReferralsPerNode =
       nodes.length > 0 ? totalReferrals / nodes.length : 0;
@@ -438,7 +436,7 @@ async function calculateNetworkStats(
       maxDepth,
       avgReferralsPerNode: Math.round(avgReferralsPerNode * 10) / 10,
       topReferrers,
-      networkGrowth: monthlyGrowth.map((g) => ({
+      networkGrowth: monthlyGrowth.map(g => ({
         month: g.month,
         newNodes: g.newNodes,
         newConnections: 0, // 추후 계산
@@ -526,7 +524,7 @@ export async function searchNetwork(
       )
       .limit(10);
 
-    return searchResults.map((client) => ({
+    return searchResults.map(client => ({
       id: client.id,
       name: client.fullName,
       type: 'client' as const,
@@ -551,18 +549,18 @@ export function calculateNetworkMetrics(
 ): NetworkMetrics {
   // 인접 리스트 생성
   const adjacencyList = new Map<string, Set<string>>();
-  nodes.forEach((node) => {
+  nodes.forEach(node => {
     adjacencyList.set(node.id, new Set());
   });
 
-  edges.forEach((edge) => {
+  edges.forEach(edge => {
     adjacencyList.get(edge.source)?.add(edge.target);
     adjacencyList.get(edge.target)?.add(edge.source);
   });
 
   // 노드 중심성 계산 (연결 중심성)
   const nodeCentrality = new Map<string, number>();
-  nodes.forEach((node) => {
+  nodes.forEach(node => {
     const connections = adjacencyList.get(node.id)?.size || 0;
     const maxPossibleConnections = nodes.length - 1;
     const centrality =
@@ -574,7 +572,7 @@ export function calculateNetworkMetrics(
   let totalClusteringCoefficient = 0;
   let nodeCount = 0;
 
-  nodes.forEach((node) => {
+  nodes.forEach(node => {
     const neighbors = adjacencyList.get(node.id);
     if (!neighbors || neighbors.size < 2) return;
 
@@ -608,7 +606,7 @@ export function calculateNetworkMetrics(
   let totalPathLength = 0;
   let pathCount = 0;
 
-  nodes.forEach((startNode) => {
+  nodes.forEach(startNode => {
     const distances = new Map<string, number>();
     const queue = [{ nodeId: startNode.id, distance: 0 }];
     distances.set(startNode.id, 0);
@@ -617,7 +615,7 @@ export function calculateNetworkMetrics(
       const { nodeId, distance } = queue.shift()!;
       const neighbors = adjacencyList.get(nodeId);
 
-      neighbors?.forEach((neighborId) => {
+      neighbors?.forEach(neighborId => {
         if (!distances.has(neighborId)) {
           distances.set(neighborId, distance + 1);
           queue.push({ nodeId: neighborId, distance: distance + 1 });
@@ -632,7 +630,7 @@ export function calculateNetworkMetrics(
 
   // 영향력 허브 식별 (높은 중심성 + 높은 중요도)
   const influenceHubs = nodes
-    .filter((node) => {
+    .filter(node => {
       const centrality = nodeCentrality.get(node.id) || 0;
       return centrality > 0.3 && node.importance === 'high';
     })
@@ -644,7 +642,7 @@ export function calculateNetworkMetrics(
     .slice(0, 5);
 
   // 고립된 노드 식별
-  const isolatedNodes = nodes.filter((node) => {
+  const isolatedNodes = nodes.filter(node => {
     const connections = adjacencyList.get(node.id)?.size || 0;
     return connections === 0;
   });
@@ -674,20 +672,20 @@ export function detectNetworkChanges(
   removedEdges: NetworkEdge[];
   modifiedNodes: NetworkNode[];
 } {
-  const oldNodeIds = new Set(oldNodes.map((n) => n.id));
-  const newNodeIds = new Set(newNodes.map((n) => n.id));
-  const oldEdgeIds = new Set(oldEdges.map((e) => e.id));
-  const newEdgeIds = new Set(newEdges.map((e) => e.id));
+  const oldNodeIds = new Set(oldNodes.map(n => n.id));
+  const newNodeIds = new Set(newNodes.map(n => n.id));
+  const oldEdgeIds = new Set(oldEdges.map(e => e.id));
+  const newEdgeIds = new Set(newEdges.map(e => e.id));
 
-  const addedNodes = newNodes.filter((n) => !oldNodeIds.has(n.id));
-  const removedNodes = oldNodes.filter((n) => !newNodeIds.has(n.id));
-  const addedEdges = newEdges.filter((e) => !oldEdgeIds.has(e.id));
-  const removedEdges = oldEdges.filter((e) => !newEdgeIds.has(e.id));
+  const addedNodes = newNodes.filter(n => !oldNodeIds.has(n.id));
+  const removedNodes = oldNodes.filter(n => !newNodeIds.has(n.id));
+  const addedEdges = newEdges.filter(e => !oldEdgeIds.has(e.id));
+  const removedEdges = oldEdges.filter(e => !newEdgeIds.has(e.id));
 
   // 수정된 노드 감지 (속성 변화)
   const modifiedNodes: NetworkNode[] = [];
-  newNodes.forEach((newNode) => {
-    const oldNode = oldNodes.find((n) => n.id === newNode.id);
+  newNodes.forEach(newNode => {
+    const oldNode = oldNodes.find(n => n.id === newNode.id);
     if (oldNode) {
       if (
         oldNode.importance !== newNode.importance ||
@@ -733,16 +731,16 @@ export function generateNetworkRecommendations(
     potentialValue: number;
   }> = [];
 
-  const targetNode = nodes.find((n) => n.id === targetNodeId);
+  const targetNode = nodes.find(n => n.id === targetNodeId);
   if (!targetNode) return recommendations;
 
   // 인접 리스트 생성
   const adjacencyList = new Map<string, Set<string>>();
-  nodes.forEach((node) => {
+  nodes.forEach(node => {
     adjacencyList.set(node.id, new Set());
   });
 
-  edges.forEach((edge) => {
+  edges.forEach(edge => {
     adjacencyList.get(edge.source)?.add(edge.target);
     adjacencyList.get(edge.target)?.add(edge.source);
   });
@@ -751,9 +749,9 @@ export function generateNetworkRecommendations(
   const directConnections = adjacencyList.get(targetNodeId) || new Set();
   const potentialIntroductions = new Set<string>();
 
-  directConnections.forEach((directId) => {
+  directConnections.forEach(directId => {
     const secondLevelConnections = adjacencyList.get(directId) || new Set();
-    secondLevelConnections.forEach((secondLevelId) => {
+    secondLevelConnections.forEach(secondLevelId => {
       if (
         secondLevelId !== targetNodeId &&
         !directConnections.has(secondLevelId)
@@ -765,11 +763,11 @@ export function generateNetworkRecommendations(
 
   // 높은 가치 소개 추천
   const highValueIntroductions = Array.from(potentialIntroductions)
-    .map((nodeId) => nodes.find((n) => n.id === nodeId))
-    .filter((node) => node && node.importance === 'high')
+    .map(nodeId => nodes.find(n => n.id === nodeId))
+    .filter(node => node && node.importance === 'high')
     .slice(0, 3);
 
-  highValueIntroductions.forEach((node) => {
+  highValueIntroductions.forEach(node => {
     if (node) {
       recommendations.push({
         type: 'introduction',
@@ -785,14 +783,14 @@ export function generateNetworkRecommendations(
   // 2. 팔로우업 추천 (비활성 고가치 고객)
   const inactiveHighValue = nodes
     .filter(
-      (node) =>
+      node =>
         node.status === 'inactive' &&
         node.contractValue > 500000 &&
         directConnections.has(node.id)
     )
     .slice(0, 2);
 
-  inactiveHighValue.forEach((node) => {
+  inactiveHighValue.forEach(node => {
     recommendations.push({
       type: 'follow_up',
       priority: 'medium',
@@ -814,7 +812,7 @@ export function generateNetworkRecommendations(
     .slice(0, 2);
 
   highCentralityNodes.forEach(([nodeId, centrality]) => {
-    const node = nodes.find((n) => n.id === nodeId);
+    const node = nodes.find(n => n.id === nodeId);
     if (node) {
       recommendations.push({
         type: 'cluster_expansion',

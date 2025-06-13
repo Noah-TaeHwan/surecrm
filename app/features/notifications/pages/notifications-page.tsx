@@ -402,11 +402,9 @@ export default function NotificationsPage({
                 {/* 🎯 읽지 않은 알림과 읽은 알림을 구분하여 표시 */}
                 {(() => {
                   const unreadNotifications = notifications.filter(
-                    (n) => !n.readAt
+                    n => !n.readAt
                   );
-                  const readNotifications = notifications.filter(
-                    (n) => n.readAt
-                  );
+                  const readNotifications = notifications.filter(n => n.readAt);
 
                   return (
                     <>
@@ -417,7 +415,7 @@ export default function NotificationsPage({
                             <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
                             읽지 않은 알림 ({unreadNotifications.length}개)
                           </div>
-                          {unreadNotifications.map((notification) => (
+                          {unreadNotifications.map(notification => (
                             <div
                               key={notification.id}
                               className="group flex items-start gap-4 p-4 border rounded-lg transition-all cursor-pointer hover:bg-muted/50 hover:shadow-sm hover:border-primary/40 bg-muted/20 border-primary/20"
@@ -454,7 +452,7 @@ export default function NotificationsPage({
                                       variant="ghost"
                                       size="sm"
                                       className="h-6 w-6 p-0"
-                                      onClick={(e) => {
+                                      onClick={e => {
                                         e.stopPropagation();
                                         handleDelete(notification.id);
                                       }}
@@ -502,7 +500,7 @@ export default function NotificationsPage({
                               읽은 알림 ({readNotifications.length}개)
                             </div>
                           )}
-                          {readNotifications.map((notification) => (
+                          {readNotifications.map(notification => (
                             <div
                               key={notification.id}
                               className="group flex items-start gap-4 p-4 border rounded-lg transition-all cursor-pointer hover:bg-muted/50 hover:shadow-sm hover:border-primary/40"
@@ -538,7 +536,7 @@ export default function NotificationsPage({
                                       variant="ghost"
                                       size="sm"
                                       className="h-6 w-6 p-0"
-                                      onClick={(e) => {
+                                      onClick={e => {
                                         e.stopPropagation();
                                         handleDelete(notification.id);
                                       }}

@@ -104,7 +104,7 @@ class MicroInteractionTracker {
   // === 🎯 미세 상호작용 리스너 설정 ===
   private setupMicroInteractionListeners(): void {
     // 호버 추적 (극한 정밀도)
-    document.addEventListener('mouseover', (e) => {
+    document.addEventListener('mouseover', e => {
       const startTime = Date.now();
       const element = e.target as HTMLElement;
 
@@ -129,7 +129,7 @@ class MicroInteractionTracker {
     });
 
     // 포커스/블러 추적
-    document.addEventListener('focusin', (e) => {
+    document.addEventListener('focusin', e => {
       const element = e.target as HTMLElement;
       this.recordInteraction({
         type: 'focus',
@@ -144,7 +144,7 @@ class MicroInteractionTracker {
       });
     });
 
-    document.addEventListener('focusout', (e) => {
+    document.addEventListener('focusout', e => {
       const element = e.target as HTMLElement;
       this.recordInteraction({
         type: 'blur',
@@ -178,7 +178,7 @@ class MicroInteractionTracker {
     });
 
     // 복사/붙여넣기 추적
-    document.addEventListener('copy', (e) => {
+    document.addEventListener('copy', e => {
       const selection = window.getSelection();
       this.recordInteraction({
         type: 'copy',
@@ -192,7 +192,7 @@ class MicroInteractionTracker {
       });
     });
 
-    document.addEventListener('paste', (e) => {
+    document.addEventListener('paste', e => {
       this.recordInteraction({
         type: 'paste',
         element: this.getElementSelector(e.target as HTMLElement),
@@ -205,7 +205,7 @@ class MicroInteractionTracker {
     });
 
     // 우클릭 컨텍스트 메뉴 추적
-    document.addEventListener('contextmenu', (e) => {
+    document.addEventListener('contextmenu', e => {
       this.recordInteraction({
         type: 'contextmenu',
         element: this.getElementSelector(e.target as HTMLElement),
@@ -220,7 +220,7 @@ class MicroInteractionTracker {
     });
 
     // 드래그 앤 드롭 추적
-    document.addEventListener('dragstart', (e) => {
+    document.addEventListener('dragstart', e => {
       this.recordInteraction({
         type: 'drag',
         element: this.getElementSelector(e.target as HTMLElement),
@@ -233,7 +233,7 @@ class MicroInteractionTracker {
       });
     });
 
-    document.addEventListener('drop', (e) => {
+    document.addEventListener('drop', e => {
       this.recordInteraction({
         type: 'drop',
         element: this.getElementSelector(e.target as HTMLElement),
@@ -276,7 +276,7 @@ class MicroInteractionTracker {
 
     // 활동 감지 시 타이머 리셋
     ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach(
-      (event) => {
+      event => {
         document.addEventListener(
           event,
           () => {
@@ -403,10 +403,10 @@ class MicroInteractionTracker {
   }
 
   private detectAbandonmentPoints(interactions: MicroInteraction[]): void {
-    const focusInteractions = interactions.filter((i) => i.type === 'focus');
-    focusInteractions.forEach((focus) => {
+    const focusInteractions = interactions.filter(i => i.type === 'focus');
+    focusInteractions.forEach(focus => {
       const correspondingBlur = interactions.find(
-        (i) =>
+        i =>
           i.type === 'blur' &&
           i.element === focus.element &&
           i.timestamp > focus.timestamp
@@ -450,7 +450,7 @@ class MicroInteractionTracker {
   }
 
   private predictNextAction(): void {
-    const recentTypes = this.interactions.slice(-5).map((i) => i.type);
+    const recentTypes = this.interactions.slice(-5).map(i => i.type);
 
     // 간단한 패턴 매칭 예측 (MicroInteraction 타입에 맞게 수정)
     if (recentTypes.includes('hover') && !recentTypes.includes('focus')) {
@@ -500,7 +500,7 @@ class MicroInteractionTracker {
 
   private calculateInteractionEfficiency(): number {
     const totalTime = Date.now() - this.sessionStart;
-    const meaningfulInteractions = this.interactions.filter((i) =>
+    const meaningfulInteractions = this.interactions.filter(i =>
       ['click', 'focus', 'selection'].includes(i.type)
     ).length;
 
@@ -531,7 +531,7 @@ class MicroInteractionTracker {
 
   private startTaskCompletionAnalysis(): void {
     // 페이지 내 폼 제출, 버튼 클릭 등 작업 완료 분석
-    document.addEventListener('submit', (e) => {
+    document.addEventListener('submit', e => {
       const form = e.target as HTMLFormElement;
       const formData = new FormData(form);
       const completionTime = Date.now() - this.sessionStart;
@@ -575,7 +575,7 @@ class MicroInteractionTracker {
 
   private calculateFeatureDiscoveryRate(): number {
     // 새로운 UI 요소 발견 비율
-    const uniqueElements = new Set(this.interactions.map((i) => i.element));
+    const uniqueElements = new Set(this.interactions.map(i => i.element));
     return (uniqueElements.size / this.interactions.length) * 100;
   }
 

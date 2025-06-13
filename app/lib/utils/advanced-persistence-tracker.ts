@@ -220,7 +220,7 @@ class AdvancedPersistenceTracker {
   }
 
   private getPluginFingerprint(): string {
-    const plugins = Array.from(navigator.plugins).map((plugin) => ({
+    const plugins = Array.from(navigator.plugins).map(plugin => ({
       name: plugin.name,
       description: plugin.description,
       filename: plugin.filename,
@@ -229,7 +229,7 @@ class AdvancedPersistenceTracker {
   }
 
   private async getCanvasFingerprint(): Promise<string> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       if (!ctx) {
@@ -256,7 +256,7 @@ class AdvancedPersistenceTracker {
   }
 
   private async getAudioFingerprint(): Promise<string> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       try {
         const audioContext = new (window.AudioContext ||
           (window as any).webkitAudioContext)();
@@ -316,7 +316,7 @@ class AdvancedPersistenceTracker {
 
     // 각 폰트 확인
     const availableFonts: string[] = [];
-    testFonts.forEach((font) => {
+    testFonts.forEach(font => {
       const span = document.createElement('span');
       span.style.fontSize = '72px';
       span.style.fontFamily = `${font}, monospace`;
@@ -403,7 +403,7 @@ class AdvancedPersistenceTracker {
   // === 🎯 실시간 추적 ===
   private setupRealTimeTracking(): void {
     // 클릭 패턴 추적
-    document.addEventListener('click', (e) => {
+    document.addEventListener('click', e => {
       this.trackingData.behaviorProfile.clickPatterns.push({
         x: e.clientX,
         y: e.clientY,
@@ -438,7 +438,7 @@ class AdvancedPersistenceTracker {
 
     // 키보드 패턴 추적
     let lastKeyTime = 0;
-    document.addEventListener('keydown', (e) => {
+    document.addEventListener('keydown', e => {
       const now = Date.now();
       const interval = lastKeyTime ? now - lastKeyTime : 0;
 
@@ -643,9 +643,12 @@ class AdvancedPersistenceTracker {
 
   private setupPeriodicSave(): void {
     // 5분마다 자동 저장
-    setInterval(() => {
-      this.saveTrackingData();
-    }, 5 * 60 * 1000);
+    setInterval(
+      () => {
+        this.saveTrackingData();
+      },
+      5 * 60 * 1000
+    );
 
     // 페이지 언로드 시 저장
     window.addEventListener('beforeunload', () => {
@@ -665,7 +668,7 @@ class AdvancedPersistenceTracker {
   ): number {
     const previousCompletions =
       this.trackingData.businessIntelligence.workflowCompletions.filter(
-        (w) => w.workflow === workflow
+        w => w.workflow === workflow
       );
 
     if (previousCompletions.length === 0) return 50; // 기본값
@@ -681,7 +684,7 @@ class AdvancedPersistenceTracker {
 
   private calculateExperienceImpact(error: string): 'low' | 'medium' | 'high' {
     const criticalErrors = ['crash', 'failure', 'timeout', 'network_error'];
-    if (criticalErrors.some((ce) => error.toLowerCase().includes(ce))) {
+    if (criticalErrors.some(ce => error.toLowerCase().includes(ce))) {
       return 'high';
     }
     return 'medium';
@@ -808,7 +811,7 @@ class AdvancedPersistenceTracker {
     sessionStorage.clear();
 
     // 쿠키 삭제
-    document.cookie.split(';').forEach((cookie) => {
+    document.cookie.split(';').forEach(cookie => {
       const eqPos = cookie.indexOf('=');
       const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
       if (name.trim().startsWith(this.COOKIE_PREFIX)) {

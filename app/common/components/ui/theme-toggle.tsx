@@ -89,7 +89,7 @@ export function ThemeToggle({
             theme: newIsDark ? 'dark' : 'light',
           }),
           credentials: 'include',
-        }).catch((error) => {
+        }).catch(error => {
           console.warn('서버 테마 저장 실패 (로컬스토리지는 유지됨):', error);
         });
       }

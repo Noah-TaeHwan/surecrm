@@ -170,7 +170,7 @@ const DOCUMENT_TYPES = [
 
 // 🏷️ 문서 타입 라벨 변환 함수
 const getDocumentTypeLabel = (documentType: string) => {
-  const type = DOCUMENT_TYPES.find((t) => t.value === documentType);
+  const type = DOCUMENT_TYPES.find(t => t.value === documentType);
   return type?.label || '기타 문서';
 };
 
@@ -353,8 +353,8 @@ export function InsuranceContractsTab({
 
         // 🚀 새로운 계약을 로컬 상태에 즉시 추가 (중복 방지)
         if (result.data) {
-          setContracts((prev) => {
-            const existingIds = prev.map((contract) => contract.id);
+          setContracts(prev => {
+            const existingIds = prev.map(contract => contract.id);
             // 이미 존재하지 않는 경우에만 추가
             if (!existingIds.includes(result.data.id)) {
               return [result.data, ...prev];
@@ -515,7 +515,7 @@ export function InsuranceContractsTab({
       'contractorName',
       'insuredName',
     ];
-    const completedFields = requiredFields.filter((field) =>
+    const completedFields = requiredFields.filter(field =>
       formData[field as keyof typeof formData]?.toString().trim()
     ).length;
     return Math.round((completedFields / requiredFields.length) * 100);
@@ -573,7 +573,7 @@ export function InsuranceContractsTab({
   };
 
   const handleFormChange = (field: keyof ContractFormData, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormData(prev => ({ ...prev, [field]: value }));
     // 실시간 검증
     validateField(field, value);
   };
@@ -581,23 +581,23 @@ export function InsuranceContractsTab({
   const handleFileUpload = (files: FileList | null) => {
     if (!files) return;
 
-    const newAttachments = Array.from(files).map((file) => ({
+    const newAttachments = Array.from(files).map(file => ({
       id: Math.random().toString(36).substr(2, 9),
       file,
       name: file.name,
       type: file.type,
     }));
 
-    setAttachments((prev) => [...prev, ...newAttachments]);
+    setAttachments(prev => [...prev, ...newAttachments]);
   };
 
   const handleRemoveAttachment = (attachmentId: string) => {
-    setAttachments((prev) => prev.filter((att) => att.id !== attachmentId));
+    setAttachments(prev => prev.filter(att => att.id !== attachmentId));
   };
 
   // 🔍 상세보기 토글 함수
   const toggleContractDetails = (contractId: string) => {
-    setExpandedContracts((prev) => {
+    setExpandedContracts(prev => {
       const newSet = new Set(prev);
       if (newSet.has(contractId)) {
         newSet.delete(contractId);
@@ -610,7 +610,7 @@ export function InsuranceContractsTab({
 
   // 👁️ 주민등록번호 마스킹 토글 - 간단한 버전
   const toggleSsnVisibility = (ssnKey: string) => {
-    setVisibleSsns((prev) => {
+    setVisibleSsns(prev => {
       const newSet = new Set(prev);
       if (newSet.has(ssnKey)) {
         newSet.delete(ssnKey);
@@ -901,12 +901,12 @@ export function InsuranceContractsTab({
 
   // 📊 계약 통계 계산
   const totalContracts = contracts.length;
-  const activeContracts = contracts.filter((c) => c.status === 'active').length;
+  const activeContracts = contracts.filter(c => c.status === 'active').length;
   const totalMonthlyPremium = contracts
-    .filter((c) => c.status === 'active' && c.monthlyPremium)
+    .filter(c => c.status === 'active' && c.monthlyPremium)
     .reduce((sum, c) => sum + Number(c.monthlyPremium || 0), 0);
   const totalCommission = contracts
-    .filter((c) => c.status === 'active' && c.agentCommission)
+    .filter(c => c.status === 'active' && c.agentCommission)
     .reduce((sum, c) => sum + Number(c.agentCommission || 0), 0);
 
   // 🗑️ 보험계약 삭제 관련 함수들
@@ -934,9 +934,7 @@ export function InsuranceContractsTab({
 
       if (result.success) {
         // 성공 시 로컬 상태에서 계약 제거
-        setContracts((prev) =>
-          prev.filter((c) => c.id !== contractToDelete.id)
-        );
+        setContracts(prev => prev.filter(c => c.id !== contractToDelete.id));
 
         toast.success(
           '계약 삭제 완료',
@@ -1056,7 +1054,7 @@ export function InsuranceContractsTab({
                 <h4 className="font-medium text-foreground flex items-center gap-2">
                   🗂️ 계약 목록
                 </h4>
-                {contracts.map((contract) => {
+                {contracts.map(contract => {
                   const typeConfig = getInsuranceTypeConfig(
                     contract.insuranceType
                   );
@@ -1089,7 +1087,7 @@ export function InsuranceContractsTab({
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={(e) => {
+                            onClick={e => {
                               e.stopPropagation();
                               handleEditContract(contract);
                             }}
@@ -1099,7 +1097,7 @@ export function InsuranceContractsTab({
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={(e) => {
+                            onClick={e => {
                               e.stopPropagation();
                               handleDeleteContract(contract);
                             }}
@@ -1330,7 +1328,7 @@ export function InsuranceContractsTab({
                                         variant="ghost"
                                         size="sm"
                                         className="h-7 w-7 p-0 text-slate-400 hover:text-green-600 hover:bg-green-100 dark:hover:bg-green-900/20 opacity-0 group-hover:opacity-100 transition-all"
-                                        onClick={(e) => {
+                                        onClick={e => {
                                           e.stopPropagation();
                                           handleDownloadAttachment(att.id);
                                         }}
@@ -1352,7 +1350,7 @@ export function InsuranceContractsTab({
                                     variant="ghost"
                                     size="sm"
                                     className="ml-2 h-5 px-2 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-100 dark:hover:bg-blue-900/20"
-                                    onClick={(e) => {
+                                    onClick={e => {
                                       e.stopPropagation();
                                       // TODO: 전체 첨부파일 보기
                                     }}
@@ -1469,7 +1467,7 @@ export function InsuranceContractsTab({
                                             variant="ghost"
                                             size="sm"
                                             className="h-6 w-6 p-0 hover:bg-slate-200 dark:hover:bg-slate-700 flex-shrink-0"
-                                            onClick={(e) => {
+                                            onClick={e => {
                                               e.preventDefault();
                                               e.stopPropagation();
                                               const contractorKey = `contractor-${contract.id}`;
@@ -1524,7 +1522,7 @@ export function InsuranceContractsTab({
                                             variant="ghost"
                                             size="sm"
                                             className="h-6 w-6 p-0 hover:bg-slate-200 dark:hover:bg-slate-700 flex-shrink-0"
-                                            onClick={(e) => {
+                                            onClick={e => {
                                               e.preventDefault();
                                               e.stopPropagation();
                                               const insuredKey = `insured-${contract.id}`;
@@ -1844,7 +1842,7 @@ function NewContractModal({
         editingContract.attachments.length > 0
       ) {
         const existingAttachments: AttachmentData[] =
-          editingContract.attachments.map((att) => ({
+          editingContract.attachments.map(att => ({
             id: att.id,
             fileName: att.fileName,
             fileDisplayName: att.fileDisplayName,
@@ -1975,7 +1973,7 @@ function NewContractModal({
 
   // 필드 업데이트 함수
   const updateField = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
       const newErrors = { ...errors };
       delete newErrors[field];
@@ -2028,7 +2026,7 @@ function NewContractModal({
       description: '',
     };
 
-    setAttachments((prev) => [...prev, newAttachment]);
+    setAttachments(prev => [...prev, newAttachment]);
 
     // input 초기화
     e.target.value = '';
@@ -2039,15 +2037,15 @@ function NewContractModal({
     field: keyof AttachmentData,
     value: string
   ) => {
-    setAttachments((prev) =>
-      prev.map((attachment) =>
+    setAttachments(prev =>
+      prev.map(attachment =>
         attachment.id === id ? { ...attachment, [field]: value } : attachment
       )
     );
   };
 
   const handleAttachmentRemove = (id: string) => {
-    setAttachments((prev) => prev.filter((attachment) => attachment.id !== id));
+    setAttachments(prev => prev.filter(attachment => attachment.id !== id));
   };
 
   // 📄 파일 크기 포맷팅
@@ -2123,7 +2121,7 @@ function NewContractModal({
                     <Input
                       id="contractorName"
                       value={formData.contractorName}
-                      onChange={(e) =>
+                      onChange={e =>
                         updateField('contractorName', e.target.value)
                       }
                       placeholder="홍길동"
@@ -2149,22 +2147,22 @@ function NewContractModal({
                     <Input
                       id="contractorSsn"
                       value={formData.contractorSsn}
-                      onChange={(e) => {
+                      onChange={e => {
                         const formatted = formatKoreanIdInput(e.target.value);
                         updateField('contractorSsn', formatted);
                       }}
-                      onBlur={(e) => {
+                      onBlur={e => {
                         const value = e.target.value.trim();
                         if (value && !validateKoreanId(value)) {
                           const parseResult = parseKoreanId(value);
-                          setErrors((prev) => ({
+                          setErrors(prev => ({
                             ...prev,
                             contractorSsn:
                               parseResult.errorMessage ||
                               '유효하지 않은 주민등록번호입니다',
                           }));
                         } else {
-                          setErrors((prev) => {
+                          setErrors(prev => {
                             const newErrors = { ...prev };
                             delete newErrors.contractorSsn;
                             return newErrors;
@@ -2177,9 +2175,9 @@ function NewContractModal({
                         errors.contractorSsn
                           ? 'border-destructive'
                           : formData.contractorSsn &&
-                            validateKoreanId(formData.contractorSsn)
-                          ? 'border-green-500'
-                          : ''
+                              validateKoreanId(formData.contractorSsn)
+                            ? 'border-green-500'
+                            : ''
                       }`}
                     />
                     <div className="flex items-center justify-between">
@@ -2210,7 +2208,7 @@ function NewContractModal({
                     <Input
                       id="contractorPhone"
                       value={formData.contractorPhone}
-                      onChange={(e) =>
+                      onChange={e =>
                         updateField('contractorPhone', e.target.value)
                       }
                       placeholder="010-0000-0000"
@@ -2237,9 +2235,7 @@ function NewContractModal({
                     <Input
                       id="insuredName"
                       value={formData.insuredName}
-                      onChange={(e) =>
-                        updateField('insuredName', e.target.value)
-                      }
+                      onChange={e => updateField('insuredName', e.target.value)}
                       placeholder="홍길동"
                       className={`w-full ${
                         errors.insuredName ? 'border-destructive' : ''
@@ -2260,22 +2256,22 @@ function NewContractModal({
                     <Input
                       id="insuredSsn"
                       value={formData.insuredSsn}
-                      onChange={(e) => {
+                      onChange={e => {
                         const formatted = formatKoreanIdInput(e.target.value);
                         updateField('insuredSsn', formatted);
                       }}
-                      onBlur={(e) => {
+                      onBlur={e => {
                         const value = e.target.value.trim();
                         if (value && !validateKoreanId(value)) {
                           const parseResult = parseKoreanId(value);
-                          setErrors((prev) => ({
+                          setErrors(prev => ({
                             ...prev,
                             insuredSsn:
                               parseResult.errorMessage ||
                               '유효하지 않은 주민등록번호입니다',
                           }));
                         } else {
-                          setErrors((prev) => {
+                          setErrors(prev => {
                             const newErrors = { ...prev };
                             delete newErrors.insuredSsn;
                             return newErrors;
@@ -2288,9 +2284,9 @@ function NewContractModal({
                         errors.insuredSsn
                           ? 'border-destructive'
                           : formData.insuredSsn &&
-                            validateKoreanId(formData.insuredSsn)
-                          ? 'border-green-500'
-                          : ''
+                              validateKoreanId(formData.insuredSsn)
+                            ? 'border-green-500'
+                            : ''
                       }`}
                     />
                     <div className="flex items-center justify-between">
@@ -2321,7 +2317,7 @@ function NewContractModal({
                     <Input
                       id="insuredPhone"
                       value={formData.insuredPhone}
-                      onChange={(e) =>
+                      onChange={e =>
                         updateField('insuredPhone', e.target.value)
                       }
                       placeholder="010-0000-0000"
@@ -2351,7 +2347,7 @@ function NewContractModal({
                   <Input
                     id="productName"
                     value={formData.productName}
-                    onChange={(e) => updateField('productName', e.target.value)}
+                    onChange={e => updateField('productName', e.target.value)}
                     placeholder="예: 무배당 종합보험"
                     className={`w-full ${
                       errors.productName ? 'border-destructive' : ''
@@ -2376,7 +2372,7 @@ function NewContractModal({
                   <Input
                     id="insuranceCompany"
                     value={formData.insuranceCompany}
-                    onChange={(e) =>
+                    onChange={e =>
                       updateField('insuranceCompany', e.target.value)
                     }
                     placeholder="예: 삼성화재, 현대해상"
@@ -2403,15 +2399,13 @@ function NewContractModal({
                   </Label>
                   <Select
                     value={formData.insuranceType}
-                    onValueChange={(value) =>
-                      updateField('insuranceType', value)
-                    }
+                    onValueChange={value => updateField('insuranceType', value)}
                   >
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="보험 종류 선택" />
                     </SelectTrigger>
                     <SelectContent>
-                      {insuranceTypes.map((type) => (
+                      {insuranceTypes.map(type => (
                         <SelectItem key={type.value} value={type.value}>
                           {type.label}
                         </SelectItem>
@@ -2430,9 +2424,7 @@ function NewContractModal({
                   <Input
                     id="insuranceCode"
                     value={formData.insuranceCode}
-                    onChange={(e) =>
-                      updateField('insuranceCode', e.target.value)
-                    }
+                    onChange={e => updateField('insuranceCode', e.target.value)}
                     placeholder="예: 01-01-01"
                     className="w-full"
                   />
@@ -2450,7 +2442,7 @@ function NewContractModal({
                   <Input
                     id="contractNumber"
                     value={formData.contractNumber}
-                    onChange={(e) =>
+                    onChange={e =>
                       updateField('contractNumber', e.target.value)
                     }
                     placeholder="예: CT2024001234"
@@ -2465,9 +2457,7 @@ function NewContractModal({
                   <Input
                     id="policyNumber"
                     value={formData.policyNumber}
-                    onChange={(e) =>
-                      updateField('policyNumber', e.target.value)
-                    }
+                    onChange={e => updateField('policyNumber', e.target.value)}
                     placeholder="예: PL2024001234"
                     className="w-full"
                   />
@@ -2495,9 +2485,7 @@ function NewContractModal({
                     id="contractDate"
                     type="date"
                     value={formData.contractDate}
-                    onChange={(e) =>
-                      updateField('contractDate', e.target.value)
-                    }
+                    onChange={e => updateField('contractDate', e.target.value)}
                     className={`w-full ${
                       errors.contractDate ? 'border-destructive' : ''
                     }`}
@@ -2522,9 +2510,7 @@ function NewContractModal({
                     id="effectiveDate"
                     type="date"
                     value={formData.effectiveDate}
-                    onChange={(e) =>
-                      updateField('effectiveDate', e.target.value)
-                    }
+                    onChange={e => updateField('effectiveDate', e.target.value)}
                     className={`w-full ${
                       errors.effectiveDate ? 'border-destructive' : ''
                     }`}
@@ -2548,7 +2534,7 @@ function NewContractModal({
                     id="expirationDate"
                     type="date"
                     value={formData.expirationDate}
-                    onChange={(e) =>
+                    onChange={e =>
                       updateField('expirationDate', e.target.value)
                     }
                     className="w-full"
@@ -2566,7 +2552,7 @@ function NewContractModal({
                     id="paymentDueDate"
                     type="date"
                     value={formData.paymentDueDate}
-                    onChange={(e) =>
+                    onChange={e =>
                       updateField('paymentDueDate', e.target.value)
                     }
                     className="w-full"
@@ -2598,10 +2584,10 @@ function NewContractModal({
                       step="1"
                       min="0"
                       value={formData.premiumAmount}
-                      onChange={(e) =>
+                      onChange={e =>
                         updateField('premiumAmount', e.target.value)
                       }
-                      onInput={(e) => {
+                      onInput={e => {
                         // 소수점 입력 방지
                         const target = e.target as HTMLInputElement;
                         const value = target.value;
@@ -2641,10 +2627,10 @@ function NewContractModal({
                       step="1"
                       min="0"
                       value={formData.monthlyPremium}
-                      onChange={(e) =>
+                      onChange={e =>
                         updateField('monthlyPremium', e.target.value)
                       }
-                      onInput={(e) => {
+                      onInput={e => {
                         // 소수점 입력 방지
                         const target = e.target as HTMLInputElement;
                         const value = target.value;
@@ -2678,10 +2664,10 @@ function NewContractModal({
                       step="1"
                       min="0"
                       value={formData.agentCommission}
-                      onChange={(e) =>
+                      onChange={e =>
                         updateField('agentCommission', e.target.value)
                       }
-                      onInput={(e) => {
+                      onInput={e => {
                         // 소수점 입력 방지
                         const target = e.target as HTMLInputElement;
                         const value = target.value;
@@ -2713,10 +2699,10 @@ function NewContractModal({
                       step="1"
                       min="0"
                       value={formData.coverageAmount}
-                      onChange={(e) =>
+                      onChange={e =>
                         updateField('coverageAmount', e.target.value)
                       }
-                      onInput={(e) => {
+                      onInput={e => {
                         // 소수점 입력 방지
                         const target = e.target as HTMLInputElement;
                         const value = target.value;
@@ -2742,15 +2728,13 @@ function NewContractModal({
                   </Label>
                   <Select
                     value={formData.paymentCycle}
-                    onValueChange={(value) =>
-                      updateField('paymentCycle', value)
-                    }
+                    onValueChange={value => updateField('paymentCycle', value)}
                   >
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="납입주기 선택" />
                     </SelectTrigger>
                     <SelectContent>
-                      {paymentMethods.map((method) => (
+                      {paymentMethods.map(method => (
                         <SelectItem key={method.value} value={method.value}>
                           {method.label}
                         </SelectItem>
@@ -2773,7 +2757,7 @@ function NewContractModal({
                       step="1"
                       min="0"
                       value={formData.paymentPeriod}
-                      onChange={(e) =>
+                      onChange={e =>
                         updateField('paymentPeriod', e.target.value)
                       }
                       placeholder="0"
@@ -2812,9 +2796,7 @@ function NewContractModal({
                 <Input
                   id="beneficiaryName"
                   value={formData.beneficiaryName}
-                  onChange={(e) =>
-                    updateField('beneficiaryName', e.target.value)
-                  }
+                  onChange={e => updateField('beneficiaryName', e.target.value)}
                   placeholder="수익자가 계약자/피보험자와 다른 경우에만 입력"
                   className="w-full"
                 />
@@ -2827,7 +2809,7 @@ function NewContractModal({
                 <Textarea
                   id="notes"
                   value={formData.notes}
-                  onChange={(e) => updateField('notes', e.target.value)}
+                  onChange={e => updateField('notes', e.target.value)}
                   placeholder="계약 관련 특이사항, 고객 요청사항 등을 기록하세요..."
                   className="min-h-[80px] resize-none w-full"
                 />
@@ -2867,7 +2849,7 @@ function NewContractModal({
                 <div className="space-y-2">
                   <h4 className="font-medium text-sm">업로드된 파일</h4>
                   <div className="max-h-60 overflow-y-auto space-y-2">
-                    {attachments.map((attachment) => (
+                    {attachments.map(attachment => (
                       <div
                         key={attachment.id}
                         className={`p-3 border rounded-lg space-y-2 ${
@@ -2948,7 +2930,7 @@ function NewContractModal({
                             </Label>
                             <Input
                               value={attachment.fileDisplayName}
-                              onChange={(e) =>
+                              onChange={e =>
                                 handleAttachmentUpdate(
                                   attachment.id,
                                   'fileDisplayName',
@@ -2966,7 +2948,7 @@ function NewContractModal({
                             </Label>
                             <Select
                               value={attachment.documentType}
-                              onValueChange={(value) =>
+                              onValueChange={value =>
                                 handleAttachmentUpdate(
                                   attachment.id,
                                   'documentType',
@@ -2978,7 +2960,7 @@ function NewContractModal({
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                {DOCUMENT_TYPES.map((type) => (
+                                {DOCUMENT_TYPES.map(type => (
                                   <SelectItem
                                     key={type.value}
                                     value={type.value}
@@ -2996,7 +2978,7 @@ function NewContractModal({
                             </Label>
                             <Input
                               value={attachment.description || ''}
-                              onChange={(e) =>
+                              onChange={e =>
                                 handleAttachmentUpdate(
                                   attachment.id,
                                   'description',

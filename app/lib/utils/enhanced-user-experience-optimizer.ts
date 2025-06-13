@@ -67,7 +67,7 @@ class EnhancedUserExperienceOptimizer {
   private trackMouseMovementPatterns(): void {
     let mouseData: Array<{ x: number; y: number; timestamp: number }> = [];
 
-    document.addEventListener('mousemove', (e) => {
+    document.addEventListener('mousemove', e => {
       mouseData.push({
         x: e.clientX,
         y: e.clientY,
@@ -88,7 +88,7 @@ class EnhancedUserExperienceOptimizer {
       context: string;
     }> = [];
 
-    document.addEventListener('keydown', (e) => {
+    document.addEventListener('keydown', e => {
       keyboardData.push({
         key: e.key,
         timestamp: Date.now(),
@@ -135,7 +135,7 @@ class EnhancedUserExperienceOptimizer {
   }
 
   private trackClickAccuracyPatterns(): void {
-    document.addEventListener('click', (e) => {
+    document.addEventListener('click', e => {
       const target = e.target as HTMLElement;
       const targetRect = target.getBoundingClientRect();
       const clickAccuracy = this.calculateClickAccuracy(e, targetRect);

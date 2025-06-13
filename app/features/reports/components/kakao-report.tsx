@@ -263,7 +263,7 @@ ${
   };
 
   const handleNumberChange = (field: keyof KakaoReportData, value: number) => {
-    setReportData((prev) => ({
+    setReportData(prev => ({
       ...prev,
       [field]: Math.max(0, value),
     }));
@@ -291,7 +291,7 @@ ${
     type: 'daily' | 'weekly' | 'monthly',
     content: string
   ) => {
-    setCustomTemplates((prev) => ({
+    setCustomTemplates(prev => ({
       ...prev,
       [type]: content,
     }));
@@ -302,24 +302,24 @@ ${
     const templateKey = `surecrm_template_${type}_${user?.id || 'default'}`;
     localStorage.setItem(templateKey, customTemplates[type]);
 
-    setHasCustomTemplate((prev) => ({
+    setHasCustomTemplate(prev => ({
       ...prev,
       [type]: true,
     }));
 
-    setEditMode((prev) => ({
+    setEditMode(prev => ({
       ...prev,
       [type]: false,
     }));
 
     // 성공 메시지 (간단한 state로 처리)
-    setCopiedStates((prev) => ({
+    setCopiedStates(prev => ({
       ...prev,
       [`saved_${type}`]: true,
     }));
 
     setTimeout(() => {
-      setCopiedStates((prev) => ({
+      setCopiedStates(prev => ({
         ...prev,
         [`saved_${type}`]: false,
       }));
@@ -330,17 +330,17 @@ ${
     const templateKey = `surecrm_template_${type}_${user?.id || 'default'}`;
     localStorage.removeItem(templateKey);
 
-    setCustomTemplates((prev) => ({
+    setCustomTemplates(prev => ({
       ...prev,
       [type]: '',
     }));
 
-    setHasCustomTemplate((prev) => ({
+    setHasCustomTemplate(prev => ({
       ...prev,
       [type]: false,
     }));
 
-    setEditMode((prev) => ({
+    setEditMode(prev => ({
       ...prev,
       [type]: false,
     }));
@@ -349,17 +349,17 @@ ${
   // 🆕 컴포넌트 마운트 시 저장된 템플릿 로드
   useEffect(() => {
     const loadSavedTemplates = () => {
-      ['daily', 'weekly', 'monthly'].forEach((type) => {
+      ['daily', 'weekly', 'monthly'].forEach(type => {
         const templateKey = `surecrm_template_${type}_${user?.id || 'default'}`;
         const savedTemplate = localStorage.getItem(templateKey);
 
         if (savedTemplate) {
-          setCustomTemplates((prev) => ({
+          setCustomTemplates(prev => ({
             ...prev,
             [type]: savedTemplate,
           }));
 
-          setHasCustomTemplate((prev) => ({
+          setHasCustomTemplate(prev => ({
             ...prev,
             [type]: true,
           }));
@@ -555,15 +555,15 @@ ${
                 <TimeInput
                   label="시작 시간"
                   value={reportData.workStartTime}
-                  onChange={(value) =>
-                    setReportData((prev) => ({ ...prev, workStartTime: value }))
+                  onChange={value =>
+                    setReportData(prev => ({ ...prev, workStartTime: value }))
                   }
                 />
                 <TimeInput
                   label="종료 시간"
                   value={reportData.workEndTime}
-                  onChange={(value) =>
-                    setReportData((prev) => ({ ...prev, workEndTime: value }))
+                  onChange={value =>
+                    setReportData(prev => ({ ...prev, workEndTime: value }))
                   }
                 />
               </div>
@@ -663,7 +663,7 @@ ${
                         ? customTemplates.daily
                         : getReportContent('daily')
                     }
-                    onChange={(e) =>
+                    onChange={e =>
                       editMode.daily
                         ? handleTemplateEdit('daily', e.target.value)
                         : undefined
@@ -699,9 +699,9 @@ ${
                   {!editMode.daily ? (
                     <Button
                       onClick={() => {
-                        setEditMode((prev) => ({ ...prev, daily: true }));
+                        setEditMode(prev => ({ ...prev, daily: true }));
                         if (!hasCustomTemplate.daily) {
-                          setCustomTemplates((prev) => ({
+                          setCustomTemplates(prev => ({
                             ...prev,
                             daily: generateKakaoReport(),
                           }));
@@ -731,7 +731,7 @@ ${
                       </Button>
                       <Button
                         onClick={() =>
-                          setEditMode((prev) => ({ ...prev, daily: false }))
+                          setEditMode(prev => ({ ...prev, daily: false }))
                         }
                         variant="outline"
                         size="sm"
@@ -761,7 +761,7 @@ ${
                         ? customTemplates.weekly
                         : getReportContent('weekly')
                     }
-                    onChange={(e) =>
+                    onChange={e =>
                       editMode.weekly
                         ? handleTemplateEdit('weekly', e.target.value)
                         : undefined
@@ -797,9 +797,9 @@ ${
                   {!editMode.weekly ? (
                     <Button
                       onClick={() => {
-                        setEditMode((prev) => ({ ...prev, weekly: true }));
+                        setEditMode(prev => ({ ...prev, weekly: true }));
                         if (!hasCustomTemplate.weekly) {
-                          setCustomTemplates((prev) => ({
+                          setCustomTemplates(prev => ({
                             ...prev,
                             weekly: generateWeeklyReport(),
                           }));
@@ -829,7 +829,7 @@ ${
                       </Button>
                       <Button
                         onClick={() =>
-                          setEditMode((prev) => ({ ...prev, weekly: false }))
+                          setEditMode(prev => ({ ...prev, weekly: false }))
                         }
                         variant="outline"
                         size="sm"
@@ -859,7 +859,7 @@ ${
                         ? customTemplates.monthly
                         : getReportContent('monthly')
                     }
-                    onChange={(e) =>
+                    onChange={e =>
                       editMode.monthly
                         ? handleTemplateEdit('monthly', e.target.value)
                         : undefined
@@ -895,9 +895,9 @@ ${
                   {!editMode.monthly ? (
                     <Button
                       onClick={() => {
-                        setEditMode((prev) => ({ ...prev, monthly: true }));
+                        setEditMode(prev => ({ ...prev, monthly: true }));
                         if (!hasCustomTemplate.monthly) {
-                          setCustomTemplates((prev) => ({
+                          setCustomTemplates(prev => ({
                             ...prev,
                             monthly: generateMonthlyReport(),
                           }));
@@ -927,7 +927,7 @@ ${
                       </Button>
                       <Button
                         onClick={() =>
-                          setEditMode((prev) => ({ ...prev, monthly: false }))
+                          setEditMode(prev => ({ ...prev, monthly: false }))
                         }
                         variant="outline"
                         size="sm"

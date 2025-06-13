@@ -148,7 +148,7 @@ export function InterestCategoriesTab({
             ]}
             values={interestCategories}
             onChange={(key, checked) =>
-              setInterestCategories((prev) => ({
+              setInterestCategories(prev => ({
                 ...prev,
                 [key]: checked,
               }))
@@ -159,8 +159,8 @@ export function InterestCategoriesTab({
           <TextareaField
             label="기타 관심사항"
             value={interestCategories.interestNotes}
-            onChange={(value) =>
-              setInterestCategories((prev) => ({
+            onChange={value =>
+              setInterestCategories(prev => ({
                 ...prev,
                 interestNotes: value,
               }))

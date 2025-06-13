@@ -35,7 +35,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     ]);
 
     // TeamMember 타입에 맞게 변환
-    const teamMembers: TeamMember[] = teamMembersData.map((member) => ({
+    const teamMembers: TeamMember[] = teamMembersData.map(member => ({
       id: member.id,
       name: member.name || '이름 없음',
       email: member.email || '',

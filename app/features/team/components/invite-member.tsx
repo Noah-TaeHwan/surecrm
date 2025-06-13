@@ -126,7 +126,7 @@ export function InviteMember({ onInvite }: InviteMemberProps) {
                       value={field.value}
                       className="space-y-1"
                     >
-                      {roles.map((role) => (
+                      {roles.map(role => (
                         <Label
                           key={role.id}
                           htmlFor={role.id}

@@ -25,7 +25,7 @@ export function ClientMemoSection({
         {isEditing ? (
           <Textarea
             value={notes}
-            onChange={(e) => onNotesChange(e.target.value)}
+            onChange={e => onNotesChange(e.target.value)}
             placeholder="고객에 대한 메모를 입력하세요..."
             className="min-h-[120px] resize-none border-none p-0 bg-transparent"
           />

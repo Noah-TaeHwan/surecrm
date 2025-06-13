@@ -118,7 +118,7 @@ export async function createInsuranceContract(
       const stages = await getPipelineStages(agentId);
 
       // "계약 완료" 단계 찾기
-      const completedStage = stages.find((stage) => stage.name === '계약 완료');
+      const completedStage = stages.find(stage => stage.name === '계약 완료');
 
       if (completedStage) {
         // 고객을 "계약 완료" 단계로 자동 이동
@@ -155,7 +155,7 @@ export async function createInsuranceContract(
       console.log(`📎 첨부파일 ${attachments.length}개 업로드 시작...`);
 
       const uploadResults = await Promise.allSettled(
-        attachments.map(async (attachment) => {
+        attachments.map(async attachment => {
           try {
             // 1. Supabase Storage에 파일 업로드
             const uploadResult = await uploadContractAttachment(
@@ -205,7 +205,7 @@ export async function createInsuranceContract(
 
       // 업로드 결과 검사
       const failedUploads = uploadResults.filter(
-        (result) => result.status === 'rejected'
+        result => result.status === 'rejected'
       );
       if (failedUploads.length > 0) {
         console.warn(`⚠️ ${failedUploads.length}개 첨부파일 업로드 실패`);
@@ -213,7 +213,7 @@ export async function createInsuranceContract(
       }
 
       const successfulUploads = uploadResults.filter(
-        (result) => result.status === 'fulfilled'
+        result => result.status === 'fulfilled'
       ).length;
       console.log(`✅ ${successfulUploads}개 첨부파일 업로드 성공`);
     }
@@ -293,7 +293,7 @@ export async function getClientInsuranceContracts(
 
     // 📎 각 계약의 첨부파일도 함께 조회
     const contractsWithAttachments = await Promise.all(
-      contracts.map(async (contract) => {
+      contracts.map(async contract => {
         try {
           const attachments = await db
             .select({
@@ -552,7 +552,7 @@ export async function updateInsuranceContractWithAttachments(
       console.log(`📎 새 첨부파일 ${newAttachments.length}개 업로드 시작...`);
 
       const uploadResults = await Promise.allSettled(
-        newAttachments.map(async (attachment) => {
+        newAttachments.map(async attachment => {
           try {
             // Supabase Storage에 파일 업로드
             const uploadResult = await uploadContractAttachment(
@@ -601,7 +601,7 @@ export async function updateInsuranceContractWithAttachments(
       );
 
       const successfulUploads = uploadResults.filter(
-        (result) => result.status === 'fulfilled'
+        result => result.status === 'fulfilled'
       ).length;
       console.log(`✅ ${successfulUploads}개 새 첨부파일 업로드 성공`);
     }
@@ -662,7 +662,7 @@ export async function deleteInsuranceContract(
     console.log(`📎 삭제할 첨부파일: ${attachments.length}개`);
 
     // 3. 트랜잭션으로 안전하게 삭제
-    const deletionResult = await db.transaction(async (tx) => {
+    const deletionResult = await db.transaction(async tx => {
       // 3.1. 첨부파일 레코드 삭제
       if (attachments.length > 0) {
         await tx
@@ -690,7 +690,7 @@ export async function deleteInsuranceContract(
     if (attachments.length > 0) {
       const { deleteFile } = await import('~/lib/core/storage');
 
-      const deletionPromises = attachments.map(async (attachment) => {
+      const deletionPromises = attachments.map(async attachment => {
         try {
           const result = await deleteFile(
             'contract-attachments',
@@ -716,7 +716,7 @@ export async function deleteInsuranceContract(
 
       const storageResults = await Promise.allSettled(deletionPromises);
       const failedDeletions = storageResults.filter(
-        (result) =>
+        result =>
           result.status === 'rejected' ||
           (result.status === 'fulfilled' && !result.value.success)
       );
@@ -1079,18 +1079,18 @@ export async function getInsuranceContractStats(agentId: string) {
 
     // 통계 계산
     const totalContracts = stats.length;
-    const activeContracts = stats.filter((c) => c.status === 'active').length;
+    const activeContracts = stats.filter(c => c.status === 'active').length;
     const cancelledContracts = stats.filter(
-      (c) => c.status === 'cancelled'
+      c => c.status === 'cancelled'
     ).length;
-    const expiredContracts = stats.filter((c) => c.status === 'expired').length;
+    const expiredContracts = stats.filter(c => c.status === 'expired').length;
 
     const totalMonthlyPremium = stats
-      .filter((c) => c.status === 'active' && c.monthlyPremium)
+      .filter(c => c.status === 'active' && c.monthlyPremium)
       .reduce((sum, c) => sum + parseFloat(c.monthlyPremium || '0'), 0);
 
     const totalCommission = stats
-      .filter((c) => c.status === 'active' && c.agentCommission)
+      .filter(c => c.status === 'active' && c.agentCommission)
       .reduce((sum, c) => sum + parseFloat(c.agentCommission || '0'), 0);
 
     // 월별 계약 통계 (최근 12개월)
@@ -1102,7 +1102,7 @@ export async function getInsuranceContractStats(agentId: string) {
       const year = targetDate.getFullYear();
       const month = targetDate.getMonth() + 1;
 
-      const monthlyContracts = stats.filter((contract) => {
+      const monthlyContracts = stats.filter(contract => {
         const contractDate = new Date(contract.contractDate);
         return (
           contractDate.getFullYear() === year &&
@@ -1115,10 +1115,10 @@ export async function getInsuranceContractStats(agentId: string) {
         month,
         count: monthlyContracts.length,
         totalPremium: monthlyContracts
-          .filter((c) => c.monthlyPremium)
+          .filter(c => c.monthlyPremium)
           .reduce((sum, c) => sum + parseFloat(c.monthlyPremium || '0'), 0),
         totalCommission: monthlyContracts
-          .filter((c) => c.agentCommission)
+          .filter(c => c.agentCommission)
           .reduce((sum, c) => sum + parseFloat(c.agentCommission || '0'), 0),
       });
     }

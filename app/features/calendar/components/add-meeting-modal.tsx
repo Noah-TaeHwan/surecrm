@@ -264,13 +264,11 @@ export function AddMeetingModal({
 
   // 선택된 고객 정보
   const selectedClientId = form.watch('clientId');
-  const selectedClient = clients.find((c) => c.id === selectedClientId);
+  const selectedClient = clients.find(c => c.id === selectedClientId);
 
   // 미팅 제목 자동 생성
   const selectedType = form.watch('type');
-  const selectedMeetingType = meetingTypes.find(
-    (t) => t.value === selectedType
-  );
+  const selectedMeetingType = meetingTypes.find(t => t.value === selectedType);
 
   // 제목 자동 업데이트
   React.useEffect(() => {
@@ -396,7 +394,7 @@ export function AddMeetingModal({
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {clients.map((client) => (
+                            {clients.map(client => (
                               <SelectItem key={client.id} value={client.id}>
                                 <div className="flex items-center gap-2">
                                   <span className="font-medium">
@@ -430,7 +428,7 @@ export function AddMeetingModal({
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {meetingTypes.map((type) => (
+                            {meetingTypes.map(type => (
                               <SelectItem key={type.value} value={type.value}>
                                 <div className="flex items-center gap-2">
                                   <span>{type.icon}</span>
@@ -483,7 +481,7 @@ export function AddMeetingModal({
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {priorityOptions.map((option) => (
+                            {priorityOptions.map(option => (
                               <SelectItem
                                 key={option.value}
                                 value={option.value}
@@ -517,7 +515,7 @@ export function AddMeetingModal({
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {contactMethods.map((method) => (
+                            {contactMethods.map(method => (
                               <SelectItem
                                 key={method.value}
                                 value={method.value}
@@ -586,9 +584,7 @@ export function AddMeetingModal({
                     <FormItem>
                       <FormLabel className="text-xs">소요 시간</FormLabel>
                       <Select
-                        onValueChange={(value) =>
-                          field.onChange(parseInt(value))
-                        }
+                        onValueChange={value => field.onChange(parseInt(value))}
                         defaultValue={field.value.toString()}
                       >
                         <FormControl>
@@ -597,7 +593,7 @@ export function AddMeetingModal({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {durationOptions.map((option) => (
+                          {durationOptions.map(option => (
                             <SelectItem
                               key={option.value}
                               value={option.value.toString()}
@@ -654,7 +650,7 @@ export function AddMeetingModal({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {reminderOptions.map((option) => (
+                          {reminderOptions.map(option => (
                             <SelectItem key={option.value} value={option.value}>
                               {option.label}
                             </SelectItem>
@@ -811,7 +807,7 @@ export function AddMeetingModal({
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {expectedOutcomes.map((outcome) => (
+                            {expectedOutcomes.map(outcome => (
                               <SelectItem
                                 key={outcome.value}
                                 value={outcome.value}
@@ -845,7 +841,7 @@ export function AddMeetingModal({
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {productInterests.map((product) => (
+                            {productInterests.map(product => (
                               <SelectItem
                                 key={product.value}
                                 value={product.value}
@@ -882,7 +878,7 @@ export function AddMeetingModal({
                               ? Number(field.value).toLocaleString('ko-KR')
                               : ''
                           }
-                          onChange={(e) => {
+                          onChange={e => {
                             const value = e.target.value.replace(/[^0-9]/g, '');
                             field.onChange(value ? Number(value) : undefined);
                           }}

@@ -117,7 +117,7 @@ export function MedicalHistoryTab({
                   label: '수술',
                   icon: '⚕️',
                 },
-              ].map((item) => (
+              ].map(item => (
                 <div key={item.key} className="flex items-center space-x-3">
                   <span className="text-lg">{item.icon}</span>
                   <label className="flex items-center space-x-2 text-sm cursor-pointer">
@@ -129,8 +129,8 @@ export function MedicalHistoryTab({
                           item.key as keyof typeof medicalHistory
                         ] as boolean
                       }
-                      onChange={(e) =>
-                        setMedicalHistory((prev) => ({
+                      onChange={e =>
+                        setMedicalHistory(prev => ({
                           ...prev,
                           [item.key]: e.target.checked,
                         }))
@@ -156,8 +156,8 @@ export function MedicalHistoryTab({
                     type="checkbox"
                     className="rounded border-border"
                     checked={medicalHistory.hasAdditionalExam}
-                    onChange={(e) =>
-                      setMedicalHistory((prev) => ({
+                    onChange={e =>
+                      setMedicalHistory(prev => ({
                         ...prev,
                         hasAdditionalExam: e.target.checked,
                       }))
@@ -195,7 +195,7 @@ export function MedicalHistoryTab({
                   label: '30일 이상 투약',
                   icon: '💊',
                 },
-              ].map((item) => (
+              ].map(item => (
                 <div key={item.key} className="flex items-center space-x-3">
                   <span className="text-lg">{item.icon}</span>
                   <label className="flex items-center space-x-2 text-sm cursor-pointer">
@@ -207,8 +207,8 @@ export function MedicalHistoryTab({
                           item.key as keyof typeof medicalHistory
                         ] as boolean
                       }
-                      onChange={(e) =>
-                        setMedicalHistory((prev) => ({
+                      onChange={e =>
+                        setMedicalHistory(prev => ({
                           ...prev,
                           [item.key]: e.target.checked,
                         }))
@@ -234,8 +234,8 @@ export function MedicalHistoryTab({
                   rows={4}
                   placeholder="3개월 이내 의료 관련 상세 내용을 입력해주세요..."
                   value={medicalHistory.recentMedicalDetails}
-                  onChange={(e) =>
-                    setMedicalHistory((prev) => ({
+                  onChange={e =>
+                    setMedicalHistory(prev => ({
                       ...prev,
                       recentMedicalDetails: e.target.value,
                     }))
@@ -251,8 +251,8 @@ export function MedicalHistoryTab({
                   rows={4}
                   placeholder="5년 이내 주요 의료 이력 상세 내용을 입력해주세요..."
                   value={medicalHistory.majorMedicalDetails}
-                  onChange={(e) =>
-                    setMedicalHistory((prev) => ({
+                  onChange={e =>
+                    setMedicalHistory(prev => ({
                       ...prev,
                       majorMedicalDetails: e.target.value,
                     }))

@@ -63,7 +63,7 @@ export function PipelineBoard({
   const clientsByStage = stages.reduce<Record<string, Client[]>>(
     (acc, stage) => {
       acc[stage.id] = clientsState.filter(
-        (client) => client.stageId === stage.id
+        client => client.stageId === stage.id
       );
       return acc;
     },
@@ -133,8 +133,8 @@ export function PipelineBoard({
       onClientMove(clientId, sourceStageId, targetStageId);
 
       // UI 상태 즉시 업데이트 (실제로는 API 호출 후 응답으로 처리해야 함)
-      setClientsState((prevClients) =>
-        prevClients.map((client) =>
+      setClientsState(prevClients =>
+        prevClients.map(client =>
           client.id === clientId
             ? { ...client, stageId: targetStageId }
             : client
@@ -156,7 +156,7 @@ export function PipelineBoard({
 
   // 🎯 단계별 카드들 토글 함수
   const toggleStageCards = (stageId: string) => {
-    setCollapsedStages((prev) => ({
+    setCollapsedStages(prev => ({
       ...prev,
       [stageId]: !prev[stageId],
     }));
@@ -187,7 +187,7 @@ export function PipelineBoard({
       <div className="min-w-max">
         {/* 단계 헤더 */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-6">
-          {stages.map((stage) => {
+          {stages.map(stage => {
             const isDragTarget = draggingOver === stage.id;
             const canDrop =
               draggedClientId && dragSourceStageId.current !== stage.id;
@@ -262,7 +262,7 @@ export function PipelineBoard({
 
         {/* 칸반보드 컨텐츠 */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-          {stages.map((stage) => {
+          {stages.map(stage => {
             const isDragTarget = draggingOver === stage.id;
             const canDrop =
               draggedClientId && dragSourceStageId.current !== stage.id;
@@ -275,9 +275,9 @@ export function PipelineBoard({
                 className={`min-w-[300px] min-h-[400px] transition-all duration-200 ${
                   isDragTarget && canDrop ? 'transform scale-[1.02]' : ''
                 }`}
-                onDragOver={(e) => handleDragOver(e, stage.id)}
+                onDragOver={e => handleDragOver(e, stage.id)}
                 onDragLeave={handleDragLeave}
-                onDrop={(e) => handleDrop(e, stage.id)}
+                onDrop={e => handleDrop(e, stage.id)}
               >
                 {/* 고객 카드 컨테이너 */}
                 <div
@@ -309,12 +309,12 @@ export function PipelineBoard({
                     </div>
                   ) : /* 🎯 일반 상태: 모든 고객 카드들 표시 */
                   stageClients.length > 0 ? (
-                    stageClients.map((client) => (
+                    stageClients.map(client => (
                       <div
                         key={client.id}
                         id={`client-card-${client.id}`}
                         draggable
-                        onDragStart={(e) =>
+                        onDragStart={e =>
                           handleDragStart(e, client.id, stage.id)
                         }
                         onDragEnd={handleDragEnd}
