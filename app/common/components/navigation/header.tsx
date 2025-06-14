@@ -225,7 +225,7 @@ export function Header({
   return (
     <header
       className={cn(
-        'fixed top-0 left-0 right-0 z-50 h-14 md:h-16 px-4 md:px-6 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex items-center justify-between',
+        'fixed top-0 left-0 right-0 z-40 h-14 md:h-16 px-4 md:px-6 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex items-center justify-between',
         className
       )}
     >

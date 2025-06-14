@@ -161,7 +161,9 @@ body {
   overflow-x: hidden;
   background: hsl(var(--background));
   padding: 0.75rem;
-  padding-top: calc(var(--header-height) + 0.75rem); /* 헤더 높이 + 패딩 */
+  padding-top: calc(
+    var(--header-height) + 1.5rem
+  ); /* 헤더 높이 + 충분한 패딩 */
   padding-bottom: 5rem; /* 모바일 바텀네비 공간 확보 */
 
   /* 스크롤바 완전 제거 */
@@ -185,6 +187,9 @@ body {
 @media (min-width: 768px) {
   .content-area {
     padding: 1rem;
+    padding-top: calc(
+      var(--header-height) + 1rem
+    ); /* 데스크톱에서 헤더 높이 + 패딩 */
     padding-bottom: 0.75rem; /* 데스크톱에서는 바텀네비 없음 */
   }
 }
@@ -192,6 +197,9 @@ body {
 @media (min-width: 1024px) {
   .content-area {
     padding: 1.5rem;
+    padding-top: calc(
+      var(--header-height) + 1.5rem
+    ); /* 대형 화면에서 헤더 높이 + 패딩 */
   }
 }
 
