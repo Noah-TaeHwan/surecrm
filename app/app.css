@@ -1690,3 +1690,19 @@ textarea {
     animation: low-border-gentle 15s ease-in-out infinite !important;
   }
 }
+
+/* 🎯 Sheet 컴포넌트 z-index 설정 - 헤더보다 높게 */
+[data-slot='sheet-content'] {
+  z-index: 60 !important;
+}
+
+[data-slot='sheet-overlay'] {
+  z-index: 55 !important;
+}
+
+/* 모바일 사이드바 상단 패딩 조정 */
+@media (max-width: 767px) {
+  [data-slot='sheet-content'] .sidebar-content {
+    padding-top: calc(var(--header-height) + 0.5rem) !important;
+  }
+}

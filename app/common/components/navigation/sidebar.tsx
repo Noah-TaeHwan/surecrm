@@ -123,11 +123,21 @@ export function Sidebar({ className, onClose }: SidebarProps) {
     <div
       className={cn(
         'flex flex-col h-full bg-background w-full',
+        // 모바일에서 헤더 높이만큼 상단 패딩 추가
+        'pt-16 md:pt-0',
         // 데스크톱에서는 기존 스타일 유지
         'md:h-screen md:bg-sidebar md:border-r md:border-sidebar-border md:w-64',
         className
       )}
     >
+      {/* 모바일 전용 로고 영역 */}
+      <div className="md:hidden px-6 py-4 border-b border-border">
+        <h1 className="text-xl font-bold text-foreground">SureCRM</h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          보험설계사 전용 CRM
+        </p>
+      </div>
+
       {/* 데스크톱에서만 로고 헤더 표시 */}
       <div className="hidden md:block p-4 border-b border-sidebar-border">
         <Link

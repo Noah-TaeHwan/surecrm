@@ -185,7 +185,11 @@ export default function AppLayout({ loaderData }: ComponentProps) {
       {/* 모바일 사이드바 Sheet */}
       <MobileOnly>
         <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
-          <SheetContent side="left" className="w-64 p-0 scrollbar-none">
+          <SheetContent side="left" className="w-64 p-0 scrollbar-none z-[60]">
+            <SheetTitle className="sr-only">메뉴</SheetTitle>
+            <SheetDescription className="sr-only">
+              사이트 네비게이션 메뉴입니다. 원하는 페이지로 이동할 수 있습니다.
+            </SheetDescription>
             <Sidebar onClose={handleMobileNavigation} />
           </SheetContent>
         </Sheet>
