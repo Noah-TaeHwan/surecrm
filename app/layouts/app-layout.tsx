@@ -161,7 +161,7 @@ export default function AppLayout({ loaderData }: ComponentProps) {
       <FlexibleSidebar />
 
       {/* 메인 컨텐츠 영역 */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 relative">
         {/* 헤더 */}
         <Header
           title={pageTitle}
@@ -171,7 +171,7 @@ export default function AppLayout({ loaderData }: ComponentProps) {
         />
 
         {/* 페이지 컨텐츠 */}
-        <main className="flex-1 overflow-auto bg-background p-3 md:p-4 lg:p-6 pb-20 md:pb-3">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden bg-background p-3 md:p-4 lg:p-6 pb-20 md:pb-3">
           <Outlet />
         </main>
       </div>

@@ -225,11 +225,11 @@ export function Header({
   return (
     <header
       className={cn(
-        'h-14 md:h-16 px-4 md:px-6 border-b border-border bg-background flex items-center justify-between',
+        'sticky top-0 z-50 h-14 md:h-16 px-4 md:px-6 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex items-center justify-between',
         className
       )}
     >
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 flex-1">
         {/* 모바일 메뉴 버튼 */}
         {showMenuButton && (
           <Button
@@ -243,12 +243,19 @@ export function Header({
           </Button>
         )}
 
-        {/* 페이지 제목 */}
+        {/* 페이지 제목 - 데스크톱만 */}
         {title && (
           <div className="hidden md:block">
             <h1 className="text-lg font-semibold text-foreground">{title}</h1>
           </div>
         )}
+      </div>
+
+      {/* 🎯 모바일 중앙 로고 */}
+      <div className="absolute left-1/2 transform -translate-x-1/2 lg:hidden">
+        <Link to="/dashboard" className="flex items-center">
+          <span className="text-lg font-bold text-primary">SureCRM</span>
+        </Link>
       </div>
 
       {/* 헤더 우측 요소들 */}
