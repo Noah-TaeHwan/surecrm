@@ -8,7 +8,7 @@ import {
 } from 'react-router';
 import { InsuranceAgentEvents } from '~/lib/utils/analytics';
 import type { Route } from './+types/client-detail-page';
-import { MainLayout } from '~/common/layouts/main-layout';
+
 import { Button } from '~/common/components/ui/button';
 import { Badge } from '~/common/components/ui/badge';
 import {
@@ -690,34 +690,30 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
   // 🎯 빈 상태 처리
   if (isEmpty || !client) {
     return (
-      <MainLayout title="고객 상세">
-        <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-          <div className="text-6xl">🔍</div>
-          {error ? (
-            <>
-              <h2 className="text-2xl font-semibold">오류가 발생했습니다</h2>
-              <p className="text-muted-foreground text-center max-w-md">
-                {error}
-              </p>
-            </>
-          ) : (
-            <>
-              <h2 className="text-2xl font-semibold">
-                고객을 찾을 수 없습니다
-              </h2>
-              <p className="text-muted-foreground text-center max-w-md">
-                요청하신 고객 정보가 존재하지 않거나 접근 권한이 없습니다.
-              </p>
-            </>
-          )}
-          <Link to="/clients">
-            <Button variant="outline">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              고객 목록으로 돌아가기
-            </Button>
-          </Link>
-        </div>
-      </MainLayout>
+      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+        <div className="text-6xl">🔍</div>
+        {error ? (
+          <>
+            <h2 className="text-2xl font-semibold">오류가 발생했습니다</h2>
+            <p className="text-muted-foreground text-center max-w-md">
+              {error}
+            </p>
+          </>
+        ) : (
+          <>
+            <h2 className="text-2xl font-semibold">고객을 찾을 수 없습니다</h2>
+            <p className="text-muted-foreground text-center max-w-md">
+              요청하신 고객 정보가 존재하지 않거나 접근 권한이 없습니다.
+            </p>
+          </>
+        )}
+        <Link to="/clients">
+          <Button variant="outline">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            고객 목록으로 돌아가기
+          </Button>
+        </Link>
+      </div>
     );
   }
 
@@ -1612,207 +1608,205 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
   }, [client?.id, currentUser?.id, loadClientTags]);
 
   return (
-    <MainLayout title={`${client?.fullName || '고객'} - 고객 상세`}>
-      <div className="space-y-6">
-        {/* 🎯 헤더 섹션 */}
-        <ClientPageHeader
-          clientName={client?.fullName || '고객'}
+    <div className="space-y-6">
+      {/* 🎯 헤더 섹션 */}
+      <ClientPageHeader
+        clientName={client?.fullName || '고객'}
+        isEditing={isEditing}
+        isDeleting={isDeleting}
+        onEditStart={handleEditStart}
+        onEditCancel={handleEditCancel}
+        onEditSave={handleEditSave}
+        onDeleteClient={handleDeleteClient}
+        onShowOpportunityModal={() => setShowOpportunityModal(true)}
+      />
+
+      {/* 🎯 메인 컨텐츠 - 이력서 스타일 그리드 레이아웃 */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* 왼쪽 사이드바 - 기본 정보 */}
+        <ClientSidebar
+          client={client}
           isEditing={isEditing}
-          isDeleting={isDeleting}
-          onEditStart={handleEditStart}
-          onEditCancel={handleEditCancel}
-          onEditSave={handleEditSave}
-          onDeleteClient={handleDeleteClient}
-          onShowOpportunityModal={() => setShowOpportunityModal(true)}
+          editFormData={editFormData}
+          setEditFormData={setEditFormData}
+          handleEditStart={handleEditStart}
+          handleSsnChange={handleSsnChange}
+          clientTags={clientTags}
+          handleOpenTagModal={handleOpenTagModal}
+          removeClientTag={removeClientTag}
+          availableReferrers={availableReferrers} // 🆕 소개자 후보 목록 전달
         />
 
-        {/* 🎯 메인 컨텐츠 - 이력서 스타일 그리드 레이아웃 */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* 왼쪽 사이드바 - 기본 정보 */}
-          <ClientSidebar
-            client={client}
-            isEditing={isEditing}
-            editFormData={editFormData}
-            setEditFormData={setEditFormData}
-            handleEditStart={handleEditStart}
-            handleSsnChange={handleSsnChange}
-            clientTags={clientTags}
-            handleOpenTagModal={handleOpenTagModal}
-            removeClientTag={removeClientTag}
-            availableReferrers={availableReferrers} // 🆕 소개자 후보 목록 전달
-          />
+        {/* 오른쪽 메인 컨텐츠 */}
+        <div className="lg:col-span-3">
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="space-y-6"
+          >
+            <TabsList className="grid w-full grid-cols-4 lg:grid-cols-7 h-auto lg:h-9 gap-1 lg:gap-0 p-1">
+              <TabsTrigger value="notes">상담내용</TabsTrigger>
+              <TabsTrigger value="medical">병력사항</TabsTrigger>
+              <TabsTrigger value="checkup">점검목적</TabsTrigger>
+              <TabsTrigger value="interests">관심사항</TabsTrigger>
+              <TabsTrigger value="companions">상담동반자</TabsTrigger>
+              <TabsTrigger value="insurance">보험계약</TabsTrigger>
+              <TabsTrigger value="family">가족</TabsTrigger>
+            </TabsList>
 
-          {/* 오른쪽 메인 컨텐츠 */}
-          <div className="lg:col-span-3">
-            <Tabs
-              value={activeTab}
-              onValueChange={setActiveTab}
-              className="space-y-6"
-            >
-              <TabsList className="grid w-full grid-cols-4 lg:grid-cols-7 h-auto lg:h-9 gap-1 lg:gap-0 p-1">
-                <TabsTrigger value="notes">상담내용</TabsTrigger>
-                <TabsTrigger value="medical">병력사항</TabsTrigger>
-                <TabsTrigger value="checkup">점검목적</TabsTrigger>
-                <TabsTrigger value="interests">관심사항</TabsTrigger>
-                <TabsTrigger value="companions">상담동반자</TabsTrigger>
-                <TabsTrigger value="insurance">보험계약</TabsTrigger>
-                <TabsTrigger value="family">가족</TabsTrigger>
-              </TabsList>
-
-              {/* 탭 컨텐츠들 */}
-              <TabsContent value="insurance" className="space-y-6">
-                <InsuranceContractsTab
-                  clientId={client?.id}
-                  clientName={client?.fullName || '고객'}
-                  agentId={data?.currentUserId}
-                  initialContracts={insuranceContracts}
-                  shouldOpenModal={shouldCreateContract} // 🏢 파이프라인에서 왔을 때 모달 자동 열기
-                />
-              </TabsContent>
-
-              <TabsContent value="family" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <User className="h-5 w-5" />
-                      가족 구성원
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-6">
-                    <div className="text-center py-8">
-                      <User className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                      <p className="text-sm text-muted-foreground">
-                        가족 정보가 준비 중입니다.
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              {/* 🆕 병력사항 탭 */}
-              <MedicalHistoryTab
-                medicalHistory={medicalHistory}
-                setMedicalHistory={setMedicalHistory}
-                submit={submit}
-                setSuccessMessage={setSuccessMessage}
-                setShowSuccessModal={setShowSuccessModal}
+            {/* 탭 컨텐츠들 */}
+            <TabsContent value="insurance" className="space-y-6">
+              <InsuranceContractsTab
+                clientId={client?.id}
+                clientName={client?.fullName || '고객'}
+                agentId={data?.currentUserId}
+                initialContracts={insuranceContracts}
+                shouldOpenModal={shouldCreateContract} // 🏢 파이프라인에서 왔을 때 모달 자동 열기
               />
+            </TabsContent>
 
-              {/* 🆕 점검목적 탭 */}
-              <CheckupPurposesTab
-                checkupPurposes={checkupPurposes}
-                setCheckupPurposes={setCheckupPurposes}
-                onSave={handleSaveCheckupPurposes}
-              />
+            <TabsContent value="family" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <User className="h-5 w-5" />
+                    가족 구성원
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="text-center py-8">
+                    <User className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                    <p className="text-sm text-muted-foreground">
+                      가족 정보가 준비 중입니다.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
 
-              {/* 🆕 관심사항 탭 */}
-              <InterestCategoriesTab
-                interestCategories={interestCategories}
-                setInterestCategories={setInterestCategories}
-                onSave={handleSaveInterestCategories}
-              />
+            {/* 🆕 병력사항 탭 */}
+            <MedicalHistoryTab
+              medicalHistory={medicalHistory}
+              setMedicalHistory={setMedicalHistory}
+              submit={submit}
+              setSuccessMessage={setSuccessMessage}
+              setShowSuccessModal={setShowSuccessModal}
+            />
 
-              {/* 🆕 상담동반자 탭 */}
-              <CompanionsTab
-                consultationCompanions={consultationCompanions}
-                handleAddCompanion={handleAddCompanion}
-                handleEditCompanion={handleEditCompanion}
-                handleDeleteCompanion={handleDeleteCompanion}
-              />
+            {/* 🆕 점검목적 탭 */}
+            <CheckupPurposesTab
+              checkupPurposes={checkupPurposes}
+              setCheckupPurposes={setCheckupPurposes}
+              onSave={handleSaveCheckupPurposes}
+            />
 
-              {/* 🆕 상담내용 탭 */}
-              <ConsultationNotesTab
-                isEditing={isEditing}
-                notes={isEditing ? editFormData.notes : client?.notes || ''}
-                onNotesChange={notes =>
-                  setEditFormData({
-                    ...editFormData,
-                    notes,
-                  })
-                }
-                onEditStart={handleEditStart}
-                consultationNotes={consultationNotes}
-                onAddNote={handleAddNote}
-                onEditNote={handleEditNote}
-                onDeleteNote={handleDeleteNote}
-                onShowDeleteModal={handleShowDeleteModal}
-              />
-            </Tabs>
-          </div>
+            {/* 🆕 관심사항 탭 */}
+            <InterestCategoriesTab
+              interestCategories={interestCategories}
+              setInterestCategories={setInterestCategories}
+              onSave={handleSaveInterestCategories}
+            />
+
+            {/* 🆕 상담동반자 탭 */}
+            <CompanionsTab
+              consultationCompanions={consultationCompanions}
+              handleAddCompanion={handleAddCompanion}
+              handleEditCompanion={handleEditCompanion}
+              handleDeleteCompanion={handleDeleteCompanion}
+            />
+
+            {/* 🆕 상담내용 탭 */}
+            <ConsultationNotesTab
+              isEditing={isEditing}
+              notes={isEditing ? editFormData.notes : client?.notes || ''}
+              onNotesChange={notes =>
+                setEditFormData({
+                  ...editFormData,
+                  notes,
+                })
+              }
+              onEditStart={handleEditStart}
+              consultationNotes={consultationNotes}
+              onAddNote={handleAddNote}
+              onEditNote={handleEditNote}
+              onDeleteNote={handleDeleteNote}
+              onShowDeleteModal={handleShowDeleteModal}
+            />
+          </Tabs>
         </div>
-
-        {/* 모든 모달들 */}
-        <ClientModalsSection
-          // 새 영업 기회 모달
-          showOpportunityModal={showOpportunityModal}
-          setShowOpportunityModal={setShowOpportunityModal}
-          onCreateOpportunity={handleCreateOpportunity}
-          clientName={client?.fullName || '고객'}
-          isCreatingOpportunity={isCreatingOpportunity}
-          // 삭제 확인 모달
-          showDeleteModal={showDeleteModal}
-          setShowDeleteModal={setShowDeleteModal}
-          onConfirmDelete={confirmDeleteClient}
-          isDeleting={isDeleting}
-          // 저장 성공 모달
-          showSaveSuccessModal={showSaveSuccessModal}
-          setShowSaveSuccessModal={setShowSaveSuccessModal}
-          // 삭제 성공 모달
-          showDeleteSuccessModal={showDeleteSuccessModal}
-          setShowDeleteSuccessModal={setShowDeleteSuccessModal}
-          // 새 영업 기회 성공 모달
-          showOpportunitySuccessModal={showOpportunitySuccessModal}
-          setShowOpportunitySuccessModal={setShowOpportunitySuccessModal}
-          opportunitySuccessData={opportunitySuccessData}
-          // 에러 모달
-          showErrorModal={showErrorModal}
-          setShowErrorModal={setShowErrorModal}
-          errorModalContent={errorModalContent}
-          // 성공 모달
-          showSuccessModal={showSuccessModal}
-          setShowSuccessModal={setShowSuccessModal}
-          successMessage={successMessage}
-          // 상담동반자 모달
-          showAddCompanionModal={showAddCompanionModal}
-          setShowAddCompanionModal={setShowAddCompanionModal}
-          editingCompanion={editingCompanion}
-          setEditingCompanion={setEditingCompanion}
-          onSaveCompanion={handleSaveCompanion}
-          // 상담내용 모달
-          showAddNoteModal={showAddNoteModal}
-          setShowAddNoteModal={setShowAddNoteModal}
-          editingNote={editingNote}
-          setEditingNote={setEditingNote}
-          onSaveNote={handleSaveNote}
-          // 태그 모달
-          showTagModal={showTagModal}
-          setShowTagModal={setShowTagModal}
-          availableTags={availableTags}
-          selectedTagIds={selectedTagIds}
-          setSelectedTagIds={setSelectedTagIds}
-          isLoadingTags={isLoadingTags}
-          onSaveTags={handleSaveTags}
-          onCreateTag={handleCreateTag}
-          tagForm={tagForm}
-          setTagForm={setTagForm}
-          showCreateTagModal={showCreateTagModal}
-          setShowCreateTagModal={setShowCreateTagModal}
-          showTagSuccessModal={showTagSuccessModal}
-          setShowTagSuccessModal={setShowTagSuccessModal}
-          tagSuccessMessage={tagSuccessMessage}
-        />
-
-        {/* 🗑️ 상담 기록 삭제 확인 모달 */}
-        <ConsultationNoteDeleteModal
-          isOpen={showDeleteNoteModal}
-          onClose={handleCloseDeleteModal}
-          onConfirm={() => noteToDelete && handleDeleteNote(noteToDelete.id)}
-          noteTitle={noteToDelete?.title || ''}
-          noteDate={noteToDelete?.consultationDate || ''}
-          isDeleting={isDeletingNote}
-        />
       </div>
-    </MainLayout>
+
+      {/* 모든 모달들 */}
+      <ClientModalsSection
+        // 새 영업 기회 모달
+        showOpportunityModal={showOpportunityModal}
+        setShowOpportunityModal={setShowOpportunityModal}
+        onCreateOpportunity={handleCreateOpportunity}
+        clientName={client?.fullName || '고객'}
+        isCreatingOpportunity={isCreatingOpportunity}
+        // 삭제 확인 모달
+        showDeleteModal={showDeleteModal}
+        setShowDeleteModal={setShowDeleteModal}
+        onConfirmDelete={confirmDeleteClient}
+        isDeleting={isDeleting}
+        // 저장 성공 모달
+        showSaveSuccessModal={showSaveSuccessModal}
+        setShowSaveSuccessModal={setShowSaveSuccessModal}
+        // 삭제 성공 모달
+        showDeleteSuccessModal={showDeleteSuccessModal}
+        setShowDeleteSuccessModal={setShowDeleteSuccessModal}
+        // 새 영업 기회 성공 모달
+        showOpportunitySuccessModal={showOpportunitySuccessModal}
+        setShowOpportunitySuccessModal={setShowOpportunitySuccessModal}
+        opportunitySuccessData={opportunitySuccessData}
+        // 에러 모달
+        showErrorModal={showErrorModal}
+        setShowErrorModal={setShowErrorModal}
+        errorModalContent={errorModalContent}
+        // 성공 모달
+        showSuccessModal={showSuccessModal}
+        setShowSuccessModal={setShowSuccessModal}
+        successMessage={successMessage}
+        // 상담동반자 모달
+        showAddCompanionModal={showAddCompanionModal}
+        setShowAddCompanionModal={setShowAddCompanionModal}
+        editingCompanion={editingCompanion}
+        setEditingCompanion={setEditingCompanion}
+        onSaveCompanion={handleSaveCompanion}
+        // 상담내용 모달
+        showAddNoteModal={showAddNoteModal}
+        setShowAddNoteModal={setShowAddNoteModal}
+        editingNote={editingNote}
+        setEditingNote={setEditingNote}
+        onSaveNote={handleSaveNote}
+        // 태그 모달
+        showTagModal={showTagModal}
+        setShowTagModal={setShowTagModal}
+        availableTags={availableTags}
+        selectedTagIds={selectedTagIds}
+        setSelectedTagIds={setSelectedTagIds}
+        isLoadingTags={isLoadingTags}
+        onSaveTags={handleSaveTags}
+        onCreateTag={handleCreateTag}
+        tagForm={tagForm}
+        setTagForm={setTagForm}
+        showCreateTagModal={showCreateTagModal}
+        setShowCreateTagModal={setShowCreateTagModal}
+        showTagSuccessModal={showTagSuccessModal}
+        setShowTagSuccessModal={setShowTagSuccessModal}
+        tagSuccessMessage={tagSuccessMessage}
+      />
+
+      {/* 🗑️ 상담 기록 삭제 확인 모달 */}
+      <ConsultationNoteDeleteModal
+        isOpen={showDeleteNoteModal}
+        onClose={handleCloseDeleteModal}
+        onConfirm={() => noteToDelete && handleDeleteNote(noteToDelete.id)}
+        noteTitle={noteToDelete?.title || ''}
+        noteDate={noteToDelete?.consultationDate || ''}
+        isDeleting={isDeletingNote}
+      />
+    </div>
   );
 }
 

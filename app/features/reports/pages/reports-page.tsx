@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from '~/common/components/ui/select';
 import { Download, Calendar, RefreshCw } from 'lucide-react';
-import { MainLayout } from '~/common/layouts/main-layout';
+
 import {
   getPerformanceData,
   getTopPerformers,
@@ -295,70 +295,66 @@ export default function ReportsPage({ loaderData }: Route.ComponentProps) {
   };
 
   return (
-    <MainLayout title="보고서">
-      <div className="space-y-6">
-        {/* 헤더 */}
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-muted-foreground">
-              비즈니스 성과와 주요 지표를 확인하세요
-            </p>
-            <p className="text-sm text-muted-foreground mt-1">
-              <Calendar className="inline h-4 w-4 mr-1" />
-              {dateRange.formatted}
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <Select
-              value={selectedPeriod}
-              onValueChange={handlePeriodChange}
-              disabled={isLoading}
-            >
-              <SelectTrigger className="w-32">
-                <SelectValue />
-                {isLoading && (
-                  <RefreshCw className="ml-2 h-4 w-4 animate-spin" />
-                )}
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="week">이번 주</SelectItem>
-                <SelectItem value="month">이번 달</SelectItem>
-                <SelectItem value="quarter">이번 분기</SelectItem>
-                <SelectItem value="year">올해</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button variant="outline" size="sm" onClick={handleDownload}>
-              <Download className="mr-2 h-4 w-4" />
-              다운로드
-            </Button>
-          </div>
+    <div className="space-y-6">
+      {/* 헤더 */}
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-muted-foreground">
+            비즈니스 성과와 주요 지표를 확인하세요
+          </p>
+          <p className="text-sm text-muted-foreground mt-1">
+            <Calendar className="inline h-4 w-4 mr-1" />
+            {dateRange.formatted}
+          </p>
         </div>
-
-        {/* 핵심 지표 카드들 */}
-        <PerformanceMetrics
-          performance={performance}
-          period={{
-            type: selectedPeriod as any,
-            startDate: new Date(dateRange.start),
-            endDate: new Date(dateRange.end),
-            label: dateRange.formatted,
-          }}
-        />
-
-        {/* 카카오톡 업무 보고 양식 */}
-        <KakaoReport
-          performance={performance}
-          user={user}
-          period={selectedPeriod}
-        />
-
-        {/* 비즈니스 인사이트 탭 - 🔧 수정: userGoals 전달 */}
-        <InsightsTabs
-          performance={performance}
-          topPerformers={topPerformers}
-          userGoals={userGoals}
-        />
+        <div className="flex items-center gap-3">
+          <Select
+            value={selectedPeriod}
+            onValueChange={handlePeriodChange}
+            disabled={isLoading}
+          >
+            <SelectTrigger className="w-32">
+              <SelectValue />
+              {isLoading && <RefreshCw className="ml-2 h-4 w-4 animate-spin" />}
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="week">이번 주</SelectItem>
+              <SelectItem value="month">이번 달</SelectItem>
+              <SelectItem value="quarter">이번 분기</SelectItem>
+              <SelectItem value="year">올해</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button variant="outline" size="sm" onClick={handleDownload}>
+            <Download className="mr-2 h-4 w-4" />
+            다운로드
+          </Button>
+        </div>
       </div>
-    </MainLayout>
+
+      {/* 핵심 지표 카드들 */}
+      <PerformanceMetrics
+        performance={performance}
+        period={{
+          type: selectedPeriod as any,
+          startDate: new Date(dateRange.start),
+          endDate: new Date(dateRange.end),
+          label: dateRange.formatted,
+        }}
+      />
+
+      {/* 카카오톡 업무 보고 양식 */}
+      <KakaoReport
+        performance={performance}
+        user={user}
+        period={selectedPeriod}
+      />
+
+      {/* 비즈니스 인사이트 탭 - 🔧 수정: userGoals 전달 */}
+      <InsightsTabs
+        performance={performance}
+        topPerformers={topPerformers}
+        userGoals={userGoals}
+      />
+    </div>
   );
 }

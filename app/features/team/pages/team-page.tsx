@@ -1,7 +1,7 @@
 import type { Route } from './+types/team-page';
 import { useState, useEffect } from 'react';
 import { Form, useFetcher } from 'react-router';
-import { MainLayout } from '~/common/layouts/main-layout';
+
 import { toast } from 'sonner';
 
 // 컴포넌트 imports
@@ -185,45 +185,50 @@ export default function TeamPage({
     fetcher.state === 'submitting' || fetcher.state === 'loading';
 
   return (
-    <MainLayout title="나의 팀">
-      <div className="space-y-8">
-        {/* 팀 통계와 초대 버튼 */}
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-          <div className="flex-1">
-            <TeamStatsCards stats={teamStats} />
-          </div>
-          <div className="sm:ml-4">
-            <InviteMember onInvite={handleInvite} />
+    <div className="space-y-8">
+      {/* 헤더 */}
+      <div>
+        <p className="text-muted-foreground">
+          팀원을 관리하고 팀 설정을 변경합니다
+        </p>
+      </div>
+
+      {/* 팀 통계와 초대 버튼 */}
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+        <div className="flex-1">
+          <TeamStatsCards stats={teamStats} />
+        </div>
+        <div className="sm:ml-4">
+          <InviteMember onInvite={handleInvite} />
+        </div>
+      </div>
+
+      {/* 팀원 목록 */}
+      <TeamMemberList
+        members={teamMembers}
+        onRemoveMember={handleRemoveMember}
+        onResendInvite={handleResendInvite}
+        onViewMember={handleViewMember}
+      />
+
+      {/* 팀원 프로필 다이얼로그 */}
+      {selectedMember && (
+        <TeamMemberProfile
+          member={selectedMember}
+          isOpen={!!selectedMember}
+          onClose={() => setSelectedMember(null)}
+        />
+      )}
+
+      {/* 로딩 오버레이 */}
+      {isLoading && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+            <p className="text-sm text-muted-foreground">처리 중...</p>
           </div>
         </div>
-
-        {/* 팀원 목록 */}
-        <TeamMemberList
-          members={teamMembers}
-          onRemoveMember={handleRemoveMember}
-          onResendInvite={handleResendInvite}
-          onViewMember={handleViewMember}
-        />
-
-        {/* 팀원 프로필 다이얼로그 */}
-        {selectedMember && (
-          <TeamMemberProfile
-            member={selectedMember}
-            isOpen={!!selectedMember}
-            onClose={() => setSelectedMember(null)}
-          />
-        )}
-
-        {/* 로딩 오버레이 */}
-        {isLoading && (
-          <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
-              <p className="text-sm text-muted-foreground">처리 중...</p>
-            </div>
-          </div>
-        )}
-      </div>
-    </MainLayout>
+      )}
+    </div>
   );
 }

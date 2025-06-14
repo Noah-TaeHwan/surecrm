@@ -1,5 +1,5 @@
 import type { Route } from './+types/network-page';
-import { MainLayout } from '~/common/layouts/main-layout';
+
 import {
   Card,
   CardContent,
@@ -720,13 +720,20 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
   }, []);
 
   return (
-    <MainLayout title="소개 네트워크">
+    <div className="space-y-6">
+      {/* 헤더 */}
+      <div>
+        <p className="text-muted-foreground">
+          고객 간 소개 관계를 시각화하여 네트워크 효과를 극대화하세요.
+        </p>
+      </div>
+
       <div
         data-network-main
         className="flex gap-3" // CSS Grid 대신 Flexbox 사용
         style={{
-          height: 'calc(100vh - 4rem)',
-          maxHeight: 'calc(100vh - 4rem)',
+          height: 'calc(100vh - 8rem)',
+          maxHeight: 'calc(100vh - 8rem)',
           overflow: 'hidden',
           padding: '0.75rem',
         }}
@@ -860,6 +867,6 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
           </div>
         </div>
       </div>
-    </MainLayout>
+    </div>
   );
 }

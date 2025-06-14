@@ -1,6 +1,6 @@
 import type { Route } from './+types/invitations-page';
 import { useState } from 'react';
-import { MainLayout } from '~/common/layouts/main-layout';
+
 import { Button } from '~/common/components/ui/button';
 import {
   Card,
@@ -188,127 +188,115 @@ export default function InvitationsPage({ loaderData }: Route.ComponentProps) {
 
   // 에러 상태 처리
   if (error) {
-    return (
-      <MainLayout title="동료 추천">
-        <ErrorState error={error} />
-      </MainLayout>
-    );
+    return <ErrorState error={error} />;
   }
 
   // 빈 데이터 상태 처리
   if (!hasData) {
-    return (
-      <MainLayout title="동료 추천">
-        <EmptyInvitationsState />
-      </MainLayout>
-    );
+    return <EmptyInvitationsState />;
   }
 
   return (
-    <MainLayout title="동료 추천">
-      <div className="space-y-6">
-        {/* 헤더 */}
-        <div>
-          <p className="text-muted-foreground">
-            소중한 동료들을 SureCRM에 추천하고 함께 성장하세요. 추천 코드를 통해
-            전문가 네트워크를 확장하세요.
-          </p>
+    <div className="space-y-6">
+      {/* 헤더 */}
+      <div>
+        <p className="text-muted-foreground">
+          소중한 동료들을 SureCRM에 추천하고 함께 성장하세요. 추천 코드를 통해
+          전문가 네트워크를 확장하세요.
+        </p>
+      </div>
+
+      {/* 추천 코드 현황 요약 */}
+      <InvitationStatsCards
+        availableCount={invitationStats.availableInvitations}
+        usedInvitations={usedInvitations}
+      />
+
+      {/* 내 추천 코드들 */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-medium">내 추천 코드</h3>
+          <Badge variant="outline">{myInvitations.length}개 보유</Badge>
         </div>
 
-        {/* 추천 코드 현황 요약 */}
-        <InvitationStatsCards
-          availableCount={invitationStats.availableInvitations}
-          usedInvitations={usedInvitations}
-        />
-
-        {/* 내 추천 코드들 */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium">내 추천 코드</h3>
-            <Badge variant="outline">{myInvitations.length}개 보유</Badge>
+        {myInvitations.length > 0 ? (
+          <div className="grid gap-4">
+            {myInvitations.map((invitation: Invitation) => (
+              <InvitationCard
+                key={invitation.id}
+                invitation={invitation}
+                onCopyLink={copyInviteLink}
+                copiedCode={copiedCode}
+              />
+            ))}
           </div>
-
-          {myInvitations.length > 0 ? (
-            <div className="grid gap-4">
-              {myInvitations.map((invitation: Invitation) => (
-                <InvitationCard
-                  key={invitation.id}
-                  invitation={invitation}
-                  onCopyLink={copyInviteLink}
-                  copiedCode={copiedCode}
-                />
-              ))}
-            </div>
-          ) : (
-            <Card>
-              <CardContent className="text-center py-8">
-                <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <h4 className="font-medium mb-2">추천 코드가 없습니다</h4>
-                <p className="text-sm text-muted-foreground mb-4">
-                  관리자에게 문의하여 추천 코드를 요청하실 수 있습니다.
-                </p>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* 모든 추천 코드를 사용한 경우 */}
-          {availableInvitations.length === 0 && usedInvitations.length > 0 && (
-            <EmptyInvitations usedCount={usedInvitations.length} />
-          )}
-        </div>
-
-        {/* 내가 추천한 사람들 */}
-        {invitedColleagues.length > 0 ? (
-          <InvitedColleagues usedInvitations={invitedColleagues} />
         ) : (
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium">추천한 동료들</h3>
-            <Card>
-              <CardContent className="text-center py-8">
-                <CheckCircle className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <h4 className="font-medium mb-2">
-                  아직 추천한 동료가 없습니다
-                </h4>
-                <p className="text-sm text-muted-foreground">
-                  추천 코드를 공유하여 동료들을 SureCRM에 추천해보세요.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
+          <Card>
+            <CardContent className="text-center py-8">
+              <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <h4 className="font-medium mb-2">추천 코드가 없습니다</h4>
+              <p className="text-sm text-muted-foreground mb-4">
+                관리자에게 문의하여 추천 코드를 요청하실 수 있습니다.
+              </p>
+            </CardContent>
+          </Card>
         )}
 
-        {/* 추천 가이드 */}
-        <Card className="border-border/40 bg-muted/20 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle className="text-foreground flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                💡
-              </div>
-              추천 가이드
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 text-sm">
-            <div className="flex items-start gap-3 p-3 rounded-lg bg-card/50 border border-border/30">
-              <div className="w-2 h-2 rounded-full bg-primary/60 mt-2 flex-shrink-0" />
-              <p className="text-muted-foreground">
-                추천 코드는 관리자를 통해 발급받을 수 있습니다
-              </p>
-            </div>
-            <div className="flex items-start gap-3 p-3 rounded-lg bg-card/50 border border-border/30">
-              <div className="w-2 h-2 rounded-full bg-primary/60 mt-2 flex-shrink-0" />
-              <p className="text-muted-foreground">
-                추천 코드는 영구적으로 유효하며 만료되지 않습니다
-              </p>
-            </div>
-            <div className="flex items-start gap-3 p-3 rounded-lg bg-card/50 border border-border/30">
-              <div className="w-2 h-2 rounded-full bg-primary/60 mt-2 flex-shrink-0" />
-              <p className="text-muted-foreground">
-                소중한 동료들에게만 추천 코드를 공유하시기 바랍니다
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+        {/* 모든 추천 코드를 사용한 경우 */}
+        {availableInvitations.length === 0 && usedInvitations.length > 0 && (
+          <EmptyInvitations usedCount={usedInvitations.length} />
+        )}
       </div>
-    </MainLayout>
+
+      {/* 내가 추천한 사람들 */}
+      {invitedColleagues.length > 0 ? (
+        <InvitedColleagues usedInvitations={invitedColleagues} />
+      ) : (
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium">추천한 동료들</h3>
+          <Card>
+            <CardContent className="text-center py-8">
+              <CheckCircle className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <h4 className="font-medium mb-2">아직 추천한 동료가 없습니다</h4>
+              <p className="text-sm text-muted-foreground">
+                추천 코드를 공유하여 동료들을 SureCRM에 추천해보세요.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* 추천 가이드 */}
+      <Card className="border-border/40 bg-muted/20 backdrop-blur-sm">
+        <CardHeader>
+          <CardTitle className="text-foreground flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+              💡
+            </div>
+            추천 가이드
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3 text-sm">
+          <div className="flex items-start gap-3 p-3 rounded-lg bg-card/50 border border-border/30">
+            <div className="w-2 h-2 rounded-full bg-primary/60 mt-2 flex-shrink-0" />
+            <p className="text-muted-foreground">
+              추천 코드는 관리자를 통해 발급받을 수 있습니다
+            </p>
+          </div>
+          <div className="flex items-start gap-3 p-3 rounded-lg bg-card/50 border border-border/30">
+            <div className="w-2 h-2 rounded-full bg-primary/60 mt-2 flex-shrink-0" />
+            <p className="text-muted-foreground">
+              추천 코드는 영구적으로 유효하며 만료되지 않습니다
+            </p>
+          </div>
+          <div className="flex items-start gap-3 p-3 rounded-lg bg-card/50 border border-border/30">
+            <div className="w-2 h-2 rounded-full bg-primary/60 mt-2 flex-shrink-0" />
+            <p className="text-muted-foreground">
+              소중한 동료들에게만 추천 코드를 공유하시기 바랍니다
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

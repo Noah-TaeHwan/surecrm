@@ -1,4 +1,3 @@
-import { MainLayout } from '~/common/layouts/main-layout';
 import { useState, useMemo, useEffect } from 'react';
 import { useFetcher, useNavigate } from 'react-router';
 import { z } from 'zod';
@@ -949,64 +948,62 @@ export default function ClientsPage({ loaderData }: any) {
     .sort((a: any, b: any) => a.name.localeCompare(b.name)); // 이름순 정렬
 
   return (
-    <MainLayout title="고객 관리">
-      <div className="space-y-8">
-        {/* 🎯 고객 관리 핵심 액션 */}
-        <ClientStatsSection
-          stats={loaderData.stats}
-          clients={loaderData.clients}
-          onAddClient={handleAddClient}
-        />
+    <div className="space-y-8">
+      {/* 🎯 고객 관리 핵심 액션 */}
+      <ClientStatsSection
+        stats={loaderData.stats}
+        clients={loaderData.clients}
+        onAddClient={handleAddClient}
+      />
 
-        {/* 🎯 스마트 검색 및 필터 */}
-        <ClientFiltersSection
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          filterImportance={filterImportance}
-          setFilterImportance={setFilterImportance}
-          filterStage={filterStage}
-          setFilterStage={setFilterStage}
-          filterReferralStatus={filterReferralStatus}
-          setFilterReferralStatus={setFilterReferralStatus}
-          viewMode={viewMode}
-          setViewMode={setViewMode}
-          showFilters={showFilters}
-          setShowFilters={setShowFilters}
-          filteredClientsCount={filteredClients.length}
-        />
+      {/* 🎯 스마트 검색 및 필터 */}
+      <ClientFiltersSection
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        filterImportance={filterImportance}
+        setFilterImportance={setFilterImportance}
+        filterStage={filterStage}
+        setFilterStage={setFilterStage}
+        filterReferralStatus={filterReferralStatus}
+        setFilterReferralStatus={setFilterReferralStatus}
+        viewMode={viewMode}
+        setViewMode={setViewMode}
+        showFilters={showFilters}
+        setShowFilters={setShowFilters}
+        filteredClientsCount={filteredClients.length}
+      />
 
-        {/* 🎯 고객 목록 */}
-        <ClientListSection
-          filteredClients={sortedClients}
-          viewMode={viewMode}
-          onClientRowClick={handleClientRowClick}
-          onAddClient={handleAddClient}
-        />
+      {/* 🎯 고객 목록 */}
+      <ClientListSection
+        filteredClients={sortedClients}
+        viewMode={viewMode}
+        onClientRowClick={handleClientRowClick}
+        onAddClient={handleAddClient}
+      />
 
-        {/* 🎯 모든 모달들 */}
-        <ClientsPageModals
-          // Add Client Modal
-          showAddClientModal={showAddClientModal}
-          setShowAddClientModal={setShowAddClientModal}
-          onClientSubmit={handleClientSubmit}
-          isSubmitting={fetcher.state === 'submitting'}
-          submitError={
-            fetcher.data?.success === false ? fetcher.data.message : null
-          }
-          potentialReferrers={potentialReferrers}
-          // Import Modal
-          showImportModal={showImportModal}
-          setShowImportModal={setShowImportModal}
-          // Edit Client Modal
-          showEditClientModal={showEditClientModal}
-          setShowEditClientModal={setShowEditClientModal}
-          // Delete Confirm Modal
-          showDeleteConfirmModal={showDeleteConfirmModal}
-          setShowDeleteConfirmModal={setShowDeleteConfirmModal}
-          selectedClient={selectedClient as any}
-          onConfirmDelete={handleConfirmDelete}
-        />
-      </div>
-    </MainLayout>
+      {/* 🎯 모든 모달들 */}
+      <ClientsPageModals
+        // Add Client Modal
+        showAddClientModal={showAddClientModal}
+        setShowAddClientModal={setShowAddClientModal}
+        onClientSubmit={handleClientSubmit}
+        isSubmitting={fetcher.state === 'submitting'}
+        submitError={
+          fetcher.data?.success === false ? fetcher.data.message : null
+        }
+        potentialReferrers={potentialReferrers}
+        // Import Modal
+        showImportModal={showImportModal}
+        setShowImportModal={setShowImportModal}
+        // Edit Client Modal
+        showEditClientModal={showEditClientModal}
+        setShowEditClientModal={setShowEditClientModal}
+        // Delete Confirm Modal
+        showDeleteConfirmModal={showDeleteConfirmModal}
+        setShowDeleteConfirmModal={setShowDeleteConfirmModal}
+        selectedClient={selectedClient as any}
+        onConfirmDelete={handleConfirmDelete}
+      />
+    </div>
   );
 }

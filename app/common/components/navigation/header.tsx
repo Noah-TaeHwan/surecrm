@@ -236,11 +236,18 @@ export function Header({
             variant="ghost"
             size="icon"
             onClick={onMenuButtonClick}
-            className="lg:hidden"
+            className="lg:hidden !outline-none !border-none !ring-0 !shadow-none hover:!bg-transparent focus:!bg-transparent active:!bg-transparent !transition-none"
           >
             <Menu className="h-5 w-5" />
             <span className="sr-only">메뉴 열기</span>
           </Button>
+        )}
+
+        {/* 페이지 제목 */}
+        {title && (
+          <div className="hidden md:block">
+            <h1 className="text-lg font-semibold text-foreground">{title}</h1>
+          </div>
         )}
       </div>
 
@@ -249,7 +256,11 @@ export function Header({
         {/* 알림 아이콘 */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative !outline-none !border-none !ring-0 !shadow-none hover:!bg-transparent focus:!bg-transparent active:!bg-transparent !transition-none"
+            >
               <Bell className="h-4 w-4" />
               {unreadCount > 0 && (
                 <div className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-primary-foreground text-xs rounded-full flex items-center justify-center">
@@ -259,21 +270,20 @@ export function Header({
               <span className="sr-only">알림</span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-80" align="end">
-            <DropdownMenuLabel className="flex items-center justify-between py-3">
-              <span className="font-medium">알림</span>
+          <DropdownMenuContent className="w-80 md:w-96 p-0" align="end">
+            <DropdownMenuLabel className="flex items-center justify-between py-3 px-4 border-b border-border/50">
+              <span className="font-semibold text-base">알림</span>
               {unreadCount > 0 && (
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-auto p-1 text-xs text-muted-foreground hover:text-foreground"
+                  className="h-auto px-2 py-1 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-md transition-colors"
                   onClick={handleMarkAllAsRead}
                 >
                   모두 읽음
                 </Button>
               )}
             </DropdownMenuLabel>
-            <DropdownMenuSeparator />
 
             {isLoading ? (
               <div className="p-8 text-center">
@@ -282,100 +292,112 @@ export function Header({
               </div>
             ) : notifications.length > 0 ? (
               <div className="max-h-80 overflow-y-auto">
-                {/* 🔧 수정: 읽지 않은 알림을 먼저 표시하고, 읽은 알림과 구분 */}
-                {notifications
-                  .sort((a, b) => {
-                    // 읽지 않은 알림을 먼저 정렬
-                    if (!a.readAt && b.readAt) return -1;
-                    if (a.readAt && !b.readAt) return 1;
-                    // 같은 읽음 상태라면 최신순
-                    return (
-                      new Date(b.createdAt).getTime() -
-                      new Date(a.createdAt).getTime()
-                    );
-                  })
-                  .map(notification => (
-                    <DropdownMenuItem
-                      key={notification.id}
-                      className={cn(
-                        'flex items-start p-4 cursor-pointer border-b border-border/50 last:border-b-0 transition-colors',
-                        !notification.readAt
-                          ? 'bg-primary/10 border-l-4 border-l-primary hover:bg-primary/15'
-                          : 'hover:bg-muted/50 opacity-75'
-                      )}
-                      onClick={() => handleMarkAsRead(notification.id)}
-                    >
-                      <div className="flex w-full gap-3">
-                        <div className="text-lg">
-                          {getIcon(notification.type)}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between mb-1">
+                <div className="py-2">
+                  {/* 🔧 수정: 읽지 않은 알림을 먼저 표시하고, 읽은 알림과 구분 */}
+                  {notifications
+                    .sort((a, b) => {
+                      // 읽지 않은 알림을 먼저 정렬
+                      if (!a.readAt && b.readAt) return -1;
+                      if (a.readAt && !b.readAt) return 1;
+                      // 같은 읽음 상태라면 최신순
+                      return (
+                        new Date(b.createdAt).getTime() -
+                        new Date(a.createdAt).getTime()
+                      );
+                    })
+                    .map((notification, index) => (
+                      <DropdownMenuItem
+                        key={notification.id}
+                        className={cn(
+                          'flex items-start mx-2 my-1 p-3 cursor-pointer rounded-lg transition-all duration-200',
+                          !notification.readAt
+                            ? 'bg-primary/5 border border-primary/20 hover:bg-primary/10 hover:border-primary/30'
+                            : 'hover:bg-muted/50 opacity-80'
+                        )}
+                        onClick={() => handleMarkAsRead(notification.id)}
+                      >
+                        <div className="flex w-full gap-3">
+                          <div className="text-lg">
+                            {getIcon(notification.type)}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between mb-1">
+                              <p
+                                className={cn(
+                                  'text-sm leading-tight',
+                                  !notification.readAt
+                                    ? 'font-semibold text-foreground'
+                                    : 'font-medium text-muted-foreground'
+                                )}
+                              >
+                                {notification.title}
+                              </p>
+                              {!notification.readAt && (
+                                <div className="w-2 h-2 bg-primary rounded-full mt-1 ml-2 flex-shrink-0 animate-pulse" />
+                              )}
+                            </div>
                             <p
                               className={cn(
-                                'text-sm leading-tight',
+                                'text-xs leading-relaxed mb-2',
                                 !notification.readAt
-                                  ? 'font-semibold text-foreground'
-                                  : 'font-medium text-muted-foreground'
+                                  ? 'text-muted-foreground'
+                                  : 'text-muted-foreground/70'
                               )}
                             >
-                              {notification.title}
+                              {notification.message}
                             </p>
-                            {!notification.readAt && (
-                              <div className="w-2 h-2 bg-primary rounded-full mt-1 ml-2 flex-shrink-0 animate-pulse" />
-                            )}
-                          </div>
-                          <p
-                            className={cn(
-                              'text-xs leading-relaxed mb-2',
-                              !notification.readAt
-                                ? 'text-muted-foreground'
-                                : 'text-muted-foreground/70'
-                            )}
-                          >
-                            {notification.message}
-                          </p>
-                          <div className="flex items-center justify-between">
-                            <p className="text-xs text-muted-foreground">
-                              {formatTime(notification.createdAt)}
-                            </p>
-                            {!notification.readAt && (
-                              <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-medium">
-                                읽지 않음
-                              </span>
-                            )}
+                            <div className="flex items-center justify-between">
+                              <p className="text-xs text-muted-foreground">
+                                {formatTime(notification.createdAt)}
+                              </p>
+                              {!notification.readAt && (
+                                <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-medium">
+                                  읽지 않음
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </DropdownMenuItem>
-                  ))}
+                      </DropdownMenuItem>
+                    ))}
+                </div>
               </div>
             ) : (
-              <div className="p-8 text-center">
-                <Bell className="h-12 w-12 mx-auto mb-4 text-muted-foreground/30" />
+              <div className="p-6 text-center">
+                <div className="w-12 h-12 mx-auto mb-3 bg-muted/30 rounded-full flex items-center justify-center">
+                  <Bell className="h-6 w-6 text-muted-foreground/50" />
+                </div>
                 <p className="text-sm font-medium text-foreground mb-1">
                   읽지 않은 알림이 없습니다
                 </p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-muted-foreground leading-relaxed">
                   새로운 알림이 도착하면 여기에 표시됩니다
                 </p>
               </div>
             )}
 
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link to="/notifications" className="w-full justify-center py-3">
-                <Eye className="mr-2 h-4 w-4" />
-                모든 알림 보기
-              </Link>
-            </DropdownMenuItem>
+            <div className="border-t border-border/50">
+              <DropdownMenuItem asChild>
+                <Link
+                  to="/notifications"
+                  className="w-full justify-center py-3 text-sm font-medium hover:bg-muted/50 transition-colors"
+                >
+                  <Eye className="mr-2 h-4 w-4" />
+                  모든 알림 보기
+                </Link>
+              </DropdownMenuItem>
+            </div>
           </DropdownMenuContent>
         </DropdownMenu>
 
         {/* 사용자 프로필 드롭다운 */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="rounded-full">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-full !outline-none !border-none !ring-0 !shadow-none hover:!bg-transparent focus:!bg-transparent active:!bg-transparent !transition-none"
+            >
               <Avatar className="h-8 w-8">
                 {isLoadingUser ? (
                   <AvatarFallback className="text-xs animate-pulse bg-muted">

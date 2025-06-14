@@ -27,7 +27,7 @@ import {
 } from '~/common/components/ui/card';
 import { Badge } from '~/common/components/ui/badge';
 import { useState } from 'react';
-import { MainLayout } from '~/common/layouts/main-layout';
+
 import { Form, useNavigate } from 'react-router';
 import {
   TrendingUp,
@@ -237,45 +237,33 @@ export default function InfluencersPage({
     hasMoreData,
   } = loaderData;
 
-  const navigate = useNavigate();
-
-  // 상태 관리 (기존 로직 유지)
+  // 상태 관리
+  const [currentPeriod, setCurrentPeriod] = useState(selectedPeriod);
+  const [currentTab, setCurrentTab] = useState(activeTab);
   const [modalState, setModalState] = useState<ModalState>({
     isOpen: false,
     type: 'gratitude',
   });
 
-  const [currentTab, setCurrentTab] = useState<TabState['active']>(
-    activeTab as TabState['active']
-  );
+  const navigate = useNavigate();
 
-  const [currentPeriod, setCurrentPeriod] = useState(selectedPeriod);
-
-  // 이벤트 핸들러들
+  // 기간 변경 핸들러
   const handlePeriodChange = (period: string) => {
     setCurrentPeriod(period);
     const url = new URL(window.location.href);
     url.searchParams.set('period', period);
-    if (currentTab !== 'ranking') {
-      url.searchParams.set('tab', currentTab);
-    }
     navigate(url.pathname + url.search, { replace: true });
   };
 
+  // 탭 변경 핸들러
   const handleTabChange = (tab: TabState['active']) => {
     setCurrentTab(tab);
     const url = new URL(window.location.href);
-    if (tab !== 'ranking') {
-      url.searchParams.set('tab', tab);
-    } else {
-      url.searchParams.delete('tab');
-    }
-    if (currentPeriod !== 'all') {
-      url.searchParams.set('period', currentPeriod);
-    }
+    url.searchParams.set('tab', tab);
     navigate(url.pathname + url.search, { replace: true });
   };
 
+  // 감사 표현 모달 열기
   const handleGratitudeClick = (influencer: InfluencerDisplayData) => {
     setModalState({
       isOpen: true,
@@ -284,256 +272,237 @@ export default function InfluencersPage({
     });
   };
 
+  // 감사 표현 제출 핸들러
   const handleGratitudeSubmit = async (data: any) => {
-    // Form 제출 로직은 기존 유지
     try {
-      const formData = new FormData();
-      formData.append('actionType', 'createGratitude');
-      Object.entries(data).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          formData.append(key, String(value));
-        }
-      });
-
-      const response = await fetch(window.location.href, {
-        method: 'POST',
-        body: formData,
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        setModalState({ isOpen: false, type: 'gratitude' });
-        // 성공 피드백 표시
-        navigate(window.location.pathname + window.location.search, {
-          replace: true,
-        });
-      } else {
-        console.error('감사 표현 전송 실패:', result.error);
-      }
+      // Form 제출 처리는 action에서 담당
+      console.log('감사 표현 제출:', data);
+      setModalState({ isOpen: false, type: 'gratitude' });
     } catch (error) {
       console.error('감사 표현 제출 오류:', error);
     }
   };
 
   return (
-    <MainLayout title="핵심 소개자">
-      <div className="space-y-6">
-        {/* 🎯 핵심 소개자 관리 요약 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* 빠른 현황 요약 */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Award className="h-5 w-5 text-primary" />
-                핵심 소개자 현황
-              </CardTitle>
-              <p className="text-sm text-muted-foreground">
-                현재 관리 중인 핵심 소개자들의 주요 지표
-              </p>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">총 핵심 소개자</span>
-                  <Badge variant="default">{totalInfluencers}명</Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">활성 소개자</span>
-                  <Badge variant="secondary">
-                    {kpiData.totalInfluencers.value}명
-                  </Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">평균 전환율</span>
-                  <Badge variant="outline">
-                    {kpiData.averageConversionRate.value.toFixed(1)}%
-                  </Badge>
-                </div>
-                <div className="pt-2">
-                  <Button
-                    variant="outline"
-                    className="w-full h-10 opacity-60 cursor-not-allowed"
-                    disabled
-                  >
-                    <Download className="h-4 w-4 mr-2" />
-                    소개자 목록 내보내기
-                  </Button>
-                  <p className="text-xs text-muted-foreground text-center mt-2">
-                    MVP에서는 제공되지 않는 기능입니다
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+    <div className="space-y-6">
+      {/* 헤더 */}
+      <div>
+        <p className="text-muted-foreground">
+          핵심 소개자를 관리하고 감사 표현을 통해 관계를 강화하세요
+        </p>
+      </div>
 
-          {/* 네트워크 가치 요약 */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-primary" />
-                네트워크 가치
-              </CardTitle>
-              <p className="text-sm text-muted-foreground">
-                소개 네트워크가 창출한 총 가치
-              </p>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-foreground mb-1">
-                    {(kpiData.totalNetworkValue.value / 100000000).toFixed(1)}
-                    억원
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    총 네트워크 가치
-                  </div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">월별 성장률</span>
-                  <Badge
-                    variant={
-                      kpiData.monthlyGrowth.trend === 'up'
-                        ? 'default'
-                        : 'secondary'
-                    }
-                  >
-                    {kpiData.monthlyGrowth.value > 0 ? '+' : ''}
-                    {kpiData.monthlyGrowth.value.toFixed(1)}%
-                  </Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">평균 관계 강도</span>
-                  <Badge variant="outline">
-                    {kpiData.avgRelationshipStrength.value.toFixed(1)}/10
-                  </Badge>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* 📊 KPI 요약 카드 */}
-        <StatsCards kpiData={kpiData} />
-
-        {/* 🔍 검색 및 필터 */}
+      {/* 🎯 핵심 소개자 관리 요약 */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* 빠른 현황 요약 */}
         <Card>
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>소개자 검색 및 분석</CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  {totalInfluencers}명의 핵심 소개자가 등록되어 있습니다
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Select
-                  value={currentPeriod}
-                  onValueChange={handlePeriodChange}
-                >
-                  <SelectTrigger className="w-36">
-                    <Calendar className="h-4 w-4" />
-                    <SelectValue placeholder="기간 선택" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {periodOptions.map(
-                      (option: { value: string; label: string }) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      )
-                    )}
-                  </SelectContent>
-                </Select>
-
-                <Button variant="outline" size="sm" className="gap-2">
-                  <RefreshCw className="h-4 w-4" />
-                  새로고침
-                </Button>
-              </div>
-            </div>
+            <CardTitle className="flex items-center gap-2">
+              <Award className="h-5 w-5 text-primary" />
+              핵심 소개자 현황
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              현재 관리 중인 핵심 소개자들의 주요 지표
+            </p>
           </CardHeader>
           <CardContent>
-            <Tabs
-              value={currentTab}
-              onValueChange={handleTabChange as (value: string) => void}
-              className="space-y-6"
-            >
-              <TabsList className="grid w-full grid-cols-2 lg:w-auto lg:grid-cols-2">
-                <TabsTrigger value="ranking" className="gap-2">
-                  <TrendingUp className="h-4 w-4" />
-                  랭킹 분석
-                </TabsTrigger>
-                <TabsTrigger value="analysis" className="gap-2">
-                  <BarChart3 className="h-4 w-4" />
-                  네트워크 분석
-                </TabsTrigger>
-              </TabsList>
-
-              {/* 랭킹 분석 탭 */}
-              <TabsContent value="ranking" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="flex items-center gap-2">
-                        <TrendingUp className="h-5 w-5 text-primary" />
-                        핵심 소개자 랭킹
-                      </CardTitle>
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-sm">
-                          총 {totalInfluencers}명
-                        </Badge>
-                        {hasMoreData && (
-                          <Badge variant="secondary" className="text-sm">
-                            더 보기 가능
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <InfluencerRankingCard
-                      influencers={topInfluencers}
-                      onGratitudeClick={handleGratitudeClick}
-                      period={currentPeriod}
-                    />
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              {/* 네트워크 분석 탭 */}
-              <TabsContent value="analysis" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <BarChart3 className="h-5 w-5 text-primary" />
-                      소개 네트워크 분석
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <InfluencerAnalysisCard
-                      analysisData={networkAnalysis}
-                      period={currentPeriod}
-                    />
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm">총 핵심 소개자</span>
+                <Badge variant="default">{totalInfluencers}명</Badge>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">활성 소개자</span>
+                <Badge variant="secondary">
+                  {kpiData.totalInfluencers.value}명
+                </Badge>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">평균 전환율</span>
+                <Badge variant="outline">
+                  {kpiData.averageConversionRate.value.toFixed(1)}%
+                </Badge>
+              </div>
+              <div className="pt-2">
+                <Button
+                  variant="outline"
+                  className="w-full h-10 opacity-60 cursor-not-allowed"
+                  disabled
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  소개자 목록 내보내기
+                </Button>
+                <p className="text-xs text-muted-foreground text-center mt-2">
+                  MVP에서는 제공되지 않는 기능입니다
+                </p>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
-        {/* 🎁 감사 표현 모달 - MVP 방침에 따라 주석처리 */}
-        {/* 
-        <GratitudeModal
-          isOpen={modalState.isOpen}
-          type={modalState.type}
-          influencer={modalState.data?.influencer}
-          onClose={() => setModalState({ isOpen: false, type: 'gratitude' })}
-          onSubmit={handleGratitudeSubmit}
-        />
-        */}
+        {/* 네트워크 가치 요약 */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-primary" />
+              네트워크 가치
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              소개 네트워크가 창출한 총 가치
+            </p>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-foreground mb-1">
+                  {(kpiData.totalNetworkValue.value / 100000000).toFixed(1)}
+                  억원
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  총 네트워크 가치
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">월별 성장률</span>
+                <Badge
+                  variant={
+                    kpiData.monthlyGrowth.trend === 'up'
+                      ? 'default'
+                      : 'secondary'
+                  }
+                >
+                  {kpiData.monthlyGrowth.value > 0 ? '+' : ''}
+                  {kpiData.monthlyGrowth.value.toFixed(1)}%
+                </Badge>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">평균 관계 강도</span>
+                <Badge variant="outline">
+                  {kpiData.avgRelationshipStrength.value.toFixed(1)}/10
+                </Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
-    </MainLayout>
+
+      {/* 📊 KPI 요약 카드 */}
+      <StatsCards kpiData={kpiData} />
+
+      {/* 🔍 검색 및 필터 */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>소개자 검색 및 분석</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                {totalInfluencers}명의 핵심 소개자가 등록되어 있습니다
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Select value={currentPeriod} onValueChange={handlePeriodChange}>
+                <SelectTrigger className="w-36">
+                  <Calendar className="h-4 w-4" />
+                  <SelectValue placeholder="기간 선택" />
+                </SelectTrigger>
+                <SelectContent>
+                  {periodOptions.map(
+                    (option: { value: string; label: string }) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    )
+                  )}
+                </SelectContent>
+              </Select>
+
+              <Button variant="outline" size="sm" className="gap-2">
+                <RefreshCw className="h-4 w-4" />
+                새로고침
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <Tabs
+            value={currentTab}
+            onValueChange={handleTabChange as (value: string) => void}
+            className="space-y-6"
+          >
+            <TabsList className="grid w-full grid-cols-2 lg:w-auto lg:grid-cols-2">
+              <TabsTrigger value="ranking" className="gap-2">
+                <TrendingUp className="h-4 w-4" />
+                랭킹 분석
+              </TabsTrigger>
+              <TabsTrigger value="analysis" className="gap-2">
+                <BarChart3 className="h-4 w-4" />
+                네트워크 분석
+              </TabsTrigger>
+            </TabsList>
+
+            {/* 랭킹 분석 탭 */}
+            <TabsContent value="ranking" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2">
+                      <TrendingUp className="h-5 w-5 text-primary" />
+                      핵심 소개자 랭킹
+                    </CardTitle>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="text-sm">
+                        총 {totalInfluencers}명
+                      </Badge>
+                      {hasMoreData && (
+                        <Badge variant="secondary" className="text-sm">
+                          더 보기 가능
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <InfluencerRankingCard
+                    influencers={topInfluencers}
+                    onGratitudeClick={handleGratitudeClick}
+                    period={currentPeriod}
+                  />
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* 네트워크 분석 탭 */}
+            <TabsContent value="analysis" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChart3 className="h-5 w-5 text-primary" />
+                    소개 네트워크 분석
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <InfluencerAnalysisCard
+                    analysisData={networkAnalysis}
+                    period={currentPeriod}
+                  />
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
+
+      {/* 🎁 감사 표현 모달 - MVP 방침에 따라 주석처리 */}
+      {/* 
+      <GratitudeModal
+        isOpen={modalState.isOpen}
+        type={modalState.type}
+        influencer={modalState.data?.influencer}
+        onClose={() => setModalState({ isOpen: false, type: 'gratitude' })}
+        onSubmit={handleGratitudeSubmit}
+      />
+      */}
+    </div>
   );
 }
 

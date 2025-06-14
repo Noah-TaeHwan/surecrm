@@ -122,11 +122,14 @@ export function Sidebar({ className, onClose }: SidebarProps) {
   return (
     <div
       className={cn(
-        'flex flex-col h-screen bg-sidebar border-r border-sidebar-border w-64',
+        'flex flex-col h-full bg-background w-full',
+        // 데스크톱에서는 기존 스타일 유지
+        'md:h-screen md:bg-sidebar md:border-r md:border-sidebar-border md:w-64',
         className
       )}
     >
-      <div className="p-4 border-b border-sidebar-border">
+      {/* 데스크톱에서만 로고 헤더 표시 */}
+      <div className="hidden md:block p-4 border-b border-sidebar-border">
         <Link
           to="/dashboard"
           onClick={() => handleNavigation('/dashboard', 'SureCRM 로고')}
@@ -150,10 +153,10 @@ export function Sidebar({ className, onClose }: SidebarProps) {
                       // Button 스타일을 직접 적용
                       'inline-flex items-center justify-start gap-3 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
                       'w-full h-12 px-4 py-2',
-                      // 활성/비활성 상태 스타일
+                      // 모바일과 데스크톱 스타일 분리
                       isActive
-                        ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                        : 'text-sidebar-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/50'
+                        ? 'bg-accent text-accent-foreground md:bg-sidebar-accent md:text-sidebar-accent-foreground'
+                        : 'text-foreground hover:text-foreground hover:bg-accent/50 md:text-sidebar-foreground md:hover:text-sidebar-foreground md:hover:bg-sidebar-accent/50'
                     )}
                   >
                     {item.icon}
@@ -166,7 +169,7 @@ export function Sidebar({ className, onClose }: SidebarProps) {
         </nav>
       </div>
 
-      <Separator className="bg-sidebar-border" />
+      <Separator className="bg-border md:bg-sidebar-border" />
 
       <div className="p-4 text-center">
         <VersionDisplay />

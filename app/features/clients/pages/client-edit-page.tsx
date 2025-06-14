@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import type { Route } from './+types/client-edit-page';
-import { MainLayout } from '~/common/layouts/main-layout';
 
 import { ClientEditHeader } from '../components/client-edit-header';
 import { ClientEditForm } from '../components/client-edit-form';
@@ -193,23 +192,21 @@ export default function ClientEditPage({
   };
 
   return (
-    <MainLayout title={`${client.fullName} 편집`}>
-      <div className="max-w-4xl mx-auto space-y-8">
-        {/* 🎯 헤더 섹션 */}
-        <ClientEditHeader
-          clientName={client.fullName}
-          onCancel={handleCancel}
-          error={actionData?.error}
-        />
+    <div className="max-w-4xl mx-auto space-y-8">
+      {/* 🎯 헤더 섹션 */}
+      <ClientEditHeader
+        clientName={client.fullName}
+        onCancel={handleCancel}
+        error={actionData?.error}
+      />
 
-        {/* 🎯 편집 폼 */}
-        <ClientEditForm
-          form={form}
-          onSubmit={onSubmit}
-          onCancel={handleCancel}
-          isSubmitting={isSubmitting}
-        />
-      </div>
-    </MainLayout>
+      {/* 🎯 편집 폼 */}
+      <ClientEditForm
+        form={form}
+        onSubmit={onSubmit}
+        onCancel={handleCancel}
+        isSubmitting={isSubmitting}
+      />
+    </div>
   );
 }

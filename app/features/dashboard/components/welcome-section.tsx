@@ -56,12 +56,12 @@ export function WelcomeSection({ userName, todayStats }: WelcomeSectionProps) {
 
   return (
     <Card className="border-border/50 bg-gradient-to-r from-background to-muted/20">
-      <CardContent className="px-6 py-5">
-        <div className="flex items-center justify-between">
+      <CardContent className="p-4 md:px-6 md:py-5">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div className="space-y-1.5">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 md:gap-3">
               {getTimeIcon()}
-              <h1 className="text-2xl font-semibold text-foreground">
+              <h1 className="text-lg md:text-2xl font-semibold text-foreground">
                 {getGreeting()},{' '}
                 <span className="text-primary">{userName}</span>님
               </h1>
@@ -81,26 +81,24 @@ export function WelcomeSection({ userName, todayStats }: WelcomeSectionProps) {
             </div>
           </div>
 
-          <div className="flex items-center gap-6">
+          <div className="flex items-center justify-between md:gap-6 gap-4">
             <div className="text-center">
-              <div className="text-2xl font-bold text-primary mb-0.5">
+              <div className="text-xl md:text-2xl font-bold text-primary mb-0.5">
                 {todayStats.totalClients}
               </div>
               <div className="text-xs text-muted-foreground">총 고객</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-foreground mb-0.5">
+              <div className="text-xl md:text-2xl font-bold text-foreground mb-0.5">
                 {todayStats.totalReferrals}
               </div>
               <div className="text-xs text-muted-foreground">소개 건수</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-foreground mb-0.5">
+              <div className="text-xl md:text-2xl font-bold text-foreground mb-0.5">
                 {todayStats.monthlyNewClients}
               </div>
-              <div className="text-xs text-muted-foreground">
-                이번 달 신규 고객
-              </div>
+              <div className="text-xs text-muted-foreground">이번 달 신규</div>
             </div>
           </div>
         </div>

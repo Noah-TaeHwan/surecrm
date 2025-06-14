@@ -3,7 +3,7 @@
 
 // import type { Route } from './+types/billing.subscribe';
 import { useState } from 'react';
-import { MainLayout } from '~/common/layouts/main-layout';
+
 import { SimpleSubscriptionPage } from '~/features/billing/components/simple-subscription-page';
 
 // 임시 타입 정의 (React Router v7 타입 생성 전까지)
@@ -85,8 +85,16 @@ export default function BillingSubscribePage({
   };
 
   return (
-    <MainLayout title="구독 관리">
+    <div className="space-y-6">
+      {/* 헤더 */}
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">구독 관리</h1>
+        <p className="text-muted-foreground">
+          SureCRM Pro 구독을 시작하고 완전한 CRM 기능을 이용하세요
+        </p>
+      </div>
+
       <SimpleSubscriptionPage onUpgrade={handleUpgrade} isLoading={isLoading} />
-    </MainLayout>
+    </div>
   );
 }

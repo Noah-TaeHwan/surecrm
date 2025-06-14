@@ -1,5 +1,5 @@
 import type { Route } from './+types/pipeline-page';
-import { MainLayout } from '~/common/layouts/main-layout';
+
 import { useState, useEffect } from 'react';
 import { useFetcher, useNavigate } from 'react-router';
 import { PipelineBoard } from '~/features/pipeline/components/pipeline-board';
@@ -1253,249 +1253,238 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
   }, [removeFetcher.state, removeFetcher.data?.success]);
 
   return (
-    <MainLayout title="영업 파이프라인">
-      <div className="space-y-6">
-        {/* 🎯 MVP 통계 헤더 - sticky로 고정 */}
-        <div className="sticky -top-8 z-20 bg-background border-b border-border pb-6">
-          {/* 전체 통계 카드 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-6 pt-6">
-            {/* 1. 전체 고객 */}
-            <div className="flex items-center space-x-3 p-4 bg-card rounded-lg border">
-              <div className="p-2 bg-blue-500/10 rounded-lg">
-                <Users className="h-5 w-5 text-blue-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">
-                  전체 고객
-                </p>
-                <p className="text-2xl font-bold text-foreground">
-                  {totalStats.totalAllClients}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  고객 관리의 모든 고객
-                </p>
-              </div>
+    <div className="space-y-6">
+      {/* 🎯 MVP 통계 헤더 - sticky로 고정 */}
+      <div className="sticky -top-8 z-20 bg-background border-b border-border pb-6">
+        {/* 전체 통계 카드 */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-6 pt-6">
+          {/* 1. 전체 고객 */}
+          <div className="flex items-center space-x-3 p-4 bg-card rounded-lg border">
+            <div className="p-2 bg-blue-500/10 rounded-lg">
+              <Users className="h-5 w-5 text-blue-600" />
             </div>
-
-            {/* 2. 영업 관리 중 */}
-            <div className="flex items-center space-x-3 p-4 bg-card rounded-lg border">
-              <div className="p-2 bg-orange-500/10 rounded-lg">
-                <TrendingUp className="h-5 w-5 text-orange-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">
-                  영업 관리 중
-                </p>
-                <p className="text-2xl font-bold text-foreground">
-                  {totalStats.pipelineClients}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  현재 파이프라인 진행 중
-                </p>
-              </div>
-            </div>
-
-            {/* 3. 계약 완료 */}
-            <div className="flex items-center space-x-3 p-4 bg-card rounded-lg border">
-              <div className="p-2 bg-green-500/10 rounded-lg">
-                <Target className="h-5 w-5 text-green-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">
-                  계약 완료
-                </p>
-                <p className="text-2xl font-bold text-foreground">
-                  {totalStats.contractedClients}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  실제 성과 달성 고객
-                </p>
-              </div>
-            </div>
-
-            {/* 4. 키맨 고객 */}
-            <div className="flex items-center space-x-3 p-4 bg-card rounded-lg border">
-              <div className="p-2 bg-red-500/10 rounded-lg">
-                <Users className="h-5 w-5 text-red-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">
-                  키맨 고객
-                </p>
-                <p className="text-2xl font-bold text-foreground">
-                  {totalStats.highValueClients}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  고가치 중요 고객
-                </p>
-              </div>
-            </div>
-
-            {/* 5. 전환율 */}
-            <div className="flex items-center space-x-3 p-4 bg-card rounded-lg border">
-              <div className="p-2 bg-emerald-500/10 rounded-lg">
-                <TrendingUp className="h-5 w-5 text-emerald-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">
-                  전환율
-                </p>
-                <p className="text-2xl font-bold text-foreground">
-                  {totalStats.conversionRate}%
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  계약 완료 성공률
-                </p>
-              </div>
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">
+                전체 고객
+              </p>
+              <p className="text-2xl font-bold text-foreground">
+                {totalStats.totalAllClients}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                고객 관리의 모든 고객
+              </p>
             </div>
           </div>
 
-          {/* 필터 및 검색 섹션 */}
-          <div className="flex items-center justify-between">
-            <div className="flex w-full max-w-md items-center space-x-2">
-              <div className="relative w-full">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="search"
-                  placeholder="고객명, 전화번호 검색..."
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  className="pl-10 w-full"
-                  autoComplete="off"
-                />
-              </div>
+          {/* 2. 영업 관리 중 */}
+          <div className="flex items-center space-x-3 p-4 bg-card rounded-lg border">
+            <div className="p-2 bg-orange-500/10 rounded-lg">
+              <TrendingUp className="h-5 w-5 text-orange-600" />
             </div>
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">
+                영업 관리 중
+              </p>
+              <p className="text-2xl font-bold text-foreground">
+                {totalStats.pipelineClients}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                현재 파이프라인 진행 중
+              </p>
+            </div>
+          </div>
 
-            <div className="flex items-center gap-3">
-              {/* 활성 필터 표시 */}
-              {isFilterActive && (
-                <div className="flex items-center gap-2">
-                  {searchQuery && (
-                    <Badge variant="secondary" className="text-xs">
-                      검색: {searchQuery}
-                    </Badge>
-                  )}
-                  {selectedImportance !== 'all' && (
-                    <Badge variant="secondary" className="text-xs">
-                      중요도:{' '}
-                      {selectedImportance === 'high'
-                        ? '높음'
-                        : selectedImportance === 'medium'
-                          ? '보통'
-                          : '낮음'}
-                    </Badge>
-                  )}
-                  {selectedReferrerId && (
-                    <Badge variant="secondary" className="text-xs">
-                      소개자:{' '}
-                      {
-                        potentialReferrers.find(
-                          r => r.id === selectedReferrerId
-                        )?.name
-                      }
-                    </Badge>
-                  )}
-                </div>
-              )}
+          {/* 3. 계약 완료 */}
+          <div className="flex items-center space-x-3 p-4 bg-card rounded-lg border">
+            <div className="p-2 bg-green-500/10 rounded-lg">
+              <Target className="h-5 w-5 text-green-600" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">
+                계약 완료
+              </p>
+              <p className="text-2xl font-bold text-foreground">
+                {totalStats.contractedClients}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                실제 성과 달성 고객
+              </p>
+            </div>
+          </div>
 
-              {/* 필터 드롭다운 메뉴 */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant={isFilterActive ? 'default' : 'outline'}
-                    className="flex items-center gap-2"
-                  >
-                    <SlidersHorizontal className="h-4 w-4" />
-                    <span>필터</span>
-                    {isFilterActive && (
-                      <Badge
-                        variant="destructive"
-                        className="ml-1 px-1 text-xs"
-                      >
-                        ●
-                      </Badge>
-                    )}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  className="w-[320px] p-4 bg-background"
-                  align="end"
-                  sideOffset={4}
+          {/* 4. 키맨 고객 */}
+          <div className="flex items-center space-x-3 p-4 bg-card rounded-lg border">
+            <div className="p-2 bg-red-500/10 rounded-lg">
+              <Users className="h-5 w-5 text-red-600" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">
+                키맨 고객
+              </p>
+              <p className="text-2xl font-bold text-foreground">
+                {totalStats.highValueClients}
+              </p>
+              <p className="text-xs text-muted-foreground">고가치 중요 고객</p>
+            </div>
+          </div>
+
+          {/* 5. 전환율 */}
+          <div className="flex items-center space-x-3 p-4 bg-card rounded-lg border">
+            <div className="p-2 bg-emerald-500/10 rounded-lg">
+              <TrendingUp className="h-5 w-5 text-emerald-600" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">
+                전환율
+              </p>
+              <p className="text-2xl font-bold text-foreground">
+                {totalStats.conversionRate}%
+              </p>
+              <p className="text-xs text-muted-foreground">계약 완료 성공률</p>
+            </div>
+          </div>
+        </div>
+
+        {/* 필터 및 검색 섹션 */}
+        <div className="flex items-center justify-between">
+          <div className="flex w-full max-w-md items-center space-x-2">
+            <div className="relative w-full">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="고객명, 전화번호 검색..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="pl-10 w-full"
+                autoComplete="off"
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            {/* 활성 필터 표시 */}
+            {isFilterActive && (
+              <div className="flex items-center gap-2">
+                {searchQuery && (
+                  <Badge variant="secondary" className="text-xs">
+                    검색: {searchQuery}
+                  </Badge>
+                )}
+                {selectedImportance !== 'all' && (
+                  <Badge variant="secondary" className="text-xs">
+                    중요도:{' '}
+                    {selectedImportance === 'high'
+                      ? '높음'
+                      : selectedImportance === 'medium'
+                        ? '보통'
+                        : '낮음'}
+                  </Badge>
+                )}
+                {selectedReferrerId && (
+                  <Badge variant="secondary" className="text-xs">
+                    소개자:{' '}
+                    {
+                      potentialReferrers.find(r => r.id === selectedReferrerId)
+                        ?.name
+                    }
+                  </Badge>
+                )}
+              </div>
+            )}
+
+            {/* 필터 드롭다운 메뉴 */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant={isFilterActive ? 'default' : 'outline'}
+                  className="flex items-center gap-2"
                 >
-                  <PipelineFilters
-                    referrers={potentialReferrers}
-                    selectedReferrerId={selectedReferrerId}
-                    onReferrerChange={setSelectedReferrerId}
-                    selectedImportance={selectedImportance}
-                    onImportanceChange={setSelectedImportance}
-                  />
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              {/* 🚀 기존 고객 새 영업 기회 버튼 */}
-              <Button
-                variant="default"
-                onClick={() => setExistingClientModalOpen(true)}
-                className="flex items-center gap-2"
+                  <SlidersHorizontal className="h-4 w-4" />
+                  <span>필터</span>
+                  {isFilterActive && (
+                    <Badge variant="destructive" className="ml-1 px-1 text-xs">
+                      ●
+                    </Badge>
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className="w-[320px] p-4 bg-background"
+                align="end"
+                sideOffset={4}
               >
-                <UserPlus className="h-4 w-4" />
-                <span>기존 고객 영업 기회 추가</span>
-              </Button>
+                <PipelineFilters
+                  referrers={potentialReferrers}
+                  selectedReferrerId={selectedReferrerId}
+                  onReferrerChange={setSelectedReferrerId}
+                  selectedImportance={selectedImportance}
+                  onImportanceChange={setSelectedImportance}
+                />
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-              {/* 고객 추가 버튼 */}
-              <Button
-                onClick={() => {
-                  setAddClientOpen(true);
-                }}
-                className="flex items-center gap-2"
-              >
-                <Plus className="h-4 w-4" />
-                <span>신규 고객 추가</span>
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        {/* 🎯 칸반보드 메인 콘텐츠 */}
-        <div className="min-h-[600px]">
-          <PipelineBoard
-            stages={stages.map(stage => ({
-              ...stage,
-              stats: getStageStats(stage.id),
-            }))}
-            clients={filteredClients as unknown as Client[]}
-            onClientMove={handleClientMove}
-            onAddClientToStage={handleAddClientToStage}
-            onRemoveFromPipeline={handleRemoveFromPipeline}
-            onCreateContract={handleCreateContract} // 🏢 계약 전환 핸들러 전달
-            onEditOpportunity={handleEditOpportunity} // 🏢 영업 기회 편집 핸들러 전달
-          />
-        </div>
-
-        {/* 필터 결과 안내 */}
-        {isFilterActive && (
-          <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border border-dashed">
-            <div className="flex items-center gap-2">
-              <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium">
-                필터 적용됨: {filteredClients.length}명의 고객이 표시되고
-                있습니다
-              </span>
-            </div>
+            {/* 🚀 기존 고객 새 영업 기회 버튼 */}
             <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                setSearchQuery('');
-                setSelectedReferrerId(null);
-                setSelectedImportance('all');
-              }}
+              variant="default"
+              onClick={() => setExistingClientModalOpen(true)}
+              className="flex items-center gap-2"
             >
-              필터 초기화
+              <UserPlus className="h-4 w-4" />
+              <span>기존 고객 영업 기회 추가</span>
+            </Button>
+
+            {/* 고객 추가 버튼 */}
+            <Button
+              onClick={() => {
+                setAddClientOpen(true);
+              }}
+              className="flex items-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              <span>신규 고객 추가</span>
             </Button>
           </div>
-        )}
+        </div>
       </div>
+
+      {/* 🎯 칸반보드 메인 콘텐츠 */}
+      <div className="min-h-[600px]">
+        <PipelineBoard
+          stages={stages.map(stage => ({
+            ...stage,
+            stats: getStageStats(stage.id),
+          }))}
+          clients={filteredClients as unknown as Client[]}
+          onClientMove={handleClientMove}
+          onAddClientToStage={handleAddClientToStage}
+          onRemoveFromPipeline={handleRemoveFromPipeline}
+          onCreateContract={handleCreateContract} // 🏢 계약 전환 핸들러 전달
+          onEditOpportunity={handleEditOpportunity} // 🏢 영업 기회 편집 핸들러 전달
+        />
+      </div>
+
+      {/* 필터 결과 안내 */}
+      {isFilterActive && (
+        <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border border-dashed">
+          <div className="flex items-center gap-2">
+            <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-medium">
+              필터 적용됨: {filteredClients.length}명의 고객이 표시되고 있습니다
+            </span>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setSearchQuery('');
+              setSelectedReferrerId(null);
+              setSelectedImportance('all');
+            }}
+          >
+            필터 초기화
+          </Button>
+        </div>
+      )}
 
       {/* 신규 고객 추가 모달 */}
       <AddClientModal
@@ -1528,6 +1517,6 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
         clientName={clientToRemove?.name || ''}
         isLoading={removeFetcher.state === 'submitting'}
       />
-    </MainLayout>
+    </div>
   );
 }

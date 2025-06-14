@@ -1,6 +1,5 @@
 import type { Route } from './+types/dashboard-page';
 import { useState, useEffect } from 'react';
-import { MainLayout } from '~/common/layouts/main-layout';
 import { WelcomeSection } from '../components/welcome-section';
 import { PerformanceKPICards } from '../components/performance-kpi-cards';
 // 🗓️ 오늘의 일정 - 일정 관리 기능 개발 후 활성화 예정
@@ -593,86 +592,82 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
   // 에러 상태 표시
   if (error) {
     return (
-      <MainLayout title="대시보드">
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center space-y-4">
-            <div className="text-lg font-medium text-muted-foreground">
-              {error}
-            </div>
-            <button
-              onClick={() => window.location.reload()}
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
-            >
-              다시 시도
-            </button>
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center space-y-4">
+          <div className="text-lg font-medium text-muted-foreground">
+            {error}
           </div>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+          >
+            다시 시도
+          </button>
         </div>
-      </MainLayout>
+      </div>
     );
   }
 
   return (
-    <MainLayout title="대시보드">
-      <div className="space-y-8">
-        {/* 환영 섹션 */}
-        <WelcomeSection
-          userName={user.name}
-          todayStats={{
-            totalClients: kpiData.totalClients,
-            totalReferrals: kpiData.totalReferrals,
-            monthlyNewClients: kpiData.monthlyNewClients,
-          }}
+    <div className="space-y-4 md:space-y-6">
+      {/* 환영 섹션 */}
+      <WelcomeSection
+        userName={user.name}
+        todayStats={{
+          totalClients: kpiData.totalClients,
+          totalReferrals: kpiData.totalReferrals,
+          monthlyNewClients: kpiData.monthlyNewClients,
+        }}
+      />
+
+      {/* 성과 지표 카드 */}
+      <PerformanceKPICards
+        data={compatibleKPIData}
+        isLoading={isLoading}
+        salesStats={salesStats}
+      />
+
+      {/* 오늘의 일정 및 영업 파이프라인 */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+        {/* 🗓️ 오늘의 일정 - 일정 관리 기능 개발 후 활성화 예정 */}
+        {/* <TodayAgenda meetings={transformedTodayMeetings} /> */}
+        <MyGoals
+          currentGoals={compatibleUserGoals}
+          onSetGoal={handleSetGoal}
+          onDeleteGoal={handleDeleteGoal}
         />
-
-        {/* 성과 지표 카드 */}
-        <PerformanceKPICards
-          data={compatibleKPIData}
-          isLoading={isLoading}
-          salesStats={salesStats}
+        <PipelineOverview
+          stages={transformedPipelineStages}
+          totalValue={pipelineData.totalValue}
+          monthlyTarget={pipelineData.monthlyTarget}
         />
-
-        {/* 오늘의 일정 및 영업 파이프라인 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* 🗓️ 오늘의 일정 - 일정 관리 기능 개발 후 활성화 예정 */}
-          {/* <TodayAgenda meetings={transformedTodayMeetings} /> */}
-          <MyGoals
-            currentGoals={compatibleUserGoals}
-            onSetGoal={handleSetGoal}
-            onDeleteGoal={handleDeleteGoal}
-          />
-          <PipelineOverview
-            stages={transformedPipelineStages}
-            totalValue={pipelineData.totalValue}
-            monthlyTarget={pipelineData.monthlyTarget}
-          />
-        </div>
-
-        {/* 최근 고객 현황 및 소개 네트워크 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <RecentClients
-            recentClients={transformedRecentClients}
-            totalClients={recentClientsData.totalClients}
-          />
-          <ReferralInsights
-            topReferrers={transformedTopReferrers}
-            networkStats={networkStats}
-          />
-        </div>
-
-        {/* 성공 메시지 표시 */}
-        {fetcher.data?.success && (
-          <div className="fixed bottom-4 right-4 bg-orange-600 text-white px-4 py-2 rounded-md shadow-lg">
-            {fetcher.data.message}
-          </div>
-        )}
-
-        {/* 에러 메시지 표시 */}
-        {fetcher.data?.success === false && (
-          <div className="fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded-md shadow-lg">
-            {fetcher.data.message}
-          </div>
-        )}
       </div>
-    </MainLayout>
+
+      {/* 최근 고객 현황 및 소개 네트워크 */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+        <RecentClients
+          recentClients={transformedRecentClients}
+          totalClients={recentClientsData.totalClients}
+        />
+        <ReferralInsights
+          topReferrers={transformedTopReferrers}
+          networkStats={networkStats}
+        />
+      </div>
+
+      {/* 성공 메시지 표시 */}
+      {fetcher.data?.success && (
+        <div className="fixed bottom-4 right-4 bg-orange-600 text-white px-4 py-2 rounded-md shadow-lg">
+          {fetcher.data.message}
+        </div>
+      )}
+
+      {/* 에러 메시지 표시 */}
+      {fetcher.data?.success === false && (
+        <div className="fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded-md shadow-lg">
+          {fetcher.data.message}
+        </div>
+      )}
+    </div>
   );
 }

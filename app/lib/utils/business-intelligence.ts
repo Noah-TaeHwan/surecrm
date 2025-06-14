@@ -597,7 +597,9 @@ class BusinessIntelligenceSystem {
 
   private getElementSelector(element: Element): string {
     if (element.id) return `#${element.id}`;
-    if (element.className) return `.${element.className.split(' ')[0]}`;
+    if (element.className && typeof element.className === 'string') {
+      return `.${element.className.split(' ')[0]}`;
+    }
     return element.tagName.toLowerCase();
   }
 

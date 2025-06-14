@@ -93,6 +93,20 @@ module.exports = {
         'touch-sm': '0.75rem', // 12px
         'touch-md': '1rem', // 16px
         'touch-lg': '1.25rem', // 20px
+        // 안전 영역 패딩 (iOS Safe Area)
+        safe: 'env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)',
+        'safe-top': 'env(safe-area-inset-top)',
+        'safe-right': 'env(safe-area-inset-right)',
+        'safe-bottom': 'env(safe-area-inset-bottom)',
+        'safe-left': 'env(safe-area-inset-left)',
+      },
+      // 안전 영역 마진
+      margin: {
+        safe: 'env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)',
+        'safe-top': 'env(safe-area-inset-top)',
+        'safe-right': 'env(safe-area-inset-right)',
+        'safe-bottom': 'env(safe-area-inset-bottom)',
+        'safe-left': 'env(safe-area-inset-left)',
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',

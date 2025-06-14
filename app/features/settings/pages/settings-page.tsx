@@ -1,5 +1,5 @@
 import type { Route } from './+types/settings-page';
-import { MainLayout } from '~/common/layouts/main-layout';
+
 import { getCurrentUser } from '~/lib/auth/core';
 import {
   getUserProfile,
@@ -593,835 +593,836 @@ export default function SettingsPage({
   };
 
   return (
-    <MainLayout title="설정">
-      <div className="space-y-6">
-        {/* 성공/오류 메시지 - 더 세련된 디자인 */}
-        {actionData && (
-          <div
-            className={`relative overflow-hidden rounded-xl border backdrop-blur-sm transition-all duration-300 ${
-              actionData.success
-                ? 'bg-primary/10 text-primary border-primary/30'
-                : 'bg-destructive/10 text-destructive border-destructive/30'
-            }`}
-          >
-            <div className="flex items-center gap-3 p-4">
-              <div
-                className={`p-2 rounded-full ${
-                  actionData.success ? 'bg-primary/20' : 'bg-destructive/20'
-                }`}
-              >
-                {actionData.success ? (
-                  <Check className="h-4 w-4" />
-                ) : (
-                  <AlertCircle className="h-4 w-4" />
-                )}
-              </div>
-              <div className="flex-1">
-                <p className="font-medium">
-                  {actionData.success
-                    ? (actionData as any).message
-                    : (actionData as any).error}
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
+    <div className="space-y-6">
+      {/* 헤더 */}
+      <div>
+        <p className="text-muted-foreground">
+          계정 정보와 환경설정을 관리하세요
+        </p>
+      </div>
 
-        {/* 헤더 - 더 임팩트 있게 */}
-        <div className="relative">
-          <div className="relative bg-card border rounded-xl p-6">
-            <div className="flex items-center justify-between">
-              <div className="space-y-2">
-                <div className="flex items-center gap-3">
-                  <div className="p-3 bg-muted rounded-xl">
-                    <SettingsIcon className="h-6 w-6 text-foreground" />
-                  </div>
-                  <div>
-                    <h1 className="text-3xl font-bold text-foreground">설정</h1>
-                    <p className="text-muted-foreground">
-                      {user ? `${user.fullName || user.email}님의 ` : ''}계정
-                      정보와 환경설정을 관리하세요
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <Badge variant="outline" className="px-4 py-2">
-                  <Crown className="h-3 w-3 mr-2" />
-                  MVP 버전
-                </Badge>
-              </div>
+      {/* 성공/오류 메시지 - 더 세련된 디자인 */}
+      {actionData && (
+        <div
+          className={`relative overflow-hidden rounded-xl border backdrop-blur-sm transition-all duration-300 ${
+            actionData.success
+              ? 'bg-primary/10 text-primary border-primary/30'
+              : 'bg-destructive/10 text-destructive border-destructive/30'
+          }`}
+        >
+          <div className="flex items-center gap-3 p-4">
+            <div
+              className={`p-2 rounded-full ${
+                actionData.success ? 'bg-primary/20' : 'bg-destructive/20'
+              }`}
+            >
+              {actionData.success ? (
+                <Check className="h-4 w-4" />
+              ) : (
+                <AlertCircle className="h-4 w-4" />
+              )}
+            </div>
+            <div className="flex-1">
+              <p className="font-medium">
+                {actionData.success
+                  ? (actionData as any).message
+                  : (actionData as any).error}
+              </p>
             </div>
           </div>
         </div>
+      )}
 
-        {/* 메인 설정 - 프로필 정보와 보안 설정 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* 프로필 정보 */}
-          <Card className="border bg-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-lg font-semibold">
-                <div className="p-2 bg-muted rounded-lg">
-                  <User className="h-5 w-5 text-foreground" />
+      {/* 헤더 - 더 임팩트 있게 */}
+      <div className="relative">
+        <div className="relative bg-card border rounded-xl p-6">
+          <div className="flex items-center justify-between">
+            <div className="space-y-2">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-muted rounded-xl">
+                  <SettingsIcon className="h-6 w-6 text-foreground" />
                 </div>
-                프로필 정보
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-6 space-y-6">
-              <Form method="post" className="space-y-5">
-                <input type="hidden" name="actionType" value="updateProfile" />
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="name"
-                      className="text-sm font-medium text-foreground/80"
-                    >
-                      이름
-                    </Label>
-                    <div className="relative">
-                      <Input
-                        id="name"
-                        name="name"
-                        value={profileData.name}
-                        onChange={e =>
-                          handleProfileChange('name', e.target.value)
-                        }
-                        placeholder="이름을 입력하세요"
-                        className="bg-background border"
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="position"
-                      className="text-sm font-medium text-foreground/80"
-                    >
-                      직책
-                    </Label>
-                    <div className="relative">
-                      <Input
-                        id="position"
-                        value={profileData.position}
-                        placeholder="직책"
-                        className="bg-muted/50 border-white/10 text-muted-foreground cursor-not-allowed"
-                        readOnly
-                      />
-                      <Badge className="absolute right-2 top-2 text-xs bg-muted text-muted-foreground">
-                        읽기 전용
-                      </Badge>
-                    </div>
-                  </div>
+                <div>
+                  <h1 className="text-3xl font-bold text-foreground">설정</h1>
+                  <p className="text-muted-foreground">
+                    {user ? `${user.fullName || user.email}님의 ` : ''}계정
+                    정보와 환경설정을 관리하세요
+                  </p>
                 </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <Badge variant="outline" className="px-4 py-2">
+                <Crown className="h-3 w-3 mr-2" />
+                MVP 버전
+              </Badge>
+            </div>
+          </div>
+        </div>
+      </div>
 
+      {/* 메인 설정 - 프로필 정보와 보안 설정 */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* 프로필 정보 */}
+        <Card className="border bg-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-3 text-lg font-semibold">
+              <div className="p-2 bg-muted rounded-lg">
+                <User className="h-5 w-5 text-foreground" />
+              </div>
+              프로필 정보
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6 space-y-6">
+            <Form method="post" className="space-y-5">
+              <input type="hidden" name="actionType" value="updateProfile" />
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label
-                    htmlFor="email"
-                    className="flex items-center gap-2 text-sm font-medium text-foreground/80"
+                    htmlFor="name"
+                    className="text-sm font-medium text-foreground/80"
                   >
-                    <Mail className="h-4 w-4" />
-                    이메일
+                    이름
                   </Label>
                   <div className="relative">
                     <Input
-                      id="email"
-                      type="email"
-                      value={profileData.email}
-                      placeholder="이메일"
-                      className="bg-muted/50 border-white/10 text-muted-foreground cursor-not-allowed pl-10"
+                      id="name"
+                      name="name"
+                      value={profileData.name}
+                      onChange={e =>
+                        handleProfileChange('name', e.target.value)
+                      }
+                      placeholder="이름을 입력하세요"
+                      className="bg-background border"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="position"
+                    className="text-sm font-medium text-foreground/80"
+                  >
+                    직책
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      id="position"
+                      value={profileData.position}
+                      placeholder="직책"
+                      className="bg-muted/50 border-white/10 text-muted-foreground cursor-not-allowed"
                       readOnly
                     />
-                    <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Badge className="absolute right-2 top-2 text-xs bg-muted text-muted-foreground">
                       읽기 전용
                     </Badge>
                   </div>
                 </div>
+              </div>
 
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="phone"
-                    className="flex items-center gap-2 text-sm font-medium text-foreground/80"
-                  >
-                    <Phone className="h-4 w-4 text-foreground" />
-                    전화번호
-                  </Label>
-                  <div className="relative">
-                    <Input
-                      id="phone"
-                      name="phone"
-                      value={profileData.phone}
-                      onChange={e =>
-                        handleProfileChange('phone', e.target.value)
-                      }
-                      placeholder="전화번호를 입력하세요"
-                      className="bg-background border pl-10"
-                    />
-                    <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="company"
-                    className="flex items-center gap-2 text-sm font-medium text-foreground/80"
-                  >
-                    <Building className="h-4 w-4 text-foreground" />
-                    회사
-                  </Label>
-                  <div className="relative">
-                    <Input
-                      id="company"
-                      name="company"
-                      value={profileData.company}
-                      onChange={e =>
-                        handleProfileChange('company', e.target.value)
-                      }
-                      placeholder="회사명을 입력하세요"
-                      className="bg-background border pl-10"
-                    />
-                    <Building className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  </div>
-                </div>
-
-                <Button type="submit" className="w-full">
-                  <Save className="h-4 w-4 mr-2" />
-                  프로필 저장
-                </Button>
-              </Form>
-            </CardContent>
-          </Card>
-
-          {/* 보안 설정 */}
-          <Card className="border bg-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-lg font-semibold">
-                <div className="p-2 bg-muted rounded-lg">
-                  <Shield className="h-5 w-5 text-foreground" />
-                </div>
-                보안 설정
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-6 space-y-6">
-              <Form method="post" className="space-y-5">
-                <input type="hidden" name="actionType" value="changePassword" />
-
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-foreground">
-                      현재 비밀번호
-                    </Label>
-                    <Input
-                      type="password"
-                      name="currentPassword"
-                      value={passwordData.currentPassword}
-                      onChange={e =>
-                        handlePasswordChange('currentPassword', e.target.value)
-                      }
-                      placeholder="현재 비밀번호를 입력하세요"
-                      className="bg-background border"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-foreground">
-                      새 비밀번호
-                    </Label>
-                    <Input
-                      type="password"
-                      name="newPassword"
-                      value={passwordData.newPassword}
-                      onChange={e =>
-                        handlePasswordChange('newPassword', e.target.value)
-                      }
-                      placeholder="새 비밀번호를 입력하세요 (6자 이상)"
-                      className="bg-background border"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-foreground">
-                      새 비밀번호 확인
-                    </Label>
-                    <Input
-                      type="password"
-                      name="confirmPassword"
-                      value={passwordData.confirmPassword}
-                      onChange={e =>
-                        handlePasswordChange('confirmPassword', e.target.value)
-                      }
-                      placeholder="새 비밀번호를 다시 입력하세요"
-                      className="bg-background border"
-                    />
-                  </div>
-                </div>
-
-                <Button type="submit" variant="destructive" className="w-full">
-                  <Shield className="h-4 w-4 mr-2" />
-                  비밀번호 변경
-                </Button>
-              </Form>
-
-              {/* 보안 가이드 */}
-              <div className="mt-6 p-4 bg-muted/50 border rounded-lg">
-                <div className="flex items-start gap-3">
-                  <Shield className="h-4 w-4 text-foreground mt-0.5" />
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium text-foreground">
-                      보안 권장사항
-                    </p>
-                    <ul className="text-xs text-muted-foreground space-y-1">
-                      <li>• 비밀번호는 6자 이상으로 설정하세요</li>
-                      <li>• 정기적으로 비밀번호를 변경하세요</li>
-                      <li>• 다른 서비스와 다른 비밀번호를 사용하세요</li>
-                    </ul>
-                  </div>
+              <div className="space-y-2">
+                <Label
+                  htmlFor="email"
+                  className="flex items-center gap-2 text-sm font-medium text-foreground/80"
+                >
+                  <Mail className="h-4 w-4" />
+                  이메일
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="email"
+                    type="email"
+                    value={profileData.email}
+                    placeholder="이메일"
+                    className="bg-muted/50 border-white/10 text-muted-foreground cursor-not-allowed pl-10"
+                    readOnly
+                  />
+                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Badge className="absolute right-2 top-2 text-xs bg-muted text-muted-foreground">
+                    읽기 전용
+                  </Badge>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        </div>
 
-        {/* 🌐 연동 설정 - 알림 및 구글 캘린더 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* 알림 설정 */}
-          <Card className="border bg-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-lg font-semibold">
-                <div className="p-2 bg-muted rounded-lg">
-                  <Bell className="h-5 w-5 text-foreground" />
+              <div className="space-y-2">
+                <Label
+                  htmlFor="phone"
+                  className="flex items-center gap-2 text-sm font-medium text-foreground/80"
+                >
+                  <Phone className="h-4 w-4 text-foreground" />
+                  전화번호
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="phone"
+                    name="phone"
+                    value={profileData.phone}
+                    onChange={e => handleProfileChange('phone', e.target.value)}
+                    placeholder="전화번호를 입력하세요"
+                    className="bg-background border pl-10"
+                  />
+                  <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 </div>
-                알림 설정
-              </CardTitle>
-              <CardDescription>
-                이메일 및 시스템 알림 설정을 관리하세요
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="p-6 space-y-6">
-              <Form method="post" className="space-y-5">
+              </div>
+
+              <div className="space-y-2">
+                <Label
+                  htmlFor="company"
+                  className="flex items-center gap-2 text-sm font-medium text-foreground/80"
+                >
+                  <Building className="h-4 w-4 text-foreground" />
+                  회사
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="company"
+                    name="company"
+                    value={profileData.company}
+                    onChange={e =>
+                      handleProfileChange('company', e.target.value)
+                    }
+                    placeholder="회사명을 입력하세요"
+                    className="bg-background border pl-10"
+                  />
+                  <Building className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                </div>
+              </div>
+
+              <Button type="submit" className="w-full">
+                <Save className="h-4 w-4 mr-2" />
+                프로필 저장
+              </Button>
+            </Form>
+          </CardContent>
+        </Card>
+
+        {/* 보안 설정 */}
+        <Card className="border bg-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-3 text-lg font-semibold">
+              <div className="p-2 bg-muted rounded-lg">
+                <Shield className="h-5 w-5 text-foreground" />
+              </div>
+              보안 설정
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6 space-y-6">
+            <Form method="post" className="space-y-5">
+              <input type="hidden" name="actionType" value="changePassword" />
+
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-foreground">
+                    현재 비밀번호
+                  </Label>
+                  <Input
+                    type="password"
+                    name="currentPassword"
+                    value={passwordData.currentPassword}
+                    onChange={e =>
+                      handlePasswordChange('currentPassword', e.target.value)
+                    }
+                    placeholder="현재 비밀번호를 입력하세요"
+                    className="bg-background border"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-foreground">
+                    새 비밀번호
+                  </Label>
+                  <Input
+                    type="password"
+                    name="newPassword"
+                    value={passwordData.newPassword}
+                    onChange={e =>
+                      handlePasswordChange('newPassword', e.target.value)
+                    }
+                    placeholder="새 비밀번호를 입력하세요 (6자 이상)"
+                    className="bg-background border"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-foreground">
+                    새 비밀번호 확인
+                  </Label>
+                  <Input
+                    type="password"
+                    name="confirmPassword"
+                    value={passwordData.confirmPassword}
+                    onChange={e =>
+                      handlePasswordChange('confirmPassword', e.target.value)
+                    }
+                    placeholder="새 비밀번호를 다시 입력하세요"
+                    className="bg-background border"
+                  />
+                </div>
+              </div>
+
+              <Button type="submit" variant="destructive" className="w-full">
+                <Shield className="h-4 w-4 mr-2" />
+                비밀번호 변경
+              </Button>
+            </Form>
+
+            {/* 보안 가이드 */}
+            <div className="mt-6 p-4 bg-muted/50 border rounded-lg">
+              <div className="flex items-start gap-3">
+                <Shield className="h-4 w-4 text-foreground mt-0.5" />
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-foreground">
+                    보안 권장사항
+                  </p>
+                  <ul className="text-xs text-muted-foreground space-y-1">
+                    <li>• 비밀번호는 6자 이상으로 설정하세요</li>
+                    <li>• 정기적으로 비밀번호를 변경하세요</li>
+                    <li>• 다른 서비스와 다른 비밀번호를 사용하세요</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* 🌐 연동 설정 - 알림 및 구글 캘린더 */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* 알림 설정 */}
+        <Card className="border bg-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-3 text-lg font-semibold">
+              <div className="p-2 bg-muted rounded-lg">
+                <Bell className="h-5 w-5 text-foreground" />
+              </div>
+              알림 설정
+            </CardTitle>
+            <CardDescription>
+              이메일 및 시스템 알림 설정을 관리하세요
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-6 space-y-6">
+            <Form method="post" className="space-y-5">
+              <input
+                type="hidden"
+                name="actionType"
+                value="updateNotifications"
+              />
+
+              <div className="space-y-4">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1 flex-1 mr-4">
+                    <Label
+                      htmlFor="emailNotifications"
+                      className="text-sm font-medium"
+                    >
+                      이메일 알림
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      미팅 일정, 수수료 정보 등의 알림을 이메일로 받습니다
+                    </p>
+                  </div>
+                  <Switch
+                    id="emailNotifications"
+                    name="emailNotifications"
+                    checked={emailNotifications}
+                    onCheckedChange={setEmailNotifications}
+                    className="flex-shrink-0"
+                  />
+                </div>
+              </div>
+
+              <Button type="submit" className="w-full">
+                <Save className="h-4 w-4 mr-2" />
+                알림 설정 저장
+              </Button>
+            </Form>
+
+            {/* 알림 가이드 */}
+            <div className="mt-6 p-4 bg-muted/50 border rounded-lg">
+              <div className="flex items-start gap-3">
+                <Bell className="h-4 w-4 text-foreground mt-0.5" />
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-foreground">
+                    알림 정보
+                  </p>
+                  <ul className="text-xs text-muted-foreground space-y-1">
+                    <li>• 중요한 일정과 업무 소식을 놓치지 마세요</li>
+                    <li>• 언제든지 알림 설정을 변경할 수 있습니다</li>
+                    <li>• 스팸함도 확인해 주세요</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 🌐 구글 캘린더 연동 설정 */}
+        <Card className="border bg-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-3 text-lg font-semibold">
+              <div className="p-2 bg-muted rounded-lg">
+                <Calendar className="h-5 w-5 text-foreground" />
+              </div>
+              구글 캘린더 연동
+            </CardTitle>
+            <CardDescription>
+              구글 캘린더와 SureCRM을 연동하여 일정을 통합 관리하세요
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-6 space-y-6">
+            {/* 연동 상태 표시 */}
+            <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border">
+              <div className="flex items-center gap-3">
+                <div
+                  className={`p-2 rounded-full ${
+                    calendarSettings?.syncStatus === 'connected'
+                      ? 'bg-green-100 text-green-600'
+                      : calendarSettings?.syncStatus === 'error'
+                      ? 'bg-red-100 text-red-600'
+                      : 'bg-gray-100 text-gray-600'
+                  }`}
+                >
+                  {calendarSettings?.syncStatus === 'connected' ? (
+                    <CheckCircle className="h-4 w-4" />
+                  ) : calendarSettings?.syncStatus === 'error' ? (
+                    <XCircle className="h-4 w-4" />
+                  ) : (
+                    <Globe className="h-4 w-4" />
+                  )}
+                </div>
+                <div>
+                  <p className="text-sm font-medium">
+                    {calendarSettings?.syncStatus === 'connected'
+                      ? '연동됨'
+                      : calendarSettings?.syncStatus === 'error'
+                      ? '연동 오류'
+                      : '연동 안됨'}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {calendarSettings?.syncStatus === 'connected' ? (
+                      <span suppressHydrationWarning>
+                        마지막 동기화:{' '}
+                        {formatDateTime(calendarSettings.lastSyncAt)}
+                      </span>
+                    ) : calendarSettings?.syncStatus === 'error' ? (
+                      '연동에 문제가 발생했습니다'
+                    ) : (
+                      '구글 계정을 연결하여 캘린더를 동기화하세요'
+                    )}
+                  </p>
+                </div>
+              </div>
+              <Badge
+                variant={
+                  calendarSettings?.syncStatus === 'connected'
+                    ? 'default'
+                    : 'secondary'
+                }
+                className="text-xs"
+              >
+                {calendarSettings?.syncStatus === 'connected'
+                  ? '활성'
+                  : '비활성'}
+              </Badge>
+            </div>
+
+            {/* 연동 제어 버튼 */}
+            {calendarSettings?.syncStatus !== 'connected' ? (
+              <Form method="post">
                 <input
                   type="hidden"
                   name="actionType"
-                  value="updateNotifications"
+                  value="connectGoogleCalendar"
                 />
+                <Button type="submit" className="w-full">
+                  <LinkIcon className="h-4 w-4 mr-2" />
+                  구글 계정 연결
+                </Button>
+              </Form>
+            ) : (
+              <div className="space-y-4">
+                {/* 연동 설정 */}
+                <Form method="post" className="space-y-4">
+                  <input
+                    type="hidden"
+                    name="actionType"
+                    value="updateCalendarSettings"
+                  />
 
-                <div className="space-y-4">
-                  <div className="flex items-start justify-between">
-                    <div className="space-y-1 flex-1 mr-4">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
                       <Label
-                        htmlFor="emailNotifications"
+                        htmlFor="googleCalendarSync"
                         className="text-sm font-medium"
                       >
-                        이메일 알림
+                        캘린더 동기화 활성화
                       </Label>
                       <p className="text-xs text-muted-foreground">
-                        미팅 일정, 수수료 정보 등의 알림을 이메일로 받습니다
+                        SureCRM과 구글 캘린더 간 자동 동기화
                       </p>
                     </div>
                     <Switch
-                      id="emailNotifications"
-                      name="emailNotifications"
-                      checked={emailNotifications}
-                      onCheckedChange={setEmailNotifications}
-                      className="flex-shrink-0"
+                      id="googleCalendarSync"
+                      name="googleCalendarSync"
+                      checked={calendarData.googleCalendarSync}
+                      onCheckedChange={checked =>
+                        handleCalendarChange('googleCalendarSync', checked)
+                      }
                     />
                   </div>
-                </div>
 
-                <Button type="submit" className="w-full">
-                  <Save className="h-4 w-4 mr-2" />
-                  알림 설정 저장
-                </Button>
-              </Form>
+                  {calendarData.googleCalendarSync && (
+                    <>
+                      <div className="space-y-3">
+                        <Label className="text-sm font-medium">
+                          동기화 방향
+                        </Label>
+                        <Select
+                          name="syncDirection"
+                          value={calendarData.syncDirection}
+                          onValueChange={value =>
+                            handleCalendarChange('syncDirection', value)
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="동기화 방향 선택" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="read_only">
+                              <div className="flex items-center gap-2">
+                                <span>📥</span>
+                                <span>구글 → SureCRM (읽기 전용)</span>
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="write_only">
+                              <div className="flex items-center gap-2">
+                                <span>📤</span>
+                                <span>SureCRM → 구글 (쓰기 전용)</span>
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="bidirectional">
+                              <div className="flex items-center gap-2">
+                                <span>🔄</span>
+                                <span>양방향 동기화</span>
+                              </div>
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
 
-              {/* 알림 가이드 */}
-              <div className="mt-6 p-4 bg-muted/50 border rounded-lg">
-                <div className="flex items-start gap-3">
-                  <Bell className="h-4 w-4 text-foreground mt-0.5" />
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium text-foreground">
-                      알림 정보
-                    </p>
-                    <ul className="text-xs text-muted-foreground space-y-1">
-                      <li>• 중요한 일정과 업무 소식을 놓치지 마세요</li>
-                      <li>• 언제든지 알림 설정을 변경할 수 있습니다</li>
-                      <li>• 스팸함도 확인해 주세요</li>
-                    </ul>
+                      <div className="space-y-3">
+                        <Label className="text-sm font-medium">
+                          충돌 해결 방식
+                        </Label>
+                        <RadioGroup
+                          name="conflictResolution"
+                          value={calendarData.conflictResolution}
+                          onValueChange={value =>
+                            handleCalendarChange('conflictResolution', value)
+                          }
+                        >
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem
+                              value="google_wins"
+                              id="google_wins"
+                            />
+                            <Label htmlFor="google_wins" className="text-sm">
+                              구글 캘린더 우선
+                            </Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem
+                              value="local_wins"
+                              id="local_wins"
+                            />
+                            <Label htmlFor="local_wins" className="text-sm">
+                              SureCRM 우선
+                            </Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="manual" id="manual" />
+                            <Label htmlFor="manual" className="text-sm">
+                              수동 선택
+                            </Label>
+                          </div>
+                        </RadioGroup>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label
+                          htmlFor="autoSyncInterval"
+                          className="text-sm font-medium"
+                        >
+                          자동 동기화 간격 (분)
+                        </Label>
+                        <Select
+                          name="autoSyncInterval"
+                          value={calendarData.autoSyncInterval.toString()}
+                          onValueChange={value =>
+                            handleCalendarChange(
+                              'autoSyncInterval',
+                              parseInt(value)
+                            )
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="5">5분</SelectItem>
+                            <SelectItem value="15">15분</SelectItem>
+                            <SelectItem value="30">30분</SelectItem>
+                            <SelectItem value="60">1시간</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </>
+                  )}
+
+                  <div className="flex gap-2">
+                    <Button type="submit" className="flex-1">
+                      <Save className="h-4 w-4 mr-2" />
+                      설정 저장
+                    </Button>
                   </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+                </Form>
 
-          {/* 🌐 구글 캘린더 연동 설정 */}
-          <Card className="border bg-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-lg font-semibold">
-                <div className="p-2 bg-muted rounded-lg">
-                  <Calendar className="h-5 w-5 text-foreground" />
-                </div>
-                구글 캘린더 연동
-              </CardTitle>
-              <CardDescription>
-                구글 캘린더와 SureCRM을 연동하여 일정을 통합 관리하세요
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="p-6 space-y-6">
-              {/* 연동 상태 표시 */}
-              <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border">
-                <div className="flex items-center gap-3">
-                  <div
-                    className={`p-2 rounded-full ${
-                      calendarSettings?.syncStatus === 'connected'
-                        ? 'bg-green-100 text-green-600'
-                        : calendarSettings?.syncStatus === 'error'
-                          ? 'bg-red-100 text-red-600'
-                          : 'bg-gray-100 text-gray-600'
-                    }`}
+                {/* 수동 동기화 버튼 */}
+                <Form method="post" onSubmit={() => setIsSyncing(true)}>
+                  <input
+                    type="hidden"
+                    name="actionType"
+                    value="syncGoogleCalendar"
+                  />
+                  <Button
+                    type="submit"
+                    variant="outline"
+                    className="w-full gap-2"
+                    disabled={isSyncing}
                   >
-                    {calendarSettings?.syncStatus === 'connected' ? (
-                      <CheckCircle className="h-4 w-4" />
-                    ) : calendarSettings?.syncStatus === 'error' ? (
-                      <XCircle className="h-4 w-4" />
-                    ) : (
-                      <Globe className="h-4 w-4" />
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">
-                      {calendarSettings?.syncStatus === 'connected'
-                        ? '연동됨'
-                        : calendarSettings?.syncStatus === 'error'
-                          ? '연동 오류'
-                          : '연동 안됨'}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {calendarSettings?.syncStatus === 'connected' ? (
-                        <span suppressHydrationWarning>
-                          마지막 동기화:{' '}
-                          {formatDateTime(calendarSettings.lastSyncAt)}
-                        </span>
-                      ) : calendarSettings?.syncStatus === 'error' ? (
-                        '연동에 문제가 발생했습니다'
-                      ) : (
-                        '구글 계정을 연결하여 캘린더를 동기화하세요'
-                      )}
-                    </p>
-                  </div>
-                </div>
-                <Badge
-                  variant={
-                    calendarSettings?.syncStatus === 'connected'
-                      ? 'default'
-                      : 'secondary'
-                  }
-                  className="text-xs"
-                >
-                  {calendarSettings?.syncStatus === 'connected'
-                    ? '활성'
-                    : '비활성'}
-                </Badge>
-              </div>
+                    <RefreshCw
+                      className={`h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`}
+                    />
+                    {isSyncing ? '동기화 중...' : '지금 동기화'}
+                  </Button>
+                </Form>
 
-              {/* 연동 제어 버튼 */}
-              {calendarSettings?.syncStatus !== 'connected' ? (
+                {/* 🔔 실시간 동기화 설정 */}
+                <div className="p-4 bg-muted/50 border rounded-lg">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="space-y-1">
+                      <h4 className="text-sm font-medium flex items-center gap-2">
+                        <Bell className="h-4 w-4 text-foreground" />
+                        실시간 동기화
+                      </h4>
+                      <p className="text-xs text-muted-foreground">
+                        구글 캘린더 변경사항을 즉시 SureCRM에 반영
+                      </p>
+                    </div>
+                    <Form
+                      method="post"
+                      onSubmit={() => setIsTogglingRealtime(true)}
+                    >
+                      <input
+                        type="hidden"
+                        name="actionType"
+                        value="toggleRealtimeSync"
+                      />
+                      <input
+                        type="hidden"
+                        name="enableRealtime"
+                        value={realtimeSync ? 'false' : 'true'}
+                      />
+                      <Button
+                        type="submit"
+                        variant={realtimeSync ? 'default' : 'outline'}
+                        size="sm"
+                        disabled={isTogglingRealtime}
+                        className="gap-2"
+                      >
+                        {isTogglingRealtime ? (
+                          <RefreshCw className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <Bell className="h-3 w-3" />
+                        )}
+                        {realtimeSync ? '비활성화' : '활성화'}
+                      </Button>
+                    </Form>
+                  </div>
+
+                  {realtimeSync ? (
+                    <div className="flex items-center gap-2 text-xs text-green-700">
+                      <CheckCircle className="h-3 w-3" />
+                      실시간 동기화 활성화됨
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Clock className="h-3 w-3" />
+                      수동 동기화만 사용 중
+                    </div>
+                  )}
+                </div>
+
+                {/* 연동 해제 */}
+                <Separator />
                 <Form method="post">
                   <input
                     type="hidden"
                     name="actionType"
-                    value="connectGoogleCalendar"
+                    value="disconnectGoogleCalendar"
                   />
-                  <Button type="submit" className="w-full">
-                    <LinkIcon className="h-4 w-4 mr-2" />
-                    구글 계정 연결
+                  <Button
+                    type="submit"
+                    variant="destructive"
+                    size="sm"
+                    className="w-full"
+                  >
+                    <XCircle className="h-4 w-4 mr-2" />
+                    구글 캘린더 연동 해제
                   </Button>
                 </Form>
-              ) : (
-                <div className="space-y-4">
-                  {/* 연동 설정 */}
-                  <Form method="post" className="space-y-4">
-                    <input
-                      type="hidden"
-                      name="actionType"
-                      value="updateCalendarSettings"
-                    />
+              </div>
+            )}
 
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-1">
-                        <Label
-                          htmlFor="googleCalendarSync"
-                          className="text-sm font-medium"
-                        >
-                          캘린더 동기화 활성화
-                        </Label>
-                        <p className="text-xs text-muted-foreground">
-                          SureCRM과 구글 캘린더 간 자동 동기화
-                        </p>
-                      </div>
-                      <Switch
-                        id="googleCalendarSync"
-                        name="googleCalendarSync"
-                        checked={calendarData.googleCalendarSync}
-                        onCheckedChange={checked =>
-                          handleCalendarChange('googleCalendarSync', checked)
-                        }
-                      />
-                    </div>
-
-                    {calendarData.googleCalendarSync && (
-                      <>
-                        <div className="space-y-3">
-                          <Label className="text-sm font-medium">
-                            동기화 방향
-                          </Label>
-                          <Select
-                            name="syncDirection"
-                            value={calendarData.syncDirection}
-                            onValueChange={value =>
-                              handleCalendarChange('syncDirection', value)
-                            }
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="동기화 방향 선택" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="read_only">
-                                <div className="flex items-center gap-2">
-                                  <span>📥</span>
-                                  <span>구글 → SureCRM (읽기 전용)</span>
-                                </div>
-                              </SelectItem>
-                              <SelectItem value="write_only">
-                                <div className="flex items-center gap-2">
-                                  <span>📤</span>
-                                  <span>SureCRM → 구글 (쓰기 전용)</span>
-                                </div>
-                              </SelectItem>
-                              <SelectItem value="bidirectional">
-                                <div className="flex items-center gap-2">
-                                  <span>🔄</span>
-                                  <span>양방향 동기화</span>
-                                </div>
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        <div className="space-y-3">
-                          <Label className="text-sm font-medium">
-                            충돌 해결 방식
-                          </Label>
-                          <RadioGroup
-                            name="conflictResolution"
-                            value={calendarData.conflictResolution}
-                            onValueChange={value =>
-                              handleCalendarChange('conflictResolution', value)
-                            }
-                          >
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem
-                                value="google_wins"
-                                id="google_wins"
-                              />
-                              <Label htmlFor="google_wins" className="text-sm">
-                                구글 캘린더 우선
-                              </Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem
-                                value="local_wins"
-                                id="local_wins"
-                              />
-                              <Label htmlFor="local_wins" className="text-sm">
-                                SureCRM 우선
-                              </Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="manual" id="manual" />
-                              <Label htmlFor="manual" className="text-sm">
-                                수동 선택
-                              </Label>
-                            </div>
-                          </RadioGroup>
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label
-                            htmlFor="autoSyncInterval"
-                            className="text-sm font-medium"
-                          >
-                            자동 동기화 간격 (분)
-                          </Label>
-                          <Select
-                            name="autoSyncInterval"
-                            value={calendarData.autoSyncInterval.toString()}
-                            onValueChange={value =>
-                              handleCalendarChange(
-                                'autoSyncInterval',
-                                parseInt(value)
-                              )
-                            }
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="5">5분</SelectItem>
-                              <SelectItem value="15">15분</SelectItem>
-                              <SelectItem value="30">30분</SelectItem>
-                              <SelectItem value="60">1시간</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </>
-                    )}
-
-                    <div className="flex gap-2">
-                      <Button type="submit" className="flex-1">
-                        <Save className="h-4 w-4 mr-2" />
-                        설정 저장
-                      </Button>
-                    </div>
-                  </Form>
-
-                  {/* 수동 동기화 버튼 */}
-                  <Form method="post" onSubmit={() => setIsSyncing(true)}>
-                    <input
-                      type="hidden"
-                      name="actionType"
-                      value="syncGoogleCalendar"
-                    />
-                    <Button
-                      type="submit"
-                      variant="outline"
-                      className="w-full gap-2"
-                      disabled={isSyncing}
-                    >
-                      <RefreshCw
-                        className={`h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`}
-                      />
-                      {isSyncing ? '동기화 중...' : '지금 동기화'}
-                    </Button>
-                  </Form>
-
-                  {/* 🔔 실시간 동기화 설정 */}
-                  <div className="p-4 bg-muted/50 border rounded-lg">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="space-y-1">
-                        <h4 className="text-sm font-medium flex items-center gap-2">
-                          <Bell className="h-4 w-4 text-foreground" />
-                          실시간 동기화
-                        </h4>
-                        <p className="text-xs text-muted-foreground">
-                          구글 캘린더 변경사항을 즉시 SureCRM에 반영
-                        </p>
-                      </div>
-                      <Form
-                        method="post"
-                        onSubmit={() => setIsTogglingRealtime(true)}
-                      >
-                        <input
-                          type="hidden"
-                          name="actionType"
-                          value="toggleRealtimeSync"
-                        />
-                        <input
-                          type="hidden"
-                          name="enableRealtime"
-                          value={realtimeSync ? 'false' : 'true'}
-                        />
-                        <Button
-                          type="submit"
-                          variant={realtimeSync ? 'default' : 'outline'}
-                          size="sm"
-                          disabled={isTogglingRealtime}
-                          className="gap-2"
-                        >
-                          {isTogglingRealtime ? (
-                            <RefreshCw className="h-3 w-3 animate-spin" />
-                          ) : (
-                            <Bell className="h-3 w-3" />
-                          )}
-                          {realtimeSync ? '비활성화' : '활성화'}
-                        </Button>
-                      </Form>
-                    </div>
-
-                    {realtimeSync ? (
-                      <div className="flex items-center gap-2 text-xs text-green-700">
-                        <CheckCircle className="h-3 w-3" />
-                        실시간 동기화 활성화됨
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <Clock className="h-3 w-3" />
-                        수동 동기화만 사용 중
-                      </div>
-                    )}
-                  </div>
-
-                  {/* 연동 해제 */}
-                  <Separator />
-                  <Form method="post">
-                    <input
-                      type="hidden"
-                      name="actionType"
-                      value="disconnectGoogleCalendar"
-                    />
-                    <Button
-                      type="submit"
-                      variant="destructive"
-                      size="sm"
-                      className="w-full"
-                    >
-                      <XCircle className="h-4 w-4 mr-2" />
-                      구글 캘린더 연동 해제
-                    </Button>
-                  </Form>
-                </div>
-              )}
-
-              {/* 캘린더 연동 가이드 */}
-              <div className="mt-6 p-4 bg-muted/50 border rounded-lg">
-                <div className="flex items-start gap-3">
-                  <Calendar className="h-4 w-4 text-foreground mt-0.5" />
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium text-foreground">
-                      캘린더 연동 안내
-                    </p>
-                    <ul className="text-xs text-muted-foreground space-y-1">
-                      <li>• 구글 계정 권한이 필요합니다</li>
-                      <li>
-                        • 양방향 동기화 시 데이터 충돌이 발생할 수 있습니다
-                      </li>
-                      <li>• 언제든지 연동을 해제할 수 있습니다</li>
-                    </ul>
-                  </div>
+            {/* 캘린더 연동 가이드 */}
+            <div className="mt-6 p-4 bg-muted/50 border rounded-lg">
+              <div className="flex items-start gap-3">
+                <Calendar className="h-4 w-4 text-foreground mt-0.5" />
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-foreground">
+                    캘린더 연동 안내
+                  </p>
+                  <ul className="text-xs text-muted-foreground space-y-1">
+                    <li>• 구글 계정 권한이 필요합니다</li>
+                    <li>• 양방향 동기화 시 데이터 충돌이 발생할 수 있습니다</li>
+                    <li>• 언제든지 연동을 해제할 수 있습니다</li>
+                  </ul>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* 계정 정보 및 시스템 설정 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* 계정 정보 */}
-          <Card className="border bg-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-lg font-semibold">
-                <div className="p-2 bg-muted rounded-lg">
-                  <User className="h-5 w-5 text-foreground" />
-                </div>
-                계정 정보
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-6 space-y-4">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between py-2 border-b border-border/50">
-                  <div className="flex items-center gap-2">
-                    <User className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm font-medium">사용자 ID</span>
-                  </div>
-                  <code className="text-xs bg-muted px-2 py-1 rounded font-mono">
-                    {userProfile.id.slice(0, 8)}...
-                  </code>
-                </div>
-
-                <div className="flex items-center justify-between py-2 border-b border-border/50">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm font-medium">가입일</span>
-                  </div>
-                  <span className="text-sm text-foreground">
-                    {formatJoinDate(userProfile.createdAt)}
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between py-2">
-                  <div className="flex items-center gap-2">
-                    <Crown className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm font-medium">플랜</span>
-                  </div>
-                  <Badge variant="outline" className="text-xs">
-                    MVP 베타
-                  </Badge>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* 도움말 및 가이드 */}
-          <Card className="border bg-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-lg font-semibold">
-                <div className="p-2 bg-muted rounded-lg">
-                  <SettingsIcon className="h-5 w-5 text-foreground" />
-                </div>
-                설정 가이드
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-6 space-y-4">
-              <div className="space-y-3">
-                <div className="flex items-start gap-3">
-                  <div className="p-1 bg-primary/10 rounded">
-                    <Save className="h-3 w-3 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-foreground">
-                      설정 저장
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      모든 변경사항은 저장 버튼을 클릭하여 적용됩니다
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <div className="p-1 bg-orange/10 rounded">
-                    <Shield className="h-3 w-3 text-orange-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-foreground">
-                      보안 관리
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      정기적으로 비밀번호를 변경해 계정을 안전하게 유지하세요
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <div className="p-1 bg-blue/10 rounded">
-                    <User className="h-3 w-3 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-foreground">
-                      프로필 관리
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      정확한 정보로 업데이트하여 팀과의 협업을 원활하게 하세요
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* MVP 안내 */}
-              <div className="mt-4 p-3 bg-primary/5 border border-primary/20 rounded-lg">
-                <div className="flex items-center gap-2 mb-1">
-                  <Crown className="h-3 w-3 text-primary" />
-                  <span className="text-xs font-medium text-primary">
-                    MVP 버전
-                  </span>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  현재 베타 버전에서는 기본 설정만 제공됩니다. 추가 기능은 곧
-                  업데이트될 예정입니다.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
-    </MainLayout>
+
+      {/* 계정 정보 및 시스템 설정 */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* 계정 정보 */}
+        <Card className="border bg-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-3 text-lg font-semibold">
+              <div className="p-2 bg-muted rounded-lg">
+                <User className="h-5 w-5 text-foreground" />
+              </div>
+              계정 정보
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6 space-y-4">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between py-2 border-b border-border/50">
+                <div className="flex items-center gap-2">
+                  <User className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">사용자 ID</span>
+                </div>
+                <code className="text-xs bg-muted px-2 py-1 rounded font-mono">
+                  {userProfile.id.slice(0, 8)}...
+                </code>
+              </div>
+
+              <div className="flex items-center justify-between py-2 border-b border-border/50">
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">가입일</span>
+                </div>
+                <span className="text-sm text-foreground">
+                  {formatJoinDate(userProfile.createdAt)}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between py-2">
+                <div className="flex items-center gap-2">
+                  <Crown className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">플랜</span>
+                </div>
+                <Badge variant="outline" className="text-xs">
+                  MVP 베타
+                </Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 도움말 및 가이드 */}
+        <Card className="border bg-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-3 text-lg font-semibold">
+              <div className="p-2 bg-muted rounded-lg">
+                <SettingsIcon className="h-5 w-5 text-foreground" />
+              </div>
+              설정 가이드
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6 space-y-4">
+            <div className="space-y-3">
+              <div className="flex items-start gap-3">
+                <div className="p-1 bg-primary/10 rounded">
+                  <Save className="h-3 w-3 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-foreground">
+                    설정 저장
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    모든 변경사항은 저장 버튼을 클릭하여 적용됩니다
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <div className="p-1 bg-orange/10 rounded">
+                  <Shield className="h-3 w-3 text-orange-600" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-foreground">
+                    보안 관리
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    정기적으로 비밀번호를 변경해 계정을 안전하게 유지하세요
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <div className="p-1 bg-blue/10 rounded">
+                  <User className="h-3 w-3 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-foreground">
+                    프로필 관리
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    정확한 정보로 업데이트하여 팀과의 협업을 원활하게 하세요
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* MVP 안내 */}
+            <div className="mt-4 p-3 bg-primary/5 border border-primary/20 rounded-lg">
+              <div className="flex items-center gap-2 mb-1">
+                <Crown className="h-3 w-3 text-primary" />
+                <span className="text-xs font-medium text-primary">
+                  MVP 버전
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                현재 베타 버전에서는 기본 설정만 제공됩니다. 추가 기능은 곧
+                업데이트될 예정입니다.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 }

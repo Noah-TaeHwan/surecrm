@@ -25,7 +25,7 @@ import {
   ChevronRightIcon,
 } from '@radix-ui/react-icons';
 import { useState } from 'react';
-import { MainLayout } from '~/common/layouts/main-layout';
+
 import { cn } from '~/lib/utils';
 import { CalendarGrid } from '../components/calendar-grid';
 import { WeekView } from '../components/week-view';
@@ -198,215 +198,220 @@ export default function CalendarPage({
   };
 
   return (
-    <MainLayout title="일정 관리">
-      <div className="flex-1 space-y-6 p-4 md:p-6 pt-6">
-        {/* 액션 결과 메시지 */}
-        {actionData && (
-          <div
-            className={cn(
-              'p-4 rounded-md',
-              actionData.success
-                ? 'bg-green-50 text-green-800 border border-green-200'
-                : 'bg-red-50 text-red-800 border border-red-200'
-            )}
-          >
-            {actionData.message}
+    <div className="flex-1 space-y-6 p-4 md:p-6 pt-6">
+      {/* 헤더 */}
+      <div>
+        <p className="text-muted-foreground">
+          구글 캘린더와 연동하여 일정을 관리하세요
+        </p>
+      </div>
+
+      {/* 액션 결과 메시지 */}
+      {actionData && (
+        <div
+          className={cn(
+            'p-4 rounded-md',
+            actionData.success
+              ? 'bg-green-50 text-green-800 border border-green-200'
+              : 'bg-red-50 text-red-800 border border-red-200'
+          )}
+        >
+          {actionData.message}
+        </div>
+      )}
+
+      {/* 헤더 */}
+      <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
+        <div className="flex items-center gap-6">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">
+              {getDisplayTitle()}
+            </h1>
           </div>
-        )}
-
-        {/* 헤더 */}
-        <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
-          <div className="flex items-center gap-6">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">
-                {getDisplayTitle()}
-              </h1>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => navigateCalendar('prev')}
-                className="hover:bg-muted"
-              >
-                <ChevronLeftIcon className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => navigateCalendar('next')}
-                className="hover:bg-muted"
-              >
-                <ChevronRightIcon className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setSelectedDate(new Date())}
-                className="ml-2 hover:bg-muted"
-              >
-                오늘
-              </Button>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <Tabs
-              value={viewMode}
-              onValueChange={v => setViewMode(v as ViewMode)}
-            >
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="month">월</TabsTrigger>
-                <TabsTrigger value="week">주</TabsTrigger>
-                <TabsTrigger value="day">일</TabsTrigger>
-              </TabsList>
-            </Tabs>
-
+          <div className="flex items-center gap-2">
             <Button
-              className="shadow-sm"
-              onClick={() => setIsAddMeetingOpen(true)}
+              variant="outline"
+              size="icon"
+              onClick={() => navigateCalendar('prev')}
+              className="hover:bg-muted"
             >
-              <PlusIcon className="mr-2 h-4 w-4" />
-              미팅 예약
+              <ChevronLeftIcon className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => navigateCalendar('next')}
+              className="hover:bg-muted"
+            >
+              <ChevronRightIcon className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setSelectedDate(new Date())}
+              className="ml-2 hover:bg-muted"
+            >
+              오늘
             </Button>
           </div>
         </div>
 
-        {/* 🔒 구글 캘린더 연동이 필요한 경우 */}
-        {loaderData.requiresGoogleConnection ? (
-          <div className="text-center py-16">
-            <Card className="max-w-lg mx-auto shadow-lg border ">
-              <CardContent className="pt-8 pb-8">
-                <div className="p-6  rounded-full w-fit mx-auto mb-6">
-                  <CalendarIcon className="w-16 h-16" />
-                </div>
-                <h3 className="text-2xl font-bold text-foreground mb-3">
-                  구글 캘린더 연동이 필요합니다
-                </h3>
-                <p className="700 mb-6 leading-relaxed">
-                  SureCRM의 일정 관리 기능을 사용하려면
-                  <br />
-                  구글 캘린더와의 연동이 필요합니다.
-                  <br />
-                  연동 후 모든 일정이 자동으로 동기화됩니다.
-                </p>
-                <div className="space-y-3">
-                  <form method="POST">
-                    <input
-                      type="hidden"
-                      name="actionType"
-                      value="connectGoogleCalendar"
-                    />
-                    <Button type="submit" className="w-full " size="lg">
-                      <CalendarIcon className="mr-2 h-5 w-5" />
-                      구글 캘린더 연동하기
-                    </Button>
-                  </form>
-                  <p className="text-xs text-amber-600">
-                    연동 후 새로고침하면 일정 관리 기능을 사용할 수 있습니다.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        ) : meetings.length === 0 && clients.length === 0 ? (
-          <div className="text-center py-16">
-            <Card className="max-w-md mx-auto shadow-lg border border-border/50 bg-gradient-to-br from-card/90 to-card/70 backdrop-blur-sm">
-              <CardContent className="pt-8 pb-8">
-                <div className="p-6 bg-muted/20 rounded-full w-fit mx-auto mb-6">
-                  <CalendarIcon className="w-16 h-16 text-muted-foreground/50" />
-                </div>
-                <h3 className="text-2xl font-bold text-foreground mb-3">
-                  일정 관리를 시작해보세요
-                </h3>
-                <p className="text-muted-foreground mb-6 leading-relaxed">
-                  아직 등록된 고객이나 미팅이 없습니다.
-                  <br />첫 번째 미팅을 예약하여 시작해보세요.
-                </p>
-                <div className="space-y-3">
-                  <Button
-                    onClick={() => setIsAddMeetingOpen(true)}
-                    className="w-full"
-                    size="lg"
-                  >
-                    <PlusIcon className="mr-2 h-5 w-5" />첫 미팅 예약하기
-                  </Button>
-                  <Button variant="outline" className="w-full">
-                    고객 등록하기
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        ) : (
-          /* 캘린더 뷰 */
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-            <div className="lg:col-span-4">
-              <Card className="shadow-lg border border-border/50 bg-card/50 backdrop-blur-sm">
-                <CardContent className="p-0">
-                  {viewMode === 'month' && (
-                    <CalendarGrid
-                      selectedDate={selectedDate}
-                      meetings={meetings}
-                      onMeetingClick={setSelectedMeeting}
-                      filteredTypes={filteredTypes}
-                      onDateClick={handleDateClick}
-                    />
-                  )}
-                  {viewMode === 'week' && (
-                    <WeekView
-                      selectedDate={selectedDate}
-                      meetings={meetings}
-                      onMeetingClick={setSelectedMeeting}
-                      filteredTypes={filteredTypes}
-                    />
-                  )}
-                  {viewMode === 'day' && (
-                    <DayView
-                      selectedDate={selectedDate}
-                      meetings={meetings}
-                      onMeetingClick={setSelectedMeeting}
-                      filteredTypes={filteredTypes}
-                    />
-                  )}
-                </CardContent>
-              </Card>
-            </div>
+        <div className="flex items-center gap-4">
+          <Tabs
+            value={viewMode}
+            onValueChange={v => setViewMode(v as ViewMode)}
+          >
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="month">월</TabsTrigger>
+              <TabsTrigger value="week">주</TabsTrigger>
+              <TabsTrigger value="day">일</TabsTrigger>
+            </TabsList>
+          </Tabs>
 
-            {/* 사이드바 */}
-            <CalendarSidebar
-              meetings={meetings}
-              onMeetingClick={setSelectedMeeting}
-              filteredTypes={filteredTypes}
-              onFilterChange={setFilteredTypes}
-              googleCalendarSettings={googleCalendarSettings}
-            />
-          </div>
-        )}
-
-        {/* 모달들 */}
-        <AddMeetingModal
-          isOpen={isAddMeetingOpen}
-          onClose={() => setIsAddMeetingOpen(false)}
-          clients={clients}
-          onSubmit={onSubmitMeeting}
-          googleCalendarConnected={googleCalendarSettings?.isConnected}
-        />
-
-        <MeetingDetailModal
-          meeting={selectedMeeting}
-          onClose={() => setSelectedMeeting(null)}
-          onToggleChecklist={toggleChecklist}
-        />
-
-        <ConflictResolutionModal
-          isOpen={isConflictModalOpen}
-          onClose={() => setIsConflictModalOpen(false)}
-          conflicts={conflicts}
-          onResolveConflict={handleResolveConflict}
-          onResolveAll={handleResolveAllConflicts}
-        />
+          <Button
+            className="shadow-sm"
+            onClick={() => setIsAddMeetingOpen(true)}
+          >
+            <PlusIcon className="mr-2 h-4 w-4" />
+            미팅 예약
+          </Button>
+        </div>
       </div>
-    </MainLayout>
+
+      {/* 🔒 구글 캘린더 연동이 필요한 경우 */}
+      {loaderData.requiresGoogleConnection ? (
+        <div className="text-center py-16">
+          <Card className="max-w-lg mx-auto shadow-lg border ">
+            <CardContent className="pt-8 pb-8">
+              <div className="p-6  rounded-full w-fit mx-auto mb-6">
+                <CalendarIcon className="w-16 h-16" />
+              </div>
+              <h3 className="text-2xl font-bold text-foreground mb-3">
+                구글 캘린더 연동이 필요합니다
+              </h3>
+              <p className="700 mb-6 leading-relaxed">
+                SureCRM의 일정 관리 기능을 사용하려면
+                <br />
+                구글 캘린더와의 연동이 필요합니다.
+                <br />
+                연동 후 모든 일정이 자동으로 동기화됩니다.
+              </p>
+              <div className="space-y-3">
+                <form method="POST">
+                  <input
+                    type="hidden"
+                    name="actionType"
+                    value="connectGoogleCalendar"
+                  />
+                  <Button type="submit" className="w-full " size="lg">
+                    <CalendarIcon className="mr-2 h-5 w-5" />
+                    구글 캘린더 연동하기
+                  </Button>
+                </form>
+                <p className="text-xs text-amber-600">
+                  연동 후 새로고침하면 일정 관리 기능을 사용할 수 있습니다.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      ) : meetings.length === 0 && clients.length === 0 ? (
+        <div className="text-center py-16">
+          <Card className="max-w-md mx-auto shadow-lg border border-border/50 bg-gradient-to-br from-card/90 to-card/70 backdrop-blur-sm">
+            <CardContent className="pt-8 pb-8">
+              <div className="p-6 bg-muted/20 rounded-full w-fit mx-auto mb-6">
+                <CalendarIcon className="w-16 h-16 text-muted-foreground/50" />
+              </div>
+              <h3 className="text-2xl font-bold text-foreground mb-3">
+                일정 관리를 시작해보세요
+              </h3>
+              <p className="text-muted-foreground mb-6 leading-relaxed">
+                아직 등록된 고객이나 미팅이 없습니다.
+                <br />첫 번째 미팅을 예약하여 시작해보세요.
+              </p>
+              <div className="space-y-3">
+                <Button
+                  onClick={() => setIsAddMeetingOpen(true)}
+                  className="w-full"
+                  size="lg"
+                >
+                  <PlusIcon className="mr-2 h-5 w-5" />첫 미팅 예약하기
+                </Button>
+                <Button variant="outline" className="w-full">
+                  고객 등록하기
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      ) : (
+        /* 캘린더 뷰 */
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+          <div className="lg:col-span-4">
+            <Card className="shadow-lg border border-border/50 bg-card/50 backdrop-blur-sm">
+              <CardContent className="p-0">
+                {viewMode === 'month' && (
+                  <CalendarGrid
+                    selectedDate={selectedDate}
+                    meetings={meetings}
+                    onMeetingClick={setSelectedMeeting}
+                    filteredTypes={filteredTypes}
+                    onDateClick={handleDateClick}
+                  />
+                )}
+                {viewMode === 'week' && (
+                  <WeekView
+                    selectedDate={selectedDate}
+                    meetings={meetings}
+                    onMeetingClick={setSelectedMeeting}
+                    filteredTypes={filteredTypes}
+                  />
+                )}
+                {viewMode === 'day' && (
+                  <DayView
+                    selectedDate={selectedDate}
+                    meetings={meetings}
+                    onMeetingClick={setSelectedMeeting}
+                    filteredTypes={filteredTypes}
+                  />
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* 사이드바 */}
+          <CalendarSidebar
+            meetings={meetings}
+            onMeetingClick={setSelectedMeeting}
+            filteredTypes={filteredTypes}
+            onFilterChange={setFilteredTypes}
+            googleCalendarSettings={googleCalendarSettings}
+          />
+        </div>
+      )}
+
+      {/* 모달들 */}
+      <AddMeetingModal
+        isOpen={isAddMeetingOpen}
+        onClose={() => setIsAddMeetingOpen(false)}
+        clients={clients}
+        onSubmit={onSubmitMeeting}
+        googleCalendarConnected={googleCalendarSettings?.isConnected}
+      />
+
+      <MeetingDetailModal
+        meeting={selectedMeeting}
+        onClose={() => setSelectedMeeting(null)}
+        onToggleChecklist={toggleChecklist}
+      />
+
+      <ConflictResolutionModal
+        isOpen={isConflictModalOpen}
+        onClose={() => setIsConflictModalOpen(false)}
+        conflicts={conflicts}
+        onResolveConflict={handleResolveConflict}
+        onResolveAll={handleResolveAllConflicts}
+      />
+    </div>
   );
 }

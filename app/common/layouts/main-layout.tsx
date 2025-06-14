@@ -1,13 +1,13 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
-import { Sidebar } from '~/common/components/navigation/sidebar';
+import {
+  FlexibleSidebar,
+  MobileSidebarContent,
+} from '~/common/components/navigation/flexible-sidebar';
 import { Header } from '~/common/components/navigation/header';
 import { Sheet, SheetContent } from '~/common/components/ui/sheet';
 import { Button } from '~/common/components/ui/button';
-import {
-  DesktopOnly,
-  MobileOnly,
-} from '~/common/components/ui/responsive-layout';
+import { MobileOnly } from '~/common/components/ui/responsive-layout';
 import { Menu } from 'lucide-react';
 
 interface MainLayoutProps {
@@ -117,10 +117,11 @@ export function MainLayout({
 
   return (
     <div className="fixed inset-0 bg-background flex overflow-hidden">
-      {/* 데스크톱 사이드바 - Tailwind CSS 기반 반응형 */}
-      <DesktopOnly className="w-64 border-r border-border bg-muted/30 flex-shrink-0">
-        <Sidebar />
-      </DesktopOnly>
+      {/* FlexibleSidebar 시스템 */}
+      <FlexibleSidebar
+        className="border-r border-border bg-muted/30"
+        onClose={closeMobileMenu}
+      />
 
       {/* 메인 컨텐츠 영역 */}
       <div className="flex-1 flex flex-col min-w-0">
@@ -135,6 +136,7 @@ export function MainLayout({
                   size="sm"
                   onClick={() => setIsMobileMenuOpen(true)}
                   aria-label="메뉴 열기"
+                  className="min-h-[44px] min-w-[44px]" // 터치 친화적 크기
                 >
                   <Menu className="h-5 w-5" />
                 </Button>
@@ -157,6 +159,9 @@ export function MainLayout({
             title === '소개 네트워크'
               ? 'overflow-hidden p-0'
               : 'overflow-y-auto p-3 md:p-4 lg:p-6'
+          } ${
+            // 모바일에서 하단 탭 네비게이션을 위한 여백 추가
+            'pb-20 md:pb-3'
           }`}
           style={
             title === '소개 네트워크'
@@ -175,7 +180,7 @@ export function MainLayout({
       {/* 모바일 사이드바 Sheet */}
       <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
         <SheetContent side="left" className="w-64 p-0">
-          <Sidebar />
+          <MobileSidebarContent onClose={closeMobileMenu} />
         </SheetContent>
       </Sheet>
     </div>

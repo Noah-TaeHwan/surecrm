@@ -185,11 +185,201 @@ body {
   }
 }
 
-/* 접근성 친화적 포커스 스타일 */
+/* 🎯 FOCUS & OUTLINE MANAGEMENT */
+/* HTML 기본 파란색 outline 제거하고 앱 톤앤매너에 맞는 빨간색 포커스 스타일 적용 */
+
+/* 모든 요소의 기본 브라우저 outline 제거 (파란색 방지) */
+*,
+*::before,
+*::after {
+  outline: none !important;
+}
+
+/* 기본 포커스 상태에서 브라우저 기본 스타일 제거 */
+button:focus,
+a:focus,
+input:focus,
+textarea:focus,
+select:focus,
+[role='button']:focus,
+[tabindex]:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* 앱 톤앤매너에 맞는 포커스 스타일 (빨간색 계열) */
+button:focus-visible,
+a:focus-visible,
+[role='button']:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid #ef4444 !important; /* red-500 */
+  outline-offset: 2px !important;
+  border-radius: 0.25rem !important;
+}
+
+/* 입력 요소는 테두리로 포커스 표시 */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: none !important;
+  border-color: #ef4444 !important; /* red-500 */
+  box-shadow: 0 0 0 1px #ef4444 !important;
+}
+
+/* ShadCN UI 컴포넌트의 포커스 스타일 통일 */
 .focus-visible-custom:focus-visible {
-  outline: 2px solid rgb(var(--color-primary));
+  outline: 2px solid #ef4444;
   outline-offset: 2px;
   border-radius: 0.25rem;
+}
+
+/* Sheet, Dialog 등의 닫기 버튼 포커스 스타일 */
+[data-radix-dialog-close]:focus-visible,
+[data-radix-sheet-close]:focus-visible {
+  outline: 2px solid #ef4444 !important;
+  outline-offset: 2px !important;
+  border-radius: 0.25rem !important;
+}
+
+/* 특별히 문제가 되는 요소들 추가 처리 */
+button[data-state]:focus,
+button[data-state]:focus-visible {
+  outline: 2px solid #ef4444 !important;
+  outline-offset: 2px !important;
+  border-radius: 0.25rem !important;
+}
+
+/* 🚫 헤더 및 드롭다운 모든 포커스/호버 스타일 완전 제거 */
+
+/* 헤더 내 모든 버튼 스타일 제거 */
+header button,
+header button:hover,
+header button:focus,
+header button:focus-visible,
+header button:active,
+header button[data-state='open'],
+header button[data-state='closed'] {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  ring: none !important;
+  background-color: transparent !important;
+  transition: none !important;
+}
+
+/* DropdownMenuTrigger 모든 상태 스타일 제거 */
+[data-radix-dropdown-menu-trigger],
+[data-radix-dropdown-menu-trigger]:hover,
+[data-radix-dropdown-menu-trigger]:focus,
+[data-radix-dropdown-menu-trigger]:focus-visible,
+[data-radix-dropdown-menu-trigger]:active,
+[data-radix-dropdown-menu-trigger][data-state='open'],
+[data-radix-dropdown-menu-trigger][data-state='closed'] {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  ring: none !important;
+  background-color: transparent !important;
+  transition: none !important;
+}
+
+/* 🚫 DropdownMenuContent 모든 테두리 완전 제거 - 최강 버전 */
+[data-radix-dropdown-menu-content],
+[data-radix-dropdown-menu-content]:focus,
+[data-radix-dropdown-menu-content]:focus-visible,
+[data-radix-dropdown-menu-content]:focus-within,
+[data-radix-dropdown-menu-content][data-state='open'],
+[data-radix-dropdown-menu-content][data-state='closed'],
+div[data-radix-dropdown-menu-content],
+div[data-radix-dropdown-menu-content]:focus,
+div[data-radix-dropdown-menu-content]:focus-visible,
+[role='menu'],
+[role='menu']:focus,
+[role='menu']:focus-visible {
+  outline: none !important;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+  border: none !important; /* 테두리 완전 제거 */
+  ring: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+}
+
+/* 🚫 드롭다운 메뉴 전역 포커스 규칙 무효화 - 최강 버전 */
+[data-radix-dropdown-menu-content] *,
+[data-radix-dropdown-menu-content] *:focus,
+[data-radix-dropdown-menu-content] *:focus-visible,
+[data-radix-dropdown-menu-content] button,
+[data-radix-dropdown-menu-content] button:focus,
+[data-radix-dropdown-menu-content] button:focus-visible,
+[data-radix-dropdown-menu-content] [role='button'],
+[data-radix-dropdown-menu-content] [role='button']:focus,
+[data-radix-dropdown-menu-content] [role='button']:focus-visible,
+div[data-radix-dropdown-menu-content] *,
+div[data-radix-dropdown-menu-content] *:focus,
+div[data-radix-dropdown-menu-content] *:focus-visible,
+[role='menu'] *,
+[role='menu'] *:focus,
+[role='menu'] *:focus-visible {
+  outline: none !important;
+  border: none !important;
+  ring: none !important;
+  box-shadow: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+}
+
+/* 🚫 드롭다운 메뉴 최종 보스 규칙 - 모든 가능한 선택자 */
+[data-radix-popper-content-wrapper] > div,
+[data-radix-popper-content-wrapper] > div:focus,
+[data-radix-popper-content-wrapper] > div:focus-visible,
+[data-radix-portal] [data-radix-dropdown-menu-content],
+[data-radix-portal] [data-radix-dropdown-menu-content]:focus,
+[data-radix-portal] [data-radix-dropdown-menu-content]:focus-visible {
+  outline: none !important;
+  border: none !important;
+  ring: none !important;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+}
+
+/* 드롭다운 메뉴 내부 아이템들도 테두리 제거 */
+[data-radix-dropdown-menu-item],
+[data-radix-dropdown-menu-item]:focus,
+[data-radix-dropdown-menu-item]:focus-visible,
+[data-radix-dropdown-menu-item]:hover {
+  outline: none !important;
+  border: none !important;
+  ring: none !important;
+}
+
+/* 드롭다운 메뉴 전체 컨테이너 테두리 제거 */
+[data-radix-popper-content-wrapper],
+[data-radix-popper-content-wrapper]:focus,
+[data-radix-popper-content-wrapper]:focus-visible {
+  outline: none !important;
+  border: none !important;
+  ring: none !important;
+}
+
+/* ShadCN Button 컴포넌트 포커스 스타일 완전 제거 */
+.btn,
+.btn:hover,
+.btn:focus,
+.btn:focus-visible,
+.btn:active,
+button[class*='button'],
+button[class*='button']:hover,
+button[class*='button']:focus,
+button[class*='button']:focus-visible,
+button[class*='button']:active {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  ring: none !important;
+  transition: none !important;
 }
 
 /* 고대비 모드 지원 */
@@ -668,9 +858,9 @@ details[open] summary::before {
 
 :root {
   --radius: 0.75rem;
-  --background: oklch(1 0 0);
+  --background: oklch(0.985 0 0);
   --foreground: oklch(0.141 0.005 285.823);
-  --card: oklch(1 0 0);
+  --card: oklch(0.99 0 0);
   --card-foreground: oklch(0.141 0.005 285.823);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.141 0.005 285.823);
