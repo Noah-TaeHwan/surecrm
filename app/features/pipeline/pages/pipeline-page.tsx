@@ -1259,88 +1259,122 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
         {/* 전체 통계 카드 */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-6 pt-6">
           {/* 1. 전체 고객 */}
-          <div className="flex items-center space-x-3 p-4 bg-card rounded-lg border">
-            <div className="p-2 bg-blue-500/10 rounded-lg">
-              <Users className="h-5 w-5 text-blue-600" />
+          <div className="flex items-center justify-between gap-3 p-4 bg-card rounded-lg border min-touch-target">
+            {/* 왼쪽: 아이콘 + 제목/설명 */}
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <div className="flex-shrink-0 p-2 bg-blue-500/10 rounded-lg">
+                <Users className="h-5 w-5 text-blue-600" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-foreground truncate">
+                  전체 고객
+                </p>
+                <p className="text-xs text-muted-foreground truncate">
+                  고객 관리의 모든 고객
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">
-                전체 고객
-              </p>
-              <p className="text-2xl font-bold text-foreground">
+            {/* 오른쪽: 숫자 값 */}
+            <div className="flex-shrink-0">
+              <p className="text-xl sm:text-2xl font-bold text-foreground">
                 {totalStats.totalAllClients}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                고객 관리의 모든 고객
               </p>
             </div>
           </div>
 
           {/* 2. 영업 관리 중 */}
-          <div className="flex items-center space-x-3 p-4 bg-card rounded-lg border">
-            <div className="p-2 bg-orange-500/10 rounded-lg">
-              <TrendingUp className="h-5 w-5 text-orange-600" />
+          <div className="flex items-center justify-between gap-3 p-4 bg-card rounded-lg border min-touch-target">
+            {/* 왼쪽: 아이콘 + 제목/설명 */}
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <div className="flex-shrink-0 p-2 bg-orange-500/10 rounded-lg">
+                <TrendingUp className="h-5 w-5 text-orange-600" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-foreground truncate">
+                  영업 관리 중
+                </p>
+                <p className="text-xs text-muted-foreground truncate">
+                  현재 파이프라인 진행 중
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">
-                영업 관리 중
-              </p>
-              <p className="text-2xl font-bold text-foreground">
+            {/* 오른쪽: 숫자 값 */}
+            <div className="flex-shrink-0">
+              <p className="text-xl sm:text-2xl font-bold text-foreground">
                 {totalStats.pipelineClients}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                현재 파이프라인 진행 중
               </p>
             </div>
           </div>
 
           {/* 3. 계약 완료 */}
-          <div className="flex items-center space-x-3 p-4 bg-card rounded-lg border">
-            <div className="p-2 bg-green-500/10 rounded-lg">
-              <Target className="h-5 w-5 text-green-600" />
+          <div className="flex items-center justify-between gap-3 p-4 bg-card rounded-lg border min-touch-target">
+            {/* 왼쪽: 아이콘 + 제목/설명 */}
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <div className="flex-shrink-0 p-2 bg-green-500/10 rounded-lg">
+                <Target className="h-5 w-5 text-green-600" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-foreground truncate">
+                  계약 완료
+                </p>
+                <p className="text-xs text-muted-foreground truncate">
+                  실제 성과 달성 고객
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">
-                계약 완료
-              </p>
-              <p className="text-2xl font-bold text-foreground">
+            {/* 오른쪽: 숫자 값 */}
+            <div className="flex-shrink-0">
+              <p className="text-xl sm:text-2xl font-bold text-foreground">
                 {totalStats.contractedClients}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                실제 성과 달성 고객
               </p>
             </div>
           </div>
 
           {/* 4. 키맨 고객 */}
-          <div className="flex items-center space-x-3 p-4 bg-card rounded-lg border">
-            <div className="p-2 bg-red-500/10 rounded-lg">
-              <Users className="h-5 w-5 text-red-600" />
+          <div className="flex items-center justify-between gap-3 p-4 bg-card rounded-lg border min-touch-target">
+            {/* 왼쪽: 아이콘 + 제목/설명 */}
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <div className="flex-shrink-0 p-2 bg-red-500/10 rounded-lg">
+                <Users className="h-5 w-5 text-red-600" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-foreground truncate">
+                  키맨 고객
+                </p>
+                <p className="text-xs text-muted-foreground truncate">
+                  고가치 중요 고객
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">
-                키맨 고객
-              </p>
-              <p className="text-2xl font-bold text-foreground">
+            {/* 오른쪽: 숫자 값 */}
+            <div className="flex-shrink-0">
+              <p className="text-xl sm:text-2xl font-bold text-foreground">
                 {totalStats.highValueClients}
               </p>
-              <p className="text-xs text-muted-foreground">고가치 중요 고객</p>
             </div>
           </div>
 
           {/* 5. 전환율 */}
-          <div className="flex items-center space-x-3 p-4 bg-card rounded-lg border">
-            <div className="p-2 bg-emerald-500/10 rounded-lg">
-              <TrendingUp className="h-5 w-5 text-emerald-600" />
+          <div className="flex items-center justify-between gap-3 p-4 bg-card rounded-lg border min-touch-target">
+            {/* 왼쪽: 아이콘 + 제목/설명 */}
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <div className="flex-shrink-0 p-2 bg-emerald-500/10 rounded-lg">
+                <TrendingUp className="h-5 w-5 text-emerald-600" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-foreground truncate">
+                  전환율
+                </p>
+                <p className="text-xs text-muted-foreground truncate">
+                  계약 완료 성공률
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">
-                전환율
-              </p>
-              <p className="text-2xl font-bold text-foreground">
+            {/* 오른쪽: 숫자 값 */}
+            <div className="flex-shrink-0">
+              <p className="text-xl sm:text-2xl font-bold text-foreground">
                 {totalStats.conversionRate}%
               </p>
-              <p className="text-xs text-muted-foreground">계약 완료 성공률</p>
             </div>
           </div>
         </div>

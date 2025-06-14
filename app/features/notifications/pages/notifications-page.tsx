@@ -314,57 +314,93 @@ export default function NotificationsPage({
 
       {/* 상단 요약 카드 */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardContent className="flex items-center p-6">
-            <div
-              className={`p-3 rounded-full ${getPriorityColor('normal')} mr-4`}
-            >
-              <Bell className="h-6 w-6 text-white" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">
-                전체 알림
-              </p>
-              <p className="text-2xl font-bold">{notifications.length}</p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="flex items-center p-6">
-            <div
-              className={`p-3 rounded-full ${getPriorityColor('high')} mr-4`}
-            >
-              <AlertTriangle className="h-6 w-6 text-white" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">
-                읽지 않음
-              </p>
-              <p className="text-2xl font-bold">{unreadCount}</p>
+        {/* 전체 알림 */}
+        <Card className="hover:shadow-md transition-all duration-200 border-border/50 hover:border-border">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between gap-3">
+              {/* 왼쪽: 아이콘 + 제목/설명 */}
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <div className="flex-shrink-0 p-2 bg-blue-500/10 rounded-lg">
+                  <Bell className="h-5 w-5 text-blue-600" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-foreground truncate">
+                    전체 알림
+                  </p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    모든 알림 메시지
+                  </p>
+                </div>
+              </div>
+              {/* 오른쪽: 숫자 값 */}
+              <div className="flex-shrink-0">
+                <p className="text-xl sm:text-2xl font-bold text-foreground">
+                  {notifications.length}
+                </p>
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="flex items-center p-6">
-            <div className={`p-3 rounded-full ${getPriorityColor('low')} mr-4`}>
-              <CheckCircle className="h-6 w-6 text-white" />
+        {/* 읽지 않음 */}
+        <Card className="hover:shadow-md transition-all duration-200 border-border/50 hover:border-border">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between gap-3">
+              {/* 왼쪽: 아이콘 + 제목/설명 */}
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <div className="flex-shrink-0 p-2 bg-orange-500/10 rounded-lg">
+                  <AlertTriangle className="h-5 w-5 text-orange-600" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-foreground truncate">
+                    읽지 않음
+                  </p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    확인 필요한 알림
+                  </p>
+                </div>
+              </div>
+              {/* 오른쪽: 숫자 값 */}
+              <div className="flex-shrink-0">
+                <p className="text-xl sm:text-2xl font-bold text-foreground">
+                  {unreadCount}
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">
-                완료율
-              </p>
-              <p className="text-2xl font-bold">
-                {notifications.length > 0
-                  ? Math.round(
-                      ((notifications.length - unreadCount) /
-                        notifications.length) *
-                        100
-                    )
-                  : 100}
-                %
-              </p>
+          </CardContent>
+        </Card>
+
+        {/* 완료율 */}
+        <Card className="hover:shadow-md transition-all duration-200 border-border/50 hover:border-border">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between gap-3">
+              {/* 왼쪽: 아이콘 + 제목/설명 */}
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <div className="flex-shrink-0 p-2 bg-green-500/10 rounded-lg">
+                  <CheckCircle className="h-5 w-5 text-green-600" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-foreground truncate">
+                    완료율
+                  </p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    읽음 처리 비율
+                  </p>
+                </div>
+              </div>
+              {/* 오른쪽: 숫자 값 */}
+              <div className="flex-shrink-0">
+                <p className="text-xl sm:text-2xl font-bold text-foreground">
+                  {notifications.length > 0
+                    ? Math.round(
+                        ((notifications.length - unreadCount) /
+                          notifications.length) *
+                          100
+                      )
+                    : 100}
+                  %
+                </p>
+              </div>
             </div>
           </CardContent>
         </Card>

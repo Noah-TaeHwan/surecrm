@@ -203,7 +203,7 @@ export function PerformanceKPICards({
 
   return (
     <TooltipProvider>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {kpiItems.map((item, index) => {
           const changeIndicator = getChangeIndicator(item.change);
           const IconComponent = item.icon;
@@ -221,10 +221,12 @@ export function PerformanceKPICards({
                 });
               }}
             >
-              <CardContent className="p-3 sm:p-4 md:p-6">
-                <div className="flex items-center justify-between mb-3 sm:mb-4">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 sm:p-2 bg-primary/10 rounded-lg">
+              <CardContent className="p-4 sm:p-5">
+                {/* 📱 콤팩트한 단일 라인 레이아웃 - 모든 정보를 한 줄에 */}
+                <div className="flex items-center justify-between gap-3">
+                  {/* 왼쪽: 아이콘 + 제목/설명 */}
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className="flex-shrink-0 p-2 bg-primary/10 rounded-lg">
                       <IconComponent
                         className={cn(
                           'h-4 w-4 sm:h-5 sm:w-5',
@@ -232,51 +234,56 @@ export function PerformanceKPICards({
                         )}
                       />
                     </div>
-                    <div>
-                      <h3 className="font-medium text-sm sm:text-base text-foreground">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-sm text-foreground truncate">
                         {item.title}
                       </h3>
-                      <p className="text-xs sm:text-sm text-muted-foreground">
+                      <p className="text-xs text-muted-foreground truncate">
                         {item.description}
                       </p>
                     </div>
                   </div>
-                </div>
-                <div className="flex items-baseline gap-2">
-                  <p className="text-2xl font-bold text-foreground">
-                    {typeof item.value === 'number'
-                      ? item.value.toLocaleString()
-                      : item.value}
-                  </p>
-                  {item.change !== 0 && (
-                    <div
-                      className={cn(
-                        'flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs font-medium',
-                        changeIndicator.bgColor
+
+                  {/* 오른쪽: 숫자 값 + 변화율 */}
+                  <div className="flex-shrink-0 text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      <p className="text-xl sm:text-2xl font-bold text-foreground">
+                        {typeof item.value === 'number'
+                          ? item.value.toLocaleString()
+                          : item.value}
+                      </p>
+                      {item.change !== 0 && (
+                        <div
+                          className={cn(
+                            'flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs font-medium',
+                            changeIndicator.bgColor
+                          )}
+                        >
+                          {changeIndicator.icon && (
+                            <changeIndicator.icon
+                              className={cn('h-3 w-3', changeIndicator.color)}
+                            />
+                          )}
+                          <span className={changeIndicator.color}>
+                            {changeIndicator.isSpecial &&
+                            changeIndicator.label ? (
+                              changeIndicator.label
+                            ) : (
+                              <>
+                                {changeIndicator.prefix}
+                                {Math.round(Math.abs(item.change) * 10) / 10}%
+                              </>
+                            )}
+                          </span>
+                        </div>
                       )}
-                    >
-                      {changeIndicator.icon && (
-                        <changeIndicator.icon
-                          className={cn('h-3 w-3', changeIndicator.color)}
-                        />
-                      )}
-                      <span className={changeIndicator.color}>
-                        {changeIndicator.isSpecial && changeIndicator.label ? (
-                          changeIndicator.label
-                        ) : (
-                          <>
-                            {changeIndicator.prefix}
-                            {Math.round(Math.abs(item.change) * 10) / 10}%
-                          </>
-                        )}
-                      </span>
                     </div>
-                  )}
+                  </div>
                 </div>
 
-                {/* 추가 세부 정보 */}
+                {/* 💎 추가 세부 정보 - 평균 고객 가치 */}
                 {item.title === '총 고객 수' && data.averageClientValue > 0 && (
-                  <div className="mt-4 p-3 bg-muted/20 rounded-lg">
+                  <div className="mt-3 pt-3 border-t border-border/50">
                     <div className="flex items-center justify-between text-xs">
                       <span className="text-muted-foreground">
                         평균 고객 가치
