@@ -252,11 +252,14 @@ export function CalendarGrid({
       );
 
       // 📊 이벤트 소스별 카운트
-      const sourceCount = dayMeetings.reduce((acc, meeting) => {
-        const source = meeting.syncInfo?.externalSource || 'surecrm';
-        acc[source] = (acc[source] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>);
+      const sourceCount = dayMeetings.reduce(
+        (acc, meeting) => {
+          const source = meeting.syncInfo?.externalSource || 'surecrm';
+          acc[source] = (acc[source] || 0) + 1;
+          return acc;
+        },
+        {} as Record<string, number>
+      );
 
       days.push(
         <div
@@ -271,10 +274,10 @@ export function CalendarGrid({
             dayMeetings.length === 0
               ? 'h-32'
               : dayMeetings.length === 1
-              ? 'h-36'
-              : dayMeetings.length <= 3
-              ? 'h-40'
-              : 'h-44',
+                ? 'h-36'
+                : dayMeetings.length <= 3
+                  ? 'h-40'
+                  : 'h-44',
             dayMeetings.length > 0 && 'hover:scale-[1.01]'
           )}
           onClick={() => onDateClick?.(cellDate)}
@@ -442,8 +445,8 @@ export function CalendarGrid({
                 index === 0
                   ? 'text-red-500'
                   : index === 6
-                  ? 'text-blue-500'
-                  : 'text-foreground/80'
+                    ? 'text-blue-500'
+                    : 'text-foreground/80'
               )}
             >
               <div className="hidden lg:block">{day}</div>

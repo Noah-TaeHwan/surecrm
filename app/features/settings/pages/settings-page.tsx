@@ -979,8 +979,8 @@ export default function SettingsPage({
                     calendarSettings?.syncStatus === 'connected'
                       ? 'bg-green-100 text-green-600'
                       : calendarSettings?.syncStatus === 'error'
-                      ? 'bg-red-100 text-red-600'
-                      : 'bg-gray-100 text-gray-600'
+                        ? 'bg-red-100 text-red-600'
+                        : 'bg-gray-100 text-gray-600'
                   }`}
                 >
                   {calendarSettings?.syncStatus === 'connected' ? (
@@ -996,8 +996,8 @@ export default function SettingsPage({
                     {calendarSettings?.syncStatus === 'connected'
                       ? '연동됨'
                       : calendarSettings?.syncStatus === 'error'
-                      ? '연동 오류'
-                      : '연동 안됨'}
+                        ? '연동 오류'
+                        : '연동 안됨'}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {calendarSettings?.syncStatus === 'connected' ? (
