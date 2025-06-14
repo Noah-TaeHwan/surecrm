@@ -406,41 +406,42 @@ button[class*='button']:active {
 }
 
 /* 🚀 ENHANCED SCROLLBAR STYLING - Critical CSS 보완 */
+/* 🎯 전체 서비스 스크롤바 완전 숨김 */
 /* Firefox */
 * {
-  scrollbar-width: thin !important;
-  scrollbar-color: #6b7280 transparent !important;
+  scrollbar-width: none !important;
 }
 
 /* Webkit browsers (Chrome, Safari, Edge) */
 *::-webkit-scrollbar {
-  width: 14px !important;
-  height: 14px !important;
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 *::-webkit-scrollbar-track {
-  background: transparent !important;
-  border-radius: 8px !important;
+  display: none !important;
 }
 
 *::-webkit-scrollbar-thumb {
-  background: #6b7280 !important;
-  border-radius: 8px !important;
-  border: 3px solid transparent !important;
-  background-clip: content-box !important;
+  display: none !important;
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  background: #4b5563 !important;
+  display: none !important;
 }
 
-/* Dark mode scrollbar */
+/* Dark mode scrollbar - 완전 숨김 */
+.dark *::-webkit-scrollbar {
+  display: none !important;
+}
+
 .dark *::-webkit-scrollbar-thumb {
-  background: #374151 !important;
+  display: none !important;
 }
 
 .dark *::-webkit-scrollbar-thumb:hover {
-  background: #4b5563 !important;
+  display: none !important;
 }
 
 /* 🎯 필터 영역 스크롤바 숨김 */
@@ -512,30 +513,27 @@ button[class*='button']:active {
   height: 0 !important;
 }
 
-/* 🎯 LAYOUT SHIFT PREVENTION - 심플하게 */
+/* 🎯 이중 스크롤 문제 해결 - 근본적 구조 변경 */
+/* HTML/Body는 고정 높이, 스크롤 없음 */
 html {
-  overflow-y: scroll !important;
-  scrollbar-gutter: stable !important;
+  height: 100% !important;
+  overflow: hidden !important;
 }
 
-/* 🚫 MODAL/DROPDOWN LAYOUT SHIFT FIX */
-/* body에 overflow: hidden이 적용되어도 스크롤바 공간 유지 */
 body {
-  overflow-y: scroll !important;
-  scrollbar-gutter: stable !important;
+  height: 100% !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
-/* 🔥 SUPER STRONG LAYOUT SHIFT PREVENTION */
-/* 모든 상황에서 스크롤바 공간 강제 확보 */
-html,
-body {
-  overflow-y: scroll !important;
-  scrollbar-gutter: stable !important;
-  width: 100vw !important;
-  max-width: 100% !important;
+/* Root 컨테이너도 고정 높이 */
+#root {
+  height: 100% !important;
+  overflow: hidden !important;
 }
 
-/* 🛡️ ULTIMATE RADIX UI OVERRIDE */
+/* 🛡️ RADIX UI OVERRIDE - 모달/드롭다운에서도 이중 스크롤 방지 */
 /* Radix UI가 body에 적용하는 모든 스타일 완전 무효화 */
 body,
 body[style],
@@ -550,11 +548,11 @@ html:has([data-radix-dropdown-menu-content]) body,
 html:has([data-radix-select-content]) body,
 html:has([data-radix-popover-content]) body,
 html:has([data-state='open']) body {
-  overflow-y: scroll !important;
-  scrollbar-gutter: stable !important;
+  height: 100% !important;
+  overflow: hidden !important;
   padding-right: 0 !important;
   margin-right: 0 !important;
-  width: 100vw !important;
+  width: 100% !important;
   max-width: 100% !important;
   box-sizing: border-box !important;
 }
@@ -566,8 +564,8 @@ body:has([data-radix-select-content]),
 body:has([data-radix-popover-content]),
 body:has([data-radix-tooltip-content]),
 body:has([data-state='open']) {
-  overflow-y: scroll !important;
-  scrollbar-gutter: stable !important;
+  height: 100% !important;
+  overflow: hidden !important;
   padding-right: 0 !important;
   margin-right: 0 !important;
 }
@@ -579,18 +577,29 @@ body:has([data-state='open']) {
 [data-radix-dropdown-menu-content],
 [data-radix-select-content],
 [data-radix-popover-content] {
-  width: calc(100vw - 17px) !important; /* 스크롤바 너비 고려 */
-  max-width: calc(100vw - 17px) !important;
+  width: 100% !important;
+  max-width: 100% !important;
 }
 
 /* 메인 컨테이너도 안정화 */
-#root,
 [data-reactroot],
 .App,
 main {
   width: 100% !important;
   max-width: none !important;
   overflow-x: hidden !important;
+}
+
+/* 🎯 Tailwind 유틸리티 클래스 - 스크롤바 숨김 */
+.scrollbar-none {
+  scrollbar-width: none !important; /* Firefox */
+  -ms-overflow-style: none !important; /* IE and Edge */
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none !important; /* Chrome, Safari, Opera */
+  width: 0 !important;
+  height: 0 !important;
 }
 
 /* 🛡️ EMERGENCY LAYOUT LOCK */
