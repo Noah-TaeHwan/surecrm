@@ -12,9 +12,7 @@ import {
   SheetTitle,
   SheetDescription,
 } from '~/common/components/ui/sheet';
-import { Button } from '~/common/components/ui/button';
 import { MobileOnly } from '~/common/components/ui/responsive-layout';
-import { Menu } from 'lucide-react';
 import { requireAuth } from '~/lib/auth/middleware';
 
 // 임시 타입 정의 (React Router v7 타입 생성 전까지)
@@ -173,16 +171,8 @@ export default function AppLayout({ loaderData }: ComponentProps) {
         />
 
         {/* 페이지 컨텐츠 */}
-        <main className="flex-1 overflow-auto bg-background">
-          <div
-            className="min-h-full p-4 md:p-6 md:pb-6"
-            style={{
-              paddingBottom:
-                'max(10rem, env(safe-area-inset-bottom, 0px) + 8rem)',
-            }}
-          >
-            <Outlet />
-          </div>
+        <main className="flex-1 overflow-auto bg-background p-3 md:p-4 lg:p-6 pb-20 md:pb-3">
+          <Outlet />
         </main>
       </div>
 

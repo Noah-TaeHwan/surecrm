@@ -13,6 +13,8 @@ import {
   CalendarIcon,
 } from '@radix-ui/react-icons';
 import { Link } from 'react-router';
+import { cn } from '~/lib/utils';
+import { Sparkles } from 'lucide-react';
 
 interface Client {
   id: string;
@@ -22,6 +24,7 @@ interface Client {
   potentialValue: number;
   referredBy?: string;
   stage: string;
+  importance?: string;
 }
 
 interface RecentClientsProps {
@@ -74,6 +77,12 @@ export function RecentClients({
     });
   };
 
+  const getInitialsBg = (initial: string) => {
+    // Implement the logic to determine the background color based on the initial
+    // This is a placeholder and should be replaced with the actual implementation
+    return 'bg-primary/10 text-primary border-primary/20';
+  };
+
   return (
     <Card className="border-border/50">
       <CardHeader className="pb-3">
@@ -98,7 +107,7 @@ export function RecentClients({
       </CardHeader>
       <CardContent className="space-y-4">
         {/* 고객 현황 요약 */}
-        <div className="p-3 bg-muted/30 rounded-lg border border-border/30">
+        <div className="p-2 sm:p-3 bg-muted/30 rounded-lg border border-border/30">
           <div className="text-center">
             <div className="text-2xl font-bold text-foreground mb-1">
               {totalClients}
@@ -120,12 +129,20 @@ export function RecentClients({
                   key={client.id}
                   className="block"
                 >
-                  <div className="flex items-center gap-3 p-3 border border-border/30 rounded-lg hover:bg-accent/20 transition-colors cursor-pointer hover:border-primary/30 hover:shadow-sm">
-                    <Avatar className="w-8 h-8 border border-primary/20">
-                      <AvatarFallback className="text-xs font-medium bg-primary/10 text-primary">
-                        {client.name.charAt(0)}
-                      </AvatarFallback>
-                    </Avatar>
+                  <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 border border-border/30 rounded-lg hover:bg-accent/20 transition-colors cursor-pointer hover:border-primary/30 hover:shadow-sm min-touch-target">
+                    <div className="relative">
+                      <div
+                        className={cn(
+                          'w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-xs sm:text-sm font-medium',
+                          getInitialsBg(client.name[0])
+                        )}
+                      >
+                        {client.name[0]}
+                      </div>
+                      {client.importance === '키맨' && (
+                        <Sparkles className="absolute -top-1 -right-1 h-3 w-3 sm:h-4 sm:w-4 text-amber-500 fill-amber-500" />
+                      )}
+                    </div>
 
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
@@ -188,11 +205,11 @@ export function RecentClients({
               )}
             </>
           ) : (
-            <div className="text-center py-6">
-              <div className="p-3 bg-muted/20 rounded-full w-fit mx-auto mb-3">
-                <PersonIcon className="h-6 w-6 text-muted-foreground" />
+            <div className="text-center py-4 sm:py-6">
+              <div className="p-2 sm:p-3 bg-muted/20 rounded-full w-fit mx-auto mb-2 sm:mb-3">
+                <PersonIcon className="h-5 w-5 sm:h-6 sm:w-6 text-muted-foreground" />
               </div>
-              <p className="text-sm text-muted-foreground mb-3">
+              <p className="text-xs sm:text-sm text-muted-foreground mb-2 sm:mb-3">
                 등록된 고객이 없습니다
               </p>
               <Link to="/clients">

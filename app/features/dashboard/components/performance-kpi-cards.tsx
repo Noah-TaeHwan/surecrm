@@ -211,7 +211,7 @@ export function PerformanceKPICards({
           return (
             <Card
               key={index}
-              className="hover:shadow-md transition-all duration-200 border-border/50 hover:border-border cursor-pointer"
+              className="hover:shadow-md transition-all duration-200 border-border/50 hover:border-border cursor-pointer min-touch-target"
               onClick={() => {
                 // 🎯 극한 분석: KPI 카드 클릭 이벤트 추적
                 InsuranceAgentEvents.dashboardCardClick(item.title, {
@@ -221,104 +221,57 @@ export function PerformanceKPICards({
                 });
               }}
             >
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-1">
-                      <p className="text-sm font-medium text-muted-foreground">
+              <CardContent className="p-3 sm:p-4 md:p-6">
+                <div className="flex items-center justify-between mb-3 sm:mb-4">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 sm:p-2 bg-primary/10 rounded-lg">
+                      <IconComponent
+                        className={cn(
+                          'h-4 w-4 sm:h-5 sm:w-5',
+                          getIconColorClass(item.color)
+                        )}
+                      />
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-sm sm:text-base text-foreground">
                         {item.title}
+                      </h3>
+                      <p className="text-xs sm:text-sm text-muted-foreground">
+                        {item.description}
                       </p>
-                      {(item.title === '전환율' ||
-                        item.title === '총 고객 수' ||
-                        item.title === '예상 총 수수료' ||
-                        item.title === '소개 네트워크') && (
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <QuestionMarkCircledIcon className="h-3 w-3 text-muted-foreground hover:text-foreground transition-colors" />
-                          </TooltipTrigger>
-                          <TooltipContent side="top" className="max-w-xs">
-                            {item.title === '전환율' && (
-                              <p className="">
-                                전체 고객 대비 '계약 완료' 단계에 있는 고객의
-                                비율입니다.
-                                <br />
-                                증가율: 지난 달 대비 계약 완료 고객 증가율
-                              </p>
-                            )}
-                            {item.title === '총 고객 수' && (
-                              <p className="">
-                                전체 관리 중인 고객의 수입니다.
-                                <br />
-                                증가율: 지난 달 대비 신규 고객 증가율
-                              </p>
-                            )}
-                            {item.title === '예상 총 수수료' && (
-                              <p className="">
-                                진행 중인 영업 기회들의 예상 계약 수수료
-                                합계입니다.
-                                <br />
-                                평균 계약당 수수료:{' '}
-                                {(averageCommissionPerDeal / 10000).toFixed(0)}
-                                만원
-                              </p>
-                            )}
-                            {item.title === '소개 네트워크' && (
-                              <p className="">
-                                총 소개받은 고객의 수입니다.
-                                <br />
-                                증가율: 지난 달 대비 소개 건수 증가율
-                              </p>
-                            )}
-                          </TooltipContent>
-                        </Tooltip>
-                      )}
                     </div>
-                    <div className="flex items-baseline gap-2">
-                      <p className="text-2xl font-bold text-foreground">
-                        {typeof item.value === 'number'
-                          ? item.value.toLocaleString()
-                          : item.value}
-                      </p>
-                      {item.change !== 0 && (
-                        <div
-                          className={cn(
-                            'flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs font-medium',
-                            changeIndicator.bgColor
-                          )}
-                        >
-                          {changeIndicator.icon && (
-                            <changeIndicator.icon
-                              className={cn('h-3 w-3', changeIndicator.color)}
-                            />
-                          )}
-                          <span className={changeIndicator.color}>
-                            {changeIndicator.isSpecial &&
-                            changeIndicator.label ? (
-                              changeIndicator.label
-                            ) : (
-                              <>
-                                {changeIndicator.prefix}
-                                {Math.round(Math.abs(item.change) * 10) / 10}%
-                              </>
-                            )}
-                          </span>
-                        </div>
+                  </div>
+                </div>
+                <div className="flex items-baseline gap-2">
+                  <p className="text-2xl font-bold text-foreground">
+                    {typeof item.value === 'number'
+                      ? item.value.toLocaleString()
+                      : item.value}
+                  </p>
+                  {item.change !== 0 && (
+                    <div
+                      className={cn(
+                        'flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs font-medium',
+                        changeIndicator.bgColor
                       )}
+                    >
+                      {changeIndicator.icon && (
+                        <changeIndicator.icon
+                          className={cn('h-3 w-3', changeIndicator.color)}
+                        />
+                      )}
+                      <span className={changeIndicator.color}>
+                        {changeIndicator.isSpecial && changeIndicator.label ? (
+                          changeIndicator.label
+                        ) : (
+                          <>
+                            {changeIndicator.prefix}
+                            {Math.round(Math.abs(item.change) * 10) / 10}%
+                          </>
+                        )}
+                      </span>
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                      {item.description}
-                    </p>
-                  </div>
-                  <div
-                    className={cn(
-                      'flex items-center justify-center h-12 w-12 rounded-lg',
-                      getBackgroundColorClass(item.color)
-                    )}
-                  >
-                    <IconComponent
-                      className={cn('h-6 w-6', getIconColorClass(item.color))}
-                    />
-                  </div>
+                  )}
                 </div>
 
                 {/* 추가 세부 정보 */}

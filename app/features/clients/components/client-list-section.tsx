@@ -135,7 +135,7 @@ export function ClientListSection({
         return (
           <div key={client.id} className="relative">
             <Card
-              className={`group hover:shadow-lg transition-all duration-200 ${cardStyle.bgGradient} ${cardStyle.borderClass} cursor-pointer hover:scale-[1.02] hover:-translate-y-1 h-[320px] flex flex-col relative overflow-hidden`}
+              className={`group hover:shadow-lg transition-all duration-200 ${cardStyle.bgGradient} ${cardStyle.borderClass} cursor-pointer hover:scale-[1.02] hover:-translate-y-1 h-[320px] flex flex-col relative overflow-hidden min-touch-target`}
               onClick={() => onClientRowClick(client.id)}
             >
               <CardHeader className="pb-3 flex-shrink-0">
@@ -168,7 +168,38 @@ export function ClientListSection({
                 </div>
               </CardHeader>
 
-              <CardContent className="flex-1 flex flex-col justify-between space-y-3 min-h-0">
+              <CardContent className="p-3 sm:p-4 md:p-6 h-full flex flex-col">
+                {/* 상단: 고객 기본 정보 */}
+                <div className="flex items-start justify-between mb-3 sm:mb-4">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="flex -space-x-2">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-xs sm:text-sm font-medium">
+                        {client.fullName.charAt(0)}
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-sm sm:text-base text-foreground">
+                        {client.fullName}
+                      </h3>
+                      <p className="text-xs sm:text-sm text-muted-foreground">
+                        {client.phone}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2 flex-shrink-0">
+                    <Badge
+                      className={`${getImportanceBadgeColor(
+                        client.importance
+                      )} border text-xs font-medium`}
+                    >
+                      {getImportanceText(client.importance)}
+                    </Badge>
+                    {client.importance === 'high' && (
+                      <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                    )}
+                  </div>
+                </div>
+
                 <div className="space-y-3">
                   {/* 현재 단계 - 항상 표시 */}
                   <div className="flex items-center justify-between">
@@ -358,14 +389,14 @@ export function ClientListSection({
       </CardHeader>
       <CardContent>
         {filteredClients.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 px-4">
-            <div className="rounded-full bg-primary/10 p-6 mb-6">
-              <Users className="h-12 w-12 text-primary" />
+          <div className="flex flex-col items-center justify-center py-12 sm:py-16 px-4">
+            <div className="rounded-full bg-primary/10 p-4 sm:p-6 mb-4 sm:mb-6">
+              <Users className="h-8 w-8 sm:h-12 sm:w-12 text-primary" />
             </div>
-            <h3 className="text-xl font-semibold text-foreground mb-2">
+            <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2">
               검색 결과가 없습니다
             </h3>
-            <p className="text-muted-foreground text-center max-w-md mb-6">
+            <p className="text-sm sm:text-base text-muted-foreground text-center max-w-md mb-4 sm:mb-6">
               검색 조건을 변경하거나 새 고객을 추가해보세요.
             </p>
             <Button onClick={onAddClient}>

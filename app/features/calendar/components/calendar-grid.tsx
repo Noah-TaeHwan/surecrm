@@ -15,6 +15,7 @@ import {
   AlertTriangle,
   XCircle,
   Circle,
+  CalendarIcon,
 } from 'lucide-react';
 
 interface CalendarGridProps {
@@ -140,7 +141,7 @@ function MoreButton({
 
   return (
     <div
-      className="text-xs text-muted-foreground bg-muted/50 hover:bg-muted/70 p-2 rounded cursor-pointer transition-all duration-200 border border-border/50 hover:border-border group"
+      className="text-xs text-muted-foreground bg-muted/50 hover:bg-muted/70 p-1.5 sm:p-2 rounded cursor-pointer transition-all duration-200 border border-border/50 hover:border-border group min-touch-target"
       onClick={onClick}
       title={`남은 일정: ${previewTimes}${meetings.length > 3 ? '...' : ''}`}
     >
@@ -169,27 +170,15 @@ export function CalendarGrid({
   if (filteredMeetings.length === 0 && meetings.length > 0) {
     return (
       <div className="bg-card/30 rounded-2xl overflow-hidden border border-border/30 shadow-2xl backdrop-blur-md">
-        <div className="p-12 text-center">
-          <div className="p-6 bg-muted/20 rounded-full w-fit mx-auto mb-6">
-            <svg
-              className="w-16 h-16 text-muted-foreground/50"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z"
-              />
-            </svg>
+        <div className="p-8 sm:p-12 text-center">
+          <div className="p-4 sm:p-6 bg-muted/20 rounded-full w-fit mx-auto mb-4 sm:mb-6">
+            <CalendarIcon className="h-8 w-8 sm:h-12 sm:w-12 text-muted-foreground" />
           </div>
-          <h3 className="text-xl font-semibold text-foreground mb-3">
-            선택한 필터에 해당하는 미팅이 없습니다
+          <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2">
+            일정이 없습니다
           </h3>
-          <p className="text-muted-foreground mb-6">
-            다른 미팅 유형을 선택하거나 필터를 초기화해보세요.
+          <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6">
+            새로운 미팅을 예약해보세요.
           </p>
           <div className="text-sm text-muted-foreground bg-muted/20 px-4 py-2 rounded-lg inline-block">
             전체 미팅: {meetings.length}개 | 필터링된 미팅: 0개
@@ -263,14 +252,11 @@ export function CalendarGrid({
       );
 
       // 📊 이벤트 소스별 카운트
-      const sourceCount = dayMeetings.reduce(
-        (acc, meeting) => {
-          const source = meeting.syncInfo?.externalSource || 'surecrm';
-          acc[source] = (acc[source] || 0) + 1;
-          return acc;
-        },
-        {} as Record<string, number>
-      );
+      const sourceCount = dayMeetings.reduce((acc, meeting) => {
+        const source = meeting.syncInfo?.externalSource || 'surecrm';
+        acc[source] = (acc[source] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
 
       days.push(
         <div
@@ -285,10 +271,10 @@ export function CalendarGrid({
             dayMeetings.length === 0
               ? 'h-32'
               : dayMeetings.length === 1
-                ? 'h-36'
-                : dayMeetings.length <= 3
-                  ? 'h-40'
-                  : 'h-44',
+              ? 'h-36'
+              : dayMeetings.length <= 3
+              ? 'h-40'
+              : 'h-44',
             dayMeetings.length > 0 && 'hover:scale-[1.01]'
           )}
           onClick={() => onDateClick?.(cellDate)}
@@ -456,8 +442,8 @@ export function CalendarGrid({
                 index === 0
                   ? 'text-red-500'
                   : index === 6
-                    ? 'text-blue-500'
-                    : 'text-foreground/80'
+                  ? 'text-blue-500'
+                  : 'text-foreground/80'
               )}
             >
               <div className="hidden lg:block">{day}</div>
