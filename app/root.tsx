@@ -37,7 +37,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
     <html lang="ko" suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no"
+        />
         <Meta />
         <Links />
 
@@ -199,13 +202,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
                         // GTM으로 기본 추적 활성화 알림
                         if (window.dataLayer) {
                           window.dataLayer.push({
-                            event: 'analytics_initialized',
-                            category: 'user_experience_optimization',
-                            systems_activated: ['basic_analytics'],
-                            timestamp: Date.now()
+                            'event': 'user_experience_optimization_active',
+                            'optimization_level': 'enhanced',
+                            'data_collection_scope': 'comprehensive'
                           });
                         }
-                      }, 1000);
+                      }, 2000);
                     }
                   });
                 `,
@@ -826,6 +828,101 @@ export function Layout({ children }: { children: React.ReactNode }) {
               .animate-bounce {
                 animation: bounce 1s infinite !important;
               }
+            `,
+          }}
+        />
+        {/* 🚀 모바일 Viewport 최적화 스크립트 */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              // 🎯 동적 Viewport 높이 계산 시스템
+              (function() {
+                function setVH() {
+                  const vh = window.innerHeight * 0.01;
+                  document.documentElement.style.setProperty('--vh', vh + 'px');
+                }
+                
+                // 초기 설정
+                setVH();
+                
+                // 이벤트 리스너 등록
+                window.addEventListener('resize', setVH);
+                window.addEventListener('orientationchange', function() {
+                  // 화면 회전 시 약간의 지연 후 재계산
+                  setTimeout(setVH, 100);
+                });
+                
+                // iOS Safari 스크롤 시 viewport 변화 감지
+                let ticking = false;
+                function updateOnScroll() {
+                  if (!ticking) {
+                    requestAnimationFrame(function() {
+                      setVH();
+                      ticking = false;
+                    });
+                    ticking = true;
+                  }
+                }
+                
+                // 스크롤 이벤트는 throttle 적용
+                window.addEventListener('scroll', updateOnScroll, { passive: true });
+              })();
+            `,
+          }}
+        />
+
+        {/* 🎯 iOS Safari 바운스 스크롤 방지 및 터치 최적화 */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              // 🛡️ iOS Safari 바운스 스크롤 방지 시스템
+              (function() {
+                // 터치 시작 위치 저장
+                let startY = 0;
+                let startX = 0;
+                
+                // 터치 시작 이벤트
+                document.addEventListener('touchstart', function(e) {
+                  startY = e.touches[0].clientY;
+                  startX = e.touches[0].clientX;
+                }, { passive: true });
+                
+                // 터치 이동 이벤트 - 바운스 스크롤 방지
+                document.addEventListener('touchmove', function(e) {
+                  const contentArea = e.target.closest('.content-area');
+                  
+                  if (contentArea) {
+                    // 콘텐츠 영역 내부에서의 터치
+                    const currentY = e.touches[0].clientY;
+                    const isAtTop = contentArea.scrollTop === 0;
+                    const isAtBottom = contentArea.scrollTop + contentArea.clientHeight >= contentArea.scrollHeight;
+                    
+                    // 상단에서 아래로 당기기 또는 하단에서 위로 당기기 방지
+                    if ((isAtTop && currentY > startY) || (isAtBottom && currentY < startY)) {
+                      e.preventDefault();
+                    }
+                  } else {
+                    // 콘텐츠 영역 외부 터치는 모두 방지
+                    e.preventDefault();
+                  }
+                }, { passive: false });
+                
+                // 터치 끝 이벤트
+                document.addEventListener('touchend', function(e) {
+                  startY = 0;
+                  startX = 0;
+                }, { passive: true });
+                
+                // 더블 탭 줌 방지
+                let lastTouchEnd = 0;
+                document.addEventListener('touchend', function(e) {
+                  const now = (new Date()).getTime();
+                  if (now - lastTouchEnd <= 300) {
+                    e.preventDefault();
+                  }
+                  lastTouchEnd = now;
+                }, { passive: false });
+              })();
             `,
           }}
         />

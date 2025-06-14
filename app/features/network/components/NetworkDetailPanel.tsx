@@ -238,7 +238,7 @@ export default function NetworkDetailPanel({
       </div>
 
       <div
-        className="flex-1 overflow-y-auto p-4 pt-0"
+        className="flex-1 overflow-y-auto p-4 pt-0 scrollbar-none"
         style={{
           maxHeight: 'calc(100% - 80px)',
         }}

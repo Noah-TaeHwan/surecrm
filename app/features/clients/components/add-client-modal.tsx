@@ -170,7 +170,7 @@ export function AddClientModal({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto scrollbar-none">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3 text-xl font-bold">
             <PersonIcon className="h-5 w-5" />새 고객 추가

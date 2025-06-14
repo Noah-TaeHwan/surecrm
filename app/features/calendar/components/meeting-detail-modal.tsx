@@ -383,7 +383,7 @@ export function MeetingDetailModal({
 
   return (
     <Dialog open={!!meeting} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto scrollbar-none">
         <DialogHeader className="space-y-4 pb-6">
           <div className="flex items-start justify-between">
             <div className="space-y-3">

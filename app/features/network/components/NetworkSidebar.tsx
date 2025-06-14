@@ -284,7 +284,7 @@ export default function NetworkSidebar({
       )}
 
       {/* 스크롤 가능한 필터 콘텐츠 영역 */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto scrollbar-none">
         <div className="space-y-3 py-2 pb-6">
           {/* 🎯 개선된 네트워크 현황 */}
           <div className="rounded-lg border">

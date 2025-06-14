@@ -14,6 +14,8 @@ import {
 } from '~/common/components/ui/sheet';
 import { MobileOnly } from '~/common/components/ui/responsive-layout';
 import { requireAuth } from '~/lib/auth/middleware';
+import { Sidebar } from '~/common/components/navigation/sidebar';
+import { MobileBottomNav } from '~/common/components/navigation/mobile-bottom-nav';
 
 // 임시 타입 정의 (React Router v7 타입 생성 전까지)
 interface LoaderArgs {
@@ -143,6 +145,10 @@ export default function AppLayout({ loaderData }: ComponentProps) {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
+  const handleMobileNavigation = () => {
+    setIsMobileMenuOpen(false);
+  };
+
   // 키보드 이벤트 처리 (Escape로 모바일 메뉴 닫기)
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -156,13 +162,13 @@ export default function AppLayout({ loaderData }: ComponentProps) {
   }, [isMobileMenuOpen]);
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden">
+    <div className="app-container">
       {/* FlexibleSidebar 시스템 */}
       <FlexibleSidebar />
 
       {/* 메인 컨텐츠 영역 */}
-      <div className="flex-1 flex flex-col min-w-0 relative h-full overflow-hidden">
-        {/* 헤더 */}
+      <div className="main-layout">
+        {/* 헤더 - 완전 고정 */}
         <Header
           title={pageTitle}
           currentUser={currentUser}
@@ -170,8 +176,8 @@ export default function AppLayout({ loaderData }: ComponentProps) {
           onMenuButtonClick={handleMobileMenuToggle}
         />
 
-        {/* 페이지 컨텐츠 - 여기서만 스크롤 */}
-        <main className="flex-1 overflow-y-auto overflow-x-hidden bg-background p-3 md:p-4 lg:p-6 pb-20 md:pb-3 scrollbar-none">
+        {/* 페이지 컨텐츠 - 독립 스크롤 영역 */}
+        <main className="content-area">
           <Outlet />
         </main>
       </div>
@@ -179,19 +185,15 @@ export default function AppLayout({ loaderData }: ComponentProps) {
       {/* 모바일 사이드바 Sheet */}
       <MobileOnly>
         <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
-          <SheetContent
-            side="left"
-            className="w-80 p-0 bg-background overflow-y-auto scrollbar-none"
-          >
-            <SheetHeader className="sr-only">
-              <SheetTitle>모바일 네비게이션 메뉴</SheetTitle>
-              <SheetDescription>
-                사이드바 메뉴를 통해 다양한 페이지로 이동할 수 있습니다.
-              </SheetDescription>
-            </SheetHeader>
-            <MobileSidebarContent onClose={handleMobileMenuClose} />
+          <SheetContent side="left" className="w-64 p-0 scrollbar-none">
+            <Sidebar onClose={handleMobileNavigation} />
           </SheetContent>
         </Sheet>
+      </MobileOnly>
+
+      {/* 모바일 바텀 네비게이션 - 완전 고정 */}
+      <MobileOnly>
+        <MobileBottomNav />
       </MobileOnly>
     </div>
   );
