@@ -1,6 +1,224 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
+/* 🎯 RESPONSIVE TYPOGRAPHY SYSTEM */
+/* 모바일 우선: 16px 기본, 데스크톱: 14px 기본 */
+body {
+  font-size: 1rem; /* 16px - 모바일 기본 */
+  line-height: 1.5;
+}
+
+/* 데스크톱에서 더 작은 기본 폰트 사이즈 */
+@media (min-width: 768px) {
+  body {
+    font-size: 0.875rem; /* 14px - 데스크톱 기본 */
+    line-height: 1.25;
+  }
+}
+
+/* 반응형 타이포그래피 유틸리티 클래스 */
+.text-responsive-base {
+  font-size: 1rem; /* 16px - 모바일 */
+  line-height: 1.5;
+}
+
+@media (min-width: 768px) {
+  .text-responsive-base {
+    font-size: 0.875rem; /* 14px - 데스크톱 */
+    line-height: 1.25;
+  }
+}
+
+/* 터치 타겟 최소 크기 유틸리티 */
+.min-touch-target {
+  min-height: 2.75rem; /* 44px */
+  min-width: 2.75rem; /* 44px */
+}
+
+.min-touch-target-md {
+  min-height: 3rem; /* 48px */
+  min-width: 3rem; /* 48px */
+}
+
+.min-touch-target-lg {
+  min-height: 3.5rem; /* 56px */
+  min-width: 3.5rem; /* 56px */
+}
+
+/* 🎨 DYNAMIC THEMING SYSTEM */
+/* CSS 커스텀 프로퍼티로 동적 테마 지원 */
+:root {
+  /* 반응형 스페이싱 변수 */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+
+  /* 반응형 폰트 사이즈 변수 */
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+
+  /* 터치 타겟 크기 변수 */
+  --touch-target-sm: 2.75rem; /* 44px */
+  --touch-target-md: 3rem; /* 48px */
+  --touch-target-lg: 3.5rem; /* 56px */
+
+  /* 테마 색상 변수 (라이트 모드) */
+  --color-primary: 59 130 246; /* blue-500 */
+  --color-primary-dark: 37 99 235; /* blue-600 */
+  --color-secondary: 156 163 175; /* gray-400 */
+  --color-background: 255 255 255; /* white */
+  --color-surface: 249 250 251; /* gray-50 */
+  --color-text: 17 24 39; /* gray-900 */
+  --color-text-muted: 107 114 128; /* gray-500 */
+  --color-border: 229 231 235; /* gray-200 */
+
+  /* 브레이크포인트 변수 */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+}
+
+/* 다크 모드 테마 변수 */
+.dark {
+  --color-primary: 99 102 241; /* indigo-500 */
+  --color-primary-dark: 79 70 229; /* indigo-600 */
+  --color-secondary: 75 85 99; /* gray-600 */
+  --color-background: 17 24 39; /* gray-900 */
+  --color-surface: 31 41 55; /* gray-800 */
+  --color-text: 243 244 246; /* gray-100 */
+  --color-text-muted: 156 163 175; /* gray-400 */
+  --color-border: 55 65 81; /* gray-700 */
+}
+
+/* 반응형 폰트 크기 조정 */
+@media (min-width: 768px) {
+  :root {
+    --font-size-base: 0.875rem; /* 14px - 데스크톱 */
+  }
+}
+
+/* 동적 테마 유틸리티 클래스 */
+.theme-primary {
+  color: rgb(var(--color-primary));
+}
+
+.theme-bg-primary {
+  background-color: rgb(var(--color-primary));
+}
+
+.theme-bg-surface {
+  background-color: rgb(var(--color-surface));
+}
+
+.theme-text {
+  color: rgb(var(--color-text));
+}
+
+.theme-text-muted {
+  color: rgb(var(--color-text-muted));
+}
+
+.theme-border {
+  border-color: rgb(var(--color-border));
+}
+
+/* ♿ ACCESSIBILITY - MOTION PREFERENCES */
+/* 사용자가 애니메이션 감소를 선호하는 경우 모든 애니메이션 비활성화 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+    transform: none !important;
+  }
+
+  /* 특정 애니메이션 클래스들 비활성화 */
+  .animate-spin,
+  .animate-pulse,
+  .animate-bounce,
+  .animate-ping,
+  .animate-marquee,
+  .animate-marquee-reverse,
+  .animate-marquee-vertical,
+  .animate-marquee-vertical-reverse,
+  .animate-shimmer,
+  .animate-grid,
+  .animate-border-beam {
+    animation: none !important;
+  }
+
+  /* 호버 트랜지션도 비활성화 */
+  .transition,
+  .transition-all,
+  .transition-colors,
+  .transition-opacity,
+  .transition-shadow,
+  .transition-transform {
+    transition: none !important;
+  }
+}
+
+/* 반대로 애니메이션을 선호하는 사용자를 위한 강화된 효과 */
+@media (prefers-reduced-motion: no-preference) {
+  .enhance-motion {
+    transition-duration: 300ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .enhance-motion:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 10px 25px -5px rgba(0, 0, 0, 0.1),
+      0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+}
+
+/* 접근성 친화적 포커스 스타일 */
+.focus-visible-custom:focus-visible {
+  outline: 2px solid rgb(var(--color-primary));
+  outline-offset: 2px;
+  border-radius: 0.25rem;
+}
+
+/* 고대비 모드 지원 */
+@media (prefers-contrast: high) {
+  :root {
+    --color-border: 0 0 0; /* black */
+    --color-text: 0 0 0; /* black */
+  }
+
+  .dark {
+    --color-border: 255 255 255; /* white */
+    --color-text: 255 255 255; /* white */
+  }
+}
+
+/* 투명도 감소 선호 지원 */
+@media (prefers-reduced-transparency: reduce) {
+  * {
+    backdrop-filter: none !important;
+    background: none !important;
+  }
+
+  .bg-opacity-50,
+  .bg-opacity-75,
+  .bg-opacity-90 {
+    background-opacity: 1 !important;
+  }
+}
+
 /* 🚀 ENHANCED SCROLLBAR STYLING - Critical CSS 보완 */
 /* Firefox */
 * {

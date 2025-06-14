@@ -4,6 +4,10 @@ import { Sidebar } from '~/common/components/navigation/sidebar';
 import { Header } from '~/common/components/navigation/header';
 import { Sheet, SheetContent } from '~/common/components/ui/sheet';
 import { Button } from '~/common/components/ui/button';
+import {
+  DesktopOnly,
+  MobileOnly,
+} from '~/common/components/ui/responsive-layout';
 import { Menu } from 'lucide-react';
 
 interface MainLayoutProps {
@@ -23,7 +27,6 @@ export function MainLayout({
   currentUser: propsCurrentUser,
 }: MainLayoutProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
   const [currentUser, setCurrentUser] = useState<{
     id: string;
     email: string;
@@ -97,23 +100,6 @@ export function MainLayout({
     fetchCurrentUser();
   }, [propsCurrentUser]);
 
-  // 반응형 처리를 위한 윈도우 크기 감지
-  useEffect(() => {
-    const checkScreenSize = () => {
-      setIsMobile(window.innerWidth < 1024);
-    };
-
-    // 초기 체크
-    checkScreenSize();
-
-    // 리사이즈 이벤트에 대응
-    window.addEventListener('resize', checkScreenSize);
-
-    return () => {
-      window.removeEventListener('resize', checkScreenSize);
-    };
-  }, []);
-
   // 모바일 메뉴가 열려있을 때 외부 스크롤 방지
   useEffect(() => {
     if (isMobileMenuOpen) {
@@ -131,12 +117,10 @@ export function MainLayout({
 
   return (
     <div className="fixed inset-0 bg-background flex overflow-hidden">
-      {/* 데스크톱 사이드바 */}
-      {!isMobile && (
-        <div className="w-64 border-r border-border bg-muted/30 flex-shrink-0">
-          <Sidebar />
-        </div>
-      )}
+      {/* 데스크톱 사이드바 - Tailwind CSS 기반 반응형 */}
+      <DesktopOnly className="w-64 border-r border-border bg-muted/30 flex-shrink-0">
+        <Sidebar />
+      </DesktopOnly>
 
       {/* 메인 컨텐츠 영역 */}
       <div className="flex-1 flex flex-col min-w-0">
@@ -144,18 +128,22 @@ export function MainLayout({
         <header className="h-16 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex-shrink-0 z-50">
           <div className="h-full px-4 lg:px-6 flex items-center justify-between">
             <div className="flex items-center gap-4">
-              {/* 모바일 메뉴 버튼 */}
-              {isMobile && (
+              {/* 모바일 메뉴 버튼 - md breakpoint 미만에서만 표시 */}
+              <MobileOnly>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setIsMobileMenuOpen(true)}
+                  aria-label="메뉴 열기"
                 >
                   <Menu className="h-5 w-5" />
                 </Button>
-              )}
+              </MobileOnly>
+
               {title && (
-                <h1 className="font-semibold text-foreground">{title}</h1>
+                <h1 className="font-semibold text-foreground text-sm md:text-base">
+                  {title}
+                </h1>
               )}
             </div>
 
@@ -168,7 +156,7 @@ export function MainLayout({
           className={`flex-1 ${
             title === '소개 네트워크'
               ? 'overflow-hidden p-0'
-              : 'overflow-y-auto p-3 lg:p-4'
+              : 'overflow-y-auto p-3 md:p-4 lg:p-6'
           }`}
           style={
             title === '소개 네트워크'
@@ -184,7 +172,7 @@ export function MainLayout({
         </main>
       </div>
 
-      {/* 모바일 사이드바 */}
+      {/* 모바일 사이드바 Sheet */}
       <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
         <SheetContent side="left" className="w-64 p-0">
           <Sidebar />
