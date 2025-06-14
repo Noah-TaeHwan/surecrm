@@ -1,4 +1,15 @@
 import React from 'react';
+import { Link, useLocation } from 'react-router';
+import {
+  LayoutDashboard,
+  Network,
+  PieChart,
+  Users,
+  Calendar,
+  Settings,
+  ChevronRight,
+  ChevronLeft,
+} from 'lucide-react';
 import { Sidebar } from './sidebar';
 import { MobileBottomNav } from './mobile-bottom-nav';
 import {
@@ -9,18 +20,6 @@ import { cn } from '~/lib/utils';
 
 interface FlexibleSidebarProps {
   className?: string;
-  /**
-   * 모바일 메뉴 닫기 콜백 (Sheet 컴포넌트에서 사용)
-   */
-  onClose?: () => void;
-  /**
-   * 사이드바 접힘 상태 (태블릿에서 사용)
-   */
-  isCollapsed?: boolean;
-  /**
-   * 사이드바 접힘 토글 함수
-   */
-  onToggleCollapse?: () => void;
 }
 
 /**
@@ -31,12 +30,7 @@ interface FlexibleSidebarProps {
  * - 태블릿 (md-lg): 접이식 사이드바 (향후 구현)
  * - 모바일 (<md): 하단 탭 네비게이션 + Sheet 사이드바
  */
-export function FlexibleSidebar({
-  className,
-  onClose,
-  isCollapsed = false,
-  onToggleCollapse,
-}: FlexibleSidebarProps) {
+export function FlexibleSidebar({ className }: FlexibleSidebarProps) {
   return (
     <>
       {/* 데스크톱 고정 사이드바 (md 이상) */}
@@ -81,7 +75,8 @@ export function MobileSidebarContent({ onClose }: { onClose?: () => void }) {
 }
 
 /**
- * 태블릿용 접이식 사이드바 (향후 구현)
+ * 태블릿용 접이식 사이드바
+ * 아이콘만 표시하는 축소 모드와 풀 사이드바 간 전환
  */
 export function CollapsibleSidebar({
   isCollapsed,
@@ -92,22 +87,135 @@ export function CollapsibleSidebar({
   onToggle: () => void;
   className?: string;
 }) {
-  // TODO: 태블릿용 접이식 사이드바 구현
-  // - 아이콘만 표시하는 축소 모드
-  // - 호버 시 확장되는 기능
-  // - 토글 버튼
-
   return (
-    <div className={cn('transition-all duration-300', className)}>
+    <div className={cn('transition-all duration-300 ease-in-out', className)}>
       {isCollapsed ? (
         // 축소된 사이드바 (아이콘만)
-        <div className="w-16">{/* 축소된 네비게이션 */}</div>
+        <CollapsedSidebar onToggle={onToggle} />
       ) : (
         // 전체 사이드바
-        <div className="w-64">
-          <Sidebar />
-        </div>
+        <ExpandedSidebar onToggle={onToggle} />
       )}
+    </div>
+  );
+}
+
+/**
+ * 축소된 사이드바 (아이콘만 표시)
+ */
+function CollapsedSidebar({ onToggle }: { onToggle: () => void }) {
+  const location = useLocation();
+
+  const iconNavItems = [
+    {
+      label: '대시보드',
+      href: '/dashboard',
+      icon: <LayoutDashboard className="h-5 w-5" />,
+    },
+    {
+      label: '소개 네트워크',
+      href: '/network',
+      icon: <Network className="h-5 w-5" />,
+    },
+    {
+      label: '영업 파이프라인',
+      href: '/pipeline',
+      icon: <PieChart className="h-5 w-5" />,
+    },
+    {
+      label: '고객 관리',
+      href: '/clients',
+      icon: <Users className="h-5 w-5" />,
+    },
+    {
+      label: '일정 관리',
+      href: '/calendar',
+      icon: <Calendar className="h-5 w-5" />,
+    },
+    {
+      label: '설정',
+      href: '/settings',
+      icon: <Settings className="h-5 w-5" />,
+    },
+  ];
+
+  const isActiveRoute = (href: string) => {
+    if (href === '/dashboard') {
+      return location.pathname === href || location.pathname === '/';
+    }
+    return location.pathname.startsWith(href);
+  };
+
+  return (
+    <div className="w-16 h-screen bg-sidebar border-r border-sidebar-border flex flex-col">
+      {/* 로고 및 토글 버튼 */}
+      <div className="p-2 border-b border-sidebar-border">
+        <button
+          onClick={onToggle}
+          className="w-12 h-12 flex items-center justify-center rounded-md hover:bg-sidebar-accent transition-colors"
+          title="사이드바 확장"
+        >
+          <ChevronRight className="h-4 w-4 text-sidebar-foreground" />
+        </button>
+      </div>
+
+      {/* 축소된 네비게이션 아이콘들 */}
+      <div className="flex-1 overflow-y-auto p-2">
+        <nav>
+          <ul className="space-y-2">
+            {iconNavItems.map(item => {
+              const isActive = isActiveRoute(item.href);
+              return (
+                <li key={item.href}>
+                  <Link
+                    to={item.href}
+                    className={cn(
+                      'flex items-center justify-center w-12 h-12 rounded-md transition-colors min-touch-target',
+                      isActive
+                        ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                        : 'text-sidebar-foreground hover:bg-sidebar-accent/50'
+                    )}
+                    title={item.label}
+                  >
+                    {item.icon}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * 확장된 사이드바 (전체 메뉴 표시)
+ */
+function ExpandedSidebar({ onToggle }: { onToggle: () => void }) {
+  return (
+    <div className="w-64 h-screen bg-sidebar border-r border-sidebar-border flex flex-col">
+      {/* 헤더 with 토글 버튼 */}
+      <div className="p-4 border-b border-sidebar-border flex items-center justify-between">
+        <Link
+          to="/dashboard"
+          className="text-xl font-bold text-sidebar-foreground flex justify-center cursor-pointer hover:text-sidebar-primary transition-colors"
+        >
+          SureCRM
+        </Link>
+        <button
+          onClick={onToggle}
+          className="p-2 rounded-md hover:bg-sidebar-accent transition-colors min-touch-target"
+          title="사이드바 축소"
+        >
+          <ChevronLeft className="h-4 w-4 text-sidebar-foreground" />
+        </button>
+      </div>
+
+      {/* 풀 사이드바 컨텐츠 */}
+      <div className="flex-1">
+        <Sidebar />
+      </div>
     </div>
   );
 }

@@ -1,9 +1,10 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
 import {
-  FlexibleSidebar,
-  MobileSidebarContent,
-} from '~/common/components/navigation/flexible-sidebar';
+  AdaptiveNavigation,
+  NavigationContainer,
+} from '~/common/components/navigation/adaptive-navigation';
+import { MobileSidebarContent } from '~/common/components/navigation/flexible-sidebar';
 import { Header } from '~/common/components/navigation/header';
 import { Sheet, SheetContent } from '~/common/components/ui/sheet';
 import { Button } from '~/common/components/ui/button';
@@ -117,11 +118,10 @@ export function MainLayout({
 
   return (
     <div className="fixed inset-0 bg-background flex overflow-hidden">
-      {/* FlexibleSidebar 시스템 */}
-      <FlexibleSidebar
-        className="border-r border-border bg-muted/30"
-        onClose={closeMobileMenu}
-      />
+      {/* AdaptiveNavigation 시스템 */}
+      <NavigationContainer className="border-r border-border bg-muted/30">
+        <AdaptiveNavigation />
+      </NavigationContainer>
 
       {/* 메인 컨텐츠 영역 */}
       <div className="flex-1 flex flex-col min-w-0">

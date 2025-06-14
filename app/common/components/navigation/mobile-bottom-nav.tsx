@@ -16,7 +16,7 @@ interface MobileBottomNavProps {
 interface MobileNavItem {
   label: string;
   href: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: typeof LayoutDashboard;
 }
 
 /**
@@ -74,12 +74,14 @@ export function MobileBottomNav({ className }: MobileBottomNavProps) {
 
   return (
     <nav
+      role="tablist"
+      aria-label="주요 네비게이션"
       className={cn(
         // 모바일에서만 표시 (md breakpoint 미만)
         'block md:hidden',
         // 하단 고정 위치
         'fixed bottom-0 left-0 right-0 z-50',
-        // 배경 및 테두리
+        // 배경 및 테두리 - app.css 기존 시스템 활용
         'bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80',
         'border-t border-border',
         // 안전 영역 고려 (iPhone 등)
@@ -97,15 +99,19 @@ export function MobileBottomNav({ className }: MobileBottomNavProps) {
               key={item.href}
               to={item.href}
               onClick={() => handleNavigation(item.href, item.label)}
+              // 접근성 개선
+              role="tab"
+              aria-label={`${item.label}${isActive ? ' (현재 페이지)' : ''}`}
+              aria-current={isActive ? 'page' : undefined}
               className={cn(
-                // 터치 친화적 크기 (최소 44px)
+                // 터치 친화적 크기 - app.css의 터치 타겟 클래스 활용
                 'flex flex-col items-center justify-center',
-                'min-h-[60px] min-w-[60px] px-2 py-2',
+                'min-touch-target-lg px-2 py-2',
                 // 터치 타겟 확장
                 'relative',
-                // 전환 효과
+                // 전환 효과 - app.css의 테마 시스템 활용
                 'transition-colors duration-200',
-                // 활성/비활성 상태
+                // 활성/비활성 상태 - app.css 프라이머리 컬러 사용
                 isActive
                   ? 'text-primary'
                   : 'text-muted-foreground hover:text-foreground'
