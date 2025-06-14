@@ -8,6 +8,7 @@ import { MyGoals } from '../components/my-goals';
 import { PipelineOverview } from '../components/pipeline-overview';
 import { RecentClients } from '../components/recent-clients';
 import { ReferralInsights } from '../components/referral-insights';
+import { MobileCardSlider } from '../components/mobile-card-slider';
 import {
   getUserInfo,
   getTodayStats,
@@ -35,7 +36,7 @@ import type {
   DashboardReferralInsights,
 } from '../types';
 
-export function meta({ data, params }: Route.MetaArgs) {
+export function meta({ data: _data, params: _params }: Route.MetaArgs) {
   return [
     { title: '대시보드 - SureCRM' },
     {
@@ -627,32 +628,63 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
         salesStats={salesStats}
       />
 
-      {/* 오늘의 일정 및 영업 파이프라인 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-        {/* 🗓️ 오늘의 일정 - 일정 관리 기능 개발 후 활성화 예정 */}
-        {/* <TodayAgenda meetings={transformedTodayMeetings} /> */}
-        <MyGoals
-          currentGoals={compatibleUserGoals}
-          onSetGoal={handleSetGoal}
-          onDeleteGoal={handleDeleteGoal}
-        />
-        <PipelineOverview
-          stages={transformedPipelineStages}
-          totalValue={pipelineData.totalValue}
-          monthlyTarget={pipelineData.monthlyTarget}
-        />
+      {/* 📱 모바일: 스와이프 슬라이더 */}
+      <div className="block lg:hidden">
+        <MobileCardSlider>
+          <div className="space-y-4">
+            <MyGoals
+              currentGoals={compatibleUserGoals}
+              onSetGoal={handleSetGoal}
+              onDeleteGoal={handleDeleteGoal}
+            />
+            <PipelineOverview
+              stages={transformedPipelineStages}
+              totalValue={pipelineData.totalValue}
+              monthlyTarget={pipelineData.monthlyTarget}
+            />
+          </div>
+          <div className="space-y-4">
+            <RecentClients
+              recentClients={transformedRecentClients}
+              totalClients={recentClientsData.totalClients}
+            />
+            <ReferralInsights
+              topReferrers={transformedTopReferrers}
+              networkStats={networkStats}
+            />
+          </div>
+        </MobileCardSlider>
       </div>
 
-      {/* 최근 고객 현황 및 소개 네트워크 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-        <RecentClients
-          recentClients={transformedRecentClients}
-          totalClients={recentClientsData.totalClients}
-        />
-        <ReferralInsights
-          topReferrers={transformedTopReferrers}
-          networkStats={networkStats}
-        />
+      {/* 🖥️ 데스크톱: 기존 그리드 레이아웃 */}
+      <div className="hidden lg:block space-y-4 md:space-y-6">
+        {/* 오늘의 일정 및 영업 파이프라인 */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+          {/* 🗓️ 오늘의 일정 - 일정 관리 기능 개발 후 활성화 예정 */}
+          {/* <TodayAgenda meetings={transformedTodayMeetings} /> */}
+          <MyGoals
+            currentGoals={compatibleUserGoals}
+            onSetGoal={handleSetGoal}
+            onDeleteGoal={handleDeleteGoal}
+          />
+          <PipelineOverview
+            stages={transformedPipelineStages}
+            totalValue={pipelineData.totalValue}
+            monthlyTarget={pipelineData.monthlyTarget}
+          />
+        </div>
+
+        {/* 최근 고객 현황 및 소개 네트워크 */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+          <RecentClients
+            recentClients={transformedRecentClients}
+            totalClients={recentClientsData.totalClients}
+          />
+          <ReferralInsights
+            topReferrers={transformedTopReferrers}
+            networkStats={networkStats}
+          />
+        </div>
       </div>
 
       {/* 성공 메시지 표시 */}
