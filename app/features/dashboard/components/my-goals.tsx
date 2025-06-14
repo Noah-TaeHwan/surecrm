@@ -154,233 +154,197 @@ export function MyGoals({
     <>
       <Card className="border-border/50">
         <CardHeader className="pb-3">
-          {/* 모바일: 세로 배치, 데스크톱: 가로 배치 */}
-          <div className="space-y-3 md:space-y-0">
-            {/* 제목과 목표 설정 버튼 */}
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base font-medium flex items-center gap-2">
-                <div className="p-1.5 bg-primary/10 rounded-lg">
-                  <TargetIcon className="h-4 w-4 text-primary" />
-                </div>
-                내 목표
-              </CardTitle>
+          {/* 깔끔한 헤더 레이아웃 */}
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-base font-medium flex items-center gap-2">
+              <div className="p-1.5 bg-primary/10 rounded-lg">
+                <TargetIcon className="h-4 w-4 text-primary" />
+              </div>
+              내 목표
+            </CardTitle>
 
-              {/* 목표 설정 버튼 - 모바일에서 더 크게 */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsGoalModalOpen(true)}
+              className="text-xs text-muted-foreground hover:text-primary"
+            >
+              <PlusIcon className="h-3 w-3 mr-1" />
+              <span className="hidden sm:inline">목표 </span>설정
+            </Button>
+          </div>
+
+          {/* 월별 탐색 UI */}
+          <div className="flex items-center justify-between mt-3">
+            <div className="flex items-center gap-2">
+              <Badge
+                variant={isCurrentMonth ? 'default' : 'secondary'}
+                className="text-xs font-medium"
+              >
+                <CalendarIcon className="h-3 w-3 mr-1" />
+                {viewingYear}년 {viewingMonth}월
+              </Badge>
+
+              {!isCurrentMonth && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={goToCurrentMonth}
+                  className="h-7 w-7 p-0 text-muted-foreground hover:text-primary"
+                  title="현재 월로 돌아가기"
+                >
+                  <HomeIcon className="h-3 w-3" />
+                </Button>
+              )}
+            </div>
+
+            <div className="flex items-center gap-1 border border-border/30 rounded-md">
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setIsGoalModalOpen(true)}
-                className="text-xs text-muted-foreground hover:text-primary md:hidden"
+                onClick={() => navigateMonth('prev')}
+                className="h-7 w-7 p-0 rounded-l-md rounded-r-none hover:bg-muted"
+                title="이전 달"
               >
-                <PlusIcon className="h-4 w-4 mr-1" />
-                설정
+                <ChevronLeftIcon className="h-4 w-4" />
               </Button>
-            </div>
-
-            {/* 월별 탐색 UI - 모바일에서 별도 줄 */}
-            <div className="flex items-center justify-between md:justify-center">
-              {/* 현재 보고 있는 월 표시 */}
-              <div className="flex items-center gap-2">
-                <Badge
-                  variant={isCurrentMonth ? 'default' : 'secondary'}
-                  className="text-xs font-medium"
-                >
-                  <CalendarIcon className="h-3 w-3 mr-1" />
-                  {viewingYear}년 {viewingMonth}월
-                </Badge>
-
-                {/* 현재 월로 돌아가기 버튼 */}
-                {!isCurrentMonth && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={goToCurrentMonth}
-                    className="h-7 w-7 p-0 text-muted-foreground hover:text-primary"
-                    title="현재 월로 돌아가기"
-                  >
-                    <HomeIcon className="h-3 w-3" />
-                  </Button>
-                )}
-              </div>
-
-              {/* 월 탐색 버튼들 - 모바일에서 더 크게 */}
-              <div className="flex items-center gap-1 border border-border/30 rounded-md">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => navigateMonth('prev')}
-                  className="h-7 w-7 p-0 rounded-l-md rounded-r-none hover:bg-muted"
-                  title="이전 달"
-                >
-                  <ChevronLeftIcon className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => navigateMonth('next')}
-                  className="h-7 w-7 p-0 rounded-r-md rounded-l-none hover:bg-muted"
-                  title="다음 달"
-                >
-                  <ChevronRightIcon className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-
-            {/* 데스크톱용 목표 설정 버튼 */}
-            <div className="hidden md:flex justify-end">
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setIsGoalModalOpen(true)}
-                className="text-xs text-muted-foreground hover:text-primary"
+                onClick={() => navigateMonth('next')}
+                className="h-7 w-7 p-0 rounded-r-md rounded-l-none hover:bg-muted"
+                title="다음 달"
               >
-                <PlusIcon className="h-3 w-3 mr-1" />
-                목표 설정
+                <ChevronRightIcon className="h-4 w-4" />
               </Button>
             </div>
           </div>
         </CardHeader>
+
         <CardContent className="space-y-4">
           {viewingMonthGoals.length > 0 ? (
             <>
-              {/* 현재 월 목표 우선 표시 */}
-              {viewingMonthGoals.length > 0 && (
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div
-                      className={`w-2 h-2 rounded-full ${
-                        isCurrentMonth ? 'bg-primary' : 'bg-muted-foreground'
-                      }`}
-                    ></div>
-                    <span
-                      className={`text-sm font-medium ${
-                        isCurrentMonth
-                          ? 'text-primary'
-                          : 'text-muted-foreground'
-                      }`}
-                    >
-                      {isCurrentMonth
-                        ? `이번 달 목표`
-                        : `${viewingYear}년 ${viewingMonth}월 목표`}
-                    </span>
-                  </div>
-                  {viewingMonthGoals.map(goal => (
-                    <div
-                      key={goal.id}
-                      className={`p-3 border rounded-lg transition-colors ${
-                        isCurrentMonth
-                          ? 'border-primary/20 bg-primary/5 hover:bg-primary/10'
-                          : 'border-border/30 hover:bg-accent/20'
-                      }`}
-                    >
-                      {/* 모바일: 세로 배치, 데스크톱: 가로 배치 */}
-                      <div className="space-y-3 md:space-y-0">
-                        <div className="flex items-center justify-between md:mb-2">
-                          <div className="flex items-center gap-2">
-                            <span className="text-xl">
-                              {getGoalIcon(goal.goalType)}
-                            </span>
-                            <div>
-                              <p className="text-sm font-medium text-foreground">
-                                {goal.title || getGoalTypeLabel(goal.goalType)}
-                              </p>
-                              <p
-                                className={`text-xs flex items-center gap-1 ${
-                                  isCurrentMonth
-                                    ? 'text-primary'
-                                    : 'text-muted-foreground'
-                                }`}
-                              >
-                                <CalendarIcon className="h-3 w-3" />
-                                {isCurrentMonth ? '진행 중' : '완료'}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-sm font-medium text-foreground">
-                              {formatValue(goal.currentValue, goal.goalType)}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              목표:{' '}
-                              {formatValue(goal.targetValue, goal.goalType)}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-muted-foreground">
-                            진행률
-                          </span>
-                          <Badge
-                            variant={
-                              goal.progress >= 80 ? 'default' : 'secondary'
-                            }
-                            className="text-xs"
-                          >
-                            {goal.progress.toFixed(1)}%{' '}
-                            {/* 🎯 초과 달성률도 표시 */}
-                          </Badge>
-                        </div>
-                        <Progress
-                          value={goal.progress} // 🎯 초과 달성률도 표시
-                          className="h-3"
-                        />
-                      </div>
-
-                      {goal.progress >= 100 && (
-                        <div className="flex items-center gap-1 mt-2 text-xs text-green-600">
-                          <TriangleUpIcon className="h-3 w-3" />
-                          <span>
-                            {goal.progress > 100
-                              ? `목표 초과 달성! (+${Math.round(
-                                  goal.progress - 100
-                                )}%)`
-                              : '목표 달성 완료!'}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* 목표 요약 - 현재 월 기준 */}
-              {viewingMonthGoals.length > 0 && (
-                <div className="p-3 bg-muted/30 rounded-lg border border-border/30">
-                  <h4 className="text-sm font-medium text-foreground mb-2 flex items-center gap-1">
-                    📊{' '}
+              {/* 현재 월 목표 표시 */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <div
+                    className={`w-2 h-2 rounded-full ${
+                      isCurrentMonth ? 'bg-primary' : 'bg-muted-foreground'
+                    }`}
+                  ></div>
+                  <span
+                    className={`text-sm font-medium ${
+                      isCurrentMonth ? 'text-primary' : 'text-muted-foreground'
+                    }`}
+                  >
                     {isCurrentMonth
-                      ? '이번 달'
-                      : `${viewingYear}년 ${viewingMonth}월`}{' '}
-                    목표 현황
-                  </h4>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="text-center">
-                      <p className="text-xs text-muted-foreground mb-1">
-                        달성 완료
-                      </p>
-                      <p className="text-lg font-medium text-green-600">
-                        {
-                          viewingMonthGoals.filter(g => g.progress >= 100)
-                            .length
-                        }
-                        개
-                      </p>
+                      ? `이번 달 목표`
+                      : `${viewingYear}년 ${viewingMonth}월 목표`}
+                  </span>
+                </div>
+
+                {viewingMonthGoals.map(goal => (
+                  <div
+                    key={goal.id}
+                    className={`p-3 border rounded-lg transition-colors ${
+                      isCurrentMonth
+                        ? 'border-primary/20 bg-primary/5 hover:bg-primary/10'
+                        : 'border-border/30 hover:bg-accent/20'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl">
+                          {getGoalIcon(goal.goalType)}
+                        </span>
+                        <div>
+                          <p className="text-sm font-medium text-foreground">
+                            {goal.title || getGoalTypeLabel(goal.goalType)}
+                          </p>
+                          <p
+                            className={`text-xs flex items-center gap-1 ${
+                              isCurrentMonth
+                                ? 'text-primary'
+                                : 'text-muted-foreground'
+                            }`}
+                          >
+                            <CalendarIcon className="h-3 w-3" />
+                            {isCurrentMonth ? '진행 중' : '완료'}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-medium text-foreground">
+                          {formatValue(goal.currentValue, goal.goalType)}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          목표: {formatValue(goal.targetValue, goal.goalType)}
+                        </p>
+                      </div>
                     </div>
-                    <div className="text-center">
-                      <p className="text-xs text-muted-foreground mb-1">
-                        {isCurrentMonth ? '진행 중' : '미달성'}
-                      </p>
-                      <p className="text-lg font-medium text-primary">
-                        {viewingMonthGoals.filter(g => g.progress < 100).length}
-                        개
-                      </p>
+
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">
+                          진행률
+                        </span>
+                        <Badge
+                          variant={
+                            goal.progress >= 80 ? 'default' : 'secondary'
+                          }
+                          className="text-xs"
+                        >
+                          {goal.progress.toFixed(1)}%
+                        </Badge>
+                      </div>
+                      <Progress value={goal.progress} className="h-3" />
                     </div>
+
+                    {goal.progress >= 100 && (
+                      <div className="flex items-center gap-1 mt-2 text-xs text-green-600">
+                        <TriangleUpIcon className="h-3 w-3" />
+                        <span>
+                          {goal.progress > 100
+                            ? `목표 초과 달성! (+${Math.round(
+                                goal.progress - 100
+                              )}%)`
+                            : '목표 달성 완료!'}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* 목표 요약 */}
+              <div className="p-3 bg-muted/30 rounded-lg border border-border/30">
+                <h4 className="text-sm font-medium text-foreground mb-2 flex items-center gap-1">
+                  📊{' '}
+                  {isCurrentMonth
+                    ? '이번 달'
+                    : `${viewingYear}년 ${viewingMonth}월`}{' '}
+                  목표 현황
+                </h4>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="text-center">
+                    <p className="text-xs text-muted-foreground mb-1">
+                      달성 완료
+                    </p>
+                    <p className="text-lg font-medium text-green-600">
+                      {viewingMonthGoals.filter(g => g.progress >= 100).length}
+                      개
+                    </p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xs text-muted-foreground mb-1">
+                      {isCurrentMonth ? '진행 중' : '미달성'}
+                    </p>
+                    <p className="text-lg font-medium text-primary">
+                      {viewingMonthGoals.filter(g => g.progress < 100).length}개
+                    </p>
                   </div>
                 </div>
-              )}
+              </div>
             </>
           ) : (
             <div className="text-center py-8 space-y-3">
