@@ -170,8 +170,8 @@ export function AddClientModal({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto scrollbar-none">
-        <DialogHeader>
+      <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle className="flex items-center gap-3 text-xl font-bold">
             <PersonIcon className="h-5 w-5" />새 고객 추가
           </DialogTitle>
@@ -182,8 +182,9 @@ export function AddClientModal({
 
         <Form {...form}>
           <form
+            id="client-form"
             onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-6"
+            className="space-y-6 flex-1 overflow-y-auto overflow-x-hidden scrollbar-none"
           >
             {/* 상태 메시지 표시 */}
             {error && (
@@ -457,29 +458,35 @@ export function AddClientModal({
               </AlertDescription>
             </Alert>
 
-            <DialogFooter className="gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleClose}
-                className="flex-1"
-                disabled={isSubmitting}
-              >
-                취소
-              </Button>
-              <Button type="submit" className="flex-1" disabled={isSubmitting}>
-                {isSubmitting ? (
-                  <>처리 중...</>
-                ) : (
-                  <>
-                    <PlusIcon className="mr-2 h-4 w-4" />
-                    고객 추가하기
-                  </>
-                )}
-              </Button>
-            </DialogFooter>
-          </form>
+            </form>
         </Form>
+        
+        <DialogFooter className="gap-2 flex-shrink-0 pt-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleClose}
+            className="flex-1"
+            disabled={isSubmitting}
+          >
+            취소
+          </Button>
+          <Button 
+            type="submit" 
+            className="flex-1" 
+            disabled={isSubmitting}
+            form="client-form"
+          >
+            {isSubmitting ? (
+              <>처리 중...</>
+            ) : (
+              <>
+                <PlusIcon className="mr-2 h-4 w-4" />
+                고객 추가하기
+              </>
+            )}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

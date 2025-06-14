@@ -333,8 +333,8 @@ export function AddMeetingModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto scrollbar-none">
-        <DialogHeader className="space-y-1 pb-4">
+      <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
+        <DialogHeader className="space-y-1 pb-4 flex-shrink-0">
           <DialogTitle className="flex items-center gap-2 text-xl font-bold">
             <CalendarIcon className="h-5 w-5 text-primary" />새 미팅 예약
           </DialogTitle>
@@ -345,8 +345,9 @@ export function AddMeetingModal({
 
         <Form {...form}>
           <form
+            id="meeting-form"
             onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-3"
+            className="space-y-3 flex-1 overflow-y-auto overflow-x-hidden scrollbar-none"
           >
             {/* 🚨 고객 없는 경우 안내 */}
             {clients.length === 0 && (
@@ -978,27 +979,29 @@ export function AddMeetingModal({
               </Alert>
             )}
 
-            {/* 버튼 영역 */}
-            <DialogFooter className="gap-2 pt-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleClose}
-                className="flex-1"
-              >
-                취소
-              </Button>
-              <Button
-                type="submit"
-                disabled={clients.length === 0}
-                className="flex-1"
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                미팅 예약하기
-              </Button>
-            </DialogFooter>
           </form>
         </Form>
+        
+        {/* 버튼 영역 */}
+        <DialogFooter className="gap-2 pt-4 flex-shrink-0">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleClose}
+            className="flex-1"
+          >
+            취소
+          </Button>
+          <Button
+            type="submit"
+            disabled={clients.length === 0}
+            className="flex-1"
+            form="meeting-form"
+          >
+            <CalendarIcon className="mr-2 h-4 w-4" />
+            미팅 예약하기
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
