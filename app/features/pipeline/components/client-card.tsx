@@ -241,7 +241,7 @@ export function ClientCard({
   return (
     <div className="relative">
       <Card
-        className={`mb-4 relative group transition-all duration-200 select-none ${
+        className={`mb-4 relative group transition-all duration-200 select-none gap-2 ${
           styles.bgGradient
         } ${styles.borderClass} ${
           isDragging
@@ -254,7 +254,7 @@ export function ClientCard({
           <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"></div>
         )}
 
-        <CardHeader className="pb-0">
+        <CardHeader className="pb-1">
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1 min-w-0">
               {/* 🏷️ 이름 (텍스트 오버플로우 수정) */}
@@ -296,7 +296,7 @@ export function ClientCard({
           )}
         </CardHeader>
 
-        <CardContent className="pt-0 space-y-4">
+        <CardContent className="pt-1 space-y-3">
           {/* 💰 예상 수익 정보 */}
           <div className="grid grid-cols-2 gap-3">
             <div

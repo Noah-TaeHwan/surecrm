@@ -13,6 +13,9 @@ import type {
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 
+// 반응형 감지 훅 추가
+import { useDeviceDetection } from '~/hooks/use-device-detection';
+
 import { ClientStatsSection } from '../components/client-stats-section';
 import { ClientFiltersSection } from '../components/client-filters-section';
 import { ClientListSection } from '../components/client-list-section';
@@ -464,6 +467,9 @@ export default function ClientsPage({ loaderData }: any) {
   const fetcher = useFetcher();
   const navigate = useNavigate();
 
+  // 🎯 반응형 감지
+  const { isMobile, isDesktop } = useDeviceDetection();
+
   // 🎯 상태 관리
   const [searchQuery, setSearchQuery] = useState('');
   const [filterImportance, setFilterImportance] = useState<
@@ -472,7 +478,25 @@ export default function ClientsPage({ loaderData }: any) {
   const [filterStage, setFilterStage] = useState<string>('all');
   const [filterReferralStatus, setFilterReferralStatus] =
     useState<string>('all');
-  const [viewMode, setViewMode] = useState<'cards' | 'table'>('table');
+
+  // 🎯 반응형 뷰모드: 자동 감지 + 사용자 override 옵션
+  const [userViewModeOverride, setUserViewModeOverride] = useState<
+    'cards' | 'table' | null
+  >(null);
+
+  // 자동 뷰모드 계산: 모바일은 카드, 데스크톱은 테이블
+  const autoViewMode: 'cards' | 'table' = isMobile ? 'cards' : 'table';
+
+  // 최종 뷰모드: 사용자 override가 있으면 그것을 사용, 없으면 자동 감지 결과 사용
+  const viewMode = userViewModeOverride || autoViewMode;
+
+  // 🎯 화면 크기 변경 시 사용자 override 초기화 (선택적)
+  useEffect(() => {
+    // 화면 크기가 변경되면 override를 초기화하여 자동 감지가 다시 작동하도록 함
+    // 이는 사용자가 기기를 회전하거나 창 크기를 조절했을 때 적절한 뷰로 자동 전환
+    setUserViewModeOverride(null);
+  }, [isMobile]);
+
   const [showFilters, setShowFilters] = useState(false);
   const [sortBy, setSortBy] = useState<
     'name' | 'stage' | 'importance' | 'premium' | 'lastContact' | 'createdAt'
@@ -966,8 +990,6 @@ export default function ClientsPage({ loaderData }: any) {
         setFilterStage={setFilterStage}
         filterReferralStatus={filterReferralStatus}
         setFilterReferralStatus={setFilterReferralStatus}
-        viewMode={viewMode}
-        setViewMode={setViewMode}
         showFilters={showFilters}
         setShowFilters={setShowFilters}
         filteredClientsCount={filteredClients.length}
@@ -976,7 +998,6 @@ export default function ClientsPage({ loaderData }: any) {
       {/* 🎯 고객 목록 */}
       <ClientListSection
         filteredClients={sortedClients}
-        viewMode={viewMode}
         onClientRowClick={handleClientRowClick}
         onAddClient={handleAddClient}
       />

@@ -79,35 +79,16 @@ function isTouchDevice(): boolean {
  * ```
  */
 export function useDeviceDetection(): DeviceState {
-  const [deviceState, setDeviceState] = useState<DeviceState>(() => {
-    // SSR 환경에서 안전한 기본값
-    if (typeof window === 'undefined') {
-      return {
-        deviceType: 'desktop',
-        screenWidth: 1280,
-        screenHeight: 720,
-        isMobile: false,
-        isTablet: false,
-        isDesktop: true,
-        orientation: 'landscape',
-        isTouch: false,
-      };
-    }
-
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    const deviceType = getDeviceType(width);
-
-    return {
-      deviceType,
-      screenWidth: width,
-      screenHeight: height,
-      isMobile: deviceType === 'mobile',
-      isTablet: deviceType === 'tablet',
-      isDesktop: deviceType === 'desktop',
-      orientation: width > height ? 'landscape' : 'portrait',
-      isTouch: isTouchDevice(),
-    };
+  // SSR 안전성을 위해 항상 동일한 기본값으로 시작
+  const [deviceState, setDeviceState] = useState<DeviceState>({
+    deviceType: 'desktop',
+    screenWidth: 1280,
+    screenHeight: 720,
+    isMobile: false,
+    isTablet: false,
+    isDesktop: true,
+    orientation: 'landscape',
+    isTouch: false,
   });
 
   useEffect(() => {

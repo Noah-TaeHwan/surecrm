@@ -281,7 +281,7 @@ export function Header({
               <span className="sr-only">알림</span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-80 md:w-96 p-0" align="end">
+          <DropdownMenuContent className="w-80 md:w-96 p-0 " align="end">
             <DropdownMenuLabel className="flex items-center justify-between py-3 px-4 border-b border-border/50">
               <span className="font-semibold text-base">알림</span>
               {unreadCount > 0 && (

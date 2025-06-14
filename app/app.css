@@ -1358,8 +1358,37 @@ input[type='password'],
 input[type='search'],
 input[type='tel'],
 input[type='url'],
-textarea {
+input[type='number'],
+textarea,
+select {
   cursor: text !important;
+  font-size: 14px !important; /* 모바일 인풋 폰트 사이즈 축소 */
+}
+
+/* 플레이스홀더 폰트 사이즈도 동일하게 조정 */
+input::placeholder,
+textarea::placeholder {
+  font-size: 14px !important;
+}
+
+/* 데스크톱에서는 더 작게 */
+@media (min-width: 768px) {
+  input[type='text'],
+  input[type='email'],
+  input[type='password'],
+  input[type='search'],
+  input[type='tel'],
+  input[type='url'],
+  input[type='number'],
+  textarea,
+  select {
+    font-size: 13px !important;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    font-size: 13px !important;
+  }
 }
 
 /* 추가 커서 유틸리티 */

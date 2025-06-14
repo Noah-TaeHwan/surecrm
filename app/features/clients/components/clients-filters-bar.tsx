@@ -23,7 +23,6 @@ import {
 import {
   PlusIcon,
   MagnifyingGlassIcon,
-  DownloadIcon,
   MixerVerticalIcon,
   ArrowUpIcon,
   ArrowDownIcon,
@@ -101,30 +100,38 @@ export function ClientsFiltersBar({
   };
 
   return (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 bg-background border rounded-lg">
-      {/* 왼쪽: 검색 및 필터 */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 flex-1">
-        {/* 검색 */}
-        <div className="flex items-center gap-2 min-w-0 flex-1 max-w-md">
-          <div className="relative flex-1">
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="이름, 전화번호, 이메일로 검색..."
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleSearch()}
-              className="pl-10"
-            />
-          </div>
-          <Button onClick={handleSearch} size="sm">
-            검색
-          </Button>
+    <div className="p-4 bg-background border rounded-lg space-y-4">
+      {/* 상단: 검색 */}
+      <div className="flex items-center gap-2">
+        <div className="relative flex-1">
+          <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="이름, 전화번호, 이메일로 검색..."
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleSearch()}
+            className="pl-10 h-10 py-2 text-sm"
+          />
         </div>
+        <Button
+          onClick={handleSearch}
+          size="sm"
+          className="h-10 py-2 text-sm flex-shrink-0"
+        >
+          검색
+        </Button>
+      </div>
 
+      {/* 중단: 필터 및 정렬 */}
+      <div className="flex flex-wrap items-center gap-2">
         {/* 필터 드롭다운 */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2 h-10 py-2 text-sm"
+            >
               <MixerVerticalIcon className="h-4 w-4" />
               필터
             </Button>
@@ -176,7 +183,11 @@ export function ClientsFiltersBar({
         {/* 정렬 드롭다운 */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2 h-10 py-2 text-sm"
+            >
               <MixerHorizontalIcon className="h-4 w-4" />
               정렬
               {sortOrder === 'asc' ? (
@@ -208,20 +219,9 @@ export function ClientsFiltersBar({
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-      </div>
-
-      {/* 오른쪽: 통계 및 액션 */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-        {/* 통계 표시 */}
-        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-          <span>전체 {totalCount.toLocaleString()}명</span>
-          {selectedCount > 0 && (
-            <Badge variant="secondary">{selectedCount}명 선택</Badge>
-          )}
-        </div>
 
         {/* 민감정보 표시 토글 */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 h-10">
           <Label htmlFor="show-confidential" className="text-sm">
             민감정보 표시
           </Label>
@@ -236,30 +236,21 @@ export function ClientsFiltersBar({
             <EyeClosedIcon className="h-4 w-4 text-muted-foreground" />
           )}
         </div>
+      </div>
+
+      {/* 하단: 통계 및 액션 */}
+      <div className="flex items-center justify-between">
+        {/* 통계 표시 */}
+        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+          <span>전체 {totalCount.toLocaleString()}명</span>
+          {selectedCount > 0 && (
+            <Badge variant="secondary">{selectedCount}명 선택</Badge>
+          )}
+        </div>
 
         {/* 액션 버튼들 */}
         <div className="flex items-center gap-2">
-          {selectedCount > 0 && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm">
-                  일괄 작업
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem>
-                  <DownloadIcon className="mr-2 h-4 w-4" />
-                  내보내기
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-red-600">
-                  삭제
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
-
-          <Button onClick={onAddClick} className="gap-2">
+          <Button onClick={onAddClick} className="gap-2 h-10 py-2 text-sm">
             <PlusIcon className="h-4 w-4" />
             고객 추가
           </Button>
