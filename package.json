@@ -22,6 +22,7 @@
     "version:patch": "npm version patch && git push origin master --tags",
     "version:minor": "npm version minor && git push origin master --tags",
     "version:major": "npm version major && git push origin master --tags",
+    "deploy": "npm run version:patch",
     "version:info": "tsx scripts/utils/version-info.ts",
     "setup:hooks": "tsx scripts/utils/setup-hooks.ts"
   },
