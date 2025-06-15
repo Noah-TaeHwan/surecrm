@@ -1,6 +1,91 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
+/* =================================================================
+   TAILWIND CSS V4 CONFIGURATION
+   ================================================================= */
+
+@theme {
+  /* Container Queries Breakpoints */
+  --container-3xs: 16rem;  /* 256px */
+  --container-2xs: 18rem;  /* 288px */
+  --container-xs: 20rem;   /* 320px */
+  --container-sm: 24rem;   /* 384px */
+  --container-md: 28rem;   /* 448px */
+  --container-lg: 32rem;   /* 512px */
+  --container-xl: 36rem;   /* 576px */
+  --container-2xl: 42rem;  /* 672px */
+  --container-3xl: 48rem;  /* 768px */
+  --container-4xl: 56rem;  /* 896px */
+  --container-5xl: 64rem;  /* 1024px */
+  --container-6xl: 72rem;  /* 1152px */
+  --container-7xl: 80rem;  /* 1280px */
+
+  /* Custom Animations */
+  --animate-marquee: marquee var(--duration) linear infinite;
+  --animate-marquee-reverse: marquee-reverse var(--duration) linear infinite;
+  --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
+  --animate-marquee-vertical-reverse: marquee-vertical-reverse var(--duration) linear infinite;
+  --animate-shimmer: shimmer 2s infinite;
+  --animate-ping: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+  --animate-grid: grid 15s linear infinite;
+  --animate-pulse: pulse 3s ease-in-out infinite;
+  --animate-border-beam: border-beam 2s linear infinite;
+
+  /* Custom Background Images */
+  --bg-gradient-radial: radial-gradient(var(--tw-gradient-stops));
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(calc(-100% - var(--gap))); }
+}
+
+@keyframes marquee-reverse {
+  from { transform: translateX(calc(-100% - var(--gap))); }
+  to { transform: translateX(0); }
+}
+
+@keyframes marquee-vertical {
+  from { transform: translateY(0); }
+  to { transform: translateY(calc(-100% - var(--gap))); }
+}
+
+@keyframes marquee-vertical-reverse {
+  from { transform: translateY(calc(-100% - var(--gap))); }
+  to { transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes ping {
+  0% { transform: scale(1); opacity: 0.8; }
+  75%, 100% { transform: scale(1.5); opacity: 0; }
+}
+
+@keyframes grid {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(calc(var(--cell-size) * 2)); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 0.8; }
+}
+
+@keyframes border-beam {
+  0% { transform: rotate(0deg); opacity: 0.3; }
+  50% { opacity: 1; }
+  100% { transform: rotate(360deg); opacity: 0.3; }
+}
+
+/* =================================================================
+   ENHANCED SCROLLBAR STYLING - Critical CSS
+   ================================================================= */
+
 /* 🚀 ENHANCED SCROLLBAR STYLING - Critical CSS 보완 */
 /* Firefox */
 * {
