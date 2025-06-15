@@ -6,6 +6,14 @@
    ================================================================= */
 
 @theme {
+  /* Mobile-First Responsive Breakpoints */
+  --breakpoint-xs: 20rem;    /* 320px - Small mobile */
+  --breakpoint-sm: 24rem;    /* 384px - Large mobile */
+  --breakpoint-md: 48rem;    /* 768px - Tablet */
+  --breakpoint-lg: 64rem;    /* 1024px - Desktop */
+  --breakpoint-xl: 80rem;    /* 1280px - Large desktop */
+  --breakpoint-2xl: 96rem;   /* 1536px - Extra large */
+
   /* Container Queries Breakpoints */
   --container-3xs: 16rem;  /* 256px */
   --container-2xs: 18rem;  /* 288px */
@@ -34,6 +42,23 @@
 
   /* Custom Background Images */
   --bg-gradient-radial: radial-gradient(var(--tw-gradient-stops));
+
+  /* Mobile-First Spacing Scale */
+  --spacing-safe-top: env(safe-area-inset-top);
+  --spacing-safe-bottom: env(safe-area-inset-bottom);
+  --spacing-safe-left: env(safe-area-inset-left);
+  --spacing-safe-right: env(safe-area-inset-right);
+
+  /* Touch Target Sizes (iOS/Android Guidelines) */
+  --size-touch-target: 44px;     /* iOS minimum */
+  --size-touch-target-android: 48px; /* Android minimum */
+  
+  /* Mobile Typography Scale */
+  --font-size-mobile-xs: 0.75rem;   /* 12px */
+  --font-size-mobile-sm: 0.875rem;  /* 14px */
+  --font-size-mobile-base: 1rem;    /* 16px */
+  --font-size-mobile-lg: 1.125rem;  /* 18px */
+  --font-size-mobile-xl: 1.25rem;   /* 20px */
 }
 
 @keyframes marquee {
@@ -80,6 +105,48 @@
   0% { transform: rotate(0deg); opacity: 0.3; }
   50% { opacity: 1; }
   100% { transform: rotate(360deg); opacity: 0.3; }
+}
+
+/* =================================================================
+   MOBILE-FIRST RESPONSIVE UTILITIES
+   ================================================================= */
+
+/* Safe Area Utilities for iOS/Android */
+.pt-safe { padding-top: var(--spacing-safe-top); }
+.pb-safe { padding-bottom: var(--spacing-safe-bottom); }
+.pl-safe { padding-left: var(--spacing-safe-left); }
+.pr-safe { padding-right: var(--spacing-safe-right); }
+.p-safe { 
+  padding-top: var(--spacing-safe-top);
+  padding-bottom: var(--spacing-safe-bottom);
+  padding-left: var(--spacing-safe-left);
+  padding-right: var(--spacing-safe-right);
+}
+
+/* Touch Target Utilities */
+.touch-target { 
+  min-height: var(--size-touch-target);
+  min-width: var(--size-touch-target);
+}
+.touch-target-android { 
+  min-height: var(--size-touch-target-android);
+  min-width: var(--size-touch-target-android);
+}
+
+/* Mobile Typography */
+.text-mobile-xs { font-size: var(--font-size-mobile-xs); }
+.text-mobile-sm { font-size: var(--font-size-mobile-sm); }
+.text-mobile-base { font-size: var(--font-size-mobile-base); }
+.text-mobile-lg { font-size: var(--font-size-mobile-lg); }
+.text-mobile-xl { font-size: var(--font-size-mobile-xl); }
+
+/* Mobile-Optimized Interactions */
+.tap-highlight-none { -webkit-tap-highlight-color: transparent; }
+.touch-manipulation { touch-action: manipulation; }
+.select-none-mobile { 
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
 }
 
 /* =================================================================
