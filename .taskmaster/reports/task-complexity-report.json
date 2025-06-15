@@ -1,0 +1,93 @@
+{
+	"meta": {
+		"generatedAt": "2025-06-15T04:32:55.448Z",
+		"tasksAnalyzed": 10,
+		"totalTasks": 10,
+		"analysisCount": 10,
+		"thresholdScore": 5,
+		"projectName": "Taskmaster",
+		"usedResearch": true
+	},
+	"complexityAnalysis": [
+		{
+			"taskId": 1,
+			"taskTitle": "Tailwind CSS v4 Migration and Container Queries Setup",
+			"complexityScore": 8,
+			"recommendedSubtasks": 8,
+			"expansionPrompt": "Break down the migration and setup into subtasks such as: upgrading dependencies, updating configuration files, refactoring class names for container queries, configuring custom breakpoints, implementing intrinsic grid patterns, setting up CSS custom properties, updating Tailwind config for new utilities, and cross-browser testing.",
+			"reasoning": "Migrating to Tailwind CSS v4 involves significant changes, including a new CSS-first configuration, updated class naming for container queries, and potential manual adjustments for complex projects. The process also requires thorough testing across browsers and refactoring for new responsive patterns, making it a high-complexity task that benefits from granular subtasks for each migration and setup step.[1][3][4][5]"
+		},
+		{
+			"taskId": 2,
+			"taskTitle": "PWA Foundation and Service Worker Implementation",
+			"complexityScore": 9,
+			"recommendedSubtasks": 9,
+			"expansionPrompt": "Expand into subtasks such as: installing Workbox, configuring the service worker, creating the web app manifest, implementing caching strategies, setting up offline fallback, configuring push notifications, enabling app install prompts, implementing background sync, and setting up Core Web Vitals monitoring.",
+			"reasoning": "Setting up a robust PWA foundation with advanced service worker features, offline support, push notifications, and performance monitoring is a multifaceted task. Each aspect (manifest, caching, offline, notifications, install prompts, background sync, monitoring) requires specialized implementation and testing, justifying a high complexity and a detailed subtask breakdown."
+		},
+		{
+			"taskId": 3,
+			"taskTitle": "Touch Gesture Engine and Multi-touch System",
+			"complexityScore": 9,
+			"recommendedSubtasks": 9,
+			"expansionPrompt": "Decompose into subtasks such as: designing the TouchGestureManager, implementing pinch zoom, adding swipe detection, long-press logic, optimizing touch targets, integrating haptic feedback, resolving gesture conflicts, creating feedback animations, and building gesture debugging tools.",
+			"reasoning": "A comprehensive touch gesture system with multi-touch support, haptic feedback, conflict resolution, and developer tooling is highly complex. Each gesture type and system feature requires careful design, implementation, and testing, warranting a high complexity score and a subtask for each major feature."
+		},
+		{
+			"taskId": 4,
+			"taskTitle": "Mobile-Optimized ShadCN UI Component Library Extension",
+			"complexityScore": 8,
+			"recommendedSubtasks": 9,
+			"expansionPrompt": "Expand into subtasks for each component and feature: BottomSheet, TouchSelector, SwipeActionList, mobile modal system, FloatingActionButton, touch-friendly forms, mobile navigation, dark mode, and high contrast mode.",
+			"reasoning": "Extending a UI library for mobile-first patterns involves building several complex, interactive components and accessibility features. Each component (e.g., bottom sheets, swipe actions, navigation) is a substantial task, and accessibility/dark mode adds further complexity."
+		},
+		{
+			"taskId": 5,
+			"taskTitle": "Responsive Navigation System Implementation",
+			"complexityScore": 8,
+			"recommendedSubtasks": 9,
+			"expansionPrompt": "Break down into subtasks for: ResponsiveNavigation component, BottomTabNavigation, SidebarNavigation, FloatingActionButton, breadcrumb navigation, thumb-zone optimization, smart prediction, keyboard navigation, and navigation state management.",
+			"reasoning": "Building a hybrid navigation system that adapts to device type, supports accessibility, and includes predictive and stateful features is complex. Each navigation pattern and feature (e.g., thumb-zone, keyboard support) merits its own subtask."
+		},
+		{
+			"taskId": 6,
+			"taskTitle": "Mobile-Optimized Dashboard with Adaptive Widgets",
+			"complexityScore": 9,
+			"recommendedSubtasks": 9,
+			"expansionPrompt": "Expand into subtasks for: adaptive grid implementation, KPI widgets, progressive disclosure, context-aware UI, skeleton loading, widget customization, real-time updates, mobile chart components, and voice input support.",
+			"reasoning": "Redesigning a dashboard for mobile with adaptive widgets, touch interactions, real-time updates, and voice input is highly complex. Each feature (adaptive grid, charts, customization, context-awareness) is a significant engineering effort."
+		},
+		{
+			"taskId": 7,
+			"taskTitle": "Touch-Optimized Network Visualization Graph",
+			"complexityScore": 9,
+			"recommendedSubtasks": 10,
+			"expansionPrompt": "Decompose into subtasks for: D3.js touch optimization, pinch zoom, pan gestures, tap-to-select, long-press context menu, bottom sheet for node details, force simulation tuning, layout persistence, presentation mode, and accessibility features.",
+			"reasoning": "Rebuilding a network graph for mobile touch optimization with advanced gestures, accessibility, and presentation features is a highly complex, multidisciplinary task. Each feature requires careful design and testing, justifying a subtask for each."
+		},
+		{
+			"taskId": 8,
+			"taskTitle": "Mobile-First Pipeline Kanban with Swipe Actions",
+			"complexityScore": 9,
+			"recommendedSubtasks": 10,
+			"expansionPrompt": "Expand into subtasks for: swipe-to-move cards, mobile card layout, drag-and-drop, stage change confirmation, mobile pipeline view, quick action buttons, card filtering/search, batch operations, pipeline analytics, and offline support.",
+			"reasoning": "A mobile-first kanban with advanced touch gestures, analytics, offline support, and batch operations is highly complex. Each feature is substantial and benefits from being a separate subtask."
+		},
+		{
+			"taskId": 9,
+			"taskTitle": "Performance Optimization and Bundle Management",
+			"complexityScore": 10,
+			"recommendedSubtasks": 10,
+			"expansionPrompt": "Break down into subtasks for: route-based code splitting, bundle size optimization, tree shaking, dynamic imports, image optimization, lazy loading, resource hints, critical CSS inlining, service worker caching, and performance monitoring setup.",
+			"reasoning": "Achieving aggressive performance targets across a large app with code splitting, tree shaking, image optimization, and advanced caching is extremely complex. Each optimization area is a specialized task requiring careful implementation and validation."
+		},
+		{
+			"taskId": 10,
+			"taskTitle": "Accessibility Implementation and WCAG 2.1 AA Compliance",
+			"complexityScore": 9,
+			"recommendedSubtasks": 11,
+			"expansionPrompt": "Expand into subtasks for: keyboard navigation, ARIA labels/live regions, color contrast, high contrast theme, focus management, skip links, screen reader announcements, voice input, keyboard shortcuts, accessibility testing/documentation, and error handling.",
+			"reasoning": "Comprehensive accessibility implementation for WCAG 2.1 AA compliance is highly complex, requiring attention to many details across the app. Each requirement (navigation, ARIA, contrast, testing) is a significant effort and should be a distinct subtask."
+		}
+	]
+}
