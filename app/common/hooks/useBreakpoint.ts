@@ -11,7 +11,7 @@ export interface BreakpointInfo {
 }
 
 // Tailwind CSS breakpoint values (from our configuration)
-const BREAKPOINTS = {
+export const BREAKPOINTS = {
   xs: 0,      // Default for very small screens
   sm: 640,    // Mobile landscape (40rem)
   md: 768,    // Tablet portrait (48rem)  
@@ -34,11 +34,7 @@ class BreakpointStore {
   }
 
   private handleResize = () => {
-    const newBreakpointInfo = this.createBreakpointInfo();
-    if (newBreakpointInfo.current !== this.currentSnapshot.current) {
-      this.currentSnapshot = newBreakpointInfo;
-      this.listeners.forEach((listener) => listener());
-    }
+    this.forceUpdate();
   };
 
   private getCurrentBreakpoint(): BreakpointName {
@@ -111,6 +107,13 @@ class BreakpointStore {
     };
   };
 
+  // 🔧 테스트 환경용: 강제 업데이트 메서드 추가
+  public forceUpdate = (): void => {
+    const newBreakpointInfo = this.createBreakpointInfo();
+    this.currentSnapshot = newBreakpointInfo;
+    this.listeners.forEach((listener) => listener());
+  };
+
   public destroy() {
     if (typeof window !== 'undefined') {
       window.removeEventListener('resize', this.handleResize);
@@ -159,8 +162,8 @@ export const useBreakpoint = (): BreakpointInfo => {
   );
 };
 
-// Export breakpoint constants and store for testing
-export { BREAKPOINTS, breakpointStore };
+// Export store for testing  
+export { breakpointStore };
 
 // Cleanup function
 export const destroyBreakpointStore = () => {

@@ -1,5 +1,4 @@
 import { useSyncExternalStore } from 'react';
-import { useViewport } from './useViewport';
 
 export type DeviceType = 'mobile' | 'tablet' | 'desktop';
 
@@ -31,24 +30,33 @@ class DeviceTypeStore {
     }
 
     const width = window.innerWidth;
-    const userAgent = navigator.userAgent;
 
-    // First check viewport width (most reliable)
+    // Check User Agent first for device identification
+    if (typeof navigator !== 'undefined') {
+      const userAgent = navigator.userAgent;
+      
+      // Specific tablet detection (iPad and Android tablets)
+      const isTablet = /iPad/i.test(userAgent) || 
+                       /Android(?=.*tablet)/i.test(userAgent) ||
+                       /Kindle|Silk|Playbook/i.test(userAgent);
+
+      if (isTablet) {
+        return 'tablet';
+      }
+
+      // Mobile device detection (phones)
+      const isMobileDevice = /iPhone|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+      
+      if (isMobileDevice) {
+        return 'mobile';
+      }
+    }
+
+    // Fallback to viewport width-based detection for desktop browsers
     if (width < 768) {
       return 'mobile';
     } else if (width < 1024) {
       return 'tablet';
-    }
-
-    // Secondary check: User Agent for more precise detection
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
-    const isTablet = /iPad|Android(?=.*tablet)|Kindle|Silk|Playbook/i.test(userAgent) || 
-                     (isMobile && width >= 768);
-
-    if (isTablet) {
-      return 'tablet';
-    } else if (isMobile) {
-      return 'mobile';
     }
 
     return 'desktop';
@@ -75,6 +83,15 @@ class DeviceTypeStore {
       window.removeEventListener('resize', this.handleResize);
     }
     this.listeners.clear();
+  }
+
+  // Method to force recalculation (for testing)
+  public forceUpdate() {
+    const newDeviceType = this.detectDeviceType();
+    if (newDeviceType !== this.currentSnapshot) {
+      this.currentSnapshot = newDeviceType;
+      this.listeners.forEach((listener) => listener());
+    }
   }
 }
 

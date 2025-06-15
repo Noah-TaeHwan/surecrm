@@ -55,29 +55,39 @@ class TouchDeviceStore {
       };
     }
 
-    // Detect touch support
-    const hasTouch = 'ontouchstart' in window ||
-                     navigator.maxTouchPoints > 0 ||
-                     // @ts-ignore - DocumentTouch is for legacy browser support
-                     (window.DocumentTouch && document instanceof window.DocumentTouch);
+    // Detect touch support with safe defaults
+    const hasOntouchstart = 'ontouchstart' in window;
+    const hasMaxTouchPoints = navigator && navigator.maxTouchPoints > 0;
+    
+    // DocumentTouch detection (legacy) - safer approach
+    let hasDocumentTouch = false;
+    try {
+      // @ts-ignore - DocumentTouch is for legacy browser support
+      hasDocumentTouch = !!(window.DocumentTouch && document && document instanceof window.DocumentTouch);
+    } catch (error) {
+      // Ignore errors in DocumentTouch detection
+      hasDocumentTouch = false;
+    }
 
-    const maxTouchPoints = navigator.maxTouchPoints || 0;
+    const hasTouch = hasOntouchstart || hasMaxTouchPoints || hasDocumentTouch;
 
-    // Media queries for pointer capabilities
-    const supportsCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
-    const supportsFinePointer = window.matchMedia('(pointer: fine)').matches;
-    const isHoverCapable = window.matchMedia('(hover: hover)').matches;
+    const maxTouchPoints = (navigator && navigator.maxTouchPoints) || 0;
+
+    // Media queries for pointer capabilities with safe defaults
+    const supportsCoarsePointer = !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+    const supportsFinePointer = !!(window.matchMedia && window.matchMedia('(pointer: fine)').matches);
+    const isHoverCapable = !!(window.matchMedia && window.matchMedia('(hover: hover)').matches);
 
     // Determine if touch is the primary input method
     const isPrimaryTouch = supportsCoarsePointer && !supportsFinePointer;
 
     return {
-      hasTouch,
-      maxTouchPoints,
-      supportsCoarsePointer,
-      supportsFinePointer,
-      isHoverCapable,
-      isPrimaryTouch,
+      hasTouch: !!hasTouch,
+      maxTouchPoints: Number(maxTouchPoints) || 0,
+      supportsCoarsePointer: !!supportsCoarsePointer,
+      supportsFinePointer: !!supportsFinePointer,
+      isHoverCapable: !!isHoverCapable,
+      isPrimaryTouch: !!isPrimaryTouch,
     };
   }
 
@@ -103,6 +113,17 @@ class TouchDeviceStore {
     return () => {
       this.listeners.delete(listener);
     };
+  };
+
+  // 🔧 테스트 전용 메서드: 강제 업데이트
+  public forceUpdate = (): void => {
+    this.currentSnapshot = this.detectTouchCapabilities();
+    this.listeners.forEach((listener) => listener());
+  };
+
+  // 🔧 테스트 전용 메서드: 수동 감지 실행
+  public detectCapabilities = (): TouchCapabilities => {
+    return this.detectTouchCapabilities();
   };
 
   public destroy() {
@@ -165,8 +186,8 @@ export const useIsTouchPrimary = (): boolean => {
   return isPrimaryTouch;
 };
 
-// Export store for testing
-export { touchDeviceStore };
+// Export store and class for testing
+export { touchDeviceStore, TouchDeviceStore };
 
 // Cleanup function
 export const destroyTouchDeviceStore = () => {
