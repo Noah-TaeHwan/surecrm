@@ -23,23 +23,25 @@ interface ThemeProviderProps {
 
 export function ThemeProvider({
   children,
-  initialDarkMode = false,
+  initialDarkMode = true,
 }: ThemeProviderProps) {
-  const [isDarkMode, setIsDarkMode] = useState(initialDarkMode);
+  const [isDarkMode, setIsDarkMode] = useState(true); // 기본값 다크모드
 
   useEffect(() => {
     // 초기 로드 시 사용자의 다크모드 설정 적용
     if (typeof window !== 'undefined') {
       const savedTheme = localStorage.getItem('surecrm-theme');
-      if (savedTheme) {
-        const isDark = savedTheme === 'dark';
-        setIsDarkMode(isDark);
-        updateDocumentClass(isDark);
-      } else if (initialDarkMode !== false) {
-        // 서버에서 가져온 설정이 있는 경우
-        setIsDarkMode(initialDarkMode);
-        updateDocumentClass(initialDarkMode);
-      }
+      // 강제로 다크모드 기본값 적용 (테스트용)
+      console.log('🌙 현재 저장된 테마:', savedTheme);
+      
+      // 임시: 무조건 다크모드로 설정
+      const isDark = true; // savedTheme ? savedTheme === 'dark' : true;
+      setIsDarkMode(isDark);
+      updateDocumentClass(isDark);
+      
+      // 로컬스토리지도 다크모드로 업데이트
+      localStorage.setItem('surecrm-theme', 'dark');
+      console.log('🌙 테마를 다크모드로 강제 설정');
     }
   }, [initialDarkMode]);
 
