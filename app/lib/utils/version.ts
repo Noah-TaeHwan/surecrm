@@ -24,7 +24,9 @@ export function getVersionInfo(): VersionInfo {
   // 빌드 시 환경변수로 주입될 Git 정보
   const gitTag = process.env.REACT_APP_GIT_TAG || process.env.VITE_GIT_TAG;
   const commitHash =
-    process.env.REACT_APP_GIT_COMMIT || process.env.VITE_GIT_COMMIT;
+    process.env.REACT_APP_GIT_COMMIT || 
+    process.env.VITE_GIT_COMMIT || 
+    process.env.VERCEL_GIT_COMMIT_SHA; // Vercel 자동 환경변수
 
   // 🔧 항상 package.json 버전을 기준으로 사용하여 동기화
   const version = baseVersion;
@@ -42,10 +44,22 @@ export function getVersionInfo(): VersionInfo {
  * 현재 환경을 판단합니다 (SSR 안전)
  */
 function getEnvironment(): 'development' | 'production' | 'staging' {
-  // 🔧 빌드 환경과 호스트명 기반으로 정확한 환경 판단
+  // 🔧 Vercel 환경변수 기반 판단 (가장 정확)
+  if (process.env.VERCEL_ENV) {
+    switch (process.env.VERCEL_ENV) {
+      case 'development':
+        return 'development';
+      case 'preview':
+        return 'staging';
+      case 'production':
+        return 'production';
+    }
+  }
+
+  // 빌드 환경 기반 판단
   const buildEnv = process.env.NODE_ENV;
 
-  // 서버사이드에서는 빌드 환경만 사용
+  // 서버사이드에서는 빌드 환경 사용
   if (typeof window === 'undefined') {
     return buildEnv === 'production' ? 'production' : 'development';
   }
@@ -58,7 +72,7 @@ function getEnvironment(): 'development' | 'production' | 'staging' {
     return 'development';
   }
 
-  // Vercel 배포 환경
+  // Vercel 배포 환경 (preview 브랜치)
   if (hostname.includes('vercel.app')) {
     return 'staging';
   }
