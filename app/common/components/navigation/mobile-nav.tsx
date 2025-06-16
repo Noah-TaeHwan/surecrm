@@ -134,8 +134,8 @@ const MobileNavItem = memo(function MobileNavItem({
         onClick={handleClick}
         onKeyDown={handleKeyDown}
         className={cn(
-          // Base styles - 터치 친화적 디자인 (WCAG 2.5.5 AAA) - 콤팩트하게 수정
-          'group flex items-center justify-between w-full min-h-[44px] px-3 py-2 rounded-lg text-left',
+          // Base styles - 터치 친화적 디자인 (WCAG 2.5.5 AAA) - 균형잡힌 레이아웃
+          'group flex items-center justify-between w-full min-h-[40px] px-3 py-2.5 rounded-lg text-left',
           'transition-all duration-200 ease-out',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
           // Active state styles
@@ -149,11 +149,11 @@ const MobileNavItem = memo(function MobileNavItem({
         aria-current={isActive ? 'page' : undefined}
         tabIndex={0}
       >
-        <div className="flex items-center gap-3">
-          {/* Icon with animation - 더 작게 */}
+        <div className="flex items-center gap-2.5">
+          {/* Icon with animation - 크기 최적화 및 정렬 개선 */}
           <motion.div
             className={cn(
-              'flex items-center justify-center w-8 h-8 rounded-md transition-colors duration-200',
+              'flex items-center justify-center w-6 h-6 rounded-md transition-colors duration-200 flex-shrink-0',
               isActive
                 ? 'bg-primary/20 text-primary'
                 : 'bg-muted/60 text-muted-foreground group-hover:bg-muted group-hover:text-foreground'
@@ -161,15 +161,15 @@ const MobileNavItem = memo(function MobileNavItem({
             whileTap={{ scale: 0.9 }}
             aria-hidden="true"
           >
-            <div className="w-4 h-4">
+            <div className="w-3.5 h-3.5 flex items-center justify-center">
               {item.icon}
             </div>
           </motion.div>
 
-          {/* Label - 폰트 크기 약간 줄임 */}
+          {/* Label - 수직 정렬 개선 */}
           <span
             className={cn(
-              'font-medium text-[14px] leading-5',
+              'font-medium text-[13px] leading-4 flex-1',
               isActive ? 'text-primary' : 'text-foreground'
             )}
           >
@@ -178,11 +178,11 @@ const MobileNavItem = memo(function MobileNavItem({
         </div>
 
         {/* Badge and Arrow */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           {item.badge && (
             <Badge
               variant={isActive ? 'default' : 'secondary'}
-              className="text-xs min-w-[18px] h-4 px-1.5"
+              className="text-[10px] min-w-[16px] h-3.5 px-1.5 flex items-center justify-center"
               aria-label={`${item.badge}개의 알림`}
             >
               {item.badge}
@@ -207,7 +207,7 @@ const MobileNavItem = memo(function MobileNavItem({
             animate={{ opacity: isActive ? 1 : 0 }}
             aria-hidden="true"
           >
-            <ChevronRight className="w-3.5 h-3.5 text-primary" />
+            <ChevronRight className="w-3 h-3 text-primary" />
           </motion.div>
         </div>
       </Link>
