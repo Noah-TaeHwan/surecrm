@@ -1427,3 +1427,187 @@ textarea {
   background: rgba(255, 255, 255, 0.3);
   filter: blur(0.5px);
 }
+
+/* ===================================================================
+   🚀 COMPREHENSIVE MOBILE SIDEBAR SCROLL LOCK SYSTEM
+   iOS Safari에서 완벽하게 작동하는 스크롤 차단 시스템
+   =================================================================== */
+
+/* 🔒 Base Mobile Scroll Lock */
+.mobile-scroll-lock {
+  /* 배경 스크롤 완전 차단 */
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+  touch-action: none !important;
+  
+  /* iOS Safari 특화 대응 */
+  -webkit-overflow-scrolling: none !important;
+  -webkit-touch-callout: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+  
+  /* 위치 고정으로 스크롤 방지 */
+  position: fixed !important;
+  width: 100% !important;
+  height: 100% !important;
+  
+  /* 레이아웃 시프트 방지 */
+  padding-right: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* 🎯 Mobile Sidebar Container - 완전한 스크롤 제어 */
+.mobile-sidebar-container {
+  /* 터치 이벤트 완전 제어 */
+  touch-action: none !important;
+  overscroll-behavior: none !important;
+  
+  /* iOS Safari 바운스 효과 차단 */
+  -webkit-overflow-scrolling: none !important;
+  
+  /* 좌우 스크롤 차단 */
+  overflow-x: hidden !important;
+  
+  /* 터치 콜아웃과 하이라이트 차단 */
+  -webkit-touch-callout: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+  -webkit-user-drag: none !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  
+  /* 메모리 성능 최적화 */
+  will-change: transform !important;
+  backface-visibility: hidden !important;
+  perspective: 1000px !important;
+}
+
+/* 🔥 All Child Elements - 스크롤 상속 차단 */
+.mobile-sidebar-container * {
+  touch-action: inherit !important;
+  overscroll-behavior: inherit !important;
+  -webkit-overflow-scrolling: inherit !important;
+  -webkit-touch-callout: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+/* 🚫 Complete Focus Outline Removal System */
+.no-focus-outline,
+.no-focus-outline *,
+.no-focus-outline:focus,
+.no-focus-outline:focus-visible,
+.no-focus-outline:active,
+.no-focus-outline:hover {
+  outline: none !important;
+  outline-width: 0 !important;
+  outline-style: none !important;
+  outline-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+  -webkit-touch-callout: none !important;
+  -webkit-user-drag: none !important;
+}
+
+/* 📱 iOS Safari Specific Fixes */
+@supports (-webkit-touch-callout: none) {
+  /* iOS Safari에서만 적용되는 스타일 */
+  
+  .mobile-scroll-lock {
+    /* iOS의 rubber band 효과 완전 차단 */
+    overscroll-behavior-y: none !important;
+    overscroll-behavior-x: none !important;
+    
+    /* iOS 스크롤 관성 차단 */
+    -webkit-overflow-scrolling: auto !important;
+  }
+  
+  .mobile-sidebar-container {
+    /* iOS 전용 터치 동작 차단 */
+    -webkit-overflow-scrolling: auto !important;
+    overscroll-behavior-y: none !important;
+    overscroll-behavior-x: none !important;
+    
+    /* iOS 줌 차단 */
+    touch-action: none !important;
+    
+    /* iOS 텍스트 선택 차단 */
+    -webkit-user-select: none !important;
+    -webkit-touch-callout: none !important;
+  }
+}
+
+/* 🔧 Android Chrome Specific Fixes */
+@media screen and (max-width: 768px) {
+  .mobile-scroll-lock {
+    /* Android에서 address bar 숨김 방지 */
+    min-height: 100vh !important;
+    min-height: 100dvh !important;
+  }
+  
+  .mobile-sidebar-container {
+    /* 안드로이드 터치 최적화 */
+    touch-action: none !important;
+    contain: layout style paint !important;
+  }
+}
+
+/* 🚀 Body Scroll Lock with Position Save */
+.body-scroll-locked {
+  overflow: hidden !important;
+  position: fixed !important;
+  width: 100% !important;
+  height: 100% !important;
+  overscroll-behavior: none !important;
+  touch-action: none !important;
+  -webkit-overflow-scrolling: none !important;
+}
+
+/* 🎯 Backdrop Overlay - 완전한 차단 */
+.mobile-sidebar-backdrop {
+  /* 모든 터치 이벤트 차단 */
+  touch-action: none !important;
+  overscroll-behavior: none !important;
+  
+  /* iOS Safari 대응 */
+  -webkit-touch-callout: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+  
+  /* 좌우 스크롤 차단 */
+  overflow: hidden !important;
+  
+  /* 포인터 이벤트는 허용 (닫기 위해) */
+  pointer-events: auto !important;
+}
+
+/* ===================================================================
+   🛠️ ENHANCED FOCUS MANAGEMENT
+   =================================================================== */
+
+/* 모바일에서 포커스 최적화 */
+.focus-mobile {
+  /* 터치 친화적 포커스 스타일 */
+  outline: 2px solid hsl(var(--primary)) !important;
+  outline-offset: 2px !important;
+  border-radius: 6px !important;
+}
+
+/* 모바일 터치 타겟 최적화 */
+.touch-target-mobile {
+  min-height: 44px !important; /* iOS 권장 */
+  min-width: 44px !important;
+  touch-action: manipulation !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+/* ===================================================================
+   🎨 MOBILE CONTAINER OPTIMIZATIONS  
+   =================================================================== */
+
+.container-mobile {
+  width: 100% !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
+  max-width: 100vw !important;
+  overflow-x: hidden !important;
+}

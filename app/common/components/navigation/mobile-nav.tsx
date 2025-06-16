@@ -564,6 +564,90 @@ const LiveRegion = memo(function LiveRegion({
   );
 });
 
+// 💡 Body Scroll Lock Hook - iOS Safari 완전 대응
+function useBodyScrollLock() {
+  const scrollPositionRef = useRef<number>(0);
+  const bodyOriginalStyleRef = useRef<string>('');
+  const htmlOriginalStyleRef = useRef<string>('');
+
+  const lockScroll = useCallback(() => {
+    // 현재 스크롤 위치 저장
+    scrollPositionRef.current = window.pageYOffset;
+    
+    // 원본 스타일 저장
+    bodyOriginalStyleRef.current = document.body.getAttribute('style') || '';
+    htmlOriginalStyleRef.current = document.documentElement.getAttribute('style') || '';
+
+    // iOS Safari 특화 스크롤 잠금
+    const bodyStyle = document.body.style as any;
+    const htmlStyle = document.documentElement.style as any;
+    
+    // body 스타일 적용
+    bodyStyle.overflow = 'hidden';
+    bodyStyle.position = 'fixed';
+    bodyStyle.top = `-${scrollPositionRef.current}px`;
+    bodyStyle.left = '0';
+    bodyStyle.right = '0';
+    bodyStyle.width = '100%';
+    bodyStyle.height = '100%';
+    bodyStyle.touchAction = 'none';
+    bodyStyle.overscrollBehavior = 'none';
+    bodyStyle.webkitOverflowScrolling = 'none';
+    bodyStyle.webkitTouchCallout = 'none';
+    bodyStyle.webkitTapHighlightColor = 'transparent';
+    
+    // HTML 스타일 적용
+    htmlStyle.touchAction = 'none';
+    htmlStyle.overscrollBehavior = 'none';
+    htmlStyle.webkitTouchCallout = 'none';
+    
+    // CSS 클래스도 추가 (fallback)
+    document.body.classList.add('mobile-scroll-lock', 'body-scroll-locked');
+    document.documentElement.classList.add('mobile-scroll-lock');
+
+    // viewport meta 태그 수정으로 줌 방지
+    const viewport = document.querySelector('meta[name=viewport]');
+    if (viewport) {
+      viewport.setAttribute('data-original-content', viewport.getAttribute('content') || '');
+      viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+    }
+  }, []);
+
+  const unlockScroll = useCallback(() => {
+    // 스타일 복원
+    if (bodyOriginalStyleRef.current) {
+      document.body.setAttribute('style', bodyOriginalStyleRef.current);
+    } else {
+      document.body.removeAttribute('style');
+    }
+    
+    if (htmlOriginalStyleRef.current) {
+      document.documentElement.setAttribute('style', htmlOriginalStyleRef.current);
+    } else {
+      document.documentElement.removeAttribute('style');
+    }
+
+    // 클래스 제거
+    document.body.classList.remove('mobile-scroll-lock', 'body-scroll-locked');
+    document.documentElement.classList.remove('mobile-scroll-lock');
+
+    // 스크롤 위치 복원
+    window.scrollTo(0, scrollPositionRef.current);
+
+    // viewport meta 태그 복원
+    const viewport = document.querySelector('meta[name=viewport]');
+    if (viewport) {
+      const originalContent = viewport.getAttribute('data-original-content');
+      if (originalContent) {
+        viewport.setAttribute('content', originalContent);
+        viewport.removeAttribute('data-original-content');
+      }
+    }
+  }, []);
+
+  return { lockScroll, unlockScroll };
+}
+
 export function MobileNav({ 
   isOpen, 
   onClose, 
@@ -576,6 +660,9 @@ export function MobileNav({
   const { isMobile } = useViewport();
   const [isClosing, setIsClosing] = useState(false);
   const [animationDuration, setAnimationDuration] = useState(0.4);
+  
+  // 💡 Body Scroll Lock 적용
+  const { lockScroll, unlockScroll } = useBodyScrollLock();
   
   // 💡 고급 제스처 지원을 위한 motion values
   const dragX = useMotionValue(0);
@@ -595,7 +682,7 @@ export function MobileNav({
 
   // 💡 Progressive Reveal 기능
   const progressiveReveal = useProgressiveReveal(dragX, finalGestureConfig.progressiveReveal);
-  
+
   // 💡 Multi-touch 제스처 감지
   const { touchCount, gestureType } = useMultiTouchGesture();
 
@@ -753,7 +840,7 @@ export function MobileNav({
     setLiveMessage(`${item.label} 페이지로 이동합니다.`);
     handleClose();
   }, [handleClose]);
-
+          
   // 💡 Edge Swipe 감지 및 메뉴 열기 핸들러
   const handleEdgeSwipeOpen = useCallback(() => {
     if (!isOpen && onOpen) {
@@ -764,7 +851,23 @@ export function MobileNav({
   // 💡 Edge Swipe Detection Hook 적용
   useEdgeSwipeDetection(handleEdgeSwipeOpen, finalGestureConfig.edgeSwipe);
 
-  // 💡 Enhanced 키보드 이벤트 핸들러
+  // 💡 Scroll Lock Effect - 사이드바 열림/닫힘에 따른 스크롤 제어
+  useEffect(() => {
+    if (isOpen) {
+      lockScroll();
+    } else {
+      unlockScroll();
+    }
+
+    // cleanup function
+    return () => {
+      if (isOpen) {
+        unlockScroll();
+      }
+    };
+  }, [isOpen, lockScroll, unlockScroll]);
+
+  // 💡 Enhanced 키보드 이벤트 핸들러 with Focus Management
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && isOpen) {
@@ -790,20 +893,32 @@ export function MobileNav({
       }
     };
 
+    // 💡 Enhanced Focus Management - 포커스 아웃라인 제거
+    const handleFocus = (event: FocusEvent) => {
+      const target = event.target as HTMLElement;
+      if (target.closest('[data-mobile-nav]')) {
+        target.style.outline = 'none';
+        target.style.boxShadow = 'none';
+      }
+    };
+
     if (isOpen) {
       document.addEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = 'hidden';
+      document.addEventListener('focus', handleFocus, true);
       
       // 포커스 설정 (접근성)
       setTimeout(() => {
         const firstFocusable = document.querySelector('[data-mobile-nav] a') as HTMLElement;
         firstFocusable?.focus();
+        if (firstFocusable) {
+          firstFocusable.style.outline = 'none';
+        }
       }, 100);
     }
-
+      
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = '';
+      document.removeEventListener('focus', handleFocus, true);
     };
   }, [isOpen, handleClose]);
 
@@ -836,22 +951,13 @@ export function MobileNav({
       {/* Backdrop */}
       <motion.div
         initial={{ opacity: 0 }}
-        animate={{ 
-          opacity: 1,
-          transition: {
-            duration: 0.25,
-            ease: [0.25, 0.46, 0.45, 0.94]
-          }
-        }}
+        animate={{ opacity: 1 }}
         exit={{ 
           opacity: 0,
-          transition: {
-            duration: 0.2,
-            ease: [0.25, 0.46, 0.45, 0.94]
-          }
+          transition: { duration: 0.3 }
         }}
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
-        onClick={handleClose}
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 mobile-sidebar-backdrop"
+        onClick={onClose}
         aria-hidden="true"
       />
 
@@ -864,7 +970,7 @@ export function MobileNav({
           transition: {
             // 🎯 열기: 부드러운 easing으로 일관성 유지
             type: "tween",
-            duration: 0.35,
+            duration: animationDuration,
             ease: [0.25, 0.46, 0.45, 0.94] // easeOutQuart
           }
         }}
@@ -903,7 +1009,7 @@ export function MobileNav({
           'mobile-sidebar-container no-focus-outline', // 전용 CSS 클래스 적용
           // Enhanced visual feedback for gesture states
           isInterrupted && 'ring-2 ring-primary/50',
-          touchCount > 1 && 'ring-2 ring-warning/50',
+          useMultiTouchGesture().gestureType === 'multi' && 'ring-2 ring-warning/50',
           className
         )}
         data-mobile-nav
@@ -930,7 +1036,6 @@ export function MobileNav({
               to="/dashboard"
               onClick={() => {
                 triggerHapticFeedback('selection');
-                handleNavigation({ label: '대시보드', href: '/', icon: null, ariaLabel: '대시보드로 이동' });
               }}
               className="text-xl font-bold text-primary hover:text-primary/80 transition-colors rounded"
               aria-label="SureCRM 대시보드로 이동"
@@ -950,7 +1055,7 @@ export function MobileNav({
           <Button
             variant="ghost"
             size="icon"
-            onClick={handleClose}
+            onClick={onClose}
             className="hover:bg-muted/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             aria-label="메뉴 닫기"
           >

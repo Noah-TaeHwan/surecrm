@@ -148,16 +148,12 @@ export function MainLayout({
 
     if (isMobileMenuOpen) {
       document.addEventListener('keydown', handleKeyDown);
-      // 모바일 메뉴가 열려있을 때 배경 스크롤 방지
-      document.body.style.overflow = 'hidden';
-    } else {
-      // 메뉴가 닫혔을 때 배경 스크롤 복원
-      document.body.style.overflow = '';
+      // 💡 MobileNav가 자체적으로 body scroll lock을 관리하므로 여기서는 제거
     }
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = '';
+      // 💡 body overflow 제어는 MobileNav에서 담당
     };
   }, [isMobileMenuOpen, closeMobileMenu]);
 
