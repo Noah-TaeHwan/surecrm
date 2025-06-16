@@ -1,493 +1,580 @@
-import { ResponsiveContainer, ResponsiveGrid, ResponsiveStack } from '~/common/components/ui';
+import { 
+  ResponsiveContainer, 
+  ResponsiveGrid, 
+  ResponsiveStack, 
+  ResponsiveFlex, 
+  ResponsiveSection,
+  validateAccessibility,
+  logAccessibilityResults,
+  createAriaAttributes,
+  generateAccessibleId,
+  FocusManager,
+  type AccessibilityValidationResult
+} from "~/common/components/ui";
+import { Button } from "~/common/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/common/components/ui/card";
+import { Badge } from "~/common/components/ui/badge";
+import { useEffect, useRef, useState } from "react";
 
 export function meta() {
   return [
-    { title: "반응형 컨테이너 테스트 - SureCRM" },
-    { name: "description", content: "ResponsiveContainer 컴포넌트 테스트 페이지" }
+    { title: "반응형 컴포넌트 테스트 - SureCRM" },
+    { name: "description", content: "SureCRM 반응형 레이아웃 컴포넌트들의 테스트 페이지입니다." }
   ];
 }
 
-export default function TestResponsivePage() {
+export default function TestResponsive() {
+  const [accessibilityResults, setAccessibilityResults] = useState<Record<string, AccessibilityValidationResult>>({});
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // 접근성 검증 실행
+  useEffect(() => {
+    if (containerRef.current) {
+      const testSections = containerRef.current.querySelectorAll('[data-test-section]');
+      const results: Record<string, AccessibilityValidationResult> = {};
+
+      testSections.forEach((section) => {
+        const sectionName = section.getAttribute('data-test-section') || 'unknown';
+        const result = validateAccessibility(section as HTMLElement, {});
+        results[sectionName] = result;
+        
+        // 개발 환경에서 콘솔에 결과 출력
+        logAccessibilityResults(`${sectionName} 섹션`, result);
+      });
+
+      setAccessibilityResults(results);
+    }
+  }, []);
+
+  // 접근성 점수 계산
+  const getAccessibilityScore = (result: AccessibilityValidationResult): number => {
+    const totalIssues = result.errors.length + result.warnings.length;
+    const errorWeight = 10;
+    const warningWeight = 5;
+    const penalty = (result.errors.length * errorWeight) + (result.warnings.length * warningWeight);
+    return Math.max(0, 100 - penalty);
+  };
+
+  // 접근성 배지 색상 결정
+  const getAccessibilityBadgeVariant = (score: number): "default" | "secondary" | "destructive" | "outline" => {
+    if (score >= 90) return "default"; // 녹색
+    if (score >= 70) return "secondary"; // 노란색
+    return "destructive"; // 빨간색
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="space-y-12">
-        {/* 크기별 컨테이너 테스트 */}
-        <section className="space-y-6">
-          <h1 className="text-3xl font-bold text-center text-gray-900">
-            ResponsiveContainer 테스트
+    <div ref={containerRef} className="min-h-screen bg-gray-50 p-4">
+      <ResponsiveContainer size="2xl" padding="xl">
+        {/* 페이지 헤더 */}
+        <ResponsiveSection 
+          as="header"
+          padding="xl" 
+          background="white" 
+          rounded="lg" 
+          shadow="sm" 
+          className="mb-8"
+          data-test-section="page-header"
+          aria-labelledby="page-title"
+        >
+          <h1 id="page-title" className="text-3xl font-bold text-gray-900 mb-2">
+            반응형 컴포넌트 테스트
           </h1>
+          <p className="text-gray-600 mb-4">
+            SureCRM의 반응형 레이아웃 컴포넌트들과 접근성 검증 기능을 테스트합니다.
+          </p>
           
-          {/* XS 컨테이너 */}
-          <ResponsiveContainer 
-            size="xs" 
-            padding="md" 
-            center 
-            className="bg-blue-100 border-2 border-blue-300 rounded-lg"
-            aria-label="Extra Small 컨테이너 예제"
-          >
-            <div className="py-8 text-center">
-              <h2 className="text-xl font-semibold text-blue-800 mb-2">XS 컨테이너</h2>
-              <p className="text-blue-600">max-width: 320px (xs)</p>
-              <p className="text-sm text-blue-500 mt-2">패딩: 반응형 medium</p>
+          {/* 접근성 검증 결과 요약 */}
+          <ResponsiveFlex wrap="wrap" gap="sm" className="mt-4">
+            {Object.entries(accessibilityResults).map(([sectionName, result]) => {
+              const score = getAccessibilityScore(result);
+              return (
+                <Badge 
+                  key={sectionName}
+                  variant={getAccessibilityBadgeVariant(score)}
+                  className="text-xs"
+                >
+                  {sectionName}: {score}점
+                </Badge>
+              );
+            })}
+          </ResponsiveFlex>
+        </ResponsiveSection>
+
+        {/* 1. ResponsiveContainer 테스트 */}
+        <ResponsiveSection 
+          padding="lg" 
+          background="white" 
+          rounded="lg" 
+          shadow="sm" 
+          className="mb-8"
+          data-test-section="responsive-container"
+          aria-labelledby="container-title"
+        >
+          <h2 id="container-title" className="text-2xl font-semibold mb-4">1. ResponsiveContainer</h2>
+          
+                      <ResponsiveStack gap="lg">
+            <div>
+              <h3 className="text-lg font-medium mb-2">기본 컨테이너</h3>
+              <ResponsiveContainer 
+                size="md" 
+                padding="md" 
+                className="bg-blue-50 border border-blue-200 rounded"
+                role="region"
+                aria-label="기본 컨테이너 예시"
+              >
+                <p>최대 너비 md, 패딩 md인 컨테이너입니다.</p>
+              </ResponsiveContainer>
             </div>
-          </ResponsiveContainer>
 
-          {/* SM 컨테이너 */}
-          <ResponsiveContainer 
-            size="sm" 
-            padding="lg" 
-            center 
-            className="bg-green-100 border-2 border-green-300 rounded-lg"
-            aria-label="Small 컨테이너 예제"
-          >
-            <div className="py-8 text-center">
-              <h2 className="text-xl font-semibold text-green-800 mb-2">SM 컨테이너</h2>
-              <p className="text-green-600">max-width: 384px (sm)</p>
-              <p className="text-sm text-green-500 mt-2">패딩: 반응형 large</p>
+            <div>
+              <h3 className="text-lg font-medium mb-2">큰 컨테이너</h3>
+              <ResponsiveContainer 
+                size="lg" 
+                padding="lg"
+                className="bg-green-50 border border-green-200 rounded"
+                role="region"
+                aria-label="큰 컨테이너 예시"
+              >
+                <p>큰 크기의 컨테이너입니다.</p>
+              </ResponsiveContainer>
             </div>
-          </ResponsiveContainer>
 
-          {/* MD 컨테이너 */}
-          <ResponsiveContainer 
-            size="md" 
-            padding="md" 
-            center 
-            className="bg-yellow-100 border-2 border-yellow-300 rounded-lg"
-            aria-label="Medium 컨테이너 예제"
-          >
-            <div className="py-8 text-center">
-              <h2 className="text-xl font-semibold text-yellow-800 mb-2">MD 컨테이너</h2>
-              <p className="text-yellow-600">max-width: 448px (md)</p>
-              <p className="text-sm text-yellow-500 mt-2">패딩: 반응형 medium</p>
+            <div>
+              <h3 className="text-lg font-medium mb-2">중앙 정렬 컨테이너</h3>
+              <ResponsiveContainer 
+                size="xl" 
+                padding="xl"
+                center
+                className="bg-purple-50 border border-purple-200 rounded min-h-32"
+                role="region"
+                aria-label="중앙 정렬 컨테이너 예시"
+              >
+                <p className="text-center">중앙 정렬된 컨텐츠</p>
+              </ResponsiveContainer>
             </div>
-          </ResponsiveContainer>
+          </ResponsiveStack>
+        </ResponsiveSection>
 
-          {/* LG 컨테이너 (기본값) */}
-          <ResponsiveContainer 
-            center 
-            className="bg-purple-100 border-2 border-purple-300 rounded-lg"
-            aria-label="Large 컨테이너 예제 (기본값)"
-          >
-            <div className="py-8 text-center">
-              <h2 className="text-xl font-semibold text-purple-800 mb-2">LG 컨테이너 (기본값)</h2>
-              <p className="text-purple-600">max-width: 896px (4xl)</p>
-              <p className="text-sm text-purple-500 mt-2">패딩: 반응형 medium (기본값)</p>
-            </div>
-          </ResponsiveContainer>
-
-          {/* XL 컨테이너 */}
-          <ResponsiveContainer 
-            size="xl" 
-            padding="xl" 
-            center 
-            className="bg-red-100 border-2 border-red-300 rounded-lg"
-            aria-label="Extra Large 컨테이너 예제"
-          >
-            <div className="py-8 text-center">
-              <h2 className="text-xl font-semibold text-red-800 mb-2">XL 컨테이너</h2>
-              <p className="text-red-600">max-width: 1152px (6xl)</p>
-              <p className="text-sm text-red-500 mt-2">패딩: 반응형 extra large</p>
-            </div>
-          </ResponsiveContainer>
-
-          {/* 2XL 컨테이너 */}
-          <ResponsiveContainer 
-            size="2xl" 
-            padding="sm" 
-            center 
-            className="bg-indigo-100 border-2 border-indigo-300 rounded-lg"
-            aria-label="2X Large 컨테이너 예제"
-          >
-            <div className="py-8 text-center">
-              <h2 className="text-xl font-semibold text-indigo-800 mb-2">2XL 컨테이너</h2>
-              <p className="text-indigo-600">max-width: 1280px (7xl)</p>
-              <p className="text-sm text-indigo-500 mt-2">패딩: 반응형 small</p>
-            </div>
-          </ResponsiveContainer>
-
-          {/* FULL 컨테이너 */}
-          <ResponsiveContainer 
-            size="full" 
-            padding="none" 
-            className="bg-gray-100 border-2 border-gray-300 rounded-lg"
-            aria-label="Full Width 컨테이너 예제"
-          >
-            <div className="py-8 text-center px-4">
-              <h2 className="text-xl font-semibold text-gray-800 mb-2">FULL 컨테이너</h2>
-              <p className="text-gray-600">max-width: 100% (full)</p>
-              <p className="text-sm text-gray-500 mt-2">패딩: 없음 (수동으로 px-4 추가)</p>
-            </div>
-          </ResponsiveContainer>
-        </section>
-
-        {/* Semantic HTML 테스트 */}
-        <section className="space-y-6">
-          <ResponsiveContainer 
-            as="section" 
-            size="lg" 
-            center
-            className="bg-slate-100 border-2 border-slate-300 rounded-lg"
-            aria-labelledby="semantic-title"
-          >
-            <div className="py-8">
-              <h2 id="semantic-title" className="text-xl font-semibold text-slate-800 mb-4 text-center">
-                Semantic HTML 테스트
-              </h2>
-              <div className="space-y-4 text-slate-600">
-                <p>이 컨테이너는 &lt;section&gt; 태그로 렌더됩니다.</p>
-                <p>aria-labelledby 속성을 통해 접근성을 향상시킵니다.</p>
-                <p>다양한 HTML 태그로 렌더링할 수 있는 유연성을 제공합니다.</p>
-              </div>
-            </div>
-          </ResponsiveContainer>
-        </section>
-
-        {/* ResponsiveGrid 테스트 섹션 */}
-        <section className="space-y-6">
-          <ResponsiveContainer center>
-            <h2 className="text-2xl font-bold text-center text-gray-900 mb-8">
-              ResponsiveGrid 컴포넌트 테스트
-            </h2>
-          </ResponsiveContainer>
-
-          {/* 기본 그리드 */}
-          <ResponsiveContainer center>
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-800">기본 그리드 (1→2→3→4 컬럼)</h3>
-              <ResponsiveGrid
-                cols={1}
-                sm={{ cols: 2 }}
-                md={{ cols: 3 }}
+        {/* 2. ResponsiveGrid 테스트 */}
+        <ResponsiveSection 
+          padding="lg" 
+          background="white" 
+          rounded="lg" 
+          shadow="sm" 
+          className="mb-8"
+          data-test-section="responsive-grid"
+          aria-labelledby="grid-title"
+        >
+          <h2 id="grid-title" className="text-2xl font-semibold mb-4">2. ResponsiveGrid</h2>
+          
+          <ResponsiveStack gap="xl">
+            <div>
+              <h3 className="text-lg font-medium mb-2">기본 그리드 (3열)</h3>
+              <ResponsiveGrid 
+                cols={3} 
                 gap="md"
-                className="mb-6"
-                aria-label="기본 반응형 그리드 예제"
-              >
-                {Array.from({ length: 12 }, (_, i) => (
-                  <div
-                    key={i}
-                    className="bg-blue-100 border border-blue-300 rounded-lg p-4 text-center"
-                  >
-                    <div className="text-blue-800 font-medium">아이템 {i + 1}</div>
-                    <div className="text-blue-600 text-sm mt-1">그리드 셀</div>
-                  </div>
-                ))}
-              </ResponsiveGrid>
-            </div>
-          </ResponsiveContainer>
-
-          {/* 다양한 간격 테스트 */}
-          <ResponsiveContainer center>
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-800">반응형 간격 테스트</h3>
-              <ResponsiveGrid
-                cols={2}
-                md={{ cols: 3 }}
-                lg={{ cols: 4 }}
-                gap="lg"
-                className="mb-6"
-                aria-label="반응형 간격 그리드 예제"
-              >
-                {Array.from({ length: 8 }, (_, i) => (
-                  <div
-                    key={i}
-                    className="bg-green-100 border border-green-300 rounded-lg p-4 text-center"
-                  >
-                    <div className="text-green-800 font-medium">Card {i + 1}</div>
-                    <div className="text-green-600 text-sm mt-1">
-                      간격: xs → lg → xl
-                    </div>
-                  </div>
-                ))}
-              </ResponsiveGrid>
-            </div>
-          </ResponsiveContainer>
-
-          {/* 정렬 옵션 테스트 */}
-          <ResponsiveContainer center>
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-800">정렬 옵션 테스트</h3>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* 중앙 정렬 */}
-                <div>
-                  <h4 className="text-md font-medium text-gray-700 mb-3">Items Center</h4>
-                  <ResponsiveGrid
-                    cols={3}
-                    gap="md"
-                    alignItems="center"
-                    justifyItems="center"
-                    className="bg-purple-50 border border-purple-200 rounded-lg p-4"
-                  >
-                    <div className="bg-purple-100 border border-purple-300 rounded p-2 text-purple-800 text-sm">
-                      짧은 내용
-                    </div>
-                    <div className="bg-purple-100 border border-purple-300 rounded p-2 text-purple-800 text-sm">
-                      조금 더 긴 내용이 들어가는 카드
-                    </div>
-                    <div className="bg-purple-100 border border-purple-300 rounded p-2 text-purple-800 text-sm">
-                      매우 긴 내용이 들어가는 카드로서 높이가 다른 카드들보다 상당히 높을 수 있습니다.
-                    </div>
-                  </ResponsiveGrid>
-                </div>
-
-                {/* 시작점 정렬 */}
-                <div>
-                  <h4 className="text-md font-medium text-gray-700 mb-3">Items Start</h4>
-                  <ResponsiveGrid
-                    cols={3}
-                    gap="md"
-                    alignItems="start"
-                    justifyItems="start"
-                    className="bg-orange-50 border border-orange-200 rounded-lg p-4"
-                  >
-                    <div className="bg-orange-100 border border-orange-300 rounded p-2 text-orange-800 text-sm">
-                      짧은 내용
-                    </div>
-                    <div className="bg-orange-100 border border-orange-300 rounded p-2 text-orange-800 text-sm">
-                      조금 더 긴 내용이 들어가는 카드
-                    </div>
-                    <div className="bg-orange-100 border border-orange-300 rounded p-2 text-orange-800 text-sm">
-                      매우 긴 내용이 들어가는 카드로서 높이가 다른 카드들보다 상당히 높을 수 있습니다.
-                    </div>
-                  </ResponsiveGrid>
-                </div>
-              </div>
-            </div>
-          </ResponsiveContainer>
-
-          {/* Semantic HTML 테스트 */}
-          <ResponsiveContainer center>
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-800">Semantic HTML 테스트</h3>
-              <ResponsiveGrid
-                as="section"
-                cols={1}
-                md={{ cols: 2 }}
-                lg={{ cols: 3 }}
-                gap="lg"
                 role="grid"
-                aria-labelledby="product-grid-title"
-                className="mb-6"
+                aria-label="3열 그리드 예시"
               >
-                <h4 id="product-grid-title" className="sr-only">상품 그리드</h4>
-                {Array.from({ length: 6 }, (_, i) => (
-                  <article
-                    key={i}
-                    className="bg-slate-100 border border-slate-300 rounded-lg p-6"
-                    role="gridcell"
-                  >
-                    <h5 className="text-slate-800 font-semibold mb-2">제품 {i + 1}</h5>
-                    <p className="text-slate-600 text-sm mb-3">
-                      이 그리드는 &lt;section&gt; 태그로 렌더되며, 각 아이템은 &lt;article&gt; 태그입니다.
-                    </p>
-                    <div className="text-slate-500 text-xs">
-                      role="grid" 및 role="gridcell" 사용
-                    </div>
-                  </article>
+                {[1, 2, 3, 4, 5, 6].map((num) => (
+                  <Card key={num} role="gridcell">
+                    <CardContent className="p-4">
+                      <p>아이템 {num}</p>
+                    </CardContent>
+                  </Card>
                 ))}
               </ResponsiveGrid>
             </div>
-          </ResponsiveContainer>
-        </section>
 
-        {/* ResponsiveStack 테스트 */}
-        <section className="space-y-6">
-          <h2 className="text-2xl font-semibold text-gray-800">3. ResponsiveStack 테스트</h2>
-          
-          <div className="space-y-6">
-            <h3 className="text-lg font-medium text-gray-700">기본 세로 스택</h3>
-            <ResponsiveStack
-              gap="md"
-              className="bg-blue-50 p-4 rounded-lg"
-            >
-              <div className="bg-white p-4 rounded-lg shadow-sm">
-                <h4 className="font-medium text-gray-800">스택 아이템 1</h4>
-                <p className="text-sm text-gray-600">기본 세로 방향 스택입니다.</p>
-              </div>
-              <div className="bg-white p-4 rounded-lg shadow-sm">
-                <h4 className="font-medium text-gray-800">스택 아이템 2</h4>
-                <p className="text-sm text-gray-600">gap이 medium으로 설정되어 있습니다.</p>
-              </div>
-              <div className="bg-white p-4 rounded-lg shadow-sm">
-                <h4 className="font-medium text-gray-800">스택 아이템 3</h4>
-                <p className="text-sm text-gray-600">align이 stretch로 설정되어 있습니다.</p>
-              </div>
-            </ResponsiveStack>
-          </div>
-
-          <div className="space-y-6">
-            <h3 className="text-lg font-medium text-gray-700">반응형 방향 변경 (세로 → 가로)</h3>
-            <ResponsiveStack
-              direction="column"
-              md={{ direction: 'row', gap: 'lg' }}
-              gap="sm"
-              className="bg-green-50 p-4 rounded-lg"
-            >
-              <div className="bg-white p-4 rounded-lg shadow-sm flex-1">
-                <h4 className="font-medium text-gray-800">카드 1</h4>
-                <p className="text-sm text-gray-600">모바일에서는 세로로 배치됩니다.</p>
-              </div>
-              <div className="bg-white p-4 rounded-lg shadow-sm flex-1">
-                <h4 className="font-medium text-gray-800">카드 2</h4>
-                <p className="text-sm text-gray-600">태블릿 이상에서는 가로로 배치됩니다.</p>
-              </div>
-              <div className="bg-white p-4 rounded-lg shadow-sm flex-1">
-                <h4 className="font-medium text-gray-800">카드 3</h4>
-                <p className="text-sm text-gray-600">gap도 화면 크기에 따라 변경됩니다.</p>
-              </div>
-            </ResponsiveStack>
-          </div>
-
-          <div className="space-y-6">
-            <h3 className="text-lg font-medium text-gray-700">정렬 옵션 테스트</h3>
-            <ResponsiveStack
-              direction="row"
-              gap="md"
-              align="center"
-              justify="between"
-              className="bg-purple-50 p-4 rounded-lg min-h-24"
-            >
-              <div className="bg-white p-2 rounded shadow-sm">
-                <p className="text-xs">작은 박스</p>
-              </div>
-              <div className="bg-white p-4 rounded shadow-sm">
-                <p className="text-xs">중간 박스</p>
-              </div>
-              <div className="bg-white p-6 rounded shadow-sm">
-                <p className="text-xs">큰 박스</p>
-              </div>
-            </ResponsiveStack>
-          </div>
-
-          <div className="space-y-6">
-            <h3 className="text-lg font-medium text-gray-700">wrap 기능 테스트</h3>
-            <ResponsiveStack
-              direction="row"
-              gap="sm"
-              wrap={true}
-              className="bg-yellow-50 p-4 rounded-lg"
-            >
-              {Array.from({ length: 8 }, (_, i) => (
-                <div
-                  key={i}
-                  className="bg-white p-3 rounded-lg shadow-sm min-w-32"
-                >
-                  <p className="text-sm font-medium">아이템 {i + 1}</p>
-                </div>
-              ))}
-            </ResponsiveStack>
-          </div>
-
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium text-gray-700">의미론적 HTML 및 접근성 테스트</h3>
-            <ResponsiveStack
-              as="nav"
-              direction="row"
-              gap="md"
-              role="navigation"
-              aria-label="메인 네비게이션"
-              className="bg-gray-100 p-4 rounded-lg"
-            >
-              <div className="bg-white px-4 py-2 rounded-lg shadow-sm">
-                <a href="#" className="text-sm font-medium text-blue-600 hover:text-blue-800">
-                  홈
-                </a>
-              </div>
-              <div className="bg-white px-4 py-2 rounded-lg shadow-sm">
-                <a href="#" className="text-sm font-medium text-blue-600 hover:text-blue-800">
-                  서비스
-                </a>
-              </div>
-              <div className="bg-white px-4 py-2 rounded-lg shadow-sm">
-                <a href="#" className="text-sm font-medium text-blue-600 hover:text-blue-800">
-                  연락처
-                </a>
-              </div>
-            </ResponsiveStack>
-          </div>
-        </section>
-
-        {/* 조합 테스트 */}
-        <section className="space-y-6">
-          <h2 className="text-2xl font-semibold text-gray-800">4. 컴포넌트 조합 테스트</h2>
-          
-          <ResponsiveContainer size="lg" padding="lg">
-            <ResponsiveStack gap="xl">
-              <div className="text-center">
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">대시보드 레이아웃 예시</h3>
-                <p className="text-gray-600">Container + Stack + Grid 조합</p>
-              </div>
-              
-                              <ResponsiveGrid
-                  cols={1}
-                  md={{ cols: 2 }}
-                  lg={{ cols: 3 }}
-                  gap="md"
-                >
-                <div className="bg-white p-6 rounded-lg shadow-md border">
-                  <h4 className="font-semibold text-gray-800 mb-2">통계 카드 1</h4>
-                  <p className="text-2xl font-bold text-blue-600">1,234</p>
-                  <p className="text-sm text-gray-500">총 사용자 수</p>
-                </div>
-                <div className="bg-white p-6 rounded-lg shadow-md border">
-                  <h4 className="font-semibold text-gray-800 mb-2">통계 카드 2</h4>
-                  <p className="text-2xl font-bold text-green-600">5,678</p>
-                  <p className="text-sm text-gray-500">총 주문 수</p>
-                </div>
-                <div className="bg-white p-6 rounded-lg shadow-md border">
-                  <h4 className="font-semibold text-gray-800 mb-2">통계 카드 3</h4>
-                  <p className="text-2xl font-bold text-purple-600">9,012</p>
-                  <p className="text-sm text-gray-500">총 매출</p>
-                </div>
-              </ResponsiveGrid>
-              
-              <ResponsiveStack
-                direction="column"
-                lg={{ direction: 'row' }}
-                gap="md"
+            <div>
+              <h3 className="text-lg font-medium mb-2">반응형 그리드</h3>
+              <ResponsiveGrid 
+                cols={1}
+                sm={{ cols: 1 }}
+                md={{ cols: 2 }}
+                lg={{ cols: 4 }}
+                gap="sm"
+                role="grid"
+                aria-label="반응형 그리드 예시"
               >
-                <div className="bg-white p-6 rounded-lg shadow-md border flex-2">
-                  <h4 className="font-semibold text-gray-800 mb-4">메인 차트 영역</h4>
-                  <div className="bg-gray-100 h-48 rounded flex items-center justify-center">
-                    <p className="text-gray-500">차트 컴포넌트 위치</p>
-                  </div>
-                </div>
-                <div className="bg-white p-6 rounded-lg shadow-md border flex-1">
-                  <h4 className="font-semibold text-gray-800 mb-4">사이드 정보</h4>
-                  <ResponsiveStack gap="sm">
-                    <div className="bg-gray-50 p-3 rounded">
-                      <p className="text-sm font-medium">알림 1</p>
-                    </div>
-                    <div className="bg-gray-50 p-3 rounded">
-                      <p className="text-sm font-medium">알림 2</p>
-                    </div>
-                    <div className="bg-gray-50 p-3 rounded">
-                      <p className="text-sm font-medium">알림 3</p>
-                    </div>
-                  </ResponsiveStack>
-                </div>
-              </ResponsiveStack>
-            </ResponsiveStack>
-          </ResponsiveContainer>
-        </section>
-
-        {/* 브라우저 크기 조정 안내 */}
-        <ResponsiveContainer center className="bg-amber-50 border border-amber-200 rounded-lg">
-          <div className="py-6 text-center">
-            <h3 className="text-lg font-medium text-amber-800 mb-2">
-              🔍 테스트 방법
-            </h3>
-            <div className="space-y-2 text-amber-700">
-              <p>브라우저 창의 크기를 조정하여 다음 사항들을 확인해보세요:</p>
-              <ul className="text-left inline-block space-y-1">
-                <li>• ResponsiveContainer: 패딩이 반응형으로 변경</li>
-                <li>• ResponsiveGrid: 컬럼 수가 화면 크기에 따라 변경</li>
-                <li>• 간격(gap)이 브레이크포인트별로 조정</li>
-                <li>• 정렬 옵션이 다양한 높이의 콘텐츠에 적용</li>
-              </ul>
+                {[1, 2, 3, 4].map((num) => (
+                  <Card key={num} role="gridcell">
+                    <CardContent className="p-4">
+                      <p>반응형 아이템 {num}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </ResponsiveGrid>
             </div>
-          </div>
-        </ResponsiveContainer>
-      </div>
+
+            <div>
+              <h3 className="text-lg font-medium mb-2">Auto-fit 그리드</h3>
+              <ResponsiveGrid 
+                autoFit 
+                minItemWidth="200px" 
+                gap="md"
+                role="grid"
+                aria-label="Auto-fit 그리드 예시"
+              >
+                {[1, 2, 3, 4, 5].map((num) => (
+                  <Card key={num} role="gridcell">
+                    <CardContent className="p-4">
+                      <p>Auto-fit 아이템 {num}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </ResponsiveGrid>
+            </div>
+          </ResponsiveStack>
+        </ResponsiveSection>
+
+        {/* 3. ResponsiveStack 테스트 */}
+        <ResponsiveSection 
+          padding="lg" 
+          background="white" 
+          rounded="lg" 
+          shadow="sm" 
+          className="mb-8"
+          data-test-section="responsive-stack"
+          aria-labelledby="stack-title"
+        >
+          <h2 id="stack-title" className="text-2xl font-semibold mb-4">3. ResponsiveStack</h2>
+          
+          <ResponsiveStack gap="xl">
+            <div>
+              <h3 className="text-lg font-medium mb-2">세로 스택 (기본)</h3>
+              <ResponsiveStack 
+                gap="md" 
+                className="p-4 bg-gray-50 rounded"
+                role="group"
+                aria-label="세로 스택 예시"
+              >
+                <Button>버튼 1</Button>
+                <Button variant="outline">버튼 2</Button>
+                <Button variant="secondary">버튼 3</Button>
+              </ResponsiveStack>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-medium mb-2">가로 스택</h3>
+              <ResponsiveStack 
+                direction="row" 
+                gap="md" 
+                className="p-4 bg-gray-50 rounded"
+                role="group"
+                aria-label="가로 스택 예시"
+              >
+                <Button>버튼 1</Button>
+                <Button variant="outline">버튼 2</Button>
+                <Button variant="secondary">버튼 3</Button>
+              </ResponsiveStack>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-medium mb-2">반응형 방향</h3>
+              <ResponsiveStack 
+                direction="column" 
+                gap="md" 
+                className="p-4 bg-gray-50 rounded sm:flex-row"
+                role="group"
+                aria-label="반응형 방향 스택 예시"
+              >
+                <Button>모바일: 세로</Button>
+                <Button variant="outline">데스크톱: 가로</Button>
+                <Button variant="secondary">정렬</Button>
+              </ResponsiveStack>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-medium mb-2">중앙 정렬 + 래핑</h3>
+              <ResponsiveStack 
+                direction="row" 
+                align="center" 
+                justify="center" 
+                wrap={true}
+                gap="sm" 
+                className="p-4 bg-gray-50 rounded"
+                role="group"
+                aria-label="래핑 스택 예시"
+              >
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
+                  <Badge key={num} variant="outline">태그 {num}</Badge>
+                ))}
+              </ResponsiveStack>
+            </div>
+          </ResponsiveStack>
+        </ResponsiveSection>
+
+        {/* 4. ResponsiveFlex 테스트 */}
+        <ResponsiveSection 
+          padding="lg" 
+          background="white" 
+          rounded="lg" 
+          shadow="sm" 
+          className="mb-8"
+          data-test-section="responsive-flex"
+          aria-labelledby="flex-title"
+        >
+          <h2 id="flex-title" className="text-2xl font-semibold mb-4">4. ResponsiveFlex</h2>
+          
+          <ResponsiveStack gap="lg">
+            <div>
+              <h3 className="text-lg font-medium mb-2">기본 플렉스 레이아웃</h3>
+              <ResponsiveFlex 
+                direction="row"
+                wrap="wrap" 
+                gap="md"
+                className="p-4 bg-gray-50 rounded"
+                role="group"
+                aria-label="기본 Flex 예시"
+              >
+                <span>왼쪽 컨텐츠</span>
+                <Button>오른쪽 버튼</Button>
+              </ResponsiveFlex>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-medium mb-2">반응형 방향 변경</h3>
+              <ResponsiveFlex 
+                direction="row"
+                justify="between" 
+                align="center"
+                className="p-4 bg-gray-50 rounded"
+                role="group"
+                aria-label="정렬된 Flex 예시"
+              >
+                <Card className="flex-1">
+                  <CardContent className="p-4">
+                    <p>카드 1</p>
+                  </CardContent>
+                </Card>
+                <Card className="flex-1">
+                  <CardContent className="p-4">
+                    <p>카드 2</p>
+                  </CardContent>
+                </Card>
+              </ResponsiveFlex>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-medium mb-2">Grow/Shrink 테스트</h3>
+              <ResponsiveFlex gap="md" className="p-4 bg-gray-50 rounded" role="group" aria-label="Grow/Shrink 테스트 예시">
+                <div className="bg-blue-100 p-2 rounded flex-shrink-0">고정 너비</div>
+                <div className="bg-green-100 p-2 rounded flex-grow">확장 가능</div>
+                <div className="bg-red-100 p-2 rounded flex-shrink-0">고정 너비</div>
+              </ResponsiveFlex>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-medium mb-2">래핑 + 정렬</h3>
+              <ResponsiveFlex 
+                direction="row"
+                wrap="wrap" 
+                gap="md"
+                className="p-4 bg-gray-50 rounded"
+                role="group"
+                aria-label="기본 Flex 예시"
+              >
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                  <Badge key={num} variant="secondary">아이템 {num}</Badge>
+                ))}
+              </ResponsiveFlex>
+            </div>
+          </ResponsiveStack>
+        </ResponsiveSection>
+
+        {/* 5. ResponsiveSection 테스트 */}
+        <ResponsiveSection 
+          padding="lg" 
+          background="white" 
+          rounded="lg" 
+          shadow="sm" 
+          className="mb-8"
+          data-test-section="responsive-section"
+          aria-labelledby="section-title"
+        >
+          <h2 id="section-title" className="text-2xl font-semibold mb-4">5. ResponsiveSection</h2>
+          
+          <ResponsiveStack gap="xl">
+            <div>
+              <h3 className="text-lg font-medium mb-2">기본 섹션</h3>
+              <ResponsiveSection 
+                padding="md" 
+                background="gray" 
+                rounded="md"
+                role="region"
+                aria-label="기본 섹션 예시"
+              >
+                <p>기본 패딩과 배경을 가진 섹션입니다.</p>
+              </ResponsiveSection>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-medium mb-2">반응형 섹션</h3>
+              <ResponsiveSection 
+                padding="sm"
+                sm={{ padding: 'md' }}
+                lg={{ padding: 'lg' }}
+                background="primary" 
+                rounded="lg"
+                role="region"
+                aria-label="반응형 섹션 예시"
+              >
+                <p>반응형 패딩을 가진 섹션입니다.</p>
+              </ResponsiveSection>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-medium mb-2">최대 너비 + 중앙 정렬</h3>
+              <ResponsiveSection 
+                maxWidth="md"
+                centerContent
+                padding="lg"
+                background="gray" 
+                rounded="xl"
+                shadow="md"
+                role="region"
+                aria-label="최대 너비 중앙 정렬 섹션 예시"
+              >
+                <p className="text-center">최대 너비가 제한되고 중앙 정렬된 섹션입니다.</p>
+              </ResponsiveSection>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-medium mb-2">최소 높이</h3>
+              <ResponsiveSection 
+                minHeight="quarter"
+                padding="md"
+                background="gray" 
+                rounded="lg"
+                border="thin"
+                className="flex items-center justify-center"
+                role="region"
+                aria-label="최소 높이 섹션 예시"
+              >
+                <p>최소 높이가 설정된 섹션입니다.</p>
+              </ResponsiveSection>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-medium mb-2">시맨틱 HTML</h3>
+              <ResponsiveSection 
+                as="article"
+                padding="md"
+                background="gray" 
+                rounded="md"
+                role="article"
+                aria-labelledby="article-title"
+              >
+                <h4 id="article-title" className="font-semibold mb-2">기사 제목</h4>
+                <p>article 태그로 렌더링되는 시맨틱 섹션입니다.</p>
+              </ResponsiveSection>
+            </div>
+          </ResponsiveStack>
+        </ResponsiveSection>
+
+        {/* 6. 접근성 검증 결과 */}
+        <ResponsiveSection 
+          padding="lg" 
+          background="white" 
+          rounded="lg" 
+          shadow="sm" 
+          className="mb-8"
+          data-test-section="accessibility-results"
+          aria-labelledby="accessibility-title"
+        >
+          <h2 id="accessibility-title" className="text-2xl font-semibold mb-4">6. 접근성 검증 결과</h2>
+          
+          <ResponsiveGrid cols={1} sm={{ cols: 2 }} lg={{ cols: 3 }} gap="lg">
+            {Object.entries(accessibilityResults).map(([sectionName, result]) => {
+              const score = getAccessibilityScore(result);
+              return (
+                <Card key={sectionName}>
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      {sectionName}
+                      <Badge variant={getAccessibilityBadgeVariant(score)}>
+                        {score}점
+                      </Badge>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ResponsiveStack gap="sm">
+                      <div className="text-sm">
+                        <span className="font-medium text-red-600">오류: </span>
+                        {result.errors.length}개
+                      </div>
+                      <div className="text-sm">
+                        <span className="font-medium text-yellow-600">경고: </span>
+                        {result.warnings.length}개
+                      </div>
+                      <div className="text-sm">
+                        <span className="font-medium text-blue-600">제안: </span>
+                        {result.suggestions.length}개
+                      </div>
+                      {result.errors.length > 0 && (
+                        <div className="mt-2">
+                          <p className="text-xs font-medium text-red-600 mb-1">주요 오류:</p>
+                          <ul className="text-xs text-red-500 space-y-1">
+                            {result.errors.slice(0, 2).map((error, index) => (
+                              <li key={index}>• {error.message}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </ResponsiveStack>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </ResponsiveGrid>
+        </ResponsiveSection>
+
+        {/* 7. 키보드 네비게이션 테스트 */}
+        <ResponsiveSection 
+          padding="lg" 
+          background="white" 
+          rounded="lg" 
+          shadow="sm"
+          data-test-section="keyboard-navigation"
+          aria-labelledby="keyboard-title"
+        >
+          <h2 id="keyboard-title" className="text-2xl font-semibold mb-4">7. 키보드 네비게이션 테스트</h2>
+          <p className="text-gray-600 mb-4">Tab 키를 사용하여 아래 요소들을 순서대로 탐색해보세요.</p>
+          
+          <ResponsiveFlex direction="row" wrap="wrap" gap="md">
+            <Button 
+              onClick={() => alert('버튼 1 클릭됨')}
+              aria-describedby="button1-desc"
+            >
+              포커스 가능한 버튼 1
+            </Button>
+            <span id="button1-desc" className="sr-only">첫 번째 테스트 버튼입니다</span>
+            
+            <Button 
+              variant="outline"
+              onClick={() => alert('버튼 2 클릭됨')}
+              aria-describedby="button2-desc"
+            >
+              포커스 가능한 버튼 2
+            </Button>
+            <span id="button2-desc" className="sr-only">두 번째 테스트 버튼입니다</span>
+            
+            <Button 
+              variant="secondary"
+              onClick={() => {
+                if (containerRef.current) {
+                  FocusManager.focusFirst(containerRef.current);
+                }
+              }}
+              aria-describedby="button3-desc"
+            >
+              첫 번째 요소로 포커스 이동
+            </Button>
+            <span id="button3-desc" className="sr-only">페이지의 첫 번째 포커스 가능한 요소로 이동합니다</span>
+          </ResponsiveFlex>
+        </ResponsiveSection>
+      </ResponsiveContainer>
     </div>
   );
 } 
