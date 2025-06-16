@@ -22,6 +22,9 @@ import { InsuranceAgentEvents } from '~/lib/utils/analytics';
 interface SidebarProps {
   className?: string;
   onClose?: () => void;
+  id?: string;
+  role?: string;
+  'aria-label'?: string;
 }
 
 interface NavItem {
@@ -30,48 +33,40 @@ interface NavItem {
   icon: React.ReactNode;
 }
 
-export function Sidebar({ className, onClose }: SidebarProps) {
+export function Sidebar({ className, onClose, id, role, 'aria-label': ariaLabel }: SidebarProps) {
   const location = useLocation();
 
-  const navItems: NavItem[] = [
+  // 기본 네비게이션 아이템들 (모바일과 동일)
+  const mainNavItems: NavItem[] = [
     {
       label: '대시보드',
       href: '/dashboard',
       icon: <LayoutDashboard className="h-5 w-5" />,
     },
     {
-      label: '소개 네트워크',
+      label: '네트워크',
       href: '/network',
       icon: <Network className="h-5 w-5" />,
     },
-    // MVP: 핵심 소개자 기능 비활성화
-    // {
-    //   label: '핵심 소개자',
-    //   href: '/influencers',
-    //   icon: <Sparkles className="h-5 w-5" />,
-    // },
     {
-      label: '영업 파이프라인',
+      label: '영업',
       href: '/pipeline',
       icon: <PieChart className="h-5 w-5" />,
     },
     {
-      label: '고객 관리',
+      label: '고객',
       href: '/clients',
       icon: <Users className="h-5 w-5" />,
     },
-    // 👥 나의 팀 - 팀 관련 기능 개발 후 활성화 예정
-    // {
-    //   label: '나의 팀',
-    //   href: '/team',
-    //   icon: <UserPlus className="h-5 w-5" />,
-    // },
-    // 🗓️ 일정 관리 - 구글 캘린더 연동 활성화
     {
-      label: '일정 관리',
+      label: '일정',
       href: '/calendar',
       icon: <Calendar className="h-5 w-5" />,
     },
+  ];
+
+  // 추가 기능 메뉴들 (데스크톱에서만 표시)
+  const additionalNavItems: NavItem[] = [
     {
       label: '초대장 관리',
       href: '/invitations',
@@ -87,12 +82,6 @@ export function Sidebar({ className, onClose }: SidebarProps) {
       href: '/reports',
       icon: <FileText className="h-5 w-5" />,
     },
-    // MVP: 구독 관리 기능 - 추후 결제 시스템 연동 후 활성화 예정
-    // {
-    //   label: '구독 관리',
-    //   href: '/billing/subscribe',
-    //   icon: <CreditCard className="h-5 w-5" />,
-    // },
     {
       label: '설정',
       href: '/settings',
@@ -121,6 +110,9 @@ export function Sidebar({ className, onClose }: SidebarProps) {
 
   return (
     <div
+      id={id}
+      role={role}
+      aria-label={ariaLabel}
       className={cn(
         'flex flex-col h-screen bg-sidebar border-r border-sidebar-border w-64',
         className
@@ -138,8 +130,38 @@ export function Sidebar({ className, onClose }: SidebarProps) {
 
       <div className="flex-1 overflow-y-auto p-4">
         <nav>
+          {/* 메인 네비게이션 */}
+          <ul className="space-y-2 mb-6">
+            {mainNavItems.map(item => {
+              const isActive = isActiveRoute(item.href);
+              return (
+                <li key={item.href}>
+                  <Link
+                    to={item.href}
+                    onClick={() => handleNavigation(item.href, item.label)}
+                    className={cn(
+                      // Button 스타일을 직접 적용
+                      'inline-flex items-center justify-start gap-3 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+                      'w-full h-12 px-4 py-2',
+                      // 활성/비활성 상태 스타일
+                      isActive
+                        ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                        : 'text-sidebar-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/50'
+                    )}
+                  >
+                    {item.icon}
+                    <span className="font-medium">{item.label}</span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+
+          <Separator className="bg-sidebar-border mb-4" />
+
+          {/* 추가 기능 */}
           <ul className="space-y-2">
-            {navItems.map(item => {
+            {additionalNavItems.map(item => {
               const isActive = isActiveRoute(item.href);
               return (
                 <li key={item.href}>

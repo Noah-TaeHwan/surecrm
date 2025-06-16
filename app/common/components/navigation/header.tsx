@@ -225,7 +225,7 @@ export function Header({
   return (
     <header
       className={cn(
-        'h-14 md:h-16 px-4 md:px-6 border-b border-border bg-background flex items-center justify-between',
+        'h-14 md:h-16 px-4 md:px-6 bg-background flex items-center justify-between',
         className
       )}
     >

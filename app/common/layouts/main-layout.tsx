@@ -2,9 +2,9 @@ import React from 'react';
 import { useState, useEffect } from 'react';
 import { Sidebar } from '~/common/components/navigation/sidebar';
 import { Header } from '~/common/components/navigation/header';
-import { Sheet, SheetContent } from '~/common/components/ui/sheet';
-import { Button } from '~/common/components/ui/button';
-import { Menu } from 'lucide-react';
+import { MobileNav, MobileNavButton } from '~/common/components/navigation/mobile-nav';
+import { BottomTabNavigation } from '~/common/components/navigation/bottom-tab-navigation';
+import { useViewport } from '~/common/hooks/useViewport';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -23,7 +23,8 @@ export function MainLayout({
   currentUser: propsCurrentUser,
 }: MainLayoutProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isInitialRender, setIsInitialRender] = useState(true);
+  const { isMobile } = useViewport();
   const [currentUser, setCurrentUser] = useState<{
     id: string;
     email: string;
@@ -31,6 +32,15 @@ export function MainLayout({
     profileImage?: string;
   } | null>(null);
   const [isLoadingUser, setIsLoadingUser] = useState(true);
+
+  // 🎯 초기 렌더링 완료 처리 (사이드바 플래시 방지)
+  useEffect(() => {
+    // 즉시 실행하되, 레이아웃 계산이 완료된 후에 실행
+    const timer = requestAnimationFrame(() => {
+      setIsInitialRender(false);
+    });
+    return () => cancelAnimationFrame(timer);
+  }, []);
 
   // 🎯 사용자 정보 가져오기
   useEffect(() => {
@@ -97,42 +107,49 @@ export function MainLayout({
     fetchCurrentUser();
   }, [propsCurrentUser]);
 
-  // 반응형 처리를 위한 윈도우 크기 감지
-  useEffect(() => {
-    const checkScreenSize = () => {
-      setIsMobile(window.innerWidth < 1024);
-    };
-
-    // 초기 체크
-    checkScreenSize();
-
-    // 리사이즈 이벤트에 대응
-    window.addEventListener('resize', checkScreenSize);
-
-    return () => {
-      window.removeEventListener('resize', checkScreenSize);
-    };
+  // 모바일 메뉴 닫기 핸들러 개선
+  const closeMobileMenu = React.useCallback(() => {
+    setIsMobileMenuOpen(false);
   }, []);
 
-  // 모바일 메뉴가 열려있을 때 외부 스크롤 방지
+  // 모바일 메뉴 열기 핸들러
+  const openMobileMenu = React.useCallback(() => {
+    setIsMobileMenuOpen(true);
+  }, []);
+
+  // 모바일 메뉴 토글 핸들러
+  const toggleMobileMenu = React.useCallback(() => {
+    setIsMobileMenuOpen(prev => !prev);
+  }, []);
+
+  // ESC 키로 모바일 메뉴 닫기 (개선된 버전)
   useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isMobileMenuOpen) {
+        event.preventDefault();
+        closeMobileMenu();
+      }
+    };
+
     if (isMobileMenuOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+      // 모바일 메뉴가 열려있을 때 배경 스크롤 방지
       document.body.style.overflow = 'hidden';
     } else {
+      // 메뉴가 닫혔을 때 배경 스크롤 복원
       document.body.style.overflow = '';
     }
 
     return () => {
+      document.removeEventListener('keydown', handleKeyDown);
       document.body.style.overflow = '';
     };
-  }, [isMobileMenuOpen]);
-
-  const closeMobileMenu = () => setIsMobileMenuOpen(false);
+  }, [isMobileMenuOpen, closeMobileMenu]);
 
   return (
     <div className="fixed inset-0 bg-background flex overflow-hidden">
-      {/* 데스크톱 사이드바 */}
-      {!isMobile && (
+      {/* 🎯 데스크톱 사이드바 - 초기 렌더링 완료 후에만 표시 (플래시 방지) */}
+      {!isInitialRender && !isMobile && (
         <div className="w-64 border-r border-border bg-muted/30 flex-shrink-0">
           <Sidebar />
         </div>
@@ -140,19 +157,16 @@ export function MainLayout({
 
       {/* 메인 컨텐츠 영역 */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* 헤더 */}
-        <header className="h-16 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex-shrink-0 z-50">
+        {/* 헤더 - 고정됨 */}
+        <header className={`h-16 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex-shrink-0 z-50 fixed top-0 left-0 right-0 ${!isInitialRender && !isMobile ? 'lg:left-64' : ''}`}>
           <div className="h-full px-4 lg:px-6 flex items-center justify-between">
             <div className="flex items-center gap-4">
-              {/* 모바일 메뉴 버튼 */}
-              {isMobile && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setIsMobileMenuOpen(true)}
-                >
-                  <Menu className="h-5 w-5" />
-                </Button>
+              {/* 🎯 모바일 메뉴 버튼 - 초기 렌더링 완료 후에만 표시 */}
+              {!isInitialRender && isMobile && (
+                <MobileNavButton
+                  onClick={openMobileMenu}
+                  isOpen={isMobileMenuOpen}
+                />
               )}
               {title && (
                 <h1 className="font-semibold text-foreground">{title}</h1>
@@ -163,9 +177,11 @@ export function MainLayout({
           </div>
         </header>
 
-        {/* 페이지 컨텐츠 - 스크롤 가능한 영역 */}
+        {/* 페이지 컨텐츠 - 바텀 네비게이션과 헤더를 고려한 스크롤 가능한 영역 */}
         <main
-          className={`flex-1 ${
+          className={`flex-1 mt-16 ${
+            !isInitialRender && isMobile ? 'pb-40' : 'pb-4'
+          } ${
             title === '소개 네트워크'
               ? 'overflow-hidden p-0'
               : 'overflow-y-auto p-3 lg:p-4'
@@ -173,8 +189,8 @@ export function MainLayout({
           style={
             title === '소개 네트워크'
               ? {
-                  height: 'calc(100vh - 4rem)',
-                  maxHeight: 'calc(100vh - 4rem)',
+                  height: !isInitialRender && isMobile ? 'calc(100vh - 14rem)' : 'calc(100vh - 4rem)', // 헤더(4rem) + 바텀네비(10rem - 플로팅 여백 포함)
+                  maxHeight: !isInitialRender && isMobile ? 'calc(100vh - 14rem)' : 'calc(100vh - 4rem)',
                   overflow: 'hidden',
                 }
               : {}
@@ -184,12 +200,20 @@ export function MainLayout({
         </main>
       </div>
 
-      {/* 모바일 사이드바 */}
-      <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
-        <SheetContent side="left" className="w-64 p-0">
-          <Sidebar />
-        </SheetContent>
-      </Sheet>
+      {/* 🎯 새로운 모바일 네비게이션 - 초기 렌더링 완료 후에만 표시 */}
+      {!isInitialRender && (
+        <MobileNav
+          isOpen={isMobileMenuOpen}
+          onClose={closeMobileMenu}
+        />
+      )}
+
+      {/* 🎯 Bottom Tab Navigation (모바일에서만 표시) - 새로운 API로 업데이트 */}
+      {!isInitialRender && isMobile && (
+        <BottomTabNavigation
+          isMenuOpen={isMobileMenuOpen}
+        />
+      )}
     </div>
   );
 }

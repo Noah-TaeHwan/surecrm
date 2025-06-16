@@ -19,6 +19,7 @@ import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { Users, Plus, Star } from 'lucide-react';
 import { formatCurrencyTable } from '~/lib/utils/currency';
+import { ClientCard, type ClientCardData } from './client-card';
 
 // 클라이언트 프로필 타입 정의
 interface ClientProfile {
@@ -126,127 +127,40 @@ export function ClientListSection({
     }
   };
 
-  // 카드 뷰 렌더링
-  const renderCardView = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {filteredClients.map((client: ClientProfile) => {
-        const cardStyle = getClientCardStyle(client.importance);
+  // 📱 모바일 반응형 카드 뷰 렌더링 (새로운 ClientCard 사용)
+  const renderCardView = () => {
+    // ClientProfile을 ClientCardData로 변환하는 헬퍼 함수
+    const transformToClientCardData = (client: ClientProfile): ClientCardData => ({
+      id: client.id,
+      fullName: client.fullName,
+      email: client.email,
+      phone: client.phone,
+      address: client.address,
+      occupation: client.occupation,
+      importance: client.importance,
+      tags: Array.isArray(client.insuranceTypes) ? client.insuranceTypes : [],
+      currentStage: client.currentStage,
+      totalPremium: client.totalPremium,
+      lastContactDate: client.lastContactDate,
+      nextActionDate: undefined, // 추후 실제 데이터로 교체
+      referredBy: client.referredBy,
+      referralCount: client.referralCount,
+      createdAt: client.createdAt,
+    });
 
-        return (
-          <div key={client.id} className="relative">
-            <Card
-              className={`group hover:shadow-lg transition-all duration-200 ${cardStyle.bgGradient} ${cardStyle.borderClass} cursor-pointer hover:scale-[1.02] hover:-translate-y-1 h-[320px] flex flex-col relative overflow-hidden`}
-              onClick={() => onClientRowClick(client.id)}
-            >
-              <CardHeader className="pb-3 flex-shrink-0">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
-                      {client.fullName.charAt(0)}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <CardTitle className="text-lg truncate">
-                        {client.fullName}
-                      </CardTitle>
-                      <p className="text-sm text-muted-foreground truncate">
-                        {client.phone}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2 flex-shrink-0">
-                    <Badge
-                      className={`${getImportanceBadgeColor(
-                        client.importance
-                      )} border text-xs font-medium`}
-                    >
-                      {getImportanceText(client.importance)}
-                    </Badge>
-                    {client.importance === 'high' && (
-                      <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                    )}
-                  </div>
-                </div>
-              </CardHeader>
-
-              <CardContent className="flex-1 flex flex-col justify-between space-y-3 min-h-0">
-                <div className="space-y-3">
-                  {/* 현재 단계 - 항상 표시 */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">
-                      현재 단계
-                    </span>
-                    <Badge
-                      variant="outline"
-                      style={{
-                        borderColor: client.currentStage.color,
-                        color: client.currentStage.color,
-                      }}
-                    >
-                      {client.currentStage.name}
-                    </Badge>
-                  </div>
-
-                  {/* 보험 정보 - 항상 표시 (없으면 "미설정") */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">
-                      보험 종류
-                    </span>
-                    <span className="text-sm font-medium text-right">
-                      {client.insuranceTypes.length > 0 ? (
-                        <>
-                          {client.insuranceTypes.slice(0, 2).join(', ')}
-                          {client.insuranceTypes.length > 2 &&
-                            ` 외 ${client.insuranceTypes.length - 2}개`}
-                        </>
-                      ) : (
-                        <span className="text-muted-foreground">미설정</span>
-                      )}
-                    </span>
-                  </div>
-
-                  {/* 총 보험료 - 항상 표시 */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">
-                      총 보험료
-                    </span>
-                    <span className="text-sm font-semibold text-green-600">
-                      {client.totalPremium > 0
-                        ? formatCurrency(client.totalPremium)
-                        : '미설정'}
-                    </span>
-                  </div>
-
-                  {/* 소개 정보 - 항상 표시 (없으면 "직접 고객") */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">
-                      소개자
-                    </span>
-                    <span className="text-sm">
-                      {client.referredBy ? (
-                        client.referredBy.name
-                      ) : (
-                        <span className="text-muted-foreground">직접 고객</span>
-                      )}
-                    </span>
-                  </div>
-                </div>
-
-                {/* 최근 연락 - 하단 고정 */}
-                <div className="flex items-center justify-between pt-2 border-t border-border/30">
-                  <span className="text-sm text-muted-foreground">
-                    최근 연락
-                  </span>
-                  <span className="text-sm">
-                    {formatDate(client.lastContactDate)}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        );
-      })}
-    </div>
-  );
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+        {filteredClients.map((client: ClientProfile) => (
+          <ClientCard
+            key={client.id}
+            client={transformToClientCardData(client)}
+            onClick={() => onClientRowClick(client.id)}
+            className="h-auto min-h-[280px]" // 일관된 높이 유지
+          />
+        ))}
+      </div>
+    );
+  };
 
   // 테이블 뷰 렌더링
   const renderTableView = () => (

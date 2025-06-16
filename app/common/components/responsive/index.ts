@@ -116,6 +116,16 @@ export {
   ResponsiveTableCaption,
 } from './responsive-table';
 
+// Navigation Components
+export {
+  MobileNav,
+  MobileNavButton,
+  BottomNav,
+} from '~/common/components/navigation/mobile-nav';
+
+// Core hooks
+export { useViewport } from '~/common/hooks/useViewport';
+
 // Types
 export type { MobileButtonProps } from './mobile-button';
 export type { ResponsiveButtonProps } from './responsive-button';
@@ -170,4 +180,11 @@ export type {
   ResponsiveTableRowProps,
   ResponsiveTableCellProps,
   ResponsiveTableFooterProps,
-} from './responsive-table'; 
+} from './responsive-table';
+
+// Navigation Types
+export type {
+  MobileNavProps,
+  MobileNavButtonProps,
+  BottomNavProps,
+} from '~/common/components/navigation/mobile-nav'; 

@@ -1355,3 +1355,38 @@ textarea {
     animation: low-border-gentle 15s ease-in-out infinite !important;
   }
 }
+
+/* =================================================================
+   LIQUID GLASS UI EFFECTS (iOS 26 Style)
+   ================================================================= */
+
+/* Liquid Glass Text Drop Shadow */
+.liquid-glass-text {
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25));
+}
+
+/* Liquid Glass Backdrop Effects */
+.liquid-glass-backdrop {
+  backdrop-filter: blur(40px) saturate(180%);
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.liquid-glass-button {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Liquid Glass Highlight Effects */
+.liquid-glass-highlight {
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.25), transparent);
+}
+
+.liquid-glass-glow {
+  background: rgba(255, 255, 255, 0.3);
+  filter: blur(0.5px);
+}

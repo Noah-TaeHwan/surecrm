@@ -597,7 +597,11 @@ class BusinessIntelligenceSystem {
 
   private getElementSelector(element: Element): string {
     if (element.id) return `#${element.id}`;
-    if (element.className) return `.${element.className.split(' ')[0]}`;
+    if (element.className) {
+      // className이 DOMTokenList인 경우 toString()으로 변환
+      const className = element.className.toString();
+      return `.${className.split(' ')[0]}`;
+    }
     return element.tagName.toLowerCase();
   }
 

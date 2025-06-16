@@ -8,6 +8,15 @@ export interface ViewportSize {
   isDesktop: boolean;
 }
 
+// 🔧 SSR 기본값을 상수로 캐시하여 무한 루프 방지
+const SSR_DEFAULT_VIEWPORT: ViewportSize = {
+  width: 1024, 
+  height: 768,
+  isMobile: false,
+  isTablet: false,
+  isDesktop: true,
+};
+
 // Viewport tracking store
 class ViewportStore {
   private listeners = new Set<() => void>();
@@ -27,13 +36,7 @@ class ViewportStore {
 
   private getViewportSize(): ViewportSize {
     if (typeof window === 'undefined') {
-      return { 
-        width: 1024, 
-        height: 768,
-        isMobile: false,
-        isTablet: false,
-        isDesktop: true,
-      }; // SSR default
+      return SSR_DEFAULT_VIEWPORT; // 캐시된 상수 사용
     }
 
     const width = window.innerWidth;
@@ -55,14 +58,9 @@ class ViewportStore {
     return this.currentSnapshot;
   };
 
+  // 🔧 캐시된 SSR 기본값 반환으로 무한 루프 방지
   public getServerSnapshot = (): ViewportSize => {
-    return { 
-      width: 1024, 
-      height: 768,
-      isMobile: false,
-      isTablet: false,
-      isDesktop: true,
-    }; // SSR safe defaults
+    return SSR_DEFAULT_VIEWPORT;
   };
 
   public subscribe = (listener: () => void): (() => void) => {
