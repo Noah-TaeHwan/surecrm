@@ -120,6 +120,7 @@ const MobileNavItem = memo(function MobileNavItem({ item, isActive, index, onCli
     <motion.li
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -20 }}
       transition={{ 
         duration: 0.3, 
         delay: index * 0.05,
@@ -826,7 +827,15 @@ export function MobileNav({
   // 💡 컴포넌트 언마운트 시 상태 리셋
   useEffect(() => {
     if (!isOpen) {
+      // 🎯 즉시 dragX 리셋 (AnimatePresence 지연 때문에 바로 실행)
+      dragX.set(0);
       setIsClosing(false);
+    }
+  }, [isOpen, dragX]);
+
+  // 🎯 컴포넌트 마운트 시 dragX 강제 초기화 (두 번째 열기 문제 해결)
+  useEffect(() => {
+    if (isOpen) {
       dragX.set(0);
     }
   }, [isOpen, dragX]);
@@ -846,7 +855,10 @@ export function MobileNav({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: 0.3 }}
+        transition={{ 
+          duration: 0.3,
+          ease: "easeInOut"
+        }}
         className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
         onClick={handleClose}
         aria-hidden="true"
@@ -858,11 +870,15 @@ export function MobileNav({
         initial={{ x: '-100%' }}
         animate={{ x: 0 }}
         exit={{ x: '-100%' }}
-        transition={{ 
-          type: "spring", 
-          stiffness: 400, 
-          damping: 35,
-          mass: 0.8
+        transition={{
+          // 🎯 열기: spring 애니메이션으로 부드럽게
+          type: isOpen ? "spring" : "tween",
+          stiffness: isOpen ? 400 : undefined,
+          damping: isOpen ? 35 : undefined,
+          mass: isOpen ? 0.8 : undefined,
+          // 🎯 닫기: tween 애니메이션으로 더 부드럽고 느리게
+          duration: isOpen ? undefined : 0.4,
+          ease: isOpen ? undefined : [0.25, 0.46, 0.45, 0.94] // easeOutQuart
         }}
         drag="x"
         dragConstraints={{ left: -800, right: 0 }}
@@ -897,7 +913,11 @@ export function MobileNav({
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ 
+              delay: isOpen ? 0.1 : 0,
+              duration: 0.3
+            }}
           >
             <Link
               to="/dashboard"
@@ -932,13 +952,22 @@ export function MobileNav({
           <motion.ul
             initial="hidden"
             animate="visible"
+            exit="hidden"
             variants={{
-              hidden: { opacity: 0 },
+              hidden: { 
+                opacity: 0,
+                transition: {
+                  staggerChildren: 0.02,
+                  staggerDirection: -1,
+                  when: "afterChildren"
+                }
+              },
               visible: {
                 opacity: 1,
                 transition: {
                   delayChildren: 0.1,
-                  staggerChildren: 0.05
+                  staggerChildren: 0.05,
+                  when: "beforeChildren"
                 }
               }
             }}
@@ -963,7 +992,11 @@ export function MobileNav({
             <motion.div
               initial={{ opacity: 0, scaleX: 0 }}
               animate={{ opacity: 1, scaleX: 1 }}
-              transition={{ delay: 0.4, duration: 0.3 }}
+              exit={{ opacity: 0, scaleX: 0 }}
+              transition={{ 
+                delay: isOpen ? 0.4 : 0, 
+                duration: 0.3 
+              }}
               className="h-px bg-border mx-4 my-4"
             />
             
@@ -988,7 +1021,11 @@ export function MobileNav({
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
+            exit={{ opacity: 0, y: 10 }}
+            transition={{ 
+              delay: isOpen ? 0.3 : 0,
+              duration: 0.3
+            }}
             className="text-center"
           >
             <VersionDisplay />
