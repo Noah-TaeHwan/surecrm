@@ -752,8 +752,16 @@ export function MobileNav({
               </Button>
             </div>
 
-            {/* 🎯 스크롤 가능한 네비게이션 영역 */}
-            <div className="flex-1 overflow-y-auto min-h-0">
+            {/* 🎯 스크롤 가능한 네비게이션 영역 - iOS Safari 최적화 */}
+            <div 
+              className="flex-1 overflow-y-auto min-h-0" 
+              style={{
+                WebkitOverflowScrolling: 'touch', // iOS 터치 스크롤 최적화
+                overscrollBehavior: 'contain', // 스크롤 경계 처리
+                height: 'calc(100vh - 160px)', // 헤더(80px) + 푸터(80px) 제외
+                minHeight: '200px', // 최소 높이 보장
+              }}
+            >
               <nav
                 className="p-4"
                 role="navigation"
@@ -783,6 +791,9 @@ export function MobileNav({
                   }}
                   className="space-y-2"
                   role="list"
+                  style={{
+                    paddingBottom: '20px', // 하단 여백으로 스크롤 끝 표시
+                  }}
                 >
                   {/* 메인 네비게이션 */}
                   {mainNavItems.map((item, index) => {

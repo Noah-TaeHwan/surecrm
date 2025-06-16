@@ -302,17 +302,21 @@
 
 /* 🎯 모바일 사이드바 전용 터치 최적화 스타일 */
 .mobile-sidebar-container {
-  touch-action: none !important;
-  -webkit-touch-callout: none !important;
-  -webkit-user-select: none !important;
-  user-select: none !important;
-  overflow: hidden !important;
-  overscroll-behavior: contain !important;
+  /* iOS Safari 터치 스크롤 최적화 */
+  -webkit-overflow-scrolling: touch;
+  /* 스크롤 바운스 효과 방지 */
+  overscroll-behavior: contain;
+  /* 스크롤 성능 최적화 */
+  will-change: scroll-position;
+  /* iOS에서 스크롤 영역 명확히 표시 */
+  transform: translateZ(0);
 }
 
-.mobile-sidebar-container * {
-  touch-action: manipulation !important;
-  -webkit-touch-callout: none !important;
+.mobile-sidebar-container > div:nth-child(2) {
+  /* 스크롤 영역에 iOS 최적화 적용 */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  scroll-behavior: smooth;
 }
 
 /* 🎯 iOS Safari 포커스 아웃라인 완전 제거 */
