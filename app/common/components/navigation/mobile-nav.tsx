@@ -62,30 +62,9 @@ export interface MobileNavItemProps {
 type HapticType = 'selection' | 'impactLight' | 'impactMedium' | 'impactHeavy' | 'notificationSuccess' | 'notificationWarning' | 'notificationError';
 
 const triggerHapticFeedback = (type: HapticType = 'selection') => {
-  // Progressive Web App 햅틱 패턴
-  if ('vibrate' in navigator) {
-    const patterns: Record<HapticType, number[]> = {
-      selection: [5],
-      impactLight: [10],
-      impactMedium: [20],
-      impactHeavy: [30],
-      notificationSuccess: [10, 50, 10],
-      notificationWarning: [15, 100, 15],
-      notificationError: [25, 150, 25],
-    };
-    navigator.vibrate(patterns[type]);
-  }
-
-  // Web Vibration API alternative for better UX
-  if ('HapticFeedback' in window) {
-    try {
-      // @ts-ignore - Web platform 확장 API
-      window.HapticFeedback?.impact?.(type === 'selection' ? 'light' : 'medium');
-    } catch (error) {
-      // Fallback to vibration
-      console.log('Web Haptic API not available, using vibration fallback');
-    }
-  }
+  // 🎯 iOS Safari와 Chrome 보안 정책으로 인한 에러 방지를 위해 진동 기능 비활성화
+  // 대신 시각적 피드백에만 의존
+  return;
 };
 
 // 💡 최적화된 개별 네비게이션 아이템 컴포넌트 (메모이제이션)
@@ -901,7 +880,8 @@ export function MobileNav({
         }}
         drag="x"
         dragConstraints={{ left: -800, right: 0 }}
-        dragElastic={0.1}
+        dragElastic={0.05} // 🎯 Context7 권장: elastic 값 감소로 이상한 움직임 방지
+        dragMomentum={false} // 🎯 관성 비활성화로 예측 가능한 동작
         onDragEnd={handleDragEnd}
         onDrag={handleDrag}
         whileDrag={{ 
@@ -912,10 +892,15 @@ export function MobileNav({
           x: isOpen ? dragX : undefined, // 🎯 닫힐 때는 dragX 비활성화
           opacity: progressiveReveal.opacity,
           scale: progressiveReveal.scale,
+          // 🎯 iOS Safari 포커스 문제 해결
+          outline: 'none',
+          WebkitTapHighlightColor: 'transparent',
         }}
         className={cn(
           'fixed left-0 top-0 bottom-0 w-80 max-w-[85vw] bg-background/95 backdrop-blur-xl border-r border-border z-50',
           'flex flex-col shadow-2xl',
+          // 🎯 터치 스크롤 비활성화 (Context7 권장사항)  
+          'mobile-sidebar-container no-focus-outline', // 전용 CSS 클래스 적용
           // Enhanced visual feedback for gesture states
           isInterrupted && 'ring-2 ring-primary/50',
           touchCount > 1 && 'ring-2 ring-warning/50',
@@ -926,6 +911,9 @@ export function MobileNav({
         aria-label={ariaLabel}
         aria-modal="true"
         id="mobile-nav-main"
+        // 🎯 포커스 이벤트 완전 차단
+        onFocus={e => e.target.blur()}
+        tabIndex={-1}
       >
         {/* Enhanced Header */}
         <div className="flex items-center justify-between p-4 border-b border-border bg-muted/30">
@@ -944,8 +932,16 @@ export function MobileNav({
                 triggerHapticFeedback('selection');
                 handleNavigation({ label: '대시보드', href: '/', icon: null, ariaLabel: '대시보드로 이동' });
               }}
-              className="text-xl font-bold text-primary hover:text-primary/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded"
+              className="text-xl font-bold text-primary hover:text-primary/80 transition-colors rounded"
               aria-label="SureCRM 대시보드로 이동"
+              // 🎯 iOS Safari 포커스 완전 차단
+              onFocus={e => e.target.blur()}
+              tabIndex={-1}
+              style={{
+                outline: 'none',
+                WebkitTapHighlightColor: 'transparent',
+                WebkitTouchCallout: 'none',
+              }}
             >
               SureCRM
             </Link>

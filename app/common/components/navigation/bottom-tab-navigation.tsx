@@ -41,36 +41,11 @@ const navigationItems = [
   },
 ];
 
-// 🎯 사용자 상호작용 추적 - 진동 API 안전 사용을 위함
-let hasUserInteracted = false;
-
-// 전역 사용자 상호작용 이벤트 리스너 (한 번만 실행)
-if (typeof window !== 'undefined' && !hasUserInteracted) {
-  const markUserInteraction = () => {
-    hasUserInteracted = true;
-    // 이벤트 리스너 제거 (메모리 누수 방지)
-    document.removeEventListener('click', markUserInteraction);
-    document.removeEventListener('touchstart', markUserInteraction);
-    document.removeEventListener('keydown', markUserInteraction);
-  };
-
-  document.addEventListener('click', markUserInteraction, { once: true });
-  document.addEventListener('touchstart', markUserInteraction, { once: true });
-  document.addEventListener('keydown', markUserInteraction, { once: true });
-}
-
-// 🎯 안전한 진동 API 함수
+// 🎯 모바일 터치 피드백 - 진동 API 완전 비활성화 (iOS 호환성)
 function safeVibrate(duration: number = 5) {
-  // 사용자 상호작용이 없었다면 진동하지 않음
-  if (!hasUserInteracted) return;
-  
-  try {
-    if ('vibrate' in navigator && typeof navigator.vibrate === 'function') {
-      navigator.vibrate(duration);
-    }
-  } catch (error) {
-    // 진동 실패 시 조용히 무시 (콘솔 로그 없음)
-  }
+  // iOS Safari와 Chrome 보안 정책으로 인한 에러 방지를 위해 진동 기능 비활성화
+  // 대신 시각적 피드백에만 의존
+  return;
 }
 
 // 액티브 인덱스를 찾는 함수

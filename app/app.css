@@ -295,6 +295,43 @@
   user-select: none;
 }
 
+/* 🎯 모바일 터치 최적화 확장 */
+.touch-none { touch-action: none; }
+.touch-pan-x { touch-action: pan-x; }
+.touch-pan-y { touch-action: pan-y; }
+
+/* 🎯 모바일 사이드바 전용 터치 최적화 스타일 */
+.mobile-sidebar-container {
+  touch-action: none !important;
+  -webkit-touch-callout: none !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  overflow: hidden !important;
+  overscroll-behavior: contain !important;
+}
+
+.mobile-sidebar-container * {
+  touch-action: manipulation !important;
+  -webkit-touch-callout: none !important;
+}
+
+/* 🎯 iOS Safari 포커스 아웃라인 완전 제거 */
+.no-focus-outline,
+.no-focus-outline * {
+  outline: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+  -webkit-touch-callout: none !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+}
+
+.no-focus-outline:focus,
+.no-focus-outline *:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
 /* Mobile Focus States */
 .focus-mobile {
   outline: 2px solid var(--color-mobile-border-focus);
