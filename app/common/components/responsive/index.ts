@@ -60,6 +60,28 @@ export {
   ResponsiveDialogTrigger,
 } from './responsive-dialog';
 
+// Mobile Card Components
+export {
+  MobileCard,
+  MobileCardHeader,
+  MobileCardTitle,
+  MobileCardDescription,
+  MobileCardAction,
+  MobileCardContent,
+  MobileCardFooter,
+} from './mobile-card';
+
+// Responsive Card Components
+export {
+  ResponsiveCard,
+  ResponsiveCardHeader,
+  ResponsiveCardTitle,
+  ResponsiveCardDescription,
+  ResponsiveCardAction,
+  ResponsiveCardContent,
+  ResponsiveCardFooter,
+} from './responsive-card';
+
 // Types
 export type { MobileButtonProps } from './mobile-button';
 export type { ResponsiveButtonProps } from './responsive-button';
@@ -85,4 +107,16 @@ export type {
 export type {
   ResponsiveDialogProps,
   ResponsiveDialogContentProps,
-} from './responsive-dialog'; 
+} from './responsive-dialog';
+export type {
+  MobileCardSize,
+  MobileCardInteraction,
+  MobileCardElevation,
+} from './mobile-card';
+export type {
+  ResponsiveCardProps,
+  ResponsiveCardHeaderProps,
+  ResponsiveCardContentProps,
+  ResponsiveCardFooterProps,
+  ResponsiveCardActionProps,
+} from './responsive-card'; 
