@@ -33,12 +33,12 @@ export function ThemeProvider({
       const savedTheme = localStorage.getItem('surecrm-theme');
       // 강제로 다크모드 기본값 적용 (테스트용)
       console.log('🌙 현재 저장된 테마:', savedTheme);
-      
+
       // 임시: 무조건 다크모드로 설정
       const isDark = true; // savedTheme ? savedTheme === 'dark' : true;
       setIsDarkMode(isDark);
       updateDocumentClass(isDark);
-      
+
       // 로컬스토리지도 다크모드로 업데이트
       localStorage.setItem('surecrm-theme', 'dark');
       console.log('🌙 테마를 다크모드로 강제 설정');

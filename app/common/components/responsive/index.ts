@@ -132,12 +132,12 @@ export type { ResponsiveButtonProps } from './responsive-button';
 export type { MobileInputProps } from './mobile-input';
 export type { ResponsiveInputProps } from './responsive-input';
 export type { TouchableAreaProps } from './touchable-area';
-export type { 
+export type {
   MobileSelectTriggerProps,
   MobileSelectContentProps,
   MobileSelectItemProps,
 } from './mobile-select';
-export type { 
+export type {
   ResponsiveSelectProps,
   ResponsiveSelectTriggerProps,
   ResponsiveSelectContentProps,
@@ -187,4 +187,4 @@ export type {
   MobileNavProps,
   MobileNavButtonProps,
   BottomNavProps,
-} from '~/common/components/navigation/mobile-nav'; 
+} from '~/common/components/navigation/mobile-nav';

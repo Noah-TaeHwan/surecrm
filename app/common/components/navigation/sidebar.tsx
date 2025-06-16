@@ -33,7 +33,13 @@ interface NavItem {
   icon: React.ReactNode;
 }
 
-export function Sidebar({ className, onClose, id, role, 'aria-label': ariaLabel }: SidebarProps) {
+export function Sidebar({
+  className,
+  onClose,
+  id,
+  role,
+  'aria-label': ariaLabel,
+}: SidebarProps) {
   const location = useLocation();
 
   // 기본 네비게이션 아이템들 (모바일과 동일)

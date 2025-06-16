@@ -4,7 +4,15 @@ import { cn } from '~/lib/utils';
 interface ResponsiveFlexBreakpoint {
   direction?: 'row' | 'row-reverse' | 'col' | 'col-reverse';
   align?: 'stretch' | 'start' | 'center' | 'end' | 'baseline';
-  justify?: 'normal' | 'start' | 'end' | 'center' | 'between' | 'around' | 'evenly' | 'stretch';
+  justify?:
+    | 'normal'
+    | 'start'
+    | 'end'
+    | 'center'
+    | 'between'
+    | 'around'
+    | 'evenly'
+    | 'stretch';
   wrap?: 'wrap' | 'wrap-reverse' | 'nowrap';
   gap?: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 }
@@ -12,33 +20,41 @@ interface ResponsiveFlexBreakpoint {
 interface ResponsiveFlexProps {
   children: React.ReactNode;
   className?: string;
-  
+
   // 기본 flex 설정
   direction?: 'row' | 'row-reverse' | 'col' | 'col-reverse';
   align?: 'stretch' | 'start' | 'center' | 'end' | 'baseline';
-  justify?: 'normal' | 'start' | 'end' | 'center' | 'between' | 'around' | 'evenly' | 'stretch';
+  justify?:
+    | 'normal'
+    | 'start'
+    | 'end'
+    | 'center'
+    | 'between'
+    | 'around'
+    | 'evenly'
+    | 'stretch';
   wrap?: 'wrap' | 'wrap-reverse' | 'nowrap';
   gap?: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
-  
+
   // flex-grow, flex-shrink, flex-basis 제어
   grow?: boolean | number;
   shrink?: boolean | number;
   basis?: string | number;
-  
+
   // 반응형 브레이크포인트별 설정
   sm?: ResponsiveFlexBreakpoint;
   md?: ResponsiveFlexBreakpoint;
   lg?: ResponsiveFlexBreakpoint;
   xl?: ResponsiveFlexBreakpoint;
   '2xl'?: ResponsiveFlexBreakpoint;
-  
+
   // 레이아웃 옵션
   fullHeight?: boolean;
   fullWidth?: boolean;
-  
+
   // 의미론적 HTML 지원
   as?: React.ElementType;
-  
+
   // 접근성
   'aria-label'?: string;
   'aria-labelledby'?: string;
@@ -75,7 +91,7 @@ const ResponsiveFlex = React.forwardRef<HTMLElement, ResponsiveFlexProps>(
   ) => {
     // 기본 flex 클래스
     const baseClasses = ['flex'];
-    
+
     // 방향 클래스 매핑
     const directionMap = {
       row: 'flex-row',
@@ -83,7 +99,7 @@ const ResponsiveFlex = React.forwardRef<HTMLElement, ResponsiveFlexProps>(
       col: 'flex-col',
       'col-reverse': 'flex-col-reverse',
     };
-    
+
     // 정렬 클래스 매핑
     const alignMap = {
       stretch: 'items-stretch',
@@ -92,7 +108,7 @@ const ResponsiveFlex = React.forwardRef<HTMLElement, ResponsiveFlexProps>(
       end: 'items-end',
       baseline: 'items-baseline',
     };
-    
+
     // justify 클래스 매핑
     const justifyMap = {
       normal: 'justify-normal',
@@ -104,14 +120,14 @@ const ResponsiveFlex = React.forwardRef<HTMLElement, ResponsiveFlexProps>(
       evenly: 'justify-evenly',
       stretch: 'justify-stretch',
     };
-    
+
     // wrap 클래스 매핑
     const wrapMap = {
       wrap: 'flex-wrap',
       'wrap-reverse': 'flex-wrap-reverse',
       nowrap: 'flex-nowrap',
     };
-    
+
     // gap 클래스 매핑
     const gapMap = {
       none: '',
@@ -121,14 +137,14 @@ const ResponsiveFlex = React.forwardRef<HTMLElement, ResponsiveFlexProps>(
       lg: 'gap-6',
       xl: 'gap-8',
     };
-    
+
     // 기본 스타일 적용
     if (direction) baseClasses.push(directionMap[direction]);
     if (align) baseClasses.push(alignMap[align]);
     if (justify) baseClasses.push(justifyMap[justify]);
     if (wrap) baseClasses.push(wrapMap[wrap]);
     if (gap && gapMap[gap]) baseClasses.push(gapMap[gap]);
-    
+
     // flex-grow, flex-shrink, flex-basis 처리
     if (grow !== undefined) {
       if (grow === true) {
@@ -139,7 +155,7 @@ const ResponsiveFlex = React.forwardRef<HTMLElement, ResponsiveFlexProps>(
         baseClasses.push(`grow-${grow}`);
       }
     }
-    
+
     if (shrink !== undefined) {
       if (shrink === true) {
         baseClasses.push('shrink');
@@ -149,7 +165,7 @@ const ResponsiveFlex = React.forwardRef<HTMLElement, ResponsiveFlexProps>(
         baseClasses.push(`shrink-${shrink}`);
       }
     }
-    
+
     if (basis !== undefined) {
       if (typeof basis === 'string') {
         baseClasses.push(`basis-${basis}`);
@@ -157,16 +173,18 @@ const ResponsiveFlex = React.forwardRef<HTMLElement, ResponsiveFlexProps>(
         baseClasses.push(`basis-${basis}`);
       }
     }
-    
+
     // 반응형 클래스 생성 함수
     const generateResponsiveClasses = (
       breakpoint: string,
       config: ResponsiveFlexBreakpoint
     ): string[] => {
       const responsiveClasses: string[] = [];
-      
+
       if (config.direction) {
-        responsiveClasses.push(`${breakpoint}:${directionMap[config.direction]}`);
+        responsiveClasses.push(
+          `${breakpoint}:${directionMap[config.direction]}`
+        );
       }
       if (config.align) {
         responsiveClasses.push(`${breakpoint}:${alignMap[config.align]}`);
@@ -180,29 +198,25 @@ const ResponsiveFlex = React.forwardRef<HTMLElement, ResponsiveFlexProps>(
       if (config.gap && gapMap[config.gap]) {
         responsiveClasses.push(`${breakpoint}:${gapMap[config.gap]}`);
       }
-      
+
       return responsiveClasses;
     };
-    
+
     // 반응형 클래스 적용
     const responsiveClasses: string[] = [];
-    
+
     if (sm) responsiveClasses.push(...generateResponsiveClasses('sm', sm));
     if (md) responsiveClasses.push(...generateResponsiveClasses('md', md));
     if (lg) responsiveClasses.push(...generateResponsiveClasses('lg', lg));
     if (xl) responsiveClasses.push(...generateResponsiveClasses('xl', xl));
     if (xl2) responsiveClasses.push(...generateResponsiveClasses('2xl', xl2));
-    
+
     // 전체 크기 옵션
     if (fullHeight) baseClasses.push('h-full');
     if (fullWidth) baseClasses.push('w-full');
-    
-    const finalClasses = cn(
-      ...baseClasses,
-      ...responsiveClasses,
-      className
-    );
-    
+
+    const finalClasses = cn(...baseClasses, ...responsiveClasses, className);
+
     return (
       <Component
         ref={ref}
@@ -221,4 +235,4 @@ const ResponsiveFlex = React.forwardRef<HTMLElement, ResponsiveFlexProps>(
 ResponsiveFlex.displayName = 'ResponsiveFlex';
 
 export { ResponsiveFlex };
-export type { ResponsiveFlexProps, ResponsiveFlexBreakpoint }; 
+export type { ResponsiveFlexProps, ResponsiveFlexBreakpoint };

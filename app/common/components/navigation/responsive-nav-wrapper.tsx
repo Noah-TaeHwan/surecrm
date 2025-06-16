@@ -50,14 +50,14 @@ export interface Breakpoints {
  */
 const DEFAULT_BREAKPOINTS: Breakpoints = {
   desktop: 1024, // lg 브레이크포인트
-  tablet: 768,   // md 브레이크포인트
+  tablet: 768, // md 브레이크포인트
 };
 
 /**
  * 네비게이션 모드 결정 로직
  */
 function determineNavigationMode(
-  width: number, 
+  width: number,
   breakpoints: Breakpoints
 ): NavigationMode {
   if (width >= breakpoints.desktop) {
@@ -93,12 +93,15 @@ function useNavigationState(
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
   // 네비게이션 상태 계산
-  const navigationState = useMemo<NavigationState>(() => ({
-    mode,
-    isMobileNavOpen,
-    isBottomNavVisible: mode === 'mobile',
-    isSidebarVisible: mode === 'desktop',
-  }), [mode, isMobileNavOpen]);
+  const navigationState = useMemo<NavigationState>(
+    () => ({
+      mode,
+      isMobileNavOpen,
+      isBottomNavVisible: mode === 'mobile',
+      isSidebarVisible: mode === 'desktop',
+    }),
+    [mode, isMobileNavOpen]
+  );
 
   // 상태 변경 콜백 실행
   useEffect(() => {
@@ -131,18 +134,18 @@ function useNavigationState(
 /**
  * Skip Link 컴포넌트 - 접근성을 위한 콘텐츠 바로가기 링크
  */
-const SkipLink = memo(function SkipLink({ 
-  href, 
-  children 
-}: { 
-  href: string; 
-  children: React.ReactNode; 
+const SkipLink = memo(function SkipLink({
+  href,
+  children,
+}: {
+  href: string;
+  children: React.ReactNode;
 }) {
   return (
     <a
       href={href}
       className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[9999] focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:font-medium"
-      onClick={(e) => {
+      onClick={e => {
         e.preventDefault();
         const target = document.querySelector(href) as HTMLElement;
         if (target) {
@@ -158,7 +161,7 @@ const SkipLink = memo(function SkipLink({
 
 /**
  * 메인 반응형 네비게이션 래퍼 컴포넌트
- * 
+ *
  * 화면 크기에 따라 자동으로 네비게이션 모드를 전환:
  * - 데스크톱 (≥1024px): 고정 사이드바
  * - 태블릿 (768px-1023px): 햄버거 메뉴 + 모바일 네비게이션
@@ -206,7 +209,7 @@ export const ResponsiveNavWrapper = memo(function ResponsiveNavWrapper({
         <div className="flex h-screen">
           {/* SSR 시 기본 사이드바 렌더링 */}
           <Sidebar className="hidden lg:flex" />
-          <main 
+          <main
             id="main-content"
             className="flex-1 overflow-auto"
             role="main"
@@ -229,10 +232,14 @@ export const ResponsiveNavWrapper = memo(function ResponsiveNavWrapper({
 
         <div className="flex h-screen">
           {/* 고정 사이드바 */}
-          <Sidebar id="navigation" role="navigation" aria-label="주요 네비게이션" />
-          
+          <Sidebar
+            id="navigation"
+            role="navigation"
+            aria-label="주요 네비게이션"
+          />
+
           {/* 메인 컨텐츠 영역 */}
-          <main 
+          <main
             id="main-content"
             className="flex-1 overflow-auto"
             role="main"
@@ -263,9 +270,7 @@ export const ResponsiveNavWrapper = memo(function ResponsiveNavWrapper({
       >
         {/* 로고/브랜딩 */}
         <div className="flex items-center gap-3">
-          <h1 className="text-xl font-bold text-primary">
-            SureCRM
-          </h1>
+          <h1 className="text-xl font-bold text-primary">SureCRM</h1>
         </div>
 
         {/* 햄버거 메뉴 버튼 */}
@@ -273,7 +278,11 @@ export const ResponsiveNavWrapper = memo(function ResponsiveNavWrapper({
           id="mobile-nav-button"
           onClick={openMobileNav}
           isOpen={navigationState.isMobileNavOpen}
-          ariaLabel={navigationState.isMobileNavOpen ? '네비게이션 메뉴 닫기' : '네비게이션 메뉴 열기'}
+          ariaLabel={
+            navigationState.isMobileNavOpen
+              ? '네비게이션 메뉴 닫기'
+              : '네비게이션 메뉴 열기'
+          }
         />
       </motion.header>
 
@@ -282,7 +291,7 @@ export const ResponsiveNavWrapper = memo(function ResponsiveNavWrapper({
         id="main-content"
         className={cn(
           'mt-16', // 헤더 높이만큼 여백
-          navigationState.isBottomNavVisible && 'pb-20', // 바텀 네비게이션 여백
+          navigationState.isBottomNavVisible && 'pb-20' // 바텀 네비게이션 여백
         )}
         role="main"
         aria-label="메인 콘텐츠"
@@ -325,7 +334,8 @@ export interface NavigationContextValue {
   closeMobileNav: () => void;
 }
 
-export const NavigationContext = React.createContext<NavigationContextValue | null>(null);
+export const NavigationContext =
+  React.createContext<NavigationContextValue | null>(null);
 
 /**
  * 네비게이션 상태에 접근하기 위한 훅
@@ -351,11 +361,14 @@ export const NavigationProvider = memo(function NavigationProvider({
 }: NavigationProviderProps) {
   const { width } = useViewport();
   const isClient = useIsClient();
-  
+
   const navigationMode = useMemo<NavigationMode>(() => {
     if (props.forceMode) return props.forceMode;
     if (!isClient) return 'desktop';
-    return determineNavigationMode(width, props.breakpoints || DEFAULT_BREAKPOINTS);
+    return determineNavigationMode(
+      width,
+      props.breakpoints || DEFAULT_BREAKPOINTS
+    );
   }, [isClient, width, props.breakpoints, props.forceMode]);
 
   const { navigationState, openMobileNav, closeMobileNav } = useNavigationState(
@@ -363,19 +376,20 @@ export const NavigationProvider = memo(function NavigationProvider({
     props.onNavigationStateChange
   );
 
-  const contextValue = useMemo<NavigationContextValue>(() => ({
-    state: navigationState,
-    openMobileNav,
-    closeMobileNav,
-  }), [navigationState, openMobileNav, closeMobileNav]);
+  const contextValue = useMemo<NavigationContextValue>(
+    () => ({
+      state: navigationState,
+      openMobileNav,
+      closeMobileNav,
+    }),
+    [navigationState, openMobileNav, closeMobileNav]
+  );
 
   return (
     <NavigationContext.Provider value={contextValue}>
-      <ResponsiveNavWrapper {...props}>
-        {children}
-      </ResponsiveNavWrapper>
+      <ResponsiveNavWrapper {...props}>{children}</ResponsiveNavWrapper>
     </NavigationContext.Provider>
   );
 });
 
-export default ResponsiveNavWrapper; 
+export default ResponsiveNavWrapper;

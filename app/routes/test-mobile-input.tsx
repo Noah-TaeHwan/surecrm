@@ -1,11 +1,24 @@
 import { useState } from 'react';
 import { MobileInput, ResponsiveInput } from '~/common/components/responsive';
-import { Search, Mail, Phone, User, Lock, Eye, EyeOff, CreditCard } from 'lucide-react';
+import {
+  Search,
+  Mail,
+  Phone,
+  User,
+  Lock,
+  Eye,
+  EyeOff,
+  CreditCard,
+} from 'lucide-react';
 
 export function meta() {
   return [
     { title: 'Mobile Input 컴포넌트 테스트 - SureCRM' },
-    { name: 'description', content: 'MobileInput과 ResponsiveInput 컴포넌트의 다양한 사용 사례와 접근성 기능을 테스트합니다.' }
+    {
+      name: 'description',
+      content:
+        'MobileInput과 ResponsiveInput 컴포넌트의 다양한 사용 사례와 접근성 기능을 테스트합니다.',
+    },
   ];
 }
 
@@ -25,37 +38,38 @@ export default function TestMobileInputPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const handleInputChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({ ...prev, [field]: e.target.value }));
-    // 에러 클리어
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
-    }
-  };
+  const handleInputChange =
+    (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
+      setFormData(prev => ({ ...prev, [field]: e.target.value }));
+      // 에러 클리어
+      if (errors[field]) {
+        setErrors(prev => ({ ...prev, [field]: '' }));
+      }
+    };
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-    
+
     if (!formData.name.trim()) {
       newErrors.name = '이름을 입력해주세요.';
     }
-    
+
     if (!formData.email.trim()) {
       newErrors.email = '이메일을 입력해주세요.';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = '올바른 이메일 형식이 아닙니다.';
     }
-    
+
     if (!formData.phone.trim()) {
       newErrors.phone = '전화번호를 입력해주세요.';
     }
-    
+
     if (!formData.password) {
       newErrors.password = '비밀번호를 입력해주세요.';
     } else if (formData.password.length < 8) {
       newErrors.password = '비밀번호는 8자 이상이어야 합니다.';
     }
-    
+
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = '비밀번호가 일치하지 않습니다.';
     }
@@ -84,8 +98,10 @@ export default function TestMobileInputPage() {
 
         {/* 기본 MobileInput 테스트 */}
         <section className="space-y-4">
-          <h2 className="text-2xl font-semibold">1. 기본 MobileInput 컴포넌트</h2>
-          
+          <h2 className="text-2xl font-semibold">
+            1. 기본 MobileInput 컴포넌트
+          </h2>
+
           <div className="grid gap-6 md:grid-cols-2">
             {/* 크기 변형 */}
             <div className="space-y-4">
@@ -145,7 +161,7 @@ export default function TestMobileInputPage() {
         {/* 터치 피드백 테스트 */}
         <section className="space-y-4">
           <h2 className="text-2xl font-semibold">2. 터치 피드백 강도</h2>
-          
+
           <div className="grid gap-4 md:grid-cols-3">
             <MobileInput
               label="Subtle 피드백"
@@ -168,7 +184,7 @@ export default function TestMobileInputPage() {
         {/* 아이콘과 함께 사용 */}
         <section className="space-y-4">
           <h2 className="text-2xl font-semibold">3. 아이콘과 함께 사용</h2>
-          
+
           <div className="grid gap-4 md:grid-cols-2">
             <MobileInput
               label="검색"
@@ -205,7 +221,9 @@ export default function TestMobileInputPage() {
               inputMode="numeric"
               placeholder="금액을 입력하세요"
               startIcon={<CreditCard className="h-4 w-4" />}
-              endIcon={<span className="text-sm text-muted-foreground">원</span>}
+              endIcon={
+                <span className="text-sm text-muted-foreground">원</span>
+              }
               value={formData.amount}
               onChange={handleInputChange('amount')}
             />
@@ -215,7 +233,7 @@ export default function TestMobileInputPage() {
         {/* 비밀번호 필드 */}
         <section className="space-y-4">
           <h2 className="text-2xl font-semibold">4. 비밀번호 필드</h2>
-          
+
           <div className="grid gap-4 md:grid-cols-2">
             <MobileInput
               label="비밀번호"
@@ -228,7 +246,11 @@ export default function TestMobileInputPage() {
                   onClick={() => setShowPassword(!showPassword)}
                   className="text-muted-foreground hover:text-foreground"
                 >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
                 </button>
               }
               value={formData.password}
@@ -248,7 +270,11 @@ export default function TestMobileInputPage() {
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="text-muted-foreground hover:text-foreground"
                 >
-                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
                 </button>
               }
               value={formData.confirmPassword}
@@ -261,11 +287,13 @@ export default function TestMobileInputPage() {
 
         {/* ResponsiveInput 테스트 */}
         <section className="space-y-4">
-          <h2 className="text-2xl font-semibold">5. ResponsiveInput 컴포넌트</h2>
+          <h2 className="text-2xl font-semibold">
+            5. ResponsiveInput 컴포넌트
+          </h2>
           <p className="text-muted-foreground">
             화면 크기에 따라 자동으로 데스크톱/모바일 버전을 선택합니다
           </p>
-          
+
           <div className="grid gap-4 md:grid-cols-2">
             <ResponsiveInput
               label="반응형 이름 필드"
@@ -305,7 +333,7 @@ export default function TestMobileInputPage() {
         {/* 폼 제출 테스트 */}
         <section className="space-y-4">
           <h2 className="text-2xl font-semibold">6. 폼 제출 테스트</h2>
-          
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
               <ResponsiveInput
@@ -330,7 +358,7 @@ export default function TestMobileInputPage() {
                 required
               />
             </div>
-            
+
             <button
               type="submit"
               className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-12 px-4 py-2 rounded-md font-medium transition-colors"
@@ -360,4 +388,4 @@ export default function TestMobileInputPage() {
       </div>
     </div>
   );
-} 
+}

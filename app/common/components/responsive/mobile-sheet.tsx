@@ -13,7 +13,8 @@ type MobileSheetSize = 'compact' | 'default' | 'large' | 'full';
 // Mobile sheet interaction modes
 type MobileSheetInteraction = 'swipe' | 'button' | 'both';
 
-interface MobileSheetProps extends React.ComponentProps<typeof SheetPrimitive.Root> {
+interface MobileSheetProps
+  extends React.ComponentProps<typeof SheetPrimitive.Root> {
   side?: MobileSheetSide;
   size?: MobileSheetSize;
   interaction?: MobileSheetInteraction;
@@ -22,7 +23,8 @@ interface MobileSheetProps extends React.ComponentProps<typeof SheetPrimitive.Ro
   onSwipeClose?: () => void;
 }
 
-interface MobileSheetContentProps extends React.ComponentProps<typeof SheetPrimitive.Content> {
+interface MobileSheetContentProps
+  extends React.ComponentProps<typeof SheetPrimitive.Content> {
   side?: MobileSheetSide;
   size?: MobileSheetSize;
   interaction?: MobileSheetInteraction;
@@ -33,7 +35,9 @@ interface MobileSheetContentProps extends React.ComponentProps<typeof SheetPrimi
 }
 
 // Haptic feedback utility
-const triggerHapticFeedback = (type: 'light' | 'medium' | 'heavy' = 'light') => {
+const triggerHapticFeedback = (
+  type: 'light' | 'medium' | 'heavy' = 'light'
+) => {
   if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
     const patterns = {
       light: 20,
@@ -72,31 +76,32 @@ const getSizeClasses = (side: MobileSheetSide, size: MobileSheetSize) => {
       full: 'w-[90vw]',
     },
   };
-  
+
   return sizeMap[side][size];
 };
 
 // Mobile Sheet Root Component
 const MobileSheet: React.FC<MobileSheetProps> = ({ children, ...props }) => {
-  return (
-    <SheetPrimitive.Root {...props}>
-      {children}
-    </SheetPrimitive.Root>
-  );
+  return <SheetPrimitive.Root {...props}>{children}</SheetPrimitive.Root>;
 };
 MobileSheet.displayName = 'MobileSheet';
 
 // Mobile Sheet Trigger
 const MobileSheetTrigger = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Trigger>,
-  React.ComponentProps<typeof SheetPrimitive.Trigger> & { hapticFeedback?: boolean }
+  React.ComponentProps<typeof SheetPrimitive.Trigger> & {
+    hapticFeedback?: boolean;
+  }
 >(({ className, hapticFeedback = true, onClick, ...props }, ref) => {
-  const handleClick = React.useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
-    if (hapticFeedback) {
-      triggerHapticFeedback('light');
-    }
-    onClick?.(e);
-  }, [hapticFeedback, onClick]);
+  const handleClick = React.useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      if (hapticFeedback) {
+        triggerHapticFeedback('light');
+      }
+      onClick?.(e);
+    },
+    [hapticFeedback, onClick]
+  );
 
   return (
     <SheetPrimitive.Trigger
@@ -120,14 +125,19 @@ MobileSheetTrigger.displayName = 'MobileSheetTrigger';
 // Mobile Sheet Close
 const MobileSheetClose = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Close>,
-  React.ComponentProps<typeof SheetPrimitive.Close> & { hapticFeedback?: boolean }
+  React.ComponentProps<typeof SheetPrimitive.Close> & {
+    hapticFeedback?: boolean;
+  }
 >(({ className, hapticFeedback = true, onClick, ...props }, ref) => {
-  const handleClick = React.useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
-    if (hapticFeedback) {
-      triggerHapticFeedback('medium');
-    }
-    onClick?.(e);
-  }, [hapticFeedback, onClick]);
+  const handleClick = React.useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      if (hapticFeedback) {
+        triggerHapticFeedback('medium');
+      }
+      onClick?.(e);
+    },
+    [hapticFeedback, onClick]
+  );
 
   return (
     <SheetPrimitive.Close
@@ -180,167 +190,189 @@ MobileSheetOverlay.displayName = 'MobileSheetOverlay';
 const MobileSheetContent = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Content>,
   MobileSheetContentProps
->(({ 
-  className, 
-  children, 
-  side = 'bottom',
-  size = 'default',
-  interaction = 'both',
-  hapticFeedback = true,
-  swipeThreshold = 100,
-  onSwipeClose,
-  showDragHandle = true,
-  ...props 
-}, ref) => {
-  const [isDragging, setIsDragging] = React.useState(false);
-  const [dragDistance, setDragDistance] = React.useState(0);
-  const startPos = React.useRef<{ x: number; y: number } | null>(null);
-  const currentPos = React.useRef<{ x: number; y: number } | null>(null);
+>(
+  (
+    {
+      className,
+      children,
+      side = 'bottom',
+      size = 'default',
+      interaction = 'both',
+      hapticFeedback = true,
+      swipeThreshold = 100,
+      onSwipeClose,
+      showDragHandle = true,
+      ...props
+    },
+    ref
+  ) => {
+    const [isDragging, setIsDragging] = React.useState(false);
+    const [dragDistance, setDragDistance] = React.useState(0);
+    const startPos = React.useRef<{ x: number; y: number } | null>(null);
+    const currentPos = React.useRef<{ x: number; y: number } | null>(null);
 
-  // Drag handlers
-  const handleTouchStart = React.useCallback((e: React.TouchEvent) => {
-    if (interaction === 'button') return;
-    
-    const touch = e.touches[0];
-    startPos.current = { x: touch.clientX, y: touch.clientY };
-    setIsDragging(true);
-    
-    if (hapticFeedback) {
-      triggerHapticFeedback('light');
-    }
-  }, [interaction, hapticFeedback]);
+    // Drag handlers
+    const handleTouchStart = React.useCallback(
+      (e: React.TouchEvent) => {
+        if (interaction === 'button') return;
 
-  const handleTouchMove = React.useCallback((e: React.TouchEvent) => {
-    if (!isDragging || !startPos.current || interaction === 'button') return;
-    
-    const touch = e.touches[0];
-    currentPos.current = { x: touch.clientX, y: touch.clientY };
-    
-    let distance = 0;
-    if (side === 'bottom') {
-      distance = Math.max(0, touch.clientY - startPos.current.y);
-    } else if (side === 'top') {
-      distance = Math.max(0, startPos.current.y - touch.clientY);
-    } else if (side === 'right') {
-      distance = Math.max(0, touch.clientX - startPos.current.x);
-    } else if (side === 'left') {
-      distance = Math.max(0, startPos.current.x - touch.clientX);
-    }
-    
-    setDragDistance(distance);
-  }, [isDragging, side, interaction]);
+        const touch = e.touches[0];
+        startPos.current = { x: touch.clientX, y: touch.clientY };
+        setIsDragging(true);
 
-  const handleTouchEnd = React.useCallback(() => {
-    if (!isDragging || interaction === 'button') return;
-    
-    if (dragDistance > swipeThreshold) {
-      if (hapticFeedback) {
-        triggerHapticFeedback('medium');
+        if (hapticFeedback) {
+          triggerHapticFeedback('light');
+        }
+      },
+      [interaction, hapticFeedback]
+    );
+
+    const handleTouchMove = React.useCallback(
+      (e: React.TouchEvent) => {
+        if (!isDragging || !startPos.current || interaction === 'button')
+          return;
+
+        const touch = e.touches[0];
+        currentPos.current = { x: touch.clientX, y: touch.clientY };
+
+        let distance = 0;
+        if (side === 'bottom') {
+          distance = Math.max(0, touch.clientY - startPos.current.y);
+        } else if (side === 'top') {
+          distance = Math.max(0, startPos.current.y - touch.clientY);
+        } else if (side === 'right') {
+          distance = Math.max(0, touch.clientX - startPos.current.x);
+        } else if (side === 'left') {
+          distance = Math.max(0, startPos.current.x - touch.clientX);
+        }
+
+        setDragDistance(distance);
+      },
+      [isDragging, side, interaction]
+    );
+
+    const handleTouchEnd = React.useCallback(() => {
+      if (!isDragging || interaction === 'button') return;
+
+      if (dragDistance > swipeThreshold) {
+        if (hapticFeedback) {
+          triggerHapticFeedback('medium');
+        }
+        onSwipeClose?.();
+      } else if (dragDistance > 20 && hapticFeedback) {
+        // Small haptic feedback for attempted but unsuccessful swipe
+        triggerHapticFeedback('light');
       }
-      onSwipeClose?.();
-    } else if (dragDistance > 20 && hapticFeedback) {
-      // Small haptic feedback for attempted but unsuccessful swipe
-      triggerHapticFeedback('light');
-    }
-    
-    setIsDragging(false);
-    setDragDistance(0);
-    startPos.current = null;
-    currentPos.current = null;
-  }, [isDragging, dragDistance, swipeThreshold, hapticFeedback, onSwipeClose, interaction]);
 
-  // Get position-specific classes
-  const getPositionClasses = () => {
-    const baseClasses = 'fixed z-50 bg-background shadow-lg transition-all ease-out';
-    const sizeClasses = getSizeClasses(side, size);
-    
-    const positionMap = {
-      top: `inset-x-0 top-0 border-b rounded-b-lg ${sizeClasses}`,
-      bottom: `inset-x-0 bottom-0 border-t rounded-t-lg ${sizeClasses} pb-safe-area-inset-bottom`,
-      left: `inset-y-0 left-0 border-r rounded-r-lg ${sizeClasses}`,
-      right: `inset-y-0 right-0 border-l rounded-l-lg ${sizeClasses}`,
-    };
-    
-    return `${baseClasses} ${positionMap[side]}`;
-  };
+      setIsDragging(false);
+      setDragDistance(0);
+      startPos.current = null;
+      currentPos.current = null;
+    }, [
+      isDragging,
+      dragDistance,
+      swipeThreshold,
+      hapticFeedback,
+      onSwipeClose,
+      interaction,
+    ]);
 
-  // Get animation classes
-  const getAnimationClasses = () => {
-    const animationMap = {
-      top: 'data-[state=open]:slide-in-from-top data-[state=closed]:slide-out-to-top',
-      bottom: 'data-[state=open]:slide-in-from-bottom data-[state=closed]:slide-out-to-bottom',
-      left: 'data-[state=open]:slide-in-from-left data-[state=closed]:slide-out-to-left',
-      right: 'data-[state=open]:slide-in-from-right data-[state=closed]:slide-out-to-right',
-    };
-    
-    return `data-[state=open]:animate-in data-[state=closed]:animate-out ${animationMap[side]} data-[state=open]:duration-300 data-[state=closed]:duration-200`;
-  };
+    // Get position-specific classes
+    const getPositionClasses = () => {
+      const baseClasses =
+        'fixed z-50 bg-background shadow-lg transition-all ease-out';
+      const sizeClasses = getSizeClasses(side, size);
 
-  // Apply drag transform
-  const getDragStyle = (): React.CSSProperties => {
-    if (!isDragging || dragDistance === 0) return {};
-    
-    const transformMap = {
-      top: `translateY(-${dragDistance}px)`,
-      bottom: `translateY(${dragDistance}px)`,
-      left: `translateX(-${dragDistance}px)`,
-      right: `translateX(${dragDistance}px)`,
-    };
-    
-    return {
-      transform: transformMap[side],
-      opacity: Math.max(0.3, 1 - dragDistance / (swipeThreshold * 2)),
-    };
-  };
+      const positionMap = {
+        top: `inset-x-0 top-0 border-b rounded-b-lg ${sizeClasses}`,
+        bottom: `inset-x-0 bottom-0 border-t rounded-t-lg ${sizeClasses} pb-safe-area-inset-bottom`,
+        left: `inset-y-0 left-0 border-r rounded-r-lg ${sizeClasses}`,
+        right: `inset-y-0 right-0 border-l rounded-l-lg ${sizeClasses}`,
+      };
 
-  return (
-    <MobileSheetPortal>
-      <MobileSheetOverlay />
-      <SheetPrimitive.Content
-        ref={ref}
-        className={cn(
-          getPositionClasses(),
-          getAnimationClasses(),
-          'flex flex-col',
-          isDragging && 'transition-none', // Disable CSS transitions during drag
-          className
-        )}
-        style={getDragStyle()}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        {...props}
-      >
-        {/* Drag Handle */}
-        {showDragHandle && (side === 'top' || side === 'bottom') && (
-          <div className={cn(
-            'flex justify-center py-2',
-            side === 'top' ? 'order-last' : 'order-first'
-          )}>
-            <div className="w-12 h-1 bg-gray-300 rounded-full" />
-          </div>
-        )}
-        
-        {/* Close Button */}
-        <MobileSheetClose 
+      return `${baseClasses} ${positionMap[side]}`;
+    };
+
+    // Get animation classes
+    const getAnimationClasses = () => {
+      const animationMap = {
+        top: 'data-[state=open]:slide-in-from-top data-[state=closed]:slide-out-to-top',
+        bottom:
+          'data-[state=open]:slide-in-from-bottom data-[state=closed]:slide-out-to-bottom',
+        left: 'data-[state=open]:slide-in-from-left data-[state=closed]:slide-out-to-left',
+        right:
+          'data-[state=open]:slide-in-from-right data-[state=closed]:slide-out-to-right',
+      };
+
+      return `data-[state=open]:animate-in data-[state=closed]:animate-out ${animationMap[side]} data-[state=open]:duration-300 data-[state=closed]:duration-200`;
+    };
+
+    // Apply drag transform
+    const getDragStyle = (): React.CSSProperties => {
+      if (!isDragging || dragDistance === 0) return {};
+
+      const transformMap = {
+        top: `translateY(-${dragDistance}px)`,
+        bottom: `translateY(${dragDistance}px)`,
+        left: `translateX(-${dragDistance}px)`,
+        right: `translateX(${dragDistance}px)`,
+      };
+
+      return {
+        transform: transformMap[side],
+        opacity: Math.max(0.3, 1 - dragDistance / (swipeThreshold * 2)),
+      };
+    };
+
+    return (
+      <MobileSheetPortal>
+        <MobileSheetOverlay />
+        <SheetPrimitive.Content
+          ref={ref}
           className={cn(
-            'absolute z-10',
-            side === 'top' ? 'bottom-4 right-4' : 'top-4 right-4'
+            getPositionClasses(),
+            getAnimationClasses(),
+            'flex flex-col',
+            isDragging && 'transition-none', // Disable CSS transitions during drag
+            className
           )}
-          hapticFeedback={hapticFeedback}
+          style={getDragStyle()}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          {...props}
         >
-          <XIcon className="h-5 w-5" />
-          <span className="sr-only">닫기</span>
-        </MobileSheetClose>
-        
-        {/* Content */}
-        <div className="flex-1 overflow-hidden">
-          {children}
-        </div>
-      </SheetPrimitive.Content>
-    </MobileSheetPortal>
-  );
-});
+          {/* Drag Handle */}
+          {showDragHandle && (side === 'top' || side === 'bottom') && (
+            <div
+              className={cn(
+                'flex justify-center py-2',
+                side === 'top' ? 'order-last' : 'order-first'
+              )}
+            >
+              <div className="w-12 h-1 bg-gray-300 rounded-full" />
+            </div>
+          )}
+
+          {/* Close Button */}
+          <MobileSheetClose
+            className={cn(
+              'absolute z-10',
+              side === 'top' ? 'bottom-4 right-4' : 'top-4 right-4'
+            )}
+            hapticFeedback={hapticFeedback}
+          >
+            <XIcon className="h-5 w-5" />
+            <span className="sr-only">닫기</span>
+          </MobileSheetClose>
+
+          {/* Content */}
+          <div className="flex-1 overflow-hidden">{children}</div>
+        </SheetPrimitive.Content>
+      </MobileSheetPortal>
+    );
+  }
+);
 MobileSheetContent.displayName = 'MobileSheetContent';
 
 // Mobile Sheet Header
@@ -445,8 +477,4 @@ export {
   MobileSheetBody,
 };
 
-export type {
-  MobileSheetSide,
-  MobileSheetSize,
-  MobileSheetInteraction,
-}; 
+export type { MobileSheetSide, MobileSheetSize, MobileSheetInteraction };

@@ -33,7 +33,7 @@ interface ResponsiveTableProps extends React.ComponentProps<'div'> {
   mobileHapticFeedback?: boolean;
   mobileVirtualScrolling?: boolean;
   mobileMaxHeight?: string;
-  
+
   // Force mode (useful for testing)
   forceMode?: 'mobile' | 'desktop';
 }
@@ -70,23 +70,27 @@ interface ResponsiveTableFooterProps extends React.ComponentProps<'tfoot'> {
 
 // Responsive Table Root
 const ResponsiveTable = React.forwardRef<HTMLDivElement, ResponsiveTableProps>(
-  ({
-    className,
-    children,
-    mobileMode = 'cards',
-    mobileDensity = 'comfortable',
-    mobileInteraction = 'tap',
-    onMobileRowClick,
-    onMobileRowLongPress,
-    mobileHapticFeedback = true,
-    mobileVirtualScrolling = false,
-    mobileMaxHeight,
-    forceMode,
-    ...props
-  }, ref) => {
+  (
+    {
+      className,
+      children,
+      mobileMode = 'cards',
+      mobileDensity = 'comfortable',
+      mobileInteraction = 'tap',
+      onMobileRowClick,
+      onMobileRowLongPress,
+      mobileHapticFeedback = true,
+      mobileVirtualScrolling = false,
+      mobileMaxHeight,
+      forceMode,
+      ...props
+    },
+    ref
+  ) => {
     const { isMobile } = useViewport();
-    
-    const shouldUseMobile = forceMode === 'mobile' || (forceMode !== 'desktop' && isMobile);
+
+    const shouldUseMobile =
+      forceMode === 'mobile' || (forceMode !== 'desktop' && isMobile);
 
     if (shouldUseMobile) {
       return (
@@ -111,9 +115,7 @@ const ResponsiveTable = React.forwardRef<HTMLDivElement, ResponsiveTableProps>(
     // Desktop mode - use regular Table
     return (
       <div ref={ref} className={className} {...props}>
-        <Table>
-          {children}
-        </Table>
+        <Table>{children}</Table>
       </div>
     );
   }
@@ -121,16 +123,22 @@ const ResponsiveTable = React.forwardRef<HTMLDivElement, ResponsiveTableProps>(
 ResponsiveTable.displayName = 'ResponsiveTable';
 
 // Responsive Table Header
-const ResponsiveTableHeader = React.forwardRef<HTMLTableSectionElement, ResponsiveTableHeaderProps>(
-  ({
-    className,
-    children,
-    mobileSortable = false,
-    mobileSortDirection = null,
-    onMobileSort,
-    mobileSticky = false,
-    ...props
-  }, ref) => {
+const ResponsiveTableHeader = React.forwardRef<
+  HTMLTableSectionElement,
+  ResponsiveTableHeaderProps
+>(
+  (
+    {
+      className,
+      children,
+      mobileSortable = false,
+      mobileSortDirection = null,
+      onMobileSort,
+      mobileSticky = false,
+      ...props
+    },
+    ref
+  ) => {
     const { isMobile } = useViewport();
 
     if (isMobile) {
@@ -158,38 +166,45 @@ const ResponsiveTableHeader = React.forwardRef<HTMLTableSectionElement, Responsi
 ResponsiveTableHeader.displayName = 'ResponsiveTableHeader';
 
 // Responsive Table Body
-const ResponsiveTableBody = React.forwardRef<HTMLTableSectionElement, React.ComponentProps<'tbody'>>(
-  ({ className, children, ...props }, ref) => {
-    const { isMobile } = useViewport();
+const ResponsiveTableBody = React.forwardRef<
+  HTMLTableSectionElement,
+  React.ComponentProps<'tbody'>
+>(({ className, children, ...props }, ref) => {
+  const { isMobile } = useViewport();
 
-    if (isMobile) {
-      return (
-        <MobileTableBody className={className} {...props}>
-          {children}
-        </MobileTableBody>
-      );
-    }
-
+  if (isMobile) {
     return (
-      <TableBody ref={ref} className={className} {...props}>
+      <MobileTableBody className={className} {...props}>
         {children}
-      </TableBody>
+      </MobileTableBody>
     );
   }
-);
+
+  return (
+    <TableBody ref={ref} className={className} {...props}>
+      {children}
+    </TableBody>
+  );
+});
 ResponsiveTableBody.displayName = 'ResponsiveTableBody';
 
 // Responsive Table Row
-const ResponsiveTableRow = React.forwardRef<HTMLTableRowElement, ResponsiveTableRowProps>(
-  ({
-    className,
-    children,
-    mobileIndex = 0,
-    mobileData,
-    mobileIsSelected = false,
-    mobileIsHighlighted = false,
-    ...props
-  }, ref) => {
+const ResponsiveTableRow = React.forwardRef<
+  HTMLTableRowElement,
+  ResponsiveTableRowProps
+>(
+  (
+    {
+      className,
+      children,
+      mobileIndex = 0,
+      mobileData,
+      mobileIsSelected = false,
+      mobileIsHighlighted = false,
+      ...props
+    },
+    ref
+  ) => {
     const { isMobile } = useViewport();
 
     if (isMobile) {
@@ -217,17 +232,23 @@ const ResponsiveTableRow = React.forwardRef<HTMLTableRowElement, ResponsiveTable
 ResponsiveTableRow.displayName = 'ResponsiveTableRow';
 
 // Responsive Table Cell
-const ResponsiveTableCell = React.forwardRef<HTMLTableCellElement, ResponsiveTableCellProps>(
-  ({
-    className,
-    children,
-    mobileLabel,
-    mobilePrimary = false,
-    mobileSecondary = false,
-    mobileNumeric = false,
-    mobileTruncate = false,
-    ...props
-  }, ref) => {
+const ResponsiveTableCell = React.forwardRef<
+  HTMLTableCellElement,
+  ResponsiveTableCellProps
+>(
+  (
+    {
+      className,
+      children,
+      mobileLabel,
+      mobilePrimary = false,
+      mobileSecondary = false,
+      mobileNumeric = false,
+      mobileTruncate = false,
+      ...props
+    },
+    ref
+  ) => {
     const { isMobile } = useViewport();
 
     if (isMobile) {
@@ -256,72 +277,66 @@ const ResponsiveTableCell = React.forwardRef<HTMLTableCellElement, ResponsiveTab
 ResponsiveTableCell.displayName = 'ResponsiveTableCell';
 
 // Responsive Table Head (desktop only)
-const ResponsiveTableHead = React.forwardRef<HTMLTableCellElement, React.ComponentProps<'th'>>(
-  ({ className, children, ...props }, ref) => {
-    const { isMobile } = useViewport();
+const ResponsiveTableHead = React.forwardRef<
+  HTMLTableCellElement,
+  React.ComponentProps<'th'>
+>(({ className, children, ...props }, ref) => {
+  const { isMobile } = useViewport();
 
-    if (isMobile) {
-      // Mobile doesn't use table heads in the same way
-      return null;
-    }
-
-    return (
-      <TableHead ref={ref} className={className} {...props}>
-        {children}
-      </TableHead>
-    );
+  if (isMobile) {
+    // Mobile doesn't use table heads in the same way
+    return null;
   }
-);
+
+  return (
+    <TableHead ref={ref} className={className} {...props}>
+      {children}
+    </TableHead>
+  );
+});
 ResponsiveTableHead.displayName = 'ResponsiveTableHead';
 
 // Responsive Table Footer
-const ResponsiveTableFooter = React.forwardRef<HTMLTableSectionElement, ResponsiveTableFooterProps>(
-  ({
-    className,
-    children,
-    mobileSticky = false,
-    ...props
-  }, ref) => {
-    const { isMobile } = useViewport();
+const ResponsiveTableFooter = React.forwardRef<
+  HTMLTableSectionElement,
+  ResponsiveTableFooterProps
+>(({ className, children, mobileSticky = false, ...props }, ref) => {
+  const { isMobile } = useViewport();
 
-    if (isMobile) {
-      return (
-        <MobileTableFooter
-          className={className}
-          sticky={mobileSticky}
-          {...props}
-        >
-          {children}
-        </MobileTableFooter>
-      );
-    }
-
+  if (isMobile) {
     return (
-      <TableFooter ref={ref} className={className} {...props}>
+      <MobileTableFooter className={className} sticky={mobileSticky} {...props}>
         {children}
-      </TableFooter>
+      </MobileTableFooter>
     );
   }
-);
+
+  return (
+    <TableFooter ref={ref} className={className} {...props}>
+      {children}
+    </TableFooter>
+  );
+});
 ResponsiveTableFooter.displayName = 'ResponsiveTableFooter';
 
 // Responsive Table Caption (desktop only)
-const ResponsiveTableCaption = React.forwardRef<HTMLTableCaptionElement, React.ComponentProps<'caption'>>(
-  ({ className, children, ...props }, ref) => {
-    const { isMobile } = useViewport();
+const ResponsiveTableCaption = React.forwardRef<
+  HTMLTableCaptionElement,
+  React.ComponentProps<'caption'>
+>(({ className, children, ...props }, ref) => {
+  const { isMobile } = useViewport();
 
-    if (isMobile) {
-      // Caption doesn't make sense in mobile card/stacked mode
-      return null;
-    }
-
-    return (
-      <TableCaption ref={ref} className={className} {...props}>
-        {children}
-      </TableCaption>
-    );
+  if (isMobile) {
+    // Caption doesn't make sense in mobile card/stacked mode
+    return null;
   }
-);
+
+  return (
+    <TableCaption ref={ref} className={className} {...props}>
+      {children}
+    </TableCaption>
+  );
+});
 ResponsiveTableCaption.displayName = 'ResponsiveTableCaption';
 
 export {
@@ -341,4 +356,4 @@ export type {
   ResponsiveTableRowProps,
   ResponsiveTableCellProps,
   ResponsiveTableFooterProps,
-}; 
+};

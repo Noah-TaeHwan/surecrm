@@ -71,13 +71,19 @@ export function useViewport(): ViewportState {
 
 export function useDeviceType() {
   const { isMobile, isTablet, isDesktop, isXL } = useViewport();
-  
+
   return {
     isMobile,
     isTablet,
     isDesktop,
     isXL,
-    deviceType: isMobile ? 'mobile' : isTablet ? 'tablet' : isDesktop ? 'desktop' : 'xl'
+    deviceType: isMobile
+      ? 'mobile'
+      : isTablet
+        ? 'tablet'
+        : isDesktop
+          ? 'desktop'
+          : 'xl',
   } as const;
 }
 
@@ -86,4 +92,4 @@ export function useBreakpoint(breakpoint: keyof typeof BREAKPOINTS) {
   return width >= BREAKPOINTS[breakpoint];
 }
 
-export { BREAKPOINTS }; 
+export { BREAKPOINTS };

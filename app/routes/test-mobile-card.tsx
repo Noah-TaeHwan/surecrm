@@ -1,7 +1,14 @@
 import { useState } from 'react';
 import { Button } from '~/common/components/ui/button';
 import { Badge } from '~/common/components/ui/badge';
-import { Heart, Share, MoreVertical, Star, MessageCircle, Bookmark } from 'lucide-react';
+import {
+  Heart,
+  Share,
+  MoreVertical,
+  Star,
+  MessageCircle,
+  Bookmark,
+} from 'lucide-react';
 import {
   MobileCard,
   MobileCardHeader,
@@ -22,17 +29,25 @@ import {
 export function meta() {
   return [
     { title: 'Mobile Card Test - SureCRM' },
-    { name: 'description', content: 'Testing mobile-optimized card components' }
+    {
+      name: 'description',
+      content: 'Testing mobile-optimized card components',
+    },
   ];
 }
 
 export default function TestMobileCard() {
   const [likedCards, setLikedCards] = useState<Set<string>>(new Set());
-  const [bookmarkedCards, setBookmarkedCards] = useState<Set<string>>(new Set());
+  const [bookmarkedCards, setBookmarkedCards] = useState<Set<string>>(
+    new Set()
+  );
   const [actionLog, setActionLog] = useState<string[]>([]);
 
   const logAction = (action: string) => {
-    setActionLog(prev => [...prev.slice(-4), `${new Date().toLocaleTimeString()}: ${action}`]);
+    setActionLog(prev => [
+      ...prev.slice(-4),
+      `${new Date().toLocaleTimeString()}: ${action}`,
+    ]);
   };
 
   const toggleLike = (cardId: string) => {
@@ -98,8 +113,8 @@ export default function TestMobileCard() {
             </MobileCardHeader>
             <MobileCardContent>
               <p className="text-sm">
-                이 카드는 모바일 화면에서 최적의 사용자 경험을 제공하도록 설계되었습니다.
-                터치 친화적인 크기와 간격을 가지고 있습니다.
+                이 카드는 모바일 화면에서 최적의 사용자 경험을 제공하도록
+                설계되었습니다. 터치 친화적인 크기와 간격을 가지고 있습니다.
               </p>
             </MobileCardContent>
           </MobileCard>
@@ -121,7 +136,8 @@ export default function TestMobileCard() {
             </MobileCardHeader>
             <MobileCardContent>
               <p className="text-sm">
-                이 카드를 탭해보세요! 시각적 피드백과 함께 진동 피드백을 느낄 수 있습니다.
+                이 카드를 탭해보세요! 시각적 피드백과 함께 진동 피드백을 느낄 수
+                있습니다.
               </p>
             </MobileCardContent>
           </MobileCard>
@@ -168,7 +184,8 @@ export default function TestMobileCard() {
             </MobileCardHeader>
             <MobileCardContent>
               <p className="text-sm">
-                이 카드를 0.5초 이상 길게 눌러보세요. 햅틱 피드백과 함께 액션이 실행됩니다.
+                이 카드를 0.5초 이상 길게 눌러보세요. 햅틱 피드백과 함께 액션이
+                실행됩니다.
               </p>
             </MobileCardContent>
           </MobileCard>
@@ -196,8 +213,9 @@ export default function TestMobileCard() {
             </MobileCardHeader>
             <MobileCardContent>
               <p className="text-sm mb-3">
-                모바일 앱 개발에서 사용자 경험은 정말 중요합니다. 
-                특히 터치 인터랙션과 피드백은 앱의 품질을 좌우하는 핵심 요소라고 생각해요! 🚀
+                모바일 앱 개발에서 사용자 경험은 정말 중요합니다. 특히 터치
+                인터랙션과 피드백은 앱의 품질을 좌우하는 핵심 요소라고 생각해요!
+                🚀
               </p>
               <div className="bg-muted rounded-lg p-3 mb-3">
                 <p className="text-xs text-muted-foreground">
@@ -213,10 +231,12 @@ export default function TestMobileCard() {
                   className="h-8 px-2"
                   onClick={() => toggleLike('social-card')}
                 >
-                  <Heart 
+                  <Heart
                     className={`h-4 w-4 mr-1 ${
-                      likedCards.has('social-card') ? 'fill-red-500 text-red-500' : ''
-                    }`} 
+                      likedCards.has('social-card')
+                        ? 'fill-red-500 text-red-500'
+                        : ''
+                    }`}
                   />
                   <span className="text-xs">
                     {likedCards.has('social-card') ? '124' : '123'}
@@ -237,10 +257,10 @@ export default function TestMobileCard() {
                 className="h-8 w-8"
                 onClick={() => toggleBookmark('social-card')}
               >
-                <Bookmark 
+                <Bookmark
                   className={`h-4 w-4 ${
                     bookmarkedCards.has('social-card') ? 'fill-current' : ''
-                  }`} 
+                  }`}
                 />
               </Button>
             </MobileCardFooter>
@@ -250,8 +270,8 @@ export default function TestMobileCard() {
         {/* 6. Product Card */}
         <div className="space-y-2">
           <h2 className="text-lg font-semibold">6. 상품 카드</h2>
-          <MobileCard 
-            size="spacious" 
+          <MobileCard
+            size="spacious"
             elevation="medium"
             interaction="tap"
             touchFeedback={true}
@@ -271,13 +291,15 @@ export default function TestMobileCard() {
                 </MobileCardDescription>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-1">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <Star 
-                        key={star} 
-                        className="h-3 w-3 fill-yellow-400 text-yellow-400" 
+                    {[1, 2, 3, 4, 5].map(star => (
+                      <Star
+                        key={star}
+                        className="h-3 w-3 fill-yellow-400 text-yellow-400"
                       />
                     ))}
-                    <span className="text-xs text-muted-foreground ml-1">(4.8)</span>
+                    <span className="text-xs text-muted-foreground ml-1">
+                      (4.8)
+                    </span>
                   </div>
                   <span className="text-lg font-bold">₩1,550,000</span>
                 </div>
@@ -306,7 +328,8 @@ export default function TestMobileCard() {
             </ResponsiveCardHeader>
             <ResponsiveCardContent>
               <p className="text-sm">
-                현재 화면 크기: 768px 미만이면 모바일 카드, 이상이면 데스크톱 카드가 표시됩니다.
+                현재 화면 크기: 768px 미만이면 모바일 카드, 이상이면 데스크톱
+                카드가 표시됩니다.
               </p>
             </ResponsiveCardContent>
             <ResponsiveCardFooter>
@@ -322,9 +345,9 @@ export default function TestMobileCard() {
           <h2 className="text-lg font-semibold">8. 컴팩트 카드 그리드</h2>
           <div className="grid grid-cols-2 gap-3">
             {['알림', '설정', '도움말', '피드백'].map((title, index) => (
-              <MobileCard 
+              <MobileCard
                 key={title}
-                size="compact" 
+                size="compact"
                 elevation="low"
                 interaction="tap"
                 touchFeedback={true}
@@ -337,7 +360,9 @@ export default function TestMobileCard() {
                         {['🔔', '⚙️', '❓', '💬'][index]}
                       </span>
                     </div>
-                    <MobileCardTitle className="text-sm">{title}</MobileCardTitle>
+                    <MobileCardTitle className="text-sm">
+                      {title}
+                    </MobileCardTitle>
                   </div>
                 </MobileCardContent>
               </MobileCard>
@@ -359,8 +384,9 @@ export default function TestMobileCard() {
               <div className="space-y-3">
                 {Array.from({ length: 10 }, (_, i) => (
                   <div key={i} className="p-2 bg-muted/50 rounded text-sm">
-                    스크롤 가능한 아이템 {i + 1}: 이것은 긴 텍스트 콘텐츠의 예시입니다. 
-                    사용자는 이 영역을 스크롤하여 더 많은 내용을 볼 수 있습니다.
+                    스크롤 가능한 아이템 {i + 1}: 이것은 긴 텍스트 콘텐츠의
+                    예시입니다. 사용자는 이 영역을 스크롤하여 더 많은 내용을 볼
+                    수 있습니다.
                   </div>
                 ))}
               </div>
@@ -385,8 +411,8 @@ export default function TestMobileCard() {
             </MobileCardHeader>
             <MobileCardContent>
               <p className="text-sm mb-4">
-                이 카드는 우측 하단에 플로팅 액션 버튼을 가지고 있습니다. 
-                주요 액션을 강조하고 싶을 때 사용할 수 있습니다.
+                이 카드는 우측 하단에 플로팅 액션 버튼을 가지고 있습니다. 주요
+                액션을 강조하고 싶을 때 사용할 수 있습니다.
               </p>
               <div className="bg-muted/50 rounded-lg p-3">
                 <p className="text-xs text-muted-foreground">
@@ -395,8 +421,8 @@ export default function TestMobileCard() {
               </div>
             </MobileCardContent>
             <MobileCardAction position="bottom-right" floating={true}>
-              <Button 
-                size="icon" 
+              <Button
+                size="icon"
                 className="rounded-full shadow-lg"
                 onClick={() => logAction('플로팅 액션 버튼 클릭됨')}
               >
@@ -418,4 +444,4 @@ export default function TestMobileCard() {
       </div>
     </div>
   );
-} 
+}

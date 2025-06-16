@@ -130,7 +130,9 @@ export function ClientListSection({
   // 📱 모바일 반응형 카드 뷰 렌더링 (새로운 ClientCard 사용)
   const renderCardView = () => {
     // ClientProfile을 ClientCardData로 변환하는 헬퍼 함수
-    const transformToClientCardData = (client: ClientProfile): ClientCardData => ({
+    const transformToClientCardData = (
+      client: ClientProfile
+    ): ClientCardData => ({
       id: client.id,
       fullName: client.fullName,
       email: client.email,

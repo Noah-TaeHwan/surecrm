@@ -1,21 +1,34 @@
 import React, { useState, useCallback } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/common/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '~/common/components/ui/card';
 import { Badge } from '~/common/components/ui/badge';
 import { Button } from '~/common/components/ui/button';
 import { Separator } from '~/common/components/ui/separator';
-import { ResponsiveNavWrapper, NavigationProvider, useNavigation } from '../components/navigation/responsive-nav-wrapper';
-import type { NavigationState, NavigationMode } from '../components/navigation/responsive-nav-wrapper';
+import {
+  ResponsiveNavWrapper,
+  NavigationProvider,
+  useNavigation,
+} from '../components/navigation/responsive-nav-wrapper';
+import type {
+  NavigationState,
+  NavigationMode,
+} from '../components/navigation/responsive-nav-wrapper';
 import { useViewport } from '~/common/hooks/useViewport';
-import { 
-  Monitor, 
-  Tablet, 
-  Smartphone, 
-  Menu, 
-  X, 
+import {
+  Monitor,
+  Tablet,
+  Smartphone,
+  Menu,
+  X,
   RotateCcw,
   Info,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
 } from 'lucide-react';
 import { BottomTabNavigation } from '../components/navigation/bottom-tab-navigation';
 
@@ -63,16 +76,20 @@ function NavigationStateDisplay() {
         {/* 화면 크기 정보 */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <h4 className="font-medium text-sm text-muted-foreground">화면 크기</h4>
+            <h4 className="font-medium text-sm text-muted-foreground">
+              화면 크기
+            </h4>
             <div className="text-lg font-mono">
               {width} × {height}px
             </div>
           </div>
-          
+
           <div className="space-y-2">
-            <h4 className="font-medium text-sm text-muted-foreground">네비게이션 모드</h4>
-            <Badge 
-              variant="outline" 
+            <h4 className="font-medium text-sm text-muted-foreground">
+              네비게이션 모드
+            </h4>
+            <Badge
+              variant="outline"
               className={`${getModeColor(state.mode)} font-medium`}
             >
               {getModeIcon(state.mode)}
@@ -93,7 +110,7 @@ function NavigationStateDisplay() {
               <X className="h-4 w-4 text-red-500" />
             )}
           </div>
-          
+
           <div className="flex items-center justify-between p-3 rounded-lg border bg-muted/50">
             <span className="text-sm font-medium">모바일 메뉴 열림</span>
             {state.isMobileNavOpen ? (
@@ -102,7 +119,7 @@ function NavigationStateDisplay() {
               <X className="h-4 w-4 text-red-500" />
             )}
           </div>
-          
+
           <div className="flex items-center justify-between p-3 rounded-lg border bg-muted/50">
             <span className="text-sm font-medium">하단 탭 표시</span>
             {state.isBottomNavVisible ? (
@@ -145,7 +162,7 @@ function TestControlPanel() {
             <Menu className="h-4 w-4 mr-2" />
             모바일 메뉴 열기
           </Button>
-          
+
           <Button
             onClick={closeMobileNav}
             disabled={!state.isMobileNavOpen}
@@ -155,7 +172,7 @@ function TestControlPanel() {
             <X className="h-4 w-4 mr-2" />
             모바일 메뉴 닫기
           </Button>
-          
+
           <Button
             onClick={() => window.location.reload()}
             variant="outline"
@@ -165,14 +182,15 @@ function TestControlPanel() {
             페이지 새로고침
           </Button>
         </div>
-        
+
         {state.mode !== 'desktop' && (
           <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
             <div className="flex items-start gap-2">
               <AlertCircle className="h-4 w-4 text-yellow-600 mt-0.5" />
               <div className="text-sm text-yellow-800">
-                <strong>테스트 팁:</strong> 브라우저 개발자 도구의 디바이스 시뮬레이터를 사용하여 
-                다양한 화면 크기에서 네비게이션 동작을 테스트해보세요.
+                <strong>테스트 팁:</strong> 브라우저 개발자 도구의 디바이스
+                시뮬레이터를 사용하여 다양한 화면 크기에서 네비게이션 동작을
+                테스트해보세요.
               </div>
             </div>
           </div>
@@ -206,7 +224,7 @@ function BreakpointGuide() {
             </div>
             <div className="text-sm text-blue-700">고정 사이드바</div>
           </div>
-          
+
           <div className="flex items-center justify-between p-3 rounded-lg border bg-orange-50 border-orange-200">
             <div className="flex items-center gap-3">
               <Tablet className="h-5 w-5 text-orange-600" />
@@ -217,7 +235,7 @@ function BreakpointGuide() {
             </div>
             <div className="text-sm text-orange-700">햄버거 메뉴</div>
           </div>
-          
+
           <div className="flex items-center justify-between p-3 rounded-lg border bg-green-50 border-green-200">
             <div className="flex items-center gap-3">
               <Smartphone className="h-5 w-5 text-green-600" />
@@ -245,14 +263,15 @@ function TestPageContent() {
           반응형 네비게이션 래퍼 테스트
         </h1>
         <p className="text-muted-foreground">
-          화면 크기에 따라 자동으로 네비게이션 모드가 변경되는 것을 확인해보세요.
+          화면 크기에 따라 자동으로 네비게이션 모드가 변경되는 것을
+          확인해보세요.
         </p>
       </div>
 
       <NavigationStateDisplay />
       <TestControlPanel />
       <BreakpointGuide />
-      
+
       {/* 추가 컨텐츠 */}
       <Card>
         <CardHeader>
@@ -295,7 +314,8 @@ function TestPageContent() {
  * 반응형 네비게이션 테스트 페이지
  */
 export default function TestResponsiveNav() {
-  const [navigationState, setNavigationState] = useState<NavigationState | null>(null);
+  const [navigationState, setNavigationState] =
+    useState<NavigationState | null>(null);
 
   const handleNavigationStateChange = useCallback((state: NavigationState) => {
     setNavigationState(state);
@@ -335,7 +355,7 @@ export default function TestResponsiveNav() {
         {/* 스크롤 가능한 콘텐츠 */}
         <div className="space-y-4">
           {Array.from({ length: 10 }, (_, i) => (
-            <div 
+            <div
               key={i}
               className="bg-white/20 backdrop-blur-sm rounded-xl p-4 border border-white/30"
             >
@@ -343,8 +363,9 @@ export default function TestResponsiveNav() {
                 콘텐츠 아이템 {i + 1}
               </h3>
               <p className="text-white/80 text-sm">
-                리퀴드글래스 효과가 이 콘텐츠들과 어떻게 상호작용하는지 확인해보세요. 
-                바텀네비게이션의 투명한 글래스 효과가 배경 색상을 자연스럽게 반영합니다.
+                리퀴드글래스 효과가 이 콘텐츠들과 어떻게 상호작용하는지
+                확인해보세요. 바텀네비게이션의 투명한 글래스 효과가 배경 색상을
+                자연스럽게 반영합니다.
               </p>
             </div>
           ))}
@@ -358,4 +379,4 @@ export default function TestResponsiveNav() {
       <BottomTabNavigation isMenuOpen={false} />
     </div>
   );
-} 
+}

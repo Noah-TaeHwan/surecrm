@@ -6,13 +6,15 @@ import { cn } from '~/lib/utils';
 // Size variants for mobile optimization
 type MobileDialogSize = 'sm' | 'md' | 'lg' | 'xl' | 'full';
 
-interface MobileDialogProps extends React.ComponentProps<typeof DialogPrimitive.Root> {
+interface MobileDialogProps
+  extends React.ComponentProps<typeof DialogPrimitive.Root> {
   size?: MobileDialogSize;
   dismissible?: boolean;
   swipeToClose?: boolean;
 }
 
-interface MobileDialogContentProps extends React.ComponentProps<typeof DialogPrimitive.Content> {
+interface MobileDialogContentProps
+  extends React.ComponentProps<typeof DialogPrimitive.Content> {
   size?: MobileDialogSize;
   dismissible?: boolean;
   swipeToClose?: boolean;
@@ -22,25 +24,32 @@ interface MobileDialogContentProps extends React.ComponentProps<typeof DialogPri
 // Size class mappings for mobile-optimized dimensions
 const sizeClasses = {
   sm: 'max-h-[40vh] w-full max-w-sm',
-  md: 'max-h-[60vh] w-full max-w-md', 
+  md: 'max-h-[60vh] w-full max-w-md',
   lg: 'max-h-[80vh] w-full max-w-lg',
   xl: 'max-h-[90vh] w-full max-w-xl',
-  full: 'h-full w-full max-w-none'
+  full: 'h-full w-full max-w-none',
 } as const;
 
 // Haptic feedback utility
-const triggerHapticFeedback = (intensity: 'light' | 'medium' | 'heavy' = 'light') => {
+const triggerHapticFeedback = (
+  intensity: 'light' | 'medium' | 'heavy' = 'light'
+) => {
   if ('vibrate' in navigator) {
     const patterns = {
       light: [10],
       medium: [20],
-      heavy: [50]
+      heavy: [50],
     };
     navigator.vibrate(patterns[intensity]);
   }
 };
 
-function MobileDialog({ size = 'md', dismissible = true, swipeToClose = true, ...props }: MobileDialogProps) {
+function MobileDialog({
+  size = 'md',
+  dismissible = true,
+  swipeToClose = true,
+  ...props
+}: MobileDialogProps) {
   return <DialogPrimitive.Root data-slot="mobile-dialog" {...props} />;
 }
 
@@ -158,44 +167,52 @@ function MobileDialogContent({
   const currentYRef = React.useRef(0);
 
   // Touch handlers for swipe-to-dismiss
-  const handleTouchStart = React.useCallback((e: React.TouchEvent) => {
-    if (!swipeToClose) return;
-    
-    const touch = e.touches[0];
-    startYRef.current = touch.clientY;
-    currentYRef.current = touch.clientY;
-    setIsDragging(true);
-    triggerHapticFeedback('light');
-  }, [swipeToClose]);
+  const handleTouchStart = React.useCallback(
+    (e: React.TouchEvent) => {
+      if (!swipeToClose) return;
 
-  const handleTouchMove = React.useCallback((e: React.TouchEvent) => {
-    if (!swipeToClose || !isDragging) return;
-    
-    const touch = e.touches[0];
-    currentYRef.current = touch.clientY;
-    const deltaY = currentYRef.current - startYRef.current;
-    
-    // Only allow downward swipes
-    if (deltaY > 0) {
-      setDragOffset(deltaY);
-      // Haptic feedback at threshold
-      if (deltaY > 100) {
-        triggerHapticFeedback('medium');
+      const touch = e.touches[0];
+      startYRef.current = touch.clientY;
+      currentYRef.current = touch.clientY;
+      setIsDragging(true);
+      triggerHapticFeedback('light');
+    },
+    [swipeToClose]
+  );
+
+  const handleTouchMove = React.useCallback(
+    (e: React.TouchEvent) => {
+      if (!swipeToClose || !isDragging) return;
+
+      const touch = e.touches[0];
+      currentYRef.current = touch.clientY;
+      const deltaY = currentYRef.current - startYRef.current;
+
+      // Only allow downward swipes
+      if (deltaY > 0) {
+        setDragOffset(deltaY);
+        // Haptic feedback at threshold
+        if (deltaY > 100) {
+          triggerHapticFeedback('medium');
+        }
       }
-    }
-  }, [swipeToClose, isDragging]);
+    },
+    [swipeToClose, isDragging]
+  );
 
   const handleTouchEnd = React.useCallback(() => {
     if (!swipeToClose || !isDragging) return;
-    
+
     setIsDragging(false);
     const deltaY = currentYRef.current - startYRef.current;
-    
+
     // Close if swiped down enough
     if (deltaY > 150) {
       triggerHapticFeedback('heavy');
       // Trigger close through Radix
-      const closeButton = contentRef.current?.querySelector('[data-slot="mobile-dialog-close"]') as HTMLButtonElement;
+      const closeButton = contentRef.current?.querySelector(
+        '[data-slot="mobile-dialog-close"]'
+      ) as HTMLButtonElement;
       closeButton?.click();
     } else {
       // Snap back
@@ -235,7 +252,7 @@ function MobileDialogContent({
           className
         )}
         style={{
-          transform: dragOffset > 0 ? `translateY(${dragOffset}px)` : undefined
+          transform: dragOffset > 0 ? `translateY(${dragOffset}px)` : undefined,
         }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
@@ -244,7 +261,7 @@ function MobileDialogContent({
       >
         {/* Drag handle */}
         {showDragHandle && (
-          <div 
+          <div
             className="flex justify-center pt-3 pb-2"
             aria-label="Drag to close"
           >
@@ -253,9 +270,7 @@ function MobileDialogContent({
         )}
 
         {/* Content */}
-        <div className="px-4 pb-4">
-          {children}
-        </div>
+        <div className="px-4 pb-4">{children}</div>
 
         {/* Close button */}
         {dismissible && (
@@ -269,9 +284,9 @@ function MobileDialogContent({
   );
 }
 
-function MobileDialogHeader({ 
-  className, 
-  ...props 
+function MobileDialogHeader({
+  className,
+  ...props
 }: React.ComponentProps<'div'>) {
   return (
     <div
@@ -287,9 +302,9 @@ function MobileDialogHeader({
   );
 }
 
-function MobileDialogFooter({ 
-  className, 
-  ...props 
+function MobileDialogFooter({
+  className,
+  ...props
 }: React.ComponentProps<'div'>) {
   return (
     <div
@@ -353,8 +368,4 @@ export {
   MobileDialogTrigger,
 };
 
-export type {
-  MobileDialogSize,
-  MobileDialogProps,
-  MobileDialogContentProps,
-}; 
+export type { MobileDialogSize, MobileDialogProps, MobileDialogContentProps };

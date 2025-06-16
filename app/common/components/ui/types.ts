@@ -26,8 +26,33 @@ export type GapScale = 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 export type PaddingScale = 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 export type MarginScale = 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 
-export type MaxWidthScale = 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl' | '7xl' | 'full';
-export type MinHeightScale = 'none' | 'screen' | 'full' | 'quarter' | 'half' | '96' | '80' | '64' | '48' | '32' | '24' | '16';
+export type MaxWidthScale =
+  | 'none'
+  | 'xs'
+  | 'sm'
+  | 'md'
+  | 'lg'
+  | 'xl'
+  | '2xl'
+  | '3xl'
+  | '4xl'
+  | '5xl'
+  | '6xl'
+  | '7xl'
+  | 'full';
+export type MinHeightScale =
+  | 'none'
+  | 'screen'
+  | 'full'
+  | 'quarter'
+  | 'half'
+  | '96'
+  | '80'
+  | '64'
+  | '48'
+  | '32'
+  | '24'
+  | '16';
 
 // =============================================================================
 // WCAG 2.1 ACCESSIBILITY TYPES
@@ -98,7 +123,13 @@ export interface AccessibilityProps extends AriaAttributes {
 
 export type FlexDirection = 'row' | 'row-reverse' | 'column' | 'column-reverse';
 export type AlignItems = 'start' | 'end' | 'center' | 'baseline' | 'stretch';
-export type JustifyContent = 'start' | 'end' | 'center' | 'between' | 'around' | 'evenly';
+export type JustifyContent =
+  | 'start'
+  | 'end'
+  | 'center'
+  | 'between'
+  | 'around'
+  | 'evenly';
 export type FlexWrap = 'wrap' | 'wrap-reverse' | 'nowrap';
 export type FlexGrow = 0 | 1;
 export type FlexShrink = 0 | 1;
@@ -108,7 +139,17 @@ export type FlexBasis = 'auto' | 'full' | '1/2' | '1/3' | '2/3' | '1/4' | '3/4';
 // STYLING TYPES (Updated to match implementations)
 // =============================================================================
 
-export type BackgroundScale = 'none' | 'white' | 'gray' | 'primary' | 'secondary' | 'gray-50' | 'gray-100' | 'gray-200' | 'blue-50' | 'blue-100';
+export type BackgroundScale =
+  | 'none'
+  | 'white'
+  | 'gray'
+  | 'primary'
+  | 'secondary'
+  | 'gray-50'
+  | 'gray-100'
+  | 'gray-200'
+  | 'blue-50'
+  | 'blue-100';
 export type RoundedScale = 'none' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full';
 export type ShadowScale = 'none' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 export type BorderScale = 'none' | 'thin' | 'sm' | 'md' | 'lg' | 'xl';
@@ -260,36 +301,37 @@ export interface AccessibilitySuggestion {
 export const AccessibilityRules = {
   // WCAG 1.1.1 - Non-text Content
   ALT_TEXT_REQUIRED: 'alt-text-required',
-  
+
   // WCAG 1.3.1 - Info and Relationships
   SEMANTIC_STRUCTURE: 'semantic-structure',
   HEADING_HIERARCHY: 'heading-hierarchy',
-  
+
   // WCAG 1.4.3 - Contrast (Minimum)
   COLOR_CONTRAST: 'color-contrast',
-  
+
   // WCAG 2.1.1 - Keyboard
   KEYBOARD_ACCESSIBLE: 'keyboard-accessible',
   FOCUS_VISIBLE: 'focus-visible',
-  
+
   // WCAG 2.4.1 - Bypass Blocks
   SKIP_LINKS: 'skip-links',
-  
+
   // WCAG 2.4.3 - Focus Order
   FOCUS_ORDER: 'focus-order',
-  
+
   // WCAG 2.4.6 - Headings and Labels
   DESCRIPTIVE_LABELS: 'descriptive-labels',
-  
+
   // WCAG 3.2.2 - On Input
   PREDICTABLE_INPUT: 'predictable-input',
-  
+
   // WCAG 4.1.2 - Name, Role, Value
   ARIA_LABELS: 'aria-labels',
   ROLE_DEFINITION: 'role-definition',
 } as const;
 
-export type AccessibilityRuleCode = typeof AccessibilityRules[keyof typeof AccessibilityRules];
+export type AccessibilityRuleCode =
+  (typeof AccessibilityRules)[keyof typeof AccessibilityRules];
 
 // =============================================================================
 // DEVELOPMENT & DEBUGGING TYPES
@@ -320,14 +362,22 @@ export interface ResponsiveDebugConfig {
 // UTILITY TYPES
 // =============================================================================
 
-export type ComponentVariant = 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'error';
+export type ComponentVariant =
+  | 'default'
+  | 'primary'
+  | 'secondary'
+  | 'success'
+  | 'warning'
+  | 'error';
 export type ComponentSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
 // Helper type for extracting responsive values
-export type ExtractResponsiveValue<T> = T extends ResponsiveValue<infer U> ? U : T;
+export type ExtractResponsiveValue<T> =
+  T extends ResponsiveValue<infer U> ? U : T;
 
 // Helper type for component ref forwarding
-export type ComponentRef<T extends ElementType> = React.ComponentPropsWithRef<T>['ref'];
+export type ComponentRef<T extends ElementType> =
+  React.ComponentPropsWithRef<T>['ref'];
 
 // =============================================================================
 // EXPORT ALL TYPES
@@ -338,4 +388,4 @@ export type {
   ReactNode,
   HTMLAttributes,
   ElementType,
-}; 
+};

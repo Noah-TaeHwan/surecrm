@@ -1,11 +1,23 @@
 import { useState } from 'react';
 import { TouchableArea } from '~/common/components/responsive';
-import { Heart, Star, Settings, Play, Pause, Volume2, VolumeX } from 'lucide-react';
+import {
+  Heart,
+  Star,
+  Settings,
+  Play,
+  Pause,
+  Volume2,
+  VolumeX,
+} from 'lucide-react';
 
 export function meta() {
   return [
     { title: 'TouchableArea 컴포넌트 테스트 - SureCRM' },
-    { name: 'description', content: 'TouchableArea 컴포넌트의 다양한 사용 사례와 접근성 기능을 테스트합니다.' }
+    {
+      name: 'description',
+      content:
+        'TouchableArea 컴포넌트의 다양한 사용 사례와 접근성 기능을 테스트합니다.',
+    },
   ];
 }
 
@@ -156,18 +168,24 @@ export default function TestTouchableAreaPage() {
               aria-label={`좋아요 ${likeCount}개`}
               size="lg"
             >
-              <Heart className="w-5 h-5" fill={likeCount > 0 ? "currentColor" : "none"} />
+              <Heart
+                className="w-5 h-5"
+                fill={likeCount > 0 ? 'currentColor' : 'none'}
+              />
               {likeCount > 0 && <span className="ml-1">{likeCount}</span>}
             </TouchableArea>
 
             <TouchableArea
               onPress={() => setIsStarred(!isStarred)}
               className={`rounded-full ${isStarred ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-gray-300 hover:bg-gray-400'} text-white`}
-              aria-label={isStarred ? "즐겨찾기 해제" : "즐겨찾기 추가"}
+              aria-label={isStarred ? '즐겨찾기 해제' : '즐겨찾기 추가'}
               aria-pressed={isStarred}
               size="lg"
             >
-              <Star className="w-5 h-5" fill={isStarred ? "currentColor" : "none"} />
+              <Star
+                className="w-5 h-5"
+                fill={isStarred ? 'currentColor' : 'none'}
+              />
             </TouchableArea>
 
             <TouchableArea
@@ -188,21 +206,29 @@ export default function TestTouchableAreaPage() {
             <TouchableArea
               onPress={() => setIsPlaying(!isPlaying)}
               className="bg-blue-600 text-white rounded-full hover:bg-blue-700"
-              aria-label={isPlaying ? "일시정지" : "재생"}
+              aria-label={isPlaying ? '일시정지' : '재생'}
               aria-pressed={isPlaying}
               size="xl"
             >
-              {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
+              {isPlaying ? (
+                <Pause className="w-6 h-6" />
+              ) : (
+                <Play className="w-6 h-6" />
+              )}
             </TouchableArea>
 
             <TouchableArea
               onPress={() => setIsMuted(!isMuted)}
               className="bg-gray-600 text-white rounded-full hover:bg-gray-700"
-              aria-label={isMuted ? "음소거 해제" : "음소거"}
+              aria-label={isMuted ? '음소거 해제' : '음소거'}
               aria-pressed={isMuted}
               size="lg"
             >
-              {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+              {isMuted ? (
+                <VolumeX className="w-5 h-5" />
+              ) : (
+                <Volume2 className="w-5 h-5" />
+              )}
             </TouchableArea>
           </div>
         </section>
@@ -215,8 +241,8 @@ export default function TestTouchableAreaPage() {
               { id: 'home', label: '홈' },
               { id: 'profile', label: '프로필' },
               { id: 'settings', label: '설정' },
-              { id: 'help', label: '도움말' }
-            ].map((tab) => (
+              { id: 'help', label: '도움말' },
+            ].map(tab => (
               <TouchableArea
                 key={tab.id}
                 role="tab"
@@ -235,7 +261,9 @@ export default function TestTouchableAreaPage() {
             ))}
           </div>
           <div className="mt-4 p-4 bg-gray-50 rounded-md">
-            <p>선택된 탭: <strong>{selectedTab}</strong></p>
+            <p>
+              선택된 탭: <strong>{selectedTab}</strong>
+            </p>
           </div>
         </section>
 
@@ -246,8 +274,8 @@ export default function TestTouchableAreaPage() {
             {[
               { id: 'option1', label: '옵션 1' },
               { id: 'option2', label: '옵션 2' },
-              { id: 'option3', label: '옵션 3' }
-            ].map((option) => (
+              { id: 'option3', label: '옵션 3' },
+            ].map(option => (
               <TouchableArea
                 key={option.id}
                 role="option"
@@ -277,16 +305,21 @@ export default function TestTouchableAreaPage() {
           >
             <div className="flex justify-between items-center">
               <span>상세 정보 {isExpanded ? '숨기기' : '보기'}</span>
-              <span className={`transform transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
+              <span
+                className={`transform transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+              >
                 ▼
               </span>
             </div>
           </TouchableArea>
-          
+
           {isExpanded && (
             <div className="mt-4 p-4 bg-gray-50 rounded-md">
               <p>여기에 상세 정보가 표시됩니다.</p>
-              <p>TouchableArea 컴포넌트는 WCAG 2.5.5 Target Size (AAA) 가이드라인을 준수합니다.</p>
+              <p>
+                TouchableArea 컴포넌트는 WCAG 2.5.5 Target Size (AAA)
+                가이드라인을 준수합니다.
+              </p>
               <ul className="mt-2 list-disc list-inside space-y-1">
                 <li>최소 44x44px 터치 타겟 크기</li>
                 <li>키보드 접근성 완전 지원</li>
@@ -299,7 +332,9 @@ export default function TestTouchableAreaPage() {
 
         {/* 접근성 정보 */}
         <section className="bg-blue-50 rounded-lg p-6">
-          <h2 className="text-xl font-semibold mb-4 text-blue-900">접근성 기능</h2>
+          <h2 className="text-xl font-semibold mb-4 text-blue-900">
+            접근성 기능
+          </h2>
           <div className="grid md:grid-cols-2 gap-4 text-sm">
             <div>
               <h3 className="font-medium text-blue-800 mb-2">키보드 지원</h3>
@@ -338,4 +373,4 @@ export default function TestTouchableAreaPage() {
       </div>
     </div>
   );
-} 
+}

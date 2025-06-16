@@ -34,22 +34,28 @@ class MockResizeObserver {
     const mockEntry = {
       target,
       contentRect: mockContentRect,
-      contentBoxSize: [{
-        inlineSize: window.innerWidth,
-        blockSize: window.innerHeight,
-      }],
-      borderBoxSize: [{
-        inlineSize: window.innerWidth,
-        blockSize: window.innerHeight,
-      }],
-      devicePixelContentBoxSize: [{
-        inlineSize: window.innerWidth,
-        blockSize: window.innerHeight,
-      }],
+      contentBoxSize: [
+        {
+          inlineSize: window.innerWidth,
+          blockSize: window.innerHeight,
+        },
+      ],
+      borderBoxSize: [
+        {
+          inlineSize: window.innerWidth,
+          blockSize: window.innerHeight,
+        },
+      ],
+      devicePixelContentBoxSize: [
+        {
+          inlineSize: window.innerWidth,
+          blockSize: window.innerHeight,
+        },
+      ],
     } as unknown as ResizeObserverEntry;
 
     this.entries = [mockEntry];
-    
+
     // Simulate immediate callback execution for testing
     setTimeout(() => {
       this.callback(this.entries, this);
@@ -148,7 +154,7 @@ declare global {
 (global as any).mockWindowResize = (width: number, height: number) => {
   windowWidth = width;
   windowHeight = height;
-  
+
   // Trigger resize event
   const resizeEvent = new Event('resize');
   window.dispatchEvent(resizeEvent);
@@ -165,7 +171,7 @@ beforeEach(() => {
   // Reset window dimensions to default
   windowWidth = 1024;
   windowHeight = 768;
-  
+
   // Clear all mocks
   vi.clearAllMocks();
-}); 
+});

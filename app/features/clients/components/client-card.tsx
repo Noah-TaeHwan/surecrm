@@ -1,5 +1,14 @@
 import { memo } from 'react';
-import { Phone, Mail, MapPin, User, TrendingUp, Tag, Calendar, Star } from 'lucide-react';
+import {
+  Phone,
+  Mail,
+  MapPin,
+  User,
+  TrendingUp,
+  Tag,
+  Calendar,
+  Star,
+} from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -71,12 +80,14 @@ const IMPORTANCE_CONFIG = {
   },
   medium: {
     label: '일반',
-    className: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400',
+    className:
+      'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400',
     icon: User,
   },
   low: {
     label: '관찰',
-    className: 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400',
+    className:
+      'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400',
     icon: TrendingUp,
   },
 } as const;
@@ -190,7 +201,7 @@ export const ClientCard = memo(function ClientCard({
               </p>
             )}
           </div>
-          
+
           {/* 중요도 배지 */}
           <Badge
             variant="secondary"
@@ -208,7 +219,10 @@ export const ClientCard = memo(function ClientCard({
         <div className="space-y-2">
           {client.phone && (
             <div className="flex items-center gap-2">
-              <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" aria-hidden="true" />
+              <Phone
+                className="h-4 w-4 text-muted-foreground flex-shrink-0"
+                aria-hidden="true"
+              />
               <Button
                 variant="link"
                 className="h-auto p-0 text-sm text-foreground hover:text-primary focus-visible:ring-1 focus-visible:ring-primary"
@@ -222,7 +236,10 @@ export const ClientCard = memo(function ClientCard({
 
           {client.email && (
             <div className="flex items-center gap-2">
-              <Mail className="h-4 w-4 text-muted-foreground flex-shrink-0" aria-hidden="true" />
+              <Mail
+                className="h-4 w-4 text-muted-foreground flex-shrink-0"
+                aria-hidden="true"
+              />
               <Button
                 variant="link"
                 className="h-auto p-0 text-sm text-foreground hover:text-primary focus-visible:ring-1 focus-visible:ring-primary"
@@ -236,7 +253,10 @@ export const ClientCard = memo(function ClientCard({
 
           {client.address && (
             <div className="flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" aria-hidden="true" />
+              <MapPin
+                className="h-4 w-4 text-muted-foreground flex-shrink-0"
+                aria-hidden="true"
+              />
               <span className="text-sm text-muted-foreground truncate">
                 {client.address}
               </span>
@@ -247,10 +267,16 @@ export const ClientCard = memo(function ClientCard({
         {/* 🎯 현재 단계 */}
         {client.currentStage && (
           <div className="flex items-center gap-2">
-            <TrendingUp className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+            <TrendingUp
+              className="h-4 w-4 text-muted-foreground"
+              aria-hidden="true"
+            />
             <Badge
               variant="outline"
-              style={{ borderColor: client.currentStage.color, color: client.currentStage.color }}
+              style={{
+                borderColor: client.currentStage.color,
+                color: client.currentStage.color,
+              }}
               className="text-xs"
             >
               {client.currentStage.name}
@@ -261,7 +287,10 @@ export const ClientCard = memo(function ClientCard({
         {/* 🎯 태그 */}
         {client.tags && client.tags.length > 0 && (
           <div className="flex items-center gap-2">
-            <Tag className="h-4 w-4 text-muted-foreground flex-shrink-0" aria-hidden="true" />
+            <Tag
+              className="h-4 w-4 text-muted-foreground flex-shrink-0"
+              aria-hidden="true"
+            />
             <div className="flex flex-wrap gap-1">
               {client.tags.slice(0, 3).map((tag, index) => (
                 <Badge
@@ -299,7 +328,10 @@ export const ClientCard = memo(function ClientCard({
           {/* 다음 액션 */}
           {client.nextActionDate && (
             <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+              <Calendar
+                className="h-4 w-4 text-muted-foreground"
+                aria-hidden="true"
+              />
               <span className="text-sm text-muted-foreground">
                 다음 연락: {formatDate(client.nextActionDate)}
               </span>
@@ -311,7 +343,8 @@ export const ClientCard = memo(function ClientCard({
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4 text-primary" aria-hidden="true" />
               <span className="text-sm text-primary font-medium">
-                {formatDate(client.upcomingMeeting.date)} - {client.upcomingMeeting.type}
+                {formatDate(client.upcomingMeeting.date)} -{' '}
+                {client.upcomingMeeting.type}
               </span>
             </div>
           )}

@@ -25,7 +25,8 @@ import {
 } from './mobile-select';
 
 // Responsive Select Types
-export interface ResponsiveSelectProps extends React.ComponentProps<typeof Select> {
+export interface ResponsiveSelectProps
+  extends React.ComponentProps<typeof Select> {
   forceVariant?: 'desktop' | 'mobile';
   mobileOnly?: boolean;
   // Mobile-specific props
@@ -36,7 +37,7 @@ export interface ResponsiveSelectProps extends React.ComponentProps<typeof Selec
   hapticIntensity?: 'light' | 'medium' | 'heavy';
 }
 
-export interface ResponsiveSelectTriggerProps 
+export interface ResponsiveSelectTriggerProps
   extends Omit<React.ComponentProps<typeof SelectTrigger>, 'size'> {
   forceVariant?: 'desktop' | 'mobile';
   mobileOnly?: boolean;
@@ -48,14 +49,14 @@ export interface ResponsiveSelectTriggerProps
   hapticIntensity?: 'light' | 'medium' | 'heavy';
 }
 
-export interface ResponsiveSelectContentProps 
+export interface ResponsiveSelectContentProps
   extends React.ComponentProps<typeof SelectContent> {
   forceVariant?: 'desktop' | 'mobile';
   mobileOnly?: boolean;
   size?: 'sm' | 'md' | 'lg' | 'xl';
 }
 
-export interface ResponsiveSelectItemProps 
+export interface ResponsiveSelectItemProps
   extends React.ComponentProps<typeof SelectItem> {
   forceVariant?: 'desktop' | 'mobile';
   mobileOnly?: boolean;
@@ -68,65 +69,97 @@ export interface ResponsiveSelectItemProps
 const ResponsiveSelect = React.forwardRef<
   React.ElementRef<typeof Select>,
   ResponsiveSelectProps
->(({ forceVariant, mobileOnly, mobileSize, mobileFeedback, mobileState, hapticFeedback, hapticIntensity, ...props }, ref) => {
-  const viewportWidth = useViewportWidth();
-  const isMobile = mobileOnly || forceVariant === 'mobile' || 
-    (forceVariant !== 'desktop' && viewportWidth < 768);
+>(
+  (
+    {
+      forceVariant,
+      mobileOnly,
+      mobileSize,
+      mobileFeedback,
+      mobileState,
+      hapticFeedback,
+      hapticIntensity,
+      ...props
+    },
+    ref
+  ) => {
+    const viewportWidth = useViewportWidth();
+    const isMobile =
+      mobileOnly ||
+      forceVariant === 'mobile' ||
+      (forceVariant !== 'desktop' && viewportWidth < 768);
 
-  if (isMobile) {
-    return <MobileSelect {...props} />;
+    if (isMobile) {
+      return <MobileSelect {...props} />;
+    }
+
+    return <Select {...props} />;
   }
-
-  return <Select {...props} />;
-});
-ResponsiveSelect.displayName = "ResponsiveSelect";
+);
+ResponsiveSelect.displayName = 'ResponsiveSelect';
 
 const ResponsiveSelectTrigger = React.forwardRef<
   React.ElementRef<typeof SelectTrigger>,
   ResponsiveSelectTriggerProps
->(({ 
-  forceVariant, 
-  mobileOnly, 
-  size,
-  feedback,
-  state,
-  hapticFeedback,
-  hapticIntensity,
-  className,
-  ...props 
-}, ref) => {
-  const viewportWidth = useViewportWidth();
-  const isMobile = mobileOnly || forceVariant === 'mobile' || 
-    (forceVariant !== 'desktop' && viewportWidth < 768);
+>(
+  (
+    {
+      forceVariant,
+      mobileOnly,
+      size,
+      feedback,
+      state,
+      hapticFeedback,
+      hapticIntensity,
+      className,
+      ...props
+    },
+    ref
+  ) => {
+    const viewportWidth = useViewportWidth();
+    const isMobile =
+      mobileOnly ||
+      forceVariant === 'mobile' ||
+      (forceVariant !== 'desktop' && viewportWidth < 768);
 
-  if (isMobile) {
+    if (isMobile) {
+      return (
+        <MobileSelectTrigger
+          ref={ref}
+          size={size}
+          feedback={feedback}
+          state={state}
+          hapticFeedback={hapticFeedback}
+          hapticIntensity={hapticIntensity}
+          className={className}
+          {...props}
+        />
+      );
+    }
+
+    // Map mobile size to desktop size
+    const desktopSize = size === 'sm' ? 'sm' : 'default';
+
     return (
-      <MobileSelectTrigger
+      <SelectTrigger
         ref={ref}
-        size={size}
-        feedback={feedback}
-        state={state}
-        hapticFeedback={hapticFeedback}
-        hapticIntensity={hapticIntensity}
+        size={desktopSize}
         className={className}
         {...props}
       />
     );
   }
-
-  // Map mobile size to desktop size
-  const desktopSize = size === 'sm' ? 'sm' : 'default';
-  
-  return <SelectTrigger ref={ref} size={desktopSize} className={className} {...props} />;
-});
-ResponsiveSelectTrigger.displayName = "ResponsiveSelectTrigger";
+);
+ResponsiveSelectTrigger.displayName = 'ResponsiveSelectTrigger';
 
 const ResponsiveSelectContent = React.forwardRef<
   React.ElementRef<typeof SelectContent>,
   ResponsiveSelectContentProps
 >(({ forceVariant, mobileOnly, size, ...props }, ref) => {
   const viewportWidth = useViewportWidth();
-  const isMobile = mobileOnly || forceVariant === 'mobile' || 
+  const isMobile =
+    mobileOnly ||
+    forceVariant === 'mobile' ||
     (forceVariant !== 'desktop' && viewportWidth < 768);
 
   if (isMobile) {
@@ -135,38 +168,45 @@ const ResponsiveSelectContent = React.forwardRef<
 
   return <SelectContent ref={ref} {...props} />;
 });
-ResponsiveSelectContent.displayName = "ResponsiveSelectContent";
+ResponsiveSelectContent.displayName = 'ResponsiveSelectContent';
 
 const ResponsiveSelectItem = React.forwardRef<
   React.ElementRef<typeof SelectItem>,
   ResponsiveSelectItemProps
->(({ 
-  forceVariant, 
-  mobileOnly, 
-  size,
-  hapticFeedback,
-  hapticIntensity,
-  ...props 
-}, ref) => {
-  const viewportWidth = useViewportWidth();
-  const isMobile = mobileOnly || forceVariant === 'mobile' || 
-    (forceVariant !== 'desktop' && viewportWidth < 768);
+>(
+  (
+    {
+      forceVariant,
+      mobileOnly,
+      size,
+      hapticFeedback,
+      hapticIntensity,
+      ...props
+    },
+    ref
+  ) => {
+    const viewportWidth = useViewportWidth();
+    const isMobile =
+      mobileOnly ||
+      forceVariant === 'mobile' ||
+      (forceVariant !== 'desktop' && viewportWidth < 768);
 
-  if (isMobile) {
-    return (
-      <MobileSelectItem
-        ref={ref}
-        size={size}
-        hapticFeedback={hapticFeedback}
-        hapticIntensity={hapticIntensity}
-        {...props}
-      />
-    );
+    if (isMobile) {
+      return (
+        <MobileSelectItem
+          ref={ref}
+          size={size}
+          hapticFeedback={hapticFeedback}
+          hapticIntensity={hapticIntensity}
+          {...props}
+        />
+      );
+    }
+
+    return <SelectItem ref={ref} {...props} />;
   }
-
-  return <SelectItem ref={ref} {...props} />;
-});
-ResponsiveSelectItem.displayName = "ResponsiveSelectItem";
+);
+ResponsiveSelectItem.displayName = 'ResponsiveSelectItem';
 
 const ResponsiveSelectValue = React.forwardRef<
   React.ElementRef<typeof SelectValue>,
@@ -176,7 +216,9 @@ const ResponsiveSelectValue = React.forwardRef<
   }
 >(({ forceVariant, mobileOnly, ...props }, ref) => {
   const viewportWidth = useViewportWidth();
-  const isMobile = mobileOnly || forceVariant === 'mobile' || 
+  const isMobile =
+    mobileOnly ||
+    forceVariant === 'mobile' ||
     (forceVariant !== 'desktop' && viewportWidth < 768);
 
   if (isMobile) {
@@ -185,7 +227,7 @@ const ResponsiveSelectValue = React.forwardRef<
 
   return <SelectValue ref={ref} {...props} />;
 });
-ResponsiveSelectValue.displayName = "ResponsiveSelectValue";
+ResponsiveSelectValue.displayName = 'ResponsiveSelectValue';
 
 const ResponsiveSelectGroup = React.forwardRef<
   React.ElementRef<typeof SelectGroup>,
@@ -195,7 +237,9 @@ const ResponsiveSelectGroup = React.forwardRef<
   }
 >(({ forceVariant, mobileOnly, ...props }, ref) => {
   const viewportWidth = useViewportWidth();
-  const isMobile = mobileOnly || forceVariant === 'mobile' || 
+  const isMobile =
+    mobileOnly ||
+    forceVariant === 'mobile' ||
     (forceVariant !== 'desktop' && viewportWidth < 768);
 
   if (isMobile) {
@@ -204,7 +248,7 @@ const ResponsiveSelectGroup = React.forwardRef<
 
   return <SelectGroup ref={ref} {...props} />;
 });
-ResponsiveSelectGroup.displayName = "ResponsiveSelectGroup";
+ResponsiveSelectGroup.displayName = 'ResponsiveSelectGroup';
 
 const ResponsiveSelectLabel = React.forwardRef<
   React.ElementRef<typeof SelectLabel>,
@@ -215,7 +259,9 @@ const ResponsiveSelectLabel = React.forwardRef<
   }
 >(({ forceVariant, mobileOnly, size, ...props }, ref) => {
   const viewportWidth = useViewportWidth();
-  const isMobile = mobileOnly || forceVariant === 'mobile' || 
+  const isMobile =
+    mobileOnly ||
+    forceVariant === 'mobile' ||
     (forceVariant !== 'desktop' && viewportWidth < 768);
 
   if (isMobile) {
@@ -224,7 +270,7 @@ const ResponsiveSelectLabel = React.forwardRef<
 
   return <SelectLabel ref={ref} {...props} />;
 });
-ResponsiveSelectLabel.displayName = "ResponsiveSelectLabel";
+ResponsiveSelectLabel.displayName = 'ResponsiveSelectLabel';
 
 const ResponsiveSelectSeparator = React.forwardRef<
   React.ElementRef<typeof SelectSeparator>,
@@ -235,7 +281,9 @@ const ResponsiveSelectSeparator = React.forwardRef<
   }
 >(({ forceVariant, mobileOnly, size, ...props }, ref) => {
   const viewportWidth = useViewportWidth();
-  const isMobile = mobileOnly || forceVariant === 'mobile' || 
+  const isMobile =
+    mobileOnly ||
+    forceVariant === 'mobile' ||
     (forceVariant !== 'desktop' && viewportWidth < 768);
 
   if (isMobile) {
@@ -244,7 +292,7 @@ const ResponsiveSelectSeparator = React.forwardRef<
 
   return <SelectSeparator ref={ref} {...props} />;
 });
-ResponsiveSelectSeparator.displayName = "ResponsiveSelectSeparator";
+ResponsiveSelectSeparator.displayName = 'ResponsiveSelectSeparator';
 
 export {
   ResponsiveSelect,
@@ -255,4 +303,4 @@ export {
   ResponsiveSelectSeparator,
   ResponsiveSelectTrigger,
   ResponsiveSelectValue,
-}; 
+};

@@ -4,7 +4,10 @@ import { Button } from '~/common/components/ui/button';
 export function meta() {
   return [
     { title: 'Mobile Sheet & Table Test - SureCRM' },
-    { name: 'description', content: 'Testing mobile sheet and table components' }
+    {
+      name: 'description',
+      content: 'Testing mobile sheet and table components',
+    },
   ];
 }
 
@@ -31,20 +34,20 @@ export default function TestSheetTable() {
         <div className="bg-white rounded-lg shadow-sm p-6">
           <h2 className="text-lg font-semibold mb-4">기본 테스트</h2>
           <div className="space-y-3">
-            <Button onClick={() => addToLog('테스트 실행')}>
-              테스트 시작
-            </Button>
+            <Button onClick={() => addToLog('테스트 실행')}>테스트 시작</Button>
           </div>
         </div>
 
         <div className="bg-white rounded-lg shadow-sm p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">액션 로그</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            액션 로그
+          </h3>
           <div className="space-y-2 max-h-64 overflow-y-auto">
             {actionLog.length === 0 ? (
               <p className="text-gray-500 text-sm">아직 액션이 없습니다.</p>
             ) : (
               actionLog.map((log, index) => (
-                <div 
+                <div
                   key={index}
                   className="text-sm text-gray-600 font-mono bg-gray-50 rounded px-3 py-2"
                 >
@@ -57,4 +60,4 @@ export default function TestSheetTable() {
       </div>
     </div>
   );
-} 
+}

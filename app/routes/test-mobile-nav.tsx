@@ -1,18 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { MobileNav, MobileNavButton } from '~/common/components/navigation/mobile-nav';
+import {
+  MobileNav,
+  MobileNavButton,
+} from '~/common/components/navigation/mobile-nav';
 import { Button } from '~/common/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/common/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '~/common/components/ui/card';
 import { Badge } from '~/common/components/ui/badge';
 import { Separator } from '~/common/components/ui/separator';
 import { ScrollArea } from '~/common/components/ui/scroll-area';
 import { Switch } from '~/common/components/ui/switch';
 import { Label } from '~/common/components/ui/label';
 import { Slider } from '~/common/components/ui/slider';
-import { 
-  CheckCircle, 
-  XCircle, 
-  Play, 
-  RotateCcw, 
+import {
+  CheckCircle,
+  XCircle,
+  Play,
+  RotateCcw,
   Settings,
   Hand,
   Zap,
@@ -20,14 +29,17 @@ import {
   Move,
   TouchpadIcon as Touch,
   Smartphone,
-  Gauge
+  Gauge,
 } from 'lucide-react';
 
 // 메타데이터
 export function meta() {
   return [
     { title: 'Advanced Mobile Navigation Test - SureCRM' },
-    { name: 'description', content: 'Test advanced gesture support for mobile navigation' }
+    {
+      name: 'description',
+      content: 'Test advanced gesture support for mobile navigation',
+    },
   ];
 }
 
@@ -70,7 +82,11 @@ interface GestureConfig {
   };
 }
 
-export default function AdvancedMobileNavTest({ loaderData }: { loaderData: { testMode: boolean; timestamp: string } }) {
+export default function AdvancedMobileNavTest({
+  loaderData,
+}: {
+  loaderData: { testMode: boolean; timestamp: string };
+}) {
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [actionLog, setActionLog] = useState<string[]>([]);
   const [gestureTests, setGestureTests] = useState<GestureTest[]>([
@@ -79,43 +95,43 @@ export default function AdvancedMobileNavTest({ loaderData }: { loaderData: { te
       name: 'Edge Swipe Detection',
       description: '화면 가장자리에서 스와이프하여 메뉴 열기',
       icon: <Hand className="h-4 w-4" />,
-      status: 'pending'
+      status: 'pending',
     },
     {
       id: 'progressive-reveal',
       name: 'Progressive Reveal',
       description: '스와이프 진행률에 따른 점진적 메뉴 표시',
       icon: <Eye className="h-4 w-4" />,
-      status: 'pending'
+      status: 'pending',
     },
     {
       id: 'velocity-animation',
       name: 'Velocity-based Animation',
       description: '스와이프 속도에 따른 애니메이션 조정',
       icon: <Zap className="h-4 w-4" />,
-      status: 'pending'
+      status: 'pending',
     },
     {
       id: 'multi-touch',
       name: 'Multi-touch Support',
       description: '복수 터치 제스처 감지 및 처리',
       icon: <Touch className="h-4 w-4" />,
-      status: 'pending'
+      status: 'pending',
     },
     {
       id: 'haptic-feedback',
       name: 'Enhanced Haptic Feedback',
       description: '다양한 햅틱 패턴 지원',
       icon: <Smartphone className="h-4 w-4" />,
-      status: 'pending'
+      status: 'pending',
     },
     {
       id: 'gesture-visual',
       name: 'Gesture Visual Feedback',
       description: '제스처 상태의 시각적 피드백',
       icon: <Gauge className="h-4 w-4" />,
-      status: 'pending'
-    }
+      status: 'pending',
+    },
   ]);
 
   // 고급 제스처 설정 상태
@@ -147,10 +163,16 @@ export default function AdvancedMobileNavTest({ loaderData }: { loaderData: { te
   };
 
   // 테스트 상태 업데이트
-  const updateTestStatus = (testId: string, status: GestureTest['status'], details?: string) => {
-    setGestureTests(prev => prev.map(test => 
-      test.id === testId ? { ...test, status, details } : test
-    ));
+  const updateTestStatus = (
+    testId: string,
+    status: GestureTest['status'],
+    details?: string
+  ) => {
+    setGestureTests(prev =>
+      prev.map(test =>
+        test.id === testId ? { ...test, status, details } : test
+      )
+    );
   };
 
   // 모바일 네비게이션 핸들러들
@@ -168,8 +190,10 @@ export default function AdvancedMobileNavTest({ loaderData }: { loaderData: { te
   // 제스처 테스트 시작
   const startGestureTest = (testId: string) => {
     updateTestStatus(testId, 'running');
-    addToLog(`🧪 테스트 시작: ${gestureTests.find(t => t.id === testId)?.name}`);
-    
+    addToLog(
+      `🧪 테스트 시작: ${gestureTests.find(t => t.id === testId)?.name}`
+    );
+
     // 실제 테스트 로직은 여기에 추가
     setTimeout(() => {
       const test = gestureTests.find(t => t.id === testId);
@@ -182,7 +206,13 @@ export default function AdvancedMobileNavTest({ loaderData }: { loaderData: { te
 
   // 모든 테스트 초기화
   const resetAllTests = () => {
-    setGestureTests(prev => prev.map(test => ({ ...test, status: 'pending' as const, details: undefined })));
+    setGestureTests(prev =>
+      prev.map(test => ({
+        ...test,
+        status: 'pending' as const,
+        details: undefined,
+      }))
+    );
     setActionLog([]);
     addToLog('🔄 모든 테스트 초기화');
   };
@@ -205,10 +235,17 @@ export default function AdvancedMobileNavTest({ loaderData }: { loaderData: { te
       if (startX > 0) {
         const deltaX = e.touches[0].clientX - startX;
         const deltaTime = Date.now() - startTime;
-        const velocity = deltaX / deltaTime * 1000;
+        const velocity = (deltaX / deltaTime) * 1000;
 
-        if (deltaX > gestureConfig.edgeSwipe.threshold || velocity > gestureConfig.edgeSwipe.velocity) {
-          updateTestStatus('progressive-reveal', 'running', 'Progressive reveal active');
+        if (
+          deltaX > gestureConfig.edgeSwipe.threshold ||
+          velocity > gestureConfig.edgeSwipe.velocity
+        ) {
+          updateTestStatus(
+            'progressive-reveal',
+            'running',
+            'Progressive reveal active'
+          );
           addToLog('👁️ Progressive reveal 활성화');
         }
       }
@@ -221,7 +258,9 @@ export default function AdvancedMobileNavTest({ loaderData }: { loaderData: { te
       }
     };
 
-    document.addEventListener('touchstart', handleTouchStart, { passive: true });
+    document.addEventListener('touchstart', handleTouchStart, {
+      passive: true,
+    });
     document.addEventListener('touchmove', handleTouchMove, { passive: true });
     document.addEventListener('touchend', handleTouchEnd, { passive: true });
 
@@ -236,16 +275,26 @@ export default function AdvancedMobileNavTest({ loaderData }: { loaderData: { te
   useEffect(() => {
     const handleTouchStart = (e: TouchEvent) => {
       if (e.touches.length > 1) {
-        updateTestStatus('multi-touch', 'running', `${e.touches.length} fingers detected`);
+        updateTestStatus(
+          'multi-touch',
+          'running',
+          `${e.touches.length} fingers detected`
+        );
         addToLog(`🤚 멀티터치 감지: ${e.touches.length}개 손가락`);
-        
+
         setTimeout(() => {
-          updateTestStatus('multi-touch', 'success', 'Multi-touch gesture handled');
+          updateTestStatus(
+            'multi-touch',
+            'success',
+            'Multi-touch gesture handled'
+          );
         }, 1000);
       }
     };
 
-    document.addEventListener('touchstart', handleTouchStart, { passive: true });
+    document.addEventListener('touchstart', handleTouchStart, {
+      passive: true,
+    });
     return () => document.removeEventListener('touchstart', handleTouchStart);
   }, []);
 
@@ -265,10 +314,14 @@ export default function AdvancedMobileNavTest({ loaderData }: { loaderData: { te
         {/* 헤더 */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">고급 모바일 네비게이션 테스트</h1>
-            <p className="text-muted-foreground">Advanced Gesture Support Testing</p>
+            <h1 className="text-3xl font-bold tracking-tight">
+              고급 모바일 네비게이션 테스트
+            </h1>
+            <p className="text-muted-foreground">
+              Advanced Gesture Support Testing
+            </p>
           </div>
-          
+
           <div className="flex items-center gap-2">
             <MobileNavButton
               onClick={() => setIsNavOpen(!isNavOpen)}
@@ -286,7 +339,8 @@ export default function AdvancedMobileNavTest({ loaderData }: { loaderData: { te
               Gesture Configuration
             </CardTitle>
             <CardDescription>
-              고급 제스처 지원 설정을 조정하여 다양한 동작을 테스트할 수 있습니다.
+              고급 제스처 지원 설정을 조정하여 다양한 동작을 테스트할 수
+              있습니다.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -298,22 +352,24 @@ export default function AdvancedMobileNavTest({ loaderData }: { loaderData: { te
                   <Label>Enable Edge Swipe</Label>
                   <Switch
                     checked={gestureConfig.edgeSwipe.enabled}
-                    onCheckedChange={(checked) =>
+                    onCheckedChange={checked =>
                       setGestureConfig(prev => ({
                         ...prev,
-                        edgeSwipe: { ...prev.edgeSwipe, enabled: checked }
+                        edgeSwipe: { ...prev.edgeSwipe, enabled: checked },
                       }))
                     }
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Edge Width: {gestureConfig.edgeSwipe.edgeWidth}px</Label>
+                  <Label>
+                    Edge Width: {gestureConfig.edgeSwipe.edgeWidth}px
+                  </Label>
                   <Slider
                     value={[gestureConfig.edgeSwipe.edgeWidth]}
                     onValueChange={([value]) =>
                       setGestureConfig(prev => ({
                         ...prev,
-                        edgeSwipe: { ...prev.edgeSwipe, edgeWidth: value }
+                        edgeSwipe: { ...prev.edgeSwipe, edgeWidth: value },
                       }))
                     }
                     min={10}
@@ -322,13 +378,15 @@ export default function AdvancedMobileNavTest({ loaderData }: { loaderData: { te
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Threshold: {gestureConfig.edgeSwipe.threshold}px</Label>
+                  <Label>
+                    Threshold: {gestureConfig.edgeSwipe.threshold}px
+                  </Label>
                   <Slider
                     value={[gestureConfig.edgeSwipe.threshold]}
                     onValueChange={([value]) =>
                       setGestureConfig(prev => ({
                         ...prev,
-                        edgeSwipe: { ...prev.edgeSwipe, threshold: value }
+                        edgeSwipe: { ...prev.edgeSwipe, threshold: value },
                       }))
                     }
                     min={50}
@@ -349,22 +407,30 @@ export default function AdvancedMobileNavTest({ loaderData }: { loaderData: { te
                   <Label>Enable Progressive Reveal</Label>
                   <Switch
                     checked={gestureConfig.progressiveReveal.enabled}
-                    onCheckedChange={(checked) =>
+                    onCheckedChange={checked =>
                       setGestureConfig(prev => ({
                         ...prev,
-                        progressiveReveal: { ...prev.progressiveReveal, enabled: checked }
+                        progressiveReveal: {
+                          ...prev.progressiveReveal,
+                          enabled: checked,
+                        },
                       }))
                     }
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Min Opacity: {gestureConfig.progressiveReveal.minOpacity}</Label>
+                  <Label>
+                    Min Opacity: {gestureConfig.progressiveReveal.minOpacity}
+                  </Label>
                   <Slider
                     value={[gestureConfig.progressiveReveal.minOpacity]}
                     onValueChange={([value]) =>
                       setGestureConfig(prev => ({
                         ...prev,
-                        progressiveReveal: { ...prev.progressiveReveal, minOpacity: value }
+                        progressiveReveal: {
+                          ...prev.progressiveReveal,
+                          minOpacity: value,
+                        },
                       }))
                     }
                     min={0}
@@ -373,13 +439,18 @@ export default function AdvancedMobileNavTest({ loaderData }: { loaderData: { te
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Max Opacity: {gestureConfig.progressiveReveal.maxOpacity}</Label>
+                  <Label>
+                    Max Opacity: {gestureConfig.progressiveReveal.maxOpacity}
+                  </Label>
                   <Slider
                     value={[gestureConfig.progressiveReveal.maxOpacity]}
                     onValueChange={([value]) =>
                       setGestureConfig(prev => ({
                         ...prev,
-                        progressiveReveal: { ...prev.progressiveReveal, maxOpacity: value }
+                        progressiveReveal: {
+                          ...prev.progressiveReveal,
+                          maxOpacity: value,
+                        },
                       }))
                     }
                     min={0}
@@ -397,13 +468,19 @@ export default function AdvancedMobileNavTest({ loaderData }: { loaderData: { te
               <h4 className="font-medium mb-3">Velocity-based Animation</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Slow Duration: {gestureConfig.velocityAnimation.slowDuration}s</Label>
+                  <Label>
+                    Slow Duration:{' '}
+                    {gestureConfig.velocityAnimation.slowDuration}s
+                  </Label>
                   <Slider
                     value={[gestureConfig.velocityAnimation.slowDuration]}
                     onValueChange={([value]) =>
                       setGestureConfig(prev => ({
                         ...prev,
-                        velocityAnimation: { ...prev.velocityAnimation, slowDuration: value }
+                        velocityAnimation: {
+                          ...prev.velocityAnimation,
+                          slowDuration: value,
+                        },
                       }))
                     }
                     min={0.2}
@@ -412,13 +489,19 @@ export default function AdvancedMobileNavTest({ loaderData }: { loaderData: { te
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Fast Duration: {gestureConfig.velocityAnimation.fastDuration}s</Label>
+                  <Label>
+                    Fast Duration:{' '}
+                    {gestureConfig.velocityAnimation.fastDuration}s
+                  </Label>
                   <Slider
                     value={[gestureConfig.velocityAnimation.fastDuration]}
                     onValueChange={([value]) =>
                       setGestureConfig(prev => ({
                         ...prev,
-                        velocityAnimation: { ...prev.velocityAnimation, fastDuration: value }
+                        velocityAnimation: {
+                          ...prev.velocityAnimation,
+                          fastDuration: value,
+                        },
                       }))
                     }
                     min={0.1}
@@ -445,7 +528,7 @@ export default function AdvancedMobileNavTest({ loaderData }: { loaderData: { te
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {gestureTests.map((test) => (
+                {gestureTests.map(test => (
                   <div
                     key={test.id}
                     className="flex items-center justify-between p-3 border rounded-lg"
@@ -464,21 +547,31 @@ export default function AdvancedMobileNavTest({ loaderData }: { loaderData: { te
                         )}
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center gap-2">
                       <Badge
                         variant={
-                          test.status === 'success' ? 'default' :
-                          test.status === 'error' ? 'destructive' :
-                          test.status === 'running' ? 'secondary' : 'outline'
+                          test.status === 'success'
+                            ? 'default'
+                            : test.status === 'error'
+                              ? 'destructive'
+                              : test.status === 'running'
+                                ? 'secondary'
+                                : 'outline'
                         }
                       >
-                        {test.status === 'success' && <CheckCircle className="h-3 w-3 mr-1" />}
-                        {test.status === 'error' && <XCircle className="h-3 w-3 mr-1" />}
-                        {test.status === 'running' && <Move className="h-3 w-3 mr-1 animate-spin" />}
+                        {test.status === 'success' && (
+                          <CheckCircle className="h-3 w-3 mr-1" />
+                        )}
+                        {test.status === 'error' && (
+                          <XCircle className="h-3 w-3 mr-1" />
+                        )}
+                        {test.status === 'running' && (
+                          <Move className="h-3 w-3 mr-1 animate-spin" />
+                        )}
                         {test.status}
                       </Badge>
-                      
+
                       <Button
                         size="sm"
                         variant="outline"
@@ -491,9 +584,13 @@ export default function AdvancedMobileNavTest({ loaderData }: { loaderData: { te
                   </div>
                 ))}
               </div>
-              
+
               <div className="flex gap-2 mt-4">
-                <Button onClick={resetAllTests} variant="outline" className="flex-1">
+                <Button
+                  onClick={resetAllTests}
+                  variant="outline"
+                  className="flex-1"
+                >
                   <RotateCcw className="h-4 w-4 mr-2" />
                   Reset All Tests
                 </Button>
@@ -528,7 +625,7 @@ export default function AdvancedMobileNavTest({ loaderData }: { loaderData: { te
                   )}
                 </div>
               </ScrollArea>
-              
+
               <Button
                 onClick={() => setActionLog([])}
                 variant="outline"
@@ -600,8 +697,11 @@ export default function AdvancedMobileNavTest({ loaderData }: { loaderData: { te
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
               <div>
                 <strong>Navigation State:</strong>
-                <Badge variant={isNavOpen ? "default" : "outline"} className="ml-2">
-                  {isNavOpen ? "Open" : "Closed"}
+                <Badge
+                  variant={isNavOpen ? 'default' : 'outline'}
+                  className="ml-2"
+                >
+                  {isNavOpen ? 'Open' : 'Closed'}
                 </Badge>
               </div>
               <div>
@@ -610,7 +710,9 @@ export default function AdvancedMobileNavTest({ loaderData }: { loaderData: { te
               </div>
               <div>
                 <strong>Gesture Support:</strong>
-                <Badge variant="default" className="ml-2">Advanced</Badge>
+                <Badge variant="default" className="ml-2">
+                  Advanced
+                </Badge>
               </div>
             </div>
           </CardContent>
@@ -618,4 +720,4 @@ export default function AdvancedMobileNavTest({ loaderData }: { loaderData: { te
       </div>
     </div>
   );
-} 
+}

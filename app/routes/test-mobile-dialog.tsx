@@ -10,7 +10,7 @@ import {
   ResponsiveDialog,
   ResponsiveDialogContent,
   ResponsiveDialogDescription,
-  ResponsiveDialogFooter,  
+  ResponsiveDialogFooter,
   ResponsiveDialogHeader,
   ResponsiveDialogTitle,
   ResponsiveDialogTrigger,
@@ -21,8 +21,8 @@ import { Label } from '~/common/components/ui/label';
 
 export function meta() {
   return [
-    { title: "Mobile Dialog Test - SureCRM" },
-    { name: "description", content: "Testing Mobile Dialog components" },
+    { title: 'Mobile Dialog Test - SureCRM' },
+    { name: 'description', content: 'Testing Mobile Dialog components' },
   ];
 }
 
@@ -48,9 +48,13 @@ export default function TestMobileDialog() {
 
         {/* Instructions */}
         <div className="bg-blue-50 p-4 rounded-lg">
-          <h2 className="font-semibold text-blue-900 mb-2">Test Instructions</h2>
+          <h2 className="font-semibold text-blue-900 mb-2">
+            Test Instructions
+          </h2>
           <ul className="text-blue-800 space-y-1 text-sm">
-            <li>• On mobile: Dialogs appear as bottom sheets with swipe-to-close</li>
+            <li>
+              • On mobile: Dialogs appear as bottom sheets with swipe-to-close
+            </li>
             <li>• On desktop: Dialogs appear as centered modals</li>
             <li>• Try swiping down to close on mobile devices</li>
             <li>• All dialogs have haptic feedback on mobile</li>
@@ -60,7 +64,6 @@ export default function TestMobileDialog() {
 
         {/* Test Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          
           {/* 1. Basic Mobile Dialog */}
           <div className="bg-white p-6 rounded-lg shadow">
             <h3 className="font-semibold mb-3">Basic Mobile Dialog</h3>
@@ -75,14 +78,15 @@ export default function TestMobileDialog() {
                 <MobileDialogHeader>
                   <MobileDialogTitle>Basic Dialog</MobileDialogTitle>
                   <MobileDialogDescription>
-                    This is a basic mobile dialog with swipe-to-close functionality.
-                    Try swiping down to dismiss!
+                    This is a basic mobile dialog with swipe-to-close
+                    functionality. Try swiping down to dismiss!
                   </MobileDialogDescription>
                 </MobileDialogHeader>
                 <div className="py-4">
                   <p className="text-gray-600">
-                    This dialog demonstrates the core mobile dialog functionality
-                    with proper accessibility and touch interactions.
+                    This dialog demonstrates the core mobile dialog
+                    functionality with proper accessibility and touch
+                    interactions.
                   </p>
                 </div>
               </MobileDialogContent>
@@ -97,7 +101,9 @@ export default function TestMobileDialog() {
             </p>
             <MobileDialog open={formOpen} onOpenChange={setFormOpen}>
               <MobileDialogTrigger asChild>
-                <Button variant="outline" className="w-full">Open Form Dialog</Button>
+                <Button variant="outline" className="w-full">
+                  Open Form Dialog
+                </Button>
               </MobileDialogTrigger>
               <MobileDialogContent size="lg">
                 <MobileDialogHeader>
@@ -117,7 +123,11 @@ export default function TestMobileDialog() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="phone">Phone</Label>
-                    <Input id="phone" type="tel" placeholder="Enter phone number" />
+                    <Input
+                      id="phone"
+                      type="tel"
+                      placeholder="Enter phone number"
+                    />
                   </div>
                 </div>
                 <MobileDialogFooter>
@@ -140,21 +150,29 @@ export default function TestMobileDialog() {
             </p>
             <MobileDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
               <MobileDialogTrigger asChild>
-                <Button variant="destructive" className="w-full">Delete Item</Button>
+                <Button variant="destructive" className="w-full">
+                  Delete Item
+                </Button>
               </MobileDialogTrigger>
               <MobileDialogContent size="sm" showDragHandle={false}>
                 <MobileDialogHeader>
                   <MobileDialogTitle>Confirm Deletion</MobileDialogTitle>
                   <MobileDialogDescription>
-                    Are you sure you want to delete this item? 
-                    This action cannot be undone.
+                    Are you sure you want to delete this item? This action
+                    cannot be undone.
                   </MobileDialogDescription>
                 </MobileDialogHeader>
                 <MobileDialogFooter>
-                  <Button variant="outline" onClick={() => setConfirmOpen(false)}>
+                  <Button
+                    variant="outline"
+                    onClick={() => setConfirmOpen(false)}
+                  >
                     Cancel
                   </Button>
-                  <Button variant="destructive" onClick={() => setConfirmOpen(false)}>
+                  <Button
+                    variant="destructive"
+                    onClick={() => setConfirmOpen(false)}
+                  >
                     Delete
                   </Button>
                 </MobileDialogFooter>
@@ -170,7 +188,9 @@ export default function TestMobileDialog() {
             </p>
             <MobileDialog open={fullOpen} onOpenChange={setFullOpen}>
               <MobileDialogTrigger asChild>
-                <Button variant="secondary" className="w-full">Open Full Dialog</Button>
+                <Button variant="secondary" className="w-full">
+                  Open Full Dialog
+                </Button>
               </MobileDialogTrigger>
               <MobileDialogContent size="full" swipeToClose={false}>
                 <MobileDialogHeader>
@@ -184,7 +204,11 @@ export default function TestMobileDialog() {
                     <h4 className="font-medium mb-2">Notifications</h4>
                     <div className="space-y-2">
                       <label className="flex items-center space-x-2">
-                        <input type="checkbox" className="rounded" defaultChecked />
+                        <input
+                          type="checkbox"
+                          className="rounded"
+                          defaultChecked
+                        />
                         <span>Email notifications</span>
                       </label>
                       <label className="flex items-center space-x-2">
@@ -197,11 +221,19 @@ export default function TestMobileDialog() {
                     <h4 className="font-medium mb-2">Privacy</h4>
                     <div className="space-y-2">
                       <label className="flex items-center space-x-2">
-                        <input type="checkbox" className="rounded" defaultChecked />
+                        <input
+                          type="checkbox"
+                          className="rounded"
+                          defaultChecked
+                        />
                         <span>Share usage data</span>
                       </label>
                       <label className="flex items-center space-x-2">
-                        <input type="checkbox" className="rounded" defaultChecked />
+                        <input
+                          type="checkbox"
+                          className="rounded"
+                          defaultChecked
+                        />
                         <span>Marketing emails</span>
                       </label>
                     </div>
@@ -222,16 +254,21 @@ export default function TestMobileDialog() {
             <p className="text-gray-600 text-sm mb-4">
               Auto-switches between mobile and desktop modes
             </p>
-            <ResponsiveDialog open={responsiveOpen} onOpenChange={setResponsiveOpen}>
+            <ResponsiveDialog
+              open={responsiveOpen}
+              onOpenChange={setResponsiveOpen}
+            >
               <ResponsiveDialogTrigger asChild>
                 <Button className="w-full">Open Responsive Dialog</Button>
               </ResponsiveDialogTrigger>
               <ResponsiveDialogContent size="md">
                 <ResponsiveDialogHeader>
-                  <ResponsiveDialogTitle>Responsive Dialog</ResponsiveDialogTitle>
+                  <ResponsiveDialogTitle>
+                    Responsive Dialog
+                  </ResponsiveDialogTitle>
                   <ResponsiveDialogDescription>
-                    This dialog automatically adapts to your screen size.
-                    Resize your browser to see the difference!
+                    This dialog automatically adapts to your screen size. Resize
+                    your browser to see the difference!
                   </ResponsiveDialogDescription>
                 </ResponsiveDialogHeader>
                 <div className="py-4">
@@ -239,11 +276,15 @@ export default function TestMobileDialog() {
                     On desktop (≥768px): Appears as a centered modal
                   </p>
                   <p className="text-gray-600">
-                    On mobile (&lt;768px): Appears as a bottom sheet with swipe gesture
+                    On mobile (&lt;768px): Appears as a bottom sheet with swipe
+                    gesture
                   </p>
                 </div>
                 <ResponsiveDialogFooter>
-                  <Button variant="outline" onClick={() => setResponsiveOpen(false)}>
+                  <Button
+                    variant="outline"
+                    onClick={() => setResponsiveOpen(false)}
+                  >
                     Cancel
                   </Button>
                   <Button onClick={() => setResponsiveOpen(false)}>
@@ -288,7 +329,9 @@ export default function TestMobileDialog() {
 
         {/* Mobile Tips */}
         <div className="bg-yellow-50 p-4 rounded-lg">
-          <h3 className="font-semibold text-yellow-900 mb-2">Mobile Testing Tips</h3>
+          <h3 className="font-semibold text-yellow-900 mb-2">
+            Mobile Testing Tips
+          </h3>
           <ul className="text-yellow-800 space-y-1 text-sm">
             <li>• Try swiping down on the dialogs to close them</li>
             <li>• Feel for haptic feedback when interacting with buttons</li>
@@ -300,4 +343,4 @@ export default function TestMobileDialog() {
       </div>
     </div>
   );
-} 
+}

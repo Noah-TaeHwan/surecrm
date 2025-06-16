@@ -1,6 +1,6 @@
 /**
  * SureCRM Responsive Design Hooks
- * 
+ *
  * Centralized export for all device detection and viewport management hooks
  * Designed for mobile-first responsive design implementation
  */
@@ -104,11 +104,11 @@ export const useIsMobileLike = (): boolean => {
 export const useTouchSpacing = () => {
   const { isPrimaryTouch } = useTouchDevice();
   const deviceType = useDeviceType();
-  
+
   return {
     buttonMinHeight: isPrimaryTouch ? '48px' : '40px',
     touchTarget: deviceType === 'mobile' ? '44px' : '40px',
     spacing: deviceType === 'mobile' ? 'space-y-4' : 'space-y-3',
     padding: deviceType === 'mobile' ? 'p-4' : 'p-3',
   };
-}; 
+};

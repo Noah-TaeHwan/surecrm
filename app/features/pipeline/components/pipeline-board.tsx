@@ -261,7 +261,7 @@ export function PipelineBoard({
         </div>
 
         {/* 칸반보드 컨텐츠 */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
           {stages.map(stage => {
             const isDragTarget = draggingOver === stage.id;
             const canDrop =

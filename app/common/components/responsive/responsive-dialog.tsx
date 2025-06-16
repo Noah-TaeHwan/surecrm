@@ -32,9 +32,9 @@ interface ResponsiveDialogContentProps extends MobileDialogContentProps {
   mobileBreakpoint?: number;
 }
 
-function ResponsiveDialog({ 
-  mobileBreakpoint = 768, 
-  ...props 
+function ResponsiveDialog({
+  mobileBreakpoint = 768,
+  ...props
 }: ResponsiveDialogProps) {
   const { width } = useViewport();
   const isMobile = width < mobileBreakpoint;
@@ -139,12 +139,16 @@ function ResponsiveDialogDescription({
   children,
   mobileBreakpoint = 768,
   ...props
-}: React.ComponentProps<typeof DialogDescription> & { mobileBreakpoint?: number }) {
+}: React.ComponentProps<typeof DialogDescription> & {
+  mobileBreakpoint?: number;
+}) {
   const { width } = useViewport();
   const isMobile = width < mobileBreakpoint;
 
   if (isMobile) {
-    return <MobileDialogDescription {...props}>{children}</MobileDialogDescription>;
+    return (
+      <MobileDialogDescription {...props}>{children}</MobileDialogDescription>
+    );
   }
 
   return <DialogDescription {...props}>{children}</DialogDescription>;
@@ -176,4 +180,4 @@ export {
   ResponsiveDialogTrigger,
   type ResponsiveDialogProps,
   type ResponsiveDialogContentProps,
-}; 
+};

@@ -38,7 +38,12 @@ interface MobileCardFooterProps extends React.ComponentProps<'div'> {
 }
 
 interface MobileCardActionProps extends React.ComponentProps<'div'> {
-  position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'center';
+  position?:
+    | 'top-right'
+    | 'top-left'
+    | 'bottom-right'
+    | 'bottom-left'
+    | 'center';
   floating?: boolean;
 }
 
@@ -85,82 +90,103 @@ function MobileCard({
 }: MobileCardProps) {
   const cardRef = React.useRef<HTMLDivElement>(null);
   const [isPressed, setIsPressed] = React.useState(false);
-  const [touchStart, setTouchStart] = React.useState<{ x: number; y: number; time: number } | null>(null);
+  const [touchStart, setTouchStart] = React.useState<{
+    x: number;
+    y: number;
+    time: number;
+  } | null>(null);
 
   // Touch event handlers
-  const handleTouchStart = React.useCallback((e: React.TouchEvent) => {
-    const touch = e.touches[0];
-    setTouchStart({
-      x: touch.clientX,
-      y: touch.clientY,
-      time: Date.now(),
-    });
-    setIsPressed(true);
+  const handleTouchStart = React.useCallback(
+    (e: React.TouchEvent) => {
+      const touch = e.touches[0];
+      setTouchStart({
+        x: touch.clientX,
+        y: touch.clientY,
+        time: Date.now(),
+      });
+      setIsPressed(true);
 
-    // Long press detection
-    if (interaction === 'long-press' && onLongPress) {
-      const longPressTimer = setTimeout(() => {
-        onLongPress();
-        // Haptic feedback for long press
-        if ('vibrate' in navigator) {
-          navigator.vibrate(50);
+      // Long press detection
+      if (interaction === 'long-press' && onLongPress) {
+        const longPressTimer = setTimeout(() => {
+          onLongPress();
+          // Haptic feedback for long press
+          if ('vibrate' in navigator) {
+            navigator.vibrate(50);
+          }
+        }, 500);
+
+        const cleanup = () => {
+          clearTimeout(longPressTimer);
+          setIsPressed(false);
+        };
+
+        const handleTouchEnd = () => {
+          cleanup();
+          document.removeEventListener('touchend', handleTouchEnd);
+          document.removeEventListener('touchcancel', handleTouchEnd);
+        };
+
+        document.addEventListener('touchend', handleTouchEnd);
+        document.addEventListener('touchcancel', handleTouchEnd);
+      }
+    },
+    [interaction, onLongPress]
+  );
+
+  const handleTouchEnd = React.useCallback(
+    (e: React.TouchEvent) => {
+      if (!touchStart) return;
+
+      const touch = e.changedTouches[0];
+      const deltaX = touch.clientX - touchStart.x;
+      const deltaY = touch.clientY - touchStart.y;
+      const deltaTime = Date.now() - touchStart.time;
+
+      setIsPressed(false);
+      setTouchStart(null);
+
+      // Swipe detection
+      if (
+        swipeActions &&
+        Math.abs(deltaX) > 50 &&
+        Math.abs(deltaY) < 100 &&
+        deltaTime < 300
+      ) {
+        if (deltaX > 0 && onSwipeRight) {
+          onSwipeRight();
+          // Haptic feedback for swipe
+          if ('vibrate' in navigator) {
+            navigator.vibrate(30);
+          }
+        } else if (deltaX < 0 && onSwipeLeft) {
+          onSwipeLeft();
+          // Haptic feedback for swipe
+          if ('vibrate' in navigator) {
+            navigator.vibrate(30);
+          }
         }
-      }, 500);
+        return;
+      }
 
-      const cleanup = () => {
-        clearTimeout(longPressTimer);
-        setIsPressed(false);
-      };
-
-      const handleTouchEnd = () => {
-        cleanup();
-        document.removeEventListener('touchend', handleTouchEnd);
-        document.removeEventListener('touchcancel', handleTouchEnd);
-      };
-
-      document.addEventListener('touchend', handleTouchEnd);
-      document.addEventListener('touchcancel', handleTouchEnd);
-    }
-  }, [interaction, onLongPress]);
-
-  const handleTouchEnd = React.useCallback((e: React.TouchEvent) => {
-    if (!touchStart) return;
-
-    const touch = e.changedTouches[0];
-    const deltaX = touch.clientX - touchStart.x;
-    const deltaY = touch.clientY - touchStart.y;
-    const deltaTime = Date.now() - touchStart.time;
-
-    setIsPressed(false);
-    setTouchStart(null);
-
-    // Swipe detection
-    if (swipeActions && Math.abs(deltaX) > 50 && Math.abs(deltaY) < 100 && deltaTime < 300) {
-      if (deltaX > 0 && onSwipeRight) {
-        onSwipeRight();
-        // Haptic feedback for swipe
+      // Tap detection
+      if (
+        interaction === 'tap' &&
+        onTap &&
+        Math.abs(deltaX) < 10 &&
+        Math.abs(deltaY) < 10 &&
+        deltaTime < 300
+      ) {
+        onTap();
+        // Light haptic feedback for tap
         if ('vibrate' in navigator) {
-          navigator.vibrate(30);
-        }
-      } else if (deltaX < 0 && onSwipeLeft) {
-        onSwipeLeft();
-        // Haptic feedback for swipe
-        if ('vibrate' in navigator) {
-          navigator.vibrate(30);
+          navigator.vibrate(20);
         }
       }
-      return;
-    }
-
-    // Tap detection
-    if (interaction === 'tap' && onTap && Math.abs(deltaX) < 10 && Math.abs(deltaY) < 10 && deltaTime < 300) {
-      onTap();
-      // Light haptic feedback for tap
-      if ('vibrate' in navigator) {
-        navigator.vibrate(20);
-      }
-    }
-  }, [touchStart, interaction, swipeActions, onTap, onSwipeLeft, onSwipeRight]);
+    },
+    [touchStart, interaction, swipeActions, onTap, onSwipeLeft, onSwipeRight]
+  );
 
   const handleTouchCancel = React.useCallback(() => {
     setIsPressed(false);
@@ -217,10 +243,7 @@ function MobileCardHeader({
   );
 }
 
-function MobileCardTitle({
-  className,
-  ...props
-}: React.ComponentProps<'div'>) {
+function MobileCardTitle({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
       data-slot="mobile-card-title"
@@ -265,11 +288,14 @@ function MobileCardAction({
   ...props
 }: MobileCardActionProps) {
   const positionStyles = {
-    'top-right': 'col-start-2 row-span-2 row-start-1 self-start justify-self-end',
-    'top-left': 'col-start-1 row-span-2 row-start-1 self-start justify-self-start',
+    'top-right':
+      'col-start-2 row-span-2 row-start-1 self-start justify-self-end',
+    'top-left':
+      'col-start-1 row-span-2 row-start-1 self-start justify-self-start',
     'bottom-right': 'absolute bottom-4 right-4',
     'bottom-left': 'absolute bottom-4 left-4',
-    'center': 'absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2',
+    center:
+      'absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2',
   };
 
   return (
@@ -344,8 +370,4 @@ export {
   MobileCardFooter,
 };
 
-export type {
-  MobileCardSize,
-  MobileCardInteraction,
-  MobileCardElevation,
-}; 
+export type { MobileCardSize, MobileCardInteraction, MobileCardElevation };

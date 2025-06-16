@@ -24,12 +24,23 @@ class OrientationStore {
 
     if (typeof window !== 'undefined') {
       // Listen for orientation changes
-      window.addEventListener('orientationchange', this.handleOrientationChange, { passive: true });
+      window.addEventListener(
+        'orientationchange',
+        this.handleOrientationChange,
+        { passive: true }
+      );
       window.addEventListener('resize', this.handleResize, { passive: true });
-      
+
       // Modern browsers support 'screen.orientation'
-      if ('orientation' in screen && screen.orientation && 'addEventListener' in screen.orientation) {
-        (screen.orientation as any).addEventListener('change', this.handleOrientationChange);
+      if (
+        'orientation' in screen &&
+        screen.orientation &&
+        'addEventListener' in screen.orientation
+      ) {
+        (screen.orientation as any).addEventListener(
+          'change',
+          this.handleOrientationChange
+        );
       }
     }
   }
@@ -38,10 +49,12 @@ class OrientationStore {
     // Small delay to ensure window dimensions are updated
     setTimeout(() => {
       const newOrientation = this.detectOrientation();
-      if (newOrientation.type !== this.currentSnapshot.type || 
-          newOrientation.angle !== this.currentSnapshot.angle) {
+      if (
+        newOrientation.type !== this.currentSnapshot.type ||
+        newOrientation.angle !== this.currentSnapshot.angle
+      ) {
         this.currentSnapshot = newOrientation;
-        this.listeners.forEach((listener) => listener());
+        this.listeners.forEach(listener => listener());
       }
     }, 100);
   };
@@ -51,7 +64,7 @@ class OrientationStore {
     const newOrientation = this.detectOrientation();
     if (newOrientation.aspectRatio !== this.currentSnapshot.aspectRatio) {
       this.currentSnapshot = newOrientation;
-      this.listeners.forEach((listener) => listener());
+      this.listeners.forEach(listener => listener());
     }
   };
 
@@ -64,7 +77,7 @@ class OrientationStore {
         isPortrait: true,
         isLandscape: false,
         aspectRatio: 0.75,
-        dimensions: { width: 768, height: 1024 }
+        dimensions: { width: 768, height: 1024 },
       };
     }
 
@@ -97,7 +110,7 @@ class OrientationStore {
       isPortrait: !isLandscape,
       isLandscape,
       aspectRatio,
-      dimensions: { width, height }
+      dimensions: { width, height },
     };
   }
 
@@ -113,13 +126,13 @@ class OrientationStore {
       isPortrait: true,
       isLandscape: false,
       aspectRatio: 0.75,
-      dimensions: { width: 768, height: 1024 }
+      dimensions: { width: 768, height: 1024 },
     };
   };
 
   public subscribe = (listener: () => void): (() => void) => {
     this.listeners.add(listener);
-    
+
     return () => {
       this.listeners.delete(listener);
     };
@@ -127,11 +140,21 @@ class OrientationStore {
 
   public destroy() {
     if (typeof window !== 'undefined') {
-      window.removeEventListener('orientationchange', this.handleOrientationChange);
+      window.removeEventListener(
+        'orientationchange',
+        this.handleOrientationChange
+      );
       window.removeEventListener('resize', this.handleResize);
-      
-      if ('orientation' in screen && screen.orientation && 'removeEventListener' in screen.orientation) {
-        (screen.orientation as any).removeEventListener('change', this.handleOrientationChange);
+
+      if (
+        'orientation' in screen &&
+        screen.orientation &&
+        'removeEventListener' in screen.orientation
+      ) {
+        (screen.orientation as any).removeEventListener(
+          'change',
+          this.handleOrientationChange
+        );
       }
     }
     this.listeners.clear();
@@ -143,21 +166,21 @@ const orientationStore = new OrientationStore();
 
 /**
  * Hook for detecting device orientation and related information
- * 
+ *
  * Provides comprehensive orientation detection including:
  * - Orientation type (portrait/landscape)
  * - Orientation angle (0, 90, 180, 270 degrees)
  * - Boolean helpers for quick checks
  * - Aspect ratio calculations
  * - Current dimensions
- * 
+ *
  * @returns OrientationInfo object with orientation details
- * 
+ *
  * @example
  * ```tsx
  * function OrientationAwareComponent() {
  *   const orientation = useOrientation();
- *   
+ *
  *   return (
  *     <div>
  *       <p>Current: {orientation.type}</p>
@@ -195,4 +218,4 @@ export { orientationStore };
 // Cleanup function
 export const destroyOrientationStore = () => {
   orientationStore.destroy();
-}; 
+};

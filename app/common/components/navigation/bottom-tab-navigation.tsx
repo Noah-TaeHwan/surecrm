@@ -82,7 +82,7 @@ function LiquidGlassButton({
       {/* 리퀴드글래스 액티브 백그라운드 - 플로팅 스타일 */}
       {isActive && (
         <motion.div
-          className="absolute top-2 bottom-2 left-0.5 right-0.5 rounded-2xl liquid-glass-button"
+          className="absolute top-1.5 bottom-1.5 left-0 right-0 rounded-2xl liquid-glass-button"
           layoutId="liquidGlassIndicator"
           transition={{
             type: "spring",

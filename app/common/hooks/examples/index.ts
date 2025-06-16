@@ -1,6 +1,6 @@
 /**
  * Device Detection Hooks 예제 컴포넌트 Export
- * 
+ *
  * 모든 예제 컴포넌트들을 중앙에서 관리하고 export합니다.
  */
 
@@ -151,7 +151,7 @@ function AdaptiveInterface() {
       <Content responsive={true} />
     </div>
   );
-}`
+}`,
 };
 
 // 성능 최적화 팁
@@ -191,7 +191,7 @@ import { destroyAllStores } from '~/common/hooks';
 
 afterEach(() => {
   destroyAllStores();
-});`
+});`,
 };
 
 // 일반적인 패턴들
@@ -201,5 +201,5 @@ export const COMMON_PATTERNS = {
   orientationLayout: 'useOrientation으로 방향별 레이아웃 변경',
   mobileFirst: 'useIsMobileLike로 모바일 우선 디자인 구현',
   adaptiveNavigation: '여러 hooks 조합으로 적응형 네비게이션 구현',
-  performanceOptimization: 'useMemo + 조건부 렌더링으로 성능 최적화'
-}; 
+  performanceOptimization: 'useMemo + 조건부 렌더링으로 성능 최적화',
+};

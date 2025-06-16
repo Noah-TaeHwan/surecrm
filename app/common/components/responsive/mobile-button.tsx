@@ -132,4 +132,4 @@ const MobileButton = React.forwardRef<HTMLButtonElement, MobileButtonProps>(
 MobileButton.displayName = 'MobileButton';
 
 export { MobileButton, mobileButtonVariants };
-export type { MobileButtonProps }; 
+export type { MobileButtonProps };

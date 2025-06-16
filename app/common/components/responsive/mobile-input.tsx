@@ -81,7 +81,15 @@ export interface MobileInputProps
   /**
    * 네이티브 키보드 타입 (모바일 최적화)
    */
-  inputMode?: 'none' | 'text' | 'tel' | 'url' | 'email' | 'numeric' | 'decimal' | 'search';
+  inputMode?:
+    | 'none'
+    | 'text'
+    | 'tel'
+    | 'url'
+    | 'email'
+    | 'numeric'
+    | 'decimal'
+    | 'search';
   /**
    * 자동완성 타입
    */
@@ -145,16 +153,30 @@ const MobileInput = React.forwardRef<HTMLInputElement, MobileInputProps>(
     const warningId = `${inputId}-warning`;
 
     // 상태에 따른 메시지와 ID 결정
-    const currentState = error ? 'error' : successMessage ? 'success' : warningMessage ? 'warning' : state;
+    const currentState = error
+      ? 'error'
+      : successMessage
+        ? 'success'
+        : warningMessage
+          ? 'warning'
+          : state;
     const currentMessage = error || successMessage || warningMessage;
-    const messageId = error ? errorId : successMessage ? successId : warningMessage ? warningId : helperId;
+    const messageId = error
+      ? errorId
+      : successMessage
+        ? successId
+        : warningMessage
+          ? warningId
+          : helperId;
 
     // aria-describedby 구성
     const describedByIds = [
       helperText && helperId,
       currentMessage && messageId,
       ariaDescribedBy,
-    ].filter(Boolean).join(' ');
+    ]
+      .filter(Boolean)
+      .join(' ');
 
     // 햅틱 피드백 함수
     const triggerHapticFeedback = React.useCallback(() => {
@@ -242,10 +264,7 @@ const MobileInput = React.forwardRef<HTMLInputElement, MobileInputProps>(
         {helperText && !currentMessage && (
           <p
             id={helperId}
-            className={cn(
-              'text-sm text-muted-foreground',
-              helperClassName
-            )}
+            className={cn('text-sm text-muted-foreground', helperClassName)}
           >
             {helperText}
           </p>
@@ -299,4 +318,4 @@ const MobileInput = React.forwardRef<HTMLInputElement, MobileInputProps>(
 
 MobileInput.displayName = 'MobileInput';
 
-export { MobileInput, mobileInputVariants }; 
+export { MobileInput, mobileInputVariants };

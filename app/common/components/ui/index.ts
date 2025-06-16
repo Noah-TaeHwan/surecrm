@@ -1,5 +1,12 @@
 export { Button } from './button';
-export { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './card';
+export {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from './card';
 export { ResponsiveContainer } from './responsive-container';
 export { ResponsiveGrid } from './responsive-grid';
 export { ResponsiveStack } from './responsive-stack';
@@ -12,7 +19,7 @@ export type {
   Breakpoint,
   ResponsiveValue,
   BreakpointConfig,
-  
+
   // Spacing & Sizing Types
   SpacingScale,
   GapScale,
@@ -20,7 +27,7 @@ export type {
   MarginScale,
   MaxWidthScale,
   MinHeightScale,
-  
+
   // Layout & Flexbox Types
   FlexDirection,
   AlignItems,
@@ -33,13 +40,13 @@ export type {
   GridRows,
   ColSpan,
   RowSpan,
-  
+
   // Styling Types
   BackgroundScale,
   RoundedScale,
   ShadowScale,
   BorderScale,
-  
+
   // Component Props Types
   BaseResponsiveProps,
   ResponsiveContainerProps,
@@ -47,7 +54,7 @@ export type {
   ResponsiveStackProps,
   ResponsiveFlexProps,
   ResponsiveSectionProps,
-  
+
   // Accessibility Types
   AriaAttributes,
   AccessibilityProps,
@@ -56,7 +63,7 @@ export type {
   AccessibilityWarning,
   AccessibilitySuggestion,
   AccessibilityRuleCode,
-  
+
   // Debug & Development Types
   ComponentDebugInfo,
   ResponsiveDebugConfig,
@@ -79,4 +86,4 @@ export {
 } from './accessibility-utils';
 
 // Constants
-export { AccessibilityRules } from './types'; 
+export { AccessibilityRules } from './types';

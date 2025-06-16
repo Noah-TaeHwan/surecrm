@@ -10,7 +10,7 @@ export interface ViewportSize {
 
 // 🔧 SSR 기본값을 상수로 캐시하여 무한 루프 방지
 const SSR_DEFAULT_VIEWPORT: ViewportSize = {
-  width: 1024, 
+  width: 1024,
   height: 768,
   isMobile: false,
   isTablet: false,
@@ -65,7 +65,7 @@ class ViewportStore {
 
   public subscribe = (listener: () => void): (() => void) => {
     this.listeners.add(listener);
-    
+
     return () => {
       this.listeners.delete(listener);
     };
@@ -74,7 +74,7 @@ class ViewportStore {
   public forceUpdate = (): void => {
     const newViewportSize = this.getViewportSize();
     this.currentSnapshot = newViewportSize;
-    this.listeners.forEach((listener) => listener());
+    this.listeners.forEach(listener => listener());
   };
 
   public destroy() {
@@ -90,14 +90,14 @@ const viewportStore = new ViewportStore();
 
 /**
  * Hook for viewport size tracking
- * 
+ *
  * @returns ViewportSize object with current width and height
- * 
+ *
  * @example
  * ```tsx
  * function ResponsiveComponent() {
  *   const { width, height } = useViewport();
- *   
+ *
  *   return (
  *     <div>
  *       <p>Viewport: {width}x{height}</p>
@@ -116,7 +116,7 @@ export const useViewport = (): ViewportSize => {
 
 /**
  * Hook for viewport width only
- * 
+ *
  * @returns Current viewport width
  */
 export const useViewportWidth = (): number => {
@@ -126,7 +126,7 @@ export const useViewportWidth = (): number => {
 
 /**
  * Hook for viewport height only
- * 
+ *
  * @returns Current viewport height
  */
 export const useViewportHeight = (): number => {
@@ -136,17 +136,17 @@ export const useViewportHeight = (): number => {
 
 /**
  * Hook for viewport dimensions (alias for useViewport)
- * 
+ *
  * @returns ViewportSize object with current width and height
  */
 export const useViewportDimensions = (): ViewportSize => {
   return useViewport();
 };
 
-// Export store for testing  
+// Export store for testing
 export { viewportStore };
 
 // Cleanup function
 export const destroyViewportStore = () => {
   viewportStore.destroy();
-}; 
+};

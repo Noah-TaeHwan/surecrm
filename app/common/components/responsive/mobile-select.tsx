@@ -10,65 +10,68 @@ const mobileSelectTriggerVariants = cva(
   [
     // Base styles
     "border-input data-[placeholder]:text-muted-foreground [&_svg:not([class*='text-'])]:text-muted-foreground",
-    "focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40",
-    "aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50",
-    "flex w-full items-center justify-between gap-3 rounded-lg border bg-transparent text-sm",
-    "whitespace-nowrap shadow-sm transition-all duration-200 outline-none",
-    "focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50",
-    "active:scale-[0.98] touch-manipulation",
+    'focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40',
+    'aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50',
+    'flex w-full items-center justify-between gap-3 rounded-lg border bg-transparent text-sm',
+    'whitespace-nowrap shadow-sm transition-all duration-200 outline-none',
+    'focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50',
+    'active:scale-[0.98] touch-manipulation',
     // Mobile optimizations
-    "*:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex",
-    "*:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2",
+    '*:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex',
+    '*:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2',
     "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5",
   ],
   {
     variants: {
       size: {
-        sm: "h-11 px-3 py-2 text-sm min-h-[44px]", // WCAG minimum
-        md: "h-12 px-4 py-3 text-base min-h-[48px]",
-        lg: "h-14 px-5 py-4 text-lg min-h-[56px]",
-        xl: "h-16 px-6 py-5 text-xl min-h-[64px]",
+        sm: 'h-11 px-3 py-2 text-sm min-h-[44px]', // WCAG minimum
+        md: 'h-12 px-4 py-3 text-base min-h-[48px]',
+        lg: 'h-14 px-5 py-4 text-lg min-h-[56px]',
+        xl: 'h-16 px-6 py-5 text-xl min-h-[64px]',
       },
       feedback: {
-        subtle: "hover:bg-accent/5 active:bg-accent/10",
-        medium: "hover:bg-accent/10 active:bg-accent/20 hover:shadow-md",
-        strong: "hover:bg-accent/15 active:bg-accent/30 hover:shadow-lg active:shadow-xl",
+        subtle: 'hover:bg-accent/5 active:bg-accent/10',
+        medium: 'hover:bg-accent/10 active:bg-accent/20 hover:shadow-md',
+        strong:
+          'hover:bg-accent/15 active:bg-accent/30 hover:shadow-lg active:shadow-xl',
       },
       state: {
-        default: "",
-        error: "border-destructive bg-destructive/5 text-destructive",
-        success: "border-green-500 bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300",
-        warning: "border-yellow-500 bg-yellow-50 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-300",
+        default: '',
+        error: 'border-destructive bg-destructive/5 text-destructive',
+        success:
+          'border-green-500 bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300',
+        warning:
+          'border-yellow-500 bg-yellow-50 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-300',
       },
     },
     defaultVariants: {
-      size: "md",
-      feedback: "medium",
-      state: "default",
+      size: 'md',
+      feedback: 'medium',
+      state: 'default',
     },
   }
 );
 
 const mobileSelectContentVariants = cva(
   [
-    "bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out",
-    "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95",
-    "data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2",
-    "data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
-    "relative z-50 max-h-[var(--radix-select-content-available-height)] min-w-[8rem]",
-    "origin-[var(--radix-select-content-transform-origin)] overflow-hidden rounded-lg border shadow-lg",
+    'bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out',
+    'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95',
+    'data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2',
+    'data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2',
+    'relative z-50 max-h-[var(--radix-select-content-available-height)] min-w-[8rem]',
+    'origin-[var(--radix-select-content-transform-origin)] overflow-hidden rounded-lg border shadow-lg',
   ],
   {
     variants: {
       size: {
-        sm: "text-sm",
-        md: "text-base",
-        lg: "text-lg",
-        xl: "text-xl",
+        sm: 'text-sm',
+        md: 'text-base',
+        lg: 'text-lg',
+        xl: 'text-xl',
       },
     },
     defaultVariants: {
-      size: "md",
+      size: 'md',
     },
   }
 );
@@ -76,29 +79,31 @@ const mobileSelectContentVariants = cva(
 const mobileSelectItemVariants = cva(
   [
     "cursor-pointer focus:bg-accent focus:text-accent-foreground [&_svg:not([class*='text-'])]:text-muted-foreground",
-    "relative flex w-full cursor-default items-center gap-3 rounded-md select-none outline-none",
-    "data-[disabled]:pointer-events-none data-[disabled]:opacity-50 transition-colors duration-150",
+    'relative flex w-full cursor-default items-center gap-3 rounded-md select-none outline-none',
+    'data-[disabled]:pointer-events-none data-[disabled]:opacity-50 transition-colors duration-150',
     "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5",
-    "*:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
-    "touch-manipulation active:scale-[0.98]",
+    '*:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2',
+    'touch-manipulation active:scale-[0.98]',
   ],
   {
     variants: {
       size: {
-        sm: "py-2 pr-8 pl-3 text-sm min-h-[44px]",
-        md: "py-3 pr-10 pl-4 text-base min-h-[48px]",
-        lg: "py-4 pr-12 pl-5 text-lg min-h-[56px]",
-        xl: "py-5 pr-14 pl-6 text-xl min-h-[64px]",
+        sm: 'py-2 pr-8 pl-3 text-sm min-h-[44px]',
+        md: 'py-3 pr-10 pl-4 text-base min-h-[48px]',
+        lg: 'py-4 pr-12 pl-5 text-lg min-h-[56px]',
+        xl: 'py-5 pr-14 pl-6 text-xl min-h-[64px]',
       },
     },
     defaultVariants: {
-      size: "md",
+      size: 'md',
     },
   }
 );
 
 // Haptic feedback utility
-const triggerHapticFeedback = (intensity: 'light' | 'medium' | 'heavy' = 'light') => {
+const triggerHapticFeedback = (
+  intensity: 'light' | 'medium' | 'heavy' = 'light'
+) => {
   if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
     const patterns = {
       light: 10,
@@ -136,78 +141,92 @@ const MobileSelectGroup = React.forwardRef<
   React.ComponentProps<typeof SelectPrimitive.Group>
 >(({ ...props }, ref) => {
   return (
-    <SelectPrimitive.Group 
+    <SelectPrimitive.Group
       ref={ref}
-      data-slot="mobile-select-group" 
-      {...props} 
+      data-slot="mobile-select-group"
+      {...props}
     />
   );
 });
-MobileSelectGroup.displayName = "MobileSelectGroup";
+MobileSelectGroup.displayName = 'MobileSelectGroup';
 
 const MobileSelectValue = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Value>,
   React.ComponentProps<typeof SelectPrimitive.Value>
 >(({ ...props }, ref) => {
   return (
-    <SelectPrimitive.Value 
+    <SelectPrimitive.Value
       ref={ref}
-      data-slot="mobile-select-value" 
-      {...props} 
+      data-slot="mobile-select-value"
+      {...props}
     />
   );
 });
-MobileSelectValue.displayName = "MobileSelectValue";
+MobileSelectValue.displayName = 'MobileSelectValue';
 
 const MobileSelectTrigger = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Trigger>,
   MobileSelectTriggerProps
->(({ 
-  className, 
-  size, 
-  feedback, 
-  state, 
-  hapticFeedback = true,
-  hapticIntensity = 'light',
-  children, 
-  onPointerDown,
-  onKeyDown,
-  ...props 
-}, ref) => {
-  const handlePointerDown = React.useCallback((event: React.PointerEvent<HTMLButtonElement>) => {
-    if (hapticFeedback) {
-      triggerHapticFeedback(hapticIntensity);
-    }
-    onPointerDown?.(event);
-  }, [hapticFeedback, hapticIntensity, onPointerDown]);
+>(
+  (
+    {
+      className,
+      size,
+      feedback,
+      state,
+      hapticFeedback = true,
+      hapticIntensity = 'light',
+      children,
+      onPointerDown,
+      onKeyDown,
+      ...props
+    },
+    ref
+  ) => {
+    const handlePointerDown = React.useCallback(
+      (event: React.PointerEvent<HTMLButtonElement>) => {
+        if (hapticFeedback) {
+          triggerHapticFeedback(hapticIntensity);
+        }
+        onPointerDown?.(event);
+      },
+      [hapticFeedback, hapticIntensity, onPointerDown]
+    );
 
-  const handleKeyDown = React.useCallback((event: React.KeyboardEvent<HTMLButtonElement>) => {
-    if ((event.key === 'Enter' || event.key === ' ') && hapticFeedback) {
-      triggerHapticFeedback(hapticIntensity);
-    }
-    onKeyDown?.(event);
-  }, [hapticFeedback, hapticIntensity, onKeyDown]);
+    const handleKeyDown = React.useCallback(
+      (event: React.KeyboardEvent<HTMLButtonElement>) => {
+        if ((event.key === 'Enter' || event.key === ' ') && hapticFeedback) {
+          triggerHapticFeedback(hapticIntensity);
+        }
+        onKeyDown?.(event);
+      },
+      [hapticFeedback, hapticIntensity, onKeyDown]
+    );
 
-  return (
-    <SelectPrimitive.Trigger
-      ref={ref}
-      data-slot="mobile-select-trigger"
-      data-size={size}
-      className={cn(mobileSelectTriggerVariants({ size, feedback, state }), className)}
-      onPointerDown={handlePointerDown}
-      onKeyDown={handleKeyDown}
-      role="combobox"
-      aria-haspopup="listbox"
-      {...props}
-    >
-      {children}
-      <SelectPrimitive.Icon asChild>
-        <ChevronDownIcon className="opacity-50 transition-transform duration-200 data-[state=open]:rotate-180" />
-      </SelectPrimitive.Icon>
-    </SelectPrimitive.Trigger>
-  );
-});
-MobileSelectTrigger.displayName = "MobileSelectTrigger";
+    return (
+      <SelectPrimitive.Trigger
+        ref={ref}
+        data-slot="mobile-select-trigger"
+        data-size={size}
+        className={cn(
+          mobileSelectTriggerVariants({ size, feedback, state }),
+          className
+        )}
+        onPointerDown={handlePointerDown}
+        onKeyDown={handleKeyDown}
+        role="combobox"
+        aria-haspopup="listbox"
+        {...props}
+      >
+        {children}
+        <SelectPrimitive.Icon asChild>
+          <ChevronDownIcon className="opacity-50 transition-transform duration-200 data-[state=open]:rotate-180" />
+        </SelectPrimitive.Icon>
+      </SelectPrimitive.Trigger>
+    );
+  }
+);
+MobileSelectTrigger.displayName = 'MobileSelectTrigger';
 
 const MobileSelectContent = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Content>,
@@ -243,7 +262,7 @@ const MobileSelectContent = React.forwardRef<
     </SelectPrimitive.Portal>
   );
 });
-MobileSelectContent.displayName = "MobileSelectContent";
+MobileSelectContent.displayName = 'MobileSelectContent';
 
 const MobileSelectLabel = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Label>,
@@ -271,67 +290,77 @@ const MobileSelectLabel = React.forwardRef<
     />
   );
 });
-MobileSelectLabel.displayName = "MobileSelectLabel";
+MobileSelectLabel.displayName = 'MobileSelectLabel';
 
 const MobileSelectItem = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Item>,
   MobileSelectItemProps
->(({ 
-  className, 
-  children, 
-  size,
-  hapticFeedback = true,
-  hapticIntensity = 'light',
-  onSelect,
-  onPointerDown,
-  ...props 
-}, ref) => {
-  const handleSelect = React.useCallback(() => {
-    if (hapticFeedback) {
-      triggerHapticFeedback(hapticIntensity);
-    }
-  }, [hapticFeedback, hapticIntensity]);
+>(
+  (
+    {
+      className,
+      children,
+      size,
+      hapticFeedback = true,
+      hapticIntensity = 'light',
+      onSelect,
+      onPointerDown,
+      ...props
+    },
+    ref
+  ) => {
+    const handleSelect = React.useCallback(() => {
+      if (hapticFeedback) {
+        triggerHapticFeedback(hapticIntensity);
+      }
+    }, [hapticFeedback, hapticIntensity]);
 
-  const handlePointerDown = React.useCallback((event: React.PointerEvent<HTMLDivElement>) => {
-    if (hapticFeedback) {
-      triggerHapticFeedback('light'); // Lighter feedback for hover
-    }
-    onPointerDown?.(event);
-  }, [hapticFeedback, onPointerDown]);
+    const handlePointerDown = React.useCallback(
+      (event: React.PointerEvent<HTMLDivElement>) => {
+        if (hapticFeedback) {
+          triggerHapticFeedback('light'); // Lighter feedback for hover
+        }
+        onPointerDown?.(event);
+      },
+      [hapticFeedback, onPointerDown]
+    );
 
-  const indicatorSizeClasses = {
-    sm: 'right-3 size-4',
-    md: 'right-4 size-5',
-    lg: 'right-5 size-6',
-    xl: 'right-6 size-7',
-  };
+    const indicatorSizeClasses = {
+      sm: 'right-3 size-4',
+      md: 'right-4 size-5',
+      lg: 'right-5 size-6',
+      xl: 'right-6 size-7',
+    };
 
-  return (
-    <SelectPrimitive.Item
-      ref={ref}
-      data-slot="mobile-select-item"
-      className={cn(mobileSelectItemVariants({ size }), className)}
-      onSelect={(value) => {
-        handleSelect();
-        onSelect?.(value);
-      }}
-      onPointerDown={handlePointerDown}
-      role="option"
-      {...props}
-    >
-      <span className={cn(
-        'absolute flex items-center justify-center',
-        indicatorSizeClasses[size || 'md']
-      )}>
-        <SelectPrimitive.ItemIndicator>
-          <CheckIcon className="size-full" />
-        </SelectPrimitive.ItemIndicator>
-      </span>
-      <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
-    </SelectPrimitive.Item>
-  );
-});
-MobileSelectItem.displayName = "MobileSelectItem";
+    return (
+      <SelectPrimitive.Item
+        ref={ref}
+        data-slot="mobile-select-item"
+        className={cn(mobileSelectItemVariants({ size }), className)}
+        onSelect={value => {
+          handleSelect();
+          onSelect?.(value);
+        }}
+        onPointerDown={handlePointerDown}
+        role="option"
+        {...props}
+      >
+        <span
+          className={cn(
+            'absolute flex items-center justify-center',
+            indicatorSizeClasses[size || 'md']
+          )}
+        >
+          <SelectPrimitive.ItemIndicator>
+            <CheckIcon className="size-full" />
+          </SelectPrimitive.ItemIndicator>
+        </span>
+        <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
+      </SelectPrimitive.Item>
+    );
+  }
+);
+MobileSelectItem.displayName = 'MobileSelectItem';
 
 const MobileSelectSeparator = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Separator>,
@@ -359,7 +388,7 @@ const MobileSelectSeparator = React.forwardRef<
     />
   );
 });
-MobileSelectSeparator.displayName = "MobileSelectSeparator";
+MobileSelectSeparator.displayName = 'MobileSelectSeparator';
 
 const MobileSelectScrollUpButton = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.ScrollUpButton>,
@@ -389,7 +418,7 @@ const MobileSelectScrollUpButton = React.forwardRef<
     </SelectPrimitive.ScrollUpButton>
   );
 });
-MobileSelectScrollUpButton.displayName = "MobileSelectScrollUpButton";
+MobileSelectScrollUpButton.displayName = 'MobileSelectScrollUpButton';
 
 const MobileSelectScrollDownButton = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.ScrollDownButton>,
@@ -419,10 +448,14 @@ const MobileSelectScrollDownButton = React.forwardRef<
     </SelectPrimitive.ScrollDownButton>
   );
 });
-MobileSelectScrollDownButton.displayName = "MobileSelectScrollDownButton";
+MobileSelectScrollDownButton.displayName = 'MobileSelectScrollDownButton';
 
 // Export variants for external use
-export { mobileSelectTriggerVariants, mobileSelectContentVariants, mobileSelectItemVariants };
+export {
+  mobileSelectTriggerVariants,
+  mobileSelectContentVariants,
+  mobileSelectItemVariants,
+};
 
 export {
   MobileSelect,
@@ -435,4 +468,4 @@ export {
   MobileSelectSeparator,
   MobileSelectTrigger,
   MobileSelectValue,
-}; 
+};

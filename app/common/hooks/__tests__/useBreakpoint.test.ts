@@ -1,10 +1,10 @@
 import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { 
-  useBreakpoint, 
+import {
+  useBreakpoint,
   BREAKPOINTS,
-  breakpointStore, 
-  destroyBreakpointStore 
+  breakpointStore,
+  destroyBreakpointStore,
 } from '../useBreakpoint';
 import type { BreakpointName } from '../useBreakpoint';
 
@@ -143,7 +143,7 @@ describe('useBreakpoint Hook', () => {
 
       const { result } = renderHook(() => useBreakpoint());
       forceHookUpdate();
-      
+
       expect(result.current.isAbove('xs')).toBe(true);
       expect(result.current.isAbove('sm')).toBe(true);
       expect(result.current.isAbove('md')).toBe(true);
@@ -159,7 +159,7 @@ describe('useBreakpoint Hook', () => {
 
       const { result } = renderHook(() => useBreakpoint());
       forceHookUpdate();
-      
+
       expect(result.current.isBelow('xs')).toBe(false);
       expect(result.current.isBelow('sm')).toBe(false);
       expect(result.current.isBelow('md')).toBe(false); // Same level
@@ -175,7 +175,7 @@ describe('useBreakpoint Hook', () => {
 
       const { result } = renderHook(() => useBreakpoint());
       forceHookUpdate();
-      
+
       expect(result.current.isExactly('xs')).toBe(false);
       expect(result.current.isExactly('sm')).toBe(true);
       expect(result.current.isExactly('md')).toBe(false);
@@ -191,7 +191,7 @@ describe('useBreakpoint Hook', () => {
 
       const { result } = renderHook(() => useBreakpoint());
       forceHookUpdate();
-      
+
       expect(result.current.matches('xs')).toBe(true); // lg >= xs
       expect(result.current.matches('sm')).toBe(true); // lg >= sm
       expect(result.current.matches('md')).toBe(true); // lg >= md
@@ -205,7 +205,7 @@ describe('useBreakpoint Hook', () => {
 
       const { result } = renderHook(() => useBreakpoint());
       forceHookUpdate();
-      
+
       expect(result.current.matches('xs')).toBe(true); // xs >= xs
       expect(result.current.matches('sm')).toBe(false); // xs < sm
       expect(result.current.matches('md')).toBe(false);
@@ -275,13 +275,13 @@ describe('useBreakpoint Hook', () => {
     it('should handle undefined window gracefully', () => {
       // SSR 시나리오를 시뮬레이션하지만 실제 DOM 렌더링은 피합니다
       const serverSnapshot = breakpointStore.getServerSnapshot();
-      
+
       // 서버사이드에서는 기본값을 반환해야 함
       expect(serverSnapshot.current).toBe('lg');
       expect(serverSnapshot.matches('md')).toBe(true);
       expect(serverSnapshot.isAbove('sm')).toBe(true);
       expect(serverSnapshot.isBelow('xl')).toBe(true);
-      
+
       // 클라이언트 렌더링도 잘 동작하는지 확인
       mockWindowWidth(768);
       const { result } = renderHook(() => useBreakpoint());
@@ -296,16 +296,19 @@ describe('useBreakpoint Hook', () => {
       if (typeof window === 'undefined') {
         mockWindowWidth(1024); // 기본 설정
       }
-      
+
       const removeEventListenerSpy = vi.spyOn(window, 'removeEventListener');
-      
+
       const { unmount } = renderHook(() => useBreakpoint());
-      
+
       unmount();
       destroyBreakpointStore();
-      
-      expect(removeEventListenerSpy).toHaveBeenCalledWith('resize', expect.any(Function));
-      
+
+      expect(removeEventListenerSpy).toHaveBeenCalledWith(
+        'resize',
+        expect.any(Function)
+      );
+
       removeEventListenerSpy.mockRestore();
     });
 
@@ -355,7 +358,7 @@ describe('useBreakpoint Hook', () => {
 
       const { result } = renderHook(() => useBreakpoint());
       forceHookUpdate();
-      
+
       // Edge case: checking if 2xl is above 2xl (should be false)
       expect(result.current.isAbove('2xl')).toBe(false);
       expect(result.current.isExactly('2xl')).toBe(true);
@@ -412,18 +415,30 @@ describe('useBreakpoint Hook', () => {
         },
       ];
 
-      testCases.forEach(({ width, expectedCurrent, testBreakpoint, expectedAbove, expectedBelow, expectedExactly, expectedMatches }) => {
-        mockWindowWidth(width);
-        forceHookUpdate();
-        
-        const { result } = renderHook(() => useBreakpoint());
-        
-        expect(result.current.current).toBe(expectedCurrent);
-        expect(result.current.isAbove(testBreakpoint)).toBe(expectedAbove);
-        expect(result.current.isBelow(testBreakpoint)).toBe(expectedBelow);
-        expect(result.current.isExactly(testBreakpoint)).toBe(expectedExactly);
-        expect(result.current.matches(testBreakpoint)).toBe(expectedMatches);
-      });
+      testCases.forEach(
+        ({
+          width,
+          expectedCurrent,
+          testBreakpoint,
+          expectedAbove,
+          expectedBelow,
+          expectedExactly,
+          expectedMatches,
+        }) => {
+          mockWindowWidth(width);
+          forceHookUpdate();
+
+          const { result } = renderHook(() => useBreakpoint());
+
+          expect(result.current.current).toBe(expectedCurrent);
+          expect(result.current.isAbove(testBreakpoint)).toBe(expectedAbove);
+          expect(result.current.isBelow(testBreakpoint)).toBe(expectedBelow);
+          expect(result.current.isExactly(testBreakpoint)).toBe(
+            expectedExactly
+          );
+          expect(result.current.matches(testBreakpoint)).toBe(expectedMatches);
+        }
+      );
     });
   });
-}); 
+});

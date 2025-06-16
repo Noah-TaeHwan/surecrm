@@ -34,7 +34,7 @@ interface ResponsiveCardProps extends React.ComponentProps<'div'> {
   onMobileLongPress?: () => void;
   onMobileSwipeLeft?: () => void;
   onMobileSwipeRight?: () => void;
-  
+
   // Breakpoint for switching between desktop and mobile (default: 768px)
   mobileBreakpoint?: number;
 }
@@ -55,7 +55,12 @@ interface ResponsiveCardFooterProps extends React.ComponentProps<'div'> {
 }
 
 interface ResponsiveCardActionProps extends React.ComponentProps<'div'> {
-  mobilePosition?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'center';
+  mobilePosition?:
+    | 'top-right'
+    | 'top-left'
+    | 'bottom-right'
+    | 'bottom-left'
+    | 'center';
   mobileFloating?: boolean;
 }
 
@@ -220,4 +225,4 @@ export type {
   ResponsiveCardContentProps,
   ResponsiveCardFooterProps,
   ResponsiveCardActionProps,
-}; 
+};

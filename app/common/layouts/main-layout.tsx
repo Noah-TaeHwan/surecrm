@@ -3,7 +3,10 @@ import { useState, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { Sidebar } from '~/common/components/navigation/sidebar';
 import { Header } from '~/common/components/navigation/header';
-import { MobileNav, MobileNavButton } from '~/common/components/navigation/mobile-nav';
+import {
+  MobileNav,
+  MobileNavButton,
+} from '~/common/components/navigation/mobile-nav';
 import { BottomTabNavigation } from '~/common/components/navigation/bottom-tab-navigation';
 import { useViewport } from '~/common/hooks/useViewport';
 
@@ -40,10 +43,10 @@ export function MainLayout({
   // 🎯 Hydration 완료 처리
   useEffect(() => {
     setIsHydrated(true);
-    
+
     // localStorage 확인은 hydration 후에만
     const isLayoutInitialized = localStorage.getItem('layout-initialized');
-    
+
     if (isLayoutInitialized) {
       // 이미 초기화된 경우 즉시 렌더링
       setIsInitialRender(false);
@@ -169,17 +172,19 @@ export function MainLayout({
       {/* 메인 컨텐츠 영역 */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* 헤더 - 고정됨 */}
-        <header className={`h-16 border-b border-border flex-shrink-0 fixed top-0 left-0 right-0 ${isHydrated && !isInitialRender && !isMobile ? 'lg:left-64' : ''} ${
-          isMobileMenuOpen 
-            ? 'bg-background/70 backdrop-blur-md z-30' // 🎯 사이드바 열렸을 때: backdrop(z-40) 뒤에 위치
-            : 'bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50' // 🎯 기본 상태: 높은 z-index
-        }`}>
+        <header
+          className={`h-16 border-b border-border flex-shrink-0 fixed top-0 left-0 right-0 ${isHydrated && !isInitialRender && !isMobile ? 'lg:left-64' : ''} ${
+            isMobileMenuOpen
+              ? 'bg-background/70 backdrop-blur-md z-30' // 🎯 사이드바 열렸을 때: backdrop(z-40) 뒤에 위치
+              : 'bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50' // 🎯 기본 상태: 높은 z-index
+          }`}
+        >
           <div className="h-full px-4 lg:px-6 flex items-center justify-between">
             <div className="flex items-center gap-4">
               {/* 🎯 모바일 메뉴 버튼 - Hydration 완료 후 표시 */}
               {isHydrated && !isInitialRender && isMobile && (
                 <MobileNavButton
-                  onClick={toggleMobileMenu}
+                  onClick={openMobileMenu}
                   isOpen={isMobileMenuOpen}
                 />
               )}
@@ -204,8 +209,14 @@ export function MainLayout({
           style={
             title === '소개 네트워크'
               ? {
-                  height: isHydrated && !isInitialRender && isMobile ? 'calc(100vh - 14rem)' : 'calc(100vh - 4rem)', // 헤더(4rem) + 바텀네비(10rem - 플로팅 여백 포함)
-                  maxHeight: isHydrated && !isInitialRender && isMobile ? 'calc(100vh - 14rem)' : 'calc(100vh - 4rem)',
+                  height:
+                    isHydrated && !isInitialRender && isMobile
+                      ? 'calc(100vh - 14rem)'
+                      : 'calc(100vh - 4rem)', // 헤더(4rem) + 바텀네비(10rem - 플로팅 여백 포함)
+                  maxHeight:
+                    isHydrated && !isInitialRender && isMobile
+                      ? 'calc(100vh - 14rem)'
+                      : 'calc(100vh - 4rem)',
                   overflow: 'hidden',
                 }
               : {}
@@ -219,19 +230,14 @@ export function MainLayout({
       {isHydrated && !isInitialRender && (
         <AnimatePresence mode="wait">
           {isMobileMenuOpen && (
-            <MobileNav
-              isOpen={isMobileMenuOpen}
-              onClose={closeMobileMenu}
-            />
+            <MobileNav isOpen={isMobileMenuOpen} onClose={closeMobileMenu} />
           )}
         </AnimatePresence>
       )}
 
       {/* 🎯 Bottom Tab Navigation (모바일에서만 표시) - 새로운 API로 업데이트 */}
       {isHydrated && !isInitialRender && isMobile && (
-        <BottomTabNavigation
-          isMenuOpen={isMobileMenuOpen}
-        />
+        <BottomTabNavigation isMenuOpen={isMobileMenuOpen} />
       )}
     </div>
   );

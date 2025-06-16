@@ -35,7 +35,15 @@ interface ResponsiveInputProps extends BaseInputProps {
     warningMessage?: string;
     startIcon?: React.ReactNode;
     endIcon?: React.ReactNode;
-    inputMode?: 'none' | 'text' | 'tel' | 'url' | 'email' | 'numeric' | 'decimal' | 'search';
+    inputMode?:
+      | 'none'
+      | 'text'
+      | 'tel'
+      | 'url'
+      | 'email'
+      | 'numeric'
+      | 'decimal'
+      | 'search';
     enableHapticFeedback?: boolean;
     containerClassName?: string;
     labelClassName?: string;
@@ -73,7 +81,15 @@ interface ResponsiveInputProps extends BaseInputProps {
   /**
    * 네이티브 키보드 타입 (모바일에서만 적용)
    */
-  inputMode?: 'none' | 'text' | 'tel' | 'url' | 'email' | 'numeric' | 'decimal' | 'search';
+  inputMode?:
+    | 'none'
+    | 'text'
+    | 'tel'
+    | 'url'
+    | 'email'
+    | 'numeric'
+    | 'decimal'
+    | 'search';
   /**
    * 햅틱 피드백 활성화 (모바일에서만 적용)
    */
@@ -96,7 +112,10 @@ interface ResponsiveInputProps extends BaseInputProps {
   helperClassName?: string;
 }
 
-const ResponsiveInput = React.forwardRef<HTMLInputElement, ResponsiveInputProps>(
+const ResponsiveInput = React.forwardRef<
+  HTMLInputElement,
+  ResponsiveInputProps
+>(
   (
     {
       forceVariant,
@@ -123,10 +142,10 @@ const ResponsiveInput = React.forwardRef<HTMLInputElement, ResponsiveInputProps>
   ) => {
     const viewportWidth = useViewportWidth();
     const isMobile = viewportWidth < 768; // 768px 미만을 모바일로 간주
-    
+
     // 강제 설정이 있으면 그것을 우선 사용
-    const shouldUseMobile = forceVariant === 'mobile' || 
-                           (forceVariant !== 'desktop' && isMobile);
+    const shouldUseMobile =
+      forceVariant === 'mobile' || (forceVariant !== 'desktop' && isMobile);
 
     if (shouldUseMobile) {
       // 모바일 버전 사용 - 모바일 전용 props 포함
@@ -143,8 +162,10 @@ const ResponsiveInput = React.forwardRef<HTMLInputElement, ResponsiveInputProps>
         startIcon: mobileOnly?.startIcon || startIcon,
         endIcon: mobileOnly?.endIcon || endIcon,
         inputMode: mobileOnly?.inputMode || inputMode,
-        enableHapticFeedback: mobileOnly?.enableHapticFeedback ?? enableHapticFeedback,
-        containerClassName: mobileOnly?.containerClassName || containerClassName,
+        enableHapticFeedback:
+          mobileOnly?.enableHapticFeedback ?? enableHapticFeedback,
+        containerClassName:
+          mobileOnly?.containerClassName || containerClassName,
         labelClassName: mobileOnly?.labelClassName || labelClassName,
         errorClassName: mobileOnly?.errorClassName || errorClassName,
         helperClassName: mobileOnly?.helperClassName || helperClassName,
@@ -155,7 +176,7 @@ const ResponsiveInput = React.forwardRef<HTMLInputElement, ResponsiveInputProps>
 
     // 데스크톱 버전 사용 - 기본 Input 컴포넌트 사용
     // 모바일 전용 props는 제거하고 기본 props만 전달
-    const desktopProps = { 
+    const desktopProps = {
       ...props,
       // 데스크톱에서는 기본적인 props만 지원
     };
@@ -165,7 +186,7 @@ const ResponsiveInput = React.forwardRef<HTMLInputElement, ResponsiveInputProps>
       return (
         <div className="space-y-2">
           {label && (
-            <label 
+            <label
               htmlFor={props.id}
               className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
             >
@@ -177,14 +198,20 @@ const ResponsiveInput = React.forwardRef<HTMLInputElement, ResponsiveInputProps>
               )}
             </label>
           )}
-          <Input 
-            ref={ref} 
+          <Input
+            ref={ref}
             {...desktopProps}
             aria-invalid={error ? 'true' : 'false'}
-            aria-describedby={error ? `${props.id}-error` : helperText ? `${props.id}-helper` : undefined}
+            aria-describedby={
+              error
+                ? `${props.id}-error`
+                : helperText
+                  ? `${props.id}-helper`
+                  : undefined
+            }
           />
           {helperText && !error && (
-            <p 
+            <p
               id={`${props.id}-helper`}
               className="text-sm text-muted-foreground"
             >
@@ -192,7 +219,7 @@ const ResponsiveInput = React.forwardRef<HTMLInputElement, ResponsiveInputProps>
             </p>
           )}
           {error && (
-            <p 
+            <p
               id={`${props.id}-error`}
               role="alert"
               className="text-sm text-destructive font-medium"
@@ -203,7 +230,7 @@ const ResponsiveInput = React.forwardRef<HTMLInputElement, ResponsiveInputProps>
         </div>
       );
     }
-    
+
     return <Input ref={ref} {...desktopProps} />;
   }
 );
@@ -211,4 +238,4 @@ const ResponsiveInput = React.forwardRef<HTMLInputElement, ResponsiveInputProps>
 ResponsiveInput.displayName = 'ResponsiveInput';
 
 export { ResponsiveInput };
-export type { ResponsiveInputProps }; 
+export type { ResponsiveInputProps };

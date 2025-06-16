@@ -24,8 +24,8 @@ export function getVersionInfo(): VersionInfo {
   // 빌드 시 환경변수로 주입될 Git 정보
   const gitTag = process.env.REACT_APP_GIT_TAG || process.env.VITE_GIT_TAG;
   const commitHash =
-    process.env.REACT_APP_GIT_COMMIT || 
-    process.env.VITE_GIT_COMMIT || 
+    process.env.REACT_APP_GIT_COMMIT ||
+    process.env.VITE_GIT_COMMIT ||
     process.env.VERCEL_GIT_COMMIT_SHA; // Vercel 자동 환경변수
 
   // 🔧 항상 package.json 버전을 기준으로 사용하여 동기화

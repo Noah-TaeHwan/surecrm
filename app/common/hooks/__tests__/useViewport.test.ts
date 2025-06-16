@@ -1,12 +1,12 @@
 import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { 
-  useViewport, 
+import {
+  useViewport,
   useViewportWidth,
   useViewportHeight,
   useViewportDimensions,
-  viewportStore, 
-  destroyViewportStore 
+  viewportStore,
+  destroyViewportStore,
 } from '../useViewport';
 
 // Store original values
@@ -24,14 +24,14 @@ describe('useViewport Hook', () => {
   beforeEach(async () => {
     await resetViewportStore();
     vi.clearAllMocks();
-    
+
     // Mock window dimensions
     Object.defineProperty(window, 'innerWidth', {
       writable: true,
       configurable: true,
       value: 1024,
     });
-    
+
     Object.defineProperty(window, 'innerHeight', {
       writable: true,
       configurable: true,
@@ -155,9 +155,9 @@ describe('useViewport Hook', () => {
   describe('Store Management', () => {
     it('should properly cleanup on destroy', () => {
       const { result } = renderHook(() => useViewport());
-      
+
       expect(result.current).toBeDefined();
-      
+
       act(() => {
         destroyViewportStore();
       });
@@ -166,4 +166,4 @@ describe('useViewport Hook', () => {
       expect(global.removeEventListener).toHaveBeenCalled();
     });
   });
-}); 
+});

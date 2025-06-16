@@ -20,7 +20,7 @@ class DeviceTypeStore {
     const newDeviceType = this.detectDeviceType();
     if (newDeviceType !== this.currentSnapshot) {
       this.currentSnapshot = newDeviceType;
-      this.listeners.forEach((listener) => listener());
+      this.listeners.forEach(listener => listener());
     }
   };
 
@@ -34,19 +34,23 @@ class DeviceTypeStore {
     // Check User Agent first for device identification
     if (typeof navigator !== 'undefined') {
       const userAgent = navigator.userAgent;
-      
+
       // Specific tablet detection (iPad and Android tablets)
-      const isTablet = /iPad/i.test(userAgent) || 
-                       /Android(?=.*tablet)/i.test(userAgent) ||
-                       /Kindle|Silk|Playbook/i.test(userAgent);
+      const isTablet =
+        /iPad/i.test(userAgent) ||
+        /Android(?=.*tablet)/i.test(userAgent) ||
+        /Kindle|Silk|Playbook/i.test(userAgent);
 
       if (isTablet) {
         return 'tablet';
       }
 
       // Mobile device detection (phones)
-      const isMobileDevice = /iPhone|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
-      
+      const isMobileDevice =
+        /iPhone|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(
+          userAgent
+        );
+
       if (isMobileDevice) {
         return 'mobile';
       }
@@ -72,7 +76,7 @@ class DeviceTypeStore {
 
   public subscribe = (listener: () => void): (() => void) => {
     this.listeners.add(listener);
-    
+
     return () => {
       this.listeners.delete(listener);
     };
@@ -90,7 +94,7 @@ class DeviceTypeStore {
     const newDeviceType = this.detectDeviceType();
     if (newDeviceType !== this.currentSnapshot) {
       this.currentSnapshot = newDeviceType;
-      this.listeners.forEach((listener) => listener());
+      this.listeners.forEach(listener => listener());
     }
   }
 }
@@ -100,24 +104,24 @@ const deviceTypeStore = new DeviceTypeStore();
 
 /**
  * Hook for detecting device type (mobile, tablet, desktop)
- * 
+ *
  * Detection logic:
  * - Primary: Viewport width-based detection
  * - Secondary: User Agent string analysis for better accuracy
  * - SSR compatible with safe defaults
- * 
+ *
  * Breakpoints:
  * - mobile: < 768px
- * - tablet: 768px - 1023px 
+ * - tablet: 768px - 1023px
  * - desktop: >= 1024px
- * 
+ *
  * @returns DeviceType - 'mobile' | 'tablet' | 'desktop'
- * 
+ *
  * @example
  * ```tsx
  * function AdaptiveComponent() {
  *   const deviceType = useDeviceType();
- *   
+ *
  *   return (
  *     <div>
  *       {deviceType === 'mobile' && <MobileView />}
@@ -142,4 +146,4 @@ export { deviceTypeStore };
 // Cleanup function
 export const destroyDeviceTypeStore = () => {
   deviceTypeStore.destroy();
-}; 
+};

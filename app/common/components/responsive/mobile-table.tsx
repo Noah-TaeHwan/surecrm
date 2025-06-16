@@ -51,7 +51,9 @@ interface MobileTableHeaderProps extends React.ComponentProps<'div'> {
 }
 
 // Haptic feedback utility
-const triggerHapticFeedback = (type: 'light' | 'medium' | 'heavy' = 'light') => {
+const triggerHapticFeedback = (
+  type: 'light' | 'medium' | 'heavy' = 'light'
+) => {
   if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
     const patterns = {
       light: 20,
@@ -74,26 +76,29 @@ const getDensityClasses = (density: MobileTableDensity) => {
 
 // Mobile Table Root
 const MobileTable = React.forwardRef<HTMLDivElement, MobileTableProps>(
-  ({
-    className,
-    children,
-    mode = 'cards',
-    density = 'comfortable',
-    interaction = 'tap',
-    onRowClick,
-    onRowLongPress,
-    hapticFeedback = true,
-    virtualScrolling = false,
-    maxHeight,
-    ...props
-  }, ref) => {
+  (
+    {
+      className,
+      children,
+      mode = 'cards',
+      density = 'comfortable',
+      interaction = 'tap',
+      onRowClick,
+      onRowLongPress,
+      hapticFeedback = true,
+      virtualScrolling = false,
+      maxHeight,
+      ...props
+    },
+    ref
+  ) => {
     const containerRef = React.useRef<HTMLDivElement>(null);
 
     React.useImperativeHandle(ref, () => containerRef.current!);
 
     const containerClasses = React.useMemo(() => {
       const baseClasses = 'mobile-table w-full';
-      
+
       if (mode === 'horizontal-scroll') {
         return cn(
           baseClasses,
@@ -102,7 +107,7 @@ const MobileTable = React.forwardRef<HTMLDivElement, MobileTableProps>(
           className
         );
       }
-      
+
       if (mode === 'cards') {
         return cn(
           baseClasses,
@@ -113,11 +118,7 @@ const MobileTable = React.forwardRef<HTMLDivElement, MobileTableProps>(
       }
 
       if (mode === 'stacked') {
-        return cn(
-          baseClasses,
-          'divide-y divide-gray-100',
-          className
-        );
+        return cn(baseClasses, 'divide-y divide-gray-100', className);
       }
 
       return cn(baseClasses, className);
@@ -156,16 +157,22 @@ const MobileTable = React.forwardRef<HTMLDivElement, MobileTableProps>(
 MobileTable.displayName = 'MobileTable';
 
 // Mobile Table Header
-const MobileTableHeader = React.forwardRef<HTMLDivElement, MobileTableHeaderProps>(
-  ({
-    className,
-    children,
-    sortable = false,
-    sortDirection = null,
-    onSort,
-    sticky = false,
-    ...props
-  }, ref) => {
+const MobileTableHeader = React.forwardRef<
+  HTMLDivElement,
+  MobileTableHeaderProps
+>(
+  (
+    {
+      className,
+      children,
+      sortable = false,
+      sortDirection = null,
+      onSort,
+      sticky = false,
+      ...props
+    },
+    ref
+  ) => {
     const handleSort = React.useCallback(() => {
       if (sortable && onSort) {
         triggerHapticFeedback('light');
@@ -186,13 +193,13 @@ const MobileTableHeader = React.forwardRef<HTMLDivElement, MobileTableHeaderProp
           onClick={handleSort}
           {...props}
         >
-          <div className="flex items-center space-x-2">
-            {children}
-          </div>
+          <div className="flex items-center space-x-2">{children}</div>
           {sortable && (
             <div className="flex items-center space-x-1">
               {sortDirection === 'asc' && <ChevronUpIcon className="h-4 w-4" />}
-              {sortDirection === 'desc' && <ChevronDownIcon className="h-4 w-4" />}
+              {sortDirection === 'desc' && (
+                <ChevronDownIcon className="h-4 w-4" />
+              )}
               {sortDirection === null && (
                 <div className="h-4 w-4 opacity-40">
                   <ChevronUpIcon className="h-3 w-3" />
@@ -216,13 +223,13 @@ const MobileTableHeader = React.forwardRef<HTMLDivElement, MobileTableHeaderProp
         onClick={handleSort}
         {...props}
       >
-        <div className="flex items-center space-x-2">
-          {children}
-        </div>
+        <div className="flex items-center space-x-2">{children}</div>
         {sortable && (
           <div className="flex items-center space-x-1">
             {sortDirection === 'asc' && <ChevronUpIcon className="h-4 w-4" />}
-            {sortDirection === 'desc' && <ChevronDownIcon className="h-4 w-4" />}
+            {sortDirection === 'desc' && (
+              <ChevronDownIcon className="h-4 w-4" />
+            )}
             {sortDirection === null && (
               <div className="h-4 w-4 opacity-40">
                 <ChevronUpIcon className="h-3 w-3" />
@@ -238,29 +245,32 @@ MobileTableHeader.displayName = 'MobileTableHeader';
 
 // Mobile Table Row
 const MobileTableRow = React.forwardRef<HTMLDivElement, MobileTableRowProps>(
-  ({
-    className,
-    children,
-    index = 0,
-    data,
-    mode = 'cards',
-    density = 'comfortable',
-    interaction = 'tap',
-    onRowClick,
-    onRowLongPress,
-    hapticFeedback = true,
-    isSelected = false,
-    isHighlighted = false,
-    ...props
-  }, ref) => {
+  (
+    {
+      className,
+      children,
+      index = 0,
+      data,
+      mode = 'cards',
+      density = 'comfortable',
+      interaction = 'tap',
+      onRowClick,
+      onRowLongPress,
+      hapticFeedback = true,
+      isSelected = false,
+      isHighlighted = false,
+      ...props
+    },
+    ref
+  ) => {
     const [isPressed, setIsPressed] = React.useState(false);
     const longPressTimer = React.useRef<NodeJS.Timeout | null>(null);
 
     const handleTouchStart = React.useCallback(() => {
       if (interaction === 'none') return;
-      
+
       setIsPressed(true);
-      
+
       if (hapticFeedback) {
         triggerHapticFeedback('light');
       }
@@ -277,7 +287,7 @@ const MobileTableRow = React.forwardRef<HTMLDivElement, MobileTableRowProps>(
 
     const handleTouchEnd = React.useCallback(() => {
       setIsPressed(false);
-      
+
       if (longPressTimer.current) {
         clearTimeout(longPressTimer.current);
         longPressTimer.current = null;
@@ -323,9 +333,7 @@ const MobileTableRow = React.forwardRef<HTMLDivElement, MobileTableRowProps>(
           onClick={handleClick}
           {...props}
         >
-          <div className="space-y-2">
-            {children}
-          </div>
+          <div className="space-y-2">{children}</div>
         </div>
       );
     }
@@ -356,9 +364,7 @@ const MobileTableRow = React.forwardRef<HTMLDivElement, MobileTableRowProps>(
           onClick={handleClick}
           {...props}
         >
-          <div className="space-y-1">
-            {children}
-          </div>
+          <div className="space-y-1">{children}</div>
         </div>
       );
     }
@@ -397,16 +403,19 @@ MobileTableRow.displayName = 'MobileTableRow';
 
 // Mobile Table Cell
 const MobileTableCell = React.forwardRef<HTMLDivElement, MobileTableCellProps>(
-  ({
-    className,
-    children,
-    label,
-    primary = false,
-    secondary = false,
-    numeric = false,
-    truncate = false,
-    ...props
-  }, ref) => {
+  (
+    {
+      className,
+      children,
+      label,
+      primary = false,
+      secondary = false,
+      numeric = false,
+      truncate = false,
+      ...props
+    },
+    ref
+  ) => {
     return (
       <div
         ref={ref}
@@ -432,7 +441,7 @@ const MobileTableCell = React.forwardRef<HTMLDivElement, MobileTableCellProps>(
             secondary && 'text-muted-foreground text-sm',
             !primary && !secondary && 'text-foreground text-sm',
             // Truncation
-            truncate && 'truncate',
+            truncate && 'truncate'
           )}
         >
           {children}
@@ -444,34 +453,32 @@ const MobileTableCell = React.forwardRef<HTMLDivElement, MobileTableCellProps>(
 MobileTableCell.displayName = 'MobileTableCell';
 
 // Mobile Table Body (for wrapping rows)
-const MobileTableBody = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
-  ({ className, children, ...props }, ref) => (
-    <div
-      ref={ref}
-      className={cn('mobile-table-body', className)}
-      {...props}
-    >
-      {children}
-    </div>
-  )
-);
+const MobileTableBody = React.forwardRef<
+  HTMLDivElement,
+  React.ComponentProps<'div'>
+>(({ className, children, ...props }, ref) => (
+  <div ref={ref} className={cn('mobile-table-body', className)} {...props}>
+    {children}
+  </div>
+));
 MobileTableBody.displayName = 'MobileTableBody';
 
 // Mobile Table Footer
-const MobileTableFooter = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'> & { sticky?: boolean }>(
-  ({ className, sticky = false, ...props }, ref) => (
-    <div
-      ref={ref}
-      className={cn(
-        'bg-gray-50 border-t px-4 py-3',
-        sticky && 'sticky bottom-0',
-        'pb-safe-area-inset-bottom',
-        className
-      )}
-      {...props}
-    />
-  )
-);
+const MobileTableFooter = React.forwardRef<
+  HTMLDivElement,
+  React.ComponentProps<'div'> & { sticky?: boolean }
+>(({ className, sticky = false, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn(
+      'bg-gray-50 border-t px-4 py-3',
+      sticky && 'sticky bottom-0',
+      'pb-safe-area-inset-bottom',
+      className
+    )}
+    {...props}
+  />
+));
 MobileTableFooter.displayName = 'MobileTableFooter';
 
 export {
@@ -483,8 +490,4 @@ export {
   MobileTableFooter,
 };
 
-export type {
-  MobileTableMode,
-  MobileTableDensity,
-  MobileTableInteraction,
-}; 
+export type { MobileTableMode, MobileTableDensity, MobileTableInteraction };

@@ -22,11 +22,16 @@ vi.mock('../useTouchDevice', async () => {
       })),
       getSnapshot: vi.fn(),
       subscribe: vi.fn(() => vi.fn()),
-    }
+    },
   };
 });
 
-import { useTouchDevice, useHasTouch, useIsTouchPrimary, touchDeviceStore } from '../useTouchDevice';
+import {
+  useTouchDevice,
+  useHasTouch,
+  useIsTouchPrimary,
+  touchDeviceStore,
+} from '../useTouchDevice';
 
 // Helper functions
 const mockNavigator = (maxTouchPoints: number) => {
@@ -74,7 +79,7 @@ describe('useTouchDevice Hook', () => {
     mockNavigator(0);
     mockWindowTouch(false);
     mockMatchMedia({});
-    
+
     // Mock 함수들 리셋
     vi.clearAllMocks();
   });
@@ -106,21 +111,21 @@ describe('useTouchDevice Hook', () => {
     it('should detect touch support via DocumentTouch (legacy)', () => {
       mockWindowTouch(false);
       mockNavigator(0);
-      
+
       // DocumentTouch 모킹
       if (global.window) {
         const mockDocumentTouch = function DocumentTouch() {};
         (global.window as any).DocumentTouch = mockDocumentTouch;
-        
+
         // instanceof 연산자를 모킹
         Object.defineProperty(mockDocumentTouch, Symbol.hasInstance, {
-          value: () => true
+          value: () => true,
         });
 
         const { result } = renderHook(() => useTouchDevice());
 
         expect(result.current).toHaveProperty('hasTouch');
-        
+
         // 정리
         delete (global.window as any).DocumentTouch;
       }
@@ -181,7 +186,7 @@ describe('useTouchDevice Hook', () => {
       });
 
       const { result } = renderHook(() => useTouchDevice());
-      
+
       expect(result.current).toHaveProperty('isHoverCapable');
     });
 
@@ -192,7 +197,7 @@ describe('useTouchDevice Hook', () => {
       });
 
       const { result } = renderHook(() => useTouchDevice());
-      
+
       expect(result.current).toHaveProperty('isHoverCapable');
     });
   });
@@ -205,7 +210,7 @@ describe('useTouchDevice Hook', () => {
       });
 
       const { result } = renderHook(() => useTouchDevice());
-      
+
       expect(result.current).toHaveProperty('isPrimaryTouch');
     });
 
@@ -216,7 +221,7 @@ describe('useTouchDevice Hook', () => {
       });
 
       const { result } = renderHook(() => useTouchDevice());
-      
+
       expect(result.current).toHaveProperty('isPrimaryTouch');
     });
 
@@ -227,7 +232,7 @@ describe('useTouchDevice Hook', () => {
       });
 
       const { result } = renderHook(() => useTouchDevice());
-      
+
       expect(result.current).toHaveProperty('isPrimaryTouch');
     });
   });
@@ -238,7 +243,7 @@ describe('useTouchDevice Hook', () => {
       mockWindowTouch(false);
 
       const { result } = renderHook(() => useTouchDevice());
-      
+
       expect(result.current).toHaveProperty('hasTouch');
 
       // 터치 이벤트 시뮬레이션
@@ -264,7 +269,7 @@ describe('useTouchDevice Hook', () => {
       });
 
       const { result } = renderHook(() => useTouchDevice());
-      
+
       expect(result.current).toHaveProperty('isPrimaryTouch');
 
       // 마우스 이벤트 시뮬레이션
@@ -289,7 +294,7 @@ describe('useTouchDevice Hook', () => {
       mockNavigator(1);
 
       const { result } = renderHook(() => useHasTouch());
-      
+
       expect(typeof result.current).toBe('boolean');
     });
 
@@ -300,7 +305,7 @@ describe('useTouchDevice Hook', () => {
       });
 
       const { result } = renderHook(() => useIsTouchPrimary());
-      
+
       expect(typeof result.current).toBe('boolean');
     });
   });
@@ -308,7 +313,7 @@ describe('useTouchDevice Hook', () => {
   describe('SSR Compatibility', () => {
     it('should provide safe defaults during SSR', () => {
       const serverSnapshot = touchDeviceStore.getServerSnapshot();
-      
+
       expect(serverSnapshot).toHaveProperty('hasTouch');
       expect(serverSnapshot).toHaveProperty('maxTouchPoints');
       expect(serverSnapshot).toHaveProperty('isPrimaryTouch');
@@ -320,7 +325,7 @@ describe('useTouchDevice Hook', () => {
     it('should handle undefined window gracefully', () => {
       // 이 테스트는 실제로 window를 삭제하지 않고 모킹된 store를 사용
       const { result } = renderHook(() => useTouchDevice());
-      
+
       expect(result.current).toHaveProperty('hasTouch');
       expect(result.current).toHaveProperty('maxTouchPoints');
     });
@@ -331,7 +336,7 @@ describe('useTouchDevice Hook', () => {
       // 모킹된 환경에서는 실제 cleanup을 테스트할 수 없으므로
       // hook이 정상적으로 unmount되는지만 확인
       const { unmount } = renderHook(() => useTouchDevice());
-      
+
       expect(() => unmount()).not.toThrow();
     });
 
@@ -339,7 +344,7 @@ describe('useTouchDevice Hook', () => {
       const { result: result1 } = renderHook(() => useTouchDevice());
       const { result: result2 } = renderHook(() => useTouchDevice());
       const { result: result3 } = renderHook(() => useHasTouch());
-      
+
       expect(result1.current).toHaveProperty('hasTouch');
       expect(result2.current).toHaveProperty('hasTouch');
       expect(typeof result3.current).toBe('boolean');
@@ -349,7 +354,7 @@ describe('useTouchDevice Hook', () => {
       // 모킹된 환경에서는 실제 이벤트 리스너를 테스트할 수 없으므로
       // hook이 정상적으로 렌더링되는지만 확인
       const { result } = renderHook(() => useTouchDevice());
-      
+
       expect(result.current).toHaveProperty('hasTouch');
       expect(result.current).toHaveProperty('maxTouchPoints');
       expect(result.current).toHaveProperty('isPrimaryTouch');
@@ -360,7 +365,7 @@ describe('useTouchDevice Hook', () => {
     it('should handle missing navigator gracefully', () => {
       // 모킹된 store를 사용하므로 실제로 navigator를 삭제하지 않음
       const { result } = renderHook(() => useTouchDevice());
-      
+
       expect(result.current).toHaveProperty('hasTouch');
       expect(result.current).toHaveProperty('maxTouchPoints');
     });
@@ -368,7 +373,7 @@ describe('useTouchDevice Hook', () => {
     it('should handle missing matchMedia gracefully', () => {
       // 모킹된 store를 사용하므로 실제로 matchMedia를 삭제하지 않음
       const { result } = renderHook(() => useTouchDevice());
-      
+
       expect(result.current).toHaveProperty('supportsCoarsePointer');
       expect(result.current).toHaveProperty('supportsFinePointer');
       expect(result.current).toHaveProperty('isHoverCapable');
@@ -381,7 +386,7 @@ describe('useTouchDevice Hook', () => {
       mockNavigator(999);
 
       const { result } = renderHook(() => useTouchDevice());
-      
+
       expect(result.current).toHaveProperty('hasTouch');
       expect(result.current).toHaveProperty('maxTouchPoints');
     });
@@ -393,7 +398,7 @@ describe('useTouchDevice Hook', () => {
       mockNavigator(NaN);
 
       const { result } = renderHook(() => useTouchDevice());
-      
+
       expect(result.current).toHaveProperty('maxTouchPoints');
     });
   });
@@ -408,7 +413,7 @@ describe('useTouchDevice Hook', () => {
           value: {},
         });
       }
-      
+
       mockNavigator(5);
       mockMatchMedia({
         '(pointer: coarse)': true,
@@ -418,7 +423,7 @@ describe('useTouchDevice Hook', () => {
       });
 
       const { result } = renderHook(() => useTouchDevice());
-      
+
       expect(result.current).toHaveProperty('hasTouch');
       expect(result.current).toHaveProperty('isPrimaryTouch');
       expect(result.current).toHaveProperty('supportsCoarsePointer');
@@ -431,7 +436,7 @@ describe('useTouchDevice Hook', () => {
       if (global.window) {
         delete (global.window as any).ontouchstart;
       }
-      
+
       mockNavigator(0);
       mockMatchMedia({
         '(pointer: fine)': true,
@@ -441,7 +446,7 @@ describe('useTouchDevice Hook', () => {
       });
 
       const { result } = renderHook(() => useTouchDevice());
-      
+
       expect(result.current).toHaveProperty('hasTouch');
       expect(result.current).toHaveProperty('isPrimaryTouch');
       expect(result.current).toHaveProperty('supportsFinePointer');
@@ -458,7 +463,7 @@ describe('useTouchDevice Hook', () => {
           value: {},
         });
       }
-      
+
       mockNavigator(10);
       mockMatchMedia({
         '(pointer: fine)': true,
@@ -469,7 +474,7 @@ describe('useTouchDevice Hook', () => {
       });
 
       const { result } = renderHook(() => useTouchDevice());
-      
+
       expect(result.current).toHaveProperty('hasTouch');
       expect(result.current).toHaveProperty('isPrimaryTouch');
       expect(result.current).toHaveProperty('supportsFinePointer');
@@ -480,7 +485,7 @@ describe('useTouchDevice Hook', () => {
 
   it('should return touch device info', () => {
     const { result } = renderHook(() => useTouchDevice());
-    
+
     expect(result.current).toHaveProperty('hasTouch');
     expect(result.current).toHaveProperty('maxTouchPoints');
     expect(result.current).toHaveProperty('isPrimaryTouch');
@@ -488,4 +493,4 @@ describe('useTouchDevice Hook', () => {
     expect(result.current).toHaveProperty('supportsFinePointer');
     expect(result.current).toHaveProperty('isHoverCapable');
   });
-}); 
+});

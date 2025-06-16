@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { 
-  ChevronDownIcon, 
-  UserIcon, 
-  GlobeIcon, 
+import {
+  ChevronDownIcon,
+  UserIcon,
+  GlobeIcon,
   PaletteIcon,
   SmartphoneIcon,
   MonitorIcon,
@@ -45,9 +45,12 @@ export default function TestMobileSelect() {
       <div className="mx-auto max-w-4xl space-y-8">
         {/* Header */}
         <div className="text-center space-y-4">
-          <h1 className="text-3xl font-bold tracking-tight">Mobile Select Component Test</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Mobile Select Component Test
+          </h1>
           <p className="text-muted-foreground text-lg">
-            Testing WCAG AAA compliant mobile-optimized Select components with haptic feedback
+            Testing WCAG AAA compliant mobile-optimized Select components with
+            haptic feedback
           </p>
         </div>
 
@@ -56,10 +59,11 @@ export default function TestMobileSelect() {
           <div className="space-y-2">
             <h2 className="text-2xl font-semibold">1. Size Variants</h2>
             <p className="text-muted-foreground">
-              All sizes meet WCAG 2.5.5 AAA minimum touch target requirements (44px+)
+              All sizes meet WCAG 2.5.5 AAA minimum touch target requirements
+              (44px+)
             </p>
           </div>
-          
+
           <div className="grid gap-6 md:grid-cols-2">
             <div className="space-y-4">
               <div className="space-y-2">
@@ -69,9 +73,15 @@ export default function TestMobileSelect() {
                     <MobileSelectValue placeholder="Select theme..." />
                   </MobileSelectTrigger>
                   <MobileSelectContent size="sm">
-                    <MobileSelectItem size="sm" value="light">Light</MobileSelectItem>
-                    <MobileSelectItem size="sm" value="dark">Dark</MobileSelectItem>
-                    <MobileSelectItem size="sm" value="system">System</MobileSelectItem>
+                    <MobileSelectItem size="sm" value="light">
+                      Light
+                    </MobileSelectItem>
+                    <MobileSelectItem size="sm" value="dark">
+                      Dark
+                    </MobileSelectItem>
+                    <MobileSelectItem size="sm" value="system">
+                      System
+                    </MobileSelectItem>
                   </MobileSelectContent>
                 </MobileSelect>
               </div>
@@ -83,9 +93,15 @@ export default function TestMobileSelect() {
                     <MobileSelectValue placeholder="Select theme..." />
                   </MobileSelectTrigger>
                   <MobileSelectContent size="md">
-                    <MobileSelectItem size="md" value="light">Light</MobileSelectItem>
-                    <MobileSelectItem size="md" value="dark">Dark</MobileSelectItem>
-                    <MobileSelectItem size="md" value="system">System</MobileSelectItem>
+                    <MobileSelectItem size="md" value="light">
+                      Light
+                    </MobileSelectItem>
+                    <MobileSelectItem size="md" value="dark">
+                      Dark
+                    </MobileSelectItem>
+                    <MobileSelectItem size="md" value="system">
+                      System
+                    </MobileSelectItem>
                   </MobileSelectContent>
                 </MobileSelect>
               </div>
@@ -99,23 +115,37 @@ export default function TestMobileSelect() {
                     <MobileSelectValue placeholder="Select theme..." />
                   </MobileSelectTrigger>
                   <MobileSelectContent size="lg">
-                    <MobileSelectItem size="lg" value="light">Light</MobileSelectItem>
-                    <MobileSelectItem size="lg" value="dark">Dark</MobileSelectItem>
-                    <MobileSelectItem size="lg" value="system">System</MobileSelectItem>
+                    <MobileSelectItem size="lg" value="light">
+                      Light
+                    </MobileSelectItem>
+                    <MobileSelectItem size="lg" value="dark">
+                      Dark
+                    </MobileSelectItem>
+                    <MobileSelectItem size="lg" value="system">
+                      System
+                    </MobileSelectItem>
                   </MobileSelectContent>
                 </MobileSelect>
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">Extra Large (64px min)</label>
+                <label className="text-sm font-medium">
+                  Extra Large (64px min)
+                </label>
                 <MobileSelect>
                   <MobileSelectTrigger size="xl">
                     <MobileSelectValue placeholder="Select theme..." />
                   </MobileSelectTrigger>
                   <MobileSelectContent size="xl">
-                    <MobileSelectItem size="xl" value="light">Light</MobileSelectItem>
-                    <MobileSelectItem size="xl" value="dark">Dark</MobileSelectItem>
-                    <MobileSelectItem size="xl" value="system">System</MobileSelectItem>
+                    <MobileSelectItem size="xl" value="light">
+                      Light
+                    </MobileSelectItem>
+                    <MobileSelectItem size="xl" value="dark">
+                      Dark
+                    </MobileSelectItem>
+                    <MobileSelectItem size="xl" value="system">
+                      System
+                    </MobileSelectItem>
                   </MobileSelectContent>
                 </MobileSelect>
               </div>
@@ -131,7 +161,7 @@ export default function TestMobileSelect() {
               Visual feedback for different states with clear color coding
             </p>
           </div>
-          
+
           <div className="grid gap-6 md:grid-cols-2">
             <div className="space-y-4">
               <div className="space-y-2">
@@ -156,7 +186,9 @@ export default function TestMobileSelect() {
                     <MobileSelectValue placeholder="Select country..." />
                   </MobileSelectTrigger>
                   <MobileSelectContent>
-                    <MobileSelectItem value="us">United States</MobileSelectItem>
+                    <MobileSelectItem value="us">
+                      United States
+                    </MobileSelectItem>
                     <MobileSelectItem value="kr">South Korea</MobileSelectItem>
                     <MobileSelectItem value="jp">Japan</MobileSelectItem>
                     <MobileSelectItem value="cn">China</MobileSelectItem>
@@ -173,8 +205,12 @@ export default function TestMobileSelect() {
                     <MobileSelectValue placeholder="Select notification..." />
                   </MobileSelectTrigger>
                   <MobileSelectContent>
-                    <MobileSelectItem value="all">All notifications</MobileSelectItem>
-                    <MobileSelectItem value="important">Important only</MobileSelectItem>
+                    <MobileSelectItem value="all">
+                      All notifications
+                    </MobileSelectItem>
+                    <MobileSelectItem value="important">
+                      Important only
+                    </MobileSelectItem>
                     <MobileSelectItem value="none">None</MobileSelectItem>
                   </MobileSelectContent>
                 </MobileSelect>
@@ -188,7 +224,9 @@ export default function TestMobileSelect() {
                   </MobileSelectTrigger>
                   <MobileSelectContent>
                     <MobileSelectItem value="public">Public</MobileSelectItem>
-                    <MobileSelectItem value="friends">Friends only</MobileSelectItem>
+                    <MobileSelectItem value="friends">
+                      Friends only
+                    </MobileSelectItem>
                     <MobileSelectItem value="private">Private</MobileSelectItem>
                   </MobileSelectContent>
                 </MobileSelect>
@@ -200,12 +238,14 @@ export default function TestMobileSelect() {
         {/* Section 3: Feedback Intensity */}
         <section className="space-y-6">
           <div className="space-y-2">
-            <h2 className="text-2xl font-semibold">3. Touch Feedback Intensity</h2>
+            <h2 className="text-2xl font-semibold">
+              3. Touch Feedback Intensity
+            </h2>
             <p className="text-muted-foreground">
               Different levels of haptic feedback and visual response
             </p>
           </div>
-          
+
           <div className="grid gap-6 md:grid-cols-3">
             <div className="space-y-2">
               <label className="text-sm font-medium">Subtle Feedback</label>
@@ -214,9 +254,15 @@ export default function TestMobileSelect() {
                   <MobileSelectValue placeholder="Subtle..." />
                 </MobileSelectTrigger>
                 <MobileSelectContent>
-                  <MobileSelectItem hapticIntensity="light" value="option1">Option 1</MobileSelectItem>
-                  <MobileSelectItem hapticIntensity="light" value="option2">Option 2</MobileSelectItem>
-                  <MobileSelectItem hapticIntensity="light" value="option3">Option 3</MobileSelectItem>
+                  <MobileSelectItem hapticIntensity="light" value="option1">
+                    Option 1
+                  </MobileSelectItem>
+                  <MobileSelectItem hapticIntensity="light" value="option2">
+                    Option 2
+                  </MobileSelectItem>
+                  <MobileSelectItem hapticIntensity="light" value="option3">
+                    Option 3
+                  </MobileSelectItem>
                 </MobileSelectContent>
               </MobileSelect>
             </div>
@@ -228,9 +274,15 @@ export default function TestMobileSelect() {
                   <MobileSelectValue placeholder="Medium..." />
                 </MobileSelectTrigger>
                 <MobileSelectContent>
-                  <MobileSelectItem hapticIntensity="medium" value="option1">Option 1</MobileSelectItem>
-                  <MobileSelectItem hapticIntensity="medium" value="option2">Option 2</MobileSelectItem>
-                  <MobileSelectItem hapticIntensity="medium" value="option3">Option 3</MobileSelectItem>
+                  <MobileSelectItem hapticIntensity="medium" value="option1">
+                    Option 1
+                  </MobileSelectItem>
+                  <MobileSelectItem hapticIntensity="medium" value="option2">
+                    Option 2
+                  </MobileSelectItem>
+                  <MobileSelectItem hapticIntensity="medium" value="option3">
+                    Option 3
+                  </MobileSelectItem>
                 </MobileSelectContent>
               </MobileSelect>
             </div>
@@ -242,9 +294,15 @@ export default function TestMobileSelect() {
                   <MobileSelectValue placeholder="Strong..." />
                 </MobileSelectTrigger>
                 <MobileSelectContent>
-                  <MobileSelectItem hapticIntensity="heavy" value="option1">Option 1</MobileSelectItem>
-                  <MobileSelectItem hapticIntensity="heavy" value="option2">Option 2</MobileSelectItem>
-                  <MobileSelectItem hapticIntensity="heavy" value="option3">Option 3</MobileSelectItem>
+                  <MobileSelectItem hapticIntensity="heavy" value="option1">
+                    Option 1
+                  </MobileSelectItem>
+                  <MobileSelectItem hapticIntensity="heavy" value="option2">
+                    Option 2
+                  </MobileSelectItem>
+                  <MobileSelectItem hapticIntensity="heavy" value="option3">
+                    Option 3
+                  </MobileSelectItem>
                 </MobileSelectContent>
               </MobileSelect>
             </div>
@@ -254,12 +312,14 @@ export default function TestMobileSelect() {
         {/* Section 4: Grouped Options */}
         <section className="space-y-6">
           <div className="space-y-2">
-            <h2 className="text-2xl font-semibold">4. Grouped Options with Icons</h2>
+            <h2 className="text-2xl font-semibold">
+              4. Grouped Options with Icons
+            </h2>
             <p className="text-muted-foreground">
               Organized options with visual separators and icons
             </p>
           </div>
-          
+
           <div className="space-y-4">
             <MobileSelect>
               <MobileSelectTrigger size="lg">
@@ -278,9 +338,9 @@ export default function TestMobileSelect() {
                     Display Settings
                   </MobileSelectItem>
                 </MobileSelectGroup>
-                
+
                 <MobileSelectSeparator size="lg" />
-                
+
                 <MobileSelectGroup>
                   <MobileSelectLabel size="lg">Communication</MobileSelectLabel>
                   <MobileSelectItem size="lg" value="notifications">
@@ -292,9 +352,9 @@ export default function TestMobileSelect() {
                     Language & Region
                   </MobileSelectItem>
                 </MobileSelectGroup>
-                
+
                 <MobileSelectSeparator size="lg" />
-                
+
                 <MobileSelectGroup>
                   <MobileSelectLabel size="lg">Security</MobileSelectLabel>
                   <MobileSelectItem size="lg" value="privacy">
@@ -314,41 +374,87 @@ export default function TestMobileSelect() {
         {/* Section 5: ResponsiveSelect Auto-switching */}
         <section className="space-y-6">
           <div className="space-y-2">
-            <h2 className="text-2xl font-semibold">5. ResponsiveSelect Auto-switching</h2>
+            <h2 className="text-2xl font-semibold">
+              5. ResponsiveSelect Auto-switching
+            </h2>
             <p className="text-muted-foreground">
-              Automatically switches between desktop and mobile variants at 768px breakpoint
+              Automatically switches between desktop and mobile variants at
+              768px breakpoint
             </p>
           </div>
-          
+
           <div className="grid gap-6 md:grid-cols-2">
             <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Auto-responsive (Current: {typeof window !== 'undefined' && window.innerWidth < 768 ? 'Mobile' : 'Desktop'})</label>
-                <ResponsiveSelect value={responsiveTheme} onValueChange={setResponsiveTheme}>
+                <label className="text-sm font-medium">
+                  Auto-responsive (Current:{' '}
+                  {typeof window !== 'undefined' && window.innerWidth < 768
+                    ? 'Mobile'
+                    : 'Desktop'}
+                  )
+                </label>
+                <ResponsiveSelect
+                  value={responsiveTheme}
+                  onValueChange={setResponsiveTheme}
+                >
                   <ResponsiveSelectTrigger size="md">
                     <ResponsiveSelectValue placeholder="Select theme..." />
                   </ResponsiveSelectTrigger>
                   <ResponsiveSelectContent size="md">
-                    <ResponsiveSelectItem size="md" value="light">Light Theme</ResponsiveSelectItem>
-                    <ResponsiveSelectItem size="md" value="dark">Dark Theme</ResponsiveSelectItem>
-                    <ResponsiveSelectItem size="md" value="system">System Theme</ResponsiveSelectItem>
-                    <ResponsiveSelectItem size="md" value="auto">Auto Theme</ResponsiveSelectItem>
+                    <ResponsiveSelectItem size="md" value="light">
+                      Light Theme
+                    </ResponsiveSelectItem>
+                    <ResponsiveSelectItem size="md" value="dark">
+                      Dark Theme
+                    </ResponsiveSelectItem>
+                    <ResponsiveSelectItem size="md" value="system">
+                      System Theme
+                    </ResponsiveSelectItem>
+                    <ResponsiveSelectItem size="md" value="auto">
+                      Auto Theme
+                    </ResponsiveSelectItem>
                   </ResponsiveSelectContent>
                 </ResponsiveSelect>
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">Force Mobile Variant</label>
+                <label className="text-sm font-medium">
+                  Force Mobile Variant
+                </label>
                 <ResponsiveSelect forceVariant="mobile">
                   <ResponsiveSelectTrigger forceVariant="mobile" size="lg">
                     <SmartphoneIcon className="size-5" />
                     <ResponsiveSelectValue placeholder="Mobile variant..." />
                   </ResponsiveSelectTrigger>
                   <ResponsiveSelectContent forceVariant="mobile" size="lg">
-                    <ResponsiveSelectItem forceVariant="mobile" size="lg" value="sm">Small</ResponsiveSelectItem>
-                    <ResponsiveSelectItem forceVariant="mobile" size="lg" value="md">Medium</ResponsiveSelectItem>
-                    <ResponsiveSelectItem forceVariant="mobile" size="lg" value="lg">Large</ResponsiveSelectItem>
-                    <ResponsiveSelectItem forceVariant="mobile" size="lg" value="xl">Extra Large</ResponsiveSelectItem>
+                    <ResponsiveSelectItem
+                      forceVariant="mobile"
+                      size="lg"
+                      value="sm"
+                    >
+                      Small
+                    </ResponsiveSelectItem>
+                    <ResponsiveSelectItem
+                      forceVariant="mobile"
+                      size="lg"
+                      value="md"
+                    >
+                      Medium
+                    </ResponsiveSelectItem>
+                    <ResponsiveSelectItem
+                      forceVariant="mobile"
+                      size="lg"
+                      value="lg"
+                    >
+                      Large
+                    </ResponsiveSelectItem>
+                    <ResponsiveSelectItem
+                      forceVariant="mobile"
+                      size="lg"
+                      value="xl"
+                    >
+                      Extra Large
+                    </ResponsiveSelectItem>
                   </ResponsiveSelectContent>
                 </ResponsiveSelect>
               </div>
@@ -356,16 +462,33 @@ export default function TestMobileSelect() {
 
             <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Force Desktop Variant</label>
+                <label className="text-sm font-medium">
+                  Force Desktop Variant
+                </label>
                 <ResponsiveSelect forceVariant="desktop">
                   <ResponsiveSelectTrigger forceVariant="desktop">
                     <MonitorIcon className="size-5" />
                     <ResponsiveSelectValue placeholder="Desktop variant..." />
                   </ResponsiveSelectTrigger>
                   <ResponsiveSelectContent forceVariant="desktop">
-                    <ResponsiveSelectItem forceVariant="desktop" value="compact">Compact</ResponsiveSelectItem>
-                    <ResponsiveSelectItem forceVariant="desktop" value="comfortable">Comfortable</ResponsiveSelectItem>
-                    <ResponsiveSelectItem forceVariant="desktop" value="spacious">Spacious</ResponsiveSelectItem>
+                    <ResponsiveSelectItem
+                      forceVariant="desktop"
+                      value="compact"
+                    >
+                      Compact
+                    </ResponsiveSelectItem>
+                    <ResponsiveSelectItem
+                      forceVariant="desktop"
+                      value="comfortable"
+                    >
+                      Comfortable
+                    </ResponsiveSelectItem>
+                    <ResponsiveSelectItem
+                      forceVariant="desktop"
+                      value="spacious"
+                    >
+                      Spacious
+                    </ResponsiveSelectItem>
                   </ResponsiveSelectContent>
                 </ResponsiveSelect>
               </div>
@@ -373,13 +496,23 @@ export default function TestMobileSelect() {
               <div className="space-y-2">
                 <label className="text-sm font-medium">Mobile Only</label>
                 <ResponsiveSelect mobileOnly>
-                  <ResponsiveSelectTrigger mobileOnly size="md" feedback="medium">
+                  <ResponsiveSelectTrigger
+                    mobileOnly
+                    size="md"
+                    feedback="medium"
+                  >
                     <ResponsiveSelectValue placeholder="Mobile only..." />
                   </ResponsiveSelectTrigger>
                   <ResponsiveSelectContent mobileOnly size="md">
-                    <ResponsiveSelectItem mobileOnly size="md" value="always">Always Mobile</ResponsiveSelectItem>
-                    <ResponsiveSelectItem mobileOnly size="md" value="never">Never Desktop</ResponsiveSelectItem>
-                    <ResponsiveSelectItem mobileOnly size="md" value="force">Force Mobile</ResponsiveSelectItem>
+                    <ResponsiveSelectItem mobileOnly size="md" value="always">
+                      Always Mobile
+                    </ResponsiveSelectItem>
+                    <ResponsiveSelectItem mobileOnly size="md" value="never">
+                      Never Desktop
+                    </ResponsiveSelectItem>
+                    <ResponsiveSelectItem mobileOnly size="md" value="force">
+                      Force Mobile
+                    </ResponsiveSelectItem>
                   </ResponsiveSelectContent>
                 </ResponsiveSelect>
               </div>
@@ -390,12 +523,15 @@ export default function TestMobileSelect() {
         {/* Section 6: Accessibility Features */}
         <section className="space-y-6">
           <div className="space-y-2">
-            <h2 className="text-2xl font-semibold">6. Accessibility Features</h2>
+            <h2 className="text-2xl font-semibold">
+              6. Accessibility Features
+            </h2>
             <p className="text-muted-foreground">
-              WCAG AAA compliant with full keyboard navigation and screen reader support
+              WCAG AAA compliant with full keyboard navigation and screen reader
+              support
             </p>
           </div>
-          
+
           <div className="space-y-4">
             <div className="rounded-lg border p-4 space-y-3">
               <h3 className="font-medium">Accessibility Test</h3>
@@ -407,10 +543,10 @@ export default function TestMobileSelect() {
                 <li>• Touch targets: Minimum 44px for WCAG 2.5.5 AAA</li>
                 <li>• Color contrast: Meets WCAG AA standards</li>
               </ul>
-              
+
               <MobileSelect>
-                <MobileSelectTrigger 
-                  size="lg" 
+                <MobileSelectTrigger
+                  size="lg"
                   aria-label="Accessibility test select"
                   aria-describedby="accessibility-help"
                 >
@@ -418,15 +554,28 @@ export default function TestMobileSelect() {
                   <MobileSelectValue placeholder="Test accessibility..." />
                 </MobileSelectTrigger>
                 <MobileSelectContent size="lg">
-                  <MobileSelectItem size="lg" value="keyboard">Keyboard Navigation ✓</MobileSelectItem>
-                  <MobileSelectItem size="lg" value="screen-reader">Screen Reader ✓</MobileSelectItem>
-                  <MobileSelectItem size="lg" value="touch-target">Touch Target ✓</MobileSelectItem>
-                  <MobileSelectItem size="lg" value="color-contrast">Color Contrast ✓</MobileSelectItem>
-                  <MobileSelectItem size="lg" value="haptic">Haptic Feedback ✓</MobileSelectItem>
+                  <MobileSelectItem size="lg" value="keyboard">
+                    Keyboard Navigation ✓
+                  </MobileSelectItem>
+                  <MobileSelectItem size="lg" value="screen-reader">
+                    Screen Reader ✓
+                  </MobileSelectItem>
+                  <MobileSelectItem size="lg" value="touch-target">
+                    Touch Target ✓
+                  </MobileSelectItem>
+                  <MobileSelectItem size="lg" value="color-contrast">
+                    Color Contrast ✓
+                  </MobileSelectItem>
+                  <MobileSelectItem size="lg" value="haptic">
+                    Haptic Feedback ✓
+                  </MobileSelectItem>
                 </MobileSelectContent>
               </MobileSelect>
-              
-              <p id="accessibility-help" className="text-xs text-muted-foreground">
+
+              <p
+                id="accessibility-help"
+                className="text-xs text-muted-foreground"
+              >
                 This select component meets WCAG 2.1 AAA accessibility standards
               </p>
             </div>
@@ -441,41 +590,53 @@ export default function TestMobileSelect() {
               Integration with form validation and submission
             </p>
           </div>
-          
-          <form className="space-y-4" onSubmit={(e) => {
-            e.preventDefault();
-            alert(`Form submitted with values:\nTheme: ${theme}\nLanguage: ${language}\nCountry: ${country}`);
-          }}>
+
+          <form
+            className="space-y-4"
+            onSubmit={e => {
+              e.preventDefault();
+              alert(
+                `Form submitted with values:\nTheme: ${theme}\nLanguage: ${language}\nCountry: ${country}`
+              );
+            }}
+          >
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <label htmlFor="theme-select" className="text-sm font-medium">
                   Theme Preference *
                 </label>
                 <MobileSelect value={theme} onValueChange={setTheme} required>
-                  <MobileSelectTrigger 
+                  <MobileSelectTrigger
                     id="theme-select"
-                    state={theme ? "success" : "default"}
+                    state={theme ? 'success' : 'default'}
                     aria-required="true"
                   >
                     <PaletteIcon className="size-5" />
                     <MobileSelectValue placeholder="Choose theme..." />
                   </MobileSelectTrigger>
                   <MobileSelectContent>
-                    <MobileSelectItem value="light">Light Theme</MobileSelectItem>
+                    <MobileSelectItem value="light">
+                      Light Theme
+                    </MobileSelectItem>
                     <MobileSelectItem value="dark">Dark Theme</MobileSelectItem>
-                    <MobileSelectItem value="system">System Theme</MobileSelectItem>
+                    <MobileSelectItem value="system">
+                      System Theme
+                    </MobileSelectItem>
                   </MobileSelectContent>
                 </MobileSelect>
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="language-select" className="text-sm font-medium">
+                <label
+                  htmlFor="language-select"
+                  className="text-sm font-medium"
+                >
                   Language
                 </label>
                 <MobileSelect value={language} onValueChange={setLanguage}>
-                  <MobileSelectTrigger 
+                  <MobileSelectTrigger
                     id="language-select"
-                    state={language ? "success" : "default"}
+                    state={language ? 'success' : 'default'}
                   >
                     <GlobeIcon className="size-5" />
                     <MobileSelectValue placeholder="Choose language..." />
@@ -490,8 +651,8 @@ export default function TestMobileSelect() {
               </div>
             </div>
 
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="w-full rounded-lg bg-primary text-primary-foreground px-4 py-3 font-medium hover:bg-primary/90 transition-colors"
               disabled={!theme}
             >
@@ -502,9 +663,12 @@ export default function TestMobileSelect() {
 
         {/* Footer */}
         <footer className="text-center text-sm text-muted-foreground pt-8 border-t">
-          <p>Mobile Select Component Test • WCAG AAA Compliant • Haptic Feedback Enabled</p>
+          <p>
+            Mobile Select Component Test • WCAG AAA Compliant • Haptic Feedback
+            Enabled
+          </p>
         </footer>
       </div>
     </div>
   );
-} 
+}
