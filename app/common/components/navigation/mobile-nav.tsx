@@ -754,6 +754,10 @@ export function MobileNav({
 
   // 💡 Enhanced close handler with accessibility feedback
   const handleClose = useCallback(() => {
+    // 🎯 닫기 애니메이션 전에 dragX 초기화
+    dragX.set(0);
+    setIsClosing(true);
+    
     onClose();
     setLiveMessage('메뉴가 닫혔습니다.');
     
@@ -762,7 +766,7 @@ export function MobileNav({
       const menuButton = document.querySelector('[data-mobile-nav-button]') as HTMLElement;
       menuButton?.focus();
     }, 100);
-  }, [onClose]);
+  }, [onClose, dragX]);
 
   // Enhanced navigation handler with accessibility feedback
   const handleNavigation = useCallback((item: NavItem) => {
@@ -853,11 +857,19 @@ export function MobileNav({
       {/* Backdrop */}
       <motion.div
         initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ 
-          duration: 0.3,
-          ease: "easeInOut"
+        animate={{ 
+          opacity: 1,
+          transition: {
+            duration: 0.25,
+            ease: [0.25, 0.46, 0.45, 0.94]
+          }
+        }}
+        exit={{ 
+          opacity: 0,
+          transition: {
+            duration: 0.2,
+            ease: [0.25, 0.46, 0.45, 0.94]
+          }
         }}
         className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
         onClick={handleClose}
@@ -871,19 +883,19 @@ export function MobileNav({
         animate={{ 
           x: 0,
           transition: {
-            // 🎯 열기: spring 애니메이션으로 부드럽게
-            type: "spring",
-            stiffness: 400,
-            damping: 35,
-            mass: 0.8
+            // 🎯 열기: 부드러운 easing으로 일관성 유지
+            type: "tween",
+            duration: 0.35,
+            ease: [0.25, 0.46, 0.45, 0.94] // easeOutQuart
           }
         }}
         exit={{ 
           x: '-100%',
+          opacity: 0,
           transition: {
-            // 🎯 닫기: tween 애니메이션으로 부드럽게
+            // 🎯 닫기: 동일한 easing과 유사한 duration으로 일관성 유지
             type: "tween",
-            duration: 0.4,
+            duration: 0.3,
             ease: [0.25, 0.46, 0.45, 0.94] // easeOutQuart
           }
         }}
@@ -897,7 +909,7 @@ export function MobileNav({
           transition: { duration: 0.1 }
         }}
         style={{ 
-          x: dragX,
+          x: isOpen ? dragX : undefined, // 🎯 닫힐 때는 dragX 비활성화
           opacity: progressiveReveal.opacity,
           scale: progressiveReveal.scale,
         }}

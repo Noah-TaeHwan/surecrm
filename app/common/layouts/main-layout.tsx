@@ -33,32 +33,29 @@ export function MainLayout({
   } | null>(null);
   const [isLoadingUser, setIsLoadingUser] = useState(true);
 
-  // 🎯 초기 렌더링 완료 처리 - 전역 상태로 관리하여 페이지 이동 시에도 유지
-  const [isInitialRender, setIsInitialRender] = useState(() => {
-    // 브라우저 환경에서만 localStorage 확인
-    if (typeof window !== 'undefined') {
-      return !localStorage.getItem('layout-initialized');
-    }
-    return true;
-  });
+  // 🎯 초기 렌더링 완료 처리 - Hydration 안전하게 처리
+  const [isInitialRender, setIsInitialRender] = useState(true);
+  const [isHydrated, setIsHydrated] = useState(false);
 
-  // 🎯 초기 렌더링 완료 처리 - 한 번만 실행하고 localStorage에 저장
+  // 🎯 Hydration 완료 처리
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    setIsHydrated(true);
     
-    // 이미 초기화된 상태라면 스킵
-    if (localStorage.getItem('layout-initialized')) {
+    // localStorage 확인은 hydration 후에만
+    const isLayoutInitialized = localStorage.getItem('layout-initialized');
+    
+    if (isLayoutInitialized) {
+      // 이미 초기화된 경우 즉시 렌더링
       setIsInitialRender(false);
-      return;
+    } else {
+      // 첫 방문인 경우 부드러운 전환
+      const timer = requestAnimationFrame(() => {
+        setIsInitialRender(false);
+        localStorage.setItem('layout-initialized', 'true');
+      });
+      return () => cancelAnimationFrame(timer);
     }
-    
-    // 즉시 실행하되, 레이아웃 계산이 완료된 후에 실행
-    const timer = requestAnimationFrame(() => {
-      setIsInitialRender(false);
-      localStorage.setItem('layout-initialized', 'true');
-    });
-    return () => cancelAnimationFrame(timer);
-  }, []); // 빈 의존성 배열로 한 번만 실행
+  }, []);
 
   // 🎯 사용자 정보 가져오기
   useEffect(() => {
@@ -166,8 +163,8 @@ export function MainLayout({
 
   return (
     <div className="fixed inset-0 bg-background flex overflow-hidden">
-      {/* 🎯 데스크톱 사이드바 - 초기 렌더링 완료 후에만 표시 (플래시 방지) */}
-      {!isInitialRender && !isMobile && (
+      {/* 🎯 데스크톱 사이드바 - Hydration 완료 후 표시 (플래시 방지) */}
+      {isHydrated && !isInitialRender && !isMobile && (
         <div className="w-64 border-r border-border bg-muted/30 flex-shrink-0">
           <Sidebar />
         </div>
@@ -176,15 +173,15 @@ export function MainLayout({
       {/* 메인 컨텐츠 영역 */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* 헤더 - 고정됨 */}
-        <header className={`h-16 border-b border-border flex-shrink-0 fixed top-0 left-0 right-0 ${!isInitialRender && !isMobile ? 'lg:left-64' : ''} ${
+        <header className={`h-16 border-b border-border flex-shrink-0 fixed top-0 left-0 right-0 ${isHydrated && !isInitialRender && !isMobile ? 'lg:left-64' : ''} ${
           isMobileMenuOpen 
             ? 'bg-background/70 backdrop-blur-md z-30' // 🎯 사이드바 열렸을 때: backdrop(z-40) 뒤에 위치
             : 'bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50' // 🎯 기본 상태: 높은 z-index
         }`}>
           <div className="h-full px-4 lg:px-6 flex items-center justify-between">
             <div className="flex items-center gap-4">
-              {/* 🎯 모바일 메뉴 버튼 - 초기 렌더링 완료 후에만 표시 */}
-              {!isInitialRender && isMobile && (
+              {/* 🎯 모바일 메뉴 버튼 - Hydration 완료 후 표시 */}
+              {isHydrated && !isInitialRender && isMobile && (
                 <MobileNavButton
                   onClick={toggleMobileMenu}
                   isOpen={isMobileMenuOpen}
@@ -202,7 +199,7 @@ export function MainLayout({
         {/* 페이지 컨텐츠 - 바텀 네비게이션과 헤더를 고려한 스크롤 가능한 영역 */}
         <main
           className={`flex-1 mt-16 ${
-            !isInitialRender && isMobile ? 'pb-40' : 'pb-4'
+            isHydrated && !isInitialRender && isMobile ? 'pb-40' : 'pb-4'
           } ${
             title === '소개 네트워크'
               ? 'overflow-hidden p-0'
@@ -211,8 +208,8 @@ export function MainLayout({
           style={
             title === '소개 네트워크'
               ? {
-                  height: !isInitialRender && isMobile ? 'calc(100vh - 14rem)' : 'calc(100vh - 4rem)', // 헤더(4rem) + 바텀네비(10rem - 플로팅 여백 포함)
-                  maxHeight: !isInitialRender && isMobile ? 'calc(100vh - 14rem)' : 'calc(100vh - 4rem)',
+                  height: isHydrated && !isInitialRender && isMobile ? 'calc(100vh - 14rem)' : 'calc(100vh - 4rem)', // 헤더(4rem) + 바텀네비(10rem - 플로팅 여백 포함)
+                  maxHeight: isHydrated && !isInitialRender && isMobile ? 'calc(100vh - 14rem)' : 'calc(100vh - 4rem)',
                   overflow: 'hidden',
                 }
               : {}
@@ -223,7 +220,7 @@ export function MainLayout({
       </div>
 
       {/* 🎯 새로운 모바일 네비게이션 - AnimatePresence로 래핑 */}
-      {!isInitialRender && (
+      {isHydrated && !isInitialRender && (
         <AnimatePresence mode="wait">
           {isMobileMenuOpen && (
             <MobileNav
@@ -235,7 +232,7 @@ export function MainLayout({
       )}
 
       {/* 🎯 Bottom Tab Navigation (모바일에서만 표시) - 새로운 API로 업데이트 */}
-      {!isInitialRender && isMobile && (
+      {isHydrated && !isInitialRender && isMobile && (
         <BottomTabNavigation
           isMenuOpen={isMobileMenuOpen}
         />
