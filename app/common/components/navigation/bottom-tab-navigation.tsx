@@ -67,9 +67,20 @@ function LiquidGlassButton({
       to={href}
       className="relative flex flex-col items-center justify-center min-h-[64px] w-16 px-1 py-2 group"
       onTouchStart={() => {
-        // 햅틱 피드백
-        if ('vibrate' in navigator) {
-          navigator.vibrate(5);
+        // 햅틱 피드백 - 안전하게 처리
+        try {
+          if ('vibrate' in navigator) {
+            // 사용자 제스처 컨텍스트에서만 작동하도록 지연 실행
+            setTimeout(() => {
+              try {
+                navigator.vibrate(5);
+              } catch {
+                // 진동 실패 시 무시
+              }
+            }, 0);
+          }
+        } catch {
+          // 진동 API 실패 시 무시
         }
       }}
     >

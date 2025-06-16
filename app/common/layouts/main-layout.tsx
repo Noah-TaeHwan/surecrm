@@ -1,5 +1,6 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
+import { AnimatePresence } from 'framer-motion';
 import { Sidebar } from '~/common/components/navigation/sidebar';
 import { Header } from '~/common/components/navigation/header';
 import { MobileNav, MobileNavButton } from '~/common/components/navigation/mobile-nav';
@@ -158,13 +159,17 @@ export function MainLayout({
       {/* 메인 컨텐츠 영역 */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* 헤더 - 고정됨 */}
-        <header className={`h-16 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex-shrink-0 z-50 fixed top-0 left-0 right-0 ${!isInitialRender && !isMobile ? 'lg:left-64' : ''}`}>
+        <header className={`h-16 border-b border-border flex-shrink-0 fixed top-0 left-0 right-0 ${!isInitialRender && !isMobile ? 'lg:left-64' : ''} ${
+          isMobileMenuOpen 
+            ? 'bg-background/70 backdrop-blur-md z-30' // 🎯 사이드바 열렸을 때: backdrop(z-40) 뒤에 위치
+            : 'bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50' // 🎯 기본 상태: 높은 z-index
+        }`}>
           <div className="h-full px-4 lg:px-6 flex items-center justify-between">
             <div className="flex items-center gap-4">
               {/* 🎯 모바일 메뉴 버튼 - 초기 렌더링 완료 후에만 표시 */}
               {!isInitialRender && isMobile && (
                 <MobileNavButton
-                  onClick={openMobileMenu}
+                  onClick={toggleMobileMenu}
                   isOpen={isMobileMenuOpen}
                 />
               )}
@@ -200,12 +205,16 @@ export function MainLayout({
         </main>
       </div>
 
-      {/* 🎯 새로운 모바일 네비게이션 - 초기 렌더링 완료 후에만 표시 */}
+      {/* 🎯 새로운 모바일 네비게이션 - AnimatePresence로 래핑 */}
       {!isInitialRender && (
-        <MobileNav
-          isOpen={isMobileMenuOpen}
-          onClose={closeMobileMenu}
-        />
+        <AnimatePresence mode="wait">
+          {isMobileMenuOpen && (
+            <MobileNav
+              isOpen={isMobileMenuOpen}
+              onClose={closeMobileMenu}
+            />
+          )}
+        </AnimatePresence>
       )}
 
       {/* 🎯 Bottom Tab Navigation (모바일에서만 표시) - 새로운 API로 업데이트 */}

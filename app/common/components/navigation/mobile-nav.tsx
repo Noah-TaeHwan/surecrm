@@ -634,28 +634,28 @@ export function MobileNav({
       ariaLabel: '대시보드 페이지로 이동'
     },
     { 
-      label: '네트워크', 
+      label: '소개 네트워크', 
       href: '/network', 
       icon: <Network className="w-6 h-6" />,
-      ariaLabel: '네트워크 페이지로 이동'
+      ariaLabel: '소개 네트워크 페이지로 이동'
     },
     { 
-      label: '영업', 
+      label: '영업 파이프라인', 
       href: '/pipeline', 
       icon: <PieChart className="w-6 h-6" />,
-      ariaLabel: '영업 페이지로 이동'
+      ariaLabel: '영업 파이프라인 페이지로 이동'
     },
     { 
-      label: '고객', 
+      label: '고객 관리', 
       href: '/clients', 
       icon: <Users className="w-6 h-6" />,
-      ariaLabel: '고객 페이지로 이동'
+      ariaLabel: '고객 관리 페이지로 이동'
     },
     { 
-      label: '일정', 
+      label: '일정 관리', 
       href: '/calendar', 
       icon: <Calendar className="w-6 h-6" />,
-      ariaLabel: '일정 페이지로 이동'
+      ariaLabel: '일정 관리 페이지로 이동'
     },
   ];
 
@@ -830,8 +830,6 @@ export function MobileNav({
       dragX.set(0);
     }
   }, [isOpen, dragX]);
-
-  if (!isOpen) return null;
 
   return (
     <>
