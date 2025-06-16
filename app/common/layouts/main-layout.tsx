@@ -199,7 +199,7 @@ export function MainLayout({
         {/* 페이지 컨텐츠 - 바텀 네비게이션과 헤더를 고려한 스크롤 가능한 영역 */}
         <main
           className={`flex-1 mt-16 ${
-            isHydrated && !isInitialRender && isMobile ? 'pb-40' : 'pb-4'
+            isHydrated && !isInitialRender && isMobile ? 'pb-25' : 'pb-4'
           } ${
             title === '소개 네트워크'
               ? 'overflow-hidden p-0'

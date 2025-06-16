@@ -1,5 +1,6 @@
 import { useLocation, Link } from 'react-router';
 import { motion } from 'framer-motion';
+import { useRef, useEffect } from 'react';
 import {
   LayoutDashboard,
   Network,
@@ -40,6 +41,38 @@ const navigationItems = [
   },
 ];
 
+// 🎯 사용자 상호작용 추적 - 진동 API 안전 사용을 위함
+let hasUserInteracted = false;
+
+// 전역 사용자 상호작용 이벤트 리스너 (한 번만 실행)
+if (typeof window !== 'undefined' && !hasUserInteracted) {
+  const markUserInteraction = () => {
+    hasUserInteracted = true;
+    // 이벤트 리스너 제거 (메모리 누수 방지)
+    document.removeEventListener('click', markUserInteraction);
+    document.removeEventListener('touchstart', markUserInteraction);
+    document.removeEventListener('keydown', markUserInteraction);
+  };
+
+  document.addEventListener('click', markUserInteraction, { once: true });
+  document.addEventListener('touchstart', markUserInteraction, { once: true });
+  document.addEventListener('keydown', markUserInteraction, { once: true });
+}
+
+// 🎯 안전한 진동 API 함수
+function safeVibrate(duration: number = 5) {
+  // 사용자 상호작용이 없었다면 진동하지 않음
+  if (!hasUserInteracted) return;
+  
+  try {
+    if ('vibrate' in navigator && typeof navigator.vibrate === 'function') {
+      navigator.vibrate(duration);
+    }
+  } catch (error) {
+    // 진동 실패 시 조용히 무시 (콘솔 로그 없음)
+  }
+}
+
 // 액티브 인덱스를 찾는 함수
 function getActiveIndex(pathname: string): number {
   const activeItem = navigationItems.findIndex(item => {
@@ -67,21 +100,8 @@ function LiquidGlassButton({
       to={href}
       className="relative flex flex-col items-center justify-center min-h-[64px] w-16 px-1 py-2 group"
       onTouchStart={() => {
-        // 햅틱 피드백 - 안전하게 처리
-        try {
-          if ('vibrate' in navigator) {
-            // 사용자 제스처 컨텍스트에서만 작동하도록 지연 실행
-            setTimeout(() => {
-              try {
-                navigator.vibrate(5);
-              } catch {
-                // 진동 실패 시 무시
-              }
-            }, 0);
-          }
-        } catch {
-          // 진동 API 실패 시 무시
-        }
+        // 🎯 안전한 햅틱 피드백 - 사용자 상호작용 후에만 실행
+        safeVibrate(5);
       }}
     >
       {/* 리퀴드글래스 액티브 백그라운드 - 플로팅 스타일 */}
