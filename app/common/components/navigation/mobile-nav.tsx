@@ -111,7 +111,7 @@ const MobileNavItem = memo(function MobileNavItem({
     (e: React.KeyboardEvent) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
-        handleClick(e as any);
+        handleClick(e as unknown as React.MouseEvent);
       }
     },
     [handleClick]
@@ -134,8 +134,8 @@ const MobileNavItem = memo(function MobileNavItem({
         onClick={handleClick}
         onKeyDown={handleKeyDown}
         className={cn(
-          // Base styles - 터치 친화적 디자인 (WCAG 2.5.5 AAA)
-          'group flex items-center justify-between w-full min-h-[48px] px-4 py-3 rounded-xl text-left',
+          // Base styles - 터치 친화적 디자인 (WCAG 2.5.5 AAA) - 콤팩트하게 수정
+          'group flex items-center justify-between w-full min-h-[44px] px-3 py-2 rounded-lg text-left',
           'transition-all duration-200 ease-out',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
           // Active state styles
@@ -149,11 +149,11 @@ const MobileNavItem = memo(function MobileNavItem({
         aria-current={isActive ? 'page' : undefined}
         tabIndex={0}
       >
-        <div className="flex items-center gap-4">
-          {/* Icon with animation */}
+        <div className="flex items-center gap-3">
+          {/* Icon with animation - 더 작게 */}
           <motion.div
             className={cn(
-              'flex items-center justify-center w-10 h-10 rounded-lg transition-colors duration-200',
+              'flex items-center justify-center w-8 h-8 rounded-md transition-colors duration-200',
               isActive
                 ? 'bg-primary/20 text-primary'
                 : 'bg-muted/60 text-muted-foreground group-hover:bg-muted group-hover:text-foreground'
@@ -161,13 +161,15 @@ const MobileNavItem = memo(function MobileNavItem({
             whileTap={{ scale: 0.9 }}
             aria-hidden="true"
           >
-            {item.icon}
+            <div className="w-4 h-4">
+              {item.icon}
+            </div>
           </motion.div>
 
-          {/* Label */}
+          {/* Label - 폰트 크기 약간 줄임 */}
           <span
             className={cn(
-              'font-medium text-[15px] leading-6',
+              'font-medium text-[14px] leading-5',
               isActive ? 'text-primary' : 'text-foreground'
             )}
           >
@@ -180,7 +182,7 @@ const MobileNavItem = memo(function MobileNavItem({
           {item.badge && (
             <Badge
               variant={isActive ? 'default' : 'secondary'}
-              className="text-xs min-w-[20px] h-5 px-1.5"
+              className="text-xs min-w-[18px] h-4 px-1.5"
               aria-label={`${item.badge}개의 알림`}
             >
               {item.badge}
@@ -191,7 +193,7 @@ const MobileNavItem = memo(function MobileNavItem({
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              className="w-2 h-2 bg-green-500 rounded-full"
+              className="w-1.5 h-1.5 bg-green-500 rounded-full"
               aria-label="새로운 기능"
             />
           )}
@@ -205,7 +207,7 @@ const MobileNavItem = memo(function MobileNavItem({
             animate={{ opacity: isActive ? 1 : 0 }}
             aria-hidden="true"
           >
-            <ChevronRight className="w-4 h-4 text-primary" />
+            <ChevronRight className="w-3.5 h-3.5 text-primary" />
           </motion.div>
         </div>
       </Link>
@@ -753,93 +755,97 @@ export function MobileNav({
             </div>
 
             {/* 🎯 스크롤 가능한 네비게이션 영역 - iOS Safari 최적화 */}
-            <div 
-              className="flex-1 overflow-y-auto min-h-0" 
-              style={{
-                WebkitOverflowScrolling: 'touch', // iOS 터치 스크롤 최적화
-                overscrollBehavior: 'contain', // 스크롤 경계 처리
-                height: 'calc(100vh - 160px)', // 헤더(80px) + 푸터(80px) 제외
-                minHeight: '200px', // 최소 높이 보장
-              }}
-            >
-              <nav
-                className="p-4"
-                role="navigation"
-                aria-label="주요 네비게이션"
+            <div className="flex-1 min-h-0 relative">
+              <ScrollArea 
+                className="h-full w-full"
+                style={{
+                  height: 'calc(100vh - 140px)', // 헤더와 푸터 높이 제외
+                  minHeight: '200px',
+                }}
               >
-                <motion.ul
-                  initial="hidden"
-                  animate="visible"
-                  exit="hidden"
-                  variants={{
-                    hidden: {
-                      opacity: 0,
-                      transition: {
-                        staggerChildren: 0.02,
-                        staggerDirection: -1,
-                        when: 'afterChildren',
-                      },
-                    },
-                    visible: {
-                      opacity: 1,
-                      transition: {
-                        delayChildren: 0.1,
-                        staggerChildren: 0.05,
-                        when: 'beforeChildren',
-                      },
-                    },
-                  }}
-                  className="space-y-2"
-                  role="list"
+                <div 
+                  className="h-full"
                   style={{
                     paddingBottom: '20px', // 하단 여백으로 스크롤 끝 표시
                   }}
                 >
-                  {/* 메인 네비게이션 */}
-                  {mainNavItems.map((item, index) => {
-                    const isActive = isActiveRoute(item.href);
-                    return (
-                      <MobileNavItem
-                        key={item.href}
-                        item={item}
-                        isActive={isActive}
-                        index={index}
-                        onClick={() => handleNavigation(item)}
-                      />
-                    );
-                  })}
+                  <nav
+                    className="p-3"
+                    role="navigation"
+                    aria-label="주요 네비게이션"
+                  >
+                    <motion.ul
+                      initial="hidden"
+                      animate="visible"
+                      exit="hidden"
+                      variants={{
+                        hidden: {
+                          opacity: 0,
+                          transition: {
+                            staggerChildren: 0.02,
+                            staggerDirection: -1,
+                            when: 'afterChildren',
+                          },
+                        },
+                        visible: {
+                          opacity: 1,
+                          transition: {
+                            delayChildren: 0.1,
+                            staggerChildren: 0.05,
+                            when: 'beforeChildren',
+                          },
+                        },
+                      }}
+                      className="space-y-1"
+                      role="list"
+                    >
+                      {/* 메인 네비게이션 */}
+                      {mainNavItems.map((item, index) => {
+                        const isActive = isActiveRoute(item.href);
+                        return (
+                          <MobileNavItem
+                            key={item.href}
+                            item={item}
+                            isActive={isActive}
+                            index={index}
+                            onClick={() => handleNavigation(item)}
+                          />
+                        );
+                      })}
 
-                  {/* 구분선 */}
-                  <motion.div
-                    initial={{ opacity: 0, scaleX: 0 }}
-                    animate={{ opacity: 1, scaleX: 1 }}
-                    exit={{ opacity: 0, scaleX: 0 }}
-                    transition={{
-                      delay: isOpen ? 0.4 : 0,
-                      duration: 0.3,
-                    }}
-                    className="h-px bg-border mx-4 my-4"
-                  />
-
-                  {/* 추가 기능 */}
-                  {additionalNavItems.map((item, index) => {
-                    const isActive = isActiveRoute(item.href);
-                    return (
-                      <MobileNavItem
-                        key={item.href}
-                        item={item}
-                        isActive={isActive}
-                        index={index + mainNavItems.length + 1}
-                        onClick={() => handleNavigation(item)}
+                      {/* 구분선 */}
+                      <motion.div
+                        initial={{ opacity: 0, scaleX: 0 }}
+                        animate={{ opacity: 1, scaleX: 1 }}
+                        exit={{ opacity: 0, scaleX: 0 }}
+                        transition={{
+                          delay: isOpen ? 0.4 : 0,
+                          duration: 0.3,
+                        }}
+                        className="h-px bg-border mx-3 my-3"
                       />
-                    );
-                  })}
-                </motion.ul>
-              </nav>
+
+                      {/* 추가 기능 */}
+                      {additionalNavItems.map((item, index) => {
+                        const isActive = isActiveRoute(item.href);
+                        return (
+                          <MobileNavItem
+                            key={item.href}
+                            item={item}
+                            isActive={isActive}
+                            index={index + mainNavItems.length + 1}
+                            onClick={() => handleNavigation(item)}
+                          />
+                        );
+                      })}
+                    </motion.ul>
+                  </nav>
+                </div>
+              </ScrollArea>
             </div>
 
             {/* 🎯 고정된 푸터 */}
-            <div className="p-4 border-t border-border bg-muted/30 flex-shrink-0">
+            <div className="p-3 border-t border-border bg-muted/30 flex-shrink-0">
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -852,7 +858,7 @@ export function MobileNav({
               >
                 <VersionDisplay />
                 <p className="text-xs text-muted-foreground mt-1">
-                  © 2024 SureCRM. All rights reserved.
+                  © {new Date().getFullYear()} SureCRM. All rights reserved.
                 </p>
               </motion.div>
             </div>

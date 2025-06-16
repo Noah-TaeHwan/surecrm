@@ -310,13 +310,11 @@
   will-change: scroll-position;
   /* iOS에서 스크롤 영역 명확히 표시 */
   transform: translateZ(0);
-}
-
-.mobile-sidebar-container > div:nth-child(2) {
-  /* 스크롤 영역에 iOS 최적화 적용 */
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: contain;
-  scroll-behavior: smooth;
+  /* flex 레이아웃 강화 */
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  max-height: 100vh;
 }
 
 /* 🎯 iOS Safari 포커스 아웃라인 완전 제거 */
@@ -576,9 +574,6 @@ html:has([data-state='open']) body {
   scrollbar-gutter: stable !important;
   padding-right: 0 !important;
   margin-right: 0 !important;
-  width: 100vw !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
 }
 
 /* 모든 Radix 컴포넌트 관련 body 상태 무효화 */
@@ -1614,4 +1609,75 @@ textarea {
   padding-right: 1rem !important;
   max-width: 100vw !important;
   overflow-x: hidden !important;
+}
+
+/* 💫 iOS Safari 모바일 네비게이션 스크롤 최적화 */
+.mobile-sidebar-container {
+  /* iOS Safari 터치 스크롤 최적화 */
+  -webkit-overflow-scrolling: touch;
+  /* 스크롤 바운스 효과 방지 */
+  overscroll-behavior: contain;
+  /* 스크롤 성능 최적화 */
+  will-change: scroll-position;
+  /* iOS에서 스크롤 영역 명확히 표시 */
+  transform: translateZ(0);
+  /* flex 레이아웃 강화 */
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  max-height: 100vh;
+}
+
+/* iOS Safari ScrollArea 스크롤 강제 활성화 */
+[data-radix-scroll-area-viewport] {
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior-y: contain !important;
+  scroll-behavior: smooth !important;
+  /* iOS에서 스크롤 허용을 명시적으로 강제 */
+  overflow-y: scroll !important;
+  /* 하드웨어 가속 */
+  transform: translateZ(0);
+  will-change: scroll-position;
+  /* iOS Safari에서 스크롤 영역을 명확하게 표시 */
+  touch-action: pan-y !important;
+  /* 스크롤 영역 높이 명시 */
+  height: 100% !important;
+  max-height: 100% !important;
+}
+
+/* iOS Safari에서 스크롤 영역 강제 설정 */
+.mobile-sidebar-container [data-radix-scroll-area-root] {
+  height: 100% !important;
+  flex: 1 !important;
+  min-height: 0 !important;
+}
+
+/* iOS 모바일에서 스크롤바 항상 표시 (디버깅용) */
+@media (max-width: 768px) {
+  [data-radix-scroll-area-viewport]::-webkit-scrollbar {
+    width: 3px !important;
+    display: block !important;
+  }
+  
+  [data-radix-scroll-area-viewport]::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  [data-radix-scroll-area-viewport]::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.3) !important;
+    border-radius: 3px !important;
+  }
+  
+  /* iOS Safari에서 패시브 터치 이벤트 강제 활성화 */
+  [data-radix-scroll-area-viewport] {
+    -webkit-transform: translate3d(0, 0, 0) !important;
+    transform: translate3d(0, 0, 0) !important;
+  }
+}
+
+.mobile-sidebar-container > div:nth-child(2) {
+  /* 스크롤 영역에 iOS 최적화 적용 */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  scroll-behavior: smooth;
 }
