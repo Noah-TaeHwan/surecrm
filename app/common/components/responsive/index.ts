@@ -34,6 +34,32 @@ export {
   ResponsiveSelectValue,
 } from './responsive-select';
 
+// Mobile Dialog Components
+export {
+  MobileDialog,
+  MobileDialogClose,
+  MobileDialogContent,
+  MobileDialogDescription,
+  MobileDialogFooter,
+  MobileDialogHeader,
+  MobileDialogOverlay,
+  MobileDialogPortal,
+  MobileDialogTitle,
+  MobileDialogTrigger,
+} from './mobile-dialog';
+
+// Responsive Dialog Components
+export {
+  ResponsiveDialog,
+  ResponsiveDialogClose,
+  ResponsiveDialogContent,
+  ResponsiveDialogDescription,
+  ResponsiveDialogFooter,
+  ResponsiveDialogHeader,
+  ResponsiveDialogTitle,
+  ResponsiveDialogTrigger,
+} from './responsive-dialog';
+
 // Types
 export type { MobileButtonProps } from './mobile-button';
 export type { ResponsiveButtonProps } from './responsive-button';
@@ -50,4 +76,13 @@ export type {
   ResponsiveSelectTriggerProps,
   ResponsiveSelectContentProps,
   ResponsiveSelectItemProps,
-} from './responsive-select'; 
+} from './responsive-select';
+export type {
+  MobileDialogSize,
+  MobileDialogProps,
+  MobileDialogContentProps,
+} from './mobile-dialog';
+export type {
+  ResponsiveDialogProps,
+  ResponsiveDialogContentProps,
+} from './responsive-dialog'; 
