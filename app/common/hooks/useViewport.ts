@@ -3,6 +3,9 @@ import { useSyncExternalStore } from 'react';
 export interface ViewportSize {
   width: number;
   height: number;
+  isMobile: boolean;
+  isTablet: boolean;
+  isDesktop: boolean;
 }
 
 // Viewport tracking store
@@ -24,12 +27,27 @@ class ViewportStore {
 
   private getViewportSize(): ViewportSize {
     if (typeof window === 'undefined') {
-      return { width: 1024, height: 768 }; // SSR default
+      return { 
+        width: 1024, 
+        height: 768,
+        isMobile: false,
+        isTablet: false,
+        isDesktop: true,
+      }; // SSR default
     }
 
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    const isMobile = width < 768;
+    const isTablet = width >= 768 && width < 1024;
+    const isDesktop = width >= 1024;
+
     return {
-      width: window.innerWidth,
-      height: window.innerHeight,
+      width,
+      height,
+      isMobile,
+      isTablet,
+      isDesktop,
     };
   }
 
@@ -38,7 +56,13 @@ class ViewportStore {
   };
 
   public getServerSnapshot = (): ViewportSize => {
-    return { width: 1024, height: 768 }; // SSR safe defaults
+    return { 
+      width: 1024, 
+      height: 768,
+      isMobile: false,
+      isTablet: false,
+      isDesktop: true,
+    }; // SSR safe defaults
   };
 
   public subscribe = (listener: () => void): (() => void) => {

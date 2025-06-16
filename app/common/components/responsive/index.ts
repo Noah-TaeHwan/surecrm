@@ -82,6 +82,40 @@ export {
   ResponsiveCardFooter,
 } from './responsive-card';
 
+// Mobile Sheet Components
+export {
+  MobileSheet,
+  MobileSheetTrigger,
+  MobileSheetContent,
+  MobileSheetHeader,
+  MobileSheetTitle,
+  MobileSheetDescription,
+  MobileSheetFooter,
+  MobileSheetClose,
+} from './mobile-sheet';
+
+// Mobile Table Components
+export {
+  MobileTable,
+  MobileTableHeader,
+  MobileTableBody,
+  MobileTableRow,
+  MobileTableCell,
+  MobileTableFooter,
+} from './mobile-table';
+
+// Responsive Table Components
+export {
+  ResponsiveTable,
+  ResponsiveTableHeader,
+  ResponsiveTableBody,
+  ResponsiveTableRow,
+  ResponsiveTableCell,
+  ResponsiveTableHead,
+  ResponsiveTableFooter,
+  ResponsiveTableCaption,
+} from './responsive-table';
+
 // Types
 export type { MobileButtonProps } from './mobile-button';
 export type { ResponsiveButtonProps } from './responsive-button';
@@ -119,4 +153,21 @@ export type {
   ResponsiveCardContentProps,
   ResponsiveCardFooterProps,
   ResponsiveCardActionProps,
-} from './responsive-card'; 
+} from './responsive-card';
+export type {
+  MobileSheetSide,
+  MobileSheetSize,
+  MobileSheetInteraction,
+} from './mobile-sheet';
+export type {
+  MobileTableMode,
+  MobileTableDensity,
+  MobileTableInteraction,
+} from './mobile-table';
+export type {
+  ResponsiveTableProps,
+  ResponsiveTableHeaderProps,
+  ResponsiveTableRowProps,
+  ResponsiveTableCellProps,
+  ResponsiveTableFooterProps,
+} from './responsive-table'; 
