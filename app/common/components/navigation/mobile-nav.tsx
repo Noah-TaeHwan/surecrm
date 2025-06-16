@@ -868,17 +868,24 @@ export function MobileNav({
       <motion.div
         ref={focusTrapRef}
         initial={{ x: '-100%' }}
-        animate={{ x: 0 }}
-        exit={{ x: '-100%' }}
-        transition={{
-          // 🎯 열기: spring 애니메이션으로 부드럽게
-          type: isOpen ? "spring" : "tween",
-          stiffness: isOpen ? 400 : undefined,
-          damping: isOpen ? 35 : undefined,
-          mass: isOpen ? 0.8 : undefined,
-          // 🎯 닫기: tween 애니메이션으로 더 부드럽고 느리게
-          duration: isOpen ? undefined : 0.4,
-          ease: isOpen ? undefined : [0.25, 0.46, 0.45, 0.94] // easeOutQuart
+        animate={{ 
+          x: 0,
+          transition: {
+            // 🎯 열기: spring 애니메이션으로 부드럽게
+            type: "spring",
+            stiffness: 400,
+            damping: 35,
+            mass: 0.8
+          }
+        }}
+        exit={{ 
+          x: '-100%',
+          transition: {
+            // 🎯 닫기: tween 애니메이션으로 부드럽게
+            type: "tween",
+            duration: 0.4,
+            ease: [0.25, 0.46, 0.45, 0.94] // easeOutQuart
+          }
         }}
         drag="x"
         dragConstraints={{ left: -800, right: 0 }}

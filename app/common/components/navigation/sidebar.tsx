@@ -44,22 +44,22 @@ export function Sidebar({ className, onClose, id, role, 'aria-label': ariaLabel 
       icon: <LayoutDashboard className="h-5 w-5" />,
     },
     {
-      label: '네트워크',
+      label: '소개 네트워크',
       href: '/network',
       icon: <Network className="h-5 w-5" />,
     },
     {
-      label: '영업',
+      label: '영업 파이프라인',
       href: '/pipeline',
       icon: <PieChart className="h-5 w-5" />,
     },
     {
-      label: '고객',
+      label: '고객 관리',
       href: '/clients',
       icon: <Users className="h-5 w-5" />,
     },
     {
-      label: '일정',
+      label: '일정 관리',
       href: '/calendar',
       icon: <Calendar className="h-5 w-5" />,
     },

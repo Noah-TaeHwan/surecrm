@@ -24,7 +24,6 @@ export function MainLayout({
   currentUser: propsCurrentUser,
 }: MainLayoutProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isInitialRender, setIsInitialRender] = useState(true);
   const { isMobile } = useViewport();
   const [currentUser, setCurrentUser] = useState<{
     id: string;
@@ -34,14 +33,32 @@ export function MainLayout({
   } | null>(null);
   const [isLoadingUser, setIsLoadingUser] = useState(true);
 
-  // 🎯 초기 렌더링 완료 처리 (사이드바 플래시 방지)
+  // 🎯 초기 렌더링 완료 처리 - 전역 상태로 관리하여 페이지 이동 시에도 유지
+  const [isInitialRender, setIsInitialRender] = useState(() => {
+    // 브라우저 환경에서만 localStorage 확인
+    if (typeof window !== 'undefined') {
+      return !localStorage.getItem('layout-initialized');
+    }
+    return true;
+  });
+
+  // 🎯 초기 렌더링 완료 처리 - 한 번만 실행하고 localStorage에 저장
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    // 이미 초기화된 상태라면 스킵
+    if (localStorage.getItem('layout-initialized')) {
+      setIsInitialRender(false);
+      return;
+    }
+    
     // 즉시 실행하되, 레이아웃 계산이 완료된 후에 실행
     const timer = requestAnimationFrame(() => {
       setIsInitialRender(false);
+      localStorage.setItem('layout-initialized', 'true');
     });
     return () => cancelAnimationFrame(timer);
-  }, []);
+  }, []); // 빈 의존성 배열로 한 번만 실행
 
   // 🎯 사용자 정보 가져오기
   useEffect(() => {
