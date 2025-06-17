@@ -1,6 +1,6 @@
 import { useLocation, Link } from 'react-router';
 import { motion } from 'framer-motion';
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import {
   LayoutDashboard,
   Network,
@@ -48,7 +48,7 @@ function safeVibrate(duration: number = 5) {
   return;
 }
 
-// 액티브 인덱스를 찾는 함수
+// 액티브 인덱스를 찾는 함수 - 주요 메뉴 외에는 -1 반환
 function getActiveIndex(pathname: string): number {
   const activeItem = navigationItems.findIndex(item => {
     if (item.href === '/dashboard') {
@@ -56,7 +56,39 @@ function getActiveIndex(pathname: string): number {
     }
     return pathname.startsWith(item.href);
   });
-  return activeItem >= 0 ? activeItem : 0;
+  // 주요 메뉴에 해당하지 않으면 -1 반환 (하이라이트 없음)
+  return activeItem >= 0 ? activeItem : -1;
+}
+
+// 스크롤 방향과 네비게이션 상태를 관리하는 커스텀 훅
+function useScrollDirection() {
+  const [isMinimized, setIsMinimized] = useState(false);
+  const lastScrollY = useRef(0);
+  const scrollThreshold = 50; // 50px 이상 스크롤 시 반응
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      const scrollDifference = currentScrollY - lastScrollY.current;
+
+      // 스크롤 임계값을 넘었을 때만 상태 변경
+      if (Math.abs(scrollDifference) > scrollThreshold) {
+        if (scrollDifference > 0 && currentScrollY > 100) {
+          // 아래로 스크롤: 최소화
+          setIsMinimized(true);
+        } else if (scrollDifference < 0) {
+          // 위로 스크롤: 확장
+          setIsMinimized(false);
+        }
+        lastScrollY.current = currentScrollY;
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  return isMinimized;
 }
 
 function LiquidGlassButton({
@@ -64,16 +96,20 @@ function LiquidGlassButton({
   icon: Icon,
   label,
   isActive,
+  isMinimized,
 }: {
   href: string;
   icon: React.ComponentType<{ className?: string }>;
   label: string;
   isActive: boolean;
+  isMinimized: boolean;
 }) {
   return (
     <Link
       to={href}
-      className="relative flex flex-col items-center justify-center min-h-[64px] w-16 px-1 py-2 group"
+      className={`relative flex flex-col items-center justify-center transition-all duration-300 w-16 px-1 py-2 group ${
+        isMinimized ? 'min-h-[48px]' : 'min-h-[64px]'
+      }`}
       onTouchStart={() => {
         // 🎯 안전한 햅틱 피드백 - 사용자 상호작용 후에만 실행
         safeVibrate(5);
@@ -82,7 +118,9 @@ function LiquidGlassButton({
       {/* 리퀴드글래스 액티브 백그라운드 - 플로팅 스타일 */}
       {isActive && (
         <motion.div
-          className="absolute top-1.5 bottom-1.5 left-0 right-0 rounded-2xl liquid-glass-button"
+          className={`absolute left-0 right-0 rounded-2xl liquid-glass-button transition-all duration-300 ${
+            isMinimized ? 'top-1 bottom-1' : 'top-1.5 bottom-1.5'
+          }`}
           layoutId="liquidGlassIndicator"
           transition={{
             type: "spring",
@@ -91,7 +129,7 @@ function LiquidGlassButton({
             duration: 0.4,
           }}
           style={{
-            boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 4px 12px rgba(0, 0, 0, 0.15)',
+            boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 4px 12px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
           }}
         >
           {/* 리퀴드 하이라이트 효과 */}
@@ -112,7 +150,9 @@ function LiquidGlassButton({
         }}
       >
         <Icon 
-          className={`h-5 w-5 mb-1 transition-all duration-300 ${
+          className={`transition-all duration-300 ${
+            isMinimized ? 'h-4 w-4 mb-0' : 'h-5 w-5 mb-1'
+          } ${
             isActive 
               ? 'text-primary drop-shadow-[0_0_8px_rgba(59,130,246,0.6)]' 
               : 'text-gray-400 group-hover:text-gray-300'
@@ -120,6 +160,8 @@ function LiquidGlassButton({
         />
         <span 
           className={`text-[10px] font-medium transition-all duration-300 text-center leading-tight ${
+            isMinimized ? 'opacity-0 scale-0 h-0' : 'opacity-100 scale-100'
+          } ${
             isActive 
               ? 'text-primary drop-shadow-[0_0_8px_rgba(59,130,246,0.6)]' 
               : 'text-gray-400 group-hover:text-gray-300'
@@ -135,6 +177,7 @@ function LiquidGlassButton({
 export function BottomTabNavigation({ isMenuOpen }: BottomTabNavigationProps) {
   const location = useLocation();
   const activeIndex = getActiveIndex(location.pathname);
+  const isMinimized = useScrollDirection();
 
   return (
     <nav 
@@ -190,9 +233,11 @@ export function BottomTabNavigation({ isMenuOpen }: BottomTabNavigationProps) {
         />
         
         {/* 네비게이션 버튼들 */}
-        <div className="relative flex items-center justify-center gap-2 px-2 py-0 min-h-[64px] pb-safe">
+        <div className={`relative flex items-center justify-center gap-2 px-2 transition-all duration-300 pb-safe ${
+          isMinimized ? 'py-1 min-h-[48px]' : 'py-0 min-h-[64px]'
+        }`}>
           {navigationItems.map((item, index) => {
-            const isActive = index === activeIndex;
+            const isActive = activeIndex !== -1 && index === activeIndex;
             
             return (
               <LiquidGlassButton
@@ -201,6 +246,7 @@ export function BottomTabNavigation({ isMenuOpen }: BottomTabNavigationProps) {
                 icon={item.icon}
                 label={item.label}
                 isActive={isActive}
+                isMinimized={isMinimized}
               />
             );
           })}
