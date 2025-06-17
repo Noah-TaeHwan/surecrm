@@ -142,14 +142,15 @@ export function BottomTabNavigation({ isMenuOpen }: BottomTabNavigationProps) {
         isMenuOpen ? 'z-30' : 'z-40'
       } lg:hidden px-8 pb-4`}
     >
-      {/* 확장된 백드롭 영역 - 주변 요소까지 고려한 블러 처리 */}
+      {/* 향상된 백드롭 블러 - 자연스러운 페이드 효과 */}
       <div 
-        className="absolute inset-x-4 bottom-4 top-0 pointer-events-none rounded-3xl"
+        className="absolute inset-x-0 bottom-0 pointer-events-none"
         style={{
-          height: '200%',
+          height: '180%',
           backdropFilter: 'blur(40px) saturate(180%)',
-          maskImage: 'linear-gradient(to bottom, black 0% 50%, transparent 50% 100%)',
-          WebkitMaskImage: 'linear-gradient(to bottom, black 0% 50%, transparent 50% 100%)',
+          background: 'linear-gradient(to top, rgba(0,0,0,0.25) 30%, rgba(0,0,0,0.15) 60%, rgba(0,0,0,0.05) 80%, transparent)',
+          maskImage: 'linear-gradient(to top, black 40%, transparent 100%)',
+          WebkitMaskImage: 'linear-gradient(to top, black 40%, transparent 100%)',
         }}
       />
       
@@ -159,32 +160,32 @@ export function BottomTabNavigation({ isMenuOpen }: BottomTabNavigationProps) {
         style={{
           borderTop: '1px solid rgba(255, 255, 255, 0.08)',
           border: '1px solid rgba(255, 255, 255, 0.08)',
-          boxShadow: '0 20px 40px rgba(0, 0, 0, 0.4), 0 8px 16px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+          boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3), 0 8px 16px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
         }}
       >
-        {/* 상단 글로우 라인 - 플로팅 스타일 */}
+        {/* 상단 글로우 라인 - 향상된 플로팅 효과 */}
         <div 
           className="absolute top-0 left-4 right-4 h-px opacity-60 rounded-full"
           style={{
-            background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent)',
+            background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent)',
             filter: 'blur(0.5px)',
           }}
         />
         
-        {/* 상단 하이라이트 - 플로팅 스타일 */}
+        {/* 상단 하이라이트 - 부드러운 그라데이션 */}
         <div 
-          className="absolute top-0 left-0 right-0 h-8 opacity-25 rounded-t-3xl"
+          className="absolute top-0 left-0 right-0 h-10 opacity-30 rounded-t-3xl"
           style={{
-            background: 'linear-gradient(to bottom, rgba(255, 255, 255, 0.2), transparent)',
+            background: 'linear-gradient(to bottom, rgba(255, 255, 255, 0.25), transparent)',
           }}
         />
         
-        {/* 플로팅 효과를 위한 추가 그림자 */}
+        {/* 향상된 플로팅 그림자 효과 */}
         <div 
-          className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-3/4 h-2 opacity-30"
+          className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-4/5 h-3 opacity-40"
           style={{
-            background: 'radial-gradient(ellipse, rgba(0, 0, 0, 0.4), transparent)',
-            filter: 'blur(8px)',
+            background: 'radial-gradient(ellipse, rgba(0, 0, 0, 0.5), transparent 70%)',
+            filter: 'blur(6px)',
           }}
         />
         
