@@ -16,6 +16,12 @@ import {
 } from 'lucide-react';
 import { ClientCard } from './client-card';
 import { PipelineStageFilter } from './pipeline-stage-filter';
+import { QuickEditModal } from './quick-edit-modal';
+import { 
+  triggerHapticFeedback as hapticFeedback, 
+  triggerConditionalHaptic as conditionalHaptic, 
+  isHapticSupported 
+} from '../utils/haptic-feedback';
 import type { PipelineStage, Client } from '~/features/pipeline/types/types';
 
 interface TouchKanbanBoardProps {
@@ -38,7 +44,7 @@ interface TouchKanbanBoardProps {
   onEditOpportunity?: (clientId: string, clientName: string) => void;
 }
 
-// 🎯 터치 제스처 상태 인터페이스
+// 터치 제스처 상태 인터페이스
 interface TouchState {
   startX: number;
   startY: number;
@@ -57,18 +63,6 @@ interface TouchState {
   showDirectionHint: boolean; // 방향 힌트 표시 여부
 }
 
-// 🎯 햅틱 피드백 함수
-const triggerHapticFeedback = (type: 'light' | 'medium' | 'heavy' = 'light') => {
-  if ('vibrate' in navigator) {
-    const patterns = {
-      light: [10],
-      medium: [20],
-      heavy: [30],
-    };
-    navigator.vibrate(patterns[type]);
-  }
-};
-
 export function TouchKanbanBoard({
   stages,
   clients,
@@ -78,7 +72,7 @@ export function TouchKanbanBoard({
   onCreateContract,
   onEditOpportunity,
 }: TouchKanbanBoardProps) {
-  // 🎯 터치 상태 관리
+  // 터치 상태 관리
   const [touchState, setTouchState] = useState<TouchState>({
     startX: 0,
     startY: 0,
@@ -97,29 +91,33 @@ export function TouchKanbanBoard({
     showDirectionHint: false,
   });
 
-  // 🎯 클라이언트 상태 관리 (낙관적 업데이트용)
+  // 클라이언트 상태 관리 (낙관적 업데이트용)
   const [clientsState, setClientsState] = useState(clients);
   
-  // 🎯 각 단계별 접기/펼치기 상태
+  // 각 단계별 접기/펼치기 상태
   const [collapsedStages, setCollapsedStages] = useState<Record<string, boolean>>({});
   
-  // 🎯 모바일 수평 스크롤 상태
+  // 모바일 수평 스크롤 상태
   const [scrollPosition, setScrollPosition] = useState(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // 🎯 PipelineColumn 최적화 상태 추가
+  // PipelineColumn 최적화 상태 추가
   const [verticalScrollPositions, setVerticalScrollPositions] = useState<Record<string, number>>({});
   const [visibleCardRanges, setVisibleCardRanges] = useState<Record<string, { start: number; end: number }>>({});
   const columnRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  // 🎯 PipelineStageFilter 상태 관리
+  // PipelineStageFilter 상태 관리
   const [stageFilterState, setStageFilterState] = useState({
     selectedStages: stages.map(stage => stage.id), // 기본적으로 모든 단계 선택
     viewMode: 'all' as 'all' | 'single' | 'custom',
     currentSingleStage: undefined as string | undefined,
   });
 
-  // 🎯 필터링된 단계들
+  // QuickEditModal 상태 관리
+  const [quickEditMode, setQuickEditMode] = useState(false);
+  const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
+
+  // 필터링된 단계들
   const filteredStages = useMemo(() => {
     if (stageFilterState.viewMode === 'all') {
       return stages;
@@ -130,7 +128,7 @@ export function TouchKanbanBoard({
     }
   }, [stages, stageFilterState]);
 
-  // 🎯 가상화 설정
+  // 가상화 설정
   const CARD_HEIGHT = 120; // 예상 카드 높이
   const VISIBLE_CARDS_BUFFER = 5; // 버퍼 카드 수
   const CONTAINER_HEIGHT = 400; // 컨테이너 높이
@@ -140,7 +138,7 @@ export function TouchKanbanBoard({
     setClientsState(clients);
   }, [clients]);
 
-  // 🎯 단계별 클라이언트 그룹핑
+  // 단계별 클라이언트 그룹핑
   const clientsByStage = clientsState.reduce((acc, client) => {
     if (!acc[client.stageId]) {
       acc[client.stageId] = [];
@@ -149,14 +147,14 @@ export function TouchKanbanBoard({
     return acc;
   }, {} as Record<string, Client[]>);
 
-  // 🎯 터치 시작 핸들러
+  // 터치 시작 핸들러 (햅틱 피드백 통합)
   const handleTouchStart = useCallback((e: React.TouchEvent, clientId: string, stageId: string) => {
     e.preventDefault();
     const touch = e.touches[0];
     const element = e.currentTarget as HTMLElement;
     
-    // 햅틱 피드백
-    triggerHapticFeedback('light');
+    // 햅틱 피드백: 드래그 시작
+    hapticFeedback('DRAG_START');
     
     setTouchState({
       startX: touch.clientX,
@@ -182,14 +180,14 @@ export function TouchKanbanBoard({
     element.style.opacity = '0.9';
   }, []);
 
-  // 🎯 터치 이동 처리 (드래그 인디케이터 강화)
+  // 터치 이동 처리 (드래그 인디케이터 & 햅틱 피드백 강화)
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
     if (!touchState.isDragging) return;
     
     e.preventDefault();
     const touch = e.touches[0];
     
-    // 🎯 드래그 방향 및 강도 계산
+    // 드래그 방향 및 강도 계산
     const deltaX = touch.clientX - touchState.startX;
     const deltaY = touch.clientY - touchState.startY;
     const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
@@ -216,7 +214,7 @@ export function TouchKanbanBoard({
       showDirectionHint,
     }));
     
-    // 🎯 드롭 영역 감지 및 유효성 검사
+    // 드롭 영역 감지 및 유효성 검사
     const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
     const dropZone = elementBelow?.closest('[data-stage-id]') as HTMLElement;
     
@@ -232,9 +230,9 @@ export function TouchKanbanBoard({
           dragPlaceholderStage: stageId,
         }));
         
-        // 유효한 드롭존 진입 시 햅틱 피드백
+        // 햅틱 피드백: 유효한 드롭존 진입
         if (stageId !== touchState.targetStageId) {
-          triggerHapticFeedback('light');
+          hapticFeedback('DRAG_HOVER');
         }
       } else {
         setTouchState(prev => ({ 
@@ -253,13 +251,13 @@ export function TouchKanbanBoard({
       }));
     }
     
-    // 🎯 드래그 강도에 따른 햅틱 피드백
+    // 햅틱 피드백: 드래그 강도에 따른 피드백
     if (dragIntensity > 0.7 && touchState.dragIntensity <= 0.7) {
-      triggerHapticFeedback('medium');
+      hapticFeedback('MEDIUM_TAP');
     }
   }, [touchState.isDragging, touchState.startX, touchState.startY, touchState.sourceStageId, touchState.targetStageId, touchState.dragIntensity]);
 
-  // 🎯 터치 종료 핸들러
+  // 터치 종료 핸들러 (햅틱 피드백 통합)
   const handleTouchEnd = useCallback((e: React.TouchEvent) => {
     if (!touchState.isDragging || !touchState.draggedElement) return;
     
@@ -274,8 +272,8 @@ export function TouchKanbanBoard({
     
     // 드롭 처리
     if (draggedClientId && sourceStageId && targetStageId && sourceStageId !== targetStageId) {
-      // 성공 햅틱 피드백
-      triggerHapticFeedback('medium');
+      // 햅틱 피드백: 드롭 성공
+      hapticFeedback('DRAG_DROP_SUCCESS');
       
       // 상위 컴포넌트에 이동 알림
       onClientMove(draggedClientId, sourceStageId, targetStageId);
@@ -289,8 +287,8 @@ export function TouchKanbanBoard({
         )
       );
     } else {
-      // 실패 햅틱 피드백
-      triggerHapticFeedback('light');
+      // 햅틱 피드백: 드롭 실패
+      hapticFeedback('DRAG_DROP_FAILED');
     }
     
     // 터치 상태 리셋
@@ -313,20 +311,30 @@ export function TouchKanbanBoard({
     });
   }, [touchState, onClientMove]);
 
-  // 🎯 단계별 카드들 토글 함수
+  // 단계별 카드들 토글 함수 (햅틱 피드백 추가)
   const toggleStageCards = (stageId: string) => {
+    // 햅틱 피드백: 필터 변경
+    hapticFeedback('FILTER_CHANGE');
+    
     setCollapsedStages(prev => ({
       ...prev,
       [stageId]: !prev[stageId],
     }));
   };
 
-  // 🎯 수평 스크롤 함수
+  // 수평 스크롤 함수 (햕틱 피드백 추가)
   const scrollLeft = () => {
     if (scrollContainerRef.current) {
       const newPosition = Math.max(0, scrollPosition - 300);
       scrollContainerRef.current.scrollTo({ left: newPosition, behavior: 'smooth' });
       setScrollPosition(newPosition);
+      
+      // 햅틱 피드백: 스크롤 경계
+      if (newPosition === 0) {
+        hapticFeedback('SCROLL_BOUNDARY');
+      } else {
+        hapticFeedback('LIGHT_TAP');
+      }
     }
   };
 
@@ -336,10 +344,17 @@ export function TouchKanbanBoard({
       const newPosition = Math.min(maxScroll, scrollPosition + 300);
       scrollContainerRef.current.scrollTo({ left: newPosition, behavior: 'smooth' });
       setScrollPosition(newPosition);
+      
+      // 햅틱 피드백: 스크롤 경계
+      if (newPosition === maxScroll) {
+        hapticFeedback('SCROLL_BOUNDARY');
+      } else {
+        hapticFeedback('LIGHT_TAP');
+      }
     }
   };
 
-  // 🎯 단계별 표시 텍스트 생성
+  // 단계별 표시 텍스트 생성
   const getStageDisplayText = (stage: PipelineStage) => {
     const stageClients = clientsByStage[stage.id] || [];
     switch (stage.name) {
@@ -358,16 +373,13 @@ export function TouchKanbanBoard({
     }
   };
 
-  // 🎯 PipelineColumn 가상화 함수들 추가
-  
-  // 수직 스크롤 핸들러
+  // PipelineColumn 가상화 함수들
   const handleVerticalScroll = useCallback((stageId: string, scrollTop: number) => {
     setVerticalScrollPositions(prev => ({
       ...prev,
       [stageId]: scrollTop,
     }));
 
-    // 가시 범위 계산
     const visibleStart = Math.max(0, Math.floor(scrollTop / CARD_HEIGHT) - VISIBLE_CARDS_BUFFER);
     const visibleEnd = Math.min(
       clientsByStage[stageId]?.length || 0,
@@ -380,11 +392,9 @@ export function TouchKanbanBoard({
     }));
   }, [clientsByStage, CARD_HEIGHT, VISIBLE_CARDS_BUFFER, CONTAINER_HEIGHT]);
 
-  // 컬럼별 가시 카드 계산
   const getVisibleCards = useCallback((stageId: string, stageClients: Client[]) => {
     const range = visibleCardRanges[stageId];
     if (!range || stageClients.length <= 10) {
-      // 카드가 적으면 가상화 비활성화
       return { visibleCards: stageClients, totalHeight: stageClients.length * CARD_HEIGHT };
     }
 
@@ -393,28 +403,14 @@ export function TouchKanbanBoard({
     return { visibleCards, totalHeight, offsetTop: range.start * CARD_HEIGHT };
   }, [visibleCardRanges, CARD_HEIGHT]);
 
-  // 스크롤 위치 복원
-  const restoreScrollPosition = useCallback((stageId: string) => {
-    const columnElement = columnRefs.current[stageId];
-    const savedPosition = verticalScrollPositions[stageId];
-    
-    if (columnElement && savedPosition) {
-      columnElement.scrollTop = savedPosition;
-    }
-  }, [verticalScrollPositions]);
-
-  // 컬럼 ref 설정
   const setColumnRef = useCallback((stageId: string, element: HTMLDivElement | null) => {
     columnRefs.current[stageId] = element;
     if (element) {
-      // 스크롤 이벤트 리스너 추가
       const handleScroll = () => {
         handleVerticalScroll(stageId, element.scrollTop);
       };
       
       element.addEventListener('scroll', handleScroll, { passive: true });
-      
-      // 초기 가시 범위 설정
       handleVerticalScroll(stageId, 0);
       
       return () => {
@@ -423,33 +419,78 @@ export function TouchKanbanBoard({
     }
   }, [handleVerticalScroll]);
 
+  // QuickEditModal 핸들러들 (햅틱 피드백 통합)
+  const openQuickEditMode = useCallback((clientId: string) => {
+    setSelectedClientId(clientId);
+    setQuickEditMode(true);
+    
+    // 햅틱 피드백: 모달 열기
+    hapticFeedback('MEDIUM_TAP');
+  }, []);
+
+  const closeQuickEditMode = useCallback(() => {
+    setQuickEditMode(false);
+    setSelectedClientId(null);
+    
+    // 햅틱 피드백: 모달 닫기
+    hapticFeedback('LIGHT_TAP');
+  }, []);
+
+  const handleQuickEditSave = useCallback(async (clientId: string, updates: Partial<Client>) => {
+    try {
+      setClientsState(prev => 
+        prev.map(client => 
+          client.id === clientId 
+            ? { ...client, ...updates }
+            : client
+        )
+      );
+
+      console.log('빠른 편집 저장:', clientId, updates);
+      
+      // 햅틱 피드백: 저장 성공
+      hapticFeedback('SUCCESS');
+    } catch (error) {
+      console.error('빠른 편집 저장 실패:', error);
+      
+      // 햅틱 피드백: 저장 실패
+      hapticFeedback('ERROR');
+    }
+  }, []);
+
   return (
     <div className="w-full">
-      {/* 🎯 PipelineStageFilter 통합 */}
+      {/* PipelineStageFilter 통합 */}
       <div className="mb-4">
         <PipelineStageFilter
           stages={stages}
           clients={clientsState}
           selectedStages={stageFilterState.selectedStages}
-          onStagesChange={(stageIds) => 
-            setStageFilterState(prev => ({ ...prev, selectedStages: stageIds, viewMode: 'custom' }))
-          }
+          onStagesChange={(stageIds) => {
+            // 햅틱 피드백: 스테이지 필터 변경
+            hapticFeedback('STAGE_CHANGE');
+            setStageFilterState(prev => ({ ...prev, selectedStages: stageIds, viewMode: 'custom' }));
+          }}
           viewMode={stageFilterState.viewMode}
-          onViewModeChange={(mode) => 
-            setStageFilterState(prev => ({ ...prev, viewMode: mode }))
-          }
+          onViewModeChange={(mode) => {
+            // 햅틱 피드백: 뷰 모드 변경
+            hapticFeedback('FILTER_CHANGE');
+            setStageFilterState(prev => ({ ...prev, viewMode: mode }));
+          }}
           currentSingleStage={stageFilterState.currentSingleStage}
-          onSingleStageChange={(stageId) => 
-            setStageFilterState(prev => ({ ...prev, currentSingleStage: stageId }))
-          }
-          isMobile={true} // 모바일 우선 디자인
+          onSingleStageChange={(stageId) => {
+            // 햅틱 피드백: 단일 스테이지 변경
+            hapticFeedback('STAGE_CHANGE');
+            setStageFilterState(prev => ({ ...prev, currentSingleStage: stageId }));
+          }}
+          isMobile={true}
         />
       </div>
 
-      {/* 🎯 드래그 인디케이터 오버레이 */}
+      {/* 드래그 인디케이터 오버레이 */}
       {touchState.isDragging && (
         <div className="fixed inset-0 z-50 pointer-events-none">
-          {/* 🎯 고스트 카드 */}
+          {/* 고스트 카드 */}
           <div
             className="absolute transition-all duration-100 ease-out"
             style={{
@@ -476,7 +517,7 @@ export function TouchKanbanBoard({
             </div>
           </div>
 
-          {/* 🎯 방향 힌트 화살표 */}
+          {/* 방향 힌트 화살표 */}
           {touchState.showDirectionHint && touchState.dragDirection && (
             <div
               className="absolute animate-bounce"
@@ -495,7 +536,7 @@ export function TouchKanbanBoard({
             </div>
           )}
 
-          {/* 🎯 드래그 경로 트레일 효과 */}
+          {/* 드래그 트레일 효과 */}
           <div
             className="absolute w-1 bg-gradient-to-b from-primary via-primary/50 to-transparent rounded-full transition-all duration-300"
             style={{
@@ -518,7 +559,7 @@ export function TouchKanbanBoard({
         </div>
       )}
 
-      {/* 🎯 모바일 수평 스크롤 컨트롤 */}
+      {/* 모바일 수평 스크롤 컨트롤 */}
       <div className="flex items-center justify-between mb-4 md:hidden">
         <Button
           variant="outline"
@@ -547,7 +588,7 @@ export function TouchKanbanBoard({
         </Button>
       </div>
 
-      {/* 🎯 터치 최적화 칸반 보드 */}
+      {/* 터치 최적화 칸반 보드 */}
       <div 
         ref={scrollContainerRef}
         className="w-full overflow-x-auto"
@@ -558,7 +599,6 @@ export function TouchKanbanBoard({
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-6">
             {filteredStages.map(stage => {
               const isTargetStage = touchState.targetStageId === stage.id;
-              const isDragSource = touchState.sourceStageId === stage.id;
               const stageClients = clientsByStage[stage.id] || [];
               const isCollapsed = collapsedStages[stage.id];
 
@@ -580,7 +620,6 @@ export function TouchKanbanBoard({
                         </p>
                       </div>
                       
-                      {/* 접기/펼치기 버튼 */}
                       <Button
                         variant="ghost"
                         size="sm"
@@ -595,7 +634,6 @@ export function TouchKanbanBoard({
                       </Button>
                     </div>
 
-                    {/* 통계 정보 */}
                     <div className="flex items-center gap-4 mt-3">
                       <div className="flex items-center gap-1">
                         <Users className="h-3 w-3 text-blue-500" />
@@ -613,7 +651,6 @@ export function TouchKanbanBoard({
                       )}
                     </div>
 
-                    {/* 고객 추가 버튼 */}
                     {onAddClientToStage && (
                       <Button
                         variant="outline"
@@ -634,11 +671,8 @@ export function TouchKanbanBoard({
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
             {filteredStages.map(stage => {
               const isTargetStage = touchState.targetStageId === stage.id;
-              const isDragSource = touchState.sourceStageId === stage.id;
               const stageClients = clientsByStage[stage.id] || [];
               const isCollapsed = collapsedStages[stage.id];
-
-              // 🎯 PipelineColumn 최적화: 가시 카드 계산
               const { visibleCards, totalHeight, offsetTop = 0 } = getVisibleCards(stage.id, stageClients);
 
               return (
@@ -649,7 +683,6 @@ export function TouchKanbanBoard({
                     isTargetStage ? 'transform scale-[1.02]' : ''
                   }`}
                 >
-                  {/* 🎯 PipelineColumn 최적화: 수직 스크롤 컨테이너 */}
                   <div
                     ref={(el) => setColumnRef(stage.id, el)}
                     className={`relative overflow-y-auto p-2 rounded-lg transition-all duration-200 ${
@@ -657,7 +690,6 @@ export function TouchKanbanBoard({
                         ? 'bg-primary/5 border-2 border-dashed border-primary'
                         : 'bg-transparent'
                     } ${
-                      // 🎯 드래그 인디케이터: 드롭존 하이라이트
                       touchState.isDragging && touchState.isValidDropZone && isTargetStage
                         ? 'ring-2 ring-primary/50 ring-offset-2 bg-primary/10'
                         : ''
@@ -668,9 +700,7 @@ export function TouchKanbanBoard({
                     }}
                   >
                     {isCollapsed ? (
-                      /* 접힌 상태 */
                       <div className={`flex flex-col items-center justify-center h-32 bg-muted/20 border border-dashed border-border rounded-lg ${
-                        // 🎯 드래그 인디케이터: 접힌 상태에서도 드롭존 표시
                         touchState.isDragging && isTargetStage && touchState.isValidDropZone
                           ? 'border-primary bg-primary/5 scale-105'
                           : ''
@@ -685,7 +715,6 @@ export function TouchKanbanBoard({
                           카드가 숨겨짐
                         </p>
 
-                        {/* 접힌 상태에서도 드롭 지원 */}
                         {isTargetStage && touchState.isDragging && touchState.isValidDropZone && (
                           <div className="mt-2 text-xs text-primary font-medium animate-pulse">
                             ✓ {stage.name}로 이동
@@ -693,7 +722,6 @@ export function TouchKanbanBoard({
                         )}
                       </div>
                     ) : (
-                      /* 🎯 PipelineColumn 최적화: 가상 스크롤링 렌더링 */
                       <div
                         style={{
                           height: `${totalHeight}px`,
@@ -702,7 +730,6 @@ export function TouchKanbanBoard({
                       >
                         {stageClients.length > 0 ? (
                           <>
-                            {/* 🎯 가상화된 카드 렌더링 */}
                             <div
                               style={{
                                 transform: `translateY(${offsetTop}px)`,
@@ -713,9 +740,8 @@ export function TouchKanbanBoard({
                               }}
                             >
                               <div className="space-y-3">
-                                {visibleCards.map((client, index) => (
+                                {visibleCards.map((client) => (
                                   <div key={client.id} className="relative">
-                                    {/* 🎯 드래그 플레이스홀더 */}
                                     {touchState.isDragging && 
                                      client.id === touchState.draggedClientId && 
                                      stage.id === touchState.sourceStageId && (
@@ -727,7 +753,6 @@ export function TouchKanbanBoard({
                                       </div>
                                     )}
 
-                                    {/* 🎯 실제 카드 (드래그 중이 아닐 때만 표시) */}
                                     {!(touchState.isDragging && client.id === touchState.draggedClientId) && (
                                       <div
                                         className={`transition-all duration-200 cursor-grab active:cursor-grabbing ${
@@ -737,7 +762,7 @@ export function TouchKanbanBoard({
                                         }`}
                                         style={{
                                           minHeight: `${CARD_HEIGHT}px`,
-                                          touchAction: 'none', // 터치 이벤트 최적화
+                                          touchAction: 'none',
                                         }}
                                         onTouchStart={e => handleTouchStart(e, client.id, stage.id)}
                                         onTouchMove={handleTouchMove}
@@ -763,12 +788,10 @@ export function TouchKanbanBoard({
                                       </div>
                                     )}
 
-                                    {/* 🎯 드롭 프리뷰 (다른 스테이지에서 드롭될 때) */}
                                     {touchState.isDragging && 
                                      touchState.draggedClientId &&
                                      stage.id === touchState.dragPlaceholderStage &&
-                                     stage.id !== touchState.sourceStageId &&
-                                     index === visibleCards.length - 1 && (
+                                     stage.id !== touchState.sourceStageId && (
                                       <div className="mt-3 p-4 border-2 border-dashed border-primary/50 rounded-lg bg-primary/5 animate-pulse">
                                         <div className="flex items-center justify-center gap-2 text-primary">
                                           <Users className="h-4 w-4" />
@@ -781,7 +804,6 @@ export function TouchKanbanBoard({
                               </div>
                             </div>
 
-                            {/* 🎯 스크롤 인디케이터 (대용량 카드용) */}
                             {stageClients.length > 10 && (
                               <div className="absolute top-2 right-2 bg-primary/10 text-primary text-xs px-2 py-1 rounded-full">
                                 {Math.floor((verticalScrollPositions[stage.id] || 0) / CARD_HEIGHT) + 1} / {stageClients.length}
@@ -789,9 +811,7 @@ export function TouchKanbanBoard({
                             )}
                           </>
                         ) : (
-                          /* 빈 상태 */
                           <div className={`flex flex-col items-center justify-center h-32 bg-muted/10 border border-dashed border-border rounded-lg ${
-                            // 🎯 드래그 인디케이터: 빈 컬럼에 드롭 가능 표시
                             touchState.isDragging && isTargetStage && touchState.isValidDropZone
                               ? 'border-primary bg-primary/5 scale-105'
                               : ''
@@ -817,6 +837,17 @@ export function TouchKanbanBoard({
           </div>
         </div>
       </div>
+
+      {/* QuickEditModal */}
+      {quickEditMode && selectedClientId && (
+        <QuickEditModal
+          isOpen={quickEditMode}
+          client={clientsState.find(client => client.id === selectedClientId) || null}
+          onSave={handleQuickEditSave}
+          onClose={closeQuickEditMode}
+          isMobile={true}
+        />
+      )}
     </div>
   );
 }
