@@ -1,9 +1,10 @@
 {
   "include": [
     "**/*",
-    "**/.server/**/*",
     "**/.client/**/*",
-    ".react-router/types/**/*"
+    "**/.server/**/*",
+    ".react-router/types/**/*",
+    ".next/types/**/*.ts"
   ],
   "exclude": [
     "**/*-backup-*.ts",
@@ -12,22 +13,42 @@
     "supabase/migrations/*-backup-*"
   ],
   "compilerOptions": {
-    "lib": ["DOM", "DOM.Iterable", "ES2022"],
-    "types": ["node", "vite/client", "vitest/globals"],
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ES2022"
+    ],
+    "types": [
+      "node",
+      "vite/client",
+      "vitest/globals"
+    ],
     "target": "ES2022",
-    "module": "ES2022",
+    "module": "esnext",
     "moduleResolution": "bundler",
-    "jsx": "react-jsx",
-    "rootDirs": [".", "./.react-router/types"],
+    "jsx": "preserve",
+    "rootDirs": [
+      ".",
+      "./.react-router/types"
+    ],
     "baseUrl": ".",
     "paths": {
-      "~/*": ["./app/*"]
+      "~/*": [
+        "./app/*"
+      ]
     },
     "esModuleInterop": true,
     "verbatimModuleSyntax": true,
     "noEmit": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "strict": true
+    "strict": true,
+    "allowJs": true,
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   }
 }

@@ -18,6 +18,8 @@ import { ClientStatsSection } from '../components/client-stats-section';
 import { ClientFiltersSection } from '../components/client-filters-section';
 import { ClientListSection } from '../components/client-list-section';
 import { ClientsPageModals } from '../components/clients-page-modals';
+import { MobileClientSearch } from '../components/mobile-client-search';
+import { useDeviceType } from '~/common/hooks';
 
 // 🎯 보험설계사 특화 고객 관리 페이지
 // 실제 스키마 타입 사용으로 데이터베이스 연동 준비 완료
@@ -464,6 +466,7 @@ export async function action({ request }: Route.ActionArgs) {
 export default function ClientsPage({ loaderData }: any) {
   const fetcher = useFetcher();
   const navigate = useNavigate();
+  const deviceType = useDeviceType();
 
   // 🎯 상태 관리
   const [searchQuery, setSearchQuery] = useState('');
@@ -958,22 +961,28 @@ export default function ClientsPage({ loaderData }: any) {
           onAddClient={handleAddClient}
         />
 
-        {/* 🎯 스마트 검색 및 필터 */}
-        <ClientFiltersSection
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          filterImportance={filterImportance}
-          setFilterImportance={setFilterImportance}
-          filterStage={filterStage}
-          setFilterStage={setFilterStage}
-          filterReferralStatus={filterReferralStatus}
-          setFilterReferralStatus={setFilterReferralStatus}
-          viewMode={viewMode}
-          setViewMode={setViewMode}
-          showFilters={showFilters}
-          setShowFilters={setShowFilters}
-          filteredClientsCount={filteredClients.length}
-        />
+        {deviceType === 'mobile' ? (
+          <MobileClientSearch
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+          />
+        ) : (
+          <ClientFiltersSection
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            filterImportance={filterImportance}
+            setFilterImportance={setFilterImportance}
+            filterStage={filterStage}
+            setFilterStage={setFilterStage}
+            filterReferralStatus={filterReferralStatus}
+            setFilterReferralStatus={setFilterReferralStatus}
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+            showFilters={showFilters}
+            setShowFilters={setShowFilters}
+            filteredClientsCount={filteredClients.length}
+          />
+        )}
 
         {/* 🎯 고객 목록 */}
         <ClientListSection

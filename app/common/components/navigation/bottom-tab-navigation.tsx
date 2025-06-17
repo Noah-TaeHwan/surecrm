@@ -140,7 +140,7 @@ export function BottomTabNavigation({ isMenuOpen }: BottomTabNavigationProps) {
     <nav 
       className={`fixed bottom-0 left-0 right-0 ${
         isMenuOpen ? 'z-30' : 'z-40'
-      } lg:hidden px-4 pb-4`}
+      } lg:hidden px-8 pb-4`}
     >
       {/* 확장된 백드롭 영역 - 주변 요소까지 고려한 블러 처리 */}
       <div 
@@ -189,7 +189,7 @@ export function BottomTabNavigation({ isMenuOpen }: BottomTabNavigationProps) {
         />
         
         {/* 네비게이션 버튼들 */}
-        <div className="relative flex items-center justify-center gap-2 px-4 py-0 min-h-[64px] pb-safe">
+        <div className="relative flex items-center justify-center gap-2 px-2 py-0 min-h-[64px] pb-safe">
           {navigationItems.map((item, index) => {
             const isActive = index === activeIndex;
             
