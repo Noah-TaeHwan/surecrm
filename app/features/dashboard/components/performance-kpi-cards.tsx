@@ -182,17 +182,17 @@ export function PerformanceKPICards({
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-6">
         {Array.from({ length: 4 }).map((_, i) => (
           <Card key={i} className="animate-pulse">
-            <CardContent className="p-4 md:p-6">
+            <CardContent className="p-3 md:p-4">
               <div className="flex items-center justify-between">
                 <div className="space-y-2">
-                  <div className="h-4 bg-muted rounded w-20"></div>
-                  <div className="h-8 bg-muted rounded w-16"></div>
-                  <div className="h-3 bg-muted rounded w-24"></div>
+                  <div className="h-3 md:h-4 bg-muted rounded w-16 md:w-20"></div>
+                  <div className="h-6 md:h-8 bg-muted rounded w-12 md:w-16"></div>
+                  <div className="h-2 md:h-3 bg-muted rounded w-20 md:w-24"></div>
                 </div>
-                <div className="h-10 w-10 bg-muted rounded-lg"></div>
+                <div className="h-8 w-8 md:h-10 md:w-10 bg-muted rounded-lg"></div>
               </div>
             </CardContent>
           </Card>
@@ -203,7 +203,7 @@ export function PerformanceKPICards({
 
   return (
     <TooltipProvider>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-6">
         {kpiItems.map((item, index) => {
           const changeIndicator = getChangeIndicator(item.change);
           const IconComponent = item.icon;
@@ -211,9 +211,14 @@ export function PerformanceKPICards({
           return (
             <Card
               key={index}
-              className="hover:shadow-md transition-all duration-200 border-border/50 hover:border-border cursor-pointer"
+              className="hover:shadow-md transition-all duration-200 border-border/50 hover:border-border cursor-pointer touch-manipulation"
               onClick={() => {
-                // 🎯 극한 분석: KPI 카드 클릭 이벤트 추적
+                // 🎯 햅틱 피드백 추가 (모바일 최적화)
+                if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                  navigator.vibrate(50);
+                }
+                
+                // 극한 분석: KPI 카드 클릭 이벤트 추적
                 InsuranceAgentEvents.dashboardCardClick(item.title, {
                   value: item.value,
                   change: item.change,
@@ -221,11 +226,11 @@ export function PerformanceKPICards({
                 });
               }}
             >
-              <CardContent className="p-4 md:p-6">
+              <CardContent className="p-3 md:p-4">
                 <div className="flex items-center justify-between">
-                  <div className="space-y-2">
+                  <div className="space-y-1 flex-1 min-w-0">
                     <div className="flex items-center gap-1">
-                      <p className="text-sm font-medium text-muted-foreground">
+                      <p className="text-xs md:text-sm font-medium text-muted-foreground truncate">
                         {item.title}
                       </p>
                       {(item.title === '전환율' ||
@@ -234,7 +239,7 @@ export function PerformanceKPICards({
                         item.title === '소개 네트워크') && (
                         <Tooltip>
                           <TooltipTrigger>
-                            <QuestionMarkCircledIcon className="h-3 w-3 text-muted-foreground hover:text-foreground transition-colors" />
+                            <QuestionMarkCircledIcon className="h-3 w-3 text-muted-foreground hover:text-foreground transition-colors flex-shrink-0" />
                           </TooltipTrigger>
                           <TooltipContent side="top" className="max-w-xs">
                             {item.title === '전환율' && (
@@ -273,8 +278,8 @@ export function PerformanceKPICards({
                         </Tooltip>
                       )}
                     </div>
-                    <div className="flex items-baseline gap-2">
-                      <p className="text-2xl font-bold text-foreground">
+                    <div className="flex items-baseline gap-1 md:gap-2">
+                      <p className="text-lg md:text-2xl font-bold text-foreground truncate">
                         {typeof item.value === 'number'
                           ? item.value.toLocaleString()
                           : item.value}
@@ -282,13 +287,13 @@ export function PerformanceKPICards({
                       {item.change !== 0 && (
                         <div
                           className={cn(
-                            'flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs font-medium',
+                            'flex items-center gap-0.5 md:gap-1 px-1 md:px-1.5 py-0.5 rounded-full text-xs font-medium flex-shrink-0',
                             changeIndicator.bgColor
                           )}
                         >
                           {changeIndicator.icon && (
                             <changeIndicator.icon
-                              className={cn('h-3 w-3', changeIndicator.color)}
+                              className={cn('h-2.5 w-2.5 md:h-3 md:w-3', changeIndicator.color)}
                             />
                           )}
                           <span className={changeIndicator.color}>
@@ -305,30 +310,30 @@ export function PerformanceKPICards({
                         </div>
                       )}
                     </div>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-muted-foreground truncate">
                       {item.description}
                     </p>
                   </div>
                   <div
                     className={cn(
-                      'flex items-center justify-center h-12 w-12 rounded-lg',
+                      'flex items-center justify-center h-10 w-10 md:h-12 md:w-12 rounded-lg flex-shrink-0 ml-2',
                       getBackgroundColorClass(item.color)
                     )}
                   >
                     <IconComponent
-                      className={cn('h-6 w-6', getIconColorClass(item.color))}
+                      className={cn('h-5 w-5 md:h-6 md:w-6', getIconColorClass(item.color))}
                     />
                   </div>
                 </div>
 
-                {/* 추가 세부 정보 */}
+                {/* 추가 세부 정보 - 모바일에서는 더 콤팩트하게 */}
                 {item.title === '총 고객 수' && data.averageClientValue > 0 && (
-                  <div className="mt-4 p-3 bg-muted/20 rounded-lg">
+                  <div className="mt-2 p-2 md:p-3 bg-muted/20 rounded-lg">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-muted-foreground">
+                      <span className="text-muted-foreground truncate">
                         평균 고객 가치
                       </span>
-                      <span className="font-medium text-foreground">
+                      <span className="font-medium text-foreground flex-shrink-0">
                         {formatCurrencyTable(data.averageClientValue)}
                       </span>
                     </div>

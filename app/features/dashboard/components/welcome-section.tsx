@@ -81,35 +81,14 @@ export function WelcomeSection({ userName, todayStats }: WelcomeSectionProps) {
             </div>
           </div>
 
-          <div className="flex items-center justify-between gap-4 sm:gap-6 w-full sm:w-auto mt-4 sm:mt-0">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-primary mb-0.5">
-                {todayStats.totalClients}
-              </div>
-              <div className="text-xs text-muted-foreground">총 고객</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-foreground mb-0.5">
-                {todayStats.totalReferrals}
-              </div>
-              <div className="text-xs text-muted-foreground">소개 건수</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-foreground mb-0.5">
-                {todayStats.monthlyNewClients}
-              </div>
-              <div className="text-xs text-muted-foreground">
-                이번 달 신규 고객
-              </div>
-            </div>
-          </div>
+          
         </div>
 
         {(todayStats.totalClients > 0 ||
           todayStats.totalReferrals > 0 ||
           todayStats.monthlyNewClients > 0) && (
           <div className="mt-4 pt-3 border-t border-border/30">
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 ">
               {todayStats.totalClients > 0 && (
                 <Badge
                   variant="secondary"

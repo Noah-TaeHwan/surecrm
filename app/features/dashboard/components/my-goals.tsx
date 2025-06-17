@@ -154,7 +154,7 @@ export function MyGoals({
     <>
       <Card className="border-border/50">
         <CardHeader className="px-4 sm:px-6 pb-3">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <CardTitle className="text-base font-medium flex items-center gap-2">
               <div className="p-1.5 bg-primary/10 rounded-lg">
                 <TargetIcon className="h-4 w-4 text-primary" />
@@ -256,7 +256,7 @@ export function MyGoals({
                           : 'border-border/30 hover:bg-accent/20'
                       }`}
                     >
-                      <div className="flex items-center justify-between mb-2">
+                      <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between mb-2">
                         <div className="flex items-center gap-2">
                           <span className="text-xl">
                             {getGoalIcon(goal.goalType)}
