@@ -633,9 +633,12 @@ export function MeetingDetailModal({
                         {meeting.client.name || '고객명 없음'}
                       </span>
                       {meeting.client.phone && (
-                        <span className="text-sm text-muted-foreground">
+                        <a 
+                          href={`tel:${meeting.client.phone}`}
+                          className="text-sm text-primary hover:underline"
+                        >
                           {meeting.client.phone}
-                        </span>
+                        </a>
                       )}
                     </div>
                   </>

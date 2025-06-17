@@ -366,7 +366,12 @@ export default function TestMobileSheetTable() {
                       {client.name}
                     </div>
                     <div className="text-sm text-gray-500 sm:hidden">
-                      {client.email}
+                      <a 
+                        href={`mailto:${client.email}`}
+                        className="text-primary hover:underline"
+                      >
+                        {client.email}
+                      </a>
                     </div>
                   </ResponsiveTableCell>
 
@@ -374,8 +379,22 @@ export default function TestMobileSheetTable() {
                     mobileLabel="연락처"
                     className="hidden sm:table-cell"
                   >
-                    <div>{client.phone}</div>
-                    <div className="text-sm text-gray-500">{client.email}</div>
+                    <div>
+                      <a 
+                        href={`tel:${client.phone}`}
+                        className="text-primary hover:underline"
+                      >
+                        {client.phone}
+                      </a>
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      <a 
+                        href={`mailto:${client.email}`}
+                        className="text-primary hover:underline"
+                      >
+                        {client.email}
+                      </a>
+                    </div>
                   </ResponsiveTableCell>
 
                   <ResponsiveTableCell mobileLabel="상태">

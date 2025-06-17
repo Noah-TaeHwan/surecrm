@@ -373,7 +373,12 @@ export function ClientDetailHeader({
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
                     <MobileIcon className="h-4 w-4 text-muted-foreground" />
-                    <span>{client.phone}</span>
+                    <a 
+                      href={`tel:${client.phone}`}
+                      className="text-primary hover:underline"
+                    >
+                      {client.phone}
+                    </a>
                     {client.telecomProvider && (
                       <Badge variant="outline" className="text-xs">
                         {client.telecomProvider}
@@ -383,7 +388,12 @@ export function ClientDetailHeader({
                   {client.email && (
                     <div className="flex items-center gap-2">
                       <EnvelopeClosedIcon className="h-4 w-4 text-muted-foreground" />
-                      <span>{client.email}</span>
+                      <a 
+                        href={`mailto:${client.email}`}
+                        className="text-primary hover:underline"
+                      >
+                        {client.email}
+                      </a>
                     </div>
                   )}
                   {client.address && (

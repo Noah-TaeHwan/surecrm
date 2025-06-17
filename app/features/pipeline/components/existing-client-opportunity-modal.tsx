@@ -51,7 +51,7 @@ interface ExistingClientOpportunityModalProps {
   }) => Promise<void>;
   clients: { id: string; name: string; phone: string; currentStage?: string }[];
   isLoading?: boolean;
-  preSelectedClientId?: string; // 🎯 특정 고객 자동 선택
+  preSelectedClientId?: string; // 특정 고객 자동 선택
 }
 
 // 보험 상품 타입 정의 (새 영업 기회 모달과 동일)
@@ -99,7 +99,7 @@ export function ExistingClientOpportunityModal({
   onConfirm,
   clients,
   isLoading = false,
-  preSelectedClientId, // 🎯 특정 고객 자동 선택
+  preSelectedClientId, // 특정 고객 자동 선택
 }: ExistingClientOpportunityModalProps) {
   const [selectedClientId, setSelectedClientId] = useState<string>(
     preSelectedClientId || ''
@@ -109,9 +109,9 @@ export function ExistingClientOpportunityModal({
   const [notes, setNotes] = useState('');
   const [step, setStep] = useState<
     'selectClient' | 'selectProduct' | 'details'
-  >('selectClient'); // 🎯 항상 1단계부터 시작 (미리 선택된 고객이 있으면 1단계에서 선택된 상태로 표시)
+  >('selectClient'); // 항상 1단계부터 시작 (미리 선택된 고객이 있으면 1단계에서 선택된 상태로 표시)
 
-  // 🆕 새로운 상품 정보 상태들
+  // 새로운 상품 정보 상태들
   const [productName, setProductName] = useState('');
   const [insuranceCompany, setInsuranceCompany] = useState('');
   const [monthlyPremium, setMonthlyPremium] = useState('');
@@ -120,14 +120,14 @@ export function ExistingClientOpportunityModal({
   // 선택된 고객 카드에 대한 ref
   const selectedClientRef = useRef<HTMLDivElement>(null);
 
-  // 🎯 preSelectedClientId가 변경될 때마다 selectedClientId 동기화
+  // preSelectedClientId가 변경될 때마다 selectedClientId 동기화
   useEffect(() => {
     if (preSelectedClientId) {
       setSelectedClientId(preSelectedClientId);
     }
   }, [preSelectedClientId, isOpen]); // isOpen도 의존성에 추가하여 모달이 열릴 때마다 동기화
 
-  // 🎯 선택된 고객 카드로 자동 스크롤
+  // 선택된 고객 카드로 자동 스크롤
   useEffect(() => {
     if (isOpen && preSelectedClientId && selectedClientRef.current) {
       // 약간의 지연을 두어 DOM 렌더링 완료 후 스크롤
@@ -194,7 +194,7 @@ export function ExistingClientOpportunityModal({
     setInsuranceCompany('');
     setMonthlyPremium('');
     setExpectedCommission('');
-    setStep('selectClient'); // 🎯 항상 1단계로 복원
+    setStep('selectClient'); // 항상 1단계로 복원
     onClose();
   };
 
@@ -206,7 +206,7 @@ export function ExistingClientOpportunityModal({
         client.phone.includes(clientSearchQuery)
     )
     .sort((a, b) => {
-      // 🎯 파이프라인에서 선택된 고객을 맨 위로 정렬
+      // 파이프라인에서 선택된 고객을 맨 위로 정렬
       if (preSelectedClientId) {
         if (a.id === preSelectedClientId) return -1; // a가 선택된 고객이면 맨 위로
         if (b.id === preSelectedClientId) return 1; // b가 선택된 고객이면 맨 위로
@@ -241,7 +241,7 @@ export function ExistingClientOpportunityModal({
               {preSelectedClientId ? (
                 <div className="p-3  border rounded-lg">
                   <p className="text-sm text-muted-foreground font-medium">
-                    🎯 파이프라인에서 선택된 고객이 있습니다.
+                    파이프라인에서 선택된 고객이 있습니다.
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
                     주황색으로 표시된 고객을 선택하여 영업 기회를 추가하세요.
@@ -277,7 +277,7 @@ export function ExistingClientOpportunityModal({
                       client.id === preSelectedClientId
                         ? selectedClientRef
                         : null
-                    } // 🎯 선택된 고객에게 ref 추가
+                    } // 선택된 고객에게 ref 추가
                     className={`p-2 m-2 cursor-pointer transition-all duration-200 hover:shadow-md ${
                       selectedClientId === client.id
                         ? 'ring-2 ring-primary border-primary bg-primary/5'
@@ -310,12 +310,17 @@ export function ExistingClientOpportunityModal({
                               <h4 className="font-medium">{client.name}</h4>
                               {client.id === preSelectedClientId && (
                                 <Badge className="bg-primary/10 text-primary border-primary text-xs">
-                                  🎯 파이프라인에서 선택됨
+                                  파이프라인에서 선택됨
                                 </Badge>
                               )}
                             </div>
                             <p className="text-sm text-muted-foreground">
-                              {client.phone}
+                              <a 
+                                href={`tel:${client.phone}`}
+                                className="text-primary hover:underline"
+                              >
+                                {client.phone}
+                              </a>
                             </p>
                             {client.currentStage && (
                               <Badge variant="outline" className="text-sm mt-1">
@@ -431,7 +436,7 @@ export function ExistingClientOpportunityModal({
             )}
           </div>
         ) : (
-          // 3단계: 상세 정보 입력 (🆕 상품 정보 필드 추가)
+          // 3단계: 상세 정보 입력 ( 상품 정보 필드 추가)
           <div className="space-y-6 py-4">
             <div className="space-y-3">
               <h3 className="text-lg font-semibold">상품 정보 및 영업 메모</h3>
@@ -448,7 +453,7 @@ export function ExistingClientOpportunityModal({
             </div>
 
             <div className="space-y-6">
-              {/* 🆕 상품 정보 섹션 */}
+              {/* 상품 정보 섹션 */}
               <div className="space-y-4">
                 <h4 className="text-md font-medium flex items-center gap-2">
                   <Building2 className="h-4 w-4 text-primary" />
@@ -544,7 +549,7 @@ export function ExistingClientOpportunityModal({
                     </h4>
                     <div className="text-sm text-emerald-700 dark:text-emerald-300 space-y-1">
                       <p>
-                        ✓ 첫 상담 → 니즈 분석 → 상품 설명 → 계약 검토 → 계약
+                        첫 상담 → 니즈 분석 → 상품 설명 → 계약 검토 → 계약
                         완료
                       </p>
                       <p className="text-xs">

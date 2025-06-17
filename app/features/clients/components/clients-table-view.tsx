@@ -269,11 +269,21 @@ export function ClientsTableView({
                     <TableCell>
                       <div className="text-sm">
                         <div>
-                          {maskSensitiveData(client.phone, privacyLevel)}
+                          <a 
+                            href={`tel:${client.phone}`}
+                            className="text-primary hover:underline"
+                          >
+                            {maskSensitiveData(client.phone, privacyLevel)}
+                          </a>
                         </div>
                         {client.email && (
                           <div className="text-muted-foreground">
-                            {maskSensitiveData(client.email, privacyLevel)}
+                            <a 
+                              href={`mailto:${client.email}`}
+                              className="text-primary hover:underline"
+                            >
+                              {maskSensitiveData(client.email, privacyLevel)}
+                            </a>
                           </div>
                         )}
                       </div>
