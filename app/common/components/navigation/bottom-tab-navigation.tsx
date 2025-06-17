@@ -143,8 +143,10 @@ function LiquidGlassButton({
       {/* 리퀴드글래스 액티브 백그라운드 - 플로팅 스타일 */}
       {isActive && (
         <motion.div
-          className={`absolute left-0 right-0 rounded-2xl liquid-glass-button transition-all duration-300 ${
-            isMinimized ? 'top-1 bottom-1' : 'top-1.5 bottom-1.5'
+          className={`absolute transition-all duration-300 liquid-glass-button ${
+            isMinimized 
+              ? 'top-1 bottom-1 left-1/2 transform -translate-x-1/2 w-10 h-10 rounded-full' 
+              : 'left-0 right-0 top-1.5 bottom-1.5 rounded-2xl'
           }`}
           layoutId="liquidGlassIndicator"
           transition={{
@@ -159,7 +161,9 @@ function LiquidGlassButton({
         >
           {/* 리퀴드 하이라이트 효과 */}
           <div 
-            className="absolute top-0 left-0 right-0 h-1/2 rounded-t-2xl opacity-50 liquid-glass-highlight"
+            className={`absolute top-0 left-0 right-0 h-1/2 opacity-50 liquid-glass-highlight ${
+              isMinimized ? 'rounded-t-full' : 'rounded-t-2xl'
+            }`}
           />
           {/* 바텀 글로우 제거 - 보더 바텀 효과 없애기 */}
         </motion.div>
@@ -208,7 +212,9 @@ export function BottomTabNavigation({ isMenuOpen }: BottomTabNavigationProps) {
     <nav 
       className={`fixed bottom-0 left-0 right-0 ${
         isMenuOpen ? 'z-30' : 'z-40'
-      } lg:hidden px-8 pb-4`}
+      } lg:hidden transition-all duration-500 ease-out ${
+        isMinimized ? 'px-16 pb-4' : 'px-8 pb-4'
+      }`}
     >
       {/* 향상된 백드롭 블러 - 자연스러운 페이드 효과 */}
       <div 
@@ -258,8 +264,8 @@ export function BottomTabNavigation({ isMenuOpen }: BottomTabNavigationProps) {
         />
         
         {/* 네비게이션 버튼들 */}
-        <div className={`relative flex items-center justify-center gap-2 px-2 transition-all duration-300 pb-safe ${
-          isMinimized ? 'min-h-[48px]' : 'py-0 min-h-[64px]'
+        <div className={`relative flex items-center justify-center gap-2 px-2 transition-all duration-500 ease-out pb-safe ${
+          isMinimized ? 'min-h-[48px] px-4' : 'py-0 min-h-[64px]'
         }`}>
           {navigationItems.map((item, index) => {
             const isActive = activeIndex !== -1 && index === activeIndex;
