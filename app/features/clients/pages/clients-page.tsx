@@ -18,8 +18,8 @@ import { ClientStatsSection } from '../components/client-stats-section';
 import { ClientFiltersSection } from '../components/client-filters-section';
 import { ClientListSection } from '../components/client-list-section';
 import { ClientsPageModals } from '../components/clients-page-modals';
-import { MobileClientSearch } from '../components/mobile-client-search';
 import { useDeviceType } from '~/common/hooks';
+import { type MobileFilterOptions } from '../components/mobile-filter-modal';
 
 // 🎯 보험설계사 특화 고객 관리 페이지
 // 실제 스키마 타입 사용으로 데이터베이스 연동 준비 완료
@@ -482,6 +482,20 @@ export default function ClientsPage({ loaderData }: any) {
     'name' | 'stage' | 'importance' | 'premium' | 'lastContact' | 'createdAt'
   >('createdAt');
 
+  // 🎯 고급 필터 상태 추가
+  const [advancedFilters, setAdvancedFilters] = useState<MobileFilterOptions>({
+    importance: [],
+    stages: [],
+    referralStatus: [],
+    insuranceTypes: [],
+    premiumRange: [0, 1000000],
+    dateRange: { type: 'all' },
+    tags: [],
+    engagementScore: [0, 10],
+    conversionProbability: [0, 100],
+    referralCount: [0, 50],
+  });
+
   // === 🎯 사용자 경험 향상을 위한 클라이언트 페이지 행동 분석 시스템 ===
   useEffect(() => {
     const clients = loaderData?.clients || MOCK_CLIENTS;
@@ -874,31 +888,187 @@ export default function ClientsPage({ loaderData }: any) {
     // 검색어 필터링
     const matchesSearch =
       !searchQuery ||
-      client.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      client.phone.includes(searchQuery) ||
-      (client.email &&
-        client.email.toLowerCase().includes(searchQuery.toLowerCase()));
+      (client.fullName && client.fullName.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (client.phone && client.phone.includes(searchQuery)) ||
+      (client.email && client.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (client.occupation && client.occupation.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (client.address && client.address.toLowerCase().includes(searchQuery.toLowerCase()));
 
-    // 중요도 필터링
-    const matchesImportance =
+    // 🎯 기본 중요도 필터링 (기존 UI용)
+    const matchesBasicImportance =
       filterImportance === 'all' || client.importance === filterImportance;
 
-    // 영업 단계 필터링
-    const matchesStage =
+    // 🎯 고급 중요도 필터링 (MobileFilterModal용)
+    const matchesAdvancedImportance = 
+      advancedFilters.importance.length === 0 || 
+      advancedFilters.importance.includes(client.importance);
+
+    // 최종 중요도 매칭 (기본 또는 고급 둘 중 하나라도 매칭되면 통과)
+    const matchesImportance = matchesBasicImportance && matchesAdvancedImportance;
+
+    // 🎯 기본 영업 단계 필터링 (기존 UI용)
+    const matchesBasicStage =
       filterStage === 'all' || client.currentStage?.name === filterStage;
 
-    // 소개 상태 필터링
-    const matchesReferralStatus =
+    // 🎯 고급 영업 단계 필터링 (MobileFilterModal용)
+    const matchesAdvancedStage =
+      advancedFilters.stages.length === 0 ||
+      advancedFilters.stages.includes(client.currentStage?.name || '');
+
+    // 최종 영업 단계 매칭
+    const matchesStage = matchesBasicStage && matchesAdvancedStage;
+
+    // 🎯 기본 소개 상태 필터링 (기존 UI용)
+    const matchesBasicReferralStatus =
       filterReferralStatus === 'all' ||
       (filterReferralStatus === 'has_referrer' && client.referredBy) ||
       (filterReferralStatus === 'no_referrer' && !client.referredBy) ||
       (filterReferralStatus === 'top_referrer' && client.referralCount >= 3);
 
+    // 🎯 고급 소개 상태 필터링 (MobileFilterModal용)
+    const matchesAdvancedReferralStatus =
+      advancedFilters.referralStatus.length === 0 ||
+      advancedFilters.referralStatus.some(status => {
+        switch (status) {
+          case 'has_referrer':
+            return client.referredBy !== null;
+          case 'no_referrer':
+            return client.referredBy === null;
+          case 'top_referrer':
+            return client.referralCount >= 3;
+          default:
+            return false;
+        }
+      });
+
+    // 최종 소개 상태 매칭
+    const matchesReferralStatus = matchesBasicReferralStatus && matchesAdvancedReferralStatus;
+
+    // 🎯 보험 타입 필터링 (고급 필터 전용)
+    const matchesInsuranceTypes =
+      advancedFilters.insuranceTypes.length === 0 ||
+      advancedFilters.insuranceTypes.some(type => 
+        client.insuranceTypes.includes(type)
+      );
+
+    // 🎯 월 보험료 범위 필터링 (고급 필터 전용)
+    const matchesPremiumRange =
+      client.totalPremium >= advancedFilters.premiumRange[0] &&
+      client.totalPremium <= advancedFilters.premiumRange[1];
+
+    // 🎯 참여도 점수 필터링 (고급 필터 전용)
+    const matchesEngagementScore =
+      client.engagementScore >= advancedFilters.engagementScore[0] &&
+      client.engagementScore <= advancedFilters.engagementScore[1];
+
+    // 🎯 전환 확률 필터링 (고급 필터 전용)
+    const matchesConversionProbability =
+      client.conversionProbability >= advancedFilters.conversionProbability[0] &&
+      client.conversionProbability <= advancedFilters.conversionProbability[1];
+
+    // 🎯 소개 횟수 필터링 (고급 필터 전용)
+    const matchesReferralCount =
+      client.referralCount >= advancedFilters.referralCount[0] &&
+      client.referralCount <= advancedFilters.referralCount[1];
+
+    // 🎯 태그 필터링 (고급 필터 전용)
+    const matchesTags =
+      advancedFilters.tags.length === 0 ||
+      advancedFilters.tags.some((tag: string) => 
+        client.tags.some((clientTag: string) => 
+          clientTag.toLowerCase().includes(tag.toLowerCase())
+        )
+      );
+
+    // 🎯 날짜 범위 필터링 (고급 필터 전용)
+    const matchesDateRange = (() => {
+      if (advancedFilters.dateRange.type === 'all') return true;
+      
+      const clientDate = new Date(client.createdAt);
+      const now = new Date();
+      
+      switch (advancedFilters.dateRange.type) {
+        case 'lastContact':
+          // 마지막 연락일 기준 필터링
+          const lastContactDate = client.lastContactDate ? new Date(client.lastContactDate) : clientDate;
+          if (advancedFilters.dateRange.preset) {
+            switch (advancedFilters.dateRange.preset) {
+              case 'week':
+                const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                return lastContactDate >= weekAgo;
+              case 'month':
+                const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+                return lastContactDate >= monthAgo;
+              case 'quarter':
+                const quarterAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+                return lastContactDate >= quarterAgo;
+              case 'year':
+                const yearAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+                return lastContactDate >= yearAgo;
+              default:
+                return true;
+            }
+          }
+          return true;
+        case 'nextAction':
+          // 다음 액션일 기준 필터링
+          const nextActionDate = client.nextActionDate ? new Date(client.nextActionDate) : null;
+          if (!nextActionDate) return false;
+          if (advancedFilters.dateRange.preset) {
+            switch (advancedFilters.dateRange.preset) {
+              case 'week':
+                const weekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+                return nextActionDate <= weekFromNow;
+              case 'month':
+                const monthFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+                return nextActionDate <= monthFromNow;
+              default:
+                return true;
+            }
+          }
+          return true;
+        case 'joinDate':
+          // 고객 등록일 기준 필터링
+          if (advancedFilters.dateRange.from && advancedFilters.dateRange.to) {
+            return clientDate >= advancedFilters.dateRange.from && clientDate <= advancedFilters.dateRange.to;
+          }
+          if (advancedFilters.dateRange.preset) {
+            switch (advancedFilters.dateRange.preset) {
+              case 'week':
+                const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                return clientDate >= weekAgo;
+              case 'month':
+                const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+                return clientDate >= monthAgo;
+              case 'quarter':
+                const quarterAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+                return clientDate >= quarterAgo;
+              case 'year':
+                const yearAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+                return clientDate >= yearAgo;
+              default:
+                return true;
+            }
+          }
+          return true;
+        default:
+          return true;
+      }
+    })();
+
+    // 🎯 모든 필터 조건 종합
     return (
       matchesSearch &&
       matchesImportance &&
       matchesStage &&
-      matchesReferralStatus
+      matchesReferralStatus &&
+      matchesInsuranceTypes &&
+      matchesPremiumRange &&
+      matchesEngagementScore &&
+      matchesConversionProbability &&
+      matchesReferralCount &&
+      matchesTags &&
+      matchesDateRange
     );
   });
 
@@ -961,28 +1131,23 @@ export default function ClientsPage({ loaderData }: any) {
           onAddClient={handleAddClient}
         />
 
-        {deviceType === 'mobile' ? (
-          <MobileClientSearch
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-          />
-        ) : (
-          <ClientFiltersSection
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            filterImportance={filterImportance}
-            setFilterImportance={setFilterImportance}
-            filterStage={filterStage}
-            setFilterStage={setFilterStage}
-            filterReferralStatus={filterReferralStatus}
-            setFilterReferralStatus={setFilterReferralStatus}
-            viewMode={viewMode}
-            setViewMode={setViewMode}
-            showFilters={showFilters}
-            setShowFilters={setShowFilters}
-            filteredClientsCount={filteredClients.length}
-          />
-        )}
+        <ClientFiltersSection
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          filterImportance={filterImportance}
+          setFilterImportance={setFilterImportance}
+          filterStage={filterStage}
+          setFilterStage={setFilterStage}
+          filterReferralStatus={filterReferralStatus}
+          setFilterReferralStatus={setFilterReferralStatus}
+          viewMode={viewMode}
+          setViewMode={setViewMode}
+          showFilters={showFilters}
+          setShowFilters={setShowFilters}
+          filteredClientsCount={filteredClients.length}
+          advancedFilters={advancedFilters}
+          onAdvancedFiltersChange={setAdvancedFilters}
+        />
 
         {/* 🎯 고객 목록 */}
         <ClientListSection
