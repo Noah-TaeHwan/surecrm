@@ -277,13 +277,17 @@ export function MyGoals({
                             </p>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <p className="text-sm font-medium text-foreground">
-                            {formatValue(goal.currentValue, goal.goalType)}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            목표: {formatValue(goal.targetValue, goal.goalType)}
-                          </p>
+                        <div className="flex flex-row justify-between items-center w-full">
+                          <div>
+                            <p className="text-sm font-medium text-foreground">
+                              {formatValue(goal.currentValue, goal.goalType)}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground">
+                              목표: {formatValue(goal.targetValue, goal.goalType)}
+                            </p>
+                          </div>
                         </div>
                       </div>
 
@@ -335,9 +339,9 @@ export function MyGoals({
                       : `${viewingYear}년 ${viewingMonth}월`}{' '}
                     목표 현황
                   </h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                  <div className="grid grid-cols-2 gap-3 text-xs">
                     <div className="text-center">
-                      <p className="text-lg text-muted-foreground">달성 완료</p>
+                      <p className="text-sm text-muted-foreground">달성 완료</p>
                       <p className="text-lg font-medium text-green-600">
                         {
                           viewingMonthGoals.filter(g => g.progress >= 100)
@@ -347,7 +351,7 @@ export function MyGoals({
                       </p>
                     </div>
                     <div className="text-center">
-                      <p className="text-lg text-muted-foreground">
+                      <p className="text-sm text-muted-foreground">
                         {isCurrentMonth ? '진행 중' : '미달성'}
                       </p>
                       <p className="text-lg font-medium text-primary">
