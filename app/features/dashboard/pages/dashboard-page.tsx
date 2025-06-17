@@ -632,7 +632,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
         />
 
         {/* 오늘의 일정 및 영업 파이프라인 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
           {/* 🗓️ 오늘의 일정 - 일정 관리 기능 개발 후 활성화 예정 */}
           {/* <TodayAgenda meetings={transformedTodayMeetings} /> */}
           <MyGoals
@@ -648,7 +648,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
         </div>
 
         {/* 최근 고객 현황 및 소개 네트워크 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
           <RecentClients
             recentClients={transformedRecentClients}
             totalClients={recentClientsData.totalClients}

@@ -56,8 +56,8 @@ export function WelcomeSection({ userName, todayStats }: WelcomeSectionProps) {
 
   return (
     <Card className="border-border/50 bg-gradient-to-r from-background to-muted/20">
-      <CardContent className="px-6 py-5">
-        <div className="flex items-center justify-between">
+      <CardContent className="px-4 sm:px-6 py-5">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="space-y-1.5">
             <div className="flex items-center gap-3">
               {getTimeIcon()}
@@ -81,7 +81,7 @@ export function WelcomeSection({ userName, todayStats }: WelcomeSectionProps) {
             </div>
           </div>
 
-          <div className="flex items-center gap-6">
+          <div className="flex items-center justify-between gap-4 sm:gap-6 w-full sm:w-auto mt-4 sm:mt-0">
             <div className="text-center">
               <div className="text-2xl font-bold text-primary mb-0.5">
                 {todayStats.totalClients}

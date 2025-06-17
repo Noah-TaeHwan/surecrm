@@ -153,7 +153,7 @@ export function MyGoals({
   return (
     <>
       <Card className="border-border/50">
-        <CardHeader className="pb-3">
+        <CardHeader className="px-4 sm:px-6 pb-3">
           <div className="flex items-center justify-between">
             <CardTitle className="text-base font-medium flex items-center gap-2">
               <div className="p-1.5 bg-primary/10 rounded-lg">
@@ -163,7 +163,7 @@ export function MyGoals({
             </CardTitle>
 
             {/* 월별 탐색 UI */}
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center justify-between sm:justify-start gap-3 w-full sm:w-auto">
               {/* 현재 보고 있는 월 표시 */}
               <div className="flex items-center gap-2">
                 <Badge
@@ -223,7 +223,7 @@ export function MyGoals({
             </div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="px-4 sm:px-6 space-y-4">
           {viewingMonthGoals.length > 0 ? (
             <>
               {/* 현재 월 목표 우선 표시 */}
@@ -335,7 +335,7 @@ export function MyGoals({
                       : `${viewingYear}년 ${viewingMonth}월`}{' '}
                     목표 현황
                   </h4>
-                  <div className="grid grid-cols-2 gap-3 text-xs">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                     <div className="text-center">
                       <p className="text-lg text-muted-foreground">달성 완료</p>
                       <p className="text-lg font-medium text-green-600">
