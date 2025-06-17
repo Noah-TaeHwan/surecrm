@@ -216,6 +216,38 @@ export const VirtualizedClientList = memo<VirtualizedClientListProps>(
               client={transformToClientCardData(client)}
               onClick={onClientClick}
               className="h-full w-full min-h-[280px]"
+              enableSwipe={true} // 🎯 스와이프 기능 활성화
+              onCall={(e, clientData) => {
+                e.stopPropagation();
+                if (clientData.phone) {
+                  const phoneNumber = clientData.phone.replace(/[^0-9+]/g, '');
+                  window.location.href = `tel:${phoneNumber}`;
+                }
+              }}
+              onEmail={(e, clientData) => {
+                e.stopPropagation();
+                if (clientData.email) {
+                  window.location.href = `mailto:${clientData.email}`;
+                }
+              }}
+              onEdit={(e, clientData) => {
+                e.stopPropagation();
+                onClientClick(clientData.id);
+              }}
+              onDelete={(e, clientData) => {
+                e.stopPropagation();
+                // 삭제 확인 후 처리 로직
+                if (confirm(`${clientData.fullName} 고객을 삭제하시겠습니까?`)) {
+                  console.log('클라이언트 삭제:', clientData.id);
+                  // TODO: 실제 삭제 API 호출
+                }
+              }}
+              onArchive={(e, clientData) => {
+                e.stopPropagation();
+                // 아카이브 처리 로직
+                console.log('클라이언트 아카이브:', clientData.id);
+                // TODO: 실제 아카이브 API 호출
+              }}
             />
           ))}
           {/* 빈 슬롯 채우기 (마지막 행에서 일관된 레이아웃 유지) */}

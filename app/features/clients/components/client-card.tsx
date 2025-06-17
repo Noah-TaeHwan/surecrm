@@ -8,6 +8,9 @@ import {
   Tag,
   Calendar,
   Star,
+  Edit3,
+  Trash2,
+  Archive,
 } from 'lucide-react';
 import {
   Card,
@@ -27,6 +30,7 @@ import { Button } from '~/common/components/ui/button';
 import { cn } from '~/lib/utils';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
+import { useRef, useState, useEffect } from 'react';
 
 // 🎯 ClientCard를 위한 타입 정의
 export interface ClientCardData {
@@ -67,9 +71,29 @@ interface ClientCardProps {
   onClick?: (clientId: string) => void;
   onEdit?: (e: React.MouseEvent, client: ClientCardData) => void;
   onDelete?: (e: React.MouseEvent, client: ClientCardData) => void;
+  onArchive?: (e: React.MouseEvent, client: ClientCardData) => void;
+  onCall?: (e: React.MouseEvent, client: ClientCardData) => void;
+  onEmail?: (e: React.MouseEvent, client: ClientCardData) => void;
   className?: string;
   isSelected?: boolean;
+  enableSwipe?: boolean; // 스와이프 기능 활성화 여부
 }
+
+// 🎯 스와이프 방향 타입 정의
+type SwipeDirection = 'left' | 'right' | null;
+
+// 🎯 스와이프 액션 구성
+interface SwipeAction {
+  id: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  color: string;
+  onClick: (e: React.MouseEvent, client: ClientCardData) => void;
+}
+
+// 🎯 스와이프 설정
+const SWIPE_THRESHOLD = 80; // 스와이프 인식 임계값 (px)
+const SWIPE_RESET_THRESHOLD = 20; // 스와이프 리셋 임계값 (px)
 
 // 🎯 중요도별 색상 매핑 (SureCRM 프라이머리 컬러 활용)
 const IMPORTANCE_CONFIG = {
@@ -123,12 +147,18 @@ export const ClientCard = memo(function ClientCard({
   onClick,
   onEdit,
   onDelete,
+  onArchive,
+  onCall,
+  onEmail,
   className,
   isSelected = false,
+  enableSwipe = false,
 }: ClientCardProps) {
   // 🎯 카드 클릭 핸들러
   const handleCardClick = () => {
-    onClick?.(client.id);
+    if (!isSwipeActive) {
+      onClick?.(client.id);
+    }
   };
 
   // 🎯 편집 버튼 클릭 핸들러 (이벤트 버블링 방지)
@@ -171,8 +201,245 @@ export const ClientCard = memo(function ClientCard({
   const importanceConfig = IMPORTANCE_CONFIG[client.importance];
   const ImportanceIcon = importanceConfig.icon;
 
+  // 🎯 스와이프 상태 관리
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [swipeOffset, setSwipeOffset] = useState(0);
+  const [isSwipeActive, setIsSwipeActive] = useState(false);
+  const [swipeDirection, setSwipeDirection] = useState<SwipeDirection>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
+  // 터치 시작 위치 추적
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
+  const initialOffset = useRef(0);
+
+  // 🎯 스와이프 액션 구성
+  const leftSwipeActions: SwipeAction[] = [
+    ...(onCall
+      ? [
+          {
+            id: 'call',
+            label: '전화',
+            icon: Phone,
+            color: 'bg-green-500 text-white',
+            onClick: onCall,
+          },
+        ]
+      : []),
+    ...(onEmail
+      ? [
+          {
+            id: 'email',
+            label: '이메일',
+            icon: Mail,
+            color: 'bg-blue-500 text-white',
+            onClick: onEmail,
+          },
+        ]
+      : []),
+    ...(onEdit
+      ? [
+          {
+            id: 'edit',
+            label: '편집',
+            icon: Edit3,
+            color: 'bg-orange-500 text-white',
+            onClick: onEdit,
+          },
+        ]
+      : []),
+  ];
+
+  const rightSwipeActions: SwipeAction[] = [
+    ...(onArchive
+      ? [
+          {
+            id: 'archive',
+            label: '보관',
+            icon: Archive,
+            color: 'bg-yellow-500 text-white',
+            onClick: onArchive,
+          },
+        ]
+      : []),
+    ...(onDelete
+      ? [
+          {
+            id: 'delete',
+            label: '삭제',
+            icon: Trash2,
+            color: 'bg-red-500 text-white',
+            onClick: onDelete,
+          },
+        ]
+      : []),
+  ];
+
+  // 🎯 터치 시작 핸들러
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (!enableSwipe) return;
+
+    const touch = e.touches[0];
+    touchStartX.current = touch.clientX;
+    touchStartY.current = touch.clientY;
+    initialOffset.current = swipeOffset;
+    setIsDragging(true);
+  };
+
+  // 🎯 터치 이동 핸들러
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!enableSwipe || !isDragging) return;
+
+    const touch = e.touches[0];
+    const deltaX = touch.clientX - touchStartX.current;
+    const deltaY = touch.clientY - touchStartY.current;
+
+    // 수직 스크롤이 더 큰 경우 스와이프 무시
+    if (Math.abs(deltaY) > Math.abs(deltaX)) {
+      return;
+    }
+
+    // 수평 스와이프 처리
+    e.preventDefault();
+
+    const newOffset = initialOffset.current + deltaX;
+    const maxLeftOffset = leftSwipeActions.length * 80;
+    const maxRightOffset = rightSwipeActions.length * 80;
+
+    // 오프셋 제한
+    const constrainedOffset = Math.max(
+      -maxRightOffset,
+      Math.min(maxLeftOffset, newOffset)
+    );
+
+    setSwipeOffset(constrainedOffset);
+    setIsSwipeActive(Math.abs(constrainedOffset) > SWIPE_RESET_THRESHOLD);
+
+    // 스와이프 방향 설정
+    if (constrainedOffset > SWIPE_RESET_THRESHOLD) {
+      setSwipeDirection('left');
+    } else if (constrainedOffset < -SWIPE_RESET_THRESHOLD) {
+      setSwipeDirection('right');
+    } else {
+      setSwipeDirection(null);
+    }
+  };
+
+  // 🎯 터치 끝 핸들러
+  const handleTouchEnd = () => {
+    if (!enableSwipe || !isDragging) return;
+
+    setIsDragging(false);
+
+    // 임계값 확인 후 스냅 처리
+    if (Math.abs(swipeOffset) < SWIPE_THRESHOLD) {
+      // 임계값 미달 시 원위치
+      setSwipeOffset(0);
+      setIsSwipeActive(false);
+      setSwipeDirection(null);
+    } else {
+      // 임계값 이상 시 액션 영역으로 스냅
+      const maxLeftOffset = leftSwipeActions.length * 80;
+      const maxRightOffset = rightSwipeActions.length * 80;
+
+      if (swipeOffset > 0) {
+        setSwipeOffset(Math.min(maxLeftOffset, SWIPE_THRESHOLD));
+      } else {
+        setSwipeOffset(Math.max(-maxRightOffset, -SWIPE_THRESHOLD));
+      }
+    }
+  };
+
+  // 🎯 마우스 이벤트 핸들러 (데스크톱 지원)
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!enableSwipe) return;
+
+    touchStartX.current = e.clientX;
+    touchStartY.current = e.clientY;
+    initialOffset.current = swipeOffset;
+    setIsDragging(true);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!enableSwipe || !isDragging) return;
+
+    const deltaX = e.clientX - touchStartX.current;
+    const deltaY = e.clientY - touchStartY.current;
+
+    if (Math.abs(deltaY) > Math.abs(deltaX)) return;
+
+    const newOffset = initialOffset.current + deltaX;
+    const maxLeftOffset = leftSwipeActions.length * 80;
+    const maxRightOffset = rightSwipeActions.length * 80;
+
+    const constrainedOffset = Math.max(
+      -maxRightOffset,
+      Math.min(maxLeftOffset, newOffset)
+    );
+
+    setSwipeOffset(constrainedOffset);
+    setIsSwipeActive(Math.abs(constrainedOffset) > SWIPE_RESET_THRESHOLD);
+
+    if (constrainedOffset > SWIPE_RESET_THRESHOLD) {
+      setSwipeDirection('left');
+    } else if (constrainedOffset < -SWIPE_RESET_THRESHOLD) {
+      setSwipeDirection('right');
+    } else {
+      setSwipeDirection(null);
+    }
+  };
+
+  const handleMouseUp = () => {
+    if (!enableSwipe || !isDragging) return;
+
+    setIsDragging(false);
+
+    if (Math.abs(swipeOffset) < SWIPE_THRESHOLD) {
+      setSwipeOffset(0);
+      setIsSwipeActive(false);
+      setSwipeDirection(null);
+    } else {
+      const maxLeftOffset = leftSwipeActions.length * 80;
+      const maxRightOffset = rightSwipeActions.length * 80;
+
+      if (swipeOffset > 0) {
+        setSwipeOffset(Math.min(maxLeftOffset, SWIPE_THRESHOLD));
+      } else {
+        setSwipeOffset(Math.max(-maxRightOffset, -SWIPE_THRESHOLD));
+      }
+    }
+  };
+
+  // 🎯 외부 클릭 시 스와이프 리셋
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (cardRef.current && !cardRef.current.contains(event.target as Node)) {
+        setSwipeOffset(0);
+        setIsSwipeActive(false);
+        setSwipeDirection(null);
+      }
+    };
+
+    if (isSwipeActive) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () =>
+        document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [isSwipeActive]);
+
+  // 🎯 스와이프 액션 핸들러
+  const handleSwipeActionClick = (action: SwipeAction, e: React.MouseEvent) => {
+    e.stopPropagation();
+    action.onClick(e, client);
+    // 액션 실행 후 스와이프 상태 리셋
+    setSwipeOffset(0);
+    setIsSwipeActive(false);
+    setSwipeDirection(null);
+  };
+
   return (
     <Card
+      ref={cardRef}
       className={cn(
         'relative cursor-pointer transition-all duration-200',
         'hover:shadow-md hover:scale-[1.02]',
@@ -187,8 +454,23 @@ export const ClientCard = memo(function ClientCard({
       role="button"
       aria-label={`${client.fullName} 고객 정보`}
       aria-pressed={isSelected}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
     >
-      <CardContent className="p-4 space-y-3">
+      <CardContent
+        className={cn('p-4 space-y-3', 'transition-transform duration-200', {
+          'translate-x-0': !swipeOffset,
+          'translate-x-[-80px]': swipeOffset > 0,
+          'translate-x-[80px]': swipeOffset < 0,
+        })}
+        style={{
+          transform: `translateX(${swipeOffset}px)`,
+        }}
+      >
         {/* 🎯 헤더 영역 - 이름과 중요도 */}
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
@@ -364,7 +646,7 @@ export const ClientCard = memo(function ClientCard({
         </div>
 
         {/* 🎯 액션 버튼들 (선택적) */}
-        {(onEdit || onDelete) && (
+        {(onEdit || onDelete || onArchive || onCall || onEmail) && (
           <div className="flex gap-2 pt-2">
             {onEdit && (
               <Button
@@ -388,9 +670,85 @@ export const ClientCard = memo(function ClientCard({
                 삭제
               </Button>
             )}
+            {onArchive && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={e => onArchive?.(e, client)}
+                className="flex-1 h-8 text-xs"
+                aria-label={`${client.fullName} 보관`}
+              >
+                보관
+              </Button>
+            )}
+            {onCall && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={e => onCall?.(e, client)}
+                className="flex-1 h-8 text-xs"
+                aria-label={`${client.fullName}에게 전화걸기`}
+              >
+                전화
+              </Button>
+            )}
+            {onEmail && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={e => onEmail?.(e, client)}
+                className="flex-1 h-8 text-xs"
+                aria-label={`${client.fullName}에게 이메일 보내기`}
+              >
+                이메일
+              </Button>
+            )}
           </div>
         )}
       </CardContent>
+
+      {/* 🎯 스와이프 액션 영역 */}
+      <div
+        className={cn(
+          'absolute top-0 left-0 w-full h-full flex justify-end',
+          'transition-transform duration-200',
+          {
+            'translate-x-0': !swipeOffset,
+            'translate-x-[-80px]': swipeOffset > 0,
+            'translate-x-[80px]': swipeOffset < 0,
+          }
+        )}
+        style={{
+          transform: `translateX(${swipeOffset}px)`,
+        }}
+      >
+        {swipeDirection === 'left' &&
+          leftSwipeActions.map(action => (
+            <Button
+              key={action.id}
+              variant="default"
+              size="lg"
+              className={cn('flex-1 h-full text-lg font-medium', action.color)}
+              onClick={e => handleSwipeActionClick(action, e)}
+              aria-label={action.label}
+            >
+              <action.icon className="h-6 w-6" aria-hidden="true" />
+            </Button>
+          ))}
+        {swipeDirection === 'right' &&
+          rightSwipeActions.map(action => (
+            <Button
+              key={action.id}
+              variant="default"
+              size="lg"
+              className={cn('flex-1 h-full text-lg font-medium', action.color)}
+              onClick={e => handleSwipeActionClick(action, e)}
+              aria-label={action.label}
+            >
+              <action.icon className="h-6 w-6" aria-hidden="true" />
+            </Button>
+          ))}
+      </div>
     </Card>
   );
 });
