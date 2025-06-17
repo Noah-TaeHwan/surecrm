@@ -228,8 +228,8 @@ export function PerformanceKPICards({
             >
               <CardContent className="p-3 md:p-4">
                 <div className="flex items-center justify-between">
-                  <div className="space-y-1 flex-1 min-w-0">
-                    <div className="flex items-center gap-1">
+                  <div className="space-y-1 flex-1 min-w-0 text-center md:text-left">
+                    <div className="flex items-center gap-1 justify-center md:justify-start">
                       <p className="text-xs md:text-sm font-medium text-muted-foreground truncate">
                         {item.title}
                       </p>
@@ -278,7 +278,9 @@ export function PerformanceKPICards({
                         </Tooltip>
                       )}
                     </div>
-                    <div className="flex items-baseline gap-1 md:gap-2">
+                    
+                    {/* 모바일: 값과 증가율을 별도 줄로 분리 */}
+                    <div className="flex flex-col md:flex-row items-center md:items-baseline md:gap-2">
                       <p className="text-lg md:text-2xl font-bold text-foreground truncate">
                         {typeof item.value === 'number'
                           ? item.value.toLocaleString()
@@ -287,7 +289,7 @@ export function PerformanceKPICards({
                       {item.change !== 0 && (
                         <div
                           className={cn(
-                            'flex items-center gap-0.5 md:gap-1 px-1 md:px-1.5 py-0.5 rounded-full text-xs font-medium flex-shrink-0',
+                            'inline-flex md:flex items-center gap-0.5 md:gap-1 px-1 md:px-1.5 py-0.5 rounded-full text-xs font-medium flex-shrink-0 mt-1 md:mt-0',
                             changeIndicator.bgColor
                           )}
                         >
@@ -314,9 +316,11 @@ export function PerformanceKPICards({
                       {item.description}
                     </p>
                   </div>
+                  
+                  {/* 아이콘 - 모바일에서는 숨김, 태블릿 이상에서만 표시 */}
                   <div
                     className={cn(
-                      'flex items-center justify-center h-10 w-10 md:h-12 md:w-12 rounded-lg flex-shrink-0 ml-2',
+                      'hidden md:flex items-center justify-center h-10 w-10 md:h-12 md:w-12 rounded-lg flex-shrink-0 ml-2',
                       getBackgroundColorClass(item.color)
                     )}
                   >
