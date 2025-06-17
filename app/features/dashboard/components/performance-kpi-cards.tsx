@@ -226,7 +226,7 @@ export function PerformanceKPICards({
                 });
               }}
             >
-              <CardContent className="p-3 md:p-4">
+              <CardContent className="p-3 md:py-4 md:px-8">
                 <div className="flex items-center justify-between">
                   <div className="space-y-1 flex-1 min-w-0 text-center md:text-left">
                     <div className="flex items-center gap-1 justify-center md:justify-start">
