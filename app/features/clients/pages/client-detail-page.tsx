@@ -36,6 +36,7 @@ import { Separator } from '~/common/components/ui/separator';
 import { DeleteConfirmationModal } from '~/common/components/ui/delete-confirmation-modal';
 import { NewOpportunityModal } from '../components/new-opportunity-modal';
 import { EnhancedClientOverview } from '../components/enhanced-client-overview';
+import { ResponsiveClientDetail } from '../components/responsive-client-detail';
 import {
   Dialog,
   DialogContent,
@@ -1613,131 +1614,134 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
 
   return (
     <MainLayout title={`${client?.fullName || '고객'} - 고객 상세`}>
-      <div className="space-y-6">
-        {/* 🎯 헤더 섹션 */}
-        <ClientPageHeader
-          clientName={client?.fullName || '고객'}
-          isEditing={isEditing}
-          isDeleting={isDeleting}
-          onEditStart={handleEditStart}
-          onEditCancel={handleEditCancel}
-          onEditSave={handleEditSave}
-          onDeleteClient={handleDeleteClient}
-          onShowOpportunityModal={() => setShowOpportunityModal(true)}
-        />
+      <ResponsiveClientDetail
+        client={client}
+        clientTags={clientTags}
+        isEditing={isEditing}
+        editFormData={editFormData}
+        setEditFormData={setEditFormData}
+        onEditStart={handleEditStart}
+        onSsnChange={handleSsnChange}
+        onTagModalOpen={handleOpenTagModal}
+        onTagRemove={removeClientTag}
+        availableReferrers={availableReferrers}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+      >
+        {/* 🎯 데스크톱용 기존 레이아웃 (lg 이상에서만 표시) */}
+        <div className="hidden lg:block">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            {/* 왼쪽 사이드바 - 기본 정보 */}
+            <ClientSidebar
+              client={client}
+              isEditing={isEditing}
+              editFormData={editFormData}
+              setEditFormData={setEditFormData}
+              handleEditStart={handleEditStart}
+              handleSsnChange={handleSsnChange}
+              clientTags={clientTags}
+              handleOpenTagModal={handleOpenTagModal}
+              removeClientTag={removeClientTag}
+              availableReferrers={availableReferrers}
+            />
 
-        {/* 🎯 메인 컨텐츠 - 이력서 스타일 그리드 레이아웃 */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* 왼쪽 사이드바 - 기본 정보 */}
-          <ClientSidebar
-            client={client}
-            isEditing={isEditing}
-            editFormData={editFormData}
-            setEditFormData={setEditFormData}
-            handleEditStart={handleEditStart}
-            handleSsnChange={handleSsnChange}
-            clientTags={clientTags}
-            handleOpenTagModal={handleOpenTagModal}
-            removeClientTag={removeClientTag}
-            availableReferrers={availableReferrers} // 🆕 소개자 후보 목록 전달
-          />
+            {/* 오른쪽 메인 컨텐츠 */}
+            <div className="lg:col-span-3">
+              <Tabs
+                value={activeTab}
+                onValueChange={setActiveTab}
+                className="space-y-6"
+              >
+                <TabsList className="grid w-full grid-cols-4 lg:grid-cols-7 h-auto lg:h-9 gap-1 lg:gap-0 p-1">
+                  <TabsTrigger value="notes">상담내용</TabsTrigger>
+                  <TabsTrigger value="medical">병력사항</TabsTrigger>
+                  <TabsTrigger value="checkup">점검목적</TabsTrigger>
+                  <TabsTrigger value="interests">관심사항</TabsTrigger>
+                  <TabsTrigger value="companions">상담동반자</TabsTrigger>
+                  <TabsTrigger value="insurance">보험계약</TabsTrigger>
+                  <TabsTrigger value="family">가족</TabsTrigger>
+                </TabsList>
 
-          {/* 오른쪽 메인 컨텐츠 */}
-          <div className="lg:col-span-3">
-            <Tabs
-              value={activeTab}
-              onValueChange={setActiveTab}
-              className="space-y-6"
-            >
-              <TabsList className="grid w-full grid-cols-4 lg:grid-cols-7 h-auto lg:h-9 gap-1 lg:gap-0 p-1">
-                <TabsTrigger value="notes">상담내용</TabsTrigger>
-                <TabsTrigger value="medical">병력사항</TabsTrigger>
-                <TabsTrigger value="checkup">점검목적</TabsTrigger>
-                <TabsTrigger value="interests">관심사항</TabsTrigger>
-                <TabsTrigger value="companions">상담동반자</TabsTrigger>
-                <TabsTrigger value="insurance">보험계약</TabsTrigger>
-                <TabsTrigger value="family">가족</TabsTrigger>
-              </TabsList>
+                {/* 탭 컨텐츠들 */}
+                <TabsContent value="insurance" className="space-y-6">
+                  <InsuranceContractsTab
+                    clientId={client?.id}
+                    clientName={client?.fullName || '고객'}
+                    agentId={data?.currentUserId}
+                    initialContracts={insuranceContracts}
+                    shouldOpenModal={shouldCreateContract}
+                  />
+                </TabsContent>
 
-              {/* 탭 컨텐츠들 */}
-              <TabsContent value="insurance" className="space-y-6">
-                <InsuranceContractsTab
-                  clientId={client?.id}
-                  clientName={client?.fullName || '고객'}
-                  agentId={data?.currentUserId}
-                  initialContracts={insuranceContracts}
-                  shouldOpenModal={shouldCreateContract} // 🏢 파이프라인에서 왔을 때 모달 자동 열기
+                <TabsContent value="family" className="space-y-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <User className="h-5 w-5" />
+                        가족 구성원
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-6">
+                      <div className="text-center py-8">
+                        <User className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                        <p className="text-sm text-muted-foreground">
+                          가족 정보가 준비 중입니다.
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                {/* 🆕 병력사항 탭 */}
+                <MedicalHistoryTab
+                  medicalHistory={medicalHistory}
+                  setMedicalHistory={setMedicalHistory}
+                  submit={submit}
+                  setSuccessMessage={setSuccessMessage}
+                  setShowSuccessModal={setShowSuccessModal}
                 />
-              </TabsContent>
 
-              <TabsContent value="family" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <User className="h-5 w-5" />
-                      가족 구성원
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-6">
-                    <div className="text-center py-8">
-                      <User className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                      <p className="text-sm text-muted-foreground">
-                        가족 정보가 준비 중입니다.
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
+                {/* 🆕 점검목적 탭 */}
+                <CheckupPurposesTab
+                  checkupPurposes={checkupPurposes}
+                  setCheckupPurposes={setCheckupPurposes}
+                  onSave={handleSaveCheckupPurposes}
+                />
 
-              {/* 🆕 병력사항 탭 */}
-              <MedicalHistoryTab
-                medicalHistory={medicalHistory}
-                setMedicalHistory={setMedicalHistory}
-                submit={submit}
-                setSuccessMessage={setSuccessMessage}
-                setShowSuccessModal={setShowSuccessModal}
-              />
+                {/* 🆕 관심사항 탭 */}
+                <InterestCategoriesTab
+                  interestCategories={interestCategories}
+                  setInterestCategories={setInterestCategories}
+                  onSave={handleSaveInterestCategories}
+                />
 
-              {/* 🆕 점검목적 탭 */}
-              <CheckupPurposesTab
-                checkupPurposes={checkupPurposes}
-                setCheckupPurposes={setCheckupPurposes}
-                onSave={handleSaveCheckupPurposes}
-              />
+                {/* 🆕 상담동반자 탭 */}
+                <CompanionsTab
+                  consultationCompanions={consultationCompanions}
+                  handleAddCompanion={handleAddCompanion}
+                  handleEditCompanion={handleEditCompanion}
+                  handleDeleteCompanion={handleDeleteCompanion}
+                />
 
-              {/* 🆕 관심사항 탭 */}
-              <InterestCategoriesTab
-                interestCategories={interestCategories}
-                setInterestCategories={setInterestCategories}
-                onSave={handleSaveInterestCategories}
-              />
-
-              {/* 🆕 상담동반자 탭 */}
-              <CompanionsTab
-                consultationCompanions={consultationCompanions}
-                handleAddCompanion={handleAddCompanion}
-                handleEditCompanion={handleEditCompanion}
-                handleDeleteCompanion={handleDeleteCompanion}
-              />
-
-              {/* 🆕 상담내용 탭 */}
-              <ConsultationNotesTab
-                isEditing={isEditing}
-                notes={isEditing ? editFormData.notes : client?.notes || ''}
-                onNotesChange={notes =>
-                  setEditFormData({
-                    ...editFormData,
-                    notes,
-                  })
-                }
-                onEditStart={handleEditStart}
-                consultationNotes={consultationNotes}
-                onAddNote={handleAddNote}
-                onEditNote={handleEditNote}
-                onDeleteNote={handleDeleteNote}
-                onShowDeleteModal={handleShowDeleteModal}
-              />
-            </Tabs>
+                {/* 🆕 상담내용 탭 */}
+                <ConsultationNotesTab
+                  isEditing={isEditing}
+                  notes={isEditing ? editFormData.notes : client?.notes || ''}
+                  onNotesChange={notes =>
+                    setEditFormData({
+                      ...editFormData,
+                      notes,
+                    })
+                  }
+                  onEditStart={handleEditStart}
+                  consultationNotes={consultationNotes}
+                  onAddNote={handleAddNote}
+                  onEditNote={handleEditNote}
+                  onDeleteNote={handleDeleteNote}
+                  onShowDeleteModal={handleShowDeleteModal}
+                />
+              </Tabs>
+            </div>
           </div>
         </div>
 
@@ -1811,7 +1815,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
           noteDate={noteToDelete?.consultationDate || ''}
           isDeleting={isDeletingNote}
         />
-      </div>
+      </ResponsiveClientDetail>
     </MainLayout>
   );
 }
@@ -1905,296 +1909,6 @@ export async function action({ request, params }: Route.ActionArgs) {
         '../lib/client-actions'
       );
       return await deleteConsultationNoteAction(request, noteId);
-    }
-
-    case 'createInsuranceContract': {
-      // 🏢 보험 계약 생성
-      try {
-        const user = await requireAuth(request);
-
-        const { createInsuranceContract } = await import(
-          '~/api/shared/insurance-contracts'
-        );
-
-        const contractData = {
-          productName: formData.get('productName')?.toString() || '',
-          insuranceCompany: formData.get('insuranceCompany')?.toString() || '',
-          insuranceType: formData.get('insuranceType')?.toString() || '',
-          contractNumber:
-            formData.get('contractNumber')?.toString() || undefined,
-          policyNumber: formData.get('policyNumber')?.toString() || undefined,
-          contractDate: formData.get('contractDate')?.toString() || '',
-          effectiveDate: formData.get('effectiveDate')?.toString() || '',
-          expirationDate:
-            formData.get('expirationDate')?.toString() || undefined,
-          contractorName: formData.get('contractorName')?.toString() || '',
-          insuredName: formData.get('insuredName')?.toString() || '',
-          beneficiaryName:
-            formData.get('beneficiaryName')?.toString() || undefined,
-          monthlyPremium: formData.get('monthlyPremium')?.toString()
-            ? parseFloat(formData.get('monthlyPremium')?.toString() || '0')
-            : undefined,
-          agentCommission: formData.get('agentCommission')?.toString()
-            ? parseFloat(formData.get('agentCommission')?.toString() || '0')
-            : undefined,
-          coverageAmount: formData.get('coverageAmount')?.toString()
-            ? parseFloat(formData.get('coverageAmount')?.toString() || '0')
-            : undefined,
-          paymentMethod: formData.get('paymentMethod')?.toString() || undefined,
-          notes: formData.get('notes')?.toString() || undefined,
-        };
-
-        // 📁 첨부파일 처리 (디버깅 로그 추가)
-        const attachments: Array<{
-          file: File;
-          fileName: string;
-          fileDisplayName: string;
-          documentType: string;
-          description?: string;
-        }> = [];
-
-        // FormData에서 파일들 추출
-        const entries = Array.from(formData.entries());
-
-        // 🔍 서버 디버깅: FormData 전체 내용 확인
-        console.log('🔍 서버 FormData 디버깅:', {
-          'FormData entries 총 개수': entries.length,
-          'attachment_file로 시작하는 키들': entries
-            .filter(([key]) => key.startsWith('attachment_file'))
-            .map(([key, value]) => ({
-              key,
-              valueType: typeof value,
-              isFile: value instanceof File,
-              fileName: value instanceof File ? value.name : 'Not a File',
-              valueConstructor: value.constructor.name,
-            })),
-          '모든 키들': entries.map(([key, value]) => ({
-            key,
-            valueType: typeof value,
-            isFile: value instanceof File,
-          })),
-        });
-
-        for (const [key, value] of entries) {
-          console.log(`🔍 FormData 엔트리 확인: ${key} = `, {
-            value,
-            type: typeof value,
-            isFile: value instanceof File,
-            constructor: value.constructor.name,
-          });
-
-          if (key.startsWith('attachment_file_') && value instanceof File) {
-            const index = key.split('_')[2]; // attachment_file_0, attachment_file_1, ...
-            console.log(
-              `✅ 첨부파일 발견! 인덱스: ${index}, 파일명: ${value.name}`
-            );
-
-            const fileName =
-              formData.get(`attachment_fileName_${index}`)?.toString() ||
-              value.name;
-            const fileDisplayName =
-              formData.get(`attachment_displayName_${index}`)?.toString() ||
-              value.name;
-            const documentType =
-              formData.get(`attachment_documentType_${index}`)?.toString() ||
-              'other_document';
-            const description = formData
-              .get(`attachment_description_${index}`)
-              ?.toString();
-
-            attachments.push({
-              file: value,
-              fileName,
-              fileDisplayName,
-              documentType,
-              description,
-            });
-          }
-        }
-
-        console.log(
-          `📎 첨부파일 ${attachments.length}개 발견:`,
-          attachments.map(a => a.fileName)
-        );
-
-        const result = await createInsuranceContract(
-          clientId,
-          user.id,
-          contractData,
-          attachments
-        );
-
-        console.log('🎯 보험계약 생성 결과:', result);
-
-        return result;
-      } catch (error) {
-        console.error('❌ 보험계약 생성 실패:', error);
-        return {
-          success: false,
-          message: '보험계약 생성에 실패했습니다.',
-          error: error instanceof Error ? error.message : '알 수 없는 오류',
-        };
-      }
-    }
-
-    case 'updateInsuranceContract': {
-      // 🏢 보험 계약 수정 (첨부파일 포함)
-      try {
-        const user = await requireAuth(request);
-        const contractId = formData.get('contractId')?.toString();
-
-        if (!contractId) {
-          return {
-            success: false,
-            message: '계약 ID가 필요합니다.',
-          };
-        }
-
-        const { updateInsuranceContractWithAttachments } = await import(
-          '~/api/shared/insurance-contracts'
-        );
-
-        const contractData = {
-          productName: formData.get('productName')?.toString() || '',
-          insuranceCompany: formData.get('insuranceCompany')?.toString() || '',
-          insuranceType: formData.get('insuranceType')?.toString() || '',
-          contractNumber:
-            formData.get('contractNumber')?.toString() || undefined,
-          policyNumber: formData.get('policyNumber')?.toString() || undefined,
-          contractDate: formData.get('contractDate')?.toString() || '',
-          effectiveDate: formData.get('effectiveDate')?.toString() || '',
-          expirationDate:
-            formData.get('expirationDate')?.toString() || undefined,
-          contractorName: formData.get('contractorName')?.toString() || '',
-          insuredName: formData.get('insuredName')?.toString() || '',
-          beneficiaryName:
-            formData.get('beneficiaryName')?.toString() || undefined,
-          monthlyPremium: formData.get('monthlyPremium')?.toString()
-            ? parseFloat(formData.get('monthlyPremium')?.toString() || '0')
-            : undefined,
-          agentCommission: formData.get('agentCommission')?.toString()
-            ? parseFloat(formData.get('agentCommission')?.toString() || '0')
-            : undefined,
-          coverageAmount: formData.get('coverageAmount')?.toString()
-            ? parseFloat(formData.get('coverageAmount')?.toString() || '0')
-            : undefined,
-          paymentMethod: formData.get('paymentMethod')?.toString() || undefined,
-          notes: formData.get('notes')?.toString() || undefined,
-        };
-
-        // 📁 새로운 첨부파일 처리
-        const newAttachments: Array<{
-          file: File;
-          fileName: string;
-          fileDisplayName: string;
-          documentType: string;
-          description?: string;
-        }> = [];
-
-        // FormData에서 파일들 추출
-        const entries = Array.from(formData.entries());
-        for (const [key, value] of entries) {
-          if (key.startsWith('attachment_file_') && value instanceof File) {
-            const index = key.split('_')[2]; // attachment_file_0, attachment_file_1, ...
-            const fileName =
-              formData.get(`attachment_fileName_${index}`)?.toString() ||
-              value.name;
-            const fileDisplayName =
-              formData.get(`attachment_displayName_${index}`)?.toString() ||
-              value.name;
-            const documentType =
-              formData.get(`attachment_documentType_${index}`)?.toString() ||
-              'other_document';
-            const description = formData
-              .get(`attachment_description_${index}`)
-              ?.toString();
-
-            newAttachments.push({
-              file: value,
-              fileName,
-              fileDisplayName,
-              documentType,
-              description,
-            });
-          }
-        }
-
-        console.log(
-          `📎 수정 시 새 첨부파일 ${newAttachments.length}개 발견:`,
-          newAttachments.map(a => a.fileName)
-        );
-
-        const result = await updateInsuranceContractWithAttachments(
-          contractId,
-          user.id,
-          contractData,
-          newAttachments
-        );
-
-        return result;
-      } catch (error) {
-        console.error('❌ 보험계약 수정 실패:', error);
-        return {
-          success: false,
-          message: '보험계약 수정에 실패했습니다.',
-          error: error instanceof Error ? error.message : '알 수 없는 오류',
-        };
-      }
-    }
-
-    case 'createOpportunityProduct': {
-      // 🆕 영업 기회 상품 정보 생성
-      const productName = formData.get('productName')?.toString();
-      const insuranceCompany = formData.get('insuranceCompany')?.toString();
-      const insuranceType = formData.get('insuranceType')?.toString();
-      const monthlyPremium = formData.get('monthlyPremium')?.toString();
-      const expectedCommission = formData.get('expectedCommission')?.toString();
-      const productNotes = formData.get('productNotes')?.toString();
-
-      if (!productName || !insuranceCompany || !insuranceType) {
-        return {
-          success: false,
-          message: '필수 정보가 누락되었습니다.',
-        };
-      }
-
-      try {
-        // 사용자 정보 확인
-        const user = await requireAuth(request);
-
-        // static import 사용
-        const { createOpportunityProduct } = await import(
-          '~/api/shared/opportunity-products'
-        );
-
-        const productData = {
-          productName,
-          insuranceCompany,
-          insuranceType,
-          monthlyPremium: monthlyPremium
-            ? parseFloat(monthlyPremium)
-            : undefined,
-          expectedCommission: expectedCommission
-            ? parseFloat(expectedCommission)
-            : undefined,
-          notes: productNotes,
-        };
-
-        const result = await createOpportunityProduct(
-          clientId,
-          user.id,
-          productData
-        );
-
-        return result;
-      } catch (error) {
-        console.error('❌ 상품 정보 생성 실패:', error);
-        return {
-          success: false,
-          message: '상품 정보 생성에 실패했습니다.',
-          error: error instanceof Error ? error.message : '알 수 없는 오류',
-        };
-      }
     }
 
     default:
