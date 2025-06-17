@@ -132,7 +132,7 @@ function LiquidGlassButton({
   return (
     <Link
       to={href}
-      className={`relative flex flex-col items-center justify-center transition-all duration-300 w-16 px-1 py-2 group ${
+      className={`relative flex flex-col items-center justify-center transition-all duration-700 ease-in-out w-16 px-1 py-2 group ${
         isMinimized ? 'min-h-[48px]' : 'min-h-[64px]'
       }`}
       onTouchStart={() => {
@@ -143,29 +143,108 @@ function LiquidGlassButton({
       {/* 리퀴드글래스 액티브 백그라운드 - 플로팅 스타일 */}
       {isActive && (
         <motion.div
-          className={`absolute transition-all duration-300 liquid-glass-button ${
+          className={`absolute liquid-glass-button ${
             isMinimized 
-              ? 'top-1 bottom-1 left-1/2 transform -translate-x-1/2 w-10 h-10 rounded-full' 
+              ? 'w-8 h-8 rounded-full' 
               : 'left-0 right-0 top-1.5 bottom-1.5 rounded-2xl'
           }`}
+          style={{
+            ...(isMinimized && {
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+            }),
+            boxShadow: isMinimized 
+              ? '0 4px 16px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3)'
+              : '0 6px 20px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+          }}
           layoutId="liquidGlassIndicator"
+          initial={false}
+          animate={{
+            scale: [0.9, 1.1, 1],
+            opacity: [0.7, 1, 1],
+          }}
           transition={{
             type: "spring",
-            stiffness: 350,
-            damping: 30,
-            duration: 0.4,
-          }}
-          style={{
-            boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 4px 12px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+            stiffness: 200,
+            damping: 15,
+            mass: 0.5,
+            duration: 0.7,
+            layout: {
+              type: "spring",
+              stiffness: 250,
+              damping: 20,
+              mass: 0.4,
+              duration: 0.7,
+            },
+            scale: {
+              duration: 0.7,
+              ease: [0.23, 1, 0.32, 1],
+            },
+            opacity: {
+              duration: 0.4,
+            },
           }}
         >
           {/* 리퀴드 하이라이트 효과 */}
-          <div 
-            className={`absolute top-0 left-0 right-0 h-1/2 opacity-50 liquid-glass-highlight ${
+          <motion.div 
+            className={`absolute top-0 left-0 right-0 h-1/2 opacity-40 liquid-glass-highlight ${
               isMinimized ? 'rounded-t-full' : 'rounded-t-2xl'
             }`}
+            animate={{
+              scale: [1, 1.05, 1],
+              opacity: [0.4, 0.6, 0.4],
+            }}
+            transition={{
+              duration: 1.4,
+              ease: "easeInOut",
+              repeat: Infinity,
+              repeatType: "reverse",
+            }}
           />
-          {/* 바텀 글로우 제거 - 보더 바텀 효과 없애기 */}
+          
+          {/* 물방울 중심 펄스 효과 */}
+          <motion.div
+            className={`absolute inset-0 ${
+              isMinimized ? 'rounded-full' : 'rounded-2xl'
+            }`}
+            style={{
+              background: 'radial-gradient(circle, rgba(59, 130, 246, 0.4) 0%, rgba(59, 130, 246, 0.15) 60%, transparent 100%)',
+            }}
+            animate={{
+              scale: [0.8, 1.3, 0.8],
+              opacity: [0.6, 0.2, 0.6],
+            }}
+            transition={{
+              duration: 2,
+              ease: "easeInOut",
+              repeat: Infinity,
+              repeatType: "reverse",
+            }}
+          />
+          
+          {/* 외곽 리플 효과 */}
+          <motion.div
+            className={`absolute ${
+              isMinimized 
+                ? '-inset-1 rounded-full' 
+                : '-inset-0.5 rounded-3xl'
+            }`}
+            style={{
+              background: 'linear-gradient(45deg, rgba(59, 130, 246, 0.1), rgba(147, 197, 253, 0.1))',
+              border: '1px solid rgba(59, 130, 246, 0.2)',
+            }}
+            animate={{
+              scale: [1, 1.1, 1],
+              opacity: [0.3, 0.1, 0.3],
+            }}
+            transition={{
+              duration: 1.8,
+              ease: "easeInOut",
+              repeat: Infinity,
+              repeatType: "reverse",
+            }}
+          />
         </motion.div>
       )}
 
@@ -179,7 +258,7 @@ function LiquidGlassButton({
         }}
       >
         <Icon 
-          className={`transition-all duration-300 ${
+          className={`transition-all duration-700 ease-in-out ${
             isMinimized ? 'h-4 w-4 mb-0' : 'h-5 w-5 mb-1'
           } ${
             isActive 
@@ -188,7 +267,7 @@ function LiquidGlassButton({
           }`} 
         />
         <span 
-          className={`text-[10px] font-medium transition-all duration-300 text-center leading-tight ${
+          className={`text-[10px] font-medium transition-all duration-700 ease-in-out text-center leading-tight ${
             isMinimized ? 'opacity-0 scale-0 h-0' : 'opacity-100 scale-100'
           } ${
             isActive 
@@ -212,8 +291,8 @@ export function BottomTabNavigation({ isMenuOpen }: BottomTabNavigationProps) {
     <nav 
       className={`fixed bottom-0 left-0 right-0 ${
         isMenuOpen ? 'z-30' : 'z-40'
-      } lg:hidden transition-all duration-500 ease-out ${
-        isMinimized ? 'px-16 pb-4' : 'px-8 pb-4'
+      } lg:hidden transition-all duration-700 ease-in-out ${
+        isMinimized ? 'px-20 pb-4' : 'px-8 pb-4'
       }`}
     >
       {/* 향상된 백드롭 블러 - 자연스러운 페이드 효과 */}
@@ -264,7 +343,7 @@ export function BottomTabNavigation({ isMenuOpen }: BottomTabNavigationProps) {
         />
         
         {/* 네비게이션 버튼들 */}
-        <div className={`relative flex items-center justify-center gap-2 px-2 transition-all duration-500 ease-out pb-safe ${
+        <div className={`relative flex items-center justify-center gap-2 px-2 transition-all duration-700 ease-in-out pb-safe ${
           isMinimized ? 'min-h-[48px] px-4' : 'py-0 min-h-[64px]'
         }`}>
           {navigationItems.map((item, index) => {
