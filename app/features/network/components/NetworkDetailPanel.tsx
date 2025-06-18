@@ -25,6 +25,7 @@ import {
 } from '~/common/components/ui/card';
 import { Separator } from '~/common/components/ui/separator';
 import { Link } from 'react-router';
+import { cn } from '~/lib/utils';
 import type { NetworkNode, NetworkLink, NetworkData } from '../types';
 
 interface NetworkDetailPanelProps {
@@ -218,7 +219,7 @@ export default function NetworkDetailPanel({
 
   return (
     <div
-      className="w-full border-l h-full bg-background flex flex-col"
+      className={cn('w-full', 'h-full bg-background flex flex-col', 'lg:border-l')}
       style={{ maxHeight: '100%' }}
     >
       <div className="p-4 flex-shrink-0">

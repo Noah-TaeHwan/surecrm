@@ -750,7 +750,7 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
           </div>
 
           {/* 좌측 슬라이드인 필터 사이드바 - 데스크톱과 동일한 UI */}
-          {isFilterExpanded && (
+          {isHydrated && isFilterExpanded && (
             <>
               {/* 백드롭 */}
               <div
@@ -822,8 +822,8 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
               <div 
                 className="relative transition-all duration-300 ease-in-out"
                 style={{
-                  height: selectedNode ? '35vh' : '48vh', // 필터 버튼 영역 고려해 높이 감소
-                  minHeight: selectedNode ? '280px' : '350px',
+                  height: selectedNode ? '30vh' : '45vh', // 필터 버튼 영역 고려해 높이 감소
+                  minHeight: selectedNode ? '250px' : '300px',
                   maxHeight: selectedNode ? '40vh' : '52vh',
                 }}
               >
