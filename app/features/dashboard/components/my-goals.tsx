@@ -256,13 +256,13 @@ export function MyGoals({
                           : 'border-border/30 hover:bg-accent/20'
                       }`}
                     >
-                      <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between mb-2">
-                        <div className="flex items-center gap-2">
+                      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between mb-2">
+                        <div className="flex items-center gap-2 md:flex-1 md:min-w-0">
                           <span className="text-xl">
                             {getGoalIcon(goal.goalType)}
                           </span>
-                          <div>
-                            <p className="text-sm font-medium text-foreground">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-foreground md:text-base">
                               {goal.title || getGoalTypeLabel(goal.goalType)}
                             </p>
                             <p
@@ -277,7 +277,7 @@ export function MyGoals({
                             </p>
                           </div>
                         </div>
-                        <div className="flex flex-row justify-between items-center w-full">
+                        <div className="flex flex-row justify-between items-center w-full md:w-auto md:gap-4">
                           <div>
                             <p className="text-sm font-medium text-foreground">
                               {formatValue(goal.currentValue, goal.goalType)}
