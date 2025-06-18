@@ -4,10 +4,6 @@ import {
   Users,
   TrendingUp,
   AlertCircle,
-  ChevronLeft,
-  ChevronRight,
-  Eye,
-  EyeOff,
   ChevronDown,
   ChevronUp,
 } from 'lucide-react';
@@ -17,8 +13,6 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
 } from '~/common/components/ui/carousel';
 import { useViewport } from '~/common/hooks/useViewport';
 
@@ -193,33 +187,26 @@ export function PipelineBoard({
     }
   };
 
-  // 🎯 개별 칸반 컬럼 렌더링 함수
-  const renderKanbanColumn = (stage: PipelineStage & {
-    stats: { clientCount: number; highImportanceCount: number };
-  }) => {
+  // 🎯 모바일 칸반 컬럼 렌더링 함수
+  const renderMobileKanbanColumn = (
+    stage: PipelineStage & {
+      stats: { clientCount: number; highImportanceCount: number };
+    }
+  ) => {
     const isDragTarget = draggingOver === stage.id;
     const canDrop = draggedClientId && dragSourceStageId.current !== stage.id;
     const stageClients = clientsByStage[stage.id] || [];
-    const isCollapsed = collapsedStages[stage.id];
 
     return (
       <div
         key={stage.id}
-        className={`flex flex-col transition-all duration-200 ${
-          isMobile 
-            ? 'h-full w-full px-4' // 모바일: 전체 높이와 폭 + 좌우 패딩
-            : 'min-w-[300px] h-full' // 데스크톱: 최소 폭 + 전체 높이
-        } ${isDragTarget && canDrop ? 'transform scale-[1.02]' : ''}`}
+        className="w-full px-4 flex flex-col h-full transition-all duration-200"
         onDragOver={e => handleDragOver(e, stage.id)}
         onDragLeave={handleDragLeave}
         onDrop={e => handleDrop(e, stage.id)}
       >
         {/* 🎯 Sticky 단계 헤더 (모바일에서만 sticky) */}
-        <div className={`flex-shrink-0 mb-4 ${
-          isMobile 
-            ? 'sticky top-0 z-20 bg-background/95 backdrop-blur-sm border-b border-border pb-4' 
-            : ''
-        }`}>
+        <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-sm border-b border-border pb-4 flex-shrink-0 mb-4">
           <div
             className={`flex flex-col p-4 rounded-lg border bg-card transition-all duration-200 ${
               isDragTarget && canDrop
@@ -227,7 +214,7 @@ export function PipelineBoard({
                 : 'border-border'
             }`}
           >
-            {/* 단계 제목과 버튼들 */}
+            {/* 단계 제목 */}
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center space-x-3 min-w-0 flex-1">
                 <div
@@ -238,34 +225,13 @@ export function PipelineBoard({
                   {stage.name}
                 </h3>
               </div>
-
-              {/* 🎯 카드 접기/펼치기 버튼 (데스크톱에서만) */}
-              {!isMobile && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => toggleStageCards(stage.id)}
-                  className="h-8 w-8 p-0 hover:bg-muted transition-colors duration-200"
-                  title={
-                    isCollapsed ? '고객 카드 보기' : '고객 카드 숨기기'
-                  }
-                >
-                  {isCollapsed ? (
-                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                  ) : (
-                    <ChevronUp className="h-4 w-4 text-muted-foreground" />
-                  )}
-                </Button>
-              )}
             </div>
 
             {/* 단계별 통계 */}
             <div className="flex items-center justify-between text-sm">
               <div className="flex items-center space-x-2 text-muted-foreground">
                 <Users className="h-3 w-3" />
-                <span className="font-medium">
-                  {stage.stats.clientCount}명
-                </span>
+                <span className="font-medium">{stage.stats.clientCount}명</span>
               </div>
               {stage.stats.highImportanceCount > 0 && (
                 <div className="flex items-center space-x-1">
@@ -280,52 +246,21 @@ export function PipelineBoard({
         </div>
 
         {/* 🎯 스크롤 가능한 고객 카드 컨테이너 */}
-        <div className={`flex-1 min-h-0 ${
-          isMobile 
-            ? 'overflow-y-auto overflow-x-hidden' // 모바일: 세로 스크롤만 허용
-            : 'overflow-hidden' // 데스크톱: 기존 동작 유지
-        }`}>
+        <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide">
           <div
-            className={`space-y-3 p-2 rounded-lg transition-all duration-200 ${
-              isMobile 
-                ? 'pb-6' // 모바일: 하단 패딩만 유지
-                : 'h-full overflow-y-auto scrollbar-hide' // 데스크톱: 기존 스크롤
-            } ${
+            className={`space-y-3 p-4 pb-16 rounded-lg transition-all duration-200 ${
               isDragTarget && canDrop
                 ? 'bg-primary/5 border-2 border-dashed border-primary'
                 : 'bg-transparent'
             }`}
           >
-            {isCollapsed && !isMobile ? (
-              /* 🎯 데스크톱에서 카드들이 접힌 상태 */
-              <div className="flex flex-col items-center justify-center h-32 bg-muted/20 border border-border rounded-lg">
-                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center mb-2">
-                  <Users className="h-4 w-4 text-muted-foreground" />
-                </div>
-                <p className="text-sm font-medium text-foreground">
-                  {getStageDisplayText(stage)}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  카드가 숨겨짐
-                </p>
-
-                {/* 접힌 상태에서도 드래그 앤 드롭 지원 */}
-                {isDragTarget && canDrop && (
-                  <div className="mt-2 text-xs text-primary font-medium">
-                    {stage.name}로 이동
-                  </div>
-                )}
-              </div>
-            ) : /* 🎯 일반 상태: 모든 고객 카드들 표시 */
-            stageClients.length > 0 ? (
+            {stageClients.length > 0 ? (
               stageClients.map(client => (
                 <div
                   key={client.id}
                   id={`client-card-${client.id}`}
                   draggable
-                  onDragStart={e =>
-                    handleDragStart(e, client.id, stage.id)
-                  }
+                  onDragStart={e => handleDragStart(e, client.id, stage.id)}
                   onDragEnd={handleDragEnd}
                   className={`transition-all duration-200 cursor-grab active:cursor-grabbing ${
                     client.id === draggedClientId
@@ -340,9 +275,7 @@ export function PipelineBoard({
                         ? client.tags.join(', ')
                         : client.tags
                     }
-                    createdAt={
-                      client.createdAt || new Date().toISOString()
-                    }
+                    createdAt={client.createdAt || new Date().toISOString()}
                     insuranceInfo={
                       Array.isArray(client.insuranceInfo)
                         ? client.insuranceInfo[0]
@@ -355,9 +288,7 @@ export function PipelineBoard({
                     onEditOpportunity={onEditOpportunity}
                     products={client.products}
                     totalMonthlyPremium={client.totalMonthlyPremium}
-                    totalExpectedCommission={
-                      client.totalExpectedCommission
-                    }
+                    totalExpectedCommission={client.totalExpectedCommission}
                   />
                 </div>
               ))
@@ -403,33 +334,220 @@ export function PipelineBoard({
         <div className="flex-1 overflow-hidden">
           <Carousel
             opts={{
-              align: "start",
+              align: 'start',
               loop: false,
-              containScroll: "trimSnaps", // 🎯 스냅 포인트 최적화
+              containScroll: 'trimSnaps', // 🎯 스냅 포인트 최적화
               dragFree: false, // 🎯 자유 드래그 비활성화로 스냅 강제
               skipSnaps: false, // 🎯 스냅 건너뛰기 비활성화
             }}
             className="w-full h-full"
           >
             <CarouselContent className="h-full -ml-1">
-              {stages.map((stage) => (
+              {stages.map(stage => (
                 <CarouselItem key={stage.id} className="pl-1 basis-full h-full">
-                  {renderKanbanColumn(stage)}
+                  {renderMobileKanbanColumn(stage)}
                 </CarouselItem>
               ))}
             </CarouselContent>
-            
-            {/* 🎯 캐러셀 네비게이션 버튼 */}
-            <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10" />
-            <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 z-10" />
           </Carousel>
         </div>
       ) : (
-        /* 🎯 데스크톱: 기존 그리드 레이아웃 */
-        <div className="flex-1 overflow-hidden">
-          <div className="min-w-max overflow-x-auto h-full scrollbar-hide">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 h-full">
-              {stages.map(renderKanbanColumn)}
+        /* 🎯 데스크톱: 컬럼 제목 고정 + 개별 스크롤 레이아웃 */
+        <div className="flex-1 overflow-hidden flex flex-col">
+          {/* 🎯 컬럼 제목들 고정 영역 */}
+          <div className="flex-shrink-0 bg-background border-b border-border pb-4">
+            <div className="min-w-max overflow-x-auto scrollbar-hide">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 ">
+                {stages.map(stage => (
+                  <div key={`header-${stage.id}`} className="min-w-[300px]">
+                    <div className="flex flex-col p-4 rounded-lg border bg-card">
+                      {/* 단계 제목과 버튼들 */}
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center space-x-3 min-w-0 flex-1">
+                          <div
+                            className="w-3 h-3 rounded-full flex-shrink-0"
+                            style={{ backgroundColor: stage.color }}
+                          />
+                          <h3 className="font-semibold text-foreground text-base truncate">
+                            {stage.name}
+                          </h3>
+                        </div>
+
+                        {/* 🎯 카드 접기/펼치기 버튼 */}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => toggleStageCards(stage.id)}
+                          className="h-8 w-8 p-0 hover:bg-muted transition-colors duration-200"
+                          title={
+                            collapsedStages[stage.id]
+                              ? '고객 카드 보기'
+                              : '고객 카드 숨기기'
+                          }
+                        >
+                          {collapsedStages[stage.id] ? (
+                            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                          ) : (
+                            <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                          )}
+                        </Button>
+                      </div>
+
+                      {/* 단계별 통계 */}
+                      <div className="flex items-center justify-between text-sm">
+                        <div className="flex items-center space-x-2 text-muted-foreground">
+                          <Users className="h-3 w-3" />
+                          <span className="font-medium">
+                            {stage.stats.clientCount}명
+                          </span>
+                        </div>
+                        {stage.stats.highImportanceCount > 0 && (
+                          <div className="flex items-center space-x-1">
+                            <AlertCircle className="h-3 w-3 text-red-500" />
+                            <span className="text-xs text-red-600 font-medium">
+                              중요 {stage.stats.highImportanceCount}명
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* 🎯 컬럼 내용들 스크롤 영역 */}
+          <div className="flex-1 overflow-hidden">
+            <div className="h-full overflow-hidden">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 pt-4" style={{ height: 'calc(100vh - 20rem)' }}>
+                {stages.map(stage => {
+                  const isDragTarget = draggingOver === stage.id;
+                  const canDrop =
+                    draggedClientId && dragSourceStageId.current !== stage.id;
+                  const stageClients = clientsByStage[stage.id] || [];
+                  const isCollapsed = collapsedStages[stage.id];
+
+                  return (
+                    <div
+                      key={`content-${stage.id}`}
+                      className="min-w-[300px] flex flex-col"
+                      style={{ height: 'calc(100vh - 20rem)' }}
+                      onDragOver={e => handleDragOver(e, stage.id)}
+                      onDragLeave={handleDragLeave}
+                      onDrop={e => handleDrop(e, stage.id)}
+                    >
+                      {/* 🎯 개별 컬럼 스크롤 가능한 카드 컨테이너 */}
+                      <div className="overflow-y-auto scrollbar-hide" style={{ height: 'calc(100vh - 20rem)' }}>
+                        <div
+                          className={`space-y-3 p-4 pb-16 rounded-lg transition-all duration-200 ${
+                            isDragTarget && canDrop
+                              ? 'bg-primary/5 border-2 border-dashed border-primary'
+                              : 'bg-transparent'
+                          }`}
+                        >
+                          {isCollapsed ? (
+                            /* 🎯 카드들이 접힌 상태 */
+                            <div className="flex flex-col items-center justify-center h-32 bg-muted/20 border border-border rounded-lg">
+                              <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center mb-2">
+                                <Users className="h-4 w-4 text-muted-foreground" />
+                              </div>
+                              <p className="text-sm font-medium text-foreground">
+                                {getStageDisplayText(stage)}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                카드가 숨겨짐
+                              </p>
+
+                              {/* 접힌 상태에서도 드래그 앤 드롭 지원 */}
+                              {isDragTarget && canDrop && (
+                                <div className="mt-2 text-xs text-primary font-medium">
+                                  {stage.name}로 이동
+                                </div>
+                              )}
+                            </div>
+                          ) : /* 🎯 일반 상태: 모든 고객 카드들 표시 */
+                          stageClients.length > 0 ? (
+                            stageClients.map(client => (
+                              <div
+                                key={client.id}
+                                id={`client-card-${client.id}`}
+                                draggable
+                                onDragStart={e =>
+                                  handleDragStart(e, client.id, stage.id)
+                                }
+                                onDragEnd={handleDragEnd}
+                                className={`transition-all duration-200 cursor-grab active:cursor-grabbing ${
+                                  client.id === draggedClientId
+                                    ? 'opacity-50 transform rotate-1 scale-95 z-50'
+                                    : 'hover:transform hover:scale-[1.02] hover:shadow-md'
+                                }`}
+                              >
+                                <ClientCard
+                                  {...client}
+                                  tags={
+                                    Array.isArray(client.tags)
+                                      ? client.tags.join(', ')
+                                      : client.tags
+                                  }
+                                  createdAt={
+                                    client.createdAt || new Date().toISOString()
+                                  }
+                                  insuranceInfo={
+                                    Array.isArray(client.insuranceInfo)
+                                      ? client.insuranceInfo[0]
+                                      : client.insuranceInfo
+                                  }
+                                  referredBy={client.referredBy || undefined}
+                                  isDragging={client.id === draggedClientId}
+                                  onRemoveFromPipeline={onRemoveFromPipeline}
+                                  onCreateContract={onCreateContract}
+                                  onEditOpportunity={onEditOpportunity}
+                                  products={client.products}
+                                  totalMonthlyPremium={
+                                    client.totalMonthlyPremium
+                                  }
+                                  totalExpectedCommission={
+                                    client.totalExpectedCommission
+                                  }
+                                />
+                              </div>
+                            ))
+                          ) : (
+                            <div
+                              className={`flex flex-col items-center justify-center h-32 border-2 border-dashed rounded-lg transition-all duration-200 ${
+                                isDragTarget && canDrop
+                                  ? 'border-primary bg-primary/10 text-primary'
+                                  : 'border-border text-muted-foreground hover:border-muted-foreground/60 hover:bg-muted/20'
+                              }`}
+                            >
+                              {isDragTarget && canDrop ? (
+                                <>
+                                  <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center mb-2">
+                                    <TrendingUp className="h-5 w-5 text-primary" />
+                                  </div>
+                                  <p className="text-sm font-medium">
+                                    여기에 고객을 놓으세요
+                                  </p>
+                                </>
+                              ) : (
+                                <>
+                                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center mb-2">
+                                    <Users className="h-5 w-5 text-muted-foreground" />
+                                  </div>
+                                  <p className="text-sm text-muted-foreground">
+                                    고객이 없습니다
+                                  </p>
+                                </>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>

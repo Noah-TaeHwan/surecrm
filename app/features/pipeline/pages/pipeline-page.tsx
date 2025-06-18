@@ -30,6 +30,8 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
+  CarouselPrevious,
+  CarouselNext,
 } from '~/common/components/ui/carousel';
 import { useViewport } from '~/common/hooks/useViewport';
 import {
@@ -1251,7 +1253,7 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
   ];
 
   // 🎯 통계 카드 렌더링 함수
-  const renderStatsCard = (card: typeof statsCards[0]) => {
+  const renderStatsCard = (card: (typeof statsCards)[0]) => {
     const IconComponent = card.icon;
     const colorClasses: Record<StatsCardColor, string> = {
       blue: 'bg-blue-500/10 text-blue-600',
@@ -1284,271 +1286,392 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
     <MainLayout title="영업 파이프라인">
       <style>
         {`
-          main {
-            overflow: hidden !important;
+          /* 🎯 데스크톱 기존 스타일 복원 */
+          @media (min-width: 768px) {
+            main {
+              overflow: hidden !important;
+            }
           }
           
-          /* 🎯 모바일 칸반보드 전용 스타일 */
+          /* 🎯 모바일 스크롤 문제 해결 */
           @media (max-width: 767.98px) {
+            main {
+              overflow: auto !important;
+              height: auto !important;
+              max-height: none !important;
+            }
+            
             .pipeline-mobile-container {
-              height: calc(100vh - 4rem);
-              max-height: calc(100vh - 4rem);
-              overflow: hidden;
+              min-height: calc(100vh - 4rem);
+              height: auto;
+              overflow: visible;
               position: relative;
             }
             
             .pipeline-top-sections {
-              /* 스크롤 시 헤더 뒤로 숨겨질 수 있도록 */
-              position: relative;
+              position: sticky;
+              top: 0;
               z-index: 10;
               background: var(--background);
-              transition: transform 0.2s ease-in-out;
+              border-bottom: 1px solid var(--border);
+              margin-bottom: 1rem;
+              padding-bottom: 1rem;
             }
             
             .pipeline-carousel-container {
-              /* 캐러셀 컨테이너가 전체 화면 차지 */
-              height: 100%;
-              position: relative;
-              z-index: 5;
+              min-height: calc(100vh - 20rem);
+              overflow: visible;
             }
             
-            /* 🎯 캐러셀 내부 각 슬라이드에서 스크롤 처리 개선 */
+
+            
             .embla__slide {
-              height: 100% !important;
-              display: flex !important;
-              flex-direction: column !important;
-            }
-            
-            /* 🎯 각 슬라이드 내부 컨테이너 */
-            .embla__slide > div {
-              height: 100% !important;
-              display: flex !important;
-              flex-direction: column !important;
-            }
-            
-            /* 스크롤바 숨기기 (Webkit) */
-            .embla__slide::-webkit-scrollbar,
-            .overflow-y-auto::-webkit-scrollbar {
-              width: 4px;
-            }
-            
-            .embla__slide::-webkit-scrollbar-track,
-            .overflow-y-auto::-webkit-scrollbar-track {
-              background: transparent;
-            }
-            
-            .embla__slide::-webkit-scrollbar-thumb,
-            .overflow-y-auto::-webkit-scrollbar-thumb {
-              background: rgba(0, 0, 0, 0.2);
-              border-radius: 2px;
-            }
-            
-            .embla__slide::-webkit-scrollbar-thumb:hover,
-            .overflow-y-auto::-webkit-scrollbar-thumb:hover {
-              background: rgba(0, 0, 0, 0.3);
-            }
-            
-            /* 스크롤바 숨기기 (Firefox) */
-            .embla__slide,
-            .overflow-y-auto {
-              scrollbar-width: thin;
-              scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+              height: auto;
+              min-height: calc(100vh - 20rem);
+              overflow: visible;
+              padding: 0 0.5rem;
             }
           }
         `}
       </style>
-      <div 
-        className={`h-full flex flex-col gap-4 ${
-          isMobile ? 'pipeline-mobile-container' : ''
-        }`}
-        style={{
-          height: isMobile ? undefined : 'calc(100vh - 4rem - 1.5rem)',
-          maxHeight: isMobile ? undefined : 'calc(100vh - 4rem - 1.5rem)',
-          overflow: isMobile ? undefined : 'hidden',
-        }}
-      >
-        {/* 🎯 상단 컨트롤 섹션 (모바일에서 스크롤 시 헤더 뒤로 숨겨짐) */}
-        <div className={`${isMobile ? 'pipeline-top-sections' : 'flex-shrink-0'} ${isMobile ? '' : 'space-y-4'}`}>
-          {/* 🎯 MVP 통계 카드 - 반응형 (데스크톱: 그리드, 모바일: 캐러셀) */}
-          <div className={`${isMobile ? 'mb-4' : 'flex-shrink-0'}`}>
-            {isMobile ? (
-              // 🎯 모바일: 캐러셀
+      {/* 🎯 데스크톱과 모바일 조건부 렌더링 */}
+      {isMobile ? (
+        /* 🎯 모바일 레이아웃 */
+        <div className="pipeline-mobile-container space-y-4">
+          {/* 🎯 상단 고정 섹션 */}
+          <div className="pipeline-top-sections space-y-4">
+            {/* 🎯 MVP 통계 카드 - 모바일 캐러셀 */}
+            <div>
               <Carousel
                 opts={{
-                  align: "start",
+                  align: 'start',
                   loop: false,
                 }}
-                className="w-full"
+                className="w-full relative"
               >
-                <CarouselContent className="-ml-2 md:-ml-4">
-                  {statsCards.map((card) => (
-                    <CarouselItem key={card.id} className="pl-2 md:pl-4 basis-11/12">
+                <CarouselContent className="-ml-2">
+                  {statsCards.map(card => (
+                    <CarouselItem key={card.id} className="pl-2 basis-11/12">
                       {renderStatsCard(card)}
                     </CarouselItem>
                   ))}
                 </CarouselContent>
               </Carousel>
-            ) : (
-              // 🎯 데스크톱: 기존 그리드
+            </div>
+
+            {/* 🎯 액션 버튼 섹션 */}
+            <div className="flex items-center justify-start gap-3">
+              <Button
+                variant="default"
+                onClick={() => setExistingClientModalOpen(true)}
+                className="flex items-center gap-2"
+              >
+                <UserPlus className="h-4 w-4" />
+                <span>기존 고객 영업 기회 추가</span>
+              </Button>
+
+              <Button
+                onClick={() => setAddClientOpen(true)}
+                className="flex items-center gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                <span>신규 고객 추가</span>
+              </Button>
+            </div>
+
+            {/* 🎯 검색 및 필터 섹션 */}
+            <div className="flex items-center justify-start gap-6">
+              <div className="flex w-full max-w-md items-center space-x-2">
+                <div className="relative w-full">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="search"
+                    placeholder="고객명, 전화번호 검색..."
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    className="pl-10 w-full"
+                    autoComplete="off"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                {/* 활성 필터 표시 */}
+                {isFilterActive && (
+                  <div className="flex items-center gap-2">
+                    {searchQuery && (
+                      <Badge variant="secondary" className="text-xs">
+                        검색: {searchQuery}
+                      </Badge>
+                    )}
+                    {selectedImportance !== 'all' && (
+                      <Badge variant="secondary" className="text-xs">
+                        중요도:{' '}
+                        {selectedImportance === 'high'
+                          ? '높음'
+                          : selectedImportance === 'medium'
+                            ? '보통'
+                            : '낮음'}
+                      </Badge>
+                    )}
+                    {selectedReferrerId && (
+                      <Badge variant="secondary" className="text-xs">
+                        소개자:{' '}
+                        {
+                          potentialReferrers.find(
+                            r => r.id === selectedReferrerId
+                          )?.name
+                        }
+                      </Badge>
+                    )}
+                  </div>
+                )}
+
+                {/* 필터 드롭다운 메뉴 */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant={isFilterActive ? 'default' : 'outline'}
+                      className="flex items-center gap-2"
+                    >
+                      <SlidersHorizontal className="h-4 w-4" />
+                      <span>필터</span>
+                      {isFilterActive && (
+                        <Badge
+                          variant="destructive"
+                          className="ml-1 px-1 text-xs"
+                        >
+                          ●
+                        </Badge>
+                      )}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    className="w-[320px] p-4 bg-background"
+                    align="end"
+                    sideOffset={4}
+                  >
+                    <PipelineFilters
+                      referrers={potentialReferrers}
+                      selectedReferrerId={selectedReferrerId}
+                      onReferrerChange={setSelectedReferrerId}
+                      selectedImportance={selectedImportance}
+                      onImportanceChange={setSelectedImportance}
+                    />
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
+          </div>
+
+          {/* 🎯 칸반보드 메인 콘텐츠 - 모바일 스크롤 가능 */}
+          <div className="pipeline-carousel-container">
+            <PipelineBoard
+              stages={stages.map(stage => ({
+                ...stage,
+                stats: getStageStats(stage.id),
+              }))}
+              clients={filteredClients as unknown as Client[]}
+              onClientMove={handleClientMove}
+              onAddClientToStage={handleAddClientToStage}
+              onRemoveFromPipeline={handleRemoveFromPipeline}
+              onCreateContract={handleCreateContract}
+              onEditOpportunity={handleEditOpportunity}
+            />
+          </div>
+
+          {/* 필터 결과 안내 */}
+          {isFilterActive && (
+            <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border border-dashed">
+              <div className="flex items-center gap-2">
+                <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">
+                  필터 적용됨: {filteredClients.length}명의 고객이 표시되고
+                  있습니다
+                </span>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setSearchQuery('');
+                  setSelectedReferrerId(null);
+                  setSelectedImportance('all');
+                }}
+              >
+                필터 초기화
+              </Button>
+            </div>
+          )}
+        </div>
+      ) : (
+        /* 🎯 데스크톱 레이아웃 - 기존 방식 복원 */
+        <div
+          className="h-full flex flex-col gap-4"
+          style={{
+            height: 'calc(100vh - 4rem - 1.5rem)',
+            maxHeight: 'calc(100vh - 4rem - 1.5rem)',
+            overflow: 'hidden',
+          }}
+        >
+          {/* 🎯 상단 컨트롤 섹션 - 데스크톱 기존 방식 */}
+          <div className="flex-shrink-0 space-y-4">
+            {/* 🎯 MVP 통계 카드 - 데스크톱 그리드 */}
+            <div className="flex-shrink-0">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
                 {statsCards.map(renderStatsCard)}
               </div>
-            )}
-          </div>
+            </div>
 
-          {/* 🎯 액션 버튼 섹션 */}
-          <div className={`flex items-center justify-start md:justify-end gap-3 ${isMobile ? 'mb-4' : 'flex-shrink-0'}`}>
-            {/* 🚀 기존 고객 새 영업 기회 버튼 */}
-            <Button
-              variant="default"
-              onClick={() => setExistingClientModalOpen(true)}
-              className="flex items-center gap-2"
-            >
-              <UserPlus className="h-4 w-4" />
-              <span>기존 고객 영업 기회 추가</span>
-            </Button>
+            {/* 🎯 버튼과 검색을 같은 높이로 배치 - 데스크톱 */}
+            <div className="flex items-center justify-between gap-4 flex-shrink-0">
+              {/* 왼쪽: 검색 및 필터 */}
+              <div className="flex items-center gap-6">
+                <div className="flex w-full max-w-md items-center space-x-2">
+                  <div className="relative w-full">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      type="search"
+                      placeholder="고객명, 전화번호 검색..."
+                      value={searchQuery}
+                      onChange={e => setSearchQuery(e.target.value)}
+                      className="pl-10 w-full"
+                      autoComplete="off"
+                    />
+                  </div>
+                </div>
 
-            {/* 고객 추가 버튼 */}
-            <Button
-              onClick={() => {
-                setAddClientOpen(true);
-              }}
-              className="flex items-center gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              <span>신규 고객 추가</span>
-            </Button>
-          </div>
+                <div className="flex items-center gap-3">
+                  {/* 활성 필터 표시 */}
+                  {isFilterActive && (
+                    <div className="flex items-center gap-2">
+                      {searchQuery && (
+                        <Badge variant="secondary" className="text-xs">
+                          검색: {searchQuery}
+                        </Badge>
+                      )}
+                      {selectedImportance !== 'all' && (
+                        <Badge variant="secondary" className="text-xs">
+                          중요도:{' '}
+                          {selectedImportance === 'high'
+                            ? '높음'
+                            : selectedImportance === 'medium'
+                              ? '보통'
+                              : '낮음'}
+                        </Badge>
+                      )}
+                      {selectedReferrerId && (
+                        <Badge variant="secondary" className="text-xs">
+                          소개자:{' '}
+                          {
+                            potentialReferrers.find(
+                              r => r.id === selectedReferrerId
+                            )?.name
+                          }
+                        </Badge>
+                      )}
+                    </div>
+                  )}
 
-          {/* 🎯 검색 및 필터 섹션 */}
-          <div className={`flex items-center justify-start gap-6 ${isMobile ? 'mb-4' : 'flex-shrink-0'}`}>
-            <div className="flex w-full max-w-md items-center space-x-2">
-              <div className="relative w-full">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="search"
-                  placeholder="고객명, 전화번호 검색..."
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  className="pl-10 w-full"
-                  autoComplete="off"
-                />
+                  {/* 필터 드롭다운 메뉴 */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant={isFilterActive ? 'default' : 'outline'}
+                        className="flex items-center gap-2"
+                      >
+                        <SlidersHorizontal className="h-4 w-4" />
+                        <span>필터</span>
+                        {isFilterActive && (
+                          <Badge
+                            variant="destructive"
+                            className="ml-1 px-1 text-xs"
+                          >
+                            ●
+                          </Badge>
+                        )}
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      className="w-[320px] p-4 bg-background"
+                      align="end"
+                      sideOffset={4}
+                    >
+                      <PipelineFilters
+                        referrers={potentialReferrers}
+                        selectedReferrerId={selectedReferrerId}
+                        onReferrerChange={setSelectedReferrerId}
+                        selectedImportance={selectedImportance}
+                        onImportanceChange={setSelectedImportance}
+                      />
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </div>
+
+              {/* 오른쪽: 액션 버튼들 */}
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="default"
+                  onClick={() => setExistingClientModalOpen(true)}
+                  className="flex items-center gap-2"
+                >
+                  <UserPlus className="h-4 w-4" />
+                  <span>기존 고객 영업 기회 추가</span>
+                </Button>
+
+                <Button
+                  onClick={() => setAddClientOpen(true)}
+                  className="flex items-center gap-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  <span>신규 고객 추가</span>
+                </Button>
               </div>
             </div>
-
-            <div className="flex items-center gap-3">
-              {/* 활성 필터 표시 */}
-              {isFilterActive && (
-                <div className="flex items-center gap-2">
-                  {searchQuery && (
-                    <Badge variant="secondary" className="text-xs">
-                      검색: {searchQuery}
-                    </Badge>
-                  )}
-                  {selectedImportance !== 'all' && (
-                    <Badge variant="secondary" className="text-xs">
-                      중요도:{' '}
-                      {selectedImportance === 'high'
-                        ? '높음'
-                        : selectedImportance === 'medium'
-                          ? '보통'
-                          : '낮음'}
-                    </Badge>
-                  )}
-                  {selectedReferrerId && (
-                    <Badge variant="secondary" className="text-xs">
-                      소개자:{' '}
-                      {
-                        potentialReferrers.find(
-                          r => r.id === selectedReferrerId
-                        )?.name
-                      }
-                    </Badge>
-                  )}
-                </div>
-              )}
-
-              {/* 필터 드롭다운 메뉴 */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant={isFilterActive ? 'default' : 'outline'}
-                    className="flex items-center gap-2"
-                  >
-                    <SlidersHorizontal className="h-4 w-4" />
-                    <span>필터</span>
-                    {isFilterActive && (
-                      <Badge
-                        variant="destructive"
-                        className="ml-1 px-1 text-xs"
-                      >
-                        ●
-                      </Badge>
-                    )}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  className="w-[320px] p-4 bg-background"
-                  align="end"
-                  sideOffset={4}
-                >
-                  <PipelineFilters
-                    referrers={potentialReferrers}
-                    selectedReferrerId={selectedReferrerId}
-                    onReferrerChange={setSelectedReferrerId}
-                    selectedImportance={selectedImportance}
-                    onImportanceChange={setSelectedImportance}
-                  />
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
           </div>
-        </div>
 
-        {/* 🎯 칸반보드 메인 콘텐츠 - 모바일/데스크톱 반응형 */}
-        <div className={`${
-          isMobile 
-            ? 'pipeline-carousel-container' // 모바일: 전체 화면 차지
-            : 'flex-1 min-h-0 overflow-hidden' // 데스크톱: 기존 스크롤 영역
-        }`}>
-          <PipelineBoard
-            stages={stages.map(stage => ({
-              ...stage,
-              stats: getStageStats(stage.id),
-            }))}
-            clients={filteredClients as unknown as Client[]}
-            onClientMove={handleClientMove}
-            onAddClientToStage={handleAddClientToStage}
-            onRemoveFromPipeline={handleRemoveFromPipeline}
-            onCreateContract={handleCreateContract} // 🏢 계약 전환 핸들러 전달
-            onEditOpportunity={handleEditOpportunity} // 🏢 영업 기회 편집 핸들러 전달
-          />
-        </div>
-
-        {/* 필터 결과 안내 */}
-        {isFilterActive && (
-          <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border border-dashed">
-            <div className="flex items-center gap-2">
-              <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium">
-                필터 적용됨: {filteredClients.length}명의 고객이 표시되고
-                있습니다
-              </span>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                setSearchQuery('');
-                setSelectedReferrerId(null);
-                setSelectedImportance('all');
-              }}
-            >
-              필터 초기화
-            </Button>
+          {/* 🎯 칸반보드 메인 콘텐츠 - 데스크톱 기존 스크롤 영역 */}
+          <div className="flex-1 min-h-0 overflow-hidden">
+            <PipelineBoard
+              stages={stages.map(stage => ({
+                ...stage,
+                stats: getStageStats(stage.id),
+              }))}
+              clients={filteredClients as unknown as Client[]}
+              onClientMove={handleClientMove}
+              onAddClientToStage={handleAddClientToStage}
+              onRemoveFromPipeline={handleRemoveFromPipeline}
+              onCreateContract={handleCreateContract}
+              onEditOpportunity={handleEditOpportunity}
+            />
           </div>
-        )}
-      </div>
+
+          {/* 필터 결과 안내 */}
+          {isFilterActive && (
+            <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border border-dashed flex-shrink-0">
+              <div className="flex items-center gap-2">
+                <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">
+                  필터 적용됨: {filteredClients.length}명의 고객이 표시되고
+                  있습니다
+                </span>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setSearchQuery('');
+                  setSelectedReferrerId(null);
+                  setSelectedImportance('all');
+                }}
+              >
+                필터 초기화
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* 신규 고객 추가 모달 */}
       <AddClientModal
