@@ -216,27 +216,6 @@ export default function NetworkSidebar({
     return activeFilters;
   };
 
-  // 모바일 뷰를 위한 필터 버튼
-  const FilterMobileTrigger = () => (
-    <Button
-      variant="outline"
-      size="sm"
-      className="flex items-center gap-2 md:hidden"
-      onClick={() => setIsFilterOpen(!isFilterOpen)}
-    >
-      <Filter size={16} />
-      <span className="text-base">필터</span>
-      {activeFilterCount > 0 && (
-        <Badge
-          variant="secondary"
-          className="h-5 w-5 p-0 flex items-center justify-center"
-        >
-          {activeFilterCount}
-        </Badge>
-      )}
-    </Button>
-  );
-
   // 필터 컨텐츠 (데스크톱 및 모바일)
   const FilterContent = () => (
     <>
@@ -559,57 +538,10 @@ export default function NetworkSidebar({
     </>
   );
 
-  // 모바일 뷰에서는 필터 패널이 슬라이드 인/아웃되는 형태로 구현
-  if (isMobile) {
-    return (
-      <>
-        <FilterMobileTrigger />
-
-        <div
-          className={cn(
-            'fixed inset-y-0 left-0 z-50 w-full max-w-[280px] bg-background shadow-lg transition-transform duration-300 flex flex-col h-full border-r',
-            isFilterOpen ? 'translate-x-0' : '-translate-x-full'
-          )}
-        >
-          <div className="p-4 flex-1 flex flex-col h-full overflow-hidden">
-            <div className="flex items-center justify-between pb-3">
-              <h2 className="text-base font-medium">필터</h2>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsFilterOpen(false)}
-              >
-                <X size={18} />
-              </Button>
-            </div>
-            <div className="flex-1 flex flex-col h-full overflow-hidden">
-              <FilterContent />
-            </div>
-          </div>
-        </div>
-
-        {/* 배경 오버레이 */}
-        {isFilterOpen && (
-          <div
-            className="fixed inset-0 z-40 bg-black/40"
-            onClick={() => setIsFilterOpen(false)}
-          />
-        )}
-      </>
-    );
-  }
-
-  // 데스크톱 뷰에서는 사이드바 형태로 표시
+  // 항상 FilterContent만 렌더링 (모바일/데스크톱 구분 없이)
   return (
-    <div
-      className={cn(
-        'hidden md:flex h-full border-r bg-background flex-col',
-        !cssLoaded && 'invisible' // 스타일이 로드될 때까지 일시적으로 감춤
-      )}
-    >
-      <div className="p-4 flex-1 flex flex-col h-full overflow-hidden">
-        <FilterContent />
-      </div>
+    <div className="p-4 flex-1 flex flex-col h-full overflow-hidden">
+      <FilterContent />
     </div>
   );
 }

@@ -749,7 +749,7 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
             </button>
           </div>
 
-          {/* 필터 모달 패널 - 데스크톱과 동일한 UI */}
+          {/* 좌측 슬라이드인 필터 사이드바 - 데스크톱과 동일한 UI */}
           {isFilterExpanded && (
             <>
               {/* 백드롭 */}
@@ -758,13 +758,13 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
                 onClick={() => setIsFilterExpanded(false)}
               />
               
-              {/* 필터 모달 패널 */}
+              {/* 좌측 슬라이드인 사이드바 */}
               <div
-                className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 bg-background border border-border rounded-lg shadow-2xl animate-slide-in-left"
+                className="fixed top-0 left-0 bottom-0 z-50 bg-background border-r border-border shadow-2xl animate-slide-in-left"
                 style={{
-                  width: '320px',
-                  maxHeight: '80vh',
-                  overflow: 'hidden',
+                  width: '280px', // 데스크톱과 동일한 너비
+                  paddingTop: 'calc(4rem + env(safe-area-inset-top, 0px))', // 헤더 높이 고려
+                  paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)',
                 }}
               >
                 {/* 헤더 */}
@@ -784,7 +784,7 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
                 </div>
 
                 {/* 데스크톱과 동일한 필터 콘텐츠 */}
-                <div className="overflow-y-auto" style={{ maxHeight: 'calc(80vh - 4rem)' }}>
+                <div className="flex-1 overflow-y-auto">
                   <NetworkSidebar
                     filters={filterSettings}
                     onFilterChange={handleFilterChange}
