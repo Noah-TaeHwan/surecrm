@@ -203,7 +203,7 @@ export function PerformanceKPICards({
 
   return (
     <TooltipProvider>
-      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4 lg:gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-3 md:gap-4 lg:gap-6">
         {kpiItems.map((item, index) => {
           const changeIndicator = getChangeIndicator(item.change);
           const IconComponent = item.icon;
@@ -281,7 +281,7 @@ export function PerformanceKPICards({
                     
                     {/* 모바일: 값과 증가율을 별도 줄로 분리 */}
                     <div className="flex flex-col md:flex-row items-center md:items-baseline md:gap-2">
-                      <p className="text-lg md:text-2xl font-bold text-foreground truncate">
+                      <p className="text-base md:text-xl lg:text-2xl font-bold text-foreground truncate">
                         {typeof item.value === 'number'
                           ? item.value.toLocaleString()
                           : item.value}

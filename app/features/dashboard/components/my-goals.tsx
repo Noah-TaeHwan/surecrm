@@ -277,7 +277,7 @@ export function MyGoals({
                             </p>
                           </div>
                         </div>
-                        <div className="flex flex-row justify-between items-center w-full md:w-auto md:gap-4">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center w-full md:w-auto gap-1 sm:gap-4 mt-1 sm:mt-0">
                           <div>
                             <p className="text-sm font-medium text-foreground">
                               {formatValue(goal.currentValue, goal.goalType)}

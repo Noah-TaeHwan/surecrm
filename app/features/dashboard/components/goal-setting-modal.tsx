@@ -228,7 +228,14 @@ export function GoalSettingModal({
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-      <DialogContent className="sm:max-w-xl w-[95vw] h-auto max-h-[75vh] sm:max-h-[85vh] p-0 overflow-hidden flex flex-col">
+      <DialogContent 
+        className="sm:max-w-xl w-[95vw] p-0 overflow-hidden flex flex-col sm:max-h-[85vh]"
+        style={{
+          maxHeight: '75vh',
+          height: 'auto',
+          minHeight: '0'
+        }}
+      >
         
         {/* 헤더 - 고정 */}
         <DialogHeader className="flex-shrink-0 px-4 sm:px-6 py-2 sm:py-4 border-b border-border/30">
@@ -244,15 +251,15 @@ export function GoalSettingModal({
         </DialogHeader>
 
         {/* 콘텐츠 - 스크롤 가능 */}
-        <div className="flex-1 overflow-y-auto scrollbar-none modal-scroll-area px-4 sm:px-6 py-3 sm:py-6 space-y-3 sm:space-y-6 min-h-0">
+        <div className="flex-1 overflow-y-auto scrollbar-none modal-scroll-area px-4 sm:px-6 py-2 sm:py-6 space-y-2 sm:space-y-6 min-h-0">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
+                          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 sm:space-y-6">
               {/* 🗓️ STEP 1: 목표 기간 선택 */}
-              <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
-                <h4 className="text-xs sm:text-sm font-medium text-primary mb-3 flex items-center gap-2">
+                              <div className="p-4 sm:p-4 bg-primary/5 border border-primary/20 rounded-lg">
+                                  <h4 className="text-xs sm:text-sm font-medium text-primary mb-2 sm:mb-3 flex items-center gap-2">
                   📅 목표 기간 설정
                 </h4>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-3 sm:gap-4">
                   <FormField
                     control={form.control}
                     name="targetYear"
@@ -409,8 +416,8 @@ export function GoalSettingModal({
                 </div>
               )}
 
-              {/* 🚀 STEP 3: 새 목표 설정 */}
-              <div className="space-y-4">
+                              {/* 🚀 STEP 3: 새 목표 설정 */}
+              <div className="space-y-3 sm:space-y-4">
                 <h4 className="text-sm sm:text-base font-medium text-foreground flex items-center gap-2">
                   🚀 {editingGoal ? '목표 수정' : '새 목표 설정'}
                 </h4>
@@ -502,7 +509,7 @@ export function GoalSettingModal({
         </div>
 
         {/* 푸터 - 고정 */}
-        <DialogFooter className="flex-shrink-0 gap-2 sm:gap-3 p-3 sm:p-6 border-t border-border/30">
+        <DialogFooter className="flex-shrink-0 gap-2 sm:gap-3 p-2 sm:p-6 border-t border-border/30">
           <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto sm:justify-end">
             <Button
               type="button"

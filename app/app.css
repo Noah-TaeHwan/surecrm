@@ -1905,3 +1905,12 @@ textarea {
   backdrop-filter: blur(8px) !important;
   -webkit-backdrop-filter: blur(8px) !important;
 }
+
+/* 🔥 모바일 전용 Dialog Content 높이 강제 제한 */
+@media (max-width: 639px) {
+  [data-slot="dialog-content"] {
+    max-height: 75vh !important;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+}

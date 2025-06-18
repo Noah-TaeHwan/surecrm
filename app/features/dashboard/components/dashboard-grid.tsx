@@ -32,9 +32,8 @@ export function DashboardGrid({ children, className }: DashboardGridProps) {
         // 기본 그리드 설정
         'grid gap-6',
         // 반응형 컬럼 설정
-        'grid-cols-1',      // Mobile: 1 column
-        'md:grid-cols-2',   // Tablet: 2 columns
-        'lg:grid-cols-4',   // Desktop: 4 columns
+        'grid-cols-1',      // Mobile & Tablet: 1 column
+        'xl:grid-cols-4',   // Desktop: 4 columns (1280px+)
         // 최대 너비 제한 및 중앙 정렬
         'max-w-7xl mx-auto',
         // 모바일 최적화 패딩
@@ -149,7 +148,7 @@ export function DashboardSectionGrid({
         </div>
       )}
       
-      <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
+      <div className="grid gap-6 grid-cols-1 xl:grid-cols-2">
         {children}
       </div>
     </div>
