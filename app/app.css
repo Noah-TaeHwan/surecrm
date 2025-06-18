@@ -1915,3 +1915,55 @@ textarea {
     gap: 0 !important;
   }
 }
+
+/* ⚡ 최강력한 선택자로 모든 모달 높이 75vh 강제 적용 */
+div[data-slot="dialog-content"] {
+  max-height: 75vh !important;
+}
+
+/* 🎯 기존 고객 영업 기회 모달 전용 높이 보장 */
+div[data-slot="dialog-content"]:has([data-slot="dialog-title"]) {
+  max-height: 75vh !important;
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+/* 🚀 기존 고객 영업 기회 추가 모달 특별 타겟팅 */
+div[data-slot="dialog-content"]:has(span:contains("기존 고객 영업 기회 추가")) {
+  max-height: 75vh !important;
+  height: auto !important;
+}
+
+/* 💥 절대 최종 보장 - 모든 모달의 75vh 강제 적용 */
+[data-radix-dialog-content][data-slot="dialog-content"] {
+  max-height: 75vh !important;
+}
+
+/* 🔥🔥🔥 핵폭탄급 강제 적용 - 모든 가능한 selector */
+div[role="dialog"] div[data-slot="dialog-content"],
+[data-radix-dialog-content],
+[data-slot="dialog-content"],
+.fixed.z-50.grid,
+div:has(> div[data-slot="dialog-header"]) {
+  max-height: 75vh !important;
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+/* 🚨 최후의 수단 - 모든 Dialog Content 강제 */
+* [data-slot="dialog-content"] {
+  max-height: 75vh !important;
+  height: auto !important;
+}
+
+/* ⚡ Radix UI 내부 스타일 무력화 */
+[data-radix-dialog-content=""] {
+  max-height: 75vh !important;
+}
+
+/* 💀 브라우저 기본 스타일 무력화 */
+dialog, 
+[role="dialog"],
+.fixed.inset-0 + .fixed.left-1\/2 {
+  max-height: 75vh !important;
+}

@@ -176,7 +176,7 @@ export function ClientFiltersSection({
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <div>
+          <div className="flex flex-col gap-2">
             <CardTitle className="flex items-center gap-2">
               고객 검색 및 필터
               {activeFilterCount > 0 && (

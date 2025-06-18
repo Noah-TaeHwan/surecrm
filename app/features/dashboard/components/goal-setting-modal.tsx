@@ -229,7 +229,7 @@ export function GoalSettingModal({
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent 
-        className="sm:max-w-xl w-[95vw] p-0 overflow-hidden flex flex-col sm:max-h-[85vh] gap-0"
+        className="sm:max-w-xl w-[95vw] p-0 overflow-hidden flex flex-col sm:max-h-[75vh] gap-0"
         style={{
           maxHeight: '75vh',
           height: 'auto',

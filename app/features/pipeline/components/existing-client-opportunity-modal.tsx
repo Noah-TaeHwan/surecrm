@@ -1,4 +1,27 @@
 import { useState, useEffect, useRef } from 'react';
+
+// 🔥 모달 높이 강제 CSS 주입
+const FORCE_MODAL_HEIGHT_CSS = `
+  /* 🚨 기존 고객 영업 기회 모달 75vh 강제 적용 */
+  [data-slot="dialog-content"] {
+    max-height: 75vh !important;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+  
+  div[role="dialog"] > [data-slot="dialog-content"] {
+    max-height: 75vh !important;
+  }
+  
+  .fixed.z-50.grid.w-full.max-w-lg {
+    max-height: 75vh !important;
+  }
+  
+  /* 모든 가능한 모달 selector 강제 */
+  [data-radix-dialog-content] {
+    max-height: 75vh !important;
+  }
+`;
 import {
   Dialog,
   DialogContent,
@@ -127,6 +150,23 @@ export function ExistingClientOpportunityModal({
     }
   }, [preSelectedClientId, isOpen]); // isOpen도 의존성에 추가하여 모달이 열릴 때마다 동기화
 
+  // 🚨 모달 열릴 때 CSS 강제 주입
+  useEffect(() => {
+    if (isOpen) {
+      const styleElement = document.createElement('style');
+      styleElement.id = 'force-modal-height-style';
+      styleElement.textContent = FORCE_MODAL_HEIGHT_CSS;
+      document.head.appendChild(styleElement);
+
+      return () => {
+        const existingStyle = document.getElementById('force-modal-height-style');
+        if (existingStyle) {
+          existingStyle.remove();
+        }
+      };
+    }
+  }, [isOpen]);
+
   // 선택된 고객 카드로 자동 스크롤
   useEffect(() => {
     if (isOpen && preSelectedClientId && selectedClientRef.current) {
@@ -203,7 +243,7 @@ export function ExistingClientOpportunityModal({
     .filter(
       client =>
         client.name.toLowerCase().includes(clientSearchQuery.toLowerCase()) ||
-        client.phone.includes(clientSearchQuery)
+        (client.phone && client.phone.includes(clientSearchQuery))
     )
     .sort((a, b) => {
       // 파이프라인에서 선택된 고객을 맨 위로 정렬
@@ -221,408 +261,322 @@ export function ExistingClientOpportunityModal({
   );
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-xl">
-            <TrendingUp className="h-6 w-6 text-primary" />
-            기존 고객 새 영업 기회
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent 
+        className="sm:max-w-xl w-[95vw] p-0 overflow-hidden flex flex-col gap-0"
+        style={{
+          maxHeight: '75vh !important',
+          height: 'auto !important',
+          minHeight: '0 !important',
+          '--radix-dialog-content-max-height': '75vh'
+        } as React.CSSProperties}
+      >
+        {/* 헤더 - 고정 */}
+        <DialogHeader className="flex-shrink-0 px-4 sm:px-6 py-4 sm:py-4 border-b border-border/30">
+          <DialogTitle className="flex items-center gap-2 text-sm sm:text-lg">
+            <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
+            <span className="truncate">기존 고객 영업 기회 추가</span>
           </DialogTitle>
-          <DialogDescription className="text-base">
-            기존 고객에게 새로운 보험 상품 영업을 시작합니다.
+          <DialogDescription className="text-xs sm:text-sm text-muted-foreground">
+            기존 고객에게 새로운 보험 상품을 제안하고 영업 기회를 만들어보세요.
           </DialogDescription>
         </DialogHeader>
 
-        {step === 'selectClient' ? (
-          // 1단계: 고객 선택
-          <div className="space-y-6 py-4">
-            <div className="space-y-3">
-              <h3 className="text-lg font-semibold">고객을 선택하세요</h3>
-              {preSelectedClientId ? (
-                <div className="p-3  border rounded-lg">
-                  <p className="text-sm text-muted-foreground font-medium">
-                    파이프라인에서 선택된 고객이 있습니다.
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    주황색으로 표시된 고객을 선택하여 영업 기회를 추가하세요.
-                  </p>
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  기존 고객 중에서 새로운 보험 영업을 진행할 고객을 선택하세요.
-                </p>
-              )}
-            </div>
+        {/* 콘텐츠 - 스크롤 가능 */}
+        <div className="flex-1 overflow-y-auto scrollbar-none modal-scroll-area px-4 sm:px-6 py-1 sm:py-2 space-y-2 sm:space-y-6 min-h-0">
+        
 
-            {/* 고객 검색 */}
-            <div className="space-y-3">
+          {/* STEP 1: 고객 선택 */}
+          {step === 'selectClient' && (
+            <div className="space-y-3 sm:space-y-4">
+              <h4 className="text-sm sm:text-base font-medium text-foreground flex items-center gap-2">
+                👤 고객 선택
+              </h4>
+
+              {/* 검색 입력 */}
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="고객명 또는 전화번호로 검색..."
+                  placeholder="고객명으로 검색하세요"
                   value={clientSearchQuery}
-                  onChange={e => setClientSearchQuery(e.target.value)}
-                  className="pl-10"
+                  onChange={(e) => setClientSearchQuery(e.target.value)}
+                  className="h-9 sm:h-10 text-xs sm:text-sm pl-10"
                 />
               </div>
-            </div>
 
-            {/* 고객 목록 */}
-            <div className="max-h-120 overflow-y-auto space-y-2">
-              {filteredClients.length > 0 ? (
-                filteredClients.map(client => (
-                  <Card
-                    key={client.id}
-                    ref={
-                      client.id === preSelectedClientId
-                        ? selectedClientRef
-                        : null
-                    } // 선택된 고객에게 ref 추가
-                    className={`p-2 m-2 cursor-pointer transition-all duration-200 hover:shadow-md ${
-                      selectedClientId === client.id
-                        ? 'ring-2 ring-primary border-primary bg-primary/5'
-                        : client.id === preSelectedClientId
-                          ? 'ring-2 ring-orange-400 border-orange-400 bg-orange-50 shadow-lg'
-                          : 'hover:border-border'
-                    }`}
-                    onClick={() => setSelectedClientId(client.id)}
-                  >
-                    <CardContent className="py-2 px-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className={`p-2 rounded-lg ${
-                              client.id === preSelectedClientId
-                                ? 'bg-primary/10 border-2 border-primary'
-                                : 'bg-primary/10'
-                            }`}
-                          >
-                            <User
-                              className={`h-4 w-4 ${
-                                client.id === preSelectedClientId
-                                  ? 'text-orange-600'
-                                  : 'text-primary'
-                              }`}
-                            />
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                              <h4 className="font-medium">{client.name}</h4>
-                              {client.id === preSelectedClientId && (
-                                <Badge className="bg-primary/10 text-primary border-primary text-xs">
-                                  파이프라인에서 선택됨
+              {/* 고객 리스트 */}
+              <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                {filteredClients.map(client => (
+                    <Card
+                      key={client.id}
+                      ref={
+                        preSelectedClientId === client.id
+                          ? selectedClientRef
+                          : undefined
+                      }
+                      className={`cursor-pointer transition-colors border-border/50 hover:border-border py-0 ${
+                        selectedClientId === client.id
+                          ? 'border-primary bg-primary/5'
+                          : ''
+                      } ${
+                        preSelectedClientId === client.id
+                          ? 'ring-2 ring-primary/30 border-primary/60'
+                          : ''
+                      }`}
+                      onClick={() => setSelectedClientId(client.id)}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                              <User className="h-4 w-4 text-primary" />
+                            </div>
+                            <div>
+                              <div className="text-sm font-medium text-foreground">
+                                {client.name}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                {client.phone}
+                              </div>
+                              {client.currentStage && (
+                                <Badge
+                                  variant="secondary"
+                                  className="text-xs mt-1"
+                                >
+                                  {client.currentStage}
                                 </Badge>
                               )}
                             </div>
-                            <p className="text-sm text-muted-foreground">
-                              <a 
-                                href={`tel:${client.phone}`}
-                                className="text-primary hover:underline"
-                              >
-                                {client.phone}
-                              </a>
-                            </p>
-                            {client.currentStage && (
-                              <Badge variant="outline" className="text-sm mt-1">
-                                현재: {client.currentStage}
-                              </Badge>
-                            )}
+                          </div>
+                          {selectedClientId === client.id && (
+                            <Check className="h-4 w-4 text-primary" />
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+              </div>
+
+              {filteredClients.length === 0 && (
+                <div className="text-center py-8 text-muted-foreground">
+                  <User className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                  <p className="text-xs sm:text-sm">검색 결과가 없습니다</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    다른 검색어로 시도해보세요
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* STEP 2: 보험 상품 선택 */}
+          {step === 'selectProduct' && (
+            <div className="space-y-3 sm:space-y-4">
+              <h4 className="text-sm sm:text-base font-medium text-foreground flex items-center gap-2">
+                🛡️ 보험 상품 선택
+              </h4>
+
+              <div className="grid grid-cols-1 gap-3">
+                {insuranceTypes.map(type => (
+                  <Card
+                    key={type.id}
+                    className={`cursor-pointer py-0 transition-all border-border/50 hover:border-border ${
+                      selectedType === type.id
+                        ? 'border-primary bg-primary/5'
+                        : ''
+                    }`}
+                    onClick={() => setSelectedType(type.id)}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${type.color}`}>
+                            {type.icon}
+                          </div>
+                          <div>
+                            <div className="text-sm font-medium text-foreground">
+                              {type.name}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {type.description}
+                            </div>
                           </div>
                         </div>
-                        {selectedClientId === client.id && (
-                          <Check className="h-5 w-5 text-primary" />
+                        {selectedType === type.id && (
+                          <Check className="h-4 w-4 text-primary" />
                         )}
                       </div>
                     </CardContent>
                   </Card>
-                ))
-              ) : (
-                <div className="text-center py-8">
-                  <User className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
-                  <p className="text-sm text-muted-foreground">
-                    {clientSearchQuery
-                      ? '검색 결과가 없습니다'
-                      : '등록된 고객이 없습니다'}
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {selectedClient && (
-              <div className="p-4 bg-muted/30 rounded-lg border">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-primary/10 rounded-lg">
-                    <User className="h-4 w-4 text-primary" />
-                  </div>
-                  <div>
-                    <p className="font-medium">
-                      선택된 고객: {selectedClient.name}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      이 고객에게 새로운 영업 기회를 생성합니다
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        ) : step === 'selectProduct' ? (
-          // 2단계: 보험 상품 선택
-          <div className="space-y-6 py-4">
-            <div className="space-y-3">
-              <h3 className="text-lg font-semibold">
-                영업할 보험 상품을 선택하세요
-              </h3>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="gap-2">
-                  <User className="h-3 w-3" />
-                  {selectedClient?.name}
-                </Badge>
-                <span className="text-sm text-muted-foreground">
-                  선택된 고객
-                </span>
+                ))}
               </div>
             </div>
+          )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {insuranceTypes.map(insurance => (
-                <Card
-                  key={insurance.id}
-                  className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
-                    selectedType === insurance.id
-                      ? 'ring-2 ring-primary border-primary bg-primary/5'
-                      : 'hover:border-border'
-                  }`}
-                  onClick={() => setSelectedType(insurance.id)}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex items-start gap-3">
-                      <div className={`p-2 rounded-lg ${insurance.color}`}>
-                        {insurance.icon}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <h4 className="font-medium">{insurance.name}</h4>
-                          {selectedType === insurance.id && (
-                            <Check className="h-5 w-5 text-primary" />
-                          )}
-                        </div>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {insurance.description}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+          {/* STEP 3: 상세 정보 입력 */}
+          {step === 'details' && (
+            <div className="space-y-3 sm:space-y-4">
+              <h4 className="text-sm sm:text-base font-medium text-foreground flex items-center gap-2">
+                📝 상세 정보
+              </h4>
 
-            {selectedType && selectedInsurance && (
-              <div className="p-4 bg-muted/30 rounded-lg border">
-                <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-lg ${selectedInsurance.color}`}>
-                    {selectedInsurance.icon}
-                  </div>
-                  <div>
-                    <p className="font-medium">
-                      선택된 상품: {selectedInsurance.name}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      이 상품으로 영업 기회를 생성합니다
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        ) : (
-          // 3단계: 상세 정보 입력 ( 상품 정보 필드 추가)
-          <div className="space-y-6 py-4">
-            <div className="space-y-3">
-              <h3 className="text-lg font-semibold">상품 정보 및 영업 메모</h3>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="gap-2">
-                  <User className="h-3 w-3" />
-                  {selectedClient?.name}
-                </Badge>
-                <Badge variant="outline" className="gap-2">
-                  {selectedInsurance?.icon}
-                  {selectedInsurance?.name}
-                </Badge>
-              </div>
-            </div>
-
-            <div className="space-y-6">
-              {/* 상품 정보 섹션 */}
-              <div className="space-y-4">
-                <h4 className="text-md font-medium flex items-center gap-2">
-                  <Building2 className="h-4 w-4 text-primary" />
-                  상품 정보
-                </h4>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">
-                      상품명
-                    </label>
-                    <Input
-                      value={productName}
-                      onChange={e => setProductName(e.target.value)}
-                      placeholder="예: 무배당 통합보험"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">
-                      보험회사명
-                    </label>
-                    <Input
-                      value={insuranceCompany}
-                      onChange={e => setInsuranceCompany(e.target.value)}
-                      placeholder="예: 삼성화재, 현대해상"
-                    />
-                  </div>
+              <div className="space-y-3 sm:space-y-4">
+                <div className="space-y-2">
+                  <label className="text-xs sm:text-sm font-medium">상품명</label>
+                  <Input
+                    placeholder="상품명을 입력하세요"
+                    value={productName}
+                    onChange={(e) => setProductName(e.target.value)}
+                    className="h-9 sm:h-10 text-xs sm:text-sm"
+                  />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium mb-2 items-center gap-2">
-                      <Banknote className="h-4 w-4" />월 납입료 (보험료)
-                    </label>
+                <div className="space-y-2">
+                  <label className="text-xs sm:text-sm font-medium">보험사</label>
+                  <Input
+                    placeholder="보험사를 입력하세요"
+                    value={insuranceCompany}
+                    onChange={(e) => setInsuranceCompany(e.target.value)}
+                    className="h-9 sm:h-10 text-xs sm:text-sm"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                  <div className="space-y-2">
+                    <label className="text-xs sm:text-sm font-medium">월 보험료 (원)</label>
                     <div className="relative">
+                      <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
                         type="number"
+                        placeholder="100000"
                         value={monthlyPremium}
-                        onChange={e => setMonthlyPremium(e.target.value)}
-                        placeholder="0"
-                        className="pr-8"
+                        onChange={(e) => setMonthlyPremium(e.target.value)}
+                        className="h-9 sm:h-10 text-xs sm:text-sm pl-10"
                       />
-                      <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-muted-foreground">
-                        원
-                      </span>
                     </div>
                   </div>
 
-                  <div>
-                    <label className="text-sm font-medium mb-2 items-center gap-2">
-                      <DollarSign className="h-4 w-4" />
-                      예상 수수료 (매출)
-                    </label>
+                  <div className="space-y-2">
+                    <label className="text-xs sm:text-sm font-medium">예상 수수료 (원)</label>
                     <div className="relative">
+                      <Banknote className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
                         type="number"
+                        placeholder="15000"
                         value={expectedCommission}
-                        onChange={e => setExpectedCommission(e.target.value)}
-                        placeholder="0"
-                        className="pr-8"
+                        onChange={(e) => setExpectedCommission(e.target.value)}
+                        className="h-9 sm:h-10 text-xs sm:text-sm pl-10"
                       />
-                      <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-muted-foreground">
-                        원
-                      </span>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {/* 영업 메모 섹션 */}
-              <div>
-                <label className="text-sm font-medium mb-2 block">
-                  영업 메모 (선택사항)
-                </label>
-                <Textarea
-                  value={notes}
-                  onChange={e => setNotes(e.target.value)}
-                  placeholder={`${selectedClient?.name} 고객의 ${selectedInsurance?.name} 영업에 대한 메모를 입력하세요...\n\n예시:\n- 고객 관심사: 보험료 부담 최소화\n- 기존 보험: 타사 자동차보험 가입 중\n- 영업 전략: 기존 보험과 비교 견적 제시\n- 업셀링 포인트: 기존 계약 대비 추가 혜택`}
-                  className="min-h-[100px] resize-none"
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  고객의 상황, 관심사, 영업 전략 등을 기록하세요
-                </p>
-              </div>
+                <div className="space-y-2">
+                  <label className="text-xs sm:text-sm font-medium">메모</label>
+                  <Textarea
+                    placeholder="영업 기회에 대한 메모를 입력하세요"
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    className="text-xs sm:text-sm min-h-[80px] resize-none"
+                    rows={3}
+                  />
+                </div>
 
-              <div className="p-4 bg-emerald-50 dark:bg-emerald-900/10 rounded-lg border border-emerald-200 dark:border-emerald-800">
-                <div className="flex items-start gap-3">
-                  <TrendingUp className="h-5 w-5 text-emerald-600 mt-0.5" />
-                  <div>
-                    <h4 className="font-medium text-emerald-800 dark:text-emerald-200 mb-1">
-                      영업 파이프라인 진행 과정
-                    </h4>
-                    <div className="text-sm text-emerald-700 dark:text-emerald-300 space-y-1">
-                      <p>
-                        첫 상담 → 니즈 분석 → 상품 설명 → 계약 검토 → 계약
-                        완료
-                      </p>
-                      <p className="text-xs">
-                        이 고객이 '첫 상담' 단계로 이동하여 새로운 영업이
-                        시작됩니다
-                      </p>
+                {/* 선택된 정보 요약 */}
+                <div className="p-4 bg-muted/50 rounded-lg">
+                  <h5 className="text-xs sm:text-sm font-medium mb-2">선택된 정보</h5>
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-xs">
+                      <span className="text-muted-foreground">고객:</span>
+                      <span className="font-medium">
+                        {clients.find(c => c.id === selectedClientId)?.name}
+                      </span>
                     </div>
+                    <div className="flex justify-between text-xs">
+                      <span className="text-muted-foreground">보험 종류:</span>
+                      <span className="font-medium">
+                        {insuranceTypes.find(t => t.id === selectedType)?.name}
+                      </span>
+                    </div>
+                    {monthlyPremium && (
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">월 보험료:</span>
+                        <span className="font-medium">
+                          {parseFloat(monthlyPremium).toLocaleString()}원
+                        </span>
+                      </div>
+                    )}
+                    {expectedCommission && (
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">예상 수수료:</span>
+                        <span className="font-medium text-primary">
+                          {parseFloat(expectedCommission).toLocaleString()}원
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
-        <DialogFooter className="gap-2">
-          {step === 'selectClient' ? (
-            <>
-              <Button variant="outline" onClick={handleClose}>
-                취소
+        {/* 푸터 - 고정 */}
+        <DialogFooter className="flex-shrink-0 gap-2 sm:gap-3 p-2 sm:p-6 border-t border-border/30">
+          <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto sm:justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleClose}
+              className="h-10 px-4 w-full sm:w-auto text-xs sm:text-sm"
+            >
+              취소
+            </Button>
+            
+            {step !== 'selectClient' && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleBack}
+                className="h-10 px-4 w-full sm:w-auto text-xs sm:text-sm"
+              >
+                이전
               </Button>
+            )}
+
+            {step === 'selectClient' && (
               <Button
                 onClick={handleClientNext}
                 disabled={!selectedClientId}
-                className="gap-2"
+                className="gap-2 h-10 px-4 w-full sm:w-auto text-xs sm:text-sm bg-primary text-primary-foreground"
               >
-                다음 단계
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-3 w-3" />
+                다음
               </Button>
-            </>
-          ) : step === 'selectProduct' ? (
-            <>
-              <Button variant="outline" onClick={handleBack}>
-                이전 단계
-              </Button>
-              <Button variant="outline" onClick={handleClose}>
-                취소
-              </Button>
+            )}
+
+            {step === 'selectProduct' && (
               <Button
                 onClick={handleProductNext}
                 disabled={!selectedType}
-                className="gap-2"
+                className="gap-2 h-10 px-4 w-full sm:w-auto text-xs sm:text-sm bg-primary text-primary-foreground"
               >
-                다음 단계
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-3 w-3" />
+                다음
               </Button>
-            </>
-          ) : (
-            <>
-              <Button variant="outline" onClick={handleBack}>
-                이전 단계
-              </Button>
-              <Button variant="outline" onClick={handleClose}>
-                취소
-              </Button>
+            )}
+
+            {step === 'details' && (
               <Button
                 onClick={handleConfirm}
-                disabled={isLoading}
-                className="gap-2"
+                disabled={isLoading || !selectedClientId || !selectedType}
+                className="gap-2 h-10 px-4 w-full sm:w-auto text-xs sm:text-sm bg-primary text-primary-foreground"
               >
-                {isLoading ? (
-                  <>
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
-                    생성 중...
-                  </>
-                ) : (
-                  <>
-                    <Plus className="h-4 w-4" />
-                    영업 기회 생성
-                  </>
-                )}
+                <Plus className="h-3 w-3" />
+                {isLoading ? '추가 중...' : '영업 기회 추가'}
               </Button>
-            </>
-          )}
+            )}
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

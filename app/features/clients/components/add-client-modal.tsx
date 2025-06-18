@@ -170,316 +170,350 @@ export function AddClientModal({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-3 text-xl font-bold">
-            <PersonIcon className="h-5 w-5" />새 고객 추가
+      <DialogContent 
+        className="sm:max-w-xl w-[95vw] p-0 overflow-hidden flex flex-col sm:max-h-[85vh] gap-0"
+        style={{
+          maxHeight: '75vh',
+          height: 'auto',
+          minHeight: '0'
+        }}
+      >
+        {/* 헤더 - 고정 */}
+        <DialogHeader className="flex-shrink-0 px-4 sm:px-6 py-4 sm:py-4 border-b border-border/30">
+          <DialogTitle className="flex items-center gap-2 text-sm sm:text-lg">
+            <PersonIcon className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
+            <span className="truncate">신규 고객 추가</span>
           </DialogTitle>
-          <DialogDescription>
-            새로운 고객 정보를 입력하여 관리를 시작하세요.
+          <DialogDescription className="text-xs sm:text-sm text-muted-foreground">
+            새로운 고객 정보를 입력하고 영업 파이프라인에 추가하세요.
           </DialogDescription>
         </DialogHeader>
 
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-6"
-          >
-            {/* 상태 메시지 표시 */}
-            {error && (
-              <Alert className="bg-red-50 border-red-200">
-                <CrossCircledIcon className="h-4 w-4 text-red-600" />
-                <AlertDescription className="text-red-700">
-                  {error}
-                </AlertDescription>
-              </Alert>
-            )}
+        {/* 콘텐츠 - 스크롤 가능 */}
+        <div className="flex-1 overflow-y-auto scrollbar-none modal-scroll-area px-4 sm:px-6 py-2 sm:py-6 space-y-2 sm:space-y-6 min-h-0">
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(handleSubmit)}
+              className="space-y-3 sm:space-y-6"
+            >
+              {/* 상태 메시지 표시 */}
+              {error && (
+                <Alert className="bg-destructive/10 border-destructive/20 p-4 sm:p-4 rounded-lg">
+                  <CrossCircledIcon className="h-4 w-4 text-destructive" />
+                  <AlertDescription className="text-xs sm:text-sm text-destructive ml-2">
+                    {error}
+                  </AlertDescription>
+                </Alert>
+              )}
 
-            {isSubmitting && (
-              <Alert className="bg-blue-50 border-blue-200">
-                <InfoCircledIcon className="h-4 w-4 text-blue-600" />
-                <AlertDescription className="text-blue-700">
-                  고객 정보를 저장하고 있습니다...
-                </AlertDescription>
-              </Alert>
-            )}
+              {isSubmitting && (
+                <div className="p-4 sm:p-4 bg-primary/5 border border-primary/20 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <InfoCircledIcon className="h-4 w-4 text-primary" />
+                    <span className="text-xs sm:text-sm text-primary">고객 정보를 저장하고 있습니다...</span>
+                  </div>
+                </div>
+              )}
 
-            {/* 기본 정보 */}
-            <div className="space-y-4">
-              <h4 className="font-medium text-sm">기본 정보</h4>
+             
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="fullName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>이름</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          placeholder="고객 이름"
-                          className="h-11"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
+              {/* 🏷️ 기본 정보 */}
+              <div className="space-y-3 sm:space-y-4">
+                <h4 className="text-sm sm:text-base font-medium text-foreground flex items-center gap-2">
+                  👤 기본 정보
+                </h4>
+
+                {/* 첫 번째 줄: 고객명 / 소개자 */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  <FormField
+                    control={form.control}
+                    name="fullName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs sm:text-sm font-medium">
+                          고객명 *
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="고객명을 입력하세요"
+                            className="h-9 sm:h-10 text-xs sm:text-sm min-h-[36px] sm:min-h-[40px]"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage className="text-xs" />
+                      </FormItem>
+                    )}
+                  />
+
+                  {referrers && referrers.length > 0 && (
+                    <FormField
+                      control={form.control}
+                      name="referredById"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-xs sm:text-sm font-medium">
+                            소개자
+                          </FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger className="h-9 sm:h-10 text-xs sm:text-sm min-h-[36px] sm:min-h-[40px]">
+                                <SelectValue placeholder="소개자를 선택하세요" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="none" className="text-xs sm:text-sm py-2">
+                                소개자 없음
+                              </SelectItem>
+                              {referrers.map((referrer) => (
+                                <SelectItem 
+                                  key={referrer.id} 
+                                  value={referrer.id}
+                                  className="text-xs sm:text-sm py-2"
+                                >
+                                  {referrer.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage className="text-xs" />
+                        </FormItem>
+                      )}
+                    />
                   )}
-                />
+                </div>
 
-                <FormField
-                  control={form.control}
-                  name="phone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>전화번호 (선택사항)</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          placeholder="010-1234-5678"
-                          className="h-11"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {/* 두 번째 줄: 전화번호 / 통신사 */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  <FormField
+                    control={form.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs sm:text-sm font-medium">
+                          전화번호
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type="tel"
+                            placeholder="010-1234-5678"
+                            className="h-9 sm:h-10 text-xs sm:text-sm min-h-[36px] sm:min-h-[40px]"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage className="text-xs" />
+                      </FormItem>
+                    )}
+                  />
 
+                  <FormField
+                    control={form.control}
+                    name="telecomProvider"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs sm:text-sm font-medium">
+                          통신사
+                        </FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="h-9 sm:h-10 text-xs sm:text-sm min-h-[36px] sm:min-h-[40px]">
+                              <SelectValue placeholder="통신사를 선택하세요" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {telecomProviders.map((provider) => (
+                              <SelectItem 
+                                key={provider} 
+                                value={provider}
+                                className="text-xs sm:text-sm py-2"
+                              >
+                                {provider}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage className="text-xs" />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* 세 번째 줄: 이메일 (전체 너비) */}
                 <FormField
                   control={form.control}
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>이메일 (선택사항)</FormLabel>
+                      <FormLabel className="text-xs sm:text-sm font-medium">
+                        이메일
+                      </FormLabel>
                       <FormControl>
                         <Input
-                          {...field}
                           type="email"
                           placeholder="example@email.com"
-                          className="h-11"
+                          className="h-9 sm:h-10 text-xs sm:text-sm min-h-[36px] sm:min-h-[40px]"
+                          {...field}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-xs" />
                     </FormItem>
                   )}
                 />
 
+                {/* 네 번째 줄: 주소 (전체 너비) */}
                 <FormField
                   control={form.control}
-                  name="telecomProvider"
+                  name="address"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>통신사 (선택사항)</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="h-11">
-                            <SelectValue placeholder="통신사 선택" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {telecomProviders.map(provider => (
-                            <SelectItem key={provider} value={provider}>
-                              {provider}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
+                      <FormLabel className="text-xs sm:text-sm font-medium">
+                        주소
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="주소를 입력하세요"
+                          className="h-9 sm:h-10 text-xs sm:text-sm min-h-[36px] sm:min-h-[40px]"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage className="text-xs" />
+                    </FormItem>
+                  )}
+                />
+
+                {/* 다섯 번째 줄: 직업 (전체 너비) */}
+                <FormField
+                  control={form.control}
+                  name="occupation"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs sm:text-sm font-medium">
+                        직업
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="직업을 입력하세요"
+                          className="h-9 sm:h-10 text-xs sm:text-sm min-h-[36px] sm:min-h-[40px]"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage className="text-xs" />
                     </FormItem>
                   )}
                 />
               </div>
 
-              {/* 소개자 선택 */}
-              {referrers && referrers.length > 0 && (
+              {/* 🎯 영업 정보 */}
+              <div className="space-y-3 sm:space-y-4">
+                <h4 className="text-sm sm:text-base font-medium text-foreground flex items-center gap-2">
+                  🎯 영업 정보
+                </h4>
+
                 <FormField
                   control={form.control}
-                  name="referredById"
+                  name="importance"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>소개자 (선택사항)</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="h-11">
-                            <SelectValue placeholder="소개자 선택" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="none">
-                            직접 개발 (소개자 없음)
-                          </SelectItem>
-                          {referrers.map(referrer => (
-                            <SelectItem key={referrer.id} value={referrer.id}>
-                              {referrer.name}
-                            </SelectItem>
+                      <FormLabel className="text-xs sm:text-sm font-medium">
+                        중요도
+                      </FormLabel>
+                      <FormControl>
+                        <RadioGroup
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                          className=""
+                        >
+                          {importanceOptions.map((option) => (
+                            <div key={option.id} className={`p-3 rounded-lg border ${option.color}`}>
+                              <div className="flex items-center space-x-3">
+                                <RadioGroupItem value={option.id} id={option.id} />
+                                <div className="flex-1">
+                                  <Label 
+                                    htmlFor={option.id} 
+                                    className="text-xs sm:text-sm font-medium cursor-pointer"
+                                  >
+                                    {option.name}
+                                  </Label>
+                                  <p className="text-xs text-muted-foreground mt-1">
+                                    {option.description}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
                           ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
+                        </RadioGroup>
+                      </FormControl>
+                      <FormMessage className="text-xs" />
                     </FormItem>
                   )}
                 />
-              )}
 
-              <FormField
-                control={form.control}
-                name="address"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>주소 (선택사항)</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="서울시 강남구 역삼동"
-                        className="h-11"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={form.control}
+                  name="tags"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs sm:text-sm font-medium">
+                        태그
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="태그를 쉼표로 구분하여 입력하세요"
+                          className="h-9 sm:h-10 text-xs sm:text-sm min-h-[36px] sm:min-h-[40px]"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage className="text-xs" />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="occupation"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>직업 (선택사항)</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="회사원, 자영업자 등"
-                        className="h-11"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+                <FormField
+                  control={form.control}
+                  name="notes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs sm:text-sm font-medium">
+                        메모
+                      </FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="고객에 대한 메모를 입력하세요"
+                          className="text-xs sm:text-sm min-h-[80px] resize-none"
+                          rows={3}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage className="text-xs" />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </form>
+          </Form>
+        </div>
 
-            {/* 고객 중요도 선택 */}
-            <div className="space-y-4">
-              <h4 className="font-medium text-sm">고객 중요도</h4>
-
-              <FormField
-                control={form.control}
-                name="importance"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <RadioGroup
-                        onValueChange={field.onChange}
-                        value={field.value}
-                        className="space-y-2"
-                      >
-                        {importanceOptions.map(option => (
-                          <Label
-                            key={option.id}
-                            htmlFor={option.id}
-                            className={`flex items-center space-x-3 rounded-lg border-2 p-3 cursor-pointer transition-all duration-200 ${
-                              field.value === option.id
-                                ? `${option.color} border-opacity-100`
-                                : 'border-border hover:border-primary/20 hover:bg-primary/5'
-                            }`}
-                          >
-                            <RadioGroupItem value={option.id} id={option.id} />
-                            <div className="flex-1">
-                              <div className="font-medium text-sm">
-                                {option.name}
-                              </div>
-                              <div className="text-xs text-muted-foreground">
-                                {option.description}
-                              </div>
-                            </div>
-                          </Label>
-                        ))}
-                      </RadioGroup>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            {/* 태그 및 메모 */}
-            <div className="space-y-4">
-              <FormField
-                control={form.control}
-                name="tags"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>태그 (선택사항)</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="키맨, 기업고객, 잠재고객 등 (쉼표로 구분)"
-                        className="h-11"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="notes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>메모 (선택사항)</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        {...field}
-                        placeholder="고객에 대한 메모사항을 입력하세요"
-                        rows={3}
-                        className="resize-none"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            {/* 서비스 연계 안내 */}
-            <Alert className="bg-muted/20">
-              <InfoCircledIcon className="h-4 w-4" />
-              <AlertDescription className="text-sm">
-                등록된 고객은 일정 관리, 소개 네트워크, 대시보드 등 모든
-                서비스에서 활용됩니다.
-              </AlertDescription>
-            </Alert>
-
-            <DialogFooter className="gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleClose}
-                className="flex-1"
-                disabled={isSubmitting}
-              >
-                취소
-              </Button>
-              <Button type="submit" className="flex-1" disabled={isSubmitting}>
-                {isSubmitting ? (
-                  <>처리 중...</>
-                ) : (
-                  <>
-                    <PlusIcon className="mr-2 h-4 w-4" />
-                    고객 추가하기
-                  </>
-                )}
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
+        {/* 푸터 - 고정 */}
+        <DialogFooter className="flex-shrink-0 gap-2 sm:gap-3 p-2 sm:p-6 border-t border-border/30">
+          <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto sm:justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleClose}
+              className="h-10 px-4 w-full sm:w-auto text-xs sm:text-sm"
+            >
+              취소
+            </Button>
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              onClick={form.handleSubmit(handleSubmit)}
+              className="gap-2 h-10 px-4 w-full sm:w-auto text-xs sm:text-sm bg-primary text-primary-foreground"
+            >
+              <PlusIcon className="h-3 w-3" />
+              {isSubmitting ? '추가 중...' : '고객 추가'}
+            </Button>
+          </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

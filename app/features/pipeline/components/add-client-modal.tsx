@@ -314,659 +314,631 @@ export function AddClientModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[700px] max-h-[85vh] overflow-hidden flex flex-col">
-        <DialogHeader className="flex-shrink-0 space-y-3">
-          <DialogTitle className="flex items-center space-x-2 text-lg font-semibold">
-            <User className="h-5 w-5 text-primary" />
-            <span>새 고객 추가</span>
+      <DialogContent 
+        className="sm:max-w-xl w-[95vw] p-0 overflow-hidden flex flex-col sm:max-h-[75vh] gap-0"
+        style={{
+          maxHeight: '75vh',
+          height: 'auto',
+          minHeight: '0'
+        }}
+      >
+        {/* 헤더 - 고정 */}
+        <DialogHeader className="flex-shrink-0 px-4 sm:px-6 py-4 sm:py-4 border-b border-border/30">
+          <DialogTitle className="flex items-center gap-2 text-sm sm:text-lg">
+            <User className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
+            <span className="truncate">신규 고객 추가</span>
           </DialogTitle>
-          <DialogDescription className="text-sm text-muted-foreground">
-            고객 정보를 입력하여 파이프라인에 추가하세요.
+          <DialogDescription className="text-xs sm:text-sm text-muted-foreground">
+            새로운 고객 정보를 입력하고 영업 파이프라인에 추가하세요.
           </DialogDescription>
-          <div className="flex items-center space-x-3">
-            <Progress value={progress} className="flex-1 h-2" />
-            <span className="text-xs text-muted-foreground font-medium min-w-[35px]">
-              {progress}%
-            </span>
-          </div>
         </DialogHeader>
 
-        <form
-          onSubmit={handleSubmit}
-          className="flex-1 overflow-hidden flex flex-col"
-        >
-          <Tabs
-            value={activeTab}
-            onValueChange={setActiveTab}
-            className="flex-1 overflow-hidden flex flex-col"
-          >
-            <TabsList className="grid w-full grid-cols-4 flex-shrink-0 mb-4 h-15">
-              <TabsTrigger
-                value="basic"
-                className="flex items-center gap-1.5 text-sm py-2"
-              >
-                <User className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">기본정보</span>
-                {getTabStatus('basic') && (
-                  <Check className="h-3 w-3 text-green-600" />
-                )}
-                {(errors.name || errors.phone || errors.email) && (
-                  <AlertCircle className="h-3 w-3 text-destructive" />
-                )}
-              </TabsTrigger>
-              <TabsTrigger
-                value="personal"
-                className="flex items-center gap-1.5 text-sm py-2"
-              >
-                <Briefcase className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">개인정보</span>
-                {getTabStatus('personal') && (
-                  <Check className="h-3 w-3 text-green-600" />
-                )}
-              </TabsTrigger>
-              <TabsTrigger
-                value="insurance"
-                className="flex items-center gap-1.5 text-sm py-2"
-              >
-                <Shield className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">보험정보</span>
-                {insuranceInfo.length > 0 && (
-                  <Check className="h-3 w-3 text-green-600" />
-                )}
-              </TabsTrigger>
-              <TabsTrigger
-                value="sales"
-                className="flex items-center gap-1.5 text-sm py-2"
-              >
-                <Calendar className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">영업정보</span>
-                {getTabStatus('sales') && (
-                  <Check className="h-3 w-3 text-green-600" />
-                )}
-                {errors.stageId && (
-                  <AlertCircle className="h-3 w-3 text-destructive" />
-                )}
-              </TabsTrigger>
-            </TabsList>
+        {/* 콘텐츠 - 스크롤 가능 */}
+        <div className="flex-1 overflow-y-auto scrollbar-none modal-scroll-area px-4 sm:px-6 py-2 sm:py-6 space-y-2 sm:space-y-6 min-h-0">
+          <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-6">
+            {/* 진행 상황 표시 */}
+            <div className="p-4 sm:p-4 bg-primary/5 border border-primary/20 rounded-lg">
+              <h4 className="text-xs sm:text-sm font-medium text-primary mb-2 sm:mb-3 flex items-center gap-2">
+                📋 입력 진행률
+              </h4>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-muted-foreground">완성도</span>
+                  <span className="text-xs font-medium text-primary">
+                    {getFormProgress()}%
+                  </span>
+                </div>
+                <Progress value={getFormProgress()} className="h-2" />
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                💡 필수 정보만 입력해도 고객 등록이 가능합니다
+              </p>
+            </div>
 
-            <div className="flex-1 overflow-y-auto">
-              <TabsContent value="basic" className="space-y-4 m-0 p-1">
-                <div className="grid grid-cols-2 gap-4">
+            {/* 탭 네비게이션 */}
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-4 h-9 sm:h-10">
+                <TabsTrigger
+                  value="basic"
+                  className="text-xs sm:text-sm relative"
+                >
+                  기본정보
+                  {getTabStatus('basic') && (
+                    <Check className="h-3 w-3 absolute -top-1 -right-1 text-primary" />
+                  )}
+                </TabsTrigger>
+                <TabsTrigger
+                  value="physical"
+                  className="text-xs sm:text-sm relative"
+                >
+                  신체정보
+                  {getTabStatus('physical') && (
+                    <Check className="h-3 w-3 absolute -top-1 -right-1 text-primary" />
+                  )}
+                </TabsTrigger>
+                <TabsTrigger
+                  value="sales"
+                  className="text-xs sm:text-sm relative"
+                >
+                  영업정보
+                  {getTabStatus('sales') && (
+                    <Check className="h-3 w-3 absolute -top-1 -right-1 text-primary" />
+                  )}
+                </TabsTrigger>
+                <TabsTrigger
+                  value="insurance"
+                  className="text-xs sm:text-sm relative"
+                >
+                  보험정보
+                  {getTabStatus('insurance') && (
+                    <Check className="h-3 w-3 absolute -top-1 -right-1 text-primary" />
+                  )}
+                </TabsTrigger>
+              </TabsList>
+
+              {/* 🏷️ 기본 정보 탭 */}
+              <TabsContent value="basic" className="space-y-3 sm:space-y-4 mt-3 sm:mt-4">
+                <div className="space-y-3 sm:space-y-4">
+                  <h4 className="text-sm sm:text-base font-medium text-foreground flex items-center gap-2">
+                    👤 기본 정보
+                  </h4>
+
                   <div className="space-y-2">
-                    <Label
-                      htmlFor="name"
-                      className="flex items-center space-x-1 text-sm font-medium"
-                    >
-                      <span>고객명</span>
-                      <span className="text-destructive">*</span>
+                    <Label htmlFor="name" className="text-xs sm:text-sm font-medium">
+                      고객명 *
                     </Label>
                     <Input
                       id="name"
+                      type="text"
+                      placeholder="고객명을 입력하세요"
                       value={name}
-                      onChange={e => {
-                        setName(e.target.value);
-                        if (errors.name) {
-                          const newErrors = { ...errors };
-                          delete newErrors.name;
-                          setErrors(newErrors);
-                        }
-                      }}
-                      placeholder="홍길동"
-                      className={errors.name ? 'border-destructive' : ''}
+                      onChange={(e) => setName(e.target.value)}
+                      className={`h-9 sm:h-10 text-xs sm:text-sm ${
+                        errors.name ? 'border-destructive' : ''
+                      }`}
                     />
                     {errors.name && (
-                      <p className="text-xs text-destructive flex items-center space-x-1">
-                        <AlertCircle className="h-3 w-3" />
-                        <span>{errors.name}</span>
-                      </p>
+                      <p className="text-xs text-destructive mt-1">{errors.name}</p>
                     )}
                   </div>
+
                   <div className="space-y-2">
-                    <Label htmlFor="phone" className="text-sm font-medium">
-                      전화번호 (선택사항)
+                    <Label htmlFor="phone" className="text-xs sm:text-sm font-medium">
+                      전화번호
                     </Label>
                     <Input
                       id="phone"
+                      type="tel"
+                      placeholder="010-1234-5678"
                       value={phone}
-                      onChange={e => {
-                        setPhone(e.target.value);
-                        if (errors.phone) {
-                          const newErrors = { ...errors };
-                          delete newErrors.phone;
-                          setErrors(newErrors);
-                        }
-                      }}
-                      placeholder="010-0000-0000"
-                      className={errors.phone ? 'border-destructive' : ''}
+                      onChange={(e) => setPhone(e.target.value)}
+                      className={`h-9 sm:h-10 text-xs sm:text-sm ${
+                        errors.phone ? 'border-destructive' : ''
+                      }`}
                     />
                     {errors.phone && (
-                      <p className="text-xs text-destructive flex items-center space-x-1">
-                        <AlertCircle className="h-3 w-3" />
-                        <span>{errors.phone}</span>
-                      </p>
+                      <p className="text-xs text-destructive mt-1">{errors.phone}</p>
                     )}
                   </div>
-                </div>
 
-                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="email" className="text-sm font-medium">
+                    <Label htmlFor="email" className="text-xs sm:text-sm font-medium">
                       이메일
                     </Label>
                     <Input
                       id="email"
                       type="email"
-                      value={email}
-                      onChange={e => {
-                        setEmail(e.target.value);
-                        if (errors.email) {
-                          const newErrors = { ...errors };
-                          delete newErrors.email;
-                          setErrors(newErrors);
-                        }
-                      }}
                       placeholder="example@email.com"
-                      className={errors.email ? 'border-destructive' : ''}
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className={`h-9 sm:h-10 text-xs sm:text-sm ${
+                        errors.email ? 'border-destructive' : ''
+                      }`}
                     />
                     {errors.email && (
-                      <p className="text-xs text-destructive flex items-center space-x-1">
-                        <AlertCircle className="h-3 w-3" />
-                        <span>{errors.email}</span>
-                      </p>
+                      <p className="text-xs text-destructive mt-1">{errors.email}</p>
                     )}
                   </div>
+
                   <div className="space-y-2">
-                    <Label htmlFor="telecom" className="text-sm font-medium">
+                    <Label htmlFor="address" className="text-xs sm:text-sm font-medium">
+                      주소
+                    </Label>
+                    <Input
+                      id="address"
+                      type="text"
+                      placeholder="주소를 입력하세요"
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      className="h-9 sm:h-10 text-xs sm:text-sm"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="occupation" className="text-xs sm:text-sm font-medium">
+                      직업
+                    </Label>
+                    <Input
+                      id="occupation"
+                      type="text"
+                      placeholder="직업을 입력하세요"
+                      value={occupation}
+                      onChange={(e) => setOccupation(e.target.value)}
+                      className="h-9 sm:h-10 text-xs sm:text-sm"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="telecom" className="text-xs sm:text-sm font-medium">
                       통신사
                     </Label>
-                    <Select
-                      value={telecomProvider}
-                      onValueChange={setTelecomProvider}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="통신사 선택" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {telecomProviders.map(provider => (
-                          <SelectItem key={provider} value={provider}>
-                            {provider}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="address" className="text-sm font-medium">
-                    주소
-                  </Label>
-                  <Input
-                    id="address"
-                    value={address}
-                    onChange={e => setAddress(e.target.value)}
-                    placeholder="서울시 강남구..."
-                  />
-                </div>
-              </TabsContent>
-
-              <TabsContent value="personal" className="space-y-4 m-0 p-1">
-                <div className="space-y-2">
-                  <Label htmlFor="occupation" className="text-sm font-medium">
-                    직업
-                  </Label>
-                  <Input
-                    id="occupation"
-                    value={occupation}
-                    onChange={e => setOccupation(e.target.value)}
-                    placeholder="회사원, 자영업 등"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="height" className="text-sm font-medium">
-                      키 (cm)
-                    </Label>
-                    <Input
-                      id="height"
-                      type="number"
-                      value={height || ''}
-                      onChange={e =>
-                        setHeight(
-                          e.target.value ? parseInt(e.target.value) : undefined
-                        )
-                      }
-                      placeholder="170"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="weight" className="text-sm font-medium">
-                      몸무게 (kg)
-                    </Label>
-                    <Input
-                      id="weight"
-                      type="number"
-                      value={weight || ''}
-                      onChange={e =>
-                        setWeight(
-                          e.target.value ? parseInt(e.target.value) : undefined
-                        )
-                      }
-                      placeholder="70"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <Label className="text-sm font-medium">운전 가능 여부</Label>
-                  <div className="flex gap-6">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="driving-yes"
-                        checked={hasDrivingLicense === true}
-                        onCheckedChange={checked =>
-                          setHasDrivingLicense(checked ? true : undefined)
-                        }
-                      />
-                      <Label htmlFor="driving-yes" className="text-sm">
-                        운전 가능
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="driving-no"
-                        checked={hasDrivingLicense === false}
-                        onCheckedChange={checked =>
-                          setHasDrivingLicense(checked ? false : undefined)
-                        }
-                      />
-                      <Label htmlFor="driving-no" className="text-sm">
-                        운전 불가
-                      </Label>
-                    </div>
-                  </div>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="insurance" className="space-y-4 m-0 p-1">
-                <div className="flex items-center justify-between">
-                  <Label className="text-sm font-medium">보험 정보</Label>
-                  <Select
-                    onValueChange={value =>
-                      addInsurance(value as InsuranceInfo['type'])
-                    }
-                  >
-                    <SelectTrigger className="w-40">
-                      <SelectValue placeholder="보험 추가" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="auto">자동차보험</SelectItem>
-                      <SelectItem value="prenatal">태아보험</SelectItem>
-                      <SelectItem value="health">건강보험</SelectItem>
-                      <SelectItem value="life">생명보험</SelectItem>
-                      <SelectItem value="property">재산보험</SelectItem>
-                      <SelectItem value="other">기타</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {insuranceInfo.map(insurance => (
-                  <Card key={insurance.id} className="border-border">
-                    <CardHeader className="pb-3">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-sm font-medium">
-                          {getInsuranceTypeLabel(insurance.type)}
-                        </CardTitle>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeInsurance(insurance.id!)}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="pt-0 space-y-3">
-                      {insurance.type === 'prenatal' && (
-                        <>
-                          <div className="grid grid-cols-2 gap-3">
-                            <div className="space-y-1">
-                              <Label className="text-xs">출생 예정일</Label>
-                              <Input
-                                type="date"
-                                value={insurance.details.dueDate || ''}
-                                onChange={e =>
-                                  updateInsuranceDetails(
-                                    insurance.id!,
-                                    'dueDate',
-                                    e.target.value
-                                  )
-                                }
-                              />
-                            </div>
-                            <div className="space-y-1">
-                              <Label className="text-xs">임신 방법</Label>
-                              <Select
-                                value={insurance.details.conceptionMethod || ''}
-                                onValueChange={value =>
-                                  updateInsuranceDetails(
-                                    insurance.id!,
-                                    'conceptionMethod',
-                                    value
-                                  )
-                                }
-                              >
-                                <SelectTrigger>
-                                  <SelectValue placeholder="선택" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="natural">
-                                    자연임신
-                                  </SelectItem>
-                                  <SelectItem value="ivf">시험관</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          </div>
-                          <div className="grid grid-cols-3 gap-3">
-                            <div className="flex items-center space-x-2">
-                              <Checkbox
-                                id={`abortion-prev-${insurance.id}`}
-                                checked={
-                                  insurance.details.abortionPreventionMeds ||
-                                  false
-                                }
-                                onCheckedChange={checked =>
-                                  updateInsuranceDetails(
-                                    insurance.id!,
-                                    'abortionPreventionMeds',
-                                    checked
-                                  )
-                                }
-                              />
-                              <Label
-                                htmlFor={`abortion-prev-${insurance.id}`}
-                                className="text-xs"
-                              >
-                                유산방지제
-                              </Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <Checkbox
-                                id={`abnormal-${insurance.id}`}
-                                checked={
-                                  insurance.details.abnormalFindings || false
-                                }
-                                onCheckedChange={checked =>
-                                  updateInsuranceDetails(
-                                    insurance.id!,
-                                    'abnormalFindings',
-                                    checked
-                                  )
-                                }
-                              />
-                              <Label
-                                htmlFor={`abnormal-${insurance.id}`}
-                                className="text-xs"
-                              >
-                                태아 이상소견
-                              </Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <Checkbox
-                                id={`disability-${insurance.id}`}
-                                checked={
-                                  insurance.details.disabilityTestFindings ||
-                                  false
-                                }
-                                onCheckedChange={checked =>
-                                  updateInsuranceDetails(
-                                    insurance.id!,
-                                    'disabilityTestFindings',
-                                    checked
-                                  )
-                                }
-                              />
-                              <Label
-                                htmlFor={`disability-${insurance.id}`}
-                                className="text-xs"
-                              >
-                                장애검사 이상
-                              </Label>
-                            </div>
-                          </div>
-                        </>
-                      )}
-
-                      {insurance.type === 'auto' && (
-                        <div className="grid grid-cols-2 gap-3">
-                          <div className="space-y-1">
-                            <Label className="text-xs">차량번호</Label>
-                            <Input
-                              value={insurance.details.vehicleNumber || ''}
-                              onChange={e =>
-                                updateInsuranceDetails(
-                                  insurance.id!,
-                                  'vehicleNumber',
-                                  e.target.value
-                                )
-                              }
-                              placeholder="12가3456"
-                            />
-                          </div>
-                          <div className="space-y-1">
-                            <Label className="text-xs">차량 소유자</Label>
-                            <Input
-                              value={insurance.details.ownerName || ''}
-                              onChange={e =>
-                                updateInsuranceDetails(
-                                  insurance.id!,
-                                  'ownerName',
-                                  e.target.value
-                                )
-                              }
-                              placeholder="홍길동"
-                            />
-                          </div>
-                          <div className="space-y-1">
-                            <Label className="text-xs">차종</Label>
-                            <Input
-                              value={insurance.details.vehicleType || ''}
-                              onChange={e =>
-                                updateInsuranceDetails(
-                                  insurance.id!,
-                                  'vehicleType',
-                                  e.target.value
-                                )
-                              }
-                              placeholder="승용차"
-                            />
-                          </div>
-                          <div className="space-y-1">
-                            <Label className="text-xs">제조사</Label>
-                            <Input
-                              value={insurance.details.manufacturer || ''}
-                              onChange={e =>
-                                updateInsuranceDetails(
-                                  insurance.id!,
-                                  'manufacturer',
-                                  e.target.value
-                                )
-                              }
-                              placeholder="현대"
-                            />
-                          </div>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))}
-              </TabsContent>
-
-              <TabsContent value="sales" className="space-y-4 m-0 p-1">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="stage"
-                      className="flex items-center space-x-1 text-sm font-medium"
-                    >
-                      <span>진행 단계</span>
-                      <span className="text-destructive">*</span>
-                    </Label>
-                    <Select
-                      value={stageId}
-                      onValueChange={value => {
-                        setStageId(value);
-                        if (errors.stageId) {
-                          const newErrors = { ...errors };
-                          delete newErrors.stageId;
-                          setErrors(newErrors);
-                        }
-                      }}
-                    >
-                      <SelectTrigger
-                        className={errors.stageId ? 'border-destructive' : ''}
-                      >
-                        <SelectValue placeholder="단계 선택" />
+                    <Select value={telecomProvider} onValueChange={setTelecomProvider}>
+                      <SelectTrigger className="h-9 sm:h-10 text-xs sm:text-sm">
+                        <SelectValue placeholder="통신사를 선택하세요" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectGroup>
-                          <SelectLabel>영업 단계</SelectLabel>
-                          {stages.map(stage => (
-                            <SelectItem key={stage.id} value={stage.id}>
-                              {stage.name}
+                          <SelectLabel className="text-xs sm:text-sm py-2">주요 통신사</SelectLabel>
+                          {telecomProviders.slice(0, 3).map((provider) => (
+                            <SelectItem
+                              key={provider}
+                              value={provider}
+                              className="text-xs sm:text-sm py-2"
+                            >
+                              {provider}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                        <SelectGroup>
+                          <SelectLabel className="text-xs sm:text-sm py-2">알뜰폰</SelectLabel>
+                          {telecomProviders.slice(3).map((provider) => (
+                            <SelectItem
+                              key={provider}
+                              value={provider}
+                              className="text-xs sm:text-sm py-2"
+                            >
+                              {provider}
                             </SelectItem>
                           ))}
                         </SelectGroup>
                       </SelectContent>
                     </Select>
-                    {errors.stageId && (
-                      <p className="text-xs text-destructive flex items-center space-x-1">
-                        <AlertCircle className="h-3 w-3" />
-                        <span>{errors.stageId}</span>
-                      </p>
-                    )}
                   </div>
+                </div>
+              </TabsContent>
+
+              {/* 💪 신체 정보 탭 */}
+              <TabsContent value="physical" className="space-y-3 sm:space-y-4 mt-3 sm:mt-4">
+                <div className="space-y-3 sm:space-y-4">
+                  <h4 className="text-sm sm:text-base font-medium text-foreground flex items-center gap-2">
+                    💪 신체 정보
+                  </h4>
+
+                  <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="height" className="text-xs sm:text-sm font-medium">
+                        키 (cm)
+                      </Label>
+                      <Input
+                        id="height"
+                        type="number"
+                        placeholder="170"
+                        value={height || ''}
+                        onChange={(e) =>
+                          setHeight(e.target.value ? Number(e.target.value) : undefined)
+                        }
+                        className="h-9 sm:h-10 text-xs sm:text-sm"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="weight" className="text-xs sm:text-sm font-medium">
+                        몸무게 (kg)
+                      </Label>
+                      <Input
+                        id="weight"
+                        type="number"
+                        placeholder="70"
+                        value={weight || ''}
+                        onChange={(e) =>
+                          setWeight(e.target.value ? Number(e.target.value) : undefined)
+                        }
+                        className="h-9 sm:h-10 text-xs sm:text-sm"
+                      />
+                    </div>
+                  </div>
+
                   <div className="space-y-2">
-                    <Label htmlFor="importance" className="text-sm font-medium">
-                      중요도 *
+                    <Label className="text-xs sm:text-sm font-medium">운전면허 보유</Label>
+                    <div className="flex items-center space-x-4 mt-2">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="license-yes"
+                          checked={hasDrivingLicense === true}
+                          onCheckedChange={(checked) =>
+                            setHasDrivingLicense(checked ? true : undefined)
+                          }
+                        />
+                        <Label
+                          htmlFor="license-yes"
+                          className="text-xs sm:text-sm cursor-pointer"
+                        >
+                          있음
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="license-no"
+                          checked={hasDrivingLicense === false}
+                          onCheckedChange={(checked) =>
+                            setHasDrivingLicense(checked ? false : undefined)
+                          }
+                        />
+                        <Label
+                          htmlFor="license-no"
+                          className="text-xs sm:text-sm cursor-pointer"
+                        >
+                          없음
+                        </Label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
+
+              {/* 📊 영업 정보 탭 */}
+              <TabsContent value="sales" className="space-y-3 sm:space-y-4 mt-3 sm:mt-4">
+                <div className="space-y-3 sm:space-y-4">
+                  <h4 className="text-sm sm:text-base font-medium text-foreground flex items-center gap-2">
+                    📊 영업 정보
+                  </h4>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="stage" className="text-xs sm:text-sm font-medium">
+                      진행 단계 *
                     </Label>
-                    <Select
-                      value={importance}
-                      onValueChange={val =>
-                        setImportance(val as 'high' | 'medium' | 'low')
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="중요도 선택" />
+                    <Select value={stageId} onValueChange={setStageId}>
+                      <SelectTrigger className={`h-9 sm:h-10 text-xs sm:text-sm ${
+                        errors.stageId ? 'border-destructive' : ''
+                      }`}>
+                        <SelectValue placeholder="진행 단계를 선택하세요" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectGroup>
-                          <SelectLabel>중요도</SelectLabel>
-                          <SelectItem value="high">높음</SelectItem>
-                          <SelectItem value="medium">중간</SelectItem>
-                          <SelectItem value="low">낮음</SelectItem>
-                        </SelectGroup>
+                        {stages.map((stage) => (
+                          <SelectItem
+                            key={stage.id}
+                            value={stage.id}
+                            className="text-xs sm:text-sm py-2"
+                          >
+                            {stage.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {errors.stageId && (
+                      <p className="text-xs text-destructive mt-1">{errors.stageId}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="importance" className="text-xs sm:text-sm font-medium">
+                      중요도
+                    </Label>
+                    <Select value={importance} onValueChange={(value: 'high' | 'medium' | 'low') => setImportance(value)}>
+                      <SelectTrigger className="h-9 sm:h-10 text-xs sm:text-sm">
+                        <SelectValue placeholder="중요도를 선택하세요" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="high" className="text-xs sm:text-sm py-2">
+                          🔴 키맨
+                        </SelectItem>
+                        <SelectItem value="medium" className="text-xs sm:text-sm py-2">
+                          🟡 보통
+                        </SelectItem>
+                        <SelectItem value="low" className="text-xs sm:text-sm py-2">
+                          🟢 낮음
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
-                </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="referrer" className="text-sm font-medium">
-                    소개자
-                  </Label>
-                  <Select value={referrerId} onValueChange={setReferrerId}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="소개자 선택 (선택사항)" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectLabel>소개자</SelectLabel>
-                        {referrers.map(referrer => (
-                          <SelectItem key={referrer.id} value={referrer.id}>
-                            {referrer.name}
+                  {referrers.length > 0 && (
+                    <div className="space-y-2">
+                      <Label htmlFor="referrer" className="text-xs sm:text-sm font-medium">
+                        소개자
+                      </Label>
+                      <Select value={referrerId || ''} onValueChange={(value) => setReferrerId(value || undefined)}>
+                        <SelectTrigger className="h-9 sm:h-10 text-xs sm:text-sm">
+                          <SelectValue placeholder="소개자를 선택하세요" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="" className="text-xs sm:text-sm py-2">
+                            소개자 없음
                           </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </div>
+                          {referrers.map((referrer) => (
+                            <SelectItem
+                              key={referrer.id}
+                              value={referrer.id}
+                              className="text-xs sm:text-sm py-2"
+                            >
+                              {referrer.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
 
-                <div className="space-y-3">
-                  <Label className="text-sm font-medium">태그</Label>
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {tags.map(tag => (
-                      <Badge
-                        key={tag}
-                        variant="secondary"
-                        className="flex items-center gap-1.5 py-1"
-                      >
-                        {tag}
-                        <X
-                          className="h-3 w-3 cursor-pointer"
-                          onClick={() => removeTag(tag)}
-                        />
-                      </Badge>
-                    ))}
-                  </div>
-                  <div className="flex gap-2">
-                    <Input
-                      value={newTag}
-                      onChange={e => setNewTag(e.target.value)}
-                      placeholder="태그 입력"
-                      onKeyPress={e => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          addTag();
-                        }
-                      }}
+                  <div className="space-y-2">
+                    <Label htmlFor="note" className="text-xs sm:text-sm font-medium">
+                      메모
+                    </Label>
+                    <Textarea
+                      id="note"
+                      placeholder="고객에 대한 메모를 입력하세요"
+                      value={note}
+                      onChange={(e) => setNote(e.target.value)}
+                      className="text-xs sm:text-sm min-h-[80px] resize-none"
+                      rows={3}
                     />
-                    <Button type="button" onClick={addTag} size="sm">
-                      <Plus className="h-4 w-4" />
-                    </Button>
                   </div>
-                </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="note" className="text-sm font-medium">
-                    메모
-                  </Label>
-                  <Textarea
-                    id="note"
-                    value={note}
-                    onChange={e => setNote(e.target.value)}
-                    placeholder="고객에 대한 메모를 입력하세요"
-                    className="resize-none"
-                    rows={3}
-                  />
+                  <div className="space-y-2">
+                    <Label className="text-xs sm:text-sm font-medium">태그</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="태그를 입력하고 Enter를 누르세요"
+                        value={newTag}
+                        onChange={(e) => setNewTag(e.target.value)}
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            addTag();
+                          }
+                        }}
+                        className="h-9 sm:h-10 text-xs sm:text-sm flex-1"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={addTag}
+                        className="h-9 sm:h-10 px-3"
+                      >
+                        <Plus className="h-3 w-3" />
+                      </Button>
+                    </div>
+                    {tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {tags.map((tag, index) => (
+                          <Badge
+                            key={index}
+                            variant="secondary"
+                            className="text-xs px-2 py-1 flex items-center gap-1"
+                          >
+                            {tag}
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeTag(tag)}
+                              className="h-auto w-auto p-0 hover:bg-transparent"
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </TabsContent>
-            </div>
-          </Tabs>
 
-          <DialogFooter className="pt-6 flex-shrink-0 space-x-2">
+              {/* 🛡️ 보험 정보 탭 */}
+              <TabsContent value="insurance" className="space-y-3 sm:space-y-4 mt-3 sm:mt-4">
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm sm:text-base font-medium text-foreground flex items-center gap-2">
+                      🛡️ 보험 정보
+                    </h4>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => addInsurance('life')}
+                        className="text-xs sm:text-sm h-8 px-3"
+                      >
+                        <Plus className="h-3 w-3 mr-1" />
+                        생명보험
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => addInsurance('health')}
+                        className="text-xs sm:text-sm h-8 px-3"
+                      >
+                        <Plus className="h-3 w-3 mr-1" />
+                        건강보험
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => addInsurance('auto')}
+                        className="text-xs sm:text-sm h-8 px-3"
+                      >
+                        <Plus className="h-3 w-3 mr-1" />
+                        자동차보험
+                      </Button>
+                    </div>
+                  </div>
+
+                  {insuranceInfo.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <Shield className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                      <p className="text-xs sm:text-sm">등록된 보험 정보가 없습니다</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        위 버튼을 클릭하여 보험 정보를 추가하세요
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {insuranceInfo.map((insurance) => (
+                        <Card key={insurance.id} className="border-border/50">
+                          <CardHeader className="pb-3">
+                            <CardTitle className="text-sm flex items-center justify-between">
+                              <span className="flex items-center gap-2">
+                                <Shield className="h-4 w-4 text-primary" />
+                                {getInsuranceTypeLabel(insurance.type)}
+                              </span>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => removeInsurance(insurance.id)}
+                                className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
+                              >
+                                <X className="h-3 w-3" />
+                              </Button>
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent className="space-y-3">
+                                                         <div className="grid grid-cols-2 gap-3">
+                               <div className="space-y-1">
+                                 <Label className="text-xs font-medium">보험사</Label>
+                                 <Input
+                                   placeholder="보험사명"
+                                   value={insurance.details.company || ''}
+                                   onChange={(e) =>
+                                     updateInsuranceDetails(insurance.id, 'company', e.target.value)
+                                   }
+                                   className="h-8 text-xs"
+                                 />
+                               </div>
+                               <div className="space-y-1">
+                                 <Label className="text-xs font-medium">상품명</Label>
+                                 <Input
+                                   placeholder="상품명"
+                                   value={insurance.details.productName || ''}
+                                   onChange={(e) =>
+                                     updateInsuranceDetails(insurance.id, 'productName', e.target.value)
+                                   }
+                                   className="h-8 text-xs"
+                                 />
+                               </div>
+                             </div>
+                             <div className="grid grid-cols-2 gap-3">
+                               <div className="space-y-1">
+                                 <Label className="text-xs font-medium">보험료 (월)</Label>
+                                 <Input
+                                   type="number"
+                                   placeholder="100000"
+                                   value={insurance.details.premium || ''}
+                                   onChange={(e) =>
+                                     updateInsuranceDetails(
+                                       insurance.id,
+                                       'premium',
+                                       e.target.value ? Number(e.target.value) : undefined
+                                     )
+                                   }
+                                   className="h-8 text-xs"
+                                 />
+                               </div>
+                               <div className="space-y-1">
+                                 <Label className="text-xs font-medium">보장금액</Label>
+                                 <Input
+                                   type="number"
+                                   placeholder="50000000"
+                                   value={insurance.details.coverageAmount || ''}
+                                   onChange={(e) =>
+                                     updateInsuranceDetails(
+                                       insurance.id,
+                                       'coverageAmount',
+                                       e.target.value ? Number(e.target.value) : undefined
+                                     )
+                                   }
+                                   className="h-8 text-xs"
+                                 />
+                               </div>
+                             </div>
+                             <div className="grid grid-cols-2 gap-3">
+                               <div className="space-y-1">
+                                 <Label className="text-xs font-medium">가입일</Label>
+                                 <Input
+                                   type="date"
+                                   value={insurance.details.startDate || ''}
+                                   onChange={(e) =>
+                                     updateInsuranceDetails(insurance.id, 'startDate', e.target.value)
+                                   }
+                                   className="h-8 text-xs"
+                                 />
+                               </div>
+                               <div className="space-y-1">
+                                 <Label className="text-xs font-medium">만료일</Label>
+                                 <Input
+                                   type="date"
+                                   value={insurance.details.endDate || ''}
+                                   onChange={(e) =>
+                                     updateInsuranceDetails(insurance.id, 'endDate', e.target.value)
+                                   }
+                                   className="h-8 text-xs"
+                                 />
+                               </div>
+                             </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+            </Tabs>
+          </form>
+        </div>
+
+        {/* 푸터 - 고정 */}
+        <DialogFooter className="flex-shrink-0 gap-2 sm:gap-3 p-2 sm:p-6 border-t border-border/30">
+          <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto sm:justify-end">
             <Button
               type="button"
               variant="outline"
-              onClick={() => {
-                resetForm();
-                onOpenChange(false);
-              }}
+              onClick={() => onOpenChange(false)}
+              className="h-10 px-4 w-full sm:w-auto text-xs sm:text-sm"
             >
               취소
             </Button>
             <Button
               type="submit"
-              disabled={!name || !phone || !stageId}
-              className="min-w-[80px]"
+              onClick={handleSubmit}
+              className="gap-2 h-10 px-4 w-full sm:w-auto text-xs sm:text-sm bg-primary text-primary-foreground"
             >
-              추가
+              <Plus className="h-3 w-3" />
+              고객 추가
             </Button>
-          </DialogFooter>
-        </form>
+          </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

@@ -42,7 +42,7 @@ export function ClientStatsSection({
           <CardTitle className="flex items-center gap-2">
             <Plus className="h-5 w-5 text-green-600" />새 고객 등록
           </CardTitle>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground pb-6">
             새 고객을 빠르게 추가하고 관리를 시작하세요
           </p>
         </CardHeader>

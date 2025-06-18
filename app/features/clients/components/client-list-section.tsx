@@ -288,7 +288,7 @@ export function ClientListSection({
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <div>
+          <div className="flex flex-col gap-2">
             <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5" />
               고객 목록
