@@ -1302,34 +1302,15 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
             }
             
             .pipeline-mobile-container {
-              min-height: calc(100vh - 4rem);
+              min-height: 100vh;
               height: auto;
               overflow: visible;
               position: relative;
             }
             
-            .pipeline-top-sections {
-              position: sticky;
-              top: 0;
-              z-index: 10;
-              background: var(--background);
-              border-bottom: 1px solid var(--border);
-              margin-bottom: 1rem;
-              padding-bottom: 1rem;
-            }
-            
             .pipeline-carousel-container {
-              min-height: calc(100vh - 20rem);
+              min-height: calc(100vh - 16rem);
               overflow: visible;
-            }
-            
-
-            
-            .embla__slide {
-              height: auto;
-              min-height: calc(100vh - 20rem);
-              overflow: visible;
-              padding: 0 0.5rem;
             }
           }
         `}
@@ -1338,8 +1319,8 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
       {isMobile ? (
         /* 🎯 모바일 레이아웃 */
         <div className="pipeline-mobile-container space-y-4">
-          {/* 🎯 상단 고정 섹션 */}
-          <div className="pipeline-top-sections space-y-4">
+          {/* 🎯 상단 섹션 - 스크롤 시 최소화 */}
+          <div className="space-y-4">
             {/* 🎯 MVP 통계 카드 - 모바일 캐러셀 */}
             <div>
               <Carousel

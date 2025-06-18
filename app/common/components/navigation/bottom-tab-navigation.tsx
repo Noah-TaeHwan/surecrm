@@ -177,11 +177,19 @@ export function BottomTabNavigation({ isMenuOpen }: BottomTabNavigationProps) {
       <div 
         className="absolute inset-x-0 bottom-0 pointer-events-none"
         style={{
-          height: '180%',
-          backdropFilter: 'blur(40px) saturate(180%)',
-          background: 'linear-gradient(to top, rgba(0,0,0,0.25) 30%, rgba(0,0,0,0.15) 60%, rgba(0,0,0,0.05) 80%, transparent)',
-          maskImage: 'linear-gradient(to top, black 40%, transparent 100%)',
-          WebkitMaskImage: 'linear-gradient(to top, black 40%, transparent 100%)',
+          height: isMinimized ? '180%' : '120%',
+          backdropFilter: isMinimized ? 'blur(60px) saturate(200%)' : 'blur(25px) saturate(150%)',
+          background: isMinimized 
+            ? 'linear-gradient(to top, rgba(0,0,0,0.2) 35%, rgba(0,0,0,0.12) 50%, rgba(0,0,0,0.06) 65%, rgba(0,0,0,0.03) 75%, rgba(0,0,0,0.015) 85%, rgba(0,0,0,0.005) 92%, transparent)'
+            : 'linear-gradient(to top, rgba(0,0,0,0.1) 45%, rgba(0,0,0,0.05) 60%, rgba(0,0,0,0.025) 72%, rgba(0,0,0,0.012) 82%, rgba(0,0,0,0.006) 88%, rgba(0,0,0,0.003) 94%, transparent)',
+          maskImage: isMinimized 
+            ? 'linear-gradient(to top, black 50%, rgba(0,0,0,0.7) 65%, rgba(0,0,0,0.4) 75%, rgba(0,0,0,0.2) 85%, rgba(0,0,0,0.1) 92%, transparent 100%)'
+            : 'linear-gradient(to top, black 60%, rgba(0,0,0,0.6) 72%, rgba(0,0,0,0.3) 82%, rgba(0,0,0,0.15) 88%, rgba(0,0,0,0.08) 94%, rgba(0,0,0,0.03) 97%, transparent 100%)',
+          WebkitMaskImage: isMinimized 
+            ? 'linear-gradient(to top, black 50%, rgba(0,0,0,0.7) 65%, rgba(0,0,0,0.4) 75%, rgba(0,0,0,0.2) 85%, rgba(0,0,0,0.1) 92%, transparent 100%)'
+            : 'linear-gradient(to top, black 60%, rgba(0,0,0,0.6) 72%, rgba(0,0,0,0.3) 82%, rgba(0,0,0,0.15) 88%, rgba(0,0,0,0.08) 94%, rgba(0,0,0,0.03) 97%, transparent 100%)',
+          WebkitBackdropFilter: isMinimized ? 'blur(60px) saturate(200%)' : 'blur(25px) saturate(150%)', // iOS Safari 지원
+          transition: 'all 1s cubic-bezier(0.23, 1, 0.32, 1)',
         }}
       />
       
@@ -192,6 +200,9 @@ export function BottomTabNavigation({ isMenuOpen }: BottomTabNavigationProps) {
           borderTop: '1px solid rgba(255, 255, 255, 0.08)',
           border: '1px solid rgba(255, 255, 255, 0.08)',
           boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3), 0 8px 16px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+          backdropFilter: isMinimized ? 'blur(40px) saturate(180%)' : 'blur(20px) saturate(150%)',
+          WebkitBackdropFilter: isMinimized ? 'blur(40px) saturate(180%)' : 'blur(20px) saturate(150%)', // iOS Safari 지원
+          transition: 'all 1s cubic-bezier(0.23, 1, 0.32, 1)',
         }}
       >
         {/* 상단 글로우 라인 */}

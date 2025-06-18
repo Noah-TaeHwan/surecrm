@@ -58,6 +58,22 @@ export function PipelineBoard({
     Record<string, boolean>
   >({});
 
+  // 🎯 모바일 스크롤 상태 관리
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  // 🎯 모바일 스크롤 이벤트 리스너
+  useEffect(() => {
+    if (!isMobile) return;
+
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      setIsScrolled(scrollY > 50); // 50px 이상 스크롤시 최소화
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isMobile]);
+
   // 컴포넌트 마운트 시 클라이언트 상태 업데이트를 위한 효과
   const [clientsState, setClientsState] = useState<Client[]>(clients);
 
@@ -187,169 +203,187 @@ export function PipelineBoard({
     }
   };
 
-  // 🎯 모바일 칸반 컬럼 렌더링 함수
-  const renderMobileKanbanColumn = (
-    stage: PipelineStage & {
-      stats: { clientCount: number; highImportanceCount: number };
-    }
-  ) => {
-    const isDragTarget = draggingOver === stage.id;
-    const canDrop = draggedClientId && dragSourceStageId.current !== stage.id;
-    const stageClients = clientsByStage[stage.id] || [];
-
-    return (
-      <div
-        key={stage.id}
-        className="w-full px-4 flex flex-col h-full transition-all duration-200"
-        onDragOver={e => handleDragOver(e, stage.id)}
-        onDragLeave={handleDragLeave}
-        onDrop={e => handleDrop(e, stage.id)}
-      >
-        {/* 🎯 Sticky 단계 헤더 (모바일에서만 sticky) */}
-        <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-sm border-b border-border pb-4 flex-shrink-0 mb-4">
-          <div
-            className={`flex flex-col p-4 rounded-lg border bg-card transition-all duration-200 ${
-              isDragTarget && canDrop
-                ? 'border-primary bg-primary/5 shadow-lg'
-                : 'border-border'
-            }`}
-          >
-            {/* 단계 제목 */}
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center space-x-3 min-w-0 flex-1">
-                <div
-                  className="w-3 h-3 rounded-full flex-shrink-0"
-                  style={{ backgroundColor: stage.color }}
-                />
-                <h3 className="font-semibold text-foreground text-base truncate">
-                  {stage.name}
-                </h3>
-              </div>
-            </div>
-
-            {/* 단계별 통계 */}
-            <div className="flex items-center justify-between text-sm">
-              <div className="flex items-center space-x-2 text-muted-foreground">
-                <Users className="h-3 w-3" />
-                <span className="font-medium">{stage.stats.clientCount}명</span>
-              </div>
-              {stage.stats.highImportanceCount > 0 && (
-                <div className="flex items-center space-x-1">
-                  <AlertCircle className="h-3 w-3 text-red-500" />
-                  <span className="text-xs text-red-600 font-medium">
-                    중요 {stage.stats.highImportanceCount}명
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* 🎯 스크롤 가능한 고객 카드 컨테이너 */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide">
-          <div
-            className={`space-y-3 p-4 pb-16 rounded-lg transition-all duration-200 ${
-              isDragTarget && canDrop
-                ? 'bg-primary/5 border-2 border-dashed border-primary'
-                : 'bg-transparent'
-            }`}
-          >
-            {stageClients.length > 0 ? (
-              stageClients.map(client => (
-                <div
-                  key={client.id}
-                  id={`client-card-${client.id}`}
-                  draggable
-                  onDragStart={e => handleDragStart(e, client.id, stage.id)}
-                  onDragEnd={handleDragEnd}
-                  className={`transition-all duration-200 cursor-grab active:cursor-grabbing ${
-                    client.id === draggedClientId
-                      ? 'opacity-50 transform rotate-1 scale-95 z-50'
-                      : 'hover:transform hover:scale-[1.02] hover:shadow-md'
-                  }`}
-                >
-                  <ClientCard
-                    {...client}
-                    tags={
-                      Array.isArray(client.tags)
-                        ? client.tags.join(', ')
-                        : client.tags
-                    }
-                    createdAt={client.createdAt || new Date().toISOString()}
-                    insuranceInfo={
-                      Array.isArray(client.insuranceInfo)
-                        ? client.insuranceInfo[0]
-                        : client.insuranceInfo
-                    }
-                    referredBy={client.referredBy || undefined}
-                    isDragging={client.id === draggedClientId}
-                    onRemoveFromPipeline={onRemoveFromPipeline}
-                    onCreateContract={onCreateContract}
-                    onEditOpportunity={onEditOpportunity}
-                    products={client.products}
-                    totalMonthlyPremium={client.totalMonthlyPremium}
-                    totalExpectedCommission={client.totalExpectedCommission}
-                  />
-                </div>
-              ))
-            ) : (
-              <div
-                className={`flex flex-col items-center justify-center h-32 border-2 border-dashed rounded-lg transition-all duration-200 ${
-                  isDragTarget && canDrop
-                    ? 'border-primary bg-primary/10 text-primary'
-                    : 'border-border text-muted-foreground hover:border-muted-foreground/60 hover:bg-muted/20'
-                }`}
-              >
-                {isDragTarget && canDrop ? (
-                  <>
-                    <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center mb-2">
-                      <TrendingUp className="h-5 w-5 text-primary" />
-                    </div>
-                    <p className="text-sm font-medium">
-                      여기에 고객을 놓으세요
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center mb-2">
-                      <Users className="h-5 w-5 text-muted-foreground" />
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      고객이 없습니다
-                    </p>
-                  </>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   return (
     <div className="h-full flex flex-col pipeline-board">
       {isMobile ? (
-        /* 🎯 모바일: 칸반 컬럼 캐러셀 - 스냅 스크롤 */
-        <div className="flex-1 overflow-hidden">
-          <Carousel
-            opts={{
-              align: 'start',
-              loop: false,
-              containScroll: 'trimSnaps', // 🎯 스냅 포인트 최적화
-              dragFree: false, // 🎯 자유 드래그 비활성화로 스냅 강제
-              skipSnaps: false, // 🎯 스냅 건너뛰기 비활성화
-            }}
-            className="w-full h-full"
-          >
-            <CarouselContent className="h-full -ml-1">
-              {stages.map(stage => (
-                <CarouselItem key={stage.id} className="pl-1 basis-full h-full">
-                  {renderMobileKanbanColumn(stage)}
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-          </Carousel>
+        /* 🎯 모바일: 데스크톱과 동일한 구조로 변경 - 각 컬럼 독립 스크롤 */
+        <div className="flex-1 overflow-hidden flex flex-col">
+          {/* 🎯 모바일 헤더 영역 - 스크롤시 최소화 */}
+          <div className={`sticky top-7 z-40 bg-background border-b border-border transition-all duration-300 ${isScrolled ? 'pb-2' : 'pb-4'}`}>
+            <Carousel
+              opts={{
+                align: 'start',
+                loop: false,
+                containScroll: 'trimSnaps',
+                dragFree: false,
+                skipSnaps: false,
+              }}
+              className="w-full"
+            >
+              <CarouselContent className="-ml-1">
+                {stages.map(stage => (
+                  <CarouselItem key={`header-${stage.id}`} className="pl-1 basis-full">
+                    <div className="px-4">
+                      <div
+                        className={`flex flex-col rounded-lg border bg-card transition-all duration-300 border-border ${
+                          isScrolled ? 'p-2' : 'p-4'
+                        }`}
+                      >
+                        {/* 단계 제목 */}
+                        <div className={`flex items-center justify-between ${isScrolled ? 'mb-1' : 'mb-3'}`}>
+                          <div className="flex items-center space-x-3 min-w-0 flex-1">
+                            <div
+                              className={`rounded-full flex-shrink-0 ${isScrolled ? 'w-2 h-2' : 'w-3 h-3'}`}
+                              style={{ backgroundColor: stage.color }}
+                            />
+                            <h3 className={`font-semibold text-foreground truncate ${isScrolled ? 'text-sm' : 'text-base'}`}>
+                              {stage.name}
+                            </h3>
+                          </div>
+                        </div>
+
+                        {/* 단계별 통계 - 스크롤시 숨김 */}
+                        {!isScrolled && (
+                          <div className="flex items-center justify-between text-sm">
+                            <div className="flex items-center space-x-2 text-muted-foreground">
+                              <Users className="h-3 w-3" />
+                              <span className="font-medium">{stage.stats.clientCount}명</span>
+                            </div>
+                            {stage.stats.highImportanceCount > 0 && (
+                              <div className="flex items-center space-x-1">
+                                <AlertCircle className="h-3 w-3 text-red-500" />
+                                <span className="text-xs text-red-600 font-medium">
+                                  중요 {stage.stats.highImportanceCount}명
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+            </Carousel>
+          </div>
+
+          {/* 🎯 모바일 컨텐츠 영역 - 각 컬럼별 독립 스크롤 */}
+          <div className="flex-1 overflow-hidden">
+            <div className="h-full overflow-hidden">
+              <Carousel
+                opts={{
+                  align: 'start',
+                  loop: false,
+                  containScroll: 'trimSnaps',
+                  dragFree: false,
+                  skipSnaps: false,
+                }}
+                className="w-full h-full"
+              >
+                <CarouselContent className="h-full -ml-1">
+                  {stages.map(stage => {
+                    const isDragTarget = draggingOver === stage.id;
+                    const canDrop = draggedClientId && dragSourceStageId.current !== stage.id;
+                    const stageClients = clientsByStage[stage.id] || [];
+
+                    return (
+                      <CarouselItem key={`content-${stage.id}`} className="pl-1 basis-full h-full">
+                        <div
+                          className="w-full px-4 h-full flex flex-col"
+                          style={{ height: `calc(100vh - ${isScrolled ? '12rem' : '16rem'})` }}
+                          onDragOver={e => handleDragOver(e, stage.id)}
+                          onDragLeave={handleDragLeave}
+                          onDrop={e => handleDrop(e, stage.id)}
+                        >
+                          {/* 🎯 각 컬럼별 독립 스크롤 영역 */}
+                          <div 
+                            className="overflow-y-auto scrollbar-hide h-full"
+                            style={{ height: `calc(100vh - ${isScrolled ? '12rem' : '16rem'})` }}
+                          >
+                            <div
+                              className={`space-y-3 p-4 pb-16 rounded-lg transition-all duration-200 ${
+                                isDragTarget && canDrop
+                                  ? 'bg-primary/5 border-2 border-dashed border-primary'
+                                  : 'bg-transparent'
+                              }`}
+                            >
+                              {stageClients.length > 0 ? (
+                                stageClients.map(client => (
+                                  <div
+                                    key={client.id}
+                                    id={`client-card-${client.id}`}
+                                    draggable
+                                    onDragStart={e => handleDragStart(e, client.id, stage.id)}
+                                    onDragEnd={handleDragEnd}
+                                    className={`transition-all duration-200 cursor-grab active:cursor-grabbing ${
+                                      client.id === draggedClientId
+                                        ? 'opacity-50 transform rotate-1 scale-95 z-50'
+                                        : 'hover:transform hover:scale-[1.02] hover:shadow-md'
+                                    }`}
+                                  >
+                                    <ClientCard
+                                      {...client}
+                                      tags={
+                                        Array.isArray(client.tags)
+                                          ? client.tags.join(', ')
+                                          : client.tags
+                                      }
+                                      createdAt={client.createdAt || new Date().toISOString()}
+                                      insuranceInfo={
+                                        Array.isArray(client.insuranceInfo)
+                                          ? client.insuranceInfo[0]
+                                          : client.insuranceInfo
+                                      }
+                                      referredBy={client.referredBy || undefined}
+                                      isDragging={client.id === draggedClientId}
+                                      onRemoveFromPipeline={onRemoveFromPipeline}
+                                      onCreateContract={onCreateContract}
+                                      onEditOpportunity={onEditOpportunity}
+                                      products={client.products}
+                                      totalMonthlyPremium={client.totalMonthlyPremium}
+                                      totalExpectedCommission={client.totalExpectedCommission}
+                                    />
+                                  </div>
+                                ))
+                              ) : (
+                                <div
+                                  className={`flex flex-col items-center justify-center h-32 border-2 border-dashed rounded-lg transition-all duration-200 ${
+                                    isDragTarget && canDrop
+                                      ? 'border-primary bg-primary/10 text-primary'
+                                      : 'border-border text-muted-foreground hover:border-muted-foreground/60 hover:bg-muted/20'
+                                  }`}
+                                >
+                                  {isDragTarget && canDrop ? (
+                                    <>
+                                      <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center mb-2">
+                                        <TrendingUp className="h-5 w-5 text-primary" />
+                                      </div>
+                                      <p className="text-sm font-medium">
+                                        여기에 고객을 놓으세요
+                                      </p>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center mb-2">
+                                        <Users className="h-5 w-5 text-muted-foreground" />
+                                      </div>
+                                      <p className="text-sm text-muted-foreground">
+                                        고객이 없습니다
+                                      </p>
+                                    </>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </CarouselItem>
+                    );
+                  })}
+                </CarouselContent>
+              </Carousel>
+            </div>
+          </div>
         </div>
       ) : (
         /* 🎯 데스크톱: 컬럼 제목 고정 + 개별 스크롤 레이아웃 */

@@ -1433,8 +1433,29 @@ textarea {
 
 /* Liquid Glass Backdrop Effects */
 .liquid-glass-backdrop {
-  backdrop-filter: blur(40px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
   background: rgba(0, 0, 0, 0.25);
+  /* iOS Safari 블러 효과 강화 */
+  will-change: backdrop-filter;
+  transform: translateZ(0);
+}
+
+/* iOS Safari에서 backdrop-filter 지원 확인 */
+@supports (backdrop-filter: blur(1px)) {
+  .liquid-glass-backdrop {
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+  }
+}
+
+/* iOS Safari 전용 최적화 */
+@supports (-webkit-touch-callout: none) {
+  .liquid-glass-backdrop {
+    -webkit-backdrop-filter: blur(20px) saturate(150%) brightness(105%);
+    backdrop-filter: blur(20px) saturate(150%) brightness(105%);
+    isolation: isolate;
+  }
 }
 
 .liquid-glass-button {
