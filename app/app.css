@@ -1681,3 +1681,27 @@ textarea {
   overscroll-behavior-y: contain;
   scroll-behavior: smooth;
 }
+
+/* 🎯 PIPELINE SCROLLBAR UTILITIES - 칸반보드 스크롤바 숨김 */
+.scrollbar-hide {
+  scrollbar-width: none !important; /* Firefox */
+  -ms-overflow-style: none !important; /* Internet Explorer 10+ */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none !important; /* Safari and Chrome */
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* 칸반보드 전용 스크롤바 숨김 (더 강력한 선택자) */
+.pipeline-board .scrollbar-hide {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.pipeline-board .scrollbar-hide::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}

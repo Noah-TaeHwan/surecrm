@@ -181,12 +181,12 @@ export function PipelineBoard({
     }
   };
 
-  return (
-    <div className="w-full overflow-x-auto">
-      {/* 🎯 MVP 칸반보드 헤더와 콘텐츠 */}  
-      <div className="min-w-max">
-        {/* 단계 헤더 - sticky로 고정 */}
-        <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm pb-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-6">
+    return (
+    <div className="h-full flex flex-col pipeline-board">
+      {/* 🎯 단계 헤더 - 고정 영역 */}  
+      <div className="flex-shrink-0 pb-4 border-b border-border bg-background">
+        <div className="min-w-max overflow-x-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
           {stages.map(stage => {
             const isDragTarget = draggingOver === stage.id;
             const canDrop =
@@ -258,10 +258,14 @@ export function PipelineBoard({
               </div>
             );
           })}
+                  </div>
         </div>
+      </div>
 
-        {/* 칸반보드 컨텐츠 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+      {/* 🎯 칸반보드 카드 컨텐츠 - 스크롤 영역 */}
+      <div className="flex-1 overflow-hidden">
+        <div className="min-w-max overflow-x-auto h-full scrollbar-hide">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 h-full pt-4">
           {stages.map(stage => {
             const isDragTarget = draggingOver === stage.id;
             const canDrop =
@@ -279,9 +283,9 @@ export function PipelineBoard({
                 onDragLeave={handleDragLeave}
                 onDrop={e => handleDrop(e, stage.id)}
               >
-                {/* 고객 카드 컨테이너 */}
+                {/* 고객 카드 컨테이너 - 개별 스크롤 영역 (스크롤바 숨김) */}
                 <div
-                  className={`space-y-3 p-2 rounded-lg min-h-[350px] transition-all duration-200 ${
+                  className={`space-y-3 p-2 rounded-lg h-full overflow-y-auto transition-all duration-200 scrollbar-hide ${
                     isDragTarget && canDrop
                       ? 'bg-primary/5 border-2 border-dashed border-primary'
                       : 'bg-transparent'
@@ -385,7 +389,8 @@ export function PipelineBoard({
                 </div>
               </div>
             );
-          })}
+                      })}
+          </div>
         </div>
       </div>
     </div>

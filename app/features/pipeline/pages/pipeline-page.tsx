@@ -1254,9 +1254,23 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
 
   return (
     <MainLayout title="영업 파이프라인">
-      <div className="space-y-6">
-        {/* 🎯 MVP 통계 카드 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+      <style>
+        {`
+          main {
+            overflow: hidden !important;
+          }
+        `}
+      </style>
+      <div 
+        className="h-full flex flex-col gap-4"
+        style={{
+          height: 'calc(100vh - 4rem - 1.5rem)', // 전체 높이 - 헤더 - 패딩
+          maxHeight: 'calc(100vh - 4rem - 1.5rem)',
+          overflow: 'hidden',
+        }}
+      >
+        {/* 🎯 MVP 통계 카드 - 고정 영역 */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 flex-shrink-0">
             {/* 1. 전체 고객 */}
             <div className="flex items-center space-x-3 p-4 bg-card rounded-lg border">
               <div className="p-2 bg-blue-500/10 rounded-lg">
@@ -1348,8 +1362,8 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
             </div>
         </div>
 
-        {/* 🎯 필터 및 검색 섹션 */}
-        <div className="flex items-center justify-between">
+        {/* 🎯 필터 및 검색 섹션 - 고정 영역 */}
+        <div className="flex items-center justify-between flex-shrink-0 ">
             <div className="flex w-full max-w-md items-center space-x-2">
               <div className="relative w-full">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -1453,8 +1467,8 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
             </div>
           </div>
 
-        {/* 🎯 칸반보드 메인 콘텐츠 */}
-        <div>
+        {/* 🎯 칸반보드 메인 콘텐츠 - 스크롤 영역 */}
+        <div className="flex-1 min-h-0 overflow-hidden">
           <PipelineBoard
             stages={stages.map(stage => ({
               ...stage,
