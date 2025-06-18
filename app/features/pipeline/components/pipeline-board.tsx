@@ -205,10 +205,10 @@ export function PipelineBoard({
     return (
       <div
         key={stage.id}
-        className={`flex flex-col h-full transition-all duration-200 ${
+        className={`flex flex-col transition-all duration-200 ${
           isMobile 
-            ? 'w-full px-4' // 모바일: 전체 폭 + 좌우 패딩
-            : 'min-w-[300px]' // 데스크톱: 최소 폭
+            ? 'h-full w-full px-4' // 모바일: 전체 높이와 폭 + 좌우 패딩
+            : 'min-w-[300px] h-full' // 데스크톱: 최소 폭 + 전체 높이
         } ${isDragTarget && canDrop ? 'transform scale-[1.02]' : ''}`}
         onDragOver={e => handleDragOver(e, stage.id)}
         onDragLeave={handleDragLeave}
@@ -280,7 +280,7 @@ export function PipelineBoard({
         </div>
 
         {/* 🎯 스크롤 가능한 고객 카드 컨테이너 */}
-        <div className={`flex-1 ${
+        <div className={`flex-1 min-h-0 ${
           isMobile 
             ? 'overflow-y-auto overflow-x-hidden' // 모바일: 세로 스크롤만 허용
             : 'overflow-hidden' // 데스크톱: 기존 동작 유지
@@ -288,7 +288,7 @@ export function PipelineBoard({
           <div
             className={`space-y-3 p-2 rounded-lg transition-all duration-200 ${
               isMobile 
-                ? 'min-h-full pb-6' // 모바일: 최소 높이 + 하단 패딩
+                ? 'pb-6' // 모바일: 하단 패딩만 유지
                 : 'h-full overflow-y-auto scrollbar-hide' // 데스크톱: 기존 스크롤
             } ${
               isDragTarget && canDrop

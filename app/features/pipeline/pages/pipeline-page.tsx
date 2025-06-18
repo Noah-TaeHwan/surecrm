@@ -1312,22 +1312,47 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
               z-index: 5;
             }
             
-            /* 캐러셀 내부 각 슬라이드에서 스크롤 처리 */
+            /* 🎯 캐러셀 내부 각 슬라이드에서 스크롤 처리 개선 */
             .embla__slide {
-              height: 100%;
-              overflow-y: auto;
-              overflow-x: hidden;
+              height: 100% !important;
+              display: flex !important;
+              flex-direction: column !important;
+            }
+            
+            /* 🎯 각 슬라이드 내부 컨테이너 */
+            .embla__slide > div {
+              height: 100% !important;
+              display: flex !important;
+              flex-direction: column !important;
             }
             
             /* 스크롤바 숨기기 (Webkit) */
-            .embla__slide::-webkit-scrollbar {
-              display: none;
+            .embla__slide::-webkit-scrollbar,
+            .overflow-y-auto::-webkit-scrollbar {
+              width: 4px;
+            }
+            
+            .embla__slide::-webkit-scrollbar-track,
+            .overflow-y-auto::-webkit-scrollbar-track {
+              background: transparent;
+            }
+            
+            .embla__slide::-webkit-scrollbar-thumb,
+            .overflow-y-auto::-webkit-scrollbar-thumb {
+              background: rgba(0, 0, 0, 0.2);
+              border-radius: 2px;
+            }
+            
+            .embla__slide::-webkit-scrollbar-thumb:hover,
+            .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+              background: rgba(0, 0, 0, 0.3);
             }
             
             /* 스크롤바 숨기기 (Firefox) */
-            .embla__slide {
-              scrollbar-width: none;
-              -ms-overflow-style: none;
+            .embla__slide,
+            .overflow-y-auto {
+              scrollbar-width: thin;
+              scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
             }
           }
         `}
