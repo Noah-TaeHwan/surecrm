@@ -1,27 +1,4 @@
 import { useState, useEffect, useRef } from 'react';
-
-// 🔥 모달 높이 강제 CSS 주입
-const FORCE_MODAL_HEIGHT_CSS = `
-  /* 🚨 기존 고객 영업 기회 모달 75vh 강제 적용 */
-  [data-slot="dialog-content"] {
-    max-height: 75vh !important;
-    height: auto !important;
-    min-height: 0 !important;
-  }
-  
-  div[role="dialog"] > [data-slot="dialog-content"] {
-    max-height: 75vh !important;
-  }
-  
-  .fixed.z-50.grid.w-full.max-w-lg {
-    max-height: 75vh !important;
-  }
-  
-  /* 모든 가능한 모달 selector 강제 */
-  [data-radix-dialog-content] {
-    max-height: 75vh !important;
-  }
-`;
 import {
   Dialog,
   DialogContent,
@@ -150,22 +127,28 @@ export function ExistingClientOpportunityModal({
     }
   }, [preSelectedClientId, isOpen]); // isOpen도 의존성에 추가하여 모달이 열릴 때마다 동기화
 
-  // 🚨 모달 열릴 때 CSS 강제 주입
+  // 🚫 자동 포커스 완전 차단
   useEffect(() => {
     if (isOpen) {
-      const styleElement = document.createElement('style');
-      styleElement.id = 'force-modal-height-style';
-      styleElement.textContent = FORCE_MODAL_HEIGHT_CSS;
-      document.head.appendChild(styleElement);
-
-      return () => {
-        const existingStyle = document.getElementById('force-modal-height-style');
-        if (existingStyle) {
-          existingStyle.remove();
+      // 모든 input, textarea, select 요소의 포커스 제거
+      const timer = setTimeout(() => {
+        const focusedElement = document.activeElement as HTMLElement;
+        if (focusedElement && (
+          focusedElement.tagName === 'INPUT' || 
+          focusedElement.tagName === 'TEXTAREA' || 
+          focusedElement.tagName === 'SELECT'
+        )) {
+          focusedElement.blur();
         }
-      };
+      }, 0);
+      
+      return () => clearTimeout(timer);
     }
   }, [isOpen]);
+
+
+
+
 
   // 선택된 고객 카드로 자동 스크롤
   useEffect(() => {
@@ -263,14 +246,15 @@ export function ExistingClientOpportunityModal({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent 
-        className="sm:max-w-xl w-[95vw] p-0 overflow-hidden flex flex-col gap-0"
+        className="sm:max-w-xl w-[95vw] p-0 overflow-hidden flex flex-col sm:max-h-[75vh] gap-0 border-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
         style={{
-          maxHeight: '75vh !important',
-          height: 'auto !important',
-          minHeight: '0 !important',
-          '--radix-dialog-content-max-height': '75vh'
-        } as React.CSSProperties}
+          maxHeight: '75vh',
+          height: '75vh',
+          minHeight: '75vh'
+        }}
       >
+
+
         {/* 헤더 - 고정 */}
         <DialogHeader className="flex-shrink-0 px-4 sm:px-6 py-4 sm:py-4 border-b border-border/30">
           <DialogTitle className="flex items-center gap-2 text-sm sm:text-lg">
@@ -283,7 +267,10 @@ export function ExistingClientOpportunityModal({
         </DialogHeader>
 
         {/* 콘텐츠 - 스크롤 가능 */}
-        <div className="flex-1 overflow-y-auto scrollbar-none modal-scroll-area px-4 sm:px-6 py-1 sm:py-2 space-y-2 sm:space-y-6 min-h-0">
+        <div 
+          className="flex-1 overflow-y-auto scrollbar-none modal-scroll-area px-4 sm:px-6 py-1 sm:py-2 space-y-2 sm:space-y-6"
+          style={{ minHeight: 'calc(75vh - 200px)' }}
+        >
         
 
           {/* STEP 1: 고객 선택 */}
@@ -301,11 +288,12 @@ export function ExistingClientOpportunityModal({
                   value={clientSearchQuery}
                   onChange={(e) => setClientSearchQuery(e.target.value)}
                   className="h-9 sm:h-10 text-xs sm:text-sm pl-10"
+                  autoFocus={false}
                 />
               </div>
 
               {/* 고객 리스트 */}
-              <div className="space-y-2 max-h-[300px] overflow-y-auto">
+              <div className="space-y-2 flex-1 min-h-0">
                 {filteredClients.map(client => (
                     <Card
                       key={client.id}

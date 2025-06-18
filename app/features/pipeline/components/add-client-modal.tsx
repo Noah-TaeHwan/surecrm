@@ -312,6 +312,60 @@ export function AddClientModal({
 
   const progress = getFormProgress();
 
+  // 🚫 자동 포커스 완전 차단
+  useEffect(() => {
+    if (open) {
+      // 모든 input, textarea, select 요소의 포커스 제거
+      const timer = setTimeout(() => {
+        const focusedElement = document.activeElement as HTMLElement;
+        if (focusedElement && (
+          focusedElement.tagName === 'INPUT' || 
+          focusedElement.tagName === 'TEXTAREA' || 
+          focusedElement.tagName === 'SELECT'
+        )) {
+          focusedElement.blur();
+        }
+      }, 0);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [open]);
+
+  // 🔍 실제 모달 높이 측정 및 표시
+  useEffect(() => {
+    if (!open) return;
+
+    const measureHeight = () => {
+      const modal = document.querySelector('[data-slot="dialog-content"]') as HTMLElement;
+      const debugEl = document.getElementById('add-modal-height-debug');
+      
+      if (modal && debugEl) {
+        const actualHeight = modal.getBoundingClientRect().height;
+        const expectedHeight = Math.round(window.innerHeight * 0.75);
+        debugEl.textContent = `신규모달 실제높이: ${Math.round(actualHeight)}px | 75vh: ${expectedHeight}px | 차이: ${Math.round(expectedHeight - actualHeight)}px`;
+        
+        // 콘솔에도 로그 출력
+        console.log('🔍 신규 고객 모달 높이 디버깅:', {
+          실제높이: actualHeight,
+          예상높이_75vh: expectedHeight,
+          차이: expectedHeight - actualHeight,
+          CSS적용상태: getComputedStyle(modal).maxHeight
+        });
+      }
+    };
+
+    // 모달이 완전히 렌더링된 후 측정
+    const timer = setTimeout(measureHeight, 100);
+    
+    // 리사이즈 이벤트에도 측정
+    window.addEventListener('resize', measureHeight);
+    
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', measureHeight);
+    };
+  }, [open]);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
@@ -322,6 +376,11 @@ export function AddClientModal({
           minHeight: '0'
         }}
       >
+        {/* 🔍 디버깅: 실제 높이 표시 */}
+        <div className="absolute top-2 right-16 z-50 bg-blue-500 text-white text-xs px-2 py-1 rounded opacity-80" id="add-modal-height-debug">
+          신규모달 실제높이: 0px | 75vh: {Math.round(window.innerHeight * 0.75)}px
+        </div>
+
         {/* 헤더 - 고정 */}
         <DialogHeader className="flex-shrink-0 px-4 sm:px-6 py-4 sm:py-4 border-b border-border/30">
           <DialogTitle className="flex items-center gap-2 text-sm sm:text-lg">
@@ -416,6 +475,7 @@ export function AddClientModal({
                       className={`h-9 sm:h-10 text-xs sm:text-sm ${
                         errors.name ? 'border-destructive' : ''
                       }`}
+                      autoFocus={false}
                     />
                     {errors.name && (
                       <p className="text-xs text-destructive mt-1">{errors.name}</p>
