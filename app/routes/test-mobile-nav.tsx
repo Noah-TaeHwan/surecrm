@@ -305,7 +305,6 @@ export default function AdvancedMobileNavTest({
         isOpen={isNavOpen}
         onClose={handleNavClose}
         onOpen={handleNavOpen}
-        gestureConfig={gestureConfig}
         ariaLabel="고급 제스처 테스트 네비게이션"
       />
 

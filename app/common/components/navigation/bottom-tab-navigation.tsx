@@ -232,44 +232,6 @@ export function BottomTabNavigation({ isMenuOpen }: BottomTabNavigationProps) {
             transition: 'all 1s cubic-bezier(0.23, 1, 0.32, 1)',
           }}
         >
-          {/* 물방울 하이라이트 - 정확한 위치 우선 */}
-          {activeIndex !== -1 && (
-            <div
-              className={`absolute pointer-events-none ${
-                isMinimized 
-                  ? 'w-8 h-8 rounded-full' 
-                  : 'w-14 h-14 rounded-2xl'
-              }`}
-              style={{
-                top: '50%',
-                transformOrigin: 'center center',
-                transform: 'translate(-50%, -50%)', // 물방울 자체를 중앙 정렬
-                boxShadow: isMinimized 
-                  ? '0 2px 8px rgba(59, 130, 246, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
-                  : '0 4px 12px rgba(59, 130, 246, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15)',
-                left: isMinimized 
-                  ? `calc(16px + ${activeIndex} * (100% - 32px) / 4)`  // minimized: 16px 패딩
-                  : `calc(8px + ${activeIndex} * (100% - 16px) / 4)`,   // normal: 8px 패딩
-              }}
-            >
-              {/* 물방울 효과들 */}
-              <div 
-                className={`absolute top-0 left-0 right-0 h-1/2 opacity-25 liquid-glass-highlight ${
-                  isMinimized ? 'rounded-t-full' : 'rounded-t-2xl'
-                }`}
-              />
-              
-              <div
-                className={`absolute inset-0 ${
-                  isMinimized ? 'rounded-full' : 'rounded-2xl'
-                }`}
-                style={{
-                  background: 'radial-gradient(circle, rgba(59, 130, 246, 0.25) 0%, rgba(59, 130, 246, 0.08) 50%, transparent 80%)',
-                }}
-              />
-            </div>
-          )}
-          
           {/* 버튼들 */}
           {navigationItems.map((item, index) => {
             const isActive = activeIndex !== -1 && index === activeIndex;
