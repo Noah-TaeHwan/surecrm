@@ -1287,153 +1287,205 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
           main {
             overflow: hidden !important;
           }
+          
+          /* 🎯 모바일 칸반보드 전용 스타일 */
+          @media (max-width: 767.98px) {
+            .pipeline-mobile-container {
+              height: calc(100vh - 4rem);
+              max-height: calc(100vh - 4rem);
+              overflow: hidden;
+              position: relative;
+            }
+            
+            .pipeline-top-sections {
+              /* 스크롤 시 헤더 뒤로 숨겨질 수 있도록 */
+              position: relative;
+              z-index: 10;
+              background: var(--background);
+              transition: transform 0.2s ease-in-out;
+            }
+            
+            .pipeline-carousel-container {
+              /* 캐러셀 컨테이너가 전체 화면 차지 */
+              height: 100%;
+              position: relative;
+              z-index: 5;
+            }
+            
+            /* 캐러셀 내부 각 슬라이드에서 스크롤 처리 */
+            .embla__slide {
+              height: 100%;
+              overflow-y: auto;
+              overflow-x: hidden;
+            }
+            
+            /* 스크롤바 숨기기 (Webkit) */
+            .embla__slide::-webkit-scrollbar {
+              display: none;
+            }
+            
+            /* 스크롤바 숨기기 (Firefox) */
+            .embla__slide {
+              scrollbar-width: none;
+              -ms-overflow-style: none;
+            }
+          }
         `}
       </style>
       <div 
-        className="h-full flex flex-col gap-4"
+        className={`h-full flex flex-col gap-4 ${
+          isMobile ? 'pipeline-mobile-container' : ''
+        }`}
         style={{
-          height: 'calc(100vh - 4rem - 1.5rem)', // 전체 높이 - 헤더 - 패딩
-          maxHeight: 'calc(100vh - 4rem - 1.5rem)',
-          overflow: 'hidden',
+          height: isMobile ? undefined : 'calc(100vh - 4rem - 1.5rem)',
+          maxHeight: isMobile ? undefined : 'calc(100vh - 4rem - 1.5rem)',
+          overflow: isMobile ? undefined : 'hidden',
         }}
       >
-        {/* 🎯 MVP 통계 카드 - 반응형 (데스크톱: 그리드, 모바일: 캐러셀) */}
-        <div className="flex-shrink-0">
-          {isMobile ? (
-            // 🎯 모바일: 캐러셀
-            <Carousel
-              opts={{
-                align: "start",
-                loop: false,
-              }}
-              className="w-full"
-            >
-              <CarouselContent className="-ml-2 md:-ml-4">
-                {statsCards.map((card) => (
-                  <CarouselItem key={card.id} className="pl-2 md:pl-4 basis-11/12">
-                    {renderStatsCard(card)}
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-            </Carousel>
-          ) : (
-            // 🎯 데스크톱: 기존 그리드
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-              {statsCards.map(renderStatsCard)}
-            </div>
-          )}
-        </div>
-
-        {/* 🎯 액션 버튼 섹션 */}
-        <div className="flex items-center justify-start md:justify-end gap-3 flex-shrink-0">
-          {/* 🚀 기존 고객 새 영업 기회 버튼 */}
-          <Button
-            variant="default"
-            onClick={() => setExistingClientModalOpen(true)}
-            className="flex items-center gap-2"
-          >
-            <UserPlus className="h-4 w-4" />
-            <span>기존 고객 영업 기회 추가</span>
-          </Button>
-
-          {/* 고객 추가 버튼 */}
-          <Button
-            onClick={() => {
-              setAddClientOpen(true);
-            }}
-            className="flex items-center gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            <span>신규 고객 추가</span>
-          </Button>
-        </div>
-
-        {/* 🎯 검색 및 필터 섹션 */}
-        <div className="flex items-center justify-start gap-6 flex-shrink-0">
-          <div className="flex w-full max-w-md items-center space-x-2">
-            <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="고객명, 전화번호 검색..."
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                className="pl-10 w-full"
-                autoComplete="off"
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            {/* 활성 필터 표시 */}
-            {isFilterActive && (
-              <div className="flex items-center gap-2">
-                {searchQuery && (
-                  <Badge variant="secondary" className="text-xs">
-                    검색: {searchQuery}
-                  </Badge>
-                )}
-                {selectedImportance !== 'all' && (
-                  <Badge variant="secondary" className="text-xs">
-                    중요도:{' '}
-                    {selectedImportance === 'high'
-                      ? '높음'
-                      : selectedImportance === 'medium'
-                        ? '보통'
-                        : '낮음'}
-                  </Badge>
-                )}
-                {selectedReferrerId && (
-                  <Badge variant="secondary" className="text-xs">
-                    소개자:{' '}
-                    {
-                      potentialReferrers.find(
-                        r => r.id === selectedReferrerId
-                      )?.name
-                    }
-                  </Badge>
-                )}
+        {/* 🎯 상단 컨트롤 섹션 (모바일에서 스크롤 시 헤더 뒤로 숨겨짐) */}
+        <div className={`${isMobile ? 'pipeline-top-sections' : 'flex-shrink-0'} ${isMobile ? '' : 'space-y-4'}`}>
+          {/* 🎯 MVP 통계 카드 - 반응형 (데스크톱: 그리드, 모바일: 캐러셀) */}
+          <div className={`${isMobile ? 'mb-4' : 'flex-shrink-0'}`}>
+            {isMobile ? (
+              // 🎯 모바일: 캐러셀
+              <Carousel
+                opts={{
+                  align: "start",
+                  loop: false,
+                }}
+                className="w-full"
+              >
+                <CarouselContent className="-ml-2 md:-ml-4">
+                  {statsCards.map((card) => (
+                    <CarouselItem key={card.id} className="pl-2 md:pl-4 basis-11/12">
+                      {renderStatsCard(card)}
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+              </Carousel>
+            ) : (
+              // 🎯 데스크톱: 기존 그리드
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+                {statsCards.map(renderStatsCard)}
               </div>
             )}
+          </div>
 
-            {/* 필터 드롭다운 메뉴 */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant={isFilterActive ? 'default' : 'outline'}
-                  className="flex items-center gap-2"
-                >
-                  <SlidersHorizontal className="h-4 w-4" />
-                  <span>필터</span>
-                  {isFilterActive && (
-                    <Badge
-                      variant="destructive"
-                      className="ml-1 px-1 text-xs"
-                    >
-                      ●
+          {/* 🎯 액션 버튼 섹션 */}
+          <div className={`flex items-center justify-start md:justify-end gap-3 ${isMobile ? 'mb-4' : 'flex-shrink-0'}`}>
+            {/* 🚀 기존 고객 새 영업 기회 버튼 */}
+            <Button
+              variant="default"
+              onClick={() => setExistingClientModalOpen(true)}
+              className="flex items-center gap-2"
+            >
+              <UserPlus className="h-4 w-4" />
+              <span>기존 고객 영업 기회 추가</span>
+            </Button>
+
+            {/* 고객 추가 버튼 */}
+            <Button
+              onClick={() => {
+                setAddClientOpen(true);
+              }}
+              className="flex items-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              <span>신규 고객 추가</span>
+            </Button>
+          </div>
+
+          {/* 🎯 검색 및 필터 섹션 */}
+          <div className={`flex items-center justify-start gap-6 ${isMobile ? 'mb-4' : 'flex-shrink-0'}`}>
+            <div className="flex w-full max-w-md items-center space-x-2">
+              <div className="relative w-full">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="search"
+                  placeholder="고객명, 전화번호 검색..."
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  className="pl-10 w-full"
+                  autoComplete="off"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              {/* 활성 필터 표시 */}
+              {isFilterActive && (
+                <div className="flex items-center gap-2">
+                  {searchQuery && (
+                    <Badge variant="secondary" className="text-xs">
+                      검색: {searchQuery}
                     </Badge>
                   )}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className="w-[320px] p-4 bg-background"
-                align="end"
-                sideOffset={4}
-              >
-                <PipelineFilters
-                  referrers={potentialReferrers}
-                  selectedReferrerId={selectedReferrerId}
-                  onReferrerChange={setSelectedReferrerId}
-                  selectedImportance={selectedImportance}
-                  onImportanceChange={setSelectedImportance}
-                />
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  {selectedImportance !== 'all' && (
+                    <Badge variant="secondary" className="text-xs">
+                      중요도:{' '}
+                      {selectedImportance === 'high'
+                        ? '높음'
+                        : selectedImportance === 'medium'
+                          ? '보통'
+                          : '낮음'}
+                    </Badge>
+                  )}
+                  {selectedReferrerId && (
+                    <Badge variant="secondary" className="text-xs">
+                      소개자:{' '}
+                      {
+                        potentialReferrers.find(
+                          r => r.id === selectedReferrerId
+                        )?.name
+                      }
+                    </Badge>
+                  )}
+                </div>
+              )}
+
+              {/* 필터 드롭다운 메뉴 */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant={isFilterActive ? 'default' : 'outline'}
+                    className="flex items-center gap-2"
+                  >
+                    <SlidersHorizontal className="h-4 w-4" />
+                    <span>필터</span>
+                    {isFilterActive && (
+                      <Badge
+                        variant="destructive"
+                        className="ml-1 px-1 text-xs"
+                      >
+                        ●
+                      </Badge>
+                    )}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  className="w-[320px] p-4 bg-background"
+                  align="end"
+                  sideOffset={4}
+                >
+                  <PipelineFilters
+                    referrers={potentialReferrers}
+                    selectedReferrerId={selectedReferrerId}
+                    onReferrerChange={setSelectedReferrerId}
+                    selectedImportance={selectedImportance}
+                    onImportanceChange={setSelectedImportance}
+                  />
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
         </div>
 
-        {/* 🎯 칸반보드 메인 콘텐츠 - 스크롤 영역 */}
-        <div className="flex-1 min-h-0 overflow-hidden">
+        {/* 🎯 칸반보드 메인 콘텐츠 - 모바일/데스크톱 반응형 */}
+        <div className={`${
+          isMobile 
+            ? 'pipeline-carousel-container' // 모바일: 전체 화면 차지
+            : 'flex-1 min-h-0 overflow-hidden' // 데스크톱: 기존 스크롤 영역
+        }`}>
           <PipelineBoard
             stages={stages.map(stage => ({
               ...stage,

@@ -206,14 +206,20 @@ export function PipelineBoard({
       <div
         key={stage.id}
         className={`flex flex-col h-full transition-all duration-200 ${
-          isMobile ? 'w-full' : 'min-w-[300px]'
+          isMobile 
+            ? 'w-full px-4' // 모바일: 전체 폭 + 좌우 패딩
+            : 'min-w-[300px]' // 데스크톱: 최소 폭
         } ${isDragTarget && canDrop ? 'transform scale-[1.02]' : ''}`}
         onDragOver={e => handleDragOver(e, stage.id)}
         onDragLeave={handleDragLeave}
         onDrop={e => handleDrop(e, stage.id)}
       >
-        {/* 🎯 단계 헤더 */}
-        <div className="flex-shrink-0 mb-4">
+        {/* 🎯 Sticky 단계 헤더 (모바일에서만 sticky) */}
+        <div className={`flex-shrink-0 mb-4 ${
+          isMobile 
+            ? 'sticky top-0 z-20 bg-background/95 backdrop-blur-sm border-b border-border pb-4' 
+            : ''
+        }`}>
           <div
             className={`flex flex-col p-4 rounded-lg border bg-card transition-all duration-200 ${
               isDragTarget && canDrop
@@ -273,10 +279,18 @@ export function PipelineBoard({
           </div>
         </div>
 
-        {/* 🎯 고객 카드 컨테이너 */}
-        <div className="flex-1 overflow-hidden">
+        {/* 🎯 스크롤 가능한 고객 카드 컨테이너 */}
+        <div className={`flex-1 ${
+          isMobile 
+            ? 'overflow-y-auto overflow-x-hidden' // 모바일: 세로 스크롤만 허용
+            : 'overflow-hidden' // 데스크톱: 기존 동작 유지
+        }`}>
           <div
-            className={`space-y-3 p-2 rounded-lg h-full overflow-y-auto transition-all duration-200 scrollbar-hide ${
+            className={`space-y-3 p-2 rounded-lg transition-all duration-200 ${
+              isMobile 
+                ? 'min-h-full pb-6' // 모바일: 최소 높이 + 하단 패딩
+                : 'h-full overflow-y-auto scrollbar-hide' // 데스크톱: 기존 스크롤
+            } ${
               isDragTarget && canDrop
                 ? 'bg-primary/5 border-2 border-dashed border-primary'
                 : 'bg-transparent'
@@ -385,19 +399,21 @@ export function PipelineBoard({
   return (
     <div className="h-full flex flex-col pipeline-board">
       {isMobile ? (
-        /* 🎯 모바일: 칸반 컬럼 캐러셀 */
+        /* 🎯 모바일: 칸반 컬럼 캐러셀 - 스냅 스크롤 */
         <div className="flex-1 overflow-hidden">
           <Carousel
             opts={{
               align: "start",
               loop: false,
-              dragFree: true,
+              containScroll: "trimSnaps", // 🎯 스냅 포인트 최적화
+              dragFree: false, // 🎯 자유 드래그 비활성화로 스냅 강제
+              skipSnaps: false, // 🎯 스냅 건너뛰기 비활성화
             }}
             className="w-full h-full"
           >
-            <CarouselContent className="h-full -ml-4">
+            <CarouselContent className="h-full -ml-1">
               {stages.map((stage) => (
-                <CarouselItem key={stage.id} className="pl-4 basis-11/12 h-full">
+                <CarouselItem key={stage.id} className="pl-1 basis-full h-full">
                   {renderKanbanColumn(stage)}
                 </CarouselItem>
               ))}
