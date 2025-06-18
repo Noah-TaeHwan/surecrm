@@ -229,7 +229,7 @@ export function GoalSettingModal({
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent 
-        className="sm:max-w-xl w-[95vw] p-0 overflow-hidden flex flex-col sm:max-h-[85vh]"
+        className="sm:max-w-xl w-[95vw] p-0 overflow-hidden flex flex-col sm:max-h-[85vh] gap-0"
         style={{
           maxHeight: '75vh',
           height: 'auto',
@@ -238,7 +238,7 @@ export function GoalSettingModal({
       >
         
         {/* 헤더 - 고정 */}
-        <DialogHeader className="flex-shrink-0 px-4 sm:px-6 py-2 sm:py-4 border-b border-border/30">
+        <DialogHeader className="flex-shrink-0 px-4 sm:px-6 py-4 sm:py-4 border-b border-border/30">
           <DialogTitle className="flex items-center gap-2 text-sm sm:text-lg">
             <TargetIcon className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
             <span className="truncate">{editingGoal ? '목표 수정' : '목표 설정'}</span>

@@ -1912,5 +1912,6 @@ textarea {
     max-height: 75vh !important;
     height: auto !important;
     min-height: 0 !important;
+    gap: 0 !important;
   }
 }
