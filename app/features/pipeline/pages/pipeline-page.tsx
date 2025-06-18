@@ -962,7 +962,7 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
     const matchesSearch =
       searchQuery === '' ||
       client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      client.phone.includes(searchQuery);
+      (client.phone && client.phone.includes(searchQuery));
 
     // 소개자 필터링
     const matchesReferrer =
