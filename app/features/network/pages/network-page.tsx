@@ -731,189 +731,121 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
   if (isHydrated && isMobile) {
     return (
       <MainLayout title="소개 네트워크">
-        <div
-          data-network-main
-          className="flex flex-col gap-3 h-screen"
-          style={{
-            overflow: 'hidden',
-            padding: '0.75rem',
-          }}
-        >
-          <NetworkMobileTabs
-            activeTab={activeMobileTab}
-            onTabChange={setActiveMobileTab}
-            hasSelectedNode={!!selectedNode}
-            searchResultsCount={searchResults.length}
-          />
-          {activeMobileTab === 'graph' && (
-            <div
-              data-graph-area
-              className="flex-grow transition-all duration-700 ease-out"
-              style={{
-                height: 'calc(100vh - 5.5rem)',
-                maxHeight: 'calc(100vh - 5.5rem)',
-                overflow: 'hidden',
-              }}
-            >
-              <Card
-                className="h-full flex flex-col graph-card transition-all duration-700 ease-out"
+        <div className="space-y-6">
+          {/* 그래프 영역 */}
+          <Card>
+            <CardHeader>
+              <CardTitle>소개 네트워크</CardTitle>
+              <CardDescription>
+                고객 간 소개 관계를 시각화합니다. 노드를 클릭하면 상세 정보를 볼 수 있습니다.
+              </CardDescription>
+
+              {/* 검색 컨트롤 */}
+              <div className="mt-4">
+                <NetworkControls
+                  onSearch={handleSearch}
+                  searchResults={searchResults}
+                  onNodeFocus={handleNodeFocus}
+                />
+              </div>
+            </CardHeader>
+
+            <CardContent className="p-0">
+              <div 
+                className="relative"
                 style={{
-                  overflow: 'hidden',
-                  height: '100%',
-                  willChange: 'transform',
+                  height: '50vh',
+                  minHeight: '400px',
+                  maxHeight: '60vh',
                 }}
               >
-                <CardHeader className="flex-shrink-0 px-4  graph-card-header">
-                  <CardTitle className="text-lg">소개 네트워크</CardTitle>
-                  <CardDescription className="text-sm">
-                    고객 간 소개 관계를 시각화합니다. 노드를 클릭하면 상세 정보를 볼
-                    수 있습니다.
-                  </CardDescription>
+                {renderNetworkGraph()}
+              </div>
+            </CardContent>
+          </Card>
 
-                  {/* 컨트롤 패널 */}
-                  <div>
-                    <NetworkControls
-                      onSearch={handleSearch}
-                      searchResults={searchResults}
-                      onNodeFocus={handleNodeFocus}
-                    />
-                  </div>
-                </CardHeader>
-
-                <CardContent
-                  className="flex-1 p-0 overflow-hidden graph-card-content"
-                  style={{
-                    overflow: 'hidden',
-                    height: '100%',
-                  }}
-                >
-                  {/* 그래프 시각화 */}
+          {/* 검색 결과 */}
+          {searchQuery && searchResults.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>검색 결과</CardTitle>
+                <CardDescription>
+                  '{searchQuery}'에 대한 검색 결과 {searchResults.length}개
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {searchResults.map(result => (
                   <div
-                    className="w-full h-full relative"
-                    style={{
-                      overflow: 'hidden',
+                    key={result.id}
+                    className="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
+                    onClick={() => {
+                      handleNodeFocus(result.id);
+                      setSearchQuery('');
                     }}
                   >
-                    {renderNetworkGraph()}
+                    <div>
+                      <div className="font-medium">{result.name}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {result.type === 'agent' ? '에이전트' : '고객'} 
+                        {result.stage && ` • ${result.stage}`}
+                      </div>
+                    </div>
+                    {result.importance && (
+                      <div className="text-xs px-2 py-1 bg-primary/10 text-primary rounded">
+                        중요도 {result.importance}
+                      </div>
+                    )}
                   </div>
-                </CardContent>
-              </Card>
-            </div>
+                ))}
+              </CardContent>
+            </Card>
           )}
-          {activeMobileTab === 'filter' && (
-            <div
-              data-filter-area
-              className="flex-grow transition-all duration-700 ease-out"
-              style={{
-                height: 'calc(100vh - 5.5rem)',
-                maxHeight: 'calc(100vh - 5.5rem)',
-                overflow: 'hidden',
-              }}
-            >
+
+          {/* 필터 및 통계 */}
+          <Card>
+            <CardHeader>
+              <CardTitle>필터 및 통계</CardTitle>
+              <CardDescription>
+                네트워크 데이터를 필터링하고 통계를 확인하세요.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
               <NetworkSidebar
                 filters={filterSettings}
                 onFilterChange={handleFilterChange}
                 stats={networkStats}
               />
-            </div>
-          )}
-          {activeMobileTab === 'search' && (
-            <div
-              data-search-area
-              className="flex-grow transition-all duration-700 ease-out"
-              style={{
-                height: 'calc(100vh - 5.5rem)',
-                maxHeight: 'calc(100vh - 5.5rem)',
-                overflow: 'hidden',
-              }}
-            >
-              <Card className="h-full flex flex-col">
-                <CardHeader className="flex-shrink-0 pb-2 px-4 pt-3">
-                  <CardTitle className="text-lg">네트워크 검색</CardTitle>
-                  <CardDescription className="text-sm">
-                    고객명으로 검색하여 네트워크에서 찾아보세요.
-                  </CardDescription>
-                  
-                  {/* 검색 컨트롤 */}
-                  <div className="mt-3">
-                    <NetworkControls
-                      onSearch={handleSearch}
-                      searchResults={searchResults}
-                      onNodeFocus={handleNodeFocus}
-                    />
-                  </div>
-                </CardHeader>
+            </CardContent>
+          </Card>
 
-                <CardContent className="flex-1 p-4 overflow-auto">
-                  {searchQuery && searchResults.length > 0 && (
-                    <div className="space-y-2">
-                      <h3 className="text-sm font-medium text-muted-foreground">
-                        검색 결과 ({searchResults.length}개)
-                      </h3>
-                      {searchResults.map((result) => (
-                        <div
-                          key={result.id}
-                          className="p-3 border rounded-lg cursor-pointer hover:bg-accent transition-colors"
-                          onClick={() => {
-                            handleNodeFocus(result.id);
-                            setActiveMobileTab('graph');
-                          }}
-                        >
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <div className="font-medium">{result.name}</div>
-                              <div className="text-sm text-muted-foreground">
-                                {result.type === 'influencer' ? '핵심 소개자' : '고객'} • {result.stage}
-                              </div>
-                            </div>
-                            <div className="text-xs text-muted-foreground">
-                              중요도: {result.importance}/5
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  
-                  {searchQuery && searchResults.length === 0 && (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <p>'{searchQuery}'에 대한 검색 결과가 없습니다.</p>
-                    </div>
-                  )}
-                  
-                  {!searchQuery && (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <p>고객명을 입력하여 네트워크에서 검색하세요.</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-          )}
-          {activeMobileTab === 'details' && selectedNode && (
-            <div
-              data-details-area
-              className="flex-grow transition-all duration-700 ease-out"
-              style={{
-                height: 'calc(100vh - 5.5rem)',
-                maxHeight: 'calc(100vh - 5.5rem)',
-                overflow: 'hidden',
-              }}
-            >
-              <NetworkDetailPanel
-                nodeId={selectedNode}
-                data={networkData}
-                onClose={() => {
-                  setSelectedNode(null);
-                  setActiveMobileTab('graph');
-                }}
-                onNodeSelect={handleNodeSelect}
-                clientsData={clientsData}
-                stages={stages}
-                referralData={referralData}
-                agentInfo={agentInfo}
-              />
-            </div>
+          {/* 선택된 노드 상세 정보 */}
+          {selectedNode && (
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>노드 상세 정보</CardTitle>
+                    <CardDescription>
+                      선택한 노드의 상세 정보입니다.
+                    </CardDescription>
+                  </div>
+                  <button
+                    onClick={handleCloseSidebar}
+                    className="text-muted-foreground hover:text-foreground p-1"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <NetworkDetailPanel
+                  nodeId={selectedNode}
+                  data={networkData}
+                  onClose={handleCloseSidebar}
+                  onNodeSelect={handleNodeSelect}
+                />
+              </CardContent>
+            </Card>
           )}
         </div>
       </MainLayout>
@@ -924,139 +856,125 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
   if (isHydrated && isTablet) {
     return (
       <MainLayout title="소개 네트워크">
-        <div
-          data-network-main
-          className="flex gap-3"
-          style={{
-            height: 'calc(100vh - 4rem)',
-            maxHeight: 'calc(100vh - 4rem)',
-            overflow: 'hidden',
-            padding: '0.75rem',
-          }}
-        >
-          {/* 그래프 패널 */}
-          <div
-            data-graph-area
-            className="flex-grow transition-all duration-700 ease-out"
-            style={{
-              height: 'calc(100vh - 5.5rem)',
-              maxHeight: 'calc(100vh - 5.5rem)',
-              overflow: 'hidden',
-            }}
-          >
-            <Card
-              className="h-full flex flex-col graph-card transition-all duration-700 ease-out"
-              style={{
-                overflow: 'hidden',
-                height: '100%',
-                willChange: 'transform',
-              }}
-            >
-              <CardHeader className="flex-shrink-0 pb-2 px-4 pt-3 graph-card-header">
-                <CardTitle className="text-lg">소개 네트워크</CardTitle>
-                <CardDescription className="text-sm">
-                  고객 간 소개 관계를 시각화합니다. 노드를 클릭하면 상세 정보를 볼
-                  수 있습니다.
-                </CardDescription>
+        <div className="space-y-6">
+          {/* 그래프 영역 */}
+          <Card>
+            <CardHeader>
+              <CardTitle>소개 네트워크</CardTitle>
+              <CardDescription>
+                고객 간 소개 관계를 시각화합니다. 노드를 클릭하면 상세 정보를 볼 수 있습니다.
+              </CardDescription>
 
-                {/* 컨트롤 패널 */}
-                <div>
-                  <NetworkControls
-                    onSearch={handleSearch}
-                    searchResults={searchResults}
-                    onNodeFocus={handleNodeFocus}
-                  />
-                </div>
-              </CardHeader>
+              {/* 검색 컨트롤 */}
+              <div className="mt-4">
+                <NetworkControls
+                  onSearch={handleSearch}
+                  searchResults={searchResults}
+                  onNodeFocus={handleNodeFocus}
+                />
+              </div>
+            </CardHeader>
 
-              <CardContent
-                className="flex-1 p-0 overflow-hidden graph-card-content"
+            <CardContent className="p-0">
+              <div 
+                className="relative"
                 style={{
-                  overflow: 'hidden',
-                  height: '100%',
+                  height: '50vh',
+                  minHeight: '400px',
+                  maxHeight: '60vh',
                 }}
               >
-                {/* 그래프 시각화 */}
-                <div
-                  className="w-full h-full relative"
-                  style={{
-                    overflow: 'hidden',
-                  }}
-                >
-                  {renderNetworkGraph()}
-                </div>
+                {renderNetworkGraph()}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* 검색 결과 */}
+          {searchQuery && searchResults.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>검색 결과</CardTitle>
+                <CardDescription>
+                  '{searchQuery}'에 대한 검색 결과 {searchResults.length}개
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {searchResults.map(result => (
+                  <div
+                    key={result.id}
+                    className="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
+                    onClick={() => {
+                      handleNodeFocus(result.id);
+                      setSearchQuery('');
+                    }}
+                  >
+                    <div>
+                      <div className="font-medium">{result.name}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {result.type === 'agent' ? '에이전트' : '고객'} 
+                        {result.stage && ` • ${result.stage}`}
+                      </div>
+                    </div>
+                    {result.importance && (
+                      <div className="text-xs px-2 py-1 bg-primary/10 text-primary rounded">
+                        중요도 {result.importance}
+                      </div>
+                    )}
+                  </div>
+                ))}
               </CardContent>
             </Card>
-          </div>
+          )}
 
-          {/* 사이드바 패널 */}
-          <div
-            data-sidebar-area
-            className="flex-shrink-0"
-            style={{
-              width: '320px', // 고정 너비
-              height: 'calc(100vh - 5.5rem)',
-              maxHeight: 'calc(100vh - 5.5rem)',
-              overflow: 'hidden',
-            }}
-          >
-            <NetworkSidebar
-              filters={filterSettings}
-              onFilterChange={handleFilterChange}
-              stats={networkStats}
-            />
-          </div>
+          {/* 태블릿에서는 2열 그리드로 배치 */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* 필터 및 통계 */}
+            <Card>
+              <CardHeader>
+                <CardTitle>필터 및 통계</CardTitle>
+                <CardDescription>
+                  네트워크 데이터를 필터링하고 통계를 확인하세요.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <NetworkSidebar
+                  filters={filterSettings}
+                  onFilterChange={handleFilterChange}
+                  stats={networkStats}
+                />
+              </CardContent>
+            </Card>
 
-          {/* 상세 정보 패널 */}
-          {selectedNode && (
-            <div
-              data-details-area
-              className="absolute right-0 top-16 transition-all duration-700 ease-out"
-              style={{
-                width: '320px', // 고정 너비
-                height: 'calc(100vh - 5.5rem)',
-                maxHeight: 'calc(100vh - 5.5rem)',
-                overflow: 'hidden',
-                zIndex: 50,
-                pointerEvents: selectedNode ? 'auto' : 'none',
-                willChange: 'transform',
-                paddingRight: '0.75rem', // 메인 컨테이너 패딩과 맞춤
-              }}
-            >
-              {/* 배경 블러 효과 */}
-              <div
-                className="absolute inset-0 bg-background/80 backdrop-blur-sm"
-                style={{ borderRadius: '0.5rem' }}
-              />
-
-              {/* 실제 사이드바 콘텐츠 */}
-              <div
-                className={`relative h-full transition-all duration-500 ease-out ${
-                  selectedNode
-                    ? 'translate-y-0 opacity-100'
-                    : 'translate-y-4 opacity-0'
-                }`}
-                style={{
-                  transitionDelay: selectedNode ? '200ms' : '0ms',
-                  willChange: 'transform',
-                }}
-              >
-                {/* 항상 렌더링하되 selectedNode가 있을 때만 데이터 전달 */}
-                {selectedNode && (
+            {/* 선택된 노드 상세 정보 */}
+            {selectedNode && (
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>노드 상세 정보</CardTitle>
+                      <CardDescription>
+                        선택한 노드의 상세 정보입니다.
+                      </CardDescription>
+                    </div>
+                    <button
+                      onClick={handleCloseSidebar}
+                      className="text-muted-foreground hover:text-foreground p-1"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </CardHeader>
+                <CardContent>
                   <NetworkDetailPanel
                     nodeId={selectedNode}
                     data={networkData}
                     onClose={handleCloseSidebar}
                     onNodeSelect={handleNodeSelect}
-                    clientsData={clientsData}
-                    stages={stages}
-                    referralData={referralData}
-                    agentInfo={agentInfo}
                   />
-                )}
-              </div>
-            </div>
-          )}
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </div>
       </MainLayout>
     );

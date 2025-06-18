@@ -201,26 +201,7 @@ export function MainLayout({
         <main
           className={`flex-1 mt-16 ${
             isHydrated && !isInitialRender && isMobile ? 'pb-25' : 'pb-4'
-          } ${
-            title === '소개 네트워크'
-              ? 'overflow-hidden p-0'
-              : 'overflow-y-auto p-3 lg:p-4'
-          }`}
-          style={
-            title === '소개 네트워크'
-              ? {
-                  height:
-                    isHydrated && !isInitialRender && isMobile
-                      ? 'calc(100vh - 14rem)'
-                      : 'calc(100vh - 4rem)', // 헤더(4rem) + 바텀네비(10rem - 플로팅 여백 포함)
-                  maxHeight:
-                    isHydrated && !isInitialRender && isMobile
-                      ? 'calc(100vh - 14rem)'
-                      : 'calc(100vh - 4rem)',
-                  overflow: 'hidden',
-                }
-              : {}
-          }
+          } overflow-y-auto p-3 lg:p-4`}
         >
           {children}
         </main>
