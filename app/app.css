@@ -175,6 +175,54 @@
   min-width: var(--size-touch-target-comfortable);
 }
 
+/* Enhanced Modal Utilities for Mobile */
+.modal-mobile-enhanced {
+  /* Mobile: 16px margin on all sides */
+  @apply fixed inset-4 z-50;
+  /* Tablet: 32px margin on sides, 24px on top/bottom */
+  @apply sm:inset-x-8 sm:inset-y-6;
+  /* Desktop: centered with max dimensions */
+  @apply md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2;
+  /* Enhanced backdrop blur */
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.modal-overlay-enhanced {
+  /* Enhanced background blur and opacity */
+  @apply bg-black/60 backdrop-blur-sm;
+  /* Mobile: stronger backdrop */
+  @apply sm:bg-black/50 sm:backdrop-blur-md;
+  /* iOS momentum scrolling */
+  -webkit-overflow-scrolling: touch;
+  /* Prevent scroll behind modal */
+  overscroll-behavior: contain;
+}
+
+.modal-content-mobile {
+  /* Ensure proper scrolling on mobile */
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  /* Touch-friendly borders */
+  @apply rounded-xl sm:rounded-lg;
+  /* Enhanced shadow for floating effect */
+  @apply shadow-2xl;
+  /* Responsive width */
+  @apply w-full sm:w-auto;
+  /* Better mobile spacing */
+  @apply p-4 sm:p-6;
+}
+
+.modal-scroll-container {
+  /* Smooth scrolling container */
+  @apply overflow-y-auto overscroll-contain;
+  /* Mobile-optimized scroll behavior */
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  /* Prevent horizontal overflow */
+  @apply overflow-x-hidden;
+}
+
 /* Custom Spacing Utilities (44px+ touch targets) */
 .h-11 { height: var(--spacing-11); }
 .w-11 { width: var(--spacing-11); }
@@ -1792,4 +1840,68 @@ textarea {
   .mobile-content-scrollable.with-bottom-nav {
     bottom: 5rem !important; /* 바텀 네비게이션 높이 */
   }
+}
+
+/* 모달 스크롤바 숨김 처리 - 강화버전 */
+.scrollbar-none {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none !important; /* Chrome, Safari, Opera */
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.scrollbar-none::-webkit-scrollbar-track {
+  display: none !important;
+}
+
+.scrollbar-none::-webkit-scrollbar-thumb {
+  display: none !important;
+}
+
+.scrollbar-none::-webkit-scrollbar-corner {
+  display: none !important;
+}
+
+/* 모달 내부 스크롤 영역 */
+.modal-scroll-area {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.modal-scroll-area::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+}
+
+/* 모바일 모달 컨테이너 */
+.modal-mobile-enhanced {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: calc(100vw - 2rem);
+  max-height: calc(100vh - 3rem);
+  margin: 1.5rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+@media (min-width: 640px) {
+  .modal-mobile-enhanced {
+    width: calc(100vw - 4rem);
+    margin: 2rem;
+  }
+}
+
+/* Dialog 오버레이 블러 강화 */
+[data-radix-dialog-overlay] {
+  background-color: rgba(0, 0, 0, 0.7) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
 }

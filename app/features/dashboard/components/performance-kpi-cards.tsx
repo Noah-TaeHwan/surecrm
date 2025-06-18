@@ -203,7 +203,7 @@ export function PerformanceKPICards({
 
   return (
     <TooltipProvider>
-      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4 lg:gap-6">
         {kpiItems.map((item, index) => {
           const changeIndicator = getChangeIndicator(item.change);
           const IconComponent = item.icon;
@@ -320,12 +320,12 @@ export function PerformanceKPICards({
                   {/* 아이콘 - 모바일에서는 숨김, 태블릿 이상에서만 표시 */}
                   <div
                     className={cn(
-                      'hidden md:flex items-center justify-center h-10 w-10 md:h-12 md:w-12 rounded-lg flex-shrink-0 ml-2',
+                      'hidden xl:flex items-center justify-center h-10 w-10 xl:h-12 xl:w-12 rounded-lg flex-shrink-0 ml-2',
                       getBackgroundColorClass(item.color)
                     )}
                   >
                     <IconComponent
-                      className={cn('h-5 w-5 md:h-6 md:w-6', getIconColorClass(item.color))}
+                      className={cn('h-5 w-5 xl:h-6 xl:w-6', getIconColorClass(item.color))}
                     />
                   </div>
                 </div>

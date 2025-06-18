@@ -173,7 +173,7 @@ export function MainLayout({
       <div className="flex-1 flex flex-col min-w-0">
         {/* 헤더 - 고정됨 */}
         <header
-          className={`h-16 border-b border-border flex-shrink-0 fixed top-0 left-0 right-0 ${isHydrated && !isInitialRender && !isMobile ? 'lg:left-64' : ''} ${
+          className={`h-16 border-b border-border flex-shrink-0 fixed top-0 left-0 right-0 ${isHydrated && !isInitialRender && !isMobile ? 'sm:left-64' : ''} ${
             isMobileMenuOpen
               ? 'bg-background/70 backdrop-blur-md z-30' // 🎯 사이드바 열렸을 때: backdrop(z-40) 뒤에 위치
               : 'bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50' // 🎯 기본 상태: 높은 z-index
