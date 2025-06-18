@@ -246,7 +246,7 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
   } = loaderData;
 
   // 반응형 브레이크포인트 훅
-  const { isMobile, isTablet, isDesktop } = useBreakpoint();
+  const { isMobile, isTablet, isDesktop, isHydrated } = useBreakpoint();
 
   // 모바일 탭 상태 관리
   const [activeMobileTab, setActiveMobileTab] = useState<NetworkMobileTabType>('graph');
@@ -727,8 +727,8 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
     }, 100); // 클릭 피드백 후 애니메이션 시작
   }, []);
 
-  // 모바일 레이아웃
-  if (isMobile) {
+  // 모바일 레이아웃 - hydration 후에만 적용
+  if (isHydrated && isMobile) {
     return (
       <MainLayout title="소개 네트워크">
         <div
@@ -921,7 +921,7 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
   }
 
   // 태블릿 레이아웃
-  if (isTablet) {
+  if (isHydrated && isTablet) {
     return (
       <MainLayout title="소개 네트워크">
         <div

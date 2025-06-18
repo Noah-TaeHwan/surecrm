@@ -10,6 +10,7 @@ interface Breakpoints {
   isTablet: boolean;
   isDesktop: boolean;
   isLarge: boolean;
+  isHydrated: boolean;
 }
 
 export function useWindowSize(): WindowSize {
@@ -36,13 +37,37 @@ export function useWindowSize(): WindowSize {
 }
 
 export function useBreakpoint(): Breakpoints {
-  const { width } = useWindowSize();
+  // hydration을 위해 초기값을 데스크톱으로 통일 (가장 일반적인 케이스)
+  const [isHydrated, setIsHydrated] = useState(false);
+  const [breakpoints, setBreakpoints] = useState<Omit<Breakpoints, 'isHydrated'>>({
+    isMobile: false,
+    isTablet: false,
+    isDesktop: true,
+    isLarge: false,
+  });
+
+  useEffect(() => {
+    // 클라이언트에서만 실행되어 실제 화면 크기 기반으로 breakpoint 계산
+    const updateBreakpoints = () => {
+      const width = window.innerWidth;
+      setBreakpoints({
+        isMobile: width < 768,
+        isTablet: width >= 768 && width < 1024,
+        isDesktop: width >= 1024 && width < 1280,
+        isLarge: width >= 1280,
+      });
+    };
+
+    updateBreakpoints();
+    setIsHydrated(true);
+
+    window.addEventListener('resize', updateBreakpoints);
+    return () => window.removeEventListener('resize', updateBreakpoints);
+  }, []);
 
   return {
-    isMobile: width < 768,
-    isTablet: width >= 768 && width < 1024,
-    isDesktop: width >= 1024 && width < 1280,
-    isLarge: width >= 1280,
+    ...breakpoints,
+    isHydrated,
   };
 }
 
