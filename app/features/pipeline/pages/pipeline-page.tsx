@@ -27,6 +27,12 @@ import {
   DropdownMenuTrigger,
 } from '~/common/components/ui/dropdown-menu';
 import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+} from '~/common/components/ui/carousel';
+import { useViewport } from '~/common/hooks/useViewport';
+import {
   getPipelineStages,
   getClientsByStage,
   createDefaultPipelineStages,
@@ -475,6 +481,10 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
   const opportunityFetcher = useFetcher(); // 기존 고객 영업 기회용
   const removeFetcher = useFetcher(); // 고객 제거용
   const navigate = useNavigate(); // 🏢 계약 전환용
+
+  // 🎯 반응형 처리를 위한 뷰포트 훅
+  const { width } = useViewport();
+  const isMobile = width < 768; // md 브레이크포인트
 
   // === 🎯 사용자 경험 향상을 위한 파이프라인 페이지 고급 분석 시스템 ===
   useEffect(() => {
@@ -1193,64 +1203,82 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
 
   const totalStats = getTotalStats();
 
-  // 기존 고객 목록 (영업 기회 생성용)
-  const existingClientsForOpportunity = clients.map(client => ({
-    id: client.id,
-    name: client.name,
-    phone: client.phone,
-    currentStage: stages.find(s => s.id === client.stageId)?.name,
-  }));
+  // 🎯 색상 타입 정의
+  type StatsCardColor = 'blue' | 'orange' | 'green' | 'red' | 'emerald';
 
-  // 🎯 모달 제출 완료 후 모달 닫기 (성공한 새 제출에 대해서만)
-  useEffect(() => {
-    if (
-      addClientFetcher.state === 'idle' &&
-      addClientFetcher.data?.success === true
-    ) {
-      // 제출이 완료되고 성공했을 때, 모달이 열려있으면 닫기
-      // 단, 약간의 지연을 두어 사용자가 성공을 인지할 수 있도록 함
-      const timer = setTimeout(() => {
-        if (addClientOpen) {
-          setAddClientOpen(false);
-        }
-      }, 1000); // 1초 후 모달 닫기 (충분한 피드백 시간)
+  // 🎯 통계 카드 데이터 배열
+  const statsCards = [
+    {
+      id: 'total-clients',
+      title: '전체 고객',
+      value: totalStats.totalAllClients,
+      description: '고객 관리의 모든 고객',
+      icon: Users,
+      color: 'blue' as StatsCardColor,
+    },
+    {
+      id: 'pipeline-clients',
+      title: '영업 관리 중',
+      value: totalStats.pipelineClients,
+      description: '현재 파이프라인 진행 중',
+      icon: TrendingUp,
+      color: 'orange' as StatsCardColor,
+    },
+    {
+      id: 'contracted-clients',
+      title: '계약 완료',
+      value: totalStats.contractedClients,
+      description: '실제 성과 달성 고객',
+      icon: Target,
+      color: 'green' as StatsCardColor,
+    },
+    {
+      id: 'high-value-clients',
+      title: '키맨 고객',
+      value: totalStats.highValueClients,
+      description: '고가치 중요 고객',
+      icon: Users,
+      color: 'red' as StatsCardColor,
+    },
+    {
+      id: 'conversion-rate',
+      title: '전환율',
+      value: `${totalStats.conversionRate}%`,
+      description: '계약 완료 성공률',
+      icon: TrendingUp,
+      color: 'emerald' as StatsCardColor,
+    },
+  ];
 
-      return () => clearTimeout(timer);
-    }
-  }, [addClientFetcher.state, addClientFetcher.data?.success]);
+  // 🎯 통계 카드 렌더링 함수
+  const renderStatsCard = (card: typeof statsCards[0]) => {
+    const IconComponent = card.icon;
+    const colorClasses: Record<StatsCardColor, string> = {
+      blue: 'bg-blue-500/10 text-blue-600',
+      orange: 'bg-orange-500/10 text-orange-600',
+      green: 'bg-green-500/10 text-green-600',
+      red: 'bg-red-500/10 text-red-600',
+      emerald: 'bg-emerald-500/10 text-emerald-600',
+    };
 
-  // 🎯 기존 고객 영업 기회 모달 제어
-  useEffect(() => {
-    if (
-      opportunityFetcher.state === 'idle' &&
-      opportunityFetcher.data?.success === true
-    ) {
-      const timer = setTimeout(() => {
-        if (existingClientModalOpen) {
-          setExistingClientModalOpen(false);
-        }
-      }, 1000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [opportunityFetcher.state, opportunityFetcher.data?.success]);
-
-  // 🎯 고객 제거 모달 제어
-  useEffect(() => {
-    if (
-      removeFetcher.state === 'idle' &&
-      removeFetcher.data?.success === true
-    ) {
-      const timer = setTimeout(() => {
-        if (removeClientModalOpen) {
-          setRemoveClientModalOpen(false);
-          setClientToRemove(null);
-        }
-      }, 1000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [removeFetcher.state, removeFetcher.data?.success]);
+    return (
+      <div
+        key={card.id}
+        className="flex items-center space-x-3 p-4 bg-card rounded-lg border"
+      >
+        <div className={`p-2 rounded-lg ${colorClasses[card.color]}`}>
+          <IconComponent className="h-5 w-5" />
+        </div>
+        <div>
+          <p className="text-sm font-medium text-muted-foreground">
+            {card.title}
+          </p>
+          <p className="text-2xl font-bold text-foreground">{card.value}</p>
+          <p className="text-xs text-muted-foreground">{card.description}</p>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <MainLayout title="영업 파이프라인">
@@ -1269,97 +1297,31 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
           overflow: 'hidden',
         }}
       >
-        {/* 🎯 MVP 통계 카드 - 고정 영역 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 flex-shrink-0">
-            {/* 1. 전체 고객 */}
-            <div className="flex items-center space-x-3 p-4 bg-card rounded-lg border">
-              <div className="p-2 bg-blue-500/10 rounded-lg">
-                <Users className="h-5 w-5 text-blue-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">
-                  전체 고객
-                </p>
-                <p className="text-2xl font-bold text-foreground">
-                  {totalStats.totalAllClients}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  고객 관리의 모든 고객
-                </p>
-              </div>
+        {/* 🎯 MVP 통계 카드 - 반응형 (데스크톱: 그리드, 모바일: 캐러셀) */}
+        <div className="flex-shrink-0">
+          {isMobile ? (
+            // 🎯 모바일: 캐러셀
+            <Carousel
+              opts={{
+                align: "start",
+                loop: false,
+              }}
+              className="w-full"
+            >
+              <CarouselContent className="-ml-2 md:-ml-4">
+                {statsCards.map((card) => (
+                  <CarouselItem key={card.id} className="pl-2 md:pl-4 basis-11/12">
+                    {renderStatsCard(card)}
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+            </Carousel>
+          ) : (
+            // 🎯 데스크톱: 기존 그리드
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+              {statsCards.map(renderStatsCard)}
             </div>
-
-            {/* 2. 영업 관리 중 */}
-            <div className="flex items-center space-x-3 p-4 bg-card rounded-lg border">
-              <div className="p-2 bg-orange-500/10 rounded-lg">
-                <TrendingUp className="h-5 w-5 text-orange-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">
-                  영업 관리 중
-                </p>
-                <p className="text-2xl font-bold text-foreground">
-                  {totalStats.pipelineClients}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  현재 파이프라인 진행 중
-                </p>
-              </div>
-            </div>
-
-            {/* 3. 계약 완료 */}
-            <div className="flex items-center space-x-3 p-4 bg-card rounded-lg border">
-              <div className="p-2 bg-green-500/10 rounded-lg">
-                <Target className="h-5 w-5 text-green-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">
-                  계약 완료
-                </p>
-                <p className="text-2xl font-bold text-foreground">
-                  {totalStats.contractedClients}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  실제 성과 달성 고객
-                </p>
-              </div>
-            </div>
-
-            {/* 4. 키맨 고객 */}
-            <div className="flex items-center space-x-3 p-4 bg-card rounded-lg border">
-              <div className="p-2 bg-red-500/10 rounded-lg">
-                <Users className="h-5 w-5 text-red-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">
-                  키맨 고객
-                </p>
-                <p className="text-2xl font-bold text-foreground">
-                  {totalStats.highValueClients}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  고가치 중요 고객
-                </p>
-              </div>
-            </div>
-
-            {/* 5. 전환율 */}
-            <div className="flex items-center space-x-3 p-4 bg-card rounded-lg border">
-              <div className="p-2 bg-emerald-500/10 rounded-lg">
-                <TrendingUp className="h-5 w-5 text-emerald-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">
-                  전환율
-                </p>
-                <p className="text-2xl font-bold text-foreground">
-                  {totalStats.conversionRate}%
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  계약 완료 성공률
-                </p>
-              </div>
-            </div>
+          )}
         </div>
 
         {/* 🎯 필터 및 검색 섹션 - 고정 영역 */}
@@ -1526,7 +1488,12 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
           setSelectedOpportunityClient(null); // 🎯 모달 닫힐 때 선택된 고객 정보 초기화
         }}
         onConfirm={handleExistingClientOpportunity}
-        clients={existingClientsForOpportunity}
+        clients={clients.map(client => ({
+          id: client.id,
+          name: client.name,
+          phone: client.phone,
+          currentStage: stages.find(s => s.id === client.stageId)?.name,
+        }))}
         isLoading={opportunityFetcher.state === 'submitting'}
         preSelectedClientId={selectedOpportunityClient?.clientId} // 🎯 특정 고객 자동 선택
       />
