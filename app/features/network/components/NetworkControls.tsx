@@ -4,6 +4,7 @@ import { Input } from '~/common/components/ui/input';
 import { Badge } from '~/common/components/ui/badge';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { cn } from '~/lib/utils';
+import { useBreakpoint } from '~/common/hooks/use-window-size';
 
 interface NetworkControlsProps {
   onSearch: (query: string) => void;
@@ -16,6 +17,20 @@ interface NetworkControlsProps {
   }>;
   onNodeFocus?: (nodeId: string) => void;
   className?: string;
+}
+
+// 모바일 햅틱 피드백 함수
+function safeMobileVibrate(duration: number = 10) {
+  if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+    try {
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      if (isMobile) {
+        navigator.vibrate(duration);
+      }
+    } catch (e) {
+      // iOS나 다른 환경에서 에러 발생 시 무시
+    }
+  }
 }
 
 // 디바운스 훅 (검색 성능 최적화)
@@ -148,6 +163,7 @@ export default function NetworkControls({
     (nodeId: string) => {
       onNodeFocus?.(nodeId);
       setIsFocused(false);
+      safeMobileVibrate(20); // 햅틱 효과 적용
     },
     [onNodeFocus]
   );
@@ -155,6 +171,8 @@ export default function NetworkControls({
   // 검색 상태 표시기
   const isSearchActive = searchTerm.trim().length > 0;
   const hasResults = sortedResults.length > 0;
+
+  const { isMobile } = useBreakpoint();
 
   return (
     <div className={cn('relative', className)}>
@@ -231,6 +249,11 @@ export default function NetworkControls({
                       : 'hover:bg-accent hover:text-accent-foreground'
                   )}
                   onClick={() => handleResultClick(result.id)}
+                  style={{
+                    // 모바일에서 터치 타겟 크기 최적화
+                    minHeight: isMobile ? '40px' : 'auto',
+                    padding: isMobile ? '12px' : '8px',
+                  }}
                 >
                   <div className="flex items-center space-x-2">
                     {result.type === 'influencer' ? (

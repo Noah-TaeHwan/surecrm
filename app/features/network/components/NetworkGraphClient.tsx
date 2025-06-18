@@ -36,6 +36,33 @@ const DebugInfo = ({ data, filteredData, layout, graphRef }: any) => {
   );
 };
 
+// 햅틱 피드백 함수 추가
+function safeMobileVibrate(duration: number = 15) {
+  if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+    try {
+      // 모바일 감지
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      if (isMobile) {
+        navigator.vibrate(duration);
+      }
+    } catch (e) {
+      // iOS나 다른 환경에서 에러 발생 시 무시
+    }
+  }
+}
+
+// 터치 타겟 크기 계산 함수 (44px 최소 보장)
+function calculateTouchTargetRadius(node: any, isMobile: boolean) {
+  const baseRadius = (node.importance || 1) * (node.group === 'influencer' ? 2 : 1.5);
+  
+  if (isMobile) {
+    // 모바일에서는 최소 22px 반지름 보장 (44px 지름)
+    return Math.max(baseRadius, 22);
+  }
+  
+  return baseRadius;
+}
+
 // 그래프 실패 시 대체 UI
 const FallbackGraph = ({ data, onNodeSelect }: any) => {
   return (
@@ -1102,55 +1129,9 @@ export default function NetworkGraphClient({
     graphState.mounted,
   ]);
 
-  // 렌더링 실패 시 대체 UI 표시
-  if (graphState.renderingFailed) {
-    return <FallbackGraph data={filteredData} onNodeSelect={onNodeSelect} />;
-  }
-
-  // 마운트되지 않은 경우 또는 ForceGraph2D가 로드되지 않은 경우 로딩 표시
-  if (!graphState.mounted || !graphComponent) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-center">
-          <p className="mb-2">그래프 준비 중...</p>
-          <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full mx-auto"></div>
-        </div>
-      </div>
-    );
-  }
-
-  // GraphComponent는 동적으로 로드된 ForceGraph2D를 나타냅니다
-  const GraphComponent = graphComponent;
-
-  // 안전하게 graphData 메서드를 호출하기 위한 헬퍼 함수 추가
-  function safeGraphData() {
-    if (graphRef.current && typeof graphRef.current.graphData === 'function') {
-      return graphRef.current.graphData();
-    }
-    return { nodes: [], links: [] } as { nodes: any[]; links: any[] };
-  }
-
-  // 노드가 하이라이트 경로에 포함되는지 확인하는 헬퍼 함수
-  function isNodeInHighlightPath(nodeId: string): boolean {
-    return highlightPath.includes(nodeId);
-  }
-
-  // 링크가 하이라이트 경로에 포함되는지 확인하는 헬퍼 함수 (확장된 경로 지원)
-  function isLinkInHighlightPath(link: any): boolean {
-    if (highlightPath.length < 1) return false;
-
-    const sourceId =
-      typeof link.source === 'object' ? link.source.id : link.source;
-    const targetId =
-      typeof link.target === 'object' ? link.target.id : link.target;
-
-    // 하이라이트 경로에 포함된 노드들 간의 모든 연결을 확인
-    // (에이전트→A→B→C 경로와 C에서 직접 연결된 D까지 포함)
-    if (highlightPath.includes(sourceId) && highlightPath.includes(targetId)) {
-      return true;
-    }
-
-    return false;
+  // 노드가 검색 결과에 포함되는지 확인하는 헬퍼 함수
+  function isNodeInSearchResults(nodeId: string): boolean {
+    return graphState.searchResults.includes(nodeId);
   }
 
   // 링크의 방향성을 판단하는 헬퍼 함수 (실제 A→B 흐름 기준)
@@ -1164,7 +1145,7 @@ export default function NetworkGraphClient({
     const targetId =
       typeof link.target === 'object' ? link.target.id : link.target;
 
-    // 🎯 핵심 개선: 실제 소개 관계 방향성을 더 명확하게 표시
+    // 핵심 개선: 실제 소개 관계 방향성을 더 명확하게 표시
     // 에이전트 노드 찾기
     const agentNode = safeData.nodes.find(
       node => node.group === 'influencer' || node.type === 'agent'
@@ -1224,11 +1205,6 @@ export default function NetworkGraphClient({
     );
   }
 
-  // 노드가 검색 결과에 포함되는지 확인하는 헬퍼 함수
-  function isNodeInSearchResults(nodeId: string): boolean {
-    return graphState.searchResults.includes(nodeId);
-  }
-
   // 연결된 노드 개수 계산 함수
   function getNodeConnectionCount(nodeId: string): number {
     if (!filteredData.links) return 0;
@@ -1268,6 +1244,57 @@ export default function NetworkGraphClient({
 
     return baseRadius + connectionBonus;
   }
+
+  // 하이라이트된 노드와 연결된 노드인지 확인하는 헬퍼 함수
+  function isNodeInHighlightPath(nodeId: string): boolean {
+    return highlightPath.includes(nodeId);
+  }
+
+  // 링크가 하이라이트 경로에 포함되는지 확인하는 헬퍼 함수 (확장된 경로 지원)
+  function isLinkInHighlightPath(link: any): boolean {
+    if (highlightPath.length < 1) return false;
+
+    const sourceId =
+      typeof link.source === 'object' ? link.source.id : link.source;
+    const targetId =
+      typeof link.target === 'object' ? link.target.id : link.target;
+
+    // 하이라이트 경로에 포함된 노드들 간의 모든 연결을 확인
+    // (에이전트→A→B→C 경로와 C에서 직접 연결된 D까지 포함)
+    if (highlightPath.includes(sourceId) && highlightPath.includes(targetId)) {
+      return true;
+    }
+
+    return false;
+  }
+
+  // 안전하게 graphData 메서드를 호출하기 위한 헬퍼 함수 추가
+  function safeGraphData() {
+    if (graphRef.current && typeof graphRef.current.graphData === 'function') {
+      return graphRef.current.graphData();
+    }
+    return { nodes: [], links: [] } as { nodes: any[]; links: any[] };
+  }
+
+  // 렌더링 실패 시 대체 UI 표시
+  if (graphState.renderingFailed) {
+    return <FallbackGraph data={filteredData} onNodeSelect={onNodeSelect} />;
+  }
+
+  // 마운트되지 않은 경우 또는 ForceGraph2D가 로드되지 않은 경우 로딩 표시
+  if (!graphState.mounted || !graphComponent) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-center">
+          <p className="mb-2">그래프 준비 중...</p>
+          <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full mx-auto"></div>
+        </div>
+      </div>
+    );
+  }
+
+  // GraphComponent는 동적으로 로드된 ForceGraph2D를 나타냅니다
+  const GraphComponent = graphComponent;
 
   return (
     <div
@@ -1508,6 +1535,7 @@ export default function NetworkGraphClient({
               typeof link.source === 'object' ? link.source.id : link.source;
             const targetId =
               typeof link.target === 'object' ? link.target.id : link.target;
+
             return sourceId === node.id || targetId === node.id;
           });
 
@@ -1547,6 +1575,9 @@ export default function NetworkGraphClient({
           }
 
           onNodeSelect(node.id);
+
+          // 모바일 햅틱 피드백
+          safeMobileVibrate(15);
         }}
         // 배경 클릭으로 하이라이트 해제
         onBackgroundClick={() => {
