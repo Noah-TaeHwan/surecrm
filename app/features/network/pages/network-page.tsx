@@ -33,6 +33,9 @@ import type {
 import { getNetworkData, searchNetwork } from '../lib/network-data';
 import { requireAuth } from '~/lib/auth/middleware';
 
+// 아이콘 import 추가
+import { Filter, X, Search, Settings, Star, CheckCircle, BarChart4 } from 'lucide-react';
+
 export async function loader({ request }: Route.LoaderArgs) {
   try {
     // 인증 확인
@@ -260,16 +263,20 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
     showInfluencersOnly: false,
   });
   const [searchQuery, setSearchQuery] = useState('');
+  const [isFilterExpanded, setIsFilterExpanded] = useState(false); // 모바일 필터 접힘/펼침 상태
 
-  // 네트워크 페이지 전용 스타일 적용
+  // 네트워크 페이지 전용 스타일 적용 (데스크톱에서만)
   useEffect(() => {
-    // HTML과 body 요소의 스크롤 방지
+    // 모바일에서는 스타일 적용하지 않음 (스크롤 가능해야 함)
+    if (!isHydrated || isMobile || isTablet) return;
+
+    // HTML과 body 요소의 스크롤 방지 (데스크톱에서만)
     const originalHTMLOverflow = document.documentElement.style.overflow;
     const originalBodyOverflow = document.body.style.overflow;
     const originalHTMLHeight = document.documentElement.style.height;
     const originalBodyHeight = document.body.style.height;
 
-    // CSS 강제 적용
+    // CSS 강제 적용 (데스크톱에서만)
     document.documentElement.style.setProperty(
       'overflow',
       'hidden',
@@ -279,7 +286,7 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
     document.documentElement.style.setProperty('height', '100vh', 'important');
     document.body.style.setProperty('height', '100vh', 'important');
 
-    // 모든 부모 컨테이너들도 강제 제어
+    // 모든 부모 컨테이너들도 강제 제어 (데스크톱에서만)
     const mainElement = document.querySelector('main');
     if (mainElement) {
       (mainElement as HTMLElement).style.setProperty(
@@ -307,18 +314,7 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
         (mainElement as HTMLElement).style.removeProperty('height');
       }
     };
-  }, []);
-
-  // 검색 결과 상태 추가 (옵시디언 스타일)
-  const [searchResults, setSearchResults] = useState<
-    Array<{
-      id: string;
-      name: string;
-      type: string;
-      stage?: string;
-      importance?: number;
-    }>
-  >([]);
+  }, [isHydrated, isMobile, isTablet]);
 
   // 실제 네트워크 데이터 사용 - useMemo로 최적화
   const networkData = useMemo(() => {
@@ -382,45 +378,53 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
     setGraphLoadError(true);
   }, []);
 
-  // 검색 처리 함수 (옵시디언 스타일 즉시 검색)
+  // 🎯 검색 기능 (옵시디언 스타일)
   const handleSearch = useCallback(
     (query: string) => {
       setSearchQuery(query);
 
       if (!query.trim()) {
-        setSearchResults([]);
-        return;
+        return [];
       }
 
-      // 실시간 검색 - 노드 이름으로 필터링
+      // 모든 노드에서 검색
       const results = nodes
-        .filter(node => node.name.toLowerCase().includes(query.toLowerCase()))
-        .map(node => {
-          // 실제 고객 데이터에서 영업 단계 정보 찾기
-          const clientData = clientsData.find(client => client.id === node.id);
-
-          return {
-            id: node.id,
-            name: node.name,
-            type: node.type === 'agent' ? 'influencer' : 'client',
-            // 실제 고객의 영업 단계 사용 (fallback: 기존 로직)
-            stage:
-              clientData?.stageName ||
-              (node.status === 'active' ? '계약 완료' : '첫 상담'),
-            importance:
-              node.importance === 'high'
-                ? 5
-                : node.importance === 'medium'
-                  ? 3
-                  : 1,
-          };
+        .filter(node => {
+          const searchTerm = query.toLowerCase();
+          return (
+            node.name.toLowerCase().includes(searchTerm) ||
+            (node.type && node.type.toLowerCase().includes(searchTerm)) ||
+            (node.status && node.status.toLowerCase().includes(searchTerm))
+          );
         })
+        .map(node => ({
+          id: node.id,
+          name: node.name,
+          type: node.type || 'client',
+          stage: node.status === 'active' ? '계약 완료' : '첫 상담',
+          importance: node.importance === 'high' ? 5 : node.importance === 'medium' ? 3 : 1,
+        }))
         .slice(0, 10); // 최대 10개 결과
 
-      setSearchResults(results);
+      return results;
     },
     [nodes]
   );
+
+  // 검색 결과 state
+  const [searchResults, setSearchResults] = useState<Array<{
+    id: string;
+    name: string;
+    type: string;
+    stage?: string;
+    importance?: number;
+  }>>([]);
+
+  // 검색 실행 함수
+  const executeSearch = useCallback((query: string) => {
+    const results = handleSearch(query);
+    setSearchResults(results);
+  }, [handleSearch]);
 
   // 노드 포커스 함수 (옵시디언 스타일)
   const handleNodeFocus = useCallback(
@@ -638,8 +642,8 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
   ]);
 
   // 필터 변경 시 통계 업데이트
-  const handleFilterChange = useCallback((newFilters: NetworkFilters) => {
-    setFilterSettings(newFilters);
+  const handleFilterChange = useCallback((newFilters: Partial<NetworkFilters>) => {
+    setFilterSettings(prevFilters => ({ ...prevFilters, ...newFilters }));
   }, []);
 
   // 그래프 컴포넌트 렌더링
@@ -727,8 +731,211 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
     }, 100); // 클릭 피드백 후 애니메이션 시작
   }, []);
 
-  // 모바일 레이아웃 - hydration 후에만 적용
+  // 모바일 레이아웃
   if (isHydrated && isMobile) {
+    return (
+      <MainLayout title="소개 네트워크">
+        <div className="space-y-4">
+          {/* 필터 버튼 */}
+          <div className="flex justify-start">
+            <button
+              onClick={() => setIsFilterExpanded(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors shadow-sm"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707v4.172a1 1 0 01-.293.707L10 20.414a1 1 0 01-.707.293H9a1 1 0 01-1-1v-3.586a1 1 0 00-.293-.707L1.293 9.707A1 1 0 011 9V4z" />
+              </svg>
+              필터
+            </button>
+          </div>
+
+          {/* 필터 모달 패널 - 데스크톱과 동일한 UI */}
+          {isFilterExpanded && (
+            <>
+              {/* 백드롭 */}
+              <div
+                className="fixed inset-0 bg-black/20 z-40 animate-fade-in"
+                onClick={() => setIsFilterExpanded(false)}
+              />
+              
+              {/* 필터 모달 패널 */}
+              <div
+                className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 bg-background border border-border rounded-lg shadow-2xl animate-slide-in-left"
+                style={{
+                  width: '320px',
+                  maxHeight: '80vh',
+                  overflow: 'hidden',
+                }}
+              >
+                {/* 헤더 */}
+                <div className="flex items-center justify-between px-4 py-3 border-b bg-background">
+                  <div>
+                    <h3 className="text-lg font-semibold">필터 및 통계</h3>
+                    <p className="text-sm text-muted-foreground">
+                      네트워크 데이터 필터링
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setIsFilterExpanded(false)}
+                    className="text-muted-foreground hover:text-foreground p-2 rounded-md hover:bg-muted/50 transition-colors"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                {/* 데스크톱과 동일한 필터 콘텐츠 */}
+                <div className="overflow-y-auto" style={{ maxHeight: 'calc(80vh - 4rem)' }}>
+                  <NetworkSidebar
+                    filters={filterSettings}
+                    onFilterChange={handleFilterChange}
+                    stats={networkStats}
+                  />
+                </div>
+              </div>
+            </>
+          )}
+          {/* 그래프 영역 - 동적 높이 */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg">소개 네트워크</CardTitle>
+              <CardDescription className="text-sm">
+                고객 간 소개 관계를 시각화합니다. 노드를 클릭하면 상세 정보를 볼 수 있습니다.
+              </CardDescription>
+
+              {/* 검색 컨트롤 */}
+              <div className="mt-3">
+                <NetworkControls
+                  onSearch={executeSearch}
+                  onNodeFocus={handleNodeFocus}
+                  searchResults={searchResults}
+                />
+              </div>
+            </CardHeader>
+
+            <CardContent className="p-0">
+              <div 
+                className="relative transition-all duration-300 ease-in-out"
+                style={{
+                  height: selectedNode ? '40vh' : '55vh',
+                  minHeight: selectedNode ? '300px' : '400px',
+                  maxHeight: selectedNode ? '45vh' : '60vh',
+                }}
+              >
+                {renderNetworkGraph()}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* 선택된 노드 상세 정보 */}
+          {selectedNode && (
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>노드 상세 정보</CardTitle>
+                    <CardDescription>
+                      선택한 노드의 상세 정보입니다.
+                    </CardDescription>
+                  </div>
+                  <button
+                    onClick={handleCloseSidebar}
+                    className="text-muted-foreground hover:text-foreground p-1"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <NetworkDetailPanel
+                  nodeId={selectedNode}
+                  data={networkData}
+                  onClose={handleCloseSidebar}
+                  onNodeSelect={handleNodeSelect}
+                  clientsData={clientsData}
+                  stages={stages}
+                  referralData={referralData}
+                  agentInfo={agentInfo}
+                />
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        {/* 하단 슬라이드업 사이드바 */}
+        {selectedNode && (
+          <>
+            {/* 백드롭 */}
+            <div
+              className="fixed inset-0 bg-black/20 z-40 animate-fade-in"
+              onClick={handleCloseSidebar}
+            />
+            
+            {/* 슬라이드업 패널 */}
+            <div
+              className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border rounded-t-xl shadow-2xl animate-slide-up flex flex-col"
+              style={{
+                height: '85vh', // maxHeight 대신 height 사용으로 명확한 크기 설정
+                paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)',
+              }}
+            >
+              {/* 드래그 핸들 - sticky로 고정 */}
+              <div className="flex justify-center pt-3 pb-2 bg-background sticky top-0 z-10 border-b border-border/20">
+                <div className="w-12 h-1 bg-muted-foreground/30 rounded-full" />
+              </div>
+
+              {/* NetworkDetailPanel 직접 렌더링 (데스크톱과 동일) - 스크롤 가능 */}
+              <div 
+                className="flex-1 overflow-y-auto px-4 pb-4" 
+                style={{
+                  WebkitOverflowScrolling: 'touch', // iOS 모바일 스크롤 최적화
+                  overscrollBehavior: 'contain', // 스크롤 바운싱 제어
+                }}
+              >
+                <NetworkDetailPanel
+                  nodeId={selectedNode}
+                  data={networkData}
+                  onClose={handleCloseSidebar}
+                  onNodeSelect={handleNodeSelect}
+                  clientsData={clientsData}
+                  stages={stages}
+                  referralData={referralData}
+                  agentInfo={agentInfo}
+                />
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* 애니메이션 스타일 */}
+        <style>{`
+          @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+          }
+          @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+          }
+          @keyframes slideInLeft {
+            from { transform: translateX(-100%); }
+            to { transform: translateX(0); }
+          }
+          .animate-fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+          }
+          .animate-slide-up {
+            animation: slideUp 0.3s ease-in-out;
+          }
+          .animate-slide-in-left {
+            animation: slideInLeft 0.3s ease-in-out;
+          }
+        `}</style>
+      </MainLayout>
+    );
+  }
+
+  // 태블릿 레이아웃
+  if (isHydrated && isTablet) {
     return (
       <MainLayout title="소개 네트워크">
         <div className="space-y-6">
@@ -743,8 +950,7 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
               {/* 검색 컨트롤 */}
               <div className="mt-4">
                 <NetworkControls
-                  onSearch={handleSearch}
-                  searchResults={searchResults}
+                  onSearch={executeSearch}
                   onNodeFocus={handleNodeFocus}
                 />
               </div>
@@ -763,43 +969,6 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
               </div>
             </CardContent>
           </Card>
-
-          {/* 검색 결과 */}
-          {searchQuery && searchResults.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>검색 결과</CardTitle>
-                <CardDescription>
-                  '{searchQuery}'에 대한 검색 결과 {searchResults.length}개
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {searchResults.map(result => (
-                  <div
-                    key={result.id}
-                    className="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
-                    onClick={() => {
-                      handleNodeFocus(result.id);
-                      setSearchQuery('');
-                    }}
-                  >
-                    <div>
-                      <div className="font-medium">{result.name}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {result.type === 'agent' ? '에이전트' : '고객'} 
-                        {result.stage && ` • ${result.stage}`}
-                      </div>
-                    </div>
-                    {result.importance && (
-                      <div className="text-xs px-2 py-1 bg-primary/10 text-primary rounded">
-                        중요도 {result.importance}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          )}
 
           {/* 필터 및 통계 */}
           <Card>
@@ -843,138 +1012,14 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
                   data={networkData}
                   onClose={handleCloseSidebar}
                   onNodeSelect={handleNodeSelect}
+                  clientsData={clientsData}
+                  stages={stages}
+                  referralData={referralData}
+                  agentInfo={agentInfo}
                 />
               </CardContent>
             </Card>
           )}
-        </div>
-      </MainLayout>
-    );
-  }
-
-  // 태블릿 레이아웃
-  if (isHydrated && isTablet) {
-    return (
-      <MainLayout title="소개 네트워크">
-        <div className="space-y-6">
-          {/* 그래프 영역 */}
-          <Card>
-            <CardHeader>
-              <CardTitle>소개 네트워크</CardTitle>
-              <CardDescription>
-                고객 간 소개 관계를 시각화합니다. 노드를 클릭하면 상세 정보를 볼 수 있습니다.
-              </CardDescription>
-
-              {/* 검색 컨트롤 */}
-              <div className="mt-4">
-                <NetworkControls
-                  onSearch={handleSearch}
-                  searchResults={searchResults}
-                  onNodeFocus={handleNodeFocus}
-                />
-              </div>
-            </CardHeader>
-
-            <CardContent className="p-0">
-              <div 
-                className="relative"
-                style={{
-                  height: '50vh',
-                  minHeight: '400px',
-                  maxHeight: '60vh',
-                }}
-              >
-                {renderNetworkGraph()}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* 검색 결과 */}
-          {searchQuery && searchResults.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>검색 결과</CardTitle>
-                <CardDescription>
-                  '{searchQuery}'에 대한 검색 결과 {searchResults.length}개
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {searchResults.map(result => (
-                  <div
-                    key={result.id}
-                    className="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
-                    onClick={() => {
-                      handleNodeFocus(result.id);
-                      setSearchQuery('');
-                    }}
-                  >
-                    <div>
-                      <div className="font-medium">{result.name}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {result.type === 'agent' ? '에이전트' : '고객'} 
-                        {result.stage && ` • ${result.stage}`}
-                      </div>
-                    </div>
-                    {result.importance && (
-                      <div className="text-xs px-2 py-1 bg-primary/10 text-primary rounded">
-                        중요도 {result.importance}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          )}
-
-          {/* 태블릿에서는 2열 그리드로 배치 */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* 필터 및 통계 */}
-            <Card>
-              <CardHeader>
-                <CardTitle>필터 및 통계</CardTitle>
-                <CardDescription>
-                  네트워크 데이터를 필터링하고 통계를 확인하세요.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <NetworkSidebar
-                  filters={filterSettings}
-                  onFilterChange={handleFilterChange}
-                  stats={networkStats}
-                />
-              </CardContent>
-            </Card>
-
-            {/* 선택된 노드 상세 정보 */}
-            {selectedNode && (
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle>노드 상세 정보</CardTitle>
-                      <CardDescription>
-                        선택한 노드의 상세 정보입니다.
-                      </CardDescription>
-                    </div>
-                    <button
-                      onClick={handleCloseSidebar}
-                      className="text-muted-foreground hover:text-foreground p-1"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <NetworkDetailPanel
-                    nodeId={selectedNode}
-                    data={networkData}
-                    onClose={handleCloseSidebar}
-                    onNodeSelect={handleNodeSelect}
-                  />
-                </CardContent>
-              </Card>
-            )}
-          </div>
         </div>
       </MainLayout>
     );
@@ -1042,8 +1087,7 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
               {/* 컨트롤 패널 */}
               <div>
                 <NetworkControls
-                  onSearch={handleSearch}
-                  searchResults={searchResults}
+                  onSearch={executeSearch}
                   onNodeFocus={handleNodeFocus}
                 />
               </div>

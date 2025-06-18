@@ -234,7 +234,7 @@ export default function NetworkControls({
         </div>
       </div>
 
-      {/* 옵시디언 스타일 검색 결과 드롭다운 */}
+      {/* 옵시디언 스타일 검색 결과 드롭다운 - 모든 환경에서 활성화 */}
       {isFocused && isSearchActive && (
         <div className="absolute top-full left-0 right-0 z-50 bg-popover border rounded-md shadow-lg mt-1 max-h-64 overflow-auto">
           {hasResults ? (
