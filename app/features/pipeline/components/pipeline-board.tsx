@@ -183,10 +183,10 @@ export function PipelineBoard({
 
   return (
     <div className="w-full overflow-x-auto">
-      {/* 🎯 MVP 칸반보드 헤더와 콘텐츠 */}
+      {/* 🎯 MVP 칸반보드 헤더와 콘텐츠 */}  
       <div className="min-w-max">
-        {/* 단계 헤더 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-6">
+        {/* 단계 헤더 - sticky로 고정 */}
+        <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm pb-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-6">
           {stages.map(stage => {
             const isDragTarget = draggingOver === stage.id;
             const canDrop =

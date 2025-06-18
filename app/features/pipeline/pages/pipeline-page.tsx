@@ -1255,10 +1255,8 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
   return (
     <MainLayout title="영업 파이프라인">
       <div className="space-y-6">
-        {/* 🎯 MVP 통계 헤더 - sticky로 고정 */}
-        <div className="sticky -top-8 z-20 bg-background border-b border-border pb-6">
-          {/* 전체 통계 카드 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-6 pt-6">
+        {/* 🎯 MVP 통계 카드 */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
             {/* 1. 전체 고객 */}
             <div className="flex items-center space-x-3 p-4 bg-card rounded-lg border">
               <div className="p-2 bg-blue-500/10 rounded-lg">
@@ -1348,10 +1346,10 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
                 </p>
               </div>
             </div>
-          </div>
+        </div>
 
-          {/* 필터 및 검색 섹션 */}
-          <div className="flex items-center justify-between">
+        {/* 🎯 필터 및 검색 섹션 */}
+        <div className="flex items-center justify-between">
             <div className="flex w-full max-w-md items-center space-x-2">
               <div className="relative w-full">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -1454,10 +1452,9 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
               </Button>
             </div>
           </div>
-        </div>
 
         {/* 🎯 칸반보드 메인 콘텐츠 */}
-        <div className="min-h-[600px]">
+        <div>
           <PipelineBoard
             stages={stages.map(stage => ({
               ...stage,
