@@ -10,6 +10,8 @@ import {
 import NetworkControls from '../components/NetworkControls';
 import NetworkSidebar from '../components/NetworkSidebar';
 import NetworkDetailPanel from '../components/NetworkDetailPanel';
+import { NetworkMobileTabs, type NetworkMobileTabType } from '../components/NetworkMobileTabs';
+import { useBreakpoint } from '~/common/hooks/use-window-size';
 import {
   useRef,
   useState,
@@ -39,13 +41,13 @@ export async function loader({ request }: Route.LoaderArgs) {
     // 실제 네트워크 데이터 조회
     const networkData = await getNetworkData(user.id);
 
-    // 🎯 파이프라인 단계 조회
+    // 파이프라인 단계 조회
     const { getPipelineStages } = await import(
       '~/features/pipeline/lib/supabase-pipeline-data'
     );
     const stages = await getPipelineStages(user.id);
 
-    // 🎯 모든 활성 클라이언트의 상세 정보 조회
+    // 모든 활성 클라이언트의 상세 정보 조회
     const { db } = await import('~/lib/core/db');
     const { clients, clientDetails, pipelineStages, profiles } = await import(
       '~/lib/schema/core'
@@ -82,7 +84,7 @@ export async function loader({ request }: Route.LoaderArgs) {
       .leftJoin(pipelineStages, eq(clients.currentStageId, pipelineStages.id))
       .where(and(eq(clients.agentId, user.id), eq(clients.isActive, true)));
 
-    // 🎯 에이전트(사용자) 정보 조회 - app_user_profiles 테이블과 auth.users에서
+    // 에이전트(사용자) 정보 조회 - app_user_profiles 테이블과 auth.users에서
     const { createAdminClient } = await import('~/lib/core/supabase');
 
     // app_user_profiles(profiles)에서 프로필 정보 조회
@@ -112,7 +114,7 @@ export async function loader({ request }: Route.LoaderArgs) {
         }
       : null;
 
-    // 🎯 소개 관계 데이터 구성
+    // 소개 관계 데이터 구성
     const clientMap = new Map();
     const referralData = new Map();
 
@@ -243,6 +245,12 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
     referralData,
   } = loaderData;
 
+  // 반응형 브레이크포인트 훅
+  const { isMobile, isTablet, isDesktop } = useBreakpoint();
+
+  // 모바일 탭 상태 관리
+  const [activeMobileTab, setActiveMobileTab] = useState<NetworkMobileTabType>('graph');
+
   const graphRef = useRef<any>(null);
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
   const [filterSettings, setFilterSettings] = useState<NetworkFilters>({
@@ -322,7 +330,7 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
         return {
           id: node.id,
           name: node.name,
-          type: node.type, // 🔥 중요: 원본 타입 필드 보존
+          type: node.type, // 중요: 원본 타입 필드 보존
           group: node.type === 'agent' ? 'influencer' : 'client',
           importance:
             node.importance === 'high'
@@ -330,7 +338,7 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
               : node.importance === 'medium'
                 ? 3
                 : 1,
-          // 🎯 실제 고객의 영업 단계 사용 (fallback: 기존 로직)
+          // 실제 고객의 영업 단계 사용 (fallback: 기존 로직)
           stage:
             clientData?.stageName ||
             (node.status === 'active' ? '계약 완료' : '첫 상담'),
@@ -395,7 +403,7 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
             id: node.id,
             name: node.name,
             type: node.type === 'agent' ? 'influencer' : 'client',
-            // 🎯 실제 고객의 영업 단계 사용 (fallback: 기존 로직)
+            // 실제 고객의 영업 단계 사용 (fallback: 기존 로직)
             stage:
               clientData?.stageName ||
               (node.status === 'active' ? '계약 완료' : '첫 상담'),
@@ -504,9 +512,9 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
       // 모든 직접 연결 관계 수집
       networkData.links.forEach((link: NetworkLink) => {
         const sourceId =
-          typeof link.source === 'string' ? link.source : link.source.id;
+          typeof link.source === 'string' ? link.source : (link.source as any).id;
         const targetId =
-          typeof link.target === 'string' ? link.target : link.target.id;
+          typeof link.target === 'string' ? link.target : (link.target as any).id;
 
         if (!nodeConnections.has(sourceId)) {
           nodeConnections.set(sourceId, new Set());
@@ -563,7 +571,7 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
     };
   }, [networkData, filterSettings, searchQuery]);
 
-  // 🎯 개선된 네트워크 데이터 통계 상태 - useMemo로 최적화
+  // 개선된 네트워크 데이터 통계 상태 - useMemo로 최적화
   const networkStats = useMemo(() => {
     const nodes = networkData.nodes;
     const links = networkData.links;
@@ -719,6 +727,342 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
     }, 100); // 클릭 피드백 후 애니메이션 시작
   }, []);
 
+  // 모바일 레이아웃
+  if (isMobile) {
+    return (
+      <MainLayout title="소개 네트워크">
+        <div
+          data-network-main
+          className="flex flex-col gap-3 h-screen"
+          style={{
+            overflow: 'hidden',
+            padding: '0.75rem',
+          }}
+        >
+          <NetworkMobileTabs
+            activeTab={activeMobileTab}
+            onTabChange={setActiveMobileTab}
+            hasSelectedNode={!!selectedNode}
+            searchResultsCount={searchResults.length}
+          />
+          {activeMobileTab === 'graph' && (
+            <div
+              data-graph-area
+              className="flex-grow transition-all duration-700 ease-out"
+              style={{
+                height: 'calc(100vh - 5.5rem)',
+                maxHeight: 'calc(100vh - 5.5rem)',
+                overflow: 'hidden',
+              }}
+            >
+              <Card
+                className="h-full flex flex-col graph-card transition-all duration-700 ease-out"
+                style={{
+                  overflow: 'hidden',
+                  height: '100%',
+                  willChange: 'transform',
+                }}
+              >
+                <CardHeader className="flex-shrink-0 px-4  graph-card-header">
+                  <CardTitle className="text-lg">소개 네트워크</CardTitle>
+                  <CardDescription className="text-sm">
+                    고객 간 소개 관계를 시각화합니다. 노드를 클릭하면 상세 정보를 볼
+                    수 있습니다.
+                  </CardDescription>
+
+                  {/* 컨트롤 패널 */}
+                  <div>
+                    <NetworkControls
+                      onSearch={handleSearch}
+                      searchResults={searchResults}
+                      onNodeFocus={handleNodeFocus}
+                    />
+                  </div>
+                </CardHeader>
+
+                <CardContent
+                  className="flex-1 p-0 overflow-hidden graph-card-content"
+                  style={{
+                    overflow: 'hidden',
+                    height: '100%',
+                  }}
+                >
+                  {/* 그래프 시각화 */}
+                  <div
+                    className="w-full h-full relative"
+                    style={{
+                      overflow: 'hidden',
+                    }}
+                  >
+                    {renderNetworkGraph()}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+          {activeMobileTab === 'filter' && (
+            <div
+              data-filter-area
+              className="flex-grow transition-all duration-700 ease-out"
+              style={{
+                height: 'calc(100vh - 5.5rem)',
+                maxHeight: 'calc(100vh - 5.5rem)',
+                overflow: 'hidden',
+              }}
+            >
+              <NetworkSidebar
+                filters={filterSettings}
+                onFilterChange={handleFilterChange}
+                stats={networkStats}
+              />
+            </div>
+          )}
+          {activeMobileTab === 'search' && (
+            <div
+              data-search-area
+              className="flex-grow transition-all duration-700 ease-out"
+              style={{
+                height: 'calc(100vh - 5.5rem)',
+                maxHeight: 'calc(100vh - 5.5rem)',
+                overflow: 'hidden',
+              }}
+            >
+              <Card className="h-full flex flex-col">
+                <CardHeader className="flex-shrink-0 pb-2 px-4 pt-3">
+                  <CardTitle className="text-lg">네트워크 검색</CardTitle>
+                  <CardDescription className="text-sm">
+                    고객명으로 검색하여 네트워크에서 찾아보세요.
+                  </CardDescription>
+                  
+                  {/* 검색 컨트롤 */}
+                  <div className="mt-3">
+                    <NetworkControls
+                      onSearch={handleSearch}
+                      searchResults={searchResults}
+                      onNodeFocus={handleNodeFocus}
+                    />
+                  </div>
+                </CardHeader>
+
+                <CardContent className="flex-1 p-4 overflow-auto">
+                  {searchQuery && searchResults.length > 0 && (
+                    <div className="space-y-2">
+                      <h3 className="text-sm font-medium text-muted-foreground">
+                        검색 결과 ({searchResults.length}개)
+                      </h3>
+                      {searchResults.map((result) => (
+                        <div
+                          key={result.id}
+                          className="p-3 border rounded-lg cursor-pointer hover:bg-accent transition-colors"
+                          onClick={() => {
+                            handleNodeFocus(result.id);
+                            setActiveMobileTab('graph');
+                          }}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <div className="font-medium">{result.name}</div>
+                              <div className="text-sm text-muted-foreground">
+                                {result.type === 'influencer' ? '핵심 소개자' : '고객'} • {result.stage}
+                              </div>
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              중요도: {result.importance}/5
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {searchQuery && searchResults.length === 0 && (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <p>'{searchQuery}'에 대한 검색 결과가 없습니다.</p>
+                    </div>
+                  )}
+                  
+                  {!searchQuery && (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <p>고객명을 입력하여 네트워크에서 검색하세요.</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+          {activeMobileTab === 'details' && selectedNode && (
+            <div
+              data-details-area
+              className="flex-grow transition-all duration-700 ease-out"
+              style={{
+                height: 'calc(100vh - 5.5rem)',
+                maxHeight: 'calc(100vh - 5.5rem)',
+                overflow: 'hidden',
+              }}
+            >
+              <NetworkDetailPanel
+                nodeId={selectedNode}
+                data={networkData}
+                onClose={() => {
+                  setSelectedNode(null);
+                  setActiveMobileTab('graph');
+                }}
+                onNodeSelect={handleNodeSelect}
+                clientsData={clientsData}
+                stages={stages}
+                referralData={referralData}
+                agentInfo={agentInfo}
+              />
+            </div>
+          )}
+        </div>
+      </MainLayout>
+    );
+  }
+
+  // 태블릿 레이아웃
+  if (isTablet) {
+    return (
+      <MainLayout title="소개 네트워크">
+        <div
+          data-network-main
+          className="flex gap-3"
+          style={{
+            height: 'calc(100vh - 4rem)',
+            maxHeight: 'calc(100vh - 4rem)',
+            overflow: 'hidden',
+            padding: '0.75rem',
+          }}
+        >
+          {/* 그래프 패널 */}
+          <div
+            data-graph-area
+            className="flex-grow transition-all duration-700 ease-out"
+            style={{
+              height: 'calc(100vh - 5.5rem)',
+              maxHeight: 'calc(100vh - 5.5rem)',
+              overflow: 'hidden',
+            }}
+          >
+            <Card
+              className="h-full flex flex-col graph-card transition-all duration-700 ease-out"
+              style={{
+                overflow: 'hidden',
+                height: '100%',
+                willChange: 'transform',
+              }}
+            >
+              <CardHeader className="flex-shrink-0 pb-2 px-4 pt-3 graph-card-header">
+                <CardTitle className="text-lg">소개 네트워크</CardTitle>
+                <CardDescription className="text-sm">
+                  고객 간 소개 관계를 시각화합니다. 노드를 클릭하면 상세 정보를 볼
+                  수 있습니다.
+                </CardDescription>
+
+                {/* 컨트롤 패널 */}
+                <div>
+                  <NetworkControls
+                    onSearch={handleSearch}
+                    searchResults={searchResults}
+                    onNodeFocus={handleNodeFocus}
+                  />
+                </div>
+              </CardHeader>
+
+              <CardContent
+                className="flex-1 p-0 overflow-hidden graph-card-content"
+                style={{
+                  overflow: 'hidden',
+                  height: '100%',
+                }}
+              >
+                {/* 그래프 시각화 */}
+                <div
+                  className="w-full h-full relative"
+                  style={{
+                    overflow: 'hidden',
+                  }}
+                >
+                  {renderNetworkGraph()}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* 사이드바 패널 */}
+          <div
+            data-sidebar-area
+            className="flex-shrink-0"
+            style={{
+              width: '320px', // 고정 너비
+              height: 'calc(100vh - 5.5rem)',
+              maxHeight: 'calc(100vh - 5.5rem)',
+              overflow: 'hidden',
+            }}
+          >
+            <NetworkSidebar
+              filters={filterSettings}
+              onFilterChange={handleFilterChange}
+              stats={networkStats}
+            />
+          </div>
+
+          {/* 상세 정보 패널 */}
+          {selectedNode && (
+            <div
+              data-details-area
+              className="absolute right-0 top-16 transition-all duration-700 ease-out"
+              style={{
+                width: '320px', // 고정 너비
+                height: 'calc(100vh - 5.5rem)',
+                maxHeight: 'calc(100vh - 5.5rem)',
+                overflow: 'hidden',
+                zIndex: 50,
+                pointerEvents: selectedNode ? 'auto' : 'none',
+                willChange: 'transform',
+                paddingRight: '0.75rem', // 메인 컨테이너 패딩과 맞춤
+              }}
+            >
+              {/* 배경 블러 효과 */}
+              <div
+                className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+                style={{ borderRadius: '0.5rem' }}
+              />
+
+              {/* 실제 사이드바 콘텐츠 */}
+              <div
+                className={`relative h-full transition-all duration-500 ease-out ${
+                  selectedNode
+                    ? 'translate-y-0 opacity-100'
+                    : 'translate-y-4 opacity-0'
+                }`}
+                style={{
+                  transitionDelay: selectedNode ? '200ms' : '0ms',
+                  willChange: 'transform',
+                }}
+              >
+                {/* 항상 렌더링하되 selectedNode가 있을 때만 데이터 전달 */}
+                {selectedNode && (
+                  <NetworkDetailPanel
+                    nodeId={selectedNode}
+                    data={networkData}
+                    onClose={handleCloseSidebar}
+                    onNodeSelect={handleNodeSelect}
+                    clientsData={clientsData}
+                    stages={stages}
+                    referralData={referralData}
+                    agentInfo={agentInfo}
+                  />
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </MainLayout>
+    );
+  }
+
+  // 데스크톱 레이아웃
   return (
     <MainLayout title="소개 네트워크">
       <div
