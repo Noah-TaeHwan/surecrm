@@ -760,7 +760,7 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
               
               {/* 좌측 슬라이드인 사이드바 */}
               <div
-                className="fixed top-0 left-0 bottom-0 z-50 bg-background border-r border-border shadow-2xl animate-slide-in-left"
+                className="fixed top-0 left-0 bottom-0 z-50 bg-background border-r border-border shadow-2xl animate-slide-in-left flex flex-col"
                 style={{
                   width: '280px', // 데스크톱과 동일한 너비
                   paddingTop: 'calc(4rem + env(safe-area-inset-top, 0px))', // 헤더 높이 고려
@@ -768,7 +768,7 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
                 }}
               >
                 {/* 헤더 */}
-                <div className="flex items-center justify-between px-4 py-3 border-b bg-background">
+                <div className="flex items-center justify-between px-4 py-3 border-b bg-background flex-shrink-0">
                   <div>
                     <h3 className="text-lg font-semibold">필터 및 통계</h3>
                     <p className="text-sm text-muted-foreground">
@@ -783,8 +783,14 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
                   </button>
                 </div>
 
-                {/* 데스크톱과 동일한 필터 콘텐츠 */}
-                <div className="flex-1 overflow-y-auto">
+                {/* 스크롤 가능한 콘텐츠 영역 */}
+                <div 
+                  className="flex-1 overflow-y-auto min-h-0"
+                  style={{
+                    WebkitOverflowScrolling: 'touch', // iOS 모바일 스크롤 최적화
+                    overscrollBehavior: 'contain', // 스크롤 바운싱 제어
+                  }}
+                >
                   <NetworkSidebar
                     filters={filterSettings}
                     onFilterChange={handleFilterChange}
@@ -816,9 +822,9 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
               <div 
                 className="relative transition-all duration-300 ease-in-out"
                 style={{
-                  height: selectedNode ? '40vh' : '55vh',
-                  minHeight: selectedNode ? '300px' : '400px',
-                  maxHeight: selectedNode ? '45vh' : '60vh',
+                  height: selectedNode ? '35vh' : '48vh', // 필터 버튼 영역 고려해 높이 감소
+                  minHeight: selectedNode ? '280px' : '350px',
+                  maxHeight: selectedNode ? '40vh' : '52vh',
                 }}
               >
                 {renderNetworkGraph()}
