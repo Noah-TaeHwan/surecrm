@@ -660,16 +660,32 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <style
           dangerouslySetInnerHTML={{
             __html: `
-              /* 🎯 INSTANT THEME APPLICATION - 레이아웃 파괴 없이 */
+              /* 🎯 INSTANT THEME APPLICATION - 반응형 스크롤 정책 */
               html, body {
                 font-family: 'Inter', ui-sans-serif, system-ui, sans-serif !important;
                 -webkit-font-smoothing: antialiased !important;
                 -moz-osx-font-smoothing: grayscale !important;
-                overflow-y: scroll !important;
-                scrollbar-gutter: stable !important;
-                width: 100vw !important;
-                max-width: 100% !important;
                 min-height: 100vh !important;
+              }
+              
+              /* 데스크톱에서만 기존 스크롤 정책 적용 */
+              @media (min-width: 768px) {
+                html, body {
+                  overflow-y: scroll !important;
+                  scrollbar-gutter: stable !important;
+                  width: 100vw !important;
+                  max-width: 100% !important;
+                }
+              }
+              
+              /* 모바일에서는 MainLayout이 스크롤 담당 */
+              @media (max-width: 767.98px) {
+                html, body {
+                  overflow: hidden !important;
+                  height: 100vh !important;
+                  max-height: 100vh !important;
+                  width: 100% !important;
+                }
               }
               
               /* 라이트 테마 */
