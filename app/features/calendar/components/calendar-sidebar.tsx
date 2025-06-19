@@ -230,20 +230,18 @@ export function CalendarSidebar({
                     <Checkbox
                       id={`filter-${type}`}
                       checked={isChecked}
-                      onCheckedChange={() => toggleFilter(type)}
+                      onCheckedChange={() => {}} // 빈 함수 - 실제 토글은 부모 div에서 처리
+                      className="pointer-events-none" // 체크박스 자체 클릭 비활성화
                     />
-                    <label
-                      htmlFor={`filter-${type}`}
-                      className="flex items-center gap-2 text-sm font-medium cursor-pointer flex-1"
-                    >
+                    <div className="flex items-center gap-2 text-sm font-medium flex-1 cursor-pointer">
                       <span className="text-base">
                         {typeInfo?.icon || '📅'}
                       </span>
                       <span>
                         {meetingTypeKoreanMap[type as keyof typeof meetingTypeKoreanMap] || type}
                       </span>
-                    </label>
-                    <Badge variant="secondary" className="text-xs">
+                    </div>
+                    <Badge variant="secondary" className="text-xs pointer-events-none">
                       {meetings.filter(m => m.type === type).length}
                     </Badge>
                   </div>
