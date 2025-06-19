@@ -226,7 +226,7 @@ interface AddMeetingModalProps {
   isOpen: boolean;
   onClose: () => void;
   clients: Client[];
-  onSubmit: (data: MeetingFormData) => void;
+  onSubmit?: (data: MeetingFormData) => void;
   googleCalendarConnected?: boolean;
 }
 
@@ -303,7 +303,35 @@ export function AddMeetingModal({
       syncToGoogle: true, // 항상 구글 캘린더에 동기화
     };
     
-    onSubmit(finalData);
+    // 🚀 실제 서버로 Form 제출
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.style.display = 'none';
+
+    // actionType 설정
+    const actionInput = document.createElement('input');
+    actionInput.name = 'actionType';
+    actionInput.value = 'createMeeting';
+    form.appendChild(actionInput);
+
+    // 모든 form 데이터를 hidden input으로 추가
+    Object.entries(finalData).forEach(([key, value]) => {
+      const input = document.createElement('input');
+      input.name = key;
+      input.value = value?.toString() || '';
+      form.appendChild(input);
+    });
+
+    // form 제출
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+    
+    // 선택적 onSubmit 콜백 호출
+    if (onSubmit) {
+      onSubmit(finalData);
+    }
+    
     handleClose();
   };
 

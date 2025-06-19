@@ -18,25 +18,25 @@ export function GoogleConnectRequired({ onConnect }: GoogleConnectRequiredProps)
     <div className="flex items-center justify-center min-h-[600px] p-6">
       <Card className="max-w-md w-full">
         <CardHeader className="text-center space-y-4">
-          <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
-            <CalendarIcon className="w-8 h-8 text-blue-600" />
+          <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
+            <CalendarIcon className="w-8 h-8 text-primary" />
           </div>
           <CardTitle className="text-xl">구글 캘린더 연동 필요</CardTitle>
-          <CardDescription className="text-sm text-muted-foreground">
+          <CardDescription className="text-sm text-muted-foreground mb-4">
             일정 관리 기능을 사용하려면 구글 캘린더 연동이 필요합니다.
           </CardDescription>
         </CardHeader>
 
         <CardContent className="space-y-6">
           {/* 연동 필요성 설명 */}
-          <Alert className="border-blue-200 bg-blue-50/30">
-            <CheckCircledIcon className="h-4 w-4 text-blue-600" />
+          <Alert className="border-primary/20">
+            <CheckCircledIcon className="h-4 w-4 text-muted-foreground" />
             <AlertDescription className="text-sm">
               <div className="space-y-2">
-                <p className="font-medium text-blue-900">
+                <p className="font-medium text-muted-foreground">
                   SureCRM 일정 관리는 구글 캘린더와 완전 동기화됩니다
                 </p>
-                <ul className="text-blue-800 space-y-1 text-xs">
+                <ul className="text-muted-foreground space-y-1 text-xs">
                   <li>• 새 일정 등록 → 구글 캘린더에 자동 저장</li>
                   <li>• 구글 캘린더 일정 → SureCRM에 자동 표시</li>
                   <li>• 양방향 실시간 동기화</li>
@@ -48,7 +48,7 @@ export function GoogleConnectRequired({ onConnect }: GoogleConnectRequiredProps)
           {/* 연동 버튼 */}
           <Button 
             onClick={onConnect} 
-            className="w-full h-12 bg-blue-600 hover:bg-blue-700"
+            className="w-full h-12 bg-primary hover:bg-primary/90"
             size="lg"
           >
             <Link1Icon className="w-4 h-4 mr-2" />

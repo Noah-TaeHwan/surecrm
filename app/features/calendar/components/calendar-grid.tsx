@@ -15,7 +15,13 @@ import {
   AlertTriangle,
   XCircle,
   Circle,
+  Clock,
+  MapPin,
+  User,
+  Plus,
+  MoreHorizontal,
 } from 'lucide-react';
+import { Badge } from '~/common/components/ui/badge';
 
 interface CalendarGridProps {
   selectedDate: Date;
@@ -25,7 +31,7 @@ interface CalendarGridProps {
   onDateClick?: (date: Date) => void;
 }
 
-// 🎨 동기화 상태 표시기 컴포넌트
+// 🎨 현대적인 동기화 상태 표시기
 function SyncStatusIndicator({ status }: { status?: SyncStatus }) {
   if (!status || status === 'not_synced') return null;
 
@@ -41,20 +47,23 @@ function SyncStatusIndicator({ status }: { status?: SyncStatus }) {
   return (
     <div
       className={cn(
-        'flex items-center gap-1 text-xs px-1.5 py-0.5 rounded-full backdrop-blur-sm border border-white/20',
+        'flex items-center gap-1 text-xs px-2 py-1 rounded-full backdrop-blur-sm border',
+        'shadow-sm transition-all duration-200',
         style.bgColor,
-        style.color
+        style.color,
+        'border-white/30'
       )}
       title={style.label}
     >
       <IconComponent
         className={cn('h-3 w-3', 'animate' in style ? style.animate : '')}
       />
+      <span className="font-medium text-xs">{style.label}</span>
     </div>
   );
 }
 
-// 🎯 개선된 이벤트 카드 컴포넌트 - 호버 텍스트 겹침 문제 해결
+// 🚀 Google Calendar 스타일의 이벤트 카드 
 function EventCard({
   meeting,
   compact = false,
@@ -75,55 +84,77 @@ function EventCard({
   return (
     <div
       className={cn(
-        'rounded cursor-pointer transition-all duration-200 relative overflow-hidden',
-        'hover:scale-[1.02] hover:shadow-md text-white font-medium',
-        compact ? 'text-xs p-1.5' : 'text-xs p-2',
-        `bg-gradient-to-r ${sourceStyle.gradient}`,
-        `border ${sourceStyle.border}`,
-        sourceStyle.textColor,
-        'hover:brightness-105'
+        'group relative rounded-lg cursor-pointer transition-transform duration-200 ease-out',
+        'hover:scale-[1.05] font-medium',
+        'active:scale-[0.98]',
+        compact ? 'text-xs p-2.5' : 'text-sm p-3',
+        'bg-card border-2 text-foreground',
+        // 타입별 보더 색상만 (배경 그라데이션 제거)
+        meeting.type === 'initial'
+          ? 'border-blue-500 hover:border-blue-600'
+          : meeting.type === 'consultation'
+            ? 'border-green-500 hover:border-green-600'
+            : meeting.type === 'contract'
+              ? 'border-red-500 hover:border-red-600'
+              : 'border-gray-500 hover:border-gray-600',
+        'shadow-sm'
       )}
       onClick={onClick}
-      title={`${meeting.time} - ${meeting.client.name} (${koreanName}) - ${
-        source === 'surecrm' ? 'SureCRM' : '구글 캘린더'
-      }`}
+      title={`${meeting.time} - ${meeting.client.name} (${koreanName})`}
     >
-      {/* 메인 콘텐츠 */}
-      <div className="relative z-10">
-        {/* 상단: 시간 & 아이콘 */}
-        <div className="flex items-center justify-between mb-1">
-          <div className="flex items-center gap-1">
-            <span className="text-xs">{sourceStyle.icon}</span>
-            <span className="font-semibold text-xs">{meeting.time}</span>
+      <div className="relative z-10 space-y-1.5">
+        {/* 상단: 시간 & 소스 아이콘 */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <Clock className="h-3 w-3 opacity-90 group-hover:h-3.5 group-hover:w-3.5 transition-all duration-200" />
+            <span className="font-semibold text-xs tracking-wide">{meeting.time}</span>
           </div>
-          <SyncStatusIndicator status={syncStatus} />
+          <span className="text-sm opacity-80 group-hover:text-base transition-all duration-200">
+            {source === 'google' ? '📅' : '💼'}
+          </span>
         </div>
 
-        {/* 중앙: 고객명 */}
-        <div className="truncate font-medium text-xs mb-1">
-          {meeting.client.name}
+        {/* 중앙: 이벤트 제목 */}
+        <div className="flex items-center gap-1.5">
+          <User className="h-3 w-3 opacity-75 flex-shrink-0 group-hover:h-3.5 group-hover:w-3.5 transition-all duration-200" />
+          <span className={cn(
+            "font-medium truncate",
+            compact ? "text-xs" : "text-sm"
+          )}>
+            {meeting.title}
+          </span>
         </div>
 
-        {/* 하단: 미팅 타입 (compact가 아닐 때만) */}
+        {/* 하단: 미팅 타입 & 위치 */}
         {!compact && (
-          <div className="text-xs opacity-80 truncate">{koreanName}</div>
+          <div className="space-y-1">
+            <div className="text-xs opacity-85 truncate">{koreanName}</div>
+            {meeting.location && (
+              <div className="flex items-center gap-1">
+                <MapPin className="h-2.5 w-2.5 opacity-70 group-hover:h-3 group-hover:w-3 transition-all duration-200" />
+                <span className="text-xs opacity-75 truncate">{meeting.location}</span>
+              </div>
+            )}
+          </div>
         )}
       </div>
 
-      {/* 상태 표시 점들 */}
+      {/* 동기화 상태 표시점 */}
       {syncStatus === 'conflict' && (
-        <div className="absolute top-1 right-1 w-2 h-2 rounded-full bg-red-400 border border-white/70 animate-pulse z-20"></div>
+        <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-red-500 border-2 border-white animate-pulse shadow-lg z-20"></div>
       )}
 
       {syncStatus === 'synced' && source !== 'surecrm' && (
-        <div className="absolute top-1 right-1 w-2 h-2 rounded-full bg-green-400 border border-white/50 z-20"></div>
+        <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white shadow-lg z-20"></div>
       )}
+
+
     </div>
   );
 }
 
-// 🚀 더보기 버튼 컴포넌트 - 개선된 디자인
-function MoreButton({
+// 🎯 세련된 더보기 버튼 
+function MoreEventsButton({
   count,
   meetings,
   onClick,
@@ -132,22 +163,89 @@ function MoreButton({
   meetings: Meeting[];
   onClick: (e: React.MouseEvent) => void;
 }) {
-  // 남은 미팅들의 시간 미리보기
   const previewTimes = meetings
-    .slice(0, 3)
+    .slice(0, 2)
     .map(m => m.time)
     .join(', ');
 
   return (
     <div
-      className="text-xs text-muted-foreground bg-muted/50 hover:bg-muted/70 p-2 rounded cursor-pointer transition-all duration-200 border border-border/50 hover:border-border group"
+      className={cn(
+        "group relative rounded-lg cursor-pointer transition-all duration-300",
+        "bg-gradient-to-br from-muted/40 to-muted/60 hover:from-muted/60 hover:to-muted/80",
+        "border border-border/50 hover:border-border shadow-sm hover:shadow-md",
+        "p-2.5 text-xs text-muted-foreground hover:text-foreground",
+        "transform hover:scale-[1.02] active:scale-[0.98]"
+      )}
       onClick={onClick}
-      title={`남은 일정: ${previewTimes}${meetings.length > 3 ? '...' : ''}`}
+      title={`추가 일정: ${previewTimes}${meetings.length > 2 ? '...' : ''}`}
     >
       <div className="flex items-center justify-between">
-        <span className="font-medium">+{count}개 더보기</span>
-        <div className="w-1 h-1 bg-primary rounded-full group-hover:scale-125 transition-transform"></div>
+        <div className="flex items-center gap-1.5">
+          <MoreHorizontal className="h-3 w-3" />
+          <span className="font-medium">+{count}개 더</span>
+        </div>
+        <div className="w-1.5 h-1.5 bg-primary/60 rounded-full group-hover:bg-primary group-hover:scale-125 transition-all duration-200" />
       </div>
+      
+      {/* 미리보기 힌트 */}
+      <div className="mt-1 text-xs opacity-70 truncate">
+        {previewTimes}
+      </div>
+    </div>
+  );
+}
+
+// 📅 개선된 날짜 셀 헤더
+function DateCellHeader({ 
+  day, 
+  isToday, 
+  dayMeetings, 
+  sourceCount 
+}: { 
+  day: number;
+  isToday: boolean;
+  dayMeetings: Meeting[];
+  sourceCount: Record<string, number>;
+}) {
+  return (
+    <div className="flex items-center justify-between mb-3">
+      {/* 날짜 */}
+      <div className={cn(
+        "flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold transition-all duration-200",
+        isToday
+          ? "bg-primary text-primary-foreground shadow-lg scale-110"
+          : "text-foreground/70"
+      )}>
+        {day}
+      </div>
+
+      {/* 이벤트 소스별 카운터 */}
+      {dayMeetings.length > 0 && (
+        <div className="flex items-center gap-1">
+          {Object.entries(sourceCount).map(([source, count]) => {
+            const sourceStyle =
+              eventSourceStyles[source as EventSource] ||
+              eventSourceStyles.surecrm;
+            return (
+              <Badge
+                key={source}
+                variant="secondary"
+                className={cn(
+                  'text-xs px-2 py-0.5 font-semibold border',
+                  `bg-gradient-to-r ${sourceStyle.gradient}`,
+                  sourceStyle.textColor,
+                  sourceStyle.border,
+                  'shadow-sm hover:shadow-md transition-shadow duration-200'
+                )}
+                title={`${source === 'surecrm' ? 'SureCRM' : '구글 캘린더'}: ${count}개`}
+              >
+                {sourceStyle.icon} {count}
+              </Badge>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
@@ -168,31 +266,35 @@ export function CalendarGrid({
   // 필터링된 결과가 없는 경우 빈 상태 표시
   if (filteredMeetings.length === 0 && meetings.length > 0) {
     return (
-      <div className="bg-card/30 rounded-2xl overflow-hidden border border-border/30 shadow-2xl backdrop-blur-md">
-        <div className="p-12 text-center">
-          <div className="p-6 bg-muted/20 rounded-full w-fit mx-auto mb-6">
-            <svg
-              className="w-16 h-16 text-muted-foreground/50"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z"
-              />
-            </svg>
-          </div>
-          <h3 className="text-xl font-semibold text-foreground mb-3">
-            선택한 필터에 해당하는 미팅이 없습니다
-          </h3>
-          <p className="text-muted-foreground mb-6">
-            다른 미팅 유형을 선택하거나 필터를 초기화해보세요.
-          </p>
-          <div className="text-sm text-muted-foreground bg-muted/20 px-4 py-2 rounded-lg inline-block">
-            전체 미팅: {meetings.length}개 | 필터링된 미팅: 0개
+      <div className="bg-gradient-to-br from-card/50 to-card/30 rounded-3xl overflow-hidden border border-border/30 shadow-2xl backdrop-blur-xl">
+        <div className="p-16 text-center">
+          <div className="relative">
+            <div className="p-8 bg-gradient-to-br from-muted/30 to-muted/10 rounded-full w-fit mx-auto mb-8 shadow-lg">
+              <svg
+                className="w-20 h-20 text-muted-foreground/40"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z"
+                />
+              </svg>
+            </div>
+            <h3 className="text-2xl font-bold text-foreground mb-4 tracking-tight">
+              선택한 필터에 해당하는 미팅이 없습니다
+            </h3>
+            <p className="text-muted-foreground mb-8 text-lg leading-relaxed max-w-md mx-auto">
+              다른 미팅 유형을 선택하거나 필터를 초기화해보세요.
+            </p>
+            <div className="inline-flex items-center gap-3 text-sm text-muted-foreground bg-muted/30 px-6 py-3 rounded-xl border border-border/50">
+              <Badge variant="outline">전체 {meetings.length}개</Badge>
+              <span>|</span>
+              <Badge variant="outline">필터링됨 0개</Badge>
+            </div>
           </div>
         </div>
       </div>
@@ -208,7 +310,7 @@ export function CalendarGrid({
     return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
   };
 
-  // 월별 캘린더 렌더링
+  // 🎨 현대적인 월별 캘린더 렌더링
   const renderMonthView = () => {
     const daysInMonth = getDaysInMonth(selectedDate);
     const firstDay = getFirstDayOfMonth(selectedDate);
@@ -228,9 +330,9 @@ export function CalendarGrid({
       days.push(
         <div
           key={`prev-${prevDate}`}
-          className="h-32 bg-muted/10 border border-border/10 p-2 opacity-30"
+          className="min-h-[140px] bg-gradient-to-br from-muted/5 to-muted/10 border border-border/5 p-3 opacity-40 transition-all duration-200 hover:opacity-60"
         >
-          <div className="text-sm text-muted-foreground/40 font-medium">
+          <div className="text-sm text-muted-foreground/50 font-medium">
             {prevDate}
           </div>
         </div>
@@ -276,66 +378,38 @@ export function CalendarGrid({
         <div
           key={day}
           className={cn(
-            'border border-border/20 p-2 cursor-pointer transition-all duration-200 relative overflow-hidden bg-card/30',
-            'hover:bg-card/60 hover:shadow-lg hover:border-accent/40',
+            'border border-border/20 p-3 cursor-pointer transition-colors duration-200 relative overflow-hidden',
+            'bg-gradient-to-br from-card/40 to-card/20 backdrop-blur-sm',
             isToday &&
-              'bg-primary/8 border-primary/30 ring-1 ring-primary/20 shadow-md',
-            isWeekend && 'bg-muted/20',
-            // 이벤트 수에 따른 동적 높이
+              'bg-gradient-to-br from-primary/15 to-primary/5 border-primary/40 ring-2 ring-primary/20 shadow-xl',
+            isWeekend && 'bg-gradient-to-br from-muted/30 to-muted/10',
+            // 동적 높이 - 더 자연스럽게
             dayMeetings.length === 0
-              ? 'h-32'
+              ? 'min-h-[140px]'
               : dayMeetings.length === 1
-                ? 'h-36'
+                ? 'min-h-[160px]'
                 : dayMeetings.length <= 3
-                  ? 'h-40'
-                  : 'h-44',
-            dayMeetings.length > 0 && 'hover:scale-[1.01]'
+                  ? 'min-h-[180px]'
+                  : 'min-h-[200px]'
           )}
           onClick={() => onDateClick?.(cellDate)}
         >
-          {/* 날짜 헤더 - 간소화된 버전 */}
-          <div className="flex items-center justify-between mb-2">
-            <span
-              className={cn(
-                'flex items-center justify-center w-6 h-6 rounded-full text-sm font-semibold',
-                isToday
-                  ? 'bg-primary text-primary-foreground shadow-sm'
-                  : 'text-foreground/80'
-              )}
-            >
-              {day}
-            </span>
+          {/* 날짜 헤더 */}
+          <DateCellHeader 
+            day={day}
+            isToday={isToday}
+            dayMeetings={dayMeetings}
+            sourceCount={sourceCount}
+          />
 
-            {/* 간소화된 이벤트 카운터 */}
-            {dayMeetings.length > 0 && (
-              <div className="flex items-center gap-0.5">
-                {Object.entries(sourceCount).map(([source, count]) => {
-                  const sourceStyle =
-                    eventSourceStyles[source as EventSource] ||
-                    eventSourceStyles.surecrm;
-                  return (
-                    <div
-                      key={source}
-                      className={cn(
-                        'text-xs px-1.5 py-0.5 rounded-full font-medium',
-                        `bg-gradient-to-r ${sourceStyle.gradient}`,
-                        sourceStyle.textColor
-                      )}
-                      title={`${
-                        source === 'surecrm' ? 'SureCRM' : '구글 캘린더'
-                      }: ${count}개`}
-                    >
-                      {count}
-                    </div>
-                  );
-                })}
+          {/* 🎨 스마트 이벤트 표시 시스템 - 개선된 버전 */}
+          <div className="space-y-2">
+            {dayMeetings.length === 0 ? (
+              // 빈 상태 - 미묘한 플러스 아이콘
+              <div className="flex items-center justify-center h-16 opacity-0 hover:opacity-30 transition-opacity duration-300">
+                <Plus className="h-5 w-5 text-muted-foreground/50" />
               </div>
-            )}
-          </div>
-
-          {/* 🎨 스마트 이벤트 표시 시스템 */}
-          <div className="space-y-1">
-            {dayMeetings.length === 0 ? null : dayMeetings.length === 1 ? ( // 이벤트 없음
+            ) : dayMeetings.length === 1 ? (
               // 1개: 풀 사이즈로 표시
               <EventCard
                 key={dayMeetings[0].id}
@@ -348,17 +422,19 @@ export function CalendarGrid({
               />
             ) : dayMeetings.length === 2 ? (
               // 2개: 둘 다 컴팩트로 표시
-              dayMeetings.map(meeting => (
-                <EventCard
-                  key={meeting.id}
-                  meeting={meeting}
-                  compact={true}
-                  onClick={e => {
-                    e.stopPropagation();
-                    onMeetingClick(meeting);
-                  }}
-                />
-              ))
+              dayMeetings
+                .sort((a, b) => a.time.localeCompare(b.time))
+                .map(meeting => (
+                  <EventCard
+                    key={meeting.id}
+                    meeting={meeting}
+                    compact={true}
+                    onClick={e => {
+                      e.stopPropagation();
+                      onMeetingClick(meeting);
+                    }}
+                  />
+                ))
             ) : dayMeetings.length === 3 ? (
               // 3개: 시간순 정렬 후 모두 컴팩트로 표시
               dayMeetings
@@ -391,7 +467,7 @@ export function CalendarGrid({
                       }}
                     />
                   ))}
-                <MoreButton
+                <MoreEventsButton
                   count={dayMeetings.length - 2}
                   meetings={dayMeetings.slice(2)}
                   onClick={e => {
@@ -403,18 +479,15 @@ export function CalendarGrid({
             )}
           </div>
 
-          {/* 오늘 표시 효과 */}
-          {isToday && (
-            <div className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full animate-pulse shadow-sm" />
-          )}
-
-          {/* 🔄 동기화 충돌 전체 표시 */}
+          {/* 🔄 동기화 충돌 표시 - 더 눈에 띄게 */}
           {dayMeetings.some(m => m.syncInfo?.syncStatus === 'conflict') && (
             <div
-              className="absolute bottom-2 right-2 w-3 h-3 bg-red-500 rounded-full animate-pulse border-2 border-white shadow-lg"
+              className="absolute bottom-3 right-3 w-4 h-4 bg-red-500 rounded-full animate-pulse border-2 border-white shadow-lg ring-2 ring-red-500/30"
               title="동기화 충돌이 있는 이벤트가 있습니다"
             />
           )}
+
+
         </div>
       );
     }
@@ -427,9 +500,9 @@ export function CalendarGrid({
       days.push(
         <div
           key={`next-${day}`}
-          className="h-32 bg-muted/10 border border-border/10 p-2 opacity-30"
+          className="min-h-[140px] bg-gradient-to-br from-muted/5 to-muted/10 border border-border/5 p-3 opacity-40 transition-all duration-200 hover:opacity-60"
         >
-          <div className="text-sm text-muted-foreground/40 font-medium">
+          <div className="text-sm text-muted-foreground/50 font-medium">
             {day}
           </div>
         </div>
@@ -437,22 +510,24 @@ export function CalendarGrid({
     }
 
     return (
-      <div className="bg-card/30 rounded-2xl overflow-hidden border border-border/30 shadow-2xl backdrop-blur-md">
-        {/* 요일 헤더 */}
-        <div className="grid grid-cols-7 border-b border-border/30 bg-gradient-to-r from-muted/40 to-muted/20 backdrop-blur-sm">
+      <div className="bg-gradient-to-br from-card/50 to-card/30 rounded-3xl overflow-hidden border border-border/30 shadow-2xl backdrop-blur-xl">
+        {/* 🎨 현대적인 요일 헤더 */}
+        <div className="grid grid-cols-7 border-b border-border/30 bg-gradient-to-r from-muted/50 via-muted/30 to-muted/50 backdrop-blur-sm">
           {[
-            '일요일',
-            '월요일',
-            '화요일',
-            '수요일',
-            '목요일',
-            '금요일',
-            '토요일',
+            { full: '일요일', short: '일' },
+            { full: '월요일', short: '월' },
+            { full: '화요일', short: '화' },
+            { full: '수요일', short: '수' },
+            { full: '목요일', short: '목' },
+            { full: '금요일', short: '금' },
+            { full: '토요일', short: '토' },
           ].map((day, index) => (
             <div
-              key={day}
+              key={day.full}
               className={cn(
-                'p-4 text-center font-bold text-sm border-r border-border/20 last:border-r-0 bg-gradient-to-b from-card/40 to-card/20',
+                'p-5 text-center font-bold text-sm border-r border-border/20 last:border-r-0',
+                'bg-gradient-to-b from-card/50 to-card/30 backdrop-blur-sm',
+                'transition-colors duration-200 hover:bg-card/40',
                 index === 0
                   ? 'text-red-500'
                   : index === 6
@@ -460,14 +535,14 @@ export function CalendarGrid({
                     : 'text-foreground/80'
               )}
             >
-              <div className="hidden lg:block">{day}</div>
-              <div className="lg:hidden font-extrabold">{day.slice(0, 1)}</div>
+              <div className="hidden lg:block tracking-wide">{day.full}</div>
+              <div className="lg:hidden font-black text-lg">{day.short}</div>
             </div>
           ))}
         </div>
 
-        {/* 날짜 그리드 */}
-        <div className="grid grid-cols-7 bg-gradient-to-br from-background/60 to-background/40">
+        {/* 🎯 현대적인 날짜 그리드 */}
+        <div className="grid grid-cols-7 bg-gradient-to-br from-background/80 to-background/60 backdrop-blur-sm">
           {days}
         </div>
       </div>

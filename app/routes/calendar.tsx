@@ -105,17 +105,21 @@ export async function loader({ request }: Route.LoaderArgs) {
             events: [],
           };
 
-    // 구글 이벤트를 SureCRM 미팅 형식으로 변환
+    // 구글 이벤트를 SureCRM 미팅 형식으로 변환 (완전 통합 방식)
     const googleMeetings = googleResult.events.map((event: any) => ({
       id: event.id,
-      title: event.title,
-      client: { id: 'google', name: '구글 캘린더', phone: '' },
+      title: event.title, // 구글 캘린더의 실제 이벤트 제목
+      client: { 
+        id: 'google', 
+        name: event.title, // 구글 이벤트 제목을 클라이언트명으로 사용
+        phone: '' 
+      },
       date: event.startTime.toISOString().split('T')[0],
       time: event.startTime.toTimeString().slice(0, 5),
       duration: Math.floor(
         (event.endTime.getTime() - event.startTime.getTime()) / (1000 * 60)
       ),
-      type: 'google_imported', // 구글에서 가져온 일정 구분
+      type: 'meeting', // 일반 미팅 타입으로 통일
       location: event.location || '',
       description: event.description,
       status: 'scheduled' as const,
@@ -123,7 +127,7 @@ export async function loader({ request }: Route.LoaderArgs) {
       notes: [],
       syncInfo: {
         status: event.syncStatus,
-        externalSource: 'google_calendar' as const,
+        externalSource: 'google' as const, // 'google_calendar' 대신 'google' 사용
         externalEventId: event.googleEventId,
         lastSyncAt: event.lastSyncAt.toISOString(),
       },
@@ -336,7 +340,20 @@ export async function action({ request }: Route.ActionArgs) {
 
         const scheduledAt = new Date(year, month - 1, day, hour, minute);
 
-        await updateMeeting(meetingId, agentId, {
+        // 🔍 기존 미팅 정보 조회 (구글 이벤트 ID 확인용)
+        const { getMeetingsByMonth } = await import(
+          '~/features/calendar/lib/calendar-data'
+        );
+        const currentDate = new Date();
+        const year2 = currentDate.getFullYear();
+        const month2 = currentDate.getMonth() + 1;
+
+        const meetings = await getMeetingsByMonth(agentId, year2, month2);
+        const existingMeeting = meetings.find(m => m.id === meetingId);
+        const googleEventId = existingMeeting?.syncInfo?.externalEventId;
+
+        // 📝 SureCRM 미팅 업데이트
+        const updatedMeeting = await updateMeeting(meetingId, agentId, {
           title,
           scheduledAt,
           duration, // 분 단위로 전달
@@ -357,7 +374,58 @@ export async function action({ request }: Route.ActionArgs) {
           reminder,
         });
 
-        return { success: true, message: '미팅이 성공적으로 수정되었습니다.' };
+        // 🌐 구글 캘린더 동기화 수행
+        let googleUpdateResult = 'not_connected';
+
+        if (syncToGoogle && googleEventId) {
+          try {
+            const { GoogleCalendarService } = await import(
+              '~/features/calendar/lib/google-calendar-service'
+            );
+            const googleService = new GoogleCalendarService();
+
+            // 구글 캘린더 연동 상태 확인
+            const settings = await googleService.getCalendarSettings(agentId);
+
+            if (settings?.googleAccessToken) {
+              // 🎯 구글 캘린더 이벤트 업데이트
+              const updateSuccess = await googleService.updateEvent(
+                agentId,
+                googleEventId,
+                updatedMeeting as any
+              );
+
+              googleUpdateResult = updateSuccess ? 'updated' : 'sync_failed';
+            } else {
+              googleUpdateResult = 'not_connected';
+            }
+          } catch (googleError) {
+            console.error('❌ 구글 캘린더 업데이트 실패:', googleError);
+            googleUpdateResult = 'sync_failed';
+          }
+        }
+
+        // 📢 성공 메시지 생성
+        const getSuccessMessage = (result: string) => {
+          switch (result) {
+            case 'updated':
+              return '미팅이 수정되고 구글 캘린더에도 업데이트되었습니다.';
+            case 'sync_failed':
+              return '미팅은 수정되었으나 구글 캘린더 업데이트에 실패했습니다.';
+            case 'not_connected':
+              return '미팅이 성공적으로 수정되었습니다.';
+            default:
+              return '미팅이 성공적으로 수정되었습니다.';
+          }
+        };
+
+        const successMessage = getSuccessMessage(googleUpdateResult);
+
+        return {
+          success: true,
+          message: successMessage,
+          googleSynced: googleUpdateResult === 'updated',
+        };
       }
 
       case 'deleteMeeting': {

@@ -209,9 +209,7 @@ export function MeetingDetailModal({
   };
 
   // 🌐 구글 캘린더 연동 상태 확인
-  const isGoogleSynced =
-    (meeting as any)?.syncToGoogle ||
-    (meeting as any)?.syncInfo?.externalSource === 'google_calendar';
+  const isGoogleSynced = (meeting as any).syncToGoogle;
   const googleSyncStatus = (meeting as any)?.syncInfo?.status || 'not_synced';
 
   // 노트 관리 함수
@@ -421,26 +419,15 @@ export function MeetingDetailModal({
               </DialogDescription>
 
               {/* 🌐 구글 캘린더 연동 상태 뱃지 */}
-              <div className="flex items-center gap-2">
-                {isGoogleSynced && (
-                  <Badge
-                    variant="secondary"
-                    className="bg-green-100 text-green-800 border-green-200 hover:bg-green-200 transition-colors"
-                  >
-                    <GlobeIcon className="w-3 h-3 mr-1" />
-                    구글 캘린더 연동됨
-                  </Badge>
-                )}
-                {(meeting as any)?.syncInfo?.externalSource ===
-                  'google_calendar' && (
-                  <Badge
-                    variant="outline"
-                    className="bg-blue-50 text-blue-700 border-blue-200"
-                  >
-                    구글에서 가져온 미팅
-                  </Badge>
-                )}
-              </div>
+              {(meeting as any).syncToGoogle && (
+                <Badge
+                  variant="outline"
+                  className="bg-emerald-50 text-emerald-700 border-emerald-200"
+                >
+                  <GlobeIcon className="w-3 h-3 mr-1" />
+                  구글 캘린더 연동됨
+                </Badge>
+              )}
             </div>
             {isEditingMeeting ? (
               <Select
@@ -887,15 +874,6 @@ export function MeetingDetailModal({
                     className="ml-2 bg-green-100 text-green-800 text-xs"
                   >
                     연동됨
-                  </Badge>
-                )}
-                {(meeting as any)?.syncInfo?.externalSource ===
-                  'google_calendar' && (
-                  <Badge
-                    variant="outline"
-                    className="ml-2 bg-blue-50 text-blue-700 text-xs"
-                  >
-                    구글에서 가져옴
                   </Badge>
                 )}
               </CardTitle>

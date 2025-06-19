@@ -39,6 +39,7 @@ import {
 } from '../components/conflict-resolution-modal';
 import { GoogleConnectRequired } from '../components/google-connect-required';
 import { type Meeting, type Client, type ViewMode } from '../types/types';
+import { Badge } from '~/common/components/ui/badge';
 
 export default function CalendarPage({
   loaderData,
@@ -77,8 +78,7 @@ export default function CalendarPage({
 
   // 미팅 추가 제출
   const onSubmitMeeting = (data: any) => {
-    console.log('새 미팅:', data);
-    // Form 제출은 AddMeetingModal에서 처리
+    // 미팅 저장은 AddMeetingModal에서 직접 form 제출로 처리됨
     setIsAddMeetingOpen(false);
   };
 
@@ -241,60 +241,119 @@ export default function CalendarPage({
         )}
 
         {/* 헤더 */}
-        <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
-          <div className="flex items-center gap-6">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">
+        <div className="bg-card/40 backdrop-blur-sm border border-border/30 rounded-2xl p-6 shadow-lg">
+          {/* 상단 줄: 제목과 뷰 모드 선택 */}
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+            <div className="flex items-center gap-4">
+              <h1 className="text-2xl lg:text-3xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
                 {getDisplayTitle()}
               </h1>
+              <Badge variant="secondary" className="hidden lg:flex items-center gap-1.5 px-3 py-1">
+                <CalendarIcon className="h-3.5 w-3.5" />
+                {viewMode === 'month' ? '월별' : viewMode === 'week' ? '주별' : '일별'} 보기
+              </Badge>
             </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => navigateCalendar('prev')}
-                className="hover:bg-muted"
-              >
-                <ChevronLeftIcon className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => navigateCalendar('next')}
-                className="hover:bg-muted"
-              >
-                <ChevronRightIcon className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setSelectedDate(new Date())}
-                className="ml-2 hover:bg-muted"
-              >
-                오늘
-              </Button>
-            </div>
-          </div>
 
-          <div className="flex items-center gap-4">
             <Tabs
               value={viewMode}
               onValueChange={v => setViewMode(v as ViewMode)}
+              className="w-fit"
             >
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="month">월</TabsTrigger>
-                <TabsTrigger value="week">주</TabsTrigger>
-                <TabsTrigger value="day">일</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-3 bg-muted/50 backdrop-blur-sm border border-border/30 shadow-sm">
+                <TabsTrigger 
+                  value="month" 
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all duration-200"
+                >
+                  월
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="week"
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all duration-200"
+                >
+                  주
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="day"
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all duration-200"
+                >
+                  일
+                </TabsTrigger>
               </TabsList>
             </Tabs>
+          </div>
 
-            <Button
-              className="shadow-sm"
-              onClick={() => setIsAddMeetingOpen(true)}
-            >
-              <PlusIcon className="mr-2 h-4 w-4" />
-              미팅 예약
-            </Button>
+          {/* 하단 줄: 네비게이션과 액션 버튼 */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            {/* 네비게이션 컨트롤 */}
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1 bg-muted/30 rounded-lg p-1 border border-border/30">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigateCalendar('prev')}
+                  className="h-8 w-8 p-0 hover:bg-primary/10 hover:text-primary transition-all duration-200"
+                >
+                  <ChevronLeftIcon className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedDate(new Date())}
+                  className="h-8 px-3 text-sm font-medium hover:bg-primary/10 hover:text-primary transition-all duration-200"
+                >
+                  오늘
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigateCalendar('next')}
+                  className="h-8 w-8 p-0 hover:bg-primary/10 hover:text-primary transition-all duration-200"
+                >
+                  <ChevronRightIcon className="h-4 w-4" />
+                </Button>
+              </div>
+
+              {/* 미니 날짜 표시 */}
+              <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground">
+                <CalendarIcon className="h-4 w-4" />
+                <span>
+                  {selectedDate.toLocaleDateString('ko-KR', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    weekday: 'short'
+                  })}
+                </span>
+              </div>
+            </div>
+
+            {/* 액션 버튼들 */}
+            <div className="flex items-center gap-3">
+              {/* 미팅 통계 */}
+              <div className="hidden lg:flex items-center gap-4 px-4 py-2 bg-muted/30 rounded-lg border border-border/30">
+                <div className="flex items-center gap-2 text-sm">
+                  <div className="w-2 h-2 rounded-full bg-primary"></div>
+                  <span className="text-muted-foreground">이번 주</span>
+                                     <span className="font-semibold">{meetings.filter((m: Meeting) => {
+                     const meetingDate = new Date(m.date);
+                     const weekStart = new Date(selectedDate);
+                     weekStart.setDate(selectedDate.getDate() - selectedDate.getDay());
+                     const weekEnd = new Date(weekStart);
+                     weekEnd.setDate(weekStart.getDate() + 6);
+                     return meetingDate >= weekStart && meetingDate <= weekEnd;
+                   }).length}건</span>
+                </div>
+              </div>
+
+              <Button
+                onClick={() => setIsAddMeetingOpen(true)}
+                className="bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+                size="sm"
+              >
+                <PlusIcon className="mr-2 h-4 w-4" />
+                미팅 예약
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -415,7 +474,6 @@ export default function CalendarPage({
           isOpen={isAddMeetingOpen}
           onClose={() => setIsAddMeetingOpen(false)}
           clients={clients}
-          onSubmit={onSubmitMeeting}
           googleCalendarConnected={googleCalendarSettings?.isConnected}
         />
 
