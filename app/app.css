@@ -1456,6 +1456,19 @@ textarea {
     }
   }
 
+  /* 호버 시 효과 강화 - 선택 상태 제외 */
+  .client-card-keyman:hover {
+    animation: keyman-border-glow 4s ease-in-out infinite !important;
+  }
+
+  .client-card-normal:hover {
+    animation: normal-border-subtle 10s ease-in-out infinite !important;
+  }
+
+  .client-card-low:hover {
+    animation: low-border-gentle 15s ease-in-out infinite !important;
+  }
+
   /* 호버 시 효과 강화 */
   .client-card-keyman:hover {
     animation: keyman-border-glow 4s ease-in-out infinite !important;
@@ -1989,23 +2002,22 @@ dialog:focus-visible {
   border: 1px solid hsl(var(--border)) !important;
 }
 
-/* 🔴 모든 인풋/폼 요소 포커스 → 프라이머리 컬러(붉은색) 강제 적용 */
+/* 🔴 인풋 요소만 포커스 효과 → 깔끔한 단일 아웃라인 */
 input:focus,
 input:focus-visible,
 textarea:focus,
 textarea:focus-visible,
 select:focus,
 select:focus-visible,
-button:focus:not(:disabled),
-button:focus-visible:not(:disabled),
 [data-radix-select-trigger]:focus,
 [data-radix-select-trigger]:focus-visible,
 [role="combobox"]:focus,
 [role="combobox"]:focus-visible {
-  outline: 2px solid hsl(var(--primary)) !important;
+  outline: 2px solid oklch(0.645 0.246 16.439) !important;
   outline-offset: 2px !important;
-  border-color: hsl(var(--primary)) !important;
-  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.2) !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  --tw-ring-color: oklch(0.645 0.246 16.439 / 0.5) !important;
 }
 
 /* 🔴 ShadCN UI 컴포넌트 포커스 강제 적용 */
@@ -2018,14 +2030,26 @@ button:focus-visible:not(:disabled),
   border-color: hsl(var(--primary)) !important;
 }
 
-/* 🔴 라디오 버튼 & 체크박스 포커스 */
+/* 🔴 라디오 버튼 & 체크박스 포커스 - 개별 아이템만 */
 [data-radix-radio-item]:focus,
 [data-radix-checkbox]:focus,
 input[type="radio"]:focus,
 input[type="checkbox"]:focus {
-  outline: 2px solid hsl(var(--primary)) !important;
+  outline: 2px solid oklch(0.645 0.246 16.439) !important;
   outline-offset: 2px !important;
-  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.2) !important;
+  box-shadow: none !important;
+}
+
+/* 🚫 라디오 버튼 그룹 컨테이너 포커스 제거 */
+[data-radix-radio-group]:focus,
+[data-radix-radio-group]:focus-visible,
+[role="radiogroup"]:focus,
+[role="radiogroup"]:focus-visible,
+.radio-group:focus,
+.radio-group:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: inherit !important;
 }
 
 /* 🖱️ Select 드롭다운 아이템 포인터 커서 강제 적용 */
@@ -2106,6 +2130,171 @@ div[data-slot="dialog-content"]:focus {
   border-style: solid !important;
   border-color: var(--border) !important;
 }
+
+/* 🔴 ShadCN UI Form Control 포커스 - 깔끔한 단일 아웃라인 */
+[data-slot="form-control"]:focus,
+[data-slot="form-control"]:focus-visible,
+.border-input:focus,
+.border-input:focus-visible,
+[data-slot="select-trigger"]:focus,
+[data-slot="select-trigger"]:focus-visible,
+[data-size="default"]:focus,
+[data-size="default"]:focus-visible,
+.flex.items-center.justify-between:focus,
+.flex.items-center.justify-between:focus-visible {
+  outline: 2px solid oklch(0.645 0.246 16.439) !important;
+  outline-offset: 2px !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  --tw-ring-color: oklch(0.645 0.246 16.439 / 0.5) !important;
+}
+
+/* 🚨 인풋 요소만 포커스 효과 - 라디오그룹 제외 */
+input:focus:not([data-slot="dialog-content"]):not([type="radio"]):not([type="checkbox"]),
+input:focus-visible:not([data-slot="dialog-content"]):not([type="radio"]):not([type="checkbox"]),
+textarea:focus:not([data-slot="dialog-content"]),
+textarea:focus-visible:not([data-slot="dialog-content"]),
+select:focus:not([data-slot="dialog-content"]),
+select:focus-visible:not([data-slot="dialog-content"]),
+[role="combobox"]:focus:not([data-slot="dialog-content"]):not([role="radiogroup"]),
+[role="combobox"]:focus-visible:not([data-slot="dialog-content"]):not([role="radiogroup"]) {
+  outline: 2px solid oklch(0.645 0.246 16.439) !important;
+  outline-offset: 2px !important;
+  border-color: transparent !important;
+  --tw-ring-color: oklch(0.645 0.246 16.439 / 0.5) !important;
+}
+
+/* 🎯 특별히 Tailwind ring 클래스들 덮어쓰기 */
+.focus\:ring-2:focus,
+.focus\:ring:focus,
+.focus\:border-ring:focus,
+.focus-visible\:ring-2:focus-visible,
+.focus-visible\:ring:focus-visible,
+.focus-visible\:border-ring:focus-visible {
+  --tw-ring-color: oklch(0.645 0.246 16.439 / 0.5) !important;
+  border-color: transparent !important;
+  outline: 2px solid oklch(0.645 0.246 16.439) !important;
+  outline-offset: 2px !important;
+}
+
+/* 🚫 버튼 포커스 효과 완전 제거 */
+button:focus,
+button:focus-visible,
+[data-slot="button"]:focus,
+[data-slot="button"]:focus-visible,
+.btn:focus,
+.btn:focus-visible,
+[role="button"]:focus,
+[role="button"]:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: inherit !important;
+  --tw-ring-color: transparent !important;
+}
+
+/* 🚫 라디오 버튼 그룹 - 모든 가능한 선택자 차단 */
+[data-radix-radio-group],
+[data-radix-radio-group]:focus,
+[data-radix-radio-group]:focus-visible,
+[role="radiogroup"],
+[role="radiogroup"]:focus,
+[role="radiogroup"]:focus-visible,
+div[role="radiogroup"],
+div[role="radiogroup"]:focus,
+div[role="radiogroup"]:focus-visible,
+fieldset:focus,
+fieldset:focus-visible,
+.space-y-3:focus,
+.space-y-3:focus-visible,
+div:has([data-radix-radio-item]):focus,
+div:has([data-radix-radio-item]):focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  border-color: transparent !important;
+  --tw-ring-color: transparent !important;
+}
+
+/* 🚨 절대 최강 라디오 그룹 포커스 차단 */
+*:has([data-radix-radio-item]):focus,
+*:has([data-radix-radio-item]):focus-visible,
+*:has(input[type="radio"]):focus,
+*:has(input[type="radio"]):focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: inherit !important;
+  --tw-ring-color: transparent !important;
+}
+
+/* 💀 핵폭탄급 라디오 그룹 포커스 완전 제거 */
+div:focus:has([role="radio"]),
+div:focus-visible:has([role="radio"]),
+div:focus:has(input[type="radio"]),
+div:focus-visible:has(input[type="radio"]),
+*:focus:has([data-radix-radio-item]),
+*:focus-visible:has([data-radix-radio-item]) {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  border-color: transparent !important;
+  --tw-ring-color: transparent !important;
+}
+
+/* 🚫 고객 카드 포커스 효과 완전 제거 - 호버 효과는 보존 */
+.client-card-keyman:focus:not(:hover),
+.client-card-keyman:focus-visible:not(:hover),
+.client-card-normal:focus:not(:hover),
+.client-card-normal:focus-visible:not(:hover),
+.client-card-low:focus:not(:hover),
+.client-card-low:focus-visible:not(:hover),
+[data-client-card]:focus:not(:hover),
+[data-client-card]:focus-visible:not(:hover),
+.client-card:focus:not(:hover),
+.client-card:focus-visible:not(:hover) {
+  outline: none !important;
+  box-shadow: none !important;
+  --tw-ring-color: transparent !important;
+}
+
+/* 🎯 호버 상태에서는 선택된 보더 + 호버 애니메이션 모두 유지 */
+.client-card-keyman:hover,
+.client-card-normal:hover, 
+.client-card-low:hover {
+  /* outline 제거하지 않음 - 선택 보더 유지 */
+  /* 호버 애니메이션은 위쪽 CSS에서 처리됨 */
+}
+
+/* 🚫 일반 클릭 가능한 카드 요소 포커스 제거 (호버 고려) */
+div.cursor-pointer:focus:not(:hover),
+div.cursor-pointer:focus-visible:not(:hover),
+.rounded-lg.cursor-pointer:focus:not(:hover),
+.rounded-lg.cursor-pointer:focus-visible:not(:hover),
+.border.cursor-pointer:focus:not(:hover),
+.border.cursor-pointer:focus-visible:not(:hover),
+[role="option"]:focus:not(:hover),
+[role="option"]:focus-visible:not(:hover) {
+  outline: none !important;
+  box-shadow: none !important;
+  --tw-ring-color: transparent !important;
+}
+
+/* 🔥 모든 호버 테두리를 프라이머리 컬러로 변경 - 흰색 테두리 박멸 */
+.hover\:border-border:hover,
+.cursor-pointer:hover,
+.transition-colors:hover,
+[class*="hover:border"]:hover {
+  border-color: oklch(0.645 0.246 16.439) !important;
+}
+
+/* 🎯 기존 고객 영업 기회 모달 - 고객 카드 호버 효과 강제 적용 */
+[data-slot="dialog-content"] .hover\:border-border:hover,
+[data-slot="dialog-content"] .cursor-pointer.transition-colors:hover {
+  border-color: oklch(0.645 0.246 16.439) !important;
+}
+
+
+
+
 
 
 
