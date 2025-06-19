@@ -2966,10 +2966,26 @@ function NewContractModal({
                                 )
                               }
                             >
-                              <SelectTrigger className="h-8 text-sm">
+                              <SelectTrigger 
+                                className="h-8 text-sm"
+                                onPointerDown={(e) => {
+                                  // 모바일에서 더 강한 포커스 유지
+                                  if (window.innerWidth < 768) {
+                                    e.currentTarget.focus();
+                                  }
+                                }}
+                              >
                                 <SelectValue placeholder="문서 종류 선택" />
                               </SelectTrigger>
-                              <SelectContent>
+                              <SelectContent 
+                                className="z-[200]"
+                                side="bottom"
+                                align="start"
+                                sideOffset={8}
+                                alignOffset={0}
+                                avoidCollisions={false}
+                                sticky="always"
+                              >
                                 {DOCUMENT_TYPES.map(type => (
                                   <SelectItem
                                     key={type.value}
