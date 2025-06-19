@@ -515,6 +515,13 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
     isPrimary: boolean;
   } | null>(null);
 
+  // 🗑️ 상담동반자 삭제 확인 모달 상태
+  const [showDeleteCompanionModal, setShowDeleteCompanionModal] = useState(false);
+  const [companionToDelete, setCompanionToDelete] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+
   // 🆕 상담내용 관리 상태
   const [showAddNoteModal, setShowAddNoteModal] = useState(false);
   const [editingNote, setEditingNote] = useState<{
@@ -1261,16 +1268,31 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
   };
 
   const handleDeleteCompanion = async (companionId: string) => {
-    if (!confirm('이 동반자를 삭제하시겠습니까?')) {
-      return;
+    // 삭제할 동반자 정보를 찾아서 설정
+    const companionToDelete = consultationCompanions.find(c => c.id === companionId);
+    if (companionToDelete) {
+      setCompanionToDelete({
+        id: companionId,
+        name: companionToDelete.name,
+      });
+      setShowDeleteCompanionModal(true);
     }
+  };
+
+  // 실제 동반자 삭제 함수
+  const handleConfirmDeleteCompanion = async () => {
+    if (!companionToDelete?.id) return;
 
     try {
       const formData = new FormData();
       formData.append('intent', 'deleteConsultationCompanion');
-      formData.append('companionId', companionId);
+      formData.append('companionId', companionToDelete.id);
 
       submit(formData, { method: 'post' });
+
+      // 모달 닫기
+      setShowDeleteCompanionModal(false);
+      setCompanionToDelete(null);
 
       // 성공 모달 표시
       setSuccessMessage('동반자가 성공적으로 삭제되었습니다.');
@@ -1893,6 +1915,11 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
           editingCompanion={editingCompanion}
           setEditingCompanion={setEditingCompanion}
           onSaveCompanion={handleSaveCompanion}
+          // 상담동반자 삭제 모달
+          showDeleteCompanionModal={showDeleteCompanionModal}
+          setShowDeleteCompanionModal={setShowDeleteCompanionModal}
+          companionToDelete={companionToDelete}
+          onConfirmDeleteCompanion={handleConfirmDeleteCompanion}
           // 상담내용 모달
           showAddNoteModal={showAddNoteModal}
           setShowAddNoteModal={setShowAddNoteModal}

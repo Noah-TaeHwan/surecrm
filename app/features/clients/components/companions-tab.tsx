@@ -29,70 +29,47 @@ export function CompanionsTab({
   handleDeleteCompanion,
 }: CompanionsTabProps) {
   return (
-    <TabsContent value="companions" className="space-y-4 md:space-y-6">
+    <TabsContent value="companions" className="space-y-4">
       <Card>
-        <CardHeader className="pb-3 md:pb-4">
-          <div className="flex items-start justify-between gap-3">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between gap-3">
             <h3 className="text-lg font-semibold text-foreground leading-tight">상담동반자</h3>
             <Button
               size="sm"
               className="flex-shrink-0"
               onClick={handleAddCompanion}
             >
-              <Plus className="h-4 w-4 mr-1 sm:mr-2" />
+              <Plus className="h-4 w-4 mr-2" />
               <span className="hidden sm:inline">동반자 </span>추가
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="p-4 md:p-6 space-y-5 md:space-y-6">
+        <CardContent className="p-4 space-y-4">
           
           {/* 👥 등록된 동반자 */}
-          <div className="space-y-3 md:space-y-4">
-            <h4 className="font-medium text-foreground flex items-center gap-2 text-sm md:text-base">
+          <div className="space-y-3">
+            <h4 className="font-medium text-foreground flex items-center gap-2 text-sm">
               👥 등록된 동반자
             </h4>
             
             {consultationCompanions && consultationCompanions.length > 0 ? (
-              <div className="space-y-3 md:space-y-4">
+              <div className="space-y-3">
                 {consultationCompanions.map(companion => (
                   <div
                     key={companion.id}
-                    className="p-3 md:p-4 bg-muted/20 rounded-lg border border-border/40"
+                    className="p-4 bg-muted/20 rounded-lg border border-border/40"
                   >
-                    {/* 모바일: 세로 배치, 데스크톱: 가로 배치 */}
-                    <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
-                      <div className="flex-1 space-y-2 md:space-y-3">
-                        {/* 이름과 관계 */}
-                        <div className="flex items-center gap-3">
-                          <span className="text-lg md:text-xl flex-shrink-0">👤</span>
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <h5 className="font-medium text-foreground text-sm md:text-base">
-                                {companion.name}
-                              </h5>
-                              <span className="text-xs md:text-sm text-muted-foreground bg-muted/50 px-2 py-1 rounded">
-                                {companion.relationship}
-                              </span>
-                              {companion.isPrimary && (
-                                <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded font-medium">
-                                  주 동반자
-                                </span>
-                              )}
-                            </div>
-                          </div>
+                    {/* 헤더: 이름과 액션 버튼 */}
+                    <div className="flex items-start justify-between gap-3 mb-3">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <span className="text-lg flex-shrink-0">👤</span>
+                        <div className="min-w-0 flex-1">
+                          <h5 className="font-medium text-foreground text-sm leading-tight">
+                            {companion.name}
+                          </h5>
                         </div>
-                        
-                        {/* 연락처 */}
-                        {companion.phone && (
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground ml-8 md:ml-11">
-                            <Phone className="h-4 w-4 flex-shrink-0" />
-                            <span className="font-mono">{companion.phone}</span>
-                          </div>
-                        )}
                       </div>
-                      
-                      {/* 액션 버튼들 */}
-                      <div className="flex gap-1 md:gap-2 self-end md:self-start flex-shrink-0">
+                      <div className="flex gap-1 flex-shrink-0">
                         <Button
                           variant="ghost"
                           size="sm"
@@ -101,7 +78,7 @@ export function CompanionsTab({
                           }
                           className="h-8 w-8 p-0 hover:bg-primary/10"
                         >
-                          <Edit2 className="h-4 w-4" />
+                          <Edit2 className="h-3 w-3" />
                         </Button>
                         <Button
                           variant="ghost"
@@ -111,31 +88,68 @@ export function CompanionsTab({
                           }
                           className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-3 w-3" />
                         </Button>
                       </div>
+                    </div>
+                    
+                    {/* 정보 섹션 - 세로 배치 */}
+                    <div className="space-y-2">
+                      {/* 관계 */}
+                      <div className="flex justify-between items-center py-1.5 border-b border-slate-100/50 dark:border-slate-700/50">
+                        <span className="text-xs text-muted-foreground">
+                          관계
+                        </span>
+                        <span className="text-xs bg-muted/50 px-2 py-1 rounded font-medium">
+                          {companion.relationship}
+                        </span>
+                      </div>
+                      
+                      {/* 연락처 */}
+                      {companion.phone && (
+                        <div className="flex justify-between items-center py-1.5 border-b border-slate-100/50 dark:border-slate-700/50">
+                          <span className="text-xs text-muted-foreground">
+                            연락처
+                          </span>
+                          <span className="font-mono text-sm font-medium">
+                            {companion.phone}
+                          </span>
+                        </div>
+                      )}
+                      
+                      {/* 주 동반자 여부 */}
+                      {companion.isPrimary && (
+                        <div className="flex justify-between items-center py-1.5">
+                          <span className="text-xs text-muted-foreground">
+                            상태
+                          </span>
+                          <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded font-medium">
+                            주 동반자
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
               /* 빈 상태 */
-              <div className="text-center py-8 md:py-12 p-3 md:p-4 bg-muted/10 rounded-lg border border-border/30">
-                <div className="w-12 h-12 md:w-16 md:h-16 bg-muted/30 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
-                  <span className="text-xl md:text-2xl">👥</span>
+              <div className="text-center py-8 p-4 bg-muted/10 rounded-lg border border-border/30">
+                <div className="w-12 h-12 bg-muted/30 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <span className="text-xl">👥</span>
                 </div>
-                <h4 className="font-medium text-foreground mb-2 text-sm md:text-base">
+                <h4 className="font-medium text-foreground mb-2 text-sm">
                   동반자가 없습니다
                 </h4>
-                <p className="text-xs md:text-sm text-muted-foreground mb-3 md:mb-4">
+                <p className="text-xs text-muted-foreground mb-4">
                   상담에 함께 참석할 동반자를 추가해보세요.
                 </p>
                 <Button 
                   size="sm"
                   onClick={handleAddCompanion}
-                  className="text-xs md:text-sm"
+                  className="text-xs"
                 >
-                  <Plus className="h-4 w-4 mr-1 md:mr-2" />
+                  <Plus className="h-4 w-4 mr-2" />
                   첫 동반자 추가
                 </Button>
               </div>
@@ -143,12 +157,12 @@ export function CompanionsTab({
           </div>
 
           {/* 📝 동반자 안내 */}
-          <div className="space-y-3 md:space-y-4">
-            <h4 className="font-medium text-foreground flex items-center gap-2 text-sm md:text-base">
+          <div className="space-y-3">
+            <h4 className="font-medium text-foreground flex items-center gap-2 text-sm">
               📝 동반자 안내
             </h4>
-            <div className="p-3 md:p-4 bg-secondary/20 rounded-lg border border-border/40">
-              <div className="space-y-2 text-xs md:text-sm text-muted-foreground">
+            <div className="p-3 bg-secondary/20 rounded-lg border border-border/40">
+              <div className="space-y-2 text-xs text-muted-foreground">
                 <p className="flex items-start gap-2">
                   <span className="text-primary">•</span>
                   <span>상담에 함께 참석하실 분의 정보를 미리 등록해두세요.</span>
@@ -167,25 +181,25 @@ export function CompanionsTab({
 
           {/* 동반자 추가 폼 (숨김 상태) */}
           <div className="hidden p-4 bg-muted/30 rounded-lg border border-border">
-            <h5 className="font-medium text-foreground mb-4">새 동반자 추가</h5>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <h5 className="font-medium text-foreground mb-4 text-sm">새 동반자 추가</h5>
+            <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-muted-foreground mb-1">
+                <label className="block text-xs font-medium text-muted-foreground mb-2">
                   성함 *
                 </label>
                 <input
                   type="text"
-                  className="w-full p-2 border rounded-lg text-sm"
+                  className="w-full p-3 border rounded-lg text-sm"
                   placeholder="동반자 성함"
                   disabled
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-muted-foreground mb-1">
+                <label className="block text-xs font-medium text-muted-foreground mb-2">
                   관계 *
                 </label>
                 <select
-                  className="w-full p-2 border rounded-lg text-sm"
+                  className="w-full p-3 border rounded-lg text-sm"
                   disabled
                 >
                   <option>관계 선택</option>
@@ -196,18 +210,18 @@ export function CompanionsTab({
                   <option>기타</option>
                 </select>
               </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-muted-foreground mb-1">
+              <div>
+                <label className="block text-xs font-medium text-muted-foreground mb-2">
                   연락처 *
                 </label>
                 <input
                   type="tel"
-                  className="w-full p-2 border rounded-lg text-sm"
+                  className="w-full p-3 border rounded-lg text-sm"
                   placeholder="010-0000-0000"
                   disabled
                 />
               </div>
-              <div className="md:col-span-2">
+              <div>
                 <label className="flex items-center space-x-2">
                   <input type="checkbox" className="rounded" disabled />
                   <span className="text-sm">주 동반자로 설정</span>

@@ -71,6 +71,12 @@ interface ClientModalsSectionProps {
   setEditingCompanion: (companion: any) => void;
   onSaveCompanion: () => void;
 
+  // 상담동반자 삭제 모달
+  showDeleteCompanionModal: boolean;
+  setShowDeleteCompanionModal: (show: boolean) => void;
+  companionToDelete: { id: string; name: string } | null;
+  onConfirmDeleteCompanion: () => void;
+
   // 상담내용 모달
   showAddNoteModal: boolean;
   setShowAddNoteModal: (show: boolean) => void;
@@ -139,6 +145,12 @@ export function ClientModalsSection({
   editingCompanion,
   setEditingCompanion,
   onSaveCompanion,
+
+  // 상담동반자 삭제 모달 props
+  showDeleteCompanionModal,
+  setShowDeleteCompanionModal,
+  companionToDelete,
+  onConfirmDeleteCompanion,
 
   // 상담내용 모달 props
   showAddNoteModal,
@@ -288,6 +300,19 @@ export function ClientModalsSection({
         companion={editingCompanion}
         onSave={onSaveCompanion}
         onCompanionChange={setEditingCompanion}
+      />
+
+      {/* 🗑️ 상담동반자 삭제 확인 모달 */}
+      <DeleteConfirmationModal
+        isOpen={showDeleteCompanionModal}
+        onClose={() => setShowDeleteCompanionModal(false)}
+        onConfirm={onConfirmDeleteCompanion}
+        title="상담동반자 삭제 확인"
+        description={`정말로 "${companionToDelete?.name}" 동반자를 삭제하시겠습니까?`}
+        itemName={companionToDelete?.name || ''}
+        itemType="상담동반자"
+        warningMessage="삭제된 동반자 정보는 복구할 수 없습니다."
+        isLoading={false}
       />
 
       {/* 🆕 상담내용 추가/수정 모달 */}

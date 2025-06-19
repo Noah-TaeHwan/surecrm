@@ -1821,6 +1821,25 @@ function NewContractModal({
     }
   }, [initialFormData, isOpen]);
 
+  // 🚫 자동 포커스 완전 차단
+  useEffect(() => {
+    if (isOpen) {
+      // 모든 input, textarea, select 요소의 포커스 제거
+      const timer = setTimeout(() => {
+        const focusedElement = document.activeElement as HTMLElement;
+        if (focusedElement && (
+          focusedElement.tagName === 'INPUT' || 
+          focusedElement.tagName === 'TEXTAREA' || 
+          focusedElement.tagName === 'SELECT'
+        )) {
+          focusedElement.blur();
+        }
+      }, 0);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
+
   // 🔄 수정 모드일 때 기존 첨부파일 로드
   useEffect(() => {
     if (editingContract && isOpen) {
