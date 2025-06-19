@@ -3072,14 +3072,8 @@ input[type="datetime-local"]:not([style*="color"]) {
   backface-visibility: hidden;
   perspective: 1000px;
   
-  /* 🎯 길이와 border-radius 변화를 위한 부드러운 전환 */
-  transition: 
-    padding 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-    border-radius 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.05s,
-    background-color 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.1s,
-    box-shadow 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.1s,
-    transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-    color 0.25s ease-out;
+  /* 🎯 일관되고 부드러운 전환 애니메이션 */
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 /* 🎨 활성 탭 특별 애니메이션 */
@@ -3090,15 +3084,8 @@ input[type="datetime-local"]:not([style*="color"]) {
   /* 향상된 그림자 효과 */
   filter: drop-shadow(0 4px 12px rgba(59, 130, 246, 0.15));
   
-  /* 활성 상태에서의 부드러운 전환 */
-  transition: 
-    padding 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-    border-radius 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.05s,
-    background-color 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.1s,
-    box-shadow 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.1s,
-    transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-    filter 0.3s ease-out,
-    color 0.25s ease-out;
+  /* 🎯 일관되고 부드러운 전환 애니메이션 */
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 /* 🌊 호버 상태 부드러운 전환 */

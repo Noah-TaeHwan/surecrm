@@ -1024,8 +1024,6 @@ export function ResponsiveClientDetail({
                 })}
               </div>
             </div>
-
-            
           </div>
         </div>
 
