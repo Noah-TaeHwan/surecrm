@@ -1621,12 +1621,16 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
         editFormData={editFormData}
         setEditFormData={setEditFormData}
         onEditStart={handleEditStart}
+        onEditSave={handleEditSave}
+        onEditCancel={handleEditCancel}
         onSsnChange={handleSsnChange}
         onTagModalOpen={handleOpenTagModal}
         onTagRemove={removeClientTag}
         availableReferrers={availableReferrers}
         activeTab={activeTab}
         onTabChange={setActiveTab}
+        onDeleteClient={handleDeleteClient}
+        onShowOpportunityModal={() => setShowOpportunityModal(true)}
       >
         {/* 🎯 데스크톱용 기존 레이아웃 (lg 이상에서만 표시) */}
         <div className="hidden lg:block">
@@ -1752,6 +1756,104 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
               </Tabs>
             </div>
           </div>
+        </div>
+
+        {/* 🎯 모바일/태블릿 탭 컨텐츠 (lg 미만에서만 표시) */}
+        <div className="lg:hidden">
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="w-full"
+          >
+            {/* 탭 컨텐츠들 - 모바일 최적화 */}
+            <TabsContent value="notes" className="mt-0 space-y-4">
+              <ConsultationNotesTab
+                notes={client?.notes || ''}
+                onSaveMemo={async (notes: string) => {
+                  const formData = new FormData();
+                  formData.append('intent', 'updateClientNotes');
+                  formData.append('notes', notes);
+                  
+                  try {
+                    const result = await submit(formData, { method: 'post' });
+                    console.log('메모 저장 완료');
+                  } catch (error) {
+                    console.error('메모 저장 실패:', error);
+                    throw error;
+                  }
+                }}
+                consultationNotes={consultationNotes}
+                onAddNote={handleAddNote}
+                onEditNote={handleEditNote}
+                onDeleteNote={handleDeleteNote}
+                onShowDeleteModal={handleShowDeleteModal}
+              />
+            </TabsContent>
+
+            <TabsContent value="medical" className="mt-0 space-y-4">
+              <MedicalHistoryTab
+                medicalHistory={medicalHistory}
+                setMedicalHistory={setMedicalHistory}
+                submit={submit}
+                setSuccessMessage={setSuccessMessage}
+                setShowSuccessModal={setShowSuccessModal}
+              />
+            </TabsContent>
+
+            <TabsContent value="checkup" className="mt-0 space-y-4">
+              <CheckupPurposesTab
+                checkupPurposes={checkupPurposes}
+                setCheckupPurposes={setCheckupPurposes}
+                onSave={handleSaveCheckupPurposes}
+              />
+            </TabsContent>
+
+            <TabsContent value="interests" className="mt-0 space-y-4">
+              <InterestCategoriesTab
+                interestCategories={interestCategories}
+                setInterestCategories={setInterestCategories}
+                onSave={handleSaveInterestCategories}
+              />
+            </TabsContent>
+
+            <TabsContent value="companions" className="mt-0 space-y-4">
+              <CompanionsTab
+                consultationCompanions={consultationCompanions}
+                handleAddCompanion={handleAddCompanion}
+                handleEditCompanion={handleEditCompanion}
+                handleDeleteCompanion={handleDeleteCompanion}
+              />
+            </TabsContent>
+
+            <TabsContent value="insurance" className="mt-0 space-y-4">
+              <InsuranceContractsTab
+                clientId={client?.id}
+                clientName={client?.fullName || '고객'}
+                agentId={data?.currentUserId}
+                initialContracts={insuranceContracts}
+                shouldOpenModal={shouldCreateContract}
+              />
+            </TabsContent>
+
+            <TabsContent value="family" className="mt-0 space-y-4">
+              <Card className="border-0 shadow-sm">
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <User className="h-4 w-4" />
+                    가족 구성원
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="text-center py-8">
+                    <User className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                    <p className="text-sm text-muted-foreground">
+                      가족 정보가 준비 중입니다.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </div>
 
         {/* 모든 모달들 */}

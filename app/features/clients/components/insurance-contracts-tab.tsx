@@ -59,6 +59,7 @@ import { useToast, ToastContainer } from '~/common/components/ui/toast';
 
 // 📁 공통 포맷팅 함수 import
 import { formatCurrencyCompact } from '~/lib/utils/currency';
+import { cn } from '~/lib/utils';
 
 // 🆔 주민등록번호 유틸리티 import
 import {
@@ -989,56 +990,56 @@ export function InsuranceContractsTab({
               </Button>
             </div>
           </CardHeader>
-          <CardContent className="p-6 space-y-6">
+          <CardContent className="p-4 sm:p-6 space-y-4 sm:space-y-6">
             {/* 📊 통계 대시보드 */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="p-4 bg-card rounded-lg border  hover:shadow-md transition-shadow">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-primary/10 rounded-lg">
-                    <FileText className="h-4 w-4 text-primary" />
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+              <div className="p-3 sm:p-4 bg-card rounded-lg border hover:shadow-md transition-shadow">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                  <div className="p-2 bg-primary/10 rounded-lg w-fit">
+                    <FileText className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">총 계약</p>
-                    <p className="text-xl font-bold text-foreground">
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-sm text-muted-foreground">총 계약</p>
+                    <p className="text-lg sm:text-xl font-bold text-foreground">
                       {totalContracts}
                     </p>
                   </div>
                 </div>
               </div>
-              <div className="p-4 bg-card rounded-lg border hover:shadow-md transition-shadow">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-green-100 dark:bg-green-900/20 rounded-lg">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
+              <div className="p-3 sm:p-4 bg-card rounded-lg border hover:shadow-md transition-shadow">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                  <div className="p-2 bg-green-100 dark:bg-green-900/20 rounded-lg w-fit">
+                    <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">유효 계약</p>
-                    <p className="text-xl font-bold text-foreground">
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-sm text-muted-foreground">유효 계약</p>
+                    <p className="text-lg sm:text-xl font-bold text-foreground">
                       {activeContracts}
                     </p>
                   </div>
                 </div>
               </div>
-              <div className="p-4 bg-card rounded-lg border  hover:shadow-md transition-shadow">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
-                    <DollarSign className="h-4 w-4 text-blue-600" />
+              <div className="p-3 sm:p-4 bg-card rounded-lg border hover:shadow-md transition-shadow">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                  <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg w-fit">
+                    <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">월 보험료</p>
-                    <p className="text-xl font-bold text-foreground">
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-sm text-muted-foreground">월 보험료</p>
+                    <p className="text-sm sm:text-xl font-bold text-foreground">
                       {formatCurrency(totalMonthlyPremium)}
                     </p>
                   </div>
                 </div>
               </div>
-              <div className="p-4 bg-card rounded-lg border hover:shadow-md transition-shadow">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-orange-100 dark:bg-orange-900/20 rounded-lg">
-                    <DollarSign className="h-4 w-4 text-orange-600" />
+              <div className="p-3 sm:p-4 bg-card rounded-lg border hover:shadow-md transition-shadow">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                  <div className="p-2 bg-orange-100 dark:bg-orange-900/20 rounded-lg w-fit">
+                    <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-orange-600" />
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">총 수수료</p>
-                    <p className="text-xl font-bold text-foreground">
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-sm text-muted-foreground">총 수수료</p>
+                    <p className="text-sm sm:text-xl font-bold text-foreground">
                       {formatCurrency(totalCommission)}
                     </p>
                   </div>
@@ -1050,8 +1051,8 @@ export function InsuranceContractsTab({
 
             {/* 📋 계약 목록 */}
             {contracts.length > 0 ? (
-              <div className="space-y-4">
-                <h4 className="font-medium text-foreground flex items-center gap-2">
+              <div className="space-y-3 sm:space-y-4">
+                <h4 className="font-medium text-foreground flex items-center gap-2 text-sm sm:text-base">
                   🗂️ 계약 목록
                 </h4>
                 {contracts.map(contract => {
@@ -1061,21 +1062,19 @@ export function InsuranceContractsTab({
                   return (
                     <div
                       key={contract.id}
-                      className="p-5 bg-card border border-slate-200/60 dark:border-slate-700/60 rounded-xl hover:border-slate-300/80 dark:hover:border-slate-600/80 hover:shadow-md transition-all duration-200 cursor-pointer relative"
+                      className="p-4 sm:p-5 bg-card border border-slate-200/60 dark:border-slate-700/60 rounded-xl hover:border-slate-300/80 dark:hover:border-slate-600/80 hover:shadow-md transition-all duration-200 cursor-pointer relative"
                     >
-                      {/* 좌측 은은한 강조선 */}
-
-                      <div className="flex items-start justify-between mb-4">
+                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-0 mb-4">
                         <div className="flex items-center gap-3">
-                          <span className="text-2xl">{typeConfig.icon}</span>
-                          <div>
-                            <h5 className="font-semibold">
+                          <span className="text-xl sm:text-2xl">{typeConfig.icon}</span>
+                          <div className="min-w-0 flex-1">
+                            <h5 className="font-semibold text-sm sm:text-base truncate">
                               {contract.productName}
                             </h5>
-                            <div className="flex items-center gap-2 mt-1">
+                            <div className="flex flex-wrap items-center gap-2 mt-1">
                               <Badge
                                 variant="outline"
-                                className={typeConfig.color}
+                                className={cn("text-xs", typeConfig.color)}
                               >
                                 {typeConfig.label}
                               </Badge>
@@ -1083,39 +1082,41 @@ export function InsuranceContractsTab({
                             </div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 shrink-0">
                           <Button
                             variant="ghost"
                             size="sm"
+                            className="h-8 w-8 p-0"
                             onClick={e => {
                               e.stopPropagation();
                               handleEditContract(contract);
                             }}
                           >
-                            <Edit className="h-4 w-4" />
+                            <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
                           </Button>
                           <Button
                             variant="ghost"
                             size="sm"
+                            className="h-8 w-8 p-0"
                             onClick={e => {
                               e.stopPropagation();
                               handleDeleteContract(contract);
                             }}
                           >
-                            <X className="h-4 w-4" />
+                            <X className="h-3 w-3 sm:h-4 sm:w-4" />
                           </Button>
                         </div>
                       </div>
 
-                      {/* 🔄 계약자/피보험자 정보 섹션 추가 */}
+                      {/* 🔄 계약자/피보험자 정보 섹션 - 모바일 최적화 */}
                       <div className="mb-4 p-3 bg-muted/30 rounded-lg">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                          <div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm">
+                          <div className="space-y-1">
                             <span className="text-xs text-muted-foreground font-medium">
                               계약자:
                             </span>
-                            <div className="flex items-center gap-2 mt-1">
-                              <span className="font-medium">
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                              <span className="font-medium text-sm">
                                 {contract.contractorName}
                               </span>
                               {contract.contractorPhone && (
@@ -1125,12 +1126,12 @@ export function InsuranceContractsTab({
                               )}
                             </div>
                           </div>
-                          <div>
+                          <div className="space-y-1">
                             <span className="text-xs text-muted-foreground font-medium">
                               피보험자:
                             </span>
-                            <div className="flex items-center gap-2 mt-1">
-                              <span className="font-medium">
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                              <span className="font-medium text-sm">
                                 {contract.insuredName}
                               </span>
                               {contract.insuredPhone && (
@@ -1143,58 +1144,58 @@ export function InsuranceContractsTab({
                         </div>
                       </div>
 
-                      {/* 🎯 핵심 정보만 기본 표시 - 세련된 현대적 SaaS 디자인 */}
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div className="space-y-4">
+                      {/* 🎯 핵심 정보 - 모바일 우선 반응형 디자인 */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                        <div className="space-y-3 sm:space-y-4">
                           <div className="flex items-center gap-2 mb-3">
-                            <div className="w-1 h-5 bg-gradient-to-b from-blue-500 to-blue-600 rounded-full"></div>
-                            <h6 className="text-base font-medium text-slate-800 dark:text-slate-200">
+                            <div className="w-1 h-4 sm:h-5 bg-gradient-to-b from-blue-500 to-blue-600 rounded-full"></div>
+                            <h6 className="text-sm sm:text-base font-medium text-slate-800 dark:text-slate-200">
                               계약 정보
                             </h6>
                           </div>
-                          <div className="space-y-3">
-                            <div className="flex justify-between items-center py-1.5">
-                              <span className="text-sm text-slate-600 dark:text-slate-400">
+                          <div className="space-y-2 sm:space-y-3">
+                            <div className="flex justify-between items-center py-1 sm:py-1.5">
+                              <span className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
                                 보험사
                               </span>
-                              <span className="font-semibold text-base text-blue-600 dark:text-blue-400">
+                              <span className="font-semibold text-sm sm:text-base text-blue-600 dark:text-blue-400 text-right">
                                 {contract.insuranceCompany}
                               </span>
                             </div>
                             {contract.policyNumber && (
-                              <div className="flex justify-between items-center py-1.5">
-                                <span className="text-sm text-slate-600 dark:text-slate-400">
+                              <div className="flex justify-between items-center py-1 sm:py-1.5">
+                                <span className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
                                   증권번호
                                 </span>
-                                <span className="font-mono text-sm font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-md">
+                                <span className="font-mono text-xs sm:text-sm font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md break-all text-right">
                                   {contract.policyNumber}
                                 </span>
                               </div>
                             )}
                             {contract.insuranceCode && (
-                              <div className="flex justify-between items-center py-1.5">
-                                <span className="text-sm text-slate-600 dark:text-slate-400">
+                              <div className="flex justify-between items-center py-1 sm:py-1.5">
+                                <span className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
                                   보종코드
                                 </span>
-                                <span className="font-medium text-sm text-slate-900 dark:text-slate-100">
+                                <span className="font-medium text-sm sm:text-base text-slate-900 dark:text-slate-100 text-right">
                                   {contract.insuranceCode}
                                 </span>
                               </div>
                             )}
-                            <div className="flex justify-between items-center py-1.5">
-                              <span className="text-sm text-slate-600 dark:text-slate-400">
+                            <div className="flex justify-between items-center py-1 sm:py-1.5">
+                              <span className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
                                 계약일
                               </span>
-                              <span className="font-medium text-sm text-slate-900 dark:text-slate-100">
+                              <span className="font-medium text-sm sm:text-base text-slate-900 dark:text-slate-100 text-right">
                                 {formatDate(contract.contractDate)}
                               </span>
                             </div>
                             {contract.paymentDueDate && (
-                              <div className="flex justify-between items-center py-1.5">
-                                <span className="text-sm text-slate-600 dark:text-slate-400">
+                              <div className="flex justify-between items-center py-1 sm:py-1.5">
+                                <span className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
                                   납기일
                                 </span>
-                                <span className="font-semibold text-sm text-red-600 dark:text-red-400">
+                                <span className="font-semibold text-sm sm:text-base text-red-600 dark:text-red-400 text-right">
                                   {formatDate(contract.paymentDueDate)}
                                 </span>
                               </div>
@@ -1202,53 +1203,53 @@ export function InsuranceContractsTab({
                           </div>
                         </div>
 
-                        <div className="space-y-4">
+                        <div className="space-y-3 sm:space-y-4">
                           <div className="flex items-center gap-2 mb-3">
-                            <div className="w-1 h-5 bg-gradient-to-b from-emerald-500 to-emerald-600 rounded-full"></div>
-                            <h6 className="text-base font-medium text-slate-800 dark:text-slate-200">
+                            <div className="w-1 h-4 sm:h-5 bg-gradient-to-b from-emerald-500 to-emerald-600 rounded-full"></div>
+                            <h6 className="text-sm sm:text-base font-medium text-slate-800 dark:text-slate-200">
                               금액 정보
                             </h6>
                           </div>
-                          <div className="space-y-3">
+                          <div className="space-y-2 sm:space-y-3">
                             {contract.premiumAmount && (
-                              <div className="flex justify-between items-center py-2 px-3 bg-gradient-to-r from-emerald-50 to-emerald-100/50 dark:from-emerald-950/30 dark:to-emerald-900/20 rounded-lg border border-emerald-200/50 dark:border-emerald-800/30">
-                                <span className="text-sm text-slate-700 dark:text-slate-300">
+                              <div className="flex justify-between items-center py-1 sm:py-1.5">
+                                <span className="text-xs sm:text-sm text-slate-700 dark:text-slate-300">
                                   납입보험료
                                 </span>
-                                <span className="font-bold text-base text-emerald-600 dark:text-emerald-400">
+                                <span className="font-bold text-sm sm:text-base text-emerald-600 dark:text-emerald-400 text-right">
                                   {formatCurrency(contract.premiumAmount)}
                                 </span>
                               </div>
                             )}
                             {contract.paymentCycle && (
-                              <div className="flex justify-between items-center py-1.5">
-                                <span className="text-sm text-slate-700 dark:text-slate-300">
+                              <div className="flex justify-between items-center py-1 sm:py-1.5">
+                                <span className="text-xs sm:text-sm text-slate-700 dark:text-slate-300">
                                   납입주기
                                 </span>
                                 <Badge
                                   variant="secondary"
-                                  className="font-medium text-xs"
+                                  className="font-medium text-xs sm:text-sm"
                                 >
                                   {getPaymentCycleLabel(contract.paymentCycle)}
                                 </Badge>
                               </div>
                             )}
                             {contract.agentCommission && (
-                              <div className="flex justify-between items-center py-2 px-3 bg-gradient-to-r from-green-50 to-green-100/50 dark:from-green-950/30 dark:to-green-900/20 rounded-lg border border-green-200/50 dark:border-green-800/30">
-                                <span className="text-sm text-slate-700 dark:text-slate-300">
+                              <div className="flex justify-between items-center py-1 sm:py-1.5">
+                                <span className="text-xs sm:text-sm text-slate-700 dark:text-slate-300">
                                   수수료
                                 </span>
-                                <span className="font-bold text-base text-green-600 dark:text-green-400">
+                                <span className="font-bold text-sm sm:text-base text-green-600 dark:text-green-400 text-right">
                                   {formatCurrency(contract.agentCommission)}
                                 </span>
                               </div>
                             )}
                             {contract.coverageAmount && (
-                              <div className="flex justify-between items-center py-2 px-3 bg-gradient-to-r from-amber-50 to-amber-100/50 dark:from-amber-950/30 dark:to-amber-900/20 rounded-lg border border-amber-200/50 dark:border-amber-800/30">
-                                <span className="text-sm text-slate-700 dark:text-slate-300">
+                              <div className="flex justify-between items-center py-1 sm:py-1.5">
+                                <span className="text-xs sm:text-sm text-slate-700 dark:text-slate-300">
                                   보장금액
                                 </span>
-                                <span className="font-bold text-base text-amber-600 dark:text-amber-400">
+                                <span className="font-bold text-sm sm:text-base text-amber-600 dark:text-amber-400 text-right">
                                   {formatCurrency(contract.coverageAmount)}
                                 </span>
                               </div>
