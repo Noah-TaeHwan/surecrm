@@ -476,7 +476,7 @@ export default function ClientsPage({ loaderData }: any) {
   const [filterStage, setFilterStage] = useState<string>('all');
   const [filterReferralStatus, setFilterReferralStatus] =
     useState<string>('all');
-  const [viewMode, setViewMode] = useState<'cards' | 'table'>('table');
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
   const [showFilters, setShowFilters] = useState(false);
   const [sortBy, setSortBy] = useState<
     'name' | 'stage' | 'importance' | 'premium' | 'lastContact' | 'createdAt'

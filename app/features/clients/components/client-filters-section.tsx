@@ -40,8 +40,8 @@ interface ClientFiltersProps {
   setFilterStage: (stage: string) => void;
   filterReferralStatus: string;
   setFilterReferralStatus: (status: string) => void;
-  viewMode: 'cards' | 'table';
-  setViewMode: (mode: 'cards' | 'table') => void;
+  viewMode: 'grid' | 'table';
+  setViewMode: (mode: 'grid' | 'table') => void;
   showFilters: boolean;
   setShowFilters: (show: boolean) => void;
   filteredClientsCount: number;
@@ -222,21 +222,29 @@ export function ClientFiltersSection({
               <ToggleGroup 
                 type="single" 
                 value={viewMode} 
-                onValueChange={(value) => value && setViewMode(value as 'cards' | 'table')}
-                className="bg-slate-50 dark:bg-slate-800 p-1 rounded-lg"
+                  onValueChange={(value) => value && setViewMode(value as 'grid' | 'table')}
+                className="border border-border rounded-lg overflow-hidden"
               >
-                <ToggleGroupItem 
-                  value="cards" 
-                  className="flex items-center gap-2 px-3 py-2 text-sm data-[state=on]:bg-white data-[state=on]:shadow-sm dark:data-[state=on]:bg-slate-700"
-                  title="카드로 보기"
+                                  <ToggleGroupItem 
+                    value="grid" 
+                    aria-label="카드뷰로 보기"
+                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium transition-all
+                           data-[state=on]:bg-primary data-[state=on]:text-primary-foreground 
+                           data-[state=off]:bg-background data-[state=off]:text-muted-foreground
+                           data-[state=off]:hover:bg-muted data-[state=off]:hover:text-foreground
+                           border-r border-border last:border-r-0"
                 >
                   <LayoutGrid className="h-4 w-4" />
                   <span className="hidden sm:inline">카드뷰</span>
                 </ToggleGroupItem>
                 <ToggleGroupItem 
                   value="table" 
-                  className="flex items-center gap-2 px-3 py-2 text-sm data-[state=on]:bg-white data-[state=on]:shadow-sm dark:data-[state=on]:bg-slate-700"
-                  title="테이블로 보기"
+                  aria-label="테이블뷰로 보기"
+                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium transition-all
+                           data-[state=on]:bg-primary data-[state=on]:text-primary-foreground 
+                           data-[state=off]:bg-background data-[state=off]:text-muted-foreground
+                           data-[state=off]:hover:bg-muted data-[state=off]:hover:text-foreground
+                           border-r border-border last:border-r-0"
                 >
                   <LayoutList className="h-4 w-4" />
                   <span className="hidden sm:inline">테이블뷰</span>
