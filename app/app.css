@@ -2875,6 +2875,125 @@ input[type="datetime-local"]:not([style*="color"]) {
   color: hsl(var(--foreground)) !important;
 }
 
+/* =================================================================
+   TAB CAROUSEL SMOOTH ANIMATIONS
+   ================================================================= */
+
+/* 🎨 탭 캐러셀 부드러운 애니메이션 개선 */
+.tab-carousel-container {
+  /* GPU 가속을 위한 transform 3D 활성화 */
+  transform: translate3d(0, 0, 0);
+  
+  /* 부드러운 모멘텀 스크롤 */
+  -webkit-overflow-scrolling: touch;
+  
+  /* 자연스러운 스크롤 행동 */
+  scroll-behavior: smooth;
+  
+  /* 하드웨어 가속 최적화 */
+  will-change: scroll-position;
+  
+  /* 성능 향상을 위한 컴포지팅 레이어 */
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* 🚀 탭 버튼 애니메이션 최적화 */
+.tab-carousel-container button {
+  /* GPU 가속 활성화 */
+  transform: translate3d(0, 0, 0);
+  will-change: transform, opacity, box-shadow;
+  backface-visibility: hidden;
+  
+  /* 부드러운 전환 곡선 */
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  
+  /* 하위 픽셀 렌더링 개선 */
+  transform-style: preserve-3d;
+}
+
+/* 🎯 활성 탭 애니메이션 강화 */
+.tab-carousel-container button[data-active="true"] {
+  /* 부드러운 스케일 애니메이션 */
+  transform: translate3d(0, 0, 0) scale(1.05);
+  
+  /* 자연스러운 그림자 전환 */
+  box-shadow: 
+    0 4px 12px rgba(var(--primary), 0.25),
+    0 2px 4px rgba(var(--primary), 0.1);
+    
+  /* 활성 상태 강조 */
+  z-index: 10;
+  position: relative;
+}
+
+/* ✨ 호버 효과 부드럽게 */
+.tab-carousel-container button:hover:not([data-active="true"]) {
+  transform: translate3d(0, 0, 0) scale(1.02);
+  transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* 📱 터치 피드백 개선 (모바일) */
+@media (hover: none) and (pointer: coarse) {
+  .tab-carousel-container button:active {
+    transform: translate3d(0, 0, 0) scale(0.98);
+    transition: transform 0.1s ease-out;
+  }
+}
+
+/* 🌊 스크롤 모멘텀 최적화 */
+.tab-carousel-container::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* 🎬 애니메이션 성능 최적화 */
+@media (prefers-reduced-motion: no-preference) {
+  .tab-carousel-container {
+    scroll-behavior: smooth;
+  }
+  
+  .tab-carousel-container button {
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+}
+
+/* 🚫 모션 감소 설정 사용자 대응 */
+@media (prefers-reduced-motion: reduce) {
+  .tab-carousel-container {
+    scroll-behavior: auto;
+  }
+  
+  .tab-carousel-container button {
+    transition: none;
+  }
+}
+
+/* 🔧 Focus 상태 개선 */
+.tab-carousel-container button:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+  
+  /* 포커스 시에도 부드러운 전환 */
+  transition: all 0.2s ease-out;
+}
+
+/* 🎨 글로우 효과 성능 최적화 */
+.tab-carousel-container button::before,
+.tab-carousel-container button::after {
+  /* GPU 가속 적용 */
+  transform: translate3d(0, 0, 0);
+  will-change: opacity;
+  backface-visibility: hidden;
+}
+
+/* 💫 부드러운 나타남/사라짐 애니메이션 */
+.tab-carousel-container button > * {
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transform: translate3d(0, 0, 0);
+}
+
 
 
 

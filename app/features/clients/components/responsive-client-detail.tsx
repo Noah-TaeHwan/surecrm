@@ -157,14 +157,17 @@ export function ResponsiveClientDetail({
         const tabButton = carousel.children[currentIndex] as HTMLElement;
         
         if (tabButton) {
-          // 탭 버튼을 중앙으로 스크롤
-          const carouselRect = carousel.getBoundingClientRect();
-          const buttonRect = tabButton.getBoundingClientRect();
-          const scrollLeft = buttonRect.left - carouselRect.left + carousel.scrollLeft - (carouselRect.width / 2) + (buttonRect.width / 2);
-          
-          carousel.scrollTo({
-            left: scrollLeft,
-            behavior: 'smooth'
+          // 자연스러운 스크롤을 위해 requestAnimationFrame 사용
+          requestAnimationFrame(() => {
+            const carouselRect = carousel.getBoundingClientRect();
+            const buttonRect = tabButton.getBoundingClientRect();
+            const scrollLeft = buttonRect.left - carouselRect.left + carousel.scrollLeft - (carouselRect.width / 2) + (buttonRect.width / 2);
+            
+            // 스크롤 애니메이션 시간을 좀 더 부드럽게
+            carousel.scrollTo({
+              left: scrollLeft,
+              behavior: 'smooth'
+            });
           });
         }
       }
@@ -921,7 +924,7 @@ export function ResponsiveClientDetail({
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
-style={{ 
+                style={{ 
                   scrollBehavior: 'smooth',
                   WebkitOverflowScrolling: 'touch',
                   scrollbarWidth: 'none',
@@ -934,67 +937,78 @@ style={{
                 {mobileTabs.map((tab, index) => {
                   const Icon = tab.icon;
                   const isActive = activeTab === tab.id;
-                  const currentIndex = mobileTabs.findIndex(t => t.id === activeTab);
-                  
-                  // 탭 위치에 따른 스타일 계산
-                  const distance = Math.abs(index - currentIndex);
-                  const isAdjacent = distance === 1;
-                  const isNear = distance <= 2;
                   
                   return (
                     <button
                       key={tab.id}
                       onClick={() => onTabChange?.(tab.id)}
+                      data-active={isActive}
                       className={cn(
-                        "relative flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-500 snap-center border min-w-fit",
-                        "transform-gpu will-change-transform",
+                        // 기본 스타일 - 모든 탭에 공통 적용
+                        "relative flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium",
+                        "snap-center border min-w-fit",
+                        "transform-gpu will-change-transform backface-hidden",
+                        "transition-all duration-300 ease-out",
                         // 활성 탭 스타일
-                        isActive && [
+                        isActive ? [
                           "bg-gradient-to-r from-primary via-primary to-primary/90 text-primary-foreground",
                           "shadow-lg shadow-primary/25 scale-105 border-primary/20",
-                          "ring-2 ring-primary/20 ring-offset-2 ring-offset-background"
-                        ],
-                        // 인접 탭 스타일 (부드러운 전환을 위해)
-                        !isActive && isAdjacent && [
-                          "bg-gradient-to-r from-muted/50 to-muted/30 text-foreground/80 border-border/50",
-                          "hover:bg-gradient-to-r hover:from-accent hover:to-accent/80 hover:text-accent-foreground",
-                          "hover:scale-102 hover:shadow-md"
-                        ],
-                        // 가까운 탭 스타일
-                        !isActive && !isAdjacent && isNear && [
+                          "ring-2 ring-primary/20 ring-offset-2 ring-offset-background",
+                          "translate-y-0 z-10"
+                        ] : [
+                          // 비활성 탭 기본 스타일
                           "bg-muted/30 text-muted-foreground border-border/30",
-                          "hover:bg-muted/50 hover:text-foreground/70 hover:scale-102"
-                        ],
-                        // 먼 탭 스타일
-                        !isActive && !isNear && [
-                          "bg-transparent text-muted-foreground/60 border-transparent",
-                          "hover:bg-muted/30 hover:text-muted-foreground"
+                          "hover:bg-muted/50 hover:text-foreground/80 hover:scale-102",
+                          "hover:shadow-sm hover:border-border/50",
+                          "translate-y-0 z-0"
                         ]
                       )}
+                      style={{
+                        // CSS 변수를 사용한 부드러운 애니메이션
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                      }}
                     >
                       {/* 아이콘 */}
                       <div className={cn(
-                        "transition-all duration-300",
+                        "transition-all duration-300 ease-out",
                         isActive ? "scale-105" : "scale-100"
                       )}>
                         <Icon className={cn(
-                          "transition-all duration-300",
+                          "transition-all duration-300 ease-out",
                           isActive ? "h-3.5 w-3.5" : "h-3 w-3"
                         )} />
                       </div>
                       
                       {/* 라벨 */}
                       <span className={cn(
-                        "text-xs font-medium transition-all duration-300 whitespace-nowrap",
+                        "text-xs font-medium transition-all duration-300 ease-out whitespace-nowrap",
                         isActive && "font-semibold"
                       )}>
                         {tab.label}
                       </span>
                       
-                      {/* 활성 탭 글로우 효과 */}
+                      {/* 활성 탭 글로우 효과 - transform3d로 GPU 가속 */}
                       {isActive && (
-                        <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/20 via-primary/10 to-primary/20 blur-sm -z-10" />
+                        <div 
+                          className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/20 via-primary/10 to-primary/20 blur-sm -z-10"
+                          style={{
+                            transform: 'translate3d(0, 0, 0)',
+                            transition: 'opacity 0.3s ease-out',
+                          }}
+                        />
                       )}
+
+                      {/* 호버 시 배경 효과 */}
+                      <div 
+                        className={cn(
+                          "absolute inset-0 rounded-lg transition-all duration-300 ease-out -z-20",
+                          "bg-gradient-to-r from-accent/5 to-accent/10",
+                          isActive ? "opacity-0" : "opacity-0 group-hover:opacity-100"
+                        )}
+                        style={{
+                          transform: 'translate3d(0, 0, 0)',
+                        }}
+                      />
                     </button>
                   );
                 })}
