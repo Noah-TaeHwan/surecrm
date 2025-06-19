@@ -423,22 +423,23 @@ export function AddClientModal({
                           className=""
                         >
                           {importanceOptions.map((option) => (
-                            <div key={option.id} className={`p-3 rounded-lg border ${option.color}`}>
+                            <Label 
+                              key={option.id} 
+                              htmlFor={option.id}
+                              className={`p-3 rounded-lg border ${option.color} cursor-pointer hover:bg-muted/20 transition-colors block w-full`}
+                            >
                               <div className="flex items-center space-x-3">
                                 <RadioGroupItem value={option.id} id={option.id} />
                                 <div className="flex-1">
-                                  <Label 
-                                    htmlFor={option.id} 
-                                    className="text-xs sm:text-sm font-medium cursor-pointer"
-                                  >
+                                  <div className="text-xs sm:text-sm font-medium">
                                     {option.name}
-                                  </Label>
+                                  </div>
                                   <p className="text-xs text-muted-foreground mt-1">
                                     {option.description}
                                   </p>
                                 </div>
                               </div>
-                            </div>
+                            </Label>
                           ))}
                         </RadioGroup>
                       </FormControl>

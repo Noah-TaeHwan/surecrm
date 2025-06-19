@@ -59,6 +59,7 @@ import {
   privacyLevelColors,
 } from './insurance-config';
 import type { ClientPrivacyLevel } from '../types';
+import { Shield } from 'lucide-react';
 
 // 🔒 **보안 강화된 보험 추가 스키마**
 const secureInsuranceSchema = z.object({
@@ -350,16 +351,33 @@ export function AddInsuranceModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>새 보험 추가</DialogTitle>
-          <DialogDescription>
-            고객의 새로운 보험 정보를 입력하세요.
+      <DialogContent 
+        className="sm:max-w-xl w-[95vw] p-0 overflow-hidden flex flex-col sm:max-h-[85vh] gap-0"
+        style={{
+          maxHeight: '75vh',
+          height: 'auto',
+          minHeight: '0'
+        }}
+      >
+        {/* 헤더 - 고정 */}
+        <DialogHeader className="flex-shrink-0 px-4 sm:px-6 py-4 sm:py-4 border-b border-border/30">
+          <DialogTitle className="flex items-center gap-2 text-sm sm:text-lg">
+            <Shield className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
+            <span className="truncate">새 보험 계약 등록</span>
+          </DialogTitle>
+          <DialogDescription className="text-xs sm:text-sm text-muted-foreground">
+            고객의 새로운 보험 계약 정보를 입력하세요.
           </DialogDescription>
         </DialogHeader>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        {/* 콘텐츠 - 스크롤 가능 */}
+        <div className="flex-1 overflow-y-auto scrollbar-none modal-scroll-area px-4 sm:px-6 py-2 sm:py-6 space-y-2 sm:space-y-6 min-h-0">
+          <Form {...form}>
+            <form
+              id="insurance-form"
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="space-y-3 sm:space-y-6"
+            >
             {/* 기본 정보 */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
@@ -815,21 +833,31 @@ export function AddInsuranceModal({
               )}
             />
 
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-              >
-                취소
-              </Button>
-              <Button type="submit">
-                <CheckIcon className="mr-2 h-4 w-4" />
-                보험 추가
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
+            </form>
+          </Form>
+        </div>
+
+        {/* 푸터 - 고정 */}
+        <DialogFooter className="flex-shrink-0 gap-2 sm:gap-3 p-2 sm:p-6 border-t border-border/30">
+          <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto sm:justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              className="h-10 px-4 w-full sm:w-auto text-xs sm:text-sm"
+            >
+              취소
+            </Button>
+            <Button 
+              type="submit"
+              form="insurance-form"
+              className="gap-2 h-10 px-4 w-full sm:w-auto text-xs sm:text-sm bg-primary text-primary-foreground"
+            >
+              <CheckIcon className="h-3 w-3" />
+              보험 추가
+            </Button>
+          </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

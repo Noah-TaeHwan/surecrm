@@ -1967,3 +1967,67 @@ dialog,
 .fixed.inset-0 + .fixed.left-1\/2 {
   max-height: 75vh !important;
 }
+
+/* =================================================================
+   🔧 모달 보더 & 포커스 효과 수정 - 최우선 적용
+   ================================================================= */
+
+/* 🎯 모든 모달에 기본 테두리 강제 적용 */
+[data-radix-dialog-content],
+[role="dialog"],
+dialog,
+.modal-content {
+  border: 1px solid hsl(var(--border)) !important;
+  border-radius: 0.5rem !important;
+}
+
+/* 🚫 모달 자체 포커스 효과 완전 제거 */
+[data-radix-dialog-content]:focus,
+[data-radix-dialog-content]:focus-visible,
+[role="dialog"]:focus,
+[role="dialog"]:focus-visible,
+dialog:focus,
+dialog:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+  border: 1px solid hsl(var(--border)) !important;
+}
+
+/* 🔴 모든 인풋/폼 요소 포커스 → 프라이머리 컬러(붉은색) 강제 적용 */
+input:focus,
+input:focus-visible,
+textarea:focus,
+textarea:focus-visible,
+select:focus,
+select:focus-visible,
+button:focus:not(:disabled),
+button:focus-visible:not(:disabled),
+[data-radix-select-trigger]:focus,
+[data-radix-select-trigger]:focus-visible,
+[role="combobox"]:focus,
+[role="combobox"]:focus-visible {
+  outline: 2px solid hsl(var(--primary)) !important;
+  outline-offset: 2px !important;
+  border-color: hsl(var(--primary)) !important;
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.2) !important;
+}
+
+/* 🔴 ShadCN UI 컴포넌트 포커스 강제 적용 */
+.focus\:ring-2:focus,
+.focus\:ring:focus,
+.focus\:border-blue-500:focus,
+.focus\:border-white:focus,
+.focus\:border-gray-300:focus {
+  --tw-ring-color: hsl(var(--primary) / 0.5) !important;
+  border-color: hsl(var(--primary)) !important;
+}
+
+/* 🔴 라디오 버튼 & 체크박스 포커스 */
+[data-radix-radio-item]:focus,
+[data-radix-checkbox]:focus,
+input[type="radio"]:focus,
+input[type="checkbox"]:focus {
+  outline: 2px solid hsl(var(--primary)) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.2) !important;
+}
