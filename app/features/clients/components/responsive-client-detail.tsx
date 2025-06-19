@@ -968,18 +968,10 @@ export function ResponsiveClientDetail({
                         ]
                       )}
                       style={{
-                        // 🚀 부드러운 전환을 위한 다단계 애니메이션
+                        // 🚀 부드럽고 일관된 전환 애니메이션
                         transition: [
-                          // 크기와 패딩 전환 (먼저)
-                          'padding 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-                          // border-radius 전환 (약간 지연)
-                          'border-radius 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.05s',
-                          // 배경과 그림자 전환 (마지막)
-                          'background-color 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.1s',
-                          'box-shadow 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.1s',
-                          'border-color 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.1s',
-                          'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-                          'color 0.25s ease-out',
+                          // 모든 속성을 동시에, 부드럽게 전환
+                          'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
                         ].join(', '),
                       }}
                     >
@@ -1013,12 +1005,7 @@ export function ResponsiveClientDetail({
                         )}
                         style={{
                           transform: 'translate3d(0, 0, 0)',
-                          transition: [
-                            'opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-                            'border-radius 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.05s',
-                            'transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-                            'filter 0.3s ease-out',
-                          ].join(', '),
+                          transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
                         }}
                       />
 
@@ -1028,10 +1015,7 @@ export function ResponsiveClientDetail({
                           className="absolute inset-0 rounded-lg bg-gradient-to-r from-accent/5 to-accent/10 opacity-0 hover:opacity-100 transition-all duration-300 ease-out -z-20"
                           style={{
                             transform: 'translate3d(0, 0, 0)',
-                            transition: [
-                              'opacity 0.3s ease-out',
-                              'border-radius 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-                            ].join(', '),
+                            transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
                           }}
                         />
                       )}
