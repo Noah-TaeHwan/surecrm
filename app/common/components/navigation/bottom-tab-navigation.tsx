@@ -189,56 +189,56 @@ export function BottomTabNavigation({ isMenuOpen }: BottomTabNavigationProps) {
     >
       {/* iOS 26 리퀴드글래스 배경 효과 - 다층 백드롭 필터 */}
       
-      {/* 레이어 1: 가장 멀리 퍼지는 대기 블러 (훨씬 더 위부터 시작) - 블러 강화 */}
+      {/* 레이어 1: 가장 멀리 퍼지는 대기 블러 (적당한 위치에서 시작) - 블러 강화 */}
       <div 
         className="absolute inset-x-0 bottom-0 pointer-events-none"
         style={{
-          height: '700%',
-          transform: 'translateY(65%)',
-          backdropFilter: 'blur(20px) saturate(105%) brightness(1.01)',
-          background: 'radial-gradient(ellipse 200% 160% at 50% 100%, rgba(0,0,0,0.012) 0%, rgba(0,0,0,0.008) 45%, rgba(0,0,0,0.004) 75%, transparent 98%)',
-          maskImage: 'radial-gradient(ellipse 190% 150% at 50% 100%, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.18) 40%, rgba(0,0,0,0.12) 55%, rgba(0,0,0,0.08) 70%, rgba(0,0,0,0.04) 83%, rgba(0,0,0,0.015) 92%, rgba(0,0,0,0.006) 97%, transparent 100%)',
-          WebkitMaskImage: 'radial-gradient(ellipse 190% 150% at 50% 100%, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.18) 40%, rgba(0,0,0,0.12) 55%, rgba(0,0,0,0.08) 70%, rgba(0,0,0,0.04) 83%, rgba(0,0,0,0.015) 92%, rgba(0,0,0,0.006) 97%, transparent 100%)',
-          filter: 'blur(0.15px)',
+          height: '280%',
+          transform: 'translateY(45%)',
+          backdropFilter: 'blur(16px) saturate(105%) brightness(1.01)',
+          background: 'radial-gradient(ellipse 180% 140% at 50% 100%, rgba(0,0,0,0.01) 0%, rgba(0,0,0,0.006) 50%, rgba(0,0,0,0.003) 75%, transparent 95%)',
+          maskImage: 'radial-gradient(ellipse 170% 130% at 50% 100%, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.12) 35%, rgba(0,0,0,0.08) 55%, rgba(0,0,0,0.05) 70%, rgba(0,0,0,0.025) 82%, rgba(0,0,0,0.01) 90%, rgba(0,0,0,0.004) 95%, transparent 100%)',
+          WebkitMaskImage: 'radial-gradient(ellipse 170% 130% at 50% 100%, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.12) 35%, rgba(0,0,0,0.08) 55%, rgba(0,0,0,0.05) 70%, rgba(0,0,0,0.025) 82%, rgba(0,0,0,0.01) 90%, rgba(0,0,0,0.004) 95%, transparent 100%)',
+          filter: 'blur(0.1px)',
         }}
       />
       
-      {/* 레이어 2: 중간 깊이 블러 (더욱 넓은 범위) - 블러 강화 */}
+      {/* 레이어 2: 중간 깊이 블러 (적당한 범위로 조정) - 블러 강화 */}
       <div 
         className="absolute inset-x-0 bottom-0 pointer-events-none"
         style={{
-          height: '520%',
-          transform: 'translateY(48%)',
-          backdropFilter: 'blur(12px) saturate(110%) brightness(1.005)',
-          background: 'linear-gradient(to top, rgba(0,0,0,0.04) 0%, rgba(0,0,0,0.025) 40%, rgba(0,0,0,0.012) 65%, rgba(0,0,0,0.005) 85%, transparent 98%)',
-          maskImage: 'linear-gradient(to top, rgba(0,0,0,0.35) 5%, rgba(0,0,0,0.28) 30%, rgba(0,0,0,0.2) 45%, rgba(0,0,0,0.14) 60%, rgba(0,0,0,0.08) 75%, rgba(0,0,0,0.04) 85%, rgba(0,0,0,0.018) 92%, rgba(0,0,0,0.008) 96%, rgba(0,0,0,0.003) 98%, transparent 100%)',
-          WebkitMaskImage: 'linear-gradient(to top, rgba(0,0,0,0.35) 5%, rgba(0,0,0,0.28) 30%, rgba(0,0,0,0.2) 45%, rgba(0,0,0,0.14) 60%, rgba(0,0,0,0.08) 75%, rgba(0,0,0,0.04) 85%, rgba(0,0,0,0.018) 92%, rgba(0,0,0,0.008) 96%, rgba(0,0,0,0.003) 98%, transparent 100%)',
+          height: '220%',
+          transform: 'translateY(35%)',
+          backdropFilter: 'blur(10px) saturate(110%) brightness(1.005)',
+          background: 'linear-gradient(to top, rgba(0,0,0,0.025) 0%, rgba(0,0,0,0.018) 40%, rgba(0,0,0,0.01) 65%, rgba(0,0,0,0.004) 85%, transparent 96%)',
+          maskImage: 'linear-gradient(to top, rgba(0,0,0,0.25) 10%, rgba(0,0,0,0.2) 30%, rgba(0,0,0,0.15) 45%, rgba(0,0,0,0.1) 60%, rgba(0,0,0,0.06) 75%, rgba(0,0,0,0.03) 85%, rgba(0,0,0,0.015) 92%, rgba(0,0,0,0.006) 96%, rgba(0,0,0,0.002) 98%, transparent 100%)',
+          WebkitMaskImage: 'linear-gradient(to top, rgba(0,0,0,0.25) 10%, rgba(0,0,0,0.2) 30%, rgba(0,0,0,0.15) 45%, rgba(0,0,0,0.1) 60%, rgba(0,0,0,0.06) 75%, rgba(0,0,0,0.03) 85%, rgba(0,0,0,0.015) 92%, rgba(0,0,0,0.006) 96%, rgba(0,0,0,0.002) 98%, transparent 100%)',
         }}
       />
       
-      {/* 레이어 3: 근접 블러 (바텀 네비게이션 위아래로 더 확장) - 블러 강화 */}
+      {/* 레이어 3: 근접 블러 (바텀 네비게이션 가까이에서 시작) - 블러 강화 */}
       <div 
         className="absolute inset-x-0 bottom-0 pointer-events-none"
         style={{
-          height: '340%',
-          transform: 'translateY(28%)',
-          backdropFilter: 'blur(8px) saturate(120%) brightness(1.0015)',
-          background: 'linear-gradient(to top, rgba(0,0,0,0.06) 0%, rgba(0,0,0,0.035) 50%, rgba(0,0,0,0.018) 75%, rgba(0,0,0,0.008) 92%, transparent 100%)',
-          maskImage: 'linear-gradient(to top, rgba(0,0,0,0.45) 15%, rgba(0,0,0,0.35) 40%, rgba(0,0,0,0.25) 55%, rgba(0,0,0,0.18) 70%, rgba(0,0,0,0.12) 80%, rgba(0,0,0,0.08) 87%, rgba(0,0,0,0.04) 92%, rgba(0,0,0,0.02) 95%, rgba(0,0,0,0.008) 97%, rgba(0,0,0,0.003) 99%, transparent 100%)',
-          WebkitMaskImage: 'linear-gradient(to top, rgba(0,0,0,0.45) 15%, rgba(0,0,0,0.35) 40%, rgba(0,0,0,0.25) 55%, rgba(0,0,0,0.18) 70%, rgba(0,0,0,0.12) 80%, rgba(0,0,0,0.08) 87%, rgba(0,0,0,0.04) 92%, rgba(0,0,0,0.02) 95%, rgba(0,0,0,0.008) 97%, rgba(0,0,0,0.003) 99%, transparent 100%)',
+          height: '160%',
+          transform: 'translateY(22%)',
+          backdropFilter: 'blur(7px) saturate(120%) brightness(1.0015)',
+          background: 'linear-gradient(to top, rgba(0,0,0,0.04) 0%, rgba(0,0,0,0.025) 50%, rgba(0,0,0,0.012) 75%, rgba(0,0,0,0.005) 90%, transparent 98%)',
+          maskImage: 'linear-gradient(to top, rgba(0,0,0,0.35) 20%, rgba(0,0,0,0.28) 40%, rgba(0,0,0,0.2) 55%, rgba(0,0,0,0.14) 70%, rgba(0,0,0,0.09) 80%, rgba(0,0,0,0.05) 87%, rgba(0,0,0,0.025) 92%, rgba(0,0,0,0.012) 95%, rgba(0,0,0,0.005) 97%, rgba(0,0,0,0.002) 99%, transparent 100%)',
+          WebkitMaskImage: 'linear-gradient(to top, rgba(0,0,0,0.35) 20%, rgba(0,0,0,0.28) 40%, rgba(0,0,0,0.2) 55%, rgba(0,0,0,0.14) 70%, rgba(0,0,0,0.09) 80%, rgba(0,0,0,0.05) 87%, rgba(0,0,0,0.025) 92%, rgba(0,0,0,0.012) 95%, rgba(0,0,0,0.005) 97%, rgba(0,0,0,0.002) 99%, transparent 100%)',
         }}
       />
       
-      {/* 레이어 4: 바텀 네비게이션 직접 경계 블러 (매우 약한 시작) - 블러 강화 */}
+      {/* 레이어 4: 바텀 네비게이션 직접 경계 블러 (바로 위부터 시작) - 블러 강화 */}
       <div 
         className="absolute inset-x-0 bottom-0 pointer-events-none"
         style={{
-          height: '190%',
-          transform: 'translateY(2%)',
-          backdropFilter: 'blur(5px) saturate(115%) brightness(1.0006)',
-          background: 'linear-gradient(to top, rgba(0,0,0,0.04) 0%, rgba(0,0,0,0.022) 45%, rgba(0,0,0,0.012) 70%, rgba(0,0,0,0.005) 90%, transparent 100%)',
-          maskImage: 'linear-gradient(to top, rgba(0,0,0,0.4) 20%, rgba(0,0,0,0.3) 45%, rgba(0,0,0,0.2) 60%, rgba(0,0,0,0.14) 72%, rgba(0,0,0,0.09) 80%, rgba(0,0,0,0.05) 86%, rgba(0,0,0,0.025) 91%, rgba(0,0,0,0.012) 94%, rgba(0,0,0,0.005) 96%, rgba(0,0,0,0.002) 98%, transparent 100%)',
-          WebkitMaskImage: 'linear-gradient(to top, rgba(0,0,0,0.4) 20%, rgba(0,0,0,0.3) 45%, rgba(0,0,0,0.2) 60%, rgba(0,0,0,0.14) 72%, rgba(0,0,0,0.09) 80%, rgba(0,0,0,0.05) 86%, rgba(0,0,0,0.025) 91%, rgba(0,0,0,0.012) 94%, rgba(0,0,0,0.005) 96%, rgba(0,0,0,0.002) 98%, transparent 100%)',
+          height: '120%',
+          transform: 'translateY(8%)',
+          backdropFilter: 'blur(4px) saturate(115%) brightness(1.0006)',
+          background: 'linear-gradient(to top, rgba(0,0,0,0.028) 0%, rgba(0,0,0,0.016) 45%, rgba(0,0,0,0.008) 70%, rgba(0,0,0,0.003) 88%, transparent 98%)',
+          maskImage: 'linear-gradient(to top, rgba(0,0,0,0.3) 25%, rgba(0,0,0,0.22) 45%, rgba(0,0,0,0.15) 60%, rgba(0,0,0,0.1) 72%, rgba(0,0,0,0.06) 80%, rgba(0,0,0,0.035) 86%, rgba(0,0,0,0.018) 91%, rgba(0,0,0,0.008) 94%, rgba(0,0,0,0.003) 96%, rgba(0,0,0,0.001) 98%, transparent 100%)',
+          WebkitMaskImage: 'linear-gradient(to top, rgba(0,0,0,0.3) 25%, rgba(0,0,0,0.22) 45%, rgba(0,0,0,0.15) 60%, rgba(0,0,0,0.1) 72%, rgba(0,0,0,0.06) 80%, rgba(0,0,0,0.035) 86%, rgba(0,0,0,0.018) 91%, rgba(0,0,0,0.008) 94%, rgba(0,0,0,0.003) 96%, rgba(0,0,0,0.001) 98%, transparent 100%)',
         }}
       />
       
@@ -246,12 +246,12 @@ export function BottomTabNavigation({ isMenuOpen }: BottomTabNavigationProps) {
       <div 
         className="absolute inset-x-0 bottom-0 pointer-events-none"
         style={{
-          height: '170%',
-          transform: 'translateY(-12%)',
-          backdropFilter: 'blur(3px) saturate(108%) brightness(1.0001)',
-          background: 'linear-gradient(to top, rgba(0,0,0,0.025) 0%, rgba(0,0,0,0.015) 50%, rgba(0,0,0,0.008) 80%, rgba(0,0,0,0.003) 95%, transparent 100%)',
-          maskImage: 'linear-gradient(to top, rgba(0,0,0,0.3) 25%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.14) 65%, rgba(0,0,0,0.09) 77%, rgba(0,0,0,0.05) 85%, rgba(0,0,0,0.025) 90%, rgba(0,0,0,0.012) 94%, rgba(0,0,0,0.005) 96%, rgba(0,0,0,0.002) 98%, rgba(0,0,0,0.0008) 99%, transparent 100%)',
-          WebkitMaskImage: 'linear-gradient(to top, rgba(0,0,0,0.3) 25%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.14) 65%, rgba(0,0,0,0.09) 77%, rgba(0,0,0,0.05) 85%, rgba(0,0,0,0.025) 90%, rgba(0,0,0,0.012) 94%, rgba(0,0,0,0.005) 96%, rgba(0,0,0,0.002) 98%, rgba(0,0,0,0.0008) 99%, transparent 100%)',
+          height: '100%',
+          transform: 'translateY(-8%)',
+          backdropFilter: 'blur(2px) saturate(108%) brightness(1.0001)',
+          background: 'linear-gradient(to top, rgba(0,0,0,0.015) 0%, rgba(0,0,0,0.008) 50%, rgba(0,0,0,0.004) 80%, rgba(0,0,0,0.001) 95%, transparent 100%)',
+          maskImage: 'linear-gradient(to top, rgba(0,0,0,0.2) 30%, rgba(0,0,0,0.14) 50%, rgba(0,0,0,0.09) 65%, rgba(0,0,0,0.05) 77%, rgba(0,0,0,0.025) 85%, rgba(0,0,0,0.012) 90%, rgba(0,0,0,0.005) 94%, rgba(0,0,0,0.002) 96%, rgba(0,0,0,0.0008) 98%, rgba(0,0,0,0.0003) 99%, transparent 100%)',
+          WebkitMaskImage: 'linear-gradient(to top, rgba(0,0,0,0.2) 30%, rgba(0,0,0,0.14) 50%, rgba(0,0,0,0.09) 65%, rgba(0,0,0,0.05) 77%, rgba(0,0,0,0.025) 85%, rgba(0,0,0,0.012) 90%, rgba(0,0,0,0.005) 94%, rgba(0,0,0,0.002) 96%, rgba(0,0,0,0.0008) 98%, rgba(0,0,0,0.0003) 99%, transparent 100%)',
         }}
       />
       
