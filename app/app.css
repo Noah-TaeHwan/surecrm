@@ -2859,6 +2859,23 @@ input[type="datetime-local"]::-moz-focus-inner {
   }
 }
 
+/* 🎯 모달 내 날짜/시간 picker 아이콘 밝기 개선 */
+[data-slot="dialog-content"] input[type="date"]::-webkit-calendar-picker-indicator,
+[data-slot="dialog-content"] input[type="time"]::-webkit-calendar-picker-indicator,
+[data-slot="dialog-content"] input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  /* 모달 내에서 더 밝고 선명한 아이콘 */
+  opacity: 0.9 !important;
+  filter: brightness(1.3) saturate(1.1) !important;
+}
+
+/* 호버 상태에서도 밝게 유지 */
+[data-slot="dialog-content"] input[type="date"]::-webkit-calendar-picker-indicator:hover,
+[data-slot="dialog-content"] input[type="time"]::-webkit-calendar-picker-indicator:hover,
+[data-slot="dialog-content"] input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1 !important;
+  filter: brightness(1.5) saturate(1.3) !important;
+}
+
 /* 💡 추가 보완: Input 그룹과의 호환성 */
 .relative input[type="date"],
 .relative input[type="time"],

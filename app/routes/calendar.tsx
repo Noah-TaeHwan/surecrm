@@ -105,32 +105,62 @@ export async function loader({ request }: Route.LoaderArgs) {
           };
 
     // 구글 이벤트를 SureCRM 미팅 형식으로 변환 (완전 통합 방식)
-    const googleMeetings = googleResult.events.map((event: any) => ({
-      id: event.id,
-      title: event.title, // 구글 캘린더의 실제 이벤트 제목
-      client: { 
-        id: 'google', 
-        name: event.title, // 구글 이벤트 제목을 클라이언트명으로 사용
-        phone: '' 
-      },
-      date: event.startTime.toISOString().split('T')[0],
-      time: event.startTime.toTimeString().slice(0, 5),
-      duration: Math.floor(
-        (event.endTime.getTime() - event.startTime.getTime()) / (1000 * 60)
-      ),
-      type: 'meeting', // 일반 미팅 타입으로 통일
-      location: event.location || '',
-      description: event.description,
-      status: 'scheduled' as const,
-      checklist: [],
-      notes: [],
-      syncInfo: {
-        status: event.syncStatus,
-        externalSource: 'google' as const, // 'google_calendar' 대신 'google' 사용
-        externalEventId: event.googleEventId,
-        lastSyncAt: event.lastSyncAt.toISOString(),
-      },
-    }));
+    const googleMeetings = googleResult.events.map((event: any) => {
+      // 구글 이벤트 제목에서 미팅 타입 유추 시도
+      const inferMeetingTypeFromTitle = (title: string): string => {
+        const titleLower = title.toLowerCase();
+        
+        // 한국어 키워드 기반 타입 추론
+        if (titleLower.includes('초회') || titleLower.includes('첫') || titleLower.includes('신규')) {
+          return 'first_consultation';
+        }
+        if (titleLower.includes('후속') || titleLower.includes('팔로업') || titleLower.includes('follow')) {
+          return 'follow_up';
+        }
+        if (titleLower.includes('상품') || titleLower.includes('설명') || titleLower.includes('presentation')) {
+          return 'product_explanation';
+        }
+        if (titleLower.includes('계약') && (titleLower.includes('검토') || titleLower.includes('review'))) {
+          return 'contract_review';
+        }
+        if (titleLower.includes('계약') && (titleLower.includes('체결') || titleLower.includes('서명') || titleLower.includes('signing'))) {
+          return 'contract_signing';
+        }
+        if (titleLower.includes('보험금') || titleLower.includes('청구') || titleLower.includes('claim')) {
+          return 'claim_support';
+        }
+        
+        // 기본값: 기타 미팅
+        return 'other';
+      };
+
+      return {
+        id: event.id,
+        title: event.title, // 구글 캘린더의 실제 이벤트 제목
+        client: { 
+          id: 'google', 
+          name: event.title, // 구글 이벤트 제목을 클라이언트명으로 사용
+          phone: '' 
+        },
+        date: event.startTime.toISOString().split('T')[0],
+        time: event.startTime.toTimeString().slice(0, 5),
+        duration: Math.floor(
+          (event.endTime.getTime() - event.startTime.getTime()) / (1000 * 60)
+        ),
+        type: inferMeetingTypeFromTitle(event.title), // 🎯 지능적 타입 추론
+        location: event.location || '',
+        description: event.description,
+        status: 'scheduled' as const,
+        checklist: [],
+        notes: [],
+        syncInfo: {
+          status: event.syncStatus,
+          externalSource: 'google' as const, // 'google_calendar' 대신 'google' 사용
+          externalEventId: event.googleEventId,
+          lastSyncAt: event.lastSyncAt.toISOString(),
+        },
+      };
+    });
 
     // SureCRM 미팅과 구글 이벤트 병합
     const allMeetings = [

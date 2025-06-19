@@ -24,7 +24,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
 } from '@radix-ui/react-icons';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MainLayout } from '~/common/layouts/main-layout';
 import { cn } from '~/lib/utils';
 import { CalendarGrid } from '../components/calendar-grid';
@@ -51,6 +51,22 @@ export default function CalendarPage({
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isAddMeetingOpen, setIsAddMeetingOpen] = useState(false);
   const [selectedMeeting, setSelectedMeeting] = useState<Meeting | null>(null);
+
+  // 필터 상태 (기본값: 모든 타입 선택)
+  const [filteredTypes, setFilteredTypes] = useState<string[]>([]);
+
+  // 필터링된 미팅 목록
+  const filteredMeetings = filteredTypes.length === 0 
+    ? meetings 
+    : meetings.filter((meeting: Meeting) => filteredTypes.includes(meeting.type));
+
+  // 초기 필터 설정 (모든 타입 선택)
+  useEffect(() => {
+    if (meetings && meetings.length > 0 && filteredTypes.length === 0) {
+      const allTypes = Array.from(new Set((meetings as Meeting[]).map((m: Meeting) => m.type)));
+      setFilteredTypes(allTypes);
+    }
+  }, [meetings, filteredTypes.length]);
 
   // 충돌 관리 상태
   const [conflicts, setConflicts] = useState<ConflictData[]>([]);
@@ -431,7 +447,7 @@ export default function CalendarPage({
                   {viewMode === 'month' && (
                     <CalendarGrid
                       selectedDate={selectedDate}
-                      meetings={meetings}
+                      meetings={filteredMeetings}
                       onMeetingClick={setSelectedMeeting}
                       onDateClick={handleDateClick}
                     />
@@ -439,14 +455,14 @@ export default function CalendarPage({
                   {viewMode === 'week' && (
                     <WeekView
                       selectedDate={selectedDate}
-                      meetings={meetings}
+                      meetings={filteredMeetings}
                       onMeetingClick={setSelectedMeeting}
                     />
                   )}
                   {viewMode === 'day' && (
                     <DayView
                       selectedDate={selectedDate}
-                      meetings={meetings}
+                      meetings={filteredMeetings}
                       onMeetingClick={setSelectedMeeting}
                     />
                   )}
@@ -458,8 +474,8 @@ export default function CalendarPage({
             <CalendarSidebar
               meetings={meetings}
               onMeetingClick={setSelectedMeeting}
-              filteredTypes={[]}
-              onFilterChange={() => {}}
+              filteredTypes={filteredTypes}
+              onFilterChange={setFilteredTypes}
               googleCalendarSettings={googleCalendarSettings}
             />
           </div>

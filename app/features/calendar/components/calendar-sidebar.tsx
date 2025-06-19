@@ -19,6 +19,7 @@ import {
   CheckCircledIcon,
   GearIcon,
   UpdateIcon,
+  MixerHorizontalIcon,
 } from '@radix-ui/react-icons';
 import { cn } from '~/lib/utils';
 import {
@@ -58,9 +59,12 @@ export function CalendarSidebar({
   const thisWeekEnd = new Date(thisWeekStart);
   thisWeekEnd.setDate(thisWeekStart.getDate() + 6);
 
+  // 이번 주 미팅 (필터 적용)
   const thisWeekMeetings = meetings.filter((m: Meeting) => {
     const meetingDate = new Date(m.date);
-    return meetingDate >= thisWeekStart && meetingDate <= thisWeekEnd;
+    const isThisWeek = meetingDate >= thisWeekStart && meetingDate <= thisWeekEnd;
+    const passesFilter = filteredTypes.length === 0 || filteredTypes.includes(m.type);
+    return isThisWeek && passesFilter;
   });
 
   // 미팅 타입별 분류
@@ -70,18 +74,35 @@ export function CalendarSidebar({
     return acc;
   }, {} as Record<string, number>);
 
-  // 오늘 미팅
+  // 오늘 미팅 (필터 적용)
   const today = new Date();
   const todayMeetings = meetings.filter((m: Meeting) => {
     const meetingDate = new Date(m.date);
-    return meetingDate.toDateString() === today.toDateString();
+    const isToday = meetingDate.toDateString() === today.toDateString();
+    const passesFilter = filteredTypes.length === 0 || filteredTypes.includes(m.type);
+    return isToday && passesFilter;
   });
 
-  // 다음 미팅 (3개만)
+  // 다음 미팅 (3개만, 필터 적용)
   const upcomingMeetings = meetings
-    .filter((m: Meeting) => new Date(m.date) > new Date())
+    .filter((m: Meeting) => {
+      const isFuture = new Date(m.date) > new Date();
+      const passesFilter = filteredTypes.length === 0 || filteredTypes.includes(m.type);
+      return isFuture && passesFilter;
+    })
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
     .slice(0, 3);
+
+  // 사용 가능한 미팅 타입들 (meetings에서 추출)
+  const availableTypes = Array.from(new Set(meetings.map(m => m.type)));
+
+  // 필터 토글 핸들러
+  const toggleFilter = (type: string) => {
+    const newFilters = filteredTypes.includes(type)
+      ? filteredTypes.filter(t => t !== type)
+      : [...filteredTypes, type];
+    onFilterChange(newFilters);
+  };
 
   const formatLastSync = (dateStr?: string) => {
     if (!dateStr) return '동기화된 적 없음';
@@ -185,7 +206,85 @@ export function CalendarSidebar({
         </CardContent>
       </Card>
 
-      {/* 2. 이번 주 성과 요약 (고도화) */}
+      {/* 2. 미팅 필터 */}
+      {availableTypes.length > 0 && (
+        <Card className="border border-sidebar-border shadow-sm">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <MixerHorizontalIcon className="h-5 w-5 text-purple-600" />
+              미팅 필터
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="space-y-2">
+              {availableTypes.map((type) => {
+                const isChecked = filteredTypes.includes(type);
+                const typeInfo = meetingTypeDetails[type as keyof typeof meetingTypeDetails];
+                
+                return (
+                  <div
+                    key={type}
+                    className="flex items-center space-x-3 cursor-pointer hover:bg-muted/30 rounded-md p-2 transition-colors"
+                    onClick={() => toggleFilter(type)}
+                  >
+                    <Checkbox
+                      id={`filter-${type}`}
+                      checked={isChecked}
+                      onCheckedChange={() => toggleFilter(type)}
+                    />
+                    <label
+                      htmlFor={`filter-${type}`}
+                      className="flex items-center gap-2 text-sm font-medium cursor-pointer flex-1"
+                    >
+                      <span className="text-base">
+                        {typeInfo?.icon || '📅'}
+                      </span>
+                      <span>
+                        {meetingTypeKoreanMap[type as keyof typeof meetingTypeKoreanMap] || type}
+                      </span>
+                    </label>
+                    <Badge variant="secondary" className="text-xs">
+                      {meetings.filter(m => m.type === type).length}
+                    </Badge>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* 필터 제어 버튼들 */}
+            <Separator className="my-3" />
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1 text-xs"
+                onClick={() => onFilterChange(availableTypes)}
+                disabled={filteredTypes.length === availableTypes.length}
+              >
+                전체 선택
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1 text-xs"
+                onClick={() => onFilterChange([])}
+                disabled={filteredTypes.length === 0}
+              >
+                전체 해제
+              </Button>
+            </div>
+
+            {/* 필터 상태 요약 */}
+            {filteredTypes.length > 0 && filteredTypes.length < availableTypes.length && (
+              <div className="text-xs text-muted-foreground bg-muted/20 p-2 rounded-md">
+                <span className="font-medium">{filteredTypes.length}개</span> 타입이 선택됨
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* 3. 이번 주 성과 요약 (고도화) */}
       <Card className="border border-sidebar-border bg-gradient-to-br from-primary/5 to-primary/10 shadow-sm">
         <CardHeader className="pb-4">
           <CardTitle className="text-lg flex items-center gap-2 text-primary">
@@ -258,7 +357,7 @@ export function CalendarSidebar({
         </CardContent>
       </Card>
 
-      {/* 3. 다음 예정 미팅 */}
+      {/* 4. 다음 예정 미팅 */}
       {upcomingMeetings.length > 0 && (
         <Card className="border border-sidebar-border shadow-sm">
           <CardHeader className="pb-4">
