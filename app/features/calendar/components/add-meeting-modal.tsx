@@ -297,39 +297,33 @@ export function AddMeetingModal({
   }, [contactMethod, form]);
 
   const handleSubmit = (data: MeetingFormData) => {
-    // 🔒 구글 캘린더 동기화 항상 활성화
-    const finalData = {
-      ...data,
-      syncToGoogle: true, // 항상 구글 캘린더에 동기화
-    };
-    
-    // 🚀 실제 서버로 Form 제출
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.style.display = 'none';
+    // 🚀 구글 캘린더에 직접 저장 (단일 소스 방식)
+    const formElement = document.createElement('form');
+    formElement.method = 'POST';
+    formElement.style.display = 'none';
 
     // actionType 설정
     const actionInput = document.createElement('input');
     actionInput.name = 'actionType';
     actionInput.value = 'createMeeting';
-    form.appendChild(actionInput);
+    formElement.appendChild(actionInput);
 
     // 모든 form 데이터를 hidden input으로 추가
-    Object.entries(finalData).forEach(([key, value]) => {
+    Object.entries(data).forEach(([key, value]) => {
       const input = document.createElement('input');
       input.name = key;
       input.value = value?.toString() || '';
-      form.appendChild(input);
+      formElement.appendChild(input);
     });
 
     // form 제출
-    document.body.appendChild(form);
-    form.submit();
-    document.body.removeChild(form);
+    document.body.appendChild(formElement);
+    formElement.submit();
+    document.body.removeChild(formElement);
     
     // 선택적 onSubmit 콜백 호출
     if (onSubmit) {
-      onSubmit(finalData);
+      onSubmit(data);
     }
     
     handleClose();

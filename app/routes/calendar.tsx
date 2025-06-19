@@ -10,7 +10,6 @@ import { requireAuth } from '~/lib/auth/middleware';
 import {
   getMeetingsByMonth,
   getClientsByAgent,
-  createMeeting,
   updateMeeting,
   deleteMeeting,
   toggleChecklistItem,
@@ -217,97 +216,88 @@ export async function action({ request }: Route.ActionArgs) {
         ) as string;
         const productInterest = formData.get('productInterest') as string;
 
-        // 🌐 구글 캘린더 연동 옵션들
-        const syncToGoogle = formData.get('syncToGoogle') === 'true';
+        // 🌐 구글 캘린더 연동 옵션들 (항상 true로 강제)
         const sendClientInvite = formData.get('sendClientInvite') === 'true';
         const reminder = formData.get('reminder') as string;
 
-        // 예약 시간 계산 (scheduledAt 필드 사용)
+        // 예약 시간 계산
         const [year, month, day] = date.split('-').map(Number);
         const [hour, minute] = time.split(':').map(Number);
-
         const scheduledAt = new Date(year, month - 1, day, hour, minute);
 
-        // SureCRM에서 미팅 생성
-        const meeting = await createMeeting(agentId, {
-          title,
-          clientId,
-          scheduledAt,
-          duration, // 분 단위로 전달
-          location,
-          meetingType,
-          description,
-          // 🎯 새로운 영업 정보 필드들
-          priority,
-          expectedOutcome,
-          contactMethod,
-          estimatedCommission: estimatedCommission
-            ? Number(estimatedCommission.replace(/[^0-9]/g, ''))
-            : undefined,
-          productInterest,
-          // 🌐 구글 캘린더 연동 옵션들
-          syncToGoogle,
-          sendClientInvite,
-          reminder,
-        });
+        // 🌐 구글 캘린더에 직접 생성 (단일 소스 방식)
+        try {
+          const { GoogleCalendarService } = await import(
+            '~/features/calendar/lib/google-calendar-service'
+          );
+          const googleService = new GoogleCalendarService();
 
-        // 🌐 구글 캘린더 동기화 (중복 생성 방지)
-        let googleEventId = null;
-        let syncResult = 'local_only';
+          // 구글 캘린더 연동 상태 확인
+          const settings = await googleService.getCalendarSettings(agentId);
 
-        if (syncToGoogle && meeting) {
-          try {
-            const { GoogleCalendarService } = await import(
-              '~/features/calendar/lib/google-calendar-service'
-            );
-            const googleService = new GoogleCalendarService();
-
-            // 구글 캘린더 연동 상태 확인
-            const settings = await googleService.getCalendarSettings(agentId);
-
-            if (settings?.googleAccessToken) {
-              // 구글 캘린더에 단일 이벤트로 생성 (중복 방지)
-              googleEventId = await googleService.createEventFromMeeting(
-                agentId,
-                meeting
-              );
-
-              if (googleEventId) {
-                syncResult = 'synced';
-                console.log('✅ 구글 캘린더 단일 동기화 성공:', googleEventId);
-              } else {
-                syncResult = 'sync_failed';
-              }
-            } else {
-              syncResult = 'not_connected';
-            }
-          } catch (error) {
-            console.error('❌ 구글 캘린더 동기화 실패:', error);
-            syncResult = 'sync_failed';
+          if (!settings?.googleAccessToken) {
+            return {
+              success: false,
+              message: '구글 캘린더 연동이 필요합니다. 설정에서 구글 계정을 연결해주세요.',
+              requiresGoogleConnection: true,
+            };
           }
+
+          // 클라이언트 정보 조회 (구글 이벤트 설명에 포함용)
+          const { getClientsByAgent } = await import('~/features/calendar/lib/calendar-data');
+          const clients = await getClientsByAgent(agentId);
+          const selectedClient = clients.find(c => c.id === clientId);
+
+          // 미팅 정보 구성 (구글 캘린더 이벤트용)
+          const meetingData = {
+            id: crypto.randomUUID(), // 임시 ID
+            title,
+            client: selectedClient || { id: clientId, name: '고객' },
+            scheduledAt,
+            duration,
+            location,
+            description,
+            meetingType,
+            // 영업 정보
+            priority,
+            expectedOutcome,
+            contactMethod,
+            estimatedCommission: estimatedCommission
+              ? Number(estimatedCommission.replace(/[^0-9]/g, ''))
+              : undefined,
+            productInterest,
+            // 메타데이터
+            sendClientInvite,
+            reminder,
+          };
+
+          // 구글 캘린더에 직접 생성
+          const googleEventId = await googleService.createEventFromMeeting(
+            agentId,
+            meetingData as any
+          );
+
+          if (googleEventId) {
+            return {
+              success: true,
+              message: '미팅이 구글 캘린더에 생성되었습니다. 곧 캘린더에 표시됩니다.',
+              googleEventId,
+              googleSynced: true,
+            };
+          } else {
+            return {
+              success: false,
+              message: '구글 캘린더에 미팅 생성에 실패했습니다. 다시 시도해주세요.',
+            };
+          }
+        } catch (error) {
+          console.error('❌ 구글 캘린더 미팅 생성 실패:', error);
+          return {
+            success: false,
+            message: '미팅 생성 중 오류가 발생했습니다. 구글 캘린더 연동 상태를 확인해주세요.',
+            error: error instanceof Error ? error.message : '알 수 없는 오류',
+          };
         }
-
-        // 사용자 친화적 메시지
-        const getSuccessMessage = (result: string) => {
-          switch (result) {
-            case 'synced':
-              return '미팅이 생성되고 구글 캘린더에 자동 동기화되었습니다.';
-            case 'sync_failed':
-              return '미팅은 생성되었으나 구글 캘린더 동기화에 실패했습니다. 설정을 확인해주세요.';
-            case 'not_connected':
-              return '미팅이 생성되었습니다. 구글 캘린더 연동을 원하시면 설정에서 연결해주세요.';
-            default:
-              return '미팅이 성공적으로 생성되었습니다.';
-          }
-        };
-
-        const successMessage = getSuccessMessage(syncResult);
-
-        return {
-          success: true,
-          message: successMessage,
-          googleSynced: !!googleEventId,
-        };
       }
 
       case 'updateMeeting': {
