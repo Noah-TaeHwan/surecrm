@@ -910,13 +910,13 @@ export function ResponsiveClientDetail({
         </div>
 
         {/* 🎨 모던 스마트 탭 네비게이션 - 완전 재설계 */}
-        <div className="sticky top-0 z-30 bg-background border-b border-border/50 -mx-4 px-4">
+        <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-sm border-b border-border/50 -mx-4 px-4 -mt-1 pt-1">
           <div className="relative">
             {/* 탭 컨테이너 */}
             <div className="relative overflow-hidden">
               <div 
                 ref={carouselRef}
-className="flex gap-2 px-4 py-2.5 overflow-x-auto overflow-y-hidden snap-x snap-mandatory scrollbar-hide scrollbar-none tab-carousel-container"
+                className="flex gap-3 px-4 py-2.5 overflow-x-auto overflow-y-hidden snap-x snap-mandatory scrollbar-hide scrollbar-none tab-carousel-container"
                 data-scrollbar-hidden="true"
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
