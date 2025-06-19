@@ -13,7 +13,6 @@ import {
   internalServerError,
   logAPIError,
 } from './utils';
-import type { User } from '@supabase/supabase-js';
 
 // ===== 인증된 사용자 정보 타입 =====
 export interface AuthenticatedUser {
@@ -224,7 +223,16 @@ export function isSystemAdmin(user: AuthenticatedUser): boolean {
 export function validateWebhookRequest(request: Request): boolean {
   // Supabase 웹훅 시크릿 검증
   const signature = request.headers.get('authorization');
-  const webhookSecret = process.env.SUPABASE_WEBHOOK_SECRET;
+  
+  // 환경변수 안전하게 접근
+  let webhookSecret: string | undefined;
+  try {
+    webhookSecret = typeof process !== 'undefined' 
+      ? process.env.SUPABASE_WEBHOOK_SECRET 
+      : undefined;
+  } catch {
+    webhookSecret = undefined;
+  }
 
   if (!webhookSecret) {
     console.warn('SUPABASE_WEBHOOK_SECRET이 설정되지 않았습니다.');

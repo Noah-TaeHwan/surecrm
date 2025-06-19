@@ -27,6 +27,7 @@ import {
 import { useState, useEffect } from 'react';
 import { MainLayout } from '~/common/layouts/main-layout';
 import { cn } from '~/lib/utils';
+import { useToast } from '~/common/components/ui/toast';
 import { CalendarGrid } from '../components/calendar-grid';
 import { WeekView } from '../components/week-view';
 import { DayView } from '../components/day-view';
@@ -46,6 +47,9 @@ export default function CalendarPage({
   actionData,
 }: CalendarPageProps) {
   const { meetings, clients, googleCalendarSettings, requiresGoogleConnection } = loaderData;
+  
+  // 토스트 훅 추가
+  const { success, error } = useToast();
 
   const [viewMode, setViewMode] = useState<ViewMode>('month');
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -67,6 +71,17 @@ export default function CalendarPage({
       setFilteredTypes(allTypes);
     }
   }, [meetings, filteredTypes.length]);
+
+  // actionData 메시지를 토스트로 표시
+  useEffect(() => {
+    if (actionData?.message) {
+      if (actionData.success) {
+        success(actionData.message);
+      } else {
+        error(actionData.message);
+      }
+    }
+  }, [actionData, success, error]);
 
   // 충돌 관리 상태
   const [conflicts, setConflicts] = useState<ConflictData[]>([]);
@@ -242,18 +257,7 @@ export default function CalendarPage({
     <MainLayout title="일정 관리">
       <div className="flex-1 space-y-6 p-4 md:p-6 pt-6">
         {/* 액션 결과 메시지 */}
-        {actionData && (
-          <div
-            className={cn(
-              'p-4 rounded-md',
-              actionData.success
-                ? 'bg-green-50 text-green-800 border border-green-200'
-                : 'bg-red-50 text-red-800 border border-red-200'
-            )}
-          >
-            {actionData.message}
-          </div>
-        )}
+        {/* 알림 메시지는 이제 토스트로 표시됨 */}
 
         {/* 헤더 */}
         <div className="bg-card/40 backdrop-blur-sm border border-border/30 rounded-2xl p-6 shadow-lg">

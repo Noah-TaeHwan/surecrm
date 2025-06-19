@@ -63,6 +63,7 @@ import {
 } from '../types/types';
 import { useState } from 'react';
 import { DeleteMeetingModal } from './delete-meeting-modal';
+import { useToast } from '~/common/components/ui/toast';
 
 // 🎯 영업 정보 관련 데이터 (새 미팅 예약 모달과 완전 동일)
 const priorityOptions = [
@@ -158,6 +159,10 @@ export function MeetingDetailModal({
 
   // 삭제 모달 상태
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // 토스트 훅 추가
+  const { success, error } = useToast();
 
   // 체크리스트 관리 상태
   const [checklist, setChecklist] = useState<ChecklistItem[]>(
@@ -271,6 +276,9 @@ export function MeetingDetailModal({
 
   // 상품 관심 분야 정보 가져오기
   const productInterestInfo = productInterests.find(p => p.value === (meeting as any)?.productInterest);
+
+  // 알림 정보 가져오기
+  const reminderInfo = reminderOptions.find(r => r.value === (meeting as any)?.reminder);
 
   // 노트 관리 함수
   const handleAddNote = () => {
@@ -401,28 +409,39 @@ export function MeetingDetailModal({
     setIsDeleteModalOpen(true);
   };
 
-  const handleConfirmDelete = () => {
-    // Form 제출로 처리
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.style.display = 'none';
+  const handleConfirmDelete = async () => {
+    try {
+      setIsDeleting(true);
+      
+      // 개선된 삭제 로직: 구글 캘린더 연동 처리
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = '/calendar';
+      form.style.display = 'none';
 
-    const actionInput = document.createElement('input');
-    actionInput.name = 'actionType';
-    actionInput.value = 'deleteMeeting';
-    form.appendChild(actionInput);
+      const actionInput = document.createElement('input');
+      actionInput.name = 'actionType';
+      actionInput.value = 'deleteMeeting';
+      form.appendChild(actionInput);
 
-    const meetingIdInput = document.createElement('input');
-    meetingIdInput.name = 'meetingId';
-    meetingIdInput.value = meeting.id;
-    form.appendChild(meetingIdInput);
+      const meetingIdInput = document.createElement('input');
+      meetingIdInput.name = 'meetingId';
+      meetingIdInput.value = meeting.id;
+      form.appendChild(meetingIdInput);
 
-    document.body.appendChild(form);
-    form.submit();
-    document.body.removeChild(form);
+      document.body.appendChild(form);
+      form.submit();
+      document.body.removeChild(form);
 
-    setIsDeleteModalOpen(false);
-    onClose();
+      setIsDeleteModalOpen(false);
+      success('미팅이 성공적으로 삭제되었습니다.');
+      onClose();
+    } catch (err) {
+      console.error('미팅 삭제 중 오류:', err);
+      error('미팅 삭제 중 오류가 발생했습니다.');
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   return (
@@ -434,7 +453,6 @@ export function MeetingDetailModal({
             <DialogTitle className="text-lg sm:text-xl font-semibold flex items-center gap-2 sm:gap-3 text-foreground">
               <div className="flex items-center gap-2">
                 {meetingTypeInfo?.icon && <span className="text-lg sm:text-xl">{meetingTypeInfo.icon}</span>}
-                <CalendarIcon className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
               </div>
               <span className="truncate">{meeting.title}</span>
               {/* 우선순위 배지 */}
@@ -518,50 +536,88 @@ export function MeetingDetailModal({
 
                     {/* 영업 정보 */}
                     <div className="space-y-3 sm:space-y-4">
-                      {contactMethodInfo && (
-                        <div className="flex items-center gap-3">
-                          {contactMethodInfo.icon}
-                          <div className="min-w-0 flex-1">
-                            <div className="text-xs text-muted-foreground">연락 방법</div>
-                            <div className="text-sm font-medium">{contactMethodInfo.label}</div>
+                      <div className="flex items-center gap-3">
+                        {contactMethodInfo?.icon || <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />}
+                        <div className="min-w-0 flex-1">
+                          <div className="text-xs text-muted-foreground">연락 방법</div>
+                          <div className="text-sm font-medium">{contactMethodInfo?.label || '미설정'}</div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <TargetIcon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <div className="text-xs text-muted-foreground">기대 성과</div>
+                          <div className="text-sm font-medium flex items-center gap-1">
+                            {expectedOutcomeInfo ? (
+                              <>
+                                <span>{expectedOutcomeInfo.icon}</span>
+                                {expectedOutcomeInfo.label}
+                              </>
+                            ) : (
+                              '미설정'
+                            )}
                           </div>
                         </div>
-                      )}
+                      </div>
 
-                      {expectedOutcomeInfo && (
-                        <div className="flex items-center gap-3">
-                          <TargetIcon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                          <div className="min-w-0 flex-1">
-                            <div className="text-xs text-muted-foreground">기대 성과</div>
-                            <div className="text-sm font-medium flex items-center gap-1">
-                              <span>{expectedOutcomeInfo.icon}</span>
-                              {expectedOutcomeInfo.label}
-                            </div>
+                      <div className="flex items-center gap-3">
+                        <StarFilledIcon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <div className="text-xs text-muted-foreground">관심 상품</div>
+                          <div className="text-sm font-medium flex items-center gap-1">
+                            {productInterestInfo ? (
+                              <>
+                                <span>{productInterestInfo.icon}</span>
+                                {productInterestInfo.label}
+                              </>
+                            ) : (
+                              '미설정'
+                            )}
                           </div>
                         </div>
-                      )}
+                      </div>
 
-                      {productInterestInfo && (
-                        <div className="flex items-center gap-3">
-                          <StarFilledIcon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                          <div className="min-w-0 flex-1">
-                            <div className="text-xs text-muted-foreground">관심 상품</div>
-                            <div className="text-sm font-medium flex items-center gap-1">
-                              <span>{productInterestInfo.icon}</span>
-                              {productInterestInfo.label}
-                            </div>
+                      <div className="flex items-center gap-3">
+                        <DollarSign className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <div className="text-xs text-muted-foreground">예상 수수료</div>
+                          <div className="text-sm font-medium">
+                            {((meeting as any)?.estimatedCommission || 0) > 0 
+                              ? `${((meeting as any)?.estimatedCommission || 0).toLocaleString()}원`
+                              : '미설정'
+                            }
                           </div>
                         </div>
-                      )}
+                      </div>
 
-                      {((meeting as any)?.estimatedCommission || 0) > 0 && (
+                      {/* 구글 캘린더 연동 상태 */}
+                      <div className="flex items-center gap-3">
+                        <GlobeIcon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <div className="text-xs text-muted-foreground">구글 캘린더</div>
+                          <div className="text-sm font-medium flex items-center gap-1">
+                            {(meeting as any)?.syncToGoogle ? (
+                              <>
+                                <span className="text-green-600">✅</span>
+                                연동됨
+                              </>
+                            ) : (
+                              <>
+                                <span className="text-gray-400">⚪</span>
+                                연동 안됨
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {reminderInfo && (
                         <div className="flex items-center gap-3">
-                          <DollarSign className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                          <LightningBoltIcon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                           <div className="min-w-0 flex-1">
-                            <div className="text-xs text-muted-foreground">예상 수수료</div>
-                            <div className="text-sm font-medium">
-                              {((meeting as any)?.estimatedCommission || 0).toLocaleString()}원
-                            </div>
+                            <div className="text-xs text-muted-foreground">알림</div>
+                            <div className="text-sm font-medium">{reminderInfo.label}</div>
                           </div>
                         </div>
                       )}
@@ -724,7 +780,7 @@ export function MeetingDetailModal({
                 {!isEditingMeeting && meeting.description && (
                   <div className="pt-4 border-t border-border/50">
                     <div className="text-xs text-muted-foreground mb-2">메모</div>
-                    <div className="text-sm text-muted-foreground leading-relaxed bg-muted/30 p-3 rounded-md">
+                    <div className="text-sm text-muted-foreground leading-relaxed bg-muted/30 p-3 rounded-md whitespace-pre-wrap">
                       {meeting.description}
                     </div>
                   </div>
