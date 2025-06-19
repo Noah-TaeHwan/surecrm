@@ -34,7 +34,7 @@ export function CheckupPurposesTab({
   onSave,
 }: CheckupPurposesTabProps) {
   return (
-    <TabsContent value="checkup" className="space-y-4 md:space-y-6" data-tabscontent="checkup">
+    <TabsContent value="checkup" className="space-y-4 md:space-y-6">
       <Card>
         <CardHeader className="pb-3 md:pb-4">
           <div className="flex items-start justify-between gap-3">
@@ -127,7 +127,7 @@ export function CheckupPurposesTab({
             </h4>
             <div className="p-3 md:p-4 bg-muted/20 rounded-lg border border-border/40">
               <div className="space-y-2">
-                <Label className="text-xs md:text-sm text-muted-foreground">
+                <Label className="text-xs md:text-sm text-muted-foreground font-medium">
                   지금 저축은 어디서 하고 계신가요?
                 </Label>
                 <Textarea
@@ -218,7 +218,7 @@ export function CheckupPurposesTab({
             <h4 className="font-medium text-foreground flex items-center gap-2 text-sm md:text-base">
               📝 상세 내용
             </h4>
-            <div className="space-y-4">
+            <div className="p-3 md:p-4 bg-muted/20 rounded-lg border border-border/40">
               <div className="space-y-2">
                 <Label className="text-xs md:text-sm text-muted-foreground font-medium">
                   기타 걱정사항
