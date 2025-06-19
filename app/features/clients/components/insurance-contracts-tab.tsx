@@ -2079,41 +2079,49 @@ function NewContractModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
-        <DialogHeader className="flex-shrink-0 pb-4">
-          <DialogTitle className="flex items-center gap-2 text-xl">
-            <FileText className="h-6 w-6 text-primary" />
-            {editingContract ? '보험계약 수정' : '새 보험계약 등록'}
+      <DialogContent 
+        className="sm:max-w-xl w-[95vw] p-0 overflow-hidden flex flex-col sm:max-h-[85vh] gap-0"
+        style={{
+          maxHeight: '75vh',
+          height: 'auto',
+          minHeight: '0'
+        }}
+      >
+        {/* 헤더 - 고정 */}
+        <DialogHeader className="flex-shrink-0 px-4 sm:px-6 py-4 sm:py-4 border-b border-border/30">
+          <DialogTitle className="flex items-center gap-2 text-sm sm:text-lg">
+            <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
+            <span className="truncate">{editingContract ? '보험계약 수정' : '새 보험계약 등록'}</span>
           </DialogTitle>
-          <DialogDescription className="text-base">
-            <span className="font-medium text-foreground">{clientName}</span>{' '}
-            고객의 보험계약 정보를 {editingContract ? '수정' : '등록'}합니다.
+          <DialogDescription className="text-xs sm:text-sm text-muted-foreground">
+            <span className="font-medium text-foreground">{clientName}</span> 고객의 보험계약 정보를 {editingContract ? '수정' : '등록'}하세요.
           </DialogDescription>
         </DialogHeader>
 
-        <form
-          id="contract-form"
-          onSubmit={handleSubmit}
-          className="flex-1 overflow-hidden flex flex-col"
-        >
-          <div className="flex-1 overflow-y-auto scrollbar-hide space-y-6 px-1 py-1">
+        {/* 콘텐츠 - 스크롤 가능 */}
+        <div className="flex-1 overflow-y-auto scrollbar-none modal-scroll-area px-4 sm:px-6 py-2 sm:py-6 space-y-2 sm:space-y-6 min-h-0">
+          <form
+            id="contract-form"
+            onSubmit={handleSubmit}
+            className="space-y-3 sm:space-y-6"
+          >
             {/* 👥 계약자/피보험자 정보 (최상단으로 이동) */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold flex items-center gap-2">
-                <Users className="h-5 w-5 text-primary" />
+            <div className="space-y-3 sm:space-y-4">
+              <h3 className="text-sm sm:text-base font-medium flex items-center gap-2">
+                <Users className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                 계약자/피보험자 정보
               </h3>
 
               {/* 계약자 정보 */}
-              <div className="space-y-4 p-4 border rounded-lg bg-muted/30">
-                <h4 className="font-medium text-sm text-muted-foreground">
+              <div className="space-y-3 sm:space-y-4 p-3 sm:p-4 border rounded-lg bg-muted/30">
+                <h4 className="font-medium text-xs sm:text-sm text-muted-foreground">
                   계약자 정보
                 </h4>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="space-y-2">
+                <div className="grid grid-cols-1 gap-3 sm:gap-4">
+                  <div className="space-y-1 sm:space-y-2">
                     <Label
                       htmlFor="contractorName"
-                      className="flex items-center space-x-1 text-sm font-medium"
+                      className="flex items-center space-x-1 text-xs sm:text-sm font-medium"
                     >
                       <span>계약자명</span>
                       <span className="text-destructive">*</span>
@@ -2125,7 +2133,7 @@ function NewContractModal({
                         updateField('contractorName', e.target.value)
                       }
                       placeholder="홍길동"
-                      className={`w-full ${
+                      className={`h-9 sm:h-10 text-xs sm:text-sm min-h-[36px] sm:min-h-[40px] ${
                         errors.contractorName ? 'border-destructive' : ''
                       }`}
                     />
@@ -2137,10 +2145,10 @@ function NewContractModal({
                     )}
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-1 sm:space-y-2">
                     <Label
                       htmlFor="contractorSsn"
-                      className="text-sm font-medium"
+                      className="text-xs sm:text-sm font-medium"
                     >
                       계약자 주민번호
                     </Label>
@@ -2171,7 +2179,7 @@ function NewContractModal({
                       }}
                       placeholder="000000-0000000"
                       maxLength={14}
-                      className={`w-full ${
+                      className={`h-9 sm:h-10 text-xs sm:text-sm min-h-[36px] sm:min-h-[40px] ${
                         errors.contractorSsn
                           ? 'border-destructive'
                           : formData.contractorSsn &&
@@ -2212,22 +2220,22 @@ function NewContractModal({
                         updateField('contractorPhone', e.target.value)
                       }
                       placeholder="010-0000-0000"
-                      className="w-full"
+                      className="h-9 sm:h-10 text-xs sm:text-sm min-h-[36px] sm:min-h-[40px]"
                     />
                   </div>
                 </div>
               </div>
 
               {/* 피보험자 정보 */}
-              <div className="space-y-4 p-4 border rounded-lg bg-muted/30">
-                <h4 className="font-medium text-sm text-muted-foreground">
+              <div className="space-y-3 sm:space-y-4 p-3 sm:p-4 border rounded-lg bg-muted/30">
+                <h4 className="font-medium text-xs sm:text-sm text-muted-foreground">
                   피보험자 정보
                 </h4>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="space-y-2">
+                <div className="grid grid-cols-1 gap-3 sm:gap-4">
+                  <div className="space-y-1 sm:space-y-2">
                     <Label
                       htmlFor="insuredName"
-                      className="flex items-center space-x-1 text-sm font-medium"
+                      className="flex items-center space-x-1 text-xs sm:text-sm font-medium"
                     >
                       <span>피보험자명</span>
                       <span className="text-destructive">*</span>
@@ -2237,7 +2245,7 @@ function NewContractModal({
                       value={formData.insuredName}
                       onChange={e => updateField('insuredName', e.target.value)}
                       placeholder="홍길동"
-                      className={`w-full ${
+                      className={`h-9 sm:h-10 text-xs sm:text-sm min-h-[36px] sm:min-h-[40px] ${
                         errors.insuredName ? 'border-destructive' : ''
                       }`}
                     />
@@ -2249,8 +2257,8 @@ function NewContractModal({
                     )}
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="insuredSsn" className="text-sm font-medium">
+                  <div className="space-y-1 sm:space-y-2">
+                    <Label htmlFor="insuredSsn" className="text-xs sm:text-sm font-medium">
                       피보험자 주민번호
                     </Label>
                     <Input
@@ -2280,7 +2288,7 @@ function NewContractModal({
                       }}
                       placeholder="000000-0000000"
                       maxLength={14}
-                      className={`w-full ${
+                      className={`h-9 sm:h-10 text-xs sm:text-sm min-h-[36px] sm:min-h-[40px] ${
                         errors.insuredSsn
                           ? 'border-destructive'
                           : formData.insuredSsn &&
@@ -2307,10 +2315,10 @@ function NewContractModal({
                     </div>
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-1 sm:space-y-2">
                     <Label
                       htmlFor="insuredPhone"
-                      className="text-sm font-medium"
+                      className="text-xs sm:text-sm font-medium"
                     >
                       피보험자 연락처
                     </Label>
@@ -2321,7 +2329,7 @@ function NewContractModal({
                         updateField('insuredPhone', e.target.value)
                       }
                       placeholder="010-0000-0000"
-                      className="w-full"
+                      className="h-9 sm:h-10 text-xs sm:text-sm min-h-[36px] sm:min-h-[40px]"
                     />
                   </div>
                 </div>
@@ -2329,9 +2337,9 @@ function NewContractModal({
             </div>
 
             {/* 📋 기본 계약 정보 */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold flex items-center gap-2">
-                <Shield className="h-5 w-5 text-primary" />
+            <div className="space-y-3 sm:space-y-4">
+              <h3 className="text-sm sm:text-base font-medium flex items-center gap-2">
+                <Shield className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                 기본 계약 정보
               </h3>
 
@@ -2466,9 +2474,9 @@ function NewContractModal({
             </div>
 
             {/* 📅 계약 일정 */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-primary" />
+            <div className="space-y-3 sm:space-y-4">
+              <h3 className="text-sm sm:text-base font-medium flex items-center gap-2">
+                <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                 계약 일정
               </h3>
 
@@ -2562,9 +2570,9 @@ function NewContractModal({
             </div>
 
             {/* 💰 금액 정보 */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold flex items-center gap-2">
-                <DollarSign className="h-5 w-5 text-primary" />
+            <div className="space-y-3 sm:space-y-4">
+              <h3 className="text-sm sm:text-base font-medium flex items-center gap-2">
+                <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                 금액 정보
               </h3>
 
@@ -2780,9 +2788,9 @@ function NewContractModal({
             </div>
 
             {/* 📝 추가 정보 */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold flex items-center gap-2">
-                <FileText className="h-5 w-5 text-primary" />
+            <div className="space-y-3 sm:space-y-4">
+              <h3 className="text-sm sm:text-base font-medium flex items-center gap-2">
+                <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                 추가 정보
               </h3>
 
@@ -2802,8 +2810,8 @@ function NewContractModal({
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="notes" className="text-sm font-medium">
+              <div className="space-y-1 sm:space-y-2">
+                <Label htmlFor="notes" className="text-xs sm:text-sm font-medium">
                   메모 (선택사항)
                 </Label>
                 <Textarea
@@ -2811,15 +2819,16 @@ function NewContractModal({
                   value={formData.notes}
                   onChange={e => updateField('notes', e.target.value)}
                   placeholder="계약 관련 특이사항, 고객 요청사항 등을 기록하세요..."
-                  className="min-h-[80px] resize-none w-full"
+                  className="text-xs sm:text-sm min-h-[80px] resize-none"
+                  rows={3}
                 />
               </div>
             </div>
 
             {/* 📁 첨부파일 섹션 */}
-            <div className="space-y-3">
-              <h3 className="text-lg font-semibold flex items-center gap-2">
-                <Paperclip className="h-5 w-5 text-primary" />
+            <div className="space-y-2 sm:space-y-3">
+              <h3 className="text-sm sm:text-base font-medium flex items-center gap-2">
+                <Paperclip className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                 첨부파일 ({attachments.length}개)
               </h3>
 
@@ -2997,41 +3006,50 @@ function NewContractModal({
               )}
             </div>
 
+            
+
             {/* 📌 안내 메시지 */}
             <div className="p-3 bg-blue-50 dark:bg-blue-900/10 rounded-lg border border-blue-200 dark:border-blue-800">
               <div className="flex items-center gap-2">
                 <FileText className="h-4 w-4 text-blue-600" />
                 <div className="text-xs text-blue-700 dark:text-blue-300">
-                  <span className="font-medium">등록 완료 시:</span> 파이프라인
-                  업데이트, 수수료 반영, 서류 관리 제공
+                  <span className="font-medium">등록 완료 시:</span> 파이프라인 업데이트, 수수료 반영, 서류 관리 제공
                 </div>
               </div>
             </div>
-          </div>
-        </form>
+          </form>
+        </div>
 
-        <DialogFooter className="flex-shrink-0 gap-2">
-          <Button variant="outline" onClick={handleClose}>
-            취소
-          </Button>
-          <Button
-            type="submit"
-            form="contract-form"
-            disabled={isLoading}
-            className="gap-2"
-          >
-            {isLoading ? (
-              <>
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
-                등록 중...
-              </>
-            ) : (
-              <>
-                <Plus className="h-4 w-4" />
-                {editingContract ? '계약 수정' : '계약 등록'}
-              </>
-            )}
-          </Button>
+        {/* 푸터 - 고정 */}
+        <DialogFooter className="flex-shrink-0 gap-2 sm:gap-3 p-2 sm:p-6 border-t border-border/30">
+          <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto sm:justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleClose}
+              className="h-10 px-4 w-full sm:w-auto text-xs sm:text-sm"
+            >
+              취소
+            </Button>
+            <Button
+              type="submit"
+              form="contract-form"
+              disabled={isLoading}
+              className="gap-2 h-10 px-4 w-full sm:w-auto text-xs sm:text-sm bg-primary text-primary-foreground"
+            >
+              {isLoading ? (
+                <>
+                  <div className="h-3 w-3 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
+                  등록 중...
+                </>
+              ) : (
+                <>
+                  <Plus className="h-3 w-3" />
+                  {editingContract ? '계약 수정' : '계약 등록'}
+                </>
+              )}
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
