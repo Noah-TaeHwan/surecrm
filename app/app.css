@@ -2746,8 +2746,8 @@ input[type="datetime-local"] {
 input[type="date"]::-webkit-calendar-picker-indicator,
 input[type="time"]::-webkit-calendar-picker-indicator,
 input[type="datetime-local"]::-webkit-calendar-picker-indicator {
-  /* 아이콘 스타일 정규화 */
-  opacity: 0.6 !important;
+  /* 아이콘 스타일 정규화 - muted-foreground 색상 적용 */
+  opacity: 0.7 !important; /* muted-foreground 색상 강도로 조정 */
   cursor: pointer !important;
   
   /* 크기 및 위치 조정 */
@@ -2756,18 +2756,18 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator {
   padding: 0 !important;
   margin: 0 !important;
   
-  /* 색상 필터 (다크모드 대응) */
-  filter: brightness(0.8) !important;
+  /* muted-foreground에 맞는 색상 필터 */
+  filter: brightness(0.6) saturate(0.8) !important;
   
   /* 호버 효과 */
-  transition: opacity 0.2s ease !important;
+  transition: opacity 0.2s ease, filter 0.2s ease !important;
 }
 
 input[type="date"]::-webkit-calendar-picker-indicator:hover,
 input[type="time"]::-webkit-calendar-picker-indicator:hover,
 input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
   opacity: 1 !important;
-  filter: brightness(1) !important;
+  filter: brightness(0.8) saturate(1) !important; /* 호버 시 더 선명하게 */
 }
 
 /* Dark mode에서 캘린더 아이콘 색상 보정 */

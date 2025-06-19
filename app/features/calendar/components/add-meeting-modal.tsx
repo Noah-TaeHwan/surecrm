@@ -85,7 +85,7 @@ type MeetingFormData = z.infer<typeof meetingSchema>;
 
 // 🎨 미팅 유형 배열 (통일된 정의 사용)
 const meetingTypes = Object.entries(meetingTypeDetails)
-  .filter(([key]) => key !== 'google') // 구글 이벤트는 생성 시 제외
+  .filter(([key]) => key !== 'google' && key !== 'google_imported') // 구글 이벤트는 생성 시 제외
   .map(([value, details]) => ({
     value,
     label: details.label,

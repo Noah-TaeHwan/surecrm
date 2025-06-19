@@ -9,14 +9,12 @@ interface WeekViewProps {
   selectedDate: Date;
   meetings: Meeting[];
   onMeetingClick: (meeting: Meeting) => void;
-  filteredTypes?: string[];
 }
 
 export function WeekView({
   selectedDate,
   meetings,
   onMeetingClick,
-  filteredTypes = [],
 }: WeekViewProps) {
   // 주의 시작일 계산 (일요일)
   const weekStart = new Date(selectedDate);
@@ -32,10 +30,8 @@ export function WeekView({
   // 시간 슬롯 생성 (6시부터 22시까지)
   const timeSlots = Array.from({ length: 17 }, (_, i) => i + 6);
 
-  // 필터링된 미팅들
-  const filteredMeetings = meetings.filter(meeting =>
-    filteredTypes.length === 0 || filteredTypes.includes(meeting.type)
-  );
+  // 모든 미팅 표시 (필터링 제거)
+  const filteredMeetings = meetings;
 
   // 날짜별로 미팅 그룹화
   const meetingsByDate = weekDates.map(date => {

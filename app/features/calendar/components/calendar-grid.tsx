@@ -24,7 +24,6 @@ interface CalendarGridProps {
   selectedDate: Date;
   meetings: Meeting[];
   onMeetingClick: (meeting: Meeting) => void;
-  filteredTypes?: string[];
   onDateClick?: (date: Date) => void;
 }
 
@@ -73,10 +72,6 @@ function EventCard({
   const source = (meeting.syncInfo?.externalSource || 'surecrm') as EventSource;
   const syncStatus = meeting.syncInfo?.syncStatus;
 
-  const koreanName =
-    meetingTypeKoreanMap[meeting.type as keyof typeof meetingTypeKoreanMap] ||
-    meeting.type;
-
   return (
     <div
       className={cn(
@@ -96,7 +91,7 @@ function EventCard({
         'shadow-sm'
       )}
       onClick={onClick}
-      title={`${meeting.time} - ${meeting.client.name} (${koreanName})`}
+      title={`${meeting.time} - ${meeting.title}`}
     >
       <div className="relative z-10 space-y-1.5">
         {/* 상단: 시간 & 소스 아이콘 */}
@@ -110,7 +105,7 @@ function EventCard({
           </span>
         </div>
 
-        {/* 이벤트 제목 - 콤팩트 버전 */}
+        {/* 이벤트 제목 - 간결하게 */}
         <div className="flex items-center">
           <span className={cn(
             "font-medium truncate",
@@ -119,14 +114,6 @@ function EventCard({
             {meeting.title}
           </span>
         </div>
-
-        {/* 위치 정보만 유지 (미팅 타입 제거) */}
-        {!compact && meeting.location && (
-          <div className="flex items-center gap-1">
-            <MapPin className="h-2.5 w-2.5 opacity-70 group-hover:h-3 group-hover:w-3 transition-all duration-200" />
-            <span className="text-xs opacity-75 truncate">{meeting.location}</span>
-          </div>
-        )}
       </div>
 
       {/* 동기화 상태 표시점 */}
@@ -137,8 +124,6 @@ function EventCard({
       {syncStatus === 'synced' && source !== 'surecrm' && (
         <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white shadow-lg z-20"></div>
       )}
-
-
     </div>
   );
 }
@@ -221,14 +206,10 @@ export function CalendarGrid({
   selectedDate,
   meetings,
   onMeetingClick,
-  filteredTypes = [],
   onDateClick,
 }: CalendarGridProps) {
-  // 필터링된 미팅
-  const filteredMeetings =
-    filteredTypes.length > 0
-      ? meetings.filter(meeting => filteredTypes.includes(meeting.type))
-      : meetings;
+  // 모든 미팅 표시 (필터링 제거)
+  const filteredMeetings = meetings;
 
   // 필터링된 결과가 없는 경우 빈 상태 표시
   if (filteredMeetings.length === 0 && meetings.length > 0) {

@@ -51,7 +51,6 @@ export default function CalendarPage({
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isAddMeetingOpen, setIsAddMeetingOpen] = useState(false);
   const [selectedMeeting, setSelectedMeeting] = useState<Meeting | null>(null);
-  const [filteredTypes, setFilteredTypes] = useState<string[]>([]);
 
   // 충돌 관리 상태
   const [conflicts, setConflicts] = useState<ConflictData[]>([]);
@@ -434,7 +433,6 @@ export default function CalendarPage({
                       selectedDate={selectedDate}
                       meetings={meetings}
                       onMeetingClick={setSelectedMeeting}
-                      filteredTypes={filteredTypes}
                       onDateClick={handleDateClick}
                     />
                   )}
@@ -443,7 +441,6 @@ export default function CalendarPage({
                       selectedDate={selectedDate}
                       meetings={meetings}
                       onMeetingClick={setSelectedMeeting}
-                      filteredTypes={filteredTypes}
                     />
                   )}
                   {viewMode === 'day' && (
@@ -451,7 +448,6 @@ export default function CalendarPage({
                       selectedDate={selectedDate}
                       meetings={meetings}
                       onMeetingClick={setSelectedMeeting}
-                      filteredTypes={filteredTypes}
                     />
                   )}
                 </CardContent>
@@ -462,8 +458,8 @@ export default function CalendarPage({
             <CalendarSidebar
               meetings={meetings}
               onMeetingClick={setSelectedMeeting}
-              filteredTypes={filteredTypes}
-              onFilterChange={setFilteredTypes}
+              filteredTypes={[]}
+              onFilterChange={() => {}}
               googleCalendarSettings={googleCalendarSettings}
             />
           </div>

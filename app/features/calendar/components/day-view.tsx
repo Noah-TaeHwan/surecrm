@@ -9,19 +9,15 @@ interface DayViewProps {
   selectedDate: Date;
   meetings: Meeting[];
   onMeetingClick: (meeting: Meeting) => void;
-  filteredTypes?: string[];
 }
 
 export function DayView({
   selectedDate,
   meetings,
   onMeetingClick,
-  filteredTypes = [],
 }: DayViewProps) {
-  // 필터링된 미팅들
-  const filteredMeetings = meetings.filter(meeting =>
-    filteredTypes.length === 0 || filteredTypes.includes(meeting.type)
-  );
+  // 모든 미팅 표시 (필터링 제거)
+  const filteredMeetings = meetings;
 
   // 선택된 날짜의 미팅들만 필터링
   const dateStr = selectedDate.toISOString().split('T')[0];
