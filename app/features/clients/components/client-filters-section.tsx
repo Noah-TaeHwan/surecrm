@@ -15,6 +15,7 @@ import {
 } from '~/common/components/ui/select';
 import { Separator } from '~/common/components/ui/separator';
 import { Badge } from '~/common/components/ui/badge';
+import { ToggleGroup, ToggleGroupItem } from '~/common/components/ui/toggle-group';
 import { 
   Search, 
   Filter, 
@@ -26,8 +27,7 @@ import {
 } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import { useDeviceType } from '~/common/hooks';
-import { 
-  MobileFilterModal, 
+import MobileFilterModal, { 
   type MobileFilterOptions 
 } from './mobile-filter-modal';
 
@@ -72,16 +72,13 @@ export function ClientFiltersSection({
   
   // 기본 고급 필터 상태
   const defaultAdvancedFilters: MobileFilterOptions = {
-    importance: [],
     stages: [],
-    referralStatus: [],
-    insuranceTypes: [],
-    premiumRange: [0, 1000000],
-    dateRange: { type: 'all' },
-    tags: [],
-    engagementScore: [0, 10],
-    conversionProbability: [0, 100],
-    referralCount: [0, 50],
+    importance: [],
+    sources: [],
+    ageRange: [20, 80],
+    hasPolicy: null,
+    sortBy: 'name',
+    sortDirection: 'asc',
   };
 
   const currentAdvancedFilters = advancedFilters || defaultAdvancedFilters;
@@ -97,16 +94,12 @@ export function ClientFiltersSection({
     if (searchQuery.trim()) count++;
     
     // 고급 필터들
-    if (currentAdvancedFilters.importance.length > 0) count++;
     if (currentAdvancedFilters.stages.length > 0) count++;
-    if (currentAdvancedFilters.referralStatus.length > 0) count++;
-    if (currentAdvancedFilters.insuranceTypes.length > 0) count++;
-    if (currentAdvancedFilters.tags.length > 0) count++;
-    if (currentAdvancedFilters.premiumRange[0] > 0 || currentAdvancedFilters.premiumRange[1] < 1000000) count++;
-    if (currentAdvancedFilters.engagementScore[0] > 0 || currentAdvancedFilters.engagementScore[1] < 10) count++;
-    if (currentAdvancedFilters.conversionProbability[0] > 0 || currentAdvancedFilters.conversionProbability[1] < 100) count++;
-    if (currentAdvancedFilters.referralCount[0] > 0 || currentAdvancedFilters.referralCount[1] < 50) count++;
-    if (currentAdvancedFilters.dateRange.type !== 'all') count++;
+    if (currentAdvancedFilters.importance.length > 0) count++;
+    if (currentAdvancedFilters.sources.length > 0) count++;
+    if (currentAdvancedFilters.ageRange[0] !== 20 || currentAdvancedFilters.ageRange[1] !== 80) count++;
+    if (currentAdvancedFilters.hasPolicy !== null) count++;
+    if (currentAdvancedFilters.sortBy !== 'name' || currentAdvancedFilters.sortDirection !== 'asc') count++;
     
     return count;
   }, [
@@ -154,15 +147,15 @@ export function ClientFiltersSection({
       );
     }
     
-    if (currentAdvancedFilters.insuranceTypes.length > 0) {
+    if (currentAdvancedFilters.sources.length > 0) {
       badges.push(
-        <Badge key="insurance" variant="secondary" className="gap-1 text-xs py-1 px-2">
-          보험타입: {currentAdvancedFilters.insuranceTypes.length}개
+        <Badge key="sources" variant="secondary" className="gap-1 text-xs py-1 px-2">
+          출처: {currentAdvancedFilters.sources.length}개
           <X 
             className="h-3 w-3 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full p-0.5" 
             onClick={() => onAdvancedFiltersChange?.({
               ...currentAdvancedFilters,
-              insuranceTypes: []
+              sources: []
             })}
           />
         </Badge>
@@ -224,22 +217,31 @@ export function ClientFiltersSection({
             {/* 뷰 모드 토글 - 모바일에서도 한 줄로 우측 정렬 */}
             <div className="flex items-center gap-2 justify-end md:justify-start">
               <Separator orientation="vertical" className="h-6 hidden md:block" />
-              <Button
-                variant={viewMode === 'cards' ? 'default' : 'outline'}
-                className="h-10 w-10"
-                onClick={() => setViewMode('cards')}
-                title="카드 보기"
+              
+              {/* 🎯 ToggleGroup으로 개선된 뷰 모드 선택 */}
+              <ToggleGroup 
+                type="single" 
+                value={viewMode} 
+                onValueChange={(value) => value && setViewMode(value as 'cards' | 'table')}
+                className="bg-slate-50 dark:bg-slate-800 p-1 rounded-lg"
               >
-                <LayoutGrid className="h-4 w-4" />
-              </Button>
-              <Button
-                variant={viewMode === 'table' ? 'default' : 'outline'}
-                className="h-10 w-10"
-                onClick={() => setViewMode('table')}
-                title="테이블 보기"
-              >
-                <LayoutList className="h-4 w-4" />
-              </Button>
+                <ToggleGroupItem 
+                  value="cards" 
+                  className="flex items-center gap-2 px-3 py-2 text-sm data-[state=on]:bg-white data-[state=on]:shadow-sm dark:data-[state=on]:bg-slate-700"
+                  title="카드로 보기"
+                >
+                  <LayoutGrid className="h-4 w-4" />
+                  <span className="hidden sm:inline">카드뷰</span>
+                </ToggleGroupItem>
+                <ToggleGroupItem 
+                  value="table" 
+                  className="flex items-center gap-2 px-3 py-2 text-sm data-[state=on]:bg-white data-[state=on]:shadow-sm dark:data-[state=on]:bg-slate-700"
+                  title="테이블로 보기"
+                >
+                  <LayoutList className="h-4 w-4" />
+                  <span className="hidden sm:inline">테이블뷰</span>
+                </ToggleGroupItem>
+              </ToggleGroup>
             </div>
           </div>
         </div>
@@ -386,17 +388,36 @@ export function ClientFiltersSection({
       {/* 모바일 고급 필터 모달 */}
       <MobileFilterModal
         isOpen={isAdvancedFilterOpen}
-        onOpenChange={setIsAdvancedFilterOpen}
+        onClose={() => setIsAdvancedFilterOpen(false)}
         filters={currentAdvancedFilters}
         onFiltersChange={onAdvancedFiltersChange || (() => {})}
-        onApply={() => {
+        onApplyFilters={() => {
           // 필터 적용 후 추가 처리 로직
           console.log('Advanced filters applied:', currentAdvancedFilters);
         }}
-        onReset={() => {
+        onClearFilters={() => {
           onAdvancedFiltersChange?.(defaultAdvancedFilters);
         }}
-        activeFilterCount={activeFilterCount}
+        availableStages={[
+          { id: 'prospect', name: '잠재고객' },
+          { id: 'consultation', name: '첫 상담' },
+          { id: 'needs_analysis', name: '니즈 분석' },
+          { id: 'proposal', name: '상품 설명' },
+          { id: 'negotiation', name: '계약 검토' },
+          { id: 'closed_won', name: '계약 완료' },
+        ]}
+        availableImportance={[
+          { value: 'high', label: '키맨' },
+          { value: 'medium', label: '일반' },
+          { value: 'low', label: '관찰' },
+        ]}
+        availableSources={[
+          { value: 'referral', label: '소개' },
+          { value: 'direct', label: '직접 영업' },
+          { value: 'online', label: '온라인' },
+          { value: 'event', label: '이벤트' },
+        ]}
+        activeFiltersCount={activeFilterCount}
       />
     </Card>
   );

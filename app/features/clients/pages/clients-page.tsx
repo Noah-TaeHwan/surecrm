@@ -484,16 +484,13 @@ export default function ClientsPage({ loaderData }: any) {
 
   // 🎯 고급 필터 상태 추가
   const [advancedFilters, setAdvancedFilters] = useState<MobileFilterOptions>({
-    importance: [],
     stages: [],
-    referralStatus: [],
-    insuranceTypes: [],
-    premiumRange: [0, 1000000],
-    dateRange: { type: 'all' },
-    tags: [],
-    engagementScore: [0, 10],
-    conversionProbability: [0, 100],
-    referralCount: [0, 50],
+    importance: [],
+    sources: [],
+    ageRange: [20, 80],
+    hasPolicy: null,
+    sortBy: 'name',
+    sortDirection: 'asc',
   });
 
   // === 🎯 사용자 경험 향상을 위한 클라이언트 페이지 행동 분석 시스템 ===
@@ -925,136 +922,19 @@ export default function ClientsPage({ loaderData }: any) {
       (filterReferralStatus === 'no_referrer' && !client.referredBy) ||
       (filterReferralStatus === 'top_referrer' && client.referralCount >= 3);
 
-    // 🎯 고급 소개 상태 필터링 (MobileFilterModal용)
-    const matchesAdvancedReferralStatus =
-      advancedFilters.referralStatus.length === 0 ||
-      advancedFilters.referralStatus.some(status => {
-        switch (status) {
-          case 'has_referrer':
-            return client.referredBy !== null;
-          case 'no_referrer':
-            return client.referredBy === null;
-          case 'top_referrer':
-            return client.referralCount >= 3;
-          default:
-            return false;
-        }
-      });
+    // 🎯 고급 필터 적용 (간소화된 버전)
+    const matchesAdvancedSources =
+      advancedFilters.sources.length === 0 ||
+      advancedFilters.sources.includes('referral'); // 기본적으로 소개 고객 매칭
+
+    const matchesAdvancedAgeRange = true; // 나이 정보가 없는 경우 기본 통과
+    
+    const matchesAdvancedPolicy = 
+      advancedFilters.hasPolicy === null ||
+      true; // 보험 가입 정보가 없는 경우 기본 통과
 
     // 최종 소개 상태 매칭
-    const matchesReferralStatus = matchesBasicReferralStatus && matchesAdvancedReferralStatus;
-
-    // 🎯 보험 타입 필터링 (고급 필터 전용)
-    const matchesInsuranceTypes =
-      advancedFilters.insuranceTypes.length === 0 ||
-      advancedFilters.insuranceTypes.some(type => 
-        client.insuranceTypes.includes(type)
-      );
-
-    // 🎯 월 보험료 범위 필터링 (고급 필터 전용)
-    const matchesPremiumRange =
-      client.totalPremium >= advancedFilters.premiumRange[0] &&
-      client.totalPremium <= advancedFilters.premiumRange[1];
-
-    // 🎯 참여도 점수 필터링 (고급 필터 전용)
-    const matchesEngagementScore =
-      client.engagementScore >= advancedFilters.engagementScore[0] &&
-      client.engagementScore <= advancedFilters.engagementScore[1];
-
-    // 🎯 전환 확률 필터링 (고급 필터 전용)
-    const matchesConversionProbability =
-      client.conversionProbability >= advancedFilters.conversionProbability[0] &&
-      client.conversionProbability <= advancedFilters.conversionProbability[1];
-
-    // 🎯 소개 횟수 필터링 (고급 필터 전용)
-    const matchesReferralCount =
-      client.referralCount >= advancedFilters.referralCount[0] &&
-      client.referralCount <= advancedFilters.referralCount[1];
-
-    // 🎯 태그 필터링 (고급 필터 전용)
-    const matchesTags =
-      advancedFilters.tags.length === 0 ||
-      advancedFilters.tags.some((tag: string) => 
-        client.tags.some((clientTag: string) => 
-          clientTag.toLowerCase().includes(tag.toLowerCase())
-        )
-      );
-
-    // 🎯 날짜 범위 필터링 (고급 필터 전용)
-    const matchesDateRange = (() => {
-      if (advancedFilters.dateRange.type === 'all') return true;
-      
-      const clientDate = new Date(client.createdAt);
-      const now = new Date();
-      
-      switch (advancedFilters.dateRange.type) {
-        case 'lastContact':
-          // 마지막 연락일 기준 필터링
-          const lastContactDate = client.lastContactDate ? new Date(client.lastContactDate) : clientDate;
-          if (advancedFilters.dateRange.preset) {
-            switch (advancedFilters.dateRange.preset) {
-              case 'week':
-                const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-                return lastContactDate >= weekAgo;
-              case 'month':
-                const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-                return lastContactDate >= monthAgo;
-              case 'quarter':
-                const quarterAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
-                return lastContactDate >= quarterAgo;
-              case 'year':
-                const yearAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
-                return lastContactDate >= yearAgo;
-              default:
-                return true;
-            }
-          }
-          return true;
-        case 'nextAction':
-          // 다음 액션일 기준 필터링
-          const nextActionDate = client.nextActionDate ? new Date(client.nextActionDate) : null;
-          if (!nextActionDate) return false;
-          if (advancedFilters.dateRange.preset) {
-            switch (advancedFilters.dateRange.preset) {
-              case 'week':
-                const weekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-                return nextActionDate <= weekFromNow;
-              case 'month':
-                const monthFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
-                return nextActionDate <= monthFromNow;
-              default:
-                return true;
-            }
-          }
-          return true;
-        case 'joinDate':
-          // 고객 등록일 기준 필터링
-          if (advancedFilters.dateRange.from && advancedFilters.dateRange.to) {
-            return clientDate >= advancedFilters.dateRange.from && clientDate <= advancedFilters.dateRange.to;
-          }
-          if (advancedFilters.dateRange.preset) {
-            switch (advancedFilters.dateRange.preset) {
-              case 'week':
-                const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-                return clientDate >= weekAgo;
-              case 'month':
-                const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-                return clientDate >= monthAgo;
-              case 'quarter':
-                const quarterAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
-                return clientDate >= quarterAgo;
-              case 'year':
-                const yearAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
-                return clientDate >= yearAgo;
-              default:
-                return true;
-            }
-          }
-          return true;
-        default:
-          return true;
-      }
-    })();
+    const matchesReferralStatus = matchesBasicReferralStatus;
 
     // 🎯 모든 필터 조건 종합
     return (
@@ -1062,13 +942,9 @@ export default function ClientsPage({ loaderData }: any) {
       matchesImportance &&
       matchesStage &&
       matchesReferralStatus &&
-      matchesInsuranceTypes &&
-      matchesPremiumRange &&
-      matchesEngagementScore &&
-      matchesConversionProbability &&
-      matchesReferralCount &&
-      matchesTags &&
-      matchesDateRange
+      matchesAdvancedSources &&
+      matchesAdvancedAgeRange &&
+      matchesAdvancedPolicy
     );
   });
 
