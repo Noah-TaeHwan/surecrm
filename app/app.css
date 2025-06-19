@@ -1815,6 +1815,162 @@ textarea {
 
 .pipeline-board .scrollbar-hide::-webkit-scrollbar {
   display: none !important;
+}
+
+/* 탭 캐러셀 전용 스크롤바 완전 숨김 - 최강력 버전 */
+.tab-carousel-container {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+  -webkit-overflow-scrolling: touch !important;
+  overflow: -moz-scrollbars-none !important;
+  /* 추가 브라우저 호환성 */
+  scrollbar-color: transparent transparent !important;
+}
+
+.tab-carousel-container::-webkit-scrollbar {
+  width: 0px !important;
+  height: 0px !important;
+  background: transparent !important;
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+.tab-carousel-container::-webkit-scrollbar-track {
+  background: transparent !important;
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+.tab-carousel-container::-webkit-scrollbar-thumb {
+  background: transparent !important;
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+.tab-carousel-container::-webkit-scrollbar-corner {
+  background: transparent !important;
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+/* 모든 하위 요소에도 스크롤바 숨김 적용 */
+.tab-carousel-container * {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.tab-carousel-container *::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* 극강 스크롤바 숨김 - 모든 상황 대응 */
+.tab-carousel-container,
+.tab-carousel-container * {
+  /* 모든 브라우저의 스크롤바 완전 제거 */
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+  scrollbar-color: transparent transparent !important;
+}
+
+/* WebKit 계열 브라우저 (Chrome, Safari, Edge) 완전 제거 */
+.tab-carousel-container::-webkit-scrollbar,
+.tab-carousel-container *::-webkit-scrollbar {
+  display: none !important;
+  -webkit-appearance: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+.tab-carousel-container::-webkit-scrollbar-track,
+.tab-carousel-container *::-webkit-scrollbar-track {
+  display: none !important;
+  background: transparent !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+.tab-carousel-container::-webkit-scrollbar-thumb,
+.tab-carousel-container *::-webkit-scrollbar-thumb {
+  display: none !important;
+  background: transparent !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+/* 최종 핵폭탄급 스크롤바 제거 - 모든 가능한 셀렉터 */
+div.tab-carousel-container {
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+  scrollbar-color: transparent transparent !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+div.tab-carousel-container::-webkit-scrollbar {
+  width: 0px !important;
+  height: 0px !important;
+  display: none !important;
+  background: transparent !important;
+  -webkit-appearance: none !important;
+}
+
+div.tab-carousel-container::-webkit-scrollbar-track {
+  display: none !important;
+  background: transparent !important;
+}
+
+div.tab-carousel-container::-webkit-scrollbar-thumb {
+  display: none !important;
+  background: transparent !important;
+}
+
+div.tab-carousel-container::-webkit-scrollbar-corner {
+  display: none !important;
+  background: transparent !important;
+}
+
+/* 브라우저별 추가 대응 */
+div.tab-carousel-container::-webkit-scrollbar-button {
+  display: none !important;
+}
+
+div.tab-carousel-container::-webkit-scrollbar-track-piece {
+  display: none !important;
+}
+
+/* 절대 최종 보증 - 모든 브라우저 모든 상황 스크롤바 완전 제거 */
+[class*="tab-carousel"] {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+  scrollbar-color: transparent !important;
+}
+
+[class*="tab-carousel"]::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+  background: none !important;
+  -webkit-appearance: none !important;
+}
+
+/* 더 구체적인 셀렉터로 우선순위 높이기 */
+.lg\\:hidden .tab-carousel-container {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.lg\\:hidden .tab-carousel-container::-webkit-scrollbar {
+  display: none !important;
   width: 0 !important;
   height: 0 !important;
 }
@@ -2281,6 +2437,270 @@ div.cursor-pointer:focus-visible:not(:hover),
 /* 🎯 기존 고객 영업 기회 모달에서만 - 고객 카드 호버 효과를 빨간색으로 변경 */
 [data-slot="dialog-content"] .hover\:border-border:hover {
   border-color: oklch(0.645 0.246 16.439) !important;
+}
+
+/* =================================================================
+   🚀 ULTIMATE SCROLLBAR REMOVAL - 탭 캐러셀 전용
+   모든 브라우저와 환경에서 100% 스크롤바 제거 보장
+   ================================================================= */
+
+/* ⚡ 1단계: 기본 스크롤바 제거 - 모든 탭 캐러셀 관련 요소 */
+.tab-carousel-container,
+.tab-carousel-container *,
+div.tab-carousel-container,
+div.tab-carousel-container *,
+[class*="tab-carousel"],
+[class*="tab-carousel"] *,
+.lg\:hidden .tab-carousel-container,
+.lg\:hidden .tab-carousel-container *,
+.lg\:hidden [class*="tab-carousel"],
+.lg\:hidden [class*="tab-carousel"] * {
+  /* Firefox & IE */
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+  
+  /* Safari */
+  -webkit-overflow-scrolling: touch !important;
+  
+  /* 모든 브라우저 기본값 무력화 */
+  scrollbar-color: transparent transparent !important;
+  scrollbar-gutter: stable !important;
+}
+
+/* ⚡ 2단계: 웹킷 스크롤바 완전 제거 - 주요 셀렉터 */
+.tab-carousel-container::-webkit-scrollbar,
+.tab-carousel-container *::-webkit-scrollbar,
+div.tab-carousel-container::-webkit-scrollbar,
+div.tab-carousel-container *::-webkit-scrollbar,
+[class*="tab-carousel"]::-webkit-scrollbar,
+[class*="tab-carousel"] *::-webkit-scrollbar,
+.lg\:hidden .tab-carousel-container::-webkit-scrollbar,
+.lg\:hidden .tab-carousel-container *::-webkit-scrollbar,
+.lg\:hidden [class*="tab-carousel"]::-webkit-scrollbar,
+.lg\:hidden [class*="tab-carousel"] *::-webkit-scrollbar {
+  display: none !important;
+  width: 0px !important;
+  height: 0px !important;
+  background: transparent !important;
+  -webkit-appearance: none !important;
+}
+
+/* ⚡ 3단계: 웹킷 스크롤바 트랙 완전 제거 */
+.tab-carousel-container::-webkit-scrollbar-track,
+.tab-carousel-container *::-webkit-scrollbar-track,
+div.tab-carousel-container::-webkit-scrollbar-track,
+div.tab-carousel-container *::-webkit-scrollbar-track,
+[class*="tab-carousel"]::-webkit-scrollbar-track,
+[class*="tab-carousel"] *::-webkit-scrollbar-track,
+.lg\:hidden .tab-carousel-container::-webkit-scrollbar-track,
+.lg\:hidden .tab-carousel-container *::-webkit-scrollbar-track,
+.lg\:hidden [class*="tab-carousel"]::-webkit-scrollbar-track,
+.lg\:hidden [class*="tab-carousel"] *::-webkit-scrollbar-track {
+  display: none !important;
+  width: 0px !important;
+  height: 0px !important;
+  background: transparent !important;
+  -webkit-appearance: none !important;
+}
+
+/* ⚡ 4단계: 웹킷 스크롤바 썸 완전 제거 */
+.tab-carousel-container::-webkit-scrollbar-thumb,
+.tab-carousel-container *::-webkit-scrollbar-thumb,
+div.tab-carousel-container::-webkit-scrollbar-thumb,
+div.tab-carousel-container *::-webkit-scrollbar-thumb,
+[class*="tab-carousel"]::-webkit-scrollbar-thumb,
+[class*="tab-carousel"] *::-webkit-scrollbar-thumb,
+.lg\:hidden .tab-carousel-container::-webkit-scrollbar-thumb,
+.lg\:hidden .tab-carousel-container *::-webkit-scrollbar-thumb,
+.lg\:hidden [class*="tab-carousel"]::-webkit-scrollbar-thumb,
+.lg\:hidden [class*="tab-carousel"] *::-webkit-scrollbar-thumb {
+  display: none !important;
+  width: 0px !important;
+  height: 0px !important;
+  background: transparent !important;
+  -webkit-appearance: none !important;
+}
+
+/* ⚡ 5단계: 웹킷 스크롤바 모든 하위 요소 완전 제거 */
+.tab-carousel-container::-webkit-scrollbar-corner,
+.tab-carousel-container *::-webkit-scrollbar-corner,
+div.tab-carousel-container::-webkit-scrollbar-corner,
+div.tab-carousel-container *::-webkit-scrollbar-corner,
+[class*="tab-carousel"]::-webkit-scrollbar-corner,
+[class*="tab-carousel"] *::-webkit-scrollbar-corner,
+.lg\:hidden .tab-carousel-container::-webkit-scrollbar-corner,
+.lg\:hidden .tab-carousel-container *::-webkit-scrollbar-corner,
+.lg\:hidden [class*="tab-carousel"]::-webkit-scrollbar-corner,
+.lg\:hidden [class*="tab-carousel"] *::-webkit-scrollbar-corner,
+
+.tab-carousel-container::-webkit-scrollbar-button,
+.tab-carousel-container *::-webkit-scrollbar-button,
+div.tab-carousel-container::-webkit-scrollbar-button,
+div.tab-carousel-container *::-webkit-scrollbar-button,
+[class*="tab-carousel"]::-webkit-scrollbar-button,
+[class*="tab-carousel"] *::-webkit-scrollbar-button,
+.lg\:hidden .tab-carousel-container::-webkit-scrollbar-button,
+.lg\:hidden .tab-carousel-container *::-webkit-scrollbar-button,
+.lg\:hidden [class*="tab-carousel"]::-webkit-scrollbar-button,
+.lg\:hidden [class*="tab-carousel"] *::-webkit-scrollbar-button,
+
+.tab-carousel-container::-webkit-scrollbar-track-piece,
+.tab-carousel-container *::-webkit-scrollbar-track-piece,
+div.tab-carousel-container::-webkit-scrollbar-track-piece,
+div.tab-carousel-container *::-webkit-scrollbar-track-piece,
+[class*="tab-carousel"]::-webkit-scrollbar-track-piece,
+[class*="tab-carousel"] *::-webkit-scrollbar-track-piece,
+.lg\:hidden .tab-carousel-container::-webkit-scrollbar-track-piece,
+.lg\:hidden .tab-carousel-container *::-webkit-scrollbar-track-piece,
+.lg\:hidden [class*="tab-carousel"]::-webkit-scrollbar-track-piece,
+.lg\:hidden [class*="tab-carousel"] *::-webkit-scrollbar-track-piece {
+  display: none !important;
+  width: 0px !important;
+  height: 0px !important;
+  background: transparent !important;
+  -webkit-appearance: none !important;
+}
+
+/* 🔥 6단계: 미디어 쿼리로 모바일/태블릿에서 강제 */
+@media (max-width: 1023px) {
+  .tab-carousel-container,
+  .tab-carousel-container *,
+  [class*="tab-carousel"],
+  [class*="tab-carousel"] * {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+  
+  .tab-carousel-container::-webkit-scrollbar,
+  .tab-carousel-container *::-webkit-scrollbar,
+  [class*="tab-carousel"]::-webkit-scrollbar,
+  [class*="tab-carousel"] *::-webkit-scrollbar {
+    display: none !important;
+    width: 0px !important;
+    height: 0px !important;
+  }
+}
+
+/* 💀 7단계: 핵 옵션 - 모든 가능한 스크롤바 제거 */
+html .tab-carousel-container,
+html .tab-carousel-container *,
+html div.tab-carousel-container,
+html div.tab-carousel-container *,
+html [class*="tab-carousel"],
+html [class*="tab-carousel"] *,
+body .tab-carousel-container,
+body .tab-carousel-container *,
+body div.tab-carousel-container,
+body div.tab-carousel-container *,
+body [class*="tab-carousel"],
+body [class*="tab-carousel"] *,
+#root .tab-carousel-container,
+#root .tab-carousel-container *,
+#root div.tab-carousel-container,
+#root div.tab-carousel-container *,
+#root [class*="tab-carousel"],
+#root [class*="tab-carousel"] * {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+  scrollbar-color: transparent transparent !important;
+}
+
+html .tab-carousel-container::-webkit-scrollbar,
+html .tab-carousel-container *::-webkit-scrollbar,
+html div.tab-carousel-container::-webkit-scrollbar,
+html div.tab-carousel-container *::-webkit-scrollbar,
+html [class*="tab-carousel"]::-webkit-scrollbar,
+html [class*="tab-carousel"] *::-webkit-scrollbar,
+body .tab-carousel-container::-webkit-scrollbar,
+body .tab-carousel-container *::-webkit-scrollbar,
+body div.tab-carousel-container::-webkit-scrollbar,
+body div.tab-carousel-container *::-webkit-scrollbar,
+body [class*="tab-carousel"]::-webkit-scrollbar,
+body [class*="tab-carousel"] *::-webkit-scrollbar,
+#root .tab-carousel-container::-webkit-scrollbar,
+#root .tab-carousel-container *::-webkit-scrollbar,
+#root div.tab-carousel-container::-webkit-scrollbar,
+#root div.tab-carousel-container *::-webkit-scrollbar,
+#root [class*="tab-carousel"]::-webkit-scrollbar,
+#root [class*="tab-carousel"] *::-webkit-scrollbar {
+  display: none !important;
+  width: 0px !important;
+  height: 0px !important;
+  background: transparent !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  position: absolute !important;
+  left: -9999px !important;
+  top: -9999px !important;
+}
+
+/* 🚨 8단계: 최후의 수단 - overflow 스타일 강제 */
+.tab-carousel-container {
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+/* 🔥 9단계: 데이터 속성으로 스크롤바 완전 제거 */
+[data-scrollbar-hidden="true"],
+[data-scrollbar-hidden="true"] *,
+div[data-scrollbar-hidden="true"],
+div[data-scrollbar-hidden="true"] * {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+  scrollbar-color: transparent !important;
+}
+
+[data-scrollbar-hidden="true"]::-webkit-scrollbar,
+[data-scrollbar-hidden="true"] *::-webkit-scrollbar,
+div[data-scrollbar-hidden="true"]::-webkit-scrollbar,
+div[data-scrollbar-hidden="true"] *::-webkit-scrollbar {
+  display: none !important;
+  width: 0px !important;
+  height: 0px !important;
+  background: transparent !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  position: absolute !important;
+  left: -9999px !important;
+  top: -9999px !important;
+  z-index: -9999 !important;
+}
+
+/* 💀 10단계: 절대 최종 보장 - 모든 가능한 셀렉터 조합 */
+div.flex.gap-3.px-5.py-3.overflow-x-auto,
+div.flex.gap-3.px-5.py-3.overflow-x-auto *,
+.flex.gap-3.px-5.py-3.overflow-x-auto.overflow-y-hidden,
+.flex.gap-3.px-5.py-3.overflow-x-auto.overflow-y-hidden *,
+.lg\:hidden div.flex.gap-3.px-5.py-3.overflow-x-auto,
+.lg\:hidden div.flex.gap-3.px-5.py-3.overflow-x-auto *,
+.lg\:hidden .flex.gap-3.px-5.py-3.overflow-x-auto.overflow-y-hidden,
+.lg\:hidden .flex.gap-3.px-5.py-3.overflow-x-auto.overflow-y-hidden * {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+  scrollbar-color: transparent !important;
+}
+
+div.flex.gap-3.px-5.py-3.overflow-x-auto::-webkit-scrollbar,
+div.flex.gap-3.px-5.py-3.overflow-x-auto *::-webkit-scrollbar,
+.flex.gap-3.px-5.py-3.overflow-x-auto.overflow-y-hidden::-webkit-scrollbar,
+.flex.gap-3.px-5.py-3.overflow-x-auto.overflow-y-hidden *::-webkit-scrollbar,
+.lg\:hidden div.flex.gap-3.px-5.py-3.overflow-x-auto::-webkit-scrollbar,
+.lg\:hidden div.flex.gap-3.px-5.py-3.overflow-x-auto *::-webkit-scrollbar,
+.lg\:hidden .flex.gap-3.px-5.py-3.overflow-x-auto.overflow-y-hidden::-webkit-scrollbar,
+.lg\:hidden .flex.gap-3.px-5.py-3.overflow-x-auto.overflow-y-hidden *::-webkit-scrollbar {
+  display: none !important;
+  width: 0px !important;
+  height: 0px !important;
+  background: transparent !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  position: absolute !important;
+  left: -9999px !important;
+  top: -9999px !important;
+  z-index: -9999 !important;
 }
 
 

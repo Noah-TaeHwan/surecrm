@@ -105,10 +105,10 @@ export function ResponsiveClientDetail({
   const [newTag, setNewTag] = useState('');
   const [isAddingTag, setIsAddingTag] = useState(false);
   
-  // 캐러셀 스와이프 지원을 위한 state와 ref
+  // 캐러셀 스크롤용 state (스와이프 자동 이동 제거됨)
+  
+  // 캐러셀 스크롤 제어를 위한 ref
   const carouselRef = useRef<HTMLDivElement>(null);
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
   if (!client) {
     return (
@@ -147,6 +147,29 @@ export function ResponsiveClientDetail({
     { id: 'insurance', label: '보험계약', icon: Shield },
     { id: 'family', label: '가족', icon: Network },
   ];
+
+  // 탭 변경 시 캐러셀 자동 스크롤
+  useEffect(() => {
+    if (carouselRef.current && activeTab) {
+      const currentIndex = mobileTabs.findIndex(tab => tab.id === activeTab);
+      if (currentIndex !== -1) {
+        const carousel = carouselRef.current;
+        const tabButton = carousel.children[currentIndex] as HTMLElement;
+        
+        if (tabButton) {
+          // 탭 버튼을 중앙으로 스크롤
+          const carouselRect = carousel.getBoundingClientRect();
+          const buttonRect = tabButton.getBoundingClientRect();
+          const scrollLeft = buttonRect.left - carouselRect.left + carousel.scrollLeft - (carouselRect.width / 2) + (buttonRect.width / 2);
+          
+          carousel.scrollTo({
+            left: scrollLeft,
+            behavior: 'smooth'
+          });
+        }
+      }
+    }
+  }, [activeTab]);
 
   const calculateAge = (birthDate: string) => {
     if (!birthDate) return null;
@@ -195,28 +218,17 @@ export function ResponsiveClientDetail({
     }
   };
 
-  // 스와이프 제스처 처리
+  // 탭 캐러셀 터치 이벤트 (스와이프 자동 이동 제거)
   const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
+    // 터치 시작점만 기록 (자동 이동 없음)
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
+    // 터치 이동 처리 (자동 이동 없음)
   };
 
   const handleTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
-    
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > 50;
-    const isRightSwipe = distance < -50;
-
-    if (isLeftSwipe) {
-      goToNextTab();
-    } else if (isRightSwipe) {
-      goToPrevTab();
-    }
+    // 터치 종료 처리 (자동 이동 없음)
   };
 
   return (
@@ -225,7 +237,7 @@ export function ResponsiveClientDetail({
       <div className="lg:hidden">
 
         {/* 🆕 모바일/태블릿 기본정보 접기/펼치기 섹션 */}
-        <div className="border-b bg-background">
+        <div className="border-b bg-background ">
           <Collapsible 
             open={isClientInfoExpanded} 
             onOpenChange={setIsClientInfoExpanded}
@@ -897,64 +909,108 @@ export function ResponsiveClientDetail({
           </Collapsible>
         </div>
 
-        {/* 모바일/태블릿 탭 캐러셀 네비게이션 */}
-        <div className="sticky top-0 z-30 bg-background border-b shadow-sm">
-          <div className="relative px-4 py-3">
-            {/* 이전/다음 버튼 */}
-            <button
-              onClick={goToPrevTab}
-              disabled={mobileTabs.findIndex(tab => tab.id === activeTab) === 0}
-              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 bg-background/90 border rounded-full flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed hover:bg-accent shadow-sm"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </button>
-
-            <button
-              onClick={goToNextTab}
-              disabled={mobileTabs.findIndex(tab => tab.id === activeTab) === mobileTabs.length - 1}
-              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 bg-background/90 border rounded-full flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed hover:bg-accent shadow-sm"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </button>
-
-            {/* 캐러셀 탭 버튼들 */}
-            <div 
-              className="mx-8 overflow-hidden"
-              onTouchStart={handleTouchStart}
-              onTouchMove={handleTouchMove}
-              onTouchEnd={handleTouchEnd}
-            >
+        {/* 🎨 모던 스마트 탭 네비게이션 - 완전 재설계 */}
+        <div className="sticky top-0 z-30 bg-gradient-to-r from-background via-background/98 to-background backdrop-blur-xl border-b border-border/50 overflow-hidden">
+          <div className="relative">
+            {/* 탭 컨테이너 */}
+            <div className="relative overflow-hidden">
               <div 
                 ref={carouselRef}
-                className="flex transition-transform duration-300 ease-in-out"
-                style={{ 
-                  transform: `translateX(-${mobileTabs.findIndex(tab => tab.id === activeTab) * 100}%)` 
-                }}
+className="flex gap-3 px-5 py-3 overflow-x-auto overflow-y-hidden snap-x snap-mandatory scrollbar-hide scrollbar-none tab-carousel-container"
+                data-scrollbar-hidden="true"
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+style={{ 
+                  scrollBehavior: 'smooth',
+                  WebkitOverflowScrolling: 'touch',
+                  scrollbarWidth: 'none',
+                  msOverflowStyle: 'none',
+                  overflowX: 'auto',
+                  overflowY: 'hidden',
+                  scrollbarColor: 'transparent transparent'
+                } as React.CSSProperties}
               >
                 {mobileTabs.map((tab, index) => {
                   const Icon = tab.icon;
                   const isActive = activeTab === tab.id;
+                  const currentIndex = mobileTabs.findIndex(t => t.id === activeTab);
+                  
+                  // 탭 위치에 따른 스타일 계산
+                  const distance = Math.abs(index - currentIndex);
+                  const isAdjacent = distance === 1;
+                  const isNear = distance <= 2;
+                  
                   return (
-                    <div key={tab.id} className="w-full flex-shrink-0">
-                      <button
-                        onClick={() => onTabChange?.(tab.id)}
-                        className={cn(
-                          "w-full h-10 px-4 text-sm rounded-md transition-colors flex items-center justify-center gap-2 font-medium",
-                          isActive 
-                            ? "bg-primary text-primary-foreground shadow-sm" 
-                            : "hover:bg-accent hover:text-accent-foreground text-muted-foreground"
-                        )}
-                      >
-                        <Icon className="h-4 w-4" />
+                    <button
+                      key={tab.id}
+                      onClick={() => onTabChange?.(tab.id)}
+                      className={cn(
+                        "relative flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-500 snap-center border min-w-fit",
+                        "transform-gpu will-change-transform",
+                        // 활성 탭 스타일
+                        isActive && [
+                          "bg-gradient-to-r from-primary via-primary to-primary/90 text-primary-foreground",
+                          "shadow-lg shadow-primary/25 scale-105 border-primary/20",
+                          "ring-2 ring-primary/20 ring-offset-2 ring-offset-background"
+                        ],
+                        // 인접 탭 스타일 (부드러운 전환을 위해)
+                        !isActive && isAdjacent && [
+                          "bg-gradient-to-r from-muted/50 to-muted/30 text-foreground/80 border-border/50",
+                          "hover:bg-gradient-to-r hover:from-accent hover:to-accent/80 hover:text-accent-foreground",
+                          "hover:scale-102 hover:shadow-md"
+                        ],
+                        // 가까운 탭 스타일
+                        !isActive && !isAdjacent && isNear && [
+                          "bg-muted/30 text-muted-foreground border-border/30",
+                          "hover:bg-muted/50 hover:text-foreground/70 hover:scale-102"
+                        ],
+                        // 먼 탭 스타일
+                        !isActive && !isNear && [
+                          "bg-transparent text-muted-foreground/60 border-transparent",
+                          "hover:bg-muted/30 hover:text-muted-foreground"
+                        ]
+                      )}
+                    >
+                      {/* 아이콘 */}
+                      <div className={cn(
+                        "transition-all duration-300",
+                        isActive ? "scale-105" : "scale-100"
+                      )}>
+                        <Icon className={cn(
+                          "transition-all duration-300",
+                          isActive ? "h-4 w-4" : "h-3.5 w-3.5"
+                        )} />
+                      </div>
+                      
+                      {/* 라벨 */}
+                      <span className={cn(
+                        "text-sm font-medium transition-all duration-300 whitespace-nowrap",
+                        isActive && "font-semibold"
+                      )}>
                         {tab.label}
-                      </button>
-                    </div>
+                      </span>
+                      
+                      {/* 활성 탭 글로우 효과 */}
+                      {isActive && (
+                        <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/20 via-primary/10 to-primary/20 blur-sm -z-10" />
+                      )}
+                    </button>
                   );
                 })}
               </div>
             </div>
 
-            
+            {/* 진행률 인디케이터 바 */}
+            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-border/30">
+              <div 
+                className="h-full bg-gradient-to-r from-primary via-primary/80 to-primary transition-all duration-500 ease-out"
+                style={{ 
+                  width: `${((mobileTabs.findIndex(tab => tab.id === activeTab) + 1) / mobileTabs.length) * 100}%`,
+                  boxShadow: '0 0 8px rgba(var(--primary), 0.5)'
+                }}
+              />
+            </div>
           </div>
         </div>
 
@@ -966,7 +1022,7 @@ export function ResponsiveClientDetail({
 
       {/* 🎯 데스크톱 레이아웃 (lg 이상에서만 표시) - 기존 children을 그대로 렌더링 */}
       <div className="hidden lg:block">
-        {children}
+      {children}
       </div>
     </div>
   );
