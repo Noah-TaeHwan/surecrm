@@ -201,7 +201,7 @@ export function MainLayout({
         <main
           className={`flex-1 mt-16 ${
             isHydrated && !isInitialRender && isMobile ? 'pb-25' : 'pb-4'
-          } overflow-y-auto lg:p-4`}
+          } overflow-y-auto p-3 lg:p-4`}
         >
           {children}
         </main>
