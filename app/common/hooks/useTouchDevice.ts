@@ -70,11 +70,12 @@ class TouchDeviceStore {
     // DocumentTouch detection (legacy) - safer approach
     let hasDocumentTouch = false;
     try {
-      // @ts-ignore - DocumentTouch is for legacy browser support
+      // DocumentTouch is for legacy browser support
+      const DocumentTouch = (window as any).DocumentTouch;
       hasDocumentTouch = !!(
-        window.DocumentTouch &&
+        DocumentTouch &&
         document &&
-        document instanceof window.DocumentTouch
+        document instanceof DocumentTouch
       );
     } catch (error) {
       // Ignore errors in DocumentTouch detection
