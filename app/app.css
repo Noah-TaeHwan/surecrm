@@ -3078,25 +3078,19 @@ input[type="datetime-local"]:not([style*="color"]) {
 
 /* 🎨 활성 탭 특별 애니메이션 */
 .tab-carousel-button[data-active="true"] {
-  /* 부드러운 크기 증가 */
-  transform: translate3d(0, 0, 0) scale(1.02);
-  
-  /* 향상된 그림자 효과 */
-  filter: drop-shadow(0 4px 12px rgba(59, 130, 246, 0.15));
-  
   /* 🎯 일관되고 부드러운 전환 애니메이션 */
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 /* 🌊 호버 상태 부드러운 전환 */
 .tab-carousel-button:not([data-active="true"]):hover {
-  transform: translate3d(0, 0, 0) scale(1.01);
+  /* 호버 시 미묘한 변화만 */
   transition: all 0.2s ease-out;
 }
 
 /* 🎯 터치 피드백 최적화 */
 .tab-carousel-button:active {
-  transform: translate3d(0, 0, 0) scale(0.98);
+  /* 터치 시 미묘한 변화만 */
   transition: transform 0.1s ease-out;
 }
 
@@ -3117,8 +3111,8 @@ input[type="datetime-local"]:not([style*="color"]) {
   }
   
   .tab-carousel-button[data-active="true"] {
-    /* 모바일에서 활성 탭 강조 */
-    transform: translate3d(0, 0, 0) scale(1.03);
+    /* 모바일에서 더 빠른 응답만 */
+    transition-duration: 0.25s;
   }
 }
 

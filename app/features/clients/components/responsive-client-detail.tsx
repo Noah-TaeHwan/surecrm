@@ -952,14 +952,13 @@ export function ResponsiveClientDetail({
                         "tab-carousel-button",
                         // 🎯 부드러운 크기 및 border-radius 전환을 위한 CSS 변수 사용
                         isActive ? [
-                          // 활성 탭: 더 큰 패딩과 rounded 값
-                          "px-4 py-2 rounded-xl",
-                          "bg-gradient-to-r from-primary via-primary to-primary/90 text-white",
-                          "shadow-lg shadow-primary/25 border-primary/20",
-                          "ring-2 ring-primary/20 ring-offset-2 ring-offset-background",
+                          // 활성 탭: 미묘한 패딩 증가와 일관된 rounded 값
+                          "px-3.5 py-1.5 rounded-lg",
+                          "bg-primary text-white",
+                          "shadow-sm shadow-primary/20 border-primary/30",
                           "translate-y-0 z-10"
                         ] : [
-                          // 비활성 탭: 일반 패딩과 rounded 값
+                          // 비활성 탭: 기본 패딩과 rounded 값
                           "px-3 py-1.5 rounded-lg",
                           "bg-muted/30 text-muted-foreground border-border/30",
                           "hover:bg-muted/50 hover:text-foreground/80",
@@ -978,8 +977,8 @@ export function ResponsiveClientDetail({
                       {/* 아이콘 */}
                       <div className={cn(
                         "transition-all duration-300 ease-out flex-shrink-0",
-                        // 🎯 아이콘 크기도 부드럽게 전환
-                        isActive ? "scale-110" : "scale-100"
+                        // 🎯 아이콘 크기도 부드럽게 전환 (더 미묘하게)
+                        isActive ? "scale-105" : "scale-100"
                       )}>
                         <Icon className={cn(
                           "transition-all duration-300 ease-out",
@@ -990,24 +989,13 @@ export function ResponsiveClientDetail({
                       {/* 라벨 */}
                       <span className={cn(
                         "text-xs font-medium whitespace-nowrap transition-all duration-300 ease-out",
-                        // 🎯 폰트 두께도 부드럽게 전환
-                        isActive ? "font-semibold tracking-wide text-white" : "font-normal tracking-normal"
+                        // 🎯 폰트 두께도 부드럽게 전환 (더 미묘하게)
+                        isActive ? "font-medium tracking-normal text-white" : "font-normal tracking-normal"
                       )}>
                         {tab.label}
                       </span>
                       
-                      {/* 🌟 활성 탭 내부 글로우 효과 - 부드러운 나타남/사라짐 */}
-                      <div 
-                        className={cn(
-                          "absolute inset-0 bg-gradient-to-r from-primary/15 via-primary/8 to-primary/15 transition-all duration-500 ease-out -z-10",
-                          // border-radius가 부드럽게 따라가도록 조정
-                          isActive ? "rounded-xl opacity-100 blur-sm scale-105" : "rounded-lg opacity-0 blur-none scale-100"
-                        )}
-                        style={{
-                          transform: 'translate3d(0, 0, 0)',
-                          transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-                        }}
-                      />
+
 
                       {/* 🎨 호버 시 배경 효과 - 비활성 탭에만 */}
                       {!isActive && (
