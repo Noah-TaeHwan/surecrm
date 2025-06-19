@@ -9,6 +9,7 @@ import {
   Plus,
   Edit2,
   X,
+  Save,
 } from 'lucide-react';
 import {
   Card,
@@ -44,6 +45,8 @@ interface ClientSidebarProps {
   editFormData: any;
   setEditFormData: (data: any) => void;
   handleEditStart: () => void;
+  handleEditSave: () => void;
+  handleEditCancel: () => void;
   handleSsnChange: (ssnFront: string, ssnBack: string) => void;
   clientTags: any[];
   handleOpenTagModal: () => void;
@@ -57,6 +60,8 @@ export function ClientSidebar({
   editFormData,
   setEditFormData,
   handleEditStart,
+  handleEditSave,
+  handleEditCancel,
   handleSsnChange,
   clientTags,
   handleOpenTagModal,
@@ -86,8 +91,42 @@ export function ClientSidebar({
           className={`sticky top-6 border-border/50 ${cardStyle.bgGradient} ${cardStyle.borderClass} overflow-hidden`}
         >
           <CardHeader className="text-center pb-2">
-            <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-              <User className="h-6 w-6 text-primary" />
+            <div className="flex justify-between items-start mb-4">
+              <div className="flex-1" />
+              <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+                <User className="h-6 w-6 text-primary" />
+              </div>
+              <div className="flex-1 flex justify-end">
+                {isEditing ? (
+                  <div className="flex gap-2">
+                    <Button 
+                      onClick={handleEditSave}
+                      size="sm"
+                      className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                    >
+                      <Save className="h-4 w-4 mr-1" />
+                      저장
+                    </Button>
+                    <Button 
+                      onClick={handleEditCancel}
+                      size="sm"
+                      variant="outline"
+                    >
+                      <X className="h-4 w-4 mr-1" />
+                      취소
+                    </Button>
+                  </div>
+                ) : (
+                  <Button 
+                    onClick={handleEditStart}
+                    size="sm"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                  >
+                    <Edit2 className="h-4 w-4 mr-1" />
+                    편집
+                  </Button>
+                )}
+              </div>
             </div>
             {isEditing ? (
               <div className="space-y-3">

@@ -813,3 +813,50 @@ export async function deleteConsultationNoteAction(
     };
   }
 }
+
+export async function updateClientNotesAction(
+  request: Request,
+  clientId: string,
+  formData: FormData
+) {
+  // 🎯 실제 로그인된 보험설계사 정보 가져오기
+  const user = await requireAuth(request);
+  const agentId = user.id;
+
+  try {
+    const notes = formData.get('notes')?.toString();
+
+    // 🎯 Supabase Admin 클라이언트를 사용하여 메모만 업데이트
+    const { createAdminClient } = await import('~/lib/core/supabase');
+    const supabase = createAdminClient();
+
+    const { error: updateError } = await supabase
+      .from('app_client_profiles')
+      .update({
+        notes: notes || null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', clientId)
+      .eq('agent_id', agentId)
+      .eq('is_active', true);
+
+    if (updateError) {
+      throw new Error(updateError.message);
+    }
+
+    return {
+      success: true,
+      message: '메모가 성공적으로 저장되었습니다.',
+    };
+  } catch (error) {
+    console.error('메모 저장 실패:', error);
+
+    return {
+      success: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : '메모 저장 중 오류가 발생했습니다.',
+    };
+  }
+}

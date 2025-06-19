@@ -21,10 +21,8 @@ interface ConsultationNote {
 }
 
 interface ConsultationNotesTabProps {
-  isEditing: boolean;
   notes: string;
-  onNotesChange: (notes: string) => void;
-  onEditStart: () => void;
+  onSaveMemo: (notes: string) => Promise<void>; // 메모 저장 함수
   consultationNotes: ConsultationNote[];
   onAddNote: () => void;
   onEditNote: (note: ConsultationNote) => void;
@@ -33,10 +31,8 @@ interface ConsultationNotesTabProps {
 }
 
 export function ConsultationNotesTab({
-  isEditing,
   notes,
-  onNotesChange,
-  onEditStart,
+  onSaveMemo,
   consultationNotes,
   onAddNote,
   onEditNote,
@@ -58,10 +54,8 @@ export function ConsultationNotesTab({
         <CardContent className="p-6 space-y-6">
           {/* 고객 메모 및 특이사항 */}
           <ClientMemoSection
-            isEditing={isEditing}
             notes={notes}
-            onNotesChange={onNotesChange}
-            onEditStart={onEditStart}
+            onSave={onSaveMemo}
           />
 
           <Separator />

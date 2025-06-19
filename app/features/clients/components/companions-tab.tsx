@@ -45,7 +45,11 @@ export function CompanionsTab({
           {/* 동반자 추가 버튼 */}
           <div className="flex justify-between items-center">
             <h4 className="font-medium text-foreground">등록된 동반자</h4>
-            <Button variant="outline" size="sm" onClick={handleAddCompanion}>
+            <Button 
+              size="sm" 
+              onClick={handleAddCompanion}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground"
+            >
               <Plus className="h-4 w-4 mr-2" />
               동반자 추가
             </Button>
@@ -121,7 +125,10 @@ export function CompanionsTab({
                 <p className="text-sm text-muted-foreground mb-4">
                   상담에 함께 참석할 동반자를 추가해보세요.
                 </p>
-                <Button variant="outline" onClick={handleAddCompanion}>
+                <Button 
+                  onClick={handleAddCompanion}
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                >
                   <Plus className="h-4 w-4 mr-2" />첫 동반자 추가
                 </Button>
               </div>

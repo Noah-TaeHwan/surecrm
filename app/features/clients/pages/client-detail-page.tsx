@@ -1632,18 +1632,20 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
         <div className="hidden lg:block">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             {/* 왼쪽 사이드바 - 기본 정보 */}
-            <ClientSidebar
-              client={client}
-              isEditing={isEditing}
-              editFormData={editFormData}
-              setEditFormData={setEditFormData}
-              handleEditStart={handleEditStart}
-              handleSsnChange={handleSsnChange}
-              clientTags={clientTags}
-              handleOpenTagModal={handleOpenTagModal}
-              removeClientTag={removeClientTag}
-              availableReferrers={availableReferrers}
-            />
+                          <ClientSidebar
+                client={client}
+                isEditing={isEditing}
+                editFormData={editFormData}
+                setEditFormData={setEditFormData}
+                handleEditStart={handleEditStart}
+                handleEditSave={handleEditSave}
+                handleEditCancel={handleEditCancel}
+                handleSsnChange={handleSsnChange}
+                clientTags={clientTags}
+                handleOpenTagModal={handleOpenTagModal}
+                removeClientTag={removeClientTag}
+                availableReferrers={availableReferrers}
+              />
 
             {/* 오른쪽 메인 컨텐츠 */}
             <div className="lg:col-span-3">
@@ -1725,15 +1727,22 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
 
                 {/* 🆕 상담내용 탭 */}
                 <ConsultationNotesTab
-                  isEditing={isEditing}
-                  notes={isEditing ? editFormData.notes : client?.notes || ''}
-                  onNotesChange={notes =>
-                    setEditFormData({
-                      ...editFormData,
-                      notes,
-                    })
-                  }
-                  onEditStart={handleEditStart}
+                  notes={client?.notes || ''}
+                  onSaveMemo={async (notes: string) => {
+                    // 메모 저장을 위한 별도 함수
+                    const formData = new FormData();
+                    formData.append('intent', 'updateClientNotes');
+                    formData.append('notes', notes);
+                    
+                    try {
+                      const result = await submit(formData, { method: 'post' });
+                      // 성공 시 클라이언트 데이터 업데이트는 loader가 자동으로 처리
+                      console.log('메모 저장 완료');
+                    } catch (error) {
+                      console.error('메모 저장 실패:', error);
+                      throw error; // 에러를 다시 던져서 컴포넌트에서 처리할 수 있도록
+                    }
+                  }}
                   consultationNotes={consultationNotes}
                   onAddNote={handleAddNote}
                   onEditNote={handleEditNote}
@@ -1843,12 +1852,16 @@ export async function action({ request, params }: Route.ActionArgs) {
     deleteConsultationCompanionAction,
     createConsultationNoteAction,
     updateConsultationNoteAction,
+    updateClientNotesAction,
   } = await import('../lib/client-actions');
 
   // Intent별 액션 분기
   switch (intent) {
     case 'updateClient':
       return await updateClientAction(request, clientId, formData);
+
+    case 'updateClientNotes':
+      return await updateClientNotesAction(request, clientId, formData);
 
     case 'deleteClient':
       return await deleteClientAction(request, clientId);
