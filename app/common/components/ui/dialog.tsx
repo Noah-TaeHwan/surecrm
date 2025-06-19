@@ -59,15 +59,8 @@ function DialogContent({
           className
         )}
         onOpenAutoFocus={(event) => {
-          const currentTarget = event.currentTarget as HTMLElement;
-          const dateInputs = currentTarget?.querySelectorAll('input[type="date"], input[type="time"], input[type="datetime-local"]');
-          if (dateInputs && dateInputs.length > 0) {
-            event.preventDefault();
-            const firstTextInput = currentTarget?.querySelector('input[type="text"], input[type="email"], input[type="tel"], textarea') as HTMLElement;
-            if (firstTextInput) {
-              setTimeout(() => firstTextInput.focus(), 150);
-            }
-          }
+          // 🚫 자동 포커스 완전 차단 - 사용자 경험 개선
+          event.preventDefault();
         }}
         onInteractOutside={(event) => {
           const eventTarget = event.target as Element;
