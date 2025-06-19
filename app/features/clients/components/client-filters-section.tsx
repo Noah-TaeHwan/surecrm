@@ -175,12 +175,14 @@ export function ClientFiltersSection({
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <div className="flex flex-col gap-2">
-            <CardTitle className="flex items-center gap-2">
+        {/* 🎯 모바일 우선 레이아웃 - 세로 배치 */}
+        <div className="space-y-4">
+          {/* 제목과 결과 개수 - 모바일에서 전체 너비 */}
+          <div className="flex flex-col gap-2 md:gap-1">
+            <CardTitle className="flex items-center gap-2 text-base md:text-lg">
               고객 검색 및 필터
               {activeFilterCount > 0 && (
-                <Badge variant="default" className="px-2 py-1">
+                <Badge variant="default" className="px-2 py-1 text-xs">
                   {activeFilterCount}
                 </Badge>
               )}
@@ -189,48 +191,56 @@ export function ClientFiltersSection({
               {filteredClientsCount}명의 고객이 검색되었습니다
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            {/* 모바일: 고급 필터 버튼 */}
-            {deviceType === 'mobile' && (
+          
+          {/* 액션 버튼 영역 - 모바일에서 세로 배치 */}
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            {/* 필터 버튼 그룹 - 모바일에서 전체 너비 */}
+            <div className="flex items-center gap-2 w-full md:w-auto">
+              {/* 모바일: 고급 필터 버튼 */}
+              {deviceType === 'mobile' && (
+                <Button
+                  variant="outline"
+                  className="h-10 flex-1"
+                  onClick={() => setIsAdvancedFilterOpen(true)}
+                >
+                  <Settings className="h-4 w-4 mr-2" />
+                  고급 필터
+                </Button>
+              )}
+              
+              {/* 데스크톱: 기존 필터 토글 */}
+              {deviceType !== 'mobile' && (
+                <Button
+                  variant="outline"
+                  className="h-10"
+                  onClick={() => setShowFilters(!showFilters)}
+                >
+                  <Filter className="h-4 w-4 mr-2" />
+                  필터 {showFilters ? '숨기기' : '보기'}
+                </Button>
+              )}
+            </div>
+            
+            {/* 뷰 모드 토글 - 모바일에서도 한 줄로 우측 정렬 */}
+            <div className="flex items-center gap-2 justify-end md:justify-start">
+              <Separator orientation="vertical" className="h-6 hidden md:block" />
               <Button
-                variant="outline"
-                className="h-10"
-                onClick={() => setIsAdvancedFilterOpen(true)}
+                variant={viewMode === 'cards' ? 'default' : 'outline'}
+                className="h-10 w-10"
+                onClick={() => setViewMode('cards')}
+                title="카드 보기"
               >
-                <Settings className="h-4 w-4 mr-2" />
-                고급 필터
+                <LayoutGrid className="h-4 w-4" />
               </Button>
-            )}
-            
-            {/* 데스크톱: 기존 필터 토글 */}
-            {deviceType !== 'mobile' && (
               <Button
-                variant="outline"
-                className="h-10"
-                onClick={() => setShowFilters(!showFilters)}
+                variant={viewMode === 'table' ? 'default' : 'outline'}
+                className="h-10 w-10"
+                onClick={() => setViewMode('table')}
+                title="테이블 보기"
               >
-                <Filter className="h-4 w-4 mr-2" />
-                필터 {showFilters ? '숨기기' : '보기'}
+                <LayoutList className="h-4 w-4" />
               </Button>
-            )}
-            
-            <Separator orientation="vertical" className="h-6" />
-            
-            {/* 뷰 모드 토글 */}
-            <Button
-              variant={viewMode === 'cards' ? 'default' : 'outline'}
-              className="h-10 w-10"
-              onClick={() => setViewMode('cards')}
-            >
-              <LayoutGrid className="h-4 w-4" />
-            </Button>
-            <Button
-              variant={viewMode === 'table' ? 'default' : 'outline'}
-              className="h-10 w-10"
-              onClick={() => setViewMode('table')}
-            >
-              <LayoutList className="h-4 w-4" />
-            </Button>
+            </div>
           </div>
         </div>
       </CardHeader>

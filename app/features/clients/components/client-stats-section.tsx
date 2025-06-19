@@ -71,11 +71,11 @@ export function ClientStatsSection({
       {/* 고객 관리 통계 요약 */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 pb-2">
             <Users className="h-5 w-5 text-blue-600" />
             고객 현황 요약
           </CardTitle>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground pb-4">
             현재 관리 중인 고객들의 핵심 지표
           </p>
         </CardHeader>
