@@ -2038,16 +2038,10 @@ function NewContractModal({
     field: keyof AttachmentData,
     value: string
   ) => {
-    console.log('📝 첨부파일 업데이트:', { id, field, value });
     setAttachments(prev =>
-      prev.map(attachment => {
-        if (attachment.id === id) {
-          const updated = { ...attachment, [field]: value };
-          console.log('✅ 업데이트된 첨부파일:', updated);
-          return updated;
-        }
-        return attachment;
-      })
+      prev.map(attachment =>
+        attachment.id === id ? { ...attachment, [field]: value } : attachment
+      )
     );
   };
 
@@ -2864,10 +2858,8 @@ function NewContractModal({
               {attachments.length > 0 && (
                 <div className="space-y-2">
                   <h4 className="font-medium text-sm">업로드된 파일</h4>
-                  <div className="max-h-60 overflow-y-auto space-y-2">
-                    {attachments.map(attachment => {
-                      console.log('🔍 첨부파일 렌더링:', attachment);
-                      return (
+                  <div className="space-y-2">
+                    {attachments.map(attachment => (
                       <div
                         key={attachment.id}
                         className={`p-3 border rounded-lg space-y-2 ${
@@ -3009,8 +3001,7 @@ function NewContractModal({
                           </div>
                         </div>
                                               </div>
-                      );
-                    })}
+                    ))}
                     </div>
                 </div>
               )}
