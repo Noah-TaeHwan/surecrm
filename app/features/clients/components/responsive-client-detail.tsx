@@ -945,33 +945,49 @@ export function ResponsiveClientDetail({
                       data-active={isActive}
                       className={cn(
                         // 기본 스타일 - 모든 탭에 공통 적용
-                        "relative flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium",
-                        "snap-center border min-w-fit",
+                        "relative flex-shrink-0 flex items-center gap-1.5 text-xs font-medium",
+                        "snap-center border min-w-fit overflow-hidden",
                         "transform-gpu will-change-transform backface-hidden",
-                        "transition-all duration-300 ease-out",
-                        // 활성 탭 스타일
+                        // 🎯 새로운 부드러운 애니메이션을 위한 클래스 추가
+                        "tab-carousel-button",
+                        // 🎯 부드러운 크기 및 border-radius 전환을 위한 CSS 변수 사용
                         isActive ? [
+                          // 활성 탭: 더 큰 패딩과 rounded 값
+                          "px-4 py-2 rounded-xl",
                           "bg-gradient-to-r from-primary via-primary to-primary/90 text-primary-foreground",
-                          "shadow-lg shadow-primary/25 scale-105 border-primary/20",
+                          "shadow-lg shadow-primary/25 border-primary/20",
                           "ring-2 ring-primary/20 ring-offset-2 ring-offset-background",
                           "translate-y-0 z-10"
                         ] : [
-                          // 비활성 탭 기본 스타일
+                          // 비활성 탭: 일반 패딩과 rounded 값
+                          "px-3 py-1.5 rounded-lg",
                           "bg-muted/30 text-muted-foreground border-border/30",
-                          "hover:bg-muted/50 hover:text-foreground/80 hover:scale-102",
+                          "hover:bg-muted/50 hover:text-foreground/80",
                           "hover:shadow-sm hover:border-border/50",
                           "translate-y-0 z-0"
                         ]
                       )}
                       style={{
-                        // CSS 변수를 사용한 부드러운 애니메이션
-                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                        // 🚀 부드러운 전환을 위한 다단계 애니메이션
+                        transition: [
+                          // 크기와 패딩 전환 (먼저)
+                          'padding 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                          // border-radius 전환 (약간 지연)
+                          'border-radius 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.05s',
+                          // 배경과 그림자 전환 (마지막)
+                          'background-color 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.1s',
+                          'box-shadow 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.1s',
+                          'border-color 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.1s',
+                          'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                          'color 0.25s ease-out',
+                        ].join(', '),
                       }}
                     >
                       {/* 아이콘 */}
                       <div className={cn(
-                        "transition-all duration-300 ease-out",
-                        isActive ? "scale-105" : "scale-100"
+                        "transition-all duration-300 ease-out flex-shrink-0",
+                        // 🎯 아이콘 크기도 부드럽게 전환
+                        isActive ? "scale-110" : "scale-100"
                       )}>
                         <Icon className={cn(
                           "transition-all duration-300 ease-out",
@@ -981,34 +997,55 @@ export function ResponsiveClientDetail({
                       
                       {/* 라벨 */}
                       <span className={cn(
-                        "text-xs font-medium transition-all duration-300 ease-out whitespace-nowrap",
-                        isActive && "font-semibold"
+                        "text-xs font-medium whitespace-nowrap transition-all duration-300 ease-out",
+                        // 🎯 폰트 두께도 부드럽게 전환
+                        isActive ? "font-semibold tracking-wide" : "font-normal tracking-normal"
                       )}>
                         {tab.label}
                       </span>
                       
-                      {/* 활성 탭 글로우 효과 - transform3d로 GPU 가속 */}
-                      {isActive && (
-                        <div 
-                          className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/20 via-primary/10 to-primary/20 blur-sm -z-10"
-                          style={{
-                            transform: 'translate3d(0, 0, 0)',
-                            transition: 'opacity 0.3s ease-out',
-                          }}
-                        />
-                      )}
-
-                      {/* 호버 시 배경 효과 */}
+                      {/* 🌟 활성 탭 내부 글로우 효과 - 부드러운 나타남/사라짐 */}
                       <div 
                         className={cn(
-                          "absolute inset-0 rounded-lg transition-all duration-300 ease-out -z-20",
-                          "bg-gradient-to-r from-accent/5 to-accent/10",
-                          isActive ? "opacity-0" : "opacity-0 group-hover:opacity-100"
+                          "absolute inset-0 bg-gradient-to-r from-primary/15 via-primary/8 to-primary/15 transition-all duration-500 ease-out -z-10",
+                          // border-radius가 부드럽게 따라가도록 조정
+                          isActive ? "rounded-xl opacity-100 blur-sm scale-105" : "rounded-lg opacity-0 blur-none scale-100"
                         )}
                         style={{
                           transform: 'translate3d(0, 0, 0)',
+                          transition: [
+                            'opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                            'border-radius 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.05s',
+                            'transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                            'filter 0.3s ease-out',
+                          ].join(', '),
                         }}
                       />
+
+                      {/* 🎨 호버 시 배경 효과 - 비활성 탭에만 */}
+                      {!isActive && (
+                        <div 
+                          className="absolute inset-0 rounded-lg bg-gradient-to-r from-accent/5 to-accent/10 opacity-0 hover:opacity-100 transition-all duration-300 ease-out -z-20"
+                          style={{
+                            transform: 'translate3d(0, 0, 0)',
+                            transition: [
+                              'opacity 0.3s ease-out',
+                              'border-radius 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                            ].join(', '),
+                          }}
+                        />
+                      )}
+                      
+                      {/* 🎯 활성 상태 표시를 위한 작은 인디케이터 */}
+                      {isActive && (
+                        <div 
+                          className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-4 h-0.5 bg-primary-foreground/30 rounded-full transition-all duration-400 ease-out"
+                          style={{
+                            transform: 'translate3d(-50%, 0, 0)',
+                            transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.15s',
+                          }}
+                        />
+                      )}
                     </button>
                   );
                 })}

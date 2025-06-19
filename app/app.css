@@ -3054,6 +3054,101 @@ input[type="datetime-local"]:not([style*="color"]) {
   }
 }
 
+/* 🚀 탭 버튼 애니메이션 최적화 */
+.tab-carousel-button {
+  /* GPU 가속을 위한 3D transform 활성화 */
+  transform: translate3d(0, 0, 0);
+  
+  /* 부드러운 모멘텀 스크롤 */
+  -webkit-overflow-scrolling: touch;
+  
+  /* 자연스러운 스크롤 행동 */
+  scroll-behavior: smooth;
+  
+  /* 하드웨어 가속 최적화 */
+  will-change: transform, border-radius, padding;
+  
+  /* 성능 향상을 위한 컴포지팅 레이어 */
+  backface-visibility: hidden;
+  perspective: 1000px;
+  
+  /* 🎯 길이와 border-radius 변화를 위한 부드러운 전환 */
+  transition: 
+    padding 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    border-radius 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.05s,
+    background-color 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.1s,
+    box-shadow 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.1s,
+    transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    color 0.25s ease-out;
+}
+
+/* 🎨 활성 탭 특별 애니메이션 */
+.tab-carousel-button[data-active="true"] {
+  /* 부드러운 크기 증가 */
+  transform: translate3d(0, 0, 0) scale(1.02);
+  
+  /* 향상된 그림자 효과 */
+  filter: drop-shadow(0 4px 12px rgba(59, 130, 246, 0.15));
+  
+  /* 활성 상태에서의 부드러운 전환 */
+  transition: 
+    padding 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    border-radius 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.05s,
+    background-color 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.1s,
+    box-shadow 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.1s,
+    transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    filter 0.3s ease-out,
+    color 0.25s ease-out;
+}
+
+/* 🌊 호버 상태 부드러운 전환 */
+.tab-carousel-button:not([data-active="true"]):hover {
+  transform: translate3d(0, 0, 0) scale(1.01);
+  transition: all 0.2s ease-out;
+}
+
+/* 🎯 터치 피드백 최적화 */
+.tab-carousel-button:active {
+  transform: translate3d(0, 0, 0) scale(0.98);
+  transition: transform 0.1s ease-out;
+}
+
+/* 📱 모바일에서 부드러운 스크롤 최적화 */
+@media (max-width: 768px) {
+  .tab-carousel-container {
+    /* 모바일에서 더 부드러운 스크롤 */
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    
+    /* 스크롤 바운스 효과 */
+    overscroll-behavior-x: contain;
+  }
+  
+  .tab-carousel-button {
+    /* 모바일에서 더 빠른 응답 */
+    transition-duration: 0.25s;
+  }
+  
+  .tab-carousel-button[data-active="true"] {
+    /* 모바일에서 활성 탭 강조 */
+    transform: translate3d(0, 0, 0) scale(1.03);
+  }
+}
+
+/* 🔧 Reduced motion 사용자를 위한 접근성 */
+@media (prefers-reduced-motion: reduce) {
+  .tab-carousel-button,
+  .tab-carousel-button[data-active="true"] {
+    transition-duration: 0.01ms !important;
+    transform: none !important;
+    animation: none !important;
+  }
+  
+  .tab-carousel-container {
+    scroll-behavior: auto !important;
+  }
+}
+
 
 
 
