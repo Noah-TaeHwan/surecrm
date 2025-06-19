@@ -47,10 +47,12 @@ export function ClientMemoSection({
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-3">
-        <h4 className="font-medium text-foreground flex items-center gap-2">
-          <FileText className="h-5 w-5" />
-          고객 메모 및 특이사항
+      {/* 모바일: 세로 배치, 데스크톱: 가로 배치 */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-3 sm:mb-3">
+        <h4 className="font-medium text-foreground flex items-center gap-2 text-sm sm:text-base">
+          <FileText className="h-4 w-4 sm:h-5 sm:w-5" />
+          <span className="hidden sm:inline">고객 메모 및 특이사항</span>
+          <span className="sm:hidden">고객 메모</span>
         </h4>
         
         {/* 편집/저장/취소 버튼 */}
@@ -58,29 +60,31 @@ export function ClientMemoSection({
           <Button 
             onClick={handleEditStart}
             size="sm"
-            className="bg-primary hover:bg-primary/90 text-primary-foreground"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground w-full sm:w-auto"
           >
             <Edit2 className="h-4 w-4 mr-1" />
-            편집
+            <span className="sm:hidden">메모 편집</span>
+            <span className="hidden sm:inline">편집</span>
           </Button>
         )}
         
         {isEditingMemo && (
-          <div className="flex gap-2">
+          <div className="flex gap-2 w-full sm:w-auto">
             <Button 
               onClick={handleSave}
               size="sm"
               disabled={isSaving}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground flex-1 sm:flex-none"
             >
               <Save className="h-4 w-4 mr-1" />
-              {isSaving ? '저장 중...' : '메모 저장'}
+              {isSaving ? '저장 중...' : '저장'}
             </Button>
             <Button 
               onClick={handleEditCancel}
               size="sm"
               variant="outline"
               disabled={isSaving}
+              className="flex-1 sm:flex-none"
             >
               <X className="h-4 w-4 mr-1" />
               취소
@@ -89,27 +93,27 @@ export function ClientMemoSection({
         )}
       </div>
       
-      <div className="p-4 bg-muted/20 rounded-lg border border-border/40">
+      <div className="p-3 sm:p-4 bg-muted/20 rounded-lg border border-border/40">
         {isEditingMemo ? (
           <Textarea
             value={editingNotes}
             onChange={e => setEditingNotes(e.target.value)}
             placeholder="고객에 대한 메모를 입력하세요..."
-            className="min-h-[120px] resize-none border-none p-0 bg-transparent"
+            className="min-h-[100px] sm:min-h-[120px] resize-none border-none p-0 bg-transparent text-sm"
             disabled={isSaving}
           />
         ) : notes ? (
           <p className="text-sm whitespace-pre-wrap leading-relaxed">{notes}</p>
         ) : (
-          <div className="text-center py-6">
-            <FileText className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-            <p className="text-sm text-muted-foreground mb-3">
+          <div className="text-center py-4 sm:py-6">
+            <FileText className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground mx-auto mb-2" />
+            <p className="text-xs sm:text-sm text-muted-foreground mb-3">
               메모가 없습니다
             </p>
             <Button 
               size="sm" 
               onClick={handleEditStart}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground w-full sm:w-auto"
             >
               <Plus className="h-3 w-3 mr-1" />
               메모 추가

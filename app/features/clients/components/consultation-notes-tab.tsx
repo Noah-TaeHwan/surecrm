@@ -42,16 +42,17 @@ export function ConsultationNotesTab({
   return (
     <TabsContent value="notes" className="space-y-6">
       <Card>
-        <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
+        <CardHeader className="pb-4 sm:pb-6">
+          <CardTitle className="text-base sm:text-lg flex items-center gap-2">
             <span className="text-lg">📝</span>
-            상담 내용 및 계약사항 메모
+            <span className="hidden sm:inline">상담 내용 및 계약사항 메모</span>
+            <span className="sm:hidden">상담 내용</span>
           </CardTitle>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
             날짜별로 상담 내용과 계약사항을 기록합니다.
           </p>
         </CardHeader>
-        <CardContent className="p-6 space-y-6">
+        <CardContent className="p-4 sm:p-6 space-y-4 sm:space-y-6">
           {/* 고객 메모 및 특이사항 */}
           <ClientMemoSection
             notes={notes}
