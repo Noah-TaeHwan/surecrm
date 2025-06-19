@@ -822,39 +822,12 @@ export function AddMeetingModal({
                         rows={3}
                       />
                     </FormControl>
+                    <FormDescription>
+                      구글 캘린더 일정의 설명 부분에 자동으로 동기화됩니다
+                    </FormDescription>
                   </FormItem>
                 )}
               />
-
-              {/* 🎯 미팅 유형별 자동 체크리스트 미리보기 */}
-              {selectedMeetingType && (
-                <div className="space-y-2">
-                  <FormLabel className="text-sm">
-                    기본 체크리스트 (미팅 생성 후 자동 추가됨)
-                  </FormLabel>
-                  <div className="bg-muted/30 p-3 rounded-lg space-y-2">
-                    {getDefaultChecklistByType(selectedMeetingType.value).map(
-                      (item, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center gap-2 text-xs text-muted-foreground"
-                        >
-                          <div className="w-3 h-3 border border-muted-foreground rounded-sm flex items-center justify-center">
-                            <div className="w-1 h-1 bg-muted-foreground rounded-full" />
-                          </div>
-                          <span>{item}</span>
-                        </div>
-                      )
-                    )}
-                    {getDefaultChecklistByType(selectedMeetingType.value)
-                      .length === 0 && (
-                      <p className="text-xs text-muted-foreground italic">
-                        이 미팅 유형에는 기본 체크리스트가 없습니다.
-                      </p>
-                    )}
-                  </div>
-                </div>
-              )}
 
               {/* 📱 선택된 고객 정보 미리보기 */}
               {selectedClient && (

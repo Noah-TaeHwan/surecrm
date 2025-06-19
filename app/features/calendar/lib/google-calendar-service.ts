@@ -287,56 +287,97 @@ export class GoogleCalendarService {
   private formatMeetingForGoogleCalendar(meeting: any): string {
     const sections = [];
 
-    // 기본 설명
+    // 📋 메모 부분 (기본 설명)
     if (meeting.description) {
-      sections.push(`📋 미팅 설명:\n${meeting.description}`);
+      sections.push(`📝 미팅 메모:\n${meeting.description}`);
     }
 
-    // 영업 정보 섹션
+    // 💼 영업 정보 섹션 개선
     const salesInfo = [];
+    
     if ((meeting as any).priority) {
       const priorityMap: any = {
         urgent: '🔴 긴급',
         high: '🟠 높음',
-        medium: '🟡 보통',
-        low: '🟢 낮음',
+        medium: '🔵 보통',
+        low: '⚪ 낮음',
       };
       salesInfo.push(
         `우선순위: ${
-          priorityMap[(meeting as any).priority] || (meeting as any).priority
+          priorityMap[(meeting as any).priority] || '🔵 보통'
         }`
       );
-    }
-
-    if ((meeting as any).expectedOutcome) {
-      salesInfo.push(`예상 결과: ${(meeting as any).expectedOutcome}`);
     }
 
     if ((meeting as any).contactMethod) {
       const methodMap: any = {
         phone: '📞 전화',
+        video: '📹 화상통화',
         in_person: '👥 대면',
-        video_call: '📹 화상통화',
-        email: '📧 이메일',
+        hybrid: '🔄 혼합',
       };
       salesInfo.push(
         `연락 방법: ${
-          methodMap[(meeting as any).contactMethod] ||
-          (meeting as any).contactMethod
+          methodMap[(meeting as any).contactMethod] || '👥 대면'
         }`
       );
     }
 
-    if ((meeting as any).estimatedCommission) {
+    if ((meeting as any).expectedOutcome) {
+      const outcomeMap: any = {
+        information_gathering: '📊 정보 수집',
+        needs_analysis: '🔍 니즈 분석',
+        proposal_presentation: '📋 제안서 발표',
+        objection_handling: '💭 이의 제기 해결',
+        contract_discussion: '📄 계약 논의',
+        closing: '✅ 계약 체결',
+        relationship_building: '🤝 관계 구축',
+      };
       salesInfo.push(
-        `예상 수수료: ${(
-          meeting as any
-        ).estimatedCommission.toLocaleString()}원`
+        `기대 성과: ${
+          outcomeMap[(meeting as any).expectedOutcome] || '📊 정보 수집'
+        }`
+      );
+    }
+
+    if ((meeting as any).estimatedCommission && (meeting as any).estimatedCommission > 0) {
+      salesInfo.push(
+        `예상 수수료: ₩${((meeting as any).estimatedCommission).toLocaleString('ko-KR')}`
       );
     }
 
     if ((meeting as any).productInterest) {
-      salesInfo.push(`관심 상품: ${(meeting as any).productInterest}`);
+      const productMap: any = {
+        life: '💗 생명보험',
+        health: '🏥 건강보험',
+        auto: '🚗 자동차보험',
+        prenatal: '👶 태아보험',
+        property: '🏠 재산보험',
+        pension: '💰 연금보험',
+        investment: '📈 투자형 보험',
+        multiple: '🎯 복합 상품',
+      };
+      salesInfo.push(
+        `관심 상품: ${
+          productMap[(meeting as any).productInterest] || '💗 생명보험'
+        }`
+      );
+    }
+
+    if ((meeting as any).reminder) {
+      const reminderMap: any = {
+        none: '알림 없음',
+        '5_minutes': '5분 전',
+        '15_minutes': '15분 전',
+        '30_minutes': '30분 전',
+        '1_hour': '1시간 전',
+        '1_day': '1일 전',
+      };
+      salesInfo.push(
+        `알림 설정: ${
+          reminderMap[(meeting as any).reminder] || '30분 전'
+        }`
+      );
     }
 
     if (salesInfo.length > 0) {
@@ -345,9 +386,9 @@ export class GoogleCalendarService {
       );
     }
 
-    // 시스템 정보
-    sections.push(`\n🔗 SureCRM에서 생성된 미팅`);
-    sections.push(`생성 시간: ${new Date().toLocaleString('ko-KR')}`);
+    // 🔗 시스템 정보
+    sections.push(`\n🔗 SureCRM 연동 미팅`);
+    sections.push(`동기화 시간: ${new Date().toLocaleString('ko-KR')}`);
 
     return sections.join('\n\n');
   }

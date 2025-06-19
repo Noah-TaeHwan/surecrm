@@ -153,9 +153,10 @@ export function MeetingDetailModal({
   onClose,
   onToggleChecklist,
 }: MeetingDetailModalProps) {
-  const [notes, setNotes] = useState<MeetingNote[]>(meeting?.notes || []);
-  const [newNote, setNewNote] = useState('');
-  const [isAddingNote, setIsAddingNote] = useState(false);
+  // 미팅 노트 관련 상태 제거
+  const [checklist, setChecklist] = useState<ChecklistItem[]>(
+    meeting?.checklist || []
+  );
 
   // 삭제 모달 상태
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -165,9 +166,6 @@ export function MeetingDetailModal({
   const { success, error } = useToast();
 
   // 체크리스트 관리 상태
-  const [checklist, setChecklist] = useState<ChecklistItem[]>(
-    meeting?.checklist || []
-  );
   const [isAddingChecklistItem, setIsAddingChecklistItem] = useState(false);
   const [newChecklistItem, setNewChecklistItem] = useState('');
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
@@ -279,24 +277,6 @@ export function MeetingDetailModal({
 
   // 알림 정보 가져오기
   const reminderInfo = reminderOptions.find(r => r.value === (meeting as any)?.reminder);
-
-  // 노트 관리 함수
-  const handleAddNote = () => {
-    if (newNote.trim()) {
-      const note: MeetingNote = {
-        id: Date.now().toString(),
-        content: newNote.trim(),
-        createdAt: new Date().toISOString(),
-      };
-      setNotes([...notes, note]);
-      setNewNote('');
-      setIsAddingNote(false);
-    }
-  };
-
-  const handleDeleteNote = (noteId: string) => {
-    setNotes(notes.filter(note => note.id !== noteId));
-  };
 
   // 체크리스트 관리 함수
   const handleToggleChecklistItem = (itemId: string) => {
@@ -916,86 +896,329 @@ export function MeetingDetailModal({
               </Card>
             )}
 
-            {/* 노트 카드 */}
+            {/* 노트 카드 → 메모 카드로 변경 */}
             <Card className="border border-border/50 shadow-sm">
               <CardHeader className="pb-3 sm:pb-4">
                 <CardTitle className="text-base sm:text-lg flex items-center gap-2">
                   <FileTextIcon className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-                  미팅 노트
-                  <Badge variant="secondary" className="text-xs">
-                    {notes.length}
-                  </Badge>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setIsAddingNote(true)}
-                    className="ml-auto h-8 w-8 p-0 hover:bg-primary/10"
-                  >
-                    <PlusIcon className="h-4 w-4" />
-                  </Button>
+                  미팅 메모
+                  {!isEditingMeeting && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleStartEditingMeeting}
+                      className="ml-auto h-8 w-8 p-0 hover:bg-primary/10"
+                      title="메모 수정"
+                    >
+                      <Pencil2Icon className="h-4 w-4" />
+                    </Button>
+                  )}
+                  {isEditingMeeting && (
+                    <div className="ml-auto flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleSaveMeetingChanges}
+                        className="h-8 w-8 p-0 hover:bg-emerald-100 text-emerald-600"
+                        title="저장"
+                      >
+                        <CheckIcon className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleCancelEditingMeeting}
+                        className="h-8 w-8 p-0 hover:bg-red-100 text-red-600"
+                        title="취소"
+                      >
+                        <Cross2Icon className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
-                {notes.length === 0 ? (
-                  <div className="text-center py-6 text-muted-foreground">
-                    <FileTextIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                    <p className="text-sm">아직 작성된 노트가 없습니다.</p>
-                  </div>
+              <CardContent>
+                {isEditingMeeting ? (
+                  <Textarea
+                    value={editedMeeting.description}
+                    onChange={(e) =>
+                      setEditedMeeting({
+                        ...editedMeeting,
+                        description: e.target.value,
+                      })
+                    }
+                    placeholder="• 준비해야 할 자료&#10;• 논의할 주제&#10;• 고객 특이사항 등"
+                    className="min-h-[100px] resize-none"
+                    rows={4}
+                  />
                 ) : (
-                  notes.map((note) => (
-                    <div key={note.id} className="p-3 rounded-md bg-muted/30 border border-border/30">
-                      <div className="flex justify-between items-start gap-2 mb-2">
-                        <div className="text-xs text-muted-foreground">
-                          {new Date(note.createdAt).toLocaleString('ko-KR')}
-                        </div>
-                        <Button
-                          onClick={() => handleDeleteNote(note.id)}
-                          size="sm"
-                          variant="ghost"
-                          className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
-                        >
-                          <TrashIcon className="h-3 w-3" />
-                        </Button>
-                      </div>
+                  <div className="min-h-[100px] p-3 rounded-md bg-muted/30 border border-border/30">
+                    {meeting.description ? (
                       <div className="text-sm leading-relaxed whitespace-pre-wrap">
-                        {note.content}
+                        {meeting.description}
                       </div>
+                    ) : (
+                      <div className="text-center py-6 text-muted-foreground">
+                        <FileTextIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                        <p className="text-sm">메모가 작성되지 않았습니다.</p>
+                        <p className="text-xs mt-1">수정 버튼을 클릭하여 메모를 추가하세요.</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+                {isEditingMeeting && (
+                  <p className="text-xs text-muted-foreground mt-2">
+                    ✓ 구글 캘린더 일정의 설명 부분에 자동으로 동기화됩니다
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* 영업 정보 카드 (새 미팅 예약과 동일한 정보들) */}
+            <Card className="border border-border/50 shadow-sm">
+              <CardHeader className="pb-3 sm:pb-4">
+                <CardTitle className="text-base sm:text-lg flex items-center gap-2">
+                  <TargetIcon className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                  영업 정보
+                  {!isEditingMeeting && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleStartEditingMeeting}
+                      className="ml-auto h-8 w-8 p-0 hover:bg-primary/10"
+                      title="영업 정보 수정"
+                    >
+                      <Pencil2Icon className="h-4 w-4" />
+                    </Button>
+                  )}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* 우선순위 */}
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <StarFilledIcon className="h-4 w-4 text-orange-600" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-sm font-medium text-foreground">우선순위</div>
+                    {isEditingMeeting ? (
+                      <Select
+                        value={editedMeeting.priority}
+                        onValueChange={(value) =>
+                          setEditedMeeting({ ...editedMeeting, priority: value })
+                        }
+                      >
+                        <SelectTrigger className="h-8 text-sm">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {priorityOptions.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              <div className="flex items-center gap-2">
+                                <span>{option.icon}</span>
+                                <span>{option.label}</span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <div className="flex items-center gap-2 mt-1">
+                        {priorityOptions.find(p => p.value === (meeting as any)?.priority)?.icon || '🔵'}
+                        <span className="text-sm text-muted-foreground">
+                          {priorityOptions.find(p => p.value === (meeting as any)?.priority)?.label || '보통'}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* 연락 방법 */}
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <MobileIcon className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-sm font-medium text-foreground">연락 방법</div>
+                    {isEditingMeeting ? (
+                      <Select
+                        value={editedMeeting.contactMethod}
+                        onValueChange={(value) =>
+                          setEditedMeeting({ ...editedMeeting, contactMethod: value })
+                        }
+                      >
+                        <SelectTrigger className="h-8 text-sm">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {contactMethods.map((method) => (
+                            <SelectItem key={method.value} value={method.value}>
+                              <div className="flex items-center gap-2">
+                                {method.icon}
+                                <span>{method.label}</span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <div className="flex items-center gap-2 mt-1">
+                        {contactMethods.find(m => m.value === (meeting as any)?.contactMethod)?.icon}
+                        <span className="text-sm text-muted-foreground">
+                          {contactMethods.find(m => m.value === (meeting as any)?.contactMethod)?.label || '대면'}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* 기대 성과 */}
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircledIcon className="h-4 w-4 text-green-600" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-sm font-medium text-foreground">기대 성과</div>
+                    {isEditingMeeting ? (
+                      <Select
+                        value={editedMeeting.expectedOutcome}
+                        onValueChange={(value) =>
+                          setEditedMeeting({ ...editedMeeting, expectedOutcome: value })
+                        }
+                      >
+                        <SelectTrigger className="h-8 text-sm">
+                          <SelectValue placeholder="선택하세요" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {expectedOutcomes.map((outcome) => (
+                            <SelectItem key={outcome.value} value={outcome.value}>
+                              <div className="flex items-center gap-2">
+                                <span>{outcome.icon}</span>
+                                <span>{outcome.label}</span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <div className="flex items-center gap-2 mt-1">
+                        <span>{expectedOutcomes.find(o => o.value === (meeting as any)?.expectedOutcome)?.icon || '📊'}</span>
+                        <span className="text-sm text-muted-foreground">
+                          {expectedOutcomes.find(o => o.value === (meeting as any)?.expectedOutcome)?.label || '정보 수집'}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* 예상 수수료 */}
+                {((meeting as any)?.estimatedCommission || isEditingMeeting) && (
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <DollarSign className="h-4 w-4 text-emerald-600" />
                     </div>
-                  ))
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-foreground">예상 수수료</div>
+                      {isEditingMeeting ? (
+                        <Input
+                          type="text"
+                          placeholder="100,000"
+                          value={
+                            editedMeeting.estimatedCommission
+                              ? Number(editedMeeting.estimatedCommission).toLocaleString('ko-KR')
+                              : ''
+                          }
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/[^0-9]/g, '');
+                            setEditedMeeting({
+                              ...editedMeeting,
+                              estimatedCommission: value ? Number(value) : 0,
+                            });
+                          }}
+                          className="h-8 text-sm mt-1"
+                        />
+                      ) : (
+                        <div className="text-sm text-muted-foreground mt-1">
+                          ₩{((meeting as any)?.estimatedCommission || 0).toLocaleString('ko-KR')}
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 )}
 
-                {isAddingNote && (
-                  <div className="space-y-2">
-                    <Textarea
-                      value={newNote}
-                      onChange={(e) => setNewNote(e.target.value)}
-                      placeholder="미팅 노트를 입력하세요..."
-                      className="min-h-[100px] resize-none"
-                      autoFocus
-                    />
-                    <div className="flex gap-2">
-                      <Button
-                        onClick={handleAddNote}
-                        size="sm"
-                        disabled={!newNote.trim()}
-                      >
-                        <CheckIcon className="h-4 w-4 mr-2" />
-                        추가
-                      </Button>
-                      <Button
-                        onClick={() => {
-                          setIsAddingNote(false);
-                          setNewNote('');
-                        }}
-                        variant="outline"
-                        size="sm"
-                      >
-                        <Cross2Icon className="h-4 w-4 mr-2" />
-                        취소
-                      </Button>
+                {/* 관심 상품 */}
+                {((meeting as any)?.productInterest || isEditingMeeting) && (
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <TargetIcon className="h-4 w-4 text-purple-600" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-foreground">관심 상품</div>
+                      {isEditingMeeting ? (
+                        <Select
+                          value={editedMeeting.productInterest}
+                          onValueChange={(value) =>
+                            setEditedMeeting({ ...editedMeeting, productInterest: value })
+                          }
+                        >
+                          <SelectTrigger className="h-8 text-sm">
+                            <SelectValue placeholder="선택하세요" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {productInterests.map((product) => (
+                              <SelectItem key={product.value} value={product.value}>
+                                <div className="flex items-center gap-2">
+                                  <span>{product.icon}</span>
+                                  <span>{product.label}</span>
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <div className="flex items-center gap-2 mt-1">
+                          <span>{productInterests.find(p => p.value === (meeting as any)?.productInterest)?.icon || '💗'}</span>
+                          <span className="text-sm text-muted-foreground">
+                            {productInterests.find(p => p.value === (meeting as any)?.productInterest)?.label || '생명보험'}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
+
+                {/* 알림 설정 */}
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <ClockIcon className="h-4 w-4 text-yellow-600" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-sm font-medium text-foreground">알림 설정</div>
+                    {isEditingMeeting ? (
+                      <Select
+                        value={editedMeeting.reminder}
+                        onValueChange={(value) =>
+                          setEditedMeeting({ ...editedMeeting, reminder: value })
+                        }
+                      >
+                        <SelectTrigger className="h-8 text-sm">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {reminderOptions.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <div className="text-sm text-muted-foreground mt-1">
+                        {reminderOptions.find(r => r.value === (meeting as any)?.reminder)?.label || '30분 전'}
+                      </div>
+                    )}
+                  </div>
+                </div>
               </CardContent>
             </Card>
 
