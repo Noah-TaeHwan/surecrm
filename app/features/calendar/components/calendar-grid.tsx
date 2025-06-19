@@ -2,8 +2,6 @@ import { cn } from '~/lib/utils';
 import {
   meetingTypeColors,
   meetingTypeKoreanMap,
-  eventSourceIcons,
-  eventSourceStyles,
   syncStatusStyles,
   type Meeting,
   type EventSource,
@@ -17,7 +15,6 @@ import {
   Circle,
   Clock,
   MapPin,
-  User,
   Plus,
   MoreHorizontal,
 } from 'lucide-react';
@@ -74,7 +71,6 @@ function EventCard({
   onClick: (e: React.MouseEvent) => void;
 }) {
   const source = (meeting.syncInfo?.externalSource || 'surecrm') as EventSource;
-  const sourceStyle = eventSourceStyles[source] || eventSourceStyles.surecrm;
   const syncStatus = meeting.syncInfo?.syncStatus;
 
   const koreanName =
@@ -114,9 +110,8 @@ function EventCard({
           </span>
         </div>
 
-        {/* 중앙: 이벤트 제목 */}
-        <div className="flex items-center gap-1.5">
-          <User className="h-3 w-3 opacity-75 flex-shrink-0 group-hover:h-3.5 group-hover:w-3.5 transition-all duration-200" />
+        {/* 이벤트 제목 - 콤팩트 버전 */}
+        <div className="flex items-center">
           <span className={cn(
             "font-medium truncate",
             compact ? "text-xs" : "text-sm"
@@ -125,16 +120,11 @@ function EventCard({
           </span>
         </div>
 
-        {/* 하단: 미팅 타입 & 위치 */}
-        {!compact && (
-          <div className="space-y-1">
-            <div className="text-xs opacity-85 truncate">{koreanName}</div>
-            {meeting.location && (
-              <div className="flex items-center gap-1">
-                <MapPin className="h-2.5 w-2.5 opacity-70 group-hover:h-3 group-hover:w-3 transition-all duration-200" />
-                <span className="text-xs opacity-75 truncate">{meeting.location}</span>
-              </div>
-            )}
+        {/* 위치 정보만 유지 (미팅 타입 제거) */}
+        {!compact && meeting.location && (
+          <div className="flex items-center gap-1">
+            <MapPin className="h-2.5 w-2.5 opacity-70 group-hover:h-3 group-hover:w-3 transition-all duration-200" />
+            <span className="text-xs opacity-75 truncate">{meeting.location}</span>
           </div>
         )}
       </div>
@@ -209,43 +199,20 @@ function DateCellHeader({
   sourceCount: Record<string, number>;
 }) {
   return (
-    <div className="flex items-center justify-between mb-3">
-      {/* 날짜 */}
-      <div className={cn(
-        "flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold transition-all duration-200",
-        isToday
-          ? "bg-primary text-primary-foreground shadow-lg scale-110"
-          : "text-foreground/70"
-      )}>
+    <div className="flex items-center justify-between mb-2">
+      {/* 날짜 번호 */}
+      <div
+        className={cn(
+          'flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold transition-all duration-200',
+          isToday
+            ? 'bg-primary text-primary-foreground shadow-lg ring-2 ring-primary/30'
+            : 'text-foreground hover:bg-muted/30'
+        )}
+      >
         {day}
       </div>
 
-      {/* 이벤트 소스별 카운터 */}
-      {dayMeetings.length > 0 && (
-        <div className="flex items-center gap-1">
-          {Object.entries(sourceCount).map(([source, count]) => {
-            const sourceStyle =
-              eventSourceStyles[source as EventSource] ||
-              eventSourceStyles.surecrm;
-            return (
-              <Badge
-                key={source}
-                variant="secondary"
-                className={cn(
-                  'text-xs px-2 py-0.5 font-semibold border',
-                  `bg-gradient-to-r ${sourceStyle.gradient}`,
-                  sourceStyle.textColor,
-                  sourceStyle.border,
-                  'shadow-sm hover:shadow-md transition-shadow duration-200'
-                )}
-                title={`${source === 'surecrm' ? 'SureCRM' : '구글 캘린더'}: ${count}개`}
-              >
-                {sourceStyle.icon} {count}
-              </Badge>
-            );
-          })}
-        </div>
-      )}
+      {/* 소스별 카운터 제거 - 구글 캘린더 완전 통합 */}
     </div>
   );
 }
