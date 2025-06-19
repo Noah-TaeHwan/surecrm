@@ -234,7 +234,7 @@ export function ResponsiveClientDetail({
   return (
     <div className={cn('w-full', className)}>
       {/* 🎯 모바일/태블릿 레이아웃 (lg 미만에서만 표시) */}
-      <div className="lg:hidden">
+      <div className="lg:hidden bg-background">
 
         {/* 🆕 모바일/태블릿 기본정보 접기/펼치기 섹션 */}
         <div className="border-b bg-background ">
@@ -910,7 +910,7 @@ export function ResponsiveClientDetail({
         </div>
 
         {/* 🎨 모던 스마트 탭 네비게이션 - 완전 재설계 */}
-        <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-sm border-b border-border/50 -mx-4 px-4 -mt-1 pt-1">
+        <div className="sticky top-0 z-40 bg-background border-b border-border/50 -mx-4 px-4 shadow-sm">
           <div className="relative">
             {/* 탭 컨테이너 */}
             <div className="relative overflow-hidden">
