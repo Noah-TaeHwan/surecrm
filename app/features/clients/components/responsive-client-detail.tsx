@@ -910,13 +910,13 @@ export function ResponsiveClientDetail({
         </div>
 
         {/* 🎨 모던 스마트 탭 네비게이션 - 완전 재설계 */}
-        <div className="sticky top-0 z-30 bg-gradient-to-r from-background via-background/98 to-background backdrop-blur-xl border-b border-border/50 overflow-hidden">
+        <div className="sticky top-0 z-30 bg-background border-b border-border/50 -mx-4 px-4">
           <div className="relative">
             {/* 탭 컨테이너 */}
             <div className="relative overflow-hidden">
               <div 
                 ref={carouselRef}
-className="flex gap-3 px-5 py-3 overflow-x-auto overflow-y-hidden snap-x snap-mandatory scrollbar-hide scrollbar-none tab-carousel-container"
+className="flex gap-2 px-4 py-2.5 overflow-x-auto overflow-y-hidden snap-x snap-mandatory scrollbar-hide scrollbar-none tab-carousel-container"
                 data-scrollbar-hidden="true"
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
@@ -946,7 +946,7 @@ style={{
                       key={tab.id}
                       onClick={() => onTabChange?.(tab.id)}
                       className={cn(
-                        "relative flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-500 snap-center border min-w-fit",
+                        "relative flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-500 snap-center border min-w-fit",
                         "transform-gpu will-change-transform",
                         // 활성 탭 스타일
                         isActive && [
@@ -979,13 +979,13 @@ style={{
                       )}>
                         <Icon className={cn(
                           "transition-all duration-300",
-                          isActive ? "h-4 w-4" : "h-3.5 w-3.5"
+                          isActive ? "h-3.5 w-3.5" : "h-3 w-3"
                         )} />
                       </div>
                       
                       {/* 라벨 */}
                       <span className={cn(
-                        "text-sm font-medium transition-all duration-300 whitespace-nowrap",
+                        "text-xs font-medium transition-all duration-300 whitespace-nowrap",
                         isActive && "font-semibold"
                       )}>
                         {tab.label}
