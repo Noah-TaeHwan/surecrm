@@ -954,7 +954,7 @@ export function ResponsiveClientDetail({
                         isActive ? [
                           // 활성 탭: 더 큰 패딩과 rounded 값
                           "px-4 py-2 rounded-xl",
-                          "bg-gradient-to-r from-primary via-primary to-primary/90 text-primary-foreground",
+                          "bg-gradient-to-r from-primary via-primary to-primary/90 text-white",
                           "shadow-lg shadow-primary/25 border-primary/20",
                           "ring-2 ring-primary/20 ring-offset-2 ring-offset-background",
                           "translate-y-0 z-10"
@@ -991,7 +991,7 @@ export function ResponsiveClientDetail({
                       )}>
                         <Icon className={cn(
                           "transition-all duration-300 ease-out",
-                          isActive ? "h-3.5 w-3.5" : "h-3 w-3"
+                          isActive ? "h-3.5 w-3.5 text-white" : "h-3 w-3"
                         )} />
                       </div>
                       
@@ -999,7 +999,7 @@ export function ResponsiveClientDetail({
                       <span className={cn(
                         "text-xs font-medium whitespace-nowrap transition-all duration-300 ease-out",
                         // 🎯 폰트 두께도 부드럽게 전환
-                        isActive ? "font-semibold tracking-wide" : "font-normal tracking-normal"
+                        isActive ? "font-semibold tracking-wide text-white" : "font-normal tracking-normal"
                       )}>
                         {tab.label}
                       </span>
@@ -1032,17 +1032,6 @@ export function ResponsiveClientDetail({
                               'opacity 0.3s ease-out',
                               'border-radius 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
                             ].join(', '),
-                          }}
-                        />
-                      )}
-                      
-                      {/* 🎯 활성 상태 표시를 위한 작은 인디케이터 */}
-                      {isActive && (
-                        <div 
-                          className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-4 h-0.5 bg-primary-foreground/30 rounded-full transition-all duration-400 ease-out"
-                          style={{
-                            transform: 'translate3d(-50%, 0, 0)',
-                            transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.15s',
                           }}
                         />
                       )}
