@@ -162,12 +162,12 @@ export function MedicalHistoryTab({
             </h4>
             <div className="p-3 md:p-4 bg-muted/20 rounded-lg border border-border/40">
               <div className={cn(
-                "flex items-start gap-3 p-2 md:p-0 rounded-md transition-colors",
+                "flex items-center gap-3 p-2 md:p-0 rounded-md transition-colors",
                 "hover:bg-muted/20 md:hover:bg-transparent",
                 "min-h-[60px] md:min-h-0" // 긴 텍스트를 위해 더 큰 최소 높이
               )}>
-                <span className="text-base md:text-lg flex-shrink-0 mt-0.5">🔄</span>
-                <div className="flex items-start gap-2 flex-1">
+                <span className="text-base md:text-lg flex-shrink-0">🔄</span>
+                <div className="flex items-center gap-2 flex-1">
                   <Checkbox
                     id="additional-exam"
                     checked={medicalHistory.hasAdditionalExam}
@@ -177,7 +177,7 @@ export function MedicalHistoryTab({
                         hasAdditionalExam: checked === true,
                       }))
                     }
-                    className="data-[state=checked]:bg-primary data-[state=checked]:border-primary mt-0.5"
+                    className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                   />
                   <Label 
                     htmlFor="additional-exam"
