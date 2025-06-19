@@ -9,6 +9,7 @@ import { TabsContent } from '~/common/components/ui/tabs';
 import { Checkbox } from '~/common/components/ui/checkbox';
 import { Label } from '~/common/components/ui/label';
 import { Textarea } from '~/common/components/ui/textarea';
+import { cn } from '~/lib/utils';
 
 interface MedicalHistoryData {
   hasRecentDiagnosis: boolean;
@@ -43,13 +44,14 @@ export function MedicalHistoryTab({
   setShowSuccessModal,
 }: MedicalHistoryTabProps) {
   return (
-    <TabsContent value="medical" className="space-y-6">
+    <TabsContent value="medical" className="space-y-4 md:space-y-6">
       <Card>
-        <CardHeader className="pb-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-foreground">병력사항</h3>
+        <CardHeader className="pb-3 md:pb-4">
+          <div className="flex items-start justify-between gap-3">
+            <h3 className="text-lg font-semibold text-foreground leading-tight">병력사항</h3>
             <Button
               size="sm"
+              className="flex-shrink-0"
               onClick={async () => {
                 try {
                   await submit(
@@ -68,17 +70,18 @@ export function MedicalHistoryTab({
                 }
               }}
             >
-              병력사항 저장
+              <span className="hidden sm:inline">병력사항 </span>저장
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="p-6 space-y-6">
-          {/* 3개월 이내 의료사항 */}
-          <div className="space-y-4">
-            <h4 className="font-medium text-foreground flex items-center gap-2">
+        <CardContent className="p-4 md:p-6 space-y-5 md:space-y-6">
+          
+          {/* 🕐 3개월 이내 의료사항 */}
+          <div className="space-y-3 md:space-y-4">
+            <h4 className="font-medium text-foreground flex items-center gap-2 text-sm md:text-base">
               🕐 3개월 이내 의료 관련 사항
             </h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/30 rounded-lg border border-border/50">
+            <div className="space-y-2 md:space-y-0 md:grid md:grid-cols-2 md:gap-4 p-3 md:p-4 bg-muted/30 rounded-lg border border-border/50">
               {[
                 {
                   key: 'hasRecentDiagnosis',
@@ -111,9 +114,17 @@ export function MedicalHistoryTab({
                   icon: '⚕️',
                 },
               ].map(item => (
-                <div key={item.key} className="flex items-center space-x-3">
-                  <span className="text-lg">{item.icon}</span>
-                  <div className="flex items-center space-x-2">
+                <div 
+                  key={item.key} 
+                  className={cn(
+                    "flex items-center gap-3 p-2 md:p-0 rounded-md transition-colors",
+                    "hover:bg-muted/20 md:hover:bg-transparent",
+                    // 모바일에서 터치하기 쉽게 더 큰 영역
+                    "min-h-[44px] md:min-h-0"
+                  )}
+                >
+                  <span className="text-base md:text-lg flex-shrink-0">{item.icon}</span>
+                  <div className="flex items-center gap-2 flex-1">
                     <Checkbox
                       id={`recent-${item.key}`}
                       checked={
@@ -127,10 +138,14 @@ export function MedicalHistoryTab({
                           [item.key]: checked === true,
                         }))
                       }
+                      className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                     />
                     <Label 
                       htmlFor={`recent-${item.key}`}
-                      className="text-sm cursor-pointer"
+                      className={cn(
+                        "text-sm cursor-pointer leading-relaxed flex-1",
+                        "hover:text-primary transition-colors"
+                      )}
                     >
                       {item.label}
                     </Label>
@@ -140,15 +155,19 @@ export function MedicalHistoryTab({
             </div>
           </div>
 
-          {/* 1년 이내 재검사 */}
-          <div className="space-y-4">
-            <h4 className="font-medium text-foreground flex items-center gap-2">
+          {/* 📅 1년 이내 재검사 */}
+          <div className="space-y-3 md:space-y-4">
+            <h4 className="font-medium text-foreground flex items-center gap-2 text-sm md:text-base">
               📅 1년 이내 재검사 관련
             </h4>
-            <div className="grid grid-cols-1 gap-4 p-4 bg-muted/20 rounded-lg border border-border/40">
-              <div className="flex items-start space-x-3">
-                <span className="text-lg">🔄</span>
-                <div className="flex items-start space-x-2">
+            <div className="p-3 md:p-4 bg-muted/20 rounded-lg border border-border/40">
+              <div className={cn(
+                "flex items-start gap-3 p-2 md:p-0 rounded-md transition-colors",
+                "hover:bg-muted/20 md:hover:bg-transparent",
+                "min-h-[60px] md:min-h-0" // 긴 텍스트를 위해 더 큰 최소 높이
+              )}>
+                <span className="text-base md:text-lg flex-shrink-0 mt-0.5">🔄</span>
+                <div className="flex items-start gap-2 flex-1">
                   <Checkbox
                     id="additional-exam"
                     checked={medicalHistory.hasAdditionalExam}
@@ -158,31 +177,61 @@ export function MedicalHistoryTab({
                         hasAdditionalExam: checked === true,
                       }))
                     }
+                    className="data-[state=checked]:bg-primary data-[state=checked]:border-primary mt-0.5"
                   />
                   <Label 
                     htmlFor="additional-exam"
-                    className="text-sm cursor-pointer leading-relaxed"
+                    className={cn(
+                      "text-sm cursor-pointer leading-relaxed flex-1",
+                      "hover:text-primary transition-colors"
+                    )}
                   >
-                    의사로부터 진찰 또는 검사를 통하여 추가검사(재검사) 소견 여부
+                    의사로부터 진찰 또는 검사를 통하여{' '}
+                    <br className="md:hidden" />
+                    추가검사(재검사) 소견 여부
                   </Label>
                 </div>
               </div>
+              
+              {/* 1년 이내 재검사 상세 내용 */}
+              {medicalHistory.hasAdditionalExam && (
+                <div className="mt-3 space-y-2">
+                  <Label className="text-xs md:text-sm text-muted-foreground">
+                    추가검사 상세 내용
+                  </Label>
+                  <Textarea
+                    className="min-h-[80px] text-sm"
+                    placeholder="추가검사나 재검사 관련 상세 내용을 입력해주세요..."
+                    value={medicalHistory.additionalExamDetails}
+                    onChange={e =>
+                      setMedicalHistory(prev => ({
+                        ...prev,
+                        additionalExamDetails: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+              )}
             </div>
           </div>
 
-          {/* 5년 이내 주요 의료 이력 */}
-          <div className="space-y-4">
-            <h4 className="font-medium text-foreground flex items-center gap-2">
+          {/* 🗓️ 5년 이내 주요 의료 이력 */}
+          <div className="space-y-3 md:space-y-4">
+            <h4 className="font-medium text-foreground flex items-center gap-2 text-sm md:text-base">
               🗓️ 5년 이내 주요 의료 이력
             </h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-secondary/30 rounded-lg border border-border/60">
+            <div className="space-y-2 md:space-y-0 md:grid md:grid-cols-2 md:gap-4 p-3 md:p-4 bg-secondary/30 rounded-lg border border-border/60">
               {[
                 {
                   key: 'hasMajorHospitalization',
                   label: '입원',
                   icon: '🏥',
                 },
-                { key: 'hasMajorSurgery', label: '수술', icon: '⚕️' },
+                { 
+                  key: 'hasMajorSurgery', 
+                  label: '수술', 
+                  icon: '⚕️' 
+                },
                 {
                   key: 'hasLongTermTreatment',
                   label: '7일 이상 치료',
@@ -194,9 +243,16 @@ export function MedicalHistoryTab({
                   icon: '💊',
                 },
               ].map(item => (
-                <div key={item.key} className="flex items-center space-x-3">
-                  <span className="text-lg">{item.icon}</span>
-                  <div className="flex items-center space-x-2">
+                <div 
+                  key={item.key} 
+                  className={cn(
+                    "flex items-center gap-3 p-2 md:p-0 rounded-md transition-colors",
+                    "hover:bg-muted/20 md:hover:bg-transparent",
+                    "min-h-[44px] md:min-h-0"
+                  )}
+                >
+                  <span className="text-base md:text-lg flex-shrink-0">{item.icon}</span>
+                  <div className="flex items-center gap-2 flex-1">
                     <Checkbox
                       id={`major-${item.key}`}
                       checked={
@@ -210,10 +266,14 @@ export function MedicalHistoryTab({
                           [item.key]: checked === true,
                         }))
                       }
+                      className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                     />
                     <Label 
                       htmlFor={`major-${item.key}`}
-                      className="text-sm cursor-pointer"
+                      className={cn(
+                        "text-sm cursor-pointer leading-relaxed flex-1",
+                        "hover:text-primary transition-colors"
+                      )}
                     >
                       {item.label}
                     </Label>
@@ -223,16 +283,18 @@ export function MedicalHistoryTab({
             </div>
           </div>
 
-          {/* 상세 메모 섹션 */}
-          <div className="space-y-4">
-            <h4 className="font-medium text-foreground">상세 내용</h4>
-            <div className="space-y-3">
-              <div className="space-y-1">
-                <Label className="text-sm text-muted-foreground">
+          {/* 📝 상세 내용 섹션 */}
+          <div className="space-y-3 md:space-y-4">
+            <h4 className="font-medium text-foreground flex items-center gap-2 text-sm md:text-base">
+              📝 상세 내용
+            </h4>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-xs md:text-sm text-muted-foreground font-medium">
                   3개월 이내 상세 내용
                 </Label>
                 <Textarea
-                  className="min-h-[100px]"
+                  className="min-h-[100px] text-sm"
                   placeholder="3개월 이내 의료 관련 상세 내용을 입력해주세요..."
                   value={medicalHistory.recentMedicalDetails}
                   onChange={e =>
@@ -243,12 +305,12 @@ export function MedicalHistoryTab({
                   }
                 />
               </div>
-              <div className="space-y-1">
-                <Label className="text-sm text-muted-foreground">
+              <div className="space-y-2">
+                <Label className="text-xs md:text-sm text-muted-foreground font-medium">
                   5년 이내 주요 의료 이력 상세 내용
                 </Label>
                 <Textarea
-                  className="min-h-[100px]"
+                  className="min-h-[100px] text-sm"
                   placeholder="5년 이내 주요 의료 이력 상세 내용을 입력해주세요..."
                   value={medicalHistory.majorMedicalDetails}
                   onChange={e =>

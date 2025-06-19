@@ -1697,9 +1697,9 @@ textarea {
 /* 모바일에서 포커스 최적화 */
 .focus-mobile {
   /* 터치 친화적 포커스 스타일 */
-  outline: 2px solid hsl(var(--primary)) !important;
-  outline-offset: 2px !important;
-  border-radius: 6px !important;
+  outline: 2px solid var(--color-mobile-border-focus);
+  outline-offset: 2px;
+  border-radius: 6px;
 }
 
 /* 모바일 터치 타겟 최적화 */
@@ -3127,6 +3127,235 @@ input[type="datetime-local"]:not([style*="color"]) {
   
   .tab-carousel-container {
     scroll-behavior: auto !important;
+  }
+}
+
+/* =================================================================
+   MEDICAL HISTORY TAB MOBILE OPTIMIZATION
+   ================================================================= */
+
+/* 🏥 병력사항 탭 모바일 최적화 */
+
+/* 📱 모바일에서 체크박스 영역 확대 및 터치 최적화 */
+@media (max-width: 768px) {
+  /* 🎯 체크박스 컨테이너 터치 최적화 */
+  [data-tabscontent="medical"] .flex.items-center.gap-3 {
+    /* 터치하기 쉬운 최소 높이 확보 */
+    min-height: 48px;
+    
+    /* 터치 영역 패딩 확대 */
+    padding: 8px 12px;
+    
+    /* 부드러운 터치 피드백 */
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    
+    /* 터치 하이라이트 제거 */
+    -webkit-tap-highlight-color: transparent;
+    
+    /* 터치 조작 최적화 */
+    touch-action: manipulation;
+  }
+  
+  /* 🔘 체크박스 크기 및 터치 영역 확대 */
+  [data-tabscontent="medical"] [data-radix-checkbox-root] {
+    /* 모바일에서 체크박스 크기 확대 */
+    width: 20px !important;
+    height: 20px !important;
+    
+    /* 터치 영역 확대를 위한 패딩 */
+    margin: 2px;
+    
+    /* 부드러운 전환 효과 */
+    transition: all 0.2s ease;
+  }
+  
+  /* ✅ 체크된 상태 시각적 강화 */
+  [data-tabscontent="medical"] [data-radix-checkbox-root][data-state="checked"] {
+    /* 체크된 상태에서 더 진한 색상 */
+    background-color: hsl(var(--primary)) !important;
+    border-color: hsl(var(--primary)) !important;
+    
+    /* 체크된 상태에서 약간의 그림자 */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* 🏷️ 레이블 터치 영역 및 가독성 개선 */
+  [data-tabscontent="medical"] label {
+    /* 레이블 터치 영역 확대 */
+    padding: 4px 0;
+    
+    /* 줄 간격 개선 */
+    line-height: 1.5;
+    
+    /* 터치 시 시각적 피드백 */
+    cursor: pointer;
+    
+    /* 긴 텍스트 줄바꿈 처리 */
+    word-break: keep-all;
+    word-wrap: break-word;
+  }
+  
+  /* 🎨 호버/포커스 상태 모바일 최적화 */
+  [data-tabscontent="medical"] .flex.items-center.gap-3:hover,
+  [data-tabscontent="medical"] .flex.items-center.gap-3:focus-within {
+    /* 모바일에서 미묘한 배경색 변화 */
+    background-color: hsl(var(--muted) / 0.3);
+    
+    /* 부드러운 모서리 */
+    border-radius: 8px;
+  }
+  
+  /* 📝 텍스트 영역 모바일 최적화 */
+  [data-tabscontent="medical"] textarea {
+    /* 모바일에서 텍스트 크기 적정화 */
+    font-size: 14px;
+    
+    /* 줄 간격 개선 */
+    line-height: 1.5;
+    
+    /* 최소 높이 조정 */
+    min-height: 80px;
+    
+    /* 리사이즈 핸들 제거 (모바일에서 불필요) */
+    resize: none;
+  }
+  
+  /* 🔤 폰트 크기 모바일 최적화 */
+  [data-tabscontent="medical"] h4 {
+    /* 섹션 제목 크기 조정 */
+    font-size: 15px;
+    font-weight: 600;
+    
+    /* 아이콘과 텍스트 간격 최적화 */
+    gap: 6px;
+  }
+  
+  [data-tabscontent="medical"] .text-sm {
+    /* 소형 텍스트 가독성 개선 */
+    font-size: 13px;
+    line-height: 1.4;
+  }
+  
+  /* 📊 섹션별 구분 강화 */
+  [data-tabscontent="medical"] .space-y-3 > div:not(:last-child) {
+    /* 섹션 간 구분선 */
+    border-bottom: 1px solid hsl(var(--border) / 0.3);
+    padding-bottom: 16px;
+    margin-bottom: 16px;
+  }
+  
+  /* 💊 아이콘 크기 및 정렬 최적화 */
+  [data-tabscontent="medical"] .flex-shrink-0 {
+    /* 아이콘 정렬 개선 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    /* 아이콘 크기 일관성 */
+    width: 24px;
+    height: 24px;
+    
+    /* 아이콘 배경 (선택사항) */
+    border-radius: 4px;
+  }
+  
+  /* 🔄 1년 이내 재검사 섹션 특별 처리 */
+  [data-tabscontent="medical"] .min-h-\[60px\] {
+    /* 긴 텍스트를 위한 추가 공간 */
+    min-height: 64px;
+    
+    /* 수직 정렬 개선 */
+    align-items: flex-start;
+  }
+  
+  /* 📱 동적 텍스트영역 표시/숨김 애니메이션 */
+  [data-tabscontent="medical"] .mt-3.space-y-2 {
+    /* 나타남/사라짐 애니메이션 */
+    animation: slideDown 0.3s ease-out;
+    transform-origin: top;
+  }
+  
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+      max-height: 0;
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+      max-height: 200px;
+    }
+  }
+  
+  /* 💾 저장 버튼 모바일 최적화 */
+  [data-tabscontent="medical"] .flex-shrink-0 button {
+    /* 모바일에서 터치하기 쉬운 크기 */
+    min-height: 40px;
+    padding: 8px 12px;
+    
+    /* 텍스트 크기 조정 */
+    font-size: 14px;
+    
+    /* 터치 피드백 최적화 */
+    transition: all 0.2s ease;
+    touch-action: manipulation;
+  }
+  
+  /* 🎯 터치 피드백 애니메이션 */
+  [data-tabscontent="medical"] .flex.items-center.gap-3:active {
+    /* 터치 시 미묘한 스케일 효과 */
+    transform: scale(0.98);
+    
+    /* 빠른 피드백 */
+    transition: transform 0.1s ease;
+  }
+}
+
+/* 🖥️ 데스크톱에서 체크박스 호버 효과 강화 */
+@media (min-width: 769px) {
+  [data-tabscontent="medical"] [data-radix-checkbox-root]:hover {
+    /* 데스크톱에서 호버 시 테두리 강화 */
+    border-color: hsl(var(--primary) / 0.6);
+    box-shadow: 0 0 0 1px hsl(var(--primary) / 0.2);
+  }
+  
+  [data-tabscontent="medical"] label:hover {
+    /* 데스크톱에서 레이블 호버 효과 */
+    color: hsl(var(--primary));
+  }
+}
+
+/* 🌙 다크 모드 최적화 */
+.dark [data-tabscontent="medical"] .flex.items-center.gap-3:hover {
+  background-color: hsl(var(--muted) / 0.2);
+}
+
+.dark [data-tabscontent="medical"] [data-radix-checkbox-root][data-state="checked"] {
+  /* 다크 모드에서 체크박스 가시성 향상 */
+  box-shadow: 0 2px 4px rgba(255, 255, 255, 0.1);
+}
+
+/* 🔍 접근성 개선 */
+[data-tabscontent="medical"] [data-radix-checkbox-root]:focus-visible {
+  /* 키보드 포커스 시 명확한 아웃라인 */
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+[data-tabscontent="medical"] label:focus-visible {
+  /* 레이블 포커스 시 아웃라인 */
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* 🚫 모션 감소 설정 사용자 대응 */
+@media (prefers-reduced-motion: reduce) {
+  [data-tabscontent="medical"] * {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
   }
 }
 
