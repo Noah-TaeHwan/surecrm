@@ -255,7 +255,7 @@ export default function CalendarPage({
 
   return (
     <MainLayout title="일정 관리">
-      <div className="flex-1 space-y-6 p-4 md:p-6 pt-6">
+      <div className="flex-1 space-y-6">
         {/* 액션 결과 메시지 */}
         {/* 알림 메시지는 이제 토스트로 표시됨 */}
 
