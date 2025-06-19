@@ -910,7 +910,7 @@ export function ResponsiveClientDetail({
         </div>
 
         {/* 🎨 모던 스마트 탭 네비게이션 - 완전 재설계 */}
-        <div className="sticky -top-4 z-40 bg-background border-b border-border/50 -mx-4 px-4 shadow-sm py-4">
+        <div className="sticky -top-4 z-40 bg-background border-b border-border/50 -mx-4 px-4 shadow-sm py-1">
           <div className="relative">
             {/* 탭 컨테이너 */}
             <div className="relative overflow-hidden">
@@ -1001,16 +1001,7 @@ style={{
               </div>
             </div>
 
-            {/* 진행률 인디케이터 바 */}
-            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-border/30">
-              <div 
-                className="h-full bg-gradient-to-r from-primary via-primary/80 to-primary transition-all duration-500 ease-out"
-                style={{ 
-                  width: `${((mobileTabs.findIndex(tab => tab.id === activeTab) + 1) / mobileTabs.length) * 100}%`,
-                  boxShadow: '0 0 8px rgba(var(--primary), 0.5)'
-                }}
-              />
-            </div>
+            
           </div>
         </div>
 
