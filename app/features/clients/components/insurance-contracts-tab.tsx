@@ -970,29 +970,28 @@ export function InsuranceContractsTab({
 
   return (
     <>
-      <TabsContent value="insurance" className="space-y-6">
+      <TabsContent value="insurance" className="space-y-4 md:space-y-6">
         <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <span className="text-lg">📋</span>
-              보험계약 관리
-            </CardTitle>
-            <p className="text-sm text-muted-foreground">
-              {clientName} 고객의 보험계약 현황을 관리하고 관련 서류를 첨부할 수
-              있습니다.
-            </p>
-            <div className="flex justify-end pb-4 border-b">
+          <CardHeader className="pb-3 md:pb-4">
+            <div className="flex items-start justify-between gap-3">
+              <h3 className="text-lg font-semibold text-foreground leading-tight">보험계약</h3>
               <Button
+                size="sm"
+                className="flex-shrink-0"
                 onClick={handleAddContract}
-                className="flex items-center gap-2"
               >
-                <Plus className="h-4 w-4" />새 계약 등록
+                <Plus className="h-4 w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">계약 </span>등록
               </Button>
             </div>
           </CardHeader>
-          <CardContent className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+          <CardContent className="p-4 md:p-6 space-y-4 md:space-y-6">
             {/* 📊 통계 대시보드 */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div className="space-y-3 md:space-y-4">
+              <h4 className="font-medium text-foreground flex items-center gap-2 text-sm md:text-base">
+                📊 계약 현황
+              </h4>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
               <div className="p-3 sm:p-4 bg-card rounded-lg border hover:shadow-md transition-shadow">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
                   <div className="p-2 bg-primary/10 rounded-lg w-fit">
@@ -1044,6 +1043,7 @@ export function InsuranceContractsTab({
                     </p>
                   </div>
                 </div>
+                              </div>
               </div>
             </div>
 
@@ -1051,8 +1051,8 @@ export function InsuranceContractsTab({
 
             {/* 📋 계약 목록 */}
             {contracts.length > 0 ? (
-              <div className="space-y-3 sm:space-y-4">
-                <h4 className="font-medium text-foreground flex items-center gap-2 text-sm sm:text-base">
+              <div className="space-y-3 md:space-y-4">
+                <h4 className="font-medium text-foreground flex items-center gap-2 text-sm md:text-base">
                   🗂️ 계약 목록
                 </h4>
                 {contracts.map(contract => {
@@ -1062,16 +1062,16 @@ export function InsuranceContractsTab({
                   return (
                     <div
                       key={contract.id}
-                      className="p-4 sm:p-5 bg-card border border-slate-200/60 dark:border-slate-700/60 rounded-xl hover:border-slate-300/80 dark:hover:border-slate-600/80 hover:shadow-md transition-all duration-200 cursor-pointer relative"
+                      className="p-4 md:p-5 bg-card border border-slate-200/60 dark:border-slate-700/60 rounded-lg hover:border-slate-300/80 dark:hover:border-slate-600/80 hover:shadow-md transition-all duration-200"
                     >
-                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-0 mb-4">
-                        <div className="flex items-center gap-3">
-                          <span className="text-xl sm:text-2xl">{typeConfig.icon}</span>
+                      <div className="flex items-start justify-between gap-3 mb-4">
+                        <div className="flex items-start gap-3 min-w-0 flex-1">
+                          <span className="text-lg md:text-xl">{typeConfig.icon}</span>
                           <div className="min-w-0 flex-1">
-                            <h5 className="font-semibold text-sm sm:text-base truncate">
+                            <h5 className="font-semibold text-sm md:text-base truncate leading-tight">
                               {contract.productName}
                             </h5>
-                            <div className="flex flex-wrap items-center gap-2 mt-1">
+                            <div className="flex flex-wrap items-center gap-2 mt-2">
                               <Badge
                                 variant="outline"
                                 className={cn("text-xs", typeConfig.color)}
@@ -1082,7 +1082,7 @@ export function InsuranceContractsTab({
                             </div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2 shrink-0">
+                        <div className="flex items-center gap-1 shrink-0">
                           <Button
                             variant="ghost"
                             size="sm"
@@ -1092,7 +1092,7 @@ export function InsuranceContractsTab({
                               handleEditContract(contract);
                             }}
                           >
-                            <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
+                            <Edit className="h-3 w-3 md:h-4 md:w-4" />
                           </Button>
                           <Button
                             variant="ghost"
@@ -1103,24 +1103,24 @@ export function InsuranceContractsTab({
                               handleDeleteContract(contract);
                             }}
                           >
-                            <X className="h-3 w-3 sm:h-4 sm:w-4" />
+                            <X className="h-3 w-3 md:h-4 md:w-4" />
                           </Button>
                         </div>
                       </div>
 
-                      {/* 🔄 계약자/피보험자 정보 섹션 - 모바일 최적화 */}
+                      {/* 👥 계약자/피보험자 정보 섹션 - 모바일 최적화 */}
                       <div className="mb-4 p-3 bg-muted/30 rounded-lg">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm">
+                        <div className="space-y-3 md:space-y-0 md:grid md:grid-cols-2 md:gap-4 text-sm">
                           <div className="space-y-1">
                             <span className="text-xs text-muted-foreground font-medium">
-                              계약자:
+                              계약자
                             </span>
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-                              <span className="font-medium text-sm">
+                            <div className="space-y-1">
+                              <span className="font-medium text-sm block">
                                 {contract.contractorName}
                               </span>
                               {contract.contractorPhone && (
-                                <span className="text-muted-foreground text-xs">
+                                <span className="text-muted-foreground text-xs block font-mono">
                                   {contract.contractorPhone}
                                 </span>
                               )}
@@ -1128,14 +1128,14 @@ export function InsuranceContractsTab({
                           </div>
                           <div className="space-y-1">
                             <span className="text-xs text-muted-foreground font-medium">
-                              피보험자:
+                              피보험자
                             </span>
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-                              <span className="font-medium text-sm">
+                            <div className="space-y-1">
+                              <span className="font-medium text-sm block">
                                 {contract.insuredName}
                               </span>
                               {contract.insuredPhone && (
-                                <span className="text-muted-foreground text-xs">
+                                <span className="text-muted-foreground text-xs block font-mono">
                                   {contract.insuredPhone}
                                 </span>
                               )}
@@ -1144,58 +1144,59 @@ export function InsuranceContractsTab({
                         </div>
                       </div>
 
-                      {/* 🎯 핵심 정보 - 모바일 우선 반응형 디자인 */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                        <div className="space-y-3 sm:space-y-4">
-                          <div className="flex items-center gap-2 mb-3">
-                            <div className="w-1 h-4 sm:h-5 bg-gradient-to-b from-blue-500 to-blue-600 rounded-full"></div>
-                            <h6 className="text-sm sm:text-base font-medium text-slate-800 dark:text-slate-200">
+                      {/* 📋 핵심 정보 - 모바일 우선 세로 배치 */}
+                      <div className="space-y-4">
+                        {/* 계약 정보 */}
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-2">
+                            <div className="w-1 h-4 bg-gradient-to-b from-blue-500 to-blue-600 rounded-full"></div>
+                            <h6 className="text-sm font-medium text-slate-800 dark:text-slate-200">
                               계약 정보
                             </h6>
                           </div>
-                          <div className="space-y-2 sm:space-y-3">
-                            <div className="flex justify-between items-center py-1 sm:py-1.5">
-                              <span className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+                          <div className="space-y-2">
+                            <div className="flex justify-between items-center py-1.5 border-b border-slate-100/50 dark:border-slate-700/50">
+                              <span className="text-xs text-slate-600 dark:text-slate-400">
                                 보험사
                               </span>
-                              <span className="font-semibold text-sm sm:text-base text-blue-600 dark:text-blue-400 text-right">
+                              <span className="font-semibold text-sm text-blue-600 dark:text-blue-400 text-right">
                                 {contract.insuranceCompany}
                               </span>
                             </div>
                             {contract.policyNumber && (
-                              <div className="flex justify-between items-center py-1 sm:py-1.5">
-                                <span className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+                              <div className="flex justify-between items-center py-1.5 border-b border-slate-100/50 dark:border-slate-700/50">
+                                <span className="text-xs text-slate-600 dark:text-slate-400">
                                   증권번호
                                 </span>
-                                <span className="font-mono text-xs sm:text-sm font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md break-all text-right">
+                                <span className="font-mono text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-1 rounded break-all text-right">
                                   {contract.policyNumber}
                                 </span>
                               </div>
                             )}
                             {contract.insuranceCode && (
-                              <div className="flex justify-between items-center py-1 sm:py-1.5">
-                                <span className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+                              <div className="flex justify-between items-center py-1.5 border-b border-slate-100/50 dark:border-slate-700/50">
+                                <span className="text-xs text-slate-600 dark:text-slate-400">
                                   보종코드
                                 </span>
-                                <span className="font-medium text-sm sm:text-base text-slate-900 dark:text-slate-100 text-right">
+                                <span className="font-medium text-sm text-slate-900 dark:text-slate-100 text-right">
                                   {contract.insuranceCode}
                                 </span>
                               </div>
                             )}
-                            <div className="flex justify-between items-center py-1 sm:py-1.5">
-                              <span className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+                            <div className="flex justify-between items-center py-1.5 border-b border-slate-100/50 dark:border-slate-700/50">
+                              <span className="text-xs text-slate-600 dark:text-slate-400">
                                 계약일
                               </span>
-                              <span className="font-medium text-sm sm:text-base text-slate-900 dark:text-slate-100 text-right">
+                              <span className="font-medium text-sm text-slate-900 dark:text-slate-100 text-right">
                                 {formatDate(contract.contractDate)}
                               </span>
                             </div>
                             {contract.paymentDueDate && (
-                              <div className="flex justify-between items-center py-1 sm:py-1.5">
-                                <span className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+                              <div className="flex justify-between items-center py-1.5">
+                                <span className="text-xs text-slate-600 dark:text-slate-400">
                                   납기일
                                 </span>
-                                <span className="font-semibold text-sm sm:text-base text-red-600 dark:text-red-400 text-right">
+                                <span className="font-semibold text-sm text-red-600 dark:text-red-400 text-right">
                                   {formatDate(contract.paymentDueDate)}
                                 </span>
                               </div>
@@ -1203,53 +1204,54 @@ export function InsuranceContractsTab({
                           </div>
                         </div>
 
-                        <div className="space-y-3 sm:space-y-4">
-                          <div className="flex items-center gap-2 mb-3">
-                            <div className="w-1 h-4 sm:h-5 bg-gradient-to-b from-emerald-500 to-emerald-600 rounded-full"></div>
-                            <h6 className="text-sm sm:text-base font-medium text-slate-800 dark:text-slate-200">
+                        {/* 금액 정보 */}
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-2">
+                            <div className="w-1 h-4 bg-gradient-to-b from-emerald-500 to-emerald-600 rounded-full"></div>
+                            <h6 className="text-sm font-medium text-slate-800 dark:text-slate-200">
                               금액 정보
                             </h6>
                           </div>
-                          <div className="space-y-2 sm:space-y-3">
+                          <div className="space-y-2">
                             {contract.premiumAmount && (
-                              <div className="flex justify-between items-center py-1 sm:py-1.5">
-                                <span className="text-xs sm:text-sm text-slate-700 dark:text-slate-300">
+                              <div className="flex justify-between items-center py-1.5 border-b border-slate-100/50 dark:border-slate-700/50">
+                                <span className="text-xs text-slate-700 dark:text-slate-300">
                                   납입보험료
                                 </span>
-                                <span className="font-bold text-sm sm:text-base text-emerald-600 dark:text-emerald-400 text-right">
+                                <span className="font-bold text-sm text-emerald-600 dark:text-emerald-400 text-right">
                                   {formatCurrency(contract.premiumAmount)}
                                 </span>
                               </div>
                             )}
                             {contract.paymentCycle && (
-                              <div className="flex justify-between items-center py-1 sm:py-1.5">
-                                <span className="text-xs sm:text-sm text-slate-700 dark:text-slate-300">
+                              <div className="flex justify-between items-center py-1.5 border-b border-slate-100/50 dark:border-slate-700/50">
+                                <span className="text-xs text-slate-700 dark:text-slate-300">
                                   납입주기
                                 </span>
                                 <Badge
                                   variant="secondary"
-                                  className="font-medium text-xs sm:text-sm"
+                                  className="font-medium text-xs"
                                 >
                                   {getPaymentCycleLabel(contract.paymentCycle)}
                                 </Badge>
                               </div>
                             )}
                             {contract.agentCommission && (
-                              <div className="flex justify-between items-center py-1 sm:py-1.5">
-                                <span className="text-xs sm:text-sm text-slate-700 dark:text-slate-300">
+                              <div className="flex justify-between items-center py-1.5 border-b border-slate-100/50 dark:border-slate-700/50">
+                                <span className="text-xs text-slate-700 dark:text-slate-300">
                                   수수료
                                 </span>
-                                <span className="font-bold text-sm sm:text-base text-green-600 dark:text-green-400 text-right">
+                                <span className="font-bold text-sm text-green-600 dark:text-green-400 text-right">
                                   {formatCurrency(contract.agentCommission)}
                                 </span>
                               </div>
                             )}
                             {contract.coverageAmount && (
-                              <div className="flex justify-between items-center py-1 sm:py-1.5">
-                                <span className="text-xs sm:text-sm text-slate-700 dark:text-slate-300">
+                              <div className="flex justify-between items-center py-1.5">
+                                <span className="text-xs text-slate-700 dark:text-slate-300">
                                   보장금액
                                 </span>
-                                <span className="font-bold text-sm sm:text-base text-amber-600 dark:text-amber-400 text-right">
+                                <span className="font-bold text-sm text-amber-600 dark:text-amber-400 text-right">
                                   {formatCurrency(contract.coverageAmount)}
                                 </span>
                               </div>
@@ -1258,13 +1260,13 @@ export function InsuranceContractsTab({
                         </div>
                       </div>
 
-                      {/* 📁 첨부파일 섹션 - 개선된 UI */}
+                      {/* 📁 첨부파일 섹션 - 모바일 최적화 */}
                       {contract.attachments &&
                         contract.attachments.length > 0 && (
-                          <div className="mt-5 pt-5 border-t border-slate-200/60 dark:border-slate-700/60">
-                            <div className="flex items-center gap-2 mb-4">
-                              <div className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-                                <Paperclip className="h-4 w-4 text-slate-600 dark:text-slate-400" />
+                          <div className="mt-4 pt-4 border-t border-slate-200/60 dark:border-slate-700/60">
+                            <div className="flex items-center gap-2 mb-3">
+                              <div className="w-6 h-6 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                                <Paperclip className="h-3 w-3 text-slate-600 dark:text-slate-400" />
                               </div>
                               <div>
                                 <h6 className="text-sm font-medium text-slate-900 dark:text-slate-100">
@@ -1278,24 +1280,15 @@ export function InsuranceContractsTab({
 
                             <div className="space-y-2">
                               {contract.attachments
-                                .slice(0, 4)
+                                .slice(0, 3)
                                 .map((att, index) => (
                                   <div
                                     key={att.id}
-                                    className="flex items-center justify-between p-3 bg-slate-50/80 dark:bg-slate-900/20 rounded-lg border border-slate-200/50 dark:border-slate-700/50 hover:bg-slate-100/60 dark:hover:bg-slate-800/30 transition-colors group"
+                                    className="p-3 bg-slate-50/80 dark:bg-slate-900/20 rounded-lg border border-slate-200/50 dark:border-slate-700/50 hover:bg-slate-100/60 dark:hover:bg-slate-800/30 transition-colors"
                                   >
-                                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                                      <div className="flex items-center gap-2.5">
-                                        <div className="w-8 h-8 rounded-md bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
-                                          <FileText className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                                        </div>
-                                        <div className="flex flex-col">
-                                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
-                                            {getDocumentTypeLabel(
-                                              att.documentType
-                                            )}
-                                          </span>
-                                        </div>
+                                    <div className="flex items-start gap-2 mb-2">
+                                      <div className="w-7 h-7 rounded-md bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
+                                        <FileText className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
                                       </div>
                                       <div className="min-w-0 flex-1">
                                         <p
@@ -1306,45 +1299,37 @@ export function InsuranceContractsTab({
                                         >
                                           {att.fileDisplayName || att.fileName}
                                         </p>
-                                        <div className="flex items-center gap-3 mt-1">
-                                          <p className="text-xs text-slate-500 dark:text-slate-500">
-                                            첨부문서
-                                          </p>
-                                          {/* 🔧 설명을 옆으로 배치 */}
-                                          {att.description && (
-                                            <div className="flex items-center gap-1">
-                                              <span className="text-xs text-slate-400">
-                                                •
-                                              </span>
-                                              <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">
-                                                {att.description}
-                                              </p>
-                                            </div>
-                                          )}
-                                        </div>
                                       </div>
-                                    </div>
-                                    <div className="flex items-center gap-1 ml-3">
                                       <Button
                                         variant="ghost"
                                         size="sm"
-                                        className="h-7 w-7 p-0 text-slate-400 hover:text-green-600 hover:bg-green-100 dark:hover:bg-green-900/20 opacity-0 group-hover:opacity-100 transition-all"
+                                        className="h-7 w-7 p-0 text-slate-400 hover:text-green-600 hover:bg-green-100 dark:hover:bg-green-900/20"
                                         onClick={e => {
                                           e.stopPropagation();
                                           handleDownloadAttachment(att.id);
                                         }}
                                         title="파일 다운로드"
                                       >
-                                        <Download className="h-3.5 w-3.5" />
+                                        <Download className="h-3 w-3" />
                                       </Button>
+                                    </div>
+                                    <div className="space-y-1">
+                                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                                        {getDocumentTypeLabel(att.documentType)}
+                                      </span>
+                                      {att.description && (
+                                        <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+                                          {att.description}
+                                        </p>
+                                      )}
                                     </div>
                                   </div>
                                 ))}
 
-                              {contract.attachments.length > 4 && (
+                              {contract.attachments.length > 3 && (
                                 <div className="flex items-center justify-center p-2.5 bg-slate-50/60 dark:bg-slate-900/15 rounded-lg border border-dashed border-slate-300 dark:border-slate-600">
                                   <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
-                                    +{contract.attachments.length - 4}개 파일 더
+                                    +{contract.attachments.length - 3}개 파일 더
                                     있음
                                   </span>
                                   <Button
@@ -1366,95 +1351,96 @@ export function InsuranceContractsTab({
 
                       {/* 🔍 상세보기 토글 및 상세 정보 */}
                       <div className="mt-4 pt-4 border-t border-slate-200/60 dark:border-slate-700/60">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                            계약 상세 정보
-                          </span>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => toggleContractDetails(contract.id)}
-                            className="text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
-                          >
-                            {expandedContracts.has(contract.id)
-                              ? '접기'
-                              : '상세보기'}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => toggleContractDetails(contract.id)}
+                          className="w-full flex items-center justify-between p-2 text-sm text-slate-600 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/30 rounded-lg"
+                        >
+                          <span>계약 상세 정보</span>
+                          <div className="flex items-center gap-1">
+                            <span className="text-xs">
+                              {expandedContracts.has(contract.id)
+                                ? '접기'
+                                : '상세보기'}
+                            </span>
                             {expandedContracts.has(contract.id) ? (
-                              <ChevronUp className="h-3 w-3 ml-1" />
+                              <ChevronUp className="h-3 w-3" />
                             ) : (
-                              <ChevronDown className="h-3 w-3 ml-1" />
+                              <ChevronDown className="h-3 w-3" />
                             )}
-                          </Button>
-                        </div>
+                          </div>
+                        </Button>
 
-                        {/* 상세 정보 펼침 영역 - 개선된 UI */}
+                        {/* 상세 정보 펼침 영역 - 모바일 최적화 */}
                         {expandedContracts.has(contract.id) && (
-                          <div className="mt-4 space-y-5 p-4 bg-slate-50/60 dark:bg-slate-900/20 rounded-lg border border-slate-200/50 dark:border-slate-700/50">
-                            {/* 📋 상세 정보 - 기본에서 표시되지 않는 정보들만 */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-sm">
-                              <div className="space-y-3">
-                                <h4 className="font-semibold text-sm text-slate-800 dark:text-slate-200 flex items-center gap-2 border-b border-slate-200 dark:border-slate-700 pb-2">
-                                  📄 추가 계약 정보
-                                </h4>
-                                <div className="space-y-2">
-                                  {contract.contractNumber && (
-                                    <div className="flex justify-between items-center">
-                                      <span className="text-slate-600 dark:text-slate-400 font-medium">
-                                        계약번호:
-                                      </span>
-                                      <span className="font-mono text-xs bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">
-                                        {contract.contractNumber}
-                                      </span>
-                                    </div>
-                                  )}
-                                  {contract.effectiveDate && (
-                                    <div className="flex justify-between items-center">
-                                      <span className="text-slate-600 dark:text-slate-400">
-                                        효력시작일:
-                                      </span>
-                                      <span className="font-medium">
-                                        {formatDate(contract.effectiveDate)}
-                                      </span>
-                                    </div>
-                                  )}
-                                  {contract.expirationDate && (
-                                    <div className="flex justify-between items-center">
-                                      <span className="text-slate-600 dark:text-slate-400">
-                                        만료일:
-                                      </span>
-                                      <span className="font-medium">
-                                        {formatDate(contract.expirationDate)}
-                                      </span>
-                                    </div>
-                                  )}
-                                  {contract.paymentPeriod && (
-                                    <div className="flex justify-between items-center">
-                                      <span className="text-slate-600 dark:text-slate-400">
-                                        납입기간:
-                                      </span>
-                                      <span className="font-medium">
-                                        {contract.paymentPeriod}년
-                                      </span>
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-
-                              <div className="space-y-3">
-                                <h4 className="font-semibold text-sm text-slate-800 dark:text-slate-200 flex items-center gap-2 border-b border-slate-200 dark:border-slate-700 pb-2">
-                                  👥 관련 인물 정보
-                                </h4>
-                                <div className="space-y-2">
-                                  <div className="flex justify-between items-center">
+                          <div className="mt-4 space-y-4 p-4 bg-slate-50/60 dark:bg-slate-900/20 rounded-lg border border-slate-200/50 dark:border-slate-700/50">
+                            {/* 📄 추가 계약 정보 */}
+                            <div className="space-y-3">
+                              <h4 className="font-semibold text-sm text-slate-800 dark:text-slate-200 flex items-center gap-2 border-b border-slate-200 dark:border-slate-700 pb-2">
+                                📄 추가 계약 정보
+                              </h4>
+                              <div className="space-y-2 text-sm">
+                                {contract.contractNumber && (
+                                  <div className="flex justify-between items-center py-1.5 border-b border-slate-100/50 dark:border-slate-700/50">
                                     <span className="text-slate-600 dark:text-slate-400">
-                                      계약자:
+                                      계약번호
+                                    </span>
+                                    <span className="font-mono text-xs bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">
+                                      {contract.contractNumber}
+                                    </span>
+                                  </div>
+                                )}
+                                {contract.effectiveDate && (
+                                  <div className="flex justify-between items-center py-1.5 border-b border-slate-100/50 dark:border-slate-700/50">
+                                    <span className="text-slate-600 dark:text-slate-400">
+                                      효력시작일
+                                    </span>
+                                    <span className="font-medium">
+                                      {formatDate(contract.effectiveDate)}
+                                    </span>
+                                  </div>
+                                )}
+                                {contract.expirationDate && (
+                                  <div className="flex justify-between items-center py-1.5 border-b border-slate-100/50 dark:border-slate-700/50">
+                                    <span className="text-slate-600 dark:text-slate-400">
+                                      만료일
+                                    </span>
+                                    <span className="font-medium">
+                                      {formatDate(contract.expirationDate)}
+                                    </span>
+                                  </div>
+                                )}
+                                {contract.paymentPeriod && (
+                                  <div className="flex justify-between items-center py-1.5">
+                                    <span className="text-slate-600 dark:text-slate-400">
+                                      납입기간
+                                    </span>
+                                    <span className="font-medium">
+                                      {contract.paymentPeriod}년
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* 👥 관련 인물 정보 */}
+                            <div className="space-y-3">
+                              <h4 className="font-semibold text-sm text-slate-800 dark:text-slate-200 flex items-center gap-2 border-b border-slate-200 dark:border-slate-700 pb-2">
+                                👥 관련 인물 정보
+                              </h4>
+                              <div className="space-y-3 text-sm">
+                                <div className="space-y-2">
+                                  <div className="flex justify-between items-start py-1.5 border-b border-slate-100/50 dark:border-slate-700/50">
+                                    <span className="text-slate-600 dark:text-slate-400">
+                                      계약자
                                     </span>
                                     <div className="text-right">
                                       <span className="font-medium block">
                                         {contract.contractorName}
                                       </span>
                                       {contract.contractorSsn && (
-                                        <div className="flex items-center gap-1 justify-end">
+                                        <div className="flex items-center gap-1 justify-end mt-1">
                                           <span className="font-mono text-xs bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">
                                             {visibleSsns.has(
                                               `contractor-${contract.id}`
@@ -1500,16 +1486,16 @@ export function InsuranceContractsTab({
                                       )}
                                     </div>
                                   </div>
-                                  <div className="flex justify-between items-center">
+                                  <div className="flex justify-between items-start py-1.5 border-b border-slate-100/50 dark:border-slate-700/50">
                                     <span className="text-slate-600 dark:text-slate-400">
-                                      피보험자:
+                                      피보험자
                                     </span>
                                     <div className="text-right">
                                       <span className="font-medium block">
                                         {contract.insuredName}
                                       </span>
                                       {contract.insuredSsn && (
-                                        <div className="flex items-center gap-1 justify-end">
+                                        <div className="flex items-center gap-1 justify-end mt-1">
                                           <span className="font-mono text-xs bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">
                                             {visibleSsns.has(
                                               `insured-${contract.id}`
@@ -1554,9 +1540,9 @@ export function InsuranceContractsTab({
                                     </div>
                                   </div>
                                   {contract.beneficiaryName && (
-                                    <div className="flex justify-between items-center">
+                                    <div className="flex justify-between items-center py-1.5">
                                       <span className="text-slate-600 dark:text-slate-400">
-                                        수익자:
+                                        수익자
                                       </span>
                                       <span className="font-medium">
                                         {contract.beneficiaryName}
@@ -1576,11 +1562,11 @@ export function InsuranceContractsTab({
                                 <h4 className="font-semibold text-sm text-slate-800 dark:text-slate-200">
                                   📋 기타 정보
                                 </h4>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                <div className="space-y-2 text-sm">
                                   {contract.monthlyPremium && (
-                                    <div className="flex justify-between items-center">
+                                    <div className="flex justify-between items-center py-1.5 border-b border-slate-100/50 dark:border-slate-700/50">
                                       <span className="text-slate-600 dark:text-slate-400">
-                                        월 보험료:
+                                        월 보험료
                                       </span>
                                       <span className="font-semibold text-slate-900 dark:text-slate-100">
                                         {formatCurrency(
@@ -1590,9 +1576,9 @@ export function InsuranceContractsTab({
                                     </div>
                                   )}
                                   {contract.annualPremium && (
-                                    <div className="flex justify-between items-center">
+                                    <div className="flex justify-between items-center py-1.5 border-b border-slate-100/50 dark:border-slate-700/50">
                                       <span className="text-slate-600 dark:text-slate-400">
-                                        연 보험료:
+                                        연 보험료
                                       </span>
                                       <span className="font-semibold text-slate-900 dark:text-slate-100">
                                         {formatCurrency(contract.annualPremium)}
@@ -1601,21 +1587,21 @@ export function InsuranceContractsTab({
                                   )}
                                 </div>
                                 {contract.specialClauses && (
-                                  <div>
-                                    <span className="text-slate-600 dark:text-slate-400 text-sm font-medium">
-                                      특약 사항:
+                                  <div className="mt-3">
+                                    <span className="text-slate-600 dark:text-slate-400 text-sm font-medium block mb-2">
+                                      특약 사항
                                     </span>
-                                    <p className="text-sm mt-1 text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 p-2 rounded">
+                                    <p className="text-sm text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 p-3 rounded">
                                       {contract.specialClauses}
                                     </p>
                                   </div>
                                 )}
                                 {contract.notes && (
-                                  <div>
-                                    <span className="text-slate-600 dark:text-slate-400 text-sm font-medium">
-                                      메모:
+                                  <div className="mt-3">
+                                    <span className="text-slate-600 dark:text-slate-400 text-sm font-medium block mb-2">
+                                      메모
                                     </span>
-                                    <p className="text-sm mt-1 text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 p-2 rounded">
+                                    <p className="text-sm text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 p-3 rounded">
                                       {contract.notes}
                                     </p>
                                   </div>
