@@ -6,6 +6,9 @@ import {
   CardTitle,
 } from '~/common/components/ui/card';
 import { TabsContent } from '~/common/components/ui/tabs';
+import { Checkbox } from '~/common/components/ui/checkbox';
+import { Label } from '~/common/components/ui/label';
+import { Textarea } from '~/common/components/ui/textarea';
 
 interface MedicalHistoryData {
   hasRecentDiagnosis: boolean;
@@ -42,31 +45,21 @@ export function MedicalHistoryTab({
   return (
     <TabsContent value="medical" className="space-y-6">
       <Card>
-        <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <span className="text-lg">🏥</span>
-            병력사항
-          </CardTitle>
-          <p className="text-sm text-muted-foreground">
-            고객의 의료 이력 및 건강 상태 정보를 관리합니다.
-          </p>
-          {/* 저장 버튼 */}
-          <div className="flex justify-end pb-4 border-b">
+        <CardHeader className="pb-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-foreground">병력사항</h3>
             <Button
-              type="submit"
-              className="px-6"
+              size="sm"
               onClick={async () => {
                 try {
-                  const formData = new FormData();
-                  formData.append('intent', 'updateMedicalHistory');
-
-                  // 병력사항 데이터 추가
-                  Object.entries(medicalHistory).forEach(([key, value]) => {
-                    formData.append(key, value.toString());
-                  });
-
-                  submit(formData, { method: 'post' });
-
+                  await submit(
+                    {
+                      intent: 'updateMedicalHistory',
+                      medicalHistory: JSON.stringify(medicalHistory),
+                    },
+                    { method: 'POST' }
+                  );
+                  
                   // 성공 모달 표시
                   setSuccessMessage('병력사항이 성공적으로 저장되었습니다.');
                   setShowSuccessModal(true);
@@ -120,24 +113,28 @@ export function MedicalHistoryTab({
               ].map(item => (
                 <div key={item.key} className="flex items-center space-x-3">
                   <span className="text-lg">{item.icon}</span>
-                  <label className="flex items-center space-x-2 text-sm cursor-pointer">
-                    <input
-                      type="checkbox"
-                      className="rounded border-border"
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`recent-${item.key}`}
                       checked={
                         medicalHistory[
                           item.key as keyof typeof medicalHistory
                         ] as boolean
                       }
-                      onChange={e =>
+                      onCheckedChange={(checked) =>
                         setMedicalHistory(prev => ({
                           ...prev,
-                          [item.key]: e.target.checked,
+                          [item.key]: checked === true,
                         }))
                       }
                     />
-                    <span>{item.label}</span>
-                  </label>
+                    <Label 
+                      htmlFor={`recent-${item.key}`}
+                      className="text-sm cursor-pointer"
+                    >
+                      {item.label}
+                    </Label>
+                  </div>
                 </div>
               ))}
             </div>
@@ -149,25 +146,26 @@ export function MedicalHistoryTab({
               📅 1년 이내 재검사 관련
             </h4>
             <div className="grid grid-cols-1 gap-4 p-4 bg-muted/20 rounded-lg border border-border/40">
-              <div className="flex items-center space-x-3">
+              <div className="flex items-start space-x-3">
                 <span className="text-lg">🔄</span>
-                <label className="flex items-center space-x-2 text-sm cursor-pointer">
-                  <input
-                    type="checkbox"
-                    className="rounded border-border"
+                <div className="flex items-start space-x-2">
+                  <Checkbox
+                    id="additional-exam"
                     checked={medicalHistory.hasAdditionalExam}
-                    onChange={e =>
+                    onCheckedChange={(checked) =>
                       setMedicalHistory(prev => ({
                         ...prev,
-                        hasAdditionalExam: e.target.checked,
+                        hasAdditionalExam: checked === true,
                       }))
                     }
                   />
-                  <span>
-                    의사로부터 진찰 또는 검사를 통하여 추가검사(재검사) 소견
-                    여부
-                  </span>
-                </label>
+                  <Label 
+                    htmlFor="additional-exam"
+                    className="text-sm cursor-pointer leading-relaxed"
+                  >
+                    의사로부터 진찰 또는 검사를 통하여 추가검사(재검사) 소견 여부
+                  </Label>
+                </div>
               </div>
             </div>
           </div>
@@ -198,24 +196,28 @@ export function MedicalHistoryTab({
               ].map(item => (
                 <div key={item.key} className="flex items-center space-x-3">
                   <span className="text-lg">{item.icon}</span>
-                  <label className="flex items-center space-x-2 text-sm cursor-pointer">
-                    <input
-                      type="checkbox"
-                      className="rounded border-border"
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`major-${item.key}`}
                       checked={
                         medicalHistory[
                           item.key as keyof typeof medicalHistory
                         ] as boolean
                       }
-                      onChange={e =>
+                      onCheckedChange={(checked) =>
                         setMedicalHistory(prev => ({
                           ...prev,
-                          [item.key]: e.target.checked,
+                          [item.key]: checked === true,
                         }))
                       }
                     />
-                    <span>{item.label}</span>
-                  </label>
+                    <Label 
+                      htmlFor={`major-${item.key}`}
+                      className="text-sm cursor-pointer"
+                    >
+                      {item.label}
+                    </Label>
+                  </div>
                 </div>
               ))}
             </div>
@@ -225,13 +227,12 @@ export function MedicalHistoryTab({
           <div className="space-y-4">
             <h4 className="font-medium text-foreground">상세 내용</h4>
             <div className="space-y-3">
-              <div>
-                <label className="text-sm text-muted-foreground">
+              <div className="space-y-1">
+                <Label className="text-sm text-muted-foreground">
                   3개월 이내 상세 내용
-                </label>
-                <textarea
-                  className="w-full p-3 border rounded-lg text-sm mt-1"
-                  rows={4}
+                </Label>
+                <Textarea
+                  className="min-h-[100px]"
                   placeholder="3개월 이내 의료 관련 상세 내용을 입력해주세요..."
                   value={medicalHistory.recentMedicalDetails}
                   onChange={e =>
@@ -242,13 +243,12 @@ export function MedicalHistoryTab({
                   }
                 />
               </div>
-              <div>
-                <label className="text-sm text-muted-foreground">
+              <div className="space-y-1">
+                <Label className="text-sm text-muted-foreground">
                   5년 이내 주요 의료 이력 상세 내용
-                </label>
-                <textarea
-                  className="w-full p-3 border rounded-lg text-sm mt-1"
-                  rows={4}
+                </Label>
+                <Textarea
+                  className="min-h-[100px]"
                   placeholder="5년 이내 주요 의료 이력 상세 내용을 입력해주세요..."
                   value={medicalHistory.majorMedicalDetails}
                   onChange={e =>
