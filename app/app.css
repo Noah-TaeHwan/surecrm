@@ -2031,3 +2031,32 @@ input[type="checkbox"]:focus {
   outline-offset: 2px !important;
   box-shadow: 0 0 0 2px hsl(var(--primary) / 0.2) !important;
 }
+
+/* 🖱️ Select 드롭다운 아이템 포인터 커서 강제 적용 */
+[data-radix-select-item],
+[data-slot="select-item"],
+.select-item {
+  cursor: pointer !important;
+}
+
+[data-radix-select-item]:hover,
+[data-slot="select-item"]:hover,
+.select-item:hover {
+  cursor: pointer !important;
+  background-color: hsl(var(--accent)) !important;
+}
+
+/* 🖱️ 기타 드롭다운/콤보박스 아이템들도 포인터 커서 적용 */
+[role="option"],
+[role="menuitem"],
+.dropdown-item,
+.combobox-option {
+  cursor: pointer !important;
+}
+
+[role="option"]:hover,
+[role="menuitem"]:hover,
+.dropdown-item:hover,
+.combobox-option:hover {
+  cursor: pointer !important;
+}
