@@ -910,7 +910,7 @@ export function ResponsiveClientDetail({
         </div>
 
         {/* 🎨 모던 스마트 탭 네비게이션 - 완전 재설계 */}
-        <div className="sticky -top-4 z-40 bg-background border-b border-border/50 -mx-4 px-4 shadow-sm pt-4">
+        <div className="sticky -top-4 z-40 bg-background border-b border-border/50 -mx-4 px-4 shadow-sm py-4">
           <div className="relative">
             {/* 탭 컨테이너 */}
             <div className="relative overflow-hidden">
