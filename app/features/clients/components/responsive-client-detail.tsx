@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '~/common/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/common/components/ui/tabs';
 import { Badge } from '~/common/components/ui/badge';
@@ -104,6 +104,11 @@ export function ResponsiveClientDetail({
   const [isClientInfoExpanded, setIsClientInfoExpanded] = useState(false);
   const [newTag, setNewTag] = useState('');
   const [isAddingTag, setIsAddingTag] = useState(false);
+  
+  // 캐러셀 스와이프 지원을 위한 state와 ref
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
   if (!client) {
     return (
@@ -173,6 +178,45 @@ export function ResponsiveClientDetail({
     if (bmi < 23) return { label: '정상', color: 'text-green-600 bg-green-50' };
     if (bmi < 25) return { label: '과체중', color: 'text-yellow-600 bg-yellow-50' };
     return { label: '비만', color: 'text-red-600 bg-red-50' };
+  };
+
+  // 캐러셀 네비게이션 함수들
+  const goToPrevTab = () => {
+    const currentIndex = mobileTabs.findIndex(tab => tab.id === activeTab);
+    if (currentIndex > 0) {
+      onTabChange?.(mobileTabs[currentIndex - 1].id);
+    }
+  };
+
+  const goToNextTab = () => {
+    const currentIndex = mobileTabs.findIndex(tab => tab.id === activeTab);
+    if (currentIndex < mobileTabs.length - 1) {
+      onTabChange?.(mobileTabs[currentIndex + 1].id);
+    }
+  };
+
+  // 스와이프 제스처 처리
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+
+    if (isLeftSwipe) {
+      goToNextTab();
+    } else if (isRightSwipe) {
+      goToPrevTab();
+    }
   };
 
   return (
@@ -853,32 +897,64 @@ export function ResponsiveClientDetail({
           </Collapsible>
         </div>
 
-        {/* 모바일/태블릿 탭 네비게이션 */}
-        <div className="sticky top-0 z-30 bg-background border-b">
-          <div className="px-4 py-2">
-            <div className="overflow-x-auto">
-              <div className="flex gap-1 w-max">
+        {/* 모바일/태블릿 탭 캐러셀 네비게이션 */}
+        <div className="sticky top-0 z-30 bg-background border-b shadow-sm">
+          <div className="relative px-4 py-3">
+            {/* 이전/다음 버튼 */}
+            <button
+              onClick={goToPrevTab}
+              disabled={mobileTabs.findIndex(tab => tab.id === activeTab) === 0}
+              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 bg-background/90 border rounded-full flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed hover:bg-accent shadow-sm"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+
+            <button
+              onClick={goToNextTab}
+              disabled={mobileTabs.findIndex(tab => tab.id === activeTab) === mobileTabs.length - 1}
+              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 bg-background/90 border rounded-full flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed hover:bg-accent shadow-sm"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+
+            {/* 캐러셀 탭 버튼들 */}
+            <div 
+              className="mx-8 overflow-hidden"
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+            >
+              <div 
+                ref={carouselRef}
+                className="flex transition-transform duration-300 ease-in-out"
+                style={{ 
+                  transform: `translateX(-${mobileTabs.findIndex(tab => tab.id === activeTab) * 100}%)` 
+                }}
+              >
                 {mobileTabs.map((tab, index) => {
                   const Icon = tab.icon;
                   const isActive = activeTab === tab.id;
                   return (
-                    <button
-                      key={tab.id}
-                      onClick={() => onTabChange?.(tab.id)}
-                      className={cn(
-                        "h-8 px-3 whitespace-nowrap text-xs rounded-md transition-colors flex items-center gap-1.5",
-                        isActive 
-                          ? "bg-primary text-primary-foreground" 
-                          : "hover:bg-accent hover:text-accent-foreground"
-                      )}
-                    >
-                      <Icon className="h-3 w-3" />
-                      {tab.label}
-                    </button>
+                    <div key={tab.id} className="w-full flex-shrink-0">
+                      <button
+                        onClick={() => onTabChange?.(tab.id)}
+                        className={cn(
+                          "w-full h-10 px-4 text-sm rounded-md transition-colors flex items-center justify-center gap-2 font-medium",
+                          isActive 
+                            ? "bg-primary text-primary-foreground shadow-sm" 
+                            : "hover:bg-accent hover:text-accent-foreground text-muted-foreground"
+                        )}
+                      >
+                        <Icon className="h-4 w-4" />
+                        {tab.label}
+                      </button>
+                    </div>
                   );
                 })}
               </div>
             </div>
+
+            
           </div>
         </div>
 
