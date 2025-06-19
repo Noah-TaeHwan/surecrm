@@ -40,6 +40,7 @@ import {
   StarIcon,
   ChatBubbleIcon,
   TargetIcon,
+  CheckIcon,
 } from '@radix-ui/react-icons';
 import { VideoIcon, Phone, MapPin, DollarSign } from 'lucide-react';
 import React from 'react';
@@ -333,276 +334,78 @@ export function AddMeetingModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader className="space-y-1 pb-4">
-          <DialogTitle className="flex items-center gap-2 text-xl font-bold">
-            <CalendarIcon className="h-5 w-5 text-primary" />새 미팅 예약
+      <DialogContent 
+        className="sm:max-w-xl w-[95vw] p-0 overflow-hidden flex flex-col sm:max-h-[85vh] gap-0"
+        style={{
+          maxHeight: '75vh',
+          height: 'auto',
+          minHeight: '0'
+        }}
+      >
+        {/* 헤더 - 고정 */}
+        <DialogHeader className="flex-shrink-0 px-4 sm:px-6 py-4 sm:py-4 border-b border-border/30">
+          <DialogTitle className="flex items-center gap-2 text-sm sm:text-lg">
+            <CalendarIcon className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
+            <span className="truncate">새 미팅 예약</span>
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-xs sm:text-sm text-muted-foreground">
             고객과의 미팅을 예약하고 구글 캘린더와 자동 동기화합니다.
           </DialogDescription>
         </DialogHeader>
 
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-3"
-          >
-            {/* 🚨 고객 없는 경우 안내 */}
-            {clients.length === 0 && (
-              <Alert>
-                <InfoCircledIcon className="h-4 w-4" />
-                <AlertDescription>
-                  미팅을 예약하려면 먼저 고객을 등록해야 합니다.{' '}
-                  <Button
-                    type="button"
-                    variant="link"
-                    size="sm"
-                    asChild
-                    className="h-auto p-0 underline"
-                  >
-                    <Link to="/clients">고객 등록하러 가기</Link>
-                  </Button>
-                </AlertDescription>
-              </Alert>
-            )}
+        {/* 콘텐츠 - 스크롤 가능 */}
+        <div className="flex-1 overflow-y-auto scrollbar-none modal-scroll-area px-4 sm:px-6 py-2 sm:py-6 space-y-2 sm:space-y-6 min-h-0">
+          <Form {...form}>
+            <form
+              id="meeting-form"
+              onSubmit={form.handleSubmit(handleSubmit)}
+              className="space-y-3 sm:space-y-6"
+            >
+              {/* 🚨 고객 없는 경우 안내 */}
+              {clients.length === 0 && (
+                <Alert>
+                  <InfoCircledIcon className="h-4 w-4" />
+                  <AlertDescription>
+                    미팅을 예약하려면 먼저 고객을 등록해야 합니다.{' '}
+                    <Button
+                      type="button"
+                      variant="link"
+                      size="sm"
+                      asChild
+                      className="h-auto p-0 underline"
+                    >
+                      <Link to="/clients">고객 등록하러 가기</Link>
+                    </Button>
+                  </AlertDescription>
+                </Alert>
+              )}
 
-            {/* 📋 기본 정보 */}
-            <Card className="bg-card text-card-foreground flex flex-col rounded-xl border shadow-sm">
-              <CardHeader className="pb-1 px-4">
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <PersonIcon className="h-4 w-4" />
-                  기본 정보
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3 px-4">
-                {/* 고객 선택 & 미팅 유형 */}
-                <div className="grid grid-cols-2 gap-3">
-                  <FormField
-                    control={form.control}
-                    name="clientId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">고객 선택</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="h-9">
-                              <SelectValue placeholder="고객 선택" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {clients.map(client => (
-                              <SelectItem key={client.id} value={client.id}>
-                                <div className="flex items-center gap-2">
-                                  <span className="font-medium">
-                                    {(client as any).fullName ||
-                                      (client as any).name ||
-                                      '고객'}
-                                  </span>
-                                </div>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="type"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">미팅 유형</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="h-9">
-                              <SelectValue placeholder="유형 선택" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {meetingTypes.map(type => (
-                              <SelectItem key={type.value} value={type.value}>
-                                <div className="flex items-center gap-2">
-                                  <span>{type.icon}</span>
-                                  <span>{type.label}</span>
-                                </div>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                {/* 미팅 제목 */}
+              {/* 기본 정보 */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
-                  name="title"
+                  name="clientId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs">미팅 제목</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          placeholder="예: 김영희님 초회 상담"
-                          className="h-9"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* 우선순위 & 연락 방법 */}
-                <div className="grid grid-cols-2 gap-3">
-                  <FormField
-                    control={form.control}
-                    name="priority"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">우선순위</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="h-9">
-                              <SelectValue />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {priorityOptions.map(option => (
-                              <SelectItem
-                                key={option.value}
-                                value={option.value}
-                              >
-                                <div className="flex items-center gap-2">
-                                  <span>{option.icon}</span>
-                                  <span>{option.label}</span>
-                                </div>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="contactMethod"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">연락 방법</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="h-9">
-                              <SelectValue />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {contactMethods.map(method => (
-                              <SelectItem
-                                key={method.value}
-                                value={method.value}
-                              >
-                                <div className="flex items-center gap-2">
-                                  {method.icon}
-                                  <span>{method.label}</span>
-                                </div>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* ⏰ 일정 정보 */}
-            <Card className="bg-card text-card-foreground flex flex-col rounded-xl border  shadow-sm">
-              <CardHeader className="pb-1 px-4">
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <ClockIcon className="h-4 w-4" />
-                  일정 정보
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3 px-4">
-                {/* 날짜 & 시간 */}
-                <div className="grid grid-cols-2 gap-3">
-                  <FormField
-                    control={form.control}
-                    name="date"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">날짜</FormLabel>
-                        <FormControl>
-                          <Input {...field} type="date" className="h-9" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="time"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">시간</FormLabel>
-                        <FormControl>
-                          <Input {...field} type="time" className="h-9" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                {/* 소요 시간 */}
-                <FormField
-                  control={form.control}
-                  name="duration"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-xs">소요 시간</FormLabel>
+                      <FormLabel>고객 선택 *</FormLabel>
                       <Select
-                        onValueChange={value => field.onChange(parseInt(value))}
-                        defaultValue={field.value.toString()}
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger className="h-9">
-                            <SelectValue />
+                          <SelectTrigger className="h-10 w-full">
+                            <SelectValue placeholder="고객 선택" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {durationOptions.map(option => (
-                            <SelectItem
-                              key={option.value}
-                              value={option.value.toString()}
-                            >
+                          {clients.map(client => (
+                            <SelectItem key={client.id} value={client.id}>
                               <div className="flex items-center gap-2">
-                                <span>{option.icon}</span>
-                                <span>{option.label}</span>
-                                <span className="text-xs text-muted-foreground">
-                                  ({option.desc})
+                                <PersonIcon className="h-4 w-4" />
+                                <span className="font-medium">
+                                  {(client as any).fullName ||
+                                    (client as any).name ||
+                                    '고객'}
                                 </span>
                               </div>
                             </SelectItem>
@@ -614,45 +417,28 @@ export function AddMeetingModal({
                   )}
                 />
 
-                {/* 장소 */}
                 <FormField
                   control={form.control}
-                  name="location"
+                  name="type"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs">미팅 장소</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          placeholder="예: 고객 사무실, 카페, 온라인"
-                          className="h-9"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* 알림 설정 */}
-                <FormField
-                  control={form.control}
-                  name="reminder"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-xs">미팅 알림</FormLabel>
+                      <FormLabel>미팅 유형 *</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger className="h-9">
-                            <SelectValue />
+                          <SelectTrigger className="h-10 w-full">
+                            <SelectValue placeholder="유형 선택" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {reminderOptions.map(option => (
-                            <SelectItem key={option.value} value={option.value}>
-                              {option.label}
+                          {meetingTypes.map(type => (
+                            <SelectItem key={type.value} value={type.value}>
+                              <div className="flex items-center gap-2">
+                                <span>{type.icon}</span>
+                                <span>{type.label}</span>
+                              </div>
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -661,218 +447,284 @@ export function AddMeetingModal({
                     </FormItem>
                   )}
                 />
-              </CardContent>
-            </Card>
 
-            {/* 🌐 구글 캘린더 연동 옵션 */}
-            <Card
-              className={`bg-card text-card-foreground flex flex-col rounded-xl border shadow-sm ${
-                googleCalendarConnected
-                  ? 'border-emerald-200'
-                  : 'border-amber-200'
-              }`}
-            >
-              <CardHeader className="pb-1 px-4">
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <CalendarIcon className="h-4 w-4" />
-                  구글 캘린더 연동
-                  {googleCalendarConnected && (
-                    <Badge
-                      variant="outline"
-                      className="text-emerald-600 border-emerald-200 text-xs"
-                    >
-                      <CheckCircledIcon className="mr-1 h-3 w-3" />
-                      연결됨
-                    </Badge>
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>미팅 제목 *</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="예: 김영희님 초회 상담"
+                          className="h-10 w-full"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
                   )}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="px-4">
-                {googleCalendarConnected ? (
-                  <div className="grid grid-cols-1 gap-3">
-                    <FormField
-                      control={form.control}
-                      name="syncToGoogle"
-                      render={({ field }) => (
-                        <FormItem className="flex items-center justify-between rounded-lg border p-2">
-                          <div>
-                            <FormLabel className="text-xs font-medium">
-                              자동 동기화
-                            </FormLabel>
-                            <FormDescription className="text-xs">
-                              구글 캘린더 추가
-                            </FormDescription>
-                          </div>
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
+                />
 
-                    <FormField
-                      control={form.control}
-                      name="googleMeetLink"
-                      render={({ field }) => (
-                        <FormItem className="flex items-center justify-between rounded-lg border p-2">
-                          <div>
-                            <FormLabel className="text-xs font-medium">
-                              Meet 링크
-                            </FormLabel>
-                            <FormDescription className="text-xs">
-                              화상통화 링크
-                            </FormDescription>
-                          </div>
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="sendClientInvite"
-                      render={({ field }) => (
-                        <FormItem className="flex items-center justify-between rounded-lg border p-2">
-                          <div>
-                            <FormLabel className="text-xs font-medium">
-                              초대장 발송
-                            </FormLabel>
-                            <FormDescription className="text-xs">
-                              고객 이메일 전송
-                            </FormDescription>
-                          </div>
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                              disabled={!(selectedClient as any)?.email}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                ) : (
-                  <Alert>
-                    <ExclamationTriangleIcon className="h-4 w-4" />
-                    <AlertDescription>
-                      구글 캘린더 연동이 설정되지 않았습니다.{' '}
-                      <Button
-                        type="button"
-                        variant="link"
-                        size="sm"
-                        asChild
-                        className="h-auto p-0 underline"
+                <FormField
+                  control={form.control}
+                  name="priority"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>우선순위</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
                       >
-                        <Link to="/settings">설정에서 연동하기</Link>
-                      </Button>
-                    </AlertDescription>
-                  </Alert>
-                )}
-              </CardContent>
-            </Card>
+                        <FormControl>
+                          <SelectTrigger className="h-10 w-full">
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {priorityOptions.map(option => (
+                            <SelectItem
+                              key={option.value}
+                              value={option.value}
+                            >
+                              <div className="flex items-center gap-2">
+                                <span>{option.icon}</span>
+                                <span>{option.label}</span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            {/* 🎯 영업 정보 */}
-            <Card className="bg-card text-card-foreground flex flex-col rounded-xl border shadow-sm">
-              <CardHeader className="pb-1 px-4">
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <TargetIcon className="h-4 w-4" />
-                  영업 정보
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3 px-4">
-                {/* 기대 성과 & 상품 관심사 */}
-                <div className="grid grid-cols-2 gap-3">
-                  <FormField
-                    control={form.control}
-                    name="expectedOutcome"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">기대 성과</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="h-9">
-                              <SelectValue placeholder="목표 선택" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {expectedOutcomes.map(outcome => (
-                              <SelectItem
-                                key={outcome.value}
-                                value={outcome.value}
-                              >
-                                <div className="flex items-center gap-2">
-                                  <span>{outcome.icon}</span>
-                                  <span>{outcome.label}</span>
-                                </div>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                <FormField
+                  control={form.control}
+                  name="date"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>날짜 *</FormLabel>
+                      <FormControl>
+                        <div className="relative w-full">
+                          <CalendarIcon className="absolute left-3 top-3 h-4 w-4 text-foreground/60" />
+                          <Input type="date" className="pl-10 h-10 w-full" {...field} />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-                  <FormField
-                    control={form.control}
-                    name="productInterest"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">관심 상품</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="h-9">
-                              <SelectValue placeholder="상품 선택" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {productInterests.map(product => (
-                              <SelectItem
-                                key={product.value}
-                                value={product.value}
-                              >
-                                <div className="flex items-center gap-2">
-                                  <span>{product.icon}</span>
-                                  <span>{product.label}</span>
-                                </div>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                <FormField
+                  control={form.control}
+                  name="time"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>시간 *</FormLabel>
+                      <FormControl>
+                        <div className="relative w-full">
+                          <ClockIcon className="absolute left-3 top-3 h-4 w-4 text-foreground/60" />
+                          <Input type="time" className="pl-10 h-10 w-full" {...field} />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="duration"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>소요 시간</FormLabel>
+                      <Select
+                        onValueChange={(value) => field.onChange(Number(value))}
+                        value={field.value?.toString()}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-10 w-full">
+                            <SelectValue placeholder="시간 선택" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {durationOptions.map(option => (
+                            <SelectItem
+                              key={option.value}
+                              value={option.value.toString()}
+                            >
+                              <div className="flex items-center gap-2">
+                                <span>{option.icon}</span>
+                                <span>{option.label}</span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="contactMethod"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>연락 방법</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-10 w-full">
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {contactMethods.map(method => (
+                            <SelectItem
+                              key={method.value}
+                              value={method.value}
+                            >
+                              <div className="flex items-center gap-2">
+                                {method.icon}
+                                <span>{method.label}</span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="location"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>장소</FormLabel>
+                      <FormControl>
+                        <div className="relative w-full">
+                          <MapPin className="absolute left-3 top-3 h-4 w-4 text-foreground/60" />
+                          <Input placeholder="미팅 장소" className="pl-10 h-10 w-full" {...field} />
+                        </div>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="reminder"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>알림</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-10 w-full">
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {reminderOptions.map(option => (
+                            <SelectItem key={option.value} value={option.value}>
+                              <div className="flex items-center gap-2">
+                                <BellIcon className="h-4 w-4" />
+                                <span>{option.label}</span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="expectedOutcome"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>기대 성과</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-10 w-full">
+                            <SelectValue placeholder="성과 선택" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {expectedOutcomes.map(outcome => (
+                            <SelectItem
+                              key={outcome.value}
+                              value={outcome.value}
+                            >
+                              <div className="flex items-center gap-2">
+                                <span>{outcome.icon}</span>
+                                <span>{outcome.label}</span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="productInterest"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>관심 상품</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-10 w-full">
+                            <SelectValue placeholder="상품 선택" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {productInterests.map(product => (
+                            <SelectItem
+                              key={product.value}
+                              value={product.value}
+                            >
+                              <div className="flex items-center gap-2">
+                                <span>{product.icon}</span>
+                                <span>{product.label}</span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
                 <FormField
                   control={form.control}
                   name="estimatedCommission"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs">
-                        예상 수수료 (원)
-                      </FormLabel>
+                      <FormLabel>예상 수수료 (원)</FormLabel>
                       <FormControl>
                         <Input
                           type="text"
                           placeholder="100,000"
-                          className="h-9"
                           value={
                             field.value
                               ? Number(field.value).toLocaleString('ko-KR')
@@ -882,123 +734,195 @@ export function AddMeetingModal({
                             const value = e.target.value.replace(/[^0-9]/g, '');
                             field.onChange(value ? Number(value) : undefined);
                           }}
+                          className="h-10 w-full"
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormDescription>
+                        {field.value ? `₩${field.value.toLocaleString()}` : ''}
+                      </FormDescription>
                     </FormItem>
                   )}
                 />
-              </CardContent>
-            </Card>
+              </div>
 
-            {/* 📝 메모 & 준비사항 */}
-            <Card className="bg-card text-card-foreground flex flex-col rounded-xl border shadow-sm">
-              <CardHeader className="pb-1 px-4">
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <ChatBubbleIcon className="h-4 w-4" />
-                  메모 & 준비사항
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3 px-4">
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-xs">미팅 메모</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          {...field}
-                          placeholder="• 준비해야 할 자료&#10;• 논의할 주제&#10;• 고객 특이사항 등"
-                          rows={4}
-                          className="resize-none text-sm"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* 🎯 미팅 유형별 자동 체크리스트 미리보기 */}
-                {selectedMeetingType && (
-                  <div className="space-y-2">
-                    <FormLabel className="text-xs">
-                      기본 체크리스트 (미팅 생성 후 자동 추가됨)
-                    </FormLabel>
-                    <div className="bg-muted/30 p-3 rounded-lg space-y-2">
-                      {getDefaultChecklistByType(selectedMeetingType.value).map(
-                        (item, index) => (
-                          <div
-                            key={index}
-                            className="flex items-center gap-2 text-xs text-muted-foreground"
-                          >
-                            <div className="w-3 h-3 border border-muted-foreground rounded-sm flex items-center justify-center">
-                              <div className="w-1 h-1 bg-muted-foreground rounded-full" />
-                            </div>
-                            <span>{item}</span>
+              {/* 동기화 설정 */}
+              <div className="space-y-4">
+                <FormLabel className="text-sm font-medium text-foreground">
+                  동기화 및 알림 설정
+                </FormLabel>
+                
+                <div className="grid grid-cols-1 gap-4 p-4 border border-border/50 rounded-lg bg-muted/20">
+                  {/* 구글 캘린더 동기화 토글 */}
+                  <FormField
+                    control={form.control}
+                    name="syncToGoogle"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between space-y-0 p-3 border border-border/30 rounded-md bg-background">
+                        <div className="flex items-center space-x-3 flex-1">
+                          <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0">
+                            <CalendarIcon className="h-5 w-5 text-blue-600" />
                           </div>
-                        )
-                      )}
-                      {getDefaultChecklistByType(selectedMeetingType.value)
-                        .length === 0 && (
-                        <p className="text-xs text-muted-foreground italic">
-                          이 미팅 유형에는 기본 체크리스트가 없습니다.
-                        </p>
-                      )}
-                    </div>
-                  </div>
+                          <div className="space-y-1 flex-1">
+                            <FormLabel className="text-sm font-medium cursor-pointer">
+                              구글 캘린더 동기화
+                            </FormLabel>
+                            <FormDescription className="text-xs text-muted-foreground">
+                              미팅을 구글 캘린더에 자동으로 등록합니다
+                            </FormDescription>
+                          </div>
+                        </div>
+                        <FormControl className="ml-4">
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* 고객 초대 발송 토글 */}
+                  <FormField
+                    control={form.control}
+                    name="sendClientInvite"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between space-y-0 p-3 border border-border/30 rounded-md bg-background">
+                        <div className="flex items-center space-x-3 flex-1">
+                          <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center flex-shrink-0">
+                            <BellIcon className="h-5 w-5 text-green-600" />
+                          </div>
+                          <div className="space-y-1 flex-1">
+                            <FormLabel className="text-sm font-medium cursor-pointer">
+                              고객 초대 발송
+                            </FormLabel>
+                            <FormDescription className="text-xs text-muted-foreground">
+                              고객에게 미팅 초대 이메일을 자동으로 발송합니다
+                            </FormDescription>
+                          </div>
+                        </div>
+                        <FormControl className="ml-4">
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+              {/* 메모 */}
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>미팅 메모</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        {...field}
+                        placeholder="• 준비해야 할 자료&#10;• 논의할 주제&#10;• 고객 특이사항 등"
+                        className="resize-none"
+                        rows={3}
+                      />
+                    </FormControl>
+                  </FormItem>
                 )}
-              </CardContent>
-            </Card>
+              />
 
-            {/* 📱 선택된 고객 정보 미리보기 */}
-            {selectedClient && (
-              <Alert className="border-emerald-200">
-                <PersonIcon className="h-4 w-4" />
-                <AlertDescription>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="font-medium">
-                        {(selectedClient as any).fullName ||
-                          (selectedClient as any).name ||
-                          '고객'}
-                      </span>
-                      <span className="text-muted-foreground ml-2">
-                        {selectedClient.phone} •{' '}
-                        {(selectedClient as any).email || '이메일 없음'}
-                      </span>
-                    </div>
-                    <Link to={`/clients/${selectedClient.id}`}>
-                      <Button variant="outline" size="sm">
-                        고객 정보 보기
-                      </Button>
-                    </Link>
+              {/* 🎯 미팅 유형별 자동 체크리스트 미리보기 */}
+              {selectedMeetingType && (
+                <div className="space-y-2">
+                  <FormLabel className="text-sm">
+                    기본 체크리스트 (미팅 생성 후 자동 추가됨)
+                  </FormLabel>
+                  <div className="bg-muted/30 p-3 rounded-lg space-y-2">
+                    {getDefaultChecklistByType(selectedMeetingType.value).map(
+                      (item, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center gap-2 text-xs text-muted-foreground"
+                        >
+                          <div className="w-3 h-3 border border-muted-foreground rounded-sm flex items-center justify-center">
+                            <div className="w-1 h-1 bg-muted-foreground rounded-full" />
+                          </div>
+                          <span>{item}</span>
+                        </div>
+                      )
+                    )}
+                    {getDefaultChecklistByType(selectedMeetingType.value)
+                      .length === 0 && (
+                      <p className="text-xs text-muted-foreground italic">
+                        이 미팅 유형에는 기본 체크리스트가 없습니다.
+                      </p>
+                    )}
                   </div>
-                </AlertDescription>
-              </Alert>
-            )}
+                </div>
+              )}
 
-            {/* 버튼 영역 */}
-            <DialogFooter className="gap-2 pt-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleClose}
-                className="flex-1"
-              >
-                취소
-              </Button>
-              <Button
-                type="submit"
-                disabled={clients.length === 0}
-                className="flex-1"
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                미팅 예약하기
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
+              {/* 📱 선택된 고객 정보 미리보기 */}
+              {selectedClient && (
+                <Alert className="border-emerald-200 ">
+                  <PersonIcon className="h-4 w-4 text-emerald-600" />
+                  <AlertDescription>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                      <div className="flex-1">
+                        <div className="font-medium text-foreground">
+                          {(selectedClient as any).fullName ||
+                            (selectedClient as any).name ||
+                            '고객'}
+                        </div>
+                        <div className="text-sm text-muted-foreground mt-1">
+                          {selectedClient.phone && (
+                            <span>{selectedClient.phone}</span>
+                          )}
+                          {selectedClient.phone && (selectedClient as any).email && (
+                            <span className="mx-2">•</span>
+                          )}
+                          {(selectedClient as any).email && (
+                            <span>{(selectedClient as any).email}</span>
+                          )}
+                          {!selectedClient.phone && !(selectedClient as any).email && (
+                            <span>연락처 정보 없음</span>
+                          )}
+                        </div>
+                      </div>
+                      <Link to={`/clients/${selectedClient.id}`} className="flex-shrink-0">
+                        <Button variant="outline" size="sm" className="h-8 text-xs">
+                          고객 정보 보기
+                        </Button>
+                      </Link>
+                    </div>
+                  </AlertDescription>
+                </Alert>
+              )}
+            </form>
+          </Form>
+        </div>
+
+        {/* 푸터 - 고정 */}
+        <DialogFooter className="flex-shrink-0 gap-2 sm:gap-3 p-2 sm:p-6 border-t border-border/30">
+          <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto sm:justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleClose}
+              className="h-10 px-4 w-full sm:w-auto text-xs sm:text-sm"
+            >
+              취소
+            </Button>
+            <Button 
+              type="submit"
+              form="meeting-form"
+              disabled={clients.length === 0}
+              className="gap-2 h-10 px-4 w-full sm:w-auto text-xs sm:text-sm bg-primary text-primary-foreground"
+            >
+              <CheckIcon className="h-3 w-3" />
+              미팅 예약하기
+            </Button>
+          </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

@@ -66,31 +66,35 @@ const priorityOptions = [
   { value: 'urgent', label: '긴급', color: 'bg-red-500' },
 ];
 
-const expectedOutcomes = [
-  { value: 'consultation', label: '상담 진행', icon: '💬' },
-  { value: 'proposal', label: '제안서 제출', icon: '📋' },
-  { value: 'contract', label: '계약 체결', icon: '✍️' },
-  { value: 'contract_completion', label: '계약 완료', icon: '✅' },
-  { value: 'claim_support', label: '보험금 청구 지원', icon: '🛡️' },
-  { value: 'relationship_maintenance', label: '관계 유지', icon: '🤝' },
-];
-
+// 📞 연락 방법
 const contactMethods = [
   { value: 'phone', label: '전화', icon: '📞' },
-  { value: 'video', label: '화상통화', icon: '💻' },
+  { value: 'video', label: '화상통화', icon: '📹' },
   { value: 'in_person', label: '대면', icon: '👥' },
-  { value: 'hybrid', label: '혼합', icon: '🔄' },
+  { value: 'hybrid', label: '혼합', icon: '💬' },
 ];
 
+// 🏆 기대 성과
+const expectedOutcomes = [
+  { value: 'information_gathering', label: '정보 수집', icon: '📊' },
+  { value: 'needs_analysis', label: '니즈 분석', icon: '🔍' },
+  { value: 'proposal_presentation', label: '제안서 발표', icon: '📋' },
+  { value: 'objection_handling', label: '이의 제기 해결', icon: '💭' },
+  { value: 'contract_discussion', label: '계약 논의', icon: '📄' },
+  { value: 'closing', label: '계약 체결', icon: '✅' },
+  { value: 'relationship_building', label: '관계 구축', icon: '🤝' },
+];
+
+// 🏢 보험 상품 관심 분야
 const productInterests = [
-  { value: 'life_insurance', label: '생명보험', icon: '❤️' },
-  { value: 'health_insurance', label: '건강보험', icon: '🏥' },
-  { value: 'car_insurance', label: '자동차보험', icon: '🚗' },
-  { value: 'maternity_insurance', label: '태아보험', icon: '👶' },
-  { value: 'property_insurance', label: '재산보험', icon: '🏠' },
-  { value: 'pension_insurance', label: '연금보험', icon: '💰' },
-  { value: 'investment_insurance', label: '투자형 보험', icon: '📈' },
-  { value: 'comprehensive', label: '복합 상품', icon: '🎯' },
+  { value: 'life', label: '생명보험', icon: '💗' },
+  { value: 'health', label: '건강보험', icon: '🏥' },
+  { value: 'auto', label: '자동차보험', icon: '🚗' },
+  { value: 'prenatal', label: '태아보험', icon: '👶' },
+  { value: 'property', label: '재산보험', icon: '🏠' },
+  { value: 'pension', label: '연금보험', icon: '💰' },
+  { value: 'investment', label: '투자형 보험', icon: '📈' },
+  { value: 'multiple', label: '복합 상품', icon: '🎯' },
 ];
 
 interface MeetingDetailModalProps {
@@ -383,8 +387,16 @@ export function MeetingDetailModal({
 
   return (
     <Dialog open={!!meeting} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader className="space-y-4 pb-6">
+      <DialogContent 
+        className="sm:max-w-6xl w-[95vw] p-0 overflow-hidden flex flex-col sm:max-h-[85vh] gap-0"
+        style={{
+          maxHeight: '85vh',
+          height: 'auto',
+          minHeight: '0'
+        }}
+      >
+        {/* 헤더 - 고정 */}
+        <DialogHeader className="flex-shrink-0 px-4 sm:px-6 py-4 sm:py-4 border-b border-border/30">
           <div className="flex items-start justify-between">
             <div className="space-y-3">
               {isEditingMeeting ? (
@@ -396,15 +408,15 @@ export function MeetingDetailModal({
                       title: e.target.value,
                     }))
                   }
-                  className="text-3xl font-bold border-none p-0 h-auto shadow-none focus-visible:ring-0"
+                  className="text-2xl sm:text-3xl font-bold border-none p-0 h-auto shadow-none focus-visible:ring-0"
                   placeholder="미팅 제목"
                 />
               ) : (
-                <DialogTitle className="text-3xl font-bold text-foreground">
+                <DialogTitle className="text-2xl sm:text-3xl font-bold text-foreground truncate">
                   {meeting.title}
                 </DialogTitle>
               )}
-              <DialogDescription className="text-base text-muted-foreground">
+              <DialogDescription className="text-xs sm:text-base text-muted-foreground">
                 미팅 상세 정보 및 체크리스트
               </DialogDescription>
 
@@ -463,9 +475,10 @@ export function MeetingDetailModal({
           </div>
         </DialogHeader>
 
-        <div className="space-y-8">
+        {/* 콘텐츠 - 스크롤 가능 */}
+        <div className="flex-1 overflow-y-auto scrollbar-none modal-scroll-area px-4 sm:px-6 py-2 sm:py-6 space-y-2 sm:space-y-6 min-h-0">
           {/* 기본 정보 - 개선된 표시 */}
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             <div className="space-y-3">
               <div className="flex items-center gap-3 text-sm text-muted-foreground">
                 <CalendarIcon className="w-5 h-5" />
@@ -620,40 +633,13 @@ export function MeetingDetailModal({
                 <PersonIcon className="w-5 h-5" />
                 <span className="font-medium">고객</span>
               </div>
-              <div className="flex items-center gap-3 pl-8">
-                {meeting.client && meeting.client.id ? (
-                  <>
-                    <Avatar className="h-8 w-8">
-                      <AvatarFallback className="text-sm font-medium">
-                        {meeting.client.name ? meeting.client.name[0] : '?'}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex flex-col">
-                      <span className="font-semibold text-lg">
-                        {meeting.client.name || '고객명 없음'}
-                      </span>
-                      {meeting.client.phone && (
-                        <a 
-                          href={`tel:${meeting.client.phone}`}
-                          className="text-sm text-primary hover:underline"
-                        >
-                          {meeting.client.phone}
-                        </a>
-                      )}
-                    </div>
-                  </>
-                ) : (
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-8 w-8">
-                      <AvatarFallback className="text-sm font-medium bg-muted">
-                        ?
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="font-semibold text-lg text-muted-foreground italic">
-                      고객 미설정
-                    </span>
-                  </div>
-                )}
+              <div className="font-semibold text-lg pl-8">
+                <Link 
+                  to={`/clients/${meeting.client.id}`}
+                  className="text-primary hover:underline"
+                >
+                  {meeting.client.name}
+                </Link>
               </div>
             </div>
           </div>
@@ -1052,119 +1038,117 @@ export function MeetingDetailModal({
 
           {/* 편집 모드 액션 버튼 */}
           {isEditingMeeting && (
-            <>
-              <Separator />
-              <div className="flex gap-3 justify-end bg-muted/20 p-4 rounded-lg">
-                <Button
-                  variant="outline"
-                  onClick={handleCancelEditingMeeting}
-                  className="gap-2"
-                >
-                  <Cross2Icon className="w-4 h-4" />
-                  취소
-                </Button>
-                <Button onClick={handleSaveMeetingChanges} className="gap-2">
-                  <CheckIcon className="w-4 h-4" />
-                  저장
-                </Button>
-              </div>
-            </>
+            <div className="flex gap-3 justify-end bg-muted/20 p-4 rounded-lg">
+              <Button
+                variant="outline"
+                onClick={handleCancelEditingMeeting}
+                className="gap-2"
+              >
+                <Cross2Icon className="w-4 h-4" />
+                취소
+              </Button>
+              <Button onClick={handleSaveMeetingChanges} className="gap-2">
+                <CheckIcon className="w-4 h-4" />
+                저장
+              </Button>
+            </div>
           )}
 
           {/* 체크리스트 */}
           <Separator />
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             <div className="flex items-center justify-between">
-              <div className="space-y-2">
-                <h3 className="text-xl font-bold">체크리스트</h3>
-                <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                  <span>
-                    {completedTasks}/{totalTasks} 완료
-                  </span>
-                  <div className="h-1 w-1 bg-muted-foreground rounded-full" />
-                  <span>{Math.round(progressPercentage)}%</span>
-                </div>
+              <h3 className="text-lg sm:text-xl font-bold">
+                체크리스트 ({completedTasks}/{totalTasks})
+              </h3>
+              <div className="flex items-center gap-3">
+                <Progress
+                  value={totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0}
+                  className="w-24 h-2"
+                />
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setIsAddingChecklistItem(true)}
+                  className="gap-2"
+                  disabled={isEditingMeeting}
+                >
+                  <PlusIcon className="w-4 h-4" />
+                  추가
+                </Button>
               </div>
-              <Button
-                onClick={() => setIsAddingChecklistItem(true)}
-                size="sm"
-                className="gap-2"
-                disabled={isEditingMeeting}
-              >
-                <PlusIcon className="w-4 h-4" />
-                항목 추가
-              </Button>
             </div>
-
-            <Progress value={progressPercentage} className="h-3" />
 
             <div className="space-y-3">
               {checklist.map(item => (
                 <div
                   key={item.id}
-                  className="flex items-center gap-4 p-4 rounded-xl border bg-card/50 group hover:shadow-md transition-all duration-200"
+                  className="flex items-center gap-4 p-4 border rounded-xl hover:shadow-sm transition-all duration-200"
                 >
                   <Checkbox
                     checked={item.completed}
                     onCheckedChange={() => handleToggleChecklistItem(item.id)}
-                    className="w-5 h-5"
-                    disabled={isEditingMeeting}
+                    className="w-5 h-5 flex-shrink-0"
                   />
-
-                  <div className="flex-1">
-                    {editingItemId === item.id ? (
-                      <div className="flex items-center gap-2">
-                        <Input
-                          value={editingText}
-                          onChange={e => setEditingText(e.target.value)}
-                          className="flex-1"
-                          autoFocus
-                          onKeyDown={e => {
-                            if (e.key === 'Enter') handleSaveEditingItem();
-                            if (e.key === 'Escape') handleCancelEditing();
-                          }}
-                        />
-                        <Button size="sm" onClick={handleSaveEditingItem}>
-                          <CheckIcon className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={handleCancelEditing}
-                        >
-                          <Cross2Icon className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    ) : (
+                  {editingItemId === item.id ? (
+                    <div className="flex items-center gap-2 flex-1">
+                      <Input
+                        value={editingText}
+                        onChange={e => setEditingText(e.target.value)}
+                        className="flex-1"
+                        autoFocus
+                        onKeyDown={e => {
+                          if (e.key === 'Enter') handleSaveEditingItem();
+                          if (e.key === 'Escape') handleCancelEditing();
+                        }}
+                      />
+                      <Button
+                        size="sm"
+                        onClick={handleSaveEditingItem}
+                        disabled={!editingText.trim()}
+                      >
+                        <CheckIcon className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={handleCancelEditing}
+                      >
+                        <Cross2Icon className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between flex-1">
                       <span
                         className={cn(
                           'text-base',
-                          item.completed && 'line-through text-muted-foreground'
+                          item.completed
+                            ? 'line-through text-muted-foreground'
+                            : 'text-foreground'
                         )}
                       >
                         {item.text}
                       </span>
-                    )}
-                  </div>
-
-                  {!isEditingMeeting && (
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleStartEditingItem(item)}
-                        className="h-8 w-8 p-0"
-                      >
-                        <Pencil1Icon className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleDeleteChecklistItem(item.id)}
-                        className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
-                      >
-                        <TrashIcon className="w-4 h-4" />
-                      </Button>
+                      {!isEditingMeeting && (
+                        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleStartEditingItem(item)}
+                            className="h-8 w-8 p-0"
+                          >
+                            <Pencil1Icon className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleDeleteChecklistItem(item.id)}
+                            className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
+                          >
+                            <TrashIcon className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -1223,9 +1207,9 @@ export function MeetingDetailModal({
 
           {/* 미팅 기록 */}
           <Separator />
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             <div className="flex items-center justify-between">
-              <h3 className="text-xl font-bold">미팅 기록</h3>
+              <h3 className="text-lg sm:text-xl font-bold">미팅 기록</h3>
               <Button
                 size="sm"
                 variant="outline"
@@ -1302,36 +1286,43 @@ export function MeetingDetailModal({
               </div>
             )}
           </div>
+        </div>
 
-          {/* 액션 버튼 */}
-          <Separator />
-          <div className="flex items-center justify-between pt-6">
+        {/* 푸터 - 고정 */}
+        <div className="flex-shrink-0 border-t border-border/30 p-4 sm:p-6">
+          <div className="flex flex-col-reverse sm:flex-row items-center justify-between gap-3">
             <Link to={`/clients/${meeting.client.id}`}>
               <Button
                 variant="outline"
-                className="gap-2"
+                className="gap-2 w-full sm:w-auto"
                 disabled={isEditingMeeting}
               >
                 고객 정보 보기
                 <ArrowRightIcon className="w-4 h-4" />
               </Button>
             </Link>
-            <div className="flex gap-3">
+            <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
               {isEditingMeeting ? (
                 <>
                   <Button
                     variant="outline"
                     onClick={handleCancelEditingMeeting}
+                    className="h-10 px-4 w-full sm:w-auto text-xs sm:text-sm"
                   >
                     취소
                   </Button>
-                  <Button onClick={handleSaveMeetingChanges}>저장</Button>
+                  <Button 
+                    onClick={handleSaveMeetingChanges}
+                    className="h-10 px-4 w-full sm:w-auto text-xs sm:text-sm bg-primary text-primary-foreground"
+                  >
+                    저장
+                  </Button>
                 </>
               ) : (
                 <>
                   <Button
                     variant="outline"
-                    className="gap-2"
+                    className="gap-2 h-10 px-4 w-full sm:w-auto text-xs sm:text-sm"
                     onClick={handleStartEditingMeeting}
                   >
                     <Pencil2Icon className="w-4 h-4" />
@@ -1339,14 +1330,14 @@ export function MeetingDetailModal({
                   </Button>
                   <Button
                     variant="destructive"
-                    className="gap-2"
+                    className="gap-2 h-10 px-4 w-full sm:w-auto text-xs sm:text-sm"
                     onClick={handleDeleteMeeting}
                   >
                     <TrashIcon className="w-4 h-4" />
                     삭제
                   </Button>
                   {meeting.status === 'scheduled' && (
-                    <Button className="gap-2">
+                    <Button className="gap-2 h-10 px-4 w-full sm:w-auto text-xs sm:text-sm bg-primary text-primary-foreground">
                       <CheckIcon className="w-4 h-4" />
                       완료 처리
                     </Button>
