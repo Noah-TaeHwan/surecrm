@@ -37,13 +37,14 @@ import {
   ConflictResolutionModal,
   type ConflictData,
 } from '../components/conflict-resolution-modal';
+import { GoogleConnectRequired } from '../components/google-connect-required';
 import { type Meeting, type Client, type ViewMode } from '../types/types';
 
 export default function CalendarPage({
   loaderData,
   actionData,
 }: CalendarPageProps) {
-  const { meetings, clients, googleCalendarSettings } = loaderData;
+  const { meetings, clients, googleCalendarSettings, requiresGoogleConnection } = loaderData;
 
   const [viewMode, setViewMode] = useState<ViewMode>('month');
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -196,6 +197,31 @@ export default function CalendarPage({
       )}`;
     }
   };
+
+  // 🔒 구글 캘린더 연동이 필수인 경우 연동 화면 표시
+  if (requiresGoogleConnection) {
+    const handleConnect = () => {
+      // Form 제출로 구글 연동 시작
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.style.display = 'none';
+      
+      const actionInput = document.createElement('input');
+      actionInput.name = 'actionType';
+      actionInput.value = 'connectGoogleCalendar';
+      form.appendChild(actionInput);
+      
+      document.body.appendChild(form);
+      form.submit();
+      document.body.removeChild(form);
+    };
+
+    return (
+      <MainLayout>
+        <GoogleConnectRequired onConnect={handleConnect} />
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout title="일정 관리">

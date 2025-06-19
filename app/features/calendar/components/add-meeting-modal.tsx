@@ -26,7 +26,7 @@ import { Input } from '~/common/components/ui/input';
 import { Textarea } from '~/common/components/ui/textarea';
 import { Button } from '~/common/components/ui/button';
 import { Alert, AlertDescription } from '~/common/components/ui/alert';
-import { Badge } from '~/common/components/ui/badge';
+
 import { Switch } from '~/common/components/ui/switch';
 import { Label } from '~/common/components/ui/label';
 import {
@@ -68,8 +68,7 @@ const meetingSchema = z.object({
   location: z.string().optional(),
   description: z.string().optional(),
   reminder: z.string(),
-  // 🌐 구글 캘린더 연동 옵션 (기본 ON)
-  syncToGoogle: z.boolean(),
+  // 🌐 구글 캘린더는 항상 연동됨 (필드 제거)
   googleMeetLink: z.boolean(),
   // 📧 자동 초대 기능
   sendClientInvite: z.boolean(),
@@ -250,14 +249,13 @@ export function AddMeetingModal({
       location: '',
       description: '',
       reminder: '30_minutes',
-      // 🌐 구글 캘린더 동기화 기본 ON (사용자 요구사항)
-      syncToGoogle: googleCalendarConnected,
+      // 🌐 구글 캘린더 연동은 항상 활성화 (필드 제거)
       googleMeetLink: false,
       sendClientInvite: true,
       // 🎯 새로운 기본값들
       priority: 'medium',
       expectedOutcome: '',
-      contactMethod: 'in_person',
+      contactMethod: 'phone',
       estimatedCommission: undefined,
       productInterest: '',
     },
@@ -299,32 +297,14 @@ export function AddMeetingModal({
   }, [contactMethod, form]);
 
   const handleSubmit = (data: MeetingFormData) => {
-    // Form 데이터를 실제 POST 요청으로 제출
-    const formElement = document.createElement('form');
-    formElement.method = 'POST';
-    formElement.style.display = 'none';
-
-    // actionType 추가
-    const actionInput = document.createElement('input');
-    actionInput.name = 'actionType';
-    actionInput.value = 'createMeeting';
-    formElement.appendChild(actionInput);
-
-    // 폼 데이터 추가
-    Object.entries(data).forEach(([key, value]) => {
-      const input = document.createElement('input');
-      input.name = key;
-      input.value = String(value);
-      formElement.appendChild(input);
-    });
-
-    document.body.appendChild(formElement);
-    formElement.submit();
-    document.body.removeChild(formElement);
-
-    // 모달 닫기 및 폼 리셋
-    onSubmit(data);
-    form.reset();
+    // 🔒 구글 캘린더 동기화 항상 활성화
+    const finalData = {
+      ...data,
+      syncToGoogle: true, // 항상 구글 캘린더에 동기화
+    };
+    
+    onSubmit(finalData);
+    handleClose();
   };
 
   const handleClose = () => {
@@ -751,61 +731,54 @@ export function AddMeetingModal({
                   동기화 및 알림 설정
                 </FormLabel>
                 
-                <div className="grid grid-cols-1 gap-4 p-4 border border-border/50 rounded-lg bg-muted/20">
-                  {/* 구글 캘린더 동기화 토글 */}
-                  <FormField
-                    control={form.control}
-                    name="syncToGoogle"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between space-y-0 p-3 border border-border/30 rounded-md bg-background">
-                        <div className="flex items-center space-x-3 flex-1">
-                          <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0">
-                            <CalendarIcon className="h-5 w-5 text-blue-600" />
-                          </div>
-                          <div className="space-y-1 flex-1">
-                            <FormLabel className="text-sm font-medium cursor-pointer">
-                              구글 캘린더 동기화
-                            </FormLabel>
-                            <FormDescription className="text-xs text-muted-foreground">
-                              미팅을 구글 캘린더에 자동으로 등록합니다
-                            </FormDescription>
-                          </div>
+                <div className="grid grid-cols-1 gap-3 p-3 sm:p-4 border border-border/50 rounded-lg bg-muted/20">
+                  {/* 구글 캘린더 자동 동기화 안내 */}
+                  <div className="flex items-center justify-between p-3 border border-emerald-200 rounded-md bg-background">
+                    <div className="flex items-start space-x-3 flex-1 min-w-0 pr-3">
+                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <CalendarIcon className="h-4 w-4 text-blue-600" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-sm text-foreground">
+                          구글 캘린더 자동 등록
                         </div>
-                        <FormControl className="ml-4">
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
+                        <div className="text-xs text-muted-foreground mt-1">
+                          모든 미팅이 구글 캘린더에 자동으로 등록됩니다
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center h-10 px-3 text-sm font-medium text-muted-foreground flex-shrink-0">
+                      활성화됨
+                    </div>
+                  </div>
 
                   {/* 고객 초대 발송 토글 */}
                   <FormField
                     control={form.control}
                     name="sendClientInvite"
                     render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between space-y-0 p-3 border border-border/30 rounded-md bg-background">
-                        <div className="flex items-center space-x-3 flex-1">
-                          <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center flex-shrink-0">
-                            <BellIcon className="h-5 w-5 text-green-600" />
+                      <FormItem className="flex items-center justify-between p-3 border border-border/30 rounded-md bg-background">
+                        <div className="flex items-start space-x-3 flex-1 min-w-0 pr-3">
+                          <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <BellIcon className="h-4 w-4 text-green-600" />
                           </div>
-                          <div className="space-y-1 flex-1">
-                            <FormLabel className="text-sm font-medium cursor-pointer">
+                          <div className="flex-1 min-w-0">
+                            <FormLabel className="font-medium text-sm text-foreground">
                               고객 초대 발송
                             </FormLabel>
-                            <FormDescription className="text-xs text-muted-foreground">
-                              고객에게 미팅 초대 이메일을 자동으로 발송합니다
+                            <FormDescription className="text-xs text-muted-foreground mt-1">
+                              선택한 고객에게 미팅 초대를 이메일로 발송합니다
                             </FormDescription>
                           </div>
                         </div>
-                        <FormControl className="ml-4">
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
+                        <div className="flex items-center h-10 px-3 flex-shrink-0">
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </div>
                       </FormItem>
                     )}
                   />
