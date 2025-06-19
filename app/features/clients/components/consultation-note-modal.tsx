@@ -34,19 +34,21 @@ export function ConsultationNoteModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent 
+      <DialogContent
         className="sm:max-w-xl w-[95vw] p-0 overflow-hidden flex flex-col sm:max-h-[85vh] gap-0"
         style={{
           maxHeight: '75vh',
           height: 'auto',
-          minHeight: '0'
+          minHeight: '0',
         }}
       >
         {/* 헤더 - 고정 */}
         <DialogHeader className="flex-shrink-0 px-4 sm:px-6 py-4 sm:py-4 border-b border-border/30">
           <DialogTitle className="flex items-center gap-2 text-sm sm:text-lg">
             <MessageCircle className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
-            <span className="truncate">{note?.id ? '상담내용 수정' : '상담내용 추가'}</span>
+            <span className="truncate">
+              {note?.id ? '상담내용 수정' : '상담내용 추가'}
+            </span>
           </DialogTitle>
           <DialogDescription className="text-xs sm:text-sm text-muted-foreground">
             고객과의 상담 내용과 계약사항을 기록하세요.
@@ -123,7 +125,7 @@ export function ConsultationNoteModal({
                 className="text-xs sm:text-sm"
               />
             </div>
-            
+
             <div className="space-y-1 sm:space-y-2">
               <Label
                 htmlFor="contractInfo"
@@ -145,7 +147,7 @@ export function ConsultationNoteModal({
                 className="text-xs sm:text-sm"
               />
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
               <div className="space-y-1 sm:space-y-2">
                 <Label

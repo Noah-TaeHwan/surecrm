@@ -756,14 +756,14 @@ export function MobileNav({
 
             {/* 🎯 스크롤 가능한 네비게이션 영역 - iOS Safari 최적화 */}
             <div className="flex-1 min-h-0 relative">
-              <ScrollArea 
+              <ScrollArea
                 className="h-full w-full"
                 style={{
                   height: 'calc(100vh - 140px)', // 헤더와 푸터 높이 제외
                   minHeight: '200px',
                 }}
               >
-                <div 
+                <div
                   className="h-full"
                   style={{
                     paddingBottom: '20px', // 하단 여백으로 스크롤 끝 표시

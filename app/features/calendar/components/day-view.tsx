@@ -21,10 +21,14 @@ export function DayView({
 
   // 선택된 날짜의 미팅들만 필터링
   const dateStr = selectedDate.toISOString().split('T')[0];
-  const dayMeetings = filteredMeetings.filter(meeting => meeting.date === dateStr);
+  const dayMeetings = filteredMeetings.filter(
+    meeting => meeting.date === dateStr
+  );
 
   // 시간별로 정렬
-  const sortedMeetings = dayMeetings.sort((a, b) => a.time.localeCompare(b.time));
+  const sortedMeetings = dayMeetings.sort((a, b) =>
+    a.time.localeCompare(b.time)
+  );
 
   // 시간 슬롯 생성 (0시부터 23시까지)
   const timeSlots = Array.from({ length: 24 }, (_, i) => i);
@@ -77,14 +81,12 @@ export function DayView({
               )}
             </p>
           </div>
-          
+
           <div className="text-right space-y-1">
             <div className="text-2xl font-bold text-primary">
               {sortedMeetings.length}
             </div>
-            <div className="text-xs text-muted-foreground">
-              개의 미팅
-            </div>
+            <div className="text-xs text-muted-foreground">개의 미팅</div>
           </div>
         </div>
 
@@ -94,19 +96,24 @@ export function DayView({
             <div className="flex items-center gap-2 text-sm">
               <Clock className="w-4 h-4 text-muted-foreground" />
               <span className="text-muted-foreground">
-                {sortedMeetings[0].time} - {sortedMeetings[sortedMeetings.length - 1].time}
+                {sortedMeetings[0].time} -{' '}
+                {sortedMeetings[sortedMeetings.length - 1].time}
               </span>
             </div>
             <div className="flex items-center gap-1">
-              {Array.from(new Set(sortedMeetings.map(m => m.type))).map(type => (
-                <div
-                  key={type}
-                  className={cn(
-                    'w-3 h-3 rounded-full',
-                    meetingTypeColors[type as keyof typeof meetingTypeColors] || 'bg-gray-500'
-                  )}
-                />
-              ))}
+              {Array.from(new Set(sortedMeetings.map(m => m.type))).map(
+                type => (
+                  <div
+                    key={type}
+                    className={cn(
+                      'w-3 h-3 rounded-full',
+                      meetingTypeColors[
+                        type as keyof typeof meetingTypeColors
+                      ] || 'bg-gray-500'
+                    )}
+                  />
+                )
+              )}
             </div>
           </div>
         )}
@@ -125,9 +132,9 @@ export function DayView({
                     {hour.toString().padStart(2, '0')}:00
                   </div>
                 </div>
-                
+
                 {/* 시간 슬롯 영역 */}
-                <div 
+                <div
                   className={cn(
                     'flex-1 min-h-20 relative p-2 hover:bg-accent/10 transition-colors duration-200',
                     isToday && hour === currentHour && 'bg-primary/5',
@@ -136,19 +143,19 @@ export function DayView({
                 >
                   {/* 현재 시간 표시선 */}
                   {isToday && hour === currentHour && (
-                    <div 
+                    <div
                       className="absolute left-0 right-0 h-0.5 bg-red-500 z-20 shadow-lg"
-                      style={{ 
-                        top: `${(currentMinute / 60) * 80}px` 
+                      style={{
+                        top: `${(currentMinute / 60) * 80}px`,
                       }}
                     >
                       <div className="absolute left-2 top-0 w-3 h-3 bg-red-500 rounded-full -translate-y-1 shadow-sm flex items-center justify-center">
                         <div className="w-1 h-1 bg-white rounded-full"></div>
                       </div>
                       <div className="absolute left-6 top-0 text-xs text-red-600 font-mono -translate-y-2">
-                        {new Date().toLocaleTimeString('ko-KR', { 
-                          hour: '2-digit', 
-                          minute: '2-digit' 
+                        {new Date().toLocaleTimeString('ko-KR', {
+                          hour: '2-digit',
+                          minute: '2-digit',
                         })}
                       </div>
                     </div>
@@ -172,11 +179,11 @@ export function DayView({
                           'group'
                         )}
                         style={{
-                          top: `${getMeetingPosition(meeting.time) - (hour * 80)}px`,
+                          top: `${getMeetingPosition(meeting.time) - hour * 80}px`,
                           height: `${getMeetingHeight(meeting.duration)}px`,
                           left: `${8 + index * 4}px`, // 겹치는 미팅들을 살짝 오프셋
                           right: `${8 + index * 4}px`,
-                          zIndex: 10 + index
+                          zIndex: 10 + index,
                         }}
                         onClick={() => onMeetingClick(meeting)}
                       >
@@ -192,9 +199,11 @@ export function DayView({
                             {meeting.syncInfo?.syncStatus === 'conflict' && (
                               <div className="w-2 h-2 rounded-full bg-red-400 border border-white/70 animate-pulse"></div>
                             )}
-                            {meeting.syncInfo?.syncStatus === 'synced' && meeting.syncInfo?.externalSource !== 'surecrm' && (
-                              <div className="w-2 h-2 rounded-full bg-green-400 border border-white/50"></div>
-                            )}
+                            {meeting.syncInfo?.syncStatus === 'synced' &&
+                              meeting.syncInfo?.externalSource !==
+                                'surecrm' && (
+                                <div className="w-2 h-2 rounded-full bg-green-400 border border-white/50"></div>
+                              )}
                           </div>
                         </div>
 
@@ -213,22 +222,22 @@ export function DayView({
                               <Clock className="w-3 h-3" />
                               <span>{meeting.duration}분</span>
                             </div>
-                            
+
                             {meeting.location && (
                               <div className="flex items-center gap-2">
                                 <MapPin className="w-3 h-3" />
-                                <span className="truncate">{meeting.location}</span>
+                                <span className="truncate">
+                                  {meeting.location}
+                                </span>
                               </div>
                             )}
-
-
                           </div>
                         </div>
 
                         {/* 미팅 타입 배지 */}
                         <div className="absolute bottom-2 right-2">
-                          <Badge 
-                            variant="secondary" 
+                          <Badge
+                            variant="secondary"
                             className="text-xs bg-white/20 text-white border-white/30"
                           >
                             {meeting.type}
@@ -257,7 +266,10 @@ export function DayView({
               </div>
               <div className="space-y-2">
                 <h3 className="text-lg font-semibold text-foreground">
-                  {isToday ? '오늘' : format(selectedDate, 'MM월 dd일', { locale: ko })} 예정된 미팅이 없습니다
+                  {isToday
+                    ? '오늘'
+                    : format(selectedDate, 'MM월 dd일', { locale: ko })}{' '}
+                  예정된 미팅이 없습니다
                 </h3>
                 <p className="text-sm text-muted-foreground">
                   새로운 미팅을 예약하여 일정을 관리해보세요.

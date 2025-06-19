@@ -54,10 +54,7 @@ export function ConsultationNotesTab({
         </CardHeader>
         <CardContent className="p-4 sm:p-6 space-y-4 sm:space-y-6">
           {/* 고객 메모 및 특이사항 */}
-          <ClientMemoSection
-            notes={notes}
-            onSave={onSaveMemo}
-          />
+          <ClientMemoSection notes={notes} onSave={onSaveMemo} />
 
           <Separator />
 

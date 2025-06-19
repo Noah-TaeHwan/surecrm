@@ -15,20 +15,23 @@ import {
 } from '~/common/components/ui/select';
 import { Separator } from '~/common/components/ui/separator';
 import { Badge } from '~/common/components/ui/badge';
-import { ToggleGroup, ToggleGroupItem } from '~/common/components/ui/toggle-group';
-import { 
-  Search, 
-  Filter, 
-  Download, 
-  LayoutGrid, 
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from '~/common/components/ui/toggle-group';
+import {
+  Search,
+  Filter,
+  Download,
+  LayoutGrid,
   LayoutList,
   Settings,
   X,
 } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import { useDeviceType } from '~/common/hooks';
-import MobileFilterModal, { 
-  type MobileFilterOptions 
+import MobileFilterModal, {
+  type MobileFilterOptions,
 } from './mobile-filter-modal';
 
 interface ClientFiltersProps {
@@ -69,7 +72,7 @@ export function ClientFiltersSection({
 }: ClientFiltersProps) {
   const deviceType = useDeviceType();
   const [isAdvancedFilterOpen, setIsAdvancedFilterOpen] = useState(false);
-  
+
   // 기본 고급 필터 상태
   const defaultAdvancedFilters: MobileFilterOptions = {
     stages: [],
@@ -86,28 +89,36 @@ export function ClientFiltersSection({
   // 활성 필터 개수 계산
   const activeFilterCount = useMemo(() => {
     let count = 0;
-    
+
     // 기본 필터들
     if (filterImportance !== 'all') count++;
     if (filterStage !== 'all') count++;
     if (filterReferralStatus !== 'all') count++;
     if (searchQuery.trim()) count++;
-    
+
     // 고급 필터들
     if (currentAdvancedFilters.stages.length > 0) count++;
     if (currentAdvancedFilters.importance.length > 0) count++;
     if (currentAdvancedFilters.sources.length > 0) count++;
-    if (currentAdvancedFilters.ageRange[0] !== 20 || currentAdvancedFilters.ageRange[1] !== 80) count++;
+    if (
+      currentAdvancedFilters.ageRange[0] !== 20 ||
+      currentAdvancedFilters.ageRange[1] !== 80
+    )
+      count++;
     if (currentAdvancedFilters.hasPolicy !== null) count++;
-    if (currentAdvancedFilters.sortBy !== 'name' || currentAdvancedFilters.sortDirection !== 'asc') count++;
-    
+    if (
+      currentAdvancedFilters.sortBy !== 'name' ||
+      currentAdvancedFilters.sortDirection !== 'asc'
+    )
+      count++;
+
     return count;
   }, [
-    filterImportance, 
-    filterStage, 
-    filterReferralStatus, 
-    searchQuery, 
-    currentAdvancedFilters
+    filterImportance,
+    filterStage,
+    filterReferralStatus,
+    searchQuery,
+    currentAdvancedFilters,
   ]);
 
   // 필터 초기화 핸들러
@@ -122,46 +133,60 @@ export function ClientFiltersSection({
   // 활성 필터 배지 렌더링
   const renderActiveFilterBadges = () => {
     const badges = [];
-    
+
     if (filterImportance !== 'all') {
       badges.push(
-        <Badge key="importance" variant="secondary" className="gap-1 text-xs py-1 px-2">
+        <Badge
+          key="importance"
+          variant="secondary"
+          className="gap-1 text-xs py-1 px-2"
+        >
           중요도: {filterImportance}
-          <X 
-            className="h-3 w-3 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full p-0.5" 
+          <X
+            className="h-3 w-3 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full p-0.5"
             onClick={() => setFilterImportance('all')}
           />
         </Badge>
       );
     }
-    
+
     if (filterStage !== 'all') {
       badges.push(
-        <Badge key="stage" variant="secondary" className="gap-1 text-xs py-1 px-2">
+        <Badge
+          key="stage"
+          variant="secondary"
+          className="gap-1 text-xs py-1 px-2"
+        >
           단계: {filterStage}
-          <X 
-            className="h-3 w-3 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full p-0.5" 
+          <X
+            className="h-3 w-3 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full p-0.5"
             onClick={() => setFilterStage('all')}
           />
         </Badge>
       );
     }
-    
+
     if (currentAdvancedFilters.sources.length > 0) {
       badges.push(
-        <Badge key="sources" variant="secondary" className="gap-1 text-xs py-1 px-2">
+        <Badge
+          key="sources"
+          variant="secondary"
+          className="gap-1 text-xs py-1 px-2"
+        >
           출처: {currentAdvancedFilters.sources.length}개
-          <X 
-            className="h-3 w-3 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full p-0.5" 
-            onClick={() => onAdvancedFiltersChange?.({
-              ...currentAdvancedFilters,
-              sources: []
-            })}
+          <X
+            className="h-3 w-3 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full p-0.5"
+            onClick={() =>
+              onAdvancedFiltersChange?.({
+                ...currentAdvancedFilters,
+                sources: [],
+              })
+            }
           />
         </Badge>
       );
     }
-    
+
     return badges;
   };
 
@@ -184,7 +209,7 @@ export function ClientFiltersSection({
               {filteredClientsCount}명의 고객이 검색되었습니다
             </p>
           </div>
-          
+
           {/* 액션 버튼 영역 - 모바일에서 세로 배치 */}
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             {/* 필터 버튼 그룹 - 모바일에서 전체 너비 */}
@@ -200,7 +225,7 @@ export function ClientFiltersSection({
                   고급 필터
                 </Button>
               )}
-              
+
               {/* 데스크톱: 기존 필터 토글 */}
               {deviceType !== 'mobile' && (
                 <Button
@@ -213,21 +238,26 @@ export function ClientFiltersSection({
                 </Button>
               )}
             </div>
-            
+
             {/* 뷰 모드 토글 - 모바일에서도 한 줄로 우측 정렬 */}
             <div className="flex items-center gap-2 justify-end md:justify-start">
-              <Separator orientation="vertical" className="h-6 hidden md:block" />
-              
+              <Separator
+                orientation="vertical"
+                className="h-6 hidden md:block"
+              />
+
               {/* 🎯 ToggleGroup으로 개선된 뷰 모드 선택 */}
-              <ToggleGroup 
-                type="single" 
-                value={viewMode} 
-                  onValueChange={(value) => value && setViewMode(value as 'grid' | 'table')}
+              <ToggleGroup
+                type="single"
+                value={viewMode}
+                onValueChange={value =>
+                  value && setViewMode(value as 'grid' | 'table')
+                }
                 className="border border-border rounded-lg overflow-hidden"
               >
-                                  <ToggleGroupItem 
-                    value="grid" 
-                    aria-label="카드뷰로 보기"
+                <ToggleGroupItem
+                  value="grid"
+                  aria-label="카드뷰로 보기"
                   className="flex items-center gap-2 px-3 py-2 text-sm font-medium transition-all
                            data-[state=on]:bg-primary data-[state=on]:text-primary-foreground 
                            data-[state=off]:bg-background data-[state=off]:text-muted-foreground
@@ -237,8 +267,8 @@ export function ClientFiltersSection({
                   <LayoutGrid className="h-4 w-4" />
                   <span className="hidden sm:inline">카드뷰</span>
                 </ToggleGroupItem>
-                <ToggleGroupItem 
-                  value="table" 
+                <ToggleGroupItem
+                  value="table"
                   aria-label="테이블뷰로 보기"
                   className="flex items-center gap-2 px-3 py-2 text-sm font-medium transition-all
                            data-[state=on]:bg-primary data-[state=on]:text-primary-foreground 
@@ -270,13 +300,15 @@ export function ClientFiltersSection({
                 />
               </div>
             </div>
-            
+
             {/* 빠른 중요도 필터 - 모바일에서 전체 너비 */}
             <div className="w-full md:w-[140px]">
               <Select
                 value={filterImportance}
                 onValueChange={value =>
-                  setFilterImportance(value as 'all' | 'high' | 'medium' | 'low')
+                  setFilterImportance(
+                    value as 'all' | 'high' | 'medium' | 'low'
+                  )
                 }
               >
                 <SelectTrigger className="w-full h-10">
@@ -297,7 +329,9 @@ export function ClientFiltersSection({
             <div className="space-y-2">
               {/* 라벨과 초기화 버튼 - 모바일에서 한 줄 */}
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">활성 필터:</span>
+                <span className="text-sm text-muted-foreground">
+                  활성 필터:
+                </span>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -307,7 +341,7 @@ export function ClientFiltersSection({
                   전체 초기화
                 </Button>
               </div>
-              
+
               {/* 배지들 - 모바일에서 줄바꿈 적극 활용 */}
               <div className="flex flex-wrap gap-1.5">
                 {renderActiveFilterBadges()}
@@ -359,8 +393,12 @@ export function ClientFiltersSection({
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">모든 고객</SelectItem>
-                      <SelectItem value="has_referrer">소개받은 고객</SelectItem>
-                      <SelectItem value="no_referrer">직접 영업 고객</SelectItem>
+                      <SelectItem value="has_referrer">
+                        소개받은 고객
+                      </SelectItem>
+                      <SelectItem value="no_referrer">
+                        직접 영업 고객
+                      </SelectItem>
                       <SelectItem value="top_referrer">
                         핵심 소개자 (3명+)
                       </SelectItem>

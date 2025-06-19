@@ -1,9 +1,5 @@
 import { TabsContent } from '~/common/components/ui/tabs';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-} from '~/common/components/ui/card';
+import { Card, CardContent, CardHeader } from '~/common/components/ui/card';
 import { Button } from '~/common/components/ui/button';
 import { Checkbox } from '~/common/components/ui/checkbox';
 import { Label } from '~/common/components/ui/label';
@@ -38,7 +34,9 @@ export function CheckupPurposesTab({
       <Card>
         <CardHeader className="pb-3 md:pb-4">
           <div className="flex items-start justify-between gap-3">
-            <h3 className="text-lg font-semibold text-foreground leading-tight">점검목적</h3>
+            <h3 className="text-lg font-semibold text-foreground leading-tight">
+              점검목적
+            </h3>
             <Button
               size="sm"
               className="flex-shrink-0"
@@ -55,7 +53,6 @@ export function CheckupPurposesTab({
           </div>
         </CardHeader>
         <CardContent className="p-4 md:p-6 space-y-5 md:space-y-6">
-          
           {/* 😟 현재 걱정되는 사항 */}
           <div className="space-y-3 md:space-y-4">
             <h4 className="font-medium text-foreground flex items-center gap-2 text-sm md:text-base">
@@ -79,16 +76,18 @@ export function CheckupPurposesTab({
                   icon: '🏥',
                 },
               ].map(item => (
-                <div 
-                  key={item.key} 
+                <div
+                  key={item.key}
                   className={cn(
-                    "flex items-center gap-3 p-2 md:p-0 rounded-md transition-colors",
-                    "hover:bg-muted/20 md:hover:bg-transparent",
+                    'flex items-center gap-3 p-2 md:p-0 rounded-md transition-colors',
+                    'hover:bg-muted/20 md:hover:bg-transparent',
                     // 모바일에서 터치하기 쉽게 더 큰 영역
-                    "min-h-[44px] md:min-h-0"
+                    'min-h-[44px] md:min-h-0'
                   )}
                 >
-                  <span className="text-base md:text-lg flex-shrink-0">{item.icon}</span>
+                  <span className="text-base md:text-lg flex-shrink-0">
+                    {item.icon}
+                  </span>
                   <div className="flex items-center gap-2 flex-1">
                     <Checkbox
                       id={`concern-${item.key}`}
@@ -97,7 +96,7 @@ export function CheckupPurposesTab({
                           item.key as keyof typeof checkupPurposes
                         ] as boolean
                       }
-                      onCheckedChange={(checked) =>
+                      onCheckedChange={checked =>
                         setCheckupPurposes(prev => ({
                           ...prev,
                           [item.key]: checked === true,
@@ -105,11 +104,11 @@ export function CheckupPurposesTab({
                       }
                       className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                     />
-                    <Label 
+                    <Label
                       htmlFor={`concern-${item.key}`}
                       className={cn(
-                        "text-sm cursor-pointer leading-relaxed flex-1",
-                        "hover:text-primary transition-colors"
+                        'text-sm cursor-pointer leading-relaxed flex-1',
+                        'hover:text-primary transition-colors'
                       )}
                     >
                       {item.label}
@@ -173,15 +172,17 @@ export function CheckupPurposesTab({
                   icon: '🧠',
                 },
               ].map(item => (
-                <div 
-                  key={item.key} 
+                <div
+                  key={item.key}
                   className={cn(
-                    "flex items-center gap-3 p-2 md:p-0 rounded-md transition-colors",
-                    "hover:bg-muted/20 md:hover:bg-transparent",
-                    "min-h-[44px] md:min-h-0"
+                    'flex items-center gap-3 p-2 md:p-0 rounded-md transition-colors',
+                    'hover:bg-muted/20 md:hover:bg-transparent',
+                    'min-h-[44px] md:min-h-0'
                   )}
                 >
-                  <span className="text-base md:text-lg flex-shrink-0">{item.icon}</span>
+                  <span className="text-base md:text-lg flex-shrink-0">
+                    {item.icon}
+                  </span>
                   <div className="flex items-center gap-2 flex-1">
                     <Checkbox
                       id={`needs-${item.key}`}
@@ -190,7 +191,7 @@ export function CheckupPurposesTab({
                           item.key as keyof typeof checkupPurposes
                         ] as boolean
                       }
-                      onCheckedChange={(checked) =>
+                      onCheckedChange={checked =>
                         setCheckupPurposes(prev => ({
                           ...prev,
                           [item.key]: checked === true,
@@ -198,11 +199,11 @@ export function CheckupPurposesTab({
                       }
                       className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                     />
-                    <Label 
+                    <Label
                       htmlFor={`needs-${item.key}`}
                       className={cn(
-                        "text-sm cursor-pointer leading-relaxed flex-1",
-                        "hover:text-primary transition-colors"
+                        'text-sm cursor-pointer leading-relaxed flex-1',
+                        'hover:text-primary transition-colors'
                       )}
                     >
                       {item.label}

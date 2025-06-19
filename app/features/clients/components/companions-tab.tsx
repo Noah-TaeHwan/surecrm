@@ -1,9 +1,5 @@
 import { TabsContent } from '~/common/components/ui/tabs';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-} from '~/common/components/ui/card';
+import { Card, CardContent, CardHeader } from '~/common/components/ui/card';
 import { Button } from '~/common/components/ui/button';
 import { Plus, Edit2, Trash2, Phone } from 'lucide-react';
 
@@ -33,7 +29,9 @@ export function CompanionsTab({
       <Card>
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between gap-3">
-            <h3 className="text-lg font-semibold text-foreground leading-tight">상담동반자</h3>
+            <h3 className="text-lg font-semibold text-foreground leading-tight">
+              상담동반자
+            </h3>
             <Button
               size="sm"
               className="flex-shrink-0"
@@ -45,13 +43,12 @@ export function CompanionsTab({
           </div>
         </CardHeader>
         <CardContent className="p-4 space-y-4">
-          
           {/* 👥 등록된 동반자 */}
           <div className="space-y-3">
             <h4 className="font-medium text-foreground flex items-center gap-2 text-sm">
               👥 등록된 동반자
             </h4>
-            
+
             {consultationCompanions && consultationCompanions.length > 0 ? (
               <div className="space-y-3">
                 {consultationCompanions.map(companion => (
@@ -92,7 +89,7 @@ export function CompanionsTab({
                         </Button>
                       </div>
                     </div>
-                    
+
                     {/* 정보 섹션 - 세로 배치 */}
                     <div className="space-y-2">
                       {/* 관계 */}
@@ -104,7 +101,7 @@ export function CompanionsTab({
                           {companion.relationship}
                         </span>
                       </div>
-                      
+
                       {/* 연락처 */}
                       {companion.phone && (
                         <div className="flex justify-between items-center py-1.5 border-b border-slate-100/50 dark:border-slate-700/50">
@@ -116,7 +113,7 @@ export function CompanionsTab({
                           </span>
                         </div>
                       )}
-                      
+
                       {/* 주 동반자 여부 */}
                       {companion.isPrimary && (
                         <div className="flex justify-between items-center py-1.5">
@@ -144,13 +141,12 @@ export function CompanionsTab({
                 <p className="text-xs text-muted-foreground mb-4">
                   상담에 함께 참석할 동반자를 추가해보세요.
                 </p>
-                <Button 
+                <Button
                   size="sm"
                   onClick={handleAddCompanion}
                   className="text-xs"
                 >
-                  <Plus className="h-4 w-4 mr-2" />
-                  첫 동반자 추가
+                  <Plus className="h-4 w-4 mr-2" />첫 동반자 추가
                 </Button>
               </div>
             )}
@@ -165,7 +161,9 @@ export function CompanionsTab({
               <div className="space-y-2 text-xs text-muted-foreground">
                 <p className="flex items-start gap-2">
                   <span className="text-primary">•</span>
-                  <span>상담에 함께 참석하실 분의 정보를 미리 등록해두세요.</span>
+                  <span>
+                    상담에 함께 참석하실 분의 정보를 미리 등록해두세요.
+                  </span>
                 </p>
                 <p className="flex items-start gap-2">
                   <span className="text-primary">•</span>
@@ -173,7 +171,9 @@ export function CompanionsTab({
                 </p>
                 <p className="flex items-start gap-2">
                   <span className="text-primary">•</span>
-                  <span>배우자, 자녀, 부모님 등 관계를 명확히 기록해주세요.</span>
+                  <span>
+                    배우자, 자녀, 부모님 등 관계를 명확히 기록해주세요.
+                  </span>
                 </p>
               </div>
             </div>
@@ -181,7 +181,9 @@ export function CompanionsTab({
 
           {/* 동반자 추가 폼 (숨김 상태) */}
           <div className="hidden p-4 bg-muted/30 rounded-lg border border-border">
-            <h5 className="font-medium text-foreground mb-4 text-sm">새 동반자 추가</h5>
+            <h5 className="font-medium text-foreground mb-4 text-sm">
+              새 동반자 추가
+            </h5>
             <div className="space-y-4">
               <div>
                 <label className="block text-xs font-medium text-muted-foreground mb-2">

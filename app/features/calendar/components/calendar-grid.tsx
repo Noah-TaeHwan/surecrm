@@ -59,7 +59,7 @@ function SyncStatusIndicator({ status }: { status?: SyncStatus }) {
   );
 }
 
-// 🚀 Google Calendar 스타일의 이벤트 카드 
+// 🚀 Google Calendar 스타일의 이벤트 카드
 function EventCard({
   meeting,
   compact = false,
@@ -98,7 +98,9 @@ function EventCard({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
             <Clock className="h-3 w-3 opacity-90 group-hover:h-3.5 group-hover:w-3.5 transition-all duration-200" />
-            <span className="font-semibold text-xs tracking-wide">{meeting.time}</span>
+            <span className="font-semibold text-xs tracking-wide">
+              {meeting.time}
+            </span>
           </div>
           <span className="text-sm opacity-80 group-hover:text-base transition-all duration-200">
             {source === 'google' ? '📅' : '💼'}
@@ -107,10 +109,12 @@ function EventCard({
 
         {/* 이벤트 제목 - 간결하게 */}
         <div className="flex items-center">
-          <span className={cn(
-            "font-medium truncate",
-            compact ? "text-xs" : "text-sm"
-          )}>
+          <span
+            className={cn(
+              'font-medium truncate',
+              compact ? 'text-xs' : 'text-sm'
+            )}
+          >
             {meeting.title}
           </span>
         </div>
@@ -128,7 +132,7 @@ function EventCard({
   );
 }
 
-// 🎯 세련된 더보기 버튼 
+// 🎯 세련된 더보기 버튼
 function MoreEventsButton({
   count,
   meetings,
@@ -146,11 +150,11 @@ function MoreEventsButton({
   return (
     <div
       className={cn(
-        "group relative rounded-lg cursor-pointer transition-all duration-300",
-        "bg-gradient-to-br from-muted/40 to-muted/60 hover:from-muted/60 hover:to-muted/80",
-        "border border-border/50 hover:border-border shadow-sm hover:shadow-md",
-        "p-2.5 text-xs text-muted-foreground hover:text-foreground",
-        "transform hover:scale-[1.02] active:scale-[0.98]"
+        'group relative rounded-lg cursor-pointer transition-all duration-300',
+        'bg-gradient-to-br from-muted/40 to-muted/60 hover:from-muted/60 hover:to-muted/80',
+        'border border-border/50 hover:border-border shadow-sm hover:shadow-md',
+        'p-2.5 text-xs text-muted-foreground hover:text-foreground',
+        'transform hover:scale-[1.02] active:scale-[0.98]'
       )}
       onClick={onClick}
       title={`추가 일정: ${previewTimes}${meetings.length > 2 ? '...' : ''}`}
@@ -162,22 +166,20 @@ function MoreEventsButton({
         </div>
         <div className="w-1.5 h-1.5 bg-primary/60 rounded-full group-hover:bg-primary group-hover:scale-125 transition-all duration-200" />
       </div>
-      
+
       {/* 미리보기 힌트 */}
-      <div className="mt-1 text-xs opacity-70 truncate">
-        {previewTimes}
-      </div>
+      <div className="mt-1 text-xs opacity-70 truncate">{previewTimes}</div>
     </div>
   );
 }
 
 // 📅 개선된 날짜 셀 헤더
-function DateCellHeader({ 
-  day, 
-  isToday, 
-  dayMeetings, 
-  sourceCount 
-}: { 
+function DateCellHeader({
+  day,
+  isToday,
+  dayMeetings,
+  sourceCount,
+}: {
   day: number;
   isToday: boolean;
   dayMeetings: Meeting[];
@@ -343,7 +345,7 @@ export function CalendarGrid({
           onClick={() => onDateClick?.(cellDate)}
         >
           {/* 날짜 헤더 */}
-          <DateCellHeader 
+          <DateCellHeader
             day={day}
             isToday={isToday}
             dayMeetings={dayMeetings}
@@ -434,8 +436,6 @@ export function CalendarGrid({
               title="동기화 충돌이 있는 이벤트가 있습니다"
             />
           )}
-
-
         </div>
       );
     }

@@ -39,7 +39,9 @@ export function useWindowSize(): WindowSize {
 export function useBreakpoint(): Breakpoints {
   // hydration을 위해 초기값을 데스크톱으로 통일 (가장 일반적인 케이스)
   const [isHydrated, setIsHydrated] = useState(false);
-  const [breakpoints, setBreakpoints] = useState<Omit<Breakpoints, 'isHydrated'>>({
+  const [breakpoints, setBreakpoints] = useState<
+    Omit<Breakpoints, 'isHydrated'>
+  >({
     isMobile: false,
     isTablet: false,
     isDesktop: true,

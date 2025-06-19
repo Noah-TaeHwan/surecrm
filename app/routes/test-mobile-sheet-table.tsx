@@ -366,7 +366,7 @@ export default function TestMobileSheetTable() {
                       {client.name}
                     </div>
                     <div className="text-sm text-gray-500 sm:hidden">
-                      <a 
+                      <a
                         href={`mailto:${client.email}`}
                         className="text-primary hover:underline"
                       >
@@ -380,7 +380,7 @@ export default function TestMobileSheetTable() {
                     className="hidden sm:table-cell"
                   >
                     <div>
-                      <a 
+                      <a
                         href={`tel:${client.phone}`}
                         className="text-primary hover:underline"
                       >
@@ -388,7 +388,7 @@ export default function TestMobileSheetTable() {
                       </a>
                     </div>
                     <div className="text-sm text-gray-500">
-                      <a 
+                      <a
                         href={`mailto:${client.email}`}
                         className="text-primary hover:underline"
                       >

@@ -170,12 +170,12 @@ export function AddClientModal({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent 
+      <DialogContent
         className="sm:max-w-xl w-[95vw] p-0 overflow-hidden flex flex-col sm:max-h-[85vh] gap-0"
         style={{
           maxHeight: '75vh',
           height: 'auto',
-          minHeight: '0'
+          minHeight: '0',
         }}
       >
         {/* 헤더 - 고정 */}
@@ -210,12 +210,12 @@ export function AddClientModal({
                 <div className="p-4 sm:p-4 bg-primary/5 border border-primary/20 rounded-lg">
                   <div className="flex items-center gap-2">
                     <InfoCircledIcon className="h-4 w-4 text-primary" />
-                    <span className="text-xs sm:text-sm text-primary">고객 정보를 저장하고 있습니다...</span>
+                    <span className="text-xs sm:text-sm text-primary">
+                      고객 정보를 저장하고 있습니다...
+                    </span>
                   </div>
                 </div>
               )}
-
-             
 
               {/* 🏷️ 기본 정보 */}
               <div className="space-y-3 sm:space-y-4">
@@ -254,19 +254,25 @@ export function AddClientModal({
                           <FormLabel className="text-xs sm:text-sm font-medium">
                             소개자
                           </FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
                             <FormControl>
                               <SelectTrigger className="h-9 sm:h-10 text-xs sm:text-sm min-h-[36px] sm:min-h-[40px]">
                                 <SelectValue placeholder="소개자를 선택하세요" />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="none" className="text-xs sm:text-sm py-2">
+                              <SelectItem
+                                value="none"
+                                className="text-xs sm:text-sm py-2"
+                              >
                                 소개자 없음
                               </SelectItem>
-                              {referrers.map((referrer) => (
-                                <SelectItem 
-                                  key={referrer.id} 
+                              {referrers.map(referrer => (
+                                <SelectItem
+                                  key={referrer.id}
                                   value={referrer.id}
                                   className="text-xs sm:text-sm py-2"
                                 >
@@ -313,16 +319,19 @@ export function AddClientModal({
                         <FormLabel className="text-xs sm:text-sm font-medium">
                           통신사
                         </FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
                           <FormControl>
                             <SelectTrigger className="h-9 sm:h-10 text-xs sm:text-sm min-h-[36px] sm:min-h-[40px]">
                               <SelectValue placeholder="통신사를 선택하세요" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {telecomProviders.map((provider) => (
-                              <SelectItem 
-                                key={provider} 
+                            {telecomProviders.map(provider => (
+                              <SelectItem
+                                key={provider}
                                 value={provider}
                                 className="text-xs sm:text-sm py-2"
                               >
@@ -422,14 +431,17 @@ export function AddClientModal({
                           defaultValue={field.value}
                           className=""
                         >
-                          {importanceOptions.map((option) => (
-                            <Label 
-                              key={option.id} 
+                          {importanceOptions.map(option => (
+                            <Label
+                              key={option.id}
                               htmlFor={option.id}
                               className={`p-3 rounded-lg border ${option.color} cursor-pointer hover:bg-muted/20 transition-colors block w-full`}
                             >
                               <div className="flex items-center space-x-3">
-                                <RadioGroupItem value={option.id} id={option.id} />
+                                <RadioGroupItem
+                                  value={option.id}
+                                  id={option.id}
+                                />
                                 <div className="flex-1">
                                   <div className="text-xs sm:text-sm font-medium">
                                     {option.name}

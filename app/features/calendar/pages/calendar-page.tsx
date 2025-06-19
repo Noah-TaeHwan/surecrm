@@ -46,8 +46,13 @@ export default function CalendarPage({
   loaderData,
   actionData,
 }: CalendarPageProps) {
-  const { meetings, clients, googleCalendarSettings, requiresGoogleConnection } = loaderData;
-  
+  const {
+    meetings,
+    clients,
+    googleCalendarSettings,
+    requiresGoogleConnection,
+  } = loaderData;
+
   // 토스트 훅 추가
   const { success, error } = useToast();
 
@@ -60,14 +65,19 @@ export default function CalendarPage({
   const [filteredTypes, setFilteredTypes] = useState<string[]>([]);
 
   // 필터링된 미팅 목록
-  const filteredMeetings = filteredTypes.length === 0 
-    ? meetings 
-    : meetings.filter((meeting: Meeting) => filteredTypes.includes(meeting.type));
+  const filteredMeetings =
+    filteredTypes.length === 0
+      ? meetings
+      : meetings.filter((meeting: Meeting) =>
+          filteredTypes.includes(meeting.type)
+        );
 
   // 초기 필터 설정 (모든 타입 선택)
   useEffect(() => {
     if (meetings && meetings.length > 0 && filteredTypes.length === 0) {
-      const allTypes = Array.from(new Set((meetings as Meeting[]).map((m: Meeting) => m.type)));
+      const allTypes = Array.from(
+        new Set((meetings as Meeting[]).map((m: Meeting) => m.type))
+      );
       setFilteredTypes(allTypes);
     }
   }, [meetings, filteredTypes.length]);
@@ -235,12 +245,12 @@ export default function CalendarPage({
       const form = document.createElement('form');
       form.method = 'POST';
       form.style.display = 'none';
-      
+
       const actionInput = document.createElement('input');
       actionInput.name = 'actionType';
       actionInput.value = 'connectGoogleCalendar';
       form.appendChild(actionInput);
-      
+
       document.body.appendChild(form);
       form.submit();
       document.body.removeChild(form);
@@ -267,9 +277,17 @@ export default function CalendarPage({
               <h1 className="text-2xl lg:text-3xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
                 {getDisplayTitle()}
               </h1>
-              <Badge variant="secondary" className="hidden lg:flex items-center gap-1.5 px-3 py-1">
+              <Badge
+                variant="secondary"
+                className="hidden lg:flex items-center gap-1.5 px-3 py-1"
+              >
                 <CalendarIcon className="h-3.5 w-3.5" />
-                {viewMode === 'month' ? '월별' : viewMode === 'week' ? '주별' : '일별'} 보기
+                {viewMode === 'month'
+                  ? '월별'
+                  : viewMode === 'week'
+                    ? '주별'
+                    : '일별'}{' '}
+                보기
               </Badge>
             </div>
 
@@ -279,19 +297,19 @@ export default function CalendarPage({
               className="w-fit"
             >
               <TabsList className="grid w-full grid-cols-3 bg-muted/50 backdrop-blur-sm border border-border/30 shadow-sm">
-                <TabsTrigger 
-                  value="month" 
+                <TabsTrigger
+                  value="month"
                   className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all duration-200"
                 >
                   월
                 </TabsTrigger>
-                <TabsTrigger 
+                <TabsTrigger
                   value="week"
                   className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all duration-200"
                 >
                   주
                 </TabsTrigger>
-                <TabsTrigger 
+                <TabsTrigger
                   value="day"
                   className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all duration-200"
                 >
@@ -340,7 +358,7 @@ export default function CalendarPage({
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric',
-                    weekday: 'short'
+                    weekday: 'short',
                   })}
                 </span>
               </div>
@@ -353,14 +371,23 @@ export default function CalendarPage({
                 <div className="flex items-center gap-2 text-sm">
                   <div className="w-2 h-2 rounded-full bg-primary"></div>
                   <span className="text-muted-foreground">이번 주</span>
-                                     <span className="font-semibold">{meetings.filter((m: Meeting) => {
-                     const meetingDate = new Date(m.date);
-                     const weekStart = new Date(selectedDate);
-                     weekStart.setDate(selectedDate.getDate() - selectedDate.getDay());
-                     const weekEnd = new Date(weekStart);
-                     weekEnd.setDate(weekStart.getDate() + 6);
-                     return meetingDate >= weekStart && meetingDate <= weekEnd;
-                   }).length}건</span>
+                  <span className="font-semibold">
+                    {
+                      meetings.filter((m: Meeting) => {
+                        const meetingDate = new Date(m.date);
+                        const weekStart = new Date(selectedDate);
+                        weekStart.setDate(
+                          selectedDate.getDate() - selectedDate.getDay()
+                        );
+                        const weekEnd = new Date(weekStart);
+                        weekEnd.setDate(weekStart.getDate() + 6);
+                        return (
+                          meetingDate >= weekStart && meetingDate <= weekEnd
+                        );
+                      }).length
+                    }
+                    건
+                  </span>
                 </div>
               </div>
 

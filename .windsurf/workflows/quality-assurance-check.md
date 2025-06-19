@@ -3,6 +3,7 @@ description: quality-assurance-check
 ---
 
 전체 품질 보증 체크를 수행해줘:
+
 1. 타입 컴파일 체크 (npx tsc --noEmit)
 2. 린터 통과 확인
 3. 코드 리뷰 체크리스트 적용

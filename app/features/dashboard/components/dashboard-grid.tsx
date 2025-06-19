@@ -22,7 +22,7 @@ interface DashboardGridItemProps {
 /**
  * 반응형 대시보드 그리드 레이아웃
  * - Desktop: 4 columns
- * - Tablet: 2 columns  
+ * - Tablet: 2 columns
  * - Mobile: 1 column
  */
 export function DashboardGrid({ children, className }: DashboardGridProps) {
@@ -32,8 +32,8 @@ export function DashboardGrid({ children, className }: DashboardGridProps) {
         // 기본 그리드 설정
         'grid gap-6',
         // 반응형 컬럼 설정
-        'grid-cols-1',      // Mobile & Tablet: 1 column
-        'xl:grid-cols-4',   // Desktop: 4 columns (1280px+)
+        'grid-cols-1', // Mobile & Tablet: 1 column
+        'xl:grid-cols-4', // Desktop: 4 columns (1280px+)
         // 최대 너비 제한 및 중앙 정렬
         'max-w-7xl mx-auto',
         // 모바일 최적화 패딩
@@ -50,16 +50,16 @@ export function DashboardGrid({ children, className }: DashboardGridProps) {
  * 대시보드 그리드 아이템 (위젯 컨테이너)
  * 반응형 컬럼 스팬과 우선순위 기반 정렬 지원
  */
-export function DashboardGridItem({ 
-  children, 
-  className, 
+export function DashboardGridItem({
+  children,
+  className,
   colSpan = { default: 1 },
-  priority = 'medium' 
+  priority = 'medium',
 }: DashboardGridItemProps) {
   // 컬럼 스팬 클래스 생성
   const getColSpanClasses = () => {
     const classes = [];
-    
+
     if (colSpan.default) {
       classes.push(`col-span-${Math.min(colSpan.default, 1)}`); // 모바일은 최대 1
     }
@@ -75,7 +75,7 @@ export function DashboardGridItem({
     if (colSpan.xl) {
       classes.push(`xl:col-span-${Math.min(colSpan.xl, 4)}`); // XL도 최대 4
     }
-    
+
     return classes.join(' ');
   };
 
@@ -125,11 +125,11 @@ interface DashboardSectionGridProps {
   description?: string;
 }
 
-export function DashboardSectionGrid({ 
-  children, 
-  className, 
-  title, 
-  description 
+export function DashboardSectionGrid({
+  children,
+  className,
+  title,
+  description,
 }: DashboardSectionGridProps) {
   return (
     <div className={cn('space-y-6', className)}>
@@ -141,16 +141,12 @@ export function DashboardSectionGrid({
             </h2>
           )}
           {description && (
-            <p className="text-sm text-muted-foreground">
-              {description}
-            </p>
+            <p className="text-sm text-muted-foreground">{description}</p>
           )}
         </div>
       )}
-      
-      <div className="grid gap-6 grid-cols-1 xl:grid-cols-2">
-        {children}
-      </div>
+
+      <div className="grid gap-6 grid-cols-1 xl:grid-cols-2">{children}</div>
     </div>
   );
 }
@@ -174,17 +170,21 @@ export function WidgetWrapper({
   loading = false,
   error = null,
   title,
-  action
+  action,
 }: WidgetWrapperProps) {
   if (error) {
     return (
-      <div className={cn(
-        'rounded-lg border border-destructive/20 bg-destructive/5 p-6',
-        'flex items-center justify-center min-h-[200px]',
-        className
-      )}>
+      <div
+        className={cn(
+          'rounded-lg border border-destructive/20 bg-destructive/5 p-6',
+          'flex items-center justify-center min-h-[200px]',
+          className
+        )}
+      >
         <div className="text-center space-y-2">
-          <p className="text-sm font-medium text-destructive">오류가 발생했습니다</p>
+          <p className="text-sm font-medium text-destructive">
+            오류가 발생했습니다
+          </p>
           <p className="text-xs text-muted-foreground">{error}</p>
         </div>
       </div>
@@ -193,12 +193,14 @@ export function WidgetWrapper({
 
   if (loading) {
     return (
-      <div className={cn(
-        'rounded-lg border bg-card p-6',
-        'flex items-center justify-center min-h-[200px]',
-        'animate-pulse',
-        className
-      )}>
+      <div
+        className={cn(
+          'rounded-lg border bg-card p-6',
+          'flex items-center justify-center min-h-[200px]',
+          'animate-pulse',
+          className
+        )}
+      >
         <div className="text-center space-y-3">
           <div className="w-8 h-8 rounded-full bg-muted mx-auto" />
           <div className="text-sm text-muted-foreground">로딩 중...</div>
@@ -208,15 +210,17 @@ export function WidgetWrapper({
   }
 
   return (
-    <div className={cn(
-      'rounded-lg border bg-card text-card-foreground shadow-sm',
-      'transition-all duration-200 ease-in-out',
-      // 호버 효과 (데스크톱)
-      'hover:shadow-md hover:border-border/80',
-      // 모바일 터치 최적화
-      'active:scale-[0.98] md:active:scale-100',
-      className
-    )}>
+    <div
+      className={cn(
+        'rounded-lg border bg-card text-card-foreground shadow-sm',
+        'transition-all duration-200 ease-in-out',
+        // 호버 효과 (데스크톱)
+        'hover:shadow-md hover:border-border/80',
+        // 모바일 터치 최적화
+        'active:scale-[0.98] md:active:scale-100',
+        className
+      )}
+    >
       {(title || action) && (
         <div className="flex items-center justify-between p-6 pb-4">
           {title && (
@@ -225,10 +229,8 @@ export function WidgetWrapper({
           {action && <div>{action}</div>}
         </div>
       )}
-      
-      <div className={title || action ? 'px-6 pb-6' : 'p-6'}>
-        {children}
-      </div>
+
+      <div className={title || action ? 'px-6 pb-6' : 'p-6'}>{children}</div>
     </div>
   );
 }

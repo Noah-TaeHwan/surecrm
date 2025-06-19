@@ -25,7 +25,7 @@ export function LazyRoute({
   fallback,
   errorFallback,
   className,
-  enableRetry = true
+  enableRetry = true,
 }: LazyRouteProps) {
   const LazyComponent = lazy(component);
 
@@ -79,7 +79,10 @@ export function LazyRoute({
     </div>
   );
 
-  const defaultErrorFallback: ComponentType<FallbackProps> = ({ error, resetErrorBoundary }) => (
+  const defaultErrorFallback: ComponentType<FallbackProps> = ({
+    error,
+    resetErrorBoundary,
+  }) => (
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="text-center space-y-4 max-w-md">
         <AlertCircleIcon className="h-12 w-12 text-destructive mx-auto" />
@@ -102,10 +105,7 @@ export function LazyRoute({
             <Button onClick={resetErrorBoundary} variant="outline">
               다시 시도
             </Button>
-            <Button 
-              onClick={() => window.location.reload()} 
-              variant="default"
-            >
+            <Button onClick={() => window.location.reload()} variant="default">
               페이지 새로고침
             </Button>
           </div>
@@ -136,12 +136,7 @@ export const createLazyRoute = (
   importFn: () => Promise<{ default: ComponentType<any> }>,
   options?: Omit<LazyRouteProps, 'component'>
 ) => {
-  return () => (
-    <LazyRoute 
-      component={importFn} 
-      {...options} 
-    />
-  );
+  return () => <LazyRoute component={importFn} {...options} />;
 };
 
 /**
@@ -247,7 +242,7 @@ export const SkeletonTypes = {
         </div>
       </div>
     </div>
-  )
+  ),
 };
 
 /**
@@ -258,6 +253,6 @@ export const createTypedLazyRoute = (
   skeletonType: keyof typeof SkeletonTypes
 ) => {
   return createLazyRoute(importFn, {
-    fallback: SkeletonTypes[skeletonType]
+    fallback: SkeletonTypes[skeletonType],
   });
 };

@@ -294,7 +294,7 @@ export class GoogleCalendarService {
 
     // 💼 영업 정보 섹션 개선
     const salesInfo = [];
-    
+
     if ((meeting as any).priority) {
       const priorityMap: any = {
         urgent: '🔴 긴급',
@@ -303,9 +303,7 @@ export class GoogleCalendarService {
         low: '⚪ 낮음',
       };
       salesInfo.push(
-        `우선순위: ${
-          priorityMap[(meeting as any).priority] || '🔵 보통'
-        }`
+        `우선순위: ${priorityMap[(meeting as any).priority] || '🔵 보통'}`
       );
     }
 
@@ -317,9 +315,7 @@ export class GoogleCalendarService {
         hybrid: '🔄 혼합',
       };
       salesInfo.push(
-        `연락 방법: ${
-          methodMap[(meeting as any).contactMethod] || '👥 대면'
-        }`
+        `연락 방법: ${methodMap[(meeting as any).contactMethod] || '👥 대면'}`
       );
     }
 
@@ -340,9 +336,12 @@ export class GoogleCalendarService {
       );
     }
 
-    if ((meeting as any).estimatedCommission && (meeting as any).estimatedCommission > 0) {
+    if (
+      (meeting as any).estimatedCommission &&
+      (meeting as any).estimatedCommission > 0
+    ) {
       salesInfo.push(
-        `예상 수수료: ₩${((meeting as any).estimatedCommission).toLocaleString('ko-KR')}`
+        `예상 수수료: ₩${(meeting as any).estimatedCommission.toLocaleString('ko-KR')}`
       );
     }
 
@@ -374,9 +373,7 @@ export class GoogleCalendarService {
         '1_day': '1일 전',
       };
       salesInfo.push(
-        `알림 설정: ${
-          reminderMap[(meeting as any).reminder] || '30분 전'
-        }`
+        `알림 설정: ${reminderMap[(meeting as any).reminder] || '30분 전'}`
       );
     }
 

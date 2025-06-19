@@ -17,7 +17,18 @@ import {
 } from '~/common/components/ui/table';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
-import { Users, Plus, Star, Building2, DollarSign, TrendingUp, Clock, Network, Shield, ChevronRight } from 'lucide-react';
+import {
+  Users,
+  Plus,
+  Star,
+  Building2,
+  DollarSign,
+  TrendingUp,
+  Clock,
+  Network,
+  Shield,
+  ChevronRight,
+} from 'lucide-react';
 import { formatCurrencyTable } from '~/lib/utils/currency';
 import { ClientCard, type ClientCardData } from './client-card';
 
@@ -139,14 +150,17 @@ export function ClientListSection({
                 'bg-gradient-to-br from-orange-50/50 to-white dark:from-orange-950/20 dark:to-background',
               badge: 'bg-primary text-primary-foreground',
               icon: 'text-orange-600',
-              borderClass: 'border-orange-200/50 dark:border-orange-800/30 hover:border-orange-300 dark:hover:border-orange-700',
+              borderClass:
+                'border-orange-200/50 dark:border-orange-800/30 hover:border-orange-300 dark:hover:border-orange-700',
             },
             medium: {
               bgGradient:
                 'bg-gradient-to-br from-blue-50/50 to-white dark:from-blue-950/20 dark:to-background',
-              badge: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+              badge:
+                'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
               icon: 'text-blue-600',
-              borderClass: 'border-blue-200/50 dark:border-blue-800/30 hover:border-blue-300 dark:hover:border-blue-700',
+              borderClass:
+                'border-blue-200/50 dark:border-blue-800/30 hover:border-blue-300 dark:hover:border-blue-700',
             },
             low: {
               bgGradient:
@@ -213,7 +227,9 @@ export function ClientListSection({
                   <div className="bg-muted/30 rounded-lg p-3">
                     <div className="flex items-center gap-2 mb-1">
                       <DollarSign className="h-3.5 w-3.5 text-green-600" />
-                      <span className="text-xs text-muted-foreground">월 보험료</span>
+                      <span className="text-xs text-muted-foreground">
+                        월 보험료
+                      </span>
                     </div>
                     <p className="text-sm font-semibold text-foreground text-center">
                       {client.totalPremium > 0 ? (
@@ -227,7 +243,9 @@ export function ClientListSection({
                   <div className="bg-muted/30 rounded-lg p-3">
                     <div className="flex items-center gap-2 mb-1">
                       <Users className="h-3.5 w-3.5 text-blue-600" />
-                      <span className="text-xs text-muted-foreground">소개 실적</span>
+                      <span className="text-xs text-muted-foreground">
+                        소개 실적
+                      </span>
                     </div>
                     <p className="text-sm font-semibold text-foreground text-center">
                       {client.referralCount > 0 ? (
@@ -244,7 +262,9 @@ export function ClientListSection({
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <TrendingUp className="h-3.5 w-3.5 text-muted-foreground" />
-                      <span className="text-xs text-muted-foreground">영업 단계</span>
+                      <span className="text-xs text-muted-foreground">
+                        영업 단계
+                      </span>
                     </div>
                     <Badge
                       variant="outline"
@@ -263,7 +283,9 @@ export function ClientListSection({
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Clock className="h-3.5 w-3.5 text-muted-foreground" />
-                        <span className="text-xs text-muted-foreground">마지막 연락</span>
+                        <span className="text-xs text-muted-foreground">
+                          마지막 연락
+                        </span>
                       </div>
                       <span className="text-xs font-medium text-foreground">
                         {formatDate(client.lastContactDate)}
@@ -287,7 +309,9 @@ export function ClientListSection({
                   <div className="space-y-1">
                     <div className="flex items-center gap-1">
                       <Shield className="h-3.5 w-3.5 text-muted-foreground" />
-                      <span className="text-xs text-muted-foreground">보험 관심사</span>
+                      <span className="text-xs text-muted-foreground">
+                        보험 관심사
+                      </span>
                     </div>
                     <div className="flex items-center gap-1 flex-wrap">
                       {client.insuranceTypes.slice(0, 2).map((type, index) => (
@@ -316,9 +340,9 @@ export function ClientListSection({
 
                 {/* 🎯 액션 버튼 - 상세보기 */}
                 <div className="pt-1">
-                  <div 
+                  <div
                     className="flex items-center justify-center gap-2 w-full p-2 text-sm text-primary hover:text-primary/80 hover:bg-primary/5 rounded-lg transition-colors group/link"
-                    onClick={(e) => {
+                    onClick={e => {
                       e.stopPropagation();
                       onClientRowClick(client.id);
                     }}

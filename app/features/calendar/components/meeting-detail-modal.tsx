@@ -260,23 +260,36 @@ export function MeetingDetailModal({
   const googleSyncStatus = (meeting as any)?.syncInfo?.status || 'not_synced';
 
   // 미팅 타입 정보 가져오기
-  const meetingTypeInfo = meetingTypeDetails[meeting.type as keyof typeof meetingTypeDetails];
-  const meetingTypeLabel = meetingTypeKoreanMap[meeting.type as keyof typeof meetingTypeKoreanMap] || meeting.type;
+  const meetingTypeInfo =
+    meetingTypeDetails[meeting.type as keyof typeof meetingTypeDetails];
+  const meetingTypeLabel =
+    meetingTypeKoreanMap[meeting.type as keyof typeof meetingTypeKoreanMap] ||
+    meeting.type;
 
   // 우선순위 정보 가져오기
-  const priorityInfo = priorityOptions.find(p => p.value === (meeting as any)?.priority) || priorityOptions[1];
+  const priorityInfo =
+    priorityOptions.find(p => p.value === (meeting as any)?.priority) ||
+    priorityOptions[1];
 
   // 연락 방법 정보 가져오기
-  const contactMethodInfo = contactMethods.find(c => c.value === (meeting as any)?.contactMethod);
+  const contactMethodInfo = contactMethods.find(
+    c => c.value === (meeting as any)?.contactMethod
+  );
 
   // 기대 성과 정보 가져오기
-  const expectedOutcomeInfo = expectedOutcomes.find(e => e.value === (meeting as any)?.expectedOutcome);
+  const expectedOutcomeInfo = expectedOutcomes.find(
+    e => e.value === (meeting as any)?.expectedOutcome
+  );
 
   // 상품 관심 분야 정보 가져오기
-  const productInterestInfo = productInterests.find(p => p.value === (meeting as any)?.productInterest);
+  const productInterestInfo = productInterests.find(
+    p => p.value === (meeting as any)?.productInterest
+  );
 
   // 알림 정보 가져오기
-  const reminderInfo = reminderOptions.find(r => r.value === (meeting as any)?.reminder);
+  const reminderInfo = reminderOptions.find(
+    r => r.value === (meeting as any)?.reminder
+  );
 
   // 체크리스트 관리 함수
   const handleToggleChecklistItem = (itemId: string) => {
@@ -392,7 +405,7 @@ export function MeetingDetailModal({
   const handleConfirmDelete = async () => {
     try {
       setIsDeleting(true);
-      
+
       // 개선된 삭제 로직: 구글 캘린더 연동 처리
       const form = document.createElement('form');
       form.method = 'POST';
@@ -432,11 +445,17 @@ export function MeetingDetailModal({
           <DialogHeader className="flex-shrink-0 p-4 sm:p-6 pb-2 sm:pb-4 border-b border-border/50">
             <DialogTitle className="text-lg sm:text-xl font-semibold flex items-center gap-2 sm:gap-3 text-foreground">
               <div className="flex items-center gap-2">
-                {meetingTypeInfo?.icon && <span className="text-lg sm:text-xl">{meetingTypeInfo.icon}</span>}
+                {meetingTypeInfo?.icon && (
+                  <span className="text-lg sm:text-xl">
+                    {meetingTypeInfo.icon}
+                  </span>
+                )}
               </div>
               <span className="truncate">{meeting.title}</span>
               {/* 우선순위 배지 */}
-              <Badge className={cn("text-xs flex-shrink-0", priorityInfo.color)}>
+              <Badge
+                className={cn('text-xs flex-shrink-0', priorityInfo.color)}
+              >
                 <span className="mr-1">{priorityInfo.icon}</span>
                 {priorityInfo.label}
               </Badge>
@@ -448,7 +467,6 @@ export function MeetingDetailModal({
 
           {/* 콘텐츠 - 스크롤 가능 영역 */}
           <div className="flex-1 overflow-y-auto scrollbar-none modal-scroll-area px-4 sm:px-6 py-2 sm:py-6 space-y-4 sm:space-y-6 min-h-0">
-            
             {/* 기본 정보 카드 */}
             <Card className="border border-border/50 shadow-sm">
               <CardHeader className="pb-3 sm:pb-4">
@@ -468,7 +486,6 @@ export function MeetingDetailModal({
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4 sm:space-y-6">
-                
                 {!isEditingMeeting ? (
                   /* 보기 모드 */
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
@@ -477,18 +494,25 @@ export function MeetingDetailModal({
                       <div className="flex items-center gap-3">
                         <CalendarIcon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                         <div className="min-w-0 flex-1">
-                          <div className="text-xs text-muted-foreground">날짜</div>
-                          <div className="text-sm font-medium">{formatDate(meeting.date)}</div>
+                          <div className="text-xs text-muted-foreground">
+                            날짜
+                          </div>
+                          <div className="text-sm font-medium">
+                            {formatDate(meeting.date)}
+                          </div>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-3">
                         <ClockIcon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                         <div className="min-w-0 flex-1">
-                          <div className="text-xs text-muted-foreground">시간</div>
+                          <div className="text-xs text-muted-foreground">
+                            시간
+                          </div>
                           <div className="text-sm font-medium">
-                            {meeting.time || '미설정'} 
-                            {meeting.duration && ` (${getDurationText(meeting.duration)})`}
+                            {meeting.time || '미설정'}
+                            {meeting.duration &&
+                              ` (${getDurationText(meeting.duration)})`}
                           </div>
                         </div>
                       </div>
@@ -496,7 +520,9 @@ export function MeetingDetailModal({
                       <div className="flex items-center gap-3">
                         <PersonIcon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                         <div className="min-w-0 flex-1">
-                          <div className="text-xs text-muted-foreground">고객</div>
+                          <div className="text-xs text-muted-foreground">
+                            고객
+                          </div>
                           <div className="text-sm font-medium">
                             {meeting.client?.name || '미설정'}
                           </div>
@@ -507,8 +533,12 @@ export function MeetingDetailModal({
                         <div className="flex items-center gap-3">
                           <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                           <div className="min-w-0 flex-1">
-                            <div className="text-xs text-muted-foreground">장소</div>
-                            <div className="text-sm font-medium">{meeting.location}</div>
+                            <div className="text-xs text-muted-foreground">
+                              장소
+                            </div>
+                            <div className="text-sm font-medium">
+                              {meeting.location}
+                            </div>
                           </div>
                         </div>
                       )}
@@ -517,17 +547,25 @@ export function MeetingDetailModal({
                     {/* 영업 정보 */}
                     <div className="space-y-3 sm:space-y-4">
                       <div className="flex items-center gap-3">
-                        {contactMethodInfo?.icon || <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />}
+                        {contactMethodInfo?.icon || (
+                          <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                        )}
                         <div className="min-w-0 flex-1">
-                          <div className="text-xs text-muted-foreground">연락 방법</div>
-                          <div className="text-sm font-medium">{contactMethodInfo?.label || '미설정'}</div>
+                          <div className="text-xs text-muted-foreground">
+                            연락 방법
+                          </div>
+                          <div className="text-sm font-medium">
+                            {contactMethodInfo?.label || '미설정'}
+                          </div>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-3">
                         <TargetIcon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                         <div className="min-w-0 flex-1">
-                          <div className="text-xs text-muted-foreground">기대 성과</div>
+                          <div className="text-xs text-muted-foreground">
+                            기대 성과
+                          </div>
                           <div className="text-sm font-medium flex items-center gap-1">
                             {expectedOutcomeInfo ? (
                               <>
@@ -544,7 +582,9 @@ export function MeetingDetailModal({
                       <div className="flex items-center gap-3">
                         <StarFilledIcon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                         <div className="min-w-0 flex-1">
-                          <div className="text-xs text-muted-foreground">관심 상품</div>
+                          <div className="text-xs text-muted-foreground">
+                            관심 상품
+                          </div>
                           <div className="text-sm font-medium flex items-center gap-1">
                             {productInterestInfo ? (
                               <>
@@ -561,12 +601,13 @@ export function MeetingDetailModal({
                       <div className="flex items-center gap-3">
                         <DollarSign className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                         <div className="min-w-0 flex-1">
-                          <div className="text-xs text-muted-foreground">예상 수수료</div>
+                          <div className="text-xs text-muted-foreground">
+                            예상 수수료
+                          </div>
                           <div className="text-sm font-medium">
-                            {((meeting as any)?.estimatedCommission || 0) > 0 
+                            {((meeting as any)?.estimatedCommission || 0) > 0
                               ? `${((meeting as any)?.estimatedCommission || 0).toLocaleString()}원`
-                              : '미설정'
-                            }
+                              : '미설정'}
                           </div>
                         </div>
                       </div>
@@ -575,7 +616,9 @@ export function MeetingDetailModal({
                       <div className="flex items-center gap-3">
                         <GlobeIcon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                         <div className="min-w-0 flex-1">
-                          <div className="text-xs text-muted-foreground">구글 캘린더</div>
+                          <div className="text-xs text-muted-foreground">
+                            구글 캘린더
+                          </div>
                           <div className="text-sm font-medium flex items-center gap-1">
                             {(meeting as any)?.syncToGoogle ? (
                               <>
@@ -596,8 +639,12 @@ export function MeetingDetailModal({
                         <div className="flex items-center gap-3">
                           <LightningBoltIcon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                           <div className="min-w-0 flex-1">
-                            <div className="text-xs text-muted-foreground">알림</div>
-                            <div className="text-sm font-medium">{reminderInfo.label}</div>
+                            <div className="text-xs text-muted-foreground">
+                              알림
+                            </div>
+                            <div className="text-sm font-medium">
+                              {reminderInfo.label}
+                            </div>
                           </div>
                         </div>
                       )}
@@ -609,77 +656,115 @@ export function MeetingDetailModal({
                     {/* 기본 정보 편집 */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="text-sm font-medium mb-2 block">미팅 제목 *</label>
+                        <label className="text-sm font-medium mb-2 block">
+                          미팅 제목 *
+                        </label>
                         <Input
                           value={editedMeeting.title}
-                          onChange={(e) => setEditedMeeting(prev => ({ ...prev, title: e.target.value }))}
+                          onChange={e =>
+                            setEditedMeeting(prev => ({
+                              ...prev,
+                              title: e.target.value,
+                            }))
+                          }
                           className="h-10 w-full"
                           placeholder="미팅 제목 입력"
                         />
                       </div>
 
                       <div>
-                        <label className="text-sm font-medium mb-2 block">미팅 유형</label>
+                        <label className="text-sm font-medium mb-2 block">
+                          미팅 유형
+                        </label>
                         <Select
                           value={editedMeeting.type}
-                          onValueChange={(value) => setEditedMeeting(prev => ({ ...prev, type: value }))}
+                          onValueChange={value =>
+                            setEditedMeeting(prev => ({ ...prev, type: value }))
+                          }
                         >
                           <SelectTrigger className="h-10 w-full">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
                             {Object.entries(meetingTypeDetails)
-                              .filter(([key]) => key !== 'google' && key !== 'google_imported')
+                              .filter(
+                                ([key]) =>
+                                  key !== 'google' && key !== 'google_imported'
+                              )
                               .map(([value, details]) => (
-                              <SelectItem key={value} value={value}>
-                                <div className="flex items-center gap-2">
-                                  <span>{details.icon}</span>
-                                  <span>{details.label}</span>
-                                </div>
-                              </SelectItem>
-                            ))}
+                                <SelectItem key={value} value={value}>
+                                  <div className="flex items-center gap-2">
+                                    <span>{details.icon}</span>
+                                    <span>{details.label}</span>
+                                  </div>
+                                </SelectItem>
+                              ))}
                           </SelectContent>
                         </Select>
                       </div>
 
                       <div>
-                        <label className="text-sm font-medium mb-2 block">날짜 *</label>
+                        <label className="text-sm font-medium mb-2 block">
+                          날짜 *
+                        </label>
                         <div className="relative w-full">
                           <CalendarIcon className="absolute left-3 top-3 h-4 w-4 text-foreground/60" />
                           <Input
                             type="date"
                             value={editedMeeting.date}
-                            onChange={(e) => setEditedMeeting(prev => ({ ...prev, date: e.target.value }))}
+                            onChange={e =>
+                              setEditedMeeting(prev => ({
+                                ...prev,
+                                date: e.target.value,
+                              }))
+                            }
                             className="pl-10 h-10 w-full"
                           />
                         </div>
                       </div>
 
                       <div>
-                        <label className="text-sm font-medium mb-2 block">시간 *</label>
+                        <label className="text-sm font-medium mb-2 block">
+                          시간 *
+                        </label>
                         <div className="relative w-full">
                           <ClockIcon className="absolute left-3 top-3 h-4 w-4 text-foreground/60" />
                           <Input
                             type="time"
                             value={editedMeeting.time}
-                            onChange={(e) => setEditedMeeting(prev => ({ ...prev, time: e.target.value }))}
+                            onChange={e =>
+                              setEditedMeeting(prev => ({
+                                ...prev,
+                                time: e.target.value,
+                              }))
+                            }
                             className="pl-10 h-10 w-full"
                           />
                         </div>
                       </div>
 
                       <div>
-                        <label className="text-sm font-medium mb-2 block">우선순위</label>
+                        <label className="text-sm font-medium mb-2 block">
+                          우선순위
+                        </label>
                         <Select
                           value={editedMeeting.priority}
-                          onValueChange={(value) => setEditedMeeting(prev => ({ ...prev, priority: value }))}
+                          onValueChange={value =>
+                            setEditedMeeting(prev => ({
+                              ...prev,
+                              priority: value,
+                            }))
+                          }
                         >
                           <SelectTrigger className="h-10 w-full">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
                             {priorityOptions.map(option => (
-                              <SelectItem key={option.value} value={option.value}>
+                              <SelectItem
+                                key={option.value}
+                                value={option.value}
+                              >
                                 <div className="flex items-center gap-2">
                                   <span>{option.icon}</span>
                                   <span>{option.label}</span>
@@ -691,17 +776,27 @@ export function MeetingDetailModal({
                       </div>
 
                       <div>
-                        <label className="text-sm font-medium mb-2 block">연락 방법</label>
+                        <label className="text-sm font-medium mb-2 block">
+                          연락 방법
+                        </label>
                         <Select
                           value={editedMeeting.contactMethod}
-                          onValueChange={(value) => setEditedMeeting(prev => ({ ...prev, contactMethod: value }))}
+                          onValueChange={value =>
+                            setEditedMeeting(prev => ({
+                              ...prev,
+                              contactMethod: value,
+                            }))
+                          }
                         >
                           <SelectTrigger className="h-10 w-full">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
                             {contactMethods.map(method => (
-                              <SelectItem key={method.value} value={method.value}>
+                              <SelectItem
+                                key={method.value}
+                                value={method.value}
+                              >
                                 <div className="flex items-center gap-2">
                                   {method.icon}
                                   <span>{method.label}</span>
@@ -715,20 +810,34 @@ export function MeetingDetailModal({
 
                     {/* 장소 및 설명 */}
                     <div>
-                      <label className="text-sm font-medium mb-2 block">장소</label>
+                      <label className="text-sm font-medium mb-2 block">
+                        장소
+                      </label>
                       <Input
                         value={editedMeeting.location}
-                        onChange={(e) => setEditedMeeting(prev => ({ ...prev, location: e.target.value }))}
+                        onChange={e =>
+                          setEditedMeeting(prev => ({
+                            ...prev,
+                            location: e.target.value,
+                          }))
+                        }
                         className="h-10 w-full"
                         placeholder="미팅 장소 입력"
                       />
                     </div>
 
                     <div>
-                      <label className="text-sm font-medium mb-2 block">메모</label>
+                      <label className="text-sm font-medium mb-2 block">
+                        메모
+                      </label>
                       <Textarea
                         value={editedMeeting.description}
-                        onChange={(e) => setEditedMeeting(prev => ({ ...prev, description: e.target.value }))}
+                        onChange={e =>
+                          setEditedMeeting(prev => ({
+                            ...prev,
+                            description: e.target.value,
+                          }))
+                        }
                         className="min-h-[80px] resize-none"
                         placeholder="미팅에 대한 추가 정보나 메모를 입력하세요"
                       />
@@ -759,7 +868,9 @@ export function MeetingDetailModal({
                 {/* 설명/메모 (보기 모드에서만) */}
                 {!isEditingMeeting && meeting.description && (
                   <div className="pt-4 border-t border-border/50">
-                    <div className="text-xs text-muted-foreground mb-2">메모</div>
+                    <div className="text-xs text-muted-foreground mb-2">
+                      메모
+                    </div>
                     <div className="text-sm text-muted-foreground leading-relaxed bg-muted/30 p-3 rounded-md whitespace-pre-wrap">
                       {meeting.description}
                     </div>
@@ -792,20 +903,25 @@ export function MeetingDetailModal({
                   )}
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {checklist.map((item) => (
-                    <div key={item.id} className="flex items-center gap-3 p-2 rounded-md hover:bg-muted/30 transition-colors">
+                  {checklist.map(item => (
+                    <div
+                      key={item.id}
+                      className="flex items-center gap-3 p-2 rounded-md hover:bg-muted/30 transition-colors"
+                    >
                       <Checkbox
                         checked={item.completed}
-                        onCheckedChange={() => handleToggleChecklistItem(item.id)}
+                        onCheckedChange={() =>
+                          handleToggleChecklistItem(item.id)
+                        }
                         className="flex-shrink-0"
                       />
                       {editingItemId === item.id ? (
                         <div className="flex-1 flex gap-2">
                           <Input
                             value={editingText}
-                            onChange={(e) => setEditingText(e.target.value)}
+                            onChange={e => setEditingText(e.target.value)}
                             className="h-8 text-sm"
-                            onKeyDown={(e) => {
+                            onKeyDown={e => {
                               if (e.key === 'Enter') handleSaveEditingItem();
                               if (e.key === 'Escape') handleCancelEditing();
                             }}
@@ -830,12 +946,14 @@ export function MeetingDetailModal({
                         </div>
                       ) : (
                         <>
-                          <span className={cn(
-                            "flex-1 text-sm transition-all",
-                            item.completed
-                              ? "line-through text-muted-foreground"
-                              : "text-foreground"
-                          )}>
+                          <span
+                            className={cn(
+                              'flex-1 text-sm transition-all',
+                              item.completed
+                                ? 'line-through text-muted-foreground'
+                                : 'text-foreground'
+                            )}
+                          >
                             {item.text}
                           </span>
                           <div className="flex gap-1">
@@ -865,12 +983,13 @@ export function MeetingDetailModal({
                     <div className="flex gap-2 p-2">
                       <Input
                         value={newChecklistItem}
-                        onChange={(e) => setNewChecklistItem(e.target.value)}
+                        onChange={e => setNewChecklistItem(e.target.value)}
                         placeholder="새 체크리스트 항목 입력"
                         className="h-8 text-sm"
-                        onKeyDown={(e) => {
+                        onKeyDown={e => {
                           if (e.key === 'Enter') handleAddChecklistItem();
-                          if (e.key === 'Escape') setIsAddingChecklistItem(false);
+                          if (e.key === 'Escape')
+                            setIsAddingChecklistItem(false);
                         }}
                         autoFocus
                       />
@@ -941,7 +1060,7 @@ export function MeetingDetailModal({
                 {isEditingMeeting ? (
                   <Textarea
                     value={editedMeeting.description}
-                    onChange={(e) =>
+                    onChange={e =>
                       setEditedMeeting({
                         ...editedMeeting,
                         description: e.target.value,
@@ -961,7 +1080,9 @@ export function MeetingDetailModal({
                       <div className="text-center py-6 text-muted-foreground">
                         <FileTextIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
                         <p className="text-sm">메모가 작성되지 않았습니다.</p>
-                        <p className="text-xs mt-1">수정 버튼을 클릭하여 메모를 추가하세요.</p>
+                        <p className="text-xs mt-1">
+                          수정 버튼을 클릭하여 메모를 추가하세요.
+                        </p>
                       </div>
                     )}
                   </div>
@@ -1000,19 +1121,24 @@ export function MeetingDetailModal({
                     <StarFilledIcon className="h-4 w-4 text-orange-600" />
                   </div>
                   <div className="flex-1">
-                    <div className="text-sm font-medium text-foreground">우선순위</div>
+                    <div className="text-sm font-medium text-foreground">
+                      우선순위
+                    </div>
                     {isEditingMeeting ? (
                       <Select
                         value={editedMeeting.priority}
-                        onValueChange={(value) =>
-                          setEditedMeeting({ ...editedMeeting, priority: value })
+                        onValueChange={value =>
+                          setEditedMeeting({
+                            ...editedMeeting,
+                            priority: value,
+                          })
                         }
                       >
                         <SelectTrigger className="h-8 text-sm">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {priorityOptions.map((option) => (
+                          {priorityOptions.map(option => (
                             <SelectItem key={option.value} value={option.value}>
                               <div className="flex items-center gap-2">
                                 <span>{option.icon}</span>
@@ -1024,9 +1150,13 @@ export function MeetingDetailModal({
                       </Select>
                     ) : (
                       <div className="flex items-center gap-2 mt-1">
-                        {priorityOptions.find(p => p.value === (meeting as any)?.priority)?.icon || '🔵'}
+                        {priorityOptions.find(
+                          p => p.value === (meeting as any)?.priority
+                        )?.icon || '🔵'}
                         <span className="text-sm text-muted-foreground">
-                          {priorityOptions.find(p => p.value === (meeting as any)?.priority)?.label || '보통'}
+                          {priorityOptions.find(
+                            p => p.value === (meeting as any)?.priority
+                          )?.label || '보통'}
                         </span>
                       </div>
                     )}
@@ -1039,19 +1169,24 @@ export function MeetingDetailModal({
                     <MobileIcon className="h-4 w-4 text-blue-600" />
                   </div>
                   <div className="flex-1">
-                    <div className="text-sm font-medium text-foreground">연락 방법</div>
+                    <div className="text-sm font-medium text-foreground">
+                      연락 방법
+                    </div>
                     {isEditingMeeting ? (
                       <Select
                         value={editedMeeting.contactMethod}
-                        onValueChange={(value) =>
-                          setEditedMeeting({ ...editedMeeting, contactMethod: value })
+                        onValueChange={value =>
+                          setEditedMeeting({
+                            ...editedMeeting,
+                            contactMethod: value,
+                          })
                         }
                       >
                         <SelectTrigger className="h-8 text-sm">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {contactMethods.map((method) => (
+                          {contactMethods.map(method => (
                             <SelectItem key={method.value} value={method.value}>
                               <div className="flex items-center gap-2">
                                 {method.icon}
@@ -1063,9 +1198,15 @@ export function MeetingDetailModal({
                       </Select>
                     ) : (
                       <div className="flex items-center gap-2 mt-1">
-                        {contactMethods.find(m => m.value === (meeting as any)?.contactMethod)?.icon}
+                        {
+                          contactMethods.find(
+                            m => m.value === (meeting as any)?.contactMethod
+                          )?.icon
+                        }
                         <span className="text-sm text-muted-foreground">
-                          {contactMethods.find(m => m.value === (meeting as any)?.contactMethod)?.label || '대면'}
+                          {contactMethods.find(
+                            m => m.value === (meeting as any)?.contactMethod
+                          )?.label || '대면'}
                         </span>
                       </div>
                     )}
@@ -1078,20 +1219,28 @@ export function MeetingDetailModal({
                     <CheckCircledIcon className="h-4 w-4 text-green-600" />
                   </div>
                   <div className="flex-1">
-                    <div className="text-sm font-medium text-foreground">기대 성과</div>
+                    <div className="text-sm font-medium text-foreground">
+                      기대 성과
+                    </div>
                     {isEditingMeeting ? (
                       <Select
                         value={editedMeeting.expectedOutcome}
-                        onValueChange={(value) =>
-                          setEditedMeeting({ ...editedMeeting, expectedOutcome: value })
+                        onValueChange={value =>
+                          setEditedMeeting({
+                            ...editedMeeting,
+                            expectedOutcome: value,
+                          })
                         }
                       >
                         <SelectTrigger className="h-8 text-sm">
                           <SelectValue placeholder="선택하세요" />
                         </SelectTrigger>
                         <SelectContent>
-                          {expectedOutcomes.map((outcome) => (
-                            <SelectItem key={outcome.value} value={outcome.value}>
+                          {expectedOutcomes.map(outcome => (
+                            <SelectItem
+                              key={outcome.value}
+                              value={outcome.value}
+                            >
                               <div className="flex items-center gap-2">
                                 <span>{outcome.icon}</span>
                                 <span>{outcome.label}</span>
@@ -1102,9 +1251,15 @@ export function MeetingDetailModal({
                       </Select>
                     ) : (
                       <div className="flex items-center gap-2 mt-1">
-                        <span>{expectedOutcomes.find(o => o.value === (meeting as any)?.expectedOutcome)?.icon || '📊'}</span>
+                        <span>
+                          {expectedOutcomes.find(
+                            o => o.value === (meeting as any)?.expectedOutcome
+                          )?.icon || '📊'}
+                        </span>
                         <span className="text-sm text-muted-foreground">
-                          {expectedOutcomes.find(o => o.value === (meeting as any)?.expectedOutcome)?.label || '정보 수집'}
+                          {expectedOutcomes.find(
+                            o => o.value === (meeting as any)?.expectedOutcome
+                          )?.label || '정보 수집'}
                         </span>
                       </div>
                     )}
@@ -1112,23 +1267,28 @@ export function MeetingDetailModal({
                 </div>
 
                 {/* 예상 수수료 */}
-                {((meeting as any)?.estimatedCommission || isEditingMeeting) && (
+                {((meeting as any)?.estimatedCommission ||
+                  isEditingMeeting) && (
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0">
                       <DollarSign className="h-4 w-4 text-emerald-600" />
                     </div>
                     <div className="flex-1">
-                      <div className="text-sm font-medium text-foreground">예상 수수료</div>
+                      <div className="text-sm font-medium text-foreground">
+                        예상 수수료
+                      </div>
                       {isEditingMeeting ? (
                         <Input
                           type="text"
                           placeholder="100,000"
                           value={
                             editedMeeting.estimatedCommission
-                              ? Number(editedMeeting.estimatedCommission).toLocaleString('ko-KR')
+                              ? Number(
+                                  editedMeeting.estimatedCommission
+                                ).toLocaleString('ko-KR')
                               : ''
                           }
-                          onChange={(e) => {
+                          onChange={e => {
                             const value = e.target.value.replace(/[^0-9]/g, '');
                             setEditedMeeting({
                               ...editedMeeting,
@@ -1139,7 +1299,10 @@ export function MeetingDetailModal({
                         />
                       ) : (
                         <div className="text-sm text-muted-foreground mt-1">
-                          ₩{((meeting as any)?.estimatedCommission || 0).toLocaleString('ko-KR')}
+                          ₩
+                          {(
+                            (meeting as any)?.estimatedCommission || 0
+                          ).toLocaleString('ko-KR')}
                         </div>
                       )}
                     </div>
@@ -1153,20 +1316,28 @@ export function MeetingDetailModal({
                       <TargetIcon className="h-4 w-4 text-purple-600" />
                     </div>
                     <div className="flex-1">
-                      <div className="text-sm font-medium text-foreground">관심 상품</div>
+                      <div className="text-sm font-medium text-foreground">
+                        관심 상품
+                      </div>
                       {isEditingMeeting ? (
                         <Select
                           value={editedMeeting.productInterest}
-                          onValueChange={(value) =>
-                            setEditedMeeting({ ...editedMeeting, productInterest: value })
+                          onValueChange={value =>
+                            setEditedMeeting({
+                              ...editedMeeting,
+                              productInterest: value,
+                            })
                           }
                         >
                           <SelectTrigger className="h-8 text-sm">
                             <SelectValue placeholder="선택하세요" />
                           </SelectTrigger>
                           <SelectContent>
-                            {productInterests.map((product) => (
-                              <SelectItem key={product.value} value={product.value}>
+                            {productInterests.map(product => (
+                              <SelectItem
+                                key={product.value}
+                                value={product.value}
+                              >
                                 <div className="flex items-center gap-2">
                                   <span>{product.icon}</span>
                                   <span>{product.label}</span>
@@ -1177,9 +1348,15 @@ export function MeetingDetailModal({
                         </Select>
                       ) : (
                         <div className="flex items-center gap-2 mt-1">
-                          <span>{productInterests.find(p => p.value === (meeting as any)?.productInterest)?.icon || '💗'}</span>
+                          <span>
+                            {productInterests.find(
+                              p => p.value === (meeting as any)?.productInterest
+                            )?.icon || '💗'}
+                          </span>
                           <span className="text-sm text-muted-foreground">
-                            {productInterests.find(p => p.value === (meeting as any)?.productInterest)?.label || '생명보험'}
+                            {productInterests.find(
+                              p => p.value === (meeting as any)?.productInterest
+                            )?.label || '생명보험'}
                           </span>
                         </div>
                       )}
@@ -1193,19 +1370,24 @@ export function MeetingDetailModal({
                     <ClockIcon className="h-4 w-4 text-yellow-600" />
                   </div>
                   <div className="flex-1">
-                    <div className="text-sm font-medium text-foreground">알림 설정</div>
+                    <div className="text-sm font-medium text-foreground">
+                      알림 설정
+                    </div>
                     {isEditingMeeting ? (
                       <Select
                         value={editedMeeting.reminder}
-                        onValueChange={(value) =>
-                          setEditedMeeting({ ...editedMeeting, reminder: value })
+                        onValueChange={value =>
+                          setEditedMeeting({
+                            ...editedMeeting,
+                            reminder: value,
+                          })
                         }
                       >
                         <SelectTrigger className="h-8 text-sm">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {reminderOptions.map((option) => (
+                          {reminderOptions.map(option => (
                             <SelectItem key={option.value} value={option.value}>
                               {option.label}
                             </SelectItem>
@@ -1214,7 +1396,9 @@ export function MeetingDetailModal({
                       </Select>
                     ) : (
                       <div className="text-sm text-muted-foreground mt-1">
-                        {reminderOptions.find(r => r.value === (meeting as any)?.reminder)?.label || '30분 전'}
+                        {reminderOptions.find(
+                          r => r.value === (meeting as any)?.reminder
+                        )?.label || '30분 전'}
                       </div>
                     )}
                   </div>
@@ -1274,13 +1458,13 @@ export function MeetingDetailModal({
         </DialogContent>
       </Dialog>
 
-             {/* 삭제 확인 모달 */}
-       <DeleteMeetingModal
-         meeting={meeting}
-         isOpen={isDeleteModalOpen}
-         onClose={() => setIsDeleteModalOpen(false)}
-         onConfirm={handleConfirmDelete}
-       />
+      {/* 삭제 확인 모달 */}
+      <DeleteMeetingModal
+        meeting={meeting}
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+      />
     </>
   );
 }

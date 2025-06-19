@@ -44,9 +44,10 @@ export class ErrorBoundary extends Component<Props, State> {
             문제가 발생했습니다
           </h2>
           <p className="text-sm text-muted-foreground mb-4 max-w-md">
-            예상치 못한 오류가 발생했습니다. 페이지를 새로고침하거나 잠시 후 다시 시도해 주세요.
+            예상치 못한 오류가 발생했습니다. 페이지를 새로고침하거나 잠시 후
+            다시 시도해 주세요.
           </p>
-          <Button 
+          <Button
             onClick={() => {
               this.setState({ hasError: false, error: undefined });
               window.location.reload();

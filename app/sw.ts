@@ -4,4 +4,4 @@
 // 기본 더미 Service Worker
 console.log('SureCRM Service Worker loaded (MVP version)');
 
-export {}; // 모듈로 인식되도록 
+export {}; // 모듈로 인식되도록

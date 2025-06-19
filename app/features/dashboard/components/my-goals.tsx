@@ -285,7 +285,8 @@ export function MyGoals({
                           </div>
                           <div>
                             <p className="text-xs text-muted-foreground">
-                              목표: {formatValue(goal.targetValue, goal.goalType)}
+                              목표:{' '}
+                              {formatValue(goal.targetValue, goal.goalType)}
                             </p>
                           </div>
                         </div>

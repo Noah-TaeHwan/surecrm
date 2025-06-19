@@ -36,7 +36,7 @@ export function NetworkMobileTabs({
   searchResultsCount = 0,
 }: NetworkMobileTabsProps) {
   const [isVisible, setIsVisible] = useState(true);
-  
+
   // 스크롤 시 탭바 숨김/표시 로직
   useEffect(() => {
     let ticking = false;
@@ -47,7 +47,7 @@ export function NetworkMobileTabs({
         requestAnimationFrame(() => {
           const currentScrollY = window.scrollY;
           const scrollDifference = currentScrollY - lastScrollY;
-          
+
           // 스크롤이 50px 이상 변화했을 때만 반응
           if (Math.abs(scrollDifference) > 50) {
             if (scrollDifference > 0 && currentScrollY > 100) {
@@ -68,26 +68,26 @@ export function NetworkMobileTabs({
   }, []);
 
   const tabs: TabItem[] = [
-    { 
-      id: 'graph', 
-      icon: Grid, 
-      label: '네트워크' 
+    {
+      id: 'graph',
+      icon: Grid,
+      label: '네트워크',
     },
-    { 
-      id: 'filter', 
-      icon: Filter, 
-      label: '필터' 
+    {
+      id: 'filter',
+      icon: Filter,
+      label: '필터',
     },
-    { 
-      id: 'search', 
-      icon: Search, 
+    {
+      id: 'search',
+      icon: Search,
       label: '검색',
-      badge: searchResultsCount > 0 ? searchResultsCount : undefined
+      badge: searchResultsCount > 0 ? searchResultsCount : undefined,
     },
-    { 
-      id: 'details', 
-      icon: Info, 
-      label: '상세정보'
+    {
+      id: 'details',
+      icon: Info,
+      label: '상세정보',
     },
   ];
 
@@ -115,23 +115,26 @@ export function NetworkMobileTabs({
           }}
         >
           {/* 백드롭 블러 */}
-          <div 
+          <div
             className="absolute inset-x-0 bottom-0 pointer-events-none"
             style={{
               height: '150%',
               backdropFilter: 'blur(20px) saturate(150%)',
-              background: 'linear-gradient(to top, rgba(0,0,0,0.2) 40%, rgba(0,0,0,0.1) 70%, transparent)',
+              background:
+                'linear-gradient(to top, rgba(0,0,0,0.2) 40%, rgba(0,0,0,0.1) 70%, transparent)',
               maskImage: 'linear-gradient(to top, black 50%, transparent 100%)',
-              WebkitMaskImage: 'linear-gradient(to top, black 50%, transparent 100%)',
+              WebkitMaskImage:
+                'linear-gradient(to top, black 50%, transparent 100%)',
             }}
           />
-          
+
           {/* 메인 탭바 컨테이너 */}
           <div className="relative mx-4 mb-4">
-            <div 
+            <div
               className="relative bg-black/20 backdrop-blur-md rounded-2xl border border-white/10 shadow-2xl"
               style={{
-                boxShadow: '0 16px 32px rgba(0, 0, 0, 0.25), 0 4px 12px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
+                boxShadow:
+                  '0 16px 32px rgba(0, 0, 0, 0.25), 0 4px 12px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
               }}
             >
               {/* 활성 탭 배경 */}
@@ -153,13 +156,13 @@ export function NetworkMobileTabs({
                   boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.1)',
                 }}
               />
-              
+
               {/* 탭 버튼들 */}
               <div className="relative flex items-center">
-                {tabs.map((tab) => {
+                {tabs.map(tab => {
                   const isActive = activeTab === tab.id;
                   const isDisabled = tab.id === 'details' && !hasSelectedNode;
-                  
+
                   return (
                     <button
                       key={tab.id}
@@ -168,9 +171,10 @@ export function NetworkMobileTabs({
                       className={`
                         relative flex-1 flex flex-col items-center justify-center py-3 px-2
                         transition-all duration-300 ease-out
-                        ${isDisabled 
-                          ? 'opacity-40 cursor-not-allowed' 
-                          : 'active:scale-95 hover:scale-105'
+                        ${
+                          isDisabled
+                            ? 'opacity-40 cursor-not-allowed'
+                            : 'active:scale-95 hover:scale-105'
                         }
                       `}
                       style={{
@@ -179,18 +183,19 @@ export function NetworkMobileTabs({
                     >
                       {/* 아이콘 */}
                       <div className="relative flex items-center justify-center mb-1">
-                        <tab.icon 
+                        <tab.icon
                           className={`
                             w-5 h-5 transition-all duration-300
-                            ${isActive 
-                              ? 'text-white scale-110' 
-                              : isDisabled
-                                ? 'text-white/30'
-                                : 'text-white/70'
+                            ${
+                              isActive
+                                ? 'text-white scale-110'
+                                : isDisabled
+                                  ? 'text-white/30'
+                                  : 'text-white/70'
                             }
                           `}
                         />
-                        
+
                         {/* 배지 */}
                         {tab.badge && tab.badge > 0 && (
                           <motion.div
@@ -204,22 +209,23 @@ export function NetworkMobileTabs({
                           </motion.div>
                         )}
                       </div>
-                      
+
                       {/* 라벨 */}
-                      <span 
+                      <span
                         className={`
                           text-xs font-medium leading-none transition-all duration-300
-                          ${isActive 
-                            ? 'text-white' 
-                            : isDisabled
-                              ? 'text-white/30'
-                              : 'text-white/60'
+                          ${
+                            isActive
+                              ? 'text-white'
+                              : isDisabled
+                                ? 'text-white/30'
+                                : 'text-white/60'
                           }
                         `}
                       >
                         {tab.label}
                       </span>
-                      
+
                       {/* 비활성화 오버레이 */}
                       {isDisabled && (
                         <div className="absolute inset-0 bg-black/20 rounded-xl" />

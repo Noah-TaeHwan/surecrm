@@ -1,23 +1,18 @@
-import { 
-  useState, 
-  useEffect, 
-  useRef, 
-  useCallback, 
-  type ReactNode, 
-  lazy, 
+import {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  type ReactNode,
+  lazy,
   Suspense,
-  type ComponentType
+  type ComponentType,
 } from 'react';
 import { cn } from '~/lib/utils';
 import { Card, CardContent } from '~/common/components/ui/card';
 import { Skeleton } from '~/common/components/ui/skeleton';
 import { WidgetWrapper } from './dashboard-grid';
-import { 
-  EyeIcon, 
-  ClockIcon,
-  WifiOffIcon,
-  AlertCircleIcon
-} from 'lucide-react';
+import { EyeIcon, ClockIcon, WifiOffIcon, AlertCircleIcon } from 'lucide-react';
 
 interface LazyWidgetProps {
   children: ReactNode;
@@ -70,7 +65,7 @@ export function LazyWidget({
   enableRetryOnError = true,
   onLoad,
   onError,
-  onVisible
+  onVisible,
 }: LazyWidgetProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -78,7 +73,7 @@ export function LazyWidget({
   const [error, setError] = useState<Error | null>(null);
   const [retryAttempts, setRetryAttempts] = useState(0);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
-  
+
   const elementRef = useRef<HTMLDivElement>(null);
   const loadTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -104,17 +99,17 @@ export function LazyWidget({
     if (!element) return;
 
     const observer = new IntersectionObserver(
-      (entries) => {
+      entries => {
         const [entry] = entries;
         if (entry.isIntersecting && !isVisible) {
           setIsVisible(true);
           onVisible?.();
-          
+
           // 우선순위에 따른 로딩 지연
           const delay = {
             high: 0,
             medium: 100,
-            low: 300
+            low: 300,
           }[priority];
 
           setTimeout(() => {
@@ -124,7 +119,7 @@ export function LazyWidget({
       },
       {
         threshold,
-        rootMargin
+        rootMargin,
       }
     );
 
@@ -169,7 +164,7 @@ export function LazyWidget({
 
       // 성능 측정 종료
       const loadTime = performance.now() - startTime;
-      
+
       if (loadTimeoutRef.current) {
         clearTimeout(loadTimeoutRef.current);
       }
@@ -182,7 +177,6 @@ export function LazyWidget({
       if (process.env.NODE_ENV === 'development') {
         console.log(`Widget "${title}" loaded in ${loadTime.toFixed(2)}ms`);
       }
-
     } catch (err) {
       if (loadTimeoutRef.current) {
         clearTimeout(loadTimeoutRef.current);
@@ -203,17 +197,17 @@ export function LazyWidget({
       }
     }
   }, [
-    isLoaded, 
-    isLoading, 
-    isOffline, 
-    enableOfflineSupport, 
-    timeout, 
-    title, 
-    onLoad, 
-    onError, 
-    enableRetryOnError, 
-    retryAttempts, 
-    retryCount
+    isLoaded,
+    isLoading,
+    isOffline,
+    enableOfflineSupport,
+    timeout,
+    title,
+    onLoad,
+    onError,
+    enableRetryOnError,
+    retryAttempts,
+    retryCount,
   ]);
 
   // 재시도 핸들러
@@ -228,10 +222,7 @@ export function LazyWidget({
     if (fallback) return fallback;
 
     return (
-      <WidgetWrapper
-        title={title}
-        className={cn('animate-pulse', className)}
-      >
+      <WidgetWrapper title={title} className={cn('animate-pulse', className)}>
         <div className="space-y-4">
           <div className="space-y-2">
             <Skeleton className="h-4 w-3/4" />
@@ -279,9 +270,7 @@ export function LazyWidget({
       <div className="text-center py-8 space-y-3">
         <AlertCircleIcon className="h-8 w-8 text-destructive mx-auto" />
         <div className="space-y-2">
-          <p className="text-sm font-medium text-destructive">
-            위젯 로딩 실패
-          </p>
+          <p className="text-sm font-medium text-destructive">위젯 로딩 실패</p>
           <p className="text-xs text-muted-foreground">
             {error?.message || '알 수 없는 오류'}
           </p>
@@ -305,7 +294,7 @@ export function LazyWidget({
 
   // 대기 상태 (아직 뷰포트에 진입하지 않음)
   const renderPending = () => (
-    <div 
+    <div
       ref={elementRef}
       className={cn(
         'min-h-[200px] flex items-center justify-center',
@@ -325,7 +314,8 @@ export function LazyWidget({
   // 렌더링 로직
   if (!isVisible) return renderPending();
   if (isOffline && enableOfflineSupport) return renderOffline();
-  if (error && (!enableRetryOnError || retryAttempts >= retryCount)) return renderError();
+  if (error && (!enableRetryOnError || retryAttempts >= retryCount))
+    return renderError();
   if (isLoading || !isLoaded) return renderSkeleton();
 
   return (
@@ -346,9 +336,10 @@ export function LazyComponent({
   title,
   priority = 'medium',
   onLoad,
-  onError
+  onError,
 }: LazyComponentProps) {
-  const [LazyLoadedComponent, setLazyLoadedComponent] = useState<ComponentType<any> | null>(null);
+  const [LazyLoadedComponent, setLazyLoadedComponent] =
+    useState<ComponentType<any> | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
@@ -369,7 +360,8 @@ export function LazyComponent({
         }
       } catch (err) {
         if (mounted) {
-          const error = err instanceof Error ? err : new Error('컴포넌트 로딩 실패');
+          const error =
+            err instanceof Error ? err : new Error('컴포넌트 로딩 실패');
           setError(error);
           onError?.(error);
         }
@@ -389,17 +381,24 @@ export function LazyComponent({
 
   if (error) {
     return (
-      <div className={cn('p-4 border border-destructive/20 bg-destructive/5 rounded-lg', className)}>
+      <div
+        className={cn(
+          'p-4 border border-destructive/20 bg-destructive/5 rounded-lg',
+          className
+        )}
+      >
         <p className="text-sm text-destructive">{error.message}</p>
       </div>
     );
   }
 
   if (loading || !LazyLoadedComponent) {
-    return fallback || (
-      <div className={cn('p-4', className)}>
-        <Skeleton className="h-20 w-full" />
-      </div>
+    return (
+      fallback || (
+        <div className={cn('p-4', className)}>
+          <Skeleton className="h-20 w-full" />
+        </div>
+      )
     );
   }
 
@@ -455,6 +454,6 @@ export function useLazyWidget() {
     failedWidgets,
     markWidgetLoaded,
     markWidgetFailed,
-    retryFailedWidgets
+    retryFailedWidgets,
   };
 }

@@ -1,21 +1,26 @@
-import { 
-  useState, 
-  useEffect, 
-  useRef, 
-  useCallback, 
-  type ReactNode, 
-  type CSSProperties 
+import {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  type ReactNode,
+  type CSSProperties,
 } from 'react';
 import { cn } from '~/lib/utils';
-import { Card, CardContent, CardHeader, CardTitle } from '~/common/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '~/common/components/ui/card';
 import { Button } from '~/common/components/ui/button';
-import { 
-  ExpandIcon, 
-  ShrinkIcon, 
+import {
+  ExpandIcon,
+  ShrinkIcon,
   DownloadIcon,
   RefreshCwIcon,
   TrendingUpIcon,
-  BarChartIcon
+  BarChartIcon,
 } from 'lucide-react';
 
 interface ChartDimensions {
@@ -78,18 +83,23 @@ export function ResponsiveChart({
     enablePanZoom: true,
     reducedAnimations: true,
     simplifiedTooltips: true,
-    touchOptimized: true
+    touchOptimized: true,
   },
   breakpoints = {
     mobile: 640,
     tablet: 768,
-    desktop: 1024
-  }
+    desktop: 1024,
+  },
 }: ResponsiveChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [dimensions, setDimensions] = useState<ChartDimensions>({ width: 0, height: 0 });
+  const [dimensions, setDimensions] = useState<ChartDimensions>({
+    width: 0,
+    height: 0,
+  });
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [deviceType, setDeviceType] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
+  const [deviceType, setDeviceType] = useState<'mobile' | 'tablet' | 'desktop'>(
+    'desktop'
+  );
 
   // 디바이스 타입 감지
   useEffect(() => {
@@ -115,16 +125,16 @@ export function ResponsiveChart({
 
     const container = containerRef.current;
     const containerWidth = container.offsetWidth;
-    
+
     let calculatedHeight: number;
-    
+
     if (isFullscreen) {
       // 전체화면 모드
       calculatedHeight = window.innerHeight - 120; // 여백 고려
     } else {
       // 일반 모드: 종횡비 기반 계산
       calculatedHeight = containerWidth / aspectRatio;
-      
+
       // 모바일에서는 높이 제한
       if (deviceType === 'mobile') {
         calculatedHeight = Math.min(calculatedHeight, 300);
@@ -132,11 +142,14 @@ export function ResponsiveChart({
     }
 
     // 최소/최대 높이 제한
-    calculatedHeight = Math.max(minHeight, Math.min(maxHeight, calculatedHeight));
+    calculatedHeight = Math.max(
+      minHeight,
+      Math.min(maxHeight, calculatedHeight)
+    );
 
     setDimensions({
       width: containerWidth,
-      height: calculatedHeight
+      height: calculatedHeight,
     });
   }, [aspectRatio, minHeight, maxHeight, isFullscreen, deviceType]);
 
@@ -189,7 +202,7 @@ export function ResponsiveChart({
       touchAction: mobileOptimizations.enablePanZoom ? 'pan-x pan-y' : 'none',
       userSelect: 'none',
       WebkitUserSelect: 'none',
-      WebkitTouchCallout: 'none'
+      WebkitTouchCallout: 'none',
     };
   };
 
@@ -207,10 +220,7 @@ export function ResponsiveChart({
           disabled={loading}
           className="h-8 w-8 p-0"
         >
-          <RefreshCwIcon className={cn(
-            'h-4 w-4',
-            loading && 'animate-spin'
-          )} />
+          <RefreshCwIcon className={cn('h-4 w-4', loading && 'animate-spin')} />
         </Button>
       );
     }
@@ -249,9 +259,7 @@ export function ResponsiveChart({
     }
 
     return buttons.length > 0 ? (
-      <div className="flex items-center gap-1">
-        {buttons}
-      </div>
+      <div className="flex items-center gap-1">{buttons}</div>
     ) : null;
   };
 
@@ -261,17 +269,19 @@ export function ResponsiveChart({
       <Card className={cn('w-full', className)}>
         {(title || description) && (
           <CardHeader>
-            {title && <CardTitle className="flex items-center gap-2">
-              <BarChartIcon className="h-5 w-5" />
-              {title}
-            </CardTitle>}
+            {title && (
+              <CardTitle className="flex items-center gap-2">
+                <BarChartIcon className="h-5 w-5" />
+                {title}
+              </CardTitle>
+            )}
             {description && (
               <p className="text-sm text-muted-foreground">{description}</p>
             )}
           </CardHeader>
         )}
         <CardContent>
-          <div 
+          <div
             className="flex items-center justify-center bg-muted/20 rounded-lg animate-pulse"
             style={{ height: minHeight }}
           >
@@ -288,23 +298,32 @@ export function ResponsiveChart({
   // 에러 상태
   if (error) {
     return (
-      <Card className={cn('w-full border-destructive/20 bg-destructive/5', className)}>
+      <Card
+        className={cn(
+          'w-full border-destructive/20 bg-destructive/5',
+          className
+        )}
+      >
         {(title || description) && (
           <CardHeader>
-            {title && <CardTitle className="text-destructive">{title}</CardTitle>}
+            {title && (
+              <CardTitle className="text-destructive">{title}</CardTitle>
+            )}
             {description && (
               <p className="text-sm text-muted-foreground">{description}</p>
             )}
           </CardHeader>
         )}
         <CardContent>
-          <div 
+          <div
             className="flex items-center justify-center border-destructive/20 bg-destructive/5 rounded-lg"
             style={{ height: minHeight }}
           >
             <div className="text-center space-y-2">
               <TrendingUpIcon className="h-8 w-8 text-destructive mx-auto" />
-              <p className="text-sm font-medium text-destructive">차트 로딩 실패</p>
+              <p className="text-sm font-medium text-destructive">
+                차트 로딩 실패
+              </p>
               <p className="text-xs text-muted-foreground">{error}</p>
               {onRefresh && (
                 <Button
@@ -340,7 +359,7 @@ export function ResponsiveChart({
           </div>
 
           {/* 전체화면 차트 */}
-          <div 
+          <div
             ref={containerRef}
             className="flex-1 w-full"
             style={getMobileOptimizedStyles()}
@@ -349,7 +368,7 @@ export function ResponsiveChart({
               className="w-full h-full"
               style={{
                 width: dimensions.width,
-                height: dimensions.height
+                height: dimensions.height,
               }}
             >
               {children}
@@ -385,7 +404,7 @@ export function ResponsiveChart({
 
       {/* 차트 컨텐츠 */}
       <CardContent>
-        <div 
+        <div
           ref={containerRef}
           className={cn(
             'w-full overflow-hidden rounded-lg',
@@ -393,7 +412,7 @@ export function ResponsiveChart({
             // 모바일 터치 최적화
             deviceType === 'mobile' && [
               'touch-manipulation',
-              mobileOptimizations.touchOptimized && 'select-none'
+              mobileOptimizations.touchOptimized && 'select-none',
             ]
           )}
           style={getMobileOptimizedStyles()}
@@ -402,7 +421,7 @@ export function ResponsiveChart({
             className="w-full"
             style={{
               width: dimensions.width,
-              height: dimensions.height
+              height: dimensions.height,
             }}
           >
             {children}
@@ -424,7 +443,7 @@ export function useResponsiveChart() {
   const refresh = useCallback(async (dataLoader: () => Promise<any>) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const newData = await dataLoader();
       setData(newData);
@@ -435,25 +454,28 @@ export function useResponsiveChart() {
     }
   }, []);
 
-  const download = useCallback((filename: string = 'chart-data.json') => {
-    if (!data) return;
+  const download = useCallback(
+    (filename: string = 'chart-data.json') => {
+      if (!data) return;
 
-    try {
-      const blob = new Blob([JSON.stringify(data, null, 2)], {
-        type: 'application/json'
-      });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error('차트 데이터 다운로드 실패:', err);
-    }
-  }, [data]);
+      try {
+        const blob = new Blob([JSON.stringify(data, null, 2)], {
+          type: 'application/json',
+        });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } catch (err) {
+        console.error('차트 데이터 다운로드 실패:', err);
+      }
+    },
+    [data]
+  );
 
   return {
     loading,
@@ -463,6 +485,6 @@ export function useResponsiveChart() {
     setLoading,
     setError,
     refresh,
-    download
+    download,
   };
 }

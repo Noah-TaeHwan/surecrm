@@ -174,7 +174,7 @@ export function EnhancedClientOverview({
               <Phone className="h-5 w-5 text-primary" />
               <div>
                 <p className="text-sm text-muted-foreground">전화번호</p>
-                <a 
+                <a
                   href={`tel:${client.phone}`}
                   className="font-medium text-primary hover:underline"
                 >
@@ -188,7 +188,7 @@ export function EnhancedClientOverview({
                 <Mail className="h-5 w-5 text-primary" />
                 <div>
                   <p className="text-sm text-muted-foreground">이메일</p>
-                  <a 
+                  <a
                     href={`mailto:${client.email}`}
                     className="font-medium text-sm text-primary hover:underline"
                   >

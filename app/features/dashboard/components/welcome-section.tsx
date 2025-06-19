@@ -80,8 +80,6 @@ export function WelcomeSection({ userName, todayStats }: WelcomeSectionProps) {
               </span>
             </div>
           </div>
-
-          
         </div>
 
         {(todayStats.totalClients > 0 ||

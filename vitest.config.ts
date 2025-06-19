@@ -15,7 +15,7 @@ export default defineConfig({
       '**/dist/**',
       '**/cypress/**',
       '**/.{idea,git,cache,output,temp}/**',
-      '**/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build}.config.*'
+      '**/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build}.config.*',
     ],
     coverage: {
       provider: 'v8',
@@ -27,12 +27,12 @@ export default defineConfig({
         '**/*.config.*',
         '**/build/**',
         '**/dist/**',
-      ]
-    }
+      ],
+    },
   },
   resolve: {
     alias: {
       '~': path.resolve(__dirname, './app'),
-    }
-  }
-}); 
+    },
+  },
+});

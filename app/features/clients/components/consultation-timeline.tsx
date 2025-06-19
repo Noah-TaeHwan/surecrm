@@ -21,9 +21,11 @@ export function ConsultationTimeline({
     <>
       {/* 상담 노트 추가 버튼 */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0">
-        <h4 className="font-medium text-foreground text-sm sm:text-base">상담 기록</h4>
-        <Button 
-          size="sm" 
+        <h4 className="font-medium text-foreground text-sm sm:text-base">
+          상담 기록
+        </h4>
+        <Button
+          size="sm"
           onClick={onAddNote}
           className="bg-primary hover:bg-primary/90 text-primary-foreground w-full sm:w-auto"
         >
@@ -122,7 +124,9 @@ export function ConsultationTimeline({
                           </span>
                         )}
                         {note.followUpNotes && (
-                          <span className="text-xs sm:text-sm">{note.followUpNotes}</span>
+                          <span className="text-xs sm:text-sm">
+                            {note.followUpNotes}
+                          </span>
                         )}
                       </div>
                     </div>
@@ -143,7 +147,7 @@ export function ConsultationTimeline({
             <p className="text-xs sm:text-sm text-muted-foreground mb-4">
               첫 상담 기록을 추가해보세요.
             </p>
-            <Button 
+            <Button
               onClick={onAddNote}
               className="bg-primary hover:bg-primary/90 text-primary-foreground w-full sm:w-auto"
             >

@@ -65,7 +65,7 @@ export function QuickActionBar({
   className,
   mobileBreakpoint = 768,
   maxPrimaryActions = 3,
-  enableNotifications = true
+  enableNotifications = true,
 }: QuickActionBarProps) {
   const [isMobile, setIsMobile] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -82,32 +82,38 @@ export function QuickActionBar({
   }, [mobileBreakpoint]);
 
   // 햅틱 피드백
-  const triggerHaptic = useCallback((intensity: 'light' | 'medium' | 'heavy' = 'light') => {
-    if (typeof navigator !== 'undefined' && navigator.vibrate) {
-      const patterns = {
-        light: 25,
-        medium: 50,
-        heavy: 100
-      };
-      navigator.vibrate(patterns[intensity]);
-    }
-  }, []);
+  const triggerHaptic = useCallback(
+    (intensity: 'light' | 'medium' | 'heavy' = 'light') => {
+      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        const patterns = {
+          light: 25,
+          medium: 50,
+          heavy: 100,
+        };
+        navigator.vibrate(patterns[intensity]);
+      }
+    },
+    []
+  );
 
   // 액션 실행 핸들러
-  const handleAction = useCallback((action: QuickAction) => {
-    if (action.disabled || action.loading) return;
+  const handleAction = useCallback(
+    (action: QuickAction) => {
+      if (action.disabled || action.loading) return;
 
-    triggerHaptic('light');
-    action.onClick();
-    
-    // 모바일에서 확장된 상태면 닫기
-    if (isMobile && isExpanded) {
-      setIsExpanded(false);
-    }
-  }, [triggerHaptic, isMobile, isExpanded]);
+      triggerHaptic('light');
+      action.onClick();
+
+      // 모바일에서 확장된 상태면 닫기
+      if (isMobile && isExpanded) {
+        setIsExpanded(false);
+      }
+    },
+    [triggerHaptic, isMobile, isExpanded]
+  );
 
   // 액션 필터링
-  const visibleActions = actions.filter(action => 
+  const visibleActions = actions.filter(action =>
     isMobile ? action.mobileVisible !== false : action.desktopVisible !== false
   );
 
@@ -115,12 +121,12 @@ export function QuickActionBar({
   const secondaryActions = visibleActions.filter(action => !action.primary);
 
   // 모바일 주요 액션 제한
-  const limitedPrimaryActions = isMobile 
+  const limitedPrimaryActions = isMobile
     ? primaryActions.slice(0, maxPrimaryActions)
     : primaryActions;
 
   // 숨겨진 액션들 (모바일에서 더보기 메뉴로)
-  const overflowActions = isMobile 
+  const overflowActions = isMobile
     ? [...primaryActions.slice(maxPrimaryActions), ...secondaryActions]
     : secondaryActions;
 
@@ -131,8 +137,9 @@ export function QuickActionBar({
       const positionMap = {
         'top-right': 'fixed top-4 right-4 z-50',
         'bottom-right': 'fixed bottom-4 right-4 z-50',
-        'bottom-center': 'fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50',
-        'top-center': 'fixed top-4 left-1/2 transform -translate-x-1/2 z-50'
+        'bottom-center':
+          'fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50',
+        'top-center': 'fixed top-4 left-1/2 transform -translate-x-1/2 z-50',
       };
       return positionMap[position];
     } else {
@@ -148,7 +155,7 @@ export function QuickActionBar({
           {/* 확장된 액션들 */}
           {isExpanded && (
             <div className="flex flex-col gap-2 mb-2">
-              {overflowActions.map((action) => (
+              {overflowActions.map(action => (
                 <MobileActionButton
                   key={action.id}
                   action={action}
@@ -161,14 +168,14 @@ export function QuickActionBar({
 
           {/* 주요 액션들 */}
           <div className="flex flex-col gap-2">
-            {limitedPrimaryActions.map((action) => (
+            {limitedPrimaryActions.map(action => (
               <MobileActionButton
                 key={action.id}
                 action={action}
                 onAction={handleAction}
               />
             ))}
-            
+
             {/* 더보기 버튼 */}
             {overflowActions.length > 0 && (
               <Button
@@ -200,7 +207,7 @@ export function QuickActionBar({
     <TooltipProvider>
       <div className={cn(getPositionClasses(), className)}>
         {/* 주요 액션들 */}
-        {limitedPrimaryActions.map((action) => (
+        {limitedPrimaryActions.map(action => (
           <DesktopActionButton
             key={action.id}
             action={action}
@@ -219,7 +226,7 @@ export function QuickActionBar({
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuLabel>추가 액션</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              {overflowActions.map((action) => (
+              {overflowActions.map(action => (
                 <DropdownMenuItem
                   key={action.id}
                   onClick={() => handleAction(action)}
@@ -252,28 +259,28 @@ interface MobileActionButtonProps {
   size?: 'sm' | 'md' | 'lg';
 }
 
-function MobileActionButton({ 
-  action, 
-  onAction, 
-  size = 'md' 
+function MobileActionButton({
+  action,
+  onAction,
+  size = 'md',
 }: MobileActionButtonProps) {
   const sizeClasses = {
     sm: 'h-10 w-10',
     md: 'h-12 w-12',
-    lg: 'h-14 w-14'
+    lg: 'h-14 w-14',
   };
 
   const iconSizes = {
     sm: 'h-4 w-4',
     md: 'h-5 w-5',
-    lg: 'h-6 w-6'
+    lg: 'h-6 w-6',
   };
 
   return (
     <Tooltip>
       <TooltipTrigger asChild>
         <Button
-          variant={action.primary ? "default" : "secondary"}
+          variant={action.primary ? 'default' : 'secondary'}
           size="lg"
           className={cn(
             sizeClasses[size],
@@ -287,11 +294,10 @@ function MobileActionButton({
           onClick={() => onAction(action)}
           disabled={action.disabled || action.loading}
         >
-          <action.icon className={cn(
-            iconSizes[size],
-            action.loading && 'animate-spin'
-          )} />
-          
+          <action.icon
+            className={cn(iconSizes[size], action.loading && 'animate-spin')}
+          />
+
           {/* 알림 배지 */}
           {action.badge && action.badge > 0 && (
             <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
@@ -320,7 +326,7 @@ function DesktopActionButton({ action, onAction }: DesktopActionButtonProps) {
     <Tooltip>
       <TooltipTrigger asChild>
         <Button
-          variant={action.primary ? "default" : "outline"}
+          variant={action.primary ? 'default' : 'outline'}
           size="sm"
           className={cn(
             'relative',
@@ -330,12 +336,11 @@ function DesktopActionButton({ action, onAction }: DesktopActionButtonProps) {
           onClick={() => onAction(action)}
           disabled={action.disabled || action.loading}
         >
-          <action.icon className={cn(
-            'h-4 w-4 mr-2',
-            action.loading && 'animate-spin'
-          )} />
+          <action.icon
+            className={cn('h-4 w-4 mr-2', action.loading && 'animate-spin')}
+          />
           {action.label}
-          
+
           {/* 알림 배지 */}
           {action.badge && action.badge > 0 && (
             <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">
@@ -362,7 +367,7 @@ export const defaultDashboardActions: QuickAction[] = [
     onClick: () => window.location.reload(),
     primary: true,
     tooltip: '대시보드 데이터 새로고침',
-    category: 'utility'
+    category: 'utility',
   },
   {
     id: 'add-client',
@@ -374,7 +379,7 @@ export const defaultDashboardActions: QuickAction[] = [
     },
     primary: true,
     tooltip: '새 고객 추가',
-    category: 'primary'
+    category: 'primary',
   },
   {
     id: 'schedule',
@@ -386,7 +391,7 @@ export const defaultDashboardActions: QuickAction[] = [
     },
     primary: true,
     tooltip: '일정 관리',
-    category: 'primary'
+    category: 'primary',
   },
   {
     id: 'filter',
@@ -397,7 +402,7 @@ export const defaultDashboardActions: QuickAction[] = [
       console.log('필터 모달 열기');
     },
     tooltip: '데이터 필터링',
-    category: 'utility'
+    category: 'utility',
   },
   {
     id: 'export',
@@ -408,7 +413,7 @@ export const defaultDashboardActions: QuickAction[] = [
       console.log('데이터 내보내기');
     },
     tooltip: '데이터 내보내기',
-    category: 'utility'
+    category: 'utility',
   },
   {
     id: 'analytics',
@@ -419,7 +424,7 @@ export const defaultDashboardActions: QuickAction[] = [
       window.location.href = '/analytics';
     },
     tooltip: '상세 분석 보기',
-    category: 'secondary'
+    category: 'secondary',
   },
   {
     id: 'settings',
@@ -430,6 +435,6 @@ export const defaultDashboardActions: QuickAction[] = [
       window.location.href = '/settings';
     },
     tooltip: '대시보드 설정',
-    category: 'utility'
-  }
+    category: 'utility',
+  },
 ];

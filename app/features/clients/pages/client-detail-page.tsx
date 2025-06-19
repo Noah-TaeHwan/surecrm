@@ -516,7 +516,8 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
   } | null>(null);
 
   // 🗑️ 상담동반자 삭제 확인 모달 상태
-  const [showDeleteCompanionModal, setShowDeleteCompanionModal] = useState(false);
+  const [showDeleteCompanionModal, setShowDeleteCompanionModal] =
+    useState(false);
   const [companionToDelete, setCompanionToDelete] = useState<{
     id: string;
     name: string;
@@ -1269,7 +1270,9 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
 
   const handleDeleteCompanion = async (companionId: string) => {
     // 삭제할 동반자 정보를 찾아서 설정
-    const companionToDelete = consultationCompanions.find(c => c.id === companionId);
+    const companionToDelete = consultationCompanions.find(
+      c => c.id === companionId
+    );
     if (companionToDelete) {
       setCompanionToDelete({
         id: companionId,
@@ -1658,20 +1661,20 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
         <div className="hidden lg:block">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             {/* 왼쪽 사이드바 - 기본 정보 */}
-                          <ClientSidebar
-                client={client}
-                isEditing={isEditing}
-                editFormData={editFormData}
-                setEditFormData={setEditFormData}
-                handleEditStart={handleEditStart}
-                handleEditSave={handleEditSave}
-                handleEditCancel={handleEditCancel}
-                handleSsnChange={handleSsnChange}
-                clientTags={clientTags}
-                handleOpenTagModal={handleOpenTagModal}
-                removeClientTag={removeClientTag}
-                availableReferrers={availableReferrers}
-              />
+            <ClientSidebar
+              client={client}
+              isEditing={isEditing}
+              editFormData={editFormData}
+              setEditFormData={setEditFormData}
+              handleEditStart={handleEditStart}
+              handleEditSave={handleEditSave}
+              handleEditCancel={handleEditCancel}
+              handleSsnChange={handleSsnChange}
+              clientTags={clientTags}
+              handleOpenTagModal={handleOpenTagModal}
+              removeClientTag={removeClientTag}
+              availableReferrers={availableReferrers}
+            />
 
             {/* 오른쪽 메인 컨텐츠 */}
             <div className="lg:col-span-3">
@@ -1759,7 +1762,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                     const formData = new FormData();
                     formData.append('intent', 'updateClientNotes');
                     formData.append('notes', notes);
-                    
+
                     try {
                       const result = await submit(formData, { method: 'post' });
                       // 성공 시 클라이언트 데이터 업데이트는 loader가 자동으로 처리
@@ -1795,7 +1798,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
                   const formData = new FormData();
                   formData.append('intent', 'updateClientNotes');
                   formData.append('notes', notes);
-                  
+
                   try {
                     const result = await submit(formData, { method: 'post' });
                     console.log('메모 저장 완료');

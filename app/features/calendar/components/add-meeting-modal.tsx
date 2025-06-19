@@ -320,12 +320,12 @@ export function AddMeetingModal({
     document.body.appendChild(formElement);
     formElement.submit();
     document.body.removeChild(formElement);
-    
+
     // 선택적 onSubmit 콜백 호출
     if (onSubmit) {
       onSubmit(data);
     }
-    
+
     handleClose();
   };
 
@@ -336,12 +336,12 @@ export function AddMeetingModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent 
+      <DialogContent
         className="sm:max-w-xl w-[95vw] p-0 overflow-hidden flex flex-col sm:max-h-[85vh] gap-0"
         style={{
           maxHeight: '75vh',
           height: 'auto',
-          minHeight: '0'
+          minHeight: '0',
         }}
       >
         {/* 헤더 - 고정 */}
@@ -485,10 +485,7 @@ export function AddMeetingModal({
                         </FormControl>
                         <SelectContent>
                           {priorityOptions.map(option => (
-                            <SelectItem
-                              key={option.value}
-                              value={option.value}
-                            >
+                            <SelectItem key={option.value} value={option.value}>
                               <div className="flex items-center gap-2">
                                 <span>{option.icon}</span>
                                 <span>{option.label}</span>
@@ -511,7 +508,11 @@ export function AddMeetingModal({
                       <FormControl>
                         <div className="relative w-full">
                           <CalendarIcon className="absolute left-3 top-3 h-4 w-4 text-foreground/60" />
-                          <Input type="date" className="pl-10 h-10 w-full" {...field} />
+                          <Input
+                            type="date"
+                            className="pl-10 h-10 w-full"
+                            {...field}
+                          />
                         </div>
                       </FormControl>
                       <FormMessage />
@@ -528,7 +529,11 @@ export function AddMeetingModal({
                       <FormControl>
                         <div className="relative w-full">
                           <ClockIcon className="absolute left-3 top-3 h-4 w-4 text-foreground/60" />
-                          <Input type="time" className="pl-10 h-10 w-full" {...field} />
+                          <Input
+                            type="time"
+                            className="pl-10 h-10 w-full"
+                            {...field}
+                          />
                         </div>
                       </FormControl>
                       <FormMessage />
@@ -543,7 +548,7 @@ export function AddMeetingModal({
                     <FormItem>
                       <FormLabel>소요 시간</FormLabel>
                       <Select
-                        onValueChange={(value) => field.onChange(Number(value))}
+                        onValueChange={value => field.onChange(Number(value))}
                         value={field.value?.toString()}
                       >
                         <FormControl>
@@ -586,10 +591,7 @@ export function AddMeetingModal({
                         </FormControl>
                         <SelectContent>
                           {contactMethods.map(method => (
-                            <SelectItem
-                              key={method.value}
-                              value={method.value}
-                            >
+                            <SelectItem key={method.value} value={method.value}>
                               <div className="flex items-center gap-2">
                                 {method.icon}
                                 <span>{method.label}</span>
@@ -612,7 +614,11 @@ export function AddMeetingModal({
                       <FormControl>
                         <div className="relative w-full">
                           <MapPin className="absolute left-3 top-3 h-4 w-4 text-foreground/60" />
-                          <Input placeholder="미팅 장소" className="pl-10 h-10 w-full" {...field} />
+                          <Input
+                            placeholder="미팅 장소"
+                            className="pl-10 h-10 w-full"
+                            {...field}
+                          />
                         </div>
                       </FormControl>
                     </FormItem>
@@ -752,7 +758,7 @@ export function AddMeetingModal({
                 <FormLabel className="text-sm font-medium text-foreground">
                   동기화 및 알림 설정
                 </FormLabel>
-                
+
                 <div className="grid grid-cols-1 gap-3 p-3 sm:p-4 border border-border/50 rounded-lg bg-muted/20">
                   {/* 구글 캘린더 자동 동기화 안내 */}
                   <div className="flex items-center justify-between p-3 border border-emerald-200 rounded-md bg-background">
@@ -845,19 +851,28 @@ export function AddMeetingModal({
                           {selectedClient.phone && (
                             <span>{selectedClient.phone}</span>
                           )}
-                          {selectedClient.phone && (selectedClient as any).email && (
-                            <span className="mx-2">•</span>
-                          )}
+                          {selectedClient.phone &&
+                            (selectedClient as any).email && (
+                              <span className="mx-2">•</span>
+                            )}
                           {(selectedClient as any).email && (
                             <span>{(selectedClient as any).email}</span>
                           )}
-                          {!selectedClient.phone && !(selectedClient as any).email && (
-                            <span>연락처 정보 없음</span>
-                          )}
+                          {!selectedClient.phone &&
+                            !(selectedClient as any).email && (
+                              <span>연락처 정보 없음</span>
+                            )}
                         </div>
                       </div>
-                      <Link to={`/clients/${selectedClient.id}`} className="flex-shrink-0">
-                        <Button variant="outline" size="sm" className="h-8 text-xs">
+                      <Link
+                        to={`/clients/${selectedClient.id}`}
+                        className="flex-shrink-0"
+                      >
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-8 text-xs"
+                        >
                           고객 정보 보기
                         </Button>
                       </Link>
@@ -880,7 +895,7 @@ export function AddMeetingModal({
             >
               취소
             </Button>
-            <Button 
+            <Button
               type="submit"
               form="meeting-form"
               disabled={clients.length === 0}

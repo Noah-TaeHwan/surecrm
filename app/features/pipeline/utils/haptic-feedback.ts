@@ -15,88 +15,92 @@ export const HAPTIC_PATTERNS: Record<string, HapticPattern> = {
   // 🎯 드래그 & 드롭
   DRAG_START: {
     pattern: [50],
-    description: '드래그 시작 - 짧은 진동'
+    description: '드래그 시작 - 짧은 진동',
   },
   DRAG_HOVER: {
     pattern: [25],
-    description: '드롭 존 호버 - 매우 짧은 진동'
+    description: '드롭 존 호버 - 매우 짧은 진동',
   },
   DRAG_DROP_SUCCESS: {
     pattern: [50, 50, 100],
-    description: '드롭 성공 - 성공 패턴'
+    description: '드롭 성공 - 성공 패턴',
   },
   DRAG_DROP_FAILED: {
     pattern: [100, 100, 100],
-    description: '드롭 실패 - 오류 패턴'
+    description: '드롭 실패 - 오류 패턴',
   },
 
   // 🎯 스와이프 액션
   SWIPE_REVEAL: {
     pattern: [30],
-    description: '스와이프 액션 노출 - 부드러운 진동'
+    description: '스와이프 액션 노출 - 부드러운 진동',
   },
   SWIPE_ACTION: {
     pattern: [50, 30, 50],
-    description: '스와이프 액션 실행 - 확인 패턴'
+    description: '스와이프 액션 실행 - 확인 패턴',
   },
 
   // 🎯 터치 & 탭
   LIGHT_TAP: {
     pattern: [25],
-    description: '가벼운 탭 - 최소 진동'
+    description: '가벼운 탭 - 최소 진동',
   },
   MEDIUM_TAP: {
     pattern: [50],
-    description: '보통 탭 - 표준 진동'
+    description: '보통 탭 - 표준 진동',
   },
   STRONG_TAP: {
     pattern: [100],
-    description: '강한 탭 - 강력한 진동'
+    description: '강한 탭 - 강력한 진동',
   },
 
   // 🎯 UI 변경사항
   FILTER_CHANGE: {
     pattern: [30, 20, 30],
-    description: '필터 변경 - 변경 확인'
+    description: '필터 변경 - 변경 확인',
   },
   STAGE_CHANGE: {
     pattern: [40, 30, 60],
-    description: '스테이지 변경 - 중요한 변경'
+    description: '스테이지 변경 - 중요한 변경',
   },
 
   // 🎯 성공/오류 피드백
   SUCCESS: {
     pattern: [50, 50, 100],
-    description: '성공 - 긍정적 패턴'
+    description: '성공 - 긍정적 패턴',
   },
   WARNING: {
     pattern: [75, 75, 75],
-    description: '경고 - 주의 패턴'
+    description: '경고 - 주의 패턴',
   },
   ERROR: {
     pattern: [100, 100, 100],
-    description: '오류 - 오류 패턴'
+    description: '오류 - 오류 패턴',
   },
 
   // 🎯 장시간 인터랙션
   LONG_PRESS_START: {
     pattern: [80],
-    description: '롱프레스 시작 - 강한 진동'
+    description: '롱프레스 시작 - 강한 진동',
   },
   SCROLL_BOUNDARY: {
     pattern: [60],
-    description: '스크롤 경계 - 경계 알림'
-  }
+    description: '스크롤 경계 - 경계 알림',
+  },
 };
 
 /**
  * 햅틱 피드백 실행 함수
  */
-export const triggerHapticFeedback = (patternKey: keyof typeof HAPTIC_PATTERNS) => {
+export const triggerHapticFeedback = (
+  patternKey: keyof typeof HAPTIC_PATTERNS
+) => {
   try {
     // 브라우저 햅틱 지원 체크
     if (!navigator.vibrate) {
-      console.log(`햅틱 피드백 미지원: ${HAPTIC_PATTERNS[patternKey].description}`);
+      console.log(
+        `햅틱 피드백 미지원: ${HAPTIC_PATTERNS[patternKey].description}`
+      );
       return false;
     }
 
@@ -119,7 +123,10 @@ export const triggerHapticFeedback = (patternKey: keyof typeof HAPTIC_PATTERNS) 
 /**
  * 커스텀 햅틱 패턴 실행
  */
-export const triggerCustomHaptic = (pattern: number[], description?: string) => {
+export const triggerCustomHaptic = (
+  pattern: number[],
+  description?: string
+) => {
   try {
     if (!navigator.vibrate) {
       console.log(`햅틱 피드백 미지원: ${description || '커스텀 패턴'}`);
@@ -158,6 +165,11 @@ export const isHapticSupported = (): boolean => {
 /**
  * 햅틱 피드백 강도 조절 (미래 확장용)
  */
-export const createScaledPattern = (basePattern: number[], intensity: number = 1): number[] => {
-  return basePattern.map(duration => Math.round(duration * Math.max(0.1, Math.min(2.0, intensity))));
+export const createScaledPattern = (
+  basePattern: number[],
+  intensity: number = 1
+): number[] => {
+  return basePattern.map(duration =>
+    Math.round(duration * Math.max(0.1, Math.min(2.0, intensity)))
+  );
 };

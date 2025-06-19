@@ -481,7 +481,10 @@ export async function deleteMeeting(meetingId: string, agentId: string) {
         // TODO: 구글 캘린더 서비스와 연동하여 실제 삭제 구현
         // 현재는 로컬 DB에서만 삭제하고 구글 캘린더는 수동 처리 필요
       } catch (googleError) {
-        console.error('❌ 구글 캘린더 삭제 중 오류 (DB는 삭제 진행):', googleError);
+        console.error(
+          '❌ 구글 캘린더 삭제 중 오류 (DB는 삭제 진행):',
+          googleError
+        );
         // 구글 캘린더 삭제 실패해도 DB 삭제는 계속 진행
       }
     }

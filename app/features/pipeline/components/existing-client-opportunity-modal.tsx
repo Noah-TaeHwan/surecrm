@@ -133,22 +133,19 @@ export function ExistingClientOpportunityModal({
       // 모든 input, textarea, select 요소의 포커스 제거
       const timer = setTimeout(() => {
         const focusedElement = document.activeElement as HTMLElement;
-        if (focusedElement && (
-          focusedElement.tagName === 'INPUT' || 
-          focusedElement.tagName === 'TEXTAREA' || 
-          focusedElement.tagName === 'SELECT'
-        )) {
+        if (
+          focusedElement &&
+          (focusedElement.tagName === 'INPUT' ||
+            focusedElement.tagName === 'TEXTAREA' ||
+            focusedElement.tagName === 'SELECT')
+        ) {
           focusedElement.blur();
         }
       }, 0);
-      
+
       return () => clearTimeout(timer);
     }
   }, [isOpen]);
-
-
-
-
 
   // 선택된 고객 카드로 자동 스크롤
   useEffect(() => {
@@ -245,16 +242,14 @@ export function ExistingClientOpportunityModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent 
+      <DialogContent
         className="sm:max-w-xl w-[95vw] p-0 overflow-hidden flex flex-col sm:max-h-[75vh] gap-0 border-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
         style={{
           maxHeight: '75vh',
           height: '75vh',
-          minHeight: '75vh'
+          minHeight: '75vh',
         }}
       >
-
-
         {/* 헤더 - 고정 */}
         <DialogHeader className="flex-shrink-0 px-4 sm:px-6 py-4 sm:py-4 border-b border-border/30">
           <DialogTitle className="flex items-center gap-2 text-sm sm:text-lg">
@@ -267,12 +262,10 @@ export function ExistingClientOpportunityModal({
         </DialogHeader>
 
         {/* 콘텐츠 - 스크롤 가능 */}
-        <div 
+        <div
           className="flex-1 overflow-y-auto scrollbar-none modal-scroll-area px-4 sm:px-6 py-1 sm:py-2 space-y-2 sm:space-y-6"
           style={{ minHeight: 'calc(75vh - 200px)' }}
         >
-        
-
           {/* STEP 1: 고객 선택 */}
           {step === 'selectClient' && (
             <div className="space-y-3 sm:space-y-4">
@@ -286,7 +279,7 @@ export function ExistingClientOpportunityModal({
                 <Input
                   placeholder="고객명으로 검색하세요"
                   value={clientSearchQuery}
-                  onChange={(e) => setClientSearchQuery(e.target.value)}
+                  onChange={e => setClientSearchQuery(e.target.value)}
                   className="h-9 sm:h-10 text-xs sm:text-sm pl-10"
                   autoFocus={false}
                 />
@@ -295,54 +288,54 @@ export function ExistingClientOpportunityModal({
               {/* 고객 리스트 */}
               <div className="space-y-2 flex-1 min-h-0">
                 {filteredClients.map(client => (
-                    <Card
-                      key={client.id}
-                      ref={
-                        preSelectedClientId === client.id
-                          ? selectedClientRef
-                          : undefined
-                      }
-                      className={`cursor-pointer transition-colors border-border/50 hover:border-border py-0 ${
-                        selectedClientId === client.id
-                          ? 'border-primary bg-primary/5'
-                          : ''
-                      } ${
-                        preSelectedClientId === client.id
-                          ? 'ring-2 ring-primary/30 border-primary/60'
-                          : ''
-                      }`}
-                      onClick={() => setSelectedClientId(client.id)}
-                    >
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-3">
-                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                              <User className="h-4 w-4 text-primary" />
-                            </div>
-                            <div>
-                              <div className="text-sm font-medium text-foreground">
-                                {client.name}
-                              </div>
-                              <div className="text-xs text-muted-foreground">
-                                {client.phone}
-                              </div>
-                              {client.currentStage && (
-                                <Badge
-                                  variant="secondary"
-                                  className="text-xs mt-1"
-                                >
-                                  {client.currentStage}
-                                </Badge>
-                              )}
-                            </div>
+                  <Card
+                    key={client.id}
+                    ref={
+                      preSelectedClientId === client.id
+                        ? selectedClientRef
+                        : undefined
+                    }
+                    className={`cursor-pointer transition-colors border-border/50 hover:border-border py-0 ${
+                      selectedClientId === client.id
+                        ? 'border-primary bg-primary/5'
+                        : ''
+                    } ${
+                      preSelectedClientId === client.id
+                        ? 'ring-2 ring-primary/30 border-primary/60'
+                        : ''
+                    }`}
+                    onClick={() => setSelectedClientId(client.id)}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                            <User className="h-4 w-4 text-primary" />
                           </div>
-                          {selectedClientId === client.id && (
-                            <Check className="h-4 w-4 text-primary" />
-                          )}
+                          <div>
+                            <div className="text-sm font-medium text-foreground">
+                              {client.name}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {client.phone}
+                            </div>
+                            {client.currentStage && (
+                              <Badge
+                                variant="secondary"
+                                className="text-xs mt-1"
+                              >
+                                {client.currentStage}
+                              </Badge>
+                            )}
+                          </div>
                         </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                        {selectedClientId === client.id && (
+                          <Check className="h-4 w-4 text-primary" />
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
 
               {filteredClients.length === 0 && (
@@ -378,7 +371,9 @@ export function ExistingClientOpportunityModal({
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-3">
-                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${type.color}`}>
+                          <div
+                            className={`w-10 h-10 rounded-lg flex items-center justify-center ${type.color}`}
+                          >
                             {type.icon}
                           </div>
                           <div>
@@ -410,49 +405,57 @@ export function ExistingClientOpportunityModal({
 
               <div className="space-y-3 sm:space-y-4">
                 <div className="space-y-2">
-                  <label className="text-xs sm:text-sm font-medium">상품명</label>
+                  <label className="text-xs sm:text-sm font-medium">
+                    상품명
+                  </label>
                   <Input
                     placeholder="상품명을 입력하세요"
                     value={productName}
-                    onChange={(e) => setProductName(e.target.value)}
+                    onChange={e => setProductName(e.target.value)}
                     className="h-9 sm:h-10 text-xs sm:text-sm"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs sm:text-sm font-medium">보험사</label>
+                  <label className="text-xs sm:text-sm font-medium">
+                    보험사
+                  </label>
                   <Input
                     placeholder="보험사를 입력하세요"
                     value={insuranceCompany}
-                    onChange={(e) => setInsuranceCompany(e.target.value)}
+                    onChange={e => setInsuranceCompany(e.target.value)}
                     className="h-9 sm:h-10 text-xs sm:text-sm"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 sm:gap-4">
                   <div className="space-y-2">
-                    <label className="text-xs sm:text-sm font-medium">월 보험료 (원)</label>
+                    <label className="text-xs sm:text-sm font-medium">
+                      월 보험료 (원)
+                    </label>
                     <div className="relative">
                       <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
                         type="number"
                         placeholder="100000"
                         value={monthlyPremium}
-                        onChange={(e) => setMonthlyPremium(e.target.value)}
+                        onChange={e => setMonthlyPremium(e.target.value)}
                         className="h-9 sm:h-10 text-xs sm:text-sm pl-10"
                       />
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-xs sm:text-sm font-medium">예상 수수료 (원)</label>
+                    <label className="text-xs sm:text-sm font-medium">
+                      예상 수수료 (원)
+                    </label>
                     <div className="relative">
                       <Banknote className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
                         type="number"
                         placeholder="15000"
                         value={expectedCommission}
-                        onChange={(e) => setExpectedCommission(e.target.value)}
+                        onChange={e => setExpectedCommission(e.target.value)}
                         className="h-9 sm:h-10 text-xs sm:text-sm pl-10"
                       />
                     </div>
@@ -464,7 +467,7 @@ export function ExistingClientOpportunityModal({
                   <Textarea
                     placeholder="영업 기회에 대한 메모를 입력하세요"
                     value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
+                    onChange={e => setNotes(e.target.value)}
                     className="text-xs sm:text-sm min-h-[80px] resize-none"
                     rows={3}
                   />
@@ -472,7 +475,9 @@ export function ExistingClientOpportunityModal({
 
                 {/* 선택된 정보 요약 */}
                 <div className="p-4 bg-muted/50 rounded-lg">
-                  <h5 className="text-xs sm:text-sm font-medium mb-2">선택된 정보</h5>
+                  <h5 className="text-xs sm:text-sm font-medium mb-2">
+                    선택된 정보
+                  </h5>
                   <div className="space-y-1">
                     <div className="flex justify-between text-xs">
                       <span className="text-muted-foreground">고객:</span>
@@ -488,7 +493,9 @@ export function ExistingClientOpportunityModal({
                     </div>
                     {monthlyPremium && (
                       <div className="flex justify-between text-xs">
-                        <span className="text-muted-foreground">월 보험료:</span>
+                        <span className="text-muted-foreground">
+                          월 보험료:
+                        </span>
                         <span className="font-medium">
                           {parseFloat(monthlyPremium).toLocaleString()}원
                         </span>
@@ -496,7 +503,9 @@ export function ExistingClientOpportunityModal({
                     )}
                     {expectedCommission && (
                       <div className="flex justify-between text-xs">
-                        <span className="text-muted-foreground">예상 수수료:</span>
+                        <span className="text-muted-foreground">
+                          예상 수수료:
+                        </span>
                         <span className="font-medium text-primary">
                           {parseFloat(expectedCommission).toLocaleString()}원
                         </span>
@@ -520,7 +529,7 @@ export function ExistingClientOpportunityModal({
             >
               취소
             </Button>
-            
+
             {step !== 'selectClient' && (
               <Button
                 type="button"

@@ -217,7 +217,7 @@ export function PerformanceKPICards({
                 if (typeof navigator !== 'undefined' && navigator.vibrate) {
                   navigator.vibrate(50);
                 }
-                
+
                 // 극한 분석: KPI 카드 클릭 이벤트 추적
                 InsuranceAgentEvents.dashboardCardClick(item.title, {
                   value: item.value,
@@ -278,7 +278,7 @@ export function PerformanceKPICards({
                         </Tooltip>
                       )}
                     </div>
-                    
+
                     {/* 모바일: 값과 증가율을 별도 줄로 분리 */}
                     <div className="flex flex-col md:flex-row items-center md:items-baseline md:gap-2">
                       <p className="text-base md:text-xl lg:text-2xl font-bold text-foreground truncate">
@@ -295,7 +295,10 @@ export function PerformanceKPICards({
                         >
                           {changeIndicator.icon && (
                             <changeIndicator.icon
-                              className={cn('h-2.5 w-2.5 md:h-3 md:w-3', changeIndicator.color)}
+                              className={cn(
+                                'h-2.5 w-2.5 md:h-3 md:w-3',
+                                changeIndicator.color
+                              )}
                             />
                           )}
                           <span className={changeIndicator.color}>
@@ -316,7 +319,7 @@ export function PerformanceKPICards({
                       {item.description}
                     </p>
                   </div>
-                  
+
                   {/* 아이콘 - 모바일에서는 숨김, 태블릿 이상에서만 표시 */}
                   <div
                     className={cn(
@@ -325,7 +328,10 @@ export function PerformanceKPICards({
                     )}
                   >
                     <IconComponent
-                      className={cn('h-5 w-5 xl:h-6 xl:w-6', getIconColorClass(item.color))}
+                      className={cn(
+                        'h-5 w-5 xl:h-6 xl:w-6',
+                        getIconColorClass(item.color)
+                      )}
                     />
                   </div>
                 </div>

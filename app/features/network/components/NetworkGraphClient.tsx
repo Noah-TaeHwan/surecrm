@@ -41,7 +41,10 @@ function safeMobileVibrate(duration: number = 15) {
   if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
     try {
       // 모바일 감지
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      const isMobile =
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+          navigator.userAgent
+        );
       if (isMobile) {
         navigator.vibrate(duration);
       }
@@ -53,13 +56,14 @@ function safeMobileVibrate(duration: number = 15) {
 
 // 터치 타겟 크기 계산 함수 (44px 최소 보장)
 function calculateTouchTargetRadius(node: any, isMobile: boolean) {
-  const baseRadius = (node.importance || 1) * (node.group === 'influencer' ? 2 : 1.5);
-  
+  const baseRadius =
+    (node.importance || 1) * (node.group === 'influencer' ? 2 : 1.5);
+
   if (isMobile) {
     // 모바일에서는 최소 22px 반지름 보장 (44px 지름)
     return Math.max(baseRadius, 22);
   }
-  
+
   return baseRadius;
 }
 

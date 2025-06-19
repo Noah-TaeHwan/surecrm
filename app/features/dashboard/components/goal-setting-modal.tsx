@@ -242,7 +242,7 @@ export function GoalSettingModal({
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-      <DialogContent 
+      <DialogContent
         className="sm:max-w-xl w-[95vw] p-0 overflow-hidden flex flex-col sm:max-h-[75vh] gap-0"
         style={{
           maxHeight: '75vh',
@@ -250,12 +250,13 @@ export function GoalSettingModal({
           minHeight: '0',
         }}
       >
-        
         {/* 헤더 - 고정 */}
         <DialogHeader className="flex-shrink-0 px-4 sm:px-6 py-4 sm:py-4 border-b border-border/30">
           <DialogTitle className="flex items-center gap-2 text-sm sm:text-lg">
             <TargetIcon className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
-            <span className="truncate">{editingGoal ? '목표 수정' : '목표 설정'}</span>
+            <span className="truncate">
+              {editingGoal ? '목표 수정' : '목표 설정'}
+            </span>
           </DialogTitle>
           <DialogDescription className="text-xs sm:text-sm text-muted-foreground">
             {editingGoal
@@ -267,10 +268,13 @@ export function GoalSettingModal({
         {/* 콘텐츠 - 스크롤 가능 */}
         <div className="flex-1 overflow-y-auto scrollbar-none modal-scroll-area px-4 sm:px-6 py-2 sm:py-6 space-y-2 sm:space-y-6 min-h-0">
           <Form {...form}>
-                          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 sm:space-y-6">
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="space-y-3 sm:space-y-6"
+            >
               {/* 🗓️ STEP 1: 목표 기간 선택 */}
-                              <div className="p-4 sm:p-4 bg-primary/5 border border-primary/20 rounded-lg">
-                                  <h4 className="text-xs sm:text-sm font-medium text-primary mb-2 sm:mb-3 flex items-center gap-2">
+              <div className="p-4 sm:p-4 bg-primary/5 border border-primary/20 rounded-lg">
+                <h4 className="text-xs sm:text-sm font-medium text-primary mb-2 sm:mb-3 flex items-center gap-2">
                   📅 목표 기간 설정
                 </h4>
                 <div className="grid grid-cols-2 gap-3 sm:gap-4">
@@ -349,7 +353,8 @@ export function GoalSettingModal({
                   />
                 </div>
                 <p className="text-xs text-muted-foreground mt-2">
-                  💡 선택한 기간의 목표를 설정하고 실시간 달성률을 확인할 수 있습니다
+                  💡 선택한 기간의 목표를 설정하고 실시간 달성률을 확인할 수
+                  있습니다
                 </p>
               </div>
 
@@ -430,7 +435,7 @@ export function GoalSettingModal({
                 </div>
               )}
 
-                              {/* 🚀 STEP 3: 새 목표 설정 */}
+              {/* 🚀 STEP 3: 새 목표 설정 */}
               <div className="space-y-3 sm:space-y-4">
                 <h4 className="text-sm sm:text-base font-medium text-foreground flex items-center gap-2">
                   🚀 {editingGoal ? '목표 수정' : '새 목표 설정'}
@@ -454,13 +459,22 @@ export function GoalSettingModal({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="revenue" className="text-xs sm:text-sm py-2">
+                          <SelectItem
+                            value="revenue"
+                            className="text-xs sm:text-sm py-2"
+                          >
                             💰 수수료 목표
                           </SelectItem>
-                          <SelectItem value="clients" className="text-xs sm:text-sm py-2">
+                          <SelectItem
+                            value="clients"
+                            className="text-xs sm:text-sm py-2"
+                          >
                             👥 신규 고객 목표
                           </SelectItem>
-                          <SelectItem value="referrals" className="text-xs sm:text-sm py-2">
+                          <SelectItem
+                            value="referrals"
+                            className="text-xs sm:text-sm py-2"
+                          >
                             🤝 소개 목표
                           </SelectItem>
                         </SelectContent>

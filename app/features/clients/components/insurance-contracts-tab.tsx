@@ -974,7 +974,9 @@ export function InsuranceContractsTab({
         <Card>
           <CardHeader className="pb-3 md:pb-4">
             <div className="flex items-start justify-between gap-3">
-              <h3 className="text-lg font-semibold text-foreground leading-tight">보험계약</h3>
+              <h3 className="text-lg font-semibold text-foreground leading-tight">
+                보험계약
+              </h3>
               <Button
                 size="sm"
                 className="flex-shrink-0"
@@ -992,58 +994,66 @@ export function InsuranceContractsTab({
                 📊 계약 현황
               </h4>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-              <div className="p-3 sm:p-4 bg-card rounded-lg border hover:shadow-md transition-shadow">
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-                  <div className="p-2 bg-primary/10 rounded-lg w-fit">
-                    <FileText className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs sm:text-sm text-muted-foreground">총 계약</p>
-                    <p className="text-lg sm:text-xl font-bold text-foreground">
-                      {totalContracts}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div className="p-3 sm:p-4 bg-card rounded-lg border hover:shadow-md transition-shadow">
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-                  <div className="p-2 bg-green-100 dark:bg-green-900/20 rounded-lg w-fit">
-                    <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs sm:text-sm text-muted-foreground">유효 계약</p>
-                    <p className="text-lg sm:text-xl font-bold text-foreground">
-                      {activeContracts}
-                    </p>
+                <div className="p-3 sm:p-4 bg-card rounded-lg border hover:shadow-md transition-shadow">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                    <div className="p-2 bg-primary/10 rounded-lg w-fit">
+                      <FileText className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs sm:text-sm text-muted-foreground">
+                        총 계약
+                      </p>
+                      <p className="text-lg sm:text-xl font-bold text-foreground">
+                        {totalContracts}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="p-3 sm:p-4 bg-card rounded-lg border hover:shadow-md transition-shadow">
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-                  <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg w-fit">
-                    <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs sm:text-sm text-muted-foreground">월 보험료</p>
-                    <p className="text-sm sm:text-xl font-bold text-foreground">
-                      {formatCurrency(totalMonthlyPremium)}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div className="p-3 sm:p-4 bg-card rounded-lg border hover:shadow-md transition-shadow">
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-                  <div className="p-2 bg-orange-100 dark:bg-orange-900/20 rounded-lg w-fit">
-                    <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-orange-600" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs sm:text-sm text-muted-foreground">총 수수료</p>
-                    <p className="text-sm sm:text-xl font-bold text-foreground">
-                      {formatCurrency(totalCommission)}
-                    </p>
+                <div className="p-3 sm:p-4 bg-card rounded-lg border hover:shadow-md transition-shadow">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                    <div className="p-2 bg-green-100 dark:bg-green-900/20 rounded-lg w-fit">
+                      <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs sm:text-sm text-muted-foreground">
+                        유효 계약
+                      </p>
+                      <p className="text-lg sm:text-xl font-bold text-foreground">
+                        {activeContracts}
+                      </p>
+                    </div>
                   </div>
                 </div>
-                              </div>
+                <div className="p-3 sm:p-4 bg-card rounded-lg border hover:shadow-md transition-shadow">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                    <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg w-fit">
+                      <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs sm:text-sm text-muted-foreground">
+                        월 보험료
+                      </p>
+                      <p className="text-sm sm:text-xl font-bold text-foreground">
+                        {formatCurrency(totalMonthlyPremium)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-3 sm:p-4 bg-card rounded-lg border hover:shadow-md transition-shadow">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                    <div className="p-2 bg-orange-100 dark:bg-orange-900/20 rounded-lg w-fit">
+                      <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-orange-600" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs sm:text-sm text-muted-foreground">
+                        총 수수료
+                      </p>
+                      <p className="text-sm sm:text-xl font-bold text-foreground">
+                        {formatCurrency(totalCommission)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -1066,7 +1076,9 @@ export function InsuranceContractsTab({
                     >
                       <div className="flex items-start justify-between gap-3 mb-4">
                         <div className="flex items-start gap-3 min-w-0 flex-1">
-                          <span className="text-lg md:text-xl">{typeConfig.icon}</span>
+                          <span className="text-lg md:text-xl">
+                            {typeConfig.icon}
+                          </span>
                           <div className="min-w-0 flex-1">
                             <h5 className="font-semibold text-sm md:text-base truncate leading-tight">
                               {contract.productName}
@@ -1074,7 +1086,7 @@ export function InsuranceContractsTab({
                             <div className="flex flex-wrap items-center gap-2 mt-2">
                               <Badge
                                 variant="outline"
-                                className={cn("text-xs", typeConfig.color)}
+                                className={cn('text-xs', typeConfig.color)}
                               >
                                 {typeConfig.label}
                               </Badge>
@@ -1827,15 +1839,16 @@ function NewContractModal({
       // 모든 input, textarea, select 요소의 포커스 제거
       const timer = setTimeout(() => {
         const focusedElement = document.activeElement as HTMLElement;
-        if (focusedElement && (
-          focusedElement.tagName === 'INPUT' || 
-          focusedElement.tagName === 'TEXTAREA' || 
-          focusedElement.tagName === 'SELECT'
-        )) {
+        if (
+          focusedElement &&
+          (focusedElement.tagName === 'INPUT' ||
+            focusedElement.tagName === 'TEXTAREA' ||
+            focusedElement.tagName === 'SELECT')
+        ) {
           focusedElement.blur();
         }
       }, 0);
-      
+
       return () => clearTimeout(timer);
     }
   }, [isOpen]);
@@ -2085,22 +2098,25 @@ function NewContractModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent 
+      <DialogContent
         className="sm:max-w-xl w-[95vw] p-0 overflow-hidden flex flex-col sm:max-h-[85vh] gap-0"
         style={{
           maxHeight: '75vh',
           height: 'auto',
-          minHeight: '0'
+          minHeight: '0',
         }}
       >
         {/* 헤더 - 고정 */}
         <DialogHeader className="flex-shrink-0 px-4 sm:px-6 py-4 sm:py-4 border-b border-border/30">
           <DialogTitle className="flex items-center gap-2 text-sm sm:text-lg">
             <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
-            <span className="truncate">{editingContract ? '보험계약 수정' : '새 보험계약 등록'}</span>
+            <span className="truncate">
+              {editingContract ? '보험계약 수정' : '새 보험계약 등록'}
+            </span>
           </DialogTitle>
           <DialogDescription className="text-xs sm:text-sm text-muted-foreground">
-            <span className="font-medium text-foreground">{clientName}</span> 고객의 보험계약 정보를 {editingContract ? '수정' : '등록'}하세요.
+            <span className="font-medium text-foreground">{clientName}</span>{' '}
+            고객의 보험계약 정보를 {editingContract ? '수정' : '등록'}하세요.
           </DialogDescription>
         </DialogHeader>
 
@@ -2264,7 +2280,10 @@ function NewContractModal({
                   </div>
 
                   <div className="space-y-1 sm:space-y-2">
-                    <Label htmlFor="insuredSsn" className="text-xs sm:text-sm font-medium">
+                    <Label
+                      htmlFor="insuredSsn"
+                      className="text-xs sm:text-sm font-medium"
+                    >
                       피보험자 주민번호
                     </Label>
                     <Input
@@ -2817,7 +2836,10 @@ function NewContractModal({
               </div>
 
               <div className="space-y-1 sm:space-y-2">
-                <Label htmlFor="notes" className="text-xs sm:text-sm font-medium">
+                <Label
+                  htmlFor="notes"
+                  className="text-xs sm:text-sm font-medium"
+                >
                   메모 (선택사항)
                 </Label>
                 <Textarea
@@ -2971,9 +2993,9 @@ function NewContractModal({
                                 )
                               }
                             >
-                              <SelectTrigger 
+                              <SelectTrigger
                                 className="h-8 text-sm"
-                                onPointerDown={(e) => {
+                                onPointerDown={e => {
                                   // 모바일에서 더 강한 포커스 유지
                                   if (window.innerWidth < 768) {
                                     e.currentTarget.focus();
@@ -2982,7 +3004,7 @@ function NewContractModal({
                               >
                                 <SelectValue placeholder="문서 종류 선택" />
                               </SelectTrigger>
-                              <SelectContent 
+                              <SelectContent
                                 className="z-[200]"
                                 side="bottom"
                                 align="start"
@@ -3021,21 +3043,20 @@ function NewContractModal({
                             />
                           </div>
                         </div>
-                                              </div>
+                      </div>
                     ))}
-                    </div>
+                  </div>
                 </div>
               )}
             </div>
-
-            
 
             {/* 📌 안내 메시지 */}
             <div className="p-3 bg-blue-50 dark:bg-blue-900/10 rounded-lg border border-blue-200 dark:border-blue-800">
               <div className="flex items-center gap-2">
                 <FileText className="h-4 w-4 text-blue-600" />
                 <div className="text-xs text-blue-700 dark:text-blue-300">
-                  <span className="font-medium">등록 완료 시:</span> 파이프라인 업데이트, 수수료 반영, 서류 관리 제공
+                  <span className="font-medium">등록 완료 시:</span> 파이프라인
+                  업데이트, 수수료 반영, 서류 관리 제공
                 </div>
               </div>
             </div>

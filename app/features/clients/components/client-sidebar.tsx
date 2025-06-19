@@ -99,7 +99,7 @@ export function ClientSidebar({
               <div className="flex-1 flex justify-end">
                 {isEditing ? (
                   <div className="flex gap-2">
-                    <Button 
+                    <Button
                       onClick={handleEditSave}
                       size="sm"
                       className="bg-primary hover:bg-primary/90 text-primary-foreground"
@@ -107,7 +107,7 @@ export function ClientSidebar({
                       <Save className="h-4 w-4 mr-1" />
                       저장
                     </Button>
-                    <Button 
+                    <Button
                       onClick={handleEditCancel}
                       size="sm"
                       variant="outline"
@@ -117,7 +117,7 @@ export function ClientSidebar({
                     </Button>
                   </div>
                 ) : (
-                  <Button 
+                  <Button
                     onClick={handleEditStart}
                     size="sm"
                     className="bg-primary hover:bg-primary/90 text-primary-foreground"

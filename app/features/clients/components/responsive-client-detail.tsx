@@ -1,11 +1,29 @@
 import { useState, useEffect, useRef } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '~/common/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/common/components/ui/tabs';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '~/common/components/ui/card';
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '~/common/components/ui/tabs';
 import { Badge } from '~/common/components/ui/badge';
 import { Button } from '~/common/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '~/common/components/ui/avatar';
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from '~/common/components/ui/avatar';
 import { Separator } from '~/common/components/ui/separator';
-import { Sheet, SheetContent, SheetTrigger } from '~/common/components/ui/sheet';
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from '~/common/components/ui/sheet';
 import {
   Phone,
   Mail,
@@ -43,7 +61,11 @@ import {
 import { cn } from '~/lib/utils';
 import { Link } from 'react-router';
 
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '~/common/components/ui/collapsible';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '~/common/components/ui/collapsible';
 import { Input } from '~/common/components/ui/input';
 
 interface ResponsiveClientDetailProps {
@@ -69,7 +91,7 @@ interface ResponsiveClientDetailProps {
 
 /**
  * ResponsiveClientDetail - 모바일 우선 반응형 고객 상세 뷰 컴포넌트
- * 
+ *
  * 주요 기능:
  * - Mobile-first 반응형 레이아웃 (모바일 → 태블릿 → 데스크톱)
  * - 터치 친화적 UI 요소 (최소 44px 터치 타겟)
@@ -104,9 +126,9 @@ export function ResponsiveClientDetail({
   const [isClientInfoExpanded, setIsClientInfoExpanded] = useState(false);
   const [newTag, setNewTag] = useState('');
   const [isAddingTag, setIsAddingTag] = useState(false);
-  
+
   // 캐러셀 스크롤용 state (스와이프 자동 이동 제거됨)
-  
+
   // 캐러셀 스크롤 제어를 위한 ref
   const carouselRef = useRef<HTMLDivElement>(null);
 
@@ -115,7 +137,9 @@ export function ResponsiveClientDetail({
       <div className="flex items-center justify-center min-h-[50vh] p-4">
         <div className="text-center">
           <User className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-          <p className="text-muted-foreground text-sm">고객 정보를 불러올 수 없습니다.</p>
+          <p className="text-muted-foreground text-sm">
+            고객 정보를 불러올 수 없습니다.
+          </p>
         </div>
       </div>
     );
@@ -125,13 +149,33 @@ export function ResponsiveClientDetail({
   const getImportanceConfig = (importance: string) => {
     switch (importance) {
       case 'high':
-        return { color: 'text-red-600', bg: 'bg-red-50 border-red-200', icon: '🔥', label: '키맨' };
+        return {
+          color: 'text-red-600',
+          bg: 'bg-red-50 border-red-200',
+          icon: '🔥',
+          label: '키맨',
+        };
       case 'medium':
-        return { color: 'text-yellow-600', bg: 'bg-yellow-50 border-yellow-200', icon: '⭐', label: '보통' };
+        return {
+          color: 'text-yellow-600',
+          bg: 'bg-yellow-50 border-yellow-200',
+          icon: '⭐',
+          label: '보통',
+        };
       case 'low':
-        return { color: 'text-gray-600', bg: 'bg-gray-50 border-gray-200', icon: '📄', label: '낮음' };
+        return {
+          color: 'text-gray-600',
+          bg: 'bg-gray-50 border-gray-200',
+          icon: '📄',
+          label: '낮음',
+        };
       default:
-        return { color: 'text-gray-600', bg: 'bg-gray-50 border-gray-200', icon: '📄', label: '보통' };
+        return {
+          color: 'text-gray-600',
+          bg: 'bg-gray-50 border-gray-200',
+          icon: '📄',
+          label: '보통',
+        };
     }
   };
 
@@ -155,18 +199,23 @@ export function ResponsiveClientDetail({
       if (currentIndex !== -1) {
         const carousel = carouselRef.current;
         const tabButton = carousel.children[currentIndex] as HTMLElement;
-        
+
         if (tabButton) {
           // 자연스러운 스크롤을 위해 requestAnimationFrame 사용
           requestAnimationFrame(() => {
             const carouselRect = carousel.getBoundingClientRect();
             const buttonRect = tabButton.getBoundingClientRect();
-            const scrollLeft = buttonRect.left - carouselRect.left + carousel.scrollLeft - (carouselRect.width / 2) + (buttonRect.width / 2);
-            
+            const scrollLeft =
+              buttonRect.left -
+              carouselRect.left +
+              carousel.scrollLeft -
+              carouselRect.width / 2 +
+              buttonRect.width / 2;
+
             // 스크롤 애니메이션 시간을 좀 더 부드럽게
             carousel.scrollTo({
               left: scrollLeft,
-              behavior: 'smooth'
+              behavior: 'smooth',
             });
           });
         }
@@ -180,7 +229,10 @@ export function ResponsiveClientDetail({
     const birth = new Date(birthDate);
     let age = today.getFullYear() - birth.getFullYear();
     const monthDiff = today.getMonth() - birth.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birth.getDate())
+    ) {
       age--;
     }
     return age;
@@ -200,9 +252,11 @@ export function ResponsiveClientDetail({
   };
 
   const getBMIStatus = (bmi: number) => {
-    if (bmi < 18.5) return { label: '저체중', color: 'text-blue-600 bg-blue-50' };
+    if (bmi < 18.5)
+      return { label: '저체중', color: 'text-blue-600 bg-blue-50' };
     if (bmi < 23) return { label: '정상', color: 'text-green-600 bg-green-50' };
-    if (bmi < 25) return { label: '과체중', color: 'text-yellow-600 bg-yellow-50' };
+    if (bmi < 25)
+      return { label: '과체중', color: 'text-yellow-600 bg-yellow-50' };
     return { label: '비만', color: 'text-red-600 bg-red-50' };
   };
 
@@ -238,33 +292,34 @@ export function ResponsiveClientDetail({
     <div className={cn('w-full', className)}>
       {/* 🎯 모바일/태블릿 레이아웃 (lg 미만에서만 표시) */}
       <div className="lg:hidden bg-background">
-
         {/* 🆕 모바일/태블릿 기본정보 접기/펼치기 섹션 */}
         <div className="border-b bg-background ">
-          <Collapsible 
-            open={isClientInfoExpanded} 
+          <Collapsible
+            open={isClientInfoExpanded}
             onOpenChange={setIsClientInfoExpanded}
           >
             <CollapsibleTrigger asChild>
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 className="w-full justify-between p-4 h-auto hover:bg-muted/50"
               >
                 <span className="font-medium text-sm">기본정보</span>
-                <ChevronDown className={cn(
-                  "h-4 w-4 transition-transform duration-200",
-                  isClientInfoExpanded && "rotate-180"
-                )} />
+                <ChevronDown
+                  className={cn(
+                    'h-4 w-4 transition-transform duration-200',
+                    isClientInfoExpanded && 'rotate-180'
+                  )}
+                />
               </Button>
             </CollapsibleTrigger>
-            
+
             <CollapsibleContent>
               <div className="px-4 pb-4 space-y-4">
                 {/* 편집 버튼 섹션 */}
                 <div className="flex justify-end">
                   {isEditing ? (
                     <div className="flex gap-2">
-                      <Button 
+                      <Button
                         onClick={onEditSave}
                         size="sm"
                         className="bg-primary hover:bg-primary/90 text-primary-foreground"
@@ -272,7 +327,7 @@ export function ResponsiveClientDetail({
                         <Save className="h-4 w-4 mr-1" />
                         저장
                       </Button>
-                      <Button 
+                      <Button
                         onClick={onEditCancel}
                         size="sm"
                         variant="outline"
@@ -282,7 +337,7 @@ export function ResponsiveClientDetail({
                       </Button>
                     </div>
                   ) : (
-                    <Button 
+                    <Button
                       onClick={onEditStart}
                       size="sm"
                       className="bg-primary hover:bg-primary/90 text-primary-foreground"
@@ -295,18 +350,22 @@ export function ResponsiveClientDetail({
 
                 {/* 연락처 정보 */}
                 <div className="space-y-3">
-                  <h4 className="text-sm font-medium text-muted-foreground">연락처 정보</h4>
-                  
+                  <h4 className="text-sm font-medium text-muted-foreground">
+                    연락처 정보
+                  </h4>
+
                   {/* 전화번호 */}
                   <div className="flex items-center gap-3">
                     <Phone className="h-4 w-4 text-muted-foreground" />
                     {isEditing ? (
                       <Input
                         value={editFormData?.phone || ''}
-                        onChange={e => setEditFormData?.({
-                          ...editFormData,
-                          phone: e.target.value,
-                        })}
+                        onChange={e =>
+                          setEditFormData?.({
+                            ...editFormData,
+                            phone: e.target.value,
+                          })
+                        }
                         placeholder="전화번호"
                         className="text-sm"
                       />
@@ -326,10 +385,12 @@ export function ResponsiveClientDetail({
                     {isEditing ? (
                       <Input
                         value={editFormData?.email || ''}
-                        onChange={e => setEditFormData?.({
-                          ...editFormData,
-                          email: e.target.value,
-                        })}
+                        onChange={e =>
+                          setEditFormData?.({
+                            ...editFormData,
+                            email: e.target.value,
+                          })
+                        }
                         placeholder="email@example.com"
                         type="email"
                         className="text-sm"
@@ -358,10 +419,12 @@ export function ResponsiveClientDetail({
                     {isEditing ? (
                       <Input
                         value={editFormData?.address || ''}
-                        onChange={e => setEditFormData?.({
-                          ...editFormData,
-                          address: e.target.value,
-                        })}
+                        onChange={e =>
+                          setEditFormData?.({
+                            ...editFormData,
+                            address: e.target.value,
+                          })
+                        }
                         placeholder="주소"
                         className="text-sm"
                       />
@@ -386,10 +449,12 @@ export function ResponsiveClientDetail({
                     {isEditing ? (
                       <Input
                         value={editFormData?.occupation || ''}
-                        onChange={e => setEditFormData?.({
-                          ...editFormData,
-                          occupation: e.target.value,
-                        })}
+                        onChange={e =>
+                          setEditFormData?.({
+                            ...editFormData,
+                            occupation: e.target.value,
+                          })
+                        }
                         placeholder="직업"
                         className="text-sm"
                       />
@@ -410,14 +475,18 @@ export function ResponsiveClientDetail({
 
                   {/* 통신사 정보 */}
                   <div className="flex items-center gap-3">
-                    <span className="h-4 w-4 text-muted-foreground flex items-center justify-center">📱</span>
+                    <span className="h-4 w-4 text-muted-foreground flex items-center justify-center">
+                      📱
+                    </span>
                     {isEditing ? (
                       <select
                         value={editFormData?.telecomProvider || 'none'}
-                        onChange={e => setEditFormData?.({
-                          ...editFormData,
-                          telecomProvider: e.target.value,
-                        })}
+                        onChange={e =>
+                          setEditFormData?.({
+                            ...editFormData,
+                            telecomProvider: e.target.value,
+                          })
+                        }
                         className="text-sm border rounded px-2 py-1"
                       >
                         <option value="none">통신사 선택</option>
@@ -428,7 +497,9 @@ export function ResponsiveClientDetail({
                       </select>
                     ) : (
                       <span className="text-sm">
-                        <span className="text-xs text-muted-foreground mr-2">통신사</span>
+                        <span className="text-xs text-muted-foreground mr-2">
+                          통신사
+                        </span>
                         {client.telecomProvider || (
                           <span
                             className="text-muted-foreground italic cursor-pointer hover:text-foreground transition-colors"
@@ -456,7 +527,9 @@ export function ResponsiveClientDetail({
                   </Badge>
                   {!client.currentStage?.name && (
                     <div className="text-xs text-muted-foreground bg-muted/20 p-2 rounded border-l-2 border-muted-foreground/30">
-                      💡 <strong>미설정</strong>은 아직 영업 파이프라인에 진입하지 않은 상태입니다. "새 영업 기회" 버튼을 눌러 파이프라인에 추가할 수 있습니다.
+                      💡 <strong>미설정</strong>은 아직 영업 파이프라인에
+                      진입하지 않은 상태입니다. "새 영업 기회" 버튼을 눌러
+                      파이프라인에 추가할 수 있습니다.
                     </div>
                   )}
                 </div>
@@ -469,16 +542,23 @@ export function ResponsiveClientDetail({
 
                   {/* 생년월일 */}
                   <div className="flex items-center gap-3">
-                    <span className="text-sm text-muted-foreground min-w-[50px]">생년월일</span>
+                    <span className="text-sm text-muted-foreground min-w-[50px]">
+                      생년월일
+                    </span>
                     {!isEditing ? (
                       client.extendedDetails?.birthDate ? (
                         <div className="space-y-1">
                           <span className="text-sm">
-                            {new Date(client.extendedDetails.birthDate).toLocaleDateString('ko-KR')}
+                            {new Date(
+                              client.extendedDetails.birthDate
+                            ).toLocaleDateString('ko-KR')}
                           </span>
                           {/* 3가지 나이 표시 */}
                           <div className="text-xs text-muted-foreground space-y-1">
-                                                         <div>만 나이: {calculateAge(client.extendedDetails.birthDate)}세</div>
+                            <div>
+                              만 나이:{' '}
+                              {calculateAge(client.extendedDetails.birthDate)}세
+                            </div>
                           </div>
                         </div>
                       ) : (
@@ -495,23 +575,29 @@ export function ResponsiveClientDetail({
                         <Input
                           type="date"
                           value={editFormData?.birthDate || ''}
-                          onChange={e => setEditFormData?.({
-                            ...editFormData,
-                            birthDate: e.target.value,
-                          })}
+                          onChange={e =>
+                            setEditFormData?.({
+                              ...editFormData,
+                              birthDate: e.target.value,
+                            })
+                          }
                           className="text-sm"
                         />
                         {/* 수정 중 나이 미리보기 */}
                         {editFormData?.birthDate && (
                           <div className="mt-2 p-2 border rounded-md bg-muted/20">
-                            <div className="text-xs text-foreground font-medium mb-1">📅 나이 미리보기:</div>
+                            <div className="text-xs text-foreground font-medium mb-1">
+                              📅 나이 미리보기:
+                            </div>
                             <div className="text-xs space-y-1">
                               <div>
-                                                                 <span className="text-green-700 dark:text-green-400">만 나이:</span>
-                                 <span className="ml-1 font-medium text-foreground">
-                                   {calculateAge(editFormData.birthDate)}세
-                                 </span>
-                               </div>
+                                <span className="text-green-700 dark:text-green-400">
+                                  만 나이:
+                                </span>
+                                <span className="ml-1 font-medium text-foreground">
+                                  {calculateAge(editFormData.birthDate)}세
+                                </span>
+                              </div>
                             </div>
                           </div>
                         )}
@@ -521,11 +607,15 @@ export function ResponsiveClientDetail({
 
                   {/* 성별 */}
                   <div className="flex items-center gap-3">
-                    <span className="text-sm text-muted-foreground min-w-[50px]">성별</span>
+                    <span className="text-sm text-muted-foreground min-w-[50px]">
+                      성별
+                    </span>
                     {!isEditing ? (
                       client.extendedDetails?.gender ? (
                         <Badge variant="outline" className="text-xs">
-                          {client.extendedDetails.gender === 'male' ? '남성' : '여성'}
+                          {client.extendedDetails.gender === 'male'
+                            ? '남성'
+                            : '여성'}
                         </Badge>
                       ) : (
                         <span
@@ -544,10 +634,12 @@ export function ResponsiveClientDetail({
                             name="gender"
                             value="male"
                             checked={editFormData?.gender === 'male'}
-                            onChange={e => setEditFormData?.({
-                              ...editFormData,
-                              gender: e.target.value,
-                            })}
+                            onChange={e =>
+                              setEditFormData?.({
+                                ...editFormData,
+                                gender: e.target.value,
+                              })
+                            }
                             className="text-xs"
                           />
                           <span className="text-xs">남성</span>
@@ -558,10 +650,12 @@ export function ResponsiveClientDetail({
                             name="gender"
                             value="female"
                             checked={editFormData?.gender === 'female'}
-                            onChange={e => setEditFormData?.({
-                              ...editFormData,
-                              gender: e.target.value,
-                            })}
+                            onChange={e =>
+                              setEditFormData?.({
+                                ...editFormData,
+                                gender: e.target.value,
+                              })
+                            }
                             className="text-xs"
                           />
                           <span className="text-xs">여성</span>
@@ -579,20 +673,26 @@ export function ResponsiveClientDetail({
 
                   {/* 키 */}
                   <div className="flex items-center gap-3">
-                    <span className="text-sm text-muted-foreground min-w-[40px]">키</span>
+                    <span className="text-sm text-muted-foreground min-w-[40px]">
+                      키
+                    </span>
                     {isEditing ? (
                       <div className="flex items-center gap-2">
                         <Input
                           type="number"
                           value={editFormData?.height || ''}
-                          onChange={e => setEditFormData?.({
-                            ...editFormData,
-                            height: e.target.value,
-                          })}
+                          onChange={e =>
+                            setEditFormData?.({
+                              ...editFormData,
+                              height: e.target.value,
+                            })
+                          }
                           placeholder="170"
                           className="text-sm"
                         />
-                        <span className="text-xs text-muted-foreground">cm</span>
+                        <span className="text-xs text-muted-foreground">
+                          cm
+                        </span>
                       </div>
                     ) : client.height ? (
                       <span className="text-sm">{client.height}cm</span>
@@ -609,20 +709,26 @@ export function ResponsiveClientDetail({
 
                   {/* 몸무게 */}
                   <div className="flex items-center gap-3">
-                    <span className="text-sm text-muted-foreground min-w-[40px]">몸무게</span>
+                    <span className="text-sm text-muted-foreground min-w-[40px]">
+                      몸무게
+                    </span>
                     {isEditing ? (
                       <div className="flex items-center gap-2">
                         <Input
                           type="number"
                           value={editFormData?.weight || ''}
-                          onChange={e => setEditFormData?.({
-                            ...editFormData,
-                            weight: e.target.value,
-                          })}
+                          onChange={e =>
+                            setEditFormData?.({
+                              ...editFormData,
+                              weight: e.target.value,
+                            })
+                          }
                           placeholder="70"
                           className="text-sm"
                         />
-                        <span className="text-xs text-muted-foreground">kg</span>
+                        <span className="text-xs text-muted-foreground">
+                          kg
+                        </span>
                       </div>
                     ) : client.weight ? (
                       <span className="text-sm">{client.weight}kg</span>
@@ -638,24 +744,46 @@ export function ResponsiveClientDetail({
                   </div>
 
                   {/* BMI 표시 */}
-                  {((isEditing && editFormData?.height && editFormData?.weight) || 
+                  {((isEditing &&
+                    editFormData?.height &&
+                    editFormData?.weight) ||
                     (!isEditing && client.height && client.weight)) && (
                     <div className="flex items-center gap-3">
-                      <span className="text-sm text-muted-foreground min-w-[40px]">BMI</span>
+                      <span className="text-sm text-muted-foreground min-w-[40px]">
+                        BMI
+                      </span>
                       <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-medium">
                             {calculateBMI(
-                              (isEditing ? editFormData?.height : client.height)?.toString() || '',
-                              (isEditing ? editFormData?.weight : client.weight)?.toString() || ''
+                              (isEditing
+                                ? editFormData?.height
+                                : client.height
+                              )?.toString() || '',
+                              (isEditing
+                                ? editFormData?.weight
+                                : client.weight
+                              )?.toString() || ''
                             )}
                           </span>
-                                                                                <Badge variant="outline" className="text-xs">
-                             {getBMIStatus(parseFloat(calculateBMI(
-                               (isEditing ? editFormData?.height : client.height)?.toString() || '',
-                               (isEditing ? editFormData?.weight : client.weight)?.toString() || ''
-                              ) || '0')).label}
-                           </Badge>
+                          <Badge variant="outline" className="text-xs">
+                            {
+                              getBMIStatus(
+                                parseFloat(
+                                  calculateBMI(
+                                    (isEditing
+                                      ? editFormData?.height
+                                      : client.height
+                                    )?.toString() || '',
+                                    (isEditing
+                                      ? editFormData?.weight
+                                      : client.weight
+                                    )?.toString() || ''
+                                  ) || '0'
+                                )
+                              ).label
+                            }
+                          </Badge>
                         </div>
                       </div>
                     </div>
@@ -663,24 +791,35 @@ export function ResponsiveClientDetail({
 
                   {/* 운전 여부 */}
                   <div className="flex items-center gap-3">
-                    <span className="text-sm text-muted-foreground min-w-[40px]">운전</span>
+                    <span className="text-sm text-muted-foreground min-w-[40px]">
+                      운전
+                    </span>
                     {isEditing ? (
                       <label className="flex items-center gap-2 cursor-pointer">
                         <input
                           type="checkbox"
                           checked={editFormData?.hasDrivingLicense || false}
-                          onChange={e => setEditFormData?.({
-                            ...editFormData,
-                            hasDrivingLicense: e.target.checked,
-                          })}
+                          onChange={e =>
+                            setEditFormData?.({
+                              ...editFormData,
+                              hasDrivingLicense: e.target.checked,
+                            })
+                          }
                           className="rounded"
                         />
                         <span className="text-sm">운전 가능</span>
                       </label>
                     ) : (
-                      <Badge variant={client.hasDrivingLicense ? 'default' : 'secondary'} className="text-xs">
+                      <Badge
+                        variant={
+                          client.hasDrivingLicense ? 'default' : 'secondary'
+                        }
+                        className="text-xs"
+                      >
                         {client.hasDrivingLicense !== undefined
-                          ? client.hasDrivingLicense ? '운전 가능' : '운전 불가'
+                          ? client.hasDrivingLicense
+                            ? '운전 가능'
+                            : '운전 불가'
                           : '미설정'}
                       </Badge>
                     )}
@@ -698,7 +837,9 @@ export function ResponsiveClientDetail({
                       <div className="border border-border rounded-lg p-4 bg-muted/30">
                         <div className="space-y-3">
                           <div className="flex items-center gap-2 mb-3">
-                            <span className="text-xs font-medium text-foreground">주민등록번호</span>
+                            <span className="text-xs font-medium text-foreground">
+                              주민등록번호
+                            </span>
                             <span className="text-xs text-amber-800 bg-amber-100 px-2 py-1 rounded border border-amber-200 dark:text-amber-300 dark:bg-amber-900/30 dark:border-amber-800">
                               ⚠️ 민감정보
                             </span>
@@ -711,20 +852,32 @@ export function ResponsiveClientDetail({
                               placeholder="YYMMDD"
                               value={editFormData?.ssnFront || ''}
                               onChange={e => {
-                                const value = e.target.value.replace(/\D/g, '').slice(0, 6);
-                                onSsnChange?.(value, editFormData?.ssnBack || '');
+                                const value = e.target.value
+                                  .replace(/\D/g, '')
+                                  .slice(0, 6);
+                                onSsnChange?.(
+                                  value,
+                                  editFormData?.ssnBack || ''
+                                );
                               }}
                               className="col-span-2 text-center font-mono"
                               maxLength={6}
                             />
-                            <span className="text-muted-foreground font-bold text-center">-</span>
+                            <span className="text-muted-foreground font-bold text-center">
+                              -
+                            </span>
                             <Input
                               type="text"
                               placeholder="1●●●●●●"
                               value={editFormData?.ssnBack || ''}
                               onChange={e => {
-                                const value = e.target.value.replace(/\D/g, '').slice(0, 7);
-                                onSsnChange?.(editFormData?.ssnFront || '', value);
+                                const value = e.target.value
+                                  .replace(/\D/g, '')
+                                  .slice(0, 7);
+                                onSsnChange?.(
+                                  editFormData?.ssnFront || '',
+                                  value
+                                );
                               }}
                               className="col-span-2 text-center font-mono"
                               maxLength={7}
@@ -736,7 +889,10 @@ export function ResponsiveClientDetail({
                             <div className="space-y-1">
                               <div className="flex items-center gap-1">
                                 <span>ℹ️</span>
-                                <span className="font-medium">주민등록번호 입력 시 자동으로 생년월일이 계산됩니다.</span>
+                                <span className="font-medium">
+                                  주민등록번호 입력 시 자동으로 생년월일이
+                                  계산됩니다.
+                                </span>
                               </div>
                               <div className="text-xs text-amber-700 dark:text-amber-300">
                                 • 앞자리: 생년월일 6자리 (YYMMDD)
@@ -762,13 +918,18 @@ export function ResponsiveClientDetail({
                   <div className="flex items-center gap-3">
                     <Network className="h-4 w-4 text-muted-foreground" />
                     <div className="flex-1">
-                      <div className="text-xs text-muted-foreground mb-1">이 고객을 소개한 사람</div>
+                      <div className="text-xs text-muted-foreground mb-1">
+                        이 고객을 소개한 사람
+                      </div>
                       {isEditing ? (
                         <div className="space-y-2">
                           <select
                             value={editFormData?.referredById || 'none'}
                             onChange={e => {
-                              const actualValue = e.target.value === 'none' ? undefined : e.target.value;
+                              const actualValue =
+                                e.target.value === 'none'
+                                  ? undefined
+                                  : e.target.value;
                               setEditFormData?.({
                                 ...editFormData,
                                 referredById: actualValue,
@@ -776,7 +937,9 @@ export function ResponsiveClientDetail({
                             }}
                             className="w-full text-sm border rounded px-2 py-1"
                           >
-                            <option value="none">직접 개발 (소개자 없음)</option>
+                            <option value="none">
+                              직접 개발 (소개자 없음)
+                            </option>
                             {availableReferrers?.map(referrer => (
                               <option key={referrer.id} value={referrer.id}>
                                 {referrer.name}
@@ -786,7 +949,10 @@ export function ResponsiveClientDetail({
                           <div className="text-xs text-muted-foreground bg-blue-50 dark:bg-blue-900/20 p-2 rounded border border-blue-200 dark:border-blue-800">
                             <div className="flex items-center gap-1">
                               <span>💡</span>
-                              <span>소개자를 변경하면 소개 네트워크가 업데이트됩니다.</span>
+                              <span>
+                                소개자를 변경하면 소개 네트워크가
+                                업데이트됩니다.
+                              </span>
                             </div>
                           </div>
                         </div>
@@ -798,12 +964,18 @@ export function ResponsiveClientDetail({
                           >
                             {client.referredBy.name}
                           </Link>
-                          <Badge variant="outline" className="text-xs">소개자</Badge>
+                          <Badge variant="outline" className="text-xs">
+                            소개자
+                          </Badge>
                         </div>
                       ) : (
                         <div className="flex items-center gap-2">
-                          <span className="text-sm text-muted-foreground">직접 개발 고객</span>
-                          <Badge variant="secondary" className="text-xs">신규 개발</Badge>
+                          <span className="text-sm text-muted-foreground">
+                            직접 개발 고객
+                          </span>
+                          <Badge variant="secondary" className="text-xs">
+                            신규 개발
+                          </Badge>
                         </div>
                       )}
                     </div>
@@ -813,35 +985,54 @@ export function ResponsiveClientDetail({
                   <div className="flex items-start gap-3">
                     <Network className="h-4 w-4 text-muted-foreground mt-1" />
                     <div className="flex-1">
-                      <div className="text-xs text-muted-foreground mb-1">이 고객이 소개한 사람들</div>
-                      {client.referredClients && client.referredClients.length > 0 ? (
+                      <div className="text-xs text-muted-foreground mb-1">
+                        이 고객이 소개한 사람들
+                      </div>
+                      {client.referredClients &&
+                      client.referredClients.length > 0 ? (
                         <div className="space-y-2">
                           <div className="flex items-center gap-2 mb-2">
-                            <span className="text-sm font-medium">총 {client.referralCount}명 소개</span>
-                            <Badge variant="default" className="text-xs bg-green-100 text-green-700 border-green-300">
+                            <span className="text-sm font-medium">
+                              총 {client.referralCount}명 소개
+                            </span>
+                            <Badge
+                              variant="default"
+                              className="text-xs bg-green-100 text-green-700 border-green-300"
+                            >
                               소개 기여자
                             </Badge>
                           </div>
                           <div className="space-y-1">
-                            {client.referredClients.map((referredClient: any, index: number) => (
-                              <div key={referredClient.id} className="flex items-center gap-2">
-                                <Link
-                                  to={`/clients/${referredClient.id}`}
-                                  className="text-sm text-primary hover:underline font-medium"
+                            {client.referredClients.map(
+                              (referredClient: any, index: number) => (
+                                <div
+                                  key={referredClient.id}
+                                  className="flex items-center gap-2"
                                 >
-                                  {index + 1}. {referredClient.name}
-                                </Link>
-                                <Badge variant="outline" className="text-xs">
-                                  {new Date(referredClient.createdAt).toLocaleDateString('ko-KR')}
-                                </Badge>
-                              </div>
-                            ))}
+                                  <Link
+                                    to={`/clients/${referredClient.id}`}
+                                    className="text-sm text-primary hover:underline font-medium"
+                                  >
+                                    {index + 1}. {referredClient.name}
+                                  </Link>
+                                  <Badge variant="outline" className="text-xs">
+                                    {new Date(
+                                      referredClient.createdAt
+                                    ).toLocaleDateString('ko-KR')}
+                                  </Badge>
+                                </div>
+                              )
+                            )}
                           </div>
                         </div>
                       ) : (
                         <div className="flex items-center gap-2">
-                          <span className="text-sm text-muted-foreground">아직 소개한 고객이 없습니다</span>
-                          <Badge variant="outline" className="text-xs">잠재 소개자</Badge>
+                          <span className="text-sm text-muted-foreground">
+                            아직 소개한 고객이 없습니다
+                          </span>
+                          <Badge variant="outline" className="text-xs">
+                            잠재 소개자
+                          </Badge>
                         </div>
                       )}
                     </div>
@@ -893,7 +1084,9 @@ export function ResponsiveClientDetail({
                     ) : (
                       <div className="text-center py-3 w-full">
                         <Target className="h-5 w-5 text-muted-foreground mx-auto mb-2" />
-                        <p className="text-xs text-muted-foreground mb-2">태그가 없습니다</p>
+                        <p className="text-xs text-muted-foreground mb-2">
+                          태그가 없습니다
+                        </p>
                         <Button
                           variant="outline"
                           size="sm"
@@ -917,27 +1110,29 @@ export function ResponsiveClientDetail({
           <div className="relative">
             {/* 탭 컨테이너 */}
             <div className="relative overflow-hidden">
-              <div 
+              <div
                 ref={carouselRef}
                 className="flex gap-3 px-4 py-2.5 overflow-x-auto overflow-y-hidden snap-x snap-mandatory scrollbar-hide scrollbar-none tab-carousel-container"
                 data-scrollbar-hidden="true"
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
-                style={{ 
-                  scrollBehavior: 'smooth',
-                  WebkitOverflowScrolling: 'touch',
-                  scrollbarWidth: 'none',
-                  msOverflowStyle: 'none',
-                  overflowX: 'auto',
-                  overflowY: 'hidden',
-                  scrollbarColor: 'transparent transparent'
-                } as React.CSSProperties}
+                style={
+                  {
+                    scrollBehavior: 'smooth',
+                    WebkitOverflowScrolling: 'touch',
+                    scrollbarWidth: 'none',
+                    msOverflowStyle: 'none',
+                    overflowX: 'auto',
+                    overflowY: 'hidden',
+                    scrollbarColor: 'transparent transparent',
+                  } as React.CSSProperties
+                }
               >
                 {mobileTabs.map((tab, index) => {
                   const Icon = tab.icon;
                   const isActive = activeTab === tab.id;
-                  
+
                   return (
                     <button
                       key={tab.id}
@@ -945,26 +1140,28 @@ export function ResponsiveClientDetail({
                       data-active={isActive}
                       className={cn(
                         // 기본 스타일 - 모든 탭에 공통 적용
-                        "relative flex-shrink-0 flex items-center gap-1.5 text-xs font-medium",
-                        "snap-center border min-w-fit overflow-hidden",
-                        "transform-gpu will-change-transform backface-hidden",
+                        'relative flex-shrink-0 flex items-center gap-1.5 text-xs font-medium',
+                        'snap-center border min-w-fit overflow-hidden',
+                        'transform-gpu will-change-transform backface-hidden',
                         // 🎯 새로운 부드러운 애니메이션을 위한 클래스 추가
-                        "tab-carousel-button",
+                        'tab-carousel-button',
                         // 🎯 부드러운 크기 및 border-radius 전환을 위한 CSS 변수 사용
-                        isActive ? [
-                          // 활성 탭: 미묘한 패딩 증가와 일관된 rounded 값
-                          "px-3.5 py-1.5 rounded-lg",
-                          "bg-primary text-white",
-                          "shadow-sm shadow-primary/20 border-primary/30",
-                          "translate-y-0 z-10"
-                        ] : [
-                          // 비활성 탭: 기본 패딩과 rounded 값
-                          "px-3 py-1.5 rounded-lg",
-                          "bg-muted/30 text-muted-foreground border-border/30",
-                          "hover:bg-muted/50 hover:text-foreground/80",
-                          "hover:shadow-sm hover:border-border/50",
-                          "translate-y-0 z-0"
-                        ]
+                        isActive
+                          ? [
+                              // 활성 탭: 미묘한 패딩 증가와 일관된 rounded 값
+                              'px-3.5 py-1.5 rounded-lg',
+                              'bg-primary text-white',
+                              'shadow-sm shadow-primary/20 border-primary/30',
+                              'translate-y-0 z-10',
+                            ]
+                          : [
+                              // 비활성 탭: 기본 패딩과 rounded 값
+                              'px-3 py-1.5 rounded-lg',
+                              'bg-muted/30 text-muted-foreground border-border/30',
+                              'hover:bg-muted/50 hover:text-foreground/80',
+                              'hover:shadow-sm hover:border-border/50',
+                              'translate-y-0 z-0',
+                            ]
                       )}
                       style={{
                         // 🚀 부드럽고 일관된 전환 애니메이션
@@ -975,35 +1172,42 @@ export function ResponsiveClientDetail({
                       }}
                     >
                       {/* 아이콘 */}
-                      <div className={cn(
-                        "transition-all duration-300 ease-out flex-shrink-0",
-                        // 🎯 아이콘 크기도 부드럽게 전환 (더 미묘하게)
-                        isActive ? "scale-105" : "scale-100"
-                      )}>
-                        <Icon className={cn(
-                          "transition-all duration-300 ease-out",
-                          isActive ? "h-3.5 w-3.5 text-white" : "h-3 w-3"
-                        )} />
+                      <div
+                        className={cn(
+                          'transition-all duration-300 ease-out flex-shrink-0',
+                          // 🎯 아이콘 크기도 부드럽게 전환 (더 미묘하게)
+                          isActive ? 'scale-105' : 'scale-100'
+                        )}
+                      >
+                        <Icon
+                          className={cn(
+                            'transition-all duration-300 ease-out',
+                            isActive ? 'h-3.5 w-3.5 text-white' : 'h-3 w-3'
+                          )}
+                        />
                       </div>
-                      
+
                       {/* 라벨 */}
-                      <span className={cn(
-                        "text-xs font-medium whitespace-nowrap transition-all duration-300 ease-out",
-                        // 🎯 폰트 두께도 부드럽게 전환 (더 미묘하게)
-                        isActive ? "font-medium tracking-normal text-white" : "font-normal tracking-normal"
-                      )}>
+                      <span
+                        className={cn(
+                          'text-xs font-medium whitespace-nowrap transition-all duration-300 ease-out',
+                          // 🎯 폰트 두께도 부드럽게 전환 (더 미묘하게)
+                          isActive
+                            ? 'font-medium tracking-normal text-white'
+                            : 'font-normal tracking-normal'
+                        )}
+                      >
                         {tab.label}
                       </span>
-                      
-
 
                       {/* 🎨 호버 시 배경 효과 - 비활성 탭에만 */}
                       {!isActive && (
-                        <div 
+                        <div
                           className="absolute inset-0 rounded-lg bg-gradient-to-r from-accent/5 to-accent/10 opacity-0 hover:opacity-100 transition-all duration-300 ease-out -z-20"
                           style={{
                             transform: 'translate3d(0, 0, 0)',
-                            transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                            transition:
+                              'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
                           }}
                         />
                       )}
@@ -1016,15 +1220,11 @@ export function ResponsiveClientDetail({
         </div>
 
         {/* 모바일/태블릿 탭 컨텐츠 영역 */}
-        <div className="p-4 pb-20">
-          {children}
-        </div>
+        <div className="p-4 pb-20">{children}</div>
       </div>
 
       {/* 🎯 데스크톱 레이아웃 (lg 이상에서만 표시) - 기존 children을 그대로 렌더링 */}
-      <div className="hidden lg:block">
-      {children}
-      </div>
+      <div className="hidden lg:block">{children}</div>
     </div>
   );
 }

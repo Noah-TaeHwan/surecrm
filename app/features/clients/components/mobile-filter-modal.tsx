@@ -20,12 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/common/components/ui/select';
-import {
-  Filter,
-  X,
-  Settings,
-  RotateCcw,
-} from 'lucide-react';
+import { Filter, X, Settings, RotateCcw } from 'lucide-react';
 import { cn } from '~/lib/utils';
 
 export interface MobileFilterOptions {
@@ -78,7 +73,8 @@ export default function MobileFilterModal({
   availableSources,
   activeFiltersCount,
 }: MobileFilterModalProps) {
-  const [localFilters, setLocalFilters] = useState<MobileFilterOptions>(filters);
+  const [localFilters, setLocalFilters] =
+    useState<MobileFilterOptions>(filters);
 
   const handleFilterChange = (newFilters: Partial<MobileFilterOptions>) => {
     const updatedFilters = { ...localFilters, ...newFilters };
@@ -103,7 +99,10 @@ export default function MobileFilterModal({
     handleFilterChange({ stages: newStages });
   };
 
-  const handleImportanceToggle = (importanceValue: string, checked: boolean) => {
+  const handleImportanceToggle = (
+    importanceValue: string,
+    checked: boolean
+  ) => {
     const newImportance = checked
       ? [...localFilters.importance, importanceValue]
       : localFilters.importance.filter(val => val !== importanceValue);
@@ -119,8 +118,8 @@ export default function MobileFilterModal({
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent 
-        side="bottom" 
+      <SheetContent
+        side="bottom"
         className="h-[85vh] flex flex-col p-0 [&>button]:hidden"
       >
         <SheetHeader className="p-6 pb-4 flex-shrink-0 border-b border-border/40">
@@ -130,10 +129,9 @@ export default function MobileFilterModal({
                 고급 필터
               </SheetTitle>
               <SheetDescription className="text-sm text-muted-foreground">
-                {activeFiltersCount > 0 
-                  ? `${activeFiltersCount}개의 필터가 활성화됨` 
-                  : '상세한 조건으로 고객을 필터링하세요'
-                }
+                {activeFiltersCount > 0
+                  ? `${activeFiltersCount}개의 필터가 활성화됨`
+                  : '상세한 조건으로 고객을 필터링하세요'}
               </SheetDescription>
             </div>
             <Button
@@ -152,7 +150,9 @@ export default function MobileFilterModal({
           <div className="space-y-6">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <Label className="text-sm font-medium text-foreground">영업 단계</Label>
+                <Label className="text-sm font-medium text-foreground">
+                  영업 단계
+                </Label>
                 {localFilters.stages.length > 0 && (
                   <Badge variant="secondary" className="h-5 px-2 text-xs">
                     {localFilters.stages.length}개 선택
@@ -160,18 +160,21 @@ export default function MobileFilterModal({
                 )}
               </div>
               <div className="grid grid-cols-2 gap-3">
-                {availableStages.map((stage) => (
-                  <div key={stage.id} className="flex items-center space-x-2 p-3 rounded-lg border border-border/50 bg-card/30">
+                {availableStages.map(stage => (
+                  <div
+                    key={stage.id}
+                    className="flex items-center space-x-2 p-3 rounded-lg border border-border/50 bg-card/30"
+                  >
                     <Checkbox
                       id={`stage-${stage.id}`}
                       checked={localFilters.stages.includes(stage.id)}
-                      onCheckedChange={(checked) => 
+                      onCheckedChange={checked =>
                         handleStageToggle(stage.id, checked as boolean)
                       }
                       className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                     />
-                    <Label 
-                      htmlFor={`stage-${stage.id}`} 
+                    <Label
+                      htmlFor={`stage-${stage.id}`}
                       className="text-sm font-normal text-foreground cursor-pointer flex-1"
                     >
                       {stage.name}
@@ -185,7 +188,9 @@ export default function MobileFilterModal({
 
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <Label className="text-sm font-medium text-foreground">중요도</Label>
+                <Label className="text-sm font-medium text-foreground">
+                  중요도
+                </Label>
                 {localFilters.importance.length > 0 && (
                   <Badge variant="secondary" className="h-5 px-2 text-xs">
                     {localFilters.importance.length}개 선택
@@ -193,18 +198,26 @@ export default function MobileFilterModal({
                 )}
               </div>
               <div className="grid grid-cols-1 gap-3">
-                {availableImportance.map((importance) => (
-                  <div key={importance.value} className="flex items-center space-x-3 p-3 rounded-lg border border-border/50 bg-card/30">
+                {availableImportance.map(importance => (
+                  <div
+                    key={importance.value}
+                    className="flex items-center space-x-3 p-3 rounded-lg border border-border/50 bg-card/30"
+                  >
                     <Checkbox
                       id={`importance-${importance.value}`}
-                      checked={localFilters.importance.includes(importance.value)}
-                      onCheckedChange={(checked) => 
-                        handleImportanceToggle(importance.value, checked as boolean)
+                      checked={localFilters.importance.includes(
+                        importance.value
+                      )}
+                      onCheckedChange={checked =>
+                        handleImportanceToggle(
+                          importance.value,
+                          checked as boolean
+                        )
                       }
                       className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                     />
-                    <Label 
-                      htmlFor={`importance-${importance.value}`} 
+                    <Label
+                      htmlFor={`importance-${importance.value}`}
                       className="text-sm font-normal text-foreground cursor-pointer flex-1"
                     >
                       {importance.label}
@@ -218,7 +231,9 @@ export default function MobileFilterModal({
 
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <Label className="text-sm font-medium text-foreground">고객 출처</Label>
+                <Label className="text-sm font-medium text-foreground">
+                  고객 출처
+                </Label>
                 {localFilters.sources.length > 0 && (
                   <Badge variant="secondary" className="h-5 px-2 text-xs">
                     {localFilters.sources.length}개 선택
@@ -226,18 +241,21 @@ export default function MobileFilterModal({
                 )}
               </div>
               <div className="grid grid-cols-2 gap-3">
-                {availableSources.map((source) => (
-                  <div key={source.value} className="flex items-center space-x-2 p-3 rounded-lg border border-border/50 bg-card/30">
+                {availableSources.map(source => (
+                  <div
+                    key={source.value}
+                    className="flex items-center space-x-2 p-3 rounded-lg border border-border/50 bg-card/30"
+                  >
                     <Checkbox
                       id={`source-${source.value}`}
                       checked={localFilters.sources.includes(source.value)}
-                      onCheckedChange={(checked) => 
+                      onCheckedChange={checked =>
                         handleSourceToggle(source.value, checked as boolean)
                       }
                       className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                     />
-                    <Label 
-                      htmlFor={`source-${source.value}`} 
+                    <Label
+                      htmlFor={`source-${source.value}`}
                       className="text-sm font-normal text-foreground cursor-pointer flex-1"
                     >
                       {source.label}
@@ -251,7 +269,9 @@ export default function MobileFilterModal({
 
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <Label className="text-sm font-medium text-foreground">나이 범위</Label>
+                <Label className="text-sm font-medium text-foreground">
+                  나이 범위
+                </Label>
                 <Badge variant="outline" className="h-5 px-2 text-xs">
                   {localFilters.ageRange[0]}세 - {localFilters.ageRange[1]}세
                 </Badge>
@@ -259,7 +279,7 @@ export default function MobileFilterModal({
               <div className="px-3">
                 <Slider
                   value={localFilters.ageRange}
-                  onValueChange={(value) => 
+                  onValueChange={value =>
                     handleFilterChange({ ageRange: value as [number, number] })
                   }
                   min={18}
@@ -277,10 +297,18 @@ export default function MobileFilterModal({
             <Separator className="bg-border/60" />
 
             <div className="space-y-3">
-              <Label className="text-sm font-medium text-foreground">보험 가입 여부</Label>
+              <Label className="text-sm font-medium text-foreground">
+                보험 가입 여부
+              </Label>
               <Select
-                value={localFilters.hasPolicy === null ? 'all' : localFilters.hasPolicy ? 'yes' : 'no'}
-                onValueChange={(value) => {
+                value={
+                  localFilters.hasPolicy === null
+                    ? 'all'
+                    : localFilters.hasPolicy
+                      ? 'yes'
+                      : 'no'
+                }
+                onValueChange={value => {
                   const hasPolicy = value === 'all' ? null : value === 'yes';
                   handleFilterChange({ hasPolicy });
                 }}
@@ -299,14 +327,20 @@ export default function MobileFilterModal({
             <Separator className="bg-border/60" />
 
             <div className="space-y-4">
-              <Label className="text-sm font-medium text-foreground">정렬 설정</Label>
-              
+              <Label className="text-sm font-medium text-foreground">
+                정렬 설정
+              </Label>
+
               <div className="space-y-3">
                 <div>
-                  <Label className="text-xs text-muted-foreground mb-2 block">정렬 기준</Label>
+                  <Label className="text-xs text-muted-foreground mb-2 block">
+                    정렬 기준
+                  </Label>
                   <Select
                     value={localFilters.sortBy}
-                    onValueChange={(value) => handleFilterChange({ sortBy: value })}
+                    onValueChange={value =>
+                      handleFilterChange({ sortBy: value })
+                    }
                   >
                     <SelectTrigger className="h-9">
                       <SelectValue />
@@ -321,11 +355,15 @@ export default function MobileFilterModal({
                 </div>
 
                 <div>
-                  <Label className="text-xs text-muted-foreground mb-2 block">정렬 방향</Label>
+                  <Label className="text-xs text-muted-foreground mb-2 block">
+                    정렬 방향
+                  </Label>
                   <Select
                     value={localFilters.sortDirection}
-                    onValueChange={(value) => 
-                      handleFilterChange({ sortDirection: value as 'asc' | 'desc' })
+                    onValueChange={value =>
+                      handleFilterChange({
+                        sortDirection: value as 'asc' | 'desc',
+                      })
                     }
                   >
                     <SelectTrigger className="h-9">

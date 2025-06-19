@@ -66,13 +66,14 @@ export function WeekView({
         <div className="p-4 border-r border-border/20 bg-gradient-to-b from-card/60 to-card/40">
           <div className="text-xs text-muted-foreground font-medium">시간</div>
         </div>
-        
+
         {weekDates.map((date, index) => (
           <div
             key={date.toISOString()}
             className={cn(
               'p-4 text-center border-r border-border/20 last:border-r-0 bg-gradient-to-b from-card/40 to-card/20 transition-all duration-200',
-              isToday(date) && 'bg-gradient-to-b from-primary/20 to-primary/10 border-primary/30',
+              isToday(date) &&
+                'bg-gradient-to-b from-primary/20 to-primary/10 border-primary/30',
               index === 0 && 'text-red-500',
               index === 6 && 'text-blue-500'
             )}
@@ -191,10 +192,11 @@ export function WeekView({
                           {meeting.syncInfo?.syncStatus === 'conflict' && (
                             <div className="absolute top-1 right-1 w-2 h-2 rounded-full bg-red-400 border border-white/70 animate-pulse"></div>
                           )}
-                          
-                                                     {meeting.syncInfo?.syncStatus === 'synced' && meeting.syncInfo?.externalSource !== 'surecrm' && (
-                             <div className="absolute top-1 right-1 w-2 h-2 rounded-full bg-green-400 border border-white/50"></div>
-                           )}
+
+                          {meeting.syncInfo?.syncStatus === 'synced' &&
+                            meeting.syncInfo?.externalSource !== 'surecrm' && (
+                              <div className="absolute top-1 right-1 w-2 h-2 rounded-full bg-green-400 border border-white/50"></div>
+                            )}
                         </div>
                       ))}
                     </div>
@@ -219,11 +221,12 @@ export function WeekView({
               const now = new Date();
               const currentHour = now.getHours();
               const currentMinute = now.getMinutes();
-              
+
               if (currentHour >= 6 && currentHour <= 22) {
-                const position = ((currentHour - 6) * 64) + (currentMinute * 64 / 60) + 64; // +64 for header
+                const position =
+                  (currentHour - 6) * 64 + (currentMinute * 64) / 60 + 64; // +64 for header
                 return (
-                  <div 
+                  <div
                     className="absolute left-0 right-0 h-0.5 bg-red-500 shadow-lg"
                     style={{ top: `${position}px` }}
                   >

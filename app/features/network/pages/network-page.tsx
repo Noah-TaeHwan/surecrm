@@ -10,7 +10,10 @@ import {
 import NetworkControls from '../components/NetworkControls';
 import NetworkSidebar from '../components/NetworkSidebar';
 import NetworkDetailPanel from '../components/NetworkDetailPanel';
-import { NetworkMobileTabs, type NetworkMobileTabType } from '../components/NetworkMobileTabs';
+import {
+  NetworkMobileTabs,
+  type NetworkMobileTabType,
+} from '../components/NetworkMobileTabs';
 import { useBreakpoint } from '~/common/hooks/use-window-size';
 import {
   useRef,
@@ -34,7 +37,15 @@ import { getNetworkData, searchNetwork } from '../lib/network-data';
 import { requireAuth } from '~/lib/auth/middleware';
 
 // 아이콘 import 추가
-import { Filter, X, Search, Settings, Star, CheckCircle, BarChart4 } from 'lucide-react';
+import {
+  Filter,
+  X,
+  Search,
+  Settings,
+  Star,
+  CheckCircle,
+  BarChart4,
+} from 'lucide-react';
 
 export async function loader({ request }: Route.LoaderArgs) {
   try {
@@ -252,7 +263,8 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
   const { isMobile, isTablet, isDesktop, isHydrated } = useBreakpoint();
 
   // 모바일 탭 상태 관리
-  const [activeMobileTab, setActiveMobileTab] = useState<NetworkMobileTabType>('graph');
+  const [activeMobileTab, setActiveMobileTab] =
+    useState<NetworkMobileTabType>('graph');
 
   const graphRef = useRef<any>(null);
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
@@ -402,7 +414,12 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
           name: node.name,
           type: node.type || 'client',
           stage: node.status === 'active' ? '계약 완료' : '첫 상담',
-          importance: node.importance === 'high' ? 5 : node.importance === 'medium' ? 3 : 1,
+          importance:
+            node.importance === 'high'
+              ? 5
+              : node.importance === 'medium'
+                ? 3
+                : 1,
         }))
         .slice(0, 10); // 최대 10개 결과
 
@@ -412,19 +429,24 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
   );
 
   // 검색 결과 state
-  const [searchResults, setSearchResults] = useState<Array<{
-    id: string;
-    name: string;
-    type: string;
-    stage?: string;
-    importance?: number;
-  }>>([]);
+  const [searchResults, setSearchResults] = useState<
+    Array<{
+      id: string;
+      name: string;
+      type: string;
+      stage?: string;
+      importance?: number;
+    }>
+  >([]);
 
   // 검색 실행 함수
-  const executeSearch = useCallback((query: string) => {
-    const results = handleSearch(query);
-    setSearchResults(results);
-  }, [handleSearch]);
+  const executeSearch = useCallback(
+    (query: string) => {
+      const results = handleSearch(query);
+      setSearchResults(results);
+    },
+    [handleSearch]
+  );
 
   // 노드 포커스 함수 (옵시디언 스타일)
   const handleNodeFocus = useCallback(
@@ -516,9 +538,13 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
       // 모든 직접 연결 관계 수집
       networkData.links.forEach((link: NetworkLink) => {
         const sourceId =
-          typeof link.source === 'string' ? link.source : (link.source as any).id;
+          typeof link.source === 'string'
+            ? link.source
+            : (link.source as any).id;
         const targetId =
-          typeof link.target === 'string' ? link.target : (link.target as any).id;
+          typeof link.target === 'string'
+            ? link.target
+            : (link.target as any).id;
 
         if (!nodeConnections.has(sourceId)) {
           nodeConnections.set(sourceId, new Set());
@@ -642,9 +668,12 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
   ]);
 
   // 필터 변경 시 통계 업데이트
-  const handleFilterChange = useCallback((newFilters: Partial<NetworkFilters>) => {
-    setFilterSettings(prevFilters => ({ ...prevFilters, ...newFilters }));
-  }, []);
+  const handleFilterChange = useCallback(
+    (newFilters: Partial<NetworkFilters>) => {
+      setFilterSettings(prevFilters => ({ ...prevFilters, ...newFilters }));
+    },
+    []
+  );
 
   // 그래프 컴포넌트 렌더링
   const renderNetworkGraph = () => {
@@ -742,8 +771,18 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
               onClick={() => setIsFilterExpanded(true)}
               className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors shadow-sm"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707v4.172a1 1 0 01-.293.707L10 20.414a1 1 0 01-.707.293H9a1 1 0 01-1-1v-3.586a1 1 0 00-.293-.707L1.293 9.707A1 1 0 011 9V4z" />
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707v4.172a1 1 0 01-.293.707L10 20.414a1 1 0 01-.707.293H9a1 1 0 01-1-1v-3.586a1 1 0 00-.293-.707L1.293 9.707A1 1 0 011 9V4z"
+                />
               </svg>
               필터
             </button>
@@ -757,14 +796,15 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
                 className="fixed inset-0 bg-black/20 z-40 animate-fade-in"
                 onClick={() => setIsFilterExpanded(false)}
               />
-              
+
               {/* 좌측 슬라이드인 사이드바 */}
               <div
                 className="fixed top-0 left-0 bottom-0 z-50 bg-background border-r border-border shadow-2xl animate-slide-in-left flex flex-col"
                 style={{
                   width: '280px', // 데스크톱과 동일한 너비
                   paddingTop: 'calc(4rem + env(safe-area-inset-top, 0px))', // 헤더 높이 고려
-                  paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)',
+                  paddingBottom:
+                    'calc(env(safe-area-inset-bottom, 0px) + 1rem)',
                 }}
               >
                 {/* 헤더 */}
@@ -784,7 +824,7 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
                 </div>
 
                 {/* 스크롤 가능한 콘텐츠 영역 */}
-                <div 
+                <div
                   className="flex-1 overflow-y-auto min-h-0"
                   style={{
                     WebkitOverflowScrolling: 'touch', // iOS 모바일 스크롤 최적화
@@ -805,7 +845,8 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
             <CardHeader className="pb-3">
               <CardTitle className="text-lg">소개 네트워크</CardTitle>
               <CardDescription className="text-sm">
-                고객 간 소개 관계를 시각화합니다. 노드를 클릭하면 상세 정보를 볼 수 있습니다.
+                고객 간 소개 관계를 시각화합니다. 노드를 클릭하면 상세 정보를 볼
+                수 있습니다.
               </CardDescription>
 
               {/* 검색 컨트롤 */}
@@ -819,7 +860,7 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
             </CardHeader>
 
             <CardContent className="p-0">
-              <div 
+              <div
                 className="relative transition-all duration-300 ease-in-out"
                 style={{
                   height: selectedNode ? '30vh' : '45vh', // 필터 버튼 영역 고려해 높이 감소
@@ -875,7 +916,7 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
               className="fixed inset-0 bg-black/20 z-40 animate-fade-in"
               onClick={handleCloseSidebar}
             />
-            
+
             {/* 슬라이드업 패널 */}
             <div
               className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border rounded-t-xl shadow-2xl animate-slide-up flex flex-col"
@@ -890,8 +931,8 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
               </div>
 
               {/* NetworkDetailPanel 직접 렌더링 (데스크톱과 동일) - 스크롤 가능 */}
-              <div 
-                className="flex-1 overflow-y-auto px-4 pb-4" 
+              <div
+                className="flex-1 overflow-y-auto px-4 pb-4"
                 style={{
                   WebkitOverflowScrolling: 'touch', // iOS 모바일 스크롤 최적화
                   overscrollBehavior: 'contain', // 스크롤 바운싱 제어
@@ -950,7 +991,8 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
             <CardHeader>
               <CardTitle>소개 네트워크</CardTitle>
               <CardDescription>
-                고객 간 소개 관계를 시각화합니다. 노드를 클릭하면 상세 정보를 볼 수 있습니다.
+                고객 간 소개 관계를 시각화합니다. 노드를 클릭하면 상세 정보를 볼
+                수 있습니다.
               </CardDescription>
 
               {/* 검색 컨트롤 */}
@@ -963,7 +1005,7 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
             </CardHeader>
 
             <CardContent className="p-0">
-              <div 
+              <div
                 className="relative"
                 style={{
                   height: '50vh',

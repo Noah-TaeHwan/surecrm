@@ -114,10 +114,7 @@ export default [
     'api/google/calendar/callback',
     'routes/api.google.calendar.callback.ts'
   ),
-  route(
-    'api/google/calendar/sync',
-    'routes/api.google.calendar.sync.ts'
-  ),
+  route('api/google/calendar/sync', 'routes/api.google.calendar.sync.ts'),
 
   // 🚫 Catch-all (404 처리) - API 라우트 이후에 배치
   route('*', 'common/pages/error/not-found-page.tsx'),

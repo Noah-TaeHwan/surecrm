@@ -51,7 +51,9 @@ export default defineConfig(({ mode }) => {
       'process.env.VITE_GIT_COMMIT': JSON.stringify(gitCommit),
       // 🏷️ Vercel 환경변수 주입
       'process.env.VERCEL_ENV': JSON.stringify(env.VERCEL_ENV),
-      'process.env.VERCEL_GIT_COMMIT_SHA': JSON.stringify(env.VERCEL_GIT_COMMIT_SHA),
+      'process.env.VERCEL_GIT_COMMIT_SHA': JSON.stringify(
+        env.VERCEL_GIT_COMMIT_SHA
+      ),
       // 최소한의 전역 변수만 설정
       global: 'globalThis',
       // Node.js 모듈 비활성화

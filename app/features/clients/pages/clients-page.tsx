@@ -885,23 +885,28 @@ export default function ClientsPage({ loaderData }: any) {
     // 검색어 필터링
     const matchesSearch =
       !searchQuery ||
-      (client.fullName && client.fullName.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (client.fullName &&
+        client.fullName.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (client.phone && client.phone.includes(searchQuery)) ||
-      (client.email && client.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (client.occupation && client.occupation.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (client.address && client.address.toLowerCase().includes(searchQuery.toLowerCase()));
+      (client.email &&
+        client.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (client.occupation &&
+        client.occupation.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (client.address &&
+        client.address.toLowerCase().includes(searchQuery.toLowerCase()));
 
     // 🎯 기본 중요도 필터링 (기존 UI용)
     const matchesBasicImportance =
       filterImportance === 'all' || client.importance === filterImportance;
 
     // 🎯 고급 중요도 필터링 (MobileFilterModal용)
-    const matchesAdvancedImportance = 
-      advancedFilters.importance.length === 0 || 
+    const matchesAdvancedImportance =
+      advancedFilters.importance.length === 0 ||
       advancedFilters.importance.includes(client.importance);
 
     // 최종 중요도 매칭 (기본 또는 고급 둘 중 하나라도 매칭되면 통과)
-    const matchesImportance = matchesBasicImportance && matchesAdvancedImportance;
+    const matchesImportance =
+      matchesBasicImportance && matchesAdvancedImportance;
 
     // 🎯 기본 영업 단계 필터링 (기존 UI용)
     const matchesBasicStage =
@@ -928,10 +933,8 @@ export default function ClientsPage({ loaderData }: any) {
       advancedFilters.sources.includes('referral'); // 기본적으로 소개 고객 매칭
 
     const matchesAdvancedAgeRange = true; // 나이 정보가 없는 경우 기본 통과
-    
-    const matchesAdvancedPolicy = 
-      advancedFilters.hasPolicy === null ||
-      true; // 보험 가입 정보가 없는 경우 기본 통과
+
+    const matchesAdvancedPolicy = advancedFilters.hasPolicy === null || true; // 보험 가입 정보가 없는 경우 기본 통과
 
     // 최종 소개 상태 매칭
     const matchesReferralStatus = matchesBasicReferralStatus;

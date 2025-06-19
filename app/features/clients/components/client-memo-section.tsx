@@ -8,10 +8,7 @@ interface ClientMemoSectionProps {
   onSave: (notes: string) => Promise<void>; // 메모 저장 함수
 }
 
-export function ClientMemoSection({
-  notes,
-  onSave,
-}: ClientMemoSectionProps) {
+export function ClientMemoSection({ notes, onSave }: ClientMemoSectionProps) {
   // 메모 편집을 위한 독립적인 상태
   const [isEditingMemo, setIsEditingMemo] = useState(false);
   const [editingNotes, setEditingNotes] = useState(notes);
@@ -32,7 +29,7 @@ export function ClientMemoSection({
   // 메모 저장
   const handleSave = async () => {
     if (isSaving) return;
-    
+
     setIsSaving(true);
     try {
       await onSave(editingNotes);
@@ -54,10 +51,10 @@ export function ClientMemoSection({
           <span className="hidden sm:inline">고객 메모 및 특이사항</span>
           <span className="sm:hidden">고객 메모</span>
         </h4>
-        
+
         {/* 편집/저장/취소 버튼 */}
         {!isEditingMemo && notes && (
-          <Button 
+          <Button
             onClick={handleEditStart}
             size="sm"
             className="bg-primary hover:bg-primary/90 text-primary-foreground w-full sm:w-auto"
@@ -67,10 +64,10 @@ export function ClientMemoSection({
             <span className="hidden sm:inline">편집</span>
           </Button>
         )}
-        
+
         {isEditingMemo && (
           <div className="flex gap-2 w-full sm:w-auto">
-            <Button 
+            <Button
               onClick={handleSave}
               size="sm"
               disabled={isSaving}
@@ -79,7 +76,7 @@ export function ClientMemoSection({
               <Save className="h-4 w-4 mr-1" />
               {isSaving ? '저장 중...' : '저장'}
             </Button>
-            <Button 
+            <Button
               onClick={handleEditCancel}
               size="sm"
               variant="outline"
@@ -92,7 +89,7 @@ export function ClientMemoSection({
           </div>
         )}
       </div>
-      
+
       <div className="p-3 sm:p-4 bg-muted/20 rounded-lg border border-border/40">
         {isEditingMemo ? (
           <Textarea
@@ -110,8 +107,8 @@ export function ClientMemoSection({
             <p className="text-xs sm:text-sm text-muted-foreground mb-3">
               메모가 없습니다
             </p>
-            <Button 
-              size="sm" 
+            <Button
+              size="sm"
               onClick={handleEditStart}
               className="bg-primary hover:bg-primary/90 text-primary-foreground w-full sm:w-auto"
             >

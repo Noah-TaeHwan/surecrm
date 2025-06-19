@@ -18,7 +18,7 @@ function Input({ className, type, ...props }: React.ComponentProps<'input'>) {
           '[&::-webkit-calendar-picker-indicator]:opacity-60 [&::-webkit-calendar-picker-indicator]:hover:opacity-100',
           '[&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none',
           // 텍스트 색상 보정 (일부 브라우저에서 date input 텍스트가 투명해지는 문제 해결)
-          'text-foreground'
+          'text-foreground',
         ],
         className
       )}

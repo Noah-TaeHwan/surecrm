@@ -269,7 +269,7 @@ export function ClientsTableView({
                     <TableCell>
                       <div className="text-sm">
                         <div>
-                          <a 
+                          <a
                             href={`tel:${client.phone}`}
                             className="text-primary hover:underline"
                           >
@@ -278,7 +278,7 @@ export function ClientsTableView({
                         </div>
                         {client.email && (
                           <div className="text-muted-foreground">
-                            <a 
+                            <a
                               href={`mailto:${client.email}`}
                               className="text-primary hover:underline"
                             >

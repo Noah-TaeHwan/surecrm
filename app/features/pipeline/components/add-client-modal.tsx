@@ -318,15 +318,16 @@ export function AddClientModal({
       // 모든 input, textarea, select 요소의 포커스 제거
       const timer = setTimeout(() => {
         const focusedElement = document.activeElement as HTMLElement;
-        if (focusedElement && (
-          focusedElement.tagName === 'INPUT' || 
-          focusedElement.tagName === 'TEXTAREA' || 
-          focusedElement.tagName === 'SELECT'
-        )) {
+        if (
+          focusedElement &&
+          (focusedElement.tagName === 'INPUT' ||
+            focusedElement.tagName === 'TEXTAREA' ||
+            focusedElement.tagName === 'SELECT')
+        ) {
           focusedElement.blur();
         }
       }, 0);
-      
+
       return () => clearTimeout(timer);
     }
   }, [open]);
@@ -336,30 +337,32 @@ export function AddClientModal({
     if (!open) return;
 
     const measureHeight = () => {
-      const modal = document.querySelector('[data-slot="dialog-content"]') as HTMLElement;
+      const modal = document.querySelector(
+        '[data-slot="dialog-content"]'
+      ) as HTMLElement;
       const debugEl = document.getElementById('add-modal-height-debug');
-      
+
       if (modal && debugEl) {
         const actualHeight = modal.getBoundingClientRect().height;
         const expectedHeight = Math.round(window.innerHeight * 0.75);
         debugEl.textContent = `신규모달 실제높이: ${Math.round(actualHeight)}px | 75vh: ${expectedHeight}px | 차이: ${Math.round(expectedHeight - actualHeight)}px`;
-        
+
         // 콘솔에도 로그 출력
         console.log('🔍 신규 고객 모달 높이 디버깅:', {
           실제높이: actualHeight,
           예상높이_75vh: expectedHeight,
           차이: expectedHeight - actualHeight,
-          CSS적용상태: getComputedStyle(modal).maxHeight
+          CSS적용상태: getComputedStyle(modal).maxHeight,
         });
       }
     };
 
     // 모달이 완전히 렌더링된 후 측정
     const timer = setTimeout(measureHeight, 100);
-    
+
     // 리사이즈 이벤트에도 측정
     window.addEventListener('resize', measureHeight);
-    
+
     return () => {
       clearTimeout(timer);
       window.removeEventListener('resize', measureHeight);
@@ -368,17 +371,21 @@ export function AddClientModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent 
+      <DialogContent
         className="sm:max-w-xl w-[95vw] p-0 overflow-hidden flex flex-col sm:max-h-[75vh] gap-0"
         style={{
           maxHeight: '75vh',
           height: 'auto',
-          minHeight: '0'
+          minHeight: '0',
         }}
       >
         {/* 🔍 디버깅: 실제 높이 표시 */}
-        <div className="absolute top-2 right-16 z-50 bg-blue-500 text-white text-xs px-2 py-1 rounded opacity-80" id="add-modal-height-debug">
-          신규모달 실제높이: 0px | 75vh: {Math.round(window.innerHeight * 0.75)}px
+        <div
+          className="absolute top-2 right-16 z-50 bg-blue-500 text-white text-xs px-2 py-1 rounded opacity-80"
+          id="add-modal-height-debug"
+        >
+          신규모달 실제높이: 0px | 75vh: {Math.round(window.innerHeight * 0.75)}
+          px
         </div>
 
         {/* 헤더 - 고정 */}
@@ -415,7 +422,11 @@ export function AddClientModal({
             </div>
 
             {/* 탭 네비게이션 */}
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <Tabs
+              value={activeTab}
+              onValueChange={setActiveTab}
+              className="w-full"
+            >
               <TabsList className="grid w-full grid-cols-4 h-9 sm:h-10">
                 <TabsTrigger
                   value="basic"
@@ -456,14 +467,20 @@ export function AddClientModal({
               </TabsList>
 
               {/* 🏷️ 기본 정보 탭 */}
-              <TabsContent value="basic" className="space-y-3 sm:space-y-4 mt-3 sm:mt-4">
+              <TabsContent
+                value="basic"
+                className="space-y-3 sm:space-y-4 mt-3 sm:mt-4"
+              >
                 <div className="space-y-3 sm:space-y-4">
                   <h4 className="text-sm sm:text-base font-medium text-foreground flex items-center gap-2">
                     👤 기본 정보
                   </h4>
 
                   <div className="space-y-2">
-                    <Label htmlFor="name" className="text-xs sm:text-sm font-medium">
+                    <Label
+                      htmlFor="name"
+                      className="text-xs sm:text-sm font-medium"
+                    >
                       고객명 *
                     </Label>
                     <Input
@@ -471,19 +488,24 @@ export function AddClientModal({
                       type="text"
                       placeholder="고객명을 입력하세요"
                       value={name}
-                      onChange={(e) => setName(e.target.value)}
+                      onChange={e => setName(e.target.value)}
                       className={`h-9 sm:h-10 text-xs sm:text-sm ${
                         errors.name ? 'border-destructive' : ''
                       }`}
                       autoFocus={false}
                     />
                     {errors.name && (
-                      <p className="text-xs text-destructive mt-1">{errors.name}</p>
+                      <p className="text-xs text-destructive mt-1">
+                        {errors.name}
+                      </p>
                     )}
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="phone" className="text-xs sm:text-sm font-medium">
+                    <Label
+                      htmlFor="phone"
+                      className="text-xs sm:text-sm font-medium"
+                    >
                       전화번호
                     </Label>
                     <Input
@@ -491,18 +513,23 @@ export function AddClientModal({
                       type="tel"
                       placeholder="010-1234-5678"
                       value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
+                      onChange={e => setPhone(e.target.value)}
                       className={`h-9 sm:h-10 text-xs sm:text-sm ${
                         errors.phone ? 'border-destructive' : ''
                       }`}
                     />
                     {errors.phone && (
-                      <p className="text-xs text-destructive mt-1">{errors.phone}</p>
+                      <p className="text-xs text-destructive mt-1">
+                        {errors.phone}
+                      </p>
                     )}
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="email" className="text-xs sm:text-sm font-medium">
+                    <Label
+                      htmlFor="email"
+                      className="text-xs sm:text-sm font-medium"
+                    >
                       이메일
                     </Label>
                     <Input
@@ -510,18 +537,23 @@ export function AddClientModal({
                       type="email"
                       placeholder="example@email.com"
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      onChange={e => setEmail(e.target.value)}
                       className={`h-9 sm:h-10 text-xs sm:text-sm ${
                         errors.email ? 'border-destructive' : ''
                       }`}
                     />
                     {errors.email && (
-                      <p className="text-xs text-destructive mt-1">{errors.email}</p>
+                      <p className="text-xs text-destructive mt-1">
+                        {errors.email}
+                      </p>
                     )}
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="address" className="text-xs sm:text-sm font-medium">
+                    <Label
+                      htmlFor="address"
+                      className="text-xs sm:text-sm font-medium"
+                    >
                       주소
                     </Label>
                     <Input
@@ -529,13 +561,16 @@ export function AddClientModal({
                       type="text"
                       placeholder="주소를 입력하세요"
                       value={address}
-                      onChange={(e) => setAddress(e.target.value)}
+                      onChange={e => setAddress(e.target.value)}
                       className="h-9 sm:h-10 text-xs sm:text-sm"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="occupation" className="text-xs sm:text-sm font-medium">
+                    <Label
+                      htmlFor="occupation"
+                      className="text-xs sm:text-sm font-medium"
+                    >
                       직업
                     </Label>
                     <Input
@@ -543,23 +578,31 @@ export function AddClientModal({
                       type="text"
                       placeholder="직업을 입력하세요"
                       value={occupation}
-                      onChange={(e) => setOccupation(e.target.value)}
+                      onChange={e => setOccupation(e.target.value)}
                       className="h-9 sm:h-10 text-xs sm:text-sm"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="telecom" className="text-xs sm:text-sm font-medium">
+                    <Label
+                      htmlFor="telecom"
+                      className="text-xs sm:text-sm font-medium"
+                    >
                       통신사
                     </Label>
-                    <Select value={telecomProvider} onValueChange={setTelecomProvider}>
+                    <Select
+                      value={telecomProvider}
+                      onValueChange={setTelecomProvider}
+                    >
                       <SelectTrigger className="h-9 sm:h-10 text-xs sm:text-sm">
                         <SelectValue placeholder="통신사를 선택하세요" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectGroup>
-                          <SelectLabel className="text-xs sm:text-sm py-2">주요 통신사</SelectLabel>
-                          {telecomProviders.slice(0, 3).map((provider) => (
+                          <SelectLabel className="text-xs sm:text-sm py-2">
+                            주요 통신사
+                          </SelectLabel>
+                          {telecomProviders.slice(0, 3).map(provider => (
                             <SelectItem
                               key={provider}
                               value={provider}
@@ -570,8 +613,10 @@ export function AddClientModal({
                           ))}
                         </SelectGroup>
                         <SelectGroup>
-                          <SelectLabel className="text-xs sm:text-sm py-2">알뜰폰</SelectLabel>
-                          {telecomProviders.slice(3).map((provider) => (
+                          <SelectLabel className="text-xs sm:text-sm py-2">
+                            알뜰폰
+                          </SelectLabel>
+                          {telecomProviders.slice(3).map(provider => (
                             <SelectItem
                               key={provider}
                               value={provider}
@@ -588,7 +633,10 @@ export function AddClientModal({
               </TabsContent>
 
               {/* 💪 신체 정보 탭 */}
-              <TabsContent value="physical" className="space-y-3 sm:space-y-4 mt-3 sm:mt-4">
+              <TabsContent
+                value="physical"
+                className="space-y-3 sm:space-y-4 mt-3 sm:mt-4"
+              >
                 <div className="space-y-3 sm:space-y-4">
                   <h4 className="text-sm sm:text-base font-medium text-foreground flex items-center gap-2">
                     💪 신체 정보
@@ -596,7 +644,10 @@ export function AddClientModal({
 
                   <div className="grid grid-cols-2 gap-3 sm:gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="height" className="text-xs sm:text-sm font-medium">
+                      <Label
+                        htmlFor="height"
+                        className="text-xs sm:text-sm font-medium"
+                      >
                         키 (cm)
                       </Label>
                       <Input
@@ -604,15 +655,20 @@ export function AddClientModal({
                         type="number"
                         placeholder="170"
                         value={height || ''}
-                        onChange={(e) =>
-                          setHeight(e.target.value ? Number(e.target.value) : undefined)
+                        onChange={e =>
+                          setHeight(
+                            e.target.value ? Number(e.target.value) : undefined
+                          )
                         }
                         className="h-9 sm:h-10 text-xs sm:text-sm"
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="weight" className="text-xs sm:text-sm font-medium">
+                      <Label
+                        htmlFor="weight"
+                        className="text-xs sm:text-sm font-medium"
+                      >
                         몸무게 (kg)
                       </Label>
                       <Input
@@ -620,8 +676,10 @@ export function AddClientModal({
                         type="number"
                         placeholder="70"
                         value={weight || ''}
-                        onChange={(e) =>
-                          setWeight(e.target.value ? Number(e.target.value) : undefined)
+                        onChange={e =>
+                          setWeight(
+                            e.target.value ? Number(e.target.value) : undefined
+                          )
                         }
                         className="h-9 sm:h-10 text-xs sm:text-sm"
                       />
@@ -629,13 +687,15 @@ export function AddClientModal({
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-xs sm:text-sm font-medium">운전면허 보유</Label>
+                    <Label className="text-xs sm:text-sm font-medium">
+                      운전면허 보유
+                    </Label>
                     <div className="flex items-center space-x-4 mt-2">
                       <div className="flex items-center space-x-2">
                         <Checkbox
                           id="license-yes"
                           checked={hasDrivingLicense === true}
-                          onCheckedChange={(checked) =>
+                          onCheckedChange={checked =>
                             setHasDrivingLicense(checked ? true : undefined)
                           }
                         />
@@ -650,7 +710,7 @@ export function AddClientModal({
                         <Checkbox
                           id="license-no"
                           checked={hasDrivingLicense === false}
-                          onCheckedChange={(checked) =>
+                          onCheckedChange={checked =>
                             setHasDrivingLicense(checked ? false : undefined)
                           }
                         />
@@ -667,24 +727,32 @@ export function AddClientModal({
               </TabsContent>
 
               {/* 📊 영업 정보 탭 */}
-              <TabsContent value="sales" className="space-y-3 sm:space-y-4 mt-3 sm:mt-4">
+              <TabsContent
+                value="sales"
+                className="space-y-3 sm:space-y-4 mt-3 sm:mt-4"
+              >
                 <div className="space-y-3 sm:space-y-4">
                   <h4 className="text-sm sm:text-base font-medium text-foreground flex items-center gap-2">
                     📊 영업 정보
                   </h4>
 
                   <div className="space-y-2">
-                    <Label htmlFor="stage" className="text-xs sm:text-sm font-medium">
+                    <Label
+                      htmlFor="stage"
+                      className="text-xs sm:text-sm font-medium"
+                    >
                       진행 단계 *
                     </Label>
                     <Select value={stageId} onValueChange={setStageId}>
-                      <SelectTrigger className={`h-9 sm:h-10 text-xs sm:text-sm ${
-                        errors.stageId ? 'border-destructive' : ''
-                      }`}>
+                      <SelectTrigger
+                        className={`h-9 sm:h-10 text-xs sm:text-sm ${
+                          errors.stageId ? 'border-destructive' : ''
+                        }`}
+                      >
                         <SelectValue placeholder="진행 단계를 선택하세요" />
                       </SelectTrigger>
                       <SelectContent>
-                        {stages.map((stage) => (
+                        {stages.map(stage => (
                           <SelectItem
                             key={stage.id}
                             value={stage.id}
@@ -696,26 +764,45 @@ export function AddClientModal({
                       </SelectContent>
                     </Select>
                     {errors.stageId && (
-                      <p className="text-xs text-destructive mt-1">{errors.stageId}</p>
+                      <p className="text-xs text-destructive mt-1">
+                        {errors.stageId}
+                      </p>
                     )}
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="importance" className="text-xs sm:text-sm font-medium">
+                    <Label
+                      htmlFor="importance"
+                      className="text-xs sm:text-sm font-medium"
+                    >
                       중요도
                     </Label>
-                    <Select value={importance} onValueChange={(value: 'high' | 'medium' | 'low') => setImportance(value)}>
+                    <Select
+                      value={importance}
+                      onValueChange={(value: 'high' | 'medium' | 'low') =>
+                        setImportance(value)
+                      }
+                    >
                       <SelectTrigger className="h-9 sm:h-10 text-xs sm:text-sm">
                         <SelectValue placeholder="중요도를 선택하세요" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="high" className="text-xs sm:text-sm py-2">
+                        <SelectItem
+                          value="high"
+                          className="text-xs sm:text-sm py-2"
+                        >
                           🔴 키맨
                         </SelectItem>
-                        <SelectItem value="medium" className="text-xs sm:text-sm py-2">
+                        <SelectItem
+                          value="medium"
+                          className="text-xs sm:text-sm py-2"
+                        >
                           🟡 보통
                         </SelectItem>
-                        <SelectItem value="low" className="text-xs sm:text-sm py-2">
+                        <SelectItem
+                          value="low"
+                          className="text-xs sm:text-sm py-2"
+                        >
                           🟢 낮음
                         </SelectItem>
                       </SelectContent>
@@ -724,18 +811,29 @@ export function AddClientModal({
 
                   {referrers.length > 0 && (
                     <div className="space-y-2">
-                      <Label htmlFor="referrer" className="text-xs sm:text-sm font-medium">
+                      <Label
+                        htmlFor="referrer"
+                        className="text-xs sm:text-sm font-medium"
+                      >
                         소개자
                       </Label>
-                      <Select value={referrerId || ''} onValueChange={(value) => setReferrerId(value || undefined)}>
+                      <Select
+                        value={referrerId || ''}
+                        onValueChange={value =>
+                          setReferrerId(value || undefined)
+                        }
+                      >
                         <SelectTrigger className="h-9 sm:h-10 text-xs sm:text-sm">
                           <SelectValue placeholder="소개자를 선택하세요" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="" className="text-xs sm:text-sm py-2">
+                          <SelectItem
+                            value=""
+                            className="text-xs sm:text-sm py-2"
+                          >
                             소개자 없음
                           </SelectItem>
-                          {referrers.map((referrer) => (
+                          {referrers.map(referrer => (
                             <SelectItem
                               key={referrer.id}
                               value={referrer.id}
@@ -750,27 +848,32 @@ export function AddClientModal({
                   )}
 
                   <div className="space-y-2">
-                    <Label htmlFor="note" className="text-xs sm:text-sm font-medium">
+                    <Label
+                      htmlFor="note"
+                      className="text-xs sm:text-sm font-medium"
+                    >
                       메모
                     </Label>
                     <Textarea
                       id="note"
                       placeholder="고객에 대한 메모를 입력하세요"
                       value={note}
-                      onChange={(e) => setNote(e.target.value)}
+                      onChange={e => setNote(e.target.value)}
                       className="text-xs sm:text-sm min-h-[80px] resize-none"
                       rows={3}
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-xs sm:text-sm font-medium">태그</Label>
+                    <Label className="text-xs sm:text-sm font-medium">
+                      태그
+                    </Label>
                     <div className="flex gap-2">
                       <Input
                         placeholder="태그를 입력하고 Enter를 누르세요"
                         value={newTag}
-                        onChange={(e) => setNewTag(e.target.value)}
-                        onKeyPress={(e) => {
+                        onChange={e => setNewTag(e.target.value)}
+                        onKeyPress={e => {
                           if (e.key === 'Enter') {
                             e.preventDefault();
                             addTag();
@@ -815,7 +918,10 @@ export function AddClientModal({
               </TabsContent>
 
               {/* 🛡️ 보험 정보 탭 */}
-              <TabsContent value="insurance" className="space-y-3 sm:space-y-4 mt-3 sm:mt-4">
+              <TabsContent
+                value="insurance"
+                className="space-y-3 sm:space-y-4 mt-3 sm:mt-4"
+              >
                 <div className="space-y-3 sm:space-y-4">
                   <div className="flex items-center justify-between">
                     <h4 className="text-sm sm:text-base font-medium text-foreground flex items-center gap-2">
@@ -858,14 +964,16 @@ export function AddClientModal({
                   {insuranceInfo.length === 0 ? (
                     <div className="text-center py-8 text-muted-foreground">
                       <Shield className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                      <p className="text-xs sm:text-sm">등록된 보험 정보가 없습니다</p>
+                      <p className="text-xs sm:text-sm">
+                        등록된 보험 정보가 없습니다
+                      </p>
                       <p className="text-xs text-muted-foreground mt-1">
                         위 버튼을 클릭하여 보험 정보를 추가하세요
                       </p>
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      {insuranceInfo.map((insurance) => (
+                      {insuranceInfo.map(insurance => (
                         <Card key={insurance.id} className="border-border/50">
                           <CardHeader className="pb-3">
                             <CardTitle className="text-sm flex items-center justify-between">
@@ -885,88 +993,120 @@ export function AddClientModal({
                             </CardTitle>
                           </CardHeader>
                           <CardContent className="space-y-3">
-                                                         <div className="grid grid-cols-2 gap-3">
-                               <div className="space-y-1">
-                                 <Label className="text-xs font-medium">보험사</Label>
-                                 <Input
-                                   placeholder="보험사명"
-                                   value={insurance.details.company || ''}
-                                   onChange={(e) =>
-                                     updateInsuranceDetails(insurance.id, 'company', e.target.value)
-                                   }
-                                   className="h-8 text-xs"
-                                 />
-                               </div>
-                               <div className="space-y-1">
-                                 <Label className="text-xs font-medium">상품명</Label>
-                                 <Input
-                                   placeholder="상품명"
-                                   value={insurance.details.productName || ''}
-                                   onChange={(e) =>
-                                     updateInsuranceDetails(insurance.id, 'productName', e.target.value)
-                                   }
-                                   className="h-8 text-xs"
-                                 />
-                               </div>
-                             </div>
-                             <div className="grid grid-cols-2 gap-3">
-                               <div className="space-y-1">
-                                 <Label className="text-xs font-medium">보험료 (월)</Label>
-                                 <Input
-                                   type="number"
-                                   placeholder="100000"
-                                   value={insurance.details.premium || ''}
-                                   onChange={(e) =>
-                                     updateInsuranceDetails(
-                                       insurance.id,
-                                       'premium',
-                                       e.target.value ? Number(e.target.value) : undefined
-                                     )
-                                   }
-                                   className="h-8 text-xs"
-                                 />
-                               </div>
-                               <div className="space-y-1">
-                                 <Label className="text-xs font-medium">보장금액</Label>
-                                 <Input
-                                   type="number"
-                                   placeholder="50000000"
-                                   value={insurance.details.coverageAmount || ''}
-                                   onChange={(e) =>
-                                     updateInsuranceDetails(
-                                       insurance.id,
-                                       'coverageAmount',
-                                       e.target.value ? Number(e.target.value) : undefined
-                                     )
-                                   }
-                                   className="h-8 text-xs"
-                                 />
-                               </div>
-                             </div>
-                             <div className="grid grid-cols-2 gap-3">
-                               <div className="space-y-1">
-                                 <Label className="text-xs font-medium">가입일</Label>
-                                 <Input
-                                   type="date"
-                                   value={insurance.details.startDate || ''}
-                                   onChange={(e) =>
-                                     updateInsuranceDetails(insurance.id, 'startDate', e.target.value)
-                                   }
-                                   className="h-8 text-xs"
-                                 />
-                               </div>
-                               <div className="space-y-1">
-                                 <Label className="text-xs font-medium">만료일</Label>
-                                 <Input
-                                   type="date"
-                                   value={insurance.details.endDate || ''}
-                                   onChange={(e) =>
-                                     updateInsuranceDetails(insurance.id, 'endDate', e.target.value)
-                                   }
-                                   className="h-8 text-xs"
-                                 />
-                               </div>
-                             </div>
+                            <div className="grid grid-cols-2 gap-3">
+                              <div className="space-y-1">
+                                <Label className="text-xs font-medium">
+                                  보험사
+                                </Label>
+                                <Input
+                                  placeholder="보험사명"
+                                  value={insurance.details.company || ''}
+                                  onChange={e =>
+                                    updateInsuranceDetails(
+                                      insurance.id,
+                                      'company',
+                                      e.target.value
+                                    )
+                                  }
+                                  className="h-8 text-xs"
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <Label className="text-xs font-medium">
+                                  상품명
+                                </Label>
+                                <Input
+                                  placeholder="상품명"
+                                  value={insurance.details.productName || ''}
+                                  onChange={e =>
+                                    updateInsuranceDetails(
+                                      insurance.id,
+                                      'productName',
+                                      e.target.value
+                                    )
+                                  }
+                                  className="h-8 text-xs"
+                                />
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                              <div className="space-y-1">
+                                <Label className="text-xs font-medium">
+                                  보험료 (월)
+                                </Label>
+                                <Input
+                                  type="number"
+                                  placeholder="100000"
+                                  value={insurance.details.premium || ''}
+                                  onChange={e =>
+                                    updateInsuranceDetails(
+                                      insurance.id,
+                                      'premium',
+                                      e.target.value
+                                        ? Number(e.target.value)
+                                        : undefined
+                                    )
+                                  }
+                                  className="h-8 text-xs"
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <Label className="text-xs font-medium">
+                                  보장금액
+                                </Label>
+                                <Input
+                                  type="number"
+                                  placeholder="50000000"
+                                  value={insurance.details.coverageAmount || ''}
+                                  onChange={e =>
+                                    updateInsuranceDetails(
+                                      insurance.id,
+                                      'coverageAmount',
+                                      e.target.value
+                                        ? Number(e.target.value)
+                                        : undefined
+                                    )
+                                  }
+                                  className="h-8 text-xs"
+                                />
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                              <div className="space-y-1">
+                                <Label className="text-xs font-medium">
+                                  가입일
+                                </Label>
+                                <Input
+                                  type="date"
+                                  value={insurance.details.startDate || ''}
+                                  onChange={e =>
+                                    updateInsuranceDetails(
+                                      insurance.id,
+                                      'startDate',
+                                      e.target.value
+                                    )
+                                  }
+                                  className="h-8 text-xs"
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <Label className="text-xs font-medium">
+                                  만료일
+                                </Label>
+                                <Input
+                                  type="date"
+                                  value={insurance.details.endDate || ''}
+                                  onChange={e =>
+                                    updateInsuranceDetails(
+                                      insurance.id,
+                                      'endDate',
+                                      e.target.value
+                                    )
+                                  }
+                                  className="h-8 text-xs"
+                                />
+                              </div>
+                            </div>
                           </CardContent>
                         </Card>
                       ))}

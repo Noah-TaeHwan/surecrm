@@ -48,7 +48,9 @@ export function MedicalHistoryTab({
       <Card>
         <CardHeader className="pb-3 md:pb-4">
           <div className="flex items-start justify-between gap-3">
-            <h3 className="text-lg font-semibold text-foreground leading-tight">병력사항</h3>
+            <h3 className="text-lg font-semibold text-foreground leading-tight">
+              병력사항
+            </h3>
             <Button
               size="sm"
               className="flex-shrink-0"
@@ -61,7 +63,7 @@ export function MedicalHistoryTab({
                     },
                     { method: 'POST' }
                   );
-                  
+
                   // 성공 모달 표시
                   setSuccessMessage('병력사항이 성공적으로 저장되었습니다.');
                   setShowSuccessModal(true);
@@ -75,7 +77,6 @@ export function MedicalHistoryTab({
           </div>
         </CardHeader>
         <CardContent className="p-4 md:p-6 space-y-5 md:space-y-6">
-          
           {/* 🕐 3개월 이내 의료사항 */}
           <div className="space-y-3 md:space-y-4">
             <h4 className="font-medium text-foreground flex items-center gap-2 text-sm md:text-base">
@@ -114,16 +115,18 @@ export function MedicalHistoryTab({
                   icon: '⚕️',
                 },
               ].map(item => (
-                <div 
-                  key={item.key} 
+                <div
+                  key={item.key}
                   className={cn(
-                    "flex items-center gap-3 p-2 md:p-0 rounded-md transition-colors",
-                    "hover:bg-muted/20 md:hover:bg-transparent",
+                    'flex items-center gap-3 p-2 md:p-0 rounded-md transition-colors',
+                    'hover:bg-muted/20 md:hover:bg-transparent',
                     // 모바일에서 터치하기 쉽게 더 큰 영역
-                    "min-h-[44px] md:min-h-0"
+                    'min-h-[44px] md:min-h-0'
                   )}
                 >
-                  <span className="text-base md:text-lg flex-shrink-0">{item.icon}</span>
+                  <span className="text-base md:text-lg flex-shrink-0">
+                    {item.icon}
+                  </span>
                   <div className="flex items-center gap-2 flex-1">
                     <Checkbox
                       id={`recent-${item.key}`}
@@ -132,7 +135,7 @@ export function MedicalHistoryTab({
                           item.key as keyof typeof medicalHistory
                         ] as boolean
                       }
-                      onCheckedChange={(checked) =>
+                      onCheckedChange={checked =>
                         setMedicalHistory(prev => ({
                           ...prev,
                           [item.key]: checked === true,
@@ -140,11 +143,11 @@ export function MedicalHistoryTab({
                       }
                       className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                     />
-                    <Label 
+                    <Label
                       htmlFor={`recent-${item.key}`}
                       className={cn(
-                        "text-sm cursor-pointer leading-relaxed flex-1",
-                        "hover:text-primary transition-colors"
+                        'text-sm cursor-pointer leading-relaxed flex-1',
+                        'hover:text-primary transition-colors'
                       )}
                     >
                       {item.label}
@@ -161,17 +164,19 @@ export function MedicalHistoryTab({
               📅 1년 이내 재검사 관련
             </h4>
             <div className="p-3 md:p-4 bg-muted/20 rounded-lg border border-border/40">
-              <div className={cn(
-                "flex items-center gap-3 p-2 md:p-0 rounded-md transition-colors",
-                "hover:bg-muted/20 md:hover:bg-transparent",
-                "min-h-[60px] md:min-h-0" // 긴 텍스트를 위해 더 큰 최소 높이
-              )}>
+              <div
+                className={cn(
+                  'flex items-center gap-3 p-2 md:p-0 rounded-md transition-colors',
+                  'hover:bg-muted/20 md:hover:bg-transparent',
+                  'min-h-[60px] md:min-h-0' // 긴 텍스트를 위해 더 큰 최소 높이
+                )}
+              >
                 <span className="text-base md:text-lg flex-shrink-0">🔄</span>
                 <div className="flex items-center gap-2 flex-1">
                   <Checkbox
                     id="additional-exam"
                     checked={medicalHistory.hasAdditionalExam}
-                    onCheckedChange={(checked) =>
+                    onCheckedChange={checked =>
                       setMedicalHistory(prev => ({
                         ...prev,
                         hasAdditionalExam: checked === true,
@@ -179,11 +184,11 @@ export function MedicalHistoryTab({
                     }
                     className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                   />
-                  <Label 
+                  <Label
                     htmlFor="additional-exam"
                     className={cn(
-                      "text-sm cursor-pointer leading-relaxed flex-1",
-                      "hover:text-primary transition-colors"
+                      'text-sm cursor-pointer leading-relaxed flex-1',
+                      'hover:text-primary transition-colors'
                     )}
                   >
                     의사로부터 진찰 또는 검사를 통하여{' '}
@@ -192,7 +197,7 @@ export function MedicalHistoryTab({
                   </Label>
                 </div>
               </div>
-              
+
               {/* 1년 이내 재검사 상세 내용 */}
               {medicalHistory.hasAdditionalExam && (
                 <div className="mt-3 space-y-2">
@@ -227,10 +232,10 @@ export function MedicalHistoryTab({
                   label: '입원',
                   icon: '🏥',
                 },
-                { 
-                  key: 'hasMajorSurgery', 
-                  label: '수술', 
-                  icon: '⚕️' 
+                {
+                  key: 'hasMajorSurgery',
+                  label: '수술',
+                  icon: '⚕️',
                 },
                 {
                   key: 'hasLongTermTreatment',
@@ -243,15 +248,17 @@ export function MedicalHistoryTab({
                   icon: '💊',
                 },
               ].map(item => (
-                <div 
-                  key={item.key} 
+                <div
+                  key={item.key}
                   className={cn(
-                    "flex items-center gap-3 p-2 md:p-0 rounded-md transition-colors",
-                    "hover:bg-muted/20 md:hover:bg-transparent",
-                    "min-h-[44px] md:min-h-0"
+                    'flex items-center gap-3 p-2 md:p-0 rounded-md transition-colors',
+                    'hover:bg-muted/20 md:hover:bg-transparent',
+                    'min-h-[44px] md:min-h-0'
                   )}
                 >
-                  <span className="text-base md:text-lg flex-shrink-0">{item.icon}</span>
+                  <span className="text-base md:text-lg flex-shrink-0">
+                    {item.icon}
+                  </span>
                   <div className="flex items-center gap-2 flex-1">
                     <Checkbox
                       id={`major-${item.key}`}
@@ -260,7 +267,7 @@ export function MedicalHistoryTab({
                           item.key as keyof typeof medicalHistory
                         ] as boolean
                       }
-                      onCheckedChange={(checked) =>
+                      onCheckedChange={checked =>
                         setMedicalHistory(prev => ({
                           ...prev,
                           [item.key]: checked === true,
@@ -268,11 +275,11 @@ export function MedicalHistoryTab({
                       }
                       className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                     />
-                    <Label 
+                    <Label
                       htmlFor={`major-${item.key}`}
                       className={cn(
-                        "text-sm cursor-pointer leading-relaxed flex-1",
-                        "hover:text-primary transition-colors"
+                        'text-sm cursor-pointer leading-relaxed flex-1',
+                        'hover:text-primary transition-colors'
                       )}
                     >
                       {item.label}

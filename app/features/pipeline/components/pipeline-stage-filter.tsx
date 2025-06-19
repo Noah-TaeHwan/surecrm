@@ -51,7 +51,7 @@ interface StageStats {
   total: number;
   highPriority: number;
   urgent: number; // 7일 이상 연락 없음
-  stale: number;  // 30일 이상 체류
+  stale: number; // 30일 이상 체류
 }
 
 export function PipelineStageFilter({
@@ -68,71 +68,82 @@ export function PipelineStageFilter({
   const [isExpanded, setIsExpanded] = useState(false);
 
   // 🎯 스테이지별 통계 계산
-  const getStageStats = useCallback((stageId: string): StageStats => {
-    const stageClients = clients.filter(client => client.stageId === stageId);
-    
-    const stats: StageStats = {
-      total: stageClients.length,
-      highPriority: 0,
-      urgent: 0,
-      stale: 0,
-    };
+  const getStageStats = useCallback(
+    (stageId: string): StageStats => {
+      const stageClients = clients.filter(client => client.stageId === stageId);
 
-    stageClients.forEach(client => {
-      // 높은 중요도
-      if (client.importance === 'high') {
-        stats.highPriority++;
-      }
+      const stats: StageStats = {
+        total: stageClients.length,
+        highPriority: 0,
+        urgent: 0,
+        stale: 0,
+      };
 
-      // 7일 이상 연락 없음
-      if (client.lastContactDate) {
-        const lastContactDate = new Date(client.lastContactDate);
-        if (!isNaN(lastContactDate.getTime())) {
-          const daysSince = Math.floor(
-            (new Date().getTime() - lastContactDate.getTime()) / (1000 * 60 * 60 * 24)
-          );
-          if (daysSince >= 7) {
-            stats.urgent++;
+      stageClients.forEach(client => {
+        // 높은 중요도
+        if (client.importance === 'high') {
+          stats.highPriority++;
+        }
+
+        // 7일 이상 연락 없음
+        if (client.lastContactDate) {
+          const lastContactDate = new Date(client.lastContactDate);
+          if (!isNaN(lastContactDate.getTime())) {
+            const daysSince = Math.floor(
+              (new Date().getTime() - lastContactDate.getTime()) /
+                (1000 * 60 * 60 * 24)
+            );
+            if (daysSince >= 7) {
+              stats.urgent++;
+            }
           }
         }
-      }
 
-      // 30일 이상 체류
-      if (client.createdAt) {
-        const createdAt = new Date(client.createdAt);
-        if (!isNaN(createdAt.getTime())) {
-          const daysInPipeline = Math.floor(
-            (new Date().getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24)
-          );
-          if (daysInPipeline >= 30) {
-            stats.stale++;
+        // 30일 이상 체류
+        if (client.createdAt) {
+          const createdAt = new Date(client.createdAt);
+          if (!isNaN(createdAt.getTime())) {
+            const daysInPipeline = Math.floor(
+              (new Date().getTime() - createdAt.getTime()) /
+                (1000 * 60 * 60 * 24)
+            );
+            if (daysInPipeline >= 30) {
+              stats.stale++;
+            }
           }
         }
-      }
-    });
+      });
 
-    return stats;
-  }, [clients]);
+      return stats;
+    },
+    [clients]
+  );
 
   // 🎯 전체 통계
-  const totalStats = stages.reduce((acc, stage) => {
-    const stats = getStageStats(stage.id);
-    return {
-      total: acc.total + stats.total,
-      highPriority: acc.highPriority + stats.highPriority,
-      urgent: acc.urgent + stats.urgent,
-      stale: acc.stale + stats.stale,
-    };
-  }, { total: 0, highPriority: 0, urgent: 0, stale: 0 });
+  const totalStats = stages.reduce(
+    (acc, stage) => {
+      const stats = getStageStats(stage.id);
+      return {
+        total: acc.total + stats.total,
+        highPriority: acc.highPriority + stats.highPriority,
+        urgent: acc.urgent + stats.urgent,
+        stale: acc.stale + stats.stale,
+      };
+    },
+    { total: 0, highPriority: 0, urgent: 0, stale: 0 }
+  );
 
   // 🎯 스테이지 토글
-  const toggleStage = useCallback((stageId: string) => {
-    if (selectedStages.includes(stageId)) {
-      onStagesChange(selectedStages.filter(id => id !== stageId));
-    } else {
-      onStagesChange([...selectedStages, stageId]);
-    }
-  }, [selectedStages, onStagesChange]);
+  const toggleStage = useCallback(
+    (stageId: string) => {
+      if (selectedStages.includes(stageId)) {
+        onStagesChange(selectedStages.filter(id => id !== stageId));
+      } else {
+        onStagesChange([...selectedStages, stageId]);
+      }
+    },
+    [selectedStages, onStagesChange]
+  );
 
   // 🎯 전체 선택/해제
   const selectAllStages = useCallback(() => {
@@ -164,10 +175,10 @@ export function PipelineStageFilter({
             <Grid3X3 className="h-4 w-4 mr-2" />
             전체 ({totalStats.total})
           </Button>
-          
+
           <Select
             value={currentSingleStage || ''}
-            onValueChange={(value) => {
+            onValueChange={value => {
               onSingleStageChange?.(value);
               onViewModeChange('single');
             }}
@@ -201,10 +212,12 @@ export function PipelineStageFilter({
                 <span className="text-sm font-medium">커스텀 필터</span>
                 <Button
                   variant="ghost"
-                  size="sm"  
+                  size="sm"
                   onClick={() => setIsExpanded(!isExpanded)}
                 >
-                  <ChevronDown className={`h-4 w-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                  <ChevronDown
+                    className={`h-4 w-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                  />
                 </Button>
               </div>
 
@@ -213,12 +226,14 @@ export function PipelineStageFilter({
                   {stages.map(stage => {
                     const stats = getStageStats(stage.id);
                     const isSelected = selectedStages.includes(stage.id);
-                    
+
                     return (
                       <div
                         key={stage.id}
                         className={`flex items-center justify-between p-2 rounded-lg border cursor-pointer transition-colors ${
-                          isSelected ? 'bg-primary/5 border-primary' : 'hover:bg-muted/50'
+                          isSelected
+                            ? 'bg-primary/5 border-primary'
+                            : 'hover:bg-muted/50'
                         }`}
                         onClick={() => toggleStage(stage.id)}
                       >
@@ -228,9 +243,11 @@ export function PipelineStageFilter({
                           ) : (
                             <Circle className="h-4 w-4 text-muted-foreground" />
                           )}
-                          <span className="text-sm font-medium">{stage.name}</span>
+                          <span className="text-sm font-medium">
+                            {stage.name}
+                          </span>
                         </div>
-                        
+
                         <div className="flex items-center gap-1">
                           <Badge variant={isSelected ? 'default' : 'secondary'}>
                             {stats.total}
@@ -258,15 +275,21 @@ export function PipelineStageFilter({
             <div className="text-xs text-muted-foreground">전체</div>
           </div>
           <div className="p-2 bg-orange-50 rounded-lg">
-            <div className="text-sm font-semibold text-orange-600">{totalStats.highPriority}</div>
+            <div className="text-sm font-semibold text-orange-600">
+              {totalStats.highPriority}
+            </div>
             <div className="text-xs text-orange-600">중요</div>
           </div>
           <div className="p-2 bg-red-50 rounded-lg">
-            <div className="text-sm font-semibold text-red-600">{totalStats.urgent}</div>
+            <div className="text-sm font-semibold text-red-600">
+              {totalStats.urgent}
+            </div>
             <div className="text-xs text-red-600">긴급</div>
           </div>
           <div className="p-2 bg-yellow-50 rounded-lg">
-            <div className="text-sm font-semibold text-yellow-600">{totalStats.stale}</div>
+            <div className="text-sm font-semibold text-yellow-600">
+              {totalStats.stale}
+            </div>
             <div className="text-xs text-yellow-600">지연</div>
           </div>
         </div>
@@ -318,7 +341,7 @@ export function PipelineStageFilter({
             {stages.map(stage => {
               const stats = getStageStats(stage.id);
               const isSelected = selectedStages.includes(stage.id);
-              
+
               return (
                 <DropdownMenuItem
                   key={stage.id}

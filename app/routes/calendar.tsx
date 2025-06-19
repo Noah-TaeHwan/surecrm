@@ -109,27 +109,51 @@ export async function loader({ request }: Route.LoaderArgs) {
       // 구글 이벤트 제목에서 미팅 타입 유추 시도
       const inferMeetingTypeFromTitle = (title: string): string => {
         const titleLower = title.toLowerCase();
-        
+
         // 한국어 키워드 기반 타입 추론
-        if (titleLower.includes('초회') || titleLower.includes('첫') || titleLower.includes('신규')) {
+        if (
+          titleLower.includes('초회') ||
+          titleLower.includes('첫') ||
+          titleLower.includes('신규')
+        ) {
           return 'first_consultation';
         }
-        if (titleLower.includes('후속') || titleLower.includes('팔로업') || titleLower.includes('follow')) {
+        if (
+          titleLower.includes('후속') ||
+          titleLower.includes('팔로업') ||
+          titleLower.includes('follow')
+        ) {
           return 'follow_up';
         }
-        if (titleLower.includes('상품') || titleLower.includes('설명') || titleLower.includes('presentation')) {
+        if (
+          titleLower.includes('상품') ||
+          titleLower.includes('설명') ||
+          titleLower.includes('presentation')
+        ) {
           return 'product_explanation';
         }
-        if (titleLower.includes('계약') && (titleLower.includes('검토') || titleLower.includes('review'))) {
+        if (
+          titleLower.includes('계약') &&
+          (titleLower.includes('검토') || titleLower.includes('review'))
+        ) {
           return 'contract_review';
         }
-        if (titleLower.includes('계약') && (titleLower.includes('체결') || titleLower.includes('서명') || titleLower.includes('signing'))) {
+        if (
+          titleLower.includes('계약') &&
+          (titleLower.includes('체결') ||
+            titleLower.includes('서명') ||
+            titleLower.includes('signing'))
+        ) {
           return 'contract_signing';
         }
-        if (titleLower.includes('보험금') || titleLower.includes('청구') || titleLower.includes('claim')) {
+        if (
+          titleLower.includes('보험금') ||
+          titleLower.includes('청구') ||
+          titleLower.includes('claim')
+        ) {
           return 'claim_support';
         }
-        
+
         // 기본값: 기타 미팅
         return 'other';
       };
@@ -137,10 +161,10 @@ export async function loader({ request }: Route.LoaderArgs) {
       return {
         id: event.id,
         title: event.title, // 구글 캘린더의 실제 이벤트 제목
-        client: { 
-          id: 'google', 
+        client: {
+          id: 'google',
           name: event.title, // 구글 이벤트 제목을 클라이언트명으로 사용
-          phone: '' 
+          phone: '',
         },
         date: event.startTime.toISOString().split('T')[0],
         time: event.startTime.toTimeString().slice(0, 5),
@@ -268,13 +292,16 @@ export async function action({ request }: Route.ActionArgs) {
           if (!settings?.googleAccessToken) {
             return {
               success: false,
-              message: '구글 캘린더 연동이 필요합니다. 설정에서 구글 계정을 연결해주세요.',
+              message:
+                '구글 캘린더 연동이 필요합니다. 설정에서 구글 계정을 연결해주세요.',
               requiresGoogleConnection: true,
             };
           }
 
           // 클라이언트 정보 조회 (구글 이벤트 설명에 포함용)
-          const { getClientsByAgent } = await import('~/features/calendar/lib/calendar-data');
+          const { getClientsByAgent } = await import(
+            '~/features/calendar/lib/calendar-data'
+          );
           const clients = await getClientsByAgent(agentId);
           const selectedClient = clients.find(c => c.id === clientId);
 
@@ -310,21 +337,24 @@ export async function action({ request }: Route.ActionArgs) {
           if (googleEventId) {
             return {
               success: true,
-              message: '미팅이 구글 캘린더에 생성되었습니다. 곧 캘린더에 표시됩니다.',
+              message:
+                '미팅이 구글 캘린더에 생성되었습니다. 곧 캘린더에 표시됩니다.',
               googleEventId,
               googleSynced: true,
             };
           } else {
             return {
               success: false,
-              message: '구글 캘린더에 미팅 생성에 실패했습니다. 다시 시도해주세요.',
+              message:
+                '구글 캘린더에 미팅 생성에 실패했습니다. 다시 시도해주세요.',
             };
           }
         } catch (error) {
           console.error('❌ 구글 캘린더 미팅 생성 실패:', error);
           return {
             success: false,
-            message: '미팅 생성 중 오류가 발생했습니다. 구글 캘린더 연동 상태를 확인해주세요.',
+            message:
+              '미팅 생성 중 오류가 발생했습니다. 구글 캘린더 연동 상태를 확인해주세요.',
             error: error instanceof Error ? error.message : '알 수 없는 오류',
           };
         }

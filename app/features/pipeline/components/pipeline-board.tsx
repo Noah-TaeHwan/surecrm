@@ -209,7 +209,9 @@ export function PipelineBoard({
         /* 🎯 모바일: 데스크톱과 동일한 구조로 변경 - 각 컬럼 독립 스크롤 */
         <div className="flex-1 overflow-hidden flex flex-col">
           {/* 🎯 모바일 헤더 영역 - 스크롤시 최소화 */}
-          <div className={`sticky top-7 z-40 bg-background border-b border-border transition-all duration-300 ${isScrolled ? 'pb-2' : 'pb-4'}`}>
+          <div
+            className={`sticky top-7 z-40 bg-background border-b border-border transition-all duration-300 ${isScrolled ? 'pb-2' : 'pb-4'}`}
+          >
             <Carousel
               opts={{
                 align: 'start',
@@ -222,7 +224,10 @@ export function PipelineBoard({
             >
               <CarouselContent className="-ml-1">
                 {stages.map(stage => (
-                  <CarouselItem key={`header-${stage.id}`} className="pl-1 basis-full">
+                  <CarouselItem
+                    key={`header-${stage.id}`}
+                    className="pl-1 basis-full"
+                  >
                     <div className="px-4">
                       <div
                         className={`flex flex-col rounded-lg border bg-card transition-all duration-300 border-border ${
@@ -230,13 +235,17 @@ export function PipelineBoard({
                         }`}
                       >
                         {/* 단계 제목 */}
-                        <div className={`flex items-center justify-between ${isScrolled ? 'mb-1' : 'mb-3'}`}>
+                        <div
+                          className={`flex items-center justify-between ${isScrolled ? 'mb-1' : 'mb-3'}`}
+                        >
                           <div className="flex items-center space-x-3 min-w-0 flex-1">
                             <div
                               className={`rounded-full flex-shrink-0 ${isScrolled ? 'w-2 h-2' : 'w-3 h-3'}`}
                               style={{ backgroundColor: stage.color }}
                             />
-                            <h3 className={`font-semibold text-foreground truncate ${isScrolled ? 'text-sm' : 'text-base'}`}>
+                            <h3
+                              className={`font-semibold text-foreground truncate ${isScrolled ? 'text-sm' : 'text-base'}`}
+                            >
                               {stage.name}
                             </h3>
                           </div>
@@ -247,7 +256,9 @@ export function PipelineBoard({
                           <div className="flex items-center justify-between text-sm">
                             <div className="flex items-center space-x-2 text-muted-foreground">
                               <Users className="h-3 w-3" />
-                              <span className="font-medium">{stage.stats.clientCount}명</span>
+                              <span className="font-medium">
+                                {stage.stats.clientCount}명
+                              </span>
                             </div>
                             {stage.stats.highImportanceCount > 0 && (
                               <div className="flex items-center space-x-1">
@@ -283,22 +294,30 @@ export function PipelineBoard({
                 <CarouselContent className="h-full -ml-1">
                   {stages.map(stage => {
                     const isDragTarget = draggingOver === stage.id;
-                    const canDrop = draggedClientId && dragSourceStageId.current !== stage.id;
+                    const canDrop =
+                      draggedClientId && dragSourceStageId.current !== stage.id;
                     const stageClients = clientsByStage[stage.id] || [];
 
                     return (
-                      <CarouselItem key={`content-${stage.id}`} className="pl-1 basis-full h-full">
+                      <CarouselItem
+                        key={`content-${stage.id}`}
+                        className="pl-1 basis-full h-full"
+                      >
                         <div
                           className="w-full px-4 h-full flex flex-col"
-                          style={{ height: `calc(100vh - ${isScrolled ? '12rem' : '16rem'})` }}
+                          style={{
+                            height: `calc(100vh - ${isScrolled ? '12rem' : '16rem'})`,
+                          }}
                           onDragOver={e => handleDragOver(e, stage.id)}
                           onDragLeave={handleDragLeave}
                           onDrop={e => handleDrop(e, stage.id)}
                         >
                           {/* 🎯 각 컬럼별 독립 스크롤 영역 */}
-                          <div 
+                          <div
                             className="overflow-y-auto scrollbar-hide h-full"
-                            style={{ height: `calc(100vh - ${isScrolled ? '12rem' : '16rem'})` }}
+                            style={{
+                              height: `calc(100vh - ${isScrolled ? '12rem' : '16rem'})`,
+                            }}
                           >
                             <div
                               className={`space-y-3 p-4 pb-16 rounded-lg transition-all duration-200 ${
@@ -313,7 +332,9 @@ export function PipelineBoard({
                                     key={client.id}
                                     id={`client-card-${client.id}`}
                                     draggable
-                                    onDragStart={e => handleDragStart(e, client.id, stage.id)}
+                                    onDragStart={e =>
+                                      handleDragStart(e, client.id, stage.id)
+                                    }
                                     onDragEnd={handleDragEnd}
                                     className={`transition-all duration-200 cursor-grab active:cursor-grabbing ${
                                       client.id === draggedClientId
@@ -328,20 +349,31 @@ export function PipelineBoard({
                                           ? client.tags.join(', ')
                                           : client.tags
                                       }
-                                      createdAt={client.createdAt || new Date().toISOString()}
+                                      createdAt={
+                                        client.createdAt ||
+                                        new Date().toISOString()
+                                      }
                                       insuranceInfo={
                                         Array.isArray(client.insuranceInfo)
                                           ? client.insuranceInfo[0]
                                           : client.insuranceInfo
                                       }
-                                      referredBy={client.referredBy || undefined}
+                                      referredBy={
+                                        client.referredBy || undefined
+                                      }
                                       isDragging={client.id === draggedClientId}
-                                      onRemoveFromPipeline={onRemoveFromPipeline}
+                                      onRemoveFromPipeline={
+                                        onRemoveFromPipeline
+                                      }
                                       onCreateContract={onCreateContract}
                                       onEditOpportunity={onEditOpportunity}
                                       products={client.products}
-                                      totalMonthlyPremium={client.totalMonthlyPremium}
-                                      totalExpectedCommission={client.totalExpectedCommission}
+                                      totalMonthlyPremium={
+                                        client.totalMonthlyPremium
+                                      }
+                                      totalExpectedCommission={
+                                        client.totalExpectedCommission
+                                      }
                                     />
                                   </div>
                                 ))
@@ -454,7 +486,10 @@ export function PipelineBoard({
           {/* 🎯 컬럼 내용들 스크롤 영역 */}
           <div className="flex-1 overflow-hidden">
             <div className="h-full overflow-hidden">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 pt-4" style={{ height: 'calc(100vh - 20rem)' }}>
+              <div
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 pt-4"
+                style={{ height: 'calc(100vh - 20rem)' }}
+              >
                 {stages.map(stage => {
                   const isDragTarget = draggingOver === stage.id;
                   const canDrop =
@@ -472,7 +507,10 @@ export function PipelineBoard({
                       onDrop={e => handleDrop(e, stage.id)}
                     >
                       {/* 🎯 개별 컬럼 스크롤 가능한 카드 컨테이너 */}
-                      <div className="overflow-y-auto scrollbar-hide" style={{ height: 'calc(100vh - 20rem)' }}>
+                      <div
+                        className="overflow-y-auto scrollbar-hide"
+                        style={{ height: 'calc(100vh - 20rem)' }}
+                      >
                         <div
                           className={`space-y-3 p-4 pb-16 rounded-lg transition-all duration-200 ${
                             isDragTarget && canDrop

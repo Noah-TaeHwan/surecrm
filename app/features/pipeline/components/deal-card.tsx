@@ -59,7 +59,7 @@ interface DealCardProps {
   insuranceInfo?: InsuranceInfo;
   interestCategories?: string[];
   isDragging?: boolean;
-  
+
   // 🎯 딜 특화 정보
   products?: Array<{
     name: string;
@@ -72,14 +72,17 @@ interface DealCardProps {
   probability?: number; // 성사 확률 0-100
   nextAction?: string;
   actionDueDate?: string;
-  
+
   // 🎯 액션 핸들러들
   onRemoveFromPipeline?: (clientId: string) => void;
   onCreateContract?: (clientId: string) => void;
   onEditOpportunity?: (clientId: string) => void;
   onQuickEdit?: (clientId: string) => void;
   onArchive?: (clientId: string) => void;
-  onSetPriority?: (clientId: string, priority: 'high' | 'medium' | 'low') => void;
+  onSetPriority?: (
+    clientId: string,
+    priority: 'high' | 'medium' | 'low'
+  ) => void;
 }
 
 // 🎯 스와이프 상태 인터페이스
@@ -136,21 +139,25 @@ export function DealCard({
   // 🎯 중요도별 스타일
   const importanceStyles = {
     high: {
-      bgGradient: 'bg-gradient-to-br from-orange-50/80 to-white dark:from-orange-950/30 dark:to-background',
-      badge: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
+      bgGradient:
+        'bg-gradient-to-br from-orange-50/80 to-white dark:from-orange-950/30 dark:to-background',
+      badge:
+        'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
       icon: 'text-orange-600',
       borderClass: 'border-orange-200/50 dark:border-orange-800/30',
       priority: '높음',
     },
     medium: {
-      bgGradient: 'bg-gradient-to-br from-blue-50/80 to-white dark:from-blue-950/30 dark:to-background',
+      bgGradient:
+        'bg-gradient-to-br from-blue-50/80 to-white dark:from-blue-950/30 dark:to-background',
       badge: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
       icon: 'text-blue-600',
       borderClass: 'border-blue-200/50 dark:border-blue-800/30',
       priority: '보통',
     },
     low: {
-      bgGradient: 'bg-gradient-to-br from-muted/50 to-white dark:from-muted/20 dark:to-background',
+      bgGradient:
+        'bg-gradient-to-br from-muted/50 to-white dark:from-muted/20 dark:to-background',
       badge: 'bg-muted text-muted-foreground',
       icon: 'text-muted-foreground',
       borderClass: 'border-muted/50',
@@ -161,42 +168,48 @@ export function DealCard({
   const styles = importanceStyles[importance];
 
   // 🎯 스와이프 이벤트 핸들러들
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    if (isDragging) return; // 드래그 중이면 스와이프 비활성화
-    
-    const touch = e.touches[0];
-    setSwipeState(prev => ({
-      ...prev,
-      startX: touch.clientX,
-      currentX: touch.clientX,
-      isDragging: true,
-      swipeDirection: null,
-    }));
-  }, [isDragging]);
+  const handleTouchStart = useCallback(
+    (e: React.TouchEvent) => {
+      if (isDragging) return; // 드래그 중이면 스와이프 비활성화
 
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    if (!swipeState.isDragging || isDragging) return;
-    
-    const touch = e.touches[0];
-    const deltaX = touch.clientX - swipeState.startX;
-    
-    setSwipeState(prev => ({
-      ...prev,
-      currentX: touch.clientX,
-      swipeDirection: deltaX > 0 ? 'right' : 'left',
-    }));
+      const touch = e.touches[0];
+      setSwipeState(prev => ({
+        ...prev,
+        startX: touch.clientX,
+        currentX: touch.clientX,
+        isDragging: true,
+        swipeDirection: null,
+      }));
+    },
+    [isDragging]
+  );
 
-    // 카드 변형 적용
-    if (cardRef.current) {
-      const clampedDelta = Math.max(-150, Math.min(150, deltaX));
-      cardRef.current.style.transform = `translateX(${clampedDelta}px)`;
-      cardRef.current.style.opacity = `${1 - Math.abs(clampedDelta) / 300}`;
-    }
-  }, [swipeState.isDragging, swipeState.startX, isDragging]);
+  const handleTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      if (!swipeState.isDragging || isDragging) return;
+
+      const touch = e.touches[0];
+      const deltaX = touch.clientX - swipeState.startX;
+
+      setSwipeState(prev => ({
+        ...prev,
+        currentX: touch.clientX,
+        swipeDirection: deltaX > 0 ? 'right' : 'left',
+      }));
+
+      // 카드 변형 적용
+      if (cardRef.current) {
+        const clampedDelta = Math.max(-150, Math.min(150, deltaX));
+        cardRef.current.style.transform = `translateX(${clampedDelta}px)`;
+        cardRef.current.style.opacity = `${1 - Math.abs(clampedDelta) / 300}`;
+      }
+    },
+    [swipeState.isDragging, swipeState.startX, isDragging]
+  );
 
   const handleTouchEnd = useCallback(() => {
     if (!swipeState.isDragging || isDragging) return;
-    
+
     const deltaX = swipeState.currentX - swipeState.startX;
     const absDelataX = Math.abs(deltaX);
 
@@ -233,11 +246,15 @@ export function DealCard({
 
   // 🎯 계산된 값들
   const daysInPipeline = Math.floor(
-    (new Date().getTime() - new Date(createdAt).getTime()) / (1000 * 60 * 60 * 24)
+    (new Date().getTime() - new Date(createdAt).getTime()) /
+      (1000 * 60 * 60 * 24)
   );
 
-  const daysSinceLastContact = lastContactDate 
-    ? Math.floor((new Date().getTime() - new Date(lastContactDate).getTime()) / (1000 * 60 * 60 * 24))
+  const daysSinceLastContact = lastContactDate
+    ? Math.floor(
+        (new Date().getTime() - new Date(lastContactDate).getTime()) /
+          (1000 * 60 * 60 * 24)
+      )
     : null;
 
   const isUrgent = daysSinceLastContact !== null && daysSinceLastContact >= 7;
@@ -262,7 +279,7 @@ export function DealCard({
             <Edit3 className="h-4 w-4" />
             <span className="text-xs">편집</span>
           </Button>
-          
+
           <Button
             variant="ghost"
             size="sm"
@@ -275,7 +292,7 @@ export function DealCard({
             <Star className="h-4 w-4" />
             <span className="text-xs">우선순위</span>
           </Button>
-          
+
           <Button
             variant="ghost"
             size="sm"
@@ -288,11 +305,13 @@ export function DealCard({
             <Archive className="h-4 w-4" />
             <span className="text-xs">보관</span>
           </Button>
-          
+
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setSwipeState(prev => ({ ...prev, showActions: false }))}
+            onClick={() =>
+              setSwipeState(prev => ({ ...prev, showActions: false }))
+            }
             className="flex flex-col items-center gap-1 text-muted-foreground"
           >
             <ArrowRight className="h-4 w-4" />
@@ -326,9 +345,16 @@ export function DealCard({
         {/* 🎯 긴급/지연 인디케이터 */}
         {(isUrgent || isStale || actionOverdue) && (
           <div className="absolute top-2 left-2">
-            <Badge variant="destructive" className="text-xs flex items-center gap-1">
+            <Badge
+              variant="destructive"
+              className="text-xs flex items-center gap-1"
+            >
               <AlertTriangle className="h-3 w-3" />
-              {actionOverdue ? '액션 지연' : isUrgent ? '연락 필요' : '장기 체류'}
+              {actionOverdue
+                ? '액션 지연'
+                : isUrgent
+                  ? '연락 필요'
+                  : '장기 체류'}
             </Badge>
           </div>
         )}
@@ -404,7 +430,9 @@ export function DealCard({
                 <span className="text-xs text-muted-foreground">거래가치</span>
               </div>
               <div className="font-semibold text-sm text-green-600">
-                {dealValue > 0 ? formatCurrencyTable(dealValue) : formatCurrencyTable(totalMonthlyPremium * 12)}
+                {dealValue > 0
+                  ? formatCurrencyTable(dealValue)
+                  : formatCurrencyTable(totalMonthlyPremium * 12)}
               </div>
             </div>
 
@@ -412,7 +440,9 @@ export function DealCard({
             <div className="text-center p-2 bg-muted/30 rounded-md">
               <div className="flex items-center justify-center gap-1 mb-1">
                 <TrendingUp className="h-3 w-3 text-blue-600" />
-                <span className="text-xs text-muted-foreground">예상수수료</span>
+                <span className="text-xs text-muted-foreground">
+                  예상수수료
+                </span>
               </div>
               <div className="font-semibold text-sm text-blue-600">
                 {formatCurrencyTable(totalExpectedCommission)}
@@ -425,9 +455,13 @@ export function DealCard({
             <div className="mb-3 p-2 bg-primary/5 border border-primary/20 rounded-md">
               <div className="flex items-center gap-2 mb-1">
                 <CheckCircle className="h-3 w-3 text-primary" />
-                <span className="text-xs font-medium text-primary">다음 액션</span>
+                <span className="text-xs font-medium text-primary">
+                  다음 액션
+                </span>
                 {actionDueDate && (
-                  <span className={`text-xs ${actionOverdue ? 'text-destructive' : 'text-muted-foreground'}`}>
+                  <span
+                    className={`text-xs ${actionOverdue ? 'text-destructive' : 'text-muted-foreground'}`}
+                  >
                     {new Date(actionDueDate).toLocaleDateString()}
                   </span>
                 )}
@@ -453,15 +487,18 @@ export function DealCard({
           {/* 🎯 태그 */}
           {tags && (
             <div className="flex flex-wrap gap-1 mt-2">
-              {tags.split(',').slice(0, 2).map((tag, index) => (
-                <Badge
-                  key={index}
-                  variant="secondary"
-                  className="text-xs px-2 py-0"
-                >
-                  {tag.trim()}
-                </Badge>
-              ))}
+              {tags
+                .split(',')
+                .slice(0, 2)
+                .map((tag, index) => (
+                  <Badge
+                    key={index}
+                    variant="secondary"
+                    className="text-xs px-2 py-0"
+                  >
+                    {tag.trim()}
+                  </Badge>
+                ))}
               {tags.split(',').length > 2 && (
                 <Badge variant="secondary" className="text-xs px-2 py-0">
                   +{tags.split(',').length - 2}

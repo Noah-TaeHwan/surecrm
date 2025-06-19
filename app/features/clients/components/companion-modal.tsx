@@ -42,7 +42,7 @@ export function CompanionModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent 
+      <DialogContent
         className="sm:max-w-xl w-[95vw] p-0 overflow-hidden flex flex-col sm:max-h-[85vh] gap-0"
         style={{ maxHeight: '75vh', height: 'auto', minHeight: '0' }}
       >
@@ -55,7 +55,7 @@ export function CompanionModal({
             상담에 함께 참석할 동반자 정보를 입력하세요.
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="flex-1 overflow-y-auto scrollbar-none modal-scroll-area px-4 sm:px-6 py-2 sm:py-6 space-y-2 sm:space-y-6 min-h-0">
           <div className="space-y-1 sm:space-y-2">
             <Label className="text-xs sm:text-sm font-medium">
@@ -105,9 +105,7 @@ export function CompanionModal({
           </div>
 
           <div className="space-y-1 sm:space-y-2">
-            <Label className="text-xs sm:text-sm font-medium">
-              연락처
-            </Label>
+            <Label className="text-xs sm:text-sm font-medium">연락처</Label>
             <Input
               type="tel"
               className="h-9 sm:h-10 text-xs sm:text-sm min-h-[36px] sm:min-h-[40px]"
@@ -127,7 +125,7 @@ export function CompanionModal({
               <Checkbox
                 id="isPrimary"
                 checked={companion?.isPrimary || false}
-                onCheckedChange={(checked) =>
+                onCheckedChange={checked =>
                   onCompanionChange({
                     ...companion!,
                     isPrimary: checked === true,
@@ -135,7 +133,7 @@ export function CompanionModal({
                 }
               />
               <div className="grid gap-1.5 leading-none">
-                <Label 
+                <Label
                   htmlFor="isPrimary"
                   className="text-xs sm:text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                 >

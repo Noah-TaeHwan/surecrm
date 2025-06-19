@@ -1,18 +1,24 @@
-import { Link, useLocation } from "react-router";
-import { Calendar, ChartPie, LayoutDashboard, Network, Users } from "lucide-react";
-import { motion } from "framer-motion";
-import { useRef, useEffect, useState } from "react";
+import { Link, useLocation } from 'react-router';
+import {
+  Calendar,
+  ChartPie,
+  LayoutDashboard,
+  Network,
+  Users,
+} from 'lucide-react';
+import { motion } from 'framer-motion';
+import { useRef, useEffect, useState } from 'react';
 
 interface BottomTabNavigationProps {
   isMenuOpen: boolean;
 }
 
 const navigationItems = [
-  { href: "/dashboard", icon: LayoutDashboard, label: "대시보드" },
-  { href: "/network", icon: Network, label: "네트워크" },
-  { href: "/pipeline", icon: ChartPie, label: "영업" },
-  { href: "/clients", icon: Users, label: "고객" },  
-  { href: "/calendar", icon: Calendar, label: "일정" },
+  { href: '/dashboard', icon: LayoutDashboard, label: '대시보드' },
+  { href: '/network', icon: Network, label: '네트워크' },
+  { href: '/pipeline', icon: ChartPie, label: '영업' },
+  { href: '/clients', icon: Users, label: '고객' },
+  { href: '/calendar', icon: Calendar, label: '일정' },
 ];
 
 // 안전한 햅틱 피드백
@@ -36,7 +42,7 @@ function useScrollDirection() {
     const handleScroll = (event: Event) => {
       const target = event.target as HTMLElement;
       if (!target) return;
-      
+
       const currentScrollY = target.scrollTop;
       const scrollDifference = currentScrollY - lastScrollY.current;
 
@@ -50,7 +56,9 @@ function useScrollDirection() {
       }
     };
 
-    const mainElement = document.querySelector('main[class*="overflow-y-auto"]');
+    const mainElement = document.querySelector(
+      'main[class*="overflow-y-auto"]'
+    );
     if (mainElement) {
       mainElement.addEventListener('scroll', handleScroll, { passive: true });
       return () => mainElement.removeEventListener('scroll', handleScroll);
@@ -107,37 +115,41 @@ function LiquidGlassButton({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          flexDirection: 'column'
+          flexDirection: 'column',
         }}
         whileTap={{ scale: 0.92 }}
         transition={{
-          type: "spring",
+          type: 'spring',
           stiffness: 200,
           damping: 20,
         }}
       >
         {/* 아이콘 - 완전 일관된 크기 */}
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <Icon 
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <Icon
             className={`transition-all duration-1000 ease-out ${
               isMinimized ? 'w-3 h-3 mb-0' : 'w-5 h-5 mb-1'
             } ${
-              isActive 
-                ? 'text-primary drop-shadow-[0_0_8px_rgba(59,130,246,0.6)]' 
+              isActive
+                ? 'text-primary drop-shadow-[0_0_8px_rgba(59,130,246,0.6)]'
                 : 'text-gray-400 group-hover:text-gray-300'
             }`}
           />
         </div>
-        
+
         {/* 라벨 - 부드러운 나타남/사라짐 */}
-        <span 
+        <span
           className={`text-[10px] font-medium text-center leading-tight whitespace-nowrap overflow-hidden transition-all duration-1000 ease-in-out ${
-            isActive 
-              ? 'text-primary drop-shadow-[0_0_8px_rgba(59,130,246,0.6)]' 
+            isActive
+              ? 'text-primary drop-shadow-[0_0_8px_rgba(59,130,246,0.6)]'
               : 'text-gray-400 group-hover:text-gray-300'
-          } ${
-            isMinimized ? 'opacity-0 h-0' : 'opacity-100 h-auto'
-          }`}
+          } ${isMinimized ? 'opacity-0 h-0' : 'opacity-100 h-auto'}`}
           style={{
             maxWidth: '60px',
           }}
@@ -164,8 +176,9 @@ export function BottomTabNavigation({ isMenuOpen }: BottomTabNavigationProps) {
       const activeButton = buttonRefs.current[activeIndex];
       if (activeButton) {
         const rect = activeButton.getBoundingClientRect();
-        const containerRect = activeButton.parentElement?.getBoundingClientRect();
-        
+        const containerRect =
+          activeButton.parentElement?.getBoundingClientRect();
+
         if (containerRect) {
           setBubblePosition({
             left: rect.left - containerRect.left + rect.width / 2,
@@ -177,86 +190,99 @@ export function BottomTabNavigation({ isMenuOpen }: BottomTabNavigationProps) {
   }, [activeIndex, isMinimized]);
 
   return (
-    <nav 
+    <nav
       className={`fixed bottom-0 left-0 right-0 ${
         isMenuOpen ? 'z-30' : 'z-40'
-      } lg:hidden ${
-        isMinimized ? 'px-24 pb-4' : 'px-8 pb-4'
-      }`}
+      } lg:hidden ${isMinimized ? 'px-24 pb-4' : 'px-8 pb-4'}`}
       style={{
         transition: 'all 1s cubic-bezier(0.23, 1, 0.32, 1)',
       }}
     >
       {/* iOS 26 리퀴드글래스 배경 효과 - 다층 백드롭 필터 */}
-      
+
       {/* 레이어 1: 가장 멀리 퍼지는 대기 블러 (적당한 위치에서 시작) - 블러 강화 */}
-      <div 
+      <div
         className="absolute inset-x-0 bottom-0 pointer-events-none"
         style={{
           height: '280%',
           transform: 'translateY(45%)',
           backdropFilter: 'blur(16px) saturate(105%) brightness(1.01)',
-          background: 'radial-gradient(ellipse 180% 140% at 50% 100%, rgba(0,0,0,0.01) 0%, rgba(0,0,0,0.006) 50%, rgba(0,0,0,0.003) 75%, transparent 95%)',
-          maskImage: 'radial-gradient(ellipse 170% 130% at 50% 100%, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.12) 35%, rgba(0,0,0,0.08) 55%, rgba(0,0,0,0.05) 70%, rgba(0,0,0,0.025) 82%, rgba(0,0,0,0.01) 90%, rgba(0,0,0,0.004) 95%, transparent 100%)',
-          WebkitMaskImage: 'radial-gradient(ellipse 170% 130% at 50% 100%, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.12) 35%, rgba(0,0,0,0.08) 55%, rgba(0,0,0,0.05) 70%, rgba(0,0,0,0.025) 82%, rgba(0,0,0,0.01) 90%, rgba(0,0,0,0.004) 95%, transparent 100%)',
+          background:
+            'radial-gradient(ellipse 180% 140% at 50% 100%, rgba(0,0,0,0.01) 0%, rgba(0,0,0,0.006) 50%, rgba(0,0,0,0.003) 75%, transparent 95%)',
+          maskImage:
+            'radial-gradient(ellipse 170% 130% at 50% 100%, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.12) 35%, rgba(0,0,0,0.08) 55%, rgba(0,0,0,0.05) 70%, rgba(0,0,0,0.025) 82%, rgba(0,0,0,0.01) 90%, rgba(0,0,0,0.004) 95%, transparent 100%)',
+          WebkitMaskImage:
+            'radial-gradient(ellipse 170% 130% at 50% 100%, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.12) 35%, rgba(0,0,0,0.08) 55%, rgba(0,0,0,0.05) 70%, rgba(0,0,0,0.025) 82%, rgba(0,0,0,0.01) 90%, rgba(0,0,0,0.004) 95%, transparent 100%)',
           filter: 'blur(0.1px)',
         }}
       />
-      
+
       {/* 레이어 2: 중간 깊이 블러 (적당한 범위로 조정) - 블러 강화 */}
-      <div 
+      <div
         className="absolute inset-x-0 bottom-0 pointer-events-none"
         style={{
           height: '220%',
           transform: 'translateY(35%)',
           backdropFilter: 'blur(10px) saturate(110%) brightness(1.005)',
-          background: 'linear-gradient(to top, rgba(0,0,0,0.025) 0%, rgba(0,0,0,0.018) 40%, rgba(0,0,0,0.01) 65%, rgba(0,0,0,0.004) 85%, transparent 96%)',
-          maskImage: 'linear-gradient(to top, rgba(0,0,0,0.25) 10%, rgba(0,0,0,0.2) 30%, rgba(0,0,0,0.15) 45%, rgba(0,0,0,0.1) 60%, rgba(0,0,0,0.06) 75%, rgba(0,0,0,0.03) 85%, rgba(0,0,0,0.015) 92%, rgba(0,0,0,0.006) 96%, rgba(0,0,0,0.002) 98%, transparent 100%)',
-          WebkitMaskImage: 'linear-gradient(to top, rgba(0,0,0,0.25) 10%, rgba(0,0,0,0.2) 30%, rgba(0,0,0,0.15) 45%, rgba(0,0,0,0.1) 60%, rgba(0,0,0,0.06) 75%, rgba(0,0,0,0.03) 85%, rgba(0,0,0,0.015) 92%, rgba(0,0,0,0.006) 96%, rgba(0,0,0,0.002) 98%, transparent 100%)',
+          background:
+            'linear-gradient(to top, rgba(0,0,0,0.025) 0%, rgba(0,0,0,0.018) 40%, rgba(0,0,0,0.01) 65%, rgba(0,0,0,0.004) 85%, transparent 96%)',
+          maskImage:
+            'linear-gradient(to top, rgba(0,0,0,0.25) 10%, rgba(0,0,0,0.2) 30%, rgba(0,0,0,0.15) 45%, rgba(0,0,0,0.1) 60%, rgba(0,0,0,0.06) 75%, rgba(0,0,0,0.03) 85%, rgba(0,0,0,0.015) 92%, rgba(0,0,0,0.006) 96%, rgba(0,0,0,0.002) 98%, transparent 100%)',
+          WebkitMaskImage:
+            'linear-gradient(to top, rgba(0,0,0,0.25) 10%, rgba(0,0,0,0.2) 30%, rgba(0,0,0,0.15) 45%, rgba(0,0,0,0.1) 60%, rgba(0,0,0,0.06) 75%, rgba(0,0,0,0.03) 85%, rgba(0,0,0,0.015) 92%, rgba(0,0,0,0.006) 96%, rgba(0,0,0,0.002) 98%, transparent 100%)',
         }}
       />
-      
+
       {/* 레이어 3: 근접 블러 (바텀 네비게이션 가까이에서 시작) - 블러 강화 */}
-      <div 
+      <div
         className="absolute inset-x-0 bottom-0 pointer-events-none"
         style={{
           height: '160%',
           transform: 'translateY(22%)',
           backdropFilter: 'blur(7px) saturate(120%) brightness(1.0015)',
-          background: 'linear-gradient(to top, rgba(0,0,0,0.04) 0%, rgba(0,0,0,0.025) 50%, rgba(0,0,0,0.012) 75%, rgba(0,0,0,0.005) 90%, transparent 98%)',
-          maskImage: 'linear-gradient(to top, rgba(0,0,0,0.35) 20%, rgba(0,0,0,0.28) 40%, rgba(0,0,0,0.2) 55%, rgba(0,0,0,0.14) 70%, rgba(0,0,0,0.09) 80%, rgba(0,0,0,0.05) 87%, rgba(0,0,0,0.025) 92%, rgba(0,0,0,0.012) 95%, rgba(0,0,0,0.005) 97%, rgba(0,0,0,0.002) 99%, transparent 100%)',
-          WebkitMaskImage: 'linear-gradient(to top, rgba(0,0,0,0.35) 20%, rgba(0,0,0,0.28) 40%, rgba(0,0,0,0.2) 55%, rgba(0,0,0,0.14) 70%, rgba(0,0,0,0.09) 80%, rgba(0,0,0,0.05) 87%, rgba(0,0,0,0.025) 92%, rgba(0,0,0,0.012) 95%, rgba(0,0,0,0.005) 97%, rgba(0,0,0,0.002) 99%, transparent 100%)',
+          background:
+            'linear-gradient(to top, rgba(0,0,0,0.04) 0%, rgba(0,0,0,0.025) 50%, rgba(0,0,0,0.012) 75%, rgba(0,0,0,0.005) 90%, transparent 98%)',
+          maskImage:
+            'linear-gradient(to top, rgba(0,0,0,0.35) 20%, rgba(0,0,0,0.28) 40%, rgba(0,0,0,0.2) 55%, rgba(0,0,0,0.14) 70%, rgba(0,0,0,0.09) 80%, rgba(0,0,0,0.05) 87%, rgba(0,0,0,0.025) 92%, rgba(0,0,0,0.012) 95%, rgba(0,0,0,0.005) 97%, rgba(0,0,0,0.002) 99%, transparent 100%)',
+          WebkitMaskImage:
+            'linear-gradient(to top, rgba(0,0,0,0.35) 20%, rgba(0,0,0,0.28) 40%, rgba(0,0,0,0.2) 55%, rgba(0,0,0,0.14) 70%, rgba(0,0,0,0.09) 80%, rgba(0,0,0,0.05) 87%, rgba(0,0,0,0.025) 92%, rgba(0,0,0,0.012) 95%, rgba(0,0,0,0.005) 97%, rgba(0,0,0,0.002) 99%, transparent 100%)',
         }}
       />
-      
+
       {/* 레이어 4: 바텀 네비게이션 직접 경계 블러 (바로 위부터 시작) - 블러 강화 */}
-      <div 
+      <div
         className="absolute inset-x-0 bottom-0 pointer-events-none"
         style={{
           height: '120%',
           transform: 'translateY(8%)',
           backdropFilter: 'blur(4px) saturate(115%) brightness(1.0006)',
-          background: 'linear-gradient(to top, rgba(0,0,0,0.028) 0%, rgba(0,0,0,0.016) 45%, rgba(0,0,0,0.008) 70%, rgba(0,0,0,0.003) 88%, transparent 98%)',
-          maskImage: 'linear-gradient(to top, rgba(0,0,0,0.3) 25%, rgba(0,0,0,0.22) 45%, rgba(0,0,0,0.15) 60%, rgba(0,0,0,0.1) 72%, rgba(0,0,0,0.06) 80%, rgba(0,0,0,0.035) 86%, rgba(0,0,0,0.018) 91%, rgba(0,0,0,0.008) 94%, rgba(0,0,0,0.003) 96%, rgba(0,0,0,0.001) 98%, transparent 100%)',
-          WebkitMaskImage: 'linear-gradient(to top, rgba(0,0,0,0.3) 25%, rgba(0,0,0,0.22) 45%, rgba(0,0,0,0.15) 60%, rgba(0,0,0,0.1) 72%, rgba(0,0,0,0.06) 80%, rgba(0,0,0,0.035) 86%, rgba(0,0,0,0.018) 91%, rgba(0,0,0,0.008) 94%, rgba(0,0,0,0.003) 96%, rgba(0,0,0,0.001) 98%, transparent 100%)',
+          background:
+            'linear-gradient(to top, rgba(0,0,0,0.028) 0%, rgba(0,0,0,0.016) 45%, rgba(0,0,0,0.008) 70%, rgba(0,0,0,0.003) 88%, transparent 98%)',
+          maskImage:
+            'linear-gradient(to top, rgba(0,0,0,0.3) 25%, rgba(0,0,0,0.22) 45%, rgba(0,0,0,0.15) 60%, rgba(0,0,0,0.1) 72%, rgba(0,0,0,0.06) 80%, rgba(0,0,0,0.035) 86%, rgba(0,0,0,0.018) 91%, rgba(0,0,0,0.008) 94%, rgba(0,0,0,0.003) 96%, rgba(0,0,0,0.001) 98%, transparent 100%)',
+          WebkitMaskImage:
+            'linear-gradient(to top, rgba(0,0,0,0.3) 25%, rgba(0,0,0,0.22) 45%, rgba(0,0,0,0.15) 60%, rgba(0,0,0,0.1) 72%, rgba(0,0,0,0.06) 80%, rgba(0,0,0,0.035) 86%, rgba(0,0,0,0.018) 91%, rgba(0,0,0,0.008) 94%, rgba(0,0,0,0.003) 96%, rgba(0,0,0,0.001) 98%, transparent 100%)',
         }}
       />
-      
+
       {/* 레이어 5: 최상단 미세 블러 (경계를 더욱 모호하게) - 블러 강화 */}
-      <div 
+      <div
         className="absolute inset-x-0 bottom-0 pointer-events-none"
         style={{
           height: '100%',
           transform: 'translateY(-8%)',
           backdropFilter: 'blur(2px) saturate(108%) brightness(1.0001)',
-          background: 'linear-gradient(to top, rgba(0,0,0,0.015) 0%, rgba(0,0,0,0.008) 50%, rgba(0,0,0,0.004) 80%, rgba(0,0,0,0.001) 95%, transparent 100%)',
-          maskImage: 'linear-gradient(to top, rgba(0,0,0,0.2) 30%, rgba(0,0,0,0.14) 50%, rgba(0,0,0,0.09) 65%, rgba(0,0,0,0.05) 77%, rgba(0,0,0,0.025) 85%, rgba(0,0,0,0.012) 90%, rgba(0,0,0,0.005) 94%, rgba(0,0,0,0.002) 96%, rgba(0,0,0,0.0008) 98%, rgba(0,0,0,0.0003) 99%, transparent 100%)',
-          WebkitMaskImage: 'linear-gradient(to top, rgba(0,0,0,0.2) 30%, rgba(0,0,0,0.14) 50%, rgba(0,0,0,0.09) 65%, rgba(0,0,0,0.05) 77%, rgba(0,0,0,0.025) 85%, rgba(0,0,0,0.012) 90%, rgba(0,0,0,0.005) 94%, rgba(0,0,0,0.002) 96%, rgba(0,0,0,0.0008) 98%, rgba(0,0,0,0.0003) 99%, transparent 100%)',
+          background:
+            'linear-gradient(to top, rgba(0,0,0,0.015) 0%, rgba(0,0,0,0.008) 50%, rgba(0,0,0,0.004) 80%, rgba(0,0,0,0.001) 95%, transparent 100%)',
+          maskImage:
+            'linear-gradient(to top, rgba(0,0,0,0.2) 30%, rgba(0,0,0,0.14) 50%, rgba(0,0,0,0.09) 65%, rgba(0,0,0,0.05) 77%, rgba(0,0,0,0.025) 85%, rgba(0,0,0,0.012) 90%, rgba(0,0,0,0.005) 94%, rgba(0,0,0,0.002) 96%, rgba(0,0,0,0.0008) 98%, rgba(0,0,0,0.0003) 99%, transparent 100%)',
+          WebkitMaskImage:
+            'linear-gradient(to top, rgba(0,0,0,0.2) 30%, rgba(0,0,0,0.14) 50%, rgba(0,0,0,0.09) 65%, rgba(0,0,0,0.05) 77%, rgba(0,0,0,0.025) 85%, rgba(0,0,0,0.012) 90%, rgba(0,0,0,0.005) 94%, rgba(0,0,0,0.002) 96%, rgba(0,0,0,0.0008) 98%, rgba(0,0,0,0.0003) 99%, transparent 100%)',
         }}
       />
-      
+
       {/* 메인 리퀴드글래스 컨테이너 - 더 어두운 리퀴드 글래스 */}
-      <div 
+      <div
         className="relative rounded-[28px] overflow-hidden"
         style={{
           backgroundColor: 'rgba(0, 0, 0, 0.18)',
@@ -274,7 +300,7 @@ export function BottomTabNavigation({ isMenuOpen }: BottomTabNavigationProps) {
         }}
       >
         {/* 유기적인 상단 하이라이트 그라데이션 - 더 어둡고 은은하게 */}
-        <div 
+        <div
           className="absolute top-0 left-0 right-0 rounded-t-[28px] overflow-hidden"
           style={{
             height: '50%',
@@ -296,12 +322,13 @@ export function BottomTabNavigation({ isMenuOpen }: BottomTabNavigationProps) {
             opacity: 0.7,
           }}
         />
-        
+
         {/* 리퀴드 동적 글로우 라인 - 더 은은하게 */}
-        <motion.div 
+        <motion.div
           className="absolute top-0 left-0 right-0 h-px"
           style={{
-            background: 'linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.06) 15%, rgba(255, 255, 255, 0.35) 50%, rgba(255, 255, 255, 0.06) 85%, transparent 100%)',
+            background:
+              'linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.06) 15%, rgba(255, 255, 255, 0.35) 50%, rgba(255, 255, 255, 0.06) 85%, transparent 100%)',
             filter: 'blur(0.5px)',
             opacity: 0.6,
           }}
@@ -312,35 +339,38 @@ export function BottomTabNavigation({ isMenuOpen }: BottomTabNavigationProps) {
           transition={{
             duration: 4,
             repeat: Infinity,
-            ease: "easeInOut",
+            ease: 'easeInOut',
           }}
         />
-        
+
         {/* 유기적인 측면 글로우 - 더 은은하게 */}
-        <div 
+        <div
           className="absolute top-4 bottom-4 left-0 w-px"
           style={{
-            background: 'linear-gradient(to bottom, transparent 0%, rgba(255, 255, 255, 0.05) 20%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.05) 80%, transparent 100%)',
+            background:
+              'linear-gradient(to bottom, transparent 0%, rgba(255, 255, 255, 0.05) 20%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.05) 80%, transparent 100%)',
             filter: 'blur(1px)',
             opacity: 0.5,
           }}
         />
-        <div 
+        <div
           className="absolute top-4 bottom-4 right-0 w-px"
           style={{
-            background: 'linear-gradient(to bottom, transparent 0%, rgba(255, 255, 255, 0.05) 20%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.05) 80%, transparent 100%)',
+            background:
+              'linear-gradient(to bottom, transparent 0%, rgba(255, 255, 255, 0.05) 20%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.05) 80%, transparent 100%)',
             filter: 'blur(1px)',
             opacity: 0.5,
           }}
         />
-        
+
         {/* 플로팅 그림자 - 더 유기적이고 자연스럽게 */}
-        <motion.div 
+        <motion.div
           className="absolute -bottom-3 left-1/2 transform -translate-x-1/2"
           style={{
             width: '85%',
             height: '12px',
-            background: 'radial-gradient(ellipse, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.2) 40%, transparent 70%)',
+            background:
+              'radial-gradient(ellipse, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.2) 40%, transparent 70%)',
             filter: 'blur(8px)',
           }}
           animate={{
@@ -350,12 +380,12 @@ export function BottomTabNavigation({ isMenuOpen }: BottomTabNavigationProps) {
           transition={{
             duration: 3,
             repeat: Infinity,
-            ease: "easeInOut",
+            ease: 'easeInOut',
           }}
         />
-        
+
         {/* 네비게이션 버튼들 - 5개 버튼 완전 균등 배치 */}
-        <div 
+        <div
           className={`relative pb-safe ${
             isMinimized ? 'min-h-[48px]' : 'min-h-[64px]'
           }`}
@@ -372,7 +402,7 @@ export function BottomTabNavigation({ isMenuOpen }: BottomTabNavigationProps) {
           {/* 버튼들 */}
           {navigationItems.map((item, index) => {
             const isActive = activeIndex !== -1 && index === activeIndex;
-            
+
             return (
               <LiquidGlassButton
                 key={item.href}
@@ -381,7 +411,7 @@ export function BottomTabNavigation({ isMenuOpen }: BottomTabNavigationProps) {
                 label={item.label}
                 isActive={isActive}
                 isMinimized={isMinimized}
-                onRef={(el) => {
+                onRef={el => {
                   buttonRefs.current[index] = el;
                 }}
               />

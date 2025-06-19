@@ -108,44 +108,56 @@ export function QuickEditModal({
         phone: client.phone || '',
         email: client.email || '',
         probability: (client as ExtendedClient).probability || 0,
-        dealValue: (client as ExtendedClient).dealValue || (client.totalMonthlyPremium || 0) * 12,
-        tags: Array.isArray(client.tags) ? client.tags.join(', ') : (client.tags || ''),
+        dealValue:
+          (client as ExtendedClient).dealValue ||
+          (client.totalMonthlyPremium || 0) * 12,
+        tags: Array.isArray(client.tags)
+          ? client.tags.join(', ')
+          : client.tags || '',
       });
       setHasChanges(false);
     }
   }, [client]);
 
   // 🎯 필드 변경 핸들러
-  const handleFieldChange = useCallback((field: keyof EditableFields, value: any) => {
-    setEditFields(prev => ({
-      ...prev,
-      [field]: value,
-    }));
-    setHasChanges(true);
+  const handleFieldChange = useCallback(
+    (field: keyof EditableFields, value: any) => {
+      setEditFields(prev => ({
+        ...prev,
+        [field]: value,
+      }));
+      setHasChanges(true);
 
-    // 햅틱 피드백
-    if (navigator.vibrate) {
-      navigator.vibrate(10);
-    }
-  }, []);
+      // 햅틱 피드백
+      if (navigator.vibrate) {
+        navigator.vibrate(10);
+      }
+    },
+    []
+  );
 
   // 🎯 저장 핸들러
   const handleSave = useCallback(async () => {
     if (!client || !hasChanges) return;
 
     setIsLoading(true);
-    
+
     try {
       // 변경된 필드들만 추출 (타입 안전성 확보)
       const updates: Partial<ExtendedClient> = {};
-      
+
       if (editFields.importance !== client.importance) {
         updates.importance = editFields.importance;
       }
-      if (editFields.nextAction !== ((client as ExtendedClient).nextAction || '')) {
+      if (
+        editFields.nextAction !== ((client as ExtendedClient).nextAction || '')
+      ) {
         updates.nextAction = editFields.nextAction;
       }
-      if (editFields.actionDueDate !== ((client as ExtendedClient).actionDueDate || '')) {
+      if (
+        editFields.actionDueDate !==
+        ((client as ExtendedClient).actionDueDate || '')
+      ) {
         updates.actionDueDate = editFields.actionDueDate;
       }
       if (editFields.notes !== (client.note || '')) {
@@ -157,15 +169,26 @@ export function QuickEditModal({
       if (editFields.email !== (client.email || '')) {
         updates.email = editFields.email;
       }
-      if (editFields.probability !== ((client as ExtendedClient).probability || 0)) {
+      if (
+        editFields.probability !== ((client as ExtendedClient).probability || 0)
+      ) {
         updates.probability = editFields.probability;
       }
-      if (editFields.dealValue !== ((client as ExtendedClient).dealValue || 0)) {
+      if (
+        editFields.dealValue !== ((client as ExtendedClient).dealValue || 0)
+      ) {
         updates.dealValue = editFields.dealValue;
       }
-      if (editFields.tags !== (Array.isArray(client.tags) ? client.tags.join(', ') : (client.tags || ''))) {
+      if (
+        editFields.tags !==
+        (Array.isArray(client.tags)
+          ? client.tags.join(', ')
+          : client.tags || '')
+      ) {
         // 문자열을 배열로 변환해서 할당 (타입 안전성 확보)
-        updates.tags = editFields.tags ? editFields.tags.split(',').map(tag => tag.trim()) : [];
+        updates.tags = editFields.tags
+          ? editFields.tags.split(',').map(tag => tag.trim())
+          : [];
       }
 
       // 성공 햅틱 피드백
@@ -178,7 +201,7 @@ export function QuickEditModal({
       onClose();
     } catch (error) {
       console.error('빠른 편집 저장 실패:', error);
-      
+
       // 오류 햅틱 피드백
       if (navigator.vibrate) {
         navigator.vibrate([100, 100, 100]);
@@ -222,7 +245,9 @@ export function QuickEditModal({
             </div>
             <div>
               <h3 className="font-semibold text-lg">{client.name}</h3>
-              <p className="text-sm text-muted-foreground">{client.occupation}</p>
+              <p className="text-sm text-muted-foreground">
+                {client.occupation}
+              </p>
             </div>
           </div>
           {(client.totalMonthlyPremium || client.totalExpectedCommission) && (
@@ -251,10 +276,10 @@ export function QuickEditModal({
           중요도
         </Label>
         <div className="grid grid-cols-3 gap-2">
-          {(['high', 'medium', 'low'] as const).map((level) => {
+          {(['high', 'medium', 'low'] as const).map(level => {
             const style = importanceStyles[level];
             const isSelected = editFields.importance === level;
-            
+
             return (
               <Button
                 key={level}
@@ -280,7 +305,7 @@ export function QuickEditModal({
           <Input
             type="tel"
             value={editFields.phone}
-            onChange={(e) => handleFieldChange('phone', e.target.value)}
+            onChange={e => handleFieldChange('phone', e.target.value)}
             placeholder="전화번호를 입력하세요"
           />
         </div>
@@ -292,7 +317,7 @@ export function QuickEditModal({
           <Input
             type="email"
             value={editFields.email}
-            onChange={(e) => handleFieldChange('email', e.target.value)}
+            onChange={e => handleFieldChange('email', e.target.value)}
             placeholder="이메일을 입력하세요"
           />
         </div>
@@ -310,7 +335,9 @@ export function QuickEditModal({
             min="0"
             max="100"
             value={editFields.probability}
-            onChange={(e) => handleFieldChange('probability', parseInt(e.target.value) || 0)}
+            onChange={e =>
+              handleFieldChange('probability', parseInt(e.target.value) || 0)
+            }
             placeholder="0"
           />
         </div>
@@ -323,7 +350,9 @@ export function QuickEditModal({
             type="number"
             min="0"
             value={editFields.dealValue}
-            onChange={(e) => handleFieldChange('dealValue', parseInt(e.target.value) || 0)}
+            onChange={e =>
+              handleFieldChange('dealValue', parseInt(e.target.value) || 0)
+            }
             placeholder="거래 가치를 입력하세요"
           />
         </div>
@@ -337,7 +366,7 @@ export function QuickEditModal({
         </Label>
         <Input
           value={editFields.nextAction}
-          onChange={(e) => handleFieldChange('nextAction', e.target.value)}
+          onChange={e => handleFieldChange('nextAction', e.target.value)}
           placeholder="다음에 해야 할 일을 입력하세요"
         />
       </div>
@@ -351,7 +380,7 @@ export function QuickEditModal({
         <Input
           type="date"
           value={editFields.actionDueDate}
-          onChange={(e) => handleFieldChange('actionDueDate', e.target.value)}
+          onChange={e => handleFieldChange('actionDueDate', e.target.value)}
         />
       </div>
 
@@ -363,7 +392,7 @@ export function QuickEditModal({
         </Label>
         <Input
           value={editFields.tags}
-          onChange={(e) => handleFieldChange('tags', e.target.value)}
+          onChange={e => handleFieldChange('tags', e.target.value)}
           placeholder="태그1, 태그2, 태그3"
         />
       </div>
@@ -376,7 +405,7 @@ export function QuickEditModal({
         </Label>
         <Textarea
           value={editFields.notes}
-          onChange={(e) => handleFieldChange('notes', e.target.value)}
+          onChange={e => handleFieldChange('notes', e.target.value)}
           placeholder="추가 메모를 입력하세요"
           rows={3}
         />
@@ -420,14 +449,10 @@ export function QuickEditModal({
               빠른 편집
             </SheetTitle>
           </SheetHeader>
-          
-          <div className="py-6">
-            {renderContent()}
-          </div>
-          
-          <SheetFooter>
-            {renderActions()}
-          </SheetFooter>
+
+          <div className="py-6">{renderContent()}</div>
+
+          <SheetFooter>{renderActions()}</SheetFooter>
         </SheetContent>
       </Sheet>
     );
@@ -443,12 +468,10 @@ export function QuickEditModal({
             빠른 편집
           </DialogTitle>
         </DialogHeader>
-        
+
         {renderContent()}
-        
-        <DialogFooter>
-          {renderActions()}
-        </DialogFooter>
+
+        <DialogFooter>{renderActions()}</DialogFooter>
       </DialogContent>
     </Dialog>
   );

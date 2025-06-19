@@ -237,7 +237,9 @@ export const VirtualizedClientList = memo<VirtualizedClientListProps>(
               onDelete={(e, clientData) => {
                 e.stopPropagation();
                 // 삭제 확인 후 처리 로직
-                if (confirm(`${clientData.fullName} 고객을 삭제하시겠습니까?`)) {
+                if (
+                  confirm(`${clientData.fullName} 고객을 삭제하시겠습니까?`)
+                ) {
                   console.log('클라이언트 삭제:', clientData.id);
                   // TODO: 실제 삭제 API 호출
                 }

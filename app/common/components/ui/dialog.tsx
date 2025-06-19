@@ -58,14 +58,18 @@ function DialogContent({
           'bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border border-border p-6 shadow-lg duration-200 sm:max-w-lg',
           className
         )}
-        onOpenAutoFocus={(event) => {
+        onOpenAutoFocus={event => {
           // 🚫 자동 포커스 완전 차단 - 사용자 경험 개선
           event.preventDefault();
         }}
-        onInteractOutside={(event) => {
+        onInteractOutside={event => {
           const eventTarget = event.target as Element;
-          if (eventTarget.closest('[data-radix-popper-content-wrapper]') || 
-              eventTarget.closest('input[type="date"], input[type="time"], input[type="datetime-local"]')) {
+          if (
+            eventTarget.closest('[data-radix-popper-content-wrapper]') ||
+            eventTarget.closest(
+              'input[type="date"], input[type="time"], input[type="datetime-local"]'
+            )
+          ) {
             event.preventDefault();
           }
         }}

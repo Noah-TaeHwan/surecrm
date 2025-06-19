@@ -223,13 +223,14 @@ export function isSystemAdmin(user: AuthenticatedUser): boolean {
 export function validateWebhookRequest(request: Request): boolean {
   // Supabase 웹훅 시크릿 검증
   const signature = request.headers.get('authorization');
-  
+
   // 환경변수 안전하게 접근
   let webhookSecret: string | undefined;
   try {
-    webhookSecret = typeof process !== 'undefined' 
-      ? process.env.SUPABASE_WEBHOOK_SECRET 
-      : undefined;
+    webhookSecret =
+      typeof process !== 'undefined'
+        ? process.env.SUPABASE_WEBHOOK_SECRET
+        : undefined;
   } catch {
     webhookSecret = undefined;
   }

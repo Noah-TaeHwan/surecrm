@@ -7,13 +7,19 @@ import {
   CardTitle,
 } from '~/common/components/ui/card';
 import { Alert, AlertDescription } from '~/common/components/ui/alert';
-import { CalendarIcon, Link1Icon, CheckCircledIcon } from '@radix-ui/react-icons';
+import {
+  CalendarIcon,
+  Link1Icon,
+  CheckCircledIcon,
+} from '@radix-ui/react-icons';
 
 interface GoogleConnectRequiredProps {
   onConnect: () => void;
 }
 
-export function GoogleConnectRequired({ onConnect }: GoogleConnectRequiredProps) {
+export function GoogleConnectRequired({
+  onConnect,
+}: GoogleConnectRequiredProps) {
   return (
     <div className="flex items-center justify-center min-h-[600px] p-6">
       <Card className="max-w-md w-full">
@@ -46,8 +52,8 @@ export function GoogleConnectRequired({ onConnect }: GoogleConnectRequiredProps)
           </Alert>
 
           {/* 연동 버튼 */}
-          <Button 
-            onClick={onConnect} 
+          <Button
+            onClick={onConnect}
             className="w-full h-12 bg-primary hover:bg-primary/90"
             size="lg"
           >
@@ -68,4 +74,4 @@ export function GoogleConnectRequired({ onConnect }: GoogleConnectRequiredProps)
       </Card>
     </div>
   );
-} 
+}

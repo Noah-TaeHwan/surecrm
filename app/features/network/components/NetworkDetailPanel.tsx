@@ -219,7 +219,11 @@ export default function NetworkDetailPanel({
 
   return (
     <div
-      className={cn('w-full', 'h-full bg-background flex flex-col', 'lg:border-l')}
+      className={cn(
+        'w-full',
+        'h-full bg-background flex flex-col',
+        'lg:border-l'
+      )}
       style={{ maxHeight: '100%' }}
     >
       <div className="p-4 flex-shrink-0">
