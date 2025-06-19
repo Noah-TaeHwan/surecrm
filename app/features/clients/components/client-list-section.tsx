@@ -213,7 +213,7 @@ export function ClientListSection({
         {filteredClients.map(client => (
           <TableRow
             key={client.id}
-            className="cursor-pointer hover:bg-muted/50"
+            className="cursor-pointer hover:bg-muted/50 "
             onClick={() => onClientRowClick(client.id)}
           >
             <TableCell>

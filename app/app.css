@@ -2278,17 +2278,8 @@ div.cursor-pointer:focus-visible:not(:hover),
   --tw-ring-color: transparent !important;
 }
 
-/* 🔥 모든 호버 테두리를 프라이머리 컬러로 변경 - 흰색 테두리 박멸 */
-.hover\:border-border:hover,
-.cursor-pointer:hover,
-.transition-colors:hover,
-[class*="hover:border"]:hover {
-  border-color: oklch(0.645 0.246 16.439) !important;
-}
-
-/* 🎯 기존 고객 영업 기회 모달 - 고객 카드 호버 효과 강제 적용 */
-[data-slot="dialog-content"] .hover\:border-border:hover,
-[data-slot="dialog-content"] .cursor-pointer.transition-colors:hover {
+/* 🎯 기존 고객 영업 기회 모달에서만 - 고객 카드 호버 효과를 빨간색으로 변경 */
+[data-slot="dialog-content"] .hover\:border-border:hover {
   border-color: oklch(0.645 0.246 16.439) !important;
 }
 
