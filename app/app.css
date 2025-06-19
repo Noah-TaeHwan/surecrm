@@ -375,11 +375,11 @@
   user-select: none !important;
 }
 
-.no-focus-outline:focus,
-.no-focus-outline *:focus {
+.no-focus-outline:focus:not([data-slot="dialog-content"]),
+.no-focus-outline *:focus:not([data-slot="dialog-content"]) {
   outline: none !important;
   box-shadow: none !important;
-  border: none !important;
+  /* border: none !important; — 모달 border 보호를 위해 제거 */
 }
 
 /* Mobile Focus States */
@@ -1589,7 +1589,7 @@ textarea {
 
 /* 🚫 Complete Focus Outline Removal System */
 .no-focus-outline,
-.no-focus-outline *,
+.no-focus-outline *:not([data-slot="dialog-content"]),
 .no-focus-outline:focus,
 .no-focus-outline:focus-visible,
 .no-focus-outline:active,
@@ -1598,12 +1598,13 @@ textarea {
   outline-width: 0 !important;
   outline-style: none !important;
   outline-color: transparent !important;
-  border: none !important;
   box-shadow: none !important;
   -webkit-tap-highlight-color: transparent !important;
   -webkit-touch-callout: none !important;
   -webkit-user-drag: none !important;
 }
+
+/* 🚫 모달은 border 예외 처리 - 다이얼로그 컨텐츠 완전 제외 */
 
 /* 📱 iOS Safari Specific Fixes */
 @supports (-webkit-touch-callout: none) {
@@ -1972,16 +1973,11 @@ dialog,
    🔧 모달 보더 & 포커스 효과 수정 - 최우선 적용
    ================================================================= */
 
-/* 🎯 모든 모달에 기본 테두리 강제 적용 */
-[data-radix-dialog-content],
-[role="dialog"],
-dialog,
-.modal-content {
-  border: 1px solid hsl(var(--border)) !important;
-  border-radius: 0.5rem !important;
-}
+
 
 /* 🚫 모달 자체 포커스 효과 완전 제거 */
+[data-slot="dialog-content"]:focus,
+[data-slot="dialog-content"]:focus-visible,
 [data-radix-dialog-content]:focus,
 [data-radix-dialog-content]:focus-visible,
 [role="dialog"]:focus,
@@ -2060,3 +2056,61 @@ input[type="checkbox"]:focus {
 .combobox-option:hover {
   cursor: pointer !important;
 }
+
+/* 🎯 ShadCN Dialog 모달 보더 - 더 구체적인 선택자 */
+div[data-slot="dialog-content"],
+html div[data-slot="dialog-content"],
+body div[data-slot="dialog-content"],
+[data-radix-portal] div[data-slot="dialog-content"],
+.fixed.z-50.grid[data-slot="dialog-content"] {
+  border: 1px solid hsl(var(--border)) !important;
+  border-radius: 0.5rem !important;
+}
+
+/* 🎯 Radix UI Dialog Content 직접 타겟팅 */
+[data-radix-dialog-content][data-slot="dialog-content"],
+html [data-radix-dialog-content][data-slot="dialog-content"],
+body [data-radix-dialog-content][data-slot="dialog-content"] {
+  border: 1px solid hsl(var(--border)) !important;
+  border-radius: 0.5rem !important;
+}
+
+/* 🎯 클래스명으로 타겟팅 (백업) */
+.bg-background.rounded-lg.border.p-6.shadow-lg {
+  border: 1px solid hsl(var(--border)) !important;
+}
+
+/* 🚫 모달 포커스 효과 제거 - 더 구체적 */
+div[data-slot="dialog-content"]:focus,
+div[data-slot="dialog-content"]:focus-visible,
+html div[data-slot="dialog-content"]:focus,
+body div[data-slot="dialog-content"]:focus,
+[data-radix-dialog-content][data-slot="dialog-content"]:focus,
+[data-radix-dialog-content][data-slot="dialog-content"]:focus-visible {
+  outline: none !important;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1) !important;
+  border: 1px solid hsl(var(--border)) !important;
+}
+
+/* 🚫 모달은 border 예외 처리 - 다이얼로그 컨텐츠 완전 제외 */
+
+/* 🎯 모달 보더 강제 적용 - 서비스 표준 CSS 변수 사용 */
+[data-slot="dialog-content"],
+[role="dialog"][data-slot="dialog-content"],
+div[data-slot="dialog-content"],
+[data-slot="dialog-content"]:focus,
+[role="dialog"][data-slot="dialog-content"]:focus,
+div[data-slot="dialog-content"]:focus {
+  border: 1px solid var(--border) !important;
+  border-width: 1px !important;
+  border-style: solid !important;
+  border-color: var(--border) !important;
+}
+
+
+
+
+
+
+
+
