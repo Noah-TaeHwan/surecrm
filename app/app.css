@@ -2703,6 +2703,178 @@ div.flex.gap-3.px-5.py-3.overflow-x-auto *::-webkit-scrollbar,
   z-index: -9999 !important;
 }
 
+/* =================================================================
+   DATE INPUT STYLING FIX - Enhanced Cross-Browser Compatibility
+   ================================================================= */
+
+/* 📅 Date/Time Input Normalization */
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"] {
+  /* 기본 브라우저 스타일 보정 */
+  color-scheme: light !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: textfield !important;
+  
+  /* 텍스트 색상 강제 설정 (투명 텍스트 문제 해결) */
+  color: hsl(var(--foreground)) !important;
+  
+  /* 폰트 일관성 */
+  font-family: inherit !important;
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  
+  /* 레이아웃 정규화 */
+  line-height: inherit !important;
+  letter-spacing: inherit !important;
+  
+  /* 브라우저별 캘린더 아이콘 정규화 */
+  background-image: none !important;
+  background-color: transparent !important;
+}
+
+/* Dark mode 대응 */
+.dark input[type="date"],
+.dark input[type="time"], 
+.dark input[type="datetime-local"] {
+  color-scheme: dark !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+/* 🎯 WebKit 브라우저 (Chrome, Safari, Edge) 캘린더 아이콘 정규화 */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  /* 아이콘 스타일 정규화 */
+  opacity: 0.6 !important;
+  cursor: pointer !important;
+  
+  /* 크기 및 위치 조정 */
+  width: 16px !important;
+  height: 16px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  
+  /* 색상 필터 (다크모드 대응) */
+  filter: brightness(0.8) !important;
+  
+  /* 호버 효과 */
+  transition: opacity 0.2s ease !important;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover,
+input[type="time"]::-webkit-calendar-picker-indicator:hover,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1 !important;
+  filter: brightness(1) !important;
+}
+
+/* Dark mode에서 캘린더 아이콘 색상 보정 */
+.dark input[type="date"]::-webkit-calendar-picker-indicator,
+.dark input[type="time"]::-webkit-calendar-picker-indicator,
+.dark input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: brightness(1.2) invert(1) !important;
+}
+
+.dark input[type="date"]::-webkit-calendar-picker-indicator:hover,
+.dark input[type="time"]::-webkit-calendar-picker-indicator:hover,
+.dark input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
+  filter: brightness(1.4) invert(1) !important;
+}
+
+/* 🚫 WebKit 스피너 제거 (time input) */
+input[type="time"]::-webkit-inner-spin-button,
+input[type="time"]::-webkit-outer-spin-button,
+input[type="datetime-local"]::-webkit-inner-spin-button,
+input[type="datetime-local"]::-webkit-outer-spin-button {
+  -webkit-appearance: none !important;
+  margin: 0 !important;
+  display: none !important;
+}
+
+/* 🔥 Firefox 브라우저 정규화 */
+input[type="date"]::-moz-focus-inner,
+input[type="time"]::-moz-focus-inner,
+input[type="datetime-local"]::-moz-focus-inner {
+  border: 0 !important;
+  padding: 0 !important;
+}
+
+/* 📱 모바일 Safari 특별 처리 */
+@supports (-webkit-touch-callout: none) {
+  input[type="date"],
+  input[type="time"],
+  input[type="datetime-local"] {
+    /* iOS Safari 특정 문제 해결 */
+    -webkit-appearance: none !important;
+    border-radius: var(--radius) !important;
+    
+    /* 텍스트 선택 및 복사 방지 (네이티브 위젯과의 충돌 방지) */
+    -webkit-user-select: none !important;
+    user-select: none !important;
+  }
+}
+
+/* 🌐 브라우저별 호환성 보강 */
+
+/* Edge 특별 처리 */
+@supports (border: max(0px)) {
+  input[type="date"],
+  input[type="time"],
+  input[type="datetime-local"] {
+    color: hsl(var(--foreground)) !important;
+    background: transparent !important;
+  }
+}
+
+/* Firefox 특별 처리 */
+@-moz-document url-prefix() {
+  input[type="date"],
+  input[type="time"],
+  input[type="datetime-local"] {
+    color: hsl(var(--foreground)) !important;
+    background: transparent !important;
+  }
+}
+
+/* 🎯 ShadCN Input 컴포넌트와의 완벽한 통합 */
+[data-slot="input"][type="date"],
+[data-slot="input"][type="time"],
+[data-slot="input"][type="datetime-local"] {
+  /* ShadCN 스타일과 일치 */
+  color: hsl(var(--foreground)) !important;
+  background-color: transparent !important;
+  
+  /* 포커스 상태에서도 일관성 유지 */
+  &:focus {
+    color: hsl(var(--foreground)) !important;
+    background-color: transparent !important;
+  }
+  
+  /* placeholder 색상 (일부 브라우저에서 date input에 placeholder 적용) */
+  &::placeholder {
+    color: hsl(var(--muted-foreground)) !important;
+    opacity: 1 !important;
+  }
+}
+
+/* 💡 추가 보완: Input 그룹과의 호환성 */
+.relative input[type="date"],
+.relative input[type="time"],
+.relative input[type="datetime-local"] {
+  /* 아이콘과 함께 사용될 때 패딩 조정 */
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+/* 🔧 마지막 안전장치: 모든 date input의 색상 강제 설정 */
+input[type="date"]:not([style*="color"]),
+input[type="time"]:not([style*="color"]),
+input[type="datetime-local"]:not([style*="color"]) {
+  color: hsl(var(--foreground)) !important;
+}
+
 
 
 
