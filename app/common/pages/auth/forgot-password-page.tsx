@@ -151,19 +151,31 @@ export default function ForgotPasswordPage({
     },
   });
 
-  const onSubmit = (data: ForgotPasswordFormData) => {
+  const onSubmit = async (data: ForgotPasswordFormData) => {
     setIsSubmitting(true);
 
-    // 폼 데이터를 FormData로 변환하여 제출
-    const formData = new FormData();
-    formData.append('email', data.email);
+    try {
+      // 폼 데이터를 FormData로 변환하여 서버 액션에 제출
+      const formData = new FormData();
+      formData.append('email', data.email);
 
-    // 실제로는 form action을 통해 제출되지만, 여기서는 시뮬레이션
-    setTimeout(() => {
+      // 서버 액션 호출
+      const response = await fetch(window.location.pathname, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          setEmailSent(true);
+        }
+      }
+    } catch (error) {
+      console.error('폼 제출 오류:', error);
+    } finally {
       setIsSubmitting(false);
-      setEmailSent(true);
-      console.log('비밀번호 재설정 이메일 발송:', data.email);
-    }, 1500);
+    }
   };
 
   // 성공 상태 확인

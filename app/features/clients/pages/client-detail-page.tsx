@@ -7,7 +7,7 @@ import {
   useSearchParams,
 } from 'react-router';
 import { InsuranceAgentEvents } from '~/lib/utils/analytics';
-import type { Route } from './+types/client-detail-page';
+// Route 타입은 라우트 파일에서 자동 생성됨
 import { MainLayout } from '~/common/layouts/main-layout';
 import { Button } from '~/common/components/ui/button';
 import { Badge } from '~/common/components/ui/badge';
@@ -143,7 +143,7 @@ import {
 
 // ✅ Zod 스키마 분리 완료 - import로 대체
 
-export async function loader({ request, params }: Route.LoaderArgs) {
+export async function loader({ request, params }: { request: Request; params: { id: string } }) {
   const { id: clientId } = params;
 
   console.log('🔍 고객 상세 페이지 loader 시작:', { clientId });
@@ -309,7 +309,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   }
 }
 
-export function meta({ data }: Route.MetaArgs) {
+export function meta({ data }: { data: any }) {
   const loaderData = data as any; // 임시 타입 우회
   const clientName = loaderData?.client?.fullName || '고객';
   return [
@@ -318,7 +318,7 @@ export function meta({ data }: Route.MetaArgs) {
   ];
 }
 
-export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
+export default function ClientDetailPage({ loaderData }: { loaderData: any }) {
   // 안전한 타입 체크와 기본값 설정
   const data = loaderData as any;
   const client = data?.client || null;
@@ -1961,7 +1961,7 @@ export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
   );
 }
 
-export async function action({ request, params }: Route.ActionArgs) {
+export async function action({ request, params }: { request: Request; params: { id: string } }) {
   const { id: clientId } = params;
 
   if (!clientId) {

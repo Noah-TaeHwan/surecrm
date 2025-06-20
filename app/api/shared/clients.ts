@@ -2,10 +2,8 @@
 import { db } from '~/lib/core/db';
 import {
   clients,
-  clientDetails,
   insuranceInfo,
   pipelineStages,
-  profiles,
   type Client,
   type NewClient,
 } from '~/lib/schema/core';
@@ -274,8 +272,8 @@ export async function getClients(params: {
       page,
       totalPages: Math.ceil(totalResult.count / limit),
     };
-  } catch (error) {
-    // console.error('❌ API: getClients 오류:', error);
+  } catch (_error) {
+    // console.error('❌ API: getClients 오류:', _error);
     return {
       success: false,
       data: [],
@@ -491,8 +489,8 @@ export async function getClientById(
     };
 
     return enrichedClient;
-  } catch (error) {
-    // console.error('❌ API: getClientById 오류:', error);
+  } catch (_error) {
+    // console.error('❌ API: getClientById 오류:', _error);
     return null;
   }
 }
@@ -589,8 +587,8 @@ export async function updateClient(
       data: updatedClient,
       message: `${updatedClient.fullName} 고객 정보가 성공적으로 수정되었습니다.`,
     };
-  } catch (error) {
-    // console.error('❌ API: updateClient 오류:', error);
+  } catch (_error) {
+    // console.error('❌ API: updateClient 오류:', _error);
     return {
       success: false,
       data: null,

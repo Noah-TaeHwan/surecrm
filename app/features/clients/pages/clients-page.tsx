@@ -2,7 +2,7 @@ import { MainLayout } from '~/common/layouts/main-layout';
 import { useState, useMemo, useEffect } from 'react';
 import { useFetcher, useNavigate } from 'react-router';
 import { z } from 'zod';
-import type { Route } from './+types/clients-page';
+// Route 타입은 라우트 파일에서 자동 생성됨
 import type {
   Client,
   AppClientTag,
@@ -349,7 +349,7 @@ const clientValidationSchema = z.object({
   notes: z.string().optional(),
 });
 
-export async function action({ request }: Route.ActionArgs) {
+export async function action({ request }: { request: Request }) {
   try {
     console.log('🔄 Action: 고객 관리 액션 시작');
 
@@ -463,7 +463,7 @@ export async function action({ request }: Route.ActionArgs) {
   }
 }
 
-export default function ClientsPage({ loaderData }: any) {
+export default function ClientsPage({ loaderData }: { loaderData: any }) {
   const fetcher = useFetcher();
   const navigate = useNavigate();
   const deviceType = useDeviceType();
