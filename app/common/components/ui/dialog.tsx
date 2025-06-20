@@ -66,6 +66,10 @@ function DialogContent({
           const eventTarget = event.target as Element;
           if (
             eventTarget.closest('[data-radix-popper-content-wrapper]') ||
+            eventTarget.closest('[data-slot="select-content"]') ||
+            eventTarget.closest('[data-slot="dropdown-menu-content"]') ||
+            eventTarget.closest('[data-radix-select-content]') ||
+            eventTarget.closest('[data-radix-dropdown-menu-content]') ||
             eventTarget.closest(
               'input[type="date"], input[type="time"], input[type="datetime-local"]'
             )
