@@ -16,7 +16,7 @@ interface PasswordSuccessModalProps {
 
 export function PasswordSuccessModal({ isOpen, onClose }: PasswordSuccessModalProps) {
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={onClose} modal={true}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader className="text-center space-y-4">
           {/* 성공 아이콘과 애니메이션 */}
@@ -36,13 +36,13 @@ export function PasswordSuccessModal({ isOpen, onClose }: PasswordSuccessModalPr
             🎉 비밀번호 변경 완료!
           </DialogTitle>
           
-          <DialogDescription className="text-slate-600 dark:text-slate-400 text-center space-y-2">
-            <p className="text-base">
+          <DialogDescription className="text-slate-600 dark:text-slate-400 text-center">
+            <span className="block text-base mb-2">
               새로운 비밀번호가 성공적으로 설정되었습니다.
-            </p>
-            <p className="text-sm">
+            </span>
+            <span className="block text-sm">
               이제 새로운 비밀번호로 SureCRM에 로그인하실 수 있습니다.
-            </p>
+            </span>
           </DialogDescription>
         </DialogHeader>
 
@@ -71,9 +71,9 @@ export function PasswordSuccessModal({ isOpen, onClose }: PasswordSuccessModalPr
 
         {/* 추가 정보 */}
         <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-          <p className="text-xs text-blue-700 dark:text-blue-300 text-center">
+          <div className="text-xs text-blue-700 dark:text-blue-300 text-center">
             💡 <strong>보안 팁:</strong> 새로운 비밀번호는 안전하게 보관해주세요
-          </p>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
