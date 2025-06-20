@@ -50,33 +50,29 @@ export async function loader({ request }: Route.LoaderArgs) {
       url: url.toString()
     };
 
-    // 환경에 상관없이 중요한 에러는 로그
+    // 검증 실패 처리
     if (error) {
       console.error('🚨 [PRODUCTION] 토큰 검증 실패:', {
         ...debugInfo,
         fullError: error
       });
-    }
 
-    // 디버그 모드나 특정 조건에서 상세 정보 반환
-    if (debug || (error && error.message.includes('expired'))) {
-      // 디버그 정보를 쿼리 파라미터로 전달
-      const debugParams = new URLSearchParams({
-        error: error?.message || 'no_error',
-        code: error?.code || 'no_code',
-        time: debugInfo.serverTime,
-        token_preview: debugInfo.token_preview,
-        has_data: String(!!data),
-        has_user: String(!!data?.user),
-        has_session: String(!!data?.session),
-        response_time: String(debugInfo.responseTime)
-      });
-      
-      throw redirect(`/auth/forgot-password?debug_info=true&${debugParams.toString()}`);
-    }
+      // 디버그 모드나 특정 에러에서 상세 정보 반환 (에러가 있을 때만!)
+      if (debug || error.message.includes('expired')) {
+        const debugParams = new URLSearchParams({
+          error: error.message || 'unknown_error',
+          code: error.code || 'unknown_code',
+          time: debugInfo.serverTime,
+          token_preview: debugInfo.token_preview,
+          has_data: String(!!data),
+          has_user: String(!!data?.user),
+          has_session: String(!!data?.session),
+          response_time: String(debugInfo.responseTime)
+        });
+        
+        throw redirect(`/auth/forgot-password?debug_info=true&${debugParams.toString()}`);
+      }
 
-    // 검증 실패 처리
-    if (error) {
       // 일반적인 에러 메시지로 변환
       if (error.message.includes('expired')) {
         throw redirect('/auth/forgot-password?error=token_expired');
@@ -92,7 +88,8 @@ export async function loader({ request }: Route.LoaderArgs) {
       console.log('✅ [PRODUCTION] 토큰 검증 성공:', {
         userId: data.user.id,
         email: data.user.email,
-        sessionExists: !!data.session
+        sessionExists: !!data.session,
+        debugMode: debug
       });
 
       // 클라이언트사이드 세션 설정을 위한 API 호출
@@ -119,7 +116,8 @@ export async function loader({ request }: Route.LoaderArgs) {
       
       // 토큰 타입별 리다이렉트 처리
       if (type === 'recovery') {
-        // 비밀번호 재설정 플로우
+        // 비밀번호 재설정 플로우 - 성공했으니 정상적으로 진행
+        console.log('✅ [PRODUCTION] 비밀번호 재설정 페이지로 리다이렉트');
         throw redirect('/auth/new-password');
       } else if (type === 'signup' || type === 'email_change') {
         // 이메일 확인 플로우
