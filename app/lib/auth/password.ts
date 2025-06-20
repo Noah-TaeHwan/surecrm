@@ -9,8 +9,10 @@ export async function sendPasswordResetEmail(
   try {
     const supabase = createServerClient();
 
-    // 환경변수에서 사이트 URL 가져오기
-    const siteUrl = process.env.SITE_URL || 'http://localhost:5173';
+    // 환경변수에서 사이트 URL 가져오기 (개발/운영 환경 고려)
+    const siteUrl = process.env.NODE_ENV === 'development' 
+      ? 'http://localhost:5173' 
+      : process.env.SITE_URL || 'https://surecrm-sigma.vercel.app';
     const redirectTo = `${siteUrl}/auth/reset-password`;
 
     console.log('비밀번호 재설정 이메일 발송:', { email, redirectTo });
