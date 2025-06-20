@@ -283,9 +283,12 @@ export async function action({ request }: Route['ActionArgs']) {
       }, { status: 400 });
     }
 
-    console.log('✅ [ACTION] 비밀번호 변경 성공 - 로그인 페이지로 리다이렉트');
-    // 성공적으로 비밀번호 변경 후 로그인 페이지로 리다이렉트
-    throw redirect('/auth/login?message=password_updated');
+    console.log('✅ [ACTION] 비밀번호 변경 성공 - 성공 응답 반환');
+    // 성공적으로 비밀번호 변경 후 성공 상태 반환 (리다이렉트 대신 모달 표시)
+    return data({
+      success: true,
+      message: '비밀번호가 성공적으로 변경되었습니다.',
+    }, { status: 200 });
   } catch (error) {
     // 리다이렉트가 아닌 일반 오류인 경우에만 로그
     if (!(error instanceof Response)) {

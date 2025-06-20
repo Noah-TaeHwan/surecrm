@@ -26,6 +26,7 @@ import {
   AlertDescription,
   AlertTitle,
 } from '~/common/components/ui/alert';
+import { PasswordSuccessModal } from '~/common/components/ui/password-success-modal';
 import { Lock, CheckCircle, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 
 // 새 비밀번호 스키마
@@ -85,6 +86,7 @@ export default function NewPasswordPage({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   // react-hook-form과 zodResolver를 사용한 폼 설정
   const form = useForm<NewPasswordFormData>({
@@ -111,6 +113,12 @@ export default function NewPasswordPage({
       console.log('🔄 [REDIRECT] Action에서 리다이렉트 요청:', actionData.redirectUrl);
       window.location.href = actionData.redirectUrl;
     }
+    
+    // 비밀번호 변경 성공 시 모달 표시
+    if (actionData?.success) {
+      console.log('🎉 [SUCCESS] 비밀번호 변경 성공 - 모달 표시');
+      setShowSuccessModal(true);
+    }
   }, [loaderData, actionData]);
 
   const onSubmit = async (formData: NewPasswordFormData) => {
@@ -121,6 +129,12 @@ export default function NewPasswordPage({
 
   return (
     <AuthLayout>
+      {/* 성공 모달 */}
+      <PasswordSuccessModal 
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+      />
+      
       <Card className="w-full bg-transparent border-none shadow-none">
         <CardHeader className="space-y-1 pb-6">
           <div className="flex items-center gap-3 mb-4">
