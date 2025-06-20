@@ -168,6 +168,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
                       import.meta.env.VITE_GA_MEASUREMENT_ID
                     }', {
                       send_page_view: true,
+                      cookie_domain: 'auto',
+                      cookie_flags: 'SameSite=Lax;Secure',
                       custom_map: {
                         'custom_parameter_1': 'user_engagement_depth',
                         'custom_parameter_2': 'behavior_prediction_score', 

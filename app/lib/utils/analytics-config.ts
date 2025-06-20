@@ -89,13 +89,13 @@ export function getCurrentUserRole(): string | null {
           return sessionRole;
         }
       }
-    } catch (sessionError) {
-      // 무시
+    } catch (_sessionError) {
+      // 세션 파싱 에러 무시
     }
 
     // 3차: 모든 방법 실패 시 null 반환
     return null;
-  } catch (error) {
+  } catch (_error) {
     return null;
   }
 }

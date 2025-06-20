@@ -166,9 +166,20 @@ export default function ForgotPasswordPage({
       });
 
       if (response.ok) {
-        const result = await response.json();
-        if (result.success) {
-          setEmailSent(true);
+        try {
+          const result = await response.json();
+          if (result.success) {
+            setEmailSent(true);
+          }
+        } catch (jsonError) {
+          // JSON 파싱 실패 시 텍스트로 시도
+          const text = await response.text();
+          console.warn('JSON 파싱 실패, 텍스트 응답:', text);
+          
+          // 성공적인 응답이라고 가정하고 이메일 발송 완료 처리
+          if (response.status === 200) {
+            setEmailSent(true);
+          }
         }
       }
     } catch (error) {

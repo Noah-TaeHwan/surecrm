@@ -15,58 +15,72 @@ export async function loader({ request }: Route['LoaderArgs']) {
   const type = url.searchParams.get('type') as EmailOtpType | null;
   const next = url.searchParams.get('next') || '/';
 
-  console.log('🔗 /auth/confirm 호출:', { token_hash, type, next });
+  console.log('🔗 /auth/confirm 호출:', { 
+    token_hash: token_hash ? 'present' : 'missing', 
+    type, 
+    next,
+    url: url.toString()
+  });
 
   // 토큰과 타입이 모두 있는 경우에만 처리
   if (token_hash && type) {
     const supabase = createServerClient();
     
     try {
-      // Supabase 표준 방식: verifyOtp로 token_hash 검증
-      const { error } = await supabase.auth.verifyOtp({
+      console.log('🔄 토큰 검증 시도:', { type });
+      
+      // Context7에서 확인한 Supabase 표준 방식
+      const { data, error } = await supabase.auth.verifyOtp({
         token_hash,
-        type,
+        type: type as EmailOtpType,
       });
 
-      if (!error) {
-        console.log('✅ 토큰 검증 성공');
+      console.log('🔍 토큰 검증 결과:', { 
+        hasData: !!data, 
+        hasUser: !!data?.user,
+        hasSession: !!data?.session,
+        error: error?.message 
+      });
+
+      if (!error && data?.user) {
+        console.log('✅ 토큰 검증 성공 - 사용자 인증됨');
         
         // 토큰 타입에 따라 적절한 페이지로 리다이렉트
-        switch (type) {
-          case 'recovery':
-            // 비밀번호 재설정 토큰인 경우
-            throw redirect('/auth/new-password');
-          case 'email':
-            // 이메일 확인 토큰인 경우
-            throw redirect(next || '/dashboard');
-          default:
-            // 기타 경우
-            throw redirect(next || '/dashboard');
+        if (type === 'recovery') {
+          // 비밀번호 재설정 토큰인 경우
+          console.log('🔄 비밀번호 재설정 페이지로 리다이렉트');
+          throw redirect('/auth/new-password');
+        } else if (type === 'email') {
+          // 이메일 확인 토큰인 경우
+          console.log('🔄 대시보드로 리다이렉트');
+          throw redirect(next || '/dashboard');
+        } else {
+          // 기타 경우
+          console.log('🔄 기본 대시보드로 리다이렉트');
+          throw redirect(next || '/dashboard');
         }
       } else {
-        console.error('❌ 토큰 검증 실패:', error);
+        console.error('❌ 토큰 검증 실패:', { 
+          errorMessage: error?.message,
+          errorCode: error?.message,
+          hasUser: !!data?.user 
+        });
         
         // 에러 타입에 따라 적절한 에러 메시지와 함께 리다이렉트
-        switch (type) {
-          case 'recovery':
-            throw redirect('/auth/forgot-password?error=invalid_token');
-          case 'email':
-            throw redirect('/auth/login?error=invalid_token');
-          default:
-            throw redirect('/auth/login?error=verification_failed');
+        if (type === 'recovery') {
+          throw redirect('/auth/forgot-password?error=invalid_token');
+        } else {
+          throw redirect('/auth/login?error=invalid_token');
         }
       }
-    } catch (error) {
-      console.error('❌ 토큰 검증 중 예외:', error);
+    } catch (verifyError) {
+      console.error('❌ 토큰 검증 중 예외 발생:', verifyError);
       
       // 예외 발생 시 적절한 페이지로 리다이렉트
-      switch (type) {
-        case 'recovery':
-          throw redirect('/auth/forgot-password?error=verification_failed');
-        case 'email':
-          throw redirect('/auth/login?error=verification_failed');
-        default:
-          throw redirect('/auth/login?error=verification_failed');
+      if (type === 'recovery') {
+        throw redirect('/auth/forgot-password?error=verification_failed');
+      } else {
+        throw redirect('/auth/login?error=verification_failed');
       }
     }
   }
