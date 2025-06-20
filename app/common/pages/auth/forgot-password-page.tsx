@@ -167,20 +167,30 @@ export default function ForgotPasswordPage({
 
       if (response.ok) {
         try {
-          const result = await response.json();
-          if (result.success) {
+          // ✅ 응답을 한 번만 읽도록 수정
+          const responseText = await response.text();
+          
+          // JSON 형태인지 확인
+          if (responseText.trim().startsWith('{')) {
+            const result = JSON.parse(responseText);
+            if (result.success) {
+              setEmailSent(true);
+            }
+          } else {
+            // 성공적인 응답이라고 가정하고 이메일 발송 완료 처리
+            console.log('✅ 비밀번호 재설정 이메일 발송 요청 완료');
             setEmailSent(true);
           }
-        } catch (jsonError) {
-          // JSON 파싱 실패 시 텍스트로 시도
-          const text = await response.text();
-          console.warn('JSON 파싱 실패, 텍스트 응답:', text);
-          
-          // 성공적인 응답이라고 가정하고 이메일 발송 완료 처리
+        } catch (parseError) {
+          console.warn('응답 처리 중 오류:', parseError);
+          // 200 응답이면 성공으로 처리
           if (response.status === 200) {
+            console.log('✅ 비밀번호 재설정 이메일 발송 완료 (응답 파싱 실패하지만 성공 처리)');
             setEmailSent(true);
           }
         }
+      } else {
+        console.error('서버 응답 오류:', response.status, response.statusText);
       }
     } catch (error) {
       console.error('폼 제출 오류:', error);

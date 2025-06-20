@@ -157,7 +157,7 @@ const getCurrentLogLevel = (): number => {
 
 // 로그 출력 빈도 제한을 위한 캐시
 const logCache = new Map<string, number>();
-const LOG_THROTTLE_MS = 30000; // 30초마다 같은 로그 허용
+const LOG_THROTTLE_MS = 60000; // ✅ 60초로 증가 (기존 30초에서)
 
 /**
  * 스마트 로그 헬퍼 함수
@@ -171,7 +171,12 @@ export function logAnalyticsStatus(
   // 로그 레벨 확인
   if (level > currentLevel) return;
 
-  // 같은 로그 반복 방지 (30초 throttle)
+  // ✅ 개발 환경에서는 애널리틱스 로그 완전 차단
+  if (isDevelopmentEnvironment()) {
+    return; // 개발 환경에서는 아예 로그 출력하지 않음
+  }
+
+  // 같은 로그 반복 방지 (60초 throttle)
   const logKey = `${action}_${level}`;
   const now = Date.now();
   const lastLogged = logCache.get(logKey);
@@ -189,15 +194,15 @@ export function logAnalyticsStatus(
         ? '시스템 관리자'
         : '설정 미완료';
 
-    // DEBUG 레벨에서만 차단 로그 출력
-    if (level >= LOG_LEVELS.DEBUG) {
+    // ✅ 차단 로그도 더 제한적으로 출력
+    if (level >= LOG_LEVELS.WARN && !isDevelopmentEnvironment()) {
       console.log(`🚫 ${action} 건너뛰기: ${reason}`);
     }
     return;
   }
 
-  // INFO 레벨에서만 성공 로그 출력
-  if (level >= LOG_LEVELS.INFO) {
+  // ✅ 성공 로그도 더 제한적으로 출력
+  if (level >= LOG_LEVELS.INFO && !isDevelopmentEnvironment()) {
     console.log(`✅ ${action} 실행`);
   }
 }
