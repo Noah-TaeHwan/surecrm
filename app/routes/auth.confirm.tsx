@@ -1,15 +1,10 @@
 import { redirect } from 'react-router';
 import { createServerClient } from '~/lib/core/supabase';
 import type { EmailOtpType } from '@supabase/supabase-js';
-
-interface Route {
-  LoaderArgs: {
-    request: Request;
-  };
-}
+import type { Route } from "./+types/auth.confirm";
 
 // Supabase 표준 토큰 확인 엔드포인트
-export async function loader({ request }: Route['LoaderArgs']) {
+export async function loader({ request }: Route.LoaderArgs) {
   const url = new URL(request.url);
   const token_hash = url.searchParams.get('token_hash');
   const type = url.searchParams.get('type') as EmailOtpType | null;
