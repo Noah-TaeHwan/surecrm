@@ -12,6 +12,8 @@ export default [
   route('auth/signup', 'common/pages/auth/signup-page.tsx'),
   route('auth/logout', 'common/pages/auth/auth.logout.tsx'),
   route('auth/forgot-password', 'common/pages/auth/forgot-password-page.tsx'),
+  route('auth/reset-password', 'routes/auth.reset-password.tsx'),
+  route('auth/new-password', 'routes/auth.new-password.tsx'),
   route('auth/otp-verification', 'common/pages/auth/otp-verification-page.tsx'),
   route('auth/magic-link-verify', 'common/pages/auth/magic-link-verify.tsx'),
   route(
