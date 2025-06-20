@@ -429,23 +429,18 @@ export function AddClientModal({
                         <RadioGroup
                           onValueChange={field.onChange}
                           defaultValue={field.value}
-                          className=""
+                          className="space-y-2"
                         >
                           {importanceOptions.map(option => (
                             <Label
                               key={option.id}
                               htmlFor={option.id}
-                              className={`p-3 rounded-lg border ${option.color} cursor-pointer hover:bg-muted/20 transition-colors block w-full ${
-                                field.value === option.id 
-                                  ? 'border-primary border-2 ring-2 ring-primary/20' 
-                                  : 'border-border'
-                              }`}
+                              className={`p-3 rounded-lg border ${option.color} cursor-pointer hover:bg-muted/20 transition-colors block w-full`}
                             >
                               <div className="flex items-center space-x-3">
                                 <RadioGroupItem
                                   value={option.id}
                                   id={option.id}
-                                  className="focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none"
                                 />
                                 <div className="flex-1">
                                   <div className="text-xs sm:text-sm font-medium">
