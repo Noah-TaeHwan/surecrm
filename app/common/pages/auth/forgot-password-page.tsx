@@ -31,7 +31,9 @@ import { ArrowLeft, Mail, CheckCircle } from 'lucide-react';
 import { sendPasswordResetEmail } from '~/lib/auth/password';
 
 // 타입 정의
-interface LoaderData {}
+interface LoaderData {
+  error?: string | null;
+}
 
 interface ActionData {
   success: boolean;
@@ -64,8 +66,29 @@ type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 
 // 로더 함수
 export async function loader({ request }: Route['LoaderArgs']) {
-  // 비밀번호 찾기 페이지는 특별한 로더 데이터가 필요하지 않음
-  return {};
+  const url = new URL(request.url);
+  const error = url.searchParams.get('error');
+
+  // URL 파라미터에서 에러 메시지 처리
+  let errorMessage = '';
+  switch (error) {
+    case 'invalid_link':
+      errorMessage = '비밀번호 재설정 링크가 유효하지 않습니다. 새로운 링크를 요청해주세요.';
+      break;
+    case 'invalid_token':
+      errorMessage = '비밀번호 재설정 토큰이 만료되었거나 유효하지 않습니다.';
+      break;
+    case 'verification_failed':
+      errorMessage = '토큰 검증 중 오류가 발생했습니다. 다시 시도해주세요.';
+      break;
+    case 'session_expired':
+      errorMessage = '세션이 만료되었습니다. 비밀번호 재설정을 다시 시도해주세요.';
+      break;
+  }
+
+  return {
+    error: errorMessage || null,
+  };
 }
 
 // 액션 함수 - 비밀번호 재설정 이메일 발송
@@ -172,11 +195,13 @@ export default function ForgotPasswordPage({
         </CardHeader>
 
         <CardContent>
-          {/* 에러 메시지 표시 */}
-          {actionData?.error && (
+          {/* 에러 메시지 표시 (URL 파라미터 또는 액션에서) */}
+          {(loaderData?.error || actionData?.error) && (
             <Alert variant="destructive" className="mb-6">
               <AlertTitle>오류</AlertTitle>
-              <AlertDescription>{actionData.error}</AlertDescription>
+              <AlertDescription>
+                {loaderData?.error || actionData?.error}
+              </AlertDescription>
             </Alert>
           )}
 
