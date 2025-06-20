@@ -143,7 +143,50 @@ export default function LoginPage({ loaderData, actionData }: ComponentProps) {
     },
   });
 
+  const handleDiagnose = async () => {
+    if (!email) {
+      alert('진단하려면 이메일을 먼저 입력하세요');
+      return;
+    }
+    
+    try {
+      const formData = new FormData();
+      formData.append('email', email);
+      
+      const response = await fetch('/api/auth/diagnose', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      const result = await response.json();
+      console.log('진단 결과:', result);
+      alert(`진단 완료! 콘솔을 확인하세요.\n\n상태: ${result.diagnosis?.diagnosis || 'UNKNOWN'}`);
+    } catch (error) {
+      console.error('진단 오류:', error);
+      alert('진단 중 오류가 발생했습니다.');
+    }
+  };
 
+  const handlePasswordReset = async (email: string) => {
+    try {
+      const response = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        alert(`✅ 비밀번호 재설정 이메일을 ${email}로 발송했습니다!\n\n이메일을 확인하고 링크를 클릭하여 새 비밀번호를 설정하세요.`);
+      } else {
+        alert(`❌ 오류: ${result.error || '알 수 없는 오류가 발생했습니다.'}`);
+      }
+    } catch (error) {
+      console.error('비밀번호 재설정 오류:', error);
+      alert('❌ 비밀번호 재설정 중 오류가 발생했습니다.');
+    }
+  };
 
   return (
     <AuthLayout>
@@ -296,7 +339,93 @@ export default function LoginPage({ loaderData, actionData }: ComponentProps) {
             </Link>
           </div>
 
-
+          {/* 개발 환경에서만 보이는 진단 도구 */}
+          {process.env.NODE_ENV === 'development' && (
+            <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg dark:bg-amber-900/20 dark:border-amber-800">
+              <h3 className="text-sm font-medium text-amber-800 dark:text-amber-200 mb-2">
+                🔧 개발자 도구
+              </h3>
+              <div className="space-y-2">
+                <Button
+                  type="button"
+                  variant="outline" 
+                  size="sm"
+                  onClick={handleDiagnose}
+                  className="w-full text-xs"
+                >
+                  🔍 로그인 문제 진단 (DEV)
+                </Button>
+                
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePasswordReset(email)}
+                  disabled={!email}
+                  className="w-full text-xs"
+                >
+                  🔑 비밀번호 재설정 이메일 발송 (DEV)
+                </Button>
+                
+                {/* 토큰 테스트 기능 추가 */}
+                <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded dark:bg-yellow-900/20 dark:border-yellow-800">
+                  <p className="text-xs text-yellow-800 dark:text-yellow-200 mb-2">
+                    ⚡ 빠른 토큰 테스트:
+                  </p>
+                  <div className="space-y-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        // 이전 이메일에서 받은 토큰으로 디버그 모드 테스트
+                        const testUrl = 'http://localhost:5173/auth/confirm?token_hash=e584d613465cc6706392517f242370bfe718229fee59deaca84d7421&type=recovery&debug=true';
+                        window.open(testUrl, '_blank');
+                      }}
+                      className="w-full text-xs"
+                    >
+                      🧪 이전 토큰으로 디버그 테스트 (DEV)
+                    </Button>
+                    
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={async () => {
+                        if (!email) {
+                          alert('이메일을 먼저 입력해주세요!');
+                          return;
+                        }
+                        
+                        try {
+                          // 새 토큰 생성
+                          const response = await fetch('/api/auth/reset-password', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email }),
+                          });
+                          
+                          const result = await response.json();
+                          
+                          if (result.success) {
+                            alert(`✅ 새 토큰이 ${email}로 발송되었습니다!\n\n이메일을 확인하고 링크에 &debug=true를 추가해서 접속하세요.\n\n예: ...&type=recovery&debug=true`);
+                          } else {
+                            alert(`❌ 오류: ${result.error}`);
+                          }
+                        } catch (error) {
+                          console.error('토큰 생성 오류:', error);
+                          alert('❌ 새 토큰 생성 중 오류가 발생했습니다.');
+                        }
+                      }}
+                      className="w-full text-xs"
+                    >
+                      🔄 새 토큰 생성 + 디버그 안내 (DEV)
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </CardContent>
 
         <CardFooter className="flex flex-col space-y-3 sm:space-y-4 pt-2">
