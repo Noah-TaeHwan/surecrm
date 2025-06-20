@@ -35,19 +35,19 @@ function UseCaseTab({
           <div className="max-w-3xl mx-auto text-center space-y-6 sm:space-y-8">
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-4 sm:mb-6">
               <div className="w-12 sm:w-14 lg:w-16 h-12 sm:h-14 lg:h-16 bg-gradient-to-br from-primary/80 to-primary rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg">
-                {icon}
-              </div>
+                    {icon}
+                  </div>
               <div className="text-center sm:text-left">
-                <Badge
-                  variant="secondary"
+                    <Badge
+                      variant="secondary"
                   className="mb-1 sm:mb-2 bg-primary/10 text-primary border-primary/20 text-xs sm:text-sm"
-                >
-                  {title.split(' ')[0]}
-                </Badge>
+                    >
+                      {title.split(' ')[0]}
+                    </Badge>
                 <h3 className="text-xl sm:text-2xl font-bold leading-tight">{title}</h3>
               </div>
             </div>
-            
+
             <p className="text-sm sm:text-base lg:text-lg text-muted-foreground leading-relaxed max-w-lg sm:max-w-xl lg:max-w-2xl mx-auto px-2 sm:px-0">
               {description}
             </p>

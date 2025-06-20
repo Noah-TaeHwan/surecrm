@@ -14,12 +14,12 @@ export function HeroSection() {
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="max-w-4xl mx-auto text-center space-y-6 sm:space-y-8 lg:space-y-10">
-          <Badge
+            <Badge
             className="px-3 sm:px-4 py-1 sm:py-1.5 text-xs sm:text-sm font-medium"
-            variant="secondary"
-          >
+              variant="secondary"
+            >
             초대 전용 MVP
-          </Badge>
+            </Badge>
           
           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight leading-tight">
             <div className="mb-2 sm:mb-3 lg:mb-4">
@@ -35,11 +35,11 @@ export function HeroSection() {
             <div>
               <TextReveal text="관리 솔루션" />
             </div>
-          </h1>
+            </h1>
           
           <p className="text-sm sm:text-base lg:text-lg xl:text-xl text-muted-foreground max-w-xs sm:max-w-lg lg:max-w-2xl mx-auto leading-relaxed px-2 sm:px-4 lg:px-0">
             누가 누구를 소개했는지 시각적으로 체계화하고 소개 네트워크의 힘을 극대화하세요
-          </p>
+            </p>
           
           {/* MVP 기능 목록 - 모바일 최적화 */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 max-w-xs sm:max-w-2xl lg:max-w-3xl mx-auto pt-6 sm:pt-8">
@@ -79,19 +79,19 @@ export function HeroSection() {
 
           <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 pt-6 sm:pt-8 px-4 sm:px-0">
             <Button size="lg" className="rounded-full px-4 sm:px-6 h-11 sm:h-12 shadow-lg text-sm sm:text-base hover:shadow-xl transition-all duration-200">
-              <Link to="/invite-only" className="flex items-center gap-2">
-                초대 코드로 시작하기
+                <Link to="/invite-only" className="flex items-center gap-2">
+                  초대 코드로 시작하기
                 <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4" />
-              </Link>
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              asChild
+                </Link>
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                asChild
               className="rounded-full px-4 sm:px-6 h-11 sm:h-12 text-sm sm:text-base hover:bg-accent transition-colors duration-200"
-            >
-              <Link to="/auth/login">계정이 있다면 로그인</Link>
-            </Button>
+              >
+                <Link to="/auth/login">계정이 있다면 로그인</Link>
+              </Button>
           </div>
         </div>
       </div>

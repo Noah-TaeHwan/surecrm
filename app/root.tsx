@@ -652,7 +652,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
               (function() {
                 try {
                   // MVP에서는 무조건 다크모드만 제공
-                  document.documentElement.classList.add('dark');
+                    document.documentElement.classList.add('dark');
                   localStorage.setItem('surecrm-theme', 'dark');
                   console.log('🌙 강제 다크모드 적용 완료');
                 } catch (e) {

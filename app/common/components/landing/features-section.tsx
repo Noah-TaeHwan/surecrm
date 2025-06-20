@@ -106,7 +106,7 @@ export function FeaturesSection() {
           <p className="text-sm sm:text-base text-muted-foreground leading-relaxed px-2 sm:px-0">
             SureCRM은 보험설계사가 소개 네트워크를 효과적으로 관리하고
             <span className="hidden sm:inline">
-              <br />
+            <br />
             </span>
             <span className="sm:hidden"> </span>
             영업 성과를 높이는 데 필요한 모든 도구를 제공합니다.

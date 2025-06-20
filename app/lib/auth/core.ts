@@ -1,4 +1,4 @@
-import { createAdminClient, createServerClient } from '../core/supabase';
+import { createAdminClient, createServerClient, createClientSideClient } from '../core/supabase';
 import { db } from '../core/db';
 import { profiles } from '../schema';
 import { eq } from 'drizzle-orm';
@@ -295,10 +295,12 @@ export async function authenticateUser(
   credentials: LoginAttempt
 ): Promise<LoginResult> {
   try {
-    console.log('로그인 시도:', credentials.email);
+    console.log('🔐 [로그인 시작] 이메일:', credentials.email);
 
     // 1. 서버 클라이언트를 사용하여 브라우저 세션 설정
     const supabase = createServerClient();
+    console.log('📡 [1단계] Supabase 클라이언트 생성 완료');
+
     const { data: authData, error: authError } =
       await supabase.auth.signInWithPassword({
         email: credentials.email,
@@ -306,51 +308,110 @@ export async function authenticateUser(
       });
 
     if (authError) {
-      console.error('Supabase Auth 로그인 오류:', authError);
+      console.error('❌ [1단계 실패] Supabase Auth 로그인 오류:', {
+        message: authError.message,
+        status: authError.status,
+        code: authError.name || 'AuthError',
+        details: authError
+      });
+      
+      // 구체적인 에러 메시지 제공
+      if (authError.message?.includes('Invalid login credentials')) {
+        return {
+          success: false,
+          error: '이메일 또는 비밀번호가 올바르지 않습니다.',
+        };
+      } else if (authError.message?.includes('Email not confirmed')) {
+        return {
+          success: false,
+          error: '이메일 인증이 필요합니다. 이메일을 확인해주세요.',
+        };
+      } else if (authError.message?.includes('Too many requests')) {
+        return {
+          success: false,
+          error: '너무 많은 로그인 시도가 있었습니다. 잠시 후 다시 시도해주세요.',
+        };
+      }
+      
       return {
         success: false,
-        error: '이메일 또는 비밀번호가 올바르지 않습니다.',
+        error: `로그인 오류: ${authError.message}`,
       };
     }
 
     if (!authData.user) {
+      console.error('❌ [1단계] authData.user가 null입니다:', authData);
       return {
         success: false,
         error: '로그인에 실패했습니다.',
       };
     }
 
-    console.log('Supabase Auth 로그인 성공:', authData.user.id);
+    console.log('✅ [1단계 성공] Supabase Auth 로그인 완료:', {
+      userId: authData.user.id,
+      email: authData.user.email,
+      confirmed_at: authData.user.email_confirmed_at
+    });
 
     // 2. 프로필 정보 조회
+    console.log('📂 [2단계] 프로필 조회 시작...');
+    
+    try {
     const userProfile = await db
       .select()
       .from(profiles)
       .where(eq(profiles.id, authData.user.id))
       .limit(1);
 
+      console.log('📊 [2단계] DB 쿼리 결과:', {
+        userId: authData.user.id,
+        profilesFound: userProfile.length,
+        profiles: userProfile.length > 0 ? userProfile[0] : null
+      });
+
     if (userProfile.length === 0) {
-      console.error('프로필을 찾을 수 없음:', authData.user.id);
+        console.error('❌ [2단계 실패] 프로필을 찾을 수 없음:', {
+          userId: authData.user.id,
+          email: authData.user.email,
+          suggestion: 'app_user_profiles 테이블에 해당 사용자가 없을 수 있습니다'
+        });
       return {
         success: false,
-        error: '사용자 프로필을 찾을 수 없습니다.',
+          error: '사용자 프로필을 찾을 수 없습니다. 관리자에게 문의하세요.',
       };
     }
 
     const profile = userProfile[0];
+      console.log('✅ [2단계 성공] 프로필 조회 완료:', {
+        id: profile.id,
+        fullName: profile.fullName,
+        isActive: profile.isActive,
+        role: profile.role
+      });
 
     // 3. 계정 활성화 상태 확인
+      console.log('🔍 [3단계] 계정 활성화 상태 확인...');
+      
     if (!profile.isActive) {
+        console.error('❌ [3단계 실패] 비활성화된 계정:', {
+          userId: profile.id,
+          fullName: profile.fullName,
+          isActive: profile.isActive
+        });
       return {
         success: false,
         error: '비활성화된 계정입니다. 관리자에게 문의하세요.',
       };
     }
 
-    // 4. 마지막 로그인 시간 업데이트
-    await updateLastLoginTime(profile.id);
+      console.log('✅ [3단계 성공] 계정 활성화 상태 정상');
 
-    console.log('로그인 성공:', profile.fullName);
+    // 4. 마지막 로그인 시간 업데이트
+      console.log('⏰ [4단계] 마지막 로그인 시간 업데이트...');
+    await updateLastLoginTime(profile.id);
+      console.log('✅ [4단계 성공] 마지막 로그인 시간 업데이트 완료');
+
+      console.log('🎉 [로그인 완료] 모든 단계 성공:', profile.fullName);
 
     return {
       success: true,
@@ -364,11 +425,102 @@ export async function authenticateUser(
         invitationsLeft: profile.invitationsLeft,
       },
     };
+
+    } catch (dbError) {
+      console.error('❌ [2단계 DB 오류] 프로필 조회 중 DB 에러:', {
+        error: dbError,
+        userId: authData.user.id,
+        suggestion: 'DB 연결 상태나 스키마를 확인해주세요'
+      });
+      return {
+        success: false,
+        error: 'DB 연결 오류가 발생했습니다. 잠시 후 다시 시도해주세요.',
+      };
+    }
+
   } catch (error) {
-    console.error('로그인 처리 중 오류:', error);
+    console.error('💥 [로그인 처리 중 예상치 못한 오류]:', {
+      error,
+      email: credentials.email,
+      timestamp: new Date().toISOString()
+    });
     return {
       success: false,
-      error: '로그인 처리 중 오류가 발생했습니다.',
+      error: '시스템 오류가 발생했습니다. 잠시 후 다시 시도해주세요.',
     };
+  }
+}
+
+/**
+ * DB 상태 진단 함수 (디버깅용)
+ */
+export async function diagnoseAuthDB(email: string): Promise<any> {
+  try {
+    console.log('🔍 [DB 진단 시작] 이메일:', email);
+    
+    // 1. Supabase Admin으로 Auth 사용자 확인
+    const supabaseAdmin = createAdminClient();
+    const { data: users, error: listError } = await supabaseAdmin.auth.admin.listUsers();
+    
+    if (listError) {
+      console.error('❌ [Auth API 오류]:', listError);
+      return { error: 'Auth API 접근 실패', details: listError };
+    }
+    
+    const authUser = users.users.find(user => user.email === email);
+    console.log('📊 [Auth 사용자 상태]:', {
+      found: !!authUser,
+      id: authUser?.id,
+      email: authUser?.email,
+      confirmed_at: authUser?.email_confirmed_at,
+      last_sign_in_at: authUser?.last_sign_in_at
+    });
+    
+    if (!authUser) {
+      return { error: 'Supabase Auth에 사용자 없음', authUser: null };
+    }
+    
+    // 2. app_user_profiles 테이블 확인
+    try {
+      const userProfile = await db
+        .select()
+        .from(profiles)
+        .where(eq(profiles.id, authUser.id))
+        .limit(1);
+        
+      console.log('📊 [프로필 테이블 상태]:', {
+        profilesFound: userProfile.length,
+        profile: userProfile.length > 0 ? {
+          id: userProfile[0].id,
+          fullName: userProfile[0].fullName,
+          isActive: userProfile[0].isActive,
+          role: userProfile[0].role,
+          createdAt: userProfile[0].createdAt
+        } : null
+      });
+      
+      return {
+        success: true,
+        authUser: {
+          id: authUser.id,
+          email: authUser.email,
+          confirmed_at: authUser.email_confirmed_at
+        },
+        profile: userProfile.length > 0 ? userProfile[0] : null,
+        diagnosis: userProfile.length === 0 ? 'PROFILE_MISSING' : 'OK'
+      };
+      
+    } catch (dbError) {
+      console.error('❌ [DB 연결 오류]:', dbError);
+      return { 
+        error: 'DB 연결 실패', 
+        authUser: { id: authUser.id, email: authUser.email },
+        dbError 
+      };
+    }
+    
+  } catch (error) {
+    console.error('💥 [진단 실패]:', error);
+    return { error: '진단 과정에서 오류 발생', details: error };
   }
 }
