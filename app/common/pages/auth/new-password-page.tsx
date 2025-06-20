@@ -131,7 +131,7 @@ export default function NewPasswordPage({
       formBody.append('password', formData.password);
       formBody.append('confirmPassword', formData.confirmPassword);
       
-      const response = await fetch('/auth/new-password', {
+      const response = await fetch('/api/auth/new-password', {
         method: 'POST',
         body: formBody,
       });
