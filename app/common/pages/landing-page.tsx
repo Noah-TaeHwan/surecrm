@@ -1,4 +1,4 @@
-import { type MetaFunction } from 'react-router';
+import type { Route } from "./+types/landing-page";
 import { LandingLayout } from '~/common/layouts/landing-layout';
 import { ScrollProgress } from '~/common/components/magicui/scroll-progress';
 import { FloatingNavbar } from '~/common/components/ui/floating-navbar';
@@ -18,22 +18,8 @@ import {
   type Testimonial,
 } from '~/lib/data/public';
 
-// Loader 함수의 인자 타입
-interface LoaderArgs {
-  request: Request;
-}
-
-// 컴포넌트 Props 타입
-interface LandingPageProps {
-  loaderData: {
-    stats: PublicStats;
-    testimonials: Testimonial[];
-    faqs: any[];
-  };
-}
-
 // Loader 함수 - 실제 데이터베이스에서 데이터 가져오기
-export async function loader({ request }: LoaderArgs) {
+export async function loader({ request }: Route.LoaderArgs) {
   try {
     const [stats, testimonials, faqs] = await Promise.all([
       getPublicStats(),
@@ -66,7 +52,7 @@ export async function loader({ request }: LoaderArgs) {
 }
 
 // 메타 정보
-export const meta: MetaFunction = () => {
+export function meta({ data }: Route.MetaArgs) {
   return [
     { title: 'SureCRM - 보험설계사를 위한 소개 네트워크 관리 솔루션' },
     {
@@ -91,7 +77,7 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export default function LandingPage({ loaderData }: LandingPageProps) {
+export default function LandingPage({ loaderData }: Route.ComponentProps) {
   const { stats, testimonials, faqs } = loaderData;
 
   const navItems = [

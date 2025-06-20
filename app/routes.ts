@@ -1,8 +1,8 @@
 import { type RouteConfig, index, route } from '@react-router/dev/routes';
 
 export default [
-  // 🏠 메인 페이지 (인증 상태에 따른 리다이렉트)
-  index('common/pages/_index.tsx'),
+  // 🏠 메인 페이지 (랜딩페이지)
+  index('common/pages/landing-page.tsx'),
 
   // 📊 대시보드
   route('dashboard', 'features/dashboard/pages/dashboard-page.tsx'),
