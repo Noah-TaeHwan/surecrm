@@ -21,12 +21,12 @@ interface FeatureCardProps {
 
 function FeatureCard({ icon, title, description }: FeatureCardProps) {
   return (
-    <div className="relative h-full p-6 bg-background/90 backdrop-blur-sm rounded-xl border border-border/40 shadow-sm hover:shadow-md transition-all duration-300">
-      <div className="rounded-full bg-primary/10 w-12 h-12 flex items-center justify-center mb-4">
+    <div className="relative h-full p-4 sm:p-5 lg:p-6 bg-background/90 backdrop-blur-sm rounded-xl border border-border/40 shadow-sm hover:shadow-md transition-all duration-300">
+      <div className="rounded-full bg-primary/10 w-10 sm:w-11 lg:w-12 h-10 sm:h-11 lg:h-12 flex items-center justify-center mb-3 sm:mb-4">
         {icon}
       </div>
-      <h3 className="text-xl font-semibold mb-2">{title}</h3>
-      <p className="text-muted-foreground">{description}</p>
+      <h3 className="text-lg sm:text-xl font-semibold mb-2 leading-tight">{title}</h3>
+      <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">{description}</p>
       <BorderBeam
         size={100}
         colorFrom="#9E7AFF"
@@ -80,7 +80,7 @@ export function FeaturesSection() {
   return (
     <section
       id="features"
-      className="relative py-20 overflow-hidden bg-muted/30"
+      className="relative py-16 sm:py-20 lg:py-24 overflow-hidden bg-muted/30"
     >
       <FlickeringGrid
         className="absolute inset-0 opacity-10"
@@ -90,27 +90,30 @@ export function FeaturesSection() {
         maxOpacity={0.3}
         flickerChance={0.1}
       />
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="text-center mb-16 max-w-2xl mx-auto">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="text-center mb-12 sm:mb-16 max-w-sm sm:max-w-lg lg:max-w-2xl mx-auto">
           <Badge
             variant="outline"
-            className="mb-3 px-4 py-1.5 text-sm font-medium"
+            className="mb-3 px-3 sm:px-4 py-1 sm:py-1.5 text-xs sm:text-sm font-medium"
           >
             주요 특징
           </Badge>
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 leading-tight">
             효율적인{' '}
             <AnimatedGradientText>소개 네트워크 관리</AnimatedGradientText>를
             위한 모든 것
           </h2>
-          <p className="text-muted-foreground">
+          <p className="text-sm sm:text-base text-muted-foreground leading-relaxed px-2 sm:px-0">
             SureCRM은 보험설계사가 소개 네트워크를 효과적으로 관리하고
-            <br />
+            <span className="hidden sm:inline">
+              <br />
+            </span>
+            <span className="sm:hidden"> </span>
             영업 성과를 높이는 데 필요한 모든 도구를 제공합니다.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           {features.map((feature, index) => (
             <BlurFade key={index} delay={0.1 * (index + 1)} inView>
               <FeatureCard

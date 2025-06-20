@@ -29,22 +29,22 @@ function FaqItem({ value, question, answer }: FaqItemProps) {
   return (
     <AccordionItem
       value={value}
-      className="bg-white/5 backdrop-blur-sm mb-4 overflow-hidden rounded-xl"
+      className="bg-white/5 backdrop-blur-sm mb-3 sm:mb-4 overflow-hidden rounded-lg sm:rounded-xl"
     >
-      <AccordionTrigger className="px-6 py-5 hover:bg-primary/5 transition-colors duration-300 font-medium">
-        <div className="flex items-center">
-          <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center mr-3 text-primary">
+      <AccordionTrigger className="px-4 sm:px-6 py-4 sm:py-5 hover:bg-primary/5 transition-colors duration-300 font-medium text-sm sm:text-base">
+        <div className="flex items-start sm:items-center">
+          <div className="w-5 sm:w-6 h-5 sm:h-6 rounded-full bg-primary/10 flex items-center justify-center mr-2 sm:mr-3 text-primary flex-shrink-0 mt-0.5 sm:mt-0">
             <span className="text-xs">Q</span>
           </div>
-          {question}
+          <span className="text-left leading-relaxed">{question}</span>
         </div>
       </AccordionTrigger>
-      <AccordionContent className="px-6 pb-6 border-t border-white/5">
-        <div className="pt-4 text-muted-foreground flex">
-          <div className="w-6 h-6 rounded-full bg-muted/50 flex items-center justify-center mr-3 text-muted-foreground shrink-0 mt-0.5">
+      <AccordionContent className="px-4 sm:px-6 pb-4 sm:pb-6 border-t border-white/5">
+        <div className="pt-3 sm:pt-4 text-muted-foreground flex">
+          <div className="w-5 sm:w-6 h-5 sm:h-6 rounded-full bg-muted/50 flex items-center justify-center mr-2 sm:mr-3 text-muted-foreground shrink-0 mt-0.5">
             <span className="text-xs">A</span>
           </div>
-          <div>{answer}</div>
+          <div className="text-sm sm:text-base leading-relaxed">{answer}</div>
         </div>
       </AccordionContent>
     </AccordionItem>
@@ -57,7 +57,7 @@ interface FAQSectionProps {
 
 export function FAQSection({ faqs }: FAQSectionProps) {
   return (
-    <section id="faq" className="py-20 relative">
+    <section id="faq" className="py-16 sm:py-20 lg:py-24 relative">
       <AnimatedGridPattern
         className="absolute inset-0 opacity-20 pointer-events-none [mask-image:radial-gradient(500px_circle_at_center,white,transparent)]"
         numSquares={25}
@@ -65,25 +65,25 @@ export function FAQSection({ faqs }: FAQSectionProps) {
         duration={3}
         repeatDelay={1}
       />
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="text-center mb-16">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="text-center mb-12 sm:mb-16">
           <Badge
             variant="outline"
-            className="mb-3 px-4 py-1.5 text-sm font-medium"
+            className="mb-3 px-3 sm:px-4 py-1 sm:py-1.5 text-xs sm:text-sm font-medium"
           >
             자주 묻는 질문
           </Badge>
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 leading-tight">
             <AuroraText color="orange" speed={12} intensity={0.4}>
               궁금한 점이 있으신가요?
             </AuroraText>
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-sm sm:text-base text-muted-foreground max-w-xs sm:max-w-lg lg:max-w-2xl mx-auto leading-relaxed px-2 sm:px-0">
             SureCRM에 대해 궁금한 점을 확인하세요.
           </p>
         </div>
 
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-xs sm:max-w-2xl lg:max-w-3xl mx-auto">
           <Accordion type="single" collapsible className="w-full">
             {faqs.flatMap((category, categoryIndex) =>
               category.faqs.map((faq, faqIndex) => (

@@ -29,59 +29,38 @@ function UseCaseTab({
 }: UseCaseTabProps) {
   return (
     <BlurFade delay={0.2} inView>
-      <div className="group relative overflow-hidden rounded-3xl bg-card/80 border border-border/60 backdrop-blur-sm hover:shadow-xl hover:shadow-primary/10 transition-all duration-500">
+      <div className="group relative overflow-hidden rounded-2xl sm:rounded-3xl bg-card/80 border border-border/60 backdrop-blur-sm hover:shadow-xl hover:shadow-primary/10 transition-all duration-500">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-        <div className="relative p-12">
-          <div className="flex flex-col lg:flex-row items-center gap-12">
-            <div className="flex-1 space-y-8">
-              <div className="space-y-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 bg-gradient-to-br from-primary/80 to-primary rounded-2xl flex items-center justify-center shadow-lg">
-                    {icon}
-                  </div>
-                  <div>
-                    <Badge
-                      variant="secondary"
-                      className="mb-2 bg-primary/10 text-primary border-primary/20"
-                    >
-                      {title.split(' ')[0]}
-                    </Badge>
-                    <h3 className="text-2xl font-bold">{title}</h3>
-                  </div>
-                </div>
-                <p className="text-lg text-muted-foreground leading-relaxed">
-                  {description}
-                </p>
+        <div className="relative p-6 sm:p-8 lg:p-12">
+          <div className="max-w-3xl mx-auto text-center space-y-6 sm:space-y-8">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+              <div className="w-12 sm:w-14 lg:w-16 h-12 sm:h-14 lg:h-16 bg-gradient-to-br from-primary/80 to-primary rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg">
+                {icon}
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {features.map((feature, index) => (
-                  <div key={index} className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
-                      <Check className="w-4 h-4 text-primary" />
-                    </div>
-                    <span className="font-medium">{feature}</span>
-                  </div>
-                ))}
+              <div className="text-center sm:text-left">
+                <Badge
+                  variant="secondary"
+                  className="mb-1 sm:mb-2 bg-primary/10 text-primary border-primary/20 text-xs sm:text-sm"
+                >
+                  {title.split(' ')[0]}
+                </Badge>
+                <h3 className="text-xl sm:text-2xl font-bold leading-tight">{title}</h3>
               </div>
             </div>
+            
+            <p className="text-sm sm:text-base lg:text-lg text-muted-foreground leading-relaxed max-w-lg sm:max-w-xl lg:max-w-2xl mx-auto px-2 sm:px-0">
+              {description}
+            </p>
 
-            <div className="flex-1">
-              <div className="relative">
-                <div className="w-full h-80 bg-gradient-to-br from-muted/30 to-muted/50 rounded-2xl border border-border/40 flex items-center justify-center overflow-hidden">
-                  <div className="relative w-full h-full flex items-center justify-center">
-                    <div className="absolute inset-0">
-                      {backgroundComponent}
-                    </div>
-                    <div className="relative z-10 text-center">
-                      {icon}
-                      <p className="text-primary font-medium mt-4">
-                        {title} 프리뷰
-                      </p>
-                    </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 max-w-xs sm:max-w-lg lg:max-w-2xl mx-auto pt-4 sm:pt-6">
+              {features.map((feature, index) => (
+                <div key={index} className="flex items-center gap-3 text-left">
+                  <div className="w-6 sm:w-7 lg:w-8 h-6 sm:h-7 lg:h-8 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Check className="w-3 sm:w-3.5 lg:w-4 h-3 sm:h-3.5 lg:h-4 text-primary" />
                   </div>
+                  <span className="text-sm sm:text-base font-medium">{feature}</span>
                 </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>
@@ -163,7 +142,7 @@ export function UseCasesSection() {
   ];
 
   return (
-    <section id="use-cases" className="py-20 relative bg-background">
+    <section id="use-cases" className="py-16 sm:py-20 lg:py-24 relative bg-background">
       <DotPattern
         className="absolute inset-0 opacity-15 pointer-events-none"
         width={28}
@@ -173,15 +152,15 @@ export function UseCasesSection() {
         color="rgba(var(--primary-rgb), 0.25)"
       />
 
-      <div className="container mx-auto px-4 relative">
-        <div className="text-center mb-16">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
+        <div className="text-center mb-12 sm:mb-16">
           <Badge
             variant="outline"
-            className="mb-3 px-4 py-1.5 text-sm font-medium"
+            className="mb-3 px-3 sm:px-4 py-1 sm:py-1.5 text-xs sm:text-sm font-medium"
           >
             활용 사례
           </Badge>
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 leading-tight">
             <span className="text-primary">어떻게</span>{' '}
             <SparklesText
               sparklesCount={8}
@@ -190,33 +169,36 @@ export function UseCasesSection() {
               활용할 수 있나요?
             </SparklesText>
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-sm sm:text-base text-muted-foreground max-w-xs sm:max-w-lg lg:max-w-2xl mx-auto leading-relaxed px-2 sm:px-0">
             다양한 상황에서 SureCRM이 어떻게 도움이 되는지 확인해보세요.
           </p>
         </div>
 
         <Tabs defaultValue="network" className="max-w-5xl mx-auto">
-          <TabsList className="grid grid-cols-3 mb-12 p-1 w-full max-w-lg mx-auto rounded-2xl bg-muted/20 backdrop-blur-sm">
+          <TabsList className="grid grid-cols-3 mb-8 sm:mb-12 p-1 w-full max-w-sm sm:max-w-lg mx-auto rounded-xl sm:rounded-2xl bg-muted/20 backdrop-blur-sm">
             <TabsTrigger
               value="network"
-              className="rounded-xl py-3 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300"
+              className="rounded-lg sm:rounded-xl py-2 sm:py-3 px-2 sm:px-6 text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300"
             >
-              <GlobeIcon className="w-4 h-4 mr-2" />
-              관계 시각화
+              <GlobeIcon className="w-3 sm:w-4 h-3 sm:h-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">관계 시각화</span>
+              <span className="sm:hidden">관계</span>
             </TabsTrigger>
             <TabsTrigger
               value="pipeline"
-              className="rounded-xl py-3 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300"
+              className="rounded-lg sm:rounded-xl py-2 sm:py-3 px-2 sm:px-6 text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300"
             >
-              <TrendingUp className="w-4 h-4 mr-2" />
-              영업 관리
+              <TrendingUp className="w-3 sm:w-4 h-3 sm:h-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">영업 관리</span>
+              <span className="sm:hidden">영업</span>
             </TabsTrigger>
             <TabsTrigger
               value="data"
-              className="rounded-xl py-3 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300"
+              className="rounded-lg sm:rounded-xl py-2 sm:py-3 px-2 sm:px-6 text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300"
             >
-              <BarChart2 className="w-4 h-4 mr-2" />
-              분석
+              <BarChart2 className="w-3 sm:w-4 h-3 sm:h-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">분석</span>
+              <span className="sm:hidden">분석</span>
             </TabsTrigger>
           </TabsList>
 

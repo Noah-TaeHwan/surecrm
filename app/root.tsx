@@ -648,20 +648,17 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              // 즉시 실행되는 테마 설정 (FOUC 방지)
+              // 즉시 실행되는 테마 설정 (FOUC 방지) - 강제 다크모드
               (function() {
                 try {
-                  const savedTheme = localStorage.getItem('surecrm-theme');
-                  const isDark = savedTheme ? savedTheme === 'dark' : true; // 기본값: 다크모드
-                  
-                  if (isDark) {
-                    document.documentElement.classList.add('dark');
-                  } else {
-                    document.documentElement.classList.remove('dark');
-                  }
-                } catch (e) {
-                  // localStorage 접근 실패 시 다크모드 기본값
+                  // MVP에서는 무조건 다크모드만 제공
                   document.documentElement.classList.add('dark');
+                  localStorage.setItem('surecrm-theme', 'dark');
+                  console.log('🌙 강제 다크모드 적용 완료');
+                } catch (e) {
+                  // 오류 발생 시에도 다크모드 강제 적용
+                  document.documentElement.classList.add('dark');
+                  console.log('🌙 오류 발생, 다크모드 강제 적용');
                 }
               })();
             `,
@@ -699,10 +696,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 }
               }
               
-              /* 라이트 테마 */
-              html:not(.dark) {
-                background-color: oklch(1 0 0) !important;
-                color: oklch(0.141 0.005 285.823) !important;
+              /* MVP 다크모드 강제 적용 */
+              html {
+                background-color: oklch(0.141 0.005 285.823) !important;
+                color: oklch(0.985 0 0) !important;
               }
               
               /* 다크 테마 (기본값) */
@@ -857,7 +854,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           }}
         />
       </head>
-      <body className="font-sans text-foreground bg-background">
+      <body className="dark font-sans text-foreground bg-background">
         {/* 🚀 GTM noscript - 프로덕션에서만 */}
         {import.meta.env.VITE_GTM_CONTAINER_ID && (
           <noscript>
