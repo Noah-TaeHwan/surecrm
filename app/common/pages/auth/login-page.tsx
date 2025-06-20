@@ -145,14 +145,14 @@ export default function LoginPage({ loaderData, actionData }: ComponentProps) {
   return (
     <AuthLayout>
       <Card className="w-full bg-transparent border-none shadow-none">
-        <CardHeader className="space-y-1 pb-6 flex flex-col items-center">
-          <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center mb-4">
-            <LogIn className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+        <CardHeader className="space-y-1 pb-4 sm:pb-6 flex flex-col items-center">
+          <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center mb-3 sm:mb-4">
+            <LogIn className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-blue-600 dark:text-blue-400" />
           </div>
-          <CardTitle className="text-2xl font-bold text-slate-900 dark:text-slate-100 text-center">
+          <CardTitle className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900 dark:text-slate-100 text-center">
             로그인
           </CardTitle>
-          <CardDescription className="text-slate-600 dark:text-slate-400 text-center">
+          <CardDescription className="text-sm sm:text-base text-slate-600 dark:text-slate-400 text-center px-2 sm:px-0">
             이메일과 비밀번호로 SureCRM에 로그인하세요
           </CardDescription>
         </CardHeader>
@@ -160,8 +160,8 @@ export default function LoginPage({ loaderData, actionData }: ComponentProps) {
         <CardContent className="pb-2">
           {/* 회원가입 성공 메시지 */}
           {loaderData.message === 'signup-success' && (
-            <Alert className="mb-4 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800">
-              <AlertDescription>
+            <Alert className="mb-3 sm:mb-4 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800">
+              <AlertDescription className="text-sm">
                 회원가입이 완료되었습니다! 이제 로그인하세요.
               </AlertDescription>
             </Alert>
@@ -169,8 +169,8 @@ export default function LoginPage({ loaderData, actionData }: ComponentProps) {
 
           {/* 이메일 인증 완료 메시지 */}
           {loaderData.message === 'email-verified' && (
-            <Alert className="mb-4 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800">
-              <AlertDescription>
+            <Alert className="mb-3 sm:mb-4 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800">
+              <AlertDescription className="text-sm">
                 이메일 인증이 완료되었습니다! 이제 로그인하세요.
               </AlertDescription>
             </Alert>
@@ -178,8 +178,8 @@ export default function LoginPage({ loaderData, actionData }: ComponentProps) {
 
           {/* 로그아웃 메시지 */}
           {loaderData.message === 'logged-out' && (
-            <Alert className="mb-4 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800">
-              <AlertDescription>
+            <Alert className="mb-3 sm:mb-4 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800">
+              <AlertDescription className="text-sm">
                 성공적으로 로그아웃되었습니다.
               </AlertDescription>
             </Alert>
@@ -187,8 +187,8 @@ export default function LoginPage({ loaderData, actionData }: ComponentProps) {
 
           {/* 계정 비활성화 메시지 */}
           {loaderData.message === 'account-disabled' && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertDescription>
+            <Alert variant="destructive" className="mb-3 sm:mb-4">
+              <AlertDescription className="text-sm">
                 계정이 비활성화되었습니다. 관리자에게 문의하세요.
               </AlertDescription>
             </Alert>
@@ -196,44 +196,30 @@ export default function LoginPage({ loaderData, actionData }: ComponentProps) {
 
           {/* 에러 메시지 */}
           {actionData?.error && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertDescription>
-                {actionData.error}
-                {(actionData.error.includes('등록되지 않은 이메일') ||
-                  actionData.error.includes(
-                    '사용자 프로필을 찾을 수 없습니다'
-                  )) && (
-                  <div className="mt-2">
-                    <Link
-                      to="/invite-only"
-                      className="font-medium text-primary hover:text-primary/80 underline"
-                    >
-                      초대 코드로 회원가입하기
-                    </Link>
-                  </div>
-                )}
-              </AlertDescription>
+            <Alert variant="destructive" className="mb-3 sm:mb-4">
+              <AlertDescription className="text-sm">{actionData.error}</AlertDescription>
             </Alert>
           )}
 
           <Form {...form}>
-            <form method="post" className="space-y-6">
+            <form method="post" className="space-y-4 sm:space-y-6">
               <FormField
                 control={form.control}
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>이메일 주소</FormLabel>
+                    <FormLabel className="text-sm sm:text-base">이메일 주소</FormLabel>
                     <FormControl>
                       <Input
                         type="email"
                         placeholder="your@email.com"
                         disabled={isSubmitting}
                         autoComplete="email"
+                        className="h-10 sm:h-11 lg:h-12 text-sm sm:text-base"
                         {...field}
                       />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-xs sm:text-sm" />
                   </FormItem>
                 )}
               />
@@ -243,7 +229,7 @@ export default function LoginPage({ loaderData, actionData }: ComponentProps) {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>비밀번호</FormLabel>
+                    <FormLabel className="text-sm sm:text-base">비밀번호</FormLabel>
                     <FormControl>
                       <div className="relative">
                         <Input
@@ -251,19 +237,20 @@ export default function LoginPage({ loaderData, actionData }: ComponentProps) {
                           placeholder="••••••••"
                           disabled={isSubmitting}
                           autoComplete="current-password"
+                          className="h-10 sm:h-11 lg:h-12 text-sm sm:text-base"
                           {...field}
                         />
                         <Button
                           type="button"
                           variant="ghost"
                           size="sm"
-                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                          className="absolute right-0 top-0 h-full px-2 sm:px-3 py-2 hover:bg-transparent"
                           onClick={() => setShowPassword(!showPassword)}
                         >
                           {showPassword ? (
-                            <EyeOff className="h-4 w-4" />
+                            <EyeOff className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                           ) : (
-                            <Eye className="h-4 w-4" />
+                            <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                           )}
                           <span className="sr-only">
                             {showPassword ? '비밀번호 숨기기' : '비밀번호 보기'}
@@ -271,20 +258,20 @@ export default function LoginPage({ loaderData, actionData }: ComponentProps) {
                         </Button>
                       </div>
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-xs sm:text-sm" />
                   </FormItem>
                 )}
               />
 
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
+              <Button type="submit" className="w-full h-10 sm:h-11 lg:h-12 text-sm sm:text-base" disabled={isSubmitting}>
                 {isSubmitting ? (
                   <>
-                    <LogIn className="w-4 h-4 mr-2 animate-pulse" />
+                    <LogIn className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-2 animate-pulse" />
                     로그인 중...
                   </>
                 ) : (
                   <>
-                    <LogIn className="w-4 h-4 mr-2" />
+                    <LogIn className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-2" />
                     로그인
                   </>
                 )}
@@ -293,22 +280,22 @@ export default function LoginPage({ loaderData, actionData }: ComponentProps) {
           </Form>
 
           {/* 비밀번호 찾기 링크 */}
-          <div className="mt-4 text-center">
+          <div className="mt-3 sm:mt-4 text-center">
             <Link
               to="/auth/forgot-password"
-              className="text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 underline"
+              className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 underline underline-offset-4"
             >
               비밀번호를 잊으셨나요?
             </Link>
           </div>
         </CardContent>
 
-        <CardFooter className="flex flex-col space-y-4 pt-2">
-          <div className="text-sm text-center text-slate-600 dark:text-slate-400">
+        <CardFooter className="flex flex-col space-y-3 sm:space-y-4 pt-2">
+          <div className="text-xs sm:text-sm text-center text-slate-600 dark:text-slate-400">
             계정이 없으신가요?{' '}
             <Link
               to="/invite-only"
-              className="font-medium text-slate-900 hover:text-slate-700 dark:text-slate-300 dark:hover:text-slate-200"
+              className="font-medium text-slate-900 hover:text-slate-700 dark:text-slate-300 dark:hover:text-slate-200 underline-offset-4 hover:underline"
             >
               초대 코드로 가입하기
             </Link>

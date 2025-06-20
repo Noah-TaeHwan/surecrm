@@ -20,7 +20,7 @@ export function AuthLayout({
   showLogo = true,
 }: AuthLayoutProps) {
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center relative overflow-hidden bg-gradient-to-br from-background to-background/90 p-4">
+    <div className="min-h-screen flex flex-col justify-center items-center relative overflow-hidden bg-gradient-to-br from-background to-background/90 p-3 sm:p-4 lg:p-6">
       {/* 배경 애니메이션 - 도트 패턴 */}
       <DotPattern
         className="absolute inset-0 w-full h-full opacity-15 text-primary/30 pointer-events-none"
@@ -50,23 +50,23 @@ export function AuthLayout({
       />
 
       {showLogo && (
-        <div className="text-center mb-4 relative z-20">
+        <div className="text-center mb-3 sm:mb-4 lg:mb-6 relative z-20">
           <Link
             to="/"
             className="inline-block cursor-pointer relative z-20 hover:opacity-80 transition-opacity"
           >
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
+            <h1 className="text-lg sm:text-xl lg:text-2xl font-bold tracking-tight text-foreground">
               {title}
             </h1>
           </Link>
-          <p className="mt-2 text-xs sm:text-sm text-muted-foreground px-4 sm:px-0">
+          <p className="mt-1 sm:mt-2 text-xs sm:text-sm lg:text-base text-muted-foreground px-2 sm:px-4 lg:px-0">
             보험 영업의 소개 네트워크와 영업 파이프라인 관리
           </p>
         </div>
       )}
 
-      <div className="w-full max-w-md relative z-10">
-        <Card className="relative overflow-hidden backdrop-blur-sm bg-card/80 dark:bg-card/40 p-8 border border-border shadow-lg">
+      <div className="w-full max-w-xs sm:max-w-sm lg:max-w-md relative z-10">
+        <Card className="relative overflow-hidden backdrop-blur-sm bg-card/80 dark:bg-card/40 p-4 sm:p-6 lg:p-8 border border-border shadow-lg">
           <BorderBeam
             size={100}
             colorFrom="var(--primary)"
@@ -76,12 +76,12 @@ export function AuthLayout({
 
           {children}
 
-          <div className="text-center text-xs text-muted-foreground mt-6">
+          <div className="text-center text-xs text-muted-foreground mt-4 sm:mt-6">
             &copy; {new Date().getFullYear()} SureCRM. All rights reserved.
           </div>
         </Card>
 
-        <div className="absolute -bottom-6 -right-6 -z-10 w-full h-full rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 blur-xl opacity-30" />
+        <div className="absolute -bottom-4 -right-4 sm:-bottom-6 sm:-right-6 -z-10 w-full h-full rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 blur-xl opacity-30" />
       </div>
     </div>
   );

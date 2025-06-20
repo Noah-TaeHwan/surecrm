@@ -145,10 +145,10 @@ export default function InviteOnlyPage({ loaderData }: ComponentProps) {
     <AuthLayout>
       <Card className="w-full bg-transparent border-none shadow-none">
         <CardHeader className="space-y-1 pb-2 text-center">
-          <CardTitle className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+          <CardTitle className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900 dark:text-slate-100">
             초대 전용 서비스
           </CardTitle>
-          <CardDescription className="text-slate-600 dark:text-slate-400">
+          <CardDescription className="text-sm sm:text-base text-slate-600 dark:text-slate-400 px-2 sm:px-0">
             SureCRM은 현재 초대 전용으로 운영되고 있습니다
           </CardDescription>
         </CardHeader>
@@ -156,15 +156,15 @@ export default function InviteOnlyPage({ loaderData }: ComponentProps) {
         <CardContent className="pb-2">
           {/* 오류 메시지 표시 (서버 또는 클라이언트) */}
           {clientError && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertDescription>{clientError}</AlertDescription>
+            <Alert variant="destructive" className="mb-3 sm:mb-4">
+              <AlertDescription className="text-sm">{clientError}</AlertDescription>
             </Alert>
           )}
 
-          <div className="py-4 space-y-4">
+          <div className="py-3 sm:py-4 space-y-3 sm:space-y-4">
             <Form {...form}>
               <form
-                className="space-y-4"
+                className="space-y-3 sm:space-y-4"
                 onSubmit={form.handleSubmit(handleFormSubmit)}
               >
                 <FormField
@@ -177,16 +177,17 @@ export default function InviteOnlyPage({ loaderData }: ComponentProps) {
                           {...field}
                           placeholder="초대 코드를 입력하세요 (예: ABC-DEF-GHI)"
                           disabled={isSubmitting}
+                          className="h-10 sm:h-11 lg:h-12 text-sm sm:text-base"
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-xs sm:text-sm" />
                     </FormItem>
                   )}
                 />
 
                 <Button
                   type="submit"
-                  className="w-full"
+                  className="w-full h-10 sm:h-11 lg:h-12 text-sm sm:text-base"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? '검증 중...' : '초대 코드로 가입하기'}
@@ -197,12 +198,12 @@ export default function InviteOnlyPage({ loaderData }: ComponentProps) {
         </CardContent>
 
         <CardFooter className="flex justify-center flex-col items-center">
-          <Separator className="my-4" />
-          <div className="text-center text-sm text-slate-600 dark:text-slate-400">
+          <Separator className="my-3 sm:my-4" />
+          <div className="text-center text-xs sm:text-sm text-slate-600 dark:text-slate-400">
             <span>이미 계정이 있으신가요? </span>
             <Link
               to="/auth/login"
-              className="font-medium text-slate-900 hover:text-slate-700 dark:text-slate-300 dark:hover:text-slate-200"
+              className="font-medium text-slate-900 hover:text-slate-700 dark:text-slate-300 dark:hover:text-slate-200 underline-offset-4 hover:underline"
             >
               로그인하기
             </Link>

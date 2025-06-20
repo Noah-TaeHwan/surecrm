@@ -305,24 +305,24 @@ export default function SignUpPage({ loaderData, actionData }: ComponentProps) {
     <AuthLayout>
       <Card className="w-full bg-transparent border-none shadow-none">
         <CardHeader className="space-y-1 pb-2 flex flex-col items-center">
-          <CardTitle className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+          <CardTitle className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900 dark:text-slate-100">
             회원가입
           </CardTitle>
-          <CardDescription className="text-slate-600 dark:text-slate-400">
+          <CardDescription className="text-sm sm:text-base text-slate-600 dark:text-slate-400 px-2 sm:px-0">
             초대 코드로 SureCRM에 가입하세요
           </CardDescription>
         </CardHeader>
 
         <CardContent className="pb-2">
           {actionData?.error && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertDescription>
+            <Alert variant="destructive" className="mb-3 sm:mb-4">
+              <AlertDescription className="text-sm">
                 {actionData.error}
                 {actionData.error.includes('이미 등록된 이메일') && (
                   <div className="mt-2">
                     <Link
                       to="/auth/login"
-                      className="font-medium text-primary hover:text-primary/80 underline"
+                      className="font-medium text-primary hover:text-primary/80 underline underline-offset-4"
                     >
                       로그인 페이지로 이동하기
                     </Link>
@@ -333,10 +333,10 @@ export default function SignUpPage({ loaderData, actionData }: ComponentProps) {
           )}
 
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4">
               {form.formState.errors.root && (
-                <Alert variant="destructive" className="mb-4">
-                  <AlertDescription>
+                <Alert variant="destructive" className="mb-3 sm:mb-4">
+                  <AlertDescription className="text-sm">
                     {form.formState.errors.root.message}
                   </AlertDescription>
                 </Alert>
@@ -347,7 +347,7 @@ export default function SignUpPage({ loaderData, actionData }: ComponentProps) {
                 name="invitationCode"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>초대 코드 *</FormLabel>
+                    <FormLabel className="text-sm sm:text-base">초대 코드 *</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
@@ -355,18 +355,18 @@ export default function SignUpPage({ loaderData, actionData }: ComponentProps) {
                         placeholder="INV-XXXXXX-XXXXXX"
                         disabled={isSubmitting}
                         onBlur={handleInvitationCodeBlur}
-                        className={
+                        className={`h-10 sm:h-11 lg:h-12 text-sm sm:text-base ${
                           invitationValid === true
                             ? 'border-green-500'
                             : invitationValid === false
                               ? 'border-red-500'
                               : ''
-                        }
+                        }`}
                       />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-xs sm:text-sm" />
                     {invitationValid === true && (
-                      <p className="text-sm text-green-600">
+                      <p className="text-xs sm:text-sm text-green-600">
                         ✓ 유효한 초대 코드입니다
                       </p>
                     )}
@@ -379,16 +379,17 @@ export default function SignUpPage({ loaderData, actionData }: ComponentProps) {
                 name="fullName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>이름 *</FormLabel>
+                    <FormLabel className="text-sm sm:text-base">이름 *</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
                         type="text"
                         placeholder="홍길동"
                         disabled={isSubmitting}
+                        className="h-10 sm:h-11 lg:h-12 text-sm sm:text-base"
                       />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-xs sm:text-sm" />
                   </FormItem>
                 )}
               />
@@ -398,16 +399,17 @@ export default function SignUpPage({ loaderData, actionData }: ComponentProps) {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>이메일 *</FormLabel>
+                    <FormLabel className="text-sm sm:text-base">이메일 *</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
                         type="email"
                         placeholder="your@email.com"
                         disabled={isSubmitting}
+                        className="h-10 sm:h-11 lg:h-12 text-sm sm:text-base"
                       />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-xs sm:text-sm" />
                   </FormItem>
                 )}
               />
@@ -417,16 +419,17 @@ export default function SignUpPage({ loaderData, actionData }: ComponentProps) {
                 name="phone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>전화번호</FormLabel>
+                    <FormLabel className="text-sm sm:text-base">전화번호</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
                         type="tel"
                         placeholder="010-1234-5678"
                         disabled={isSubmitting}
+                        className="h-10 sm:h-11 lg:h-12 text-sm sm:text-base"
                       />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-xs sm:text-sm" />
                   </FormItem>
                 )}
               />
@@ -436,16 +439,17 @@ export default function SignUpPage({ loaderData, actionData }: ComponentProps) {
                 name="company"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>회사명</FormLabel>
+                    <FormLabel className="text-sm sm:text-base">회사명</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
                         type="text"
                         placeholder="회사명을 입력하세요"
                         disabled={isSubmitting}
+                        className="h-10 sm:h-11 lg:h-12 text-sm sm:text-base"
                       />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-xs sm:text-sm" />
                   </FormItem>
                 )}
               />
@@ -455,16 +459,17 @@ export default function SignUpPage({ loaderData, actionData }: ComponentProps) {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>비밀번호 *</FormLabel>
+                    <FormLabel className="text-sm sm:text-base">비밀번호 *</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
                         type="password"
                         placeholder="••••••••"
                         disabled={isSubmitting}
+                        className="h-10 sm:h-11 lg:h-12 text-sm sm:text-base"
                       />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-xs sm:text-sm" />
                   </FormItem>
                 )}
               />
@@ -474,23 +479,24 @@ export default function SignUpPage({ loaderData, actionData }: ComponentProps) {
                 name="confirmPassword"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>비밀번호 확인 *</FormLabel>
+                    <FormLabel className="text-sm sm:text-base">비밀번호 확인 *</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
                         type="password"
                         placeholder="••••••••"
                         disabled={isSubmitting}
+                        className="h-10 sm:h-11 lg:h-12 text-sm sm:text-base"
                       />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-xs sm:text-sm" />
                   </FormItem>
                 )}
               />
 
               <Button
                 type="submit"
-                className="w-full"
+                className="w-full h-10 sm:h-11 lg:h-12 text-sm sm:text-base"
                 disabled={isSubmitting || invitationValid !== true}
               >
                 {isSubmitting ? '가입 중...' : '회원가입'}
@@ -499,12 +505,12 @@ export default function SignUpPage({ loaderData, actionData }: ComponentProps) {
           </Form>
         </CardContent>
 
-        <CardFooter className="flex flex-col space-y-4 pt-2">
-          <div className="text-sm text-center text-slate-600 dark:text-slate-400">
+        <CardFooter className="flex flex-col space-y-3 sm:space-y-4 pt-2">
+          <div className="text-xs sm:text-sm text-center text-slate-600 dark:text-slate-400">
             이미 계정이 있으신가요?{' '}
             <Link
               to="/auth/login"
-              className="font-medium text-slate-900 hover:text-slate-700 dark:text-slate-300 dark:hover:text-slate-200"
+              className="font-medium text-slate-900 hover:text-slate-700 dark:text-slate-300 dark:hover:text-slate-200 underline-offset-4 hover:underline"
             >
               로그인
             </Link>
