@@ -102,44 +102,9 @@ export default function NewPasswordPage({
   }, [loaderData]);
 
   const onSubmit = async (formData: NewPasswordFormData) => {
-    setIsSubmitting(true);
-    console.log('🔄 서버 액션을 통한 비밀번호 변경 시도');
-
-    try {
-      // 서버 액션 호출을 위해 FormData 생성
-      const formDataObj = new FormData();
-      formDataObj.append('password', formData.password);
-      formDataObj.append('confirmPassword', formData.confirmPassword);
-
-      // 현재 페이지에 POST 요청으로 서버 액션 호출
-      const response = await fetch(window.location.pathname, {
-        method: 'POST',
-        body: formDataObj,
-      });
-
-      if (response.ok) {
-        console.log('✅ 비밀번호 변경 성공');
-        // 서버 액션이 리다이렉트를 처리하므로 추가 작업 불필요
-        // 리다이렉트가 안 될 경우를 대비한 fallback
-        setTimeout(() => {
-          if (window.location.pathname === '/auth/new-password') {
-            window.location.href = '/auth/login?message=password_updated';
-          }
-        }, 1000);
-      } else {
-        console.error('❌ 비밀번호 변경 실패:', response.status);
-        try {
-          const errorData = await response.json();
-          console.error('서버 에러:', errorData);
-        } catch (parseError) {
-          console.error('에러 응답 파싱 실패');
-        }
-      }
-    } catch (error) {
-      console.error('💥 비밀번호 변경 중 예외:', error);
-    } finally {
-      setIsSubmitting(false);
-    }
+    // React Hook Form으로 유효성 검사만 하고
+    // 실제 제출은 네이티브 form의 action으로 처리
+    console.log('✅ 클라이언트 유효성 검사 통과 - 서버 액션 호출');
   };
 
   return (
@@ -181,7 +146,8 @@ export default function NewPasswordPage({
           )}
 
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            {/* 네이티브 form으로 서버 액션 직접 호출 */}
+            <form method="POST" className="space-y-4">
               <FormField
                 control={form.control}
                 name="password"
@@ -193,7 +159,10 @@ export default function NewPasswordPage({
                         <Input
                           type={showPassword ? 'text' : 'password'}
                           placeholder="새 비밀번호를 입력하세요"
-                          {...field}
+                          name="password"
+                          value={field.value}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
                         />
                         <Button
                           type="button"
@@ -226,7 +195,10 @@ export default function NewPasswordPage({
                         <Input
                           type={showConfirmPassword ? 'text' : 'password'}
                           placeholder="비밀번호를 다시 입력하세요"
-                          {...field}
+                          name="confirmPassword"
+                          value={field.value}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
                         />
                         <Button
                           type="button"
