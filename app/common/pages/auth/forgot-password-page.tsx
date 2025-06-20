@@ -33,6 +33,16 @@ import { sendPasswordResetEmail } from '~/lib/auth/password';
 // 타입 정의
 interface LoaderData {
   error?: string | null;
+  debugInfo?: {
+    error: string | null;
+    code: string | null;
+    time: string | null;
+    token_preview: string | null;
+    has_data: string | null;
+    has_user: string | null;
+    has_session: string | null;
+    response_time: string | null;
+  } | null;
 }
 
 interface ActionData {
@@ -68,10 +78,14 @@ type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 export async function loader({ request }: Route['LoaderArgs']) {
   const url = new URL(request.url);
   const error = url.searchParams.get('error');
+  const debugInfo = url.searchParams.get('debug_info') === 'true';
 
   // URL 파라미터에서 에러 메시지 처리
   let errorMessage = '';
   switch (error) {
+    case 'token_expired':
+      errorMessage = '비밀번호 재설정 링크가 만료되었습니다. 새로운 링크를 요청해주세요.';
+      break;
     case 'invalid_link':
       errorMessage = '비밀번호 재설정 링크가 유효하지 않습니다. 새로운 링크를 요청해주세요.';
       break;
@@ -86,8 +100,24 @@ export async function loader({ request }: Route['LoaderArgs']) {
       break;
   }
 
+  // 디버그 정보 수집
+  let debugData = null;
+  if (debugInfo) {
+    debugData = {
+      error: url.searchParams.get('error'),
+      code: url.searchParams.get('code'),
+      time: url.searchParams.get('time'),
+      token_preview: url.searchParams.get('token_preview'),
+      has_data: url.searchParams.get('has_data'),
+      has_user: url.searchParams.get('has_user'),
+      has_session: url.searchParams.get('has_session'),
+      response_time: url.searchParams.get('response_time'),
+    };
+  }
+
   return {
     error: errorMessage || null,
+    debugInfo: debugData,
   };
 }
 
@@ -208,7 +238,7 @@ export default function ForgotPasswordPage({
         <CardHeader className="space-y-1 pb-6">
           <div className="flex items-center gap-3 mb-4">
             <Button variant="ghost" size="sm" asChild className="p-2">
-              <Link to="/login">
+              <Link to="/auth/login">
                 <ArrowLeft className="h-4 w-4" />
               </Link>
             </Button>
@@ -234,6 +264,28 @@ export default function ForgotPasswordPage({
               <AlertTitle>오류</AlertTitle>
               <AlertDescription>
                 {loaderData?.error || actionData?.error}
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* 프로덕션 디버그 정보 표시 */}
+          {loaderData?.debugInfo && (
+            <Alert className="mb-6 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-200 border-yellow-200 dark:border-yellow-800">
+              <AlertTitle>🔍 디버그 정보 (프로덕션 문제 해결용)</AlertTitle>
+              <AlertDescription className="mt-2 space-y-2">
+                <div className="text-sm font-mono space-y-1">
+                  <div><strong>에러:</strong> {loaderData.debugInfo.error || 'N/A'}</div>
+                  <div><strong>코드:</strong> {loaderData.debugInfo.code || 'N/A'}</div>
+                  <div><strong>시간:</strong> {loaderData.debugInfo.time || 'N/A'}</div>
+                  <div><strong>토큰 미리보기:</strong> {loaderData.debugInfo.token_preview || 'N/A'}</div>
+                  <div><strong>데이터 존재:</strong> {loaderData.debugInfo.has_data || 'N/A'}</div>
+                  <div><strong>사용자 존재:</strong> {loaderData.debugInfo.has_user || 'N/A'}</div>
+                  <div><strong>세션 존재:</strong> {loaderData.debugInfo.has_session || 'N/A'}</div>
+                  <div><strong>응답시간:</strong> {loaderData.debugInfo.response_time || 'N/A'}ms</div>
+                </div>
+                <div className="text-xs text-muted-foreground mt-2">
+                  이 정보는 문제 해결을 위한 것입니다. 스크린샷을 찍어서 개발팀에 전달해주세요.
+                </div>
               </AlertDescription>
             </Alert>
           )}

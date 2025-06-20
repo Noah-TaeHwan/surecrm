@@ -8,6 +8,7 @@ export async function loader({ request }: Route.LoaderArgs) {
   const token_hash = url.searchParams.get('token_hash');
   const type = url.searchParams.get('type') as EmailOtpType | null;
   const next = url.searchParams.get('next') || '/dashboard';
+  const debug = url.searchParams.get('debug') === 'true'; // 디버그 모드 임시 추가
 
   // 기본 유효성 검사
   if (!token_hash) {
@@ -28,15 +29,54 @@ export async function loader({ request }: Route.LoaderArgs) {
     const supabase = createServerClient(request);
     
     // 토큰 검증
+    const verifyStartTime = Date.now();
     const { data, error } = await supabase.auth.verifyOtp({
       token_hash,
       type: type as EmailOtpType,
     });
+    const verifyEndTime = Date.now();
+
+    // 프로덕션 디버깅용 로그
+    const debugInfo = {
+      token_preview: `${token_hash.substring(0, 8)}...${token_hash.substring(token_hash.length - 8)}`,
+      type,
+      hasData: !!data,
+      hasUser: !!data?.user,
+      hasSession: !!data?.session,
+      errorMessage: error?.message,
+      errorCode: error?.code,
+      responseTime: verifyEndTime - verifyStartTime,
+      serverTime: new Date().toISOString(),
+      url: url.toString()
+    };
+
+    // 환경에 상관없이 중요한 에러는 로그
+    if (error) {
+      console.error('🚨 [PRODUCTION] 토큰 검증 실패:', {
+        ...debugInfo,
+        fullError: error
+      });
+    }
+
+    // 디버그 모드나 특정 조건에서 상세 정보 반환
+    if (debug || (error && error.message.includes('expired'))) {
+      // 디버그 정보를 쿼리 파라미터로 전달
+      const debugParams = new URLSearchParams({
+        error: error?.message || 'no_error',
+        code: error?.code || 'no_code',
+        time: debugInfo.serverTime,
+        token_preview: debugInfo.token_preview,
+        has_data: String(!!data),
+        has_user: String(!!data?.user),
+        has_session: String(!!data?.session),
+        response_time: String(debugInfo.responseTime)
+      });
+      
+      throw redirect(`/auth/forgot-password?debug_info=true&${debugParams.toString()}`);
+    }
 
     // 검증 실패 처리
     if (error) {
-      console.error('토큰 검증 실패:', error.message);
-      
       // 일반적인 에러 메시지로 변환
       if (error.message.includes('expired')) {
         throw redirect('/auth/forgot-password?error=token_expired');
@@ -49,6 +89,12 @@ export async function loader({ request }: Route.LoaderArgs) {
 
     // 성공 케이스 처리
     if (data?.user && data?.session) {
+      console.log('✅ [PRODUCTION] 토큰 검증 성공:', {
+        userId: data.user.id,
+        email: data.user.email,
+        sessionExists: !!data.session
+      });
+
       // 클라이언트사이드 세션 설정을 위한 API 호출
       try {
         const sessionSetResponse = await fetch('/api/auth/set-session', {
@@ -85,12 +131,13 @@ export async function loader({ request }: Route.LoaderArgs) {
     }
 
     // 예상치 못한 상황 - 에러도 없고 세션도 없는 경우
+    console.error('🤔 [PRODUCTION] 예상치 못한 상황:', debugInfo);
     throw redirect('/auth/login?error=unexpected_verification_state');
 
   } catch (error) {
     // 리다이렉트가 아닌 일반 오류인 경우에만 로그
     if (!(error instanceof Response)) {
-      console.error('토큰 확인 처리 오류:', error);
+      console.error('💥 [PRODUCTION] 토큰 확인 처리 오류:', error);
     }
     
     // 이미 리다이렉트인 경우 그대로 throw, 아니면 로그인으로 리다이렉트
