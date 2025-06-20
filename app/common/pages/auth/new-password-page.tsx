@@ -136,8 +136,34 @@ export default function NewPasswordPage({
         body: formBody,
       });
       
-      const result = await response.json();
-      console.log('📨 [CLIENT] 서버 응답:', result);
+      console.log('📨 [CLIENT] 응답 상태:', response.status, response.statusText);
+      
+      let result;
+      try {
+        // Content-Type 확인
+        const contentType = response.headers.get('content-type');
+        console.log('📋 [CLIENT] Content-Type:', contentType);
+        
+        if (contentType?.includes('application/json')) {
+          result = await response.json();
+        } else {
+          // JSON이 아닌 경우 텍스트로 읽기
+          const text = await response.text();
+          console.log('📄 [CLIENT] 응답 텍스트 (처음 200자):', text.substring(0, 200));
+          
+          // HTML 응답인 경우 에러로 처리
+          if (text.includes('<!DOCTYPE')) {
+            throw new Error(`서버가 HTML 페이지를 반환했습니다. 상태: ${response.status}`);
+          }
+          
+          result = { success: false, error: `예상치 못한 응답 형식: ${response.status}` };
+        }
+      } catch (parseError) {
+        console.error('❌ [CLIENT] 응답 파싱 실패:', parseError);
+        throw new Error(`응답 파싱 실패: ${parseError instanceof Error ? parseError.message : '알 수 없는 파싱 에러'}`);
+      }
+      
+      console.log('📨 [CLIENT] 파싱된 결과:', result);
       
       if (result.success) {
         console.log('🎉 [SUCCESS] 비밀번호 변경 성공 - 모달 표시');
