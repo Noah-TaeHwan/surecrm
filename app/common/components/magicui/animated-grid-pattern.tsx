@@ -38,6 +38,9 @@ export function AnimatedGridPattern({
   const [squares, setSquares] = useState(() => generateSquares(numSquares));
 
   function getPos() {
+    if (dimensions.width === 0 || dimensions.height === 0) {
+      return [0, 0];
+    }
     return [
       Math.floor((Math.random() * dimensions.width) / width),
       Math.floor((Math.random() * dimensions.height) / height),

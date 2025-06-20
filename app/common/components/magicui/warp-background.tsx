@@ -69,10 +69,8 @@ export function WarpBackground({
             </radialGradient>
           </defs>
           <motion.circle
-            cx={50}
-            cy={50}
-            r={35}
             fill="url(#warpBackgroundGradient)"
+            initial={{ r: 35, cx: 35, cy: 35 }}
             animate={{
               r: [35, 50],
               cx: [35, 65],
@@ -86,10 +84,8 @@ export function WarpBackground({
             }}
           />
           <motion.circle
-            cx={50}
-            cy={50}
-            r={45}
             fill="url(#warpBackgroundGradient)"
+            initial={{ r: 45, cx: 65, cy: 45 }}
             animate={{
               r: [45, 30],
               cx: [65, 35],
@@ -103,10 +99,8 @@ export function WarpBackground({
             }}
           />
           <motion.circle
-            cx={50}
-            cy={50}
-            r={25}
             fill="url(#warpBackgroundGradient)"
+            initial={{ r: 25, cx: 45, cy: 65 }}
             animate={{
               r: [25, 40],
               cx: [45, 55],
