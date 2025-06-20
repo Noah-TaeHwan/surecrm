@@ -201,13 +201,22 @@ export async function loader({ request }: Route['LoaderArgs']) {
 }
 
 export async function action({ request }: Route['ActionArgs']) {
+  console.log('🔄 [ACTION] 비밀번호 변경 요청 시작');
+  
   const formData = await request.formData();
   const password = formData.get('password') as string;
   const confirmPassword = formData.get('confirmPassword') as string;
 
+  console.log('📝 [ACTION] 폼 데이터 확인:', {
+    hasPassword: !!password,
+    hasConfirmPassword: !!confirmPassword,
+    passwordLength: password?.length || 0
+  });
+
   // 유효성 검사
   const validation = newPasswordSchema.safeParse({ password, confirmPassword });
   if (!validation.success) {
+    console.error('❌ [ACTION] 유효성 검사 실패:', validation.error.errors[0].message);
     return data({
       success: false,
       error: validation.error.errors[0].message,
@@ -215,6 +224,41 @@ export async function action({ request }: Route['ActionArgs']) {
   }
 
   try {
+    // 세션 확인 (loader와 동일한 로직)
+    const cookieHeader = request.headers.get('Cookie') || '';
+    console.log('🍪 [ACTION] 쿠키 헤더 확인:', cookieHeader.includes('sb-mzmlolwducobuknsigvz-auth-token'));
+    
+    let hasValidSession = false;
+    
+    // 쿠키에서 세션 확인
+    if (cookieHeader.includes('sb-mzmlolwducobuknsigvz-auth-token')) {
+      const startIndex = cookieHeader.indexOf('sb-mzmlolwducobuknsigvz-auth-token=') + 'sb-mzmlolwducobuknsigvz-auth-token='.length;
+      const endIndex = cookieHeader.indexOf(';', startIndex);
+      const cookieValue = cookieHeader.substring(startIndex, endIndex === -1 ? undefined : endIndex);
+      
+      try {
+        const decodedValue = decodeURIComponent(cookieValue);
+        const sessionData = JSON.parse(decodedValue);
+        
+        if (sessionData?.user?.id && sessionData?.access_token) {
+          hasValidSession = true;
+          console.log('✅ [ACTION] 쿠키에서 세션 확인됨:', sessionData.user.email);
+        }
+      } catch (cookieParseError) {
+        console.error('❌ [ACTION] 쿠키 파싱 실패:', cookieParseError);
+      }
+    }
+    
+    if (!hasValidSession) {
+      console.error('❌ [ACTION] 세션이 없음 - 비밀번호 변경 불가');
+      return data({
+        success: false,
+        error: '세션이 만료되었습니다. 비밀번호 재설정을 다시 시도해주세요.',
+        redirectUrl: '/auth/forgot-password?error=session_expired'
+      }, { status: 401 });
+    }
+    
+    console.log('🔐 [ACTION] Supabase 클라이언트로 비밀번호 업데이트 시도');
     const supabase = createServerClient(request);
     
     // 비밀번호 업데이트
@@ -223,18 +267,20 @@ export async function action({ request }: Route['ActionArgs']) {
     });
 
     if (error) {
+      console.error('❌ [ACTION] 비밀번호 업데이트 실패:', error);
       return data({
         success: false,
-        error: '비밀번호 변경에 실패했습니다. 다시 시도해 주세요.',
+        error: `비밀번호 변경 실패: ${error.message}`,
       }, { status: 400 });
     }
 
+    console.log('✅ [ACTION] 비밀번호 변경 성공 - 로그인 페이지로 리다이렉트');
     // 성공적으로 비밀번호 변경 후 로그인 페이지로 리다이렉트
     throw redirect('/auth/login?message=password_updated');
   } catch (error) {
     // 리다이렉트가 아닌 일반 오류인 경우에만 로그
     if (!(error instanceof Response)) {
-      console.error('비밀번호 변경 오류:', error);
+      console.error('💥 [ACTION] 비밀번호 변경 중 예외:', error);
     }
     
     if (error instanceof Response) {

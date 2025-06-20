@@ -59,6 +59,7 @@ interface Route {
     actionData?: {
       success?: boolean;
       error?: string;
+      redirectUrl?: string;
     };
   };
   MetaFunction: () => Array<{
@@ -104,7 +105,13 @@ export default function NewPasswordPage({
     if (loaderData?.debugInfo) {
       console.log('🔍 [DEBUG] 서버 디버그 정보:', loaderData.debugInfo);
     }
-  }, [loaderData]);
+    
+    // action에서 redirectUrl이 전달된 경우 리다이렉트
+    if (actionData?.redirectUrl) {
+      console.log('🔄 [REDIRECT] Action에서 리다이렉트 요청:', actionData.redirectUrl);
+      window.location.href = actionData.redirectUrl;
+    }
+  }, [loaderData, actionData]);
 
   const onSubmit = async (formData: NewPasswordFormData) => {
     // React Hook Form으로 유효성 검사만 하고
