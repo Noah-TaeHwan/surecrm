@@ -25,18 +25,34 @@ const newPasswordSchema = z.object({
 });
 
 export async function loader({ request }: Route['LoaderArgs']) {
+  console.log('🔐 [NEW-PASSWORD LOADER] 시작');
+  
   try {
     // 쿠키에서 직접 세션 정보 추출 (서버-클라이언트 동기화 문제 해결)
     const cookieHeader = request.headers.get('Cookie') || '';
+    console.log('🍪 [COOKIE DEBUG] 전체 쿠키 헤더:', cookieHeader);
+    
     const authCookieMatch = cookieHeader.match(/sb-mzmlolwducobuknsigvz-auth-token=([^;]+)/);
+    console.log('🔍 [COOKIE DEBUG] Auth 쿠키 매치:', !!authCookieMatch);
     
     if (authCookieMatch) {
       try {
         const decodedValue = decodeURIComponent(authCookieMatch[1]);
+        console.log('📋 [COOKIE DEBUG] 디코딩된 쿠키 값 길이:', decodedValue.length);
+        
         const directSessionData = JSON.parse(decodedValue);
+        console.log('✅ [COOKIE DEBUG] 직접 파싱된 세션 데이터:', {
+          hasUser: !!directSessionData?.user,
+          userId: directSessionData?.user?.id,
+          userEmail: directSessionData?.user?.email,
+          hasAccessToken: !!directSessionData?.access_token,
+          hasRefreshToken: !!directSessionData?.refresh_token,
+          expiresAt: directSessionData?.expires_at
+        });
         
         // 직접 파싱된 세션 데이터가 유효한 경우
         if (directSessionData?.user?.id && directSessionData?.access_token) {
+          console.log('✅ [COOKIE SUCCESS] 직접 쿠키에서 세션 확인됨');
           return { 
             hasSession: true, 
             user: {
@@ -44,22 +60,40 @@ export async function loader({ request }: Route['LoaderArgs']) {
               email: directSessionData.user.email
             }
           };
+        } else {
+          console.warn('⚠️ [COOKIE INCOMPLETE] 세션 데이터가 불완전함');
         }
       } catch (parseError) {
+        console.error('❌ [COOKIE PARSE ERROR] 쿠키 파싱 실패:', parseError);
         // 쿠키 파싱 실패 시 Supabase 클라이언트로 fallback
       }
+    } else {
+      console.warn('⚠️ [COOKIE MISSING] Auth 쿠키가 없음');
     }
+    
+    console.log('🔄 [FALLBACK] Supabase 클라이언트로 세션 확인 시도');
     
     // Fallback: Supabase 클라이언트로 세션 확인
     const supabase = createServerClient(request);
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     
+    console.log('📊 [SUPABASE DEBUG] 세션 확인 결과:', {
+      hasSession: !!session,
+      hasUser: !!user,
+      sessionError: sessionError?.message,
+      userError: userError?.message,
+      userId: user?.id,
+      userEmail: user?.email
+    });
+    
     // 세션이나 사용자가 없는 경우 토큰 검증 페이지로 리다이렉트
     if (!session || !user || sessionError || userError) {
+      console.error('❌ [SESSION FAILED] 세션 확인 실패 - forgot-password로 리다이렉트');
       throw redirect('/auth/forgot-password?error=session_required');
     }
   
+    console.log('✅ [SESSION SUCCESS] Supabase에서 세션 확인됨');
     return { 
       hasSession: true, 
       user: {
@@ -71,7 +105,7 @@ export async function loader({ request }: Route['LoaderArgs']) {
   } catch (error) {
     // 리다이렉트가 아닌 일반 오류인 경우에만 로그
     if (!(error instanceof Response)) {
-      console.error('새 비밀번호 페이지 로딩 오류:', error);
+      console.error('💥 [LOADER ERROR] 새 비밀번호 페이지 로딩 오류:', error);
     }
     
     // 이미 리다이렉트인 경우 그대로 throw, 아니면 forgot-password로 리다이렉트
@@ -79,6 +113,7 @@ export async function loader({ request }: Route['LoaderArgs']) {
       throw error;
     }
     
+    console.error('❌ [UNEXPECTED ERROR] 예상치 못한 오류 - forgot-password로 리다이렉트');
     throw redirect('/auth/forgot-password?error=session_check_failed');
   }
 }

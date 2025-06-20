@@ -102,8 +102,20 @@ export async function loader({ request }: Route.LoaderArgs) {
         user: data.user
       };
       
+      console.log('🍪 [COOKIE SET] 세션 데이터 준비:', {
+        hasAccessToken: !!sessionData.access_token,
+        hasRefreshToken: !!sessionData.refresh_token,
+        expiresAt: sessionData.expires_at,
+        userId: sessionData.user?.id,
+        userEmail: sessionData.user?.email
+      });
+      
       const cookieValue = encodeURIComponent(JSON.stringify(sessionData));
+      console.log('🔒 [COOKIE SET] 인코딩된 쿠키 값 길이:', cookieValue.length);
+      
       const expires = new Date((data.session.expires_at || Math.floor(Date.now() / 1000) + 3600) * 1000);
+      console.log('⏰ [COOKIE SET] 쿠키 만료 시간:', expires.toISOString());
+      
       const cookieOptions = [
         `${cookieName}=${cookieValue}`,
         'Path=/',
@@ -113,6 +125,8 @@ export async function loader({ request }: Route.LoaderArgs) {
         // 프로덕션에서는 Secure 추가
         process.env.NODE_ENV === 'production' ? 'Secure' : ''
       ].filter(Boolean).join('; ');
+      
+      console.log('🎯 [COOKIE SET] 최종 쿠키 옵션:', cookieOptions.substring(0, 200) + '...');
 
       // 토큰 타입별 리다이렉트 처리 (쿠키와 함께)
       if (type === 'recovery') {
@@ -127,6 +141,7 @@ export async function loader({ request }: Route.LoaderArgs) {
           }
         });
       } else if (type === 'signup' || type === 'email_change') {
+        console.log('✅ [PRODUCTION] 다음 페이지로 리다이렉트 (쿠키 설정됨):', next);
         throw new Response(null, {
           status: 302,
           headers: {
@@ -135,6 +150,7 @@ export async function loader({ request }: Route.LoaderArgs) {
           }
         });
       } else {
+        console.log('✅ [PRODUCTION] 기본 다음 페이지로 리다이렉트 (쿠키 설정됨):', next);
         throw new Response(null, {
           status: 302,
           headers: {
