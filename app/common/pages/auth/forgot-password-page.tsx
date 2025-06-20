@@ -160,12 +160,12 @@ export async function action({ request }: Route['ActionArgs']) {
 // 메타 정보
 export const meta: MetaFunction = () => {
   return [
-    { title: '비밀번호 찾기 | SureCRM' },
+    { title: '비밀번호 재설정 | SureCRM' },
     { name: 'description', content: 'SureCRM 계정의 비밀번호를 재설정하세요' },
   ];
 };
 
-// 비밀번호 찾기 페이지 컴포넌트
+// 비밀번호 재설정 페이지 컴포넌트
 export default function ForgotPasswordPage({
   loaderData,
   actionData,
@@ -248,7 +248,7 @@ export default function ForgotPasswordPage({
           </div>
 
           <CardTitle className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-            {isSuccess ? '이메일 발송 완료' : '비밀번호 찾기'}
+            {isSuccess ? '이메일 발송 완료' : '비밀번호 재설정'}
           </CardTitle>
           <CardDescription className="text-slate-600 dark:text-slate-400">
             {isSuccess
