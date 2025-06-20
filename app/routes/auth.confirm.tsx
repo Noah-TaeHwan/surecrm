@@ -8,7 +8,7 @@ export async function loader({ request }: Route.LoaderArgs) {
   const token_hash = url.searchParams.get('token_hash');
   const type = url.searchParams.get('type') as EmailOtpType | null;
   const next = url.searchParams.get('next') || '/dashboard';
-  const debug = url.searchParams.get('debug') === 'true'; // 디버그 모드 임시 추가
+  const debug = url.searchParams.get('debug') === 'true';
 
   // 기본 유효성 검사
   if (!token_hash) {
@@ -92,39 +92,56 @@ export async function loader({ request }: Route.LoaderArgs) {
         debugMode: debug
       });
 
-      // 클라이언트사이드 세션 설정을 위한 API 호출
-      try {
-        const sessionSetResponse = await fetch('/api/auth/set-session', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            access_token: data.session.access_token,
-            refresh_token: data.session.refresh_token,
-            expires_at: data.session.expires_at,
-          }),
-        });
-
-        if (!sessionSetResponse.ok) {
-          console.warn('세션 설정 API 호출 실패, 계속 진행');
-        }
-      } catch (apiError) {
-        console.warn('세션 설정 API 오류:', apiError);
-        // API 실패해도 계속 진행
-      }
+      // 서버사이드에서 직접 쿠키 설정 (Response 헤더로)
+      const cookieName = 'sb-mzmlolwducobuknsigvz-auth-token';
+      const sessionData = {
+        access_token: data.session.access_token,
+        refresh_token: data.session.refresh_token,
+        expires_at: data.session.expires_at,
+        token_type: 'bearer',
+        user: data.user
+      };
       
-      // 토큰 타입별 리다이렉트 처리
+      const cookieValue = encodeURIComponent(JSON.stringify(sessionData));
+      const expires = new Date((data.session.expires_at || Math.floor(Date.now() / 1000) + 3600) * 1000);
+      const cookieOptions = [
+        `${cookieName}=${cookieValue}`,
+        'Path=/',
+        'HttpOnly=false', // 클라이언트에서도 접근 가능하도록
+        'SameSite=Lax',
+        `Expires=${expires.toUTCString()}`,
+        // 프로덕션에서는 Secure 추가
+        process.env.NODE_ENV === 'production' ? 'Secure' : ''
+      ].filter(Boolean).join('; ');
+
+      // 토큰 타입별 리다이렉트 처리 (쿠키와 함께)
       if (type === 'recovery') {
-        // 비밀번호 재설정 플로우 - 성공했으니 정상적으로 진행
-        console.log('✅ [PRODUCTION] 비밀번호 재설정 페이지로 리다이렉트');
-        throw redirect('/auth/new-password');
+        console.log('✅ [PRODUCTION] 비밀번호 재설정 페이지로 리다이렉트 (쿠키 설정됨)');
+        
+        // Response 객체로 리다이렉트와 쿠키를 함께 설정
+        throw new Response(null, {
+          status: 302,
+          headers: {
+            'Location': '/auth/new-password',
+            'Set-Cookie': cookieOptions
+          }
+        });
       } else if (type === 'signup' || type === 'email_change') {
-        // 이메일 확인 플로우
-        throw redirect(next);
+        throw new Response(null, {
+          status: 302,
+          headers: {
+            'Location': next,
+            'Set-Cookie': cookieOptions
+          }
+        });
       } else {
-        // 기본 대시보드로 이동
-        throw redirect(next);
+        throw new Response(null, {
+          status: 302,
+          headers: {
+            'Location': next,
+            'Set-Cookie': cookieOptions
+          }
+        });
       }
     }
 
