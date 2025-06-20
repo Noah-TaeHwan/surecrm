@@ -224,13 +224,13 @@ export async function action({ request }: Route['ActionArgs']) {
   }
 
   try {
-    // 세션 확인 (loader와 동일한 로직)
+    // 세션 확인 및 추출 (loader와 동일한 로직)
     const cookieHeader = request.headers.get('Cookie') || '';
     console.log('🍪 [ACTION] 쿠키 헤더 확인:', cookieHeader.includes('sb-mzmlolwducobuknsigvz-auth-token'));
     
-    let hasValidSession = false;
+    let sessionData: any = null;
     
-    // 쿠키에서 세션 확인
+    // 쿠키에서 세션 데이터 추출
     if (cookieHeader.includes('sb-mzmlolwducobuknsigvz-auth-token')) {
       const startIndex = cookieHeader.indexOf('sb-mzmlolwducobuknsigvz-auth-token=') + 'sb-mzmlolwducobuknsigvz-auth-token='.length;
       const endIndex = cookieHeader.indexOf(';', startIndex);
@@ -238,19 +238,20 @@ export async function action({ request }: Route['ActionArgs']) {
       
       try {
         const decodedValue = decodeURIComponent(cookieValue);
-        const sessionData = JSON.parse(decodedValue);
+        sessionData = JSON.parse(decodedValue);
         
-        if (sessionData?.user?.id && sessionData?.access_token) {
-          hasValidSession = true;
-          console.log('✅ [ACTION] 쿠키에서 세션 확인됨:', sessionData.user.email);
-        }
+        console.log('✅ [ACTION] 쿠키에서 세션 데이터 추출됨:', {
+          hasUser: !!sessionData?.user,
+          hasAccessToken: !!sessionData?.access_token,
+          userEmail: sessionData?.user?.email
+        });
       } catch (cookieParseError) {
         console.error('❌ [ACTION] 쿠키 파싱 실패:', cookieParseError);
       }
     }
     
-    if (!hasValidSession) {
-      console.error('❌ [ACTION] 세션이 없음 - 비밀번호 변경 불가');
+    if (!sessionData?.user?.id || !sessionData?.access_token) {
+      console.error('❌ [ACTION] 유효한 세션 데이터가 없음 - 비밀번호 변경 불가');
       return data({
         success: false,
         error: '세션이 만료되었습니다. 비밀번호 재설정을 다시 시도해주세요.',
@@ -258,8 +259,16 @@ export async function action({ request }: Route['ActionArgs']) {
       }, { status: 401 });
     }
     
-    console.log('🔐 [ACTION] Supabase 클라이언트로 비밀번호 업데이트 시도');
+    console.log('🔐 [ACTION] Supabase 클라이언트 생성 및 세션 수동 설정');
     const supabase = createServerClient(request);
+    
+    // 추출한 세션 데이터를 Supabase 클라이언트에 수동으로 설정
+    await supabase.auth.setSession({
+      access_token: sessionData.access_token,
+      refresh_token: sessionData.refresh_token
+    });
+    
+    console.log('💡 [ACTION] 세션 설정 완료, 비밀번호 업데이트 시도');
     
     // 비밀번호 업데이트
     const { error } = await supabase.auth.updateUser({
