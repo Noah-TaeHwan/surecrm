@@ -6,19 +6,23 @@ import {
   ScrollRestoration,
   isRouteErrorResponse,
   data,
+  type LinksFunction,
 } from 'react-router';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import { useEffect } from 'react';
-
-import type { Route } from './+types/root';
 import stylesheet from './app.css?url';
 import { initGA, SessionTracking } from '~/lib/utils/analytics';
 import { usePageTracking } from '~/hooks/use-analytics';
 import { useBusinessIntelligence } from '~/hooks/use-business-intelligence';
 import { useUserRoleTracker } from '~/hooks/use-user-role-tracker';
 
-export const links: Route.LinksFunction = () => [
+// Root.tsx 전용 타입 정의
+interface ErrorBoundaryProps {
+  error: unknown;
+}
+
+export const links: LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
   {
     rel: 'preconnect',
@@ -977,7 +981,7 @@ export default function App() {
   return <Outlet />;
 }
 
-export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
+export function ErrorBoundary({ error }: ErrorBoundaryProps) {
   let message = '오류!';
   let details = '예상치 못한 오류가 발생했습니다.';
   let stack: string | undefined;
