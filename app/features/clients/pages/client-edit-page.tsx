@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
-import type { Route } from './+types/client-edit-page';
+// Route 타입은 라우트 파일에서 자동 생성됨
 import { MainLayout } from '~/common/layouts/main-layout';
 
 import { ClientEditHeader } from '../components/client-edit-header';
@@ -31,7 +31,7 @@ const clientEditSchema = z.object({
 
 type ClientEditFormData = z.infer<typeof clientEditSchema>;
 
-export async function loader({ request, params }: Route.LoaderArgs) {
+export async function loader({ request, params }: { request: Request; params: { id: string } }) {
   const { id: clientId } = params;
 
   console.log('🔍 고객 편집 페이지 loader 시작:', { clientId });
@@ -87,7 +87,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   }
 }
 
-export async function action({ request, params }: Route.ActionArgs) {
+export async function action({ request, params }: { request: Request; params: { id: string } }) {
   const { id: clientId } = params;
 
   if (!clientId) {
@@ -134,7 +134,7 @@ export async function action({ request, params }: Route.ActionArgs) {
   }
 }
 
-export function meta({ data }: Route.MetaArgs) {
+export function meta({ data }: { data: any }) {
   const clientName = data?.client?.fullName || '고객';
   return [
     { title: `${clientName} 편집 - SureCRM` },
@@ -145,7 +145,7 @@ export function meta({ data }: Route.MetaArgs) {
 export default function ClientEditPage({
   loaderData,
   actionData,
-}: Route.ComponentProps) {
+}: { loaderData: any; actionData?: any }) {
   const { client } = loaderData;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
