@@ -99,6 +99,11 @@ export default function NewPasswordPage({
     console.log('🔐 NEW-PASSWORD 페이지 로드됨');
     console.log('📋 서버 세션 상태:', loaderData?.hasSession ? '✅ 있음' : '❌ 없음');
     console.log('👤 사용자 정보:', loaderData?.user?.email || '없음');
+    
+    // 서버에서 전달된 디버그 정보 표시
+    if (loaderData?.debugInfo) {
+      console.log('🔍 [DEBUG] 서버 디버그 정보:', loaderData.debugInfo);
+    }
   }, [loaderData]);
 
   const onSubmit = async (formData: NewPasswordFormData) => {

@@ -27,18 +27,28 @@ const newPasswordSchema = z.object({
 export async function loader({ request }: Route['LoaderArgs']) {
   console.log('🔐 [NEW-PASSWORD LOADER] 시작');
   
+  const debugInfo: any = {
+    timestamp: new Date().toISOString(),
+    url: request.url,
+    method: request.method,
+    userAgent: request.headers.get('User-Agent')?.substring(0, 100),
+  };
+  
   try {
     // 쿠키에서 직접 세션 정보 추출 (서버-클라이언트 동기화 문제 해결)
     const cookieHeader = request.headers.get('Cookie') || '';
     console.log('🍪 [COOKIE DEBUG] 전체 쿠키 헤더:', cookieHeader);
+    debugInfo.cookieHeader = cookieHeader.substring(0, 200); // 일부만 저장
     
     const authCookieMatch = cookieHeader.match(/sb-mzmlolwducobuknsigvz-auth-token=([^;]+)/);
     console.log('🔍 [COOKIE DEBUG] Auth 쿠키 매치:', !!authCookieMatch);
+    debugInfo.hasAuthCookie = !!authCookieMatch;
     
     if (authCookieMatch) {
       try {
         const decodedValue = decodeURIComponent(authCookieMatch[1]);
         console.log('📋 [COOKIE DEBUG] 디코딩된 쿠키 값 길이:', decodedValue.length);
+        debugInfo.cookieLength = decodedValue.length;
         
         const directSessionData = JSON.parse(decodedValue);
         console.log('✅ [COOKIE DEBUG] 직접 파싱된 세션 데이터:', {
@@ -50,6 +60,15 @@ export async function loader({ request }: Route['LoaderArgs']) {
           expiresAt: directSessionData?.expires_at
         });
         
+        debugInfo.cookieParsed = {
+          hasUser: !!directSessionData?.user,
+          userId: directSessionData?.user?.id,
+          userEmail: directSessionData?.user?.email,
+          hasAccessToken: !!directSessionData?.access_token,
+          hasRefreshToken: !!directSessionData?.refresh_token,
+          expiresAt: directSessionData?.expires_at
+        };
+        
         // 직접 파싱된 세션 데이터가 유효한 경우
         if (directSessionData?.user?.id && directSessionData?.access_token) {
           console.log('✅ [COOKIE SUCCESS] 직접 쿠키에서 세션 확인됨');
@@ -58,13 +77,16 @@ export async function loader({ request }: Route['LoaderArgs']) {
             user: {
               id: directSessionData.user.id,
               email: directSessionData.user.email
-            }
+            },
+            debugInfo: { ...debugInfo, sessionSource: 'cookie' }
           };
         } else {
           console.warn('⚠️ [COOKIE INCOMPLETE] 세션 데이터가 불완전함');
+          debugInfo.cookieIncomplete = true;
         }
       } catch (parseError) {
         console.error('❌ [COOKIE PARSE ERROR] 쿠키 파싱 실패:', parseError);
+        debugInfo.cookieParseError = (parseError as Error).message || 'unknown_parse_error';
         // 쿠키 파싱 실패 시 Supabase 클라이언트로 fallback
       }
     } else {
@@ -87,10 +109,29 @@ export async function loader({ request }: Route['LoaderArgs']) {
       userEmail: user?.email
     });
     
+    debugInfo.supabaseResult = {
+      hasSession: !!session,
+      hasUser: !!user,
+      sessionError: sessionError?.message,
+      userError: userError?.message,
+      userId: user?.id,
+      userEmail: user?.email
+    };
+    
     // 세션이나 사용자가 없는 경우 토큰 검증 페이지로 리다이렉트
     if (!session || !user || sessionError || userError) {
       console.error('❌ [SESSION FAILED] 세션 확인 실패 - forgot-password로 리다이렉트');
-      throw redirect('/auth/forgot-password?error=session_required');
+      
+      // 디버그 정보를 포함해서 리다이렉트
+      const debugParams = new URLSearchParams({
+        error: 'session_required',
+        debug_timestamp: debugInfo.timestamp,
+        debug_has_cookie: String(debugInfo.hasAuthCookie),
+        debug_cookie_length: String(debugInfo.cookieLength || 0),
+        debug_supabase_error: sessionError?.message || userError?.message || 'no_session'
+      });
+      
+      throw redirect(`/auth/forgot-password?${debugParams.toString()}`);
     }
   
     console.log('✅ [SESSION SUCCESS] Supabase에서 세션 확인됨');
@@ -99,13 +140,15 @@ export async function loader({ request }: Route['LoaderArgs']) {
       user: {
         id: user.id,
         email: user.email
-      }
+      },
+      debugInfo: { ...debugInfo, sessionSource: 'supabase' }
     };
     
   } catch (error) {
     // 리다이렉트가 아닌 일반 오류인 경우에만 로그
     if (!(error instanceof Response)) {
       console.error('💥 [LOADER ERROR] 새 비밀번호 페이지 로딩 오류:', error);
+      debugInfo.loaderError = (error as Error).message || 'unknown_loader_error';
     }
     
     // 이미 리다이렉트인 경우 그대로 throw, 아니면 forgot-password로 리다이렉트
@@ -114,7 +157,14 @@ export async function loader({ request }: Route['LoaderArgs']) {
     }
     
     console.error('❌ [UNEXPECTED ERROR] 예상치 못한 오류 - forgot-password로 리다이렉트');
-    throw redirect('/auth/forgot-password?error=session_check_failed');
+    
+    const debugParams = new URLSearchParams({
+      error: 'session_check_failed',
+      debug_timestamp: debugInfo.timestamp,
+      debug_error: (error as Error).message || 'unknown_error'
+    });
+    
+    throw redirect(`/auth/forgot-password?${debugParams.toString()}`);
   }
 }
 
