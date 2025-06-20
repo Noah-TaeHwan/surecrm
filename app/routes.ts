@@ -78,8 +78,6 @@ export default [
 
   // 🛠️ API 라우트들
   route('api/auth/me', 'routes/api.auth.me.ts'),
-  route('api/auth/diagnose', 'routes/api.auth.diagnose.ts'),
-  route('api/auth/reset-password', 'routes/api.auth.reset-password.ts'),
   route('api/auth/set-session', 'routes/api.auth.set-session.ts'),
   route('api/email/send-test', 'routes/api.email.send-test.ts'),
   route('api/email/welcome-preview', 'routes/api.email.welcome-preview.ts'),
