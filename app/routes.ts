@@ -13,6 +13,7 @@ export default [
   route('auth/logout', 'common/pages/auth/auth.logout.tsx'),
   route('auth/forgot-password', 'common/pages/auth/forgot-password-page.tsx'),
   route('auth/confirm', 'routes/auth.confirm.tsx'),
+  route('auth/test-route', 'routes/auth.test-route.tsx'),
   route('auth/new-password', 'routes/auth.new-password.tsx'),
   route('auth/otp-verification', 'common/pages/auth/otp-verification-page.tsx'),
   route('auth/magic-link-verify', 'common/pages/auth/magic-link-verify.tsx'),
