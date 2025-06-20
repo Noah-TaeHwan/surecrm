@@ -122,9 +122,41 @@ export default function NewPasswordPage({
   }, [loaderData, actionData]);
 
   const onSubmit = async (formData: NewPasswordFormData) => {
-    // React Hook Form으로 유효성 검사만 하고
-    // 실제 제출은 네이티브 form의 action으로 처리
     console.log('✅ 클라이언트 유효성 검사 통과 - 서버 액션 호출');
+    setIsSubmitting(true);
+    
+    try {
+      // fetch API로 서버 액션 호출 (페이지 새로고침 방지)
+      const formBody = new FormData();
+      formBody.append('password', formData.password);
+      formBody.append('confirmPassword', formData.confirmPassword);
+      
+      const response = await fetch('/auth/new-password', {
+        method: 'POST',
+        body: formBody,
+      });
+      
+      const result = await response.json();
+      console.log('📨 [CLIENT] 서버 응답:', result);
+      
+      if (result.success) {
+        console.log('🎉 [SUCCESS] 비밀번호 변경 성공 - 모달 표시');
+        setShowSuccessModal(true);
+      } else {
+        console.error('❌ [ERROR] 비밀번호 변경 실패:', result.error);
+        // 에러는 React Hook Form에서 처리하거나 상태로 관리
+        form.setError('root', { 
+          message: result.error || '비밀번호 변경에 실패했습니다.' 
+        });
+      }
+    } catch (error) {
+      console.error('💥 [CLIENT] 네트워크 오류:', error);
+      form.setError('root', { 
+        message: '네트워크 오류가 발생했습니다. 다시 시도해주세요.' 
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -152,7 +184,15 @@ export default function NewPasswordPage({
         </CardHeader>
 
         <CardContent>
-          {/* 액션 에러 메시지 표시 */}
+          {/* 클라이언트 에러 메시지 표시 (React Hook Form) */}
+          {form.formState.errors.root && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertTitle>오류</AlertTitle>
+              <AlertDescription>{form.formState.errors.root.message}</AlertDescription>
+            </Alert>
+          )}
+
+          {/* 액션 에러 메시지 표시 (서버 액션에서 온 경우) */}
           {actionData?.error && (
             <Alert variant="destructive" className="mb-6">
               <AlertTitle>오류</AlertTitle>
@@ -172,8 +212,8 @@ export default function NewPasswordPage({
           )}
 
           <Form {...form}>
-            {/* 네이티브 form으로 서버 액션 직접 호출 */}
-            <form method="POST" className="space-y-4">
+            {/* React Hook Form으로 제출 (페이지 새로고침 방지) */}
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
                 name="password"
