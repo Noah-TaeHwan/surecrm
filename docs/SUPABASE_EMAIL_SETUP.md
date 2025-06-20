@@ -218,7 +218,7 @@ SureCRM은 하이브리드 인증 시스템을 사용합니다:
       <p>SureCRM에 로그인하기 위해 아래 버튼을 클릭해주세요.</p>
 
       <div style="text-align: center;">
-        <a href="{{ .ConfirmationURL }}" class="login-button">
+        <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email" class="login-button">
           🔐 SureCRM 로그인하기
         </a>
       </div>
@@ -235,7 +235,7 @@ SureCRM은 하이브리드 인증 시스템을 사용합니다:
         붙여넣어 주세요:
       </p>
 
-      <div class="backup-url">{{ .ConfirmationURL }}</div>
+      <div class="backup-url">{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email</div>
 
       <div class="footer">
         <p>이 이메일은 SureCRM 로그인 요청에 의해 자동 발송되었습니다.</p>
