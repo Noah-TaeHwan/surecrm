@@ -15,6 +15,7 @@ export async function loader({ request }: Route['LoaderArgs']) {
   const type = url.searchParams.get('type') as EmailOtpType | null;
   const next = url.searchParams.get('next') || '/dashboard';
 
+  console.log('🔥🔥🔥 AUTH.CONFIRM LOADER 실행됨!');
   console.log('🔗 /auth/confirm 호출:', { 
     token_hash: token_hash ? 'present' : 'missing', 
     type, 
