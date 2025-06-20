@@ -310,10 +310,10 @@ export default function ForgotPasswordPage({
         </CardContent>
 
         <CardFooter className="flex justify-center flex-col items-center">
-          <div className="text-center text-sm text-slate-600 dark:text-slate-400">
+          <div className="text-center text-sm text-slate-600 dark:text-slate-400 pt-4">
             <span>계정이 기억나셨나요? </span>
             <Link
-              to="/login"
+              to="/auth/login"
               className="font-medium text-slate-900 hover:text-slate-700 dark:text-slate-300 dark:hover:text-slate-200"
             >
               로그인하기
