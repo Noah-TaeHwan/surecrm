@@ -35,6 +35,7 @@ import {
 } from '~/features/pipeline/lib/supabase-pipeline-data';
 import { requireAuth } from '~/lib/auth/middleware';
 import { redirect } from 'react-router';
+import { cn } from '~/lib/utils';
 
 export function meta({ data, params }: Route.MetaArgs) {
   return [
@@ -941,6 +942,7 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
     id: string;
     name: string;
   } | null>(null);
+  const [activeStage, setActiveStage] = useState(stages[0]?.id || '');
 
   // 🎯 fetcher 상태 기반으로 상태 관리
   const isSubmitting = addClientFetcher.state === 'submitting';
@@ -1293,55 +1295,12 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
               overflow: hidden !important;
             }
           }
-          
-          /* 🎯 모바일 스크롤 문제 해결 */
-          @media (max-width: 767.98px) {
-            main {
-              overflow: auto !important;
-              height: auto !important;
-              max-height: none !important;
-            }
-            
-            .pipeline-mobile-container {
-              min-height: 100vh;
-              height: auto;
-              position: relative;
-              width: 100%;
-              max-width: 100vw;
-              overflow-x: hidden;
-              /* sticky가 작동하도록 overflow-y는 visible 유지 */
-            }
-            
-            .pipeline-board {
-              width: 100%;
-              max-width: 100%;
-              overflow-x: hidden;
-            }
-            
-            /* 🎯 모바일에서 모든 자식 요소들이 화면을 벗어나지 않도록 */
-            @media (max-width: 1023px) {
-              .pipeline-mobile-container * {
-                max-width: 100%;
-                box-sizing: border-box;
-              }
-              
-              .pipeline-mobile-container .overflow-x-auto {
-                overflow-x: auto;
-              }
-              
-              /* sticky 요소가 정상 작동하도록 */
-              .pipeline-mobile-container .sticky {
-                position: sticky !important;
-                z-index: 40;
-              }
-            }
-          }
         `}
       </style>
       {/* 🎯 데스크톱과 모바일 조건부 렌더링 */}
       {isMobile ? (
-        /* 🎯 새로운 모바일 레이아웃 */
-        <div className="lg:hidden bg-background min-h-screen overflow-x-hidden w-full">
+        // 🎯 새로운 모바일 레이아웃 - 고객 상세와 동일한 구조
+        <div className="lg:hidden bg-background">
           <MobilePipelineLayout
             statsCards={statsCards}
             stages={stages.map(stage => ({
@@ -1366,6 +1325,8 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
             onExistingClientOpportunity={() => setExistingClientModalOpen(true)}
             onFilterReset={handleFilterReset}
             filteredClientsCount={filteredClients.length}
+            activeStage={activeStage}
+            setActiveStage={setActiveStage}
           />
         </div>
       ) : (

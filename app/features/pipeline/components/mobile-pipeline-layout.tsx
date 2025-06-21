@@ -20,6 +20,8 @@ import {
   BarChart3,
   Search,
   SlidersHorizontal,
+  Plus,
+  UserPlus,
 } from 'lucide-react';
 import { cn } from '~/lib/utils';
 import { Input } from '~/common/components/ui/input';
@@ -88,6 +90,10 @@ interface MobilePipelineLayoutProps {
   
   // 필터된 클라이언트 수
   filteredClientsCount: number;
+  
+  // 활성 스테이지 관리 (외부에서 제어)
+  activeStage?: string;
+  setActiveStage?: (stageId: string) => void;
 }
 
 export function MobilePipelineLayout({
@@ -111,9 +117,14 @@ export function MobilePipelineLayout({
   onExistingClientOpportunity,
   onFilterReset,
   filteredClientsCount,
+  activeStage: externalActiveStage,
+  setActiveStage: externalSetActiveStage,
 }: MobilePipelineLayoutProps) {
   const [isStatsExpanded, setIsStatsExpanded] = useState(false);
-  const [activeStage, setActiveStage] = useState(stages[0]?.id || '');
+  // 외부에서 activeStage를 받으면 사용하고, 없으면 내부 state 사용
+  const [internalActiveStage, setInternalActiveStage] = useState(stages[0]?.id || '');
+  const activeStage = externalActiveStage || internalActiveStage;
+  const setActiveStage = externalSetActiveStage || setInternalActiveStage;
   const carouselRef = useRef<HTMLDivElement>(null);
 
   // 터치 이벤트 핸들러 (고객 상세 페이지와 동일)
@@ -160,13 +171,9 @@ export function MobilePipelineLayout({
     }
   }, [activeStage, stages]);
 
-  // 현재 활성 스테이지의 고객들만 필터링
-  const currentStageClients = clients.filter(client => client.stageId === activeStage);
 
-  // 스테이지 스크롤 함수 (고객 카드 영역으로 스크롤)
-  const scrollToStage = (stageId: string) => {
-    setActiveStage(stageId);
-  };
+
+
 
   // 통계 카드 토글 버튼 텍스트 생성
   const getStatsToggleText = () => {
@@ -174,66 +181,16 @@ export function MobilePipelineLayout({
     const managingClients = statsCards.find(card => card.title === '영업 관리 중')?.value || 0;
     const completedClients = statsCards.find(card => card.title === '계약 완료')?.value || 0;
     
-    return `전체 ${totalClients}명 • 관리 중 ${managingClients}명 • 완료 ${completedClients}명`;
+    return `전체 ${totalClients}명 · 관리 ${managingClients}명 · 계약 ${completedClients}명`;
   };
 
-  // 색상 매핑 함수 - 서비스 표준 색상 시스템 적용
-  const getColorClasses = (color: string) => {
-    switch (color) {
-      case 'blue':
-        return {
-          bg: 'bg-card',
-          border: 'border',
-          text: 'text-foreground',
-        };
-      case 'orange':
-        return {
-          bg: 'bg-card',
-          border: 'border',
-          text: 'text-foreground',
-        };
-      case 'green':
-        return {
-          bg: 'bg-card',
-          border: 'border',
-          text: 'text-foreground',
-        };
-      case 'red':
-        return {
-          bg: 'bg-card',
-          border: 'border',
-          text: 'text-foreground',
-        };
-      case 'emerald':
-        return {
-          bg: 'bg-card',
-          border: 'border',
-          text: 'text-foreground',
-        };
-      default:
-        return {
-          bg: 'bg-card',
-          border: 'border',
-          text: 'text-foreground',
-        };
-    }
-  };
+
+
+
 
   return (
-    <div 
-      className="h-full flex flex-col pipeline-mobile-container"
-      style={{
-        touchAction: 'pan-y pinch-zoom', // 세로 스크롤과 확대/축소만 허용
-        overscrollBehavior: 'contain', // 오버스크롤 방지
-        WebkitUserSelect: 'none', // 텍스트 선택 방지 (iOS Safari)
-        userSelect: 'none', // 텍스트 선택 방지
-        WebkitTouchCallout: 'none', // 길게 누르기 메뉴 방지 (iOS Safari)
-        WebkitTapHighlightColor: 'transparent', // 탭 하이라이트 제거
-        overflowX: 'hidden', // 가로 스크롤만 차단
-        // overflowY는 설정하지 않아서 sticky가 작동하도록 함
-      }}
-    >
-      {/* 🎯 상단 통계 카드 토글 섹션 - non-sticky로 변경 */}
+    <div className="h-full flex flex-col pipeline-mobile-container">
+      {/* 🎯 상단 통계 카드 토글 섹션 */}
       <div className="border-b bg-background">
         <Collapsible
           open={isStatsExpanded}
@@ -252,104 +209,73 @@ export function MobilePipelineLayout({
               </div>
               <ChevronDown
                 className={cn(
-                  'h-4 w-4 transition-transform duration-200',
+                  'h-5 w-5 text-muted-foreground transition-transform duration-200',
                   isStatsExpanded && 'rotate-180'
                 )}
               />
             </Button>
           </CollapsibleTrigger>
           
-          <CollapsibleContent className="px-4 pb-4">
-            <div className="grid grid-cols-2 gap-3">
-              {statsCards.map((card, index) => {
-                const colors = getColorClasses(card.color);
-                
-                return (
-                  <div
-                    key={index}
-                    className={cn(
-                      'flex flex-col space-y-2 p-4 rounded-lg border',
-                      colors.bg,
-                      colors.border
-                    )}
-                  >
-                    {/* 아이콘 제거, 텍스트만 표시 */}
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-muted-foreground leading-tight">
-                        {card.title}
-                      </p>
-                      <div className="flex items-center justify-between mt-1">
-                        <p className={cn('text-xl font-bold', colors.text)}>
-                          {card.value}
-                        </p>
-                        {card.trend && (
-                          <Badge
-                            variant={card.trend.isPositive ? 'default' : 'destructive'}
-                            className="text-xs px-1.5 py-0.5 flex-shrink-0"
-                          >
-                            {card.trend.isPositive ? '+' : ''}{card.trend.value}%
-                          </Badge>
-                        )}
+          <CollapsibleContent className="z-10 bg-background border-b border-border/50 shadow-sm">
+            <div className="grid grid-cols-2 gap-3 p-4 pt-0">
+                            {statsCards.map((card, index) => (
+                    <div
+                      key={card.title}
+                      className="bg-card border border-border rounded-lg p-3"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-xs font-medium text-muted-foreground mb-1">
+                            {card.title}
+                          </p>
+                          <p className="text-lg font-bold text-foreground">
+                            {card.value}
+                          </p>
+                        </div>
                       </div>
-                      {card.description && (
-                        <p className="text-xs text-muted-foreground mt-1 leading-tight">
-                          {card.description}
-                        </p>
-                      )}
                     </div>
-                  </div>
-                );
-              })}
+                  ))}
             </div>
           </CollapsibleContent>
         </Collapsible>
       </div>
 
-      {/* 🎯 검색/필터 및 스테이지 탭 통합 Sticky 영역 */}
-      <div className="sticky top-0 z-40 bg-background border-b border-border/50 px-4 shadow-sm py-1">
-        {/* 검색 및 필터 섹션 */}
-        <div className="space-y-3 py-3">
-          {/* 검색바 */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="고객명, 전화번호 검색..."
-              value={searchQuery}
-              onChange={(e) => onSearchChange(e.target.value)}
-              className="pl-10"
-              autoComplete="off"
-              style={{ touchAction: 'manipulation' }} // 터치 최적화
-            />
-          </div>
+      {/* 🎯 검색/필터 섹션 */}
+      <div className="space-y-3 py-3 px-3 bg-background">
+        {/* 검색바 */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder="고객명, 전화번호 검색..."
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
+            className="pl-10"
+            autoComplete="off"
+            style={{ touchAction: 'manipulation' }}
+          />
+        </div>
 
-          {/* 필터 및 액션 버튼들 */}
-          <div className="flex items-center justify-between gap-2">
-            {/* 필터 버튼 */}
+        {/* 액션 버튼들 */}
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant={isFilterActive ? 'default' : 'outline'}
                   size="sm"
-                  className="flex items-center gap-2"
+                  className="h-8 px-3"
                 >
-                  <SlidersHorizontal className="h-4 w-4" />
-                  <span>필터</span>
+                  <SlidersHorizontal className="h-4 w-4 mr-1" />
+                  필터
                   {isFilterActive && (
-                    <Badge
-                      variant="destructive"
-                      className="ml-1 px-1 text-xs"
-                    >
+                    <Badge variant="destructive" className="ml-1 px-1 text-xs">
                       ●
                     </Badge>
                   )}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className="w-[320px] p-4 bg-background"
-                align="start"
-                sideOffset={4}
-              >
+              <DropdownMenuContent className="w-[320px] p-4" align="start">
                 <PipelineFilters
                   referrers={potentialReferrers}
                   selectedReferrerId={selectedReferrerId}
@@ -359,170 +285,127 @@ export function MobilePipelineLayout({
                 />
               </DropdownMenuContent>
             </DropdownMenu>
-
-            {/* 액션 버튼들 */}
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onAddNewClient}
-                className="text-xs"
-              >
-                신규 고객 추가
-              </Button>
-              <Button
-                variant="default"
-                size="sm"
-                onClick={onExistingClientOpportunity}
-                className="text-xs"
-              >
-                영업 기회 추가
-              </Button>
-            </div>
           </div>
 
-          {/* 활성 필터 표시 */}
-          {isFilterActive && (
-            <div className="flex items-center gap-2 flex-wrap">
-              {searchQuery && (
-                <Badge variant="secondary" className="text-xs">
-                  검색: {searchQuery}
-                </Badge>
-              )}
-              {selectedImportance !== 'all' && (
-                <Badge variant="secondary" className="text-xs">
-                  중요도:{' '}
-                  {selectedImportance === 'high'
-                    ? '높음'
-                    : selectedImportance === 'medium'
-                      ? '보통'
-                      : '낮음'}
-                </Badge>
-              )}
-              {selectedReferrerId && (
-                <Badge variant="secondary" className="text-xs">
-                  소개자:{' '}
-                  {potentialReferrers.find(r => r.id === selectedReferrerId)?.name}
-                </Badge>
-              )}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onFilterReset}
-                className="text-xs h-6 px-2"
-              >
-                초기화
-              </Button>
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            <Button
+              variant="default"
+              size="sm"
+              onClick={onExistingClientOpportunity}
+              className="h-8 px-3"
+            >
+              <UserPlus className="h-4 w-4 mr-1" />
+              영업 기회
+            </Button>
+            <Button
+              variant="default"
+              size="sm"
+              onClick={onAddNewClient}
+              className="h-8 px-3"
+            >
+              <Plus className="h-4 w-4 mr-1" />
+              신규 고객
+            </Button>
+          </div>
         </div>
+      </div>
 
-        {/* 🎯 스테이지 캐러셀 탭 네비게이션 - 통합 sticky 영역 내부 */}
-        <div className="">
-          <div className="relative">
-            {/* 탭 컨테이너 */}
-            <div className="relative overflow-hidden">
-              <div
-                ref={carouselRef}
-                className="flex gap-3 px-4 py-1 overflow-x-auto overflow-y-hidden snap-x snap-mandatory scrollbar-hide scrollbar-none tab-carousel-container"
-                data-scrollbar-hidden="true"
-                onTouchStart={handleTouchStart}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-                style={
-                  {
-                    scrollBehavior: 'smooth',
-                    WebkitOverflowScrolling: 'touch',
-                    scrollbarWidth: 'none',
-                    msOverflowStyle: 'none',
-                    overflowX: 'auto',
-                    overflowY: 'hidden',
-                    scrollbarColor: 'transparent transparent',
-                    touchAction: 'pan-x',
-                  } as React.CSSProperties
-                }
-              >
-                {stages.map((stage, index) => {
-                  const isActive = activeStage === stage.id;
+      {/* 🎯 스테이지 캐러셀 탭 네비게이션 - 고객 상세와 완전 동일 */}
+      <div className="sticky -top-4 z-40 bg-background border-b border-border/50 -mx-4 px-4 shadow-sm py-1">
+        <div className="relative">
+          {/* 탭 컨테이너 */}
+          <div className="relative overflow-hidden">
+            <div
+              ref={carouselRef}
+              className="flex gap-3 px-4 py-2.5 overflow-x-auto overflow-y-hidden snap-x snap-mandatory scrollbar-hide scrollbar-none tab-carousel-container"
+              data-scrollbar-hidden="true"
+              style={
+                {
+                  scrollBehavior: 'smooth',
+                  WebkitOverflowScrolling: 'touch',
+                  scrollbarWidth: 'none',
+                  msOverflowStyle: 'none',
+                  overflowX: 'auto',
+                  overflowY: 'hidden',
+                  scrollbarColor: 'transparent transparent',
+                } as React.CSSProperties
+              }
+            >
+              {stages.map((stage, index) => {
+                const isActive = activeStage === stage.id;
 
-                  return (
-                    <button
-                      key={stage.id}
-                      onClick={() => setActiveStage(stage.id)}
-                      data-active={isActive}
+                return (
+                  <button
+                    key={stage.id}
+                    onClick={() => setActiveStage(stage.id)}
+                    data-active={isActive}
+                    className={cn(
+                      // 기본 스타일 - 모든 탭에 공통 적용
+                      'relative flex-shrink-0 flex items-center gap-1.5 text-xs font-medium',
+                      'snap-center border min-w-fit overflow-hidden',
+                      'transform-gpu will-change-transform backface-hidden',
+                      // 🎯 새로운 부드러운 애니메이션을 위한 클래스 추가
+                      'tab-carousel-button',
+                      // 🎯 부드러운 크기 및 border-radius 전환을 위한 CSS 변수 사용
+                      isActive
+                        ? [
+                            // 활성 탭: 미묘한 패딩 증가와 일관된 rounded 값
+                            'px-3.5 py-1.5 rounded-lg',
+                            'bg-primary text-white',
+                            'shadow-sm shadow-primary/20 border-primary/30',
+                            'translate-y-0 z-10',
+                          ]
+                        : [
+                            // 비활성 탭: 기본 패딩과 rounded 값
+                            'px-3 py-1.5 rounded-lg',
+                            'bg-muted/30 text-muted-foreground border-border/30',
+                            'hover:bg-muted/50 hover:text-foreground/80',
+                            'hover:shadow-sm hover:border-border/50',
+                            'translate-y-0 z-0',
+                          ]
+                    )}
+                    style={{
+                      // 🚀 부드럽고 일관된 전환 애니메이션
+                      transition: [
+                        // 모든 속성을 동시에, 부드럽게 전환
+                        'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                      ].join(', '),
+                    }}
+                  >
+                    {/* 라벨 */}
+                    <span
                       className={cn(
-                        // 기본 스타일 - 모든 탭에 공통 적용
-                        'relative flex-shrink-0 flex items-center gap-1.5 text-xs font-medium',
-                        'snap-center border min-w-fit overflow-hidden',
-                        'transform-gpu will-change-transform backface-hidden',
-                        // 🎯 새로운 부드러운 애니메이션을 위한 클래스 추가
-                        'tab-carousel-button',
-                        // 🎯 부드러운 크기 및 border-radius 전환을 위한 CSS 변수 사용
+                        'text-xs font-medium whitespace-nowrap transition-all duration-300 ease-out select-none',
+                        // 🎯 폰트 두께도 부드럽게 전환 (더 미묘하게)
                         isActive
-                          ? [
-                              // 활성 탭: 미묘한 패딩 증가와 일관된 rounded 값
-                              'px-3.5 py-1.5 rounded-lg',
-                              'bg-primary text-white',
-                              'shadow-sm shadow-primary/20 border-primary/30',
-                              'translate-y-0 z-10',
-                            ]
-                          : [
-                              // 비활성 탭: 기본 패딩과 rounded 값
-                              'px-3 py-1.5 rounded-lg',
-                              'bg-muted/30 text-muted-foreground border-border/30',
-                              'hover:bg-muted/50 hover:text-foreground/80',
-                              'hover:shadow-sm hover:border-border/50',
-                              'translate-y-0 z-0',
-                            ]
+                          ? 'font-medium tracking-normal text-white'
+                          : 'font-normal tracking-normal'
                       )}
-                      style={{
-                        // 🚀 부드럽고 일관된 전환 애니메이션
-                        transition: [
-                          // 모든 속성을 동시에, 부드럽게 전환
-                          'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-                        ].join(', '),
-                        touchAction: 'manipulation',
-                      }}
                     >
-                      {/* 라벨 */}
-                      <span
-                        className={cn(
-                          'text-xs font-medium whitespace-nowrap transition-all duration-300 ease-out',
-                          // 🎯 폰트 두께도 부드럽게 전환 (더 미묘하게)
-                          isActive
-                            ? 'font-medium tracking-normal text-white'
-                            : 'font-normal tracking-normal'
-                        )}
-                      >
-                        {stage.name}
-                      </span>
+                      {stage.name}
+                    </span>
 
-                      {/* 🎨 호버 시 배경 효과 - 비활성 탭에만 */}
-                      {!isActive && (
-                        <div
-                          className="absolute inset-0 rounded-lg bg-gradient-to-r from-accent/5 to-accent/10 opacity-0 hover:opacity-100 transition-all duration-300 ease-out -z-20"
-                          style={{
-                            transform: 'translate3d(0, 0, 0)',
-                            transition:
-                              'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-                          }}
-                        />
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
+                    {/* 🎨 호버 시 배경 효과 - 비활성 탭에만 */}
+                    {!isActive && (
+                      <div
+                        className="absolute inset-0 rounded-lg bg-gradient-to-r from-accent/5 to-accent/10 opacity-0 hover:opacity-100 transition-all duration-300 ease-out -z-20"
+                        style={{
+                          transform: 'translate3d(0, 0, 0)',
+                          transition:
+                            'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                        }}
+                      />
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
       </div>
 
-      {/* 🎯 칸반보드 캐러셀 */}
-      <div 
-        style={{
-          touchAction: 'pan-y', // 세로 스크롤만 허용
-        }}
-      >
+      {/* 🎯 칸반보드 영역 */}
+      <div className="flex-1 overflow-y-auto">
         <PipelineBoard
           stages={stages}
           clients={clients}
