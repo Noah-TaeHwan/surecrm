@@ -3870,6 +3870,222 @@ input[type='datetime-local']:not([style*='color']) {
 }
 
 /* 🔍 접근성 개선 */
+[data-tabscontent='checkup'] [data-radix-checkbox-root]:focus-visible {
+  /* 키보드 포커스 시 명확한 아웃라인 */
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+[data-tabscontent='checkup'] label:focus-visible {
+  /* 레이블 포커스 시 아웃라인 */
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* 🚫 모션 감소 설정 사용자 대응 */
+@media (prefers-reduced-motion: reduce) {
+  [data-tabscontent='checkup'] * {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+  }
+}
+
+/* 🧠 병력사항 탭 모바일 최적화 */
+
+/* 🔍 접근성 개선 */
+[data-tabscontent='medical'] .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* 🎯 점검목적 탭 모바일 최적화 */
+@media (max-width: 768px) {
+  /* 📱 모바일 레이아웃 기본 설정 */
+  [data-tabscontent='checkup'] {
+    /* 모바일에서 여백 최적화 */
+    margin: 0;
+    padding: 0;
+  }
+
+  [data-tabscontent='checkup'] .space-y-4 > *:not(:first-child) {
+    /* 섹션 간 간격 조정 */
+    margin-top: 16px;
+  }
+
+  [data-tabscontent='checkup'] .space-y-3 > *:not(:first-child) {
+    /* 아이템 간 간격 조정 */
+    margin-top: 12px;
+  }
+
+  /* 🎯 체크박스 영역 모바일 최적화 */
+  [data-tabscontent='checkup'] .flex.items-center.gap-3 {
+    /* 터치 영역 확장 */
+    padding: 8px;
+    margin: -4px;
+    border-radius: 8px;
+
+    /* 터치 피드백 */
+    transition:
+      background-color 0.2s ease,
+      transform 0.1s ease;
+
+    /* 최소 터치 크기 보장 */
+    min-height: 44px;
+
+    /* 중앙 정렬 */
+    align-items: center;
+  }
+
+  [data-tabscontent='checkup'] .flex.items-center.gap-3:hover {
+    /* 모바일에서 미묘한 배경색 변화 */
+    background-color: hsl(var(--muted) / 0.3);
+
+    /* 부드러운 모서리 */
+    border-radius: 8px;
+  }
+
+  [data-tabscontent='checkup'] .flex.items-center.gap-3:focus-within {
+    /* 모바일에서 미묘한 배경색 변화 */
+    background-color: hsl(var(--muted) / 0.3);
+
+    /* 부드러운 모서리 */
+    border-radius: 8px;
+  }
+
+  /* 📝 텍스트 영역 모바일 최적화 */
+  [data-tabscontent='checkup'] textarea {
+    /* 모바일에서 텍스트 크기 적정화 */
+    font-size: 14px;
+
+    /* 줄 간격 개선 */
+    line-height: 1.5;
+
+    /* 최소 높이 조정 */
+    min-height: 80px;
+
+    /* 리사이즈 핸들 제거 (모바일에서 불필요) */
+    resize: none;
+  }
+
+  /* 🔤 폰트 크기 모바일 최적화 */
+  [data-tabscontent='checkup'] h4 {
+    /* 섹션 제목 크기 조정 */
+    font-size: 15px;
+    font-weight: 600;
+
+    /* 아이콘과 텍스트 간격 최적화 */
+    gap: 6px;
+  }
+
+  [data-tabscontent='checkup'] .text-sm {
+    /* 소형 텍스트 가독성 개선 */
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  /* 📊 섹션별 구분 강화 */
+  [data-tabscontent='checkup'] .space-y-4 > div:not(:last-child) {
+    /* 섹션 간 구분선 */
+    border-bottom: 1px solid hsl(var(--border) / 0.3);
+    padding-bottom: 16px;
+    margin-bottom: 16px;
+  }
+
+  /* 🎯 아이콘 크기 및 정렬 최적화 */
+  [data-tabscontent='checkup'] .flex-shrink-0 {
+    /* 아이콘 정렬 개선 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    /* 아이콘 크기 일관성 */
+    width: 24px;
+    height: 24px;
+
+    /* 아이콘 배경 (선택사항) */
+    border-radius: 4px;
+  }
+
+  /* 💰 저축 현황 섹션 특별 처리 */
+  [data-tabscontent='checkup'] .bg-blue-50\/50 {
+    /* 모바일에서 더 부드러운 배경 */
+    background-color: hsl(var(--accent) / 0.1);
+    border-color: hsl(var(--accent) / 0.3);
+  }
+
+  .dark [data-tabscontent='checkup'] .bg-blue-50\/50 {
+    /* 다크 모드에서 배경 조정 */
+    background-color: hsl(var(--accent) / 0.05);
+    border-color: hsl(var(--accent) / 0.2);
+  }
+
+  /* 📱 동적 텍스트영역 표시/숨김 애니메이션 */
+  [data-tabscontent='checkup'] .space-y-2 {
+    /* 나타남/사라짐 애니메이션 */
+    animation: slideDown 0.3s ease-out;
+    transform-origin: top;
+  }
+
+  /* 💾 저장 버튼 모바일 최적화 */
+  [data-tabscontent='checkup'] .flex-shrink-0 button {
+    /* 모바일에서 터치하기 쉬운 크기 */
+    min-height: 40px;
+    padding: 8px 12px;
+
+    /* 텍스트 크기 조정 */
+    font-size: 14px;
+
+    /* 터치 피드백 최적화 */
+    transition: all 0.2s ease;
+    touch-action: manipulation;
+  }
+
+  /* 🎯 터치 피드백 애니메이션 */
+  [data-tabscontent='checkup'] .flex.items-center.gap-3:active {
+    /* 터치 시 미묘한 스케일 효과 */
+    transform: scale(0.98);
+
+    /* 빠른 피드백 */
+    transition: transform 0.1s ease;
+  }
+}
+
+/* 🖥️ 데스크톱에서 체크박스 호버 효과 강화 */
+@media (min-width: 769px) {
+  [data-tabscontent='checkup'] [data-radix-checkbox-root]:hover {
+    /* 데스크톱에서 호버 시 테두리 강화 */
+    border-color: hsl(var(--primary) / 0.6);
+    box-shadow: 0 0 0 1px hsl(var(--primary) / 0.2);
+  }
+
+  [data-tabscontent='checkup'] label:hover {
+    /* 데스크톱에서 레이블 호버 효과 */
+    color: hsl(var(--primary));
+  }
+}
+
+/* 🌙 다크 모드 최적화 */
+.dark [data-tabscontent='checkup'] .flex.items-center.gap-3:hover {
+  background-color: hsl(var(--muted) / 0.2);
+}
+
+.dark
+  [data-tabscontent='checkup']
+  [data-radix-checkbox-root][data-state='checked'] {
+  /* 다크 모드에서 체크박스 가시성 향상 */
+  box-shadow: 0 2px 4px rgba(255, 255, 255, 0.1);
+}
+
+/* 🔍 접근성 개선 */
 [data-tabscontent='checkup'] .sr-only {
   position: absolute;
   width: 1px;
@@ -3881,3 +4097,132 @@ input[type='datetime-local']:not([style*='color']) {
   white-space: nowrap;
   border: 0;
 }
+
+/* =================================================================
+   🔧 모바일 줌인 방지 시스템 - iOS Safari Input Focus 문제 해결
+   ================================================================= */
+
+/* 🚫 모달 내 Input 포커스 시 줌인 방지 */
+[data-slot='dialog-content'] input,
+[data-slot='dialog-content'] textarea,
+[data-slot='dialog-content'] select,
+[data-slot='mobile-dialog-content'] input,
+[data-slot='mobile-dialog-content'] textarea,
+[data-slot='mobile-dialog-content'] select,
+[role='dialog'] input,
+[role='dialog'] textarea,
+[role='dialog'] select {
+  /* iOS Safari 줌인 방지를 위한 최소 16px 폰트 사이즈 강제 적용 */
+  font-size: 16px !important;
+  /* 추가 안전 장치 */
+  -webkit-text-size-adjust: 100% !important;
+  transform-origin: left top !important;
+}
+
+/* 📱 모바일 디바이스에서만 적용되는 줌인 방지 */
+@media (max-width: 768px) {
+  /* 모든 input 요소에 16px 이상 폰트 사이즈 강제 적용 */
+  [data-slot='dialog-content'] input,
+  [data-slot='dialog-content'] textarea,
+  [data-slot='dialog-content'] select,
+  [data-slot='mobile-dialog-content'] input,
+  [data-slot='mobile-dialog-content'] textarea,
+  [data-slot='mobile-dialog-content'] select,
+  [role='dialog'] input,
+  [role='dialog'] textarea,
+  [role='dialog'] select,
+  .modal-content input,
+  .modal-content textarea,
+  .modal-content select {
+    font-size: 16px !important;
+    /* iOS Safari 특화 설정 */
+    -webkit-text-size-adjust: 100% !important;
+    -webkit-appearance: none !important;
+    /* 포커스 시 브라우저 줌 차단 */
+    transform-origin: left top !important;
+    /* 추가 안정성 */
+    zoom: 1 !important;
+  }
+}
+
+/* 🍎 iOS Safari 전용 줌인 방지 (UserAgent 기반) */
+@supports (-webkit-touch-callout: none) {
+  /* iOS에서만 적용되는 강화된 줌인 방지 */
+  [data-slot='dialog-content'] input:focus,
+  [data-slot='dialog-content'] textarea:focus,
+  [data-slot='dialog-content'] select:focus,
+  [data-slot='mobile-dialog-content'] input:focus,
+  [data-slot='mobile-dialog-content'] textarea:focus,
+  [data-slot='mobile-dialog-content'] select:focus,
+  [role='dialog'] input:focus,
+  [role='dialog'] textarea:focus,
+  [role='dialog'] select:focus {
+    font-size: 16px !important;
+    -webkit-text-size-adjust: 100% !important;
+    /* iOS에서 포커스 시 확대 차단 */
+    transform: scale(1) !important;
+    transform-origin: left top !important;
+    /* 추가 iOS 특화 설정 */
+    -webkit-user-select: text !important;
+    user-select: text !important;
+  }
+}
+
+/* 🔍 작은 폰트 사이즈가 설정된 input 요소 강제 보정 */
+input[style*="font-size"],
+textarea[style*="font-size"],
+select[style*="font-size"] {
+  font-size: 16px !important;
+}
+
+/* 📱 태블릿과 작은 화면에서의 추가 보정 */
+@media (max-width: 1024px) and (orientation: portrait),
+       (max-width: 1024px) and (orientation: landscape) {
+  
+  /* 모달 내 모든 입력 요소 */
+  [data-slot='dialog-content'] input,
+  [data-slot='dialog-content'] textarea,
+  [data-slot='dialog-content'] select,
+  [data-slot='mobile-dialog-content'] input,
+  [data-slot='mobile-dialog-content'] textarea,
+  [data-slot='mobile-dialog-content'] select {
+    font-size: max(16px, 1rem) !important;
+    line-height: 1.2 !important;
+    /* 터치 영역 확보 */
+    min-height: 44px !important;
+    padding: 12px !important;
+    /* iOS 최적화 */
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-touch-callout: none !important;
+  }
+}
+
+/* 🛡️ 강력한 백업 방지 시스템 - 클래스명 기반 */
+.input,
+.form-control,
+.form-input,
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="tel"],
+input[type="url"],
+input[type="search"],
+textarea,
+select {
+  /* 기본적으로 모든 입력 요소에 안전한 폰트 사이즈 적용 */
+  font-size: max(16px, 1rem) !important;
+}
+
+/* 🚫 Tailwind CSS sm:text-sm 클래스 무력화 (모바일에서만) */
+@media (max-width: 640px) {
+  .sm\:text-sm input,
+  .text-sm input,
+  .md\:text-sm input {
+    font-size: 16px !important;
+  }
+}
+
+/* =================================================================
+   모바일 줌인 방지 시스템 끝
+   ================================================================= */
