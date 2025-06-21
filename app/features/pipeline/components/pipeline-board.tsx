@@ -34,6 +34,7 @@ interface PipelineBoardProps {
     products: any[]
   ) => void; // 🏢 계약 전환 핸들러
   onEditOpportunity?: (clientId: string, clientName: string) => void; // 🏢 영업 기회 편집 핸들러
+  activeStage?: string; // 🎯 모바일에서 선택된 스테이지 (필터링용)
 }
 
 export function PipelineBoard({
@@ -44,6 +45,7 @@ export function PipelineBoard({
   onRemoveFromPipeline,
   onCreateContract, // 🏢 계약 전환 핸들러
   onEditOpportunity, // 🏢 영업 기회 편집 핸들러
+  activeStage, // 🎯 모바일에서 선택된 스테이지 (필터링용)
 }: PipelineBoardProps) {
   const [draggedClientId, setDraggedClientId] = useState<string | null>(null);
   const dragSourceStageId = useRef<string | null>(null);
@@ -207,8 +209,9 @@ export function PipelineBoard({
     <div className="h-full flex flex-col pipeline-board">
       {isMobile ? (
         /* 🎯 모바일: 단순한 그리드 레이아웃 - MobilePipelineLayout에서 처리 */
-        <div className="grid grid-cols-1 gap-4 p-4 pb-20">
-          {stages.map(stage => {
+        <div className="grid grid-cols-1 gap-4">
+          {/* 🎯 activeStage가 설정된 경우 해당 스테이지만 표시, 아니면 모든 스테이지 표시 */}
+          {(activeStage ? stages.filter(stage => stage.id === activeStage) : stages).map(stage => {
             const stageClients = clientsByStage[stage.id] || [];
             const isDragTarget = draggingOver === stage.id;
             const canDrop = draggedClientId && dragSourceStageId.current !== stage.id;

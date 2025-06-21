@@ -529,6 +529,7 @@ export function MobilePipelineLayout({
           onRemoveFromPipeline={onRemoveFromPipeline}
           onCreateContract={onCreateContract}
           onEditOpportunity={onEditOpportunity}
+          activeStage={activeStage}
         />
       </div>
 
