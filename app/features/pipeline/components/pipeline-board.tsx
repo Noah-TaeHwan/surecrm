@@ -60,22 +60,6 @@ export function PipelineBoard({
     Record<string, boolean>
   >({});
 
-  // 🎯 모바일 스크롤 상태 관리
-  const [isScrolled, setIsScrolled] = useState(false);
-
-  // 🎯 모바일 스크롤 이벤트 리스너
-  useEffect(() => {
-    if (!isMobile) return;
-
-    const handleScroll = () => {
-      const scrollY = window.scrollY;
-      setIsScrolled(scrollY > 50); // 50px 이상 스크롤시 최소화
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [isMobile]);
-
   // 컴포넌트 마운트 시 클라이언트 상태 업데이트를 위한 효과
   const [clientsState, setClientsState] = useState<Client[]>(clients);
 
