@@ -17,14 +17,20 @@ import {
   MapPin,
   Plus,
   MoreHorizontal,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { Badge } from '~/common/components/ui/badge';
+import { useViewport } from '~/common/hooks/useViewport';
+import { Button } from '~/common/components/ui/button';
+import { useState, useRef, useEffect } from 'react';
 
 interface CalendarGridProps {
   selectedDate: Date;
   meetings: Meeting[];
   onMeetingClick: (meeting: Meeting) => void;
   onDateClick?: (date: Date) => void;
+  onMonthChange?: (date: Date) => void;
 }
 
 // 🎨 현대적인 동기화 상태 표시기
@@ -59,7 +65,7 @@ function SyncStatusIndicator({ status }: { status?: SyncStatus }) {
   );
 }
 
-// 🚀 Google Calendar 스타일의 이벤트 카드
+// 🚀 iOS 스타일의 이벤트 카드 (모바일 최적화)
 function EventCard({
   meeting,
   compact = false,
@@ -69,50 +75,53 @@ function EventCard({
   compact?: boolean;
   onClick: (e: React.MouseEvent) => void;
 }) {
+  const { isMobile } = useViewport();
   const source = (meeting.syncInfo?.externalSource || 'surecrm') as EventSource;
   const syncStatus = meeting.syncInfo?.syncStatus;
 
   return (
     <div
       className={cn(
-        'group relative rounded-lg cursor-pointer transition-transform duration-200 ease-out',
-        'hover:scale-[1.05] font-medium',
-        'active:scale-[0.98]',
-        compact ? 'text-xs p-2.5' : 'text-sm p-3',
-        'bg-card border-2 text-foreground',
-        // 타입별 보더 색상만 (배경 그라데이션 제거)
+        'group relative rounded-lg cursor-pointer transition-all duration-200 ease-out',
+        'transform hover:scale-[1.02] active:scale-[0.98]',
+        // 모바일: 더 큰 터치 타겟과 패딩
+        isMobile ? (compact ? 'p-3 min-h-[44px]' : 'p-3.5 min-h-[48px]') : (compact ? 'p-2.5' : 'p-3'),
+        'bg-white dark:bg-gray-800 border-l-4 shadow-sm',
+        'hover:shadow-md transition-shadow duration-200',
+        // iOS 스타일 타입별 색상
         meeting.type === 'initial'
-          ? 'border-blue-500 hover:border-blue-600'
+          ? 'border-l-blue-500 bg-blue-50/30 dark:bg-blue-900/10'
           : meeting.type === 'consultation'
-            ? 'border-green-500 hover:border-green-600'
+            ? 'border-l-green-500 bg-green-50/30 dark:bg-green-900/10'
             : meeting.type === 'contract'
-              ? 'border-red-500 hover:border-red-600'
-              : 'border-gray-500 hover:border-gray-600',
-        'shadow-sm'
+              ? 'border-l-red-500 bg-red-50/30 dark:bg-red-900/10'
+              : 'border-l-gray-500 bg-gray-50/30 dark:bg-gray-900/10'
       )}
       onClick={onClick}
       title={`${meeting.time} - ${meeting.title}`}
     >
-      <div className="relative z-10 space-y-1.5">
-        {/* 상단: 시간 & 소스 아이콘 */}
+      <div className="relative z-10 space-y-1">
+        {/* 시간 & 소스 아이콘 */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
-            <Clock className="h-3 w-3 opacity-90 group-hover:h-3.5 group-hover:w-3.5 transition-all duration-200" />
-            <span className="font-semibold text-xs tracking-wide">
+            <Clock className={cn('opacity-70', isMobile ? 'h-3.5 w-3.5' : 'h-3 w-3')} />
+            <span className={cn('font-semibold tracking-wide text-gray-700 dark:text-gray-300', 
+              isMobile ? 'text-sm' : 'text-xs')}>
               {meeting.time}
             </span>
           </div>
-          <span className="text-sm opacity-80 group-hover:text-base transition-all duration-200">
+          <span className={cn('transition-transform duration-200 group-hover:scale-110', 
+            isMobile ? 'text-lg' : 'text-sm')}>
             {source === 'google' ? '📅' : '💼'}
           </span>
         </div>
 
-        {/* 이벤트 제목 - 간결하게 */}
+        {/* 이벤트 제목 */}
         <div className="flex items-center">
           <span
             className={cn(
-              'font-medium truncate',
-              compact ? 'text-xs' : 'text-sm'
+              'font-medium truncate text-gray-900 dark:text-gray-100',
+              isMobile ? (compact ? 'text-sm' : 'text-base') : (compact ? 'text-xs' : 'text-sm')
             )}
           >
             {meeting.title}
@@ -120,7 +129,7 @@ function EventCard({
         </div>
       </div>
 
-      {/* 동기화 상태 표시점 */}
+      {/* 동기화 상태 표시점 - iOS 스타일 */}
       {syncStatus === 'conflict' && (
         <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-red-500 border-2 border-white animate-pulse shadow-lg z-20"></div>
       )}
@@ -132,7 +141,7 @@ function EventCard({
   );
 }
 
-// 🎯 세련된 더보기 버튼
+// 🎯 iOS 스타일 더보기 버튼
 function MoreEventsButton({
   count,
   meetings,
@@ -142,6 +151,7 @@ function MoreEventsButton({
   meetings: Meeting[];
   onClick: (e: React.MouseEvent) => void;
 }) {
+  const { isMobile } = useViewport();
   const previewTimes = meetings
     .slice(0, 2)
     .map(m => m.time)
@@ -150,30 +160,35 @@ function MoreEventsButton({
   return (
     <div
       className={cn(
-        'group relative rounded-lg cursor-pointer transition-all duration-300',
-        'bg-gradient-to-br from-muted/40 to-muted/60 hover:from-muted/60 hover:to-muted/80',
-        'border border-border/50 hover:border-border shadow-sm hover:shadow-md',
-        'p-2.5 text-xs text-muted-foreground hover:text-foreground',
-        'transform hover:scale-[1.02] active:scale-[0.98]'
+        'group relative rounded-lg cursor-pointer transition-all duration-200',
+        'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700',
+        'border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600',
+        'shadow-sm hover:shadow-md transform hover:scale-[1.01] active:scale-[0.99]',
+        isMobile ? 'p-3 min-h-[44px]' : 'p-2.5',
+        'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
       )}
       onClick={onClick}
       title={`추가 일정: ${previewTimes}${meetings.length > 2 ? '...' : ''}`}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5">
-          <MoreHorizontal className="h-3 w-3" />
-          <span className="font-medium">+{count}개 더</span>
+          <MoreHorizontal className={cn(isMobile ? 'h-4 w-4' : 'h-3 w-3')} />
+          <span className={cn('font-medium', isMobile ? 'text-sm' : 'text-xs')}>
+            +{count}개 더
+          </span>
         </div>
-        <div className="w-1.5 h-1.5 bg-primary/60 rounded-full group-hover:bg-primary group-hover:scale-125 transition-all duration-200" />
+        <div className="w-2 h-2 bg-blue-500 rounded-full group-hover:bg-blue-600 group-hover:scale-110 transition-all duration-200" />
       </div>
 
       {/* 미리보기 힌트 */}
-      <div className="mt-1 text-xs opacity-70 truncate">{previewTimes}</div>
+      <div className={cn('mt-1 opacity-70 truncate', isMobile ? 'text-xs' : 'text-[10px]')}>
+        {previewTimes}
+      </div>
     </div>
   );
 }
 
-// 📅 개선된 날짜 셀 헤더
+// 📅 iOS 스타일 날짜 셀 헤더
 function DateCellHeader({
   day,
   isToday,
@@ -185,15 +200,18 @@ function DateCellHeader({
   dayMeetings: Meeting[];
   sourceCount: Record<string, number>;
 }) {
+  const { isMobile } = useViewport();
+  
   return (
     <div className="flex items-center justify-between mb-2">
-      {/* 날짜 번호 */}
+      {/* iOS 스타일 날짜 번호 */}
       <div
         className={cn(
-          'flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold transition-all duration-200',
+          'flex items-center justify-center rounded-full font-semibold transition-all duration-200',
+          isMobile ? 'w-8 h-8 text-base' : 'w-7 h-7 text-sm',
           isToday
-            ? 'bg-primary text-primary-foreground shadow-lg ring-2 ring-primary/30'
-            : 'text-foreground hover:bg-muted/30'
+            ? 'bg-blue-500 text-white shadow-lg ring-2 ring-blue-500/30 scale-110'
+            : 'text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800'
         )}
       >
         {day}
@@ -204,54 +222,173 @@ function DateCellHeader({
   );
 }
 
+// 🎨 iOS 스타일 월 헤더 컴포넌트
+function MonthHeader({
+  currentDate,
+  onPrevMonth,
+  onNextMonth,
+  onTitleClick,
+}: {
+  currentDate: Date;
+  onPrevMonth: () => void;
+  onNextMonth: () => void;
+  onTitleClick?: () => void;
+}) {
+  const { isMobile } = useViewport();
+  const monthName = currentDate.toLocaleDateString('ko-KR', { 
+    year: 'numeric', 
+    month: 'long' 
+  });
+
+  return (
+    <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+      <Button
+        variant="ghost"
+        size={isMobile ? "default" : "sm"}
+        onClick={onPrevMonth}
+        className={cn(
+          "p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors",
+          isMobile && "min-w-[44px] min-h-[44px]"
+        )}
+      >
+        <ChevronLeft className={cn(isMobile ? "h-5 w-5" : "h-4 w-4")} />
+      </Button>
+
+      <button
+        onClick={onTitleClick}
+        className={cn(
+          "font-semibold text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors",
+          isMobile ? "text-xl" : "text-lg"
+        )}
+      >
+        {monthName}
+      </button>
+
+      <Button
+        variant="ghost"
+        size={isMobile ? "default" : "sm"}
+        onClick={onNextMonth}
+        className={cn(
+          "p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors",
+          isMobile && "min-w-[44px] min-h-[44px]"
+        )}
+      >
+        <ChevronRight className={cn(isMobile ? "h-5 w-5" : "h-4 w-4")} />
+      </Button>
+    </div>
+  );
+}
+
+// 📱 요일 헤더 (iOS 스타일)
+function WeekdayHeader() {
+  const { isMobile } = useViewport();
+  const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
+  
+  return (
+    <div className="grid grid-cols-7 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700">
+      {weekdays.map((day, index) => (
+        <div
+          key={day}
+          className={cn(
+            "text-center font-medium transition-colors",
+            isMobile ? "py-3 text-sm" : "py-2 text-xs",
+            index === 0 ? "text-red-500" : index === 6 ? "text-blue-500" : "text-gray-600 dark:text-gray-400"
+          )}
+        >
+          {day}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function CalendarGrid({
   selectedDate,
   meetings,
   onMeetingClick,
   onDateClick,
+  onMonthChange,
 }: CalendarGridProps) {
-  // 모든 미팅 표시 (필터링 제거)
-  const filteredMeetings = meetings;
+  const { isMobile } = useViewport();
+  const [currentDate, setCurrentDate] = useState(selectedDate);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
-  // 필터링된 결과가 없는 경우 빈 상태 표시
-  if (filteredMeetings.length === 0 && meetings.length > 0) {
-    return (
-      <div className="bg-gradient-to-br from-card/50 to-card/30 rounded-3xl overflow-hidden border border-border/30 shadow-2xl backdrop-blur-xl">
-        <div className="p-16 text-center">
-          <div className="relative">
-            <div className="p-8 bg-gradient-to-br from-muted/30 to-muted/10 rounded-full w-fit mx-auto mb-8 shadow-lg">
-              <svg
-                className="w-20 h-20 text-muted-foreground/40"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z"
-                />
-              </svg>
-            </div>
-            <h3 className="text-2xl font-bold text-foreground mb-4 tracking-tight">
-              선택한 필터에 해당하는 미팅이 없습니다
-            </h3>
-            <p className="text-muted-foreground mb-8 text-lg leading-relaxed max-w-md mx-auto">
-              다른 미팅 유형을 선택하거나 필터를 초기화해보세요.
-            </p>
-            <div className="inline-flex items-center gap-3 text-sm text-muted-foreground bg-muted/30 px-6 py-3 rounded-xl border border-border/50">
-              <Badge variant="outline">전체 {meetings.length}개</Badge>
-              <span>|</span>
-              <Badge variant="outline">필터링됨 0개</Badge>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // 햅틱 피드백 함수
+  const triggerHapticFeedback = () => {
+    if ('vibrate' in navigator && isMobile) {
+      navigator.vibrate(10);
+    }
+  };
 
-  // 날짜 관련 유틸리티
+  // 터치 시작 핸들러
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (!isMobile) return;
+    
+    const touch = e.touches[0];
+    setTouchStart({
+      x: touch.clientX,
+      y: touch.clientY,
+    });
+  };
+
+  // 터치 끝 핸들러 (스와이프 감지)
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStart || !isMobile) return;
+
+    const touch = e.changedTouches[0];
+    const deltaX = touch.clientX - touchStart.x;
+    const deltaY = Math.abs(touch.clientY - touchStart.y);
+
+    // 수평 스와이프 감지 (최소 50px, 수직 이동은 30px 미만)
+    if (Math.abs(deltaX) > 50 && deltaY < 30) {
+      setIsTransitioning(true);
+      triggerHapticFeedback();
+      
+      if (deltaX > 0) {
+        // 오른쪽 스와이프 = 이전 달
+        handlePrevMonth();
+      } else {
+        // 왼쪽 스와이프 = 다음 달
+        handleNextMonth();
+      }
+
+      setTimeout(() => setIsTransitioning(false), 300);
+    }
+
+    setTouchStart(null);
+  };
+
+  // 월 변경 함수들
+  const handlePrevMonth = () => {
+    const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+    setCurrentDate(newDate);
+    onMonthChange?.(newDate);
+    triggerHapticFeedback();
+  };
+
+  const handleNextMonth = () => {
+    const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
+    setCurrentDate(newDate);
+    onMonthChange?.(newDate);
+    triggerHapticFeedback();
+  };
+
+  // 날짜 클릭 핸들러 (햅틱 피드백 추가)
+  const handleDateClick = (date: Date) => {
+    triggerHapticFeedback();
+    onDateClick?.(date);
+  };
+
+  // 미팅 클릭 핸들러 (햅틱 피드백 추가)
+  const handleMeetingClick = (meeting: Meeting, event: React.MouseEvent) => {
+    event.stopPropagation();
+    triggerHapticFeedback();
+    onMeetingClick(meeting);
+  };
+
+  // 날짜 유틸리티 함수들
   const getDaysInMonth = (date: Date) => {
     return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
   };
@@ -260,89 +397,89 @@ export function CalendarGrid({
     return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
   };
 
-  // 🎨 현대적인 월별 캘린더 렌더링
   const renderMonthView = () => {
-    const daysInMonth = getDaysInMonth(selectedDate);
-    const firstDay = getFirstDayOfMonth(selectedDate);
-    const days = [];
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const daysInMonth = getDaysInMonth(currentDate);
+    const firstDay = getFirstDayOfMonth(currentDate);
     const today = new Date();
-    const isCurrentMonth =
-      today.getMonth() === selectedDate.getMonth() &&
-      today.getFullYear() === selectedDate.getFullYear();
 
-    // 빈 셀 추가 (이전 달 마지막 날들)
-    const prevMonth = new Date(selectedDate);
-    prevMonth.setMonth(prevMonth.getMonth() - 1);
-    const daysInPrevMonth = getDaysInMonth(prevMonth);
+    const days = [];
 
-    for (let i = firstDay - 1; i >= 0; i--) {
-      const prevDate = daysInPrevMonth - i;
+    // 이전 달 날짜들 (회색 처리)
+    const prevMonthDays = firstDay;
+    const prevMonth = new Date(year, month - 1, 0);
+    const prevMonthLastDay = prevMonth.getDate();
+
+    for (let i = prevMonthDays - 1; i >= 0; i--) {
+      const day = prevMonthLastDay - i;
+      const cellDate = new Date(year, month - 1, day);
+      
       days.push(
         <div
-          key={`prev-${prevDate}`}
-          className="min-h-[140px] bg-gradient-to-br from-muted/5 to-muted/10 border border-border/5 p-3 opacity-40 transition-all duration-200 hover:opacity-60"
+          key={`prev-${day}`}
+          className={cn(
+            'cursor-pointer transition-all duration-200 relative overflow-hidden',
+            'bg-gray-50/30 dark:bg-gray-800/30 text-gray-400 dark:text-gray-600',
+            // 모바일: 더 큰 터치 타겟
+            isMobile ? 'p-4 min-h-[80px]' : 'p-3 min-h-[120px]',
+            'hover:bg-gray-100 dark:hover:bg-gray-700/30 rounded-lg'
+          )}
+          onClick={() => handleDateClick(cellDate)}
         >
-          <div className="text-sm text-muted-foreground/50 font-medium">
-            {prevDate}
+          <div className={cn(
+            'flex items-center justify-center rounded-full font-medium',
+            isMobile ? 'w-7 h-7 text-sm' : 'w-6 h-6 text-xs'
+          )}>
+            {day}
           </div>
         </div>
       );
     }
 
-    // 현재 달 날짜 셀 추가
+    // 현재 달 날짜들
     for (let day = 1; day <= daysInMonth; day++) {
-      const dateStr = `${selectedDate.getFullYear()}-${String(
-        selectedDate.getMonth() + 1
-      ).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-      const dayMeetings = filteredMeetings.filter(m => m.date === dateStr);
-      const isToday = isCurrentMonth && today.getDate() === day;
-      const isWeekend =
-        new Date(
-          selectedDate.getFullYear(),
-          selectedDate.getMonth(),
-          day
-        ).getDay() === 0 ||
-        new Date(
-          selectedDate.getFullYear(),
-          selectedDate.getMonth(),
-          day
-        ).getDay() === 6;
+      const cellDate = new Date(year, month, day);
+      const isToday = 
+        cellDate.getDate() === today.getDate() &&
+        cellDate.getMonth() === today.getMonth() &&
+        cellDate.getFullYear() === today.getFullYear();
+      const isWeekend = cellDate.getDay() === 0 || cellDate.getDay() === 6;
 
-      const cellDate = new Date(
-        selectedDate.getFullYear(),
-        selectedDate.getMonth(),
-        day
-      );
+      // 해당 날짜의 미팅들
+      const dayMeetings = meetings.filter(meeting => {
+        const meetingDate = new Date(meeting.date);
+        return (
+          meetingDate.getDate() === cellDate.getDate() &&
+          meetingDate.getMonth() === cellDate.getMonth() &&
+          meetingDate.getFullYear() === cellDate.getFullYear()
+        );
+      });
 
-      // 📊 이벤트 소스별 카운트
-      const sourceCount = dayMeetings.reduce(
-        (acc, meeting) => {
-          const source = meeting.syncInfo?.externalSource || 'surecrm';
-          acc[source] = (acc[source] || 0) + 1;
-          return acc;
-        },
-        {} as Record<string, number>
-      );
+      // 소스별 미팅 수 계산
+      const sourceCount = dayMeetings.reduce((acc, meeting) => {
+        const source = meeting.syncInfo?.externalSource || 'surecrm';
+        acc[source] = (acc[source] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
 
       days.push(
         <div
           key={day}
           className={cn(
-            'border border-border/20 p-3 cursor-pointer transition-colors duration-200 relative overflow-hidden',
-            'bg-gradient-to-br from-card/40 to-card/20 backdrop-blur-sm',
-            isToday &&
-              'bg-gradient-to-br from-primary/15 to-primary/5 border-primary/40 ring-2 ring-primary/20 shadow-xl',
-            isWeekend && 'bg-gradient-to-br from-muted/30 to-muted/10',
-            // 동적 높이 - 더 자연스럽게
-            dayMeetings.length === 0
-              ? 'min-h-[140px]'
-              : dayMeetings.length === 1
-                ? 'min-h-[160px]'
-                : dayMeetings.length <= 3
-                  ? 'min-h-[180px]'
-                  : 'min-h-[200px]'
+            'cursor-pointer transition-all duration-200 relative overflow-hidden rounded-lg',
+            'bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800',
+            'border border-gray-100 dark:border-gray-700 hover:border-gray-200 dark:hover:border-gray-600',
+            isToday && 'ring-2 ring-blue-500/30 bg-blue-50/50 dark:bg-blue-900/20 shadow-lg',
+            isWeekend && !isToday && 'bg-gray-50/50 dark:bg-gray-800/30',
+            // 모바일 최적화된 높이
+            isMobile 
+              ? (dayMeetings.length === 0 ? 'p-3 min-h-[80px]' : 'p-3 min-h-[100px]')
+              : (dayMeetings.length === 0 ? 'p-3 min-h-[120px]' : 'p-3 min-h-[140px]'),
+            // iOS 스타일 그림자
+            'shadow-sm hover:shadow-md transition-shadow duration-200'
           )}
-          onClick={() => onDateClick?.(cellDate)}
+          onClick={() => handleDateClick(cellDate)}
         >
           {/* 날짜 헤더 */}
           <DateCellHeader
@@ -352,105 +489,80 @@ export function CalendarGrid({
             sourceCount={sourceCount}
           />
 
-          {/* 🎨 스마트 이벤트 표시 시스템 - 개선된 버전 */}
-          <div className="space-y-2">
-            {dayMeetings.length === 0 ? (
-              // 빈 상태 - 미묘한 플러스 아이콘
-              <div className="flex items-center justify-center h-16 opacity-0 hover:opacity-30 transition-opacity duration-300">
-                <Plus className="h-5 w-5 text-muted-foreground/50" />
-              </div>
-            ) : dayMeetings.length === 1 ? (
-              // 1개: 풀 사이즈로 표시
-              <EventCard
-                key={dayMeetings[0].id}
-                meeting={dayMeetings[0]}
-                compact={false}
-                onClick={e => {
-                  e.stopPropagation();
-                  onMeetingClick(dayMeetings[0]);
-                }}
-              />
-            ) : dayMeetings.length === 2 ? (
-              // 2개: 둘 다 컴팩트로 표시
-              dayMeetings
-                .sort((a, b) => a.time.localeCompare(b.time))
-                .map(meeting => (
-                  <EventCard
-                    key={meeting.id}
-                    meeting={meeting}
-                    compact={true}
-                    onClick={e => {
-                      e.stopPropagation();
-                      onMeetingClick(meeting);
-                    }}
-                  />
-                ))
-            ) : dayMeetings.length === 3 ? (
-              // 3개: 시간순 정렬 후 모두 컴팩트로 표시
-              dayMeetings
-                .sort((a, b) => a.time.localeCompare(b.time))
-                .map(meeting => (
-                  <EventCard
-                    key={meeting.id}
-                    meeting={meeting}
-                    compact={true}
-                    onClick={e => {
-                      e.stopPropagation();
-                      onMeetingClick(meeting);
-                    }}
-                  />
-                ))
-            ) : (
-              // 4개 이상: 첫 2개 표시 + 스마트 더보기
+          {/* 이벤트 표시 영역 */}
+          <div className="space-y-1">
+            {dayMeetings.length > 0 && (
               <>
-                {dayMeetings
-                  .sort((a, b) => a.time.localeCompare(b.time))
-                  .slice(0, 2)
-                  .map(meeting => (
-                    <EventCard
-                      key={meeting.id}
-                      meeting={meeting}
-                      compact={true}
-                      onClick={e => {
-                        e.stopPropagation();
-                        onMeetingClick(meeting);
-                      }}
-                    />
-                  ))}
-                <MoreEventsButton
-                  count={dayMeetings.length - 2}
-                  meetings={dayMeetings.slice(2)}
-                  onClick={e => {
+                {/* 첫 번째 이벤트 */}
+                <EventCard
+                  meeting={dayMeetings[0]}
+                  compact={isMobile}
+                  onClick={(e) => {
                     e.stopPropagation();
-                    onDateClick?.(cellDate);
+                    handleMeetingClick(dayMeetings[0], e);
                   }}
                 />
+
+                {/* 두 번째 이벤트 (데스크톱에서만) */}
+                {!isMobile && dayMeetings.length > 1 && (
+                  <EventCard
+                    meeting={dayMeetings[1]}
+                    compact={true}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleMeetingClick(dayMeetings[1], e);
+                    }}
+                  />
+                )}
+
+                {/* 더보기 버튼 */}
+                {((isMobile && dayMeetings.length > 1) || (!isMobile && dayMeetings.length > 2)) && (
+                  <MoreEventsButton
+                    count={isMobile ? dayMeetings.length - 1 : dayMeetings.length - 2}
+                    meetings={dayMeetings.slice(isMobile ? 1 : 2)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDateClick(cellDate);
+                    }}
+                  />
+                )}
               </>
             )}
-          </div>
 
-          {/* 🔄 동기화 충돌 표시 - 더 눈에 띄게 */}
-          {dayMeetings.some(m => m.syncInfo?.syncStatus === 'conflict') && (
-            <div
-              className="absolute bottom-3 right-3 w-4 h-4 bg-red-500 rounded-full animate-pulse border-2 border-white shadow-lg ring-2 ring-red-500/30"
-              title="동기화 충돌이 있는 이벤트가 있습니다"
-            />
-          )}
+            {/* 빈 날짜 표시 */}
+            {dayMeetings.length === 0 && (
+              <div className={cn(
+                'flex items-center justify-center text-gray-400 dark:text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity',
+                isMobile ? 'h-8' : 'h-12'
+              )}>
+                <Plus className={cn('transition-transform group-hover:scale-110', isMobile ? 'h-4 w-4' : 'h-5 w-5')} />
+              </div>
+            )}
+          </div>
         </div>
       );
     }
 
-    // 다음 달 첫 날들로 빈 공간 채우기
-    const totalCells = Math.ceil((firstDay + daysInMonth) / 7) * 7;
-    const remainingCells = totalCells - (firstDay + daysInMonth);
-
+    // 다음 달 날짜들 (회색 처리)
+    const remainingCells = 42 - days.length; // 6주 * 7일
     for (let day = 1; day <= remainingCells; day++) {
+      const cellDate = new Date(year, month + 1, day);
+      
       days.push(
         <div
           key={`next-${day}`}
-          className="min-h-[140px] bg-gradient-to-br from-muted/5 to-muted/10 border border-border/5 p-3 opacity-40 transition-all duration-200 hover:opacity-60"
+          className={cn(
+            'cursor-pointer transition-all duration-200 relative overflow-hidden',
+            'bg-gray-50/30 dark:bg-gray-800/30 text-gray-400 dark:text-gray-600',
+            isMobile ? 'p-4 min-h-[80px]' : 'p-3 min-h-[120px]',
+            'hover:bg-gray-100 dark:hover:bg-gray-700/30 rounded-lg'
+          )}
+          onClick={() => handleDateClick(cellDate)}
         >
-          <div className="text-sm text-muted-foreground/50 font-medium">
+          <div className={cn(
+            'flex items-center justify-center rounded-full font-medium',
+            isMobile ? 'w-7 h-7 text-sm' : 'w-6 h-6 text-xs'
+          )}>
             {day}
           </div>
         </div>
@@ -458,44 +570,49 @@ export function CalendarGrid({
     }
 
     return (
-      <div className="bg-gradient-to-br from-card/50 to-card/30 rounded-3xl overflow-hidden border border-border/30 shadow-2xl backdrop-blur-xl">
-        {/* 🎨 현대적인 요일 헤더 */}
-        <div className="grid grid-cols-7 border-b border-border/30 bg-gradient-to-r from-muted/50 via-muted/30 to-muted/50 backdrop-blur-sm">
-          {[
-            { full: '일요일', short: '일' },
-            { full: '월요일', short: '월' },
-            { full: '화요일', short: '화' },
-            { full: '수요일', short: '수' },
-            { full: '목요일', short: '목' },
-            { full: '금요일', short: '금' },
-            { full: '토요일', short: '토' },
-          ].map((day, index) => (
-            <div
-              key={day.full}
-              className={cn(
-                'p-5 text-center font-bold text-sm border-r border-border/20 last:border-r-0',
-                'bg-gradient-to-b from-card/50 to-card/30 backdrop-blur-sm',
-                'transition-colors duration-200 hover:bg-card/40',
-                index === 0
-                  ? 'text-red-500'
-                  : index === 6
-                    ? 'text-blue-500'
-                    : 'text-foreground/80'
-              )}
-            >
-              <div className="hidden lg:block tracking-wide">{day.full}</div>
-              <div className="lg:hidden font-black text-lg">{day.short}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* 🎯 현대적인 날짜 그리드 */}
-        <div className="grid grid-cols-7 bg-gradient-to-br from-background/80 to-background/60 backdrop-blur-sm">
-          {days}
-        </div>
+      <div 
+        className={cn(
+          'grid grid-cols-7 gap-1 bg-gray-50 dark:bg-gray-900',
+          isMobile ? 'p-2' : 'p-3',
+          isTransitioning && 'transition-transform duration-300 ease-out'
+        )}
+      >
+        {days}
       </div>
     );
   };
 
-  return renderMonthView();
+  return (
+    <div 
+      ref={containerRef}
+      className="w-full bg-white dark:bg-gray-900 rounded-xl shadow-lg overflow-hidden"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
+      {/* iOS 스타일 월 헤더 */}
+      <MonthHeader
+        currentDate={currentDate}
+        onPrevMonth={handlePrevMonth}
+        onNextMonth={handleNextMonth}
+        onTitleClick={() => triggerHapticFeedback()}
+      />
+
+      {/* 요일 헤더 */}
+      <WeekdayHeader />
+
+      {/* 캘린더 그리드 */}
+      {renderMonthView()}
+
+      {/* 스와이프 인디케이터 (모바일만) */}
+      {isMobile && (
+        <div className="flex justify-center py-2 border-t border-gray-200 dark:border-gray-700">
+          <div className="flex items-center gap-1 text-xs text-gray-400 dark:text-gray-600">
+            <ChevronLeft className="h-3 w-3" />
+            <span>스와이프하여 월 이동</span>
+            <ChevronRight className="h-3 w-3" />
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }

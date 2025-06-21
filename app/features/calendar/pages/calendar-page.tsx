@@ -39,8 +39,15 @@ import {
   type ConflictData,
 } from '../components/conflict-resolution-modal';
 import { GoogleConnectRequired } from '../components/google-connect-required';
-import { type Meeting, type Client, type ViewMode } from '../types/types';
+import { 
+  type Meeting, 
+  type Client, 
+  type ViewMode,
+  meetingTypeColors,
+  meetingTypeKoreanMap
+} from '../types/types';
 import { Badge } from '~/common/components/ui/badge';
+import { useViewport } from '~/common/hooks/useViewport';
 
 export default function CalendarPage({
   loaderData,
@@ -53,7 +60,7 @@ export default function CalendarPage({
     requiresGoogleConnection,
   } = loaderData;
 
-  // 토스트 훅 추가
+  const { isMobile, isTablet } = useViewport();
   const { success, error } = useToast();
 
   const [viewMode, setViewMode] = useState<ViewMode>('month');
@@ -97,18 +104,7 @@ export default function CalendarPage({
   const [conflicts, setConflicts] = useState<ConflictData[]>([]);
   const [isConflictModalOpen, setIsConflictModalOpen] = useState(false);
 
-  // 캘린더 네비게이션
-  const navigateCalendar = (direction: 'prev' | 'next') => {
-    const newDate = new Date(selectedDate);
-    if (viewMode === 'month') {
-      newDate.setMonth(newDate.getMonth() + (direction === 'next' ? 1 : -1));
-    } else if (viewMode === 'week') {
-      newDate.setDate(newDate.getDate() + (direction === 'next' ? 7 : -7));
-    } else {
-      newDate.setDate(newDate.getDate() + (direction === 'next' ? 1 : -1));
-    }
-    setSelectedDate(newDate);
-  };
+
 
   // 날짜 클릭 핸들러 (월 뷰에서 일 뷰로 전환)
   const handleDateClick = (date: Date) => {
@@ -206,36 +202,58 @@ export default function CalendarPage({
     document.body.removeChild(form);
   };
 
-  // 현재 표시 날짜 포맷
+  // 현재 표시 날짜 포맷 (iOS 스타일)
   const getDisplayTitle = () => {
     if (viewMode === 'month') {
-      return `${selectedDate.getFullYear()}년 ${selectedDate.getMonth() + 1}월`;
+      return isMobile 
+        ? `${selectedDate.getFullYear()}년 ${selectedDate.getMonth() + 1}월`
+        : `${selectedDate.getFullYear()}년 ${selectedDate.getMonth() + 1}월`;
     } else if (viewMode === 'week') {
       const weekStart = new Date(selectedDate);
       weekStart.setDate(selectedDate.getDate() - selectedDate.getDay());
       const weekEnd = new Date(weekStart);
       weekEnd.setDate(weekStart.getDate() + 6);
 
-      // 같은 달인 경우와 다른 달인 경우 처리
-      if (weekStart.getMonth() === weekEnd.getMonth()) {
-        return `${weekStart.getFullYear()}년 ${
-          weekStart.getMonth() + 1
-        }월 ${weekStart.getDate()}일 - ${weekEnd.getDate()}일`;
+      if (isMobile) {
+        return `${weekStart.getMonth() + 1}월 ${weekStart.getDate()}일 - ${weekEnd.getMonth() + 1}월 ${weekEnd.getDate()}일`;
       } else {
-        return `${weekStart.getFullYear()}년 ${
-          weekStart.getMonth() + 1
-        }월 ${weekStart.getDate()}일 - ${
-          weekEnd.getMonth() + 1
-        }월 ${weekEnd.getDate()}일`;
+        return weekStart.getMonth() === weekEnd.getMonth()
+          ? `${weekStart.getFullYear()}년 ${weekStart.getMonth() + 1}월 ${weekStart.getDate()}일 - ${weekEnd.getDate()}일`
+          : `${weekStart.getFullYear()}년 ${weekStart.getMonth() + 1}월 ${weekStart.getDate()}일 - ${weekEnd.getMonth() + 1}월 ${weekEnd.getDate()}일`;
       }
     } else {
-      return `${selectedDate.getFullYear()}년 ${
-        selectedDate.getMonth() + 1
-      }월 ${selectedDate.getDate()}일 ${selectedDate.toLocaleDateString(
-        'ko-KR',
-        { weekday: 'long' }
-      )}`;
+      return isMobile
+        ? `${selectedDate.getMonth() + 1}월 ${selectedDate.getDate()}일`
+        : `${selectedDate.getFullYear()}년 ${selectedDate.getMonth() + 1}월 ${selectedDate.getDate()}일 ${selectedDate.toLocaleDateString('ko-KR', { weekday: 'long' })}`;
     }
+  };
+
+  // 햅틱 피드백 함수
+  const triggerHapticFeedback = () => {
+    if ('vibrate' in navigator && isMobile) {
+      navigator.vibrate(10);
+    }
+  };
+
+  // 네비게이션 핸들러 (햅틱 피드백 추가)
+  const navigateCalendar = (direction: 'prev' | 'next') => {
+    triggerHapticFeedback();
+    
+    const newDate = new Date(selectedDate);
+    if (viewMode === 'month') {
+      newDate.setMonth(selectedDate.getMonth() + (direction === 'next' ? 1 : -1));
+    } else if (viewMode === 'week') {
+      newDate.setDate(selectedDate.getDate() + (direction === 'next' ? 7 : -7));
+    } else {
+      newDate.setDate(selectedDate.getDate() + (direction === 'next' ? 1 : -1));
+    }
+    setSelectedDate(newDate);
+  };
+
+  // 오늘로 이동 (햅틱 피드백 추가)
+  const goToToday = () => {
+    triggerHapticFeedback();
+    setSelectedDate(new Date());
   };
 
   // 🔒 구글 캘린더 연동이 필수인 경우 연동 화면 표시
@@ -265,139 +283,167 @@ export default function CalendarPage({
 
   return (
     <MainLayout title="일정 관리">
-      <div className="flex-1 space-y-6">
-        {/* 액션 결과 메시지 */}
-        {/* 알림 메시지는 이제 토스트로 표시됨 */}
-
-        {/* 헤더 */}
-        <div className="bg-card/40 backdrop-blur-sm border border-border/30 rounded-2xl p-6 shadow-lg">
-          {/* 상단 줄: 제목과 뷰 모드 선택 */}
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
-            <div className="flex items-center gap-4">
-              <h1 className="text-2xl lg:text-3xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+      <div className="flex-1 space-y-4 md:space-y-6">
+        {/* 📱 모바일 최적화 헤더 */}
+        <div className={cn(
+          "bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg",
+          isMobile ? "p-4" : "p-6"
+        )}>
+          {/* 상단: 제목과 뷰 모드 */}
+          <div className="flex flex-col space-y-4 mb-4">
+            <div className="flex items-center justify-between">
+              <h1 className={cn(
+                "font-bold tracking-tight text-gray-900 dark:text-gray-100",
+                isMobile ? "text-xl" : "text-2xl lg:text-3xl"
+              )}>
                 {getDisplayTitle()}
               </h1>
-              <Badge
-                variant="secondary"
-                className="hidden lg:flex items-center gap-1.5 px-3 py-1"
-              >
-                <CalendarIcon className="h-3.5 w-3.5" />
-                {viewMode === 'month'
-                  ? '월별'
-                  : viewMode === 'week'
-                    ? '주별'
-                    : '일별'}{' '}
-                보기
-              </Badge>
+              
+              {!isMobile && (
+                <Badge
+                  variant="secondary"
+                  className="flex items-center gap-1.5 px-3 py-1"
+                >
+                  <CalendarIcon className="h-3.5 w-3.5" />
+                  {viewMode === 'month' ? '월별' : viewMode === 'week' ? '주별' : '일별'} 보기
+                </Badge>
+              )}
             </div>
 
+            {/* iOS 스타일 뷰 모드 선택 */}
             <Tabs
               value={viewMode}
-              onValueChange={v => setViewMode(v as ViewMode)}
-              className="w-fit"
+              onValueChange={v => {
+                triggerHapticFeedback();
+                setViewMode(v as ViewMode);
+              }}
+              className="w-full"
             >
-              <TabsList className="grid w-full grid-cols-3 bg-muted/50 backdrop-blur-sm border border-border/30 shadow-sm">
+              <TabsList className={cn(
+                "grid w-full grid-cols-3 bg-gray-100 dark:bg-gray-800 rounded-lg p-1",
+                isMobile ? "h-12" : "h-10"
+              )}>
                 <TabsTrigger
                   value="month"
-                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all duration-200"
+                  className={cn(
+                    "data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm rounded-md transition-all duration-200",
+                    isMobile ? "text-base h-10" : "text-sm h-8"
+                  )}
                 >
-                  월
+                  월별
                 </TabsTrigger>
                 <TabsTrigger
                   value="week"
-                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all duration-200"
+                  className={cn(
+                    "data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm rounded-md transition-all duration-200",
+                    isMobile ? "text-base h-10" : "text-sm h-8"
+                  )}
                 >
-                  주
+                  주별
                 </TabsTrigger>
                 <TabsTrigger
                   value="day"
-                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all duration-200"
+                  className={cn(
+                    "data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm rounded-md transition-all duration-200",
+                    isMobile ? "text-base h-10" : "text-sm h-8"
+                  )}
                 >
-                  일
+                  일별
                 </TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
 
-          {/* 하단 줄: 네비게이션과 액션 버튼 */}
+          {/* 하단: 네비게이션과 액션 */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            {/* 네비게이션 컨트롤 */}
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1 bg-muted/30 rounded-lg p-1 border border-border/30">
+            {/* iOS 스타일 네비게이션 */}
+            <div className="flex items-center gap-2">
+              <div className="flex items-center bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
                 <Button
                   variant="ghost"
-                  size="sm"
+                  size={isMobile ? "default" : "sm"}
                   onClick={() => navigateCalendar('prev')}
-                  className="h-8 w-8 p-0 hover:bg-primary/10 hover:text-primary transition-all duration-200"
+                  className={cn(
+                    "rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors",
+                    isMobile ? "h-10 w-10 p-0" : "h-8 w-8 p-0"
+                  )}
                 >
-                  <ChevronLeftIcon className="h-4 w-4" />
+                  <ChevronLeftIcon className={cn(isMobile ? "h-5 w-5" : "h-4 w-4")} />
                 </Button>
                 <Button
                   variant="ghost"
-                  size="sm"
-                  onClick={() => setSelectedDate(new Date())}
-                  className="h-8 px-3 text-sm font-medium hover:bg-primary/10 hover:text-primary transition-all duration-200"
+                  size={isMobile ? "default" : "sm"}
+                  onClick={goToToday}
+                  className={cn(
+                    "rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-medium",
+                    isMobile ? "h-10 px-4 text-base" : "h-8 px-3 text-sm"
+                  )}
                 >
                   오늘
                 </Button>
                 <Button
                   variant="ghost"
-                  size="sm"
+                  size={isMobile ? "default" : "sm"}
                   onClick={() => navigateCalendar('next')}
-                  className="h-8 w-8 p-0 hover:bg-primary/10 hover:text-primary transition-all duration-200"
+                  className={cn(
+                    "rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors",
+                    isMobile ? "h-10 w-10 p-0" : "h-8 w-8 p-0"
+                  )}
                 >
-                  <ChevronRightIcon className="h-4 w-4" />
+                  <ChevronRightIcon className={cn(isMobile ? "h-5 w-5" : "h-4 w-4")} />
                 </Button>
               </div>
 
-              {/* 미니 날짜 표시 */}
-              <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground">
-                <CalendarIcon className="h-4 w-4" />
-                <span>
-                  {selectedDate.toLocaleDateString('ko-KR', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                    weekday: 'short',
-                  })}
-                </span>
-              </div>
+              {/* 미니 날짜 표시 (데스크톱만) */}
+              {!isMobile && (
+                <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 ml-3">
+                  <CalendarIcon className="h-4 w-4" />
+                  <span>
+                    {selectedDate.toLocaleDateString('ko-KR', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                      weekday: 'short',
+                    })}
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* 액션 버튼들 */}
             <div className="flex items-center gap-3">
-              {/* 미팅 통계 */}
-              <div className="hidden lg:flex items-center gap-4 px-4 py-2 bg-muted/30 rounded-lg border border-border/30">
-                <div className="flex items-center gap-2 text-sm">
-                  <div className="w-2 h-2 rounded-full bg-primary"></div>
-                  <span className="text-muted-foreground">이번 주</span>
-                  <span className="font-semibold">
-                    {
-                      meetings.filter((m: Meeting) => {
+              {/* 미팅 통계 (데스크톱만) */}
+              {!isMobile && !isTablet && (
+                <div className="flex items-center gap-4 px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                  <div className="flex items-center gap-2 text-sm">
+                    <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                    <span className="text-gray-600 dark:text-gray-400">이번 주</span>
+                    <span className="font-semibold text-gray-900 dark:text-gray-100">
+                      {meetings.filter((m: Meeting) => {
                         const meetingDate = new Date(m.date);
                         const weekStart = new Date(selectedDate);
-                        weekStart.setDate(
-                          selectedDate.getDate() - selectedDate.getDay()
-                        );
+                        weekStart.setDate(selectedDate.getDate() - selectedDate.getDay());
                         const weekEnd = new Date(weekStart);
                         weekEnd.setDate(weekStart.getDate() + 6);
-                        return (
-                          meetingDate >= weekStart && meetingDate <= weekEnd
-                        );
-                      }).length
-                    }
-                    건
-                  </span>
+                        return meetingDate >= weekStart && meetingDate <= weekEnd;
+                      }).length}건
+                    </span>
+                  </div>
                 </div>
-              </div>
+              )}
 
               <Button
-                onClick={() => setIsAddMeetingOpen(true)}
-                className="bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
-                size="sm"
+                onClick={() => {
+                  triggerHapticFeedback();
+                  setIsAddMeetingOpen(true);
+                }}
+                className={cn(
+                  "bg-blue-500 hover:bg-blue-600 text-white shadow-lg hover:shadow-xl transition-all duration-200",
+                  isMobile ? "h-12 px-6 text-base" : "h-10 px-4 text-sm"
+                )}
               >
-                <PlusIcon className="mr-2 h-4 w-4" />
-                미팅 예약
+                <PlusIcon className={cn("mr-2", isMobile ? "h-5 w-5" : "h-4 w-4")} />
+                {isMobile ? "미팅 추가" : "미팅 예약"}
               </Button>
             </div>
           </div>
@@ -470,45 +516,99 @@ export default function CalendarPage({
             </Card>
           </div>
         ) : (
-          /* 캘린더 뷰 */
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-            <div className="lg:col-span-4">
-              <Card className="shadow-lg border border-border/50 bg-card/50 backdrop-blur-sm">
-                <CardContent className="p-0">
-                  {viewMode === 'month' && (
-                    <CalendarGrid
-                      selectedDate={selectedDate}
-                      meetings={filteredMeetings}
-                      onMeetingClick={setSelectedMeeting}
-                      onDateClick={handleDateClick}
-                    />
-                  )}
-                  {viewMode === 'week' && (
-                    <WeekView
-                      selectedDate={selectedDate}
-                      meetings={filteredMeetings}
-                      onMeetingClick={setSelectedMeeting}
-                    />
-                  )}
-                  {viewMode === 'day' && (
-                    <DayView
-                      selectedDate={selectedDate}
-                      meetings={filteredMeetings}
-                      onMeetingClick={setSelectedMeeting}
-                    />
-                  )}
-                </CardContent>
-              </Card>
+          /* 📱 iOS 스타일 캘린더 뷰 */
+          <div className={cn(
+            "grid gap-4 md:gap-6",
+            isMobile ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-5"
+          )}>
+            <div className={cn(isMobile ? "col-span-1" : "lg:col-span-4")}>
+              {/* 캘린더 컨테이너 - iOS 스타일 */}
+              <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg overflow-hidden">
+                {viewMode === 'month' && (
+                  <CalendarGrid
+                    selectedDate={selectedDate}
+                    meetings={filteredMeetings}
+                    onMeetingClick={setSelectedMeeting}
+                    onDateClick={handleDateClick}
+                    onMonthChange={(date) => setSelectedDate(date)}
+                  />
+                )}
+                {viewMode === 'week' && (
+                  <WeekView
+                    selectedDate={selectedDate}
+                    meetings={filteredMeetings}
+                    onMeetingClick={setSelectedMeeting}
+                  />
+                )}
+                {viewMode === 'day' && (
+                  <DayView
+                    selectedDate={selectedDate}
+                    meetings={filteredMeetings}
+                    onMeetingClick={setSelectedMeeting}
+                  />
+                )}
+              </div>
             </div>
 
-            {/* 사이드바 */}
-            <CalendarSidebar
-              meetings={meetings}
-              onMeetingClick={setSelectedMeeting}
-              filteredTypes={filteredTypes}
-              onFilterChange={setFilteredTypes}
-              googleCalendarSettings={googleCalendarSettings}
-            />
+            {/* 📱 모바일에서는 접을 수 있는 사이드바 */}
+            {!isMobile && (
+              <CalendarSidebar
+                meetings={meetings}
+                onMeetingClick={setSelectedMeeting}
+                filteredTypes={filteredTypes}
+                onFilterChange={setFilteredTypes}
+                googleCalendarSettings={googleCalendarSettings}
+              />
+            )}
+          </div>
+        )}
+
+        {/* 📱 모바일 전용: 선택된 날짜의 미팅 리스트 */}
+        {isMobile && (
+          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-4">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
+              {selectedDate.toLocaleDateString('ko-KR', { 
+                month: 'long', 
+                day: 'numeric' 
+              })} 일정
+            </h3>
+            
+            {filteredMeetings
+              .filter((meeting: Meeting) => {
+                const meetingDate = new Date(meeting.date);
+                return meetingDate.toDateString() === selectedDate.toDateString();
+              })
+              .map((meeting: Meeting) => (
+                <div
+                  key={meeting.id}
+                  onClick={() => {
+                    triggerHapticFeedback();
+                    setSelectedMeeting(meeting);
+                  }}
+                  className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800 mb-2 active:bg-gray-100 dark:active:bg-gray-700 transition-colors cursor-pointer"
+                >
+                  <div className="w-3 h-3 rounded-full bg-blue-500" />
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-gray-900 dark:text-gray-100 truncate">
+                      {meeting.title}
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                      {meeting.time} · {meetingTypeKoreanMap[meeting.type as keyof typeof meetingTypeKoreanMap] || meeting.type}
+                    </div>
+                  </div>
+                </div>
+              ))
+            }
+            
+            {filteredMeetings.filter((meeting: Meeting) => {
+              const meetingDate = new Date(meeting.date);
+              return meetingDate.toDateString() === selectedDate.toDateString();
+            }).length === 0 && (
+              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                <CalendarIcon className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                <p>이 날에는 예정된 일정이 없습니다.</p>
+              </div>
+            )}
           </div>
         )}
 
