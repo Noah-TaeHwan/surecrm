@@ -173,50 +173,54 @@ export function MobilePipelineLayout({
           bg: 'bg-card',
           border: 'border',
           text: 'text-foreground',
-          icon: 'bg-blue-500/10 text-blue-600',
         };
       case 'orange':
         return {
           bg: 'bg-card',
           border: 'border',
           text: 'text-foreground',
-          icon: 'bg-orange-500/10 text-orange-600',
         };
       case 'green':
         return {
           bg: 'bg-card',
           border: 'border',
           text: 'text-foreground',
-          icon: 'bg-green-500/10 text-green-600',
         };
       case 'red':
         return {
           bg: 'bg-card',
           border: 'border',
           text: 'text-foreground',
-          icon: 'bg-red-500/10 text-red-600',
         };
       case 'emerald':
         return {
           bg: 'bg-card',
           border: 'border',
           text: 'text-foreground',
-          icon: 'bg-emerald-500/10 text-emerald-600',
         };
       default:
         return {
           bg: 'bg-card',
           border: 'border',
           text: 'text-foreground',
-          icon: 'bg-gray-500/10 text-gray-600',
         };
     }
   };
 
   return (
-    <div className="lg:hidden bg-background min-h-screen">
-      {/* 🎯 상단 통계 카드 토글 섹션 */}
-      <div className="border-b bg-background sticky top-0 z-30">
+    <div 
+      className="lg:hidden bg-background min-h-screen"
+      style={{
+        // 모바일에서 의도하지 않은 터치 동작 제한
+        touchAction: 'pan-y pinch-zoom',
+        WebkitTouchCallout: 'none',
+        WebkitUserSelect: 'none',
+        userSelect: 'none',
+        overscrollBehavior: 'contain',
+      }}
+    >
+      {/* 🎯 상단 통계 카드 토글 섹션 - non-sticky로 변경 */}
+      <div className="border-b bg-background">
         <Collapsible
           open={isStatsExpanded}
           onOpenChange={setIsStatsExpanded}
@@ -227,8 +231,8 @@ export function MobilePipelineLayout({
               className="w-full justify-between p-4 h-auto hover:bg-muted/50"
             >
               <div className="flex flex-col items-start gap-1">
-                <span className="font-medium text-sm">영업 현황</span>
-                <span className="text-xs text-muted-foreground">
+                <span className="font-semibold text-base">영업 현황</span>
+                <span className="text-sm text-muted-foreground">
                   {getStatsToggleText()}
                 </span>
               </div>
@@ -244,42 +248,41 @@ export function MobilePipelineLayout({
           <CollapsibleContent className="px-4 pb-4">
             <div className="grid grid-cols-2 gap-3">
               {statsCards.map((card, index) => {
-                const Icon = card.icon;
                 const colors = getColorClasses(card.color);
                 
                 return (
                   <div
                     key={index}
                     className={cn(
-                      'flex items-center space-x-3 p-4 rounded-lg border',
+                      'flex flex-col space-y-2 p-4 rounded-lg border',
                       colors.bg,
                       colors.border
                     )}
                   >
-                    <div className={cn('p-2 rounded-lg', colors.icon)}>
-                      <Icon className="h-5 w-5" />
-                    </div>
+                    {/* 아이콘 제거, 텍스트만 표시 */}
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-muted-foreground">
+                      <p className="text-sm font-medium text-muted-foreground leading-tight">
                         {card.title}
                       </p>
-                      <p className={cn('text-2xl font-bold', colors.text)}>
-                        {card.value}
-                      </p>
+                      <div className="flex items-center justify-between mt-1">
+                        <p className={cn('text-xl font-bold', colors.text)}>
+                          {card.value}
+                        </p>
+                        {card.trend && (
+                          <Badge
+                            variant={card.trend.isPositive ? 'default' : 'destructive'}
+                            className="text-xs px-1.5 py-0.5 flex-shrink-0"
+                          >
+                            {card.trend.isPositive ? '+' : ''}{card.trend.value}%
+                          </Badge>
+                        )}
+                      </div>
                       {card.description && (
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-xs text-muted-foreground mt-1 leading-tight">
                           {card.description}
                         </p>
                       )}
                     </div>
-                    {card.trend && (
-                      <Badge
-                        variant={card.trend.isPositive ? 'default' : 'destructive'}
-                        className="text-xs px-1.5 py-0.5 flex-shrink-0"
-                      >
-                        {card.trend.isPositive ? '+' : ''}{card.trend.value}%
-                      </Badge>
-                    )}
                   </div>
                 );
               })}
@@ -302,6 +305,7 @@ export function MobilePipelineLayout({
               onChange={(e) => onSearchChange(e.target.value)}
               className="pl-10"
               autoComplete="off"
+              style={{ touchAction: 'manipulation' }} // 터치 최적화
             />
           </div>
 
@@ -410,6 +414,7 @@ export function MobilePipelineLayout({
                 WebkitOverflowScrolling: 'touch',
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
+                touchAction: 'pan-x', // 가로 스크롤만 허용
               }}
             >
               {stages.map((stage, index) => {
@@ -421,8 +426,8 @@ export function MobilePipelineLayout({
                     key={stage.id}
                     onClick={() => scrollToStage(index)}
                     className={cn(
-                      'relative flex-shrink-0 flex items-center justify-center text-xs font-medium',
-                      'snap-center border min-w-fit overflow-hidden px-4 py-2.5 rounded-lg',
+                      'relative flex-shrink-0 flex items-center justify-center text-sm font-medium',
+                      'snap-center border min-w-fit overflow-hidden px-4 py-3 rounded-lg',
                       'transition-all duration-300 ease-out',
                       isActive
                         ? [
@@ -434,9 +439,10 @@ export function MobilePipelineLayout({
                             'hover:bg-muted/50 hover:text-foreground/80',
                           ]
                     )}
+                    style={{ touchAction: 'manipulation' }} // 터치 최적화
                   >
                     {/* 스테이지 이름만 표시 */}
-                    <span className="font-medium whitespace-nowrap">
+                    <span className="font-semibold whitespace-nowrap">
                       {stage.name}
                     </span>
                   </button>
@@ -447,10 +453,13 @@ export function MobilePipelineLayout({
         </div>
       </div>
 
-
-
       {/* 🎯 칸반보드 캐러셀 */}
-      <div className="p-4 pb-20">
+      <div 
+        className="p-4 pb-20"
+        style={{
+          touchAction: 'pan-y', // 세로 스크롤만 허용
+        }}
+      >
         <PipelineBoard
           stages={stages}
           clients={clients}
