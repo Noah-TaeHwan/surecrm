@@ -1700,7 +1700,7 @@ export default function ClientDetailPage({ loaderData }: { loaderData: any }) {
                     clientName={client?.fullName || '고객'}
                     agentId={data?.currentUserId}
                     initialContracts={insuranceContracts}
-                    shouldOpenModal={shouldCreateContract} // 🏢 URL 파라미터에 따라 모달 열기
+                    shouldOpenModal={shouldCreateContract && activeTab === 'insurance'} // 🏢 보험탭이 활성화된 경우에만 모달 열기
                   />
                 </TabsContent>
 
@@ -1856,7 +1856,7 @@ export default function ClientDetailPage({ loaderData }: { loaderData: any }) {
                 clientName={client?.fullName || '고객'}
                 agentId={data?.currentUserId}
                 initialContracts={insuranceContracts}
-                shouldOpenModal={false} // 🚫 모바일에서는 중복 모달 방지 - 데스크톱에서만 열기
+                shouldOpenModal={shouldCreateContract && activeTab === 'insurance'} // 🏢 보험탭이 활성화된 경우에만 모달 열기
               />
             </TabsContent>
 
