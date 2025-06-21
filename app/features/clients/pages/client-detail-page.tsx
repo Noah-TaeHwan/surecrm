@@ -1700,7 +1700,7 @@ export default function ClientDetailPage({ loaderData }: { loaderData: any }) {
                     clientName={client?.fullName || '고객'}
                     agentId={data?.currentUserId}
                     initialContracts={insuranceContracts}
-                    shouldOpenModal={true} // 🚫 모바일에서는 중복 모달 방지
+                    shouldOpenModal={shouldCreateContract} // 🏢 URL 파라미터에 따라 모달 열기
                   />
                 </TabsContent>
 
@@ -1856,7 +1856,7 @@ export default function ClientDetailPage({ loaderData }: { loaderData: any }) {
                 clientName={client?.fullName || '고객'}
                 agentId={data?.currentUserId}
                 initialContracts={insuranceContracts}
-                shouldOpenModal={false} // 🚫 모바일에서는 중복 모달 방지
+                shouldOpenModal={false} // 🚫 모바일에서는 중복 모달 방지 - 데스크톱에서만 열기
               />
             </TabsContent>
 
@@ -2054,6 +2054,91 @@ export async function action({ request, params }: { request: Request; params: { 
         '../lib/client-actions'
       );
       return await deleteConsultationNoteAction(request, noteId);
+    }
+
+    // 🏢 보험계약 관련 액션들
+    case 'createInsuranceContract': {
+      const { createInsuranceContract } = await import(
+        '~/api/shared/insurance-contracts'
+      );
+
+      const contractData = {
+        productName: formData.get('productName')?.toString() || '',
+        insuranceCompany: formData.get('insuranceCompany')?.toString() || '',
+        insuranceType: formData.get('insuranceType')?.toString() || '',
+        insuranceCode: formData.get('insuranceCode')?.toString() || undefined,
+        contractNumber: formData.get('contractNumber')?.toString() || undefined,
+        policyNumber: formData.get('policyNumber')?.toString() || undefined,
+        contractDate: formData.get('contractDate')?.toString() || '',
+        effectiveDate: formData.get('effectiveDate')?.toString() || '',
+        expirationDate: formData.get('expirationDate')?.toString() || undefined,
+        paymentDueDate: formData.get('paymentDueDate')?.toString() || undefined,
+        contractorName: formData.get('contractorName')?.toString() || '',
+        contractorSsn: formData.get('contractorSsn')?.toString() || undefined,
+        contractorPhone: formData.get('contractorPhone')?.toString() || undefined,
+        insuredName: formData.get('insuredName')?.toString() || '',
+        insuredSsn: formData.get('insuredSsn')?.toString() || undefined,
+        insuredPhone: formData.get('insuredPhone')?.toString() || undefined,
+        beneficiaryName: formData.get('beneficiaryName')?.toString() || undefined,
+        premiumAmount: formData.get('premiumAmount')?.toString()
+          ? parseFloat(formData.get('premiumAmount')?.toString() || '0')
+          : undefined,
+        monthlyPremium: formData.get('monthlyPremium')?.toString()
+          ? parseFloat(formData.get('monthlyPremium')?.toString() || '0')
+          : undefined,
+        annualPremium: formData.get('annualPremium')?.toString()
+          ? parseFloat(formData.get('annualPremium')?.toString() || '0')
+          : undefined,
+        agentCommission: formData.get('agentCommission')?.toString()
+          ? parseFloat(formData.get('agentCommission')?.toString() || '0')
+          : undefined,
+        coverageAmount: formData.get('coverageAmount')?.toString()
+          ? parseFloat(formData.get('coverageAmount')?.toString() || '0')
+          : undefined,
+        paymentCycle: formData.get('paymentCycle')?.toString() || undefined,
+        paymentPeriod: formData.get('paymentPeriod')?.toString()
+          ? parseInt(formData.get('paymentPeriod')?.toString() || '0')
+          : undefined,
+        notes: formData.get('notes')?.toString() || undefined,
+      };
+
+      // 첨부파일 처리
+      const attachments: Array<{
+        file: File;
+        fileName: string;
+        fileDisplayName: string;
+        documentType: string;
+        description?: string;
+      }> = [];
+
+      const entries = Array.from(formData.entries());
+      for (const [key, value] of entries) {
+        if (key.startsWith('attachment_file_') && value instanceof File) {
+          const index = key.split('_')[2];
+          const fileName =
+            formData.get(`attachment_fileName_${index}`)?.toString() ||
+            value.name;
+          const fileDisplayName =
+            formData.get(`attachment_displayName_${index}`)?.toString() ||
+            value.name;
+          const documentType =
+            formData.get(`attachment_documentType_${index}`)?.toString() ||
+            'other_document';
+          const description = formData
+            .get(`attachment_description_${index}`)
+            ?.toString();
+
+          attachments.push({
+            file: value,
+            fileName,
+            fileDisplayName,
+            documentType,
+            description,
+          });
+        }
+      }
+
+      return await createInsuranceContract(clientId, formData.get('agentId')?.toString() || '', contractData, attachments);
     }
 
     default:

@@ -682,209 +682,99 @@ export function InsuranceContractsTab({
   };
 
   const handleSubmit = async (formData: any) => {
+    console.log('📋 보험계약 저장 시작:', formData);
     setIsSubmitting(true);
 
     try {
-      // 🎯 Fetcher를 사용한 API 호출
+      // FormData 생성
       const submitData = new FormData();
+      
+      // intent 설정 (고객 상세 페이지의 action 함수에서 처리)
+      submitData.append('intent', 'createInsuranceContract');
+      submitData.append('clientId', clientId || '');
+      submitData.append('agentId', agentId || '');
 
-      // 🔧 수정 모드인지 생성 모드인지 판단
-      const isEditMode = selectedContract !== null;
-      const intent = isEditMode
-        ? 'updateInsuranceContract'
-        : 'createInsuranceContract';
+      // 계약 데이터 추가
+      const contractData = {
+        productName: formData.productName || '',
+        insuranceCompany: formData.insuranceCompany || '',
+        insuranceType: formData.insuranceType || 'life',
+        insuranceCode: formData.insuranceCode || '',
+        contractNumber: formData.contractNumber || '',
+        policyNumber: formData.policyNumber || '',
+        contractDate: formData.contractDate || '',
+        effectiveDate: formData.effectiveDate || '',
+        expirationDate: formData.expirationDate || '',
+        paymentDueDate: formData.paymentDueDate || '',
+        contractorName: formData.contractorName || '',
+        contractorSsn: formData.contractorSsn || '',
+        contractorPhone: formData.contractorPhone || '',
+        insuredName: formData.insuredName || '',
+        insuredSsn: formData.insuredSsn || '',
+        insuredPhone: formData.insuredPhone || '',
+        beneficiaryName: formData.beneficiaryName || '',
+        premiumAmount: formData.premiumAmount || '',
+        monthlyPremium: formData.monthlyPremium || '',
+        annualPremium: formData.annualPremium || '',
+        coverageAmount: formData.coverageAmount || '',
+        agentCommission: formData.agentCommission || '',
+        paymentCycle: formData.paymentCycle || 'monthly',
+        paymentPeriod: formData.paymentPeriod || '',
+        specialClauses: formData.specialClauses || '',
+        notes: formData.notes || '',
+      };
 
-      submitData.append('intent', intent);
-      submitData.append('clientId', clientId);
-      submitData.append('agentId', agentId);
-
-      // 수정 모드일 때는 contractId도 추가
-      if (isEditMode && selectedContract) {
-        submitData.append('contractId', selectedContract.id);
-      }
-
-      // 첨부파일을 제외한 계약 데이터 추가
-      const contractData = { ...formData };
-      if (contractData.attachments) {
-        delete contractData.attachments; // 첨부파일은 별도 처리
-      }
-
+      // 모든 계약 데이터를 FormData에 추가
       Object.entries(contractData).forEach(([key, value]) => {
-        if (value !== undefined && value !== null && value !== '') {
+        if (value) {
           submitData.append(key, value.toString());
         }
       });
 
-      // 📁 첨부파일 디버깅 로그 추가
-      console.log('🔍 첨부파일 디버깅:', {
-        'formData 전체': formData,
-        'attachments 존재여부': !!formData.attachments,
-        'attachments 길이': formData.attachments?.length || 0,
-        'attachments 내용': formData.attachments,
-      });
-
-      // 📁 첨부파일을 FormData에 추가 (NewContractModal에서 전달받은 데이터 사용)
-      if (formData.attachments?.length > 0) {
-        console.log(
-          `📁 [다수파일처리] 첨부파일 ${formData.attachments.length}개 처리 중:`,
-          formData.attachments.map((att: any, idx: number) => ({
-            index: idx,
-            fileName: att.fileName,
-            displayName: att.fileDisplayName,
-            type: att.documentType,
-            size: att.file?.size || 'File 객체 없음',
-            hasFile: !!att.file,
-            fileType: typeof att.file,
-            isExisting: att.isExisting,
-          }))
-        );
-
-        // 새로운 파일만 FormData에 추가하기 위한 인덱스 카운터
+      // 첨부파일 처리
+      if (formData.attachments && Array.isArray(formData.attachments)) {
+        console.log(`📎 첨부파일 ${formData.attachments.length}개 처리 중...`);
+        
         let newFileIndex = 0;
-
-        // 각 첨부파일을 FormData에 추가
         formData.attachments.forEach((att: any, originalIndex: number) => {
-          console.log(`📎 [다수파일처리] 첨부파일 ${originalIndex} 처리:`, {
-            fileName: att.fileName,
-            fileObject: att.file,
-            isFile: att.file instanceof File,
-            isExisting: att.isExisting,
-            willUseIndex: newFileIndex,
-          });
-
-          if (att.file instanceof File && !att.isExisting) {
-            // 새로 추가된 파일인 경우
+          if (att.file && att.file instanceof File) {
+            // 새 첨부파일인 경우
             submitData.append(`attachment_file_${newFileIndex}`, att.file);
-            submitData.append(
-              `attachment_fileName_${newFileIndex}`,
-              att.fileName
-            );
-            submitData.append(
-              `attachment_displayName_${newFileIndex}`,
-              att.fileDisplayName
-            );
-            submitData.append(
-              `attachment_documentType_${newFileIndex}`,
-              att.documentType
-            );
+            submitData.append(`attachment_fileName_${newFileIndex}`, att.fileName || att.file.name);
+            submitData.append(`attachment_displayName_${newFileIndex}`, att.fileDisplayName || att.file.name);
+            submitData.append(`attachment_documentType_${newFileIndex}`, att.documentType || 'other_document');
             if (att.description) {
-              submitData.append(
-                `attachment_description_${newFileIndex}`,
-                att.description
-              );
+              submitData.append(`attachment_description_${newFileIndex}`, att.description);
             }
-            console.log(
-              `✅ [다수파일처리] 새 첨부파일 ${originalIndex} → FormData 인덱스 ${newFileIndex} 추가 완료`
-            );
-            newFileIndex++; // 다음 새 파일을 위해 인덱스 증가
-          } else if (att.isExisting) {
-            // 기존 첨부파일인 경우 - 메타데이터 업데이트를 FormData에 추가
-            submitData.append(
-              `existing_attachment_documentType_${att.id}`,
-              att.documentType
-            );
-            if (att.description) {
-              submitData.append(
-                `existing_attachment_description_${att.id}`,
-                att.description
-              );
-            }
-            if (att.fileDisplayName) {
-              submitData.append(
-                `existing_attachment_displayName_${att.id}`,
-                att.fileDisplayName
-              );
-            }
-            console.log(
-              `📎 [다수파일처리] 기존 첨부파일 ${originalIndex}: ${att.fileName} (메타데이터 업데이트)`
-            );
-          } else {
-            console.error(
-              `❌ [다수파일처리] 첨부파일 ${originalIndex}: File 객체가 아님`,
-              att.file
-            );
+            console.log(`📎 새 첨부파일 ${newFileIndex}: ${att.fileName || att.file.name}`);
+            newFileIndex++;
           }
         });
-
-        console.log(
-          `📋 [다수파일처리] 최종 결과: 총 ${formData.attachments.length}개 중 ${newFileIndex}개 새 파일을 FormData에 추가`
-        );
-      } else {
-        console.log('📎 [다수파일처리] 첨부파일이 없음 또는 빈 배열');
       }
 
-      console.log('📋 보험계약 저장 중...', contractData);
+      console.log('📋 보험계약 저장 중... (React Router Form 사용)');
 
-      // 🔧 수정/등록에 따른 API 엔드포인트 선택
-      const apiEndpoint = selectedContract
-        ? '/api/update-insurance-contract' // 수정
-        : '/api/insurance-contracts'; // 신규 등록
-
-      // contractId를 FormData에 추가 (수정인 경우)
-      if (selectedContract) {
-        submitData.append('contractId', selectedContract.id);
-      }
-
-      const response = await fetch(apiEndpoint, {
-        method: 'POST',
-        headers: {
-          Accept: 'application/json',
-          'X-Requested-With': 'XMLHttpRequest',
-        },
-        body: submitData,
+      // React Router Form을 사용하여 제출
+      const result = await fetcher.submit(submitData, { 
+        method: 'post',
+        encType: 'multipart/form-data'
       });
 
-      console.log('🔍 응답 상태 확인:', {
-        status: response.status,
-        statusText: response.statusText,
-        headers: Object.fromEntries(response.headers.entries()),
-        url: response.url,
-      });
-
-      const responseText = await response.text();
-      console.log('🔍 응답 내용 (처음 200자):', responseText.substring(0, 200));
-
-      let result;
-      try {
-        result = JSON.parse(responseText);
-        console.log('✅ JSON 파싱 성공:', result);
-      } catch (parseError) {
-        console.error('❌ JSON 파싱 실패:', parseError);
-        console.log('📄 전체 응답 내용:', responseText);
-        const errorMessage =
-          parseError instanceof Error ? parseError.message : '알 수 없는 오류';
-        throw new Error(
-          `서버에서 올바르지 않은 응답을 받았습니다: ${errorMessage}`
-        );
-      }
-
-      // 결과 처리
-      if (result.success) {
-        const isUpdate = !!selectedContract;
-        const actionText = isUpdate ? '수정' : '등록';
-        console.log(`✅ 보험계약 ${actionText} 성공:`, result.message);
-        toast.success(`계약 ${actionText} 완료`, result.message);
-        setShowAddModal(false);
-        setSelectedContract(null);
-        setIsSubmitting(false);
-        // 페이지 새로고침으로 최신 데이터 로드
-        window.location.reload();
-      } else {
-        const isUpdate = !!selectedContract;
-        const actionText = isUpdate ? '수정' : '등록';
-        console.error(`❌ 보험계약 ${actionText} 실패:`, result.error);
-        toast.error(`계약 ${actionText} 실패`, result.error || result.message);
-        setIsSubmitting(false);
-      }
-    } catch (error) {
-      const isUpdate = !!selectedContract;
-      const actionText = isUpdate ? '수정' : '등록';
-      console.error(`❌ 보험계약 ${actionText} 실패:`, error);
+      console.log('✅ 보험계약 등록 성공');
+      toast.success('계약 등록 완료', '보험계약이 성공적으로 등록되었습니다.');
+      setShowAddModal(false);
+      setSelectedContract(null);
       setIsSubmitting(false);
 
-      // 에러 토스트 알림 (즉시 표시할 수 있는 클라이언트 에러)
+      // 페이지 데이터 새로고침
+      revalidator.revalidate();
+
+    } catch (error) {
+      console.error('❌ 보험계약 등록 실패:', error);
+      setIsSubmitting(false);
+
       toast.error(
-        `계약 ${actionText} 실패`,
+        '계약 등록 실패',
         error instanceof Error
           ? error.message
           : '알 수 없는 오류가 발생했습니다.'
