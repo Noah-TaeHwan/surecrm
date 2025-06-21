@@ -1700,7 +1700,7 @@ export default function ClientDetailPage({ loaderData }: { loaderData: any }) {
                     clientName={client?.fullName || '고객'}
                     agentId={data?.currentUserId}
                     initialContracts={insuranceContracts}
-                    shouldOpenModal={shouldCreateContract}
+                    shouldOpenModal={true} // 🚫 모바일에서는 중복 모달 방지
                   />
                 </TabsContent>
 
@@ -1856,7 +1856,7 @@ export default function ClientDetailPage({ loaderData }: { loaderData: any }) {
                 clientName={client?.fullName || '고객'}
                 agentId={data?.currentUserId}
                 initialContracts={insuranceContracts}
-                shouldOpenModal={shouldCreateContract}
+                shouldOpenModal={false} // 🚫 모바일에서는 중복 모달 방지
               />
             </TabsContent>
 

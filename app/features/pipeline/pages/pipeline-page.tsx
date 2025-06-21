@@ -1305,42 +1305,69 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
             .pipeline-mobile-container {
               min-height: 100vh;
               height: auto;
-              overflow: visible;
               position: relative;
+              width: 100%;
+              max-width: 100vw;
+              overflow-x: hidden;
+              /* sticky가 작동하도록 overflow-y는 visible 유지 */
             }
             
-
+            .pipeline-board {
+              width: 100%;
+              max-width: 100%;
+              overflow-x: hidden;
+            }
+            
+            /* 🎯 모바일에서 모든 자식 요소들이 화면을 벗어나지 않도록 */
+            @media (max-width: 1023px) {
+              .pipeline-mobile-container * {
+                max-width: 100%;
+                box-sizing: border-box;
+              }
+              
+              .pipeline-mobile-container .overflow-x-auto {
+                overflow-x: auto;
+              }
+              
+              /* sticky 요소가 정상 작동하도록 */
+              .pipeline-mobile-container .sticky {
+                position: sticky !important;
+                z-index: 40;
+              }
+            }
           }
         `}
       </style>
       {/* 🎯 데스크톱과 모바일 조건부 렌더링 */}
       {isMobile ? (
         /* 🎯 새로운 모바일 레이아웃 */
-        <MobilePipelineLayout
-          statsCards={statsCards}
-          stages={stages.map(stage => ({
-            ...stage,
-            stats: getStageStats(stage.id),
-          }))}
-          clients={filteredClients as unknown as Client[]}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          selectedReferrerId={selectedReferrerId}
-          onReferrerChange={setSelectedReferrerId}
-          selectedImportance={selectedImportance}
-          onImportanceChange={setSelectedImportance}
-          potentialReferrers={potentialReferrers}
-          isFilterActive={isFilterActive}
-          onClientMove={handleClientMove}
-          onAddClientToStage={handleAddClientToStage}
-          onRemoveFromPipeline={handleRemoveFromPipeline}
-          onCreateContract={handleCreateContract}
-          onEditOpportunity={handleEditOpportunity}
-          onAddNewClient={() => setAddClientOpen(true)}
-          onExistingClientOpportunity={() => setExistingClientModalOpen(true)}
-          onFilterReset={handleFilterReset}
-          filteredClientsCount={filteredClients.length}
-        />
+        <div className="lg:hidden bg-background min-h-screen overflow-x-hidden w-full">
+          <MobilePipelineLayout
+            statsCards={statsCards}
+            stages={stages.map(stage => ({
+              ...stage,
+              stats: getStageStats(stage.id),
+            }))}
+            clients={filteredClients as unknown as Client[]}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            selectedReferrerId={selectedReferrerId}
+            onReferrerChange={setSelectedReferrerId}
+            selectedImportance={selectedImportance}
+            onImportanceChange={setSelectedImportance}
+            potentialReferrers={potentialReferrers}
+            isFilterActive={isFilterActive}
+            onClientMove={handleClientMove}
+            onAddClientToStage={handleAddClientToStage}
+            onRemoveFromPipeline={handleRemoveFromPipeline}
+            onCreateContract={handleCreateContract}
+            onEditOpportunity={handleEditOpportunity}
+            onAddNewClient={() => setAddClientOpen(true)}
+            onExistingClientOpportunity={() => setExistingClientModalOpen(true)}
+            onFilterReset={handleFilterReset}
+            filteredClientsCount={filteredClients.length}
+          />
+        </div>
       ) : (
         /* 🎯 데스크톱 레이아웃 - 기존 방식 복원 */
         <div

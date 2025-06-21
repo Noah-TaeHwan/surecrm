@@ -221,14 +221,16 @@ export function MobilePipelineLayout({
 
   return (
     <div 
-      className="lg:hidden bg-background min-h-screen"
+      className="h-full flex flex-col pipeline-mobile-container"
       style={{
-        // 모바일에서 의도하지 않은 터치 동작 제한
-        touchAction: 'pan-y pinch-zoom',
-        WebkitTouchCallout: 'none',
-        WebkitUserSelect: 'none',
-        userSelect: 'none',
-        overscrollBehavior: 'contain',
+        touchAction: 'pan-y pinch-zoom', // 세로 스크롤과 확대/축소만 허용
+        overscrollBehavior: 'contain', // 오버스크롤 방지
+        WebkitUserSelect: 'none', // 텍스트 선택 방지 (iOS Safari)
+        userSelect: 'none', // 텍스트 선택 방지
+        WebkitTouchCallout: 'none', // 길게 누르기 메뉴 방지 (iOS Safari)
+        WebkitTapHighlightColor: 'transparent', // 탭 하이라이트 제거
+        overflowX: 'hidden', // 가로 스크롤만 차단
+        // overflowY는 설정하지 않아서 sticky가 작동하도록 함
       }}
     >
       {/* 🎯 상단 통계 카드 토글 섹션 - non-sticky로 변경 */}
@@ -304,7 +306,7 @@ export function MobilePipelineLayout({
       </div>
 
       {/* 🎯 검색/필터 및 스테이지 탭 통합 Sticky 영역 */}
-      <div className="sticky -top-4 z-40 bg-background border-b border-border/50 -mx-4 px-4 shadow-sm py-1">
+      <div className="sticky top-0 z-40 bg-background border-b border-border/50 px-4 shadow-sm py-1">
         {/* 검색 및 필터 섹션 */}
         <div className="space-y-3 py-3">
           {/* 검색바 */}

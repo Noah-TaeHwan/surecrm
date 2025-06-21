@@ -209,7 +209,7 @@ export function PipelineBoard({
     <div className="h-full flex flex-col pipeline-board">
       {isMobile ? (
         /* 🎯 모바일: 단순한 그리드 레이아웃 - MobilePipelineLayout에서 처리 */
-        <div className="grid grid-cols-1 gap-4">
+        <div className="grid grid-cols-1 gap-4 pt-2">
           {/* 🎯 activeStage가 설정된 경우 해당 스테이지만 표시, 아니면 모든 스테이지 표시 */}
           {(activeStage ? stages.filter(stage => stage.id === activeStage) : stages).map(stage => {
             const stageClients = clientsByStage[stage.id] || [];
