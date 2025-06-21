@@ -158,11 +158,11 @@ function MoreEventsButton({
     <div
       className={cn(
         'group relative rounded-lg cursor-pointer transition-all duration-200',
-        'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700',
-        'border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600',
+        'bg-muted hover:bg-muted/80',
+        'border border-border hover:border-border/80',
         'shadow-sm hover:shadow-md transform hover:scale-[1.01] active:scale-[0.99]',
         isMobile ? 'p-3 min-h-[44px]' : 'p-2.5',
-        'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
+        'text-muted-foreground hover:text-foreground'
       )}
       onClick={onClick}
       title={`추가 일정: ${previewTimes}${meetings.length > 2 ? '...' : ''}`}
@@ -174,7 +174,7 @@ function MoreEventsButton({
             +{count}개 더
           </span>
         </div>
-        <div className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full group-hover:bg-gray-500 dark:group-hover:bg-gray-400 group-hover:scale-110 transition-all duration-200" />
+        <div className="w-2 h-2 bg-muted-foreground rounded-full group-hover:bg-foreground group-hover:scale-110 transition-all duration-200" />
       </div>
 
       {/* 미리보기 힌트 */}
@@ -207,8 +207,8 @@ function DateCellHeader({
           'flex items-center justify-center rounded-full font-semibold transition-all duration-200',
           isMobile ? 'w-8 h-8 text-base' : 'w-7 h-7 text-sm',
           isToday
-            ? 'bg-sky-500 text-white shadow-lg ring-2 ring-sky-500/30 scale-110' // SureCRM 스카이-500
-            : 'text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800'
+            ? 'bg-primary text-primary-foreground shadow-lg ring-2 ring-primary/30 scale-110'
+            : 'text-foreground hover:bg-muted/50'
         )}
       >
         {day}
@@ -257,8 +257,8 @@ function MonthHeader({
   return (
     <div className={cn(
       "flex items-center justify-between p-4",
-      "bg-white/80 dark:bg-gray-950/80 backdrop-blur-sm", // 글래스모피즘
-      "border-b border-gray-200 dark:border-gray-800/50", // SureCRM 테두리
+      "bg-card/80 backdrop-blur-sm",
+      "border-b border-border/50",
       "sticky top-0 z-10"
     )}>
       <Button
@@ -266,9 +266,9 @@ function MonthHeader({
         size={isMobile ? "default" : "sm"}
         onClick={onPrevMonth}
         className={cn(
-          "p-2 rounded-lg text-gray-600 dark:text-gray-400",
-          "hover:bg-gray-100 dark:hover:bg-gray-800/50",
-          "hover:text-gray-900 dark:hover:text-gray-100",
+          "p-2 rounded-lg text-muted-foreground",
+          "hover:bg-muted/50",
+          "hover:text-foreground",
           "transition-all duration-200",
           isMobile && "min-w-[44px] min-h-[44px] touch-target"
         )}
@@ -280,26 +280,12 @@ function MonthHeader({
         <button
           onClick={onTitleClick}
           className={cn(
-            "font-bold text-gray-900 dark:text-gray-100",
-            "hover:text-sky-600 dark:hover:text-sky-400 transition-colors",
+            "font-bold text-foreground",
+            "hover:text-primary transition-colors",
             isMobile ? "text-xl" : "text-lg"
           )}
         >
           {monthName}
-        </button>
-        
-        {/* 오늘로 이동 버튼 */}
-        <button
-          onClick={() => onTitleClick?.()}
-          className={cn(
-            "px-3 py-1.5 text-sm font-medium rounded-lg",
-            "bg-gray-100 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300",
-            "hover:bg-gray-200 dark:hover:bg-gray-700/50",
-            "transition-colors duration-200",
-            "touch-target"
-          )}
-        >
-          오늘
         </button>
       </div>
 
@@ -308,9 +294,9 @@ function MonthHeader({
         size={isMobile ? "default" : "sm"}
         onClick={onNextMonth}
         className={cn(
-          "p-2 rounded-lg text-gray-600 dark:text-gray-400",
-          "hover:bg-gray-100 dark:hover:bg-gray-800/50",
-          "hover:text-gray-900 dark:hover:text-gray-100",
+          "p-2 rounded-lg text-muted-foreground",
+          "hover:bg-muted/50",
+          "hover:text-foreground",
           "transition-all duration-200",
           isMobile && "min-w-[44px] min-h-[44px] touch-target"
         )}
@@ -329,8 +315,8 @@ function WeekdayHeader() {
   return (
     <div className={cn(
       "grid grid-cols-7",
-      "bg-gray-50/80 dark:bg-gray-800/30 backdrop-blur-sm", // 글래스모피즘
-      "border-b border-gray-200 dark:border-gray-800/50" // SureCRM 테두리
+      "bg-muted/50 backdrop-blur-sm",
+      "border-b border-border/50"
     )}>
       {weekdays.map((day, index) => (
         <div
@@ -339,10 +325,10 @@ function WeekdayHeader() {
             "text-center font-semibold transition-colors",
             isMobile ? "py-3 text-sm" : "py-2.5 text-xs",
             index === 0 
-              ? "text-rose-500 dark:text-rose-400" // 일요일 (SureCRM 로즈-500)
+              ? "text-destructive" // 일요일
               : index === 6 
-              ? "text-sky-500 dark:text-sky-400" // 토요일 (SureCRM 스카이-500)
-              : "text-gray-700 dark:text-gray-300" // 평일 (절제된 색상)
+              ? "text-primary" // 토요일
+              : "text-muted-foreground" // 평일
           )}
         >
           {day}
@@ -560,10 +546,10 @@ export function CalendarGrid({
           key={`prev-${day}`}
           className={cn(
             'cursor-pointer transition-all duration-200 relative overflow-hidden',
-            'bg-gray-50/30 dark:bg-gray-800/30 text-gray-400 dark:text-gray-600',
+            'bg-muted/30 text-muted-foreground',
             // 모바일: 더 큰 터치 타겟
             isMobile ? 'p-4 min-h-[80px]' : 'p-3 min-h-[120px]',
-            'hover:bg-gray-100 dark:hover:bg-gray-700/30 rounded-lg'
+            'hover:bg-muted/50 rounded-lg'
           )}
           onClick={() => handleDateClick(cellDate)}
         >
@@ -608,15 +594,15 @@ export function CalendarGrid({
           key={day}
           className={cn(
             'cursor-pointer transition-all duration-200 relative overflow-hidden rounded-lg',
-            'bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800',
-            'border border-gray-100 dark:border-gray-700 hover:border-gray-200 dark:hover:border-gray-600',
-            isToday && 'ring-2 ring-sky-500/30 bg-sky-50/50 dark:bg-sky-900/20 shadow-lg',
-            isWeekend && !isToday && 'bg-gray-50/50 dark:bg-gray-800/30',
+            'bg-card hover:bg-muted/50',
+            'border border-border hover:border-border/60',
+            isToday && 'ring-2 ring-primary/30 bg-primary/5 shadow-lg',
+            isWeekend && !isToday && 'bg-muted/30',
             // 💻📱 최적화된 높이 (더 많은 이벤트 표시 가능)
             isMobile 
               ? (dayMeetings.length === 0 ? 'p-3 min-h-[80px]' : 'p-3 min-h-[100px]')
               : (dayMeetings.length === 0 ? 'p-3 min-h-[140px]' : dayMeetings.length <= 2 ? 'p-3 min-h-[160px]' : 'p-3 min-h-[180px]'),
-            // iOS 스타일 그림자
+            // 그림자
             'shadow-sm hover:shadow-md transition-shadow duration-200'
           )}
           onClick={() => handleDateClick(cellDate)}
@@ -699,7 +685,7 @@ export function CalendarGrid({
             {/* 빈 날짜 표시 */}
             {dayMeetings.length === 0 && (
               <div className={cn(
-                'flex items-center justify-center text-gray-400 dark:text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity',
+                'flex items-center justify-center text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity',
                 isMobile ? 'h-8' : 'h-12'
               )}>
                 <Plus className={cn('transition-transform group-hover:scale-110', isMobile ? 'h-4 w-4' : 'h-5 w-5')} />
@@ -720,9 +706,9 @@ export function CalendarGrid({
           key={`next-${day}`}
           className={cn(
             'cursor-pointer transition-all duration-200 relative overflow-hidden',
-            'bg-gray-50/30 dark:bg-gray-800/30 text-gray-400 dark:text-gray-600',
+            'bg-muted/30 text-muted-foreground',
             isMobile ? 'p-4 min-h-[80px]' : 'p-3 min-h-[120px]',
-            'hover:bg-gray-100 dark:hover:bg-gray-700/30 rounded-lg'
+            'hover:bg-muted/50 rounded-lg'
           )}
           onClick={() => handleDateClick(cellDate)}
         >
@@ -739,7 +725,7 @@ export function CalendarGrid({
     return (
       <div 
         className={cn(
-          'grid grid-cols-7 gap-1 bg-gray-50 dark:bg-gray-900',
+          'grid grid-cols-7 gap-1 bg-background',
           isMobile ? 'p-2' : 'p-3',
           isTransitioning && 'transition-transform duration-300 ease-out'
         )}

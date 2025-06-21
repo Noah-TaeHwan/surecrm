@@ -10,6 +10,7 @@ import { Progress } from '~/common/components/ui/progress';
 import { Checkbox } from '~/common/components/ui/checkbox';
 import { Separator } from '~/common/components/ui/separator';
 import { Input } from '~/common/components/ui/input';
+import { Tabs, TabsList, TabsTrigger } from '~/common/components/ui/tabs';
 import {
   CalendarIcon,
   ClockIcon,
@@ -23,6 +24,9 @@ import {
   MixerHorizontalIcon,
   MagnifyingGlassIcon,
   Cross2Icon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  PlusIcon,
 } from '@radix-ui/react-icons';
 import { cn } from '~/lib/utils';
 import {
@@ -111,6 +115,15 @@ interface CalendarSidebarProps {
     lastSyncAt?: string;
     googleEventsCount?: number;
   };
+  // 새로운 캘린더 컨트롤 props
+  viewMode: 'month' | 'week' | 'day';
+  onViewModeChange: (mode: 'month' | 'week' | 'day') => void;
+  selectedDate: Date;
+  onNavigateCalendar: (direction: 'prev' | 'next') => void;
+  onGoToToday: () => void;
+  onAddMeetingOpen: () => void;
+  triggerHapticFeedback: () => void;
+  getDisplayTitle: () => string;
 }
 
 export function CalendarSidebar({
@@ -119,6 +132,15 @@ export function CalendarSidebar({
   filteredTypes,
   onFilterChange,
   googleCalendarSettings,
+  // 새로운 캘린더 컨트롤 props
+  viewMode,
+  onViewModeChange,
+  selectedDate,
+  onNavigateCalendar,
+  onGoToToday,
+  onAddMeetingOpen,
+  triggerHapticFeedback,
+  getDisplayTitle,
 }: CalendarSidebarProps) {
   const [isSyncing, setIsSyncing] = useState(false);
   const [isClient, setIsClient] = useState(false);
@@ -238,6 +260,87 @@ export function CalendarSidebar({
 
   return (
     <div className="space-y-5 p-4 border-sidebar-border h-full">
+      {/* 📅 캘린더 컨트롤 카드 (헤더에서 이동) */}
+      <Card className="border border-border/50 shadow-sm">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <CalendarIcon className="h-5 w-5 text-primary" />
+            {getDisplayTitle()}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* 뷰 선택 탭 */}
+          <div>
+            <label className="text-sm font-medium text-muted-foreground mb-2 block">
+              보기 방식
+            </label>
+            <Tabs
+              value={viewMode}
+              onValueChange={v => {
+                triggerHapticFeedback();
+                onViewModeChange(v as 'month' | 'week' | 'day');
+              }}
+            >
+              <TabsList className="grid grid-cols-3 w-full rounded-md p-0.5 bg-muted border border-border/30">
+                {['month', 'week', 'day'].map((mode, index) => {
+                  const labels = ['월별', '주별', '일별'];
+                  
+                  return (
+                    <TabsTrigger
+                      key={mode}
+                      value={mode}
+                      className={cn(
+                        "rounded-sm transition-all duration-150 text-xs font-medium",
+                        "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground",
+                        "data-[state=active]:shadow-sm",
+                        "text-muted-foreground hover:text-foreground",
+                        "px-3 h-8"
+                      )}
+                    >
+                      {labels[index]}
+                    </TabsTrigger>
+                  );
+                })}
+              </TabsList>
+            </Tabs>
+          </div>
+
+
+
+          {/* 새 미팅 예약 버튼 */}
+          <Button
+            onClick={() => {
+              triggerHapticFeedback();
+              onAddMeetingOpen();
+            }}
+            className="w-full gap-2"
+          >
+            <PlusIcon className="h-4 w-4" />
+            새 미팅 예약
+          </Button>
+
+          {/* 이번 주 통계 */}
+          <div className="pt-2 border-t border-border/30">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">이번 주</span>
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                <span className="font-medium">
+                  {meetings.filter((m: Meeting) => {
+                    const meetingDate = new Date(m.date);
+                    const weekStart = new Date(selectedDate);
+                    weekStart.setDate(selectedDate.getDate() - selectedDate.getDay());
+                    const weekEnd = new Date(weekStart);
+                    weekEnd.setDate(weekStart.getDate() + 6);
+                    return meetingDate >= weekStart && meetingDate <= weekEnd;
+                  }).length}건
+                </span>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* 🔍 1. 고급 검색 (새로 추가) */}
       <Card className="border border-sidebar-border shadow-sm">
         <CardHeader className="pb-4">

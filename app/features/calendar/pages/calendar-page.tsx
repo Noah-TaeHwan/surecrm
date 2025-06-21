@@ -284,198 +284,7 @@ export default function CalendarPage({
   return (
     <MainLayout title="일정 관리">
       <div className="flex-1 space-y-4 md:space-y-6">
-        {/* 📱 모바일 최적화 헤더 */}
-        <div className={cn(
-          "bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg",
-          isMobile ? "p-4" : "p-6"
-        )}>
-          {/* 상단: 제목과 뷰 모드 */}
-          <div className="flex flex-col space-y-4 mb-4">
-            <div className="flex items-center justify-between">
-              <h1 className={cn(
-                "font-bold tracking-tight text-gray-900 dark:text-gray-100",
-                isMobile ? "text-xl" : "text-2xl lg:text-3xl"
-              )}>
-                {getDisplayTitle()}
-              </h1>
-              
-              {!isMobile && (
-                <Badge
-                  variant="secondary"
-                  className="flex items-center gap-1.5 px-3 py-1"
-                >
-                  <CalendarIcon className="h-3.5 w-3.5" />
-                  {viewMode === 'month' ? '월별' : viewMode === 'week' ? '주별' : '일별'} 보기
-                </Badge>
-              )}
-            </div>
-
-            {/* 🍎 iOS 네이티브 세그먼트 컨트롤 */}
-            <Tabs
-              value={viewMode}
-              onValueChange={v => {
-                triggerHapticFeedback();
-                setViewMode(v as ViewMode);
-              }}
-              className="w-full"
-            >
-              <TabsList className={cn(
-                "grid w-full grid-cols-3 rounded-xl p-1 shadow-inner",
-                // iOS 네이티브 색상과 질감
-                "bg-gray-100/80 dark:bg-gray-800/80 backdrop-blur-md",
-                "border border-gray-200/50 dark:border-gray-700/50",
-                isMobile ? "h-12" : "h-10"
-              )}>
-                <TabsTrigger
-                  value="month"
-                  className={cn(
-                    // iOS 네이티브 선택 효과
-                    "data-[state=active]:bg-white dark:data-[state=active]:bg-gray-600",
-                    "data-[state=active]:shadow-lg data-[state=active]:shadow-black/10",
-                    "data-[state=active]:border data-[state=active]:border-gray-200/30",
-                    "rounded-lg transition-all duration-300 ease-out",
-                    // 텍스트 스타일
-                    "data-[state=active]:text-gray-900 dark:data-[state=active]:text-white",
-                    "data-[state=inactive]:text-gray-600 dark:data-[state=inactive]:text-gray-400",
-                    "font-medium tracking-tight",
-                    // 크기 조정
-                    isMobile ? "text-base h-10" : "text-sm h-8",
-                    // 호버 효과
-                    "hover:bg-gray-50 dark:hover:bg-gray-700/50 data-[state=active]:hover:bg-white"
-                  )}
-                >
-                  월별
-                </TabsTrigger>
-                <TabsTrigger
-                  value="week"
-                  className={cn(
-                    "data-[state=active]:bg-white dark:data-[state=active]:bg-gray-600",
-                    "data-[state=active]:shadow-lg data-[state=active]:shadow-black/10",
-                    "data-[state=active]:border data-[state=active]:border-gray-200/30",
-                    "rounded-lg transition-all duration-300 ease-out",
-                    "data-[state=active]:text-gray-900 dark:data-[state=active]:text-white",
-                    "data-[state=inactive]:text-gray-600 dark:data-[state=inactive]:text-gray-400",
-                    "font-medium tracking-tight",
-                    isMobile ? "text-base h-10" : "text-sm h-8",
-                    "hover:bg-gray-50 dark:hover:bg-gray-700/50 data-[state=active]:hover:bg-white"
-                  )}
-                >
-                  주별
-                </TabsTrigger>
-                <TabsTrigger
-                  value="day"
-                  className={cn(
-                    "data-[state=active]:bg-white dark:data-[state=active]:bg-gray-600",
-                    "data-[state=active]:shadow-lg data-[state=active]:shadow-black/10",
-                    "data-[state=active]:border data-[state=active]:border-gray-200/30",
-                    "rounded-lg transition-all duration-300 ease-out",
-                    "data-[state=active]:text-gray-900 dark:data-[state=active]:text-white",
-                    "data-[state=inactive]:text-gray-600 dark:data-[state=inactive]:text-gray-400",
-                    "font-medium tracking-tight",
-                    isMobile ? "text-base h-10" : "text-sm h-8",
-                    "hover:bg-gray-50 dark:hover:bg-gray-700/50 data-[state=active]:hover:bg-white"
-                  )}
-                >
-                  일별
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
-
-          {/* 하단: 네비게이션과 액션 */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            {/* iOS 스타일 네비게이션 */}
-            <div className="flex items-center gap-2">
-              <div className="flex items-center bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
-                <Button
-                  variant="ghost"
-                  size={isMobile ? "default" : "sm"}
-                  onClick={() => navigateCalendar('prev')}
-                  className={cn(
-                    "rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors",
-                    isMobile ? "h-10 w-10 p-0" : "h-8 w-8 p-0"
-                  )}
-                >
-                  <ChevronLeftIcon className={cn(isMobile ? "h-5 w-5" : "h-4 w-4")} />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size={isMobile ? "default" : "sm"}
-                  onClick={goToToday}
-                  className={cn(
-                    "rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-medium",
-                    isMobile ? "h-10 px-4 text-base" : "h-8 px-3 text-sm"
-                  )}
-                >
-                  오늘
-                </Button>
-                <Button
-                  variant="ghost"
-                  size={isMobile ? "default" : "sm"}
-                  onClick={() => navigateCalendar('next')}
-                  className={cn(
-                    "rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors",
-                    isMobile ? "h-10 w-10 p-0" : "h-8 w-8 p-0"
-                  )}
-                >
-                  <ChevronRightIcon className={cn(isMobile ? "h-5 w-5" : "h-4 w-4")} />
-                </Button>
-              </div>
-
-              {/* 미니 날짜 표시 (데스크톱만) */}
-              {!isMobile && (
-                <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 ml-3">
-                  <CalendarIcon className="h-4 w-4" />
-                  <span>
-                    {selectedDate.toLocaleDateString('ko-KR', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                      weekday: 'short',
-                    })}
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {/* 액션 버튼들 */}
-            <div className="flex items-center gap-3">
-              {/* 미팅 통계 (데스크톱만) */}
-              {!isMobile && !isTablet && (
-                <div className="flex items-center gap-4 px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
-                  <div className="flex items-center gap-2 text-sm">
-                    <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                    <span className="text-gray-600 dark:text-gray-400">이번 주</span>
-                    <span className="font-semibold text-gray-900 dark:text-gray-100">
-                      {meetings.filter((m: Meeting) => {
-                        const meetingDate = new Date(m.date);
-                        const weekStart = new Date(selectedDate);
-                        weekStart.setDate(selectedDate.getDate() - selectedDate.getDay());
-                        const weekEnd = new Date(weekStart);
-                        weekEnd.setDate(weekStart.getDate() + 6);
-                        return meetingDate >= weekStart && meetingDate <= weekEnd;
-                      }).length}건
-                    </span>
-                  </div>
-                </div>
-              )}
-
-              <Button
-                onClick={() => {
-                  triggerHapticFeedback();
-                  setIsAddMeetingOpen(true);
-                }}
-                className={cn(
-                  "bg-blue-500 hover:bg-blue-600 text-white shadow-lg hover:shadow-xl transition-all duration-200",
-                  isMobile ? "h-12 px-6 text-base" : "h-10 px-4 text-sm"
-                )}
-              >
-                <PlusIcon className={cn("mr-2", isMobile ? "h-5 w-5" : "h-4 w-4")} />
-                {isMobile ? "미팅 추가" : "미팅 예약"}
-              </Button>
-            </div>
-          </div>
-        </div>
+        
 
         {/* 🔒 구글 캘린더 연동이 필요한 경우 */}
         {loaderData.requiresGoogleConnection ? (
@@ -586,6 +395,15 @@ export default function CalendarPage({
                 filteredTypes={filteredTypes}
                 onFilterChange={setFilteredTypes}
                 googleCalendarSettings={googleCalendarSettings}
+                // 새로운 캘린더 컨트롤 props
+                viewMode={viewMode}
+                onViewModeChange={setViewMode}
+                selectedDate={selectedDate}
+                onNavigateCalendar={navigateCalendar}
+                onGoToToday={goToToday}
+                onAddMeetingOpen={() => setIsAddMeetingOpen(true)}
+                triggerHapticFeedback={triggerHapticFeedback}
+                getDisplayTitle={getDisplayTitle}
               />
             )}
           </div>
