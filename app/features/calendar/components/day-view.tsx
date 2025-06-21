@@ -1,9 +1,61 @@
 import { cn } from '~/lib/utils';
-import { meetingTypeColors, type Meeting } from '../types/types';
+import { type Meeting } from '../types/types';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { Clock, MapPin, User, Phone, Video, Coffee } from 'lucide-react';
 import { Badge } from '~/common/components/ui/badge';
+import { useDeviceType } from '~/common/hooks/use-viewport';
+
+// 🍎 SureCRM 색상 시스템 통합 (iOS 네이티브 스타일)
+const getEventColors = (meeting: Meeting) => {
+  // 비즈니스 로직에 따른 색상 매핑
+  const type = meeting.type;
+  
+  if (type === 'first_consultation') {
+    return {
+      bg: 'bg-sky-500/90 hover:bg-sky-600/90',
+      border: 'border-sky-400/50',
+      text: 'text-white',
+      dot: 'bg-sky-500'
+    };
+  } else if (type === 'contract_signing') {
+    return {
+      bg: 'bg-emerald-500/90 hover:bg-emerald-600/90', 
+      border: 'border-emerald-400/50',
+      text: 'text-white',
+      dot: 'bg-emerald-500'
+    };
+  } else if (type === 'follow_up') {
+    return {
+      bg: 'bg-amber-500/90 hover:bg-amber-600/90',
+      border: 'border-amber-400/50', 
+      text: 'text-white',
+      dot: 'bg-amber-500'
+    };
+  } else if (type === 'urgent') {
+    return {
+      bg: 'bg-rose-500/90 hover:bg-rose-600/90',
+      border: 'border-rose-400/50',
+      text: 'text-white', 
+      dot: 'bg-rose-500'
+    };
+  } else if (type === 'vip') {
+    return {
+      bg: 'bg-violet-500/90 hover:bg-violet-600/90',
+      border: 'border-violet-400/50',
+      text: 'text-white',
+      dot: 'bg-violet-500'
+    };
+  }
+  
+  // 기본값 (구글 캘린더 이벤트 등)
+  return {
+    bg: 'bg-gray-500/90 hover:bg-gray-600/90',
+    border: 'border-gray-400/50',
+    text: 'text-white',
+    dot: 'bg-gray-500'
+  };
+};
 
 interface DayViewProps {
   selectedDate: Date;
@@ -16,6 +68,7 @@ export function DayView({
   meetings,
   onMeetingClick,
 }: DayViewProps) {
+  const { isMobile } = useDeviceType();
   // 모든 미팅 표시 (필터링 제거)
   const filteredMeetings = meetings;
 
@@ -83,7 +136,7 @@ export function DayView({
           </div>
 
           <div className="text-right space-y-1">
-            <div className="text-2xl font-bold text-primary">
+            <div className="text-2xl font-bold text-sky-600 dark:text-sky-400">
               {sortedMeetings.length}
             </div>
             <div className="text-xs text-muted-foreground">개의 미팅</div>
@@ -107,9 +160,7 @@ export function DayView({
                     key={type}
                     className={cn(
                       'w-3 h-3 rounded-full',
-                      meetingTypeColors[
-                        type as keyof typeof meetingTypeColors
-                      ] || 'bg-gray-500'
+                      getEventColors({ type } as Meeting).dot
                     )}
                   />
                 )
@@ -137,7 +188,7 @@ export function DayView({
                 <div
                   className={cn(
                     'flex-1 min-h-20 relative p-2 hover:bg-accent/10 transition-colors duration-200',
-                    isToday && hour === currentHour && 'bg-primary/5',
+                    isToday && hour === currentHour && 'bg-sky-500/5',
                     hour % 2 === 0 ? 'bg-card/10' : 'bg-transparent'
                   )}
                 >
@@ -171,12 +222,12 @@ export function DayView({
                       <div
                         key={meeting.id}
                         className={cn(
-                          'absolute left-2 right-2 p-4 rounded-xl border border-white/20 cursor-pointer transition-all duration-200 shadow-lg',
-                          'hover:scale-105 hover:shadow-xl backdrop-blur-sm text-white font-medium transform hover:z-10',
-                          meetingTypeColors[
-                            meeting.type as keyof typeof meetingTypeColors
-                          ] || 'bg-gray-500',
-                          'group'
+                          'absolute left-2 right-2 p-4 rounded-xl cursor-pointer transition-all duration-200 shadow-lg backdrop-blur-sm font-medium transform group',
+                          'hover:scale-105 hover:shadow-xl hover:z-10',
+                          // 🍎 SureCRM 색상 시스템 적용
+                          getEventColors(meeting).bg,
+                          getEventColors(meeting).border,
+                          getEventColors(meeting).text
                         )}
                         style={{
                           top: `${getMeetingPosition(meeting.time) - hour * 80}px`,

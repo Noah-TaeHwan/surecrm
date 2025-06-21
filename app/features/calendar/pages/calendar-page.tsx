@@ -310,7 +310,7 @@ export default function CalendarPage({
               )}
             </div>
 
-            {/* iOS 스타일 뷰 모드 선택 */}
+            {/* 🍎 iOS 네이티브 세그먼트 컨트롤 */}
             <Tabs
               value={viewMode}
               onValueChange={v => {
@@ -320,14 +320,28 @@ export default function CalendarPage({
               className="w-full"
             >
               <TabsList className={cn(
-                "grid w-full grid-cols-3 bg-gray-100 dark:bg-gray-800 rounded-lg p-1",
+                "grid w-full grid-cols-3 rounded-xl p-1 shadow-inner",
+                // iOS 네이티브 색상과 질감
+                "bg-gray-100/80 dark:bg-gray-800/80 backdrop-blur-md",
+                "border border-gray-200/50 dark:border-gray-700/50",
                 isMobile ? "h-12" : "h-10"
               )}>
                 <TabsTrigger
                   value="month"
                   className={cn(
-                    "data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm rounded-md transition-all duration-200",
-                    isMobile ? "text-base h-10" : "text-sm h-8"
+                    // iOS 네이티브 선택 효과
+                    "data-[state=active]:bg-white dark:data-[state=active]:bg-gray-600",
+                    "data-[state=active]:shadow-lg data-[state=active]:shadow-black/10",
+                    "data-[state=active]:border data-[state=active]:border-gray-200/30",
+                    "rounded-lg transition-all duration-300 ease-out",
+                    // 텍스트 스타일
+                    "data-[state=active]:text-gray-900 dark:data-[state=active]:text-white",
+                    "data-[state=inactive]:text-gray-600 dark:data-[state=inactive]:text-gray-400",
+                    "font-medium tracking-tight",
+                    // 크기 조정
+                    isMobile ? "text-base h-10" : "text-sm h-8",
+                    // 호버 효과
+                    "hover:bg-gray-50 dark:hover:bg-gray-700/50 data-[state=active]:hover:bg-white"
                   )}
                 >
                   월별
@@ -335,8 +349,15 @@ export default function CalendarPage({
                 <TabsTrigger
                   value="week"
                   className={cn(
-                    "data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm rounded-md transition-all duration-200",
-                    isMobile ? "text-base h-10" : "text-sm h-8"
+                    "data-[state=active]:bg-white dark:data-[state=active]:bg-gray-600",
+                    "data-[state=active]:shadow-lg data-[state=active]:shadow-black/10",
+                    "data-[state=active]:border data-[state=active]:border-gray-200/30",
+                    "rounded-lg transition-all duration-300 ease-out",
+                    "data-[state=active]:text-gray-900 dark:data-[state=active]:text-white",
+                    "data-[state=inactive]:text-gray-600 dark:data-[state=inactive]:text-gray-400",
+                    "font-medium tracking-tight",
+                    isMobile ? "text-base h-10" : "text-sm h-8",
+                    "hover:bg-gray-50 dark:hover:bg-gray-700/50 data-[state=active]:hover:bg-white"
                   )}
                 >
                   주별
@@ -344,8 +365,15 @@ export default function CalendarPage({
                 <TabsTrigger
                   value="day"
                   className={cn(
-                    "data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm rounded-md transition-all duration-200",
-                    isMobile ? "text-base h-10" : "text-sm h-8"
+                    "data-[state=active]:bg-white dark:data-[state=active]:bg-gray-600",
+                    "data-[state=active]:shadow-lg data-[state=active]:shadow-black/10",
+                    "data-[state=active]:border data-[state=active]:border-gray-200/30",
+                    "rounded-lg transition-all duration-300 ease-out",
+                    "data-[state=active]:text-gray-900 dark:data-[state=active]:text-white",
+                    "data-[state=inactive]:text-gray-600 dark:data-[state=inactive]:text-gray-400",
+                    "font-medium tracking-tight",
+                    isMobile ? "text-base h-10" : "text-sm h-8",
+                    "hover:bg-gray-50 dark:hover:bg-gray-700/50 data-[state=active]:hover:bg-white"
                   )}
                 >
                   일별

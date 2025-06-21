@@ -24,6 +24,9 @@ import { Badge } from '~/common/components/ui/badge';
 import { useViewport } from '~/common/hooks/useViewport';
 import { Button } from '~/common/components/ui/button';
 import { useState, useRef, useEffect } from 'react';
+import { format } from 'date-fns';
+import { ko } from 'date-fns/locale';
+import { subMonths, addMonths } from 'date-fns';
 
 interface CalendarGridProps {
   selectedDate: Date;
@@ -65,7 +68,7 @@ function SyncStatusIndicator({ status }: { status?: SyncStatus }) {
   );
 }
 
-// 🚀 iOS 스타일의 이벤트 카드 (모바일 최적화)
+// 🚀 iOS 스타일의 이벤트 카드 (SureCRM 색상 시스템 적용)
 function EventCard({
   meeting,
   compact = false,
@@ -78,6 +81,7 @@ function EventCard({
   const { isMobile } = useViewport();
   const source = (meeting.syncInfo?.externalSource || 'surecrm') as EventSource;
   const syncStatus = meeting.syncInfo?.syncStatus;
+  const colors = getEventColors(meeting);
 
   return (
     <div
@@ -86,16 +90,11 @@ function EventCard({
         'transform hover:scale-[1.02] active:scale-[0.98]',
         // 모바일: 더 큰 터치 타겟과 패딩
         isMobile ? (compact ? 'p-3 min-h-[44px]' : 'p-3.5 min-h-[48px]') : (compact ? 'p-2.5' : 'p-3'),
-        'bg-white dark:bg-gray-800 border-l-4 shadow-sm',
-        'hover:shadow-md transition-shadow duration-200',
-        // iOS 스타일 타입별 색상
-        meeting.type === 'initial'
-          ? 'border-l-blue-500 bg-blue-50/30 dark:bg-blue-900/10'
-          : meeting.type === 'consultation'
-            ? 'border-l-green-500 bg-green-50/30 dark:bg-green-900/10'
-            : meeting.type === 'contract'
-              ? 'border-l-red-500 bg-red-50/30 dark:bg-red-900/10'
-              : 'border-l-gray-500 bg-gray-50/30 dark:bg-gray-900/10'
+        'border shadow-sm hover:shadow-md transition-shadow duration-200',
+        // SureCRM 색상 시스템 적용
+        colors.bg,
+        colors.border,
+        colors.text
       )}
       onClick={onClick}
       title={`${meeting.time} - ${meeting.title}`}
@@ -104,23 +103,21 @@ function EventCard({
         {/* 시간 & 소스 아이콘 */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
+            <div className={cn("w-1.5 h-1.5 rounded-full flex-shrink-0", colors.dot)} />
             <Clock className={cn('opacity-70', isMobile ? 'h-3.5 w-3.5' : 'h-3 w-3')} />
-            <span className={cn('font-semibold tracking-wide text-gray-700 dark:text-gray-300', 
+            <span className={cn('font-semibold tracking-wide', 
               isMobile ? 'text-sm' : 'text-xs')}>
               {meeting.time}
             </span>
           </div>
-          <span className={cn('transition-transform duration-200 group-hover:scale-110', 
-            isMobile ? 'text-lg' : 'text-sm')}>
-            {source === 'google' ? '📅' : '💼'}
-          </span>
+
         </div>
 
         {/* 이벤트 제목 */}
         <div className="flex items-center">
           <span
             className={cn(
-              'font-medium truncate text-gray-900 dark:text-gray-100',
+              'font-medium truncate',
               isMobile ? (compact ? 'text-sm' : 'text-base') : (compact ? 'text-xs' : 'text-sm')
             )}
           >
@@ -129,9 +126,9 @@ function EventCard({
         </div>
       </div>
 
-      {/* 동기화 상태 표시점 - iOS 스타일 */}
+      {/* 동기화 상태 표시점 - SureCRM 절제된 색상 */}
       {syncStatus === 'conflict' && (
-        <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-red-500 border-2 border-white animate-pulse shadow-lg z-20"></div>
+        <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-rose-500 border-2 border-white animate-pulse shadow-lg z-20"></div>
       )}
 
       {syncStatus === 'synced' && source !== 'surecrm' && (
@@ -177,7 +174,7 @@ function MoreEventsButton({
             +{count}개 더
           </span>
         </div>
-        <div className="w-2 h-2 bg-blue-500 rounded-full group-hover:bg-blue-600 group-hover:scale-110 transition-all duration-200" />
+        <div className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full group-hover:bg-gray-500 dark:group-hover:bg-gray-400 group-hover:scale-110 transition-all duration-200" />
       </div>
 
       {/* 미리보기 힌트 */}
@@ -188,7 +185,7 @@ function MoreEventsButton({
   );
 }
 
-// 📅 iOS 스타일 날짜 셀 헤더
+// 📅 iOS 스타일 날짜 셀 헤더 (SureCRM 색상 시스템 적용)
 function DateCellHeader({
   day,
   isToday,
@@ -204,25 +201,42 @@ function DateCellHeader({
   
   return (
     <div className="flex items-center justify-between mb-2">
-      {/* iOS 스타일 날짜 번호 */}
+      {/* iOS 스타일 날짜 번호 (SureCRM 톤 적용) */}
       <div
         className={cn(
           'flex items-center justify-center rounded-full font-semibold transition-all duration-200',
           isMobile ? 'w-8 h-8 text-base' : 'w-7 h-7 text-sm',
           isToday
-            ? 'bg-blue-500 text-white shadow-lg ring-2 ring-blue-500/30 scale-110'
+            ? 'bg-sky-500 text-white shadow-lg ring-2 ring-sky-500/30 scale-110' // SureCRM 스카이-500
             : 'text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800'
         )}
       >
         {day}
       </div>
 
-      {/* 소스별 카운터 제거 - 구글 캘린더 완전 통합 */}
+      {/* 🍎 모바일: iOS 네이티브 스타일 이벤트 점 표시 */}
+      {isMobile && dayMeetings.length > 0 && (
+        <div className="flex items-center gap-0.5 max-w-[50px] overflow-hidden">
+          {dayMeetings.slice(0, 4).map((meeting, index) => (
+            <EventDot 
+              key={`${meeting.id}-${index}`} 
+              event={meeting}
+              className="animate-in fade-in duration-300"
+            />
+          ))}
+          {dayMeetings.length > 4 && (
+            <div 
+              className="w-1 h-1 rounded-full bg-gray-400 dark:bg-gray-500 flex-shrink-0 ml-0.5"
+              title={`+${dayMeetings.length - 4}개 더`}
+            />
+          )}
+        </div>
+      )}
     </div>
   );
 }
 
-// 🎨 iOS 스타일 월 헤더 컴포넌트
+// 🎨 iOS 스타일 월 헤더 컴포넌트 (SureCRM 색상 시스템 적용)
 function MonthHeader({
   currentDate,
   onPrevMonth,
@@ -241,36 +255,64 @@ function MonthHeader({
   });
 
   return (
-    <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+    <div className={cn(
+      "flex items-center justify-between p-4",
+      "bg-white/80 dark:bg-gray-950/80 backdrop-blur-sm", // 글래스모피즘
+      "border-b border-gray-200 dark:border-gray-800/50", // SureCRM 테두리
+      "sticky top-0 z-10"
+    )}>
       <Button
         variant="ghost"
         size={isMobile ? "default" : "sm"}
         onClick={onPrevMonth}
         className={cn(
-          "p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors",
-          isMobile && "min-w-[44px] min-h-[44px]"
+          "p-2 rounded-lg text-gray-600 dark:text-gray-400",
+          "hover:bg-gray-100 dark:hover:bg-gray-800/50",
+          "hover:text-gray-900 dark:hover:text-gray-100",
+          "transition-all duration-200",
+          isMobile && "min-w-[44px] min-h-[44px] touch-target"
         )}
       >
         <ChevronLeft className={cn(isMobile ? "h-5 w-5" : "h-4 w-4")} />
       </Button>
 
-      <button
-        onClick={onTitleClick}
-        className={cn(
-          "font-semibold text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors",
-          isMobile ? "text-xl" : "text-lg"
-        )}
-      >
-        {monthName}
-      </button>
+      <div className="flex items-center gap-4">
+        <button
+          onClick={onTitleClick}
+          className={cn(
+            "font-bold text-gray-900 dark:text-gray-100",
+            "hover:text-sky-600 dark:hover:text-sky-400 transition-colors",
+            isMobile ? "text-xl" : "text-lg"
+          )}
+        >
+          {monthName}
+        </button>
+        
+        {/* 오늘로 이동 버튼 */}
+        <button
+          onClick={() => onTitleClick?.()}
+          className={cn(
+            "px-3 py-1.5 text-sm font-medium rounded-lg",
+            "bg-gray-100 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300",
+            "hover:bg-gray-200 dark:hover:bg-gray-700/50",
+            "transition-colors duration-200",
+            "touch-target"
+          )}
+        >
+          오늘
+        </button>
+      </div>
 
       <Button
         variant="ghost"
         size={isMobile ? "default" : "sm"}
         onClick={onNextMonth}
         className={cn(
-          "p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors",
-          isMobile && "min-w-[44px] min-h-[44px]"
+          "p-2 rounded-lg text-gray-600 dark:text-gray-400",
+          "hover:bg-gray-100 dark:hover:bg-gray-800/50",
+          "hover:text-gray-900 dark:hover:text-gray-100",
+          "transition-all duration-200",
+          isMobile && "min-w-[44px] min-h-[44px] touch-target"
         )}
       >
         <ChevronRight className={cn(isMobile ? "h-5 w-5" : "h-4 w-4")} />
@@ -279,20 +321,28 @@ function MonthHeader({
   );
 }
 
-// 📱 요일 헤더 (iOS 스타일)
+// 📱 요일 헤더 (iOS 스타일, SureCRM 색상 시스템 적용)
 function WeekdayHeader() {
   const { isMobile } = useViewport();
   const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
   
   return (
-    <div className="grid grid-cols-7 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700">
+    <div className={cn(
+      "grid grid-cols-7",
+      "bg-gray-50/80 dark:bg-gray-800/30 backdrop-blur-sm", // 글래스모피즘
+      "border-b border-gray-200 dark:border-gray-800/50" // SureCRM 테두리
+    )}>
       {weekdays.map((day, index) => (
         <div
           key={day}
           className={cn(
-            "text-center font-medium transition-colors",
-            isMobile ? "py-3 text-sm" : "py-2 text-xs",
-            index === 0 ? "text-red-500" : index === 6 ? "text-blue-500" : "text-gray-600 dark:text-gray-400"
+            "text-center font-semibold transition-colors",
+            isMobile ? "py-3 text-sm" : "py-2.5 text-xs",
+            index === 0 
+              ? "text-rose-500 dark:text-rose-400" // 일요일 (SureCRM 로즈-500)
+              : index === 6 
+              ? "text-sky-500 dark:text-sky-400" // 토요일 (SureCRM 스카이-500)
+              : "text-gray-700 dark:text-gray-300" // 평일 (절제된 색상)
           )}
         >
           {day}
@@ -301,6 +351,96 @@ function WeekdayHeader() {
     </div>
   );
 }
+
+// 🎨 SureCRM 진짜 색상 시스템 (중성적이고 프로페셔널)
+const getEventColors = (event: Meeting) => {
+  // SureCRM 실제 사용 색상 (매우 절제된 팔레트)
+  const colorMap = {
+    // 기본: 중성 회색 (가장 많이 사용)
+    neutral: {
+      bg: 'bg-gray-50 dark:bg-gray-900/20',
+      border: 'border-gray-200 dark:border-gray-700/50',
+      text: 'text-gray-700 dark:text-gray-300',
+      dot: 'bg-gray-400 dark:bg-gray-500',
+    },
+    // 첫 상담: 스카이 (절제된 파랑)
+    sky: {
+      bg: 'bg-sky-50 dark:bg-sky-950/20',
+      border: 'border-sky-200 dark:border-sky-800/50',
+      text: 'text-sky-700 dark:text-sky-300',
+      dot: 'bg-sky-500',
+    },
+    // 성공/완료: 에메랄드
+    emerald: {
+      bg: 'bg-emerald-50 dark:bg-emerald-950/20', 
+      border: 'border-emerald-200 dark:border-emerald-800/50',
+      text: 'text-emerald-700 dark:text-emerald-300',
+      dot: 'bg-emerald-500',
+    },
+    // 진행중/검토: 앰버
+    amber: {
+      bg: 'bg-amber-50 dark:bg-amber-950/20',
+      border: 'border-amber-200 dark:border-amber-800/50', 
+      text: 'text-amber-700 dark:text-amber-300',
+      dot: 'bg-amber-500',
+    },
+    // 중요/긴급: 로즈
+    rose: {
+      bg: 'bg-rose-50 dark:bg-rose-950/20',
+      border: 'border-rose-200 dark:border-rose-800/50',
+      text: 'text-rose-700 dark:text-rose-300',
+      dot: 'bg-rose-500',
+    },
+    // 특별/VIP: 바이올렛
+    violet: {
+      bg: 'bg-violet-50 dark:bg-violet-950/20',
+      border: 'border-violet-200 dark:border-violet-800/50',
+      text: 'text-violet-700 dark:text-violet-300',
+      dot: 'bg-violet-500',
+    },
+  };
+  
+  // SureCRM 이벤트 타입별 색상 매핑 (실제 비즈니스 로직 반영)
+  const typeColorMap: Record<string, keyof typeof colorMap> = {
+    'first_consultation': 'sky',        // 첫 상담 - 스카이
+    'needs_analysis': 'emerald',        // 니즈 분석 - 에메랄드  
+    'product_explanation': 'amber',     // 상품 설명 - 앰버
+    'contract_review': 'rose',          // 계약 검토 - 로즈
+    'contract_signing': 'emerald',      // 계약 완료 - 에메랄드
+    'follow_up': 'violet',              // 후속 관리 - 바이올렛
+    'claim_support': 'rose',            // 클레임 지원 - 로즈
+    'other': 'neutral',                 // 기타 - 중성
+  };
+  
+  // 구글 캘린더 이벤트는 중성 색상 (절제됨)
+  if (event.syncInfo?.externalSource === 'google') {
+    return colorMap['neutral'];
+  }
+  
+  // SureCRM 이벤트는 타입에 따라 색상 결정
+  const colorKey = typeColorMap[event.type] || 'neutral';
+  return colorMap[colorKey];
+};
+
+// 📱 모바일 iOS 스타일 점 표시 컴포넌트
+// 🍎 iOS 네이티브 스타일 이벤트 점 (더 정교한 디자인)
+const EventDot = ({ event, className = '' }: { event: Meeting; className?: string }) => {
+  const colors = getEventColors(event);
+  
+  return (
+    <div 
+      className={cn(
+        "w-1.5 h-1.5 rounded-full flex-shrink-0 shadow-sm",
+        "ring-1 ring-white/50 dark:ring-gray-900/50", // iOS 스타일 링
+        colors.dot,
+        // 미묘한 애니메이션
+        "transition-all duration-200 hover:scale-110",
+        className
+      )}
+      title={event.title}
+    />
+  );
+};
 
 export function CalendarGrid({
   selectedDate,
@@ -470,12 +610,12 @@ export function CalendarGrid({
             'cursor-pointer transition-all duration-200 relative overflow-hidden rounded-lg',
             'bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800',
             'border border-gray-100 dark:border-gray-700 hover:border-gray-200 dark:hover:border-gray-600',
-            isToday && 'ring-2 ring-blue-500/30 bg-blue-50/50 dark:bg-blue-900/20 shadow-lg',
+            isToday && 'ring-2 ring-sky-500/30 bg-sky-50/50 dark:bg-sky-900/20 shadow-lg',
             isWeekend && !isToday && 'bg-gray-50/50 dark:bg-gray-800/30',
-            // 모바일 최적화된 높이
+            // 💻📱 최적화된 높이 (더 많은 이벤트 표시 가능)
             isMobile 
               ? (dayMeetings.length === 0 ? 'p-3 min-h-[80px]' : 'p-3 min-h-[100px]')
-              : (dayMeetings.length === 0 ? 'p-3 min-h-[120px]' : 'p-3 min-h-[140px]'),
+              : (dayMeetings.length === 0 ? 'p-3 min-h-[140px]' : dayMeetings.length <= 2 ? 'p-3 min-h-[160px]' : 'p-3 min-h-[180px]'),
             // iOS 스타일 그림자
             'shadow-sm hover:shadow-md transition-shadow duration-200'
           )}
@@ -489,37 +629,64 @@ export function CalendarGrid({
             sourceCount={sourceCount}
           />
 
-          {/* 이벤트 표시 영역 */}
-          <div className="space-y-1">
+          {/* 💻🍎 이벤트 표시 영역 (데스크톱/모바일 최적화) */}
+          <div className="space-y-1 flex-1">
             {dayMeetings.length > 0 && (
               <>
-                {/* 첫 번째 이벤트 */}
-                <EventCard
-                  meeting={dayMeetings[0]}
-                  compact={isMobile}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleMeetingClick(dayMeetings[0], e);
-                  }}
-                />
-
-                {/* 두 번째 이벤트 (데스크톱에서만) */}
-                {!isMobile && dayMeetings.length > 1 && (
+                {/* 📱 모바일: 첫 번째 이벤트만 + 점 표시 */}
+                {isMobile ? (
                   <EventCard
-                    meeting={dayMeetings[1]}
+                    meeting={dayMeetings[0]}
                     compact={true}
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleMeetingClick(dayMeetings[1], e);
+                      handleMeetingClick(dayMeetings[0], e);
                     }}
                   />
+                ) : (
+                  /* 💻 데스크톱: 더 풍부한 이벤트 표시 */
+                  <>
+                    {/* 첫 번째 이벤트 (풀 사이즈) */}
+                    <EventCard
+                      meeting={dayMeetings[0]}
+                      compact={false}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleMeetingClick(dayMeetings[0], e);
+                      }}
+                    />
+
+                    {/* 두 번째 이벤트 (컴팩트) */}
+                    {dayMeetings.length > 1 && (
+                      <EventCard
+                        meeting={dayMeetings[1]}
+                        compact={true}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleMeetingClick(dayMeetings[1], e);
+                        }}
+                      />
+                    )}
+
+                    {/* 세 번째 이벤트 (컴팩트) */}
+                    {dayMeetings.length > 2 && (
+                      <EventCard
+                        meeting={dayMeetings[2]}
+                        compact={true}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleMeetingClick(dayMeetings[2], e);
+                        }}
+                      />
+                    )}
+                  </>
                 )}
 
                 {/* 더보기 버튼 */}
-                {((isMobile && dayMeetings.length > 1) || (!isMobile && dayMeetings.length > 2)) && (
+                {((isMobile && dayMeetings.length > 1) || (!isMobile && dayMeetings.length > 3)) && (
                   <MoreEventsButton
-                    count={isMobile ? dayMeetings.length - 1 : dayMeetings.length - 2}
-                    meetings={dayMeetings.slice(isMobile ? 1 : 2)}
+                    count={isMobile ? dayMeetings.length - 1 : dayMeetings.length - 3}
+                    meetings={dayMeetings.slice(isMobile ? 1 : 3)}
                     onClick={(e) => {
                       e.stopPropagation();
                       handleDateClick(cellDate);

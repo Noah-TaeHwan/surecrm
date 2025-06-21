@@ -1,9 +1,61 @@
 import { cn } from '~/lib/utils';
-import { meetingTypeColors, type Meeting } from '../types/types';
+import { type Meeting } from '../types/types';
 import { Fragment } from 'react';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { Clock, MapPin, User } from 'lucide-react';
+import { useDeviceType } from '~/common/hooks/use-viewport';
+
+// 🍎 SureCRM 색상 시스템 통합 (iOS 네이티브 스타일)
+const getEventColors = (meeting: Meeting) => {
+  // 비즈니스 로직에 따른 색상 매핑
+  const type = meeting.type;
+  
+  if (type === 'first_consultation') {
+    return {
+      bg: 'bg-sky-500/90 hover:bg-sky-600/90',
+      border: 'border-sky-400/50',
+      text: 'text-white',
+      dot: 'bg-sky-500'
+    };
+  } else if (type === 'contract_signing') {
+    return {
+      bg: 'bg-emerald-500/90 hover:bg-emerald-600/90', 
+      border: 'border-emerald-400/50',
+      text: 'text-white',
+      dot: 'bg-emerald-500'
+    };
+  } else if (type === 'follow_up') {
+    return {
+      bg: 'bg-amber-500/90 hover:bg-amber-600/90',
+      border: 'border-amber-400/50', 
+      text: 'text-white',
+      dot: 'bg-amber-500'
+    };
+  } else if (type === 'urgent') {
+    return {
+      bg: 'bg-rose-500/90 hover:bg-rose-600/90',
+      border: 'border-rose-400/50',
+      text: 'text-white', 
+      dot: 'bg-rose-500'
+    };
+  } else if (type === 'vip') {
+    return {
+      bg: 'bg-violet-500/90 hover:bg-violet-600/90',
+      border: 'border-violet-400/50',
+      text: 'text-white',
+      dot: 'bg-violet-500'
+    };
+  }
+  
+  // 기본값 (구글 캘린더 이벤트 등)
+  return {
+    bg: 'bg-gray-500/90 hover:bg-gray-600/90',
+    border: 'border-gray-400/50',
+    text: 'text-white',
+    dot: 'bg-gray-500'
+  };
+};
 
 interface WeekViewProps {
   selectedDate: Date;
@@ -16,6 +68,7 @@ export function WeekView({
   meetings,
   onMeetingClick,
 }: WeekViewProps) {
+  const { isMobile } = useDeviceType();
   // 주의 시작일 계산 (일요일)
   const weekStart = new Date(selectedDate);
   weekStart.setDate(selectedDate.getDate() - selectedDate.getDay());
@@ -73,9 +126,9 @@ export function WeekView({
             className={cn(
               'p-4 text-center border-r border-border/20 last:border-r-0 bg-gradient-to-b from-card/40 to-card/20 transition-all duration-200',
               isToday(date) &&
-                'bg-gradient-to-b from-primary/20 to-primary/10 border-primary/30',
-              index === 0 && 'text-red-500',
-              index === 6 && 'text-blue-500'
+                'bg-gradient-to-b from-sky-500/20 to-sky-500/10 border-sky-500/30',
+              index === 0 && 'text-rose-500', // 일요일
+              index === 6 && 'text-sky-500'   // 토요일
             )}
           >
             <div className="space-y-1">
@@ -85,14 +138,14 @@ export function WeekView({
               <div
                 className={cn(
                   'text-lg font-bold transition-colors duration-200',
-                  isToday(date) ? 'text-primary' : 'text-foreground'
+                  isToday(date) ? 'text-sky-600 dark:text-sky-400' : 'text-foreground'
                 )}
               >
                 {date.getDate()}
               </div>
               {meetingsByDate[index].length > 0 && (
                 <div className="flex justify-center">
-                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+                  <div className="w-2 h-2 rounded-full bg-sky-500 animate-pulse shadow-sm"></div>
                 </div>
               )}
             </div>
@@ -102,12 +155,21 @@ export function WeekView({
 
       {/* 시간 그리드 */}
       <div className="relative bg-gradient-to-br from-background/60 to-background/40 overflow-x-auto">
-        <div className="grid grid-cols-8 min-w-[800px]">
+        <div className={cn(
+          "grid grid-cols-8",
+          isMobile ? "min-w-[600px]" : "min-w-[800px]"
+        )}>
           {timeSlots.map(hour => (
             <Fragment key={hour}>
               {/* 시간 라벨 */}
-              <div className="border-r border-b border-border/20 p-3 bg-card/20 sticky left-0 z-10">
-                <div className="text-sm font-medium text-muted-foreground">
+              <div className={cn(
+                "border-r border-b border-border/20 bg-card/20 sticky left-0 z-10",
+                isMobile ? "p-2" : "p-3"
+              )}>
+                <div className={cn(
+                  "font-medium text-muted-foreground",
+                  isMobile ? "text-xs" : "text-sm"
+                )}>
                   {hour.toString().padStart(2, '0')}:00
                 </div>
               </div>
@@ -130,7 +192,7 @@ export function WeekView({
                     key={`${dateStr}-${hour}`}
                     className={cn(
                       'relative min-h-16 p-2 border-r border-b border-border/20 last:border-r-0 group hover:bg-accent/20 transition-all duration-200',
-                      isToday(date) && 'bg-primary/5 hover:bg-primary/10',
+                      isToday(date) && 'bg-sky-500/5 hover:bg-sky-500/10',
                       isWeekend(date) && 'bg-muted/10',
                       'cursor-pointer'
                     )}
@@ -148,11 +210,12 @@ export function WeekView({
                         <div
                           key={meeting.id}
                           className={cn(
-                            'relative p-2 rounded-lg border border-white/20 cursor-pointer transition-all duration-200 shadow-sm',
-                            'hover:scale-105 hover:shadow-lg backdrop-blur-sm text-white font-medium transform hover:z-10',
-                            meetingTypeColors[
-                              meeting.type as keyof typeof meetingTypeColors
-                            ] || 'bg-gray-500'
+                            'relative p-2 rounded-lg cursor-pointer transition-all duration-200 shadow-sm backdrop-blur-sm font-medium transform',
+                            'hover:scale-105 hover:shadow-lg hover:z-10',
+                            // 🍎 SureCRM 색상 시스템 적용
+                            getEventColors(meeting).bg,
+                            getEventColors(meeting).border,
+                            getEventColors(meeting).text
                           )}
                           onClick={() => onMeetingClick(meeting)}
                           title={`${meeting.time} - ${meeting.client.name}`}
