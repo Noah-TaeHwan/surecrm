@@ -296,25 +296,25 @@ export default function ReportsPage({ loaderData }: Route.ComponentProps) {
 
   return (
     <MainLayout title="보고서">
-      <div className="space-y-6">
-        {/* 헤더 */}
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-muted-foreground">
+      <div className="space-y-4 sm:space-y-6 px-2 sm:px-0">
+        {/* 🎯 모바일 최적화: 헤더 */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+          <div className="space-y-1">
+            <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
               비즈니스 성과와 주요 지표를 확인하세요
             </p>
-            <p className="text-sm text-muted-foreground mt-1">
-              <Calendar className="inline h-4 w-4 mr-1" />
+            <p className="text-xs sm:text-sm text-muted-foreground flex items-center">
+              <Calendar className="inline h-3 w-3 sm:h-4 sm:w-4 mr-1" />
               {dateRange.formatted}
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
             <Select
               value={selectedPeriod}
               onValueChange={handlePeriodChange}
               disabled={isLoading}
             >
-              <SelectTrigger className="w-32">
+              <SelectTrigger className="w-full sm:w-32 min-h-[44px]">
                 <SelectValue />
                 {isLoading && (
                   <RefreshCw className="ml-2 h-4 w-4 animate-spin" />
@@ -327,14 +327,20 @@ export default function ReportsPage({ loaderData }: Route.ComponentProps) {
                 <SelectItem value="year">올해</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline" size="sm" onClick={handleDownload}>
-              <Download className="mr-2 h-4 w-4" />
-              다운로드
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleDownload}
+              className="min-h-[44px] px-3 sm:px-4 flex-shrink-0"
+            >
+              <Download className="mr-1 sm:mr-2 h-4 w-4" />
+              <span className="hidden sm:inline">다운로드</span>
+              <span className="sm:hidden">저장</span>
             </Button>
           </div>
         </div>
 
-        {/* 핵심 지표 카드들 */}
+        {/* 🎯 모바일 최적화: 핵심 지표 카드들 */}
         <PerformanceMetrics
           performance={performance}
           period={{
@@ -345,14 +351,14 @@ export default function ReportsPage({ loaderData }: Route.ComponentProps) {
           }}
         />
 
-        {/* 카카오톡 업무 보고 양식 */}
+        {/* 🎯 모바일 최적화: 카카오톡 업무 보고 양식 */}
         <KakaoReport
           performance={performance}
           user={user}
           period={selectedPeriod}
         />
 
-        {/* 비즈니스 인사이트 탭 - 🔧 수정: userGoals 전달 */}
+        {/* 🎯 모바일 최적화: 비즈니스 인사이트 탭 - 🔧 수정: userGoals 전달 */}
         <InsightsTabs
           performance={performance}
           topPerformers={topPerformers}
