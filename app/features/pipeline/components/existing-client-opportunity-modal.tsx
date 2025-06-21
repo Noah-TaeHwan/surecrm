@@ -206,6 +206,7 @@ export function ExistingClientOpportunityModal({
   };
 
   const handleClose = () => {
+    // 🧹 모달 상태 완전 초기화
     setSelectedClientId(preSelectedClientId || '');
     setClientSearchQuery('');
     setSelectedType('');
@@ -217,6 +218,26 @@ export function ExistingClientOpportunityModal({
     setStep('selectClient'); // 항상 1단계로 복원
     onClose();
   };
+
+  // 🔄 모달이 닫힐 때마다 상태 초기화
+  useEffect(() => {
+    if (!isOpen) {
+      // 모달이 닫힌 후 상태 초기화
+      const timer = setTimeout(() => {
+        setSelectedClientId(preSelectedClientId || '');
+        setClientSearchQuery('');
+        setSelectedType('');
+        setNotes('');
+        setProductName('');
+        setInsuranceCompany('');
+        setMonthlyPremium('');
+        setExpectedCommission('');
+        setStep('selectClient');
+      }, 100); // 약간의 지연을 두어 애니메이션 완료 후 초기화
+
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, preSelectedClientId]);
 
   // 고객 필터링 및 정렬 (선택된 고객을 맨 위로)
   const filteredClients = clients
@@ -241,7 +262,11 @@ export function ExistingClientOpportunityModal({
   );
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={(open) => {
+      if (!open) {
+        handleClose(); // 🔄 X 버튼이나 ESC로 닫힐 때도 상태 초기화
+      }
+    }}>
       <DialogContent
         className="sm:max-w-xl w-[95vw] p-0 overflow-hidden flex flex-col sm:max-h-[75vh] gap-0 border-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
         style={{

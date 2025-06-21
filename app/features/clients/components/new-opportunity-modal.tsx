@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -132,6 +132,7 @@ export function NewOpportunityModal({
   };
 
   const handleClose = () => {
+    // 🧹 모달 상태 완전 초기화
     setSelectedType('');
     setNotes('');
     setProductName('');
@@ -142,12 +143,34 @@ export function NewOpportunityModal({
     onClose();
   };
 
+  // 🔄 모달이 닫힐 때마다 상태 초기화
+  useEffect(() => {
+    if (!isOpen) {
+      // 모달이 닫힌 후 상태 초기화
+      const timer = setTimeout(() => {
+        setSelectedType('');
+        setNotes('');
+        setProductName('');
+        setInsuranceCompany('');
+        setMonthlyPremium('');
+        setExpectedCommission('');
+        setStep('select');
+      }, 100); // 약간의 지연을 두어 애니메이션 완료 후 초기화
+
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
+
   const selectedInsurance = insuranceTypes.find(
     type => type.id === selectedType
   );
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
+    <Dialog open={isOpen} onOpenChange={(open) => {
+      if (!open) {
+        handleClose(); // 🔄 X 버튼이나 ESC로 닫힐 때도 상태 초기화
+      }
+    }}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
