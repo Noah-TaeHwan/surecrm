@@ -594,7 +594,7 @@ export default function SettingsPage({
 
   return (
     <MainLayout title="설정">
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6 px-2 sm:px-0">
         {/* 성공/오류 메시지 - 더 세련된 디자인 */}
         {actionData && (
           <div
@@ -604,7 +604,7 @@ export default function SettingsPage({
                 : 'bg-destructive/10 text-destructive border-destructive/30'
             }`}
           >
-            <div className="flex items-center gap-3 p-4">
+            <div className="flex items-center gap-3 p-3 sm:p-4">
               <div
                 className={`p-2 rounded-full ${
                   actionData.success ? 'bg-primary/20' : 'bg-destructive/20'
@@ -617,7 +617,7 @@ export default function SettingsPage({
                 )}
               </div>
               <div className="flex-1">
-                <p className="font-medium">
+                <p className="font-medium text-sm sm:text-base">
                   {actionData.success
                     ? (actionData as any).message
                     : (actionData as any).error}
@@ -627,26 +627,26 @@ export default function SettingsPage({
           </div>
         )}
 
-        {/* 헤더 - 더 임팩트 있게 */}
+        {/* 🎯 모바일 최적화: 헤더 - 더 임팩트 있게 */}
         <div className="relative">
-          <div className="relative bg-card border rounded-xl p-6">
-            <div className="flex items-center justify-between">
+          <div className="relative bg-card border rounded-xl p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
               <div className="space-y-2">
                 <div className="flex items-center gap-3">
-                  <div className="p-3 bg-muted rounded-xl">
-                    <SettingsIcon className="h-6 w-6 text-foreground" />
+                  <div className="p-2 sm:p-3 bg-muted rounded-xl">
+                    <SettingsIcon className="h-5 w-5 sm:h-6 sm:w-6 text-foreground" />
                   </div>
                   <div>
-                    <h1 className="text-3xl font-bold text-foreground">설정</h1>
-                    <p className="text-muted-foreground">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-foreground">설정</h1>
+                    <p className="text-sm sm:text-base text-muted-foreground">
                       {user ? `${user.fullName || user.email}님의 ` : ''}계정
                       정보와 환경설정을 관리하세요
                     </p>
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                <Badge variant="outline" className="px-4 py-2">
+              <div className="flex items-center gap-3 justify-start sm:justify-end">
+                <Badge variant="outline" className="px-3 sm:px-4 py-2">
                   <Crown className="h-3 w-3 mr-2" />
                   MVP 버전
                 </Badge>
@@ -655,23 +655,23 @@ export default function SettingsPage({
           </div>
         </div>
 
-        {/* 메인 설정 - 프로필 정보와 보안 설정 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* 프로필 정보 */}
+        {/* 🎯 모바일 최적화: 메인 설정 - 프로필 정보와 보안 설정 */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
+          {/* 🎯 모바일 최적화: 프로필 정보 */}
           <Card className="border bg-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-lg font-semibold">
+            <CardHeader className="p-4 sm:p-6 pb-3 sm:pb-4">
+              <CardTitle className="flex items-center gap-3 text-base sm:text-lg font-semibold">
                 <div className="p-2 bg-muted rounded-lg">
-                  <User className="h-5 w-5 text-foreground" />
+                  <User className="h-4 w-4 sm:h-5 sm:w-5 text-foreground" />
                 </div>
                 프로필 정보
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-6 space-y-6">
-              <Form method="post" className="space-y-5">
+            <CardContent className="p-4 sm:p-6 pt-0 space-y-5 sm:space-y-6">
+              <Form method="post" className="space-y-4 sm:space-y-5">
                 <input type="hidden" name="actionType" value="updateProfile" />
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4">
                   <div className="space-y-2">
                     <Label
                       htmlFor="name"
@@ -688,7 +688,7 @@ export default function SettingsPage({
                           handleProfileChange('name', e.target.value)
                         }
                         placeholder="이름을 입력하세요"
-                        className="bg-background border"
+                        className="bg-background border min-h-[44px]"
                       />
                     </div>
                   </div>
@@ -704,7 +704,7 @@ export default function SettingsPage({
                         id="position"
                         value={profileData.position}
                         placeholder="직책"
-                        className="bg-muted/50 border-white/10 text-muted-foreground cursor-not-allowed"
+                        className="bg-muted/50 border-white/10 text-muted-foreground cursor-not-allowed min-h-[44px]"
                         readOnly
                       />
                       <Badge className="absolute right-2 top-2 text-xs bg-muted text-muted-foreground">
@@ -728,7 +728,7 @@ export default function SettingsPage({
                       type="email"
                       value={profileData.email}
                       placeholder="이메일"
-                      className="bg-muted/50 border-white/10 text-muted-foreground cursor-not-allowed pl-10"
+                      className="bg-muted/50 border-white/10 text-muted-foreground cursor-not-allowed pl-10 min-h-[44px]"
                       readOnly
                     />
                     <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -755,7 +755,7 @@ export default function SettingsPage({
                         handleProfileChange('phone', e.target.value)
                       }
                       placeholder="전화번호를 입력하세요"
-                      className="bg-background border pl-10"
+                      className="bg-background border pl-10 min-h-[44px]"
                     />
                     <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   </div>
@@ -778,13 +778,13 @@ export default function SettingsPage({
                         handleProfileChange('company', e.target.value)
                       }
                       placeholder="회사명을 입력하세요"
-                      className="bg-background border pl-10"
+                      className="bg-background border pl-10 min-h-[44px]"
                     />
                     <Building className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   </div>
                 </div>
 
-                <Button type="submit" className="w-full">
+                <Button type="submit" className="w-full min-h-[44px]">
                   <Save className="h-4 w-4 mr-2" />
                   프로필 저장
                 </Button>
@@ -792,18 +792,18 @@ export default function SettingsPage({
             </CardContent>
           </Card>
 
-          {/* 보안 설정 */}
+          {/* 🎯 모바일 최적화: 보안 설정 */}
           <Card className="border bg-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-lg font-semibold">
+            <CardHeader className="p-4 sm:p-6 pb-3 sm:pb-4">
+              <CardTitle className="flex items-center gap-3 text-base sm:text-lg font-semibold">
                 <div className="p-2 bg-muted rounded-lg">
-                  <Shield className="h-5 w-5 text-foreground" />
+                  <Shield className="h-4 w-4 sm:h-5 sm:w-5 text-foreground" />
                 </div>
                 보안 설정
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-6 space-y-6">
-              <Form method="post" className="space-y-5">
+            <CardContent className="p-4 sm:p-6 pt-0 space-y-5 sm:space-y-6">
+              <Form method="post" className="space-y-4 sm:space-y-5">
                 <input type="hidden" name="actionType" value="changePassword" />
 
                 <div className="space-y-4">
@@ -819,7 +819,7 @@ export default function SettingsPage({
                         handlePasswordChange('currentPassword', e.target.value)
                       }
                       placeholder="현재 비밀번호를 입력하세요"
-                      className="bg-background border"
+                      className="bg-background border min-h-[44px]"
                     />
                   </div>
 
@@ -835,7 +835,7 @@ export default function SettingsPage({
                         handlePasswordChange('newPassword', e.target.value)
                       }
                       placeholder="새 비밀번호를 입력하세요 (6자 이상)"
-                      className="bg-background border"
+                      className="bg-background border min-h-[44px]"
                     />
                   </div>
 
@@ -851,19 +851,19 @@ export default function SettingsPage({
                         handlePasswordChange('confirmPassword', e.target.value)
                       }
                       placeholder="새 비밀번호를 다시 입력하세요"
-                      className="bg-background border"
+                      className="bg-background border min-h-[44px]"
                     />
                   </div>
                 </div>
 
-                <Button type="submit" variant="destructive" className="w-full">
+                <Button type="submit" variant="destructive" className="w-full min-h-[44px]">
                   <Shield className="h-4 w-4 mr-2" />
                   비밀번호 변경
                 </Button>
               </Form>
 
               {/* 보안 가이드 */}
-              <div className="mt-6 p-4 bg-muted/50 border rounded-lg">
+              <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-muted/50 border rounded-lg">
                 <div className="flex items-start gap-3">
                   <Shield className="h-4 w-4 text-foreground mt-0.5" />
                   <div className="space-y-1">
@@ -882,23 +882,23 @@ export default function SettingsPage({
           </Card>
         </div>
 
-        {/* 🌐 연동 설정 - 알림 및 구글 캘린더 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* 알림 설정 */}
+        {/* � 모바일 최적화: �🌐 연동 설정 - 알림 및 구글 캘린더 */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
+          {/* 🎯 모바일 최적화: 알림 설정 */}
           <Card className="border bg-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-lg font-semibold">
+            <CardHeader className="p-4 sm:p-6 pb-3 sm:pb-4">
+              <CardTitle className="flex items-center gap-3 text-base sm:text-lg font-semibold">
                 <div className="p-2 bg-muted rounded-lg">
-                  <Bell className="h-5 w-5 text-foreground" />
+                  <Bell className="h-4 w-4 sm:h-5 sm:w-5 text-foreground" />
                 </div>
                 알림 설정
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-sm">
                 이메일 및 시스템 알림 설정을 관리하세요
               </CardDescription>
             </CardHeader>
-            <CardContent className="p-6 space-y-6">
-              <Form method="post" className="space-y-5">
+            <CardContent className="p-4 sm:p-6 pt-0 space-y-5 sm:space-y-6">
+              <Form method="post" className="space-y-4 sm:space-y-5">
                 <input
                   type="hidden"
                   name="actionType"
@@ -906,7 +906,7 @@ export default function SettingsPage({
                 />
 
                 <div className="space-y-4">
-                  <div className="flex items-start justify-between">
+                  <div className="flex items-start justify-between min-h-[44px]">
                     <div className="space-y-1 flex-1 mr-4">
                       <Label
                         htmlFor="emailNotifications"
@@ -923,19 +923,19 @@ export default function SettingsPage({
                       name="emailNotifications"
                       checked={emailNotifications}
                       onCheckedChange={setEmailNotifications}
-                      className="flex-shrink-0"
+                      className="flex-shrink-0 mt-1"
                     />
                   </div>
                 </div>
 
-                <Button type="submit" className="w-full">
+                <Button type="submit" className="w-full min-h-[44px]">
                   <Save className="h-4 w-4 mr-2" />
                   알림 설정 저장
                 </Button>
               </Form>
 
               {/* 알림 가이드 */}
-              <div className="mt-6 p-4 bg-muted/50 border rounded-lg">
+              <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-muted/50 border rounded-lg">
                 <div className="flex items-start gap-3">
                   <Bell className="h-4 w-4 text-foreground mt-0.5" />
                   <div className="space-y-1">
@@ -953,20 +953,20 @@ export default function SettingsPage({
             </CardContent>
           </Card>
 
-          {/* 🌐 구글 캘린더 연동 설정 */}
+          {/* � 모바일 최적화: �🌐 구글 캘린더 연동 설정 */}
           <Card className="border bg-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-lg font-semibold">
+            <CardHeader className="p-4 sm:p-6 pb-3 sm:pb-4">
+              <CardTitle className="flex items-center gap-3 text-base sm:text-lg font-semibold">
                 <div className="p-2 bg-muted rounded-lg">
-                  <Calendar className="h-5 w-5 text-foreground" />
+                  <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-foreground" />
                 </div>
                 구글 캘린더 연동
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-sm">
                 구글 캘린더와 SureCRM을 연동하여 일정을 통합 관리하세요
               </CardDescription>
             </CardHeader>
-            <CardContent className="p-6 space-y-6">
+            <CardContent className="p-4 sm:p-6 pt-0 space-y-5 sm:space-y-6">
               {/* 연동 상태 표시 */}
               <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border">
                 <div className="flex items-center gap-3">
@@ -1303,31 +1303,31 @@ export default function SettingsPage({
           </Card>
         </div>
 
-        {/* 계정 정보 및 시스템 설정 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* 계정 정보 */}
+        {/* 🎯 모바일 최적화: 계정 정보 및 시스템 설정 */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
+          {/* 🎯 모바일 최적화: 계정 정보 */}
           <Card className="border bg-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-lg font-semibold">
+            <CardHeader className="p-4 sm:p-6 pb-3 sm:pb-4">
+              <CardTitle className="flex items-center gap-3 text-base sm:text-lg font-semibold">
                 <div className="p-2 bg-muted rounded-lg">
-                  <User className="h-5 w-5 text-foreground" />
+                  <User className="h-4 w-4 sm:h-5 sm:w-5 text-foreground" />
                 </div>
                 계정 정보
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-6 space-y-4">
+            <CardContent className="p-4 sm:p-6 pt-0 space-y-4">
               <div className="space-y-3">
-                <div className="flex items-center justify-between py-2 border-b border-border/50">
+                <div className="flex items-center justify-between py-2 border-b border-border/50 min-h-[44px]">
                   <div className="flex items-center gap-2">
                     <User className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm font-medium">사용자 ID</span>
                   </div>
-                  <code className="text-xs bg-muted px-2 py-1 rounded font-mono">
+                  <code className="text-xs sm:text-sm bg-muted px-2 py-1 rounded font-mono">
                     {userProfile.id.slice(0, 8)}...
                   </code>
                 </div>
 
-                <div className="flex items-center justify-between py-2 border-b border-border/50">
+                <div className="flex items-center justify-between py-2 border-b border-border/50 min-h-[44px]">
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm font-medium">가입일</span>
@@ -1337,7 +1337,7 @@ export default function SettingsPage({
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between py-2">
+                <div className="flex items-center justify-between py-2 min-h-[44px]">
                   <div className="flex items-center gap-2">
                     <Crown className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm font-medium">플랜</span>
@@ -1350,19 +1350,19 @@ export default function SettingsPage({
             </CardContent>
           </Card>
 
-          {/* 도움말 및 가이드 */}
+          {/* 🎯 모바일 최적화: 도움말 및 가이드 */}
           <Card className="border bg-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-lg font-semibold">
+            <CardHeader className="p-4 sm:p-6 pb-3 sm:pb-4">
+              <CardTitle className="flex items-center gap-3 text-base sm:text-lg font-semibold">
                 <div className="p-2 bg-muted rounded-lg">
-                  <SettingsIcon className="h-5 w-5 text-foreground" />
+                  <SettingsIcon className="h-4 w-4 sm:h-5 sm:w-5 text-foreground" />
                 </div>
                 설정 가이드
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-6 space-y-4">
+            <CardContent className="p-4 sm:p-6 pt-0 space-y-4">
               <div className="space-y-3">
-                <div className="flex items-start gap-3">
+                <div className="flex items-start gap-3 min-h-[44px]">
                   <div className="p-1 bg-primary/10 rounded">
                     <Save className="h-3 w-3 text-primary" />
                   </div>
@@ -1376,7 +1376,7 @@ export default function SettingsPage({
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3">
+                <div className="flex items-start gap-3 min-h-[44px]">
                   <div className="p-1 bg-orange/10 rounded">
                     <Shield className="h-3 w-3 text-orange-600" />
                   </div>
@@ -1390,7 +1390,7 @@ export default function SettingsPage({
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3">
+                <div className="flex items-start gap-3 min-h-[44px]">
                   <div className="p-1 bg-blue/10 rounded">
                     <User className="h-3 w-3 text-blue-600" />
                   </div>
