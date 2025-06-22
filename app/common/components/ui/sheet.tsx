@@ -8,6 +8,7 @@ import {
   isIOS,
   getMobileMotionConfig,
 } from '~/lib/utils/mobile-animation';
+import { useMobileModalHeight } from '~/common/hooks/use-viewport-height';
 
 function Sheet({ ...props }: React.ComponentProps<typeof SheetPrimitive.Root>) {
   return <SheetPrimitive.Root data-slot="sheet" {...props} />;
@@ -69,6 +70,9 @@ function SheetContent({
   const mobile = isMobile();
   const ios = isIOS();
   const contentRef = React.useRef<HTMLDivElement>(null);
+
+  // 🚀 iPhone Safari 하단 주소창 대응 모바일 모달 높이
+  const mobileModalHeight = useMobileModalHeight();
 
   // 🚀 모바일 최적화 애니메이션 설정
   const getMobileOptimizedDuration = () => {
@@ -138,6 +142,13 @@ function SheetContent({
               '--tw-exit-duration': `${durations.close}ms`,
               transitionDuration: `${durations.open}ms`,
             }),
+            // 🚀 iPhone Safari 하단 주소창 대응 동적 높이
+            ...(mobile &&
+              (side === 'left' || side === 'right') && {
+                height: `${mobileModalHeight.height}px`,
+                maxHeight: `${mobileModalHeight.height}px`,
+                top: `${mobileModalHeight.top}px`,
+              }),
           } as React.CSSProperties
         }
         {...props}

@@ -48,6 +48,17 @@
   --spacing-safe-bottom: env(safe-area-inset-bottom);
   --spacing-safe-left: env(safe-area-inset-left);
   --spacing-safe-right: env(safe-area-inset-right);
+
+  /* 🚀 iPhone Safari 하단 주소창 대응 Dynamic Viewport Height */
+  --actual-vh: 100vh; /* JavaScript로 업데이트되는 실제 viewport height */
+  --safe-vh: 100vh; /* safe area를 고려한 viewport height */
+  --ios-vh: 100vh; /* iOS Safari 전용 viewport height */
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+
+  /* Modern CSS Viewport Units (지원되는 브라우저에서 사용) */
+  --dvh-fallback: 100vh; /* dynamic viewport height fallback */
+  --svh-fallback: 100vh; /* small viewport height fallback */
+  --lvh-fallback: 100vh; /* large viewport height fallback */
   --spacing-11: 2.75rem; /* 44px - iOS touch target */
   --spacing-12: 3rem; /* 48px - Android touch target */
   --spacing-14: 3.5rem; /* 56px - Comfortable touch target */
@@ -1213,6 +1224,106 @@ details[open] summary::before {
     100% {
       transform: translateX(100%);
     }
+  }
+}
+
+/* =================================================================
+   🚀 IPHONE SAFARI VIEWPORT HEIGHT FIX
+   하단 주소창으로 인한 UI 잘림 문제 해결
+   ================================================================= */
+
+/* 동적 viewport height 유틸리티 클래스 */
+.h-screen-safe {
+  height: var(--safe-vh);
+  min-height: var(--safe-vh);
+}
+
+.h-screen-actual {
+  height: var(--actual-vh);
+  min-height: var(--actual-vh);
+}
+
+.h-screen-dynamic {
+  /* Modern CSS 지원 브라우저용 */
+  height: 100dvh;
+  /* Fallback */
+  height: var(--actual-vh);
+  min-height: var(--actual-vh);
+}
+
+.max-h-screen-safe {
+  max-height: var(--safe-vh);
+}
+
+.max-h-screen-actual {
+  max-height: var(--actual-vh);
+}
+
+.min-h-screen-safe {
+  min-height: var(--safe-vh);
+}
+
+.min-h-screen-actual {
+  min-height: var(--actual-vh);
+}
+
+/* iOS Safari 특화 클래스 */
+.ios-safari .h-screen-dynamic {
+  height: var(--ios-vh) !important;
+  min-height: var(--ios-vh) !important;
+}
+
+.ios-safari .max-h-screen-dynamic {
+  max-height: var(--ios-vh) !important;
+}
+
+/* 모바일 안전 높이 (하단 주소창과 safe area 고려) */
+.h-mobile-safe {
+  height: calc(var(--actual-vh) - var(--safe-area-bottom));
+  min-height: calc(var(--actual-vh) - var(--safe-area-bottom));
+}
+
+.max-h-mobile-safe {
+  max-height: calc(var(--actual-vh) - var(--safe-area-bottom));
+}
+
+/* 모바일 컨테이너 높이 (일반적인 모바일 UI용) */
+.h-mobile-container {
+  height: calc(var(--actual-vh) - 4rem); /* 헤더 높이 제외 */
+  min-height: calc(var(--actual-vh) - 4rem);
+}
+
+.max-h-mobile-container {
+  max-height: calc(var(--actual-vh) - 4rem);
+}
+
+/* 모바일 풀스크린 모달/시트용 */
+.h-mobile-modal {
+  height: calc(var(--actual-vh) - 2rem); /* 상하 여백 */
+  min-height: calc(var(--actual-vh) - 2rem);
+}
+
+.max-h-mobile-modal {
+  max-height: calc(var(--actual-vh) - 2rem);
+}
+
+/* iPhone Safari 특별 대응 */
+@supports (-webkit-touch-callout: none) {
+  /* iOS Safari에서만 적용되는 스타일 */
+  .h-screen-dynamic {
+    height: var(--ios-vh) !important;
+    min-height: var(--ios-vh) !important;
+  }
+
+  .h-mobile-safe {
+    height: calc(var(--ios-vh) - var(--safe-area-bottom) - 1rem) !important;
+    min-height: calc(var(--ios-vh) - var(--safe-area-bottom) - 1rem) !important;
+  }
+
+  /* iOS Safari 특화 모달/시트 */
+  .ios-mobile-modal {
+    height: calc(var(--ios-vh) - 3rem) !important;
+    max-height: calc(var(--ios-vh) - 3rem) !important;
   }
 }
 

@@ -16,6 +16,7 @@ import { initGA, SessionTracking } from '~/lib/utils/analytics';
 import { usePageTracking } from '~/hooks/use-analytics';
 import { useBusinessIntelligence } from '~/hooks/use-business-intelligence';
 import { useUserRoleTracker } from '~/hooks/use-user-role-tracker';
+import { initDynamicViewportHeight } from '~/lib/utils/viewport-height';
 
 // Root.tsx 전용 타입 정의
 interface ErrorBoundaryProps {
@@ -891,6 +892,15 @@ export default function App() {
       enableUserJourneyMapping: true,
       samplingRate: 0.8, // 80% 샘플링으로 성능 최적화
     });
+
+  // 🚀 iPhone Safari 하단 주소창 대응 전역 초기화
+  useEffect(() => {
+    const cleanupViewportHeight = initDynamicViewportHeight();
+
+    return () => {
+      cleanupViewportHeight?.();
+    };
+  }, []);
 
   // GA 초기화 및 세션 시작
   useEffect(() => {

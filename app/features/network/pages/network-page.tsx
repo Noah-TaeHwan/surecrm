@@ -15,6 +15,7 @@ import {
   type NetworkMobileTabType,
 } from '../components/NetworkMobileTabs';
 import { useBreakpoint } from '~/common/hooks/use-window-size';
+import { useMobileModalHeight } from '~/common/hooks/use-viewport-height';
 import {
   useRef,
   useState,
@@ -261,6 +262,9 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
 
   // 반응형 브레이크포인트 훅
   const { isMobile, isTablet, isDesktop, isHydrated } = useBreakpoint();
+
+  // 🚀 iPhone Safari 하단 주소창 대응 모바일 모달 높이
+  const mobileModalHeight = useMobileModalHeight();
 
   // 모바일 탭 상태 관리
   const [activeMobileTab, setActiveMobileTab] =
@@ -922,15 +926,15 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
               }}
             />
 
-            {/* 슬라이드업 패널 - 개선된 여백 설정 */}
+            {/* 슬라이드업 패널 - 🚀 iPhone Safari 하단 주소창 대응 */}
             <div
-              className="fixed left-0 right-0 z-50 bg-background border-t border-border rounded-t-xl shadow-2xl animate-slide-up flex flex-col"
+              className="fixed left-0 right-0 z-50 bg-background border-t border-border rounded-t-xl shadow-2xl animate-slide-up flex flex-col ios-mobile-modal"
               style={{
-                top: '12vh', // 🎯 위쪽 여백 추가 (12% 상단 여백)
-                bottom: '0', // 바텀은 0으로 설정
-                height: '88vh', // 전체 높이에서 위쪽 여백을 뺀 높이
-                paddingBottom:
-                  'calc(env(safe-area-inset-bottom, 0px) + 0.5rem)', // 🎯 하단 패딩 줄임 (1rem → 0.5rem)
+                ...mobileModalHeight.style, // 🚀 동적 높이 적용
+                // iPhone Safari 추가 최적화
+                willChange: 'transform, height',
+                transform: 'translateZ(0)', // GPU 가속
+                backfaceVisibility: 'hidden',
               }}
             >
               {/* 드래그 핸들 - sticky로 고정 */}
@@ -941,12 +945,17 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
               {/* NetworkDetailPanel 직접 렌더링 (데스크톱과 동일) - 스크롤 가능 */}
               <div
                 className="flex-1 overflow-y-auto px-4"
-                style={{
-                  WebkitOverflowScrolling: 'touch', // iOS 모바일 스크롤 최적화
-                  overscrollBehavior: 'contain', // 스크롤 바운싱 제어
-                  paddingBottom:
-                    'calc(env(safe-area-inset-bottom, 0px) + 0.5rem)', // 🎯 내부 패딩도 줄임
-                }}
+                style={
+                  {
+                    WebkitOverflowScrolling: 'touch', // iOS 모바일 스크롤 최적화
+                    overscrollBehavior: 'contain', // 스크롤 바운싱 제어
+                    paddingBottom: `${mobileModalHeight.bottom}px`, // 🚀 동적 하단 여백
+                    // iPhone Safari 스크롤 최적화
+                    scrollBehavior: 'smooth',
+                    msOverflowStyle: 'none',
+                    scrollbarWidth: 'none',
+                  } as React.CSSProperties
+                }
               >
                 <NetworkDetailPanel
                   nodeId={selectedNode}
