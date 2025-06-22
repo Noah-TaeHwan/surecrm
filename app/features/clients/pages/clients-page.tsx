@@ -377,13 +377,25 @@ export async function action({ request }: { request: Request }) {
       );
 
       // pipeline stages 조회
-      const stages = await getPipelineStages(user.id);
+      let stages = await getPipelineStages(user.id);
 
+      // 🎯 파이프라인 단계가 없으면 기본 단계 생성
       if (!stages || stages.length === 0) {
-        return {
-          success: false,
-          message: '파이프라인 단계 정보를 가져올 수 없습니다.',
-        };
+        console.log('🔧 파이프라인 단계가 없어서 기본 단계 생성');
+        try {
+          const { createDefaultPipelineStages } = await import(
+            '~/features/pipeline/lib/supabase-pipeline-data'
+          );
+          stages = await createDefaultPipelineStages(user.id);
+          console.log('✅ 기본 파이프라인 단계 생성 완료:', stages.length);
+        } catch (createError) {
+          console.error('❌ 기본 파이프라인 단계 생성 실패:', createError);
+          return {
+            success: false,
+            message:
+              '파이프라인 단계 정보를 가져올 수 없습니다. 관리자에게 문의하세요.',
+          };
+        }
       }
 
       // 기본 단계 찾기

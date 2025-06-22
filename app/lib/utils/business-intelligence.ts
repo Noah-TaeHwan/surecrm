@@ -216,8 +216,8 @@ class BusinessIntelligenceSystem {
 
       lastKeyTime = currentTime;
 
-      // 타이핑 속도 분석
-      if (this.behaviorMetrics.keystrokes.length >= 10) {
+      // 타이핑 속도 분석 (안전성 검사 추가)
+      if (this.behaviorMetrics?.keystrokes?.length >= 10) {
         this.analyzeTypingPattern();
       }
     });
@@ -362,6 +362,8 @@ class BusinessIntelligenceSystem {
 
   // === 📊 행동 분석 메서드들 ===
   private analyzeMousePattern(): void {
+    if (!this.behaviorMetrics?.mouseMovements) return;
+
     const recentMovements = this.behaviorMetrics.mouseMovements.slice(-10);
     if (recentMovements.length < 5) return;
 
@@ -501,27 +503,36 @@ class BusinessIntelligenceSystem {
   }
 
   private calculateEngagementScore(): number {
+    if (
+      !this.behaviorMetrics?.clickHeatmap ||
+      !this.behaviorMetrics?.scrollPattern ||
+      !this.userProfile
+    ) {
+      return 0;
+    }
+
     const clickCount = this.behaviorMetrics.clickHeatmap.reduce(
       (sum, click) => sum + click.count,
       0
     );
-    const scrollDepth = Math.max(
-      ...this.behaviorMetrics.scrollPattern.map(s => s.depth),
-      0
-    );
-    const timeOnPage = Date.now() - this.userProfile!.sessionStartTime;
+    const scrollDepth =
+      this.behaviorMetrics.scrollPattern.length > 0
+        ? Math.max(...this.behaviorMetrics.scrollPattern.map(s => s.depth), 0)
+        : 0;
+    const timeOnPage = Date.now() - this.userProfile.sessionStartTime;
 
     return Math.min(10, clickCount * 2 + scrollDepth / 10 + timeOnPage / 10000);
   }
 
   private calculateFrustrationLevel(): number {
-    const errorCount = this.behaviorMetrics.errorRecovery.length;
-    const abandonedFocus = this.behaviorMetrics.focusEvents.filter(
-      f => f.abandoned
-    ).length;
-    const rapidClicks = this.behaviorMetrics.clickHeatmap.filter(
-      c => c.avgTime < 1000
-    ).length;
+    if (!this.behaviorMetrics) return 0;
+
+    const errorCount = this.behaviorMetrics.errorRecovery?.length || 0;
+    const abandonedFocus =
+      this.behaviorMetrics.focusEvents?.filter(f => f.abandoned).length || 0;
+    const rapidClicks =
+      this.behaviorMetrics.clickHeatmap?.filter(c => c.avgTime < 1000).length ||
+      0;
 
     return Math.min(10, errorCount * 2 + abandonedFocus + rapidClicks);
   }

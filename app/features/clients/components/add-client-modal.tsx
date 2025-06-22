@@ -84,7 +84,7 @@ export function AddClientModal({
     resolver: zodResolver(clientSchema),
     defaultValues: {
       fullName: '',
-      phone: undefined, // phone이 optional이므로 undefined로 변경
+      phone: '', // 🔧 빈 문자열로 변경하여 controlled input 유지
       email: '',
       telecomProvider: '',
       address: '',
@@ -101,7 +101,7 @@ export function AddClientModal({
     if (open) {
       form.reset({
         fullName: '',
-        phone: undefined, // phone이 optional이므로 undefined로 변경
+        phone: '', // 🔧 빈 문자열로 변경하여 controlled input 유지
         email: '',
         telecomProvider: '',
         address: '',

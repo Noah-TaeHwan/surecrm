@@ -3444,6 +3444,30 @@ input[type='datetime-local']:not([style*='color']) {
   pointer-events: auto !important;
 }
 
+/* 🚫 aria-hidden이 적용된 컨테이너 내 포커스 가능한 요소 보호 */
+[aria-hidden='true'] button:focus,
+[aria-hidden='true'] input:focus,
+[aria-hidden='true'] textarea:focus,
+[aria-hidden='true'] select:focus,
+[aria-hidden='true'] [tabindex]:focus,
+[aria-hidden='true'] a:focus {
+  /* 포커스된 요소는 aria-hidden을 무시하고 접근 가능하게 유지 */
+  aria-hidden: false !important;
+}
+
+/* 🔧 Radix UI 모달 컴포넌트 aria-hidden 문제 해결 */
+[data-radix-dialog-overlay][aria-hidden='true']
+  ~ [data-radix-dialog-content]
+  *:focus,
+[data-radix-sheet-overlay][aria-hidden='true']
+  ~ [data-radix-sheet-content]
+  *:focus {
+  /* 모달 내부 포커스된 요소는 접근성에서 제외하지 않음 */
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+
 /* 🔧 모달 애니메이션 중 날짜 입력 안정성 */
 [data-state='open'] input[type='date'],
 [data-state='open'] input[type='time'],
