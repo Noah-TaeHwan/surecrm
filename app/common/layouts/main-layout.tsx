@@ -9,6 +9,7 @@ import {
 } from '~/common/components/navigation/mobile-nav';
 import { BottomTabNavigation } from '~/common/components/navigation/bottom-tab-navigation';
 import { useViewport } from '~/common/hooks/useViewport';
+import { useFullScreenMode } from '~/common/hooks/use-viewport-height';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -28,6 +29,9 @@ export function MainLayout({
 }: MainLayoutProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { isMobile } = useViewport();
+
+  // 🚀 iPhone Safari 전체 화면 모드
+  const fullScreen = useFullScreenMode();
   const [currentUser, setCurrentUser] = useState<{
     id: string;
     email: string;
@@ -161,7 +165,10 @@ export function MainLayout({
   }, [isMobileMenuOpen, closeMobileMenu]);
 
   return (
-    <div className="fixed inset-0 bg-background flex overflow-hidden">
+    <div
+      className={`fixed inset-0 bg-background flex overflow-hidden ${fullScreen.className}`}
+      style={fullScreen.style}
+    >
       {/* 🎯 데스크톱 사이드바 - Hydration 완료 후 표시 (플래시 방지) */}
       {isHydrated && !isInitialRender && !isMobile && (
         <div className="w-64 border-r border-border bg-muted/30 flex-shrink-0">

@@ -1251,6 +1251,25 @@ details[open] summary::before {
   min-height: var(--actual-vh);
 }
 
+/* 🚀 iPhone Safari 전체 화면 활용 (주소창 포함) */
+.h-screen-full-ios {
+  /* iPhone Safari에서 주소창 영역까지 포함한 전체 화면 */
+  height: 100vh; /* 주소창 포함 전체 높이 */
+  min-height: 100vh;
+  /* iOS Safari에서 주소창이 숨겨져도 일관된 높이 유지 */
+  height: 100svh; /* Small Viewport Height - 가장 작은 viewport */
+}
+
+.min-h-screen-full-ios {
+  min-height: 100vh;
+  min-height: 100svh;
+}
+
+.max-h-screen-full-ios {
+  max-height: 100vh;
+  max-height: 100svh;
+}
+
 .max-h-screen-safe {
   max-height: var(--safe-vh);
 }
@@ -1275,6 +1294,43 @@ details[open] summary::before {
 
 .ios-safari .max-h-screen-dynamic {
   max-height: var(--ios-vh) !important;
+}
+
+/* 🚀 iOS Safari 전체 화면 모드 (주소창 포함) */
+.ios-full-screen-mode {
+  /* 전체 화면 활용 */
+  --full-screen-vh: 100vh;
+  --address-bar-height: 0px;
+}
+
+.ios-full-screen-mode .h-screen-full-ios {
+  height: var(--full-screen-vh) !important;
+  min-height: var(--full-screen-vh) !important;
+  /* 주소창 영역까지 확장 */
+  margin-bottom: calc(-1 * var(--address-bar-height));
+  padding-bottom: var(--address-bar-height);
+}
+
+.ios-full-screen-mode .min-h-screen-full-ios {
+  min-height: var(--full-screen-vh) !important;
+}
+
+.ios-full-screen-mode .max-h-screen-full-ios {
+  max-height: var(--full-screen-vh) !important;
+}
+
+/* 전체 화면 모드에서 콘텐츠 보호 */
+.ios-full-screen-mode .content-safe-area {
+  padding-bottom: calc(var(--address-bar-height) + 1rem);
+}
+
+/* 전체 화면 모드에서 하단 고정 요소 */
+.ios-full-screen-mode .fixed-bottom {
+  bottom: var(--address-bar-height);
+}
+
+.ios-full-screen-mode .sticky-bottom {
+  bottom: var(--address-bar-height);
 }
 
 /* 모바일 안전 높이 (하단 주소창과 safe area 고려) */

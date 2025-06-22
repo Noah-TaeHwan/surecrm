@@ -4,6 +4,9 @@ import {
   getActualViewportHeight,
   getSafeAreaInsetBottom,
   isIOSSafari,
+  getFullScreenHeight,
+  getAddressBarHeight,
+  enableFullScreenMode,
 } from '~/lib/utils/viewport-height';
 
 /**
@@ -164,6 +167,122 @@ export function useMobileModalHeight() {
       maxHeight: `${modalHeight}px`,
       top: `${topMargin}px`,
       paddingBottom: `${bottomMargin}px`,
+    },
+  };
+}
+
+/**
+ * 🚀 iPhone Safari 전체 화면 모드 훅
+ *
+ * 주소창 영역까지 포함한 전체 화면을 활용합니다.
+ */
+export function useFullScreenMode() {
+  const [fullScreenData, setFullScreenData] = useState(() => ({
+    isEnabled: false,
+    fullHeight: getFullScreenHeight(),
+    actualHeight: getActualViewportHeight(),
+    addressBarHeight: getAddressBarHeight(),
+    isIOSSafari: isIOSSafari(),
+  }));
+
+  useEffect(() => {
+    if (!isIOSSafari()) {
+      // iOS Safari가 아닌 경우 기본값 반환
+      setFullScreenData(prev => ({ ...prev, isEnabled: false }));
+      return;
+    }
+
+    const updateFullScreenData = () => {
+      const fullHeight = getFullScreenHeight();
+      const actualHeight = getActualViewportHeight();
+      const addressBarHeight = getAddressBarHeight();
+
+      setFullScreenData({
+        isEnabled: true,
+        fullHeight,
+        actualHeight,
+        addressBarHeight,
+        isIOSSafari: true,
+      });
+
+      // 전체 화면 모드 활성화
+      enableFullScreenMode();
+    };
+
+    // 초기 설정
+    updateFullScreenData();
+
+    // 이벤트 리스너 등록
+    let resizeTimeout: NodeJS.Timeout;
+    let scrollTimeout: NodeJS.Timeout;
+
+    const handleResize = () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(updateFullScreenData, 100);
+    };
+
+    const handleScroll = () => {
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(updateFullScreenData, 150);
+    };
+
+    window.addEventListener('resize', handleResize, { passive: true });
+    window.addEventListener('orientationchange', handleResize, {
+      passive: true,
+    });
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    // Visual Viewport API 지원 시 사용
+    if ('visualViewport' in window && window.visualViewport) {
+      window.visualViewport.addEventListener('resize', updateFullScreenData);
+    }
+
+    return () => {
+      clearTimeout(resizeTimeout);
+      clearTimeout(scrollTimeout);
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
+      window.removeEventListener('scroll', handleScroll);
+
+      if ('visualViewport' in window && window.visualViewport) {
+        window.visualViewport.removeEventListener(
+          'resize',
+          updateFullScreenData
+        );
+      }
+    };
+  }, []);
+
+  return {
+    // 전체 화면 모드 상태
+    isEnabled: fullScreenData.isEnabled,
+    isIOSSafari: fullScreenData.isIOSSafari,
+
+    // 높이 정보
+    fullHeight: fullScreenData.fullHeight,
+    actualHeight: fullScreenData.actualHeight,
+    addressBarHeight: fullScreenData.addressBarHeight,
+
+    // 사용 가능한 콘텐츠 높이 (주소창 제외)
+    contentHeight: fullScreenData.fullHeight - fullScreenData.addressBarHeight,
+
+    // CSS 클래스명
+    className: fullScreenData.isEnabled
+      ? 'h-screen-full-ios'
+      : 'h-screen-dynamic',
+
+    // CSS 스타일
+    style: fullScreenData.isEnabled
+      ? {
+          height: `${fullScreenData.fullHeight}px`,
+          minHeight: `${fullScreenData.fullHeight}px`,
+        }
+      : {},
+
+    // CSS 변수
+    cssVars: {
+      '--full-screen-vh': `${fullScreenData.fullHeight}px`,
+      '--address-bar-height': `${fullScreenData.addressBarHeight}px`,
     },
   };
 }

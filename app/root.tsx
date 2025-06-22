@@ -16,7 +16,11 @@ import { initGA, SessionTracking } from '~/lib/utils/analytics';
 import { usePageTracking } from '~/hooks/use-analytics';
 import { useBusinessIntelligence } from '~/hooks/use-business-intelligence';
 import { useUserRoleTracker } from '~/hooks/use-user-role-tracker';
-import { initDynamicViewportHeight } from '~/lib/utils/viewport-height';
+import {
+  initDynamicViewportHeight,
+  enableFullScreenMode,
+  isIOSSafari,
+} from '~/lib/utils/viewport-height';
 
 // Root.tsx 전용 타입 정의
 interface ErrorBoundaryProps {
@@ -910,6 +914,14 @@ export default function App() {
   // 🚀 iPhone Safari 하단 주소창 대응 전역 초기화
   useEffect(() => {
     const cleanupViewportHeight = initDynamicViewportHeight();
+
+    // 🚀 iPhone Safari 전체 화면 모드 활성화
+    if (isIOSSafari()) {
+      enableFullScreenMode();
+      console.log(
+        '🚀 iPhone Safari 전체 화면 모드 활성화됨 - 주소창 영역까지 활용'
+      );
+    }
 
     return () => {
       cleanupViewportHeight?.();

@@ -15,7 +15,10 @@ import {
   type NetworkMobileTabType,
 } from '../components/NetworkMobileTabs';
 import { useBreakpoint } from '~/common/hooks/use-window-size';
-import { useMobileModalHeight } from '~/common/hooks/use-viewport-height';
+import {
+  useMobileModalHeight,
+  useFullScreenMode,
+} from '~/common/hooks/use-viewport-height';
 import {
   useRef,
   useState,
@@ -265,6 +268,22 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
 
   // 🚀 iPhone Safari 하단 주소창 대응 모바일 모달 높이
   const mobileModalHeight = useMobileModalHeight();
+
+  // 🚀 iPhone Safari 전체 화면 모드
+  const fullScreen = useFullScreenMode();
+
+  // 디버깅용 로그 (개발 환경에서만)
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development' && fullScreen.isIOSSafari) {
+      console.log('🚀 네트워크 페이지 - iPhone Safari 전체 화면 모드:', {
+        isEnabled: fullScreen.isEnabled,
+        fullHeight: fullScreen.fullHeight,
+        actualHeight: fullScreen.actualHeight,
+        addressBarHeight: fullScreen.addressBarHeight,
+        contentHeight: fullScreen.contentHeight,
+      });
+    }
+  }, [fullScreen]);
 
   // 모바일 탭 상태 관리
   const [activeMobileTab, setActiveMobileTab] =
@@ -926,15 +945,22 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
               }}
             />
 
-            {/* 슬라이드업 패널 - 🚀 iPhone Safari 하단 주소창 대응 */}
+            {/* 슬라이드업 패널 - 🚀 iPhone Safari 전체 화면 모드 대응 */}
             <div
-              className="fixed left-0 right-0 z-50 bg-background border-t border-border rounded-t-xl shadow-2xl animate-slide-up flex flex-col ios-mobile-modal"
+              className={`fixed left-0 right-0 z-50 bg-background border-t border-border rounded-t-xl shadow-2xl animate-slide-up flex flex-col ${fullScreen.isEnabled ? 'h-screen-full-ios content-safe-area' : 'ios-mobile-modal'}`}
               style={{
                 ...mobileModalHeight.style, // 🚀 동적 높이 적용
+                ...fullScreen.cssVars, // 🚀 전체 화면 모드 CSS 변수
                 // iPhone Safari 추가 최적화
                 willChange: 'transform, height',
                 transform: 'translateZ(0)', // GPU 가속
                 backfaceVisibility: 'hidden',
+                // 전체 화면 모드에서 주소창 영역까지 활용
+                ...(fullScreen.isEnabled && {
+                  height: `${fullScreen.fullHeight}px`,
+                  maxHeight: `${fullScreen.fullHeight}px`,
+                  bottom: 0,
+                }),
               }}
             >
               {/* 드래그 핸들 - sticky로 고정 */}
@@ -949,7 +975,9 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
                   {
                     WebkitOverflowScrolling: 'touch', // iOS 모바일 스크롤 최적화
                     overscrollBehavior: 'contain', // 스크롤 바운싱 제어
-                    paddingBottom: `${mobileModalHeight.bottom}px`, // 🚀 동적 하단 여백
+                    paddingBottom: fullScreen.isEnabled
+                      ? `${fullScreen.addressBarHeight + 16}px` // 🚀 전체 화면 모드: 주소창 높이 + 여백
+                      : `${mobileModalHeight.bottom}px`, // 🚀 일반 모드: 동적 하단 여백
                     // iPhone Safari 스크롤 최적화
                     scrollBehavior: 'smooth',
                     msOverflowStyle: 'none',

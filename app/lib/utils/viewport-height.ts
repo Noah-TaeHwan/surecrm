@@ -33,6 +33,61 @@ export const getActualViewportHeight = (): number => {
   return document.documentElement.clientHeight || window.innerHeight;
 };
 
+// 🚀 iPhone Safari 전체 화면 높이 (주소창 포함)
+export const getFullScreenHeight = (): number => {
+  if (typeof window === 'undefined') return 0;
+
+  if (isIOSSafari()) {
+    // iOS Safari에서 주소창이 보일 때의 전체 화면 높이
+    // screen.height는 기기의 실제 화면 높이
+    return Math.max(
+      window.screen.height,
+      window.outerHeight,
+      window.innerHeight + 100 // 주소창 영역 추가 (대략 100px)
+    );
+  }
+
+  return window.innerHeight;
+};
+
+// 주소창 높이 계산
+export const getAddressBarHeight = (): number => {
+  if (typeof window === 'undefined') return 0;
+
+  if (isIOSSafari()) {
+    // iOS Safari 주소창 높이 (동적으로 변함)
+    const fullHeight = window.screen.height;
+    const currentHeight = window.innerHeight;
+    return Math.max(0, fullHeight - currentHeight);
+  }
+
+  return 0;
+};
+
+// 전체 화면 모드 활성화 (주소창 영역까지 사용)
+export const enableFullScreenMode = () => {
+  if (typeof window === 'undefined') return;
+
+  const fullHeight = getFullScreenHeight();
+  const actualHeight = getActualViewportHeight();
+  const addressBarHeight = getAddressBarHeight();
+
+  // CSS 변수로 전체 화면 높이 설정
+  document.documentElement.style.setProperty(
+    '--full-screen-vh',
+    `${fullHeight}px`
+  );
+  document.documentElement.style.setProperty(
+    '--address-bar-height',
+    `${addressBarHeight}px`
+  );
+
+  // iOS Safari에서 전체 화면 모드 클래스 추가
+  if (isIOSSafari()) {
+    document.documentElement.classList.add('ios-full-screen-mode');
+  }
+};
+
 // Safe area inset bottom 값 계산
 export const getSafeAreaInsetBottom = (): number => {
   if (typeof window === 'undefined') return 0;
