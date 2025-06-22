@@ -9,6 +9,10 @@ import React, {
 import { Link, useLocation, useNavigate } from 'react-router';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
+  useMobileNavAnimation,
+  useAnimationOptimization,
+} from '~/common/hooks/use-mobile-animation';
+import {
   LayoutDashboard,
   Network,
   PieChart,
@@ -476,6 +480,11 @@ export function MobileNav({
   const { isMobile } = useViewport();
   const [isClosing, setIsClosing] = useState(false);
 
+  // 🚀 모바일 애니메이션 최적화
+  const navAnimations = useMobileNavAnimation();
+  const overlayRef = useAnimationOptimization<HTMLDivElement>();
+  const contentRef = useAnimationOptimization<HTMLDivElement>();
+
   // 💡 Body Scroll Lock 적용
   const { lockScroll, unlockScroll } = useBodyScrollLock();
 
@@ -662,6 +671,7 @@ export function MobileNav({
 
           {/* Backdrop */}
           <motion.div
+            ref={overlayRef}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{

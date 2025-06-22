@@ -4169,16 +4169,15 @@ input[type='datetime-local']:not([style*='color']) {
 }
 
 /* 🔍 작은 폰트 사이즈가 설정된 input 요소 강제 보정 */
-input[style*="font-size"],
-textarea[style*="font-size"],
-select[style*="font-size"] {
+input[style*='font-size'],
+textarea[style*='font-size'],
+select[style*='font-size'] {
   font-size: 16px !important;
 }
 
 /* 📱 태블릿과 작은 화면에서의 추가 보정 */
 @media (max-width: 1024px) and (orientation: portrait),
-       (max-width: 1024px) and (orientation: landscape) {
-  
+  (max-width: 1024px) and (orientation: landscape) {
   /* 모달 내 모든 입력 요소 */
   [data-slot='dialog-content'] input,
   [data-slot='dialog-content'] textarea,
@@ -4201,13 +4200,13 @@ select[style*="font-size"] {
 .input,
 .form-control,
 .form-input,
-input[type="text"],
-input[type="email"],
-input[type="password"],
-input[type="number"],
-input[type="tel"],
-input[type="url"],
-input[type="search"],
+input[type='text'],
+input[type='email'],
+input[type='password'],
+input[type='number'],
+input[type='tel'],
+input[type='url'],
+input[type='search'],
 textarea,
 select {
   /* 기본적으로 모든 입력 요소에 안전한 폰트 사이즈 적용 */
@@ -4226,3 +4225,201 @@ select {
 /* =================================================================
    모바일 줌인 방지 시스템 끝
    ================================================================= */
+
+/* =================================================================
+   MOBILE ANIMATION PERFORMANCE OPTIMIZATION
+   ================================================================= */
+
+/* GPU 가속 활성화 - 모든 애니메이션 요소에 적용 */
+.will-change-transform {
+  will-change: transform;
+  transform: translateZ(0); /* GPU 레이어 강제 생성 */
+}
+
+.will-change-opacity {
+  will-change: opacity;
+  transform: translateZ(0);
+}
+
+.will-change-auto {
+  will-change: auto;
+}
+
+/* 모바일 애니메이션 최적화 */
+@media (max-width: 768px) {
+  /* 모든 motion 컴포넌트에 GPU 가속 적용 */
+  [data-framer-component-type='motion'] {
+    will-change: transform, opacity;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+  }
+
+  /* 애니메이션 중인 요소 최적화 */
+  .motion-reduce-false [data-framer-component-type='motion'] {
+    will-change: transform, opacity;
+    transform: translate3d(0, 0, 0);
+  }
+
+  /* 네비게이션 애니메이션 최적화 */
+  [data-mobile-nav] {
+    will-change: transform;
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* 모달 애니메이션 최적화 */
+  [data-slot='dialog-content'] {
+    will-change: transform, opacity;
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+  }
+
+  /* 카드 애니메이션 최적화 */
+  .client-card-keyman,
+  .client-card-normal,
+  .client-card-low {
+    will-change: transform;
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+  }
+}
+
+/* Safari iOS 특별 최적화 */
+@supports (-webkit-touch-callout: none) {
+  /* iOS Safari용 최적화 */
+  [data-framer-component-type='motion'] {
+    -webkit-transform: translate3d(0, 0, 0);
+    -webkit-backface-visibility: hidden;
+    -webkit-perspective: 1000px;
+  }
+
+  /* iOS에서 스크롤 성능 향상 */
+  .mobile-sidebar-container,
+  [data-mobile-nav],
+  [data-slot='dialog-content'] {
+    -webkit-overflow-scrolling: touch;
+    -webkit-transform: translate3d(0, 0, 0);
+  }
+}
+
+/* 애니메이션 품질 향상 */
+@media (max-width: 768px) {
+  /* 부드러운 애니메이션을 위한 기본 설정 */
+  * {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* 애니메이션 요소 최적화 */
+  .animate-in,
+  .animate-out,
+  [data-state='open'],
+  [data-state='closed'] {
+    will-change: transform, opacity;
+    transform: translate3d(0, 0, 0);
+  }
+
+  /* 애니메이션 완료 후 will-change 제거 */
+  .animation-finished {
+    will-change: auto;
+  }
+}
+
+/* 저전력 모드 감지 시 애니메이션 최적화 */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    will-change: auto !important;
+  }
+}
+
+/* 고주사율 디스플레이 최적화 */
+@media (min-resolution: 120dpi) {
+  [data-framer-component-type='motion'] {
+    image-rendering: crisp-edges;
+    image-rendering: -webkit-optimize-contrast;
+  }
+}
+
+/* =================================================================
+   🚀 SIDEBAR MOBILE OPTIMIZATION
+   iPhone Safari 사이드바 애니메이션 최적화
+   ================================================================= */
+
+/* 사이드바 슬라이드 애니메이션 최적화 */
+@media (max-width: 768px) {
+  /* 모든 사이드바 컨텐츠 최적화 */
+  [data-slot='sheet-content'] {
+    will-change: transform, opacity;
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+  }
+
+  /* 사이드바 오버레이 최적화 */
+  [data-slot='sheet-overlay'] {
+    will-change: opacity;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+
+  /* 슬라이드 애니메이션 GPU 가속 */
+  [data-slot='sheet-content'][data-state='open'],
+  [data-slot='sheet-content'][data-state='closed'] {
+    transform: translate3d(0, 0, 0);
+    -webkit-transform: translate3d(0, 0, 0);
+  }
+}
+
+/* iOS Safari 특화 최적화 */
+@supports (-webkit-touch-callout: none) {
+  /* iOS Safari 사이드바 최적화 */
+  [data-slot='sheet-content'][data-ios='true'] {
+    -webkit-transform: translate3d(0, 0, 0);
+    -webkit-backface-visibility: hidden;
+    -webkit-perspective: 1000px;
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* iOS에서 부드러운 스크롤 */
+  [data-slot='sheet-content'][data-ios='true'] * {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* iOS 사이드바 애니메이션 최적화 클래스 */
+  .ios-sidebar-optimized {
+    -webkit-transform: translate3d(0, 0, 0) !important;
+    -webkit-backface-visibility: hidden !important;
+    transform: translate3d(0, 0, 0) !important;
+    backface-visibility: hidden !important;
+  }
+
+  /* iOS 사이드바 오픈 애니메이션 */
+  .ios-sidebar-optimized[data-state='open'] {
+    -webkit-animation-duration: 250ms !important;
+    -webkit-animation-timing-function: cubic-bezier(
+      0.25,
+      0.46,
+      0.45,
+      0.94
+    ) !important;
+  }
+
+  /* iOS 사이드바 클로즈 애니메이션 */
+  .ios-sidebar-optimized[data-state='closed'] {
+    -webkit-animation-duration: 200ms !important;
+    -webkit-animation-timing-function: cubic-bezier(
+      0.25,
+      0.46,
+      0.45,
+      0.94
+    ) !important;
+  }
+}
