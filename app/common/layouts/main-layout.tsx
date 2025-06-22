@@ -232,7 +232,7 @@ export function MainLayout({
       )}
 
       {/* 🔧 하단 네비게이션 디버깅 시각화 (개발 환경 전용) */}
-      <BottomNavVisualizer enabled={true} />
+      <BottomNavVisualizer enabled={false} />
     </div>
   );
 }
