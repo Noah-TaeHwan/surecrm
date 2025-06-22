@@ -109,8 +109,9 @@ export function NetworkMobileTabs({
             stiffness: 300,
             mass: 0.8,
           }}
-          className="fixed bottom-0 left-0 right-0 z-40 lg:hidden"
+          className="fixed left-0 right-0 z-40 lg:hidden bottom-nav-offset"
           style={{
+            bottom: 'var(--total-bottom-padding)',
             paddingBottom: 'env(safe-area-inset-bottom)',
           }}
         >

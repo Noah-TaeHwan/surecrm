@@ -447,6 +447,94 @@
   margin-left: var(--spacing-18);
 }
 
+/* 🚀 모바일 하단 네비게이션을 위한 추가 패딩 클래스 */
+.pb-30 {
+  padding-bottom: 7.5rem; /* 120px */
+}
+.pb-32 {
+  padding-bottom: 8rem; /* 128px */
+}
+.pb-36 {
+  padding-bottom: 9rem; /* 144px */
+}
+.pb-40 {
+  padding-bottom: 10rem; /* 160px */
+}
+
+/* 🚀 하단 네비게이션 대응 동적 패딩 시스템 */
+:root {
+  /* 하단 네비게이션 실제 구성 요소 높이 */
+  --bottom-nav-content-height: 80px; /* 실제 네비게이션 높이 (더 크게) */
+  --bottom-nav-padding: 32px; /* px-8 컨테이너 패딩 */
+  --bottom-nav-container-margin: 16px; /* pb-4 - 컨테이너 하단 여백 */
+  --bottom-nav-safe-buffer: 32px; /* 추가 안전 여백 (더 크게) */
+
+  /* 총 하단 네비게이션 높이 계산 */
+  --bottom-nav-total-height: calc(
+    var(--bottom-nav-content-height) + var(--bottom-nav-container-margin) +
+      var(--bottom-nav-safe-buffer) + env(safe-area-inset-bottom, 0px)
+  );
+
+  /* 메인 콘텐츠에 적용할 패딩 */
+  --total-bottom-padding: 160px; /* 고정값으로 설정 (충분한 여백 확보) */
+}
+
+/* 하단 네비게이션을 고려한 패딩 클래스 */
+.pb-bottom-nav {
+  padding-bottom: var(--total-bottom-padding) !important;
+}
+
+.mb-bottom-nav {
+  margin-bottom: var(--total-bottom-padding) !important;
+}
+
+/* 스크롤 컨테이너용 하단 패딩 */
+.scroll-pb-bottom-nav {
+  scroll-padding-bottom: var(--total-bottom-padding) !important;
+}
+
+/* 고정 요소 위치 조정 */
+.bottom-nav-offset {
+  bottom: var(--total-bottom-padding) !important;
+}
+
+/* 모바일에서만 적용되는 하단 네비게이션 패딩 */
+@media (max-width: 1023px) {
+  .mobile\:pb-bottom-nav {
+    padding-bottom: var(--total-bottom-padding) !important;
+  }
+
+  .mobile\:mb-bottom-nav {
+    margin-bottom: var(--total-bottom-padding) !important;
+  }
+
+  /* 스크롤 컨테이너용 하단 패딩 */
+  .mobile\:scroll-pb-bottom-nav {
+    scroll-padding-bottom: var(--total-bottom-padding) !important;
+  }
+
+  /* 고정 요소 위치 조정 */
+  .mobile\:bottom-nav-offset {
+    bottom: var(--total-bottom-padding) !important;
+  }
+}
+
+/* 🚀 디버깅용 - 하단 네비게이션 영역 시각화 (개발 환경에서만) */
+@media (max-width: 1023px) {
+  .debug-bottom-nav::after {
+    content: '';
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: var(--total-bottom-padding);
+    background: rgba(255, 0, 0, 0.1);
+    border-top: 2px dashed rgba(255, 0, 0, 0.5);
+    pointer-events: none;
+    z-index: 9999;
+  }
+}
+
 /* Mobile Typography */
 .text-mobile-xs {
   font-size: var(--font-size-mobile-xs);

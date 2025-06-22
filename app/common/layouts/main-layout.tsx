@@ -10,6 +10,7 @@ import {
 import { BottomTabNavigation } from '~/common/components/navigation/bottom-tab-navigation';
 import { useViewport } from '~/common/hooks/useViewport';
 import { useFullScreenMode } from '~/common/hooks/use-viewport-height';
+import { BottomNavVisualizer } from '~/common/components/debug/bottom-nav-visualizer';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -207,7 +208,9 @@ export function MainLayout({
         {/* 페이지 컨텐츠 - 바텀 네비게이션과 헤더를 고려한 스크롤 가능한 영역 */}
         <main
           className={`flex-1 mt-16 ${
-            isHydrated && !isInitialRender && isMobile ? 'pb-25' : 'pb-4'
+            isHydrated && !isInitialRender && isMobile
+              ? 'pb-bottom-nav'
+              : 'pb-4'
           } overflow-y-auto p-3 lg:p-4`}
         >
           {children}
@@ -227,6 +230,9 @@ export function MainLayout({
       {isHydrated && !isInitialRender && isMobile && (
         <BottomTabNavigation isMenuOpen={isMobileMenuOpen} />
       )}
+
+      {/* 🔧 하단 네비게이션 디버깅 시각화 (개발 환경 전용) */}
+      <BottomNavVisualizer enabled={true} />
     </div>
   );
 }
