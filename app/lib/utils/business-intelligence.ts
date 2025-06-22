@@ -70,15 +70,16 @@ class BusinessIntelligenceSystem {
 
   constructor(config: Partial<BusinessConfig> = {}) {
     this.config = {
-      enableAdvancedAnalytics: true,
-      enableBehavioralTracking: true,
-      enablePerformanceMonitoring: true,
-      enableUserJourneyMapping: true,
-      dataRetentionDays: 90,
-      samplingRate: 1.0,
+      enableAdvancedAnalytics: false, // 🔧 기본값을 false로 변경 (성능 최적화)
+      enableBehavioralTracking: false, // 🔧 기본값을 false로 변경
+      enablePerformanceMonitoring: false, // 🔧 기본값을 false로 변경
+      enableUserJourneyMapping: false, // 🔧 기본값을 false로 변경
+      dataRetentionDays: 30, // 🔧 보존 기간 단축
+      samplingRate: 0.1, // 🔧 샘플링 비율을 10%로 낮춤
       ...config,
     };
 
+    // 🔧 안전한 초기화 - null 체크 추가
     this.behaviorMetrics = {
       mouseMovements: [],
       clickHeatmap: [],
@@ -99,7 +100,10 @@ class BusinessIntelligenceSystem {
       behaviorAnomalies: [],
     };
 
-    this.initializeIntelligenceSystem();
+    // 🔧 브라우저 환경에서만 초기화
+    if (typeof window !== 'undefined') {
+      this.initializeIntelligenceSystem();
+    }
   }
 
   // === 🚀 시스템 초기화 ===
@@ -150,11 +154,13 @@ class BusinessIntelligenceSystem {
 
     // 마우스 움직임 추적 (극한 정밀도)
     document.addEventListener('mousemove', e => {
-      this.behaviorMetrics.mouseMovements.push({
-        x: e.clientX,
-        y: e.clientY,
-        timestamp: Date.now(),
-      });
+      if (this.behaviorMetrics?.mouseMovements) {
+        this.behaviorMetrics.mouseMovements.push({
+          x: e.clientX,
+          y: e.clientY,
+          timestamp: Date.now(),
+        });
+      }
 
       // 마우스 움직임 패턴 분석
       this.analyzeMousePattern();
@@ -162,6 +168,8 @@ class BusinessIntelligenceSystem {
 
     // 클릭 히트맵 생성
     document.addEventListener('click', e => {
+      if (!this.behaviorMetrics?.clickHeatmap || !this.userProfile) return;
+
       const element = this.getElementSelector(e.target as Element);
       const existingClick = this.behaviorMetrics.clickHeatmap.find(
         click => click.element === element
@@ -173,7 +181,7 @@ class BusinessIntelligenceSystem {
         this.behaviorMetrics.clickHeatmap.push({
           element,
           count: 1,
-          avgTime: Date.now() - this.userProfile!.lastActivity,
+          avgTime: Date.now() - this.userProfile.lastActivity,
         });
       }
 
@@ -194,11 +202,13 @@ class BusinessIntelligenceSystem {
 
       clearTimeout(scrollTimeout);
       scrollTimeout = setTimeout(() => {
-        this.behaviorMetrics.scrollPattern.push({
-          depth: Math.round(scrollDepth),
-          time: Date.now() - this.userProfile!.lastActivity,
-          bounced: scrollDepth < 25,
-        });
+        if (this.behaviorMetrics?.scrollPattern && this.userProfile) {
+          this.behaviorMetrics.scrollPattern.push({
+            depth: Math.round(scrollDepth),
+            time: Date.now() - this.userProfile.lastActivity,
+            bounced: scrollDepth < 25,
+          });
+        }
       }, 150);
     });
 
@@ -208,11 +218,13 @@ class BusinessIntelligenceSystem {
       const currentTime = Date.now();
       const interval = lastKeyTime > 0 ? currentTime - lastKeyTime : 0;
 
-      this.behaviorMetrics.keystrokes.push({
-        key: e.key.length === 1 ? 'char' : e.key, // 개인정보 보호
-        interval,
-        context: this.getCurrentContext(),
-      });
+      if (this.behaviorMetrics?.keystrokes) {
+        this.behaviorMetrics.keystrokes.push({
+          key: e.key.length === 1 ? 'char' : e.key, // 개인정보 보호
+          interval,
+          context: this.getCurrentContext(),
+        });
+      }
 
       lastKeyTime = currentTime;
 
@@ -229,11 +241,13 @@ class BusinessIntelligenceSystem {
 
       const handleFocusOut = () => {
         const duration = Date.now() - focusStart;
-        this.behaviorMetrics.focusEvents.push({
-          element,
-          duration,
-          abandoned: duration < 2000, // 2초 미만은 포기로 간주
-        });
+        if (this.behaviorMetrics?.focusEvents) {
+          this.behaviorMetrics.focusEvents.push({
+            element,
+            duration,
+            abandoned: duration < 2000, // 2초 미만은 포기로 간주
+          });
+        }
 
         (e.target as Element).removeEventListener('focusout', handleFocusOut);
       };
@@ -304,14 +318,16 @@ class BusinessIntelligenceSystem {
       const newPath = window.location.pathname;
       if (newPath !== currentPath) {
         const now = Date.now();
-        pathHistory.push({
-          path: currentPath,
-          timestamp: now,
-          duration: now - this.userProfile!.lastActivity,
-        });
+        if (this.userProfile) {
+          pathHistory.push({
+            path: currentPath,
+            timestamp: now,
+            duration: now - this.userProfile.lastActivity,
+          });
 
-        currentPath = newPath;
-        this.userProfile!.lastActivity = now;
+          currentPath = newPath;
+          this.userProfile.lastActivity = now;
+        }
 
         // 사용자 여정 패턴 분석
         this.analyzeUserJourney(pathHistory);

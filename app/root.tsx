@@ -33,8 +33,22 @@ export const links: LinksFunction = () => [
   {
     rel: 'stylesheet',
     href: 'https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap',
+    // 🔧 preload 경고 방지를 위한 추가 속성
+    crossOrigin: 'anonymous',
   },
-  { rel: 'stylesheet', href: stylesheet },
+  {
+    rel: 'stylesheet',
+    href: stylesheet,
+    // 🔧 중요한 CSS는 즉시 로드
+    as: 'style',
+  },
+  // 🚀 중요한 리소스들만 preload (실제 사용되는 것들만)
+  {
+    rel: 'preload',
+    href: '/icons/favicon.ico',
+    as: 'image',
+    type: 'image/x-icon',
+  },
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
