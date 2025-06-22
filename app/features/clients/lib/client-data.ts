@@ -715,23 +715,25 @@ export async function createClient(
       agentId, // agentId를 명시적으로 설정
     };
 
-    // 중복 고객 확인 (전화번호 기준)
-    const existingClient = await db
-      .select({ id: clients.id, fullName: clients.fullName })
-      .from(clients)
-      .where(
-        and(
-          eq(clients.phone, clientData.phone),
-          eq(clients.agentId, agentId),
-          eq(clients.isActive, true)
+    // 중복 고객 확인 (전화번호가 있는 경우에만)
+    if (clientData.phone && clientData.phone.trim() !== '') {
+      const existingClient = await db
+        .select({ id: clients.id, fullName: clients.fullName })
+        .from(clients)
+        .where(
+          and(
+            eq(clients.phone, clientData.phone),
+            eq(clients.agentId, agentId),
+            eq(clients.isActive, true)
+          )
         )
-      )
-      .limit(1);
+        .limit(1);
 
-    if (existingClient.length > 0) {
-      throw new Error(
-        `동일한 전화번호의 고객이 이미 존재합니다: ${existingClient[0].fullName}`
-      );
+      if (existingClient.length > 0) {
+        throw new Error(
+          `동일한 전화번호의 고객이 이미 존재합니다: ${existingClient[0].fullName}`
+        );
+      }
     }
 
     // 🔄 트랜잭션으로 고객 생성

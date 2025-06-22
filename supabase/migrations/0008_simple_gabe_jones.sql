@@ -1,0 +1,1 @@
+ALTER TABLE "app_client_profiles" ALTER COLUMN "phone" DROP NOT NULL;

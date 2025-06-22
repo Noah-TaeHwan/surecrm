@@ -58,7 +58,7 @@ interface AddClientModalProps {
   initialStageId?: string;
   onAddClient: (client: {
     name: string;
-    phone: string;
+    phone?: string; // 🔧 전화번호 선택사항으로 변경
     email?: string;
     address?: string;
     occupation?: string;
@@ -506,12 +506,13 @@ export function AddClientModal({
                       htmlFor="phone"
                       className="text-xs sm:text-sm font-medium"
                     >
-                      전화번호
+                      전화번호{' '}
+                      <span className="text-muted-foreground">(선택사항)</span>
                     </Label>
                     <Input
                       id="phone"
                       type="tel"
-                      placeholder="010-1234-5678"
+                      placeholder="010-1234-5678 (선택사항)"
                       value={phone}
                       onChange={e => setPhone(e.target.value)}
                       className={`h-9 sm:h-10 text-xs sm:text-sm ${

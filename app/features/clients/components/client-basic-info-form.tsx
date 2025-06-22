@@ -237,7 +237,8 @@ export function ClientBasicInfoForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="flex items-center gap-2">
-                  휴대폰 번호 *
+                  휴대폰 번호{' '}
+                  <span className="text-muted-foreground">(선택사항)</span>
                   {shouldMaskField('phone') && (
                     <LockClosedIcon className="h-3 w-3 text-amber-500" />
                   )}

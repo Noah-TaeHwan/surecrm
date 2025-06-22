@@ -177,7 +177,7 @@ export const clients: any = pgTable('app_client_profiles', {
   teamId: uuid('team_id').references(() => teams.id),
   fullName: text('full_name').notNull(),
   email: text('email'),
-  phone: text('phone').notNull(),
+  phone: text('phone'), // 🔧 선택사항으로 변경
   telecomProvider: text('telecom_provider'),
   address: text('address'),
   occupation: text('occupation'),

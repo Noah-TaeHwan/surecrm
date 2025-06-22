@@ -296,12 +296,15 @@ export function AddClientModal({
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-xs sm:text-sm font-medium">
-                          전화번호
+                          전화번호{' '}
+                          <span className="text-muted-foreground">
+                            (선택사항)
+                          </span>
                         </FormLabel>
                         <FormControl>
                           <Input
                             type="tel"
-                            placeholder="010-1234-5678"
+                            placeholder="010-1234-5678 (선택사항)"
                             className="h-9 sm:h-10 text-xs sm:text-sm min-h-[36px] sm:min-h-[40px]"
                             {...field}
                           />

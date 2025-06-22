@@ -333,10 +333,16 @@ export function meta() {
   return [{ title: '고객 관리 | SureCRM' }];
 }
 
-// 🎯 고객 데이터 유효성 검사 스키마
+// 🎯 고객 데이터 유효성 검사 스키마 (전화번호 선택사항으로 변경)
 const clientValidationSchema = z.object({
   fullName: z.string().min(2, '이름은 2글자 이상이어야 합니다'),
-  phone: z.string().min(10, '올바른 전화번호를 입력해주세요'),
+  phone: z
+    .string()
+    .optional()
+    .refine(val => {
+      if (!val || val.trim() === '') return true; // 빈 값 허용
+      return /^010-\d{4}-\d{4}$/.test(val); // 값이 있으면 형식 검증
+    }, '올바른 전화번호 형식이 아닙니다 (010-0000-0000)'),
   email: z
     .string()
     .email('올바른 이메일 주소를 입력해주세요')
@@ -404,14 +410,14 @@ export async function action({ request }: { request: Request }) {
           (stage: any) => stage.name === '첫 상담' || stage.isDefault
         ) || stages[0];
 
-      // 폼 데이터 파싱 및 유효성 검사
+      // 폼 데이터 파싱 및 유효성 검사 (전화번호 선택사항으로 변경)
       const fullName = formData.get('fullName') as string;
       const phone = formData.get('phone') as string;
 
-      if (!fullName || !phone) {
+      if (!fullName) {
         return {
           success: false,
-          message: '이름과 전화번호는 필수 항목입니다.',
+          message: '이름은 필수 항목입니다.',
         };
       }
 
