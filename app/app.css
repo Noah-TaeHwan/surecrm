@@ -4352,6 +4352,31 @@ select {
    iPhone Safari 사이드바 애니메이션 최적화
    ================================================================= */
 
+/* 네트워크 페이지 모바일 슬라이드업 모달 최적화 */
+@media (max-width: 768px) {
+  /* 슬라이드업 모달 컨테이너 최적화 */
+  .animate-slide-up {
+    will-change: transform, opacity;
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+  }
+
+  /* iOS Safari에서 부드러운 스크롤 */
+  .animate-slide-up .overflow-y-auto {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    scroll-behavior: smooth;
+  }
+
+  /* 모달 내부 스크롤 영역 최적화 */
+  .animate-slide-up [style*='WebkitOverflowScrolling'] {
+    scroll-snap-type: y proximity;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+  }
+}
+
 /* 사이드바 슬라이드 애니메이션 최적화 */
 @media (max-width: 768px) {
   /* 모든 사이드바 컨텐츠 최적화 */

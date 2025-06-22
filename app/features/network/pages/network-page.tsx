@@ -863,9 +863,9 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
               <div
                 className="relative transition-all duration-300 ease-in-out"
                 style={{
-                  height: selectedNode ? '30vh' : '45vh', // 필터 버튼 영역 고려해 높이 감소
-                  minHeight: selectedNode ? '250px' : '300px',
-                  maxHeight: selectedNode ? '40vh' : '52vh',
+                  height: selectedNode ? '25vh' : '45vh', // 🎯 모달 열렸을 때 더 작게 (30vh → 25vh)
+                  minHeight: selectedNode ? '200px' : '300px', // 🎯 최소 높이도 줄임 (250px → 200px)
+                  maxHeight: selectedNode ? '30vh' : '52vh', // 🎯 최대 높이도 줄임 (40vh → 30vh)
                 }}
               >
                 {renderNetworkGraph()}
@@ -911,18 +911,26 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
         {/* 하단 슬라이드업 사이드바 */}
         {selectedNode && (
           <>
-            {/* 백드롭 */}
+            {/* 백드롭 - 더 진한 색상과 블러 효과 */}
             <div
-              className="fixed inset-0 bg-black/20 z-40 animate-fade-in"
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 animate-fade-in"
               onClick={handleCloseSidebar}
+              style={{
+                /* 터치 영역 최적화 */
+                WebkitTapHighlightColor: 'transparent',
+                touchAction: 'none',
+              }}
             />
 
-            {/* 슬라이드업 패널 */}
+            {/* 슬라이드업 패널 - 개선된 여백 설정 */}
             <div
-              className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border rounded-t-xl shadow-2xl animate-slide-up flex flex-col"
+              className="fixed left-0 right-0 z-50 bg-background border-t border-border rounded-t-xl shadow-2xl animate-slide-up flex flex-col"
               style={{
-                height: '85vh', // maxHeight 대신 height 사용으로 명확한 크기 설정
-                paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)',
+                top: '12vh', // 🎯 위쪽 여백 추가 (12% 상단 여백)
+                bottom: '0', // 바텀은 0으로 설정
+                height: '88vh', // 전체 높이에서 위쪽 여백을 뺀 높이
+                paddingBottom:
+                  'calc(env(safe-area-inset-bottom, 0px) + 0.5rem)', // 🎯 하단 패딩 줄임 (1rem → 0.5rem)
               }}
             >
               {/* 드래그 핸들 - sticky로 고정 */}
@@ -932,10 +940,12 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
 
               {/* NetworkDetailPanel 직접 렌더링 (데스크톱과 동일) - 스크롤 가능 */}
               <div
-                className="flex-1 overflow-y-auto px-4 pb-4"
+                className="flex-1 overflow-y-auto px-4"
                 style={{
                   WebkitOverflowScrolling: 'touch', // iOS 모바일 스크롤 최적화
                   overscrollBehavior: 'contain', // 스크롤 바운싱 제어
+                  paddingBottom:
+                    'calc(env(safe-area-inset-bottom, 0px) + 0.5rem)', // 🎯 내부 패딩도 줄임
                 }}
               >
                 <NetworkDetailPanel
@@ -960,8 +970,8 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
             to { opacity: 1; }
           }
           @keyframes slideUp {
-            from { transform: translateY(100%); }
-            to { transform: translateY(0); }
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
           }
           @keyframes slideInLeft {
             from { transform: translateX(-100%); }
@@ -971,7 +981,8 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
             animation: fadeIn 0.3s ease-in-out;
           }
           .animate-slide-up {
-            animation: slideUp 0.3s ease-in-out;
+            animation: slideUp 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            /* iOS Safari 최적화된 easing과 duration */
           }
           .animate-slide-in-left {
             animation: slideInLeft 0.3s ease-in-out;
