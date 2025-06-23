@@ -23,6 +23,8 @@
     "db:studio": "drizzle-kit studio",
     "db:reset:clean": "tsx scripts/utils/reset-database.ts",
     "cron:notifications": "tsx scripts/daily-notification-cron.ts",
+    "test:env": "tsx scripts/test-env-setup.ts",
+    "check:env": "tsx scripts/test-env-setup.ts",
     "version:patch": "npm version patch && git push origin master --tags",
     "version:minor": "npm version minor && git push origin master --tags",
     "version:major": "npm version major && git push origin master --tags",
