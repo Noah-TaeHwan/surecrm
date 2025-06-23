@@ -1,53 +1,63 @@
+# OS
 .DS_Store
+
+# Dependencies
 /node_modules/
 
 # React Router
 /.react-router/
 /build/
 
-.cursor/
+# Environment variables
 .env
 .env.local
 .env.production
 
-# 🚨 보안: 테스트 파일 및 민감한 정보 포함 파일들
-test-*.cjs
-test-*.js
-*-debug.cjs
-fix-*.cjs
-apply-*.cjs
-*.backup
-*.key
-cookies.txt
-
-# 🔒 Storage 관련 테스트 파일들
-test-upload-*.cjs
-test-storage-*.cjs
-test-attachment-*.cjs
-.vercel
-.vercel.json
-vercel.json
-
-# Added by Task Master AI
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-dev-debug.log
-# Dependency directories
-node_modules/
-# Environment variables
-# Editor directories and files
-.idea
-.vscode
+# IDE/Editor
+.cursor/
+.idea/
+.vscode/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
-# OS specific
+
+# Build files
+*.tsbuildinfo
+dist/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+dev-debug.log
+
+# Deployment
+.vercel
+
+# AI Tools (불필요시 재생성됨)
+.roo/
+.taskmaster/
+.next/
+
+# Security - 민감한 정보 포함 파일들
+*.backup
+*.key
+cookies.txt
+test-*.cjs
+test-*.js
+*-debug.cjs
+fix-*.cjs
+apply-*.cjs
+
+# Storage 관련 테스트 파일들
+test-upload-*.cjs
+test-storage-*.cjs
+test-attachment-*.cjs
+
 # Task files
 tasks.json
 tasks/ 
