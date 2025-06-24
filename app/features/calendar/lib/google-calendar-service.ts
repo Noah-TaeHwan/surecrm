@@ -22,11 +22,42 @@ export class GoogleCalendarService {
   private oauth2Client: any;
 
   constructor() {
-    // 환경에 따른 올바른 redirect URI 설정 (구글 클라우드 콘솔과 일치)
-    const redirectUri =
-      process.env.NODE_ENV === 'production'
-        ? `${process.env.PRODUCTION_URL || 'https://surecrm-sigma.vercel.app'}/api/google/calendar/callback`
-        : `${process.env.APP_URL || 'http://localhost:5173'}/api/google/calendar/callback`;
+    // 프로덕션에서 확실히 작동하도록 하드코딩된 접근 방식 사용
+    let redirectUri = 'http://localhost:5173/api/google/calendar/callback'; // 기본값
+
+    // 다양한 방법으로 프로덕션 환경 감지
+    try {
+      const isProduction = 
+        process.env.NODE_ENV === 'production' || 
+        process.env.VERCEL_ENV === 'production' ||
+        process.env.VERCEL === '1' ||
+        (typeof window !== 'undefined' && (
+          window.location.hostname.includes('vercel.app') ||
+          window.location.hostname.includes('surecrm-sigma')
+        ));
+
+      if (isProduction) {
+        redirectUri = 'https://surecrm-sigma.vercel.app/api/google/calendar/callback';
+      }
+
+      // 디버깅용 로그
+      console.log('🔍 GoogleCalendarService 초기화:', {
+        NODE_ENV: process.env.NODE_ENV,
+        VERCEL_ENV: process.env.VERCEL_ENV,
+        VERCEL: process.env.VERCEL,
+        PRODUCTION_URL: process.env.PRODUCTION_URL,
+        APP_URL: process.env.APP_URL,
+        isProduction: isProduction,
+        redirectUri: redirectUri,
+        hostname: typeof window !== 'undefined' ? window.location.hostname : 'server-side'
+      });
+    } catch (error) {
+      console.error('❌ 환경 감지 오류:', error);
+      // 에러 발생 시 환경 변수만으로 판단
+      if (process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'production') {
+        redirectUri = 'https://surecrm-sigma.vercel.app/api/google/calendar/callback';
+      }
+    }
 
     this.oauth2Client = new google.auth.OAuth2(
       process.env.GOOGLE_CLIENT_ID,
