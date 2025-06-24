@@ -25,8 +25,8 @@ export class GoogleCalendarService {
     // 환경에 따른 올바른 redirect URI 설정 (구글 클라우드 콘솔과 일치)
     const redirectUri =
       process.env.NODE_ENV === 'production'
-        ? 'https://surecrm-sigma.vercel.app/api/google/calendar/callback'
-        : 'http://localhost:5173/api/google/calendar/callback';
+        ? `${process.env.PRODUCTION_URL || 'https://surecrm-sigma.vercel.app'}/api/google/calendar/callback`
+        : `${process.env.APP_URL || 'http://localhost:5173'}/api/google/calendar/callback`;
 
     this.oauth2Client = new google.auth.OAuth2(
       process.env.GOOGLE_CLIENT_ID,
