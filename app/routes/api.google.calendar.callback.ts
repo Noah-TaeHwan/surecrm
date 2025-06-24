@@ -170,19 +170,65 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
     console.log('✅ 구글 캘린더 연동 성공:', { agentId: user.id });
 
-    // 성공 시 캘린더 페이지로 리다이렉트 (환경에 따른 절대 URL 사용)
-    const baseUrl = process.env.NODE_ENV === 'production' 
-      ? (process.env.PRODUCTION_URL || 'https://surecrm-sigma.vercel.app')
-      : (process.env.APP_URL || 'http://localhost:5173');
+    // 성공 시 캘린더 페이지로 리다이렉트 (강화된 환경 감지 로직 사용)
+    let baseUrl = 'http://localhost:5173'; // 기본값
+    
+    try {
+      const isProduction = 
+        process.env.NODE_ENV === 'production' || 
+        process.env.VERCEL_ENV === 'production' ||
+        process.env.VERCEL === '1';
+
+      if (isProduction) {
+        baseUrl = 'https://surecrm-sigma.vercel.app';
+      }
+
+      console.log('🔍 최종 리다이렉트 URL 결정:', {
+        NODE_ENV: process.env.NODE_ENV,
+        VERCEL_ENV: process.env.VERCEL_ENV,
+        VERCEL: process.env.VERCEL,
+        isProduction: isProduction,
+        baseUrl: baseUrl,
+        finalUrl: `${baseUrl}/calendar?success=google_calendar_connected`
+      });
+    } catch (error) {
+      console.error('❌ 최종 리다이렉트 환경 감지 오류:', error);
+      if (process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'production') {
+        baseUrl = 'https://surecrm-sigma.vercel.app';
+      }
+    }
     
     return redirect(`${baseUrl}/calendar?success=google_calendar_connected`);
   } catch (error) {
     console.error('❌ 구글 캘린더 콜백 처리 실패:', error);
     
-    // 에러 시에도 환경에 따른 절대 URL 사용
-    const baseUrl = process.env.NODE_ENV === 'production' 
-      ? (process.env.PRODUCTION_URL || 'https://surecrm-sigma.vercel.app')
-      : (process.env.APP_URL || 'http://localhost:5173');
+    // 에러 시에도 강화된 환경 감지 로직 사용
+    let baseUrl = 'http://localhost:5173'; // 기본값
+    
+    try {
+      const isProduction = 
+        process.env.NODE_ENV === 'production' || 
+        process.env.VERCEL_ENV === 'production' ||
+        process.env.VERCEL === '1';
+
+      if (isProduction) {
+        baseUrl = 'https://surecrm-sigma.vercel.app';
+      }
+
+      console.log('🔍 에러 리다이렉트 URL 결정:', {
+        NODE_ENV: process.env.NODE_ENV,
+        VERCEL_ENV: process.env.VERCEL_ENV,
+        VERCEL: process.env.VERCEL,
+        isProduction: isProduction,
+        baseUrl: baseUrl,
+        finalUrl: `${baseUrl}/calendar?error=connection_failed`
+      });
+    } catch (envError) {
+      console.error('❌ 에러 리다이렉트 환경 감지 오류:', envError);
+      if (process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'production') {
+        baseUrl = 'https://surecrm-sigma.vercel.app';
+      }
+    }
     
     return redirect(`${baseUrl}/calendar?error=connection_failed`);
   }
