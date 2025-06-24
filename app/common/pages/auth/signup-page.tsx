@@ -333,7 +333,10 @@ export default function SignUpPage({ loaderData, actionData }: ComponentProps) {
           )}
 
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4">
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="space-y-3 sm:space-y-4"
+            >
               {form.formState.errors.root && (
                 <Alert variant="destructive" className="mb-3 sm:mb-4">
                   <AlertDescription className="text-sm">
@@ -347,7 +350,9 @@ export default function SignUpPage({ loaderData, actionData }: ComponentProps) {
                 name="invitationCode"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm sm:text-base">초대 코드 *</FormLabel>
+                    <FormLabel className="text-sm sm:text-base">
+                      초대 코드 *
+                    </FormLabel>
                     <FormControl>
                       <Input
                         {...field}
@@ -379,7 +384,9 @@ export default function SignUpPage({ loaderData, actionData }: ComponentProps) {
                 name="fullName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm sm:text-base">이름 *</FormLabel>
+                    <FormLabel className="text-sm sm:text-base">
+                      이름 *
+                    </FormLabel>
                     <FormControl>
                       <Input
                         {...field}
@@ -399,7 +406,9 @@ export default function SignUpPage({ loaderData, actionData }: ComponentProps) {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm sm:text-base">이메일 *</FormLabel>
+                    <FormLabel className="text-sm sm:text-base">
+                      이메일 *
+                    </FormLabel>
                     <FormControl>
                       <Input
                         {...field}
@@ -419,7 +428,9 @@ export default function SignUpPage({ loaderData, actionData }: ComponentProps) {
                 name="phone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm sm:text-base">전화번호</FormLabel>
+                    <FormLabel className="text-sm sm:text-base">
+                      전화번호
+                    </FormLabel>
                     <FormControl>
                       <Input
                         {...field}
@@ -439,7 +450,9 @@ export default function SignUpPage({ loaderData, actionData }: ComponentProps) {
                 name="company"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm sm:text-base">회사명</FormLabel>
+                    <FormLabel className="text-sm sm:text-base">
+                      회사명
+                    </FormLabel>
                     <FormControl>
                       <Input
                         {...field}
@@ -459,7 +472,9 @@ export default function SignUpPage({ loaderData, actionData }: ComponentProps) {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm sm:text-base">비밀번호 *</FormLabel>
+                    <FormLabel className="text-sm sm:text-base">
+                      비밀번호 *
+                    </FormLabel>
                     <FormControl>
                       <Input
                         {...field}
@@ -479,7 +494,9 @@ export default function SignUpPage({ loaderData, actionData }: ComponentProps) {
                 name="confirmPassword"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm sm:text-base">비밀번호 확인 *</FormLabel>
+                    <FormLabel className="text-sm sm:text-base">
+                      비밀번호 확인 *
+                    </FormLabel>
                     <FormControl>
                       <Input
                         {...field}

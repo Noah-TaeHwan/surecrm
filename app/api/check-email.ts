@@ -234,7 +234,7 @@ async function checkEmailExists(email: string): Promise<{
     }
 
     // 이메일로 사용자 찾기
-    const authUser = users.users.find((user) => user.email === email);
+    const authUser = users.users.find(user => user.email === email);
 
     if (!authUser) {
       // auth.users에 없음 → 가입 가능

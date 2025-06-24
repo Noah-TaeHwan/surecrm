@@ -84,10 +84,12 @@ export async function loader({ request }: Route['LoaderArgs']) {
   let errorMessage = '';
   switch (error) {
     case 'token_expired':
-      errorMessage = '비밀번호 재설정 링크가 만료되었습니다. 새로운 링크를 요청해주세요.';
+      errorMessage =
+        '비밀번호 재설정 링크가 만료되었습니다. 새로운 링크를 요청해주세요.';
       break;
     case 'invalid_link':
-      errorMessage = '비밀번호 재설정 링크가 유효하지 않습니다. 새로운 링크를 요청해주세요.';
+      errorMessage =
+        '비밀번호 재설정 링크가 유효하지 않습니다. 새로운 링크를 요청해주세요.';
       break;
     case 'invalid_token':
       errorMessage = '비밀번호 재설정 토큰이 만료되었거나 유효하지 않습니다.';
@@ -96,7 +98,8 @@ export async function loader({ request }: Route['LoaderArgs']) {
       errorMessage = '토큰 검증 중 오류가 발생했습니다. 다시 시도해주세요.';
       break;
     case 'session_expired':
-      errorMessage = '세션이 만료되었습니다. 비밀번호 재설정을 다시 시도해주세요.';
+      errorMessage =
+        '세션이 만료되었습니다. 비밀번호 재설정을 다시 시도해주세요.';
       break;
   }
 
@@ -199,7 +202,7 @@ export default function ForgotPasswordPage({
         try {
           // ✅ 응답을 한 번만 읽도록 수정
           const responseText = await response.text();
-          
+
           // JSON 형태인지 확인
           if (responseText.trim().startsWith('{')) {
             const result = JSON.parse(responseText);
@@ -215,7 +218,9 @@ export default function ForgotPasswordPage({
           console.warn('응답 처리 중 오류:', parseError);
           // 200 응답이면 성공으로 처리
           if (response.status === 200) {
-            console.log('✅ 비밀번호 재설정 이메일 발송 완료 (응답 파싱 실패하지만 성공 처리)');
+            console.log(
+              '✅ 비밀번호 재설정 이메일 발송 완료 (응답 파싱 실패하지만 성공 처리)'
+            );
             setEmailSent(true);
           }
         }
@@ -274,17 +279,39 @@ export default function ForgotPasswordPage({
               <AlertTitle>🔍 디버그 정보 (프로덕션 문제 해결용)</AlertTitle>
               <AlertDescription className="mt-2 space-y-2">
                 <div className="text-sm font-mono space-y-1">
-                  <div><strong>에러:</strong> {loaderData.debugInfo.error || 'N/A'}</div>
-                  <div><strong>코드:</strong> {loaderData.debugInfo.code || 'N/A'}</div>
-                  <div><strong>시간:</strong> {loaderData.debugInfo.time || 'N/A'}</div>
-                  <div><strong>토큰 미리보기:</strong> {loaderData.debugInfo.token_preview || 'N/A'}</div>
-                  <div><strong>데이터 존재:</strong> {loaderData.debugInfo.has_data || 'N/A'}</div>
-                  <div><strong>사용자 존재:</strong> {loaderData.debugInfo.has_user || 'N/A'}</div>
-                  <div><strong>세션 존재:</strong> {loaderData.debugInfo.has_session || 'N/A'}</div>
-                  <div><strong>응답시간:</strong> {loaderData.debugInfo.response_time || 'N/A'}ms</div>
+                  <div>
+                    <strong>에러:</strong> {loaderData.debugInfo.error || 'N/A'}
+                  </div>
+                  <div>
+                    <strong>코드:</strong> {loaderData.debugInfo.code || 'N/A'}
+                  </div>
+                  <div>
+                    <strong>시간:</strong> {loaderData.debugInfo.time || 'N/A'}
+                  </div>
+                  <div>
+                    <strong>토큰 미리보기:</strong>{' '}
+                    {loaderData.debugInfo.token_preview || 'N/A'}
+                  </div>
+                  <div>
+                    <strong>데이터 존재:</strong>{' '}
+                    {loaderData.debugInfo.has_data || 'N/A'}
+                  </div>
+                  <div>
+                    <strong>사용자 존재:</strong>{' '}
+                    {loaderData.debugInfo.has_user || 'N/A'}
+                  </div>
+                  <div>
+                    <strong>세션 존재:</strong>{' '}
+                    {loaderData.debugInfo.has_session || 'N/A'}
+                  </div>
+                  <div>
+                    <strong>응답시간:</strong>{' '}
+                    {loaderData.debugInfo.response_time || 'N/A'}ms
+                  </div>
                 </div>
                 <div className="text-xs text-muted-foreground mt-2">
-                  이 정보는 문제 해결을 위한 것입니다. 스크린샷을 찍어서 개발팀에 전달해주세요.
+                  이 정보는 문제 해결을 위한 것입니다. 스크린샷을 찍어서
+                  개발팀에 전달해주세요.
                 </div>
               </AlertDescription>
             </Alert>

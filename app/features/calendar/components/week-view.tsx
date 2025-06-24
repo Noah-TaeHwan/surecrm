@@ -10,50 +10,50 @@ import { useDeviceType } from '~/common/hooks/use-viewport';
 const getEventColors = (meeting: Meeting) => {
   // 비즈니스 로직에 따른 색상 매핑
   const type = meeting.type;
-  
+
   if (type === 'first_consultation') {
     return {
       bg: 'bg-sky-500/90 hover:bg-sky-600/90',
       border: 'border-sky-400/50',
       text: 'text-white',
-      dot: 'bg-sky-500'
+      dot: 'bg-sky-500',
     };
   } else if (type === 'contract_signing') {
     return {
-      bg: 'bg-emerald-500/90 hover:bg-emerald-600/90', 
+      bg: 'bg-emerald-500/90 hover:bg-emerald-600/90',
       border: 'border-emerald-400/50',
       text: 'text-white',
-      dot: 'bg-emerald-500'
+      dot: 'bg-emerald-500',
     };
   } else if (type === 'follow_up') {
     return {
       bg: 'bg-amber-500/90 hover:bg-amber-600/90',
-      border: 'border-amber-400/50', 
+      border: 'border-amber-400/50',
       text: 'text-white',
-      dot: 'bg-amber-500'
+      dot: 'bg-amber-500',
     };
   } else if (type === 'urgent') {
     return {
       bg: 'bg-rose-500/90 hover:bg-rose-600/90',
       border: 'border-rose-400/50',
-      text: 'text-white', 
-      dot: 'bg-rose-500'
+      text: 'text-white',
+      dot: 'bg-rose-500',
     };
   } else if (type === 'vip') {
     return {
       bg: 'bg-violet-500/90 hover:bg-violet-600/90',
       border: 'border-violet-400/50',
       text: 'text-white',
-      dot: 'bg-violet-500'
+      dot: 'bg-violet-500',
     };
   }
-  
+
   // 기본값 (구글 캘린더 이벤트 등)
   return {
     bg: 'bg-gray-500/90 hover:bg-gray-600/90',
     border: 'border-gray-400/50',
     text: 'text-white',
-    dot: 'bg-gray-500'
+    dot: 'bg-gray-500',
   };
 };
 
@@ -128,7 +128,7 @@ export function WeekView({
               isToday(date) &&
                 'bg-gradient-to-b from-sky-500/20 to-sky-500/10 border-sky-500/30',
               index === 0 && 'text-rose-500', // 일요일
-              index === 6 && 'text-sky-500'   // 토요일
+              index === 6 && 'text-sky-500' // 토요일
             )}
           >
             <div className="space-y-1">
@@ -138,7 +138,9 @@ export function WeekView({
               <div
                 className={cn(
                   'text-lg font-bold transition-colors duration-200',
-                  isToday(date) ? 'text-sky-600 dark:text-sky-400' : 'text-foreground'
+                  isToday(date)
+                    ? 'text-sky-600 dark:text-sky-400'
+                    : 'text-foreground'
                 )}
               >
                 {date.getDate()}
@@ -155,21 +157,27 @@ export function WeekView({
 
       {/* 시간 그리드 */}
       <div className="relative bg-gradient-to-br from-background/60 to-background/40 overflow-x-auto">
-        <div className={cn(
-          "grid grid-cols-8",
-          isMobile ? "min-w-[600px]" : "min-w-[800px]"
-        )}>
+        <div
+          className={cn(
+            'grid grid-cols-8',
+            isMobile ? 'min-w-[600px]' : 'min-w-[800px]'
+          )}
+        >
           {timeSlots.map(hour => (
             <Fragment key={hour}>
               {/* 시간 라벨 */}
-              <div className={cn(
-                "border-r border-b border-border/20 bg-card/20 sticky left-0 z-10",
-                isMobile ? "p-2" : "p-3"
-              )}>
-                <div className={cn(
-                  "font-medium text-muted-foreground",
-                  isMobile ? "text-xs" : "text-sm"
-                )}>
+              <div
+                className={cn(
+                  'border-r border-b border-border/20 bg-card/20 sticky left-0 z-10',
+                  isMobile ? 'p-2' : 'p-3'
+                )}
+              >
+                <div
+                  className={cn(
+                    'font-medium text-muted-foreground',
+                    isMobile ? 'text-xs' : 'text-sm'
+                  )}
+                >
                   {hour.toString().padStart(2, '0')}:00
                 </div>
               </div>

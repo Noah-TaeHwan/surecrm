@@ -41,7 +41,10 @@ export function CTASection() {
             <span className="sm:hidden"> </span>
             SureCRM과 함께 더 체계적인 고객 관리를 시작하세요.
           </p>
-          <Button size="lg" className="rounded-full px-4 sm:px-6 h-11 sm:h-12 shadow-lg text-sm sm:text-base hover:shadow-xl transition-all duration-200">
+          <Button
+            size="lg"
+            className="rounded-full px-4 sm:px-6 h-11 sm:h-12 shadow-lg text-sm sm:text-base hover:shadow-xl transition-all duration-200"
+          >
             <Link to="/invite-only" className="flex items-center gap-2">
               초대 코드로 시작하기
               <ArrowRight className="h-3 sm:h-4 w-3 sm:w-4" />

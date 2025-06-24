@@ -61,7 +61,7 @@ export async function action({ request }: Route['ActionArgs']) {
     }
 
     // 🗑️ 관련 데이터 삭제 (트랜잭션으로 처리)
-    await db.transaction(async (tx) => {
+    await db.transaction(async tx => {
       // 1. 고객의 연락 기록 삭제
       await tx
         .delete(appClientContactHistory)

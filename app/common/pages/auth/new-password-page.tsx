@@ -40,7 +40,7 @@ const newPasswordSchema = z
       }),
     confirmPassword: z.string().min(1, '비밀번호 확인을 입력해주세요'),
   })
-  .refine((data) => data.password === data.confirmPassword, {
+  .refine(data => data.password === data.confirmPassword, {
     message: '비밀번호가 일치하지 않습니다',
     path: ['confirmPassword'],
   });
@@ -100,20 +100,26 @@ export default function NewPasswordPage({
   useEffect(() => {
     // 페이지 로드 시 세션 상태 디버깅
     console.log('🔐 NEW-PASSWORD 페이지 로드됨');
-    console.log('📋 서버 세션 상태:', loaderData?.hasSession ? '✅ 있음' : '❌ 없음');
+    console.log(
+      '📋 서버 세션 상태:',
+      loaderData?.hasSession ? '✅ 있음' : '❌ 없음'
+    );
     console.log('👤 사용자 정보:', loaderData?.user?.email || '없음');
-    
+
     // 서버에서 전달된 디버그 정보 표시
     if (loaderData?.debugInfo) {
       console.log('🔍 [DEBUG] 서버 디버그 정보:', loaderData.debugInfo);
     }
-    
+
     // action에서 redirectUrl이 전달된 경우 리다이렉트
     if (actionData?.redirectUrl) {
-      console.log('🔄 [REDIRECT] Action에서 리다이렉트 요청:', actionData.redirectUrl);
+      console.log(
+        '🔄 [REDIRECT] Action에서 리다이렉트 요청:',
+        actionData.redirectUrl
+      );
       window.location.href = actionData.redirectUrl;
     }
-    
+
     // 비밀번호 변경 성공 시 모달 표시
     if (actionData?.success) {
       console.log('🎉 [SUCCESS] 비밀번호 변경 성공 - 모달 표시');
@@ -124,61 +130,75 @@ export default function NewPasswordPage({
   const onSubmit = async (formData: NewPasswordFormData) => {
     console.log('✅ 클라이언트 유효성 검사 통과 - 서버 액션 호출');
     setIsSubmitting(true);
-    
+
     try {
       // fetch API로 서버 액션 호출 (페이지 새로고침 방지)
       const formBody = new FormData();
       formBody.append('password', formData.password);
       formBody.append('confirmPassword', formData.confirmPassword);
-      
+
       const response = await fetch('/api/auth/new-password', {
         method: 'POST',
         body: formBody,
       });
-      
-      console.log('📨 [CLIENT] 응답 상태:', response.status, response.statusText);
-      
+
+      console.log(
+        '📨 [CLIENT] 응답 상태:',
+        response.status,
+        response.statusText
+      );
+
       let result;
       try {
         // Content-Type 확인
         const contentType = response.headers.get('content-type');
         console.log('📋 [CLIENT] Content-Type:', contentType);
-        
+
         if (contentType?.includes('application/json')) {
           result = await response.json();
         } else {
           // JSON이 아닌 경우 텍스트로 읽기
           const text = await response.text();
-          console.log('📄 [CLIENT] 응답 텍스트 (처음 200자):', text.substring(0, 200));
-          
+          console.log(
+            '📄 [CLIENT] 응답 텍스트 (처음 200자):',
+            text.substring(0, 200)
+          );
+
           // HTML 응답인 경우 에러로 처리
           if (text.includes('<!DOCTYPE')) {
-            throw new Error(`서버가 HTML 페이지를 반환했습니다. 상태: ${response.status}`);
+            throw new Error(
+              `서버가 HTML 페이지를 반환했습니다. 상태: ${response.status}`
+            );
           }
-          
-          result = { success: false, error: `예상치 못한 응답 형식: ${response.status}` };
+
+          result = {
+            success: false,
+            error: `예상치 못한 응답 형식: ${response.status}`,
+          };
         }
       } catch (parseError) {
         console.error('❌ [CLIENT] 응답 파싱 실패:', parseError);
-        throw new Error(`응답 파싱 실패: ${parseError instanceof Error ? parseError.message : '알 수 없는 파싱 에러'}`);
+        throw new Error(
+          `응답 파싱 실패: ${parseError instanceof Error ? parseError.message : '알 수 없는 파싱 에러'}`
+        );
       }
-      
+
       console.log('📨 [CLIENT] 파싱된 결과:', result);
-      
+
       if (result.success) {
         console.log('🎉 [SUCCESS] 비밀번호 변경 성공 - 모달 표시');
         setShowSuccessModal(true);
       } else {
         console.error('❌ [ERROR] 비밀번호 변경 실패:', result.error);
         // 에러는 React Hook Form에서 처리하거나 상태로 관리
-        form.setError('root', { 
-          message: result.error || '비밀번호 변경에 실패했습니다.' 
+        form.setError('root', {
+          message: result.error || '비밀번호 변경에 실패했습니다.',
         });
       }
     } catch (error) {
       console.error('💥 [CLIENT] 네트워크 오류:', error);
-      form.setError('root', { 
-        message: '네트워크 오류가 발생했습니다. 다시 시도해주세요.' 
+      form.setError('root', {
+        message: '네트워크 오류가 발생했습니다. 다시 시도해주세요.',
       });
     } finally {
       setIsSubmitting(false);
@@ -188,11 +208,11 @@ export default function NewPasswordPage({
   return (
     <AuthLayout>
       {/* 성공 모달 */}
-      <PasswordSuccessModal 
+      <PasswordSuccessModal
         isOpen={showSuccessModal}
         onClose={() => setShowSuccessModal(false)}
       />
-      
+
       <Card className="w-full bg-transparent border-none shadow-none">
         <CardHeader className="space-y-1 pb-6">
           <div className="flex items-center gap-3 mb-4">
@@ -214,7 +234,9 @@ export default function NewPasswordPage({
           {form.formState.errors.root && (
             <Alert variant="destructive" className="mb-6">
               <AlertTitle>오류</AlertTitle>
-              <AlertDescription>{form.formState.errors.root.message}</AlertDescription>
+              <AlertDescription>
+                {form.formState.errors.root.message}
+              </AlertDescription>
             </Alert>
           )}
 
@@ -232,7 +254,8 @@ export default function NewPasswordPage({
               <CheckCircle className="h-4 w-4" />
               <AlertTitle>성공</AlertTitle>
               <AlertDescription>
-                비밀번호가 성공적으로 변경되었습니다. 새 비밀번호로 로그인해주세요.
+                비밀번호가 성공적으로 변경되었습니다. 새 비밀번호로
+                로그인해주세요.
               </AlertDescription>
             </Alert>
           )}
@@ -338,4 +361,4 @@ export default function NewPasswordPage({
       </Card>
     </AuthLayout>
   );
-} 
+}

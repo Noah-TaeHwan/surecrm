@@ -119,7 +119,9 @@ function EmptyInvitationsState() {
       <div className="mx-auto w-20 h-20 sm:w-24 sm:h-24 bg-muted rounded-full flex items-center justify-center mb-4 sm:mb-6">
         <Users className="w-10 h-10 sm:w-12 sm:h-12 text-muted-foreground" />
       </div>
-      <h3 className="text-lg sm:text-xl font-semibold mb-2">추천 코드가 없습니다</h3>
+      <h3 className="text-lg sm:text-xl font-semibold mb-2">
+        추천 코드가 없습니다
+      </h3>
       <p className="text-sm sm:text-base text-muted-foreground mb-6 max-w-md mx-auto leading-relaxed">
         동료 추천 코드를 통해 소중한 동료들을 추천하여 함께 성장하세요!
       </p>
@@ -129,7 +131,9 @@ function EmptyInvitationsState() {
           <Card className="p-3 sm:p-4 hover:shadow-md transition-shadow">
             <div className="text-center">
               <Users className="w-6 h-6 sm:w-8 sm:h-8 text-green-500 mx-auto mb-2" />
-              <h4 className="font-medium mb-1 text-sm sm:text-base">전문가 네트워크</h4>
+              <h4 className="font-medium mb-1 text-sm sm:text-base">
+                전문가 네트워크
+              </h4>
               <p className="text-xs sm:text-sm text-muted-foreground">
                 동료들과 함께 성장
               </p>
@@ -138,7 +142,9 @@ function EmptyInvitationsState() {
           <Card className="p-3 sm:p-4 hover:shadow-md transition-shadow">
             <div className="text-center">
               <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 text-blue-500 mx-auto mb-2" />
-              <h4 className="font-medium mb-1 text-sm sm:text-base">비즈니스 성장</h4>
+              <h4 className="font-medium mb-1 text-sm sm:text-base">
+                비즈니스 성장
+              </h4>
               <p className="text-xs sm:text-sm text-muted-foreground">
                 함께 발전하는 기회
               </p>
@@ -171,8 +177,8 @@ function ErrorState({ error }: { error: string }) {
         {error}
       </p>
       {/* 🎯 터치 최적화: 버튼 크기 증가 */}
-      <Button 
-        onClick={() => window.location.reload()} 
+      <Button
+        onClick={() => window.location.reload()}
         variant="outline"
         size="lg"
         className="min-h-[44px]"
@@ -263,7 +269,9 @@ export default function InvitationsPage({ loaderData }: Route.ComponentProps) {
             <Card>
               <CardContent className="text-center py-6 sm:py-8 px-4">
                 <Users className="w-10 h-10 sm:w-12 sm:h-12 text-muted-foreground mx-auto mb-3 sm:mb-4" />
-                <h4 className="font-medium mb-2 text-sm sm:text-base">추천 코드가 없습니다</h4>
+                <h4 className="font-medium mb-2 text-sm sm:text-base">
+                  추천 코드가 없습니다
+                </h4>
                 <p className="text-xs sm:text-sm text-muted-foreground mb-4">
                   관리자에게 문의하여 추천 코드를 요청하실 수 있습니다.
                 </p>

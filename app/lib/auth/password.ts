@@ -10,16 +10,17 @@ export async function sendPasswordResetEmail(
     const supabase = createServerClient();
 
     // 환경변수에서 사이트 URL 가져오기 (개발/운영 환경 고려)
-    const siteUrl = process.env.NODE_ENV === 'development' 
-      ? 'http://localhost:5173' 
-      : process.env.SITE_URL || 'https://surecrm-sigma.vercel.app';
+    const siteUrl =
+      process.env.NODE_ENV === 'development'
+        ? 'http://localhost:5173'
+        : process.env.SITE_URL || 'https://surecrm-sigma.vercel.app';
     const redirectTo = `${siteUrl}/auth/confirm`;
 
-    console.log('📧 비밀번호 재설정 이메일 발송 시작:', { 
-      email, 
+    console.log('📧 비밀번호 재설정 이메일 발송 시작:', {
+      email,
       redirectTo,
       NODE_ENV: process.env.NODE_ENV,
-      SITE_URL: process.env.SITE_URL 
+      SITE_URL: process.env.SITE_URL,
     });
 
     // ✅ Context7에서 확인한 Supabase 표준 방식 사용
@@ -50,7 +51,7 @@ export async function sendPasswordResetEmail(
     console.log('✅ 비밀번호 재설정 이메일 발송 성공:', {
       email,
       redirectTo,
-      data: data ? 'present' : 'null'
+      data: data ? 'present' : 'null',
     });
     return {
       success: true,

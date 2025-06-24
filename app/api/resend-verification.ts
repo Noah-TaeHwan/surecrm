@@ -256,7 +256,7 @@ function checkResendThrottling(
   // 2. 이메일별 시간당 최대 시도 횟수 검증
   if (emailData) {
     const recentAttempts = emailData.attempts.filter(
-      (attempt) => now - attempt.timestamp < HOUR_IN_MS
+      attempt => now - attempt.timestamp < HOUR_IN_MS
     );
 
     if (recentAttempts.length >= MAX_ATTEMPTS_PER_HOUR) {
@@ -274,7 +274,7 @@ function checkResendThrottling(
   const ipData = ipThrottleStore.get(clientIP);
   if (ipData) {
     const recentAttempts = ipData.attempts.filter(
-      (attempt) => now - attempt.timestamp < HOUR_IN_MS
+      attempt => now - attempt.timestamp < HOUR_IN_MS
     );
 
     if (recentAttempts.length >= MAX_ATTEMPTS_PER_IP_PER_HOUR) {
@@ -307,7 +307,7 @@ function updateThrottlingCounters(email: string, clientIP: string): void {
   };
   emailData.attempts = [
     ...emailData.attempts.filter(
-      (attempt) => now - attempt.timestamp < HOUR_IN_MS
+      attempt => now - attempt.timestamp < HOUR_IN_MS
     ),
     { timestamp: now, email },
   ];
@@ -320,9 +320,7 @@ function updateThrottlingCounters(email: string, clientIP: string): void {
     lastAttempt: 0,
   };
   ipData.attempts = [
-    ...ipData.attempts.filter(
-      (attempt) => now - attempt.timestamp < HOUR_IN_MS
-    ),
+    ...ipData.attempts.filter(attempt => now - attempt.timestamp < HOUR_IN_MS),
     { timestamp: now, email },
   ];
   ipData.lastAttempt = now;
@@ -355,30 +353,33 @@ function getSupabaseErrorMessage(error: any): string {
 }
 
 // 주기적으로 만료된 데이터 정리
-setInterval(() => {
-  const now = Date.now();
+setInterval(
+  () => {
+    const now = Date.now();
 
-  for (const [email, data] of emailThrottleStore.entries()) {
-    data.attempts = data.attempts.filter(
-      (attempt) => now - attempt.timestamp < HOUR_IN_MS
-    );
+    for (const [email, data] of emailThrottleStore.entries()) {
+      data.attempts = data.attempts.filter(
+        attempt => now - attempt.timestamp < HOUR_IN_MS
+      );
 
-    if (data.attempts.length === 0 && now - data.lastAttempt > HOUR_IN_MS) {
-      emailThrottleStore.delete(email);
-    } else {
-      emailThrottleStore.set(email, data);
+      if (data.attempts.length === 0 && now - data.lastAttempt > HOUR_IN_MS) {
+        emailThrottleStore.delete(email);
+      } else {
+        emailThrottleStore.set(email, data);
+      }
     }
-  }
 
-  for (const [ip, data] of ipThrottleStore.entries()) {
-    data.attempts = data.attempts.filter(
-      (attempt) => now - attempt.timestamp < HOUR_IN_MS
-    );
+    for (const [ip, data] of ipThrottleStore.entries()) {
+      data.attempts = data.attempts.filter(
+        attempt => now - attempt.timestamp < HOUR_IN_MS
+      );
 
-    if (data.attempts.length === 0 && now - data.lastAttempt > HOUR_IN_MS) {
-      ipThrottleStore.delete(ip);
-    } else {
-      ipThrottleStore.set(ip, data);
+      if (data.attempts.length === 0 && now - data.lastAttempt > HOUR_IN_MS) {
+        ipThrottleStore.delete(ip);
+      } else {
+        ipThrottleStore.set(ip, data);
+      }
     }
-  }
-}, 15 * 60 * 1000); // 15분마다 정리
+  },
+  15 * 60 * 1000
+); // 15분마다 정리

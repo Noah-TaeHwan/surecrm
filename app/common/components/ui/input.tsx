@@ -30,7 +30,9 @@ function Input({ className, type, ...props }: React.ComponentProps<'input'>) {
         // 🍎 iOS Safari 추가 안전 장치 - 인라인 스타일로 강제 적용
         fontSize: 'max(16px, 1rem)',
         WebkitTextSizeAdjust: '100%',
-        ...('style' in props && typeof props.style === 'object' ? props.style : {}),
+        ...('style' in props && typeof props.style === 'object'
+          ? props.style
+          : {}),
       }}
       {...props}
     />

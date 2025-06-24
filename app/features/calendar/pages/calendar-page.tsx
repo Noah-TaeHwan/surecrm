@@ -39,12 +39,12 @@ import {
   type ConflictData,
 } from '../components/conflict-resolution-modal';
 import { GoogleConnectRequired } from '../components/google-connect-required';
-import { 
-  type Meeting, 
-  type Client, 
+import {
+  type Meeting,
+  type Client,
   type ViewMode,
   meetingTypeColors,
-  meetingTypeKoreanMap
+  meetingTypeKoreanMap,
 } from '../types/types';
 import { Badge } from '~/common/components/ui/badge';
 import { useViewport } from '~/common/hooks/useViewport';
@@ -103,8 +103,6 @@ export default function CalendarPage({
   // 충돌 관리 상태
   const [conflicts, setConflicts] = useState<ConflictData[]>([]);
   const [isConflictModalOpen, setIsConflictModalOpen] = useState(false);
-
-
 
   // 날짜 클릭 핸들러 (월 뷰에서 일 뷰로 전환)
   const handleDateClick = (date: Date) => {
@@ -205,7 +203,7 @@ export default function CalendarPage({
   // 현재 표시 날짜 포맷 (iOS 스타일)
   const getDisplayTitle = () => {
     if (viewMode === 'month') {
-      return isMobile 
+      return isMobile
         ? `${selectedDate.getFullYear()}년 ${selectedDate.getMonth() + 1}월`
         : `${selectedDate.getFullYear()}년 ${selectedDate.getMonth() + 1}월`;
     } else if (viewMode === 'week') {
@@ -238,10 +236,12 @@ export default function CalendarPage({
   // 네비게이션 핸들러 (햅틱 피드백 추가)
   const navigateCalendar = (direction: 'prev' | 'next') => {
     triggerHapticFeedback();
-    
+
     const newDate = new Date(selectedDate);
     if (viewMode === 'month') {
-      newDate.setMonth(selectedDate.getMonth() + (direction === 'next' ? 1 : -1));
+      newDate.setMonth(
+        selectedDate.getMonth() + (direction === 'next' ? 1 : -1)
+      );
     } else if (viewMode === 'week') {
       newDate.setDate(selectedDate.getDate() + (direction === 'next' ? 7 : -7));
     } else {
@@ -284,8 +284,6 @@ export default function CalendarPage({
   return (
     <MainLayout title="일정 관리">
       <div className="flex-1 space-y-4 md:space-y-6">
-        
-
         {/* 🔒 구글 캘린더 연동이 필요한 경우 */}
         {loaderData.requiresGoogleConnection ? (
           <div className="text-center py-16">
@@ -354,11 +352,13 @@ export default function CalendarPage({
           </div>
         ) : (
           /* 📱 iOS 스타일 캘린더 뷰 */
-          <div className={cn(
-            "grid gap-4 md:gap-6",
-            isMobile ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-5"
-          )}>
-            <div className={cn(isMobile ? "col-span-1" : "lg:col-span-4")}>
+          <div
+            className={cn(
+              'grid gap-4 md:gap-6',
+              isMobile ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-5'
+            )}
+          >
+            <div className={cn(isMobile ? 'col-span-1' : 'lg:col-span-4')}>
               {/* 캘린더 컨테이너 - iOS 스타일 */}
               <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg overflow-hidden">
                 {viewMode === 'month' && (
@@ -367,7 +367,7 @@ export default function CalendarPage({
                     meetings={filteredMeetings}
                     onMeetingClick={setSelectedMeeting}
                     onDateClick={handleDateClick}
-                    onMonthChange={(date) => setSelectedDate(date)}
+                    onMonthChange={date => setSelectedDate(date)}
                   />
                 )}
                 {viewMode === 'week' && (
@@ -413,16 +413,19 @@ export default function CalendarPage({
         {isMobile && (
           <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-4">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
-              {selectedDate.toLocaleDateString('ko-KR', { 
-                month: 'long', 
-                day: 'numeric' 
-              })} 일정
+              {selectedDate.toLocaleDateString('ko-KR', {
+                month: 'long',
+                day: 'numeric',
+              })}{' '}
+              일정
             </h3>
-            
+
             {filteredMeetings
               .filter((meeting: Meeting) => {
                 const meetingDate = new Date(meeting.date);
-                return meetingDate.toDateString() === selectedDate.toDateString();
+                return (
+                  meetingDate.toDateString() === selectedDate.toDateString()
+                );
               })
               .map((meeting: Meeting) => (
                 <div
@@ -439,13 +442,15 @@ export default function CalendarPage({
                       {meeting.title}
                     </div>
                     <div className="text-sm text-gray-600 dark:text-gray-400">
-                      {meeting.time} · {meetingTypeKoreanMap[meeting.type as keyof typeof meetingTypeKoreanMap] || meeting.type}
+                      {meeting.time} ·{' '}
+                      {meetingTypeKoreanMap[
+                        meeting.type as keyof typeof meetingTypeKoreanMap
+                      ] || meeting.type}
                     </div>
                   </div>
                 </div>
-              ))
-            }
-            
+              ))}
+
             {filteredMeetings.filter((meeting: Meeting) => {
               const meetingDate = new Date(meeting.date);
               return meetingDate.toDateString() === selectedDate.toDateString();

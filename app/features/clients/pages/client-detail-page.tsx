@@ -143,7 +143,13 @@ import {
 
 // ✅ Zod 스키마 분리 완료 - import로 대체
 
-export async function loader({ request, params }: { request: Request; params: { id: string } }) {
+export async function loader({
+  request,
+  params,
+}: {
+  request: Request;
+  params: { id: string };
+}) {
   const { id: clientId } = params;
 
   console.log('🔍 고객 상세 페이지 loader 시작:', { clientId });
@@ -1961,7 +1967,13 @@ export default function ClientDetailPage({ loaderData }: { loaderData: any }) {
   );
 }
 
-export async function action({ request, params }: { request: Request; params: { id: string } }) {
+export async function action({
+  request,
+  params,
+}: {
+  request: Request;
+  params: { id: string };
+}) {
   const { id: clientId } = params;
 
   if (!clientId) {

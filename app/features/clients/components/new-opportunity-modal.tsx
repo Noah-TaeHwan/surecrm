@@ -166,11 +166,14 @@ export function NewOpportunityModal({
   );
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => {
-      if (!open) {
-        handleClose(); // 🔄 X 버튼이나 ESC로 닫힐 때도 상태 초기화
-      }
-    }}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={open => {
+        if (!open) {
+          handleClose(); // 🔄 X 버튼이나 ESC로 닫힐 때도 상태 초기화
+        }
+      }}
+    >
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">

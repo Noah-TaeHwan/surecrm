@@ -1,7 +1,7 @@
 import { redirect } from 'react-router';
 import { createServerClient } from '~/lib/core/supabase';
 import type { EmailOtpType } from '@supabase/supabase-js';
-import type { Route } from "./+types/auth.confirm";
+import type { Route } from './+types/auth.confirm';
 
 export async function loader({ request }: Route.LoaderArgs) {
   const url = new URL(request.url);
@@ -27,7 +27,7 @@ export async function loader({ request }: Route.LoaderArgs) {
   try {
     // Supabase 클라이언트 생성
     const supabase = createServerClient(request);
-    
+
     // 토큰 검증
     const verifyStartTime = Date.now();
     const { data, error } = await supabase.auth.verifyOtp({
@@ -47,14 +47,14 @@ export async function loader({ request }: Route.LoaderArgs) {
       errorCode: error?.code,
       responseTime: verifyEndTime - verifyStartTime,
       serverTime: new Date().toISOString(),
-      url: url.toString()
+      url: url.toString(),
     };
 
     // 검증 실패 처리
     if (error) {
       console.error('🚨 [PRODUCTION] 토큰 검증 실패:', {
         ...debugInfo,
-        fullError: error
+        fullError: error,
       });
 
       // 디버그 모드나 특정 에러에서 상세 정보 반환 (에러가 있을 때만!)
@@ -67,10 +67,12 @@ export async function loader({ request }: Route.LoaderArgs) {
           has_data: String(!!data),
           has_user: String(!!data?.user),
           has_session: String(!!data?.session),
-          response_time: String(debugInfo.responseTime)
+          response_time: String(debugInfo.responseTime),
         });
-        
-        throw redirect(`/auth/forgot-password?debug_info=true&${debugParams.toString()}`);
+
+        throw redirect(
+          `/auth/forgot-password?debug_info=true&${debugParams.toString()}`
+        );
       }
 
       // 일반적인 에러 메시지로 변환
@@ -89,7 +91,7 @@ export async function loader({ request }: Route.LoaderArgs) {
         userId: data.user.id,
         email: data.user.email,
         sessionExists: !!data.session,
-        debugMode: debug
+        debugMode: debug,
       });
 
       // 서버사이드에서 직접 쿠키 설정 (Response 헤더로)
@@ -99,23 +101,25 @@ export async function loader({ request }: Route.LoaderArgs) {
         refresh_token: data.session.refresh_token,
         expires_at: data.session.expires_at,
         token_type: 'bearer',
-        user: data.user
+        user: data.user,
       };
-      
+
       console.log('🍪 [COOKIE SET] 세션 데이터 준비:', {
         hasAccessToken: !!sessionData.access_token,
         hasRefreshToken: !!sessionData.refresh_token,
         expiresAt: sessionData.expires_at,
         userId: sessionData.user?.id,
-        userEmail: sessionData.user?.email
+        userEmail: sessionData.user?.email,
       });
-      
+
       const cookieValue = encodeURIComponent(JSON.stringify(sessionData));
       console.log('🔒 [COOKIE SET] 인코딩된 쿠키 값 길이:', cookieValue.length);
-      
-      const expires = new Date((data.session.expires_at || Math.floor(Date.now() / 1000) + 3600) * 1000);
+
+      const expires = new Date(
+        (data.session.expires_at || Math.floor(Date.now() / 1000) + 3600) * 1000
+      );
       console.log('⏰ [COOKIE SET] 쿠키 만료 시간:', expires.toISOString());
-      
+
       const cookieOptions = [
         `${cookieName}=${cookieValue}`,
         'Path=/',
@@ -123,40 +127,53 @@ export async function loader({ request }: Route.LoaderArgs) {
         'SameSite=Lax',
         `Expires=${expires.toUTCString()}`,
         // 프로덕션에서는 Secure 추가
-        process.env.NODE_ENV === 'production' ? 'Secure' : ''
-      ].filter(Boolean).join('; ');
-      
-      console.log('🎯 [COOKIE SET] 최종 쿠키 옵션:', cookieOptions.substring(0, 200) + '...');
+        process.env.NODE_ENV === 'production' ? 'Secure' : '',
+      ]
+        .filter(Boolean)
+        .join('; ');
+
+      console.log(
+        '🎯 [COOKIE SET] 최종 쿠키 옵션:',
+        cookieOptions.substring(0, 200) + '...'
+      );
 
       // 토큰 타입별 리다이렉트 처리 (쿠키와 함께)
       if (type === 'recovery') {
-        console.log('✅ [PRODUCTION] 비밀번호 재설정 페이지로 리다이렉트 (쿠키 설정됨)');
-        
+        console.log(
+          '✅ [PRODUCTION] 비밀번호 재설정 페이지로 리다이렉트 (쿠키 설정됨)'
+        );
+
         // Response 객체로 리다이렉트와 쿠키를 함께 설정
         throw new Response(null, {
           status: 302,
           headers: {
-            'Location': '/auth/new-password',
-            'Set-Cookie': cookieOptions
-          }
+            Location: '/auth/new-password',
+            'Set-Cookie': cookieOptions,
+          },
         });
       } else if (type === 'signup' || type === 'email_change') {
-        console.log('✅ [PRODUCTION] 다음 페이지로 리다이렉트 (쿠키 설정됨):', next);
+        console.log(
+          '✅ [PRODUCTION] 다음 페이지로 리다이렉트 (쿠키 설정됨):',
+          next
+        );
         throw new Response(null, {
           status: 302,
           headers: {
-            'Location': next,
-            'Set-Cookie': cookieOptions
-          }
+            Location: next,
+            'Set-Cookie': cookieOptions,
+          },
         });
       } else {
-        console.log('✅ [PRODUCTION] 기본 다음 페이지로 리다이렉트 (쿠키 설정됨):', next);
+        console.log(
+          '✅ [PRODUCTION] 기본 다음 페이지로 리다이렉트 (쿠키 설정됨):',
+          next
+        );
         throw new Response(null, {
           status: 302,
           headers: {
-            'Location': next,
-            'Set-Cookie': cookieOptions
-          }
+            Location: next,
+            'Set-Cookie': cookieOptions,
+          },
         });
       }
     }
@@ -164,18 +181,17 @@ export async function loader({ request }: Route.LoaderArgs) {
     // 예상치 못한 상황 - 에러도 없고 세션도 없는 경우
     console.error('🤔 [PRODUCTION] 예상치 못한 상황:', debugInfo);
     throw redirect('/auth/login?error=unexpected_verification_state');
-
   } catch (error) {
     // 리다이렉트가 아닌 일반 오류인 경우에만 로그
     if (!(error instanceof Response)) {
       console.error('💥 [PRODUCTION] 토큰 확인 처리 오류:', error);
     }
-    
+
     // 이미 리다이렉트인 경우 그대로 throw, 아니면 로그인으로 리다이렉트
     if (error instanceof Response) {
       throw error;
     }
-    
+
     throw redirect('/auth/login?error=token_verification_failed');
   }
 }
@@ -194,7 +210,11 @@ export default function AuthConfirm() {
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
           <div className="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-blue-100">
-            <svg className="animate-spin h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24">
+            <svg
+              className="animate-spin h-6 w-6 text-blue-600"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
               <circle
                 className="opacity-25"
                 cx="12"
@@ -220,4 +240,4 @@ export default function AuthConfirm() {
       </div>
     </div>
   );
-} 
+}

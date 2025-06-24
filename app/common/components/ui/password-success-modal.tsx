@@ -14,7 +14,10 @@ interface PasswordSuccessModalProps {
   onClose: () => void;
 }
 
-export function PasswordSuccessModal({ isOpen, onClose }: PasswordSuccessModalProps) {
+export function PasswordSuccessModal({
+  isOpen,
+  onClose,
+}: PasswordSuccessModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose} modal={true}>
       <DialogContent className="sm:max-w-md">
@@ -22,7 +25,7 @@ export function PasswordSuccessModal({ isOpen, onClose }: PasswordSuccessModalPr
           {/* 성공 아이콘과 애니메이션 */}
           <div className="mx-auto w-20 h-20 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center relative">
             <CheckCircle className="w-10 h-10 text-green-600 dark:text-green-400 animate-pulse" />
-            
+
             {/* 반짝임 효과 */}
             <div className="absolute -top-1 -right-1">
               <Sparkles className="w-6 h-6 text-green-500 dark:text-green-300 animate-bounce" />
@@ -31,11 +34,11 @@ export function PasswordSuccessModal({ isOpen, onClose }: PasswordSuccessModalPr
               <Sparkles className="w-4 h-4 text-green-400 dark:text-green-300 animate-bounce delay-200" />
             </div>
           </div>
-          
+
           <DialogTitle className="text-2xl font-bold text-slate-900 dark:text-slate-100">
             🎉 비밀번호 변경 완료!
           </DialogTitle>
-          
+
           <DialogDescription className="text-slate-600 dark:text-slate-400 text-center">
             <span className="block text-base mb-2">
               새로운 비밀번호가 성공적으로 설정되었습니다.
@@ -59,9 +62,9 @@ export function PasswordSuccessModal({ isOpen, onClose }: PasswordSuccessModalPr
               </span>
             </Link>
           </Button>
-          
-          <Button 
-            variant="ghost" 
+
+          <Button
+            variant="ghost"
             onClick={onClose}
             className="w-full text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
           >
@@ -78,4 +81,4 @@ export function PasswordSuccessModal({ isOpen, onClose }: PasswordSuccessModalPr
       </DialogContent>
     </Dialog>
   );
-} 
+}

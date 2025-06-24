@@ -89,7 +89,13 @@ function EventCard({
         'group relative rounded-lg cursor-pointer transition-all duration-200 ease-out',
         'transform hover:scale-[1.02] active:scale-[0.98]',
         // 모바일: 더 큰 터치 타겟과 패딩
-        isMobile ? (compact ? 'p-3 min-h-[44px]' : 'p-3.5 min-h-[48px]') : (compact ? 'p-2.5' : 'p-3'),
+        isMobile
+          ? compact
+            ? 'p-3 min-h-[44px]'
+            : 'p-3.5 min-h-[48px]'
+          : compact
+            ? 'p-2.5'
+            : 'p-3',
         'border shadow-sm hover:shadow-md transition-shadow duration-200',
         // SureCRM 색상 시스템 적용
         colors.bg,
@@ -103,14 +109,24 @@ function EventCard({
         {/* 시간 & 소스 아이콘 */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
-            <div className={cn("w-1.5 h-1.5 rounded-full flex-shrink-0", colors.dot)} />
-            <Clock className={cn('opacity-70', isMobile ? 'h-3.5 w-3.5' : 'h-3 w-3')} />
-            <span className={cn('font-semibold tracking-wide', 
-              isMobile ? 'text-sm' : 'text-xs')}>
+            <div
+              className={cn(
+                'w-1.5 h-1.5 rounded-full flex-shrink-0',
+                colors.dot
+              )}
+            />
+            <Clock
+              className={cn('opacity-70', isMobile ? 'h-3.5 w-3.5' : 'h-3 w-3')}
+            />
+            <span
+              className={cn(
+                'font-semibold tracking-wide',
+                isMobile ? 'text-sm' : 'text-xs'
+              )}
+            >
               {meeting.time}
             </span>
           </div>
-
         </div>
 
         {/* 이벤트 제목 */}
@@ -118,7 +134,13 @@ function EventCard({
           <span
             className={cn(
               'font-medium truncate',
-              isMobile ? (compact ? 'text-sm' : 'text-base') : (compact ? 'text-xs' : 'text-sm')
+              isMobile
+                ? compact
+                  ? 'text-sm'
+                  : 'text-base'
+                : compact
+                  ? 'text-xs'
+                  : 'text-sm'
             )}
           >
             {meeting.title}
@@ -178,7 +200,12 @@ function MoreEventsButton({
       </div>
 
       {/* 미리보기 힌트 */}
-      <div className={cn('mt-1 opacity-70 truncate', isMobile ? 'text-xs' : 'text-[10px]')}>
+      <div
+        className={cn(
+          'mt-1 opacity-70 truncate',
+          isMobile ? 'text-xs' : 'text-[10px]'
+        )}
+      >
         {previewTimes}
       </div>
     </div>
@@ -198,7 +225,7 @@ function DateCellHeader({
   sourceCount: Record<string, number>;
 }) {
   const { isMobile } = useViewport();
-  
+
   return (
     <div className="flex items-center justify-between mb-2">
       {/* iOS 스타일 날짜 번호 (SureCRM 톤 적용) */}
@@ -218,14 +245,14 @@ function DateCellHeader({
       {isMobile && dayMeetings.length > 0 && (
         <div className="flex items-center gap-0.5 max-w-[50px] overflow-hidden">
           {dayMeetings.slice(0, 4).map((meeting, index) => (
-            <EventDot 
-              key={`${meeting.id}-${index}`} 
+            <EventDot
+              key={`${meeting.id}-${index}`}
               event={meeting}
               className="animate-in fade-in duration-300"
             />
           ))}
           {dayMeetings.length > 4 && (
-            <div 
+            <div
               className="w-1 h-1 rounded-full bg-gray-400 dark:bg-gray-500 flex-shrink-0 ml-0.5"
               title={`+${dayMeetings.length - 4}개 더`}
             />
@@ -249,40 +276,42 @@ function MonthHeader({
   onTitleClick?: () => void;
 }) {
   const { isMobile } = useViewport();
-  const monthName = currentDate.toLocaleDateString('ko-KR', { 
-    year: 'numeric', 
-    month: 'long' 
+  const monthName = currentDate.toLocaleDateString('ko-KR', {
+    year: 'numeric',
+    month: 'long',
   });
 
   return (
-    <div className={cn(
-      "flex items-center justify-between p-4",
-      "bg-card/80 backdrop-blur-sm",
-      "border-b border-border/50",
-      "sticky top-0 z-10"
-    )}>
+    <div
+      className={cn(
+        'flex items-center justify-between p-4',
+        'bg-card/80 backdrop-blur-sm',
+        'border-b border-border/50',
+        'sticky top-0 z-10'
+      )}
+    >
       <Button
         variant="ghost"
-        size={isMobile ? "default" : "sm"}
+        size={isMobile ? 'default' : 'sm'}
         onClick={onPrevMonth}
         className={cn(
-          "p-2 rounded-lg text-muted-foreground",
-          "hover:bg-muted/50",
-          "hover:text-foreground",
-          "transition-all duration-200",
-          isMobile && "min-w-[44px] min-h-[44px] touch-target"
+          'p-2 rounded-lg text-muted-foreground',
+          'hover:bg-muted/50',
+          'hover:text-foreground',
+          'transition-all duration-200',
+          isMobile && 'min-w-[44px] min-h-[44px] touch-target'
         )}
       >
-        <ChevronLeft className={cn(isMobile ? "h-5 w-5" : "h-4 w-4")} />
+        <ChevronLeft className={cn(isMobile ? 'h-5 w-5' : 'h-4 w-4')} />
       </Button>
 
       <div className="flex items-center gap-4">
         <button
           onClick={onTitleClick}
           className={cn(
-            "font-bold text-foreground",
-            "hover:text-primary transition-colors",
-            isMobile ? "text-xl" : "text-lg"
+            'font-bold text-foreground',
+            'hover:text-primary transition-colors',
+            isMobile ? 'text-xl' : 'text-lg'
           )}
         >
           {monthName}
@@ -291,17 +320,17 @@ function MonthHeader({
 
       <Button
         variant="ghost"
-        size={isMobile ? "default" : "sm"}
+        size={isMobile ? 'default' : 'sm'}
         onClick={onNextMonth}
         className={cn(
-          "p-2 rounded-lg text-muted-foreground",
-          "hover:bg-muted/50",
-          "hover:text-foreground",
-          "transition-all duration-200",
-          isMobile && "min-w-[44px] min-h-[44px] touch-target"
+          'p-2 rounded-lg text-muted-foreground',
+          'hover:bg-muted/50',
+          'hover:text-foreground',
+          'transition-all duration-200',
+          isMobile && 'min-w-[44px] min-h-[44px] touch-target'
         )}
       >
-        <ChevronRight className={cn(isMobile ? "h-5 w-5" : "h-4 w-4")} />
+        <ChevronRight className={cn(isMobile ? 'h-5 w-5' : 'h-4 w-4')} />
       </Button>
     </div>
   );
@@ -311,24 +340,26 @@ function MonthHeader({
 function WeekdayHeader() {
   const { isMobile } = useViewport();
   const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
-  
+
   return (
-    <div className={cn(
-      "grid grid-cols-7",
-      "bg-muted/50 backdrop-blur-sm",
-      "border-b border-border/50"
-    )}>
+    <div
+      className={cn(
+        'grid grid-cols-7',
+        'bg-muted/50 backdrop-blur-sm',
+        'border-b border-border/50'
+      )}
+    >
       {weekdays.map((day, index) => (
         <div
           key={day}
           className={cn(
-            "text-center font-semibold transition-colors",
-            isMobile ? "py-3 text-sm" : "py-2.5 text-xs",
-            index === 0 
-              ? "text-destructive" // 일요일
-              : index === 6 
-              ? "text-primary" // 토요일
-              : "text-muted-foreground" // 평일
+            'text-center font-semibold transition-colors',
+            isMobile ? 'py-3 text-sm' : 'py-2.5 text-xs',
+            index === 0
+              ? 'text-destructive' // 일요일
+              : index === 6
+                ? 'text-primary' // 토요일
+                : 'text-muted-foreground' // 평일
           )}
         >
           {day}
@@ -358,7 +389,7 @@ const getEventColors = (event: Meeting) => {
     },
     // 성공/완료: 에메랄드
     emerald: {
-      bg: 'bg-emerald-50 dark:bg-emerald-950/20', 
+      bg: 'bg-emerald-50 dark:bg-emerald-950/20',
       border: 'border-emerald-200 dark:border-emerald-800/50',
       text: 'text-emerald-700 dark:text-emerald-300',
       dot: 'bg-emerald-500',
@@ -366,7 +397,7 @@ const getEventColors = (event: Meeting) => {
     // 진행중/검토: 앰버
     amber: {
       bg: 'bg-amber-50 dark:bg-amber-950/20',
-      border: 'border-amber-200 dark:border-amber-800/50', 
+      border: 'border-amber-200 dark:border-amber-800/50',
       text: 'text-amber-700 dark:text-amber-300',
       dot: 'bg-amber-500',
     },
@@ -385,24 +416,24 @@ const getEventColors = (event: Meeting) => {
       dot: 'bg-violet-500',
     },
   };
-  
+
   // SureCRM 이벤트 타입별 색상 매핑 (실제 비즈니스 로직 반영)
   const typeColorMap: Record<string, keyof typeof colorMap> = {
-    'first_consultation': 'sky',        // 첫 상담 - 스카이
-    'needs_analysis': 'emerald',        // 니즈 분석 - 에메랄드  
-    'product_explanation': 'amber',     // 상품 설명 - 앰버
-    'contract_review': 'rose',          // 계약 검토 - 로즈
-    'contract_signing': 'emerald',      // 계약 완료 - 에메랄드
-    'follow_up': 'violet',              // 후속 관리 - 바이올렛
-    'claim_support': 'rose',            // 클레임 지원 - 로즈
-    'other': 'neutral',                 // 기타 - 중성
+    first_consultation: 'sky', // 첫 상담 - 스카이
+    needs_analysis: 'emerald', // 니즈 분석 - 에메랄드
+    product_explanation: 'amber', // 상품 설명 - 앰버
+    contract_review: 'rose', // 계약 검토 - 로즈
+    contract_signing: 'emerald', // 계약 완료 - 에메랄드
+    follow_up: 'violet', // 후속 관리 - 바이올렛
+    claim_support: 'rose', // 클레임 지원 - 로즈
+    other: 'neutral', // 기타 - 중성
   };
-  
+
   // 구글 캘린더 이벤트는 중성 색상 (절제됨)
   if (event.syncInfo?.externalSource === 'google') {
     return colorMap['neutral'];
   }
-  
+
   // SureCRM 이벤트는 타입에 따라 색상 결정
   const colorKey = typeColorMap[event.type] || 'neutral';
   return colorMap[colorKey];
@@ -410,17 +441,23 @@ const getEventColors = (event: Meeting) => {
 
 // 📱 모바일 iOS 스타일 점 표시 컴포넌트
 // 🍎 iOS 네이티브 스타일 이벤트 점 (더 정교한 디자인)
-const EventDot = ({ event, className = '' }: { event: Meeting; className?: string }) => {
+const EventDot = ({
+  event,
+  className = '',
+}: {
+  event: Meeting;
+  className?: string;
+}) => {
   const colors = getEventColors(event);
-  
+
   return (
-    <div 
+    <div
       className={cn(
-        "w-1.5 h-1.5 rounded-full flex-shrink-0 shadow-sm",
-        "ring-1 ring-white/50 dark:ring-gray-900/50", // iOS 스타일 링
+        'w-1.5 h-1.5 rounded-full flex-shrink-0 shadow-sm',
+        'ring-1 ring-white/50 dark:ring-gray-900/50', // iOS 스타일 링
         colors.dot,
         // 미묘한 애니메이션
-        "transition-all duration-200 hover:scale-110",
+        'transition-all duration-200 hover:scale-110',
         className
       )}
       title={event.title}
@@ -438,7 +475,9 @@ export function CalendarGrid({
   const { isMobile } = useViewport();
   const [currentDate, setCurrentDate] = useState(selectedDate);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
+  const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(
+    null
+  );
   const [isTransitioning, setIsTransitioning] = useState(false);
 
   // 햅틱 피드백 함수
@@ -451,7 +490,7 @@ export function CalendarGrid({
   // 터치 시작 핸들러
   const handleTouchStart = (e: React.TouchEvent) => {
     if (!isMobile) return;
-    
+
     const touch = e.touches[0];
     setTouchStart({
       x: touch.clientX,
@@ -471,7 +510,7 @@ export function CalendarGrid({
     if (Math.abs(deltaX) > 50 && deltaY < 30) {
       setIsTransitioning(true);
       triggerHapticFeedback();
-      
+
       if (deltaX > 0) {
         // 오른쪽 스와이프 = 이전 달
         handlePrevMonth();
@@ -488,14 +527,22 @@ export function CalendarGrid({
 
   // 월 변경 함수들
   const handlePrevMonth = () => {
-    const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+    const newDate = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth() - 1,
+      1
+    );
     setCurrentDate(newDate);
     onMonthChange?.(newDate);
     triggerHapticFeedback();
   };
 
   const handleNextMonth = () => {
-    const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
+    const newDate = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth() + 1,
+      1
+    );
     setCurrentDate(newDate);
     onMonthChange?.(newDate);
     triggerHapticFeedback();
@@ -540,7 +587,7 @@ export function CalendarGrid({
     for (let i = prevMonthDays - 1; i >= 0; i--) {
       const day = prevMonthLastDay - i;
       const cellDate = new Date(year, month - 1, day);
-      
+
       days.push(
         <div
           key={`prev-${day}`}
@@ -553,10 +600,12 @@ export function CalendarGrid({
           )}
           onClick={() => handleDateClick(cellDate)}
         >
-          <div className={cn(
-            'flex items-center justify-center rounded-full font-medium',
-            isMobile ? 'w-7 h-7 text-sm' : 'w-6 h-6 text-xs'
-          )}>
+          <div
+            className={cn(
+              'flex items-center justify-center rounded-full font-medium',
+              isMobile ? 'w-7 h-7 text-sm' : 'w-6 h-6 text-xs'
+            )}
+          >
             {day}
           </div>
         </div>
@@ -566,7 +615,7 @@ export function CalendarGrid({
     // 현재 달 날짜들
     for (let day = 1; day <= daysInMonth; day++) {
       const cellDate = new Date(year, month, day);
-      const isToday = 
+      const isToday =
         cellDate.getDate() === today.getDate() &&
         cellDate.getMonth() === today.getMonth() &&
         cellDate.getFullYear() === today.getFullYear();
@@ -583,11 +632,14 @@ export function CalendarGrid({
       });
 
       // 소스별 미팅 수 계산
-      const sourceCount = dayMeetings.reduce((acc, meeting) => {
-        const source = meeting.syncInfo?.externalSource || 'surecrm';
-        acc[source] = (acc[source] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>);
+      const sourceCount = dayMeetings.reduce(
+        (acc, meeting) => {
+          const source = meeting.syncInfo?.externalSource || 'surecrm';
+          acc[source] = (acc[source] || 0) + 1;
+          return acc;
+        },
+        {} as Record<string, number>
+      );
 
       days.push(
         <div
@@ -599,9 +651,15 @@ export function CalendarGrid({
             isToday && 'ring-2 ring-primary/30 bg-primary/5 shadow-lg',
             isWeekend && !isToday && 'bg-muted/30',
             // 💻📱 최적화된 높이 (더 많은 이벤트 표시 가능)
-            isMobile 
-              ? (dayMeetings.length === 0 ? 'p-3 min-h-[80px]' : 'p-3 min-h-[100px]')
-              : (dayMeetings.length === 0 ? 'p-3 min-h-[140px]' : dayMeetings.length <= 2 ? 'p-3 min-h-[160px]' : 'p-3 min-h-[180px]'),
+            isMobile
+              ? dayMeetings.length === 0
+                ? 'p-3 min-h-[80px]'
+                : 'p-3 min-h-[100px]'
+              : dayMeetings.length === 0
+                ? 'p-3 min-h-[140px]'
+                : dayMeetings.length <= 2
+                  ? 'p-3 min-h-[160px]'
+                  : 'p-3 min-h-[180px]',
             // 그림자
             'shadow-sm hover:shadow-md transition-shadow duration-200'
           )}
@@ -624,7 +682,7 @@ export function CalendarGrid({
                   <EventCard
                     meeting={dayMeetings[0]}
                     compact={true}
-                    onClick={(e) => {
+                    onClick={e => {
                       e.stopPropagation();
                       handleMeetingClick(dayMeetings[0], e);
                     }}
@@ -636,7 +694,7 @@ export function CalendarGrid({
                     <EventCard
                       meeting={dayMeetings[0]}
                       compact={false}
-                      onClick={(e) => {
+                      onClick={e => {
                         e.stopPropagation();
                         handleMeetingClick(dayMeetings[0], e);
                       }}
@@ -647,7 +705,7 @@ export function CalendarGrid({
                       <EventCard
                         meeting={dayMeetings[1]}
                         compact={true}
-                        onClick={(e) => {
+                        onClick={e => {
                           e.stopPropagation();
                           handleMeetingClick(dayMeetings[1], e);
                         }}
@@ -659,7 +717,7 @@ export function CalendarGrid({
                       <EventCard
                         meeting={dayMeetings[2]}
                         compact={true}
-                        onClick={(e) => {
+                        onClick={e => {
                           e.stopPropagation();
                           handleMeetingClick(dayMeetings[2], e);
                         }}
@@ -669,11 +727,14 @@ export function CalendarGrid({
                 )}
 
                 {/* 더보기 버튼 */}
-                {((isMobile && dayMeetings.length > 1) || (!isMobile && dayMeetings.length > 3)) && (
+                {((isMobile && dayMeetings.length > 1) ||
+                  (!isMobile && dayMeetings.length > 3)) && (
                   <MoreEventsButton
-                    count={isMobile ? dayMeetings.length - 1 : dayMeetings.length - 3}
+                    count={
+                      isMobile ? dayMeetings.length - 1 : dayMeetings.length - 3
+                    }
                     meetings={dayMeetings.slice(isMobile ? 1 : 3)}
-                    onClick={(e) => {
+                    onClick={e => {
                       e.stopPropagation();
                       handleDateClick(cellDate);
                     }}
@@ -684,11 +745,18 @@ export function CalendarGrid({
 
             {/* 빈 날짜 표시 */}
             {dayMeetings.length === 0 && (
-              <div className={cn(
-                'flex items-center justify-center text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity',
-                isMobile ? 'h-8' : 'h-12'
-              )}>
-                <Plus className={cn('transition-transform group-hover:scale-110', isMobile ? 'h-4 w-4' : 'h-5 w-5')} />
+              <div
+                className={cn(
+                  'flex items-center justify-center text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity',
+                  isMobile ? 'h-8' : 'h-12'
+                )}
+              >
+                <Plus
+                  className={cn(
+                    'transition-transform group-hover:scale-110',
+                    isMobile ? 'h-4 w-4' : 'h-5 w-5'
+                  )}
+                />
               </div>
             )}
           </div>
@@ -700,7 +768,7 @@ export function CalendarGrid({
     const remainingCells = 42 - days.length; // 6주 * 7일
     for (let day = 1; day <= remainingCells; day++) {
       const cellDate = new Date(year, month + 1, day);
-      
+
       days.push(
         <div
           key={`next-${day}`}
@@ -712,10 +780,12 @@ export function CalendarGrid({
           )}
           onClick={() => handleDateClick(cellDate)}
         >
-          <div className={cn(
-            'flex items-center justify-center rounded-full font-medium',
-            isMobile ? 'w-7 h-7 text-sm' : 'w-6 h-6 text-xs'
-          )}>
+          <div
+            className={cn(
+              'flex items-center justify-center rounded-full font-medium',
+              isMobile ? 'w-7 h-7 text-sm' : 'w-6 h-6 text-xs'
+            )}
+          >
             {day}
           </div>
         </div>
@@ -723,7 +793,7 @@ export function CalendarGrid({
     }
 
     return (
-      <div 
+      <div
         className={cn(
           'grid grid-cols-7 gap-1 bg-background',
           isMobile ? 'p-2' : 'p-3',
@@ -736,7 +806,7 @@ export function CalendarGrid({
   };
 
   return (
-    <div 
+    <div
       ref={containerRef}
       className="w-full bg-white dark:bg-gray-900 rounded-xl shadow-lg overflow-hidden"
       onTouchStart={handleTouchStart}

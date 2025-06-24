@@ -31,7 +31,13 @@ const clientEditSchema = z.object({
 
 type ClientEditFormData = z.infer<typeof clientEditSchema>;
 
-export async function loader({ request, params }: { request: Request; params: { id: string } }) {
+export async function loader({
+  request,
+  params,
+}: {
+  request: Request;
+  params: { id: string };
+}) {
   const { id: clientId } = params;
 
   console.log('🔍 고객 편집 페이지 loader 시작:', { clientId });
@@ -87,7 +93,13 @@ export async function loader({ request, params }: { request: Request; params: { 
   }
 }
 
-export async function action({ request, params }: { request: Request; params: { id: string } }) {
+export async function action({
+  request,
+  params,
+}: {
+  request: Request;
+  params: { id: string };
+}) {
   const { id: clientId } = params;
 
   if (!clientId) {
@@ -145,7 +157,10 @@ export function meta({ data }: { data: any }) {
 export default function ClientEditPage({
   loaderData,
   actionData,
-}: { loaderData: any; actionData?: any }) {
+}: {
+  loaderData: any;
+  actionData?: any;
+}) {
   const { client } = loaderData;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();

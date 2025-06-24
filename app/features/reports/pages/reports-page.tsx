@@ -327,9 +327,9 @@ export default function ReportsPage({ loaderData }: Route.ComponentProps) {
                 <SelectItem value="year">올해</SelectItem>
               </SelectContent>
             </Select>
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
               onClick={handleDownload}
               className="min-h-[44px] px-3 sm:px-4 flex-shrink-0"
             >

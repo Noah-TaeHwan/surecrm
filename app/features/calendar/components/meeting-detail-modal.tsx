@@ -156,10 +156,10 @@ export function MeetingDetailModal({
   onToggleChecklist,
 }: MeetingDetailModalProps) {
   const { success, error } = useToast();
-  
+
   // 편집 모드 상태
   const [isEditing, setIsEditing] = useState(false);
-  
+
   // 편집된 미팅 데이터
   const [editedMeeting, setEditedMeeting] = useState({
     title: meeting?.title || '',
@@ -179,21 +179,25 @@ export function MeetingDetailModal({
   if (!meeting) return null;
 
   // 미팅 타입 정보
-  const meetingTypeInfo = meetingTypeDetails[meeting.type as keyof typeof meetingTypeDetails] || {
+  const meetingTypeInfo = meetingTypeDetails[
+    meeting.type as keyof typeof meetingTypeDetails
+  ] || {
     label: '일반 미팅',
     icon: '📅',
     color: 'blue',
   };
 
   // 우선순위 정보 (실제 데이터베이스 값 기반)
-  const priorityInfo = priorityOptions.find(
-    p => p.value === (meeting as any)?.priority || 'medium'
-  ) || priorityOptions[1];
+  const priorityInfo =
+    priorityOptions.find(
+      p => p.value === (meeting as any)?.priority || 'medium'
+    ) || priorityOptions[1];
 
   // 연락 방법 정보
-  const contactMethodInfo = contactMethods.find(
-    c => c.value === (meeting as any)?.contactMethod || 'in_person'
-  ) || contactMethods[2];
+  const contactMethodInfo =
+    contactMethods.find(
+      c => c.value === (meeting as any)?.contactMethod || 'in_person'
+    ) || contactMethods[2];
 
   // 기대 성과 정보
   const expectedOutcomeInfo = expectedOutcomes.find(
@@ -270,7 +274,11 @@ export function MeetingDetailModal({
 
   // 삭제 처리
   const handleDelete = () => {
-    if (confirm('정말로 이 미팅을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.')) {
+    if (
+      confirm(
+        '정말로 이 미팅을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.'
+      )
+    ) {
       const form = document.createElement('form');
       form.method = 'POST';
       form.style.display = 'none';
@@ -317,7 +325,7 @@ export function MeetingDetailModal({
               {formatDate(meeting.date)} • {formatTime(meeting.time)}
             </DialogDescription>
             {/* 우선순위 배지 - 적절한 위치로 이동 */}
-            <Badge className={cn("text-xs ml-2", priorityInfo.color)}>
+            <Badge className={cn('text-xs ml-2', priorityInfo.color)}>
               {priorityInfo.icon} {priorityInfo.label}
             </Badge>
           </div>
@@ -330,11 +338,18 @@ export function MeetingDetailModal({
             {/* 기본 정보 */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label className="text-sm font-medium text-foreground">미팅 제목 *</Label>
+                <Label className="text-sm font-medium text-foreground">
+                  미팅 제목 *
+                </Label>
                 {isEditing ? (
                   <Input
                     value={editedMeeting.title}
-                    onChange={(e) => setEditedMeeting(prev => ({...prev, title: e.target.value}))}
+                    onChange={e =>
+                      setEditedMeeting(prev => ({
+                        ...prev,
+                        title: e.target.value,
+                      }))
+                    }
                     className="h-10 w-full mt-2"
                   />
                 ) : (
@@ -345,24 +360,30 @@ export function MeetingDetailModal({
               </div>
 
               <div>
-                <Label className="text-sm font-medium text-foreground">미팅 유형 *</Label>
+                <Label className="text-sm font-medium text-foreground">
+                  미팅 유형 *
+                </Label>
                 {isEditing ? (
                   <Select
                     value={editedMeeting.type}
-                    onValueChange={(value) => setEditedMeeting(prev => ({...prev, type: value}))}
+                    onValueChange={value =>
+                      setEditedMeeting(prev => ({ ...prev, type: value }))
+                    }
                   >
                     <SelectTrigger className="h-10 w-full mt-2">
                       <SelectValue placeholder="유형 선택" />
                     </SelectTrigger>
                     <SelectContent>
-                      {Object.entries(meetingTypeDetails).map(([value, details]) => (
-                        <SelectItem key={value} value={value}>
-                          <div className="flex items-center gap-2">
-                            <span>{details.icon}</span>
-                            <span>{details.label}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
+                      {Object.entries(meetingTypeDetails).map(
+                        ([value, details]) => (
+                          <SelectItem key={value} value={value}>
+                            <div className="flex items-center gap-2">
+                              <span>{details.icon}</span>
+                              <span>{details.label}</span>
+                            </div>
+                          </SelectItem>
+                        )
+                      )}
                     </SelectContent>
                   </Select>
                 ) : (
@@ -374,7 +395,9 @@ export function MeetingDetailModal({
               </div>
 
               <div>
-                <Label className="text-sm font-medium text-foreground">고객</Label>
+                <Label className="text-sm font-medium text-foreground">
+                  고객
+                </Label>
                 <div className="text-sm text-muted-foreground mt-2 py-2 flex items-center gap-2">
                   <PersonIcon className="h-4 w-4" />
                   <span>{(meeting as any).clientName || '미설정'}</span>
@@ -382,17 +405,21 @@ export function MeetingDetailModal({
               </div>
 
               <div>
-                <Label className="text-sm font-medium text-foreground">우선순위</Label>
+                <Label className="text-sm font-medium text-foreground">
+                  우선순위
+                </Label>
                 {isEditing ? (
                   <Select
                     value={editedMeeting.priority}
-                    onValueChange={(value) => setEditedMeeting(prev => ({...prev, priority: value}))}
+                    onValueChange={value =>
+                      setEditedMeeting(prev => ({ ...prev, priority: value }))
+                    }
                   >
                     <SelectTrigger className="h-10 w-full mt-2">
                       <SelectValue placeholder="우선순위 선택" />
                     </SelectTrigger>
                     <SelectContent>
-                      {priorityOptions.map((option) => (
+                      {priorityOptions.map(option => (
                         <SelectItem key={option.value} value={option.value}>
                           <div className="flex items-center gap-2">
                             <span>{option.icon}</span>
@@ -411,12 +438,19 @@ export function MeetingDetailModal({
               </div>
 
               <div>
-                <Label className="text-sm font-medium text-foreground">날짜 *</Label>
+                <Label className="text-sm font-medium text-foreground">
+                  날짜 *
+                </Label>
                 {isEditing ? (
                   <Input
                     type="date"
                     value={editedMeeting.date}
-                    onChange={(e) => setEditedMeeting(prev => ({...prev, date: e.target.value}))}
+                    onChange={e =>
+                      setEditedMeeting(prev => ({
+                        ...prev,
+                        date: e.target.value,
+                      }))
+                    }
                     className="h-10 w-full mt-2"
                   />
                 ) : (
@@ -427,12 +461,19 @@ export function MeetingDetailModal({
               </div>
 
               <div>
-                <Label className="text-sm font-medium text-foreground">시간 *</Label>
+                <Label className="text-sm font-medium text-foreground">
+                  시간 *
+                </Label>
                 {isEditing ? (
                   <Input
                     type="time"
                     value={editedMeeting.time}
-                    onChange={(e) => setEditedMeeting(prev => ({...prev, time: e.target.value}))}
+                    onChange={e =>
+                      setEditedMeeting(prev => ({
+                        ...prev,
+                        time: e.target.value,
+                      }))
+                    }
                     className="h-10 w-full mt-2"
                   />
                 ) : (
@@ -444,7 +485,9 @@ export function MeetingDetailModal({
               </div>
 
               <div>
-                <Label className="text-sm font-medium text-foreground">소요 시간</Label>
+                <Label className="text-sm font-medium text-foreground">
+                  소요 시간
+                </Label>
                 {isEditing ? (
                   <Input
                     type="number"
@@ -452,7 +495,12 @@ export function MeetingDetailModal({
                     max="480"
                     step="15"
                     value={editedMeeting.duration}
-                    onChange={(e) => setEditedMeeting(prev => ({...prev, duration: Number(e.target.value)}))}
+                    onChange={e =>
+                      setEditedMeeting(prev => ({
+                        ...prev,
+                        duration: Number(e.target.value),
+                      }))
+                    }
                     className="h-10 w-full mt-2"
                   />
                 ) : (
@@ -463,17 +511,24 @@ export function MeetingDetailModal({
               </div>
 
               <div>
-                <Label className="text-sm font-medium text-foreground">연락 방법</Label>
+                <Label className="text-sm font-medium text-foreground">
+                  연락 방법
+                </Label>
                 {isEditing ? (
                   <Select
                     value={editedMeeting.contactMethod}
-                    onValueChange={(value) => setEditedMeeting(prev => ({...prev, contactMethod: value}))}
+                    onValueChange={value =>
+                      setEditedMeeting(prev => ({
+                        ...prev,
+                        contactMethod: value,
+                      }))
+                    }
                   >
                     <SelectTrigger className="h-10 w-full mt-2">
                       <SelectValue placeholder="연락 방법 선택" />
                     </SelectTrigger>
                     <SelectContent>
-                      {contactMethods.map((method) => (
+                      {contactMethods.map(method => (
                         <SelectItem key={method.value} value={method.value}>
                           <div className="flex items-center gap-2">
                             {method.icon}
@@ -492,11 +547,18 @@ export function MeetingDetailModal({
               </div>
 
               <div>
-                <Label className="text-sm font-medium text-foreground">장소</Label>
+                <Label className="text-sm font-medium text-foreground">
+                  장소
+                </Label>
                 {isEditing ? (
                   <Input
                     value={editedMeeting.location}
-                    onChange={(e) => setEditedMeeting(prev => ({...prev, location: e.target.value}))}
+                    onChange={e =>
+                      setEditedMeeting(prev => ({
+                        ...prev,
+                        location: e.target.value,
+                      }))
+                    }
                     placeholder="미팅 장소를 입력하세요"
                     className="h-10 w-full mt-2"
                   />
@@ -509,17 +571,24 @@ export function MeetingDetailModal({
               </div>
 
               <div>
-                <Label className="text-sm font-medium text-foreground">기대 성과</Label>
+                <Label className="text-sm font-medium text-foreground">
+                  기대 성과
+                </Label>
                 {isEditing ? (
                   <Select
                     value={editedMeeting.expectedOutcome}
-                    onValueChange={(value) => setEditedMeeting(prev => ({...prev, expectedOutcome: value}))}
+                    onValueChange={value =>
+                      setEditedMeeting(prev => ({
+                        ...prev,
+                        expectedOutcome: value,
+                      }))
+                    }
                   >
                     <SelectTrigger className="h-10 w-full mt-2">
                       <SelectValue placeholder="기대 성과 선택" />
                     </SelectTrigger>
                     <SelectContent>
-                      {expectedOutcomes.map((outcome) => (
+                      {expectedOutcomes.map(outcome => (
                         <SelectItem key={outcome.value} value={outcome.value}>
                           <div className="flex items-center gap-2">
                             <span>{outcome.icon}</span>
@@ -538,17 +607,24 @@ export function MeetingDetailModal({
               </div>
 
               <div>
-                <Label className="text-sm font-medium text-foreground">상품 관심 분야</Label>
+                <Label className="text-sm font-medium text-foreground">
+                  상품 관심 분야
+                </Label>
                 {isEditing ? (
                   <Select
                     value={editedMeeting.productInterest}
-                    onValueChange={(value) => setEditedMeeting(prev => ({...prev, productInterest: value}))}
+                    onValueChange={value =>
+                      setEditedMeeting(prev => ({
+                        ...prev,
+                        productInterest: value,
+                      }))
+                    }
                   >
                     <SelectTrigger className="h-10 w-full mt-2">
                       <SelectValue placeholder="상품 관심 분야 선택" />
                     </SelectTrigger>
                     <SelectContent>
-                      {productInterests.map((product) => (
+                      {productInterests.map(product => (
                         <SelectItem key={product.value} value={product.value}>
                           <div className="flex items-center gap-2">
                             <span>{product.icon}</span>
@@ -567,21 +643,25 @@ export function MeetingDetailModal({
               </div>
 
               <div>
-                <Label className="text-sm font-medium text-foreground">예상 수수료 (원)</Label>
+                <Label className="text-sm font-medium text-foreground">
+                  예상 수수료 (원)
+                </Label>
                 {isEditing ? (
                   <Input
                     type="text"
                     placeholder="100,000"
                     value={
                       editedMeeting.estimatedCommission
-                        ? Number(editedMeeting.estimatedCommission).toLocaleString('ko-KR')
+                        ? Number(
+                            editedMeeting.estimatedCommission
+                          ).toLocaleString('ko-KR')
                         : ''
                     }
-                    onChange={(e) => {
+                    onChange={e => {
                       const value = e.target.value.replace(/[^0-9]/g, '');
                       setEditedMeeting(prev => ({
-                        ...prev, 
-                        estimatedCommission: value ? Number(value) : 0
+                        ...prev,
+                        estimatedCommission: value ? Number(value) : 0,
                       }));
                     }}
                     className="h-10 w-full mt-2"
@@ -590,10 +670,9 @@ export function MeetingDetailModal({
                   <div className="text-sm text-muted-foreground mt-2 py-2 flex items-center gap-2">
                     <DollarSign className="h-4 w-4" />
                     <span>
-                      {(meeting as any).estimatedCommission 
+                      {(meeting as any).estimatedCommission
                         ? `${Number((meeting as any).estimatedCommission).toLocaleString()}원`
-                        : '미설정'
-                      }
+                        : '미설정'}
                     </span>
                   </div>
                 )}
@@ -602,11 +681,18 @@ export function MeetingDetailModal({
 
             {/* 메모 영역 (구글 캘린더 설명과 연동) */}
             <div>
-              <Label className="text-sm font-medium text-foreground">미팅 메모</Label>
+              <Label className="text-sm font-medium text-foreground">
+                미팅 메모
+              </Label>
               {isEditing ? (
                 <Textarea
                   value={editedMeeting.description}
-                  onChange={(e) => setEditedMeeting(prev => ({...prev, description: e.target.value}))}
+                  onChange={e =>
+                    setEditedMeeting(prev => ({
+                      ...prev,
+                      description: e.target.value,
+                    }))
+                  }
                   placeholder="• 준비해야 할 자료&#10;• 논의할 주제&#10;• 고객 특이사항 등"
                   className="resize-none mt-2"
                   rows={3}
@@ -644,8 +730,10 @@ export function MeetingDetailModal({
                       type: meeting?.type || '',
                       priority: (meeting as any)?.priority || 'medium',
                       expectedOutcome: (meeting as any)?.expectedOutcome || '',
-                      contactMethod: (meeting as any)?.contactMethod || 'in_person',
-                      estimatedCommission: (meeting as any)?.estimatedCommission || 0,
+                      contactMethod:
+                        (meeting as any)?.contactMethod || 'in_person',
+                      estimatedCommission:
+                        (meeting as any)?.estimatedCommission || 0,
                       productInterest: (meeting as any)?.productInterest || '',
                     });
                   }}

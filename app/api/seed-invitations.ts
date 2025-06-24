@@ -112,7 +112,7 @@ export async function action({ request }: { request: Request }) {
 
     if (existingInvitations.length === 0) {
       // 트랜잭션으로 안전한 데이터 생성
-      const seedResult = await db.transaction(async (tx) => {
+      const seedResult = await db.transaction(async tx => {
         // 시스템 관리자 프로필 생성/확인
         const systemProfile = await tx
           .insert(profiles)
@@ -186,7 +186,7 @@ export async function action({ request }: { request: Request }) {
 
       systemProfileCreated = seedResult.systemProfileCreated;
       createdCount = seedResult.invitations.length;
-      invitationCodes = seedResult.invitations.map((inv) => inv.code);
+      invitationCodes = seedResult.invitations.map(inv => inv.code);
 
       // 성공 로깅
       logAPIRequest(request.method, request.url, authResult.id, {
@@ -225,7 +225,7 @@ export async function action({ request }: { request: Request }) {
           createdCount: 0,
           existingCount: existingInvitations.length,
           systemProfileCreated: false,
-          invitationCodes: existingInvitations.map((inv) => inv.code),
+          invitationCodes: existingInvitations.map(inv => inv.code),
         },
       });
     }

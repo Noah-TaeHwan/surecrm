@@ -135,7 +135,7 @@ export async function action({ request }: { request: Request }) {
           {
             profile: updatedProfile[0],
             updatedFields: Object.keys(updateData).filter(
-              (key) => key !== 'updatedAt'
+              key => key !== 'updatedAt'
             ),
           },
           '설정이 성공적으로 저장되었습니다.'

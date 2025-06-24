@@ -10,50 +10,50 @@ import { useDeviceType } from '~/common/hooks/use-viewport';
 const getEventColors = (meeting: Meeting) => {
   // 비즈니스 로직에 따른 색상 매핑
   const type = meeting.type;
-  
+
   if (type === 'first_consultation') {
     return {
       bg: 'bg-sky-500/90 hover:bg-sky-600/90',
       border: 'border-sky-400/50',
       text: 'text-white',
-      dot: 'bg-sky-500'
+      dot: 'bg-sky-500',
     };
   } else if (type === 'contract_signing') {
     return {
-      bg: 'bg-emerald-500/90 hover:bg-emerald-600/90', 
+      bg: 'bg-emerald-500/90 hover:bg-emerald-600/90',
       border: 'border-emerald-400/50',
       text: 'text-white',
-      dot: 'bg-emerald-500'
+      dot: 'bg-emerald-500',
     };
   } else if (type === 'follow_up') {
     return {
       bg: 'bg-amber-500/90 hover:bg-amber-600/90',
-      border: 'border-amber-400/50', 
+      border: 'border-amber-400/50',
       text: 'text-white',
-      dot: 'bg-amber-500'
+      dot: 'bg-amber-500',
     };
   } else if (type === 'urgent') {
     return {
       bg: 'bg-rose-500/90 hover:bg-rose-600/90',
       border: 'border-rose-400/50',
-      text: 'text-white', 
-      dot: 'bg-rose-500'
+      text: 'text-white',
+      dot: 'bg-rose-500',
     };
   } else if (type === 'vip') {
     return {
       bg: 'bg-violet-500/90 hover:bg-violet-600/90',
       border: 'border-violet-400/50',
       text: 'text-white',
-      dot: 'bg-violet-500'
+      dot: 'bg-violet-500',
     };
   }
-  
+
   // 기본값 (구글 캘린더 이벤트 등)
   return {
     bg: 'bg-gray-500/90 hover:bg-gray-600/90',
     border: 'border-gray-400/50',
     text: 'text-white',
-    dot: 'bg-gray-500'
+    dot: 'bg-gray-500',
   };
 };
 

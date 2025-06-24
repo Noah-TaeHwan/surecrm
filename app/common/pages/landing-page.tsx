@@ -1,4 +1,4 @@
-import type { Route } from "./+types/landing-page";
+import type { Route } from './+types/landing-page';
 import { LandingLayout } from '~/common/layouts/landing-layout';
 import { ScrollProgress } from '~/common/components/magicui/scroll-progress';
 import { FloatingNavbar } from '~/common/components/ui/floating-navbar';
@@ -75,7 +75,7 @@ export function meta({ data }: Route.MetaArgs) {
     },
     { property: 'og:type', content: 'website' },
   ];
-};
+}
 
 export default function LandingPage({ loaderData }: Route.ComponentProps) {
   const { stats, testimonials, faqs } = loaderData;

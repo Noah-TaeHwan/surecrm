@@ -50,11 +50,11 @@ function getSupabaseClientConfig() {
  */
 export function createServerClient(request?: Request) {
   const { url, anonKey } = getSupabaseConfig();
-  
+
   // 쿠키 기반 세션 처리
   if (request) {
     const cookieHeader = request.headers.get('Cookie') || '';
-    
+
     // Supabase 관련 쿠키들 추출 및 URL 디코딩
     const supabaseCookies = new Map<string, string>();
     cookieHeader
@@ -75,14 +75,14 @@ export function createServerClient(request?: Request) {
           }
         }
       });
-    
+
     // 세션 상태 추적을 위한 Map
     const sessionState = new Map<string, string | null>();
-    
+
     return supabaseCreateClient(url, anonKey, {
       auth: {
         autoRefreshToken: false, // 서버에서는 자동 갱신 비활성화
-        persistSession: false,   // 서버에서는 세션 유지 비활성화
+        persistSession: false, // 서버에서는 세션 유지 비활성화
         detectSessionInUrl: true,
         storage: {
           getItem: (key: string): string | null => {
@@ -90,10 +90,10 @@ export function createServerClient(request?: Request) {
             if (sessionState.has(key)) {
               return sessionState.get(key) ?? null;
             }
-            
+
             // 2. 쿠키에서 값 찾기
             const value = supabaseCookies.get(key) || null;
-            
+
             // 세션 상태에 저장
             sessionState.set(key, value);
             return value;
@@ -105,12 +105,12 @@ export function createServerClient(request?: Request) {
           removeItem: (key: string) => {
             // 세션 상태에서 명시적으로 null로 설정
             sessionState.set(key, null);
-          }
-        }
-      }
+          },
+        },
+      },
     });
   }
-  
+
   // 요청이 없는 경우 기본 클라이언트
   return supabaseCreateClient(url, anonKey);
 }
@@ -146,32 +146,37 @@ export function createClientSideClient() {
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: true,
-      flowType: 'pkce'
+      flowType: 'pkce',
     },
     global: {
       // JWT 만료 감지 및 자동 갱신 기능
       fetch: async (input: RequestInfo | URL, init?: RequestInit) => {
         try {
           const response = await fetch(input, init);
-          
+
           // JWT 만료 에러 감지
           if (response.status === 401) {
             const errorText = await response.clone().text();
-            if (errorText.includes('JWT') || errorText.includes('expired') || errorText.includes('invalid')) {
+            if (
+              errorText.includes('JWT') ||
+              errorText.includes('expired') ||
+              errorText.includes('invalid')
+            ) {
               // 클라이언트에서는 페이지 새로고침으로 자동 갱신 유도
               if (typeof window !== 'undefined') {
-                window.location.href = '/auth/login?error=session_expired&message=세션이 만료되었습니다. 다시 로그인해주세요.';
+                window.location.href =
+                  '/auth/login?error=session_expired&message=세션이 만료되었습니다. 다시 로그인해주세요.';
               }
             }
           }
-          
+
           return response;
         } catch (error) {
           console.error('Supabase fetch 오류:', error);
           throw error;
         }
-      }
-    }
+      },
+    },
   });
 }
 

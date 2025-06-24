@@ -35,16 +35,18 @@ function UseCaseTab({
           <div className="max-w-3xl mx-auto text-center space-y-6 sm:space-y-8">
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-4 sm:mb-6">
               <div className="w-12 sm:w-14 lg:w-16 h-12 sm:h-14 lg:h-16 bg-gradient-to-br from-primary/80 to-primary rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg">
-                    {icon}
-                  </div>
+                {icon}
+              </div>
               <div className="text-center sm:text-left">
-                    <Badge
-                      variant="secondary"
+                <Badge
+                  variant="secondary"
                   className="mb-1 sm:mb-2 bg-primary/10 text-primary border-primary/20 text-xs sm:text-sm"
-                    >
-                      {title.split(' ')[0]}
-                    </Badge>
-                <h3 className="text-xl sm:text-2xl font-bold leading-tight">{title}</h3>
+                >
+                  {title.split(' ')[0]}
+                </Badge>
+                <h3 className="text-xl sm:text-2xl font-bold leading-tight">
+                  {title}
+                </h3>
               </div>
             </div>
 
@@ -58,7 +60,9 @@ function UseCaseTab({
                   <div className="w-6 sm:w-7 lg:w-8 h-6 sm:h-7 lg:h-8 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
                     <Check className="w-3 sm:w-3.5 lg:w-4 h-3 sm:h-3.5 lg:h-4 text-primary" />
                   </div>
-                  <span className="text-sm sm:text-base font-medium">{feature}</span>
+                  <span className="text-sm sm:text-base font-medium">
+                    {feature}
+                  </span>
                 </div>
               ))}
             </div>
@@ -142,7 +146,10 @@ export function UseCasesSection() {
   ];
 
   return (
-    <section id="use-cases" className="py-16 sm:py-20 lg:py-24 relative bg-background">
+    <section
+      id="use-cases"
+      className="py-16 sm:py-20 lg:py-24 relative bg-background"
+    >
       <DotPattern
         className="absolute inset-0 opacity-15 pointer-events-none"
         width={28}

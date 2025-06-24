@@ -262,11 +262,14 @@ export function ExistingClientOpportunityModal({
   );
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => {
-      if (!open) {
-        handleClose(); // 🔄 X 버튼이나 ESC로 닫힐 때도 상태 초기화
-      }
-    }}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={open => {
+        if (!open) {
+          handleClose(); // 🔄 X 버튼이나 ESC로 닫힐 때도 상태 초기화
+        }
+      }}
+    >
       <DialogContent
         className="sm:max-w-xl w-[95vw] p-0 overflow-hidden flex flex-col sm:max-h-[75vh] gap-0 border-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
         style={{

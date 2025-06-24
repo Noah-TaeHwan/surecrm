@@ -157,7 +157,9 @@ export default function InviteOnlyPage({ loaderData }: ComponentProps) {
           {/* 오류 메시지 표시 (서버 또는 클라이언트) */}
           {clientError && (
             <Alert variant="destructive" className="mb-3 sm:mb-4">
-              <AlertDescription className="text-sm">{clientError}</AlertDescription>
+              <AlertDescription className="text-sm">
+                {clientError}
+              </AlertDescription>
             </Alert>
           )}
 

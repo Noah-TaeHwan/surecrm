@@ -25,8 +25,12 @@ function FeatureCard({ icon, title, description }: FeatureCardProps) {
       <div className="rounded-full bg-primary/10 w-10 sm:w-11 lg:w-12 h-10 sm:h-11 lg:h-12 flex items-center justify-center mb-3 sm:mb-4">
         {icon}
       </div>
-      <h3 className="text-lg sm:text-xl font-semibold mb-2 leading-tight">{title}</h3>
-      <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">{description}</p>
+      <h3 className="text-lg sm:text-xl font-semibold mb-2 leading-tight">
+        {title}
+      </h3>
+      <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+        {description}
+      </p>
       <BorderBeam
         size={100}
         colorFrom="#9E7AFF"
@@ -106,7 +110,7 @@ export function FeaturesSection() {
           <p className="text-sm sm:text-base text-muted-foreground leading-relaxed px-2 sm:px-0">
             SureCRM은 보험설계사가 소개 네트워크를 효과적으로 관리하고
             <span className="hidden sm:inline">
-            <br />
+              <br />
             </span>
             <span className="sm:hidden"> </span>
             영업 성과를 높이는 데 필요한 모든 도구를 제공합니다.

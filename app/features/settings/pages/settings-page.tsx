@@ -637,7 +637,9 @@ export default function SettingsPage({
                     <SettingsIcon className="h-5 w-5 sm:h-6 sm:w-6 text-foreground" />
                   </div>
                   <div>
-                    <h1 className="text-2xl sm:text-3xl font-bold text-foreground">설정</h1>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
+                      설정
+                    </h1>
                     <p className="text-sm sm:text-base text-muted-foreground">
                       {user ? `${user.fullName || user.email}님의 ` : ''}계정
                       정보와 환경설정을 관리하세요
@@ -856,7 +858,11 @@ export default function SettingsPage({
                   </div>
                 </div>
 
-                <Button type="submit" variant="destructive" className="w-full min-h-[44px]">
+                <Button
+                  type="submit"
+                  variant="destructive"
+                  className="w-full min-h-[44px]"
+                >
                   <Shield className="h-4 w-4 mr-2" />
                   비밀번호 변경
                 </Button>

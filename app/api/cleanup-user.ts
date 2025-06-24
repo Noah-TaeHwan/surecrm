@@ -243,7 +243,7 @@ async function executeUserDeletion(
       return { success: false, error: '사용자 조회에 실패했습니다.' };
     }
 
-    const targetUsers = users.users.filter((user) => user.email === email);
+    const targetUsers = users.users.filter(user => user.email === email);
 
     if (targetUsers.length === 0) {
       return {
@@ -263,7 +263,7 @@ async function executeUserDeletion(
     let transferTargetUserId: string | undefined;
     if (transferDataTo) {
       const transferTargetUsers = users.users.filter(
-        (user) => user.email === transferDataTo
+        user => user.email === transferDataTo
       );
       if (transferTargetUsers.length === 0) {
         return {
@@ -275,7 +275,7 @@ async function executeUserDeletion(
     }
 
     // 3. 트랜잭션으로 모든 데이터 삭제
-    const deletionCounts = await db.transaction(async (tx) => {
+    const deletionCounts = await db.transaction(async tx => {
       const counts = {
         userCount: targetUsers.length,
         profileCount: 0,

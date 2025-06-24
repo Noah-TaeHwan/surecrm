@@ -7,10 +7,13 @@ import { eq } from 'drizzle-orm';
 export async function loader({ request }: { request: Request }) {
   try {
     console.log('📊 [API/ME] 사용자 정보 조회 시작');
-    
+
     // 인증 확인 및 사용자 정보 가져오기 (이미 로그인 로직과 동일한 방식)
     const user = await requireAuth(request);
-    console.log('✅ [API/ME] 인증 성공:', { userId: user.id, email: user.email });
+    console.log('✅ [API/ME] 인증 성공:', {
+      userId: user.id,
+      email: user.email,
+    });
 
     // Drizzle을 사용해서 프로필 조회 (로그인과 동일한 방식)
     const userProfile = await db
@@ -21,7 +24,7 @@ export async function loader({ request }: { request: Request }) {
 
     console.log('📊 [API/ME] DB 조회 결과:', {
       profilesFound: userProfile.length,
-      userId: user.id
+      userId: user.id,
     });
 
     if (userProfile.length === 0) {
@@ -38,7 +41,7 @@ export async function loader({ request }: { request: Request }) {
     const profile = userProfile[0];
     console.log('✅ [API/ME] 프로필 조회 성공:', {
       id: profile.id,
-      fullName: profile.fullName
+      fullName: profile.fullName,
     });
 
     return {

@@ -57,18 +57,20 @@ const getEventColors = (event: Meeting) => {
       badge: 'bg-sky-100 dark:bg-sky-900/20 text-sky-700 dark:text-sky-300',
     },
     emerald: {
-      bg: 'bg-emerald-50 dark:bg-emerald-950/20', 
+      bg: 'bg-emerald-50 dark:bg-emerald-950/20',
       border: 'border-emerald-200 dark:border-emerald-800/50',
       text: 'text-emerald-700 dark:text-emerald-300',
       dot: 'bg-emerald-500',
-      badge: 'bg-emerald-100 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300',
+      badge:
+        'bg-emerald-100 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300',
     },
     amber: {
       bg: 'bg-amber-50 dark:bg-amber-950/20',
-      border: 'border-amber-200 dark:border-amber-800/50', 
+      border: 'border-amber-200 dark:border-amber-800/50',
       text: 'text-amber-700 dark:text-amber-300',
       dot: 'bg-amber-500',
-      badge: 'bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300',
+      badge:
+        'bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300',
     },
     rose: {
       bg: 'bg-rose-50 dark:bg-rose-950/20',
@@ -82,25 +84,26 @@ const getEventColors = (event: Meeting) => {
       border: 'border-violet-200 dark:border-violet-800/50',
       text: 'text-violet-700 dark:text-violet-300',
       dot: 'bg-violet-500',
-      badge: 'bg-violet-100 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300',
+      badge:
+        'bg-violet-100 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300',
     },
   };
-  
+
   const typeColorMap: Record<string, keyof typeof colorMap> = {
-    'first_consultation': 'sky',
-    'needs_analysis': 'emerald',
-    'product_explanation': 'amber',
-    'contract_review': 'rose',
-    'contract_signing': 'emerald',
-    'follow_up': 'violet',
-    'claim_support': 'rose',
-    'other': 'neutral',
+    first_consultation: 'sky',
+    needs_analysis: 'emerald',
+    product_explanation: 'amber',
+    contract_review: 'rose',
+    contract_signing: 'emerald',
+    follow_up: 'violet',
+    claim_support: 'rose',
+    other: 'neutral',
   };
-  
+
   if (event.syncInfo?.externalSource === 'google') {
     return colorMap['neutral'];
   }
-  
+
   const colorKey = typeColorMap[event.type] || 'neutral';
   return colorMap[colorKey];
 };
@@ -161,24 +164,32 @@ export function CalendarSidebar({
   const filterMeetings = (meetingList: Meeting[]) => {
     return meetingList.filter((m: Meeting) => {
       // 타입 필터
-      const passesTypeFilter = filteredTypes.length === 0 || filteredTypes.includes(m.type);
-      
+      const passesTypeFilter =
+        filteredTypes.length === 0 || filteredTypes.includes(m.type);
+
       // 검색 필터 (고객명, 미팅 제목, 미팅 타입)
-      const passesSearchFilter = !searchQuery || 
+      const passesSearchFilter =
+        !searchQuery ||
         m.client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         m.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (meetingTypeKoreanMap[m.type as keyof typeof meetingTypeKoreanMap] || m.type)
-          .toLowerCase().includes(searchQuery.toLowerCase());
-      
+        (
+          meetingTypeKoreanMap[m.type as keyof typeof meetingTypeKoreanMap] ||
+          m.type
+        )
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase());
+
       return passesTypeFilter && passesSearchFilter;
     });
   };
 
   // 이번 주 미팅 (필터 적용)
-  const thisWeekMeetings = filterMeetings(meetings.filter((m: Meeting) => {
-    const meetingDate = new Date(m.date);
-    return meetingDate >= thisWeekStart && meetingDate <= thisWeekEnd;
-  }));
+  const thisWeekMeetings = filterMeetings(
+    meetings.filter((m: Meeting) => {
+      const meetingDate = new Date(m.date);
+      return meetingDate >= thisWeekStart && meetingDate <= thisWeekEnd;
+    })
+  );
 
   // 미팅 타입별 분류
   const thisWeekByType = thisWeekMeetings.reduce(
@@ -192,15 +203,19 @@ export function CalendarSidebar({
 
   // 오늘 미팅 (필터 적용)
   const today = new Date();
-  const todayMeetings = filterMeetings(meetings.filter((m: Meeting) => {
-    const meetingDate = new Date(m.date);
-    return meetingDate.toDateString() === today.toDateString();
-  }));
+  const todayMeetings = filterMeetings(
+    meetings.filter((m: Meeting) => {
+      const meetingDate = new Date(m.date);
+      return meetingDate.toDateString() === today.toDateString();
+    })
+  );
 
   // 다음 미팅 (3개만, 필터 적용)
-  const upcomingMeetings = filterMeetings(meetings.filter((m: Meeting) => {
-    return new Date(m.date) > new Date();
-  }))
+  const upcomingMeetings = filterMeetings(
+    meetings.filter((m: Meeting) => {
+      return new Date(m.date) > new Date();
+    })
+  )
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
     .slice(0, 3);
 
@@ -284,17 +299,17 @@ export function CalendarSidebar({
               <TabsList className="grid grid-cols-3 w-full rounded-md p-0.5 bg-muted border border-border/30">
                 {['month', 'week', 'day'].map((mode, index) => {
                   const labels = ['월별', '주별', '일별'];
-                  
+
                   return (
                     <TabsTrigger
                       key={mode}
                       value={mode}
                       className={cn(
-                        "rounded-sm transition-all duration-150 text-xs font-medium",
-                        "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground",
-                        "data-[state=active]:shadow-sm",
-                        "text-muted-foreground hover:text-foreground",
-                        "px-3 h-8"
+                        'rounded-sm transition-all duration-150 text-xs font-medium',
+                        'data-[state=active]:bg-primary data-[state=active]:text-primary-foreground',
+                        'data-[state=active]:shadow-sm',
+                        'text-muted-foreground hover:text-foreground',
+                        'px-3 h-8'
                       )}
                     >
                       {labels[index]}
@@ -305,8 +320,6 @@ export function CalendarSidebar({
             </Tabs>
           </div>
 
-
-
           {/* 새 미팅 예약 버튼 */}
           <Button
             onClick={() => {
@@ -315,8 +328,7 @@ export function CalendarSidebar({
             }}
             className="w-full gap-2"
           >
-            <PlusIcon className="h-4 w-4" />
-            새 미팅 예약
+            <PlusIcon className="h-4 w-4" />새 미팅 예약
           </Button>
 
           {/* 이번 주 통계 */}
@@ -326,14 +338,19 @@ export function CalendarSidebar({
               <div className="flex items-center gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-primary" />
                 <span className="font-medium">
-                  {meetings.filter((m: Meeting) => {
-                    const meetingDate = new Date(m.date);
-                    const weekStart = new Date(selectedDate);
-                    weekStart.setDate(selectedDate.getDate() - selectedDate.getDay());
-                    const weekEnd = new Date(weekStart);
-                    weekEnd.setDate(weekStart.getDate() + 6);
-                    return meetingDate >= weekStart && meetingDate <= weekEnd;
-                  }).length}건
+                  {
+                    meetings.filter((m: Meeting) => {
+                      const meetingDate = new Date(m.date);
+                      const weekStart = new Date(selectedDate);
+                      weekStart.setDate(
+                        selectedDate.getDate() - selectedDate.getDay()
+                      );
+                      const weekEnd = new Date(weekStart);
+                      weekEnd.setDate(weekStart.getDate() + 6);
+                      return meetingDate >= weekStart && meetingDate <= weekEnd;
+                    }).length
+                  }
+                  건
                 </span>
               </div>
             </div>
@@ -355,7 +372,7 @@ export function CalendarSidebar({
             <Input
               placeholder="고객명, 미팅 제목, 타입으로 검색..."
               value={searchQuery}
-              onChange={(e) => {
+              onChange={e => {
                 setSearchQuery(e.target.value);
                 setSearchTerm(e.target.value);
               }}
@@ -375,13 +392,12 @@ export function CalendarSidebar({
               </Button>
             )}
           </div>
-          
+
           {/* 검색 결과 요약 */}
           {searchQuery && (
             <div className="mt-3 text-xs text-muted-foreground">
-              <span className="font-medium">
-                {filteredMeetings.length}개
-              </span>의 미팅이 검색됨
+              <span className="font-medium">{filteredMeetings.length}개</span>의
+              미팅이 검색됨
             </div>
           )}
 
@@ -396,58 +412,62 @@ export function CalendarSidebar({
                   {filteredMeetings.length}개 발견
                 </span>
               </div>
-              
+
               {filteredMeetings.length > 0 ? (
                 <div className="space-y-2 max-h-64 overflow-y-auto">
-                                  {filteredMeetings.map((meeting) => {
-                  const colors = getEventColors(meeting);
-                  return (
-                    <div
-                      key={meeting.id}
-                      className="p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:shadow-sm transition-shadow cursor-pointer"
-                      onClick={() => onMeetingClick?.(meeting)}
-                    >
-                      <div className="flex items-start space-x-3">
-                        <div 
-                          className={`w-3 h-3 rounded-full mt-1 ${colors.dot} ring-1 ring-white/50 shadow-sm`}
-                        />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between">
-                            <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-                              {meeting.title}
-                            </h4>
-                            <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">
-                              {meeting.time}
-                            </span>
-                          </div>
-                          {meeting.client?.name && (
-                            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                              {meeting.client.name}
-                            </p>
-                          )}
-                          <div className="flex items-center justify-between mt-2">
-                            <span className={`text-xs px-2 py-1 rounded-full ${colors.badge}`}>
-                              {meetingTypeKoreanMap[meeting.type as keyof typeof meetingTypeKoreanMap] || meeting.type}
-                            </span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">
-                              {format(new Date(meeting.date), 'M월 d일')}
-                            </span>
+                  {filteredMeetings.map(meeting => {
+                    const colors = getEventColors(meeting);
+                    return (
+                      <div
+                        key={meeting.id}
+                        className="p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:shadow-sm transition-shadow cursor-pointer"
+                        onClick={() => onMeetingClick?.(meeting)}
+                      >
+                        <div className="flex items-start space-x-3">
+                          <div
+                            className={`w-3 h-3 rounded-full mt-1 ${colors.dot} ring-1 ring-white/50 shadow-sm`}
+                          />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between">
+                              <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                                {meeting.title}
+                              </h4>
+                              <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">
+                                {meeting.time}
+                              </span>
+                            </div>
+                            {meeting.client?.name && (
+                              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                                {meeting.client.name}
+                              </p>
+                            )}
+                            <div className="flex items-center justify-between mt-2">
+                              <span
+                                className={`text-xs px-2 py-1 rounded-full ${colors.badge}`}
+                              >
+                                {meetingTypeKoreanMap[
+                                  meeting.type as keyof typeof meetingTypeKoreanMap
+                                ] || meeting.type}
+                              </span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
+                                {format(new Date(meeting.date), 'M월 d일')}
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
                 </div>
               ) : (
-                              <div className="text-center py-8">
-                <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                  <MagnifyingGlassIcon className="w-5 h-5 text-gray-400" />
+                <div className="text-center py-8">
+                  <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                    <MagnifyingGlassIcon className="w-5 h-5 text-gray-400" />
+                  </div>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    "{searchTerm}"에 대한 검색 결과가 없습니다
+                  </p>
                 </div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  "{searchTerm}"에 대한 검색 결과가 없습니다
-                </p>
-              </div>
               )}
             </div>
           )}
@@ -457,71 +477,71 @@ export function CalendarSidebar({
       {/* 2. 구글 캘린더 연동 상태 - 검색 중이 아닐 때만 표시 */}
       {!searchTerm && (
         <Card className="border border-sidebar-border shadow-sm">
-        <CardHeader className="pb-4">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <CalendarIcon className="h-5 w-5 text-emerald-600" />
-            구글 캘린더
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {googleCalendarSettings?.isConnected ? (
-            <div className="space-y-3">
-              {/* 연결 상태 */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                  <span className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
-                    연결됨
+          <CardHeader className="pb-4">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <CalendarIcon className="h-5 w-5 text-emerald-600" />
+              구글 캘린더
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {googleCalendarSettings?.isConnected ? (
+              <div className="space-y-3">
+                {/* 연결 상태 */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                    <span className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
+                      연결됨
+                    </span>
+                  </div>
+                  <Badge variant="secondary" className="text-xs">
+                    {googleCalendarSettings.googleEventsCount || 0}개 동기화
+                  </Badge>
+                </div>
+
+                {/* 마지막 동기화 */}
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">마지막 동기화</span>
+                  <span className="font-medium">
+                    {formatLastSync(googleCalendarSettings.lastSyncAt)}
                   </span>
                 </div>
-                <Badge variant="secondary" className="text-xs">
-                  {googleCalendarSettings.googleEventsCount || 0}개 동기화
-                </Badge>
+
+                {/* 수동 동기화 버튼 */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full gap-2"
+                  onClick={handleManualSync}
+                  disabled={isSyncing}
+                >
+                  <UpdateIcon
+                    className={cn('h-4 w-4', isSyncing && 'animate-spin')}
+                  />
+                  {isSyncing ? '동기화 중...' : '지금 동기화'}
+                </Button>
               </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
+                  <span className="text-sm text-yellow-700 dark:text-yellow-400">
+                    연결 필요
+                  </span>
+                </div>
 
-              {/* 마지막 동기화 */}
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">마지막 동기화</span>
-                <span className="font-medium">
-                  {formatLastSync(googleCalendarSettings.lastSyncAt)}
-                </span>
+                <p className="text-xs text-muted-foreground">
+                  구글 캘린더와 연동하여 양방향 동기화를 활성화하세요.
+                </p>
+
+                <Button variant="default" size="sm" className="w-full gap-2">
+                  <CalendarIcon className="h-4 w-4" />
+                  구글 계정 연결
+                </Button>
               </div>
-
-              {/* 수동 동기화 버튼 */}
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full gap-2"
-                onClick={handleManualSync}
-                disabled={isSyncing}
-              >
-                <UpdateIcon
-                  className={cn('h-4 w-4', isSyncing && 'animate-spin')}
-                />
-                {isSyncing ? '동기화 중...' : '지금 동기화'}
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
-                <span className="text-sm text-yellow-700 dark:text-yellow-400">
-                  연결 필요
-                </span>
-              </div>
-
-              <p className="text-xs text-muted-foreground">
-                구글 캘린더와 연동하여 양방향 동기화를 활성화하세요.
-              </p>
-
-              <Button variant="default" size="sm" className="w-full gap-2">
-                <CalendarIcon className="h-4 w-4" />
-                구글 계정 연결
-              </Button>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            )}
+          </CardContent>
+        </Card>
       )}
 
       {/* 3. 고급 미팅 필터 - 검색 중이 아닐 때만 표시 */}
@@ -531,11 +551,12 @@ export function CalendarSidebar({
             <CardTitle className="text-lg flex items-center gap-2">
               <MixerHorizontalIcon className="h-5 w-5 text-violet-600" />
               미팅 필터
-              {(filteredTypes.length > 0 && filteredTypes.length < availableTypes.length) && (
-                <Badge variant="secondary" className="text-xs">
-                  {filteredTypes.length}개 선택
-                </Badge>
-              )}
+              {filteredTypes.length > 0 &&
+                filteredTypes.length < availableTypes.length && (
+                  <Badge variant="secondary" className="text-xs">
+                    {filteredTypes.length}개 선택
+                  </Badge>
+                )}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -586,7 +607,11 @@ export function CalendarSidebar({
                 size="sm"
                 className="flex-1 text-xs"
                 onClick={() => onFilterChange(availableTypes)}
-                disabled={isClient ? filteredTypes.length === availableTypes.length : false}
+                disabled={
+                  isClient
+                    ? filteredTypes.length === availableTypes.length
+                    : false
+                }
               >
                 전체 선택
               </Button>
@@ -616,97 +641,97 @@ export function CalendarSidebar({
       {/* 4. 이번 주 성과 요약 (고도화) - 검색 중이 아닐 때만 표시 */}
       {!searchTerm && (
         <Card className="border border-sidebar-border bg-gradient-to-br from-sky-500/5 to-sky-500/10 shadow-sm">
-        <CardHeader className="pb-4">
-          <CardTitle className="text-lg flex items-center gap-2 text-sky-600 dark:text-sky-400">
-            <TargetIcon className="h-5 w-5" />
-            이번 주 성과
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* 핵심 지표 그리드 */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="text-center space-y-1">
-              <div className="text-3xl font-bold text-sky-600 dark:text-sky-400">
-                {thisWeekMeetings.length}
+          <CardHeader className="pb-4">
+            <CardTitle className="text-lg flex items-center gap-2 text-sky-600 dark:text-sky-400">
+              <TargetIcon className="h-5 w-5" />
+              이번 주 성과
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* 핵심 지표 그리드 */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="text-center space-y-1">
+                <div className="text-3xl font-bold text-sky-600 dark:text-sky-400">
+                  {thisWeekMeetings.length}
+                </div>
+                <div className="text-xs text-muted-foreground">총 미팅</div>
               </div>
-              <div className="text-xs text-muted-foreground">총 미팅</div>
-            </div>
-            <div className="text-center space-y-1">
-              <div className="text-3xl font-bold text-emerald-600">
-                {todayMeetings.length}
+              <div className="text-center space-y-1">
+                <div className="text-3xl font-bold text-emerald-600">
+                  {todayMeetings.length}
+                </div>
+                <div className="text-xs text-muted-foreground">오늘</div>
               </div>
-              <div className="text-xs text-muted-foreground">오늘</div>
             </div>
-          </div>
 
-          {/* 미팅 타입별 분석 */}
-          {Object.keys(thisWeekByType).length > 0 && (
-            <div className="space-y-2">
-              <h4 className="text-sm font-medium text-muted-foreground">
-                타입별 분석
-              </h4>
-              <div className="space-y-1">
-                {Object.entries(thisWeekByType).map(([type, count]) => (
-                  <div
-                    key={type}
-                    className="flex items-center justify-between text-sm"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm">
-                        {meetingTypeDetails[
-                          type as keyof typeof meetingTypeDetails
-                        ]?.icon || '📅'}
-                      </span>
-                      <span className="text-xs">
-                        {meetingTypeKoreanMap[
-                          type as keyof typeof meetingTypeKoreanMap
-                        ] || type}
-                      </span>
+            {/* 미팅 타입별 분석 */}
+            {Object.keys(thisWeekByType).length > 0 && (
+              <div className="space-y-2">
+                <h4 className="text-sm font-medium text-muted-foreground">
+                  타입별 분석
+                </h4>
+                <div className="space-y-1">
+                  {Object.entries(thisWeekByType).map(([type, count]) => (
+                    <div
+                      key={type}
+                      className="flex items-center justify-between text-sm"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm">
+                          {meetingTypeDetails[
+                            type as keyof typeof meetingTypeDetails
+                          ]?.icon || '📅'}
+                        </span>
+                        <span className="text-xs">
+                          {meetingTypeKoreanMap[
+                            type as keyof typeof meetingTypeKoreanMap
+                          ] || type}
+                        </span>
+                      </div>
+                      <span className="font-medium">{count}</span>
                     </div>
-                    <span className="font-medium">{count}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* 목표 달성률 */}
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">주간 목표 (10건)</span>
-              <span className="font-semibold">
-                {Math.min(
-                  100,
-                  Math.round((thisWeekMeetings.length / 10) * 100)
-                )}
-                %
-              </span>
-            </div>
-            <Progress
-              value={Math.min(100, (thisWeekMeetings.length / 10) * 100)}
-              className="h-2 bg-muted/30"
-            />
-            {thisWeekMeetings.length >= 10 && (
-              <div className="flex items-center gap-1 text-xs text-emerald-600">
-                <CheckCircledIcon className="h-3 w-3" />
-                <span>목표 달성!</span>
+                  ))}
+                </div>
               </div>
             )}
-          </div>
 
-          {/* 주간 성과 요약 */}
-          {thisWeekMeetings.length > 0 && (
-            <div className="pt-2 border-t border-border/50">
-              <div className="text-xs text-muted-foreground">
-                이번 주 {thisWeekMeetings.length}건의 미팅으로
-                {thisWeekMeetings.length >= 10
-                  ? ' 목표를 달성했습니다! 🎉'
-                  : ` ${10 - thisWeekMeetings.length}건 더 필요합니다.`}
+            {/* 목표 달성률 */}
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">주간 목표 (10건)</span>
+                <span className="font-semibold">
+                  {Math.min(
+                    100,
+                    Math.round((thisWeekMeetings.length / 10) * 100)
+                  )}
+                  %
+                </span>
               </div>
+              <Progress
+                value={Math.min(100, (thisWeekMeetings.length / 10) * 100)}
+                className="h-2 bg-muted/30"
+              />
+              {thisWeekMeetings.length >= 10 && (
+                <div className="flex items-center gap-1 text-xs text-emerald-600">
+                  <CheckCircledIcon className="h-3 w-3" />
+                  <span>목표 달성!</span>
+                </div>
+              )}
             </div>
-          )}
-        </CardContent>
-      </Card>
+
+            {/* 주간 성과 요약 */}
+            {thisWeekMeetings.length > 0 && (
+              <div className="pt-2 border-t border-border/50">
+                <div className="text-xs text-muted-foreground">
+                  이번 주 {thisWeekMeetings.length}건의 미팅으로
+                  {thisWeekMeetings.length >= 10
+                    ? ' 목표를 달성했습니다! 🎉'
+                    : ` ${10 - thisWeekMeetings.length}건 더 필요합니다.`}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       )}
 
       {/* 5. 다음 예정 미팅 - 검색 중이 아닐 때만 표시 */}

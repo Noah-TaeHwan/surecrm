@@ -10,7 +10,6 @@ export function LandingLayout({
   children,
   showCTA = true,
 }: LandingLayoutProps) {
-
   return (
     <div className="min-h-screen flex flex-col">
       <header className="py-3 sm:py-4 lg:py-6 px-4 sm:px-6 lg:px-8 fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b transition-all duration-200">
@@ -22,7 +21,10 @@ export function LandingLayout({
           </h1>
 
           {/* 시작하기 버튼만 표시 */}
-          <Button asChild className="text-sm sm:text-base px-3 sm:px-4 lg:px-6 h-8 sm:h-9 lg:h-10 rounded-full shadow-lg hover:shadow-xl transition-all duration-200">
+          <Button
+            asChild
+            className="text-sm sm:text-base px-3 sm:px-4 lg:px-6 h-8 sm:h-9 lg:h-10 rounded-full shadow-lg hover:shadow-xl transition-all duration-200"
+          >
             <Link to="/invite-only">시작하기</Link>
           </Button>
         </div>

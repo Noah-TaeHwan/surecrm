@@ -143,8 +143,6 @@ export default function LoginPage({ loaderData, actionData }: ComponentProps) {
     },
   });
 
-
-
   return (
     <AuthLayout>
       <Card className="w-full bg-transparent border-none shadow-none">
@@ -200,7 +198,9 @@ export default function LoginPage({ loaderData, actionData }: ComponentProps) {
           {/* 에러 메시지 */}
           {actionData?.error && (
             <Alert variant="destructive" className="mb-3 sm:mb-4">
-              <AlertDescription className="text-sm">{actionData.error}</AlertDescription>
+              <AlertDescription className="text-sm">
+                {actionData.error}
+              </AlertDescription>
             </Alert>
           )}
 
@@ -211,7 +211,9 @@ export default function LoginPage({ loaderData, actionData }: ComponentProps) {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm sm:text-base">이메일 주소</FormLabel>
+                    <FormLabel className="text-sm sm:text-base">
+                      이메일 주소
+                    </FormLabel>
                     <FormControl>
                       <Input
                         type="email"
@@ -220,7 +222,7 @@ export default function LoginPage({ loaderData, actionData }: ComponentProps) {
                         autoComplete="email"
                         className="h-10 sm:h-11 lg:h-12 text-sm sm:text-base"
                         {...field}
-                        onChange={(e) => {
+                        onChange={e => {
                           field.onChange(e);
                           setEmail(e.target.value);
                         }}
@@ -236,7 +238,9 @@ export default function LoginPage({ loaderData, actionData }: ComponentProps) {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm sm:text-base">비밀번호</FormLabel>
+                    <FormLabel className="text-sm sm:text-base">
+                      비밀번호
+                    </FormLabel>
                     <FormControl>
                       <div className="relative">
                         <Input
@@ -270,7 +274,11 @@ export default function LoginPage({ loaderData, actionData }: ComponentProps) {
                 )}
               />
 
-              <Button type="submit" className="w-full h-10 sm:h-11 lg:h-12 text-sm sm:text-base" disabled={isSubmitting}>
+              <Button
+                type="submit"
+                className="w-full h-10 sm:h-11 lg:h-12 text-sm sm:text-base"
+                disabled={isSubmitting}
+              >
                 {isSubmitting ? (
                   <>
                     <LogIn className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-2 animate-pulse" />
@@ -295,8 +303,6 @@ export default function LoginPage({ loaderData, actionData }: ComponentProps) {
               비밀번호를 잊으셨나요?
             </Link>
           </div>
-
-
         </CardContent>
 
         <CardFooter className="flex flex-col space-y-3 sm:space-y-4 pt-2">

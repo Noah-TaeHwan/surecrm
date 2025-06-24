@@ -329,7 +329,9 @@ export default function NotificationsPage({
                 <p className="text-xs sm:text-sm font-medium text-muted-foreground">
                   전체 알림
                 </p>
-                <p className="text-xl sm:text-2xl font-bold">{notifications.length}</p>
+                <p className="text-xl sm:text-2xl font-bold">
+                  {notifications.length}
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -585,7 +587,9 @@ export default function NotificationsPage({
                 <div className="mx-auto w-20 h-20 sm:w-24 sm:h-24 bg-muted rounded-full flex items-center justify-center mb-4">
                   <Bell className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground" />
                 </div>
-                <h3 className="text-lg sm:text-xl font-semibold mb-2">알림이 없습니다</h3>
+                <h3 className="text-lg sm:text-xl font-semibold mb-2">
+                  알림이 없습니다
+                </h3>
                 <p className="text-sm sm:text-base text-muted-foreground mb-4 max-w-md mx-auto leading-relaxed">
                   {user
                     ? `${
