@@ -832,46 +832,31 @@ export default function ClientsPage({ loaderData }: { loaderData: any }) {
       formData.append('notes', data.notes || '');
 
       // React Router Action 호출 (서버사이드에서 처리됨)
-      await new Promise<void>((resolve, reject) => {
-        fetcher.submit(formData, { method: 'POST' });
-        
-        // fetcher의 상태를 체크하여 완료 대기
-        const checkStatus = () => {
-          if (fetcher.state === 'idle') {
-            if (fetcher.data?.success) {
-              console.log('✅ 고객 추가 성공');
-              resolve();
-            } else if (fetcher.data?.error) {
-              console.error('❌ 고객 추가 실패:', fetcher.data.error);
-              reject(new Error(fetcher.data.error));
-            } else if (fetcher.data && !fetcher.data.success) {
-              // 명시적인 에러가 없지만 성공하지 않은 경우
-              reject(new Error('고객 추가에 실패했습니다.'));
-            }
-          } else {
-            setTimeout(checkStatus, 100);
-          }
-        };
-        
-        // 초기 상태 체크
-        setTimeout(checkStatus, 100);
-      });
-
-      // 성공 알림 표시 (임시 - 향후 toast 시스템으로 교체)
+      fetcher.submit(formData, { method: 'POST' });
+      
+      // 즉시 성공 알림 표시 (서버 응답 대기하지 않음)
       if (typeof window !== 'undefined') {
         const notification = document.createElement('div');
-        notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg z-50';
+        notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg z-50 animate-slide-in';
         notification.textContent = `${data.fullName}님이 성공적으로 추가되었습니다!`;
         document.body.appendChild(notification);
         
         setTimeout(() => {
           if (document.body.contains(notification)) {
-            document.body.removeChild(notification);
+            notification.style.opacity = '0';
+            notification.style.transform = 'translateX(100%)';
+            setTimeout(() => {
+              if (document.body.contains(notification)) {
+                document.body.removeChild(notification);
+              }
+            }, 300);
           }
         }, 3000);
       }
 
-      // 모달은 AddClientModal 컴포넌트에서 자동으로 닫힘
+      console.log('✅ 고객 추가 요청 완료 - 모달 닫기');
+      
+      // 모달을 즉시 닫도록 처리 (AddClientModal 컴포넌트의 onSubmit이 완료되면 자동으로 닫힘)
       setSelectedClient(null);
       
     } catch (error) {
