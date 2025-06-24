@@ -16,7 +16,15 @@ import {
   DollarSign,
   BarChart3,
   Activity,
+  Timer,
+  ChevronRight,
+  ShieldCheck,
+  Archive,
+  AlertTriangle,
+  Building2,
 } from 'lucide-react';
+import { formatCurrencyTable } from '~/lib/utils/currency';
+import { Link } from 'react-router';
 import { cn } from '~/lib/utils';
 import { Input } from '~/common/components/ui/input';
 import type { PipelineStage, Client } from '~/features/pipeline/types/types';
@@ -410,6 +418,58 @@ export function ResponsivePipeline({
             {getFilteredClients().length > 0 ? (
               getFilteredClients().map(client => {
                 const clientStage = stages.find(s => s.id === client.stageId);
+
+                // 시간 계산 로직 (데스크톱 카드와 동일)
+                const getDaysInPipeline = () => {
+                  const createdDate = new Date(client.createdAt || new Date());
+                  const now = new Date();
+                  return Math.floor(
+                    (now.getTime() - createdDate.getTime()) /
+                      (1000 * 60 * 60 * 24)
+                  );
+                };
+
+                const getDaysSinceLastConsultation = () => {
+                  if (!client.lastContactDate) return null;
+                  const lastContact = new Date(client.lastContactDate);
+                  const now = new Date();
+                  return Math.floor(
+                    (now.getTime() - lastContact.getTime()) /
+                      (1000 * 60 * 60 * 24)
+                  );
+                };
+
+                const daysInPipeline = getDaysInPipeline();
+                const daysSinceLastConsultation =
+                  getDaysSinceLastConsultation();
+                const isUrgent =
+                  daysSinceLastConsultation !== null &&
+                  daysSinceLastConsultation >= 7;
+                const isStale = daysInPipeline >= 30;
+
+                // 중요도 스타일
+                const importanceStyles = {
+                  high: {
+                    badge:
+                      'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
+                    label: '키맨',
+                  },
+                  medium: {
+                    badge:
+                      'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+                    label: '일반',
+                  },
+                  low: {
+                    badge: 'bg-muted text-muted-foreground',
+                    label: '관심',
+                  },
+                };
+
+                const styles =
+                  importanceStyles[
+                    client.importance as keyof typeof importanceStyles
+                  ];
+
                 return (
                   <div
                     key={client.id}
@@ -431,61 +491,249 @@ export function ResponsivePipeline({
                     </div>
 
                     {/* 고객 기본 정보 */}
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-semibold text-base">
-                          {client.name}
-                        </h3>
-                        {client.importance === 'high' && (
-                          <Badge variant="destructive" className="text-xs">
-                            중요
-                          </Badge>
-                        )}
+                    <div className="space-y-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1 min-w-0">
+                          <h3
+                            className="font-semibold text-base leading-tight text-foreground truncate pr-2"
+                            title={client.name}
+                          >
+                            {client.name}
+                          </h3>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-sm text-muted-foreground truncate">
+                              {client.phone}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* 중요도 배지 */}
+                        <Badge
+                          className={`${styles.badge} text-xs font-medium flex-shrink-0`}
+                        >
+                          {styles.label}
+                        </Badge>
                       </div>
 
-                      {client.phone && (
-                        <p className="text-sm text-muted-foreground">
-                          {client.phone}
-                        </p>
+                      {/* 직업 정보 */}
+                      {client.occupation && (
+                        <div className="flex items-center gap-2">
+                          <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+                          <span className="text-sm text-muted-foreground truncate">
+                            {client.occupation}
+                          </span>
+                        </div>
                       )}
 
+                      {/* 이메일 정보 */}
                       {client.email && (
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-muted-foreground truncate">
                           {client.email}
                         </p>
                       )}
 
-                      {client.occupation && (
-                        <p className="text-sm text-muted-foreground">
-                          직업: {client.occupation}
-                        </p>
-                      )}
-
-                      {/* 보험 정보 */}
-                      {client.totalMonthlyPremium &&
-                        client.totalMonthlyPremium > 0 && (
-                          <div className="flex items-center justify-between pt-2 mt-2 border-t border-border/50">
+                      {/* 💰 예상 수익 정보 */}
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="bg-muted/30 rounded-lg p-3">
+                          <div className="flex items-center gap-2 mb-1">
+                            <DollarSign className="h-3.5 w-3.5 text-green-600" />
                             <span className="text-xs text-muted-foreground">
                               월 보험료
                             </span>
-                            <span className="text-sm font-medium">
-                              {client.totalMonthlyPremium.toLocaleString()}원
+                          </div>
+                          <p className="text-sm font-semibold text-foreground text-center">
+                            {client.totalMonthlyPremium &&
+                            client.totalMonthlyPremium > 0 ? (
+                              formatCurrencyTable(client.totalMonthlyPremium)
+                            ) : (
+                              <span className="text-muted-foreground">
+                                미설정
+                              </span>
+                            )}
+                          </p>
+                        </div>
+
+                        <div className="bg-muted/30 rounded-lg p-3">
+                          <div className="flex items-center gap-2 mb-1">
+                            <TrendingUp className="h-3.5 w-3.5 text-blue-600" />
+                            <span className="text-xs text-muted-foreground">
+                              계약 수수료
                             </span>
+                          </div>
+                          <p className="text-sm font-semibold text-foreground text-center">
+                            {client.totalExpectedCommission &&
+                            client.totalExpectedCommission > 0 ? (
+                              formatCurrencyTable(
+                                client.totalExpectedCommission
+                              )
+                            ) : (
+                              <span className="text-muted-foreground">
+                                미설정
+                              </span>
+                            )}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* ⏰ 진행 상황 */}
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Timer
+                              className={`h-3.5 w-3.5 ${isStale ? 'text-orange-500' : 'text-muted-foreground'}`}
+                            />
+                            <span className="text-xs text-muted-foreground">
+                              파이프라인 체류
+                            </span>
+                          </div>
+                          <span
+                            className={`text-xs font-medium ${isStale ? 'text-orange-600' : 'text-foreground'}`}
+                          >
+                            {daysInPipeline}일
+                          </span>
+                        </div>
+
+                        {daysSinceLastConsultation !== null && (
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Clock
+                                className={`h-3.5 w-3.5 ${isUrgent ? 'text-red-500' : 'text-muted-foreground'}`}
+                              />
+                              <span className="text-xs text-muted-foreground">
+                                마지막 상담
+                              </span>
+                            </div>
+                            <span
+                              className={`text-xs font-medium ${isUrgent ? 'text-red-600' : 'text-foreground'}`}
+                            >
+                              {daysSinceLastConsultation}일 전
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* 🔗 소개자 정보 */}
+                      {client.referredBy && (
+                        <div className="flex items-center gap-2 p-2 bg-blue-50/50 dark:bg-blue-950/20 rounded-lg">
+                          <Users className="h-3.5 w-3.5 text-blue-600" />
+                          <span className="text-xs text-blue-700 dark:text-blue-300 truncate">
+                            {client.referredBy.name} 소개
+                          </span>
+                        </div>
+                      )}
+
+                      {/* 🎯 관심사항 표시 */}
+                      {client.interestCategories &&
+                        client.interestCategories.length > 0 && (
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-1">
+                              <span className="text-xs text-muted-foreground">
+                                관심사항
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1 flex-wrap">
+                              {client.interestCategories
+                                .slice(0, 3)
+                                .map((interest, index) => (
+                                  <div
+                                    key={index}
+                                    className="flex items-center gap-1 px-1.5 py-0.5 bg-accent/20 rounded text-xs"
+                                  >
+                                    <span>{interest.icon}</span>
+                                    <span className="text-foreground">
+                                      {interest.label.length > 4
+                                        ? interest.label.slice(0, 4)
+                                        : interest.label}
+                                    </span>
+                                  </div>
+                                ))}
+                              {client.interestCategories.length > 3 && (
+                                <div
+                                  className="flex items-center px-1.5 py-0.5 bg-muted/30 rounded text-xs"
+                                  title={`추가 관심사항: ${client.interestCategories
+                                    .slice(3)
+                                    .map(i => i.label)
+                                    .join(', ')}`}
+                                >
+                                  <span className="text-muted-foreground">
+                                    +{client.interestCategories.length - 3}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
                           </div>
                         )}
 
-                      {client.totalExpectedCommission &&
-                        client.totalExpectedCommission > 0 && (
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs text-muted-foreground">
-                              예상 수수료
-                            </span>
-                            <span className="text-sm font-medium text-green-600">
-                              {client.totalExpectedCommission.toLocaleString()}
-                              원
-                            </span>
-                          </div>
-                        )}
+                      {/* 🏥 건강 정보 */}
+                      {(client as any).hasHealthIssues !== undefined && (
+                        <div className="flex items-center gap-3">
+                          {(client as any).hasHealthIssues === false && (
+                            <div className="flex items-center gap-1">
+                              <ShieldCheck className="h-3.5 w-3.5 text-green-600" />
+                              <span className="text-xs text-green-700 dark:text-green-300">
+                                건강
+                              </span>
+                            </div>
+                          )}
+                          {(client as any).hasHealthIssues === true && (
+                            <div className="flex items-center gap-1">
+                              <AlertTriangle className="h-3.5 w-3.5 text-orange-500" />
+                              <span className="text-xs text-orange-600">
+                                주의
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* 🚨 긴급 알림 */}
+                      {(isUrgent || isStale) && (
+                        <div
+                          className={`flex items-center gap-2 p-2 rounded-lg ${
+                            isUrgent
+                              ? 'bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-300'
+                              : 'bg-orange-50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-300'
+                          }`}
+                        >
+                          <AlertTriangle className="h-3.5 w-3.5" />
+                          <span className="text-xs font-medium">
+                            {isUrgent ? '연락 필요' : '장기 체류'}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* 🎯 액션 버튼들 */}
+                      <div className="space-y-2 pt-1">
+                        {/* 첫 번째 줄: 상세보기 */}
+                        <Link
+                          to={`/clients/${client.id}`}
+                          className="flex items-center justify-center gap-2 w-full p-2 text-sm text-primary hover:text-primary/80 hover:bg-primary/5 rounded-lg transition-colors group/link"
+                        >
+                          <span>상세보기</span>
+                          <ChevronRight className="h-3.5 w-3.5 group-hover/link:translate-x-0.5 transition-transform" />
+                        </Link>
+
+                        {/* 두 번째 줄: 계약전환 + 보관 */}
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1 text-xs text-green-700 hover:text-green-800 hover:bg-green-50 hover:border-green-300 transition-colors"
+                          >
+                            <ShieldCheck className="h-3 w-3 mr-1" />
+                            계약전환
+                          </Button>
+
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1 text-xs text-muted-foreground hover:text-orange-700 hover:bg-orange-50 hover:border-orange-300 transition-colors"
+                          >
+                            <Archive className="h-3 w-3 mr-1" />
+                            보관
+                          </Button>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 );
