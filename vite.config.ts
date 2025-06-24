@@ -52,21 +52,25 @@ export default defineConfig(({ mode }) => {
     plugins: [tailwindcss(), reactRouter(), tsconfigPaths()],
     define: {
       // 서버사이드에서 환경 변수 사용 가능하도록 설정 (Vercel에서 필요)
-      'process.env.SUPABASE_URL': JSON.stringify(env.SUPABASE_URL),
-      'process.env.SUPABASE_ANON_KEY': JSON.stringify(env.SUPABASE_ANON_KEY),
-      'process.env.SUPABASE_SERVICE_ROLE_KEY': JSON.stringify(
-        env.SUPABASE_SERVICE_ROLE_KEY
+      'process.env.SUPABASE_URL': JSON.stringify(env.SUPABASE_URL || ''),
+      'process.env.SUPABASE_ANON_KEY': JSON.stringify(
+        env.SUPABASE_ANON_KEY || ''
       ),
-      'process.env.DATABASE_URL': JSON.stringify(env.DATABASE_URL),
-      'process.env.SESSION_SECRET': JSON.stringify(env.SESSION_SECRET),
+      'process.env.SUPABASE_SERVICE_ROLE_KEY': JSON.stringify(
+        env.SUPABASE_SERVICE_ROLE_KEY || ''
+      ),
+      'process.env.DATABASE_URL': JSON.stringify(env.DATABASE_URL || ''),
+      'process.env.SESSION_SECRET': JSON.stringify(
+        env.SESSION_SECRET || 'fallback-secret'
+      ),
       'process.env.NODE_ENV': JSON.stringify(env.NODE_ENV || mode),
       // Git 버전 정보 주입
       'process.env.VITE_GIT_TAG': JSON.stringify(gitTag),
       'process.env.VITE_GIT_COMMIT': JSON.stringify(gitCommit),
       // Vercel 환경변수 주입
-      'process.env.VERCEL_ENV': JSON.stringify(env.VERCEL_ENV),
+      'process.env.VERCEL_ENV': JSON.stringify(env.VERCEL_ENV || ''),
       'process.env.VERCEL_GIT_COMMIT_SHA': JSON.stringify(
-        env.VERCEL_GIT_COMMIT_SHA
+        env.VERCEL_GIT_COMMIT_SHA || ''
       ),
       // 전역 변수
       global: 'globalThis',
