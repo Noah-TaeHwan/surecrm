@@ -316,7 +316,7 @@ export function ResponsiveClientDetail({
             <CollapsibleContent>
               <div className="px-4 pb-4 space-y-4">
                 {/* 편집 버튼 섹션 */}
-                <div className="flex justify-end">
+                <div className="flex justify-end gap-2">
                   {isEditing ? (
                     <div className="flex gap-2">
                       <Button
@@ -337,14 +337,26 @@ export function ResponsiveClientDetail({
                       </Button>
                     </div>
                   ) : (
-                    <Button
-                      onClick={onEditStart}
-                      size="sm"
-                      className="bg-primary hover:bg-primary/90 text-primary-foreground"
-                    >
-                      <Edit2 className="h-4 w-4 mr-1" />
-                      편집
-                    </Button>
+                    <>
+                      <Button
+                        onClick={onEditStart}
+                        size="sm"
+                        variant="outline"
+                        className="hover:bg-primary/10"
+                        title="고객 정보 편집"
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        onClick={onDeleteClient}
+                        size="sm"
+                        variant="outline"
+                        className="hover:bg-red-50 hover:text-red-600 hover:border-red-200"
+                        title="고객 삭제"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </>
                   )}
                 </div>
 

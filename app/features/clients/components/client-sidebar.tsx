@@ -10,6 +10,7 @@ import {
   Edit2,
   X,
   Save,
+  Trash2,
 } from 'lucide-react';
 import {
   Card,
@@ -51,7 +52,8 @@ interface ClientSidebarProps {
   clientTags: any[];
   handleOpenTagModal: () => void;
   removeClientTag: (tagId: string) => void;
-  availableReferrers?: Array<{ id: string; name: string }>; // 🆕 소개자 후보 목록
+  availableReferrers?: Array<{ id: string; name: string }>; // 소개자 후보 목록
+  onDeleteClient: () => void; // 고객 삭제 콜백
 }
 
 export function ClientSidebar({
@@ -66,7 +68,8 @@ export function ClientSidebar({
   clientTags,
   handleOpenTagModal,
   removeClientTag,
-  availableReferrers = [], // 🆕 소개자 후보 목록
+  availableReferrers = [], // 소개자 후보 목록
+  onDeleteClient,
 }: ClientSidebarProps) {
   const cardStyle = getClientCardStyle(client?.importance || 'medium');
 
@@ -96,7 +99,7 @@ export function ClientSidebar({
               <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
                 <User className="h-6 w-6 text-primary" />
               </div>
-              <div className="flex-1 flex justify-end">
+              <div className="flex-1 flex justify-end gap-2">
                 {isEditing ? (
                   <div className="flex gap-2">
                     <Button
@@ -117,14 +120,26 @@ export function ClientSidebar({
                     </Button>
                   </div>
                 ) : (
-                  <Button
-                    onClick={handleEditStart}
-                    size="sm"
-                    className="bg-primary hover:bg-primary/90 text-primary-foreground"
-                  >
-                    <Edit2 className="h-4 w-4 mr-1" />
-                    편집
-                  </Button>
+                  <>
+                    <Button
+                      onClick={handleEditStart}
+                      size="sm"
+                      variant="outline"
+                      className="hover:bg-primary/10"
+                      title="고객 정보 편집"
+                    >
+                      <Edit2 className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      onClick={onDeleteClient}
+                      size="sm"
+                      variant="outline"
+                      className="hover:bg-red-50 hover:text-red-600 hover:border-red-200"
+                      title="고객 삭제"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </>
                 )}
               </div>
             </div>
@@ -490,7 +505,7 @@ export function ClientSidebar({
                 )}
               </div>
 
-              {/* 🆕 성별 - 항상 표시 */}
+              {/* 성별 - 항상 표시 */}
               <div className="flex items-center gap-3">
                 <span className="text-sm text-muted-foreground min-w-[50px]">
                   성별
@@ -624,7 +639,7 @@ export function ClientSidebar({
                 )}
               </div>
 
-              {/* 🎯 BMI 표시 - 키와 몸무게가 모두 있을 때만 */}
+              {/* BMI 표시 - 키와 몸무게가 모두 있을 때만 */}
               {((isEditing && editingBMI) || (!isEditing && currentBMI)) && (
                 <div className="flex items-center gap-3">
                   <span className="text-sm text-muted-foreground min-w-[40px]">
@@ -640,7 +655,7 @@ export function ClientSidebar({
                         className={`text-xs ${
                           getBMIStatus(
                             isEditing ? editingBMI! : currentBMI!,
-                            // 🎯 성별 정보 전달 (수정 중이면 editFormData, 아니면 client에서)
+                            // 성별 정보 전달 (수정 중이면 editFormData, 아니면 client에서)
                             isEditing
                               ? editFormData.gender
                               : client?.extendedDetails?.gender
@@ -657,7 +672,7 @@ export function ClientSidebar({
                         }
                       </Badge>
                     </div>
-                    {/* 🆕 성별별 기준 표시 */}
+                    {/* 성별별 기준 표시 */}
                     <div className="text-xs text-muted-foreground">
                       {
                         getBMIStatus(
@@ -818,7 +833,7 @@ export function ClientSidebar({
                           <SelectItem value="none">
                             직접 개발 (소개자 없음)
                           </SelectItem>
-                          {/* 🆕 실제 고객 목록 렌더링 */}
+                          {/* 실제 고객 목록 렌더링 */}
                           {availableReferrers.map(referrer => (
                             <SelectItem key={referrer.id} value={referrer.id}>
                               {referrer.name}
@@ -881,7 +896,7 @@ export function ClientSidebar({
                           소개 기여자
                         </Badge>
                       </div>
-                      {/* 🔥 실제 소개한 사람들 이름 목록 */}
+                      {/* 실제 소개한 사람들 이름 목록 */}
                       <div className="space-y-1">
                         {client.referredClients.map(
                           (referredClient: any, index: number) => (

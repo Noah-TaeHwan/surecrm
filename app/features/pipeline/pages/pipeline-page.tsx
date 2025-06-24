@@ -1089,10 +1089,10 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
     moveFetcher.submit(formData, { method: 'post' });
   };
 
-  // 새 고객 추가 처리 함수 (useFetcher 사용)
-  const handleAddClient = async (clientData: {
+  // 신규 고객 추가 처리 함수
+  const handleNewClientSubmit = async (clientData: {
     fullName: string;
-    phone?: string; // 전화번호를 선택사항으로 변경
+    phone?: string;
     email?: string;
     telecomProvider?: string;
     address?: string;
@@ -1102,25 +1102,73 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
     tags?: string;
     notes?: string;
   }) => {
-    // 🎯 FormData 생성
-    const formData = new FormData();
-    formData.append('intent', 'addClient');
-    formData.append('fullName', clientData.fullName);
-    if (clientData.phone) formData.append('phone', clientData.phone); // phone이 optional이므로 조건부 추가
-    if (clientData.email) formData.append('email', clientData.email);
-    if (clientData.telecomProvider)
-      formData.append('telecomProvider', clientData.telecomProvider);
-    if (clientData.address) formData.append('address', clientData.address);
-    if (clientData.occupation)
-      formData.append('occupation', clientData.occupation);
-    formData.append('importance', clientData.importance);
-    if (clientData.referredById)
-      formData.append('referredById', clientData.referredById);
-    if (clientData.tags) formData.append('tags', clientData.tags);
-    if (clientData.notes) formData.append('notes', clientData.notes);
+    try {
+      console.log('🚀 파이프라인: 고객 추가 시작', clientData);
+      
+      // 🎯 FormData 생성
+      const formData = new FormData();
+      formData.append('intent', 'addClient');
+      formData.append('fullName', clientData.fullName);
+      if (clientData.phone) formData.append('phone', clientData.phone);
+      if (clientData.email) formData.append('email', clientData.email);
+      if (clientData.telecomProvider)
+        formData.append('telecomProvider', clientData.telecomProvider);
+      if (clientData.address) formData.append('address', clientData.address);
+      if (clientData.occupation)
+        formData.append('occupation', clientData.occupation);
+      formData.append('importance', clientData.importance);
+      if (clientData.referredById)
+        formData.append('referredById', clientData.referredById);
+      if (clientData.tags) formData.append('tags', clientData.tags);
+      if (clientData.notes) formData.append('notes', clientData.notes);
 
-    // 🎯 action 함수 호출
-    addClientFetcher.submit(formData, { method: 'post' });
+      // 🎯 action 함수 호출
+      addClientFetcher.submit(formData, { method: 'post' });
+      
+      // 즉시 성공 알림 표시 (서버 응답을 기다리지 않음)
+      if (typeof window !== 'undefined') {
+        const notification = document.createElement('div');
+        notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-md shadow-lg z-50 flex items-center gap-2';
+        notification.innerHTML = `
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+          <span>${clientData.fullName}님이 파이프라인에 추가되었습니다!</span>
+        `;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+          if (document.body.contains(notification)) {
+            document.body.removeChild(notification);
+          }
+        }, 4000);
+      }
+
+      // 즉시 모달 닫기
+      setAddClientOpen(false);
+      
+    } catch (error) {
+      console.error('파이프라인 고객 추가 중 오류:', error);
+      
+      // 에러 알림 표시
+      if (typeof window !== 'undefined') {
+        const errorNotification = document.createElement('div');
+        errorNotification.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-md shadow-lg z-50 flex items-center gap-2';
+        errorNotification.innerHTML = `
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+          <span>고객 추가에 실패했습니다. 다시 시도해주세요.</span>
+        `;
+        document.body.appendChild(errorNotification);
+        
+        setTimeout(() => {
+          if (document.body.contains(errorNotification)) {
+            document.body.removeChild(errorNotification);
+          }
+        }, 4000);
+      }
+    }
   };
 
   // 기존 고객 새 영업 기회 처리 함수
@@ -1564,7 +1612,7 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
       <AddClientModal
         open={addClientOpen}
         onOpenChange={setAddClientOpen}
-        onSubmit={handleAddClient}
+        onSubmit={handleNewClientSubmit}
         isSubmitting={isSubmitting}
         error={submitError}
         referrers={potentialReferrers}

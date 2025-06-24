@@ -1680,6 +1680,7 @@ export default function ClientDetailPage({ loaderData }: { loaderData: any }) {
               handleOpenTagModal={handleOpenTagModal}
               removeClientTag={removeClientTag}
               availableReferrers={availableReferrers}
+              onDeleteClient={handleDeleteClient}
             />
 
             {/* 오른쪽 메인 컨텐츠 */}
