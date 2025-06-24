@@ -43,15 +43,37 @@ export async function loader({ request }: LoaderFunctionArgs) {
       return redirect(`${baseUrl}/calendar?error=invalid_user`);
     }
 
-    // OAuth2 클라이언트 생성
+    // OAuth2 클라이언트 생성 - GoogleCalendarService와 동일한 환경 감지 로직 사용
+    let redirectUri = 'http://localhost:5173/api/google/calendar/callback'; // 기본값
+    
+    try {
+      const isProduction = 
+        process.env.NODE_ENV === 'production' || 
+        process.env.VERCEL_ENV === 'production' ||
+        process.env.VERCEL === '1';
+
+      if (isProduction) {
+        redirectUri = 'https://surecrm-sigma.vercel.app/api/google/calendar/callback';
+      }
+
+      console.log('🔍 콜백 핸들러 OAuth2 클라이언트 생성:', {
+        NODE_ENV: process.env.NODE_ENV,
+        VERCEL_ENV: process.env.VERCEL_ENV,
+        VERCEL: process.env.VERCEL,
+        isProduction: isProduction,
+        redirectUri: redirectUri
+      });
+    } catch (error) {
+      console.error('❌ 콜백 환경 감지 오류:', error);
+      if (process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'production') {
+        redirectUri = 'https://surecrm-sigma.vercel.app/api/google/calendar/callback';
+      }
+    }
+
     const oauth2Client = new google.auth.OAuth2(
       process.env.GOOGLE_CLIENT_ID,
       process.env.GOOGLE_CLIENT_SECRET,
-      `${
-        process.env.NODE_ENV === 'production'
-          ? process.env.PRODUCTION_URL
-          : process.env.APP_URL
-      }/api/google/calendar/callback`
+      redirectUri
     );
 
     // 토큰 교환
