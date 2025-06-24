@@ -388,14 +388,20 @@ export async function getPerformanceData(
         )
       );
 
-    // "계약 완료" 단계에 있는 고객 수
+    // "계약 완료" 단계에 있는 고객 수 (영업 기회가 있는 고객 중에서만)
     const convertedClients = await db
       .select({ count: sql<number>`COUNT(DISTINCT ${clients.id})` })
       .from(clients)
+      .leftJoin(
+        opportunityProducts,
+        eq(clients.id, opportunityProducts.clientId)
+      )
       .where(
         and(
           eq(clients.agentId, userId),
           eq(clients.isActive, true),
+          // 영업 기회가 있는 고객만 (total과 동일한 조건)
+          sql`${opportunityProducts.clientId} IS NOT NULL`,
           completedStage
             ? eq(clients.currentStageId, completedStage.id)
             : sql`false`,
