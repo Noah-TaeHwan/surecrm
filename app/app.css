@@ -5,6 +5,54 @@
    TAILWIND CSS V4 CONFIGURATION
    ================================================================= */
 
+/* 🍎 iOS Safari 입력 최적화 스타일 */
+@media (max-width: 768px) {
+  /* iOS Safari 자동 줌 방지 */
+  input[type='text'],
+  input[type='email'],
+  input[type='search'],
+  textarea,
+  select {
+    font-size: 16px !important; /* 16px 이상으로 자동 줌 방지 */
+    -webkit-appearance: none;
+    -webkit-border-radius: 0;
+    border-radius: 0;
+  }
+
+  /* iOS 키보드 관련 최적화 */
+  .ios-input-fix {
+    position: relative;
+    -webkit-overflow-scrolling: touch;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+  }
+
+  /* sticky 요소 iOS 최적화 */
+  .sticky-ios-fix {
+    position: -webkit-sticky;
+    position: sticky;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    will-change: transform;
+  }
+
+  /* iOS 스크롤 영역 최적화 */
+  .scroll-area-ios {
+    -webkit-overflow-scrolling: touch;
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+    will-change: scroll-position;
+  }
+
+  /* iOS 키보드 표시 시 레이아웃 보정 */
+  @supports (height: 100dvh) {
+    .ios-container {
+      min-height: 100dvh;
+      min-height: 100vh; /* fallback */
+    }
+  }
+}
+
 @theme {
   /* Mobile-First Responsive Breakpoints (Updated per PRD) */
   --breakpoint-sm: 40rem; /* 640px - Mobile landscape */

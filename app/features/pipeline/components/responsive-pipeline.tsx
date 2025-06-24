@@ -174,7 +174,17 @@ export function ResponsivePipeline({
   return (
     <div className={cn('min-h-screen', className)}>
       {/* 🎯 모바일/태블릿 레이아웃 (lg 미만에서만 표시) */}
-      <div className="block lg:hidden">
+      <div
+        className="block lg:hidden"
+        style={{
+          // iOS Safari 최적화
+          WebkitOverflowScrolling: 'touch',
+          WebkitTransform: 'translate3d(0,0,0)',
+          transform: 'translate3d(0,0,0)',
+          position: 'relative',
+          minHeight: '100dvh', // 동적 viewport height 지원 (fallback: 100vh)
+        }}
+      >
         {/* 모바일 헤더 */}
         <div className="bg-background border-b border-border/50 px-4 py-3">
           <div className="flex items-center justify-between">
@@ -292,22 +302,37 @@ export function ResponsivePipeline({
                 </Card>
               </div>
 
-              {/* 검색바 */}
+              {/* 검색바 - iOS 최적화 */}
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-3 w-3 text-muted-foreground" />
                 <Input
                   placeholder="고객 이름으로 검색..."
                   value={searchQuery}
                   onChange={e => onSearchChange?.(e.target.value)}
-                  className="pl-9 h-8 text-sm"
+                  className="pl-9 h-10 text-base"
+                  style={{
+                    fontSize: '16px', // iOS 자동 줌 방지
+                    transformOrigin: 'left',
+                  }}
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck="false"
                 />
               </div>
             </div>
           )}
         </div>
 
-        {/* Sticky 탭 메뉴 */}
-        <div className="sticky -top-3 z-40 bg-background border-b border-border/50 shadow-sm">
+        {/* Sticky 탭 메뉴 - iOS 최적화 */}
+        <div
+          className="sticky -top-3 z-40 bg-background border-b border-border/50 shadow-sm"
+          style={{
+            position: '-webkit-sticky',
+            WebkitBackfaceVisibility: 'hidden',
+            backfaceVisibility: 'hidden',
+          }}
+        >
           <div className="relative">
             <div className="relative overflow-hidden">
               <div
@@ -411,8 +436,16 @@ export function ResponsivePipeline({
           </div>
         </div>
 
-        {/* 모바일/태블릿 콘텐츠 영역 */}
-        <div className="p-4 pb-20">
+        {/* 모바일/태블릿 콘텐츠 영역 - iOS 최적화 */}
+        <div
+          className="p-4 pb-20"
+          style={{
+            // iOS 키보드 대응
+            paddingBottom: 'env(keyboard-inset-height, 80px)',
+            minHeight: 'calc(100vh - 200px)',
+            WebkitOverflowScrolling: 'touch',
+          }}
+        >
           {/* 필터링된 고객 카드들 표시 */}
           <div className="space-y-3">
             {getFilteredClients().length > 0 ? (
