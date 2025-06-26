@@ -1,6 +1,6 @@
 {
   "name": "surecrm",
-  "version": "0.3.189",
+  "version": "0.3.190",
   "private": true,
   "type": "module",
   "scripts": {
