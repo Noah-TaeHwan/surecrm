@@ -698,13 +698,13 @@ export function MeetingDetailModal({
                   rows={3}
                 />
               ) : (
-                <div className="text-sm text-muted-foreground mt-2 py-2 min-h-[60px] whitespace-pre-wrap border rounded-md px-3 py-2 bg-muted/20">
+                <div className="text-sm text-muted-foreground mt-2 py-2 min-h-[60px] whitespace-pre-wrap border rounded-md px-3 bg-muted/20">
                   {meeting.description || '메모가 없습니다.'}
                 </div>
               )}
-              <p className="text-xs text-muted-foreground mt-1">
+              <div className="text-xs text-muted-foreground mt-1">
                 구글 캘린더 일정의 설명 부분에 자동으로 동기화됩니다
-              </p>
+              </div>
             </div>
           </div>
         </div>
