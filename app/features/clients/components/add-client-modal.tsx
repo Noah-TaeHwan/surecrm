@@ -122,18 +122,17 @@ export function AddClientModal({
         referredById:
           data.referredById === 'none' ? undefined : data.referredById,
       };
-      
+
       // 제출 중 상태에서 중복 제출 방지
       if (isSubmitting) {
         return;
       }
-      
+
       await onSubmit(cleanedData);
-      
+
       // 성공 시 폼 리셋 및 모달 닫기
       form.reset();
       onOpenChange(false);
-      
     } catch (error) {
       console.error('고객 추가 실패:', error);
       // 에러는 부모 컴포넌트에서 error prop으로 전달되어 표시됨

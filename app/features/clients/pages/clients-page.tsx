@@ -833,14 +833,15 @@ export default function ClientsPage({ loaderData }: { loaderData: any }) {
 
       // React Router Action 호출 (서버사이드에서 처리됨)
       fetcher.submit(formData, { method: 'POST' });
-      
+
       // 즉시 성공 알림 표시 (서버 응답 대기하지 않음)
       if (typeof window !== 'undefined') {
         const notification = document.createElement('div');
-        notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg z-50 animate-slide-in';
+        notification.className =
+          'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg z-50 animate-slide-in';
         notification.textContent = `${data.fullName}님이 성공적으로 추가되었습니다!`;
         document.body.appendChild(notification);
-        
+
         setTimeout(() => {
           if (document.body.contains(notification)) {
             notification.style.opacity = '0';
@@ -855,10 +856,9 @@ export default function ClientsPage({ loaderData }: { loaderData: any }) {
       }
 
       console.log('✅ 고객 추가 요청 완료 - 모달 닫기');
-      
+
       // 모달을 즉시 닫도록 처리 (AddClientModal 컴포넌트의 onSubmit이 완료되면 자동으로 닫힘)
       setSelectedClient(null);
-      
     } catch (error) {
       console.error('클라이언트 처리 중 오류:', error);
       // 에러가 발생하면 모달을 열어둬서 사용자가 다시 시도할 수 있도록 함

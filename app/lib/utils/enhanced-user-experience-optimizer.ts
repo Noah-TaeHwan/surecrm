@@ -512,28 +512,28 @@ class EnhancedUserExperienceOptimizer {
   private generateFormOptimizationData(typingMetrics: any): any {
     return {};
   }
-  private assessTargetAccessibility(clickData: any): number {
+  private assessTargetAccessibility(_clickData: any): number {
     return 0.9;
   }
-  private calculateInteractionConfidence(clickData: any): number {
+  private calculateInteractionConfidence(_clickData: any): number {
     return 0.85;
   }
-  private evaluateElementEffectiveness(clickData: any): number {
+  private evaluateElementEffectiveness(_clickData: any): number {
     return 0.8;
   }
-  private recommendButtonSizeOptimization(clickData: any): any {
+  private recommendButtonSizeOptimization(_clickData: any): any {
     return {};
   }
-  private recommendSpacingImprovements(clickData: any): any {
+  private recommendSpacingImprovements(_clickData: any): any {
     return {};
   }
-  private recommendVisualHierarchy(clickData: any): any {
+  private recommendVisualHierarchy(_clickData: any): any {
     return {};
   }
-  private checkTouchTargetCompliance(clickData: any): boolean {
+  private checkTouchTargetCompliance(_clickData: any): boolean {
     return true;
   }
-  private assessKeyboardAccessibility(clickData: any): number {
+  private assessKeyboardAccessibility(_clickData: any): number {
     return 0.9;
   }
   private analyzeUserPreferences(): void {}

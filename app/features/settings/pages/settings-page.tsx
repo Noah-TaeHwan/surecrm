@@ -1,4 +1,11 @@
-import type { Route } from './+types/settings-page';
+// Route 타입 정의
+namespace Route {
+  export type LoaderArgs = any;
+  export type ActionArgs = any;
+  export type MetaArgs = any;
+  export type ComponentProps = any;
+}
+
 import { MainLayout } from '~/common/layouts/main-layout';
 import { getCurrentUser } from '~/lib/auth/core';
 import {
@@ -888,7 +895,7 @@ export default function SettingsPage({
           </Card>
         </div>
 
-        {/* � 모바일 최적화: �🌐 연동 설정 - 알림 및 구글 캘린더 */}
+        {/* 🎯 모바일 최적화: 🌐 연동 설정 - 알림 및 구글 캘린더 */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
           {/* 🎯 모바일 최적화: 알림 설정 */}
           <Card className="border bg-card">
@@ -959,7 +966,7 @@ export default function SettingsPage({
             </CardContent>
           </Card>
 
-          {/* � 모바일 최적화: �🌐 구글 캘린더 연동 설정 */}
+          {/* 🎯 모바일 최적화: 🌐 구글 캘린더 연동 설정 */}
           <Card className="border bg-card">
             <CardHeader className="p-4 sm:p-6 pb-3 sm:pb-4">
               <CardTitle className="flex items-center gap-3 text-base sm:text-lg font-semibold">

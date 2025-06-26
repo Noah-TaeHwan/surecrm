@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogFooter,
@@ -119,18 +120,20 @@ export function MeetingDetailModal({
       <DialogContent className="sm:max-w-lg max-h-[85vh]">
         <DialogHeader>
           <DialogTitle className="text-xl">{meeting.title}</DialogTitle>
-          <div className="flex items-center gap-2 mt-2">
-            <Badge variant="secondary">
-              {meetingTypeLabels[meeting.type] || meeting.type}
-            </Badge>
-            {(meeting as any).priority && (
-              <Badge
-                className={priorityLabels[(meeting as any).priority]?.color}
-              >
-                {priorityLabels[(meeting as any).priority]?.label}
+          <DialogDescription>
+            <div className="flex items-center gap-2 mt-2">
+              <Badge variant="secondary">
+                {meetingTypeLabels[meeting.type] || meeting.type}
               </Badge>
-            )}
-          </div>
+              {(meeting as any).priority && (
+                <Badge
+                  className={priorityLabels[(meeting as any).priority]?.color}
+                >
+                  {priorityLabels[(meeting as any).priority]?.label}
+                </Badge>
+              )}
+            </div>
+          </DialogDescription>
         </DialogHeader>
 
         <ScrollArea className="h-[calc(100vh-300px)] mt-6">
