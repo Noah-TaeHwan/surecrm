@@ -9,7 +9,7 @@ export function getBaseUrl(): string {
   }
 
   // 서버 사이드에서는 환경 변수 사용
-  return process.env.SITE_URL || 'https://surecrm-sigma.vercel.app';
+  return process.env.SITE_URL || 'https://surecrm.pro';
 }
 
 /**

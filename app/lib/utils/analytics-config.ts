@@ -42,12 +42,12 @@ export function isDevelopmentEnvironment(): boolean {
   ].includes(window.location.port);
 
   // 🚀 Vercel 프로덕션 환경 명시적 제외
-  const isVercelProduction =
+  const isProduction =
     window.location.hostname.includes('.vercel.app') ||
-    window.location.hostname.includes('surecrm-sigma.vercel.app');
+    window.location.hostname.includes('surecrm.pro');
 
   // Vercel 프로덕션이면 무조건 개발환경 아님
-  if (isVercelProduction) {
+  if (isProduction) {
     return false;
   }
 

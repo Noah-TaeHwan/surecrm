@@ -27,17 +27,16 @@ export class GoogleCalendarService {
 
     // 다양한 방법으로 프로덕션 환경 감지
     try {
-      const isProduction = 
-        process.env.NODE_ENV === 'production' || 
+      const isProduction =
+        process.env.NODE_ENV === 'production' ||
         process.env.VERCEL_ENV === 'production' ||
         process.env.VERCEL === '1' ||
-        (typeof window !== 'undefined' && (
-          window.location.hostname.includes('vercel.app') ||
-          window.location.hostname.includes('surecrm-sigma')
-        ));
+        (typeof window !== 'undefined' &&
+          (window.location.hostname.includes('vercel.app') ||
+            window.location.hostname.includes('surecrm-sigma')));
 
       if (isProduction) {
-        redirectUri = 'https://surecrm-sigma.vercel.app/api/google/calendar/callback';
+        redirectUri = 'https://surecrm.pro/api/google/calendar/callback';
       }
 
       // 디버깅용 로그
@@ -49,13 +48,19 @@ export class GoogleCalendarService {
         APP_URL: process.env.APP_URL,
         isProduction: isProduction,
         redirectUri: redirectUri,
-        hostname: typeof window !== 'undefined' ? window.location.hostname : 'server-side'
+        hostname:
+          typeof window !== 'undefined'
+            ? window.location.hostname
+            : 'server-side',
       });
     } catch (error) {
       console.error('❌ 환경 감지 오류:', error);
       // 에러 발생 시 환경 변수만으로 판단
-      if (process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'production') {
-        redirectUri = 'https://surecrm-sigma.vercel.app/api/google/calendar/callback';
+      if (
+        process.env.NODE_ENV === 'production' ||
+        process.env.VERCEL_ENV === 'production'
+      ) {
+        redirectUri = 'https://surecrm.pro/api/google/calendar/callback';
       }
     }
 
@@ -1040,7 +1045,7 @@ export class GoogleCalendarService {
 
       const channelId = `surecrm_calendar_${agentId}_${Date.now()}`;
       const webhookUrl = `${
-        process.env.VITE_APP_URL || 'https://surecrm.vercel.app'
+        process.env.VITE_APP_URL || 'https://surecrm.pro'
       }/api/google/calendar/webhook`;
 
       console.log('🔔 웹훅 채널 생성 시작:', { channelId, webhookUrl });

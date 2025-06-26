@@ -37,7 +37,7 @@ SELECT cron.schedule(
   '0 9 * * *',
   $$
   SELECT net.http_post(
-    url := 'https://surecrm.vercel.app/api/notifications/scheduler',
+    url := 'https://surecrm.pro/api/notifications/scheduler',
     headers := '{"Authorization": "Bearer ' || current_setting('app.cron_secret') || '", "Content-Type": "application/json"}',
     body := '{}'
   );

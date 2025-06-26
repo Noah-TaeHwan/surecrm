@@ -242,7 +242,7 @@ app/features/settings/pages/
 GOOGLE_CLIENT_ID=your_client_id
 GOOGLE_CLIENT_SECRET=your_client_secret
 GOOGLE_WEBHOOK_VERIFY_TOKEN=surecrm_calendar_webhook
-VITE_APP_URL=https://surecrm.vercel.app
+VITE_APP_URL=https://surecrm.pro
 ```
 
 ---
@@ -271,24 +271,21 @@ VITE_APP_URL=https://surecrm.vercel.app
 
 ### **✅ 프로덕션 배포 완료**
 
-- **Vercel 배포**: https://surecrm.vercel.app
+- **Vercel 배포**: https://surecrm.pro
 - **버전**: v0.2.2
 - **빌드 상태**: ✅ 성공
 
 ### **✅ 사용자 가이드**
 
 1. **구글 계정 연결**
-
    - 설정 페이지 → "구글 계정 연결" 클릭
    - Google OAuth 인증 완료
 
 2. **실시간 동기화 활성화**
-
    - 설정 페이지 → "실시간 동기화" 토글 활성화
    - 구글 캘린더 변경사항 즉시 반영
 
 3. **미팅 생성 시 구글 동기화**
-
    - 새 미팅 모달 → "구글 캘린더에 자동 추가" 체크
    - 양쪽 캘린더에 동시 생성
 

@@ -423,7 +423,7 @@ export default function DebugAnalyticsPage() {
             <div>// GA4 요청이 보이면 정상 작동 중</div>
             <br />
             <div>// 🚀 Vercel 배포 확인:</div>
-            <div>// URL: https://surecrm-sigma.vercel.app</div>
+            <div>// URL: https://surecrm.pro</div>
             <div>// GA ID: {status.gaId || 'G-SZW1G856L5 (기본값)'}</div>
             <div>// GTM ID: {status.gtmId || 'GTM-WTCFV4DC (기본값)'}</div>
             <br />

@@ -24,7 +24,7 @@ interface WelcomeEmailProps {
 export function WelcomeEmail({
   userName = '고객님',
   userEmail = '',
-  dashboardUrl = 'https://surecrm-sigma.vercel.app/dashboard',
+  dashboardUrl = 'https://surecrm.pro/dashboard',
   unsubscribeUrl = '#',
 }: WelcomeEmailProps) {
   return (

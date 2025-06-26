@@ -230,7 +230,7 @@ async function testGoogleCalendarSetup() {
     // OAuth2 클라이언트 생성 테스트
     const redirectUri =
       process.env.NODE_ENV === 'production'
-        ? 'https://surecrm-sigma.vercel.app/api/google/calendar/callback'
+        ? 'https://surecrm.pro/api/google/calendar/callback'
         : 'http://localhost:5173/api/google/calendar/callback';
 
     const oauth2Client = new google.auth.OAuth2(
@@ -445,7 +445,7 @@ ${colors.cyan}🔗 Google Calendar 연동 완료 방법:${colors.reset}
 3. APIs & Services → Credentials에서 OAuth 2.0 클라이언트 ID 생성
 4. 승인된 리디렉션 URI에 다음 추가:
    - 개발: http://localhost:5173/api/google/calendar/callback
-   - 프로덕션: https://surecrm-sigma.vercel.app/api/google/calendar/callback
+   - 프로덕션: https://surecrm.pro/api/google/calendar/callback
 5. Calendar API 활성화 (APIs & Services → Library)
 
 ${colors.cyan}💳 Toss Payments 설정 방법:${colors.reset}

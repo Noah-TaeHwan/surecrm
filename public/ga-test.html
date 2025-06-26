@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
@@ -103,11 +103,11 @@
         '8080',
       ].includes(window.location.port);
 
-      const isVercelProduction =
+      const isProd =
         window.location.hostname.includes('.vercel.app') ||
-        window.location.hostname.includes('surecrm-sigma.vercel.app');
+        window.location.hostname.includes('surecrm.pro');
 
-      const isDevelopment = !isVercelProduction && isLocalhost && isDevPort;
+      const isDevelopment = !isProd && isLocalhost && isDevPort;
 
       // GA 측정 ID (실제 SureCRM과 동일)
       const GA_MEASUREMENT_ID = 'G-SZW1G856L5';
@@ -144,7 +144,7 @@
         document.getElementById('port').textContent =
           window.location.port || '443/80';
         document.getElementById('full-url').textContent = window.location.href;
-        document.getElementById('is-vercel').textContent = isVercelProduction
+        document.getElementById('is-vercel').textContent = isProd
           ? '✅ 예'
           : '❌ 아니오';
         document.getElementById('is-dev').textContent = isDevelopment

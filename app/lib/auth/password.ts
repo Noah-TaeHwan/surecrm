@@ -13,7 +13,7 @@ export async function sendPasswordResetEmail(
     const siteUrl =
       process.env.NODE_ENV === 'development'
         ? 'http://localhost:5173'
-        : process.env.SITE_URL || 'https://surecrm-sigma.vercel.app';
+        : process.env.SITE_URL || 'https://surecrm.pro';
     const redirectTo = `${siteUrl}/auth/confirm`;
 
     console.log('📧 비밀번호 재설정 이메일 발송 시작:', {
