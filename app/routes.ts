@@ -7,6 +7,9 @@ export default [
   // 📊 대시보드
   route('dashboard', 'features/dashboard/pages/dashboard-page.tsx'),
 
+  // 🎉 웰컴
+  route('welcome', 'common/pages/welcome-page.tsx'),
+
   // 🔐 인증 관련 페이지
   route('auth/login', 'common/pages/auth/login-page.tsx'),
   route('auth/signup', 'common/pages/auth/signup-page.tsx'),

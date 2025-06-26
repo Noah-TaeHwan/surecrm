@@ -225,8 +225,7 @@ export async function completeOTPVerification(
     if (registrationResult.success) {
       console.log('사용자 등록 완료:', data.user.id);
 
-      // 기존 등록 로직이 성공한 후
-      // 웰컴 이메일 발송 (비동기, 실패해도 등록은 완료)
+      // 회원가입 완료 후 환영 이메일 발송 (비동기, 실패해도 등록은 완료)
       triggerWelcomeEmailOnSignup(signUpData.email, signUpData.fullName).catch(
         error => {
           console.error('웰컴 이메일 발송 실패 (무시):', error);
@@ -334,14 +333,6 @@ export async function completeUserRegistration(
     if (invitationResult.success) {
       console.log('새 사용자 초대장 생성 완료:', invitationResult.invitations);
     }
-
-    // 기존 등록 로직이 성공한 후
-    // 웰컴 이메일 발송 (비동기, 실패해도 등록은 완료)
-    triggerWelcomeEmailOnSignup(signUpData.email, signUpData.fullName).catch(
-      error => {
-        console.error('웰컴 이메일 발송 실패 (무시):', error);
-      }
-    );
 
     return {
       success: true,

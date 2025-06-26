@@ -61,3 +61,7 @@ test-attachment-*.cjs
 # Task files
 tasks.json
 tasks/ 
+
+
+
+react-email-starter/
