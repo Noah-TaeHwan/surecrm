@@ -1,5 +1,6 @@
 import type { Config } from '@react-router/dev/config';
 import { vercelPreset } from '@vercel/react-router/vite';
+import { sentryOnBuildEnd } from '@sentry/react-router';
 
 export default {
   // Config options...
@@ -9,4 +10,8 @@ export default {
   // 🔄 파일 기반 라우팅 활성화
   // routes.ts 파일 없이 app/routes/ 폴더의 파일들로 라우팅
   // routes: "./app/routes", // 이 옵션은 실제로는 기본값이므로 명시적으로 설정할 필요 없음
+  buildEnd: async ({ viteConfig, reactRouterConfig, buildManifest }) => {
+    // Sentry 빌드 완료 후 처리
+    await sentryOnBuildEnd({ viteConfig, reactRouterConfig, buildManifest });
+  },
 } satisfies Config;

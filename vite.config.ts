@@ -1,12 +1,30 @@
 import { reactRouter } from '@react-router/dev/vite';
+import {
+  sentryReactRouter,
+  type SentryReactRouterBuildOptions,
+} from '@sentry/react-router';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig, loadEnv } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import { execSync } from 'child_process';
 
-export default defineConfig(({ mode }) => {
+export default defineConfig(config => {
+  const { mode } = config;
   // 환경 변수 로드
   const env = loadEnv(mode, process.cwd(), '');
+
+  const sentryConfig: SentryReactRouterBuildOptions = {
+    org: 'oh-taehwan',
+    project: 'surecrm',
+    authToken: env.SENTRY_AUTH_TOKEN,
+  };
+
+  // Sentry 인증 토큰이 없으면 경고 메시지 출력
+  if (mode === 'production' && !sentryConfig.authToken) {
+    console.warn(
+      '🚨 SENTRY_AUTH_TOKEN이 설정되지 않았습니다. 소스맵 업로드를 건너뜁니다.'
+    );
+  }
 
   // Git 정보 자동 수집
   let gitTag = '';
@@ -35,7 +53,12 @@ export default defineConfig(({ mode }) => {
   }
 
   return {
-    plugins: [tailwindcss(), reactRouter(), tsconfigPaths()],
+    plugins: [
+      tailwindcss(),
+      reactRouter(),
+      sentryReactRouter(sentryConfig, config),
+      tsconfigPaths(),
+    ],
     define: {
       // 서버사이드에서 환경 변수 사용 가능하도록 설정
       'process.env.SUPABASE_URL': JSON.stringify(env.SUPABASE_URL),

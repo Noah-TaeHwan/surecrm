@@ -21,6 +21,7 @@ import {
   enableFullScreenMode,
   isIOSSafari,
 } from '~/lib/utils/viewport-height';
+import * as Sentry from '@sentry/react-router';
 
 // Root.tsx 전용 타입 정의
 interface ErrorBoundaryProps {
@@ -1022,20 +1023,24 @@ export default function App() {
   return <Outlet />;
 }
 
-export function ErrorBoundary({ error }: ErrorBoundaryProps) {
-  let message = '오류!';
-  let details = '예상치 못한 오류가 발생했습니다.';
+export function ErrorBoundary({ error }: { error: unknown }) {
+  let message = 'Oops!';
+  let details = 'An unexpected error occurred.';
   let stack: string | undefined;
 
   if (isRouteErrorResponse(error)) {
-    message = error.status === 404 ? '404' : '오류';
+    message = error.status === 404 ? '404' : 'Error';
     details =
       error.status === 404
-        ? '요청하신 페이지를 찾을 수 없습니다.'
+        ? 'The requested page could not be found.'
         : error.statusText || details;
-  } else if (import.meta.env.DEV && error && error instanceof Error) {
-    details = error.message;
-    stack = error.stack;
+  } else if (error && error instanceof Error) {
+    // you only want to capture non 404-errors that reach the boundary
+    Sentry.captureException(error);
+    if (import.meta.env.DEV) {
+      details = error.message;
+      stack = error.stack;
+    }
   }
 
   return (
