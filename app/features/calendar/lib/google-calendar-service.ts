@@ -33,7 +33,7 @@ export class GoogleCalendarService {
         process.env.VERCEL === '1' ||
         (typeof window !== 'undefined' &&
           (window.location.hostname.includes('vercel.app') ||
-            window.location.hostname.includes('surecrm-sigma')));
+            window.location.hostname.includes('surecrm.pro')));
 
       if (isProduction) {
         redirectUri = 'https://surecrm.pro/api/google/calendar/callback';

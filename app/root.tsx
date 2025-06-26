@@ -113,7 +113,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     var f=d.getElementsByTagName(s)[0],
                         j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';
                     j.async=true;
-                    j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;
+                    j.src='https://www.googletagmanager.com/gtag/js?id='+i+dl;
                     f.parentNode.insertBefore(j,f);
                   })(window,document,'script','dataLayer','${
                     import.meta.env.VITE_GTM_CONTAINER_ID
@@ -146,11 +146,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
                                       '5180', '5181', '5182', '5183', '5184', '5185', '5186', 
                                       '5187', '3000', '8080'].includes(window.location.port);
 
-                    // 🚀 Vercel 프로덕션 환경 확인
-                    const isVercelProduction = window.location.hostname.includes('.vercel.app');
+                    // 🚀 프로덕션 환경 확인 (surecrm.pro만 허용)
+                    const isProduction = window.location.hostname === 'surecrm.pro';
 
                     // 개발 환경이면 GA 로딩 차단
-                    const isDev = !isVercelProduction && isLocalhost && isDevPort;
+                    const isDev = !isProduction && isLocalhost && isDevPort;
                     if (isDev) {
                       return; // 개발환경에서는 GA 완전 차단
                     }
@@ -195,8 +195,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
                       import.meta.env.VITE_GA_MEASUREMENT_ID
                     }', {
                       send_page_view: true,
-                      cookie_domain: window.location.hostname.includes('.vercel.app') 
-                        ? '.vercel.app' 
+                      cookie_domain: isProduction 
+                        ? 'surecrm.pro' 
                         : window.location.hostname,
                       cookie_flags: 'SameSite=Lax',
                       cookie_expires: window.location.hostname === 'localhost' 
@@ -221,11 +221,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
                                       '5180', '5181', '5182', '5183', '5184', '5185', '5186', 
                                       '5187', '3000', '8080'].includes(window.location.port);
 
-                    // 🚀 Vercel 프로덕션 환경 명시적 허용
-                    const isVercelProduction = window.location.hostname.includes('.vercel.app');
+                    // 🚀 프로덕션 환경 명시적 허용 (surecrm.pro만)
+                    const isProduction = window.location.hostname === 'surecrm.pro';
 
-                    // 개발 환경 조건: localhost + dev port (Vercel은 제외)
-                    const isDevelopment = !isVercelProduction && isLocalhost && isDevPort;
+                    // 개발 환경 조건: localhost + dev port (프로덕션은 제외)
+                    const isDevelopment = !isProduction && isLocalhost && isDevPort;
 
                     if (!isDevelopment) {
                       // 🚀 프로덕션에서만 기본 분석 활성화
