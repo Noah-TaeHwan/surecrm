@@ -1368,6 +1368,392 @@ export const InsuranceAgentEvents = {
         usage_intensity: usageMetrics.intensity || 'normal',
       },
     }),
+
+  // 🏢 === 보험설계사 특화 고급 비즈니스 메트릭 === 🏢
+
+  // 보험 상품 추천 엔진 분석
+  insuranceProductRecommendation: (
+    clientProfile: any,
+    recommendedProducts: string[],
+    recommendationScore: number
+  ) =>
+    trackEvent({
+      action: 'insurance_product_recommendation',
+      category: 'Insurance AI Engine',
+      label: 'product_matching',
+      value: recommendationScore,
+      custom_parameters: {
+        client_age_group: clientProfile.ageGroup,
+        client_income_level: clientProfile.incomeLevel,
+        client_family_status: clientProfile.familyStatus,
+        client_risk_profile: clientProfile.riskProfile,
+        recommended_products: recommendedProducts.join(','),
+        recommendation_confidence: recommendationScore,
+        matching_algorithm: 'neural_network_v2',
+        personalization_level: calculatePersonalizationLevel(clientProfile),
+      },
+    }),
+
+  // 보험료 최적화 분석
+  premiumOptimizationAnalysis: (
+    originalPremium: number,
+    optimizedPremium: number,
+    optimizationFactors: any
+  ) =>
+    trackEvent({
+      action: 'premium_optimization_analysis',
+      category: 'Financial Optimization',
+      label: 'premium_calculation',
+      value: optimizedPremium,
+      custom_parameters: {
+        original_premium: originalPremium,
+        optimized_premium: optimizedPremium,
+        savings_percentage:
+          ((originalPremium - optimizedPremium) / originalPremium) * 100,
+        optimization_factors: JSON.stringify(optimizationFactors),
+        risk_adjustment: optimizationFactors.riskAdjustment,
+        discount_applied: optimizationFactors.discountApplied,
+        optimization_engine: 'actuarial_ai_v3',
+      },
+    }),
+
+  // 고객 생애가치(CLV) 예측
+  customerLifetimeValuePrediction: (
+    clientId: string,
+    predictedCLV: number,
+    predictionFactors: any
+  ) =>
+    trackEvent({
+      action: 'predict_customer_lifetime_value',
+      category: 'Customer Analytics',
+      label: 'clv_prediction',
+      value: predictedCLV,
+      custom_parameters: {
+        client_id_hash: clientId.substring(0, 8),
+        predicted_clv: predictedCLV,
+        clv_tier:
+          predictedCLV > 50000
+            ? 'premium'
+            : predictedCLV > 20000
+              ? 'high'
+              : predictedCLV > 10000
+                ? 'medium'
+                : 'standard',
+        prediction_accuracy: predictionFactors.accuracy,
+        key_value_drivers: predictionFactors.keyDrivers.join(','),
+        time_horizon_years: predictionFactors.timeHorizon,
+        market_conditions: predictionFactors.marketConditions,
+        churn_probability: predictionFactors.churnProbability,
+      },
+    }),
+
+  // 경쟁사 비교 분석
+  competitorAnalysis: (
+    productType: string,
+    competitorData: any,
+    marketPosition: string
+  ) =>
+    trackEvent({
+      action: 'competitor_analysis',
+      category: 'Market Intelligence',
+      label: productType,
+      custom_parameters: {
+        product_type: productType,
+        our_premium: competitorData.ourPremium,
+        avg_competitor_premium: competitorData.avgCompetitorPremium,
+        premium_advantage: competitorData.premiumAdvantage,
+        coverage_comparison: competitorData.coverageComparison,
+        market_position: marketPosition,
+        competitive_edge: competitorData.competitiveEdge,
+        win_probability: competitorData.winProbability,
+      },
+    }),
+
+  // 리스크 평가 모델링
+  riskAssessmentModeling: (
+    clientProfile: any,
+    riskScore: number,
+    riskFactors: string[]
+  ) =>
+    trackEvent({
+      action: 'risk_assessment_modeling',
+      category: 'Risk Management',
+      label: 'underwriting_analysis',
+      value: riskScore,
+      custom_parameters: {
+        risk_score: riskScore,
+        risk_category:
+          riskScore > 80 ? 'high' : riskScore > 60 ? 'medium' : 'low',
+        primary_risk_factors: riskFactors.slice(0, 3).join(','),
+        health_indicators: clientProfile.healthIndicators,
+        lifestyle_factors: clientProfile.lifestyleFactors,
+        financial_stability: clientProfile.financialStability,
+        occupation_risk_level: clientProfile.occupationRisk,
+        geographic_risk: clientProfile.geographicRisk,
+        model_version: 'actuarial_risk_v4.1',
+      },
+    }),
+
+  // 판매 퍼널 효율성 분석
+  salesFunnelEfficiencyAnalysis: (
+    funnelStage: string,
+    conversionRate: number,
+    bottlenecks: string[]
+  ) =>
+    trackEvent({
+      action: 'sales_funnel_efficiency_analysis',
+      category: 'Sales Performance',
+      label: funnelStage,
+      value: conversionRate,
+      custom_parameters: {
+        funnel_stage: funnelStage,
+        conversion_rate: conversionRate,
+        efficiency_score: calculateFunnelEfficiency(
+          conversionRate,
+          funnelStage
+        ),
+        identified_bottlenecks: bottlenecks.join(','),
+        optimization_opportunities:
+          identifyOptimizationOpportunities(bottlenecks),
+        benchmark_comparison: compareWithBenchmark(conversionRate, funnelStage),
+        improvement_potential: calculateImprovementPotential(conversionRate),
+      },
+    }),
+
+  // 크로스셀/업셀 기회 분석
+  crossSellUpsellAnalysis: (
+    clientId: string,
+    currentProducts: string[],
+    opportunityProducts: string[],
+    opportunityScore: number
+  ) =>
+    trackEvent({
+      action: 'cross_sell_upsell_analysis',
+      category: 'Revenue Optimization',
+      label: 'sales_opportunity',
+      value: opportunityScore,
+      custom_parameters: {
+        client_id_hash: clientId.substring(0, 8),
+        current_products: currentProducts.join(','),
+        opportunity_products: opportunityProducts.join(','),
+        opportunity_score: opportunityScore,
+        revenue_potential: calculateRevenuePotential(opportunityProducts),
+        success_probability: calculateSuccessProbability(opportunityScore),
+        optimal_timing: determineOptimalTiming(clientId),
+        personalized_approach: generatePersonalizedApproach(
+          currentProducts,
+          opportunityProducts
+        ),
+      },
+    }),
+
+  // 시장 트렌드 분석
+  marketTrendAnalysis: (
+    trendType: string,
+    trendData: any,
+    businessImpact: string
+  ) =>
+    trackEvent({
+      action: 'market_trend_analysis',
+      category: 'Market Intelligence',
+      label: trendType,
+      custom_parameters: {
+        trend_type: trendType,
+        trend_direction: trendData.direction,
+        trend_strength: trendData.strength,
+        trend_duration: trendData.duration,
+        market_segment: trendData.segment,
+        business_impact: businessImpact,
+        strategic_implications: trendData.strategicImplications,
+        action_recommendations: trendData.actionRecommendations,
+      },
+    }),
+
+  // 고객 만족도 예측 모델
+  customerSatisfactionPrediction: (
+    clientId: string,
+    predictedSatisfaction: number,
+    satisfactionDrivers: any
+  ) =>
+    trackEvent({
+      action: 'predict_customer_satisfaction',
+      category: 'Customer Experience',
+      label: 'satisfaction_modeling',
+      value: predictedSatisfaction,
+      custom_parameters: {
+        client_id_hash: clientId.substring(0, 8),
+        predicted_satisfaction: predictedSatisfaction,
+        satisfaction_level:
+          predictedSatisfaction > 8
+            ? 'high'
+            : predictedSatisfaction > 6
+              ? 'medium'
+              : 'low',
+        key_satisfaction_drivers: satisfactionDrivers.keyDrivers.join(','),
+        service_quality_score: satisfactionDrivers.serviceQuality,
+        product_suitability_score: satisfactionDrivers.productSuitability,
+        communication_effectiveness:
+          satisfactionDrivers.communicationEffectiveness,
+        response_time_satisfaction: satisfactionDrivers.responseTime,
+        retention_probability: calculateRetentionProbability(
+          predictedSatisfaction
+        ),
+      },
+    }),
+
+  // 영업팀 성과 벤치마킹
+  salesTeamBenchmarking: (
+    agentId: string,
+    performanceMetrics: any,
+    benchmarkData: any
+  ) =>
+    trackEvent({
+      action: 'sales_team_benchmarking',
+      category: 'Team Performance',
+      label: 'performance_analysis',
+      custom_parameters: {
+        agent_id_hash: agentId.substring(0, 8),
+        sales_volume: performanceMetrics.salesVolume,
+        conversion_rate: performanceMetrics.conversionRate,
+        customer_retention: performanceMetrics.customerRetention,
+        average_deal_size: performanceMetrics.avgDealSize,
+        benchmark_percentile: calculatePercentileRank(
+          performanceMetrics,
+          benchmarkData
+        ),
+        performance_trend: analyzePerformanceTrend(performanceMetrics),
+        improvement_areas: identifyImprovementAreas(
+          performanceMetrics,
+          benchmarkData
+        ),
+        coaching_recommendations:
+          generateCoachingRecommendations(performanceMetrics),
+      },
+    }),
+
+  // 디지털 마케팅 ROI 추적
+  digitalMarketingROITracking: (
+    campaignId: string,
+    channelData: any,
+    roiMetrics: any
+  ) =>
+    trackEvent({
+      action: 'digital_marketing_roi_tracking',
+      category: 'Marketing Analytics',
+      label: campaignId,
+      value: roiMetrics.totalROI,
+      custom_parameters: {
+        campaign_id: campaignId,
+        marketing_channel: channelData.channel,
+        campaign_duration: channelData.duration,
+        total_investment: roiMetrics.totalInvestment,
+        total_revenue: roiMetrics.totalRevenue,
+        total_roi: roiMetrics.totalROI,
+        cost_per_acquisition: roiMetrics.costPerAcquisition,
+        lifetime_value_ratio: roiMetrics.lifetimeValueRatio,
+        channel_effectiveness: evaluateChannelEffectiveness(
+          channelData,
+          roiMetrics
+        ),
+        optimization_suggestions: generateOptimizationSuggestions(roiMetrics),
+      },
+    }),
+
+  // 규제 준수 모니터링
+  complianceMonitoring: (
+    complianceType: string,
+    complianceStatus: string,
+    riskLevel: string
+  ) =>
+    trackEvent({
+      action: 'compliance_monitoring',
+      category: 'Regulatory Compliance',
+      label: complianceType,
+      custom_parameters: {
+        compliance_type: complianceType,
+        compliance_status: complianceStatus,
+        risk_level: riskLevel,
+        regulatory_framework: 'K-ICS_2023',
+        audit_score: calculateAuditScore(complianceStatus, riskLevel),
+        required_actions: identifyRequiredActions(complianceStatus),
+        deadline_proximity: calculateDeadlineProximity(complianceType),
+        compliance_automation_level: 'high',
+      },
+    }),
+
+  // 고객 여정 최적화
+  customerJourneyOptimization: (
+    journeyStage: string,
+    optimizationData: any,
+    impactScore: number
+  ) =>
+    trackEvent({
+      action: 'customer_journey_optimization',
+      category: 'Customer Experience',
+      label: journeyStage,
+      value: impactScore,
+      custom_parameters: {
+        journey_stage: journeyStage,
+        current_conversion_rate: optimizationData.currentConversionRate,
+        optimized_conversion_rate: optimizationData.optimizedConversionRate,
+        improvement_percentage: optimizationData.improvementPercentage,
+        friction_points_removed: optimizationData.frictionPointsRemoved,
+        personalization_applied: optimizationData.personalizationApplied,
+        a_b_test_winner: optimizationData.abTestWinner,
+        implementation_effort: optimizationData.implementationEffort,
+        expected_revenue_impact: optimizationData.expectedRevenueImpact,
+      },
+    }),
+
+  // 인공지능 어시스턴트 성능 추적
+  aiAssistantPerformanceTracking: (
+    assistantType: string,
+    performanceData: any,
+    userSatisfaction: number
+  ) =>
+    trackEvent({
+      action: 'ai_assistant_performance_tracking',
+      category: 'AI Performance',
+      label: assistantType,
+      value: userSatisfaction,
+      custom_parameters: {
+        assistant_type: assistantType,
+        query_accuracy: performanceData.queryAccuracy,
+        response_time: performanceData.responseTime,
+        user_satisfaction: userSatisfaction,
+        task_completion_rate: performanceData.taskCompletionRate,
+        learning_improvement_rate: performanceData.learningImprovementRate,
+        model_version: performanceData.modelVersion,
+        training_data_freshness: performanceData.trainingDataFreshness,
+        fallback_to_human_rate: performanceData.fallbackToHumanRate,
+      },
+    }),
+
+  // 예측 분석 모델 정확도
+  predictiveAnalyticsAccuracy: (
+    modelType: string,
+    accuracyMetrics: any,
+    predictionData: any
+  ) =>
+    trackEvent({
+      action: 'predictive_analytics_accuracy',
+      category: 'Machine Learning',
+      label: modelType,
+      value: accuracyMetrics.overallAccuracy,
+      custom_parameters: {
+        model_type: modelType,
+        overall_accuracy: accuracyMetrics.overallAccuracy,
+        precision_score: accuracyMetrics.precisionScore,
+        recall_score: accuracyMetrics.recallScore,
+        f1_score: accuracyMetrics.f1Score,
+        prediction_confidence: predictionData.confidence,
+        feature_importance: predictionData.featureImportance,
+        model_drift_detected: predictionData.modelDrift,
+        retraining_required: predictionData.retrainingRequired,
+        business_impact_accuracy:
+          calculateBusinessImpactAccuracy(accuracyMetrics),
+      },
+    }),
 };
 
 // 헬퍼 함수들
@@ -1443,3 +1829,300 @@ export const SessionTracking = {
 
 // 기존 CRMEvents는 InsuranceAgentEvents로 대체됨
 export const CRMEvents = InsuranceAgentEvents;
+
+// 🧮 유틸리티 함수들 (보험설계사 특화 계산 로직)
+
+// 개인화 수준 계산
+function calculatePersonalizationLevel(clientProfile: any): string {
+  let score = 0;
+  if (clientProfile.ageGroup) score += 1;
+  if (clientProfile.incomeLevel) score += 1;
+  if (clientProfile.familyStatus) score += 1;
+  if (clientProfile.riskProfile) score += 1;
+  if (clientProfile.preferences) score += 1;
+
+  if (score >= 4) return 'high';
+  if (score >= 2) return 'medium';
+  return 'low';
+}
+
+// 펀널 효율성 계산
+function calculateFunnelEfficiency(
+  conversionRate: number,
+  funnelStage: string
+): number {
+  // 단계별 벤치마크 대비 효율성 계산
+  const benchmarks: Record<string, number> = {
+    lead_qualification: 60,
+    needs_analysis: 45,
+    proposal: 30,
+    contract_negotiation: 20,
+    contract_signed: 15,
+  };
+
+  const benchmark = benchmarks[funnelStage] || 25;
+  return Math.round((conversionRate / benchmark) * 100);
+}
+
+// 최적화 기회 식별
+function identifyOptimizationOpportunities(bottlenecks: string[]): string {
+  const opportunities = bottlenecks.map(bottleneck => {
+    switch (bottleneck) {
+      case 'long_response_time':
+        return 'automation';
+      case 'complex_proposal':
+        return 'simplification';
+      case 'pricing_concerns':
+        return 'value_demonstration';
+      case 'competitor_comparison':
+        return 'differentiation';
+      default:
+        return 'process_improvement';
+    }
+  });
+
+  return opportunities.join(',');
+}
+
+// 벤치마크와 비교
+function compareWithBenchmark(
+  conversionRate: number,
+  funnelStage: string
+): string {
+  const efficiency = calculateFunnelEfficiency(conversionRate, funnelStage);
+
+  if (efficiency >= 120) return 'above_benchmark';
+  if (efficiency >= 90) return 'at_benchmark';
+  if (efficiency >= 70) return 'below_benchmark';
+  return 'significantly_below';
+}
+
+// 개선 잠재력 계산
+function calculateImprovementPotential(conversionRate: number): number {
+  // 현재 전환율 대비 이론적 최대 개선 가능성
+  const maxConversionRate = 85; // 보험업계 이론적 최대치
+  const improvementPotential = maxConversionRate - conversionRate;
+  return Math.max(0, Math.round(improvementPotential));
+}
+
+// 수익 잠재력 계산
+function calculateRevenuePotential(opportunityProducts: string[]): number {
+  const productValues: Record<string, number> = {
+    생명보험: 1200000,
+    건강보험: 800000,
+    자동차보험: 600000,
+    여행보험: 200000,
+    펫보험: 300000,
+    화재보험: 400000,
+  };
+
+  return opportunityProducts.reduce((total, product) => {
+    return total + (productValues[product] || 500000);
+  }, 0);
+}
+
+// 성공 확률 계산
+function calculateSuccessProbability(opportunityScore: number): number {
+  // 기회 점수를 성공 확률로 변환 (0-100)
+  return Math.min(Math.round(opportunityScore * 1.2), 95);
+}
+
+// 최적 타이밍 결정
+function determineOptimalTiming(clientId: string): string {
+  // 클라이언트 ID 해시 기반으로 타이밍 결정 (실제로는 더 복잡한 로직)
+  const hash = clientId
+    .split('')
+    .reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const timing = hash % 4;
+
+  switch (timing) {
+    case 0:
+      return 'immediate';
+    case 1:
+      return 'within_week';
+    case 2:
+      return 'within_month';
+    default:
+      return 'within_quarter';
+  }
+}
+
+// 개인화된 접근법 생성
+function generatePersonalizedApproach(
+  currentProducts: string[],
+  opportunityProducts: string[]
+): string {
+  const hasLifeInsurance = currentProducts.includes('생명보험');
+  const hasHealthInsurance = currentProducts.includes('건강보험');
+
+  if (opportunityProducts.includes('건강보험') && !hasHealthInsurance) {
+    return 'health_focus_approach';
+  }
+  if (opportunityProducts.includes('자동차보험') && hasLifeInsurance) {
+    return 'comprehensive_coverage_approach';
+  }
+
+  return 'needs_based_approach';
+}
+
+// 고객 유지 확률 계산
+function calculateRetentionProbability(predictedSatisfaction: number): number {
+  // 만족도를 유지 확률로 변환
+  if (predictedSatisfaction >= 8) return 95;
+  if (predictedSatisfaction >= 6) return 80;
+  if (predictedSatisfaction >= 4) return 60;
+  return 30;
+}
+
+// 백분위 순위 계산
+function calculatePercentileRank(
+  performanceMetrics: any,
+  benchmarkData: any
+): number {
+  const score =
+    (performanceMetrics.salesVolume / benchmarkData.avgSalesVolume) * 25 +
+    (performanceMetrics.conversionRate / benchmarkData.avgConversionRate) * 25 +
+    (performanceMetrics.customerRetention / benchmarkData.avgRetention) * 25 +
+    (performanceMetrics.avgDealSize / benchmarkData.avgDealSize) * 25;
+
+  return Math.min(Math.round(score), 100);
+}
+
+// 성과 트렌드 분석
+function analyzePerformanceTrend(performanceMetrics: any): string {
+  // 간단한 트렌드 분석 (실제로는 시계열 데이터 필요)
+  const totalScore =
+    performanceMetrics.salesVolume + performanceMetrics.conversionRate;
+
+  if (totalScore > 150) return 'upward_trend';
+  if (totalScore > 100) return 'stable_trend';
+  return 'declining_trend';
+}
+
+// 개선 영역 식별
+function identifyImprovementAreas(
+  performanceMetrics: any,
+  benchmarkData: any
+): string {
+  const areas = [];
+
+  if (
+    performanceMetrics.conversionRate <
+    benchmarkData.avgConversionRate * 0.8
+  ) {
+    areas.push('conversion_optimization');
+  }
+  if (performanceMetrics.customerRetention < benchmarkData.avgRetention * 0.9) {
+    areas.push('retention_improvement');
+  }
+  if (performanceMetrics.avgDealSize < benchmarkData.avgDealSize * 0.85) {
+    areas.push('deal_size_optimization');
+  }
+
+  return areas.length > 0 ? areas.join(',') : 'maintain_performance';
+}
+
+// 코칭 권장사항 생성
+function generateCoachingRecommendations(performanceMetrics: any): string {
+  const recommendations = [];
+
+  if (performanceMetrics.conversionRate < 15) {
+    recommendations.push('sales_techniques_training');
+  }
+  if (performanceMetrics.customerRetention < 80) {
+    recommendations.push('relationship_management_training');
+  }
+  if (performanceMetrics.avgDealSize < 500000) {
+    recommendations.push('upselling_training');
+  }
+
+  return recommendations.length > 0
+    ? recommendations.join(',')
+    : 'advanced_skills_training';
+}
+
+// 채널 효과성 평가
+function evaluateChannelEffectiveness(
+  channelData: any,
+  roiMetrics: any
+): string {
+  if (roiMetrics.totalROI > 300) return 'highly_effective';
+  if (roiMetrics.totalROI > 200) return 'effective';
+  if (roiMetrics.totalROI > 100) return 'moderately_effective';
+  return 'needs_optimization';
+}
+
+// 최적화 제안 생성
+function generateOptimizationSuggestions(roiMetrics: any): string {
+  const suggestions = [];
+
+  if (roiMetrics.costPerAcquisition > 50000) {
+    suggestions.push('reduce_acquisition_cost');
+  }
+  if (roiMetrics.lifetimeValueRatio < 3) {
+    suggestions.push('increase_lifetime_value');
+  }
+  if (roiMetrics.totalROI < 150) {
+    suggestions.push('improve_targeting');
+  }
+
+  return suggestions.length > 0
+    ? suggestions.join(',')
+    : 'maintain_current_strategy';
+}
+
+// 감사 점수 계산
+function calculateAuditScore(
+  complianceStatus: string,
+  riskLevel: string
+): number {
+  let baseScore = 100;
+
+  if (complianceStatus === 'non_compliant') baseScore -= 40;
+  if (complianceStatus === 'partially_compliant') baseScore -= 20;
+
+  if (riskLevel === 'high') baseScore -= 15;
+  if (riskLevel === 'medium') baseScore -= 5;
+
+  return Math.max(baseScore, 0);
+}
+
+// 필요 조치 식별
+function identifyRequiredActions(complianceStatus: string): string {
+  switch (complianceStatus) {
+    case 'non_compliant':
+      return 'immediate_remediation,audit_review,policy_update';
+    case 'partially_compliant':
+      return 'process_improvement,documentation_update';
+    case 'compliant':
+      return 'regular_monitoring';
+    default:
+      return 'status_verification';
+  }
+}
+
+// 마감일 근접도 계산
+function calculateDeadlineProximity(complianceType: string): string {
+  // 규제 유형별 일반적인 마감일 (실제로는 DB에서 조회)
+  const today = new Date();
+  const endOfYear = new Date(today.getFullYear(), 11, 31);
+  const daysUntilDeadline = Math.ceil(
+    (endOfYear.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+  );
+
+  if (daysUntilDeadline < 30) return 'critical';
+  if (daysUntilDeadline < 90) return 'urgent';
+  if (daysUntilDeadline < 180) return 'upcoming';
+  return 'distant';
+}
+
+// 비즈니스 임팩트 정확도 계산
+function calculateBusinessImpactAccuracy(accuracyMetrics: any): number {
+  // 정확도 메트릭을 비즈니스 임팩트로 변환
+  const weightedScore =
+    accuracyMetrics.overallAccuracy * 0.4 +
+    accuracyMetrics.precisionScore * 0.3 +
+    accuracyMetrics.recall_score * 0.3;
+
+  return Math.round(weightedScore * 100) / 100;
+}

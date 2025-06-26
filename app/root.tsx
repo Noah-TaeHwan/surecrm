@@ -13,6 +13,7 @@ import { SpeedInsights } from '@vercel/speed-insights/react';
 import { useEffect } from 'react';
 import stylesheet from './app.css?url';
 import { initGA, SessionTracking } from '~/lib/utils/analytics';
+import { initEnhancedMeasurement } from '~/lib/utils/ga4-enhanced-measurement';
 import { usePageTracking } from '~/hooks/use-analytics';
 import { useBusinessIntelligence } from '~/hooks/use-business-intelligence';
 import { useUserRoleTracker } from '~/hooks/use-user-role-tracker';
@@ -113,7 +114,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     var f=d.getElementsByTagName(s)[0],
                         j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';
                     j.async=true;
-                    j.src='https://www.googletagmanager.com/gtag/js?id='+i+dl;
+                    j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;
                     f.parentNode.insertBefore(j,f);
                   })(window,document,'script','dataLayer','${
                     import.meta.env.VITE_GTM_CONTAINER_ID
@@ -146,8 +147,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
                                       '5180', '5181', '5182', '5183', '5184', '5185', '5186', 
                                       '5187', '3000', '8080'].includes(window.location.port);
 
-                    // 🚀 프로덕션 환경 확인 (surecrm.pro만 허용)
-                    const isProduction = window.location.hostname === 'surecrm.pro';
+                    // 🚀 프로덕션 환경 확인 (새 도메인 포함)
+                    const isProduction = window.location.hostname.includes('.vercel.app') ||
+                                         window.location.hostname.includes('surecrm.pro');
 
                     // 개발 환경이면 GA 로딩 차단
                     const isDev = !isProduction && isLocalhost && isDevPort;
@@ -195,8 +197,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
                       import.meta.env.VITE_GA_MEASUREMENT_ID
                     }', {
                       send_page_view: true,
-                      cookie_domain: isProduction 
-                        ? 'surecrm.pro' 
+                      cookie_domain: window.location.hostname.includes('.vercel.app') 
+                        ? '.vercel.app' 
+                        : window.location.hostname.includes('surecrm.pro')
+                        ? 'surecrm.pro'
                         : window.location.hostname,
                       cookie_flags: 'SameSite=Lax',
                       cookie_expires: window.location.hostname === 'localhost' 
@@ -221,10 +225,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
                                       '5180', '5181', '5182', '5183', '5184', '5185', '5186', 
                                       '5187', '3000', '8080'].includes(window.location.port);
 
-                    // 🚀 프로덕션 환경 명시적 허용 (surecrm.pro만)
-                    const isProduction = window.location.hostname === 'surecrm.pro';
+                    // 🚀 프로덕션 환경 명시적 허용 (새 도메인 포함)
+                    const isProduction = window.location.hostname.includes('.vercel.app') ||
+                                         window.location.hostname.includes('surecrm.pro');
 
-                    // 개발 환경 조건: localhost + dev port (프로덕션은 제외)
+                    // 개발 환경 조건: localhost + dev port (프로덕션 도메인은 제외)
                     const isDevelopment = !isProduction && isLocalhost && isDevPort;
 
                     if (!isDevelopment) {
@@ -935,6 +940,7 @@ export default function App() {
   // GA 초기화 및 세션 시작
   useEffect(() => {
     initGA();
+    initEnhancedMeasurement(); // Enhanced Measurement 수동 초기화
     SessionTracking.startSession();
 
     // 페이지 종료 시 세션 종료 및 최종 데이터 전송

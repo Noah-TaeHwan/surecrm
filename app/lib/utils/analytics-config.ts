@@ -41,7 +41,7 @@ export function isDevelopmentEnvironment(): boolean {
     '8080',
   ].includes(window.location.port);
 
-  // 🚀 Vercel 프로덕션 환경 명시적 제외
+  // 🚀 프로덕션 환경 명시적 제외 (새 도메인 포함)
   const isProduction =
     window.location.hostname.includes('.vercel.app') ||
     window.location.hostname.includes('surecrm.pro');
