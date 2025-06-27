@@ -4,8 +4,7 @@
   "functions": {
     "build/server/index.js": {
       "runtime": "nodejs20.x",
-      "maxDuration": 30,
-      "regions": ["icn1"]
+      "maxDuration": 30
     }
   },
   "rewrites": [
