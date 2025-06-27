@@ -7,6 +7,7 @@ import tailwindcss from '@tailwindcss/vite';
 import { defineConfig, loadEnv } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import { execSync } from 'child_process';
+// import { vercelPreset } from '@vercel/react-router/vite';
 
 export default defineConfig(config => {
   const { mode } = config;
@@ -144,6 +145,8 @@ export default defineConfig(config => {
     },
     // Rollup 옵션에서 외부 모듈과 polyfill 설정
     build: {
+      // Source map 활성화 (프로덕션에서도)
+      sourcemap: mode === 'production' ? 'hidden' : true,
       // Chunk 크기 경고 제한 증가
       chunkSizeWarningLimit: 1000,
       rollupOptions: {
