@@ -5,7 +5,6 @@ import {
   Scripts,
   ScrollRestoration,
   isRouteErrorResponse,
-  data,
   type LinksFunction,
 } from 'react-router';
 import { Analytics } from '@vercel/analytics/react';
@@ -25,9 +24,6 @@ import {
 import * as Sentry from '@sentry/react-router';
 
 // Root.tsx 전용 타입 정의
-interface ErrorBoundaryProps {
-  error: unknown;
-}
 
 export const links: LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -48,12 +44,32 @@ export const links: LinksFunction = () => [
     // 🔧 중요한 CSS는 즉시 로드
     as: 'style',
   },
-  // 🚀 중요한 리소스들만 preload (실제 사용되는 것들만)
+  // 🎨 파비콘 및 아이콘 관련
   {
-    rel: 'preload',
-    href: '/icons/favicon.ico',
-    as: 'image',
+    rel: 'icon',
     type: 'image/x-icon',
+    href: '/favicon.ico',
+  },
+  {
+    rel: 'icon',
+    type: 'image/png',
+    sizes: '16x16',
+    href: '/favicon-16x16.png',
+  },
+  {
+    rel: 'icon',
+    type: 'image/png',
+    sizes: '32x32',
+    href: '/favicon-32x32.png',
+  },
+  {
+    rel: 'apple-touch-icon',
+    sizes: '180x180',
+    href: '/apple-touch-icon.png',
+  },
+  {
+    rel: 'manifest',
+    href: '/manifest.json',
   },
 ];
 
@@ -66,6 +82,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
           name="viewport"
           content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
         />
+
+        {/* 🎨 브랜드 메타 태그들 */}
+        <meta name="theme-color" content="#E85D00" />
+        <meta name="msapplication-TileColor" content="#E85D00" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="SureCRM" />
+        <meta name="application-name" content="SureCRM" />
+        <meta name="mobile-web-app-capable" content="yes" />
+
         <Meta />
         <Links />
 

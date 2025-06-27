@@ -1,0 +1,86 @@
+{
+  "name": "SureCRM - 스마트 고객 관리 솔루션",
+  "short_name": "SureCRM",
+  "description": "AI 기반 고객 관리와 소개 네트워크를 통한 스마트한 비즈니스 성장 플랫폼",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#24242A",
+  "theme_color": "#E85D00",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "ko",
+  "categories": ["business", "productivity", "finance"],
+  "icons": [
+    {
+      "src": "/favicon-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "고객 관리",
+      "short_name": "고객",
+      "description": "고객 정보를 빠르게 확인하고 관리합니다",
+      "url": "/clients",
+      "icons": [
+        {
+          "src": "/android-chrome-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "일정 관리",
+      "short_name": "일정",
+      "description": "미팅 일정을 확인하고 관리합니다",
+      "url": "/calendar",
+      "icons": [
+        {
+          "src": "/android-chrome-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "대시보드",
+      "short_name": "대시보드",
+      "description": "비즈니스 현황을 한눈에 확인합니다",
+      "url": "/dashboard",
+      "icons": [
+        {
+          "src": "/android-chrome-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ]
+}

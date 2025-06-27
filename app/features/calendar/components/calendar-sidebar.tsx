@@ -16,10 +16,7 @@ import {
   ClockIcon,
   PersonIcon,
   TargetIcon,
-  BellIcon,
-  StarIcon,
   CheckCircledIcon,
-  GearIcon,
   UpdateIcon,
   MixerHorizontalIcon,
   MagnifyingGlassIcon,
@@ -230,37 +227,63 @@ export function CalendarSidebar({
     onFilterChange(newFilters);
   };
 
-  const formatLastSync = (dateStr?: string) => {
-    if (!dateStr) return '동기화된 적 없음';
+  const formatLastSync = (dateStr?: string | Date) => {
+    if (!dateStr) {
+      return '동기화 기록 없음';
+    }
 
-    const date = new Date(dateStr);
+    let date: Date;
+    if (dateStr instanceof Date) {
+      date = dateStr;
+    } else if (typeof dateStr === 'string') {
+      date = new Date(dateStr);
+    } else {
+      return '동기화 기록 없음';
+    }
+
     const now = new Date();
-    const diffInMinutes = Math.floor(
-      (now.getTime() - date.getTime()) / (1000 * 60)
-    );
+    const diffInMilliseconds = now.getTime() - date.getTime();
+    const diffInMinutes = Math.floor(diffInMilliseconds / (1000 * 60));
 
-    if (diffInMinutes < 1) return '방금 전';
-    if (diffInMinutes < 60) return `${diffInMinutes}분 전`;
-    if (diffInMinutes < 24 * 60)
-      return `${Math.floor(diffInMinutes / 60)}시간 전`;
-    return format(date, 'MM/dd HH:mm', { locale: ko });
+    if (diffInMinutes < 1) {
+      return '방금 전';
+    } else if (diffInMinutes < 60) {
+      return `${diffInMinutes}분 전`;
+    } else if (diffInMinutes < 24 * 60) {
+      const hours = Math.floor(diffInMinutes / 60);
+      return `${hours}시간 전`;
+    } else {
+      // 하루 이상된 경우 날짜 형식으로 표시
+      return format(date, 'MM/dd HH:mm', { locale: ko });
+    }
   };
 
   // useSyncExternalStore용 빈 구독 함수
   const emptySubscribe = () => () => {};
 
-  // Hydration-safe 시간 표시 컴포넌트
-  function HydrationSafeTimeDisplay({ dateStr }: { dateStr?: string }) {
-    const timeDisplay = useSyncExternalStore(
+  // Hydration-safe 시간 표시 컴포넌트 (Date 객체와 문자열 모두 처리)
+  function HydrationSafeTimeDisplay({ dateStr }: { dateStr?: string | Date }) {
+    const formattedTime = useSyncExternalStore(
       emptySubscribe,
       () => formatLastSync(dateStr), // 클라이언트 스냅샷
-      () =>
-        dateStr
-          ? format(new Date(dateStr), 'MM/dd HH:mm', { locale: ko })
-          : '동기화된 적 없음' // 서버 스냅샷 (고정된 형식)
+      () => {
+        // 서버 스냅샷 - 고정된 형식으로 반환
+        if (!dateStr) return '동기화 기록 없음';
+
+        let date: Date;
+        if (dateStr instanceof Date) {
+          date = dateStr;
+        } else if (typeof dateStr === 'string') {
+          date = new Date(dateStr);
+        } else {
+          return '동기화 기록 없음';
+        }
+
+        return format(date, 'MM/dd HH:mm', { locale: ko });
+      }
     );
 
-    return <span>{timeDisplay}</span>;
+    return <span>{formattedTime}</span>;
   }
 
   // 수동 동기화 실행
