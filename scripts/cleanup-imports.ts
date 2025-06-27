@@ -72,6 +72,7 @@ function main() {
   console.log('3. 문제없으면 커밋');
 }
 
-if (require.main === module) {
+// ES 모듈에서는 import.meta.main 사용
+if (import.meta.url === `file://${process.argv[1]}`) {
   main();
 }
