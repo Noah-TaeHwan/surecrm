@@ -31,6 +31,68 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 
+/* 랜딩페이지 모바일 스크롤 특별 처리 */
+@media (max-width: 767.98px) {
+  /* 랜딩페이지에서는 body의 fixed 설정을 무효화 */
+  body:has(.landing-page-container) {
+    position: relative !important;
+    overflow-y: auto !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+
+  /* 더 안정적인 방법: 랜딩페이지 전용 클래스 */
+  .landing-page-scroll-enabled {
+    position: relative !important;
+    overflow-y: auto !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+
+  /* 랜딩페이지 컨테이너 자체에서 스크롤 처리 */
+  .landing-page-container {
+    position: relative !important;
+    overflow-y: auto !important;
+    height: auto !important;
+    min-height: 100vh !important;
+    min-height: -webkit-fill-available !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: manipulation !important;
+    overscroll-behavior-y: bounce !important;
+    /* iOS Safari 대응 */
+    transform: translateZ(0) !important;
+    will-change: scroll-position !important;
+  }
+
+  /* 랜딩페이지 헤더 최적화 */
+  .landing-page-container header {
+    transform: translateZ(0);
+    will-change: transform;
+  }
+
+  /* 랜딩페이지 헤더 모바일 고정 강화 */
+  .landing-header-fixed {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 1000 !important;
+    transform: translateZ(0) !important;
+    will-change: transform !important;
+    /* iOS Safari 호환성 */
+    -webkit-transform: translateZ(0) !important;
+    -webkit-backface-visibility: hidden !important;
+    backface-visibility: hidden !important;
+  }
+
+  /* 랜딩페이지 메인 콘텐츠 스크롤 허용 */
+  .landing-page-container main {
+    position: relative !important;
+    overflow-x: hidden !important;
+    width: 100% !important;
+  }
+}
+
 /* 모바일 스크롤 강제 활성화 */
 @media (max-width: 768px) {
   html,
@@ -4519,6 +4581,40 @@ input[type='datetime-local']:not([style*='color']) {
 .brand-logo-hover:hover {
   animation-duration: 2s;
   transform: scale(1.05);
+}
+
+/* 🚀 랜딩페이지 브랜드 로고 - 가독성 우선 */
+.landing-brand-logo {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: hsl(var(--foreground));
+  /* 호버 시에만 그라데이션 효과 */
+}
+
+.landing-brand-logo:hover {
+  background: linear-gradient(
+    135deg,
+    hsl(var(--primary)),
+    hsl(var(--primary) / 0.8),
+    hsl(var(--primary))
+  );
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradient-shift 3s ease infinite;
+  transform: scale(1.02);
+}
+
+/* 모바일에서는 더 단순한 호버 효과 */
+@media (max-width: 768px) {
+  .landing-brand-logo:hover {
+    background: none;
+    -webkit-background-clip: unset;
+    background-clip: unset;
+    -webkit-text-fill-color: unset;
+    color: hsl(var(--primary));
+    animation: none;
+  }
 }
 
 @keyframes gradient-shift {

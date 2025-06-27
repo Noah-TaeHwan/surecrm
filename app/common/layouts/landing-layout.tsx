@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button } from '~/common/components/ui/button';
 import { Link } from 'react-router';
 
@@ -7,9 +7,19 @@ interface LandingLayoutProps {
 }
 
 export function LandingLayout({ children }: LandingLayoutProps) {
+  // 모바일에서 랜딩페이지 스크롤을 허용하기 위한 body 클래스 관리
+  useEffect(() => {
+    const body = document.body;
+    body.classList.add('landing-page-scroll-enabled');
+
+    return () => {
+      body.classList.remove('landing-page-scroll-enabled');
+    };
+  }, []);
+
   return (
-    <div className="relative w-full overflow-x-hidden">
-      <header className="h-14 sm:h-16 lg:h-18 px-4 sm:px-6 lg:px-8 fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b transition-all duration-200">
+    <div className="landing-page-container relative w-full min-h-screen">
+      <header className="landing-header-fixed h-14 sm:h-16 lg:h-18 px-4 sm:px-6 lg:px-8 fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b transition-all duration-200">
         <div className="container mx-auto h-full flex justify-between items-center">
           <h1 className="text-lg sm:text-xl lg:text-2xl font-bold">
             <Link to="/" className="hover:text-primary transition-colors">
@@ -38,9 +48,7 @@ export function LandingLayout({ children }: LandingLayoutProps) {
         </div>
       </header>
 
-      <main className="pt-14 sm:pt-16 lg:pt-18 min-h-screen w-full overflow-y-auto">
-        {children}
-      </main>
+      <main className="pt-14 sm:pt-16 lg:pt-18 w-full">{children}</main>
 
       {/* 🚀 고도화된 푸터 영역 */}
       <footer className="relative overflow-hidden bg-gradient-to-br from-background via-muted/20 to-background border-t footer-enhanced">
@@ -58,13 +66,14 @@ export function LandingLayout({ children }: LandingLayoutProps) {
               <div className="lg:col-span-2 footer-section-animate">
                 <div className="space-y-4">
                   <Link to="/" className="inline-block group">
-                    <h2 className="brand-logo-hover text-2xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100 hover:text-primary transition-colors duration-300 drop-shadow-md">
+                    <h2 className="landing-brand-logo text-2xl lg:text-3xl font-bold text-foreground hover:text-primary transition-colors duration-300 drop-shadow-md">
                       SureCRM
                     </h2>
                   </Link>
                   <p className="text-muted-foreground text-sm lg:text-base max-w-md leading-relaxed">
-                    보험 영업의 새로운 기준을 제시하는 스마트 CRM 솔루션. 고객
-                    관리부터 영업 기회 창출까지, 모든 것을 하나로.
+                    보험 영업의 새로운 기준을 제시하는 스마트 CRM 솔루션.
+                    <br />
+                    고객 관리부터 영업 기회 창출까지, 모든 것을 하나로.
                   </p>
 
                   {/* 소셜 링크 */}
@@ -176,22 +185,6 @@ export function LandingLayout({ children }: LandingLayoutProps) {
                   보험 영업을 위한 스마트 CRM 솔루션
                 </p>
               </div>
-
-              {/* 추가 정보 */}
-              <div className="flex items-center gap-6 text-xs text-muted-foreground">
-                <div className="feature-badge">
-                  <span className="w-1.5 h-1.5 bg-primary/60 rounded-full" />
-                  <span>Made in Korea</span>
-                </div>
-                <div className="feature-badge">
-                  <span className="w-1.5 h-1.5 bg-blue-500/60 rounded-full" />
-                  <span>Enterprise Ready</span>
-                </div>
-                <div className="feature-badge">
-                  <span className="w-1.5 h-1.5 bg-green-500/60 rounded-full" />
-                  <span>24/7 Support</span>
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -200,7 +193,7 @@ export function LandingLayout({ children }: LandingLayoutProps) {
         <div className="footer-gradient-orb absolute bottom-0 right-0 w-64 h-64 bg-gradient-to-tl from-primary/5 via-transparent to-transparent rounded-full blur-3xl" />
 
         {/* 장식적 요소 - 왼쪽 상단 그라데이션 */}
-        <div className="footer-gradient-orb absolute top-0 left-0 w-48 h-48 bg-gradient-to-br from-muted/10 via-transparent to-transparent rounded-full blur-2xl" />
+        <div className="footer-gradient-orb absolute top-0 left-0 w-48 h-48 bg-gradient-to-br from-muted/10 via-transparent to-transparent rounded-full blur-3xl" />
       </footer>
     </div>
   );
