@@ -1081,8 +1081,15 @@ export function ErrorBoundary({ error }: { error: unknown }) {
         ? 'The requested page could not be found.'
         : error.statusText || details;
   } else if (error && error instanceof Error) {
-    // you only want to capture non 404-errors that reach the boundary
-    Sentry.captureException(error);
+    // 🔒 프로덕션에서만 Sentry로 오류 전송 (404가 아닌 경우)
+    if (!import.meta.env.DEV) {
+      try {
+        Sentry.captureException(error);
+      } catch (sentryError) {
+        console.warn('⚠️ Sentry 오류 캡처 실패:', sentryError);
+      }
+    }
+
     if (import.meta.env.DEV) {
       details = error.message;
       stack = error.stack;
