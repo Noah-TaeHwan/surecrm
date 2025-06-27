@@ -1,11 +1,11 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": "build/client",
-  "serverlessFunctionRegion": "icn1",
   "functions": {
     "build/server/index.js": {
       "runtime": "nodejs20.x",
-      "maxDuration": 30
+      "maxDuration": 30,
+      "regions": ["icn1"]
     }
   },
   "rewrites": [
