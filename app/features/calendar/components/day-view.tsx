@@ -5,6 +5,7 @@ import { ko } from 'date-fns/locale';
 import { Clock, MapPin, User, Phone, Video, Coffee } from 'lucide-react';
 import { Badge } from '~/common/components/ui/badge';
 import { useDeviceType } from '~/common/hooks/use-viewport';
+import { useSyncExternalStore } from 'react';
 
 // 🍎 SureCRM 색상 시스템 통합 (iOS 네이티브 스타일)
 const getEventColors = (meeting: Meeting) => {
@@ -69,26 +70,18 @@ export function DayView({
   onMeetingClick,
 }: DayViewProps) {
   const { isMobile } = useDeviceType();
-  // 모든 미팅 표시 (필터링 제거)
-  const filteredMeetings = meetings;
 
   // 선택된 날짜의 미팅들만 필터링
   const dateStr = selectedDate.toISOString().split('T')[0];
-  const dayMeetings = filteredMeetings.filter(
-    meeting => meeting.date === dateStr
-  );
+  const filteredMeetings = meetings.filter(meeting => meeting.date === dateStr);
 
-  // 시간별로 정렬
-  const sortedMeetings = dayMeetings.sort((a, b) =>
-    a.time.localeCompare(b.time)
-  );
+  // 시간순으로 정렬된 미팅 목록
+  const sortedMeetings = filteredMeetings.sort((a, b) => {
+    return a.time.localeCompare(b.time);
+  });
 
-  // 시간 슬롯 생성 (0시부터 23시까지)
-  const timeSlots = Array.from({ length: 24 }, (_, i) => i);
-
-  const isToday = selectedDate.toDateString() === new Date().toDateString();
-  const currentHour = new Date().getHours();
-  const currentMinute = new Date().getMinutes();
+  // 시간 슬롯 생성 (6시부터 22시까지)
+  const timeSlots = Array.from({ length: 17 }, (_, i) => i + 6);
 
   // 미팅 타입에 따른 아이콘
   const getMeetingIcon = (type: string) => {
@@ -115,6 +108,44 @@ export function DayView({
   const getMeetingHeight = (duration: number) => {
     return Math.max(60, (duration / 60) * 80); // 최소 60px, 시간당 80px
   };
+
+  // useSyncExternalStore용 빈 구독 함수
+  const emptySubscribe = () => () => {};
+
+  // 오늘인지 확인 (hydration-safe)
+  const isToday = useSyncExternalStore(
+    emptySubscribe,
+    () => selectedDate.toDateString() === new Date().toDateString(),
+    () => false // 서버에서는 항상 false
+  );
+
+  // 현재 시간 (hydration-safe)
+  const currentHour = useSyncExternalStore(
+    emptySubscribe,
+    () => new Date().getHours(),
+    () => 0 // 서버에서는 0시
+  );
+
+  const currentMinute = useSyncExternalStore(
+    emptySubscribe,
+    () => new Date().getMinutes(),
+    () => 0 // 서버에서는 0분
+  );
+
+  // Hydration-safe 현재 시간 표시 컴포넌트
+  function HydrationSafeCurrentTime() {
+    const currentTime = useSyncExternalStore(
+      emptySubscribe,
+      () =>
+        new Date().toLocaleTimeString('ko-KR', {
+          hour: '2-digit',
+          minute: '2-digit',
+        }), // 클라이언트 스냅샷
+      () => format(new Date(), 'HH:mm', { locale: ko }) // 서버 스냅샷 (고정된 형식)
+    );
+
+    return <span>{currentTime}</span>;
+  }
 
   return (
     <div className="bg-card/30 rounded-2xl overflow-hidden border border-border/30 shadow-2xl backdrop-blur-md">
@@ -204,10 +235,7 @@ export function DayView({
                         <div className="w-1 h-1 bg-white rounded-full"></div>
                       </div>
                       <div className="absolute left-6 top-0 text-xs text-red-600 font-mono -translate-y-2">
-                        {new Date().toLocaleTimeString('ko-KR', {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
+                        <HydrationSafeCurrentTime />
                       </div>
                     </div>
                   )}

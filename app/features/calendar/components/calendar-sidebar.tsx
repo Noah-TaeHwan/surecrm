@@ -21,8 +21,6 @@ import {
   MixerHorizontalIcon,
   MagnifyingGlassIcon,
   Cross2Icon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
   PlusIcon,
 } from '@radix-ui/react-icons';
 import { cn } from '~/lib/utils';
@@ -261,26 +259,12 @@ export function CalendarSidebar({
   // useSyncExternalStore용 빈 구독 함수
   const emptySubscribe = () => () => {};
 
-  // Hydration-safe 시간 표시 컴포넌트 (Date 객체와 문자열 모두 처리)
+  // Hydration-safe 시간 표시 컴포넌트 (완전한 분리 방식)
   function HydrationSafeTimeDisplay({ dateStr }: { dateStr?: string | Date }) {
     const formattedTime = useSyncExternalStore(
       emptySubscribe,
-      () => formatLastSync(dateStr), // 클라이언트 스냅샷
-      () => {
-        // 서버 스냅샷 - 고정된 형식으로 반환
-        if (!dateStr) return '동기화 기록 없음';
-
-        let date: Date;
-        if (dateStr instanceof Date) {
-          date = dateStr;
-        } else if (typeof dateStr === 'string') {
-          date = new Date(dateStr);
-        } else {
-          return '동기화 기록 없음';
-        }
-
-        return format(date, 'MM/dd HH:mm', { locale: ko });
-      }
+      () => formatLastSync(dateStr), // 클라이언트: 실제 시간 계산
+      () => '동기화 정보' // 서버: 고정된 텍스트 (hydration 안전)
     );
 
     return <span>{formattedTime}</span>;

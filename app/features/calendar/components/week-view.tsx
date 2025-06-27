@@ -1,6 +1,6 @@
 import { cn } from '~/lib/utils';
 import { type Meeting } from '../types/types';
-import { Fragment } from 'react';
+import { Fragment, useSyncExternalStore } from 'react';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { Clock, MapPin, User } from 'lucide-react';
@@ -61,6 +61,18 @@ interface WeekViewProps {
   selectedDate: Date;
   meetings: Meeting[];
   onMeetingClick: (meeting: Meeting) => void;
+}
+
+// useSyncExternalStore용 빈 구독 함수
+const emptySubscribe = () => () => {};
+
+// Hydration-safe 현재 시간 확인 함수
+function useCurrentHour() {
+  return useSyncExternalStore(
+    emptySubscribe,
+    () => new Date().getHours(), // 클라이언트
+    () => -1 // 서버에서는 -1 반환 (시간 표시선 비활성화)
+  );
 }
 
 export function WeekView({
@@ -206,7 +218,7 @@ export function WeekView({
                     )}
                   >
                     {/* 현재 시간 표시선 (오늘이고 현재 시간인 경우) */}
-                    {isToday(date) && new Date().getHours() === hour && (
+                    {isToday(date) && useCurrentHour() === hour && (
                       <div className="absolute left-0 right-0 top-0 h-0.5 bg-red-500 z-20">
                         <div className="absolute left-0 top-0 w-2 h-2 bg-red-500 rounded-full -translate-y-1"></div>
                       </div>
@@ -289,9 +301,12 @@ export function WeekView({
         {weekDates.some(date => isToday(date)) && (
           <div className="absolute left-0 right-0 pointer-events-none z-10">
             {(() => {
-              const now = new Date();
-              const currentHour = now.getHours();
-              const currentMinute = now.getMinutes();
+              const currentHour = useCurrentHour();
+              const currentMinute = useSyncExternalStore(
+                emptySubscribe,
+                () => new Date().getMinutes(),
+                () => 0
+              );
 
               if (currentHour >= 6 && currentHour <= 22) {
                 const position =
