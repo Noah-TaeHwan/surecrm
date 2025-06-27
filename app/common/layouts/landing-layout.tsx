@@ -1,19 +1,16 @@
+import React from 'react';
 import { Button } from '~/common/components/ui/button';
 import { Link } from 'react-router';
 
 interface LandingLayoutProps {
   children: React.ReactNode;
-  showCTA?: boolean;
 }
 
-export function LandingLayout({
-  children,
-  showCTA = true,
-}: LandingLayoutProps) {
+export function LandingLayout({ children }: LandingLayoutProps) {
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="py-3 sm:py-4 lg:py-6 px-4 sm:px-6 lg:px-8 fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b transition-all duration-200">
-        <div className="container mx-auto flex justify-between items-center">
+    <div className="relative w-full overflow-x-hidden">
+      <header className="h-14 sm:h-16 lg:h-18 px-4 sm:px-6 lg:px-8 fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b transition-all duration-200">
+        <div className="container mx-auto h-full flex justify-between items-center">
           <h1 className="text-lg sm:text-xl lg:text-2xl font-bold">
             <Link to="/" className="hover:text-primary transition-colors">
               SureCRM
@@ -23,21 +20,27 @@ export function LandingLayout({
           {/* 로그인/회원가입 버튼 */}
           <div className="flex items-center gap-2 sm:gap-3">
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               asChild
-              className="text-sm hover:text-primary transition-colors"
+              className="text-sm border-border hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-200"
             >
               <Link to="/auth/login">로그인</Link>
             </Button>
-            <Button size="sm" asChild className="text-sm">
+            <Button
+              size="sm"
+              asChild
+              className="text-sm bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm"
+            >
               <Link to="/auth/signup">회원가입</Link>
             </Button>
           </div>
         </div>
       </header>
 
-      <main className="flex-1 pt-16">{children}</main>
+      <main className="pt-14 sm:pt-16 lg:pt-18 min-h-screen w-full overflow-y-auto">
+        {children}
+      </main>
 
       {/* 🚀 고도화된 푸터 영역 */}
       <footer className="relative overflow-hidden bg-gradient-to-br from-background via-muted/20 to-background border-t footer-enhanced">
@@ -49,13 +52,13 @@ export function LandingLayout({
         {/* 메인 푸터 콘텐츠 */}
         <div className="relative z-10">
           {/* 상단 섹션 - 브랜드 & 링크 */}
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
               {/* 브랜드 섹션 */}
               <div className="lg:col-span-2 footer-section-animate">
                 <div className="space-y-4">
                   <Link to="/" className="inline-block group">
-                    <h2 className="brand-logo-hover text-2xl lg:text-3xl font-bold">
+                    <h2 className="brand-logo-hover text-2xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100 hover:text-primary transition-colors duration-300 drop-shadow-md">
                       SureCRM
                     </h2>
                   </Link>
@@ -164,7 +167,7 @@ export function LandingLayout({
           </div>
 
           {/* 하단 섹션 - 저작권 & 추가 정보 */}
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               {/* 저작권 정보 */}
               <div className="text-xs lg:text-sm text-muted-foreground text-center md:text-left">

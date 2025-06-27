@@ -11,7 +11,7 @@ export function HeroSection() {
   return (
     <section
       id="hero"
-      className="relative min-h-screen flex items-center justify-center py-16 sm:py-20 lg:py-32 overflow-hidden"
+      className="relative min-h-[100vh] sm:min-h-[95vh] lg:min-h-screen flex items-center justify-center py-16 sm:py-20 lg:py-24 overflow-hidden"
     >
       <WarpBackground className="absolute inset-0 opacity-20" />
 

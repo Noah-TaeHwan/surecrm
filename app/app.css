@@ -5,6 +5,55 @@
    TAILWIND CSS V4 CONFIGURATION
    ================================================================= */
 
+/* 🚀 모바일 사파리 뷰포트 문제 해결 */
+html {
+  height: 100%;
+  height: -webkit-fill-available;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+body {
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+}
+
+/* 랜딩페이지 특화 스타일 */
+.landing-page-container {
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 모바일 스크롤 강제 활성화 */
+@media (max-width: 768px) {
+  html,
+  body {
+    touch-action: manipulation;
+    -webkit-overflow-scrolling: touch;
+    overflow-y: auto !important;
+    overscroll-behavior-y: bounce;
+  }
+
+  .min-h-screen {
+    min-height: 100vh !important;
+    min-height: -webkit-fill-available !important;
+  }
+
+  main {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: manipulation;
+    will-change: scroll-position;
+  }
+}
+
 /* 🍎 iOS Safari 입력 최적화 스타일 */
 @media (max-width: 768px) {
   /* iOS Safari 자동 줌 방지 */
