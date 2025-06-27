@@ -15,6 +15,13 @@
 - React Router v7 + Vercel 프리셋 자동 설정 활용
 - SSR 모드 유지, Vercel 자동 처리
 
+## 2025-01-16 18:40 KST - Google OAuth redirect URI 수정
+
+- ❌ ~~Google Cloud Console에 Vercel URL 추가 필요~~
+- ✅ 환경변수 `GOOGLE_REDIRECT_URI_PRODUCTION` 올바른 도메인으로 복원
+- ✅ `https://surecrm.pro/api/google/calendar/callback` 사용
+- 🔧 Vercel 대시보드에서 `surecrm.pro` 커스텀 도메인 설정 필요
+
 ## 변경사항
 
 - `vite.config.ts`: manualChunks 제거, ES modules 호환성 강화
