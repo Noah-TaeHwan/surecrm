@@ -1,5 +1,14 @@
-import type { Route } from './+types/billing.success';
+// React Router v7 타입 import 제거 - 직접 타입 정의 사용
 import { MainLayout } from '~/common/layouts/main-layout';
+
+// 타입 정의
+interface LoaderArgs {
+  request: Request;
+}
+
+interface ComponentProps {
+  loaderData: any;
+}
 import { Button } from '~/common/components/ui/button';
 import {
   Card,
@@ -21,7 +30,7 @@ export function meta() {
   ];
 }
 
-export function loader({ request }: Route.LoaderArgs) {
+export function loader({ request }: LoaderArgs) {
   // URL에서 쿼리 파라미터 추출
   const url = new URL(request.url);
   const sessionId = url.searchParams.get('session_id');
@@ -33,9 +42,7 @@ export function loader({ request }: Route.LoaderArgs) {
   };
 }
 
-export default function BillingSuccessPage({
-  loaderData,
-}: Route.ComponentProps) {
+export default function BillingSuccessPage({ loaderData }: ComponentProps) {
   const { sessionId } = loaderData;
 
   return (

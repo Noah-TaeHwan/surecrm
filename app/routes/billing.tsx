@@ -1,5 +1,19 @@
-import type { Route } from './+types/billing';
+// React Router v7 타입 import 제거 - 직접 타입 정의 사용
 import React from 'react';
+
+// 타입 정의
+interface LoaderArgs {
+  request: Request;
+}
+
+interface ActionArgs {
+  request: Request;
+}
+
+interface ComponentProps {
+  loaderData: any;
+  actionData?: any;
+}
 import { MainLayout } from '~/common/layouts/main-layout';
 import {
   Card,
@@ -39,7 +53,7 @@ export function meta() {
   ];
 }
 
-export async function action({ request }: Route.ActionArgs) {
+export async function action({ request }: ActionArgs) {
   const formData = await request.formData();
   const action = formData.get('action');
 
@@ -87,7 +101,7 @@ export async function action({ request }: Route.ActionArgs) {
   return data({ error: '잘못된 요청입니다.' }, { status: 400 });
 }
 
-export async function loader({ request }: Route.LoaderArgs) {
+export async function loader({ request }: LoaderArgs) {
   try {
     const { getSubscriptionStatusForUser } = await import(
       '~/lib/auth/subscription-middleware.server'
@@ -112,7 +126,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 export default function BillingPage({
   loaderData,
   actionData,
-}: Route.ComponentProps) {
+}: ComponentProps) {
   const { user, subscriptionStatus } = loaderData;
 
   // URL 파라미터에서 리다이렉트 이유 확인
