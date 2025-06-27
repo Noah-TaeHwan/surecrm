@@ -1,6 +1,6 @@
 import type { ActionFunctionArgs } from 'react-router';
 import { data } from 'react-router';
-import { GoogleCalendarService } from '~/features/calendar/lib/google-calendar-service';
+import { GoogleCalendarService } from '~/features/calendar/lib/google-calendar-service.server';
 import { db } from '~/lib/core/db.server';
 import { appCalendarSyncLogs } from '~/features/calendar/lib/schema';
 

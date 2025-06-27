@@ -63,7 +63,6 @@ import {
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Form } from 'react-router';
-import { GoogleCalendarService } from '~/features/calendar/lib/google-calendar-service';
 
 // 설정 페이지 데이터 타입
 interface SettingsPageData {
@@ -124,6 +123,9 @@ export async function loader({
         // 구글 캘린더 설정 조회
         (async () => {
           try {
+            const { GoogleCalendarService } = await import(
+              '~/features/calendar/lib/google-calendar-service'
+            );
             const googleService = new GoogleCalendarService();
             return await googleService.getCalendarSettings(user.id);
           } catch (error) {
@@ -270,6 +272,9 @@ export async function action({ request }: Route.ActionArgs) {
 
         try {
           // 기존 설정 조회
+          const { GoogleCalendarService } = await import(
+            '~/features/calendar/lib/google-calendar-service'
+          );
           const googleService = new GoogleCalendarService();
           const existingSettings = await googleService.getCalendarSettings(
             user.id
@@ -320,6 +325,9 @@ export async function action({ request }: Route.ActionArgs) {
 
       case 'connectGoogleCalendar': {
         // 🔗 구글 캘린더 연동 시작 - OAuth URL로 리다이렉트
+        const { GoogleCalendarService } = await import(
+          '~/features/calendar/lib/google-calendar-service'
+        );
         const googleService = new GoogleCalendarService();
         const authUrl = googleService.getAuthUrl(user.id);
 

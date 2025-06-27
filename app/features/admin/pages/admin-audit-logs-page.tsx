@@ -6,7 +6,7 @@
  */
 
 import { requireAdmin } from '~/lib/auth/middleware.server';
-import { logAdminAction } from '../lib/utils';
+
 import { db } from '~/lib/core/db.server';
 import { adminAuditLogs } from '~/lib/schema';
 import { desc, count, and, gte, like } from 'drizzle-orm';
@@ -36,6 +36,9 @@ interface Route {
 export async function loader({ request }: Route['LoaderArgs']) {
   // 🔒 Admin 전용 보안 체크
   const user = (await requireAdmin(request)) as AdminUser;
+
+  // 서버 전용 함수 import
+  const { logAdminAction } = await import('../lib/utils.server');
 
   // 🔍 Admin 감사 로그 접근 감사 로깅
   await logAdminAction(

@@ -141,60 +141,54 @@ export default function CalendarPage({
     setIsAddMeetingOpen(false);
   };
 
-  // 충돌 해결 핸들러
-  const handleResolveConflict = async (
+  // 충돌 해결 핸들러 - Form 제출로 처리
+  const handleResolveConflict = (
     eventId: string,
     resolution: 'local' | 'google'
   ) => {
-    try {
-      // GoogleCalendarService를 사용하여 충돌 해결
-      const { GoogleCalendarService } = await import(
-        '../lib/google-calendar-service'
-      );
-      const googleService = new GoogleCalendarService();
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.style.display = 'none';
 
-      const success = await googleService.resolveConflict(
-        loaderData.agentId || 'unknown',
-        eventId,
-        resolution
-      );
+    const actionInput = document.createElement('input');
+    actionInput.name = 'actionType';
+    actionInput.value = 'resolveConflict';
+    form.appendChild(actionInput);
 
-      if (success) {
-        // 해결된 충돌을 목록에서 제거
-        setConflicts(prev => prev.filter(c => c.eventId !== eventId));
-        console.log(`✅ 충돌 해결 완료: ${eventId} -> ${resolution}`);
-      } else {
-        console.error('충돌 해결 실패');
-      }
-    } catch (error) {
-      console.error('충돌 해결 중 오류:', error);
-    }
+    const eventIdInput = document.createElement('input');
+    eventIdInput.name = 'eventId';
+    eventIdInput.value = eventId;
+    form.appendChild(eventIdInput);
+
+    const resolutionInput = document.createElement('input');
+    resolutionInput.name = 'resolution';
+    resolutionInput.value = resolution;
+    form.appendChild(resolutionInput);
+
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
   };
 
-  // 모든 충돌 일괄 해결 핸들러
-  const handleResolveAllConflicts = async (resolution: 'local' | 'google') => {
-    try {
-      const { GoogleCalendarService } = await import(
-        '../lib/google-calendar-service'
-      );
-      const googleService = new GoogleCalendarService();
+  // 모든 충돌 일괄 해결 핸들러 - Form 제출로 처리
+  const handleResolveAllConflicts = (resolution: 'local' | 'google') => {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.style.display = 'none';
 
-      const success = await googleService.resolveAllConflicts(
-        loaderData.agentId || 'unknown',
-        resolution
-      );
+    const actionInput = document.createElement('input');
+    actionInput.name = 'actionType';
+    actionInput.value = 'resolveAllConflicts';
+    form.appendChild(actionInput);
 
-      if (success) {
-        // 모든 충돌 해결 완료
-        setConflicts([]);
-        setIsConflictModalOpen(false);
-        console.log(`✅ 모든 충돌 일괄 해결 완료 -> ${resolution}`);
-      } else {
-        console.error('일괄 충돌 해결 실패');
-      }
-    } catch (error) {
-      console.error('일괄 충돌 해결 중 오류:', error);
-    }
+    const resolutionInput = document.createElement('input');
+    resolutionInput.name = 'resolution';
+    resolutionInput.value = resolution;
+    form.appendChild(resolutionInput);
+
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
   };
 
   // 체크리스트 토글

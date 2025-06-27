@@ -1,7 +1,7 @@
 import type { LoaderFunctionArgs, ActionFunctionArgs } from 'react-router';
 import { data } from 'react-router';
 import { requireAuth } from '~/lib/auth/helpers';
-import { GoogleCalendarService } from '~/features/calendar/lib/google-calendar-service';
+import { GoogleCalendarService } from '~/features/calendar/lib/google-calendar-service.server';
 
 export async function action({ request }: ActionFunctionArgs) {
   try {

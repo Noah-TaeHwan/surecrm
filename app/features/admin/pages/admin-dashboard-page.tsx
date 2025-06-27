@@ -6,7 +6,6 @@
  */
 
 import { requireAdmin } from '~/lib/auth/middleware.server';
-import { logAdminAction, getAdminStats } from '../lib/utils';
 import { db } from '~/lib/core/db.server';
 import { profiles, invitations, clients } from '~/lib/schema';
 import { count, eq, and, gte, lt } from 'drizzle-orm';
@@ -44,6 +43,7 @@ export async function loader({ request }: Route['LoaderArgs']) {
   const user = (await requireAdmin(request)) as AdminUser;
 
   // 🔍 Admin 대시보드 접근 감사 로깅
+  const { logAdminAction } = await import('../lib/utils.server');
   await logAdminAction(
     user.id,
     'VIEW_ADMIN_DASHBOARD',
@@ -181,7 +181,10 @@ export async function loader({ request }: Route['LoaderArgs']) {
     };
   } catch (error) {
     // 🚨 Admin 대시보드 오류 로깅
-    await logAdminAction(
+    const { logAdminAction: errorLogAdminAction } = await import(
+      '../lib/utils.server'
+    );
+    await errorLogAdminAction(
       user.id,
       'ERROR_ADMIN_DASHBOARD',
       'admin_dashboard',
