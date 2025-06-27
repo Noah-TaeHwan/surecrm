@@ -229,7 +229,10 @@ class BusinessIntelligenceSystem {
       lastKeyTime = currentTime;
 
       // 타이핑 속도 분석 (안전성 검사 추가)
-      if (this.behaviorMetrics?.keystrokes?.length >= 10) {
+      if (
+        this.behaviorMetrics?.keystrokes &&
+        this.behaviorMetrics.keystrokes.length >= 10
+      ) {
         this.analyzeTypingPattern();
       }
     });
@@ -425,6 +428,8 @@ class BusinessIntelligenceSystem {
   }
 
   private analyzeTypingPattern(): void {
+    if (!this.behaviorMetrics?.keystrokes) return;
+
     const recentKeystrokes = this.behaviorMetrics.keystrokes.slice(-20);
     const intervals = recentKeystrokes.map(k => k.interval).filter(i => i > 0);
 
@@ -554,12 +559,12 @@ class BusinessIntelligenceSystem {
   }
 
   private calculateConfidenceLevel(): number {
-    const successfulActions = this.behaviorMetrics.focusEvents.filter(
-      f => !f.abandoned
-    ).length;
-    const consistentScrolling = this.behaviorMetrics.scrollPattern.filter(
-      s => !s.bounced
-    ).length;
+    if (!this.behaviorMetrics) return 0;
+
+    const successfulActions =
+      this.behaviorMetrics.focusEvents?.filter(f => !f.abandoned).length || 0;
+    const consistentScrolling =
+      this.behaviorMetrics.scrollPattern?.filter(s => !s.bounced).length || 0;
 
     return Math.min(10, successfulActions + consistentScrolling);
   }
@@ -576,10 +581,13 @@ class BusinessIntelligenceSystem {
   }
 
   private calculateChurnRisk(): number {
+    if (!this.behaviorMetrics) return 0;
+
     const frustration = this.calculateFrustrationLevel();
-    const bounceRate =
-      this.behaviorMetrics.scrollPattern.filter(s => s.bounced).length /
-      Math.max(1, this.behaviorMetrics.scrollPattern.length);
+    const scrollPatternLength = this.behaviorMetrics.scrollPattern?.length || 0;
+    const bouncedCount =
+      this.behaviorMetrics.scrollPattern?.filter(s => s.bounced).length || 0;
+    const bounceRate = bouncedCount / Math.max(1, scrollPatternLength);
 
     return Math.min(1, frustration * 0.1 + bounceRate);
   }

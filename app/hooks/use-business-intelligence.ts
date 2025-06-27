@@ -97,15 +97,22 @@ export function useBusinessIntelligence(config: Partial<BusinessConfig> = {}) {
       const intelligence = system.getSessionIntelligence();
 
       return {
-        mouseMovements: metrics.mouseMovements.slice(-10),
-        clickHeatmap: metrics.clickHeatmap,
-        scrollPattern: metrics.scrollPattern.slice(-5),
-        keystrokes: metrics.keystrokes.slice(-10),
+        mouseMovements: metrics?.mouseMovements?.slice(-10) || [],
+        clickHeatmap: metrics?.clickHeatmap || [],
+        scrollPattern: metrics?.scrollPattern?.slice(-5) || [],
+        keystrokes: metrics?.keystrokes?.slice(-10) || [],
         userProfile: profile,
         sessionIntelligence: intelligence,
       };
     }
-    return null;
+    return {
+      mouseMovements: [],
+      clickHeatmap: [],
+      scrollPattern: [],
+      keystrokes: [],
+      userProfile: null,
+      sessionIntelligence: null,
+    };
   }, []);
 
   // 사용자 행동 예측

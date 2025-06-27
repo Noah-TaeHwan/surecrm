@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router';
-import { Bell, User, LogOut, Settings, Menu, Eye } from 'lucide-react';
+import { Bell, User, LogOut, Settings, Menu, Eye, Lock } from 'lucide-react';
 import { cn } from '~/lib/utils';
 import { Button } from '~/common/components/ui/button';
 import { Avatar, AvatarFallback } from '~/common/components/ui/avatar';
@@ -15,6 +15,7 @@ import {
 } from '~/common/components/ui/dropdown-menu';
 import { Badge } from '~/common/components/ui/badge';
 import { ScrollArea } from '~/common/components/ui/scroll-area';
+import { useSubscription } from '~/lib/contexts/subscription-context';
 
 interface HeaderProps {
   title?: string;
@@ -48,12 +49,21 @@ export function Header({
   currentUser,
   isLoadingUser = false,
 }: HeaderProps) {
+  const { subscriptionStatus, isLoading: isSubscriptionLoading } =
+    useSubscription();
   const [isLoggingOut, setIsLoggingOut] = React.useState(false);
   const [notifications, setNotifications] = React.useState<BasicNotification[]>(
     []
   );
   const [unreadCount, setUnreadCount] = React.useState(0);
   const [isLoading, setIsLoading] = React.useState(false);
+
+  // 구독 상태 확인 함수
+  const isSubscriptionActive = () => {
+    if (isSubscriptionLoading || !subscriptionStatus) return false;
+    // needsPayment가 false이거나 isTrialActive가 true이면 활성 상태
+    return !subscriptionStatus.needsPayment || subscriptionStatus.isTrialActive;
+  };
 
   // 알림 데이터를 직접 fetch하는 함수
   const fetchNotifications = async () => {
@@ -246,131 +256,150 @@ export function Header({
 
       {/* 헤더 우측 요소들 */}
       <div className="flex items-center space-x-2 md:space-x-4">
-        {/* 알림 아이콘 */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="h-4 w-4" />
-              {unreadCount > 0 && (
-                <div className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-primary-foreground text-xs rounded-full flex items-center justify-center">
-                  {unreadCount > 9 ? '9+' : unreadCount}
-                </div>
-              )}
-              <span className="sr-only">알림</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-80" align="end">
-            <DropdownMenuLabel className="flex items-center justify-between py-3">
-              <span className="font-medium">알림</span>
-              {unreadCount > 0 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-auto p-1 text-xs text-muted-foreground hover:text-foreground"
-                  onClick={handleMarkAllAsRead}
-                >
-                  모두 읽음
-                </Button>
-              )}
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
+        {/* 알림 아이콘 - 구독 상태에 따라 제한 */}
+        {isSubscriptionActive() ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="relative">
+                <Bell className="h-4 w-4" />
+                {unreadCount > 0 && (
+                  <div className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-primary-foreground text-xs rounded-full flex items-center justify-center">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </div>
+                )}
+                <span className="sr-only">알림</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-80" align="end">
+              <DropdownMenuLabel className="flex items-center justify-between py-3">
+                <span className="font-medium">알림</span>
+                {unreadCount > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-auto p-1 text-xs text-muted-foreground hover:text-foreground"
+                    onClick={handleMarkAllAsRead}
+                  >
+                    모두 읽음
+                  </Button>
+                )}
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
 
-            {isLoading ? (
-              <div className="p-8 text-center">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
-                <p className="text-sm text-muted-foreground mt-2">로딩 중...</p>
-              </div>
-            ) : notifications.length > 0 ? (
-              <div className="max-h-80 overflow-y-auto">
-                {/* 🔧 수정: 읽지 않은 알림을 먼저 표시하고, 읽은 알림과 구분 */}
-                {notifications
-                  .sort((a, b) => {
-                    // 읽지 않은 알림을 먼저 정렬
-                    if (!a.readAt && b.readAt) return -1;
-                    if (a.readAt && !b.readAt) return 1;
-                    // 같은 읽음 상태라면 최신순
-                    return (
-                      new Date(b.createdAt).getTime() -
-                      new Date(a.createdAt).getTime()
-                    );
-                  })
-                  .map(notification => (
-                    <DropdownMenuItem
-                      key={notification.id}
-                      className={cn(
-                        'flex items-start p-4 cursor-pointer border-b border-border/50 last:border-b-0 transition-colors',
-                        !notification.readAt
-                          ? 'bg-primary/10 border-l-4 border-l-primary hover:bg-primary/15'
-                          : 'hover:bg-muted/50 opacity-75'
-                      )}
-                      onClick={() => handleMarkAsRead(notification.id)}
-                    >
-                      <div className="flex w-full gap-3">
-                        <div className="text-lg">
-                          {getIcon(notification.type)}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between mb-1">
+              {isLoading ? (
+                <div className="p-8 text-center">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    로딩 중...
+                  </p>
+                </div>
+              ) : notifications.length > 0 ? (
+                <div className="max-h-80 overflow-y-auto">
+                  {/* 🔧 수정: 읽지 않은 알림을 먼저 표시하고, 읽은 알림과 구분 */}
+                  {notifications
+                    .sort((a, b) => {
+                      // 읽지 않은 알림을 먼저 정렬
+                      if (!a.readAt && b.readAt) return -1;
+                      if (a.readAt && !b.readAt) return 1;
+                      // 같은 읽음 상태라면 최신순
+                      return (
+                        new Date(b.createdAt).getTime() -
+                        new Date(a.createdAt).getTime()
+                      );
+                    })
+                    .map(notification => (
+                      <DropdownMenuItem
+                        key={notification.id}
+                        className={cn(
+                          'flex items-start p-4 cursor-pointer border-b border-border/50 last:border-b-0 transition-colors',
+                          !notification.readAt
+                            ? 'bg-primary/10 border-l-4 border-l-primary hover:bg-primary/15'
+                            : 'hover:bg-muted/50 opacity-75'
+                        )}
+                        onClick={() => handleMarkAsRead(notification.id)}
+                      >
+                        <div className="flex w-full gap-3">
+                          <div className="text-lg">
+                            {getIcon(notification.type)}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between mb-1">
+                              <p
+                                className={cn(
+                                  'text-sm leading-tight',
+                                  !notification.readAt
+                                    ? 'font-semibold text-foreground'
+                                    : 'font-medium text-muted-foreground'
+                                )}
+                              >
+                                {notification.title}
+                              </p>
+                              {!notification.readAt && (
+                                <div className="w-2 h-2 bg-primary rounded-full mt-1 ml-2 flex-shrink-0 animate-pulse" />
+                              )}
+                            </div>
                             <p
                               className={cn(
-                                'text-sm leading-tight',
+                                'text-xs leading-relaxed mb-2',
                                 !notification.readAt
-                                  ? 'font-semibold text-foreground'
-                                  : 'font-medium text-muted-foreground'
+                                  ? 'text-muted-foreground'
+                                  : 'text-muted-foreground/70'
                               )}
                             >
-                              {notification.title}
+                              {notification.message}
                             </p>
-                            {!notification.readAt && (
-                              <div className="w-2 h-2 bg-primary rounded-full mt-1 ml-2 flex-shrink-0 animate-pulse" />
-                            )}
-                          </div>
-                          <p
-                            className={cn(
-                              'text-xs leading-relaxed mb-2',
-                              !notification.readAt
-                                ? 'text-muted-foreground'
-                                : 'text-muted-foreground/70'
-                            )}
-                          >
-                            {notification.message}
-                          </p>
-                          <div className="flex items-center justify-between">
-                            <p className="text-xs text-muted-foreground">
-                              {formatTime(notification.createdAt)}
-                            </p>
-                            {!notification.readAt && (
-                              <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-medium">
-                                읽지 않음
-                              </span>
-                            )}
+                            <div className="flex items-center justify-between">
+                              <p className="text-xs text-muted-foreground">
+                                {formatTime(notification.createdAt)}
+                              </p>
+                              {!notification.readAt && (
+                                <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-medium">
+                                  읽지 않음
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </DropdownMenuItem>
-                  ))}
-              </div>
-            ) : (
-              <div className="p-8 text-center">
-                <Bell className="h-12 w-12 mx-auto mb-4 text-muted-foreground/30" />
-                <p className="text-sm font-medium text-foreground mb-1">
-                  읽지 않은 알림이 없습니다
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  새로운 알림이 도착하면 여기에 표시됩니다
-                </p>
-              </div>
-            )}
+                      </DropdownMenuItem>
+                    ))}
+                </div>
+              ) : (
+                <div className="p-8 text-center">
+                  <Bell className="h-12 w-12 mx-auto mb-4 text-muted-foreground/30" />
+                  <p className="text-sm font-medium text-foreground mb-1">
+                    읽지 않은 알림이 없습니다
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    새로운 알림이 도착하면 여기에 표시됩니다
+                  </p>
+                </div>
+              )}
 
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link to="/notifications" className="w-full justify-center py-3">
-                <Eye className="mr-2 h-4 w-4" />
-                모든 알림 보기
-              </Link>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link
+                  to="/notifications"
+                  className="w-full justify-center py-3"
+                >
+                  <Eye className="mr-2 h-4 w-4" />
+                  모든 알림 보기
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="relative opacity-50 cursor-not-allowed"
+            disabled
+            title="구독 만료 - 알림 기능을 사용하려면 구독을 갱신하세요"
+          >
+            <Bell className="h-4 w-4" />
+            <Lock className="h-2 w-2 absolute -bottom-0.5 -right-0.5 text-muted-foreground" />
+            <span className="sr-only">알림 (구독 만료)</span>
+          </Button>
+        )}
 
         {/* 사용자 프로필 드롭다운 */}
         <DropdownMenu>
@@ -416,17 +445,35 @@ export function Header({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem asChild>
-                <Link to="/settings" className="cursor-pointer">
-                  <User className="mr-2 h-4 w-4" />
-                  <div className="flex flex-col">
-                    <span>내 프로필</span>
-                    <span className="text-xs text-muted-foreground">
-                      개인정보 및 계정 관리
-                    </span>
+              {isSubscriptionActive() ? (
+                <DropdownMenuItem asChild>
+                  <Link to="/settings" className="cursor-pointer">
+                    <User className="mr-2 h-4 w-4" />
+                    <div className="flex flex-col">
+                      <span>내 프로필</span>
+                      <span className="text-xs text-muted-foreground">
+                        개인정보 및 계정 관리
+                      </span>
+                    </div>
+                  </Link>
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem
+                  className="cursor-not-allowed opacity-50"
+                  disabled
+                >
+                  <div className="flex items-center">
+                    <User className="mr-2 h-4 w-4" />
+                    <div className="flex flex-col flex-1">
+                      <span>내 프로필</span>
+                      <span className="text-xs text-muted-foreground">
+                        구독 만료 - 설정 접근 불가
+                      </span>
+                    </div>
+                    <Lock className="h-3 w-3 ml-2 text-muted-foreground" />
                   </div>
-                </Link>
-              </DropdownMenuItem>
+                </DropdownMenuItem>
+              )}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem

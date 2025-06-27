@@ -11,6 +11,7 @@ import { BottomTabNavigation } from '~/common/components/navigation/bottom-tab-n
 import { useViewport } from '~/common/hooks/useViewport';
 import { useFullScreenMode } from '~/common/hooks/use-viewport-height';
 import { BottomNavVisualizer } from '~/common/components/debug/bottom-nav-visualizer';
+import { useSubscription } from '~/lib/contexts/subscription-context';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -47,12 +48,9 @@ export function MainLayout({
   } | null>(null);
   const [isLoadingUser, setIsLoadingUser] = useState(true);
 
-  // 🎯 구독 상태 관리
-  const [subscriptionStatus, setSubscriptionStatus] = useState<{
-    needsPayment: boolean;
-    isTrialActive: boolean;
-    daysRemaining: number;
-  } | null>(initialSubscriptionStatus || null);
+  // 🎯 구독 상태 관리 - Context 사용
+  const { subscriptionStatus, setSubscriptionStatus, fetchSubscriptionStatus } =
+    useSubscription();
 
   // 🎯 초기 렌더링 완료 처리 - Hydration 안전하게 처리
   const [isInitialRender, setIsInitialRender] = useState(true);
@@ -143,83 +141,27 @@ export function MainLayout({
 
   // 🎯 구독 상태 확인 (currentUser가 설정된 후)
   useEffect(() => {
-    const fetchSubscriptionStatus = async () => {
-      console.log('🔍 MainLayout: 구독 상태 확인 시작', { currentUser });
+    // 초기 구독 상태가 있으면 Context에 설정
+    if (initialSubscriptionStatus && subscriptionStatus === null) {
+      console.log(
+        '⏭️ MainLayout: 초기 구독 상태 설정',
+        initialSubscriptionStatus
+      );
+      setSubscriptionStatus(initialSubscriptionStatus);
+      return;
+    }
 
-      // 초기 구독 상태가 있으면 API 호출하지 않음
-      if (initialSubscriptionStatus) {
-        console.log('⏭️ MainLayout: 초기 구독 상태 있음, API 호출 스킵');
-        return;
-      }
-
-      if (currentUser?.id && currentUser.id !== 'unknown') {
-        try {
-          const subscriptionResponse = await fetch(
-            '/api/auth/subscription-status',
-            {
-              credentials: 'include',
-              headers: {
-                Accept: 'application/json',
-              },
-            }
-          );
-
-          console.log('📡 MainLayout: 구독 상태 API 응답', {
-            ok: subscriptionResponse.ok,
-            status: subscriptionResponse.status,
-          });
-
-          if (subscriptionResponse.ok) {
-            const contentType =
-              subscriptionResponse.headers.get('content-type');
-            if (contentType && contentType.includes('application/json')) {
-              const statusData = await subscriptionResponse.json();
-              console.log('✅ MainLayout: 구독 상태 데이터', statusData);
-
-              setSubscriptionStatus({
-                needsPayment: statusData.needsPayment || false,
-                isTrialActive: statusData.isTrialActive || false,
-                daysRemaining: statusData.daysRemaining || 0,
-              });
-            } else {
-              console.error(
-                '❌ MainLayout: 예상치 못한 응답 형식 (HTML 반환됨)'
-              );
-              // API가 실패한 경우에도 기본값 설정 (구독 필요)
-              setSubscriptionStatus({
-                needsPayment: true,
-                isTrialActive: false,
-                daysRemaining: 0,
-              });
-            }
-          } else {
-            // API 응답이 실패한 경우 기본값 설정
-            console.error(
-              '❌ MainLayout: API 응답 실패',
-              subscriptionResponse.status
-            );
-            setSubscriptionStatus({
-              needsPayment: true,
-              isTrialActive: false,
-              daysRemaining: 0,
-            });
-          }
-        } catch (error) {
-          console.warn('구독 상태 확인 실패:', error);
-          // 에러 발생 시에도 기본값 설정
-          setSubscriptionStatus({
-            needsPayment: true,
-            isTrialActive: false,
-            daysRemaining: 0,
-          });
-        }
-      } else {
-        console.log('⏭️ MainLayout: 구독 상태 확인 스킵 (사용자 정보 없음)');
-      }
-    };
-
-    fetchSubscriptionStatus();
-  }, [currentUser, initialSubscriptionStatus]);
+    // Context에서 구독 상태 확인
+    if (currentUser?.id && currentUser.id !== 'unknown') {
+      fetchSubscriptionStatus(currentUser);
+    }
+  }, [
+    currentUser,
+    initialSubscriptionStatus,
+    subscriptionStatus,
+    setSubscriptionStatus,
+    fetchSubscriptionStatus,
+  ]);
 
   // 모바일 메뉴 닫기 핸들러 개선
   const closeMobileMenu = React.useCallback(() => {
@@ -257,22 +199,24 @@ export function MainLayout({
   }, [isMobileMenuOpen, closeMobileMenu]);
 
   // 🚫 체험 기간 종료 시 사이드바 숨김
-  // 구독 상태를 아직 확인하지 못한 경우에는 일단 표시 (로딩 중)
-  // Hydration 전에는 항상 표시하여 서버/클라이언트 불일치 방지
+  // Context에서 관리되는 구독 상태를 사용하여 페이지 이동 시에도 깜빡이지 않음
   const shouldShowSidebar = React.useMemo(() => {
     // Hydration 전에는 항상 표시
     if (!isHydrated) return true;
 
-    // 초기 구독 상태가 있는 경우 (billing 페이지 등)
+    // 초기 구독 상태가 있는 경우 (billing 페이지 등) - 우선 순위 높음
     if (initialSubscriptionStatus) {
       return !initialSubscriptionStatus.needsPayment;
     }
 
-    // 구독 상태를 아직 확인하지 못한 경우 숨김 (안전한 기본값)
-    if (subscriptionStatus === null) return false;
+    // Context에서 관리되는 구독 상태 확인
+    if (subscriptionStatus !== null) {
+      return !subscriptionStatus.needsPayment;
+    }
 
-    // needsPayment가 true면 숨김, false면 표시
-    return !subscriptionStatus.needsPayment;
+    // 구독 상태가 아직 로드되지 않은 경우 표시 (기본값 - 깜빡임 방지)
+    // 한 번 로드된 구독 상태는 Context에서 유지되므로 페이지 이동 시에도 유지됨
+    return true;
   }, [isHydrated, subscriptionStatus, initialSubscriptionStatus]);
 
   return (
