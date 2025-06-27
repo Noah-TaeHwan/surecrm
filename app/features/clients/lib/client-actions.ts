@@ -824,21 +824,20 @@ export async function updateClientNotesAction(
   const agentId = user.id;
 
   try {
-    const notes = formData.get('notes')?.toString();
+    const notes = formData.get('notes')?.toString() || '';
 
-    // 🎯 Supabase Admin 클라이언트를 사용하여 메모만 업데이트
+    // 🎯 Supabase Admin 클라이언트를 사용하여 직접 업데이트
     const { createAdminClient } = await import('~/lib/core/supabase');
     const supabase = createAdminClient();
 
     const { error: updateError } = await supabase
       .from('app_client_profiles')
       .update({
-        notes: notes || null,
+        notes: notes,
         updated_at: new Date().toISOString(),
       })
       .eq('id', clientId)
-      .eq('agent_id', agentId)
-      .eq('is_active', true);
+      .eq('agent_id', agentId);
 
     if (updateError) {
       throw new Error(updateError.message);
@@ -846,17 +845,108 @@ export async function updateClientNotesAction(
 
     return {
       success: true,
-      message: '메모가 성공적으로 저장되었습니다.',
+      message: '메모가 성공적으로 업데이트되었습니다.',
+      timestamp: new Date().toISOString(),
     };
   } catch (error) {
-    console.error('메모 저장 실패:', error);
-
+    console.error('❌ 메모 업데이트 실패:', error);
     return {
       success: false,
-      message:
-        error instanceof Error
-          ? error.message
-          : '메모 저장 중 오류가 발생했습니다.',
+      message: `메모 업데이트에 실패했습니다: ${
+        error instanceof Error ? error.message : '알 수 없는 오류'
+      }`,
+      error: error instanceof Error ? error.message : '알 수 없는 오류',
     };
+  }
+}
+
+// ✅ 통합 action 핸들러 - intent에 따라 적절한 함수 호출
+export async function handleClientDetailActions({
+  intent,
+  formData,
+  clientId,
+  agentId,
+  request,
+}: {
+  intent: string;
+  formData: FormData;
+  clientId: string;
+  agentId: string;
+  request: Request;
+}) {
+  console.log('🔍 handleClientDetailActions 시작:', {
+    intent,
+    clientId,
+    agentId,
+  });
+
+  switch (intent) {
+    case 'update-client':
+      return await updateClientAction(request, clientId, formData);
+
+    case 'delete-client':
+      return await deleteClientAction(request, clientId);
+
+    case 'update-stage':
+      return await updateClientStageAction(request, clientId, formData);
+
+    case 'update-medical-history':
+      return await updateMedicalHistoryAction(request, clientId, formData);
+
+    case 'update-checkup-purposes':
+      return await updateCheckupPurposesAction(request, clientId, formData);
+
+    case 'update-interest-categories':
+      return await updateInterestCategoriesAction(request, clientId, formData);
+
+    case 'create-companion':
+      return await createConsultationCompanionAction(
+        request,
+        clientId,
+        formData
+      );
+
+    case 'update-companion':
+      return await updateConsultationCompanionAction(
+        request,
+        clientId,
+        formData
+      );
+
+    case 'delete-companion':
+      const companionId = formData.get('companionId')?.toString();
+      if (!companionId) {
+        return {
+          success: false,
+          error: '상담동반자 ID가 필요합니다.',
+        };
+      }
+      return await deleteConsultationCompanionAction(request, companionId);
+
+    case 'create-note':
+      return await createConsultationNoteAction(request, clientId, formData);
+
+    case 'update-note':
+      return await updateConsultationNoteAction(request, clientId, formData);
+
+    case 'delete-note':
+      const noteId = formData.get('noteId')?.toString();
+      if (!noteId) {
+        return {
+          success: false,
+          error: '상담내용 ID가 필요합니다.',
+        };
+      }
+      return await deleteConsultationNoteAction(request, noteId);
+
+    case 'update-notes':
+      return await updateClientNotesAction(request, clientId, formData);
+
+    default:
+      console.warn('⚠️ 알 수 없는 intent:', intent);
+      return {
+        success: false,
+        error: `알 수 없는 작업: ${intent}`,
+      };
   }
 }

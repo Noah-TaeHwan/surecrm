@@ -31,8 +31,10 @@ const clientEditSchema = z.object({
 
 type ClientEditFormData = z.infer<typeof clientEditSchema>;
 
-export async function loader({ request, params }: any) {
-  const { id: clientId } = params;
+import type { Route as ClientEditRoute } from '../../../routes/+types/clients.$clientId.edit';
+
+export async function loader({ request, params }: ClientEditRoute.LoaderArgs) {
+  const { clientId } = params;
 
   console.log('🔍 고객 편집 페이지 loader 시작:', { clientId });
 
@@ -90,8 +92,8 @@ export async function loader({ request, params }: any) {
   }
 }
 
-export async function action({ request, params }: any) {
-  const { id: clientId } = params;
+export async function action({ request, params }: ClientEditRoute.ActionArgs) {
+  const { clientId } = params;
 
   if (!clientId) {
     throw new Response('고객 ID가 필요합니다.', { status: 400 });

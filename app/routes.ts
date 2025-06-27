@@ -33,8 +33,8 @@ export default [
 
   // 👥 고객 관리
   route('clients', 'features/clients/pages/clients-page.tsx'),
-  route('clients/:id', 'features/clients/pages/client-detail-page.tsx'),
-  route('clients/edit/:id?', 'features/clients/pages/client-edit-page.tsx'),
+  route('clients/:clientId', 'routes/clients.$clientId.tsx'),
+  route('clients/:clientId/edit', 'routes/clients.$clientId.edit.tsx'),
 
   // 📅 일정 관리
   route('calendar', 'routes/calendar.tsx'),

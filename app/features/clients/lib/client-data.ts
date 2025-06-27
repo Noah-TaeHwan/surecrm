@@ -362,18 +362,32 @@ export async function getClientOverview(
   userAgent?: string
 ) {
   try {
+    console.log('🔍 getClientOverview 함수 시작:', { clientId, agentId });
+
     // 🔒 접근 권한 확인
+    console.log('🔍 클라이언트 접근 권한 확인 중...');
     const clientAccess = await db
       .select({ agentId: clients.agentId })
       .from(clients)
       .where(eq(clients.id, clientId))
       .limit(1);
 
+    console.log('🔍 클라이언트 접근 권한 결과:', {
+      foundClients: clientAccess.length,
+      clientId,
+    });
+
     if (clientAccess.length === 0) {
+      console.error('❌ 고객을 찾을 수 없습니다:', { clientId, agentId });
       throw new Error('고객을 찾을 수 없습니다.');
     }
 
     if (clientAccess[0].agentId !== agentId) {
+      console.error('❌ 무단 접근 시도:', {
+        clientId,
+        requestedAgentId: agentId,
+        actualAgentId: clientAccess[0].agentId,
+      });
       // 🔒 무단 접근 시도 로그
       await logDataAccess(
         clientId,
@@ -387,14 +401,23 @@ export async function getClientOverview(
       throw new Error('해당 고객 정보에 접근할 권한이 없습니다.');
     }
 
+    console.log('✅ 접근 권한 확인 완료');
+
     // 🎯 고객 기본 정보 조회 (단순화로 안전성 확보)
+    console.log('🔍 고객 기본 정보 조회 중...');
     const [client] = await db
       .select()
       .from(clients)
       .where(and(eq(clients.id, clientId), eq(clients.agentId, agentId)))
       .limit(1);
 
+    console.log('🔍 고객 기본 정보 조회 결과:', {
+      found: !!client,
+      clientName: client?.fullName || 'N/A',
+    });
+
     if (!client) {
+      console.error('❌ 고객 정보를 찾을 수 없습니다:', { clientId, agentId });
       throw new Error('고객 정보를 찾을 수 없습니다.');
     }
 
@@ -402,6 +425,9 @@ export async function getClientOverview(
     let currentStage = null;
     if (client.currentStageId) {
       try {
+        console.log('🔍 단계 정보 조회 중...', {
+          stageId: client.currentStageId,
+        });
         const [stage] = await db
           .select({
             id: pipelineStages.id,
@@ -414,6 +440,10 @@ export async function getClientOverview(
           .limit(1);
 
         currentStage = stage || null;
+        console.log('🔍 단계 정보 조회 결과:', {
+          found: !!stage,
+          stageName: stage?.name || 'N/A',
+        });
       } catch (error) {
         console.error('❌ 단계 정보 조회 오류:', error);
         currentStage = null;
@@ -425,6 +455,8 @@ export async function getClientOverview(
       ...client,
       currentStage,
     };
+
+    console.log('🔍 관련 데이터 병렬 조회 시작...');
 
     // 관련 데이터 병렬 조회
     const [
@@ -455,28 +487,44 @@ export async function getClientOverview(
           appClientTags,
           eq(appClientTagAssignments.tagId, appClientTags.id)
         )
-        .where(eq(appClientTagAssignments.clientId, clientId)),
+        .where(eq(appClientTagAssignments.clientId, clientId))
+        .catch(error => {
+          console.error('❌ 태그 조회 오류:', error);
+          return [];
+        }),
 
       // 선호도 조회
       db
         .select()
         .from(appClientPreferences)
         .where(eq(appClientPreferences.clientId, clientId))
-        .limit(1),
+        .limit(1)
+        .catch(error => {
+          console.error('❌ 선호도 조회 오류:', error);
+          return [];
+        }),
 
       // 분석 데이터 조회
       db
         .select()
         .from(appClientAnalytics)
         .where(eq(appClientAnalytics.clientId, clientId))
-        .limit(1),
+        .limit(1)
+        .catch(error => {
+          console.error('❌ 분석 데이터 조회 오류:', error);
+          return [];
+        }),
 
       // 가족 구성원 조회 (개인정보 보호 레벨 확인)
       db
         .select()
         .from(appClientFamilyMembers)
         .where(eq(appClientFamilyMembers.clientId, clientId))
-        .orderBy(desc(appClientFamilyMembers.createdAt)),
+        .orderBy(desc(appClientFamilyMembers.createdAt))
+        .catch(error => {
+          console.error('❌ 가족 구성원 조회 오류:', error);
+          return [];
+        }),
 
       // 최근 연락 이력 조회
       db
@@ -484,14 +532,22 @@ export async function getClientOverview(
         .from(appClientContactHistory)
         .where(eq(appClientContactHistory.clientId, clientId))
         .orderBy(desc(appClientContactHistory.createdAt))
-        .limit(5),
+        .limit(5)
+        .catch(error => {
+          console.error('❌ 연락 이력 조회 오류:', error);
+          return [];
+        }),
 
       // 마일스톤 조회
       db
         .select()
         .from(appClientMilestones)
         .where(eq(appClientMilestones.clientId, clientId))
-        .orderBy(desc(appClientMilestones.achievedAt)),
+        .orderBy(desc(appClientMilestones.achievedAt))
+        .catch(error => {
+          console.error('❌ 마일스톤 조회 오류:', error);
+          return [];
+        }),
 
       // 단계 변경 이력 조회
       db
@@ -499,169 +555,104 @@ export async function getClientOverview(
           id: appClientStageHistory.id,
           fromStageId: appClientStageHistory.fromStageId,
           toStageId: appClientStageHistory.toStageId,
-          reason: appClientStageHistory.reason,
-          notes: appClientStageHistory.notes,
           changedAt: appClientStageHistory.changedAt,
-          fromStage: {
-            name: sql<string>`from_stage.name`.as('from_stage_name'),
-          },
-          toStage: {
-            name: sql<string>`to_stage.name`.as('to_stage_name'),
-          },
+          reason: appClientStageHistory.reason,
         })
         .from(appClientStageHistory)
-        .leftJoin(
-          sql`${pipelineStages} as from_stage`,
-          eq(appClientStageHistory.fromStageId, sql`from_stage.id`)
-        )
-        .leftJoin(
-          sql`${pipelineStages} as to_stage`,
-          eq(appClientStageHistory.toStageId, sql`to_stage.id`)
-        )
         .where(eq(appClientStageHistory.clientId, clientId))
-        .orderBy(desc(appClientStageHistory.changedAt)),
+        .orderBy(desc(appClientStageHistory.changedAt))
+        .limit(10)
+        .catch(error => {
+          console.error('❌ 단계 변경 이력 조회 오류:', error);
+          return [];
+        }),
 
-      // 🆕 병력사항 조회
+      // 🆕 의료진단기록 조회
       db
         .select()
         .from(appClientMedicalHistory)
         .where(eq(appClientMedicalHistory.clientId, clientId))
-        .limit(1),
+        .limit(1)
+        .catch(error => {
+          console.error('❌ 의료진단기록 조회 오류:', error);
+          return [];
+        }),
 
       // 🆕 점검목적 조회
       db
         .select()
         .from(appClientCheckupPurposes)
         .where(eq(appClientCheckupPurposes.clientId, clientId))
-        .limit(1),
+        .limit(1)
+        .catch(error => {
+          console.error('❌ 점검목적 조회 오류:', error);
+          return [];
+        }),
 
       // 🆕 관심사항 조회
       db
         .select()
         .from(appClientInterestCategories)
         .where(eq(appClientInterestCategories.clientId, clientId))
-        .limit(1),
+        .limit(1)
+        .catch(error => {
+          console.error('❌ 관심사항 조회 오류:', error);
+          return [];
+        }),
 
       // 🆕 상담동반자 조회
       db
         .select()
         .from(appClientConsultationCompanions)
         .where(eq(appClientConsultationCompanions.clientId, clientId))
-        .orderBy(
-          desc(appClientConsultationCompanions.isPrimary),
-          asc(appClientConsultationCompanions.createdAt)
-        ),
+        .orderBy(desc(appClientConsultationCompanions.createdAt))
+        .catch(error => {
+          console.error('❌ 상담동반자 조회 오류:', error);
+          return [];
+        }),
 
-      // 🆕 상담내용 조회 (최근 10개)
+      // 🆕 상담내용 조회
       db
         .select()
         .from(appClientConsultationNotes)
         .where(eq(appClientConsultationNotes.clientId, clientId))
-        .orderBy(
-          desc(appClientConsultationNotes.consultationDate),
-          desc(appClientConsultationNotes.createdAt)
-        )
-        .limit(10),
+        .orderBy(desc(appClientConsultationNotes.createdAt))
+        .limit(50)
+        .catch(error => {
+          console.error('❌ 상담내용 조회 오류:', error);
+          return [];
+        }),
     ]);
+
+    console.log('✅ 관련 데이터 조회 완료:', {
+      tagsCount: tags.length,
+      medicalHistoryExists: medicalHistory.length > 0,
+      checkupPurposesExists: checkupPurposes.length > 0,
+      interestCategoriesExists: interestCategories.length > 0,
+      companionsCount: consultationCompanions.length,
+      notesCount: consultationNotes.length,
+    });
 
     // 🔒 데이터 접근 로그 기록
-    await logDataAccess(
-      clientId,
-      agentId,
-      'view',
-      [
-        'client_overview',
-        'tags',
-        'preferences',
-        'analytics',
-        'family',
-        'contacts',
-        'milestones',
-      ],
-      ipAddress,
-      userAgent,
-      '고객 상세 정보 조회'
-    );
+    if (ipAddress && userAgent) {
+      await logDataAccess(
+        clientId,
+        agentId,
+        'view',
+        ['client_overview'],
+        ipAddress,
+        userAgent,
+        '고객 상세 정보 조회'
+      );
+    }
 
-    // 🔒 개인정보 보호 레벨에 따른 데이터 필터링
-    const accessLevel: ClientPrivacyLevel =
-      preferences[0]?.privacyLevel || 'private';
-
-    // 🎯 clientDetails(extendedDetails) 조회 추가
-    const [clientExtendedDetails] = await db
-      .select()
-      .from(clientDetails)
-      .where(eq(clientDetails.clientId, clientId))
-      .limit(1);
-
-    // 🔗 소개 관계 정보 조회 추가
-    const [referredByInfo, referredClientsInfo] = await Promise.all([
-      // 이 고객을 소개한 사람 조회
-      client.referredById
-        ? db
-            .select({
-              id: clients.id,
-              name: clients.fullName,
-            })
-            .from(clients)
-            .where(
-              and(
-                eq(clients.id, client.referredById),
-                eq(clients.agentId, agentId),
-                eq(clients.isActive, true)
-              )
-            )
-            .limit(1)
-        : Promise.resolve([]),
-
-      // 이 고객이 소개한 사람들 조회
-      db
-        .select({
-          id: clients.id,
-          name: clients.fullName,
-          createdAt: clients.createdAt,
-        })
-        .from(clients)
-        .where(
-          and(
-            eq(clients.referredById, clientId),
-            eq(clients.agentId, agentId),
-            eq(clients.isActive, true)
-          )
-        )
-        .orderBy(desc(clients.createdAt)),
-    ]);
-
-    // 🎯 client 객체에 extendedDetails와 소개 정보 추가
-    const finalClient = {
-      ...clientWithCurrentStage,
-      extendedDetails: clientExtendedDetails || null,
-      referredBy: referredByInfo[0] || null,
-      referredClients: referredClientsInfo || [],
-      referralCount: referredClientsInfo.length,
-    };
-
-    return {
-      client: finalClient,
-      tags: tags.filter(tag => tag.id), // null 제거
+    const result = {
+      client: clientWithCurrentStage,
+      tags: tags.filter(tag => tag.id), // null 값 필터링
       preferences: preferences[0] || null,
       analytics: analytics[0] || null,
-      familyMembers: familyMembers.filter(member => {
-        // 개인정보 보호 레벨에 따른 접근 제한
-        if (member.privacyLevel === 'confidential') {
-          return (
-            member.consentDate &&
-            new Date(member.consentDate) <= new Date() &&
-            (!member.consentExpiry ||
-              new Date(member.consentExpiry) > new Date())
-          );
-        }
-        return true;
-      }),
-      recentContacts: recentContacts.filter(contact => {
-        // 기밀 연락 이력 필터링
-        return !contact.isConfidential || contact.agentId === agentId;
-      }),
+      familyMembers,
+      recentContacts,
       milestones,
       stageHistory,
       // 🆕 고객 관리 카드 데이터
@@ -670,30 +661,22 @@ export async function getClientOverview(
       interestCategories: interestCategories[0] || null,
       consultationCompanions,
       consultationNotes,
-      // 🔒 보안 정보
-      accessLevel,
-      dataConsents: {
-        marketing: preferences[0]?.marketingConsent || false,
-        dataProcessing: preferences[0]?.dataProcessingConsent || true,
-        thirdPartyShare: preferences[0]?.thirdPartyShareConsent || false,
-      },
     };
-  } catch (error: any) {
-    console.error('고객 상세 정보 조회 오류:', error);
 
-    // 🔒 에러 로그 기록
-    if (clientId && agentId) {
-      await logDataAccess(
-        clientId,
-        agentId,
-        'view',
-        ['error'],
-        ipAddress,
-        userAgent,
-        `오류 발생: ${error.message}`
-      );
-    }
+    console.log('✅ getClientOverview 완료:', {
+      clientId,
+      clientName: client?.fullName || 'N/A',
+      hasData: !!result.client,
+    });
 
+    return result;
+  } catch (error) {
+    console.error('❌ getClientOverview 오류:', {
+      clientId,
+      agentId,
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     throw error;
   }
 }
