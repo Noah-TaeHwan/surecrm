@@ -149,6 +149,9 @@ export default defineConfig(config => {
       sourcemap: mode === 'production' ? 'hidden' : true,
       // Chunk 크기 경고 제한 증가
       chunkSizeWarningLimit: 1000,
+      // React Router v7을 위한 최적화된 빌드 설정
+      target: 'esnext',
+      minify: 'esbuild',
       rollupOptions: {
         external: [
           'pg-native',
@@ -181,32 +184,12 @@ export default defineConfig(config => {
           'google-p12-pem',
         ],
         output: {
-          // 최소한의 안전한 청크 분할
-          manualChunks: id => {
-            if (id.includes('node_modules')) {
-              // React 관련은 함께 유지
-              if (id.includes('react') || id.includes('react-dom')) {
-                return 'react-vendor';
-              }
-
-              // 큰 UI 라이브러리들만 분리
-              if (id.includes('@radix-ui') || id.includes('framer-motion')) {
-                return 'ui-vendor';
-              }
-
-              // 유틸리티들
-              if (
-                id.includes('date-fns') ||
-                id.includes('clsx') ||
-                id.includes('tailwind-merge')
-              ) {
-                return 'utils-vendor';
-              }
-
-              // 나머지는 기본 vendor
-              return 'vendor';
-            }
-          },
+          // ES modules 호환성 강화
+          format: 'es',
+          entryFileNames: 'assets/[name]-[hash].js',
+          chunkFileNames: 'assets/[name]-[hash].js',
+          assetFileNames: 'assets/[name]-[hash].[ext]',
+          // React Router v7은 자체 코드 분할을 사용
           globals: {
             buffer: 'Buffer',
             net: '{}',
