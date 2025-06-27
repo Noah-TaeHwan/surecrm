@@ -181,70 +181,26 @@ export default defineConfig(config => {
           'google-p12-pem',
         ],
         output: {
-          // 수동 청크 분할로 번들 크기 최적화 (더 세밀한 분리)
+          // 최소한의 안전한 청크 분할
           manualChunks: id => {
-            // node_modules의 패키지들을 더 세밀하게 분리
             if (id.includes('node_modules')) {
-              // React 관련 라이브러리들
-              if (
-                id.includes('react') ||
-                id.includes('react-dom') ||
-                id.includes('react-router')
-              ) {
+              // React 관련은 함께 유지
+              if (id.includes('react') || id.includes('react-dom')) {
                 return 'react-vendor';
               }
 
-              // Radix UI 컴포넌트들
-              if (id.includes('@radix-ui')) return 'radix-vendor';
-
-              // 애니메이션 라이브러리
-              if (id.includes('framer-motion')) return 'animation-vendor';
-
-              // 차트 라이브러리
-              if (id.includes('recharts') || id.includes('d3'))
-                return 'charts-vendor';
-
-              // 아이콘 라이브러리
-              if (
-                id.includes('lucide-react') ||
-                id.includes('@radix-ui/react-icons')
-              ) {
-                return 'icons-vendor';
+              // 큰 UI 라이브러리들만 분리
+              if (id.includes('@radix-ui') || id.includes('framer-motion')) {
+                return 'ui-vendor';
               }
 
-              // 유틸리티 라이브러리들
+              // 유틸리티들
               if (
                 id.includes('date-fns') ||
                 id.includes('clsx') ||
-                id.includes('tailwind-merge') ||
-                id.includes('class-variance-authority') ||
-                id.includes('react-hook-form') ||
-                id.includes('@hookform/resolvers') ||
-                id.includes('zod')
+                id.includes('tailwind-merge')
               ) {
                 return 'utils-vendor';
-              }
-
-              // 데이터 관련 라이브러리
-              if (id.includes('@supabase') || id.includes('drizzle-orm')) {
-                return 'data-vendor';
-              }
-
-              // 분석 및 모니터링 도구들
-              if (
-                id.includes('@sentry') ||
-                id.includes('@vercel/analytics') ||
-                id.includes('@vercel/speed-insights')
-              ) {
-                return 'analytics-vendor';
-              }
-
-              // 기타 큰 라이브러리들
-              if (
-                id.includes('googleapis') ||
-                id.includes('google-auth-library')
-              ) {
-                return 'google-vendor';
               }
 
               // 나머지는 기본 vendor
