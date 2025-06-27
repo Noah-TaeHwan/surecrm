@@ -27,7 +27,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     let googleSettings;
     try {
       const { GoogleCalendarService } = await import(
-        '~/features/calendar/lib/google-calendar-service'
+        '~/features/calendar/lib/google-calendar-service.server'
       );
       const googleService = new GoogleCalendarService();
       googleSettings = await googleService.getCalendarSettings(agentId);
@@ -65,7 +65,7 @@ export async function loader({ request }: Route.LoaderArgs) {
       (async () => {
         try {
           const { GoogleCalendarService } = await import(
-            '~/features/calendar/lib/google-calendar-service'
+            '~/features/calendar/lib/google-calendar-service.server'
           );
           const googleService = new GoogleCalendarService();
 
@@ -235,7 +235,7 @@ export async function action({ request }: Route.ActionArgs) {
         // 🔗 구글 캘린더 연동 시작 - OAuth URL로 리다이렉트
         try {
           const { GoogleCalendarService } = await import(
-            '~/features/calendar/lib/google-calendar-service'
+            '~/features/calendar/lib/google-calendar-service.server'
           );
           const googleService = new GoogleCalendarService();
           const authUrl = googleService.getAuthUrl(user.id);
@@ -282,7 +282,7 @@ export async function action({ request }: Route.ActionArgs) {
         // 🌐 구글 캘린더에 직접 생성 (단일 소스 방식)
         try {
           const { GoogleCalendarService } = await import(
-            '~/features/calendar/lib/google-calendar-service'
+            '~/features/calendar/lib/google-calendar-service.server'
           );
           const googleService = new GoogleCalendarService();
 
@@ -430,7 +430,7 @@ export async function action({ request }: Route.ActionArgs) {
         if (syncToGoogle && googleEventId) {
           try {
             const { GoogleCalendarService } = await import(
-              '~/features/calendar/lib/google-calendar-service'
+              '~/features/calendar/lib/google-calendar-service.server'
             );
             const googleService = new GoogleCalendarService();
 
@@ -489,7 +489,7 @@ export async function action({ request }: Route.ActionArgs) {
 
             try {
               const { GoogleCalendarService } = await import(
-                '~/features/calendar/lib/google-calendar-service'
+                '~/features/calendar/lib/google-calendar-service.server'
               );
               const googleService = new GoogleCalendarService();
 
@@ -564,7 +564,7 @@ export async function action({ request }: Route.ActionArgs) {
           if (googleEventId) {
             try {
               const { GoogleCalendarService } = await import(
-                '~/features/calendar/lib/google-calendar-service'
+                '~/features/calendar/lib/google-calendar-service.server'
               );
               const googleService = new GoogleCalendarService();
 

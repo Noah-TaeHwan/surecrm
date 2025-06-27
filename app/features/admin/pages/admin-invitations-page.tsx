@@ -7,11 +7,7 @@
 
 import { requireAdmin } from '~/lib/auth/middleware.server';
 import { createInvitationsForUser } from '~/lib/data/business/invitations';
-import {
-  logAdminAction,
-  validateAdminOperation,
-  getAdminStats,
-} from '../lib/utils';
+import { validateAdminOperation } from '../lib/utils';
 import { db } from '~/lib/core/db.server';
 import { invitations, profiles } from '~/lib/schema';
 import { eq } from 'drizzle-orm';
@@ -45,6 +41,7 @@ export async function loader({ request }: Route['LoaderArgs']) {
   const user = (await requireAdmin(request)) as AdminUser;
 
   // 🔍 Admin 접근 감사 로깅
+  const { logAdminAction } = await import('../lib/utils.server');
   await logAdminAction(
     user.id,
     'VIEW_INVITATIONS',
@@ -57,6 +54,7 @@ export async function loader({ request }: Route['LoaderArgs']) {
 
   try {
     // 📊 캐시된 통계 먼저 확인
+    const { getAdminStats } = await import('../lib/utils.server');
     const cachedStats = await getAdminStats('invitations_summary');
 
     // 📋 모든 초대장 조회 (Admin은 모든 데이터 접근 가능)
@@ -98,6 +96,7 @@ export async function loader({ request }: Route['LoaderArgs']) {
     };
   } catch (error) {
     // 🚨 Admin 오류 로깅
+    const { logAdminAction } = await import('../lib/utils.server');
     await logAdminAction(
       user.id,
       'ERROR_VIEW_INVITATIONS',
@@ -121,6 +120,7 @@ export async function action({ request }: Route['LoaderArgs']) {
 
   // 🛡️ Admin 작업 권한 검증
   if (!validateAdminOperation(user, 'CREATE_INVITATIONS')) {
+    const { logAdminAction } = await import('../lib/utils.server');
     await logAdminAction(
       user.id,
       'UNAUTHORIZED_CREATE_INVITATIONS',
@@ -141,6 +141,7 @@ export async function action({ request }: Route['LoaderArgs']) {
     const count = parseInt(formData.get('count') as string) || 2;
 
     // 🔍 Admin 작업 시작 로깅
+    const { logAdminAction } = await import('../lib/utils.server');
     await logAdminAction(
       user.id,
       'START_CREATE_INVITATIONS',

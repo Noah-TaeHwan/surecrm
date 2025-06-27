@@ -124,7 +124,7 @@ export async function loader({
         (async () => {
           try {
             const { GoogleCalendarService } = await import(
-              '~/features/calendar/lib/google-calendar-service'
+              '~/features/calendar/lib/google-calendar-service.server'
             );
             const googleService = new GoogleCalendarService();
             return await googleService.getCalendarSettings(user.id);
@@ -273,7 +273,7 @@ export async function action({ request }: Route.ActionArgs) {
         try {
           // 기존 설정 조회
           const { GoogleCalendarService } = await import(
-            '~/features/calendar/lib/google-calendar-service'
+            '~/features/calendar/lib/google-calendar-service.server'
           );
           const googleService = new GoogleCalendarService();
           const existingSettings = await googleService.getCalendarSettings(
@@ -326,7 +326,7 @@ export async function action({ request }: Route.ActionArgs) {
       case 'connectGoogleCalendar': {
         // 🔗 구글 캘린더 연동 시작 - OAuth URL로 리다이렉트
         const { GoogleCalendarService } = await import(
-          '~/features/calendar/lib/google-calendar-service'
+          '~/features/calendar/lib/google-calendar-service.server'
         );
         const googleService = new GoogleCalendarService();
         const authUrl = googleService.getAuthUrl(user.id);
@@ -337,20 +337,34 @@ export async function action({ request }: Route.ActionArgs) {
 
       case 'disconnectGoogleCalendar': {
         // 🔌 구글 캘린더 연동 해제
-        const googleService = new GoogleCalendarService();
-        const success = await googleService.disconnectCalendar(user.id);
+        try {
+          const { GoogleCalendarService } = await import(
+            '~/features/calendar/lib/google-calendar-service.server'
+          );
+          const googleService = new GoogleCalendarService();
+          const success = await googleService.disconnectCalendar(user.id);
 
-        return data({
-          success,
-          message: success
-            ? '구글 캘린더 연동이 해제되었습니다.'
-            : '연동 해제 중 오류가 발생했습니다.',
-        });
+          return data({
+            success,
+            message: success
+              ? '구글 캘린더 연동이 해제되었습니다.'
+              : '연동 해제 중 오류가 발생했습니다.',
+          });
+        } catch (error) {
+          console.error('❌ 구글 캘린더 연동 해제 실패:', error);
+          return data({
+            success: false,
+            message: '연동 해제 중 오류가 발생했습니다.',
+          });
+        }
       }
 
       case 'syncGoogleCalendar': {
         // 🔄 구글 캘린더 수동 동기화
         try {
+          const { GoogleCalendarService } = await import(
+            '~/features/calendar/lib/google-calendar-service.server'
+          );
           const googleService = new GoogleCalendarService();
           const success = await googleService.performFullSync(user.id);
 
@@ -374,6 +388,9 @@ export async function action({ request }: Route.ActionArgs) {
         const enableRealtime = formData.get('enableRealtime') === 'true';
 
         try {
+          const { GoogleCalendarService } = await import(
+            '~/features/calendar/lib/google-calendar-service.server'
+          );
           const googleService = new GoogleCalendarService();
 
           if (enableRealtime) {

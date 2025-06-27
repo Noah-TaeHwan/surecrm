@@ -6,11 +6,7 @@
  */
 
 import { requireAdmin } from '~/lib/auth/middleware.server';
-import {
-  logAdminAction,
-  validateAdminOperation,
-  maskSensitiveData,
-} from '../lib/utils';
+import { validateAdminOperation, maskSensitiveData } from '../lib/utils';
 import { db } from '~/lib/core/db.server';
 import { profiles, invitations } from '~/lib/schema';
 import { count, eq, isNotNull, desc } from 'drizzle-orm';
@@ -43,11 +39,12 @@ export async function loader({ request }: Route['LoaderArgs']) {
   // 🔒 Admin 전용 보안 체크
   const user = (await requireAdmin(request)) as AdminUser;
 
-  // 🔍 Admin 사용자 관리 접근 감사 로깅
+  // 🔍 Admin 접근 감사 로깅
+  const { logAdminAction } = await import('../lib/utils.server');
   await logAdminAction(
     user.id,
-    'VIEW_ADMIN_USERS',
-    'users_management',
+    'VIEW_USERS',
+    'users',
     undefined,
     undefined,
     undefined,
@@ -55,64 +52,42 @@ export async function loader({ request }: Route['LoaderArgs']) {
   );
 
   try {
-    // 📊 사용자 통계 조회
-    const [userStats, allUsers] = await Promise.all([
-      // 사용자 통계
-      db
-        .select({ count: count() })
-        .from(profiles)
-        .then(async result => {
-          const total = result[0]?.count || 0;
-          const [active, inactive, admins, withTeam] = await Promise.all([
-            db
-              .select({ count: count() })
-              .from(profiles)
-              .where(eq(profiles.isActive, true)),
-            db
-              .select({ count: count() })
-              .from(profiles)
-              .where(eq(profiles.isActive, false)),
-            db
-              .select({ count: count() })
-              .from(profiles)
-              .where(eq(profiles.role, 'system_admin')),
-            db
-              .select({ count: count() })
-              .from(profiles)
-              .where(isNotNull(profiles.teamId)),
-          ]);
-          return {
-            total,
-            active: active[0]?.count || 0,
-            inactive: inactive[0]?.count || 0,
-            admins: admins[0]?.count || 0,
-            withTeam: withTeam[0]?.count || 0,
-          };
-        }),
+    // 🔍 모든 사용자 프로필 조회 (Admin은 모든 데이터 접근 가능)
+    const allUsers = await db
+      .select({
+        id: profiles.id,
+        fullName: profiles.fullName,
+        phone: profiles.phone,
+        company: profiles.company,
+        role: profiles.role,
+        isActive: profiles.isActive,
+        createdAt: profiles.createdAt,
+        lastLoginAt: profiles.lastLoginAt,
+        invitedById: profiles.invitedById,
+        invitationsLeft: profiles.invitationsLeft,
+      })
+      .from(profiles)
+      .orderBy(profiles.createdAt);
 
-      // 모든 사용자 목록 (최신순)
-      db
-        .select({
-          id: profiles.id,
-          fullName: profiles.fullName,
-          phone: profiles.phone,
-          company: profiles.company,
-          role: profiles.role,
-          teamId: profiles.teamId,
-          isActive: profiles.isActive,
-          invitationsLeft: profiles.invitationsLeft,
-          createdAt: profiles.createdAt,
-          lastLoginAt: profiles.lastLoginAt,
-        })
-        .from(profiles)
-        .orderBy(desc(profiles.createdAt))
-        .limit(100), // Admin 백오피스: 최근 100명만 표시 (단순하게)
-    ]);
+    // 🎯 Admin용 민감 정보 마스킹 (부분적 보안)
+    const maskedUsers = allUsers.map(user => ({
+      ...user,
+      phone: user.phone ? maskSensitiveData(user.phone, 'phone') : null,
+    }));
+
+    // 📊 Admin용 통계 계산
+    const stats = {
+      total: allUsers.length,
+      active: allUsers.filter(u => u.isActive).length,
+      inactive: allUsers.filter(u => !u.isActive).length,
+      admins: allUsers.filter(u => u.role === 'system_admin').length,
+      agents: allUsers.filter(u => u.role === 'agent').length,
+    };
 
     return {
       user,
-      userStats,
-      users: allUsers,
+      users: maskedUsers,
+      stats,
       systemInfo: {
         pageType: 'admin_users',
         accessTime: new Date().toISOString(),
@@ -120,11 +95,11 @@ export async function loader({ request }: Route['LoaderArgs']) {
       },
     };
   } catch (error) {
-    // 🚨 Admin 사용자 관리 오류 로깅
+    // 🚨 Admin 오류 로깅
     await logAdminAction(
       user.id,
-      'ERROR_ADMIN_USERS',
-      'users_management',
+      'ERROR_VIEW_USERS',
+      'users',
       undefined,
       { error: error instanceof Error ? error.message : String(error) },
       undefined,
@@ -141,15 +116,15 @@ export async function action({ request }: Route['LoaderArgs']) {
 
   const formData = await request.formData();
   const actionType = formData.get('action');
-  const targetUserId = formData.get('userId') as string;
 
   // 🛡️ Admin 작업 권한 검증
-  if (!validateAdminOperation(user, 'MODIFY_USER_STATUS')) {
+  if (!validateAdminOperation(user, 'MANAGE_USERS')) {
+    const { logAdminAction } = await import('../lib/utils.server');
     await logAdminAction(
       user.id,
-      'UNAUTHORIZED_MODIFY_USER',
-      'profiles',
-      targetUserId,
+      'UNAUTHORIZED_MANAGE_USERS',
+      'users',
+      undefined,
       { attempted_action: actionType },
       undefined,
       request
@@ -157,88 +132,88 @@ export async function action({ request }: Route['LoaderArgs']) {
 
     return {
       success: false,
-      error: '사용자 수정 권한이 없습니다.',
+      error: '이 작업을 수행할 권한이 없습니다.',
     };
   }
 
-  if (actionType === 'toggle_user_status' && targetUserId) {
-    // 🔍 Admin 사용자 상태 변경 시작 로깅
+  if (actionType === 'toggle_user_status') {
+    const targetUserId = formData.get('userId') as string;
+    const newStatus = formData.get('isActive') === 'true';
+
+    // 🔍 Admin 작업 시작 로깅
+    const { logAdminAction } = await import('../lib/utils.server');
     await logAdminAction(
       user.id,
       'START_TOGGLE_USER_STATUS',
-      'profiles',
+      'users',
       targetUserId,
-      undefined,
+      { newStatus },
       undefined,
       request
     );
 
     try {
-      // 현재 사용자 정보 조회
-      const targetUser = await db
-        .select()
-        .from(profiles)
-        .where(eq(profiles.id, targetUserId))
-        .limit(1);
+      // 🛡️ 자기 자신 비활성화 방지
+      if (targetUserId === user.id && !newStatus) {
+        await logAdminAction(
+          user.id,
+          'BLOCKED_SELF_DEACTIVATION',
+          'users',
+          targetUserId,
+          { reason: 'Cannot deactivate self' },
+          undefined,
+          request
+        );
 
-      if (targetUser.length === 0) {
         return {
           success: false,
-          error: '대상 사용자를 찾을 수 없습니다.',
+          error: '자기 자신을 비활성화할 수 없습니다.',
         };
       }
 
-      const currentUser = targetUser[0];
-      const newStatus = !currentUser.isActive;
-
-      // 상태 업데이트
+      // 🔄 사용자 상태 변경
       await db
         .update(profiles)
-        .set({ isActive: newStatus })
+        .set({
+          isActive: newStatus,
+          updatedAt: new Date(),
+        })
         .where(eq(profiles.id, targetUserId));
 
       // ✅ 성공 감사 로깅
       await logAdminAction(
         user.id,
         'SUCCESS_TOGGLE_USER_STATUS',
-        'profiles',
+        'users',
         targetUserId,
+        { newStatus },
         {
-          before: { isActive: currentUser.isActive },
-          userName: currentUser.fullName,
-        },
-        {
-          after: { isActive: newStatus },
-          action: newStatus ? 'activated' : 'deactivated',
+          admin_action: 'user_status_changed',
+          target_user: targetUserId,
+          new_status: newStatus ? 'active' : 'inactive',
         },
         request
       );
 
       return {
         success: true,
-        message: `사용자 ${currentUser.fullName}이 ${
-          newStatus ? '활성화' : '비활성화'
-        }되었습니다.`,
-        adminInfo: {
-          modifiedBy: user.fullName,
-          modifiedAt: new Date().toISOString(),
-        },
+        message: `사용자 상태가 ${newStatus ? '활성화' : '비활성화'}되었습니다.`,
       };
     } catch (error) {
       // 🚨 오류 감사 로깅
       await logAdminAction(
         user.id,
         'ERROR_TOGGLE_USER_STATUS',
-        'profiles',
+        'users',
         targetUserId,
-        undefined,
+        { newStatus },
         { error: error instanceof Error ? error.message : String(error) },
         request
       );
 
       return {
         success: false,
-        error: '사용자 상태 변경 중 오류가 발생했습니다.',
+        error: 'Admin 사용자 상태 변경 중 시스템 오류가 발생했습니다.',
       };
     }
   }
