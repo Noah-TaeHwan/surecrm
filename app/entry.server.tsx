@@ -2,8 +2,13 @@ import { createReadableStreamFromReadable } from '@react-router/node';
 import { ServerRouter, type HandleErrorFunction } from 'react-router';
 import { renderToPipeableStream } from 'react-dom/server';
 import * as Sentry from '@sentry/react-router';
+import { checkCriticalEnvs } from './lib/core/safe-env';
 
 export const streamTimeout = 5_000;
+
+// 서버 시작 시 환경변수 체크
+console.log('🚀 SureCRM 서버 시작...');
+checkCriticalEnvs();
 
 // 안전한 Sentry 핸들러 생성
 const handleRequest = Sentry.createSentryHandleRequest({
