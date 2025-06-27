@@ -22,47 +22,32 @@ export class GoogleCalendarService {
   private oauth2Client: any;
 
   constructor() {
-    // 프로덕션에서 확실히 작동하도록 하드코딩된 접근 방식 사용
-    let redirectUri = 'http://localhost:5173/api/google/calendar/callback'; // 기본값
+    // 환경변수에서 redirect URI 가져오기
+    let redirectUri =
+      process.env.GOOGLE_REDIRECT_URI ||
+      'http://localhost:5173/api/google/calendar/callback';
 
-    // 다양한 방법으로 프로덕션 환경 감지
-    try {
-      const isProduction =
-        process.env.NODE_ENV === 'production' ||
-        process.env.VERCEL_ENV === 'production' ||
-        process.env.VERCEL === '1' ||
-        (typeof window !== 'undefined' &&
-          (window.location.hostname.includes('vercel.app') ||
-            window.location.hostname.includes('surecrm.pro')));
+    // 프로덕션 환경이면 프로덕션 URI 사용
+    const isProduction =
+      process.env.NODE_ENV === 'production' ||
+      process.env.VERCEL_ENV === 'production' ||
+      process.env.VERCEL === '1';
 
-      if (isProduction) {
-        redirectUri = 'https://surecrm.pro/api/google/calendar/callback';
-      }
-
-      // 디버깅용 로그
-      console.log('🔍 GoogleCalendarService 초기화:', {
-        NODE_ENV: process.env.NODE_ENV,
-        VERCEL_ENV: process.env.VERCEL_ENV,
-        VERCEL: process.env.VERCEL,
-        PRODUCTION_URL: process.env.PRODUCTION_URL,
-        APP_URL: process.env.APP_URL,
-        isProduction: isProduction,
-        redirectUri: redirectUri,
-        hostname:
-          typeof window !== 'undefined'
-            ? window.location.hostname
-            : 'server-side',
-      });
-    } catch (error) {
-      console.error('❌ 환경 감지 오류:', error);
-      // 에러 발생 시 환경 변수만으로 판단
-      if (
-        process.env.NODE_ENV === 'production' ||
-        process.env.VERCEL_ENV === 'production'
-      ) {
-        redirectUri = 'https://surecrm.pro/api/google/calendar/callback';
-      }
+    if (isProduction && process.env.GOOGLE_REDIRECT_URI_PRODUCTION) {
+      redirectUri = process.env.GOOGLE_REDIRECT_URI_PRODUCTION;
     }
+
+    // 디버깅용 로그
+    console.log('🔍 GoogleCalendarService 초기화:', {
+      NODE_ENV: process.env.NODE_ENV,
+      VERCEL_ENV: process.env.VERCEL_ENV,
+      VERCEL: process.env.VERCEL,
+      GOOGLE_REDIRECT_URI: process.env.GOOGLE_REDIRECT_URI,
+      GOOGLE_REDIRECT_URI_PRODUCTION:
+        process.env.GOOGLE_REDIRECT_URI_PRODUCTION,
+      isProduction: isProduction,
+      redirectUri: redirectUri,
+    });
 
     this.oauth2Client = new google.auth.OAuth2(
       process.env.GOOGLE_CLIENT_ID,

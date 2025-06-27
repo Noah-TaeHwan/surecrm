@@ -14,4 +14,10 @@ export default {
     // Sentry 빌드 완료 후 처리
     await sentryOnBuildEnd({ viteConfig, reactRouterConfig, buildManifest });
   },
+  // 빌드 디렉토리 설정 (Vercel 호환)
+  buildDirectory: 'build',
+  // 앱 디렉토리 설정
+  appDirectory: 'app',
+  // 서버 빌드 설정
+  serverBuildFile: 'index.js',
 } satisfies Config;

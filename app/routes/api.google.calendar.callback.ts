@@ -46,35 +46,31 @@ export async function loader({ request }: LoaderFunctionArgs) {
       return redirect(`${baseUrl}/calendar?error=invalid_user`);
     }
 
-    // OAuth2 클라이언트 생성 - GoogleCalendarService와 동일한 환경 감지 로직 사용
-    let redirectUri = 'http://localhost:5173/api/google/calendar/callback'; // 기본값
+    // OAuth2 클라이언트 생성 - 환경변수에서 redirect URI 가져오기
+    let redirectUri =
+      process.env.GOOGLE_REDIRECT_URI ||
+      'http://localhost:5173/api/google/calendar/callback';
 
-    try {
-      const isProduction =
-        process.env.NODE_ENV === 'production' ||
-        process.env.VERCEL_ENV === 'production' ||
-        process.env.VERCEL === '1';
+    // 프로덕션 환경이면 프로덕션 URI 사용
+    const isProduction =
+      process.env.NODE_ENV === 'production' ||
+      process.env.VERCEL_ENV === 'production' ||
+      process.env.VERCEL === '1';
 
-      if (isProduction) {
-        redirectUri = 'https://surecrm.pro/api/google/calendar/callback';
-      }
-
-      console.log('�� 콜백 핸들러 OAuth2 클라이언트 생성:', {
-        NODE_ENV: process.env.NODE_ENV,
-        VERCEL_ENV: process.env.VERCEL_ENV,
-        VERCEL: process.env.VERCEL,
-        isProduction: isProduction,
-        redirectUri: redirectUri,
-      });
-    } catch (error) {
-      console.error('❌ 콜백 환경 감지 오류:', error);
-      if (
-        process.env.NODE_ENV === 'production' ||
-        process.env.VERCEL_ENV === 'production'
-      ) {
-        redirectUri = 'https://surecrm.pro/api/google/calendar/callback';
-      }
+    if (isProduction && process.env.GOOGLE_REDIRECT_URI_PRODUCTION) {
+      redirectUri = process.env.GOOGLE_REDIRECT_URI_PRODUCTION;
     }
+
+    console.log('🔍 콜백 핸들러 OAuth2 클라이언트 생성:', {
+      NODE_ENV: process.env.NODE_ENV,
+      VERCEL_ENV: process.env.VERCEL_ENV,
+      VERCEL: process.env.VERCEL,
+      GOOGLE_REDIRECT_URI: process.env.GOOGLE_REDIRECT_URI,
+      GOOGLE_REDIRECT_URI_PRODUCTION:
+        process.env.GOOGLE_REDIRECT_URI_PRODUCTION,
+      isProduction: isProduction,
+      redirectUri: redirectUri,
+    });
 
     const oauth2Client = new google.auth.OAuth2(
       process.env.GOOGLE_CLIENT_ID,

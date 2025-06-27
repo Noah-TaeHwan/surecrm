@@ -144,6 +144,8 @@ export default defineConfig(config => {
     },
     // Rollup 옵션에서 외부 모듈과 polyfill 설정
     build: {
+      // Chunk 크기 경고 제한 증가
+      chunkSizeWarningLimit: 1000,
       rollupOptions: {
         external: [
           'pg-native',
@@ -176,6 +178,22 @@ export default defineConfig(config => {
           'google-p12-pem',
         ],
         output: {
+          // 수동 청크 분할로 번들 크기 최적화 (외부 모듈 제외)
+          manualChunks: id => {
+            // node_modules의 패키지들을 vendor 청크로 분리
+            if (id.includes('node_modules')) {
+              if (id.includes('@radix-ui')) return 'ui';
+              if (id.includes('recharts')) return 'charts';
+              if (
+                id.includes('date-fns') ||
+                id.includes('clsx') ||
+                id.includes('tailwind-merge')
+              )
+                return 'utils';
+              if (id.includes('lucide-react')) return 'icons';
+              return 'vendor';
+            }
+          },
           globals: {
             buffer: 'Buffer',
             net: '{}',
