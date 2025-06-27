@@ -41,7 +41,7 @@ export const links: LinksFunction = () => [
   },
   {
     rel: 'stylesheet',
-    href: './app.css',
+    href: '/app.css',
     // 🔧 중요한 CSS는 즉시 로드
     as: 'style',
   },

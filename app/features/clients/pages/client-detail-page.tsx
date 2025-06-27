@@ -5,6 +5,7 @@ import {
   useFetcher,
   useSubmit,
   useSearchParams,
+  useLoaderData,
 } from 'react-router';
 import { InsuranceAgentEvents } from '~/lib/utils/analytics';
 import { MainLayout } from '~/common/layouts/main-layout';
@@ -141,12 +142,12 @@ import {
 
 // ✅ Zod 스키마 분리 완료 - import로 대체
 
-// ✅ React Router v7 타입을 사용하여 컴포넌트 props 타입 정의
-import type { Route } from '../../../routes/+types/clients.$clientId';
+// ✅ React Router v7 - useLoaderData 훅 사용으로 타입 import 불필요
 
-export default function ClientDetailPage({ loaderData }: Route.ComponentProps) {
-  // 안전한 타입 체크와 기본값 설정
-  const data = loaderData as any;
+export default function ClientDetailPage() {
+  // ✅ React Router v7에서는 useLoaderData() 훅을 사용
+  const data = useLoaderData() as any;
+
   const client = data?.client || null;
   const clientOverview = data?.clientOverview || null; // 🆕 통합 고객 데이터
   const availableStages = data?.availableStages || [];

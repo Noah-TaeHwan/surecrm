@@ -16,6 +16,17 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     throw new Response('고객 ID가 필요합니다.', { status: 400 });
   }
 
+  // ✅ UUID 형식 검증 (정적 파일이나 잘못된 경로 차단)
+  const uuidRegex =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  if (!uuidRegex.test(clientId)) {
+    console.error('❌ 잘못된 클라이언트 ID 형식:', {
+      clientId,
+      url: request.url,
+    });
+    throw new Response('올바른 고객 ID 형식이 아닙니다.', { status: 404 });
+  }
+
   try {
     // 🔥 구독 상태 확인 (트라이얼 만료 시 billing 페이지로 리다이렉트)
     const { requireActiveSubscription } = await import(
