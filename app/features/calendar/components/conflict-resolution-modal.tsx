@@ -3,7 +3,7 @@
  * 구글 캘린더와의 동기화 충돌을 해결하는 컴포넌트
  */
 
-import React from 'react';
+import React, { useSyncExternalStore } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -41,6 +41,24 @@ interface ConflictResolutionModalProps {
   onResolveAll: (resolution: 'local' | 'google') => void;
 }
 
+// useSyncExternalStore용 빈 구독 함수
+const emptySubscribe = () => () => {};
+
+// Hydration-safe 날짜 포맷팅 컴포넌트
+function HydrationSafeDateValue({ value }: { value: any }) {
+  const formattedDate = useSyncExternalStore(
+    emptySubscribe,
+    () => new Date(value).toLocaleDateString('ko-KR'),
+    () => {
+      // 서버에서는 기본 형식 사용
+      const date = new Date(value);
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    }
+  );
+
+  return <span>{formattedDate}</span>;
+}
+
 export function ConflictResolutionModal({
   isOpen,
   onClose,
@@ -73,7 +91,7 @@ export function ConflictResolutionModal({
   const formatValue = (field: string, value: any) => {
     if (!value) return '(없음)';
     if (field === 'date') {
-      return new Date(value).toLocaleDateString('ko-KR');
+      return <HydrationSafeDateValue value={value} />;
     }
     if (field === 'duration') {
       return `${value}분`;

@@ -24,7 +24,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
 } from '@radix-ui/react-icons';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useSyncExternalStore } from 'react';
 import { MainLayout } from '~/common/layouts/main-layout';
 import { cn } from '~/lib/utils';
 import { useToast } from '~/common/components/ui/toast';
@@ -48,6 +48,31 @@ import {
 } from '../types/types';
 import { Badge } from '~/common/components/ui/badge';
 import { useViewport } from '~/common/hooks/useViewport';
+
+// useSyncExternalStore용 빈 구독 함수
+const emptySubscribe = () => () => {};
+
+// Hydration-safe 요일 표시 컴포넌트
+function HydrationSafeWeekday({ date }: { date: Date }) {
+  const weekday = useSyncExternalStore(
+    emptySubscribe,
+    () => date.toLocaleDateString('ko-KR', { weekday: 'long' }),
+    () => '' // 서버에서는 빈 문자열
+  );
+
+  return <span>{weekday}</span>;
+}
+
+// Hydration-safe 월/일 표시 컴포넌트
+function HydrationSafeMonthDay({ date }: { date: Date }) {
+  const monthDay = useSyncExternalStore(
+    emptySubscribe,
+    () => date.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' }),
+    () => `${date.getMonth() + 1}월 ${date.getDate()}일` // 서버에서는 기본 형식
+  );
+
+  return <span>{monthDay}</span>;
+}
 
 export default function CalendarPage({
   loaderData,
@@ -222,7 +247,7 @@ export default function CalendarPage({
     } else {
       return isMobile
         ? `${selectedDate.getMonth() + 1}월 ${selectedDate.getDate()}일`
-        : `${selectedDate.getFullYear()}년 ${selectedDate.getMonth() + 1}월 ${selectedDate.getDate()}일 ${selectedDate.toLocaleDateString('ko-KR', { weekday: 'long' })}`;
+        : `${selectedDate.getFullYear()}년 ${selectedDate.getMonth() + 1}월 ${selectedDate.getDate()}일`;
     }
   };
 
@@ -413,11 +438,7 @@ export default function CalendarPage({
         {isMobile && (
           <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-4">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
-              {selectedDate.toLocaleDateString('ko-KR', {
-                month: 'long',
-                day: 'numeric',
-              })}{' '}
-              일정
+              <HydrationSafeMonthDay date={selectedDate} /> 일정
             </h3>
 
             {filteredMeetings

@@ -37,7 +37,7 @@ import {
 } from '../types/types';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useSyncExternalStore } from 'react';
 
 // getEventColors 함수를 calendar-grid에서 가져옴
 const getEventColors = (event: Meeting) => {
@@ -245,6 +245,23 @@ export function CalendarSidebar({
       return `${Math.floor(diffInMinutes / 60)}시간 전`;
     return format(date, 'MM/dd HH:mm', { locale: ko });
   };
+
+  // useSyncExternalStore용 빈 구독 함수
+  const emptySubscribe = () => () => {};
+
+  // Hydration-safe 시간 표시 컴포넌트
+  function HydrationSafeTimeDisplay({ dateStr }: { dateStr?: string }) {
+    const timeDisplay = useSyncExternalStore(
+      emptySubscribe,
+      () => formatLastSync(dateStr), // 클라이언트 스냅샷
+      () =>
+        dateStr
+          ? format(new Date(dateStr), 'MM/dd HH:mm', { locale: ko })
+          : '동기화된 적 없음' // 서버 스냅샷 (고정된 형식)
+    );
+
+    return <span>{timeDisplay}</span>;
+  }
 
   // 수동 동기화 실행
   const handleManualSync = async () => {
@@ -503,7 +520,9 @@ export function CalendarSidebar({
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">마지막 동기화</span>
                   <span className="font-medium">
-                    {formatLastSync(googleCalendarSettings.lastSyncAt)}
+                    <HydrationSafeTimeDisplay
+                      dateStr={googleCalendarSettings.lastSyncAt}
+                    />
                   </span>
                 </div>
 

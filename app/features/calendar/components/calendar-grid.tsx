@@ -23,7 +23,7 @@ import {
 import { Badge } from '~/common/components/ui/badge';
 import { useViewport } from '~/common/hooks/useViewport';
 import { Button } from '~/common/components/ui/button';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useSyncExternalStore } from 'react';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { subMonths, addMonths } from 'date-fns';
@@ -276,10 +276,15 @@ function MonthHeader({
   onTitleClick?: () => void;
 }) {
   const { isMobile } = useViewport();
-  const monthName = currentDate.toLocaleDateString('ko-KR', {
-    year: 'numeric',
-    month: 'long',
-  });
+  const monthName = useSyncExternalStore(
+    emptySubscribe,
+    () =>
+      currentDate.toLocaleDateString('ko-KR', {
+        year: 'numeric',
+        month: 'long',
+      }),
+    () => `${currentDate.getFullYear()}년 ${currentDate.getMonth() + 1}월` // 서버에서는 기본 형식
+  );
 
   return (
     <div
@@ -464,6 +469,20 @@ const EventDot = ({
     />
   );
 };
+
+// useSyncExternalStore용 빈 구독 함수
+const emptySubscribe = () => () => {};
+
+// Hydration-safe 월/년 표시 컴포넌트
+function HydrationSafeMonthYear({ date }: { date: Date }) {
+  const monthYear = useSyncExternalStore(
+    emptySubscribe,
+    () => date.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long' }),
+    () => `${date.getFullYear()}년 ${date.getMonth() + 1}월` // 서버에서는 기본 형식
+  );
+
+  return <span>{monthYear}</span>;
+}
 
 export function CalendarGrid({
   selectedDate,

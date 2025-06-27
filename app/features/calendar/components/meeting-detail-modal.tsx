@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Meeting } from '../types/types';
+import { useSyncExternalStore } from 'react';
 
 interface MeetingDetailModalProps {
   meeting: Meeting | null;
@@ -51,6 +52,32 @@ const priorityLabels: Record<string, { label: string; color: string }> = {
   high: { label: '높음', color: 'bg-orange-100 text-orange-700' },
   urgent: { label: '긴급', color: 'bg-red-100 text-red-700' },
 };
+
+// useSyncExternalStore용 빈 구독 함수
+const emptySubscribe = () => () => {};
+
+// Hydration-safe 날짜 포맷팅 컴포넌트
+function HydrationSafeDateFormat({ dateString }: { dateString: string }) {
+  const formattedDate = useSyncExternalStore(
+    emptySubscribe,
+    () => {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('ko-KR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        weekday: 'long',
+      });
+    },
+    () => {
+      // 서버에서는 기본 형식 사용
+      const date = new Date(dateString);
+      return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
+    }
+  );
+
+  return <span>{formattedDate}</span>;
+}
 
 export function MeetingDetailModal({
   meeting,
@@ -93,16 +120,6 @@ export function MeetingDetailModal({
     }
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      weekday: 'long',
-    });
-  };
-
   const formatTime = (time: string, duration: number) => {
     const [hours, minutes] = time.split(':');
     const startTime = new Date();
@@ -139,7 +156,7 @@ export function MeetingDetailModal({
             <div className="space-y-3">
               <div className="flex items-center gap-3">
                 <CalendarIcon className="h-5 w-5 text-muted-foreground" />
-                <span className="text-sm">{formatDate(meeting.date)}</span>
+                <HydrationSafeDateFormat dateString={meeting.date} />
               </div>
               <div className="flex items-center gap-3">
                 <ClockIcon className="h-5 w-5 text-muted-foreground" />
