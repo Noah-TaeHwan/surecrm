@@ -78,6 +78,22 @@ export default defineConfig(config => {
       'process.env.VERCEL_GIT_COMMIT_SHA': JSON.stringify(
         env.VERCEL_GIT_COMMIT_SHA
       ),
+      // 🍋 Lemon Squeezy 환경변수 주입
+      'process.env.LEMONSQUEEZY_API_KEY': JSON.stringify(
+        env.LEMONSQUEEZY_API_KEY
+      ),
+      'process.env.LEMONSQUEEZY_STORE_ID': JSON.stringify(
+        env.LEMONSQUEEZY_STORE_ID
+      ),
+      'process.env.LEMONSQUEEZY_WEBHOOK_SECRET': JSON.stringify(
+        env.LEMONSQUEEZY_WEBHOOK_SECRET
+      ),
+      'process.env.LEMONSQUEEZY_BASE_URL': JSON.stringify(
+        env.LEMONSQUEEZY_BASE_URL
+      ),
+      'process.env.LEMONSQUEEZY_VARIANT_ID': JSON.stringify(
+        env.LEMONSQUEEZY_VARIANT_ID
+      ),
       // 최소한의 전역 변수만 설정
       global: 'globalThis',
       // Node.js 모듈 비활성화

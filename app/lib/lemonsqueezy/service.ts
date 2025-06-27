@@ -53,7 +53,7 @@ export class LemonSqueezyService {
   ): Promise<string> {
     try {
       const checkout = await createCheckout(
-        lemonSqueezyConfig.storeId,
+        parseInt(lemonSqueezyConfig.storeId),
         options.variantId,
         {
           checkoutOptions: {
@@ -95,7 +95,7 @@ export class LemonSqueezyService {
   async syncPlans(): Promise<LemonSqueezyPlan[]> {
     try {
       const products = await listProducts({
-        filter: { storeId: lemonSqueezyConfig.storeId },
+        filter: { storeId: parseInt(lemonSqueezyConfig.storeId) },
         include: ['variants'],
       });
 

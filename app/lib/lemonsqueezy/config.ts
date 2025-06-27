@@ -12,9 +12,22 @@ export function configureLemonSqueezy() {
     'LEMONSQUEEZY_WEBHOOK_SECRET',
   ];
 
+  console.log('🍋 Lemon Squeezy 환경 변수 확인:', {
+    LEMONSQUEEZY_API_KEY: process.env.LEMONSQUEEZY_API_KEY
+      ? `${process.env.LEMONSQUEEZY_API_KEY.substring(0, 20)}...`
+      : 'NOT_SET',
+    LEMONSQUEEZY_STORE_ID: process.env.LEMONSQUEEZY_STORE_ID || 'NOT_SET',
+    LEMONSQUEEZY_WEBHOOK_SECRET: process.env.LEMONSQUEEZY_WEBHOOK_SECRET
+      ? '***SET***'
+      : 'NOT_SET',
+    LEMONSQUEEZY_BASE_URL: process.env.LEMONSQUEEZY_BASE_URL || 'NOT_SET',
+    LEMONSQUEEZY_VARIANT_ID: process.env.LEMONSQUEEZY_VARIANT_ID || 'NOT_SET',
+  });
+
   const missingVars = requiredVars.filter(varName => !process.env[varName]);
 
   if (missingVars.length > 0) {
+    console.error('❌ 누락된 Lemon Squeezy 환경변수:', missingVars);
     throw new Error(
       `다음 Lemon Squeezy 환경변수가 설정되지 않았습니다: ${missingVars.join(
         ', '
@@ -22,12 +35,16 @@ export function configureLemonSqueezy() {
     );
   }
 
+  console.log('🍋 Lemon Squeezy SDK 설정 중...');
+
   lemonSqueezySetup({
     apiKey: env.lemonSqueezy.apiKey,
     onError: error => {
       console.error('Lemon Squeezy API 에러:', error);
     },
   });
+
+  console.log('✅ Lemon Squeezy 설정 완료');
 }
 
 /**
