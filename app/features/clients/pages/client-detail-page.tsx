@@ -82,7 +82,6 @@ import type {
   ClientDetailProfile,
   ClientDetailLoaderData,
 } from '../types/client-detail';
-import { requireAuth } from '~/lib/auth/middleware.server';
 import { Input } from '~/common/components/ui/input';
 import { Textarea } from '~/common/components/ui/textarea';
 import {
