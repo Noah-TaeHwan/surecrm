@@ -6,7 +6,6 @@ namespace Route {
   export type ComponentProps = any;
 }
 import CalendarPage from '~/features/calendar/pages/calendar-page';
-import { requireActiveSubscription } from '~/lib/auth/subscription-middleware.server';
 import {
   getMeetingsByMonth,
   getClientsByAgent,
@@ -20,6 +19,9 @@ import { data } from 'react-router';
 export async function loader({ request }: Route.LoaderArgs) {
   try {
     // 구독 상태 확인 (트라이얼 만료 시 billing 페이지로 리다이렉트)
+    const { requireActiveSubscription } = await import(
+      '~/lib/auth/subscription-middleware.server'
+    );
     const { user } = await requireActiveSubscription(request);
     const agentId = user.id;
 
@@ -224,6 +226,9 @@ export async function loader({ request }: Route.LoaderArgs) {
 export async function action({ request }: Route.ActionArgs) {
   try {
     // 구독 상태 확인
+    const { requireActiveSubscription } = await import(
+      '~/lib/auth/subscription-middleware.server'
+    );
     const { user } = await requireActiveSubscription(request);
     const agentId = user.id;
 

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router';
+import { useNavigate } from 'react-router';
 // Route 타입은 라우트 파일에서 자동 생성됨
 import { MainLayout } from '~/common/layouts/main-layout';
 
@@ -8,8 +8,6 @@ import { ClientEditForm } from '../components/client-edit-form';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { requireAuth } from '~/lib/auth/middleware.server';
-import { Separator } from '~/common/components/ui/separator';
 
 // 📝 고객 편집 폼 스키마
 const clientEditSchema = z.object({
@@ -44,11 +42,19 @@ export async function loader({ request, params }: ClientEditRoute.LoaderArgs) {
   }
 
   try {
-    // 🔥 구독 상태 확인 (트라이얼 만료 시 billing 페이지로 리다이렉트)
-    const { requireActiveSubscription } = await import(
-      '~/lib/auth/subscription-middleware.server'
-    );
-    const { user } = await requireActiveSubscription(request);
+    // 🔥 구독 상태 확인 (API 호출로 변경)
+    const origin = new URL(request.url).origin;
+    const authResponse = await fetch(`${origin}/api/auth/me`, {
+      headers: {
+        Cookie: request.headers.get('Cookie') || '',
+      },
+    });
+
+    if (!authResponse.ok) {
+      throw new Response('인증이 필요합니다.', { status: 401 });
+    }
+
+    const { user } = await authResponse.json();
     const agentId = user.id;
 
     console.log('👤 로그인된 보험설계사:', {
@@ -57,11 +63,22 @@ export async function loader({ request, params }: ClientEditRoute.LoaderArgs) {
     });
 
     // 🎯 실제 API 호출로 고객 상세 정보 조회
-    const { getClientById } = await import('~/api/shared/clients.server');
-
     console.log('📞 API 호출 시작:', { clientId, agentId });
 
-    const clientDetail = await getClientById(clientId, agentId);
+    const detailResponse = await fetch(
+      `${origin}/api/clients/detail?clientId=${clientId}`,
+      {
+        headers: {
+          Cookie: request.headers.get('Cookie') || '',
+        },
+      }
+    );
+
+    if (!detailResponse.ok) {
+      throw new Response('고객 정보를 찾을 수 없습니다.', { status: 404 });
+    }
+
+    const clientDetail = await detailResponse.json();
 
     console.log('📞 API 호출 결과:', { clientDetail: !!clientDetail });
 
@@ -100,7 +117,20 @@ export async function action({ request, params }: ClientEditRoute.ActionArgs) {
   }
 
   try {
-    const user = await requireAuth(request);
+    const origin = new URL(request.url).origin;
+
+    // 🔥 인증 확인 (API 호출로 변경)
+    const authResponse = await fetch(`${origin}/api/auth/me`, {
+      headers: {
+        Cookie: request.headers.get('Cookie') || '',
+      },
+    });
+
+    if (!authResponse.ok) {
+      throw new Response('인증이 필요합니다.', { status: 401 });
+    }
+
+    const { user } = await authResponse.json();
     const agentId = user.id;
 
     const formData = await request.formData();
@@ -109,9 +139,24 @@ export async function action({ request, params }: ClientEditRoute.ActionArgs) {
     console.log('📝 고객 정보 업데이트 시작:', { clientId, updateData });
 
     // 🎯 실제 API 호출로 고객 정보 업데이트
-    const { updateClient } = await import('~/api/shared/clients.server');
+    const updateResponse = await fetch(`${origin}/api/clients/update`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Cookie: request.headers.get('Cookie') || '',
+      },
+      body: JSON.stringify({
+        clientId,
+        updateData,
+        agentId,
+      }),
+    });
 
-    const result = await updateClient(clientId, updateData, agentId);
+    if (!updateResponse.ok) {
+      throw new Error('고객 정보 업데이트에 실패했습니다.');
+    }
+
+    const result = await updateResponse.json();
 
     if (result.success) {
       console.log('✅ 고객 정보 업데이트 완료');

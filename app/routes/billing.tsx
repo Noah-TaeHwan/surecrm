@@ -25,7 +25,6 @@ import {
   Bell,
   Settings2,
 } from 'lucide-react';
-import { getSubscriptionStatusForUser } from '~/lib/auth/subscription-middleware.server';
 import { Form } from 'react-router';
 import { data } from 'react-router';
 import { env } from '~/lib/env';
@@ -90,6 +89,9 @@ export async function action({ request }: Route.ActionArgs) {
 
 export async function loader({ request }: Route.LoaderArgs) {
   try {
+    const { getSubscriptionStatusForUser } = await import(
+      '~/lib/auth/subscription-middleware.server'
+    );
     const userStatus = await getSubscriptionStatusForUser(request);
 
     return {

@@ -1,4 +1,4 @@
-import type { Route } from './+types/dashboard-page';
+// React Router v7 타입 import 제거 - 직접 타입 정의 사용
 import { useState, useEffect } from 'react';
 import { MainLayout } from '~/common/layouts/main-layout';
 import { WelcomeSection } from '../components/welcome-section';
@@ -21,7 +21,6 @@ import {
   setMonthlyGoal,
   deleteGoal,
 } from '../lib/dashboard-data';
-import { requireActiveSubscription } from '~/lib/auth/subscription-middleware.server';
 import { useFetcher, useRevalidator } from 'react-router';
 import { InsuranceAgentEvents } from '~/lib/utils/analytics';
 
@@ -36,7 +35,20 @@ import type {
   DashboardReferralInsights,
 } from '../types';
 
-export function meta({ data, params }: Route.MetaArgs) {
+// 타입 정의
+interface LoaderArgs {
+  request: Request;
+}
+
+interface ActionArgs {
+  request: Request;
+}
+
+interface ComponentProps {
+  loaderData: any;
+}
+
+export function meta() {
   return [
     { title: '대시보드 - SureCRM' },
     {
@@ -46,8 +58,11 @@ export function meta({ data, params }: Route.MetaArgs) {
   ];
 }
 
-export async function loader({ request }: Route.LoaderArgs) {
+export async function loader({ request }: LoaderArgs) {
   // 인증 및 구독 상태 확인
+  const { requireActiveSubscription } = await import(
+    '~/lib/auth/subscription-middleware.server'
+  );
   const { user } = await requireActiveSubscription(request);
 
   try {
@@ -197,7 +212,10 @@ export async function loader({ request }: Route.LoaderArgs) {
   }
 }
 
-export async function action({ request }: Route.ActionArgs) {
+export async function action({ request }: ActionArgs) {
+  const { requireActiveSubscription } = await import(
+    '~/lib/auth/subscription-middleware.server'
+  );
   const { user } = await requireActiveSubscription(request);
   const formData = await request.formData();
   const intent = formData.get('intent');
@@ -275,7 +293,7 @@ export async function action({ request }: Route.ActionArgs) {
   };
 }
 
-export default function DashboardPage({ loaderData }: Route.ComponentProps) {
+export default function DashboardPage({ loaderData }: ComponentProps) {
   const {
     user,
     todayStats,

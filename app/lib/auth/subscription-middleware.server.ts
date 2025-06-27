@@ -1,18 +1,18 @@
 import { redirect } from 'react-router';
-import { getCurrentUser } from './core.server';
-import { getUserSubscriptionStatus } from './subscription';
 
 /**
  * 보호된 라우트에서 구독 상태를 확인하는 미들웨어
  * 체험 기간이 종료된 경우 billing 페이지로 강제 리다이렉트
  */
 export async function requireActiveSubscription(request: Request) {
+  const { getCurrentUser } = await import('./core.server');
   const user = await getCurrentUser(request);
 
   if (!user) {
     throw redirect('/auth/login');
   }
 
+  const { getUserSubscriptionStatus } = await import('./subscription');
   const subscriptionStatus = await getUserSubscriptionStatus(user.id);
   const url = new URL(request.url);
 
@@ -56,12 +56,14 @@ export async function requireActiveSubscription(request: Request) {
  */
 export async function getSubscriptionStatusForUser(request: Request) {
   try {
+    const { getCurrentUser } = await import('./core.server');
     const user = await getCurrentUser(request);
 
     if (!user) {
       return null;
     }
 
+    const { getUserSubscriptionStatus } = await import('./subscription');
     const subscriptionStatus = await getUserSubscriptionStatus(user.id);
 
     return { user, subscriptionStatus };
