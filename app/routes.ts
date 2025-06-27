@@ -132,6 +132,14 @@ export default [
   ),
   route('api/google/calendar/sync', 'routes/api.google.calendar.sync.ts'),
 
+  // 📄 랜딩페이지 관련 정적 페이지들
+  route('contact', 'common/pages/contact-page.tsx'),
+  route('demo', 'common/pages/demo-page.tsx'),
+  route('features', 'common/pages/features-page.tsx'),
+  route('help', 'common/pages/help-page.tsx'),
+  route('integrations', 'common/pages/integrations-page.tsx'),
+  route('pricing', 'common/pages/pricing-page.tsx'),
+
   // 🚫 Catch-all (404 처리) - API 라우트 이후에 배치
   route('*', 'common/pages/error/not-found-page.tsx'),
 ] satisfies RouteConfig;

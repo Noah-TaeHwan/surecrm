@@ -143,7 +143,7 @@ import {
 // ✅ Zod 스키마 분리 완료 - import로 대체
 
 export async function loader({ request, params }: Route.LoaderArgs) {
-  const { id: clientId } = params;
+  const { clientId } = params;
 
   console.log('🔍 고객 상세 페이지 loader 시작:', { clientId });
 

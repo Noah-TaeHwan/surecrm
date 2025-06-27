@@ -20,10 +20,20 @@ export function LandingLayout({
             </Link>
           </h1>
 
-          {/* 시작하기 버튼만 표시 */}
-          <Button asChild size="sm" className="hidden sm:inline-flex">
-            <Link to="/auth/login">시작하기</Link>
-          </Button>
+          {/* 로그인/회원가입 버튼 */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Button
+              variant="ghost"
+              size="sm"
+              asChild
+              className="text-sm hover:text-primary transition-colors"
+            >
+              <Link to="/auth/login">로그인</Link>
+            </Button>
+            <Button size="sm" asChild className="text-sm">
+              <Link to="/auth/signup">회원가입</Link>
+            </Button>
+          </div>
         </div>
       </header>
 

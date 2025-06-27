@@ -1,0 +1,6 @@
+This favicon was generated using the following font:
+
+- Font Title: Zen Old Mincho
+- Font Author: undefined
+- Font Source: https://fonts.gstatic.com/s/zenoldmincho/v12/tss0ApVaYytLwxTqcxfMyBveyYb3g31S2s8p.ttf
+- Font License: undefined)
