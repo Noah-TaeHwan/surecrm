@@ -4426,6 +4426,316 @@ input[type='datetime-local']:not([style*='color']) {
 }
 
 /* =================================================================
+   🚀 ENHANCED FOOTER ANIMATIONS & EFFECTS
+   고도화된 푸터를 위한 애니메이션과 효과들
+   ================================================================= */
+
+/* 🎨 푸터 링크 호버 애니메이션 */
+.footer-link-hover {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.footer-link-hover::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: hsl(var(--primary));
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.footer-link-hover:hover::after {
+  width: 100%;
+}
+
+/* 🌟 브랜드 로고 호버 효과 */
+.brand-logo-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: linear-gradient(
+    135deg,
+    hsl(var(--primary)),
+    hsl(var(--primary) / 0.8),
+    hsl(var(--primary))
+  );
+  background-size: 200% 200%;
+  animation: gradient-shift 8s ease infinite;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.brand-logo-hover:hover {
+  animation-duration: 2s;
+  transform: scale(1.05);
+}
+
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* 🎯 상태 인디케이터 애니메이션 */
+.status-indicator {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
+  }
+  50% {
+    opacity: 0.8;
+    box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.1);
+  }
+}
+
+/* 🌊 배경 그리드 애니메이션 */
+.footer-grid-pattern {
+  background-image:
+    linear-gradient(to right, hsl(var(--border)) 1px, transparent 1px),
+    linear-gradient(to bottom, hsl(var(--border)) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: radial-gradient(
+    ellipse 50% 50% at 50% 50%,
+    black 40%,
+    transparent 100%
+  );
+  animation: grid-float 20s linear infinite;
+}
+
+@keyframes grid-float {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(32px, 32px);
+  }
+}
+
+/* 💫 장식적 그라데이션 애니메이션 */
+.footer-gradient-orb {
+  animation: float-and-glow 6s ease-in-out infinite;
+}
+
+@keyframes float-and-glow {
+  0%,
+  100% {
+    transform: translateY(0px) scale(1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: translateY(-10px) scale(1.05);
+    opacity: 0.5;
+  }
+}
+
+/* 🎨 푸터 섹션 페이드인 애니메이션 */
+.footer-section-animate {
+  animation: fade-in-up 0.8s ease-out forwards;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.footer-section-animate:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.footer-section-animate:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.footer-section-animate:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.footer-section-animate:nth-child(4) {
+  animation-delay: 0.4s;
+}
+
+@keyframes fade-in-up {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 🌈 서비스 상태 뱃지 */
+.service-badge {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(
+    135deg,
+    rgba(34, 197, 94, 0.1),
+    rgba(34, 197, 94, 0.05)
+  );
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  border-radius: 9999px;
+  padding: 0.25rem 0.75rem;
+  transition: all 0.3s ease;
+}
+
+.service-badge::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(34, 197, 94, 0.1),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+.service-badge:hover::before {
+  left: 100%;
+}
+
+/* 🎯 특색 뱃지들 */
+.feature-badge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.feature-badge:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.feature-badge::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.1),
+    transparent,
+    rgba(255, 255, 255, 0.05)
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.feature-badge:hover::before {
+  opacity: 1;
+}
+
+/* 다크 모드에서 뱃지 조정 */
+.dark .feature-badge {
+  background: rgba(0, 0, 0, 0.2);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark .feature-badge:hover {
+  background: rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* 🎨 푸터 전체 호버 효과 개선 */
+.footer-enhanced {
+  transition: all 0.3s ease;
+}
+
+.footer-enhanced:hover .footer-gradient-orb {
+  animation-duration: 4s;
+}
+
+/* 📱 모바일 최적화 */
+@media (max-width: 768px) {
+  .footer-grid-pattern {
+    background-size: 24px 24px;
+  }
+
+  @keyframes grid-float {
+    0% {
+      transform: translate(0, 0);
+    }
+    100% {
+      transform: translate(24px, 24px);
+    }
+  }
+
+  .brand-logo-hover {
+    font-size: 1.5rem;
+  }
+
+  .feature-badge {
+    font-size: 0.75rem;
+    padding: 0.125rem 0.5rem;
+  }
+}
+
+/* 🌙 다크 모드 푸터 개선 */
+.dark .footer-grid-pattern {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+}
+
+.dark .service-badge {
+  background: linear-gradient(
+    135deg,
+    rgba(34, 197, 94, 0.15),
+    rgba(34, 197, 94, 0.08)
+  );
+  border-color: rgba(34, 197, 94, 0.3);
+}
+
+/* 🚀 접근성 개선 */
+@media (prefers-reduced-motion: reduce) {
+  .footer-grid-pattern,
+  .footer-gradient-orb,
+  .status-indicator,
+  .brand-logo-hover {
+    animation: none !important;
+  }
+
+  .footer-section-animate {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* 고대비 모드 지원 */
+@media (prefers-contrast: high) {
+  .feature-badge {
+    border-width: 2px;
+    background: hsl(var(--background));
+  }
+
+  .service-badge {
+    border-width: 2px;
+    background: hsl(var(--background));
+  }
+}
+
+/* =================================================================
    🔧 모바일 줌인 방지 시스템 - iOS Safari Input Focus 문제 해결
    ================================================================= */
 

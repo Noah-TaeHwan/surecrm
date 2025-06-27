@@ -99,6 +99,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta name="application-name" content="SureCRM" />
         <meta name="mobile-web-app-capable" content="yes" />
 
+        {/* 🔐 Google 도메인 소유권 확인 - OAuth 검증 요구사항 */}
+        <meta
+          name="google-site-verification"
+          content="GOOGLE_VERIFICATION_CODE_PLACEHOLDER"
+        />
+
         <Meta />
         <Links />
 
