@@ -34,16 +34,19 @@ export function AnimatedGridPattern({
 }: AnimatedGridPatternProps) {
   const id = useId();
   const containerRef = useRef(null);
-  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  const [containerDimensions, setContainerDimensions] = useState({
+    width: 0,
+    height: 0,
+  });
   const [squares, setSquares] = useState(() => generateSquares(numSquares));
 
   function getPos() {
-    if (dimensions.width === 0 || dimensions.height === 0) {
+    if (containerDimensions.width === 0 || containerDimensions.height === 0) {
       return [0, 0];
     }
     return [
-      Math.floor((Math.random() * dimensions.width) / width),
-      Math.floor((Math.random() * dimensions.height) / height),
+      Math.floor((Math.random() * containerDimensions.width) / width),
+      Math.floor((Math.random() * containerDimensions.height) / height),
     ];
   }
 
@@ -71,32 +74,66 @@ export function AnimatedGridPattern({
 
   // Update squares to animate in
   useEffect(() => {
-    if (dimensions.width && dimensions.height) {
+    if (containerDimensions.width && containerDimensions.height) {
       setSquares(generateSquares(numSquares));
     }
-  }, [dimensions, numSquares]);
+  }, [containerDimensions, numSquares]);
 
-  // Resize observer to update container dimensions
+  // Resize observer to update container dimensions with debouncing
   useEffect(() => {
+    if (!containerRef.current) return;
+
+    // Resize observer to update container dimensions with debouncing
+    let resizeTimer: NodeJS.Timeout;
     const resizeObserver = new ResizeObserver(entries => {
-      for (let entry of entries) {
-        setDimensions({
-          width: entry.contentRect.width,
-          height: entry.contentRect.height,
-        });
-      }
+      // 디바운싱: 100ms 후에 실행
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        try {
+          for (const entry of entries) {
+            if (entry.target === containerRef.current) {
+              const newWidth = Math.floor(entry.contentRect.width);
+              const newHeight = Math.floor(entry.contentRect.height);
+
+              // 값이 실제로 변경되었을 때만 업데이트
+              if (
+                newWidth !== containerDimensions.width ||
+                newHeight !== containerDimensions.height
+              ) {
+                setContainerDimensions({ width: newWidth, height: newHeight });
+              }
+            }
+          }
+        } catch (error) {
+          console.warn('🔧 AnimatedGridPattern ResizeObserver 오류:', error);
+        }
+      }, 100);
     });
 
-    if (containerRef.current) {
+    try {
       resizeObserver.observe(containerRef.current);
+    } catch (error) {
+      console.warn(
+        '🔧 AnimatedGridPattern ResizeObserver observe 실패:',
+        error
+      );
     }
 
     return () => {
-      if (containerRef.current) {
-        resizeObserver.unobserve(containerRef.current);
+      clearTimeout(resizeTimer);
+      try {
+        if (containerRef.current) {
+          resizeObserver.unobserve(containerRef.current);
+        }
+        resizeObserver.disconnect();
+      } catch (error) {
+        console.warn(
+          '🔧 AnimatedGridPattern ResizeObserver cleanup 오류:',
+          error
+        );
       }
     };
-  }, [containerRef]);
+  }, []); // 빈 의존성 배열로 한 번만 실행
 
   return (
     <svg

@@ -10,7 +10,7 @@ import {
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import { useEffect } from 'react';
-import stylesheet from './app.css?url';
+import './app.css';
 import { initGA, SessionTracking } from '~/lib/utils/analytics';
 import { initEnhancedMeasurement } from '~/lib/utils/ga4-enhanced-measurement';
 import { usePageTracking } from '~/hooks/use-analytics';
@@ -40,7 +40,7 @@ export const links: LinksFunction = () => [
   },
   {
     rel: 'stylesheet',
-    href: stylesheet,
+    href: './app.css',
     // 🔧 중요한 CSS는 즉시 로드
     as: 'style',
   },
@@ -71,9 +71,15 @@ export const links: LinksFunction = () => [
     rel: 'manifest',
     href: '/manifest.json',
   },
+  // CSS 사전 로드 (중요 스타일만)
+  {
+    rel: 'preload',
+    href: '/app.css',
+    as: 'style',
+  },
 ];
 
-export function Layout({ children }: { children: React.ReactNode }) {
+export function Layout() {
   return (
     <html lang="ko" suppressHydrationWarning>
       <head>
@@ -937,14 +943,13 @@ export default function App() {
   useUserRoleTracker();
 
   // 📊 비즈니스 인텔리전스 시스템 활성화 (고급 분석 모드)
-  const { isActive, userInsights, getAnalyticsStream, getCurrentProfile } =
-    useBusinessIntelligence({
-      enableAdvancedAnalytics: true,
-      enableBehavioralTracking: true,
-      enablePerformanceMonitoring: true,
-      enableUserJourneyMapping: true,
-      samplingRate: 0.8, // 80% 샘플링으로 성능 최적화
-    });
+  const { getAnalyticsStream, getCurrentProfile } = useBusinessIntelligence({
+    enableAdvancedAnalytics: true,
+    enableBehavioralTracking: true,
+    enablePerformanceMonitoring: true,
+    enableUserJourneyMapping: true,
+    samplingRate: 0.8, // 80% 샘플링으로 성능 최적화
+  });
 
   // 🚀 iPhone Safari 하단 주소창 대응 전역 초기화
   useEffect(() => {
@@ -1052,7 +1057,12 @@ export default function App() {
   // 페이지 뷰 추적
   usePageTracking();
 
-  return <Outlet />;
+  return (
+    <>
+      <ResizeObserverErrorHandler />
+      <Outlet />
+    </>
+  );
 }
 
 export function ErrorBoundary({ error }: { error: unknown }) {
@@ -1089,4 +1099,53 @@ export function ErrorBoundary({ error }: { error: unknown }) {
       )}
     </main>
   );
+}
+
+// ResizeObserver 오류 핸들러 컴포넌트
+function ResizeObserverErrorHandler() {
+  useEffect(() => {
+    const handleResizeObserverError = (event: ErrorEvent) => {
+      // ResizeObserver 관련 오류 메시지 패턴
+      const resizeObserverErrors = [
+        'ResizeObserver loop limit exceeded',
+        'ResizeObserver loop completed with undelivered notifications',
+        'ResizeObserver maximum depth exceeded',
+      ];
+
+      const isResizeObserverError = resizeObserverErrors.some(errorPattern =>
+        event.message?.includes(errorPattern)
+      );
+
+      if (isResizeObserverError) {
+        // 🔇 ResizeObserver 오류는 로그만 남기고 무시
+        console.warn('🔧 ResizeObserver 오류 감지 (무시됨):', event.message);
+
+        // 오류 전파 중단
+        event.preventDefault();
+        event.stopPropagation();
+
+        // 개발 환경에서 오버레이 숨기기
+        if (import.meta.env.DEV) {
+          const overlay = document.getElementById(
+            'webpack-dev-server-client-overlay'
+          );
+          if (overlay) {
+            overlay.style.display = 'none';
+          }
+        }
+
+        return false; // 오류 처리 완료
+      }
+    };
+
+    // 전역 오류 리스너 등록
+    window.addEventListener('error', handleResizeObserverError);
+
+    // 정리 함수
+    return () => {
+      window.removeEventListener('error', handleResizeObserverError);
+    };
+  }, []);
+
+  return null; // 렌더링하지 않음
 }

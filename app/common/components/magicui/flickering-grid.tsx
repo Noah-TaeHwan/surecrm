@@ -154,30 +154,38 @@ export const FlickeringGrid: React.FC<FlickeringGridProps> = ({
       animationFrameId = requestAnimationFrame(animate);
     };
 
-    const resizeObserver = new ResizeObserver(() => {
-      updateCanvasSize();
-    });
-
-    resizeObserver.observe(container);
-
-    const intersectionObserver = new IntersectionObserver(
-      ([entry]) => {
-        setIsInView(entry.isIntersecting);
-      },
-      { threshold: 0 }
-    );
-
-    intersectionObserver.observe(canvas);
-
     if (isInView) {
       animationFrameId = requestAnimationFrame(animate);
     }
 
-    return () => {
-      cancelAnimationFrame(animationFrameId);
-      resizeObserver.disconnect();
-      intersectionObserver.disconnect();
-    };
+    let resizeTimer: NodeJS.Timeout;
+    const resizeObserver = new ResizeObserver(() => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        updateCanvasSize();
+      }, 100); // 100ms 디바운싱
+    });
+
+    try {
+      resizeObserver.observe(container);
+
+      return () => {
+        cancelAnimationFrame(animationFrameId);
+        clearTimeout(resizeTimer);
+        try {
+          resizeObserver.unobserve(container);
+          resizeObserver.disconnect();
+        } catch (error) {
+          console.warn('🔧 FlickeringGrid ResizeObserver cleanup 오류:', error);
+        }
+      };
+    } catch (error) {
+      console.warn('🔧 FlickeringGrid ResizeObserver 설정 오류:', error);
+      return () => {
+        cancelAnimationFrame(animationFrameId);
+        clearTimeout(resizeTimer);
+      };
+    }
   }, [setupCanvas, updateSquares, drawGrid, width, height, isInView]);
 
   return (
