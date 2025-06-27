@@ -1,4 +1,4 @@
-import { requireAuth } from '~/lib/auth/middleware';
+import { requireAuth } from '~/lib/auth/middleware.server';
 
 export async function action({ request }: { request: Request }) {
   if (request.method !== 'POST') {

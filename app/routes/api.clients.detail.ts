@@ -1,5 +1,5 @@
-import { getClientById } from '~/api/shared/clients';
-import { requireAuth } from '~/lib/auth/middleware';
+import { getClientById } from '~/api/shared/clients.server';
+import { requireAuth } from '~/lib/auth/middleware.server';
 
 export async function loader({ request }: { request: Request }) {
   try {

@@ -5,9 +5,9 @@
  * 감사 로깅: 모든 설정 변경 추적
  */
 
-import { requireAdmin } from '~/lib/auth/middleware';
+import { requireAdmin } from '~/lib/auth/middleware.server';
 import { logAdminAction, validateAdminOperation } from '../lib/utils';
-import { db } from '~/lib/core/db';
+import { db } from '~/lib/core/db.server';
 import { adminSettings } from '~/lib/schema';
 import { eq, desc } from 'drizzle-orm';
 import { AdminHeader } from '../components/admin-header';

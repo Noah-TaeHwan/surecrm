@@ -67,7 +67,7 @@ import {
   getNetworkAnalysis,
   createGratitude,
 } from '../lib/influencers-data';
-import { requireAuth } from '~/lib/auth/middleware';
+import { requireAuth } from '~/lib/auth/middleware.server';
 
 export async function action({ request }: Route.ActionArgs) {
   const user = await requireAuth(request);
@@ -125,8 +125,11 @@ export async function action({ request }: Route.ActionArgs) {
 
 export async function loader({ request }: Route.LoaderArgs) {
   try {
-    // 인증 확인
-    const user = await requireAuth(request);
+    // 🔥 구독 상태 확인 (트라이얼 만료 시 billing 페이지로 리다이렉트)
+    const { requireActiveSubscription } = await import(
+      '~/lib/auth/subscription-middleware.server'
+    );
+    const { user } = await requireActiveSubscription(request);
     const userId = user.id;
 
     // URL에서 기간 파라미터 추출 (확장된 옵션)

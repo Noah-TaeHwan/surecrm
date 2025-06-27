@@ -1,10 +1,11 @@
 // 환경 변수 타입 정의 및 검증
 interface EnvConfig {
-  toss: {
-    clientKey: string;
-    secretKey: string;
+  lemonSqueezy: {
+    apiKey: string;
+    storeId: string;
     webhookSecret: string;
     baseUrl: string;
+    variantId: string;
   };
   payment: {
     mode: 'test' | 'production';
@@ -38,11 +39,12 @@ function getEnvVar(name: string, defaultValue?: string): string {
 }
 
 export const env: EnvConfig = {
-  toss: {
-    clientKey: getEnvVar('TOSS_CLIENT_KEY'),
-    secretKey: getEnvVar('TOSS_SECRET_KEY'),
-    webhookSecret: getEnvVar('TOSS_WEBHOOK_SECRET'),
-    baseUrl: getEnvVar('TOSS_BASE_URL', 'https://api.tosspayments.com'),
+  lemonSqueezy: {
+    apiKey: getEnvVar('LEMONSQUEEZY_API_KEY'),
+    storeId: getEnvVar('LEMONSQUEEZY_STORE_ID'),
+    webhookSecret: getEnvVar('LEMONSQUEEZY_WEBHOOK_SECRET'),
+    baseUrl: getEnvVar('LEMONSQUEEZY_BASE_URL', 'https://api.lemonsqueezy.com'),
+    variantId: getEnvVar('LEMONSQUEEZY_VARIANT_ID', ''),
   },
 
   payment: {
@@ -74,8 +76,8 @@ export const env: EnvConfig = {
 export function validateEnvironment(): void {
   try {
     // 모든 필수 환경 변수가 있는지 확인
-    env.toss.clientKey;
-    env.toss.secretKey;
+    env.lemonSqueezy.apiKey;
+    env.lemonSqueezy.storeId;
     env.service.url;
     env.service.publicUrl;
 

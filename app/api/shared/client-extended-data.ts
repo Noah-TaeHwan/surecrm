@@ -1,6 +1,6 @@
 // 📋 고객 확장 데이터 API
 // 16개 Supabase 테이블 중 핵심 4개 테이블 연동
-import { db } from '~/lib/core/db';
+import { db } from '~/lib/core/db.server';
 import { eq, and, desc, asc } from 'drizzle-orm';
 import {
   clientDetails,

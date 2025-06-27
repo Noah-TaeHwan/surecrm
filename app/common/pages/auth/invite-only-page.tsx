@@ -24,7 +24,7 @@ import {
 import { Alert, AlertDescription } from '~/common/components/ui/alert';
 import { Separator } from '~/common/components/ui/separator';
 import { getInvitationStats } from '~/lib/data/business/invitations';
-import { checkAuthStatus } from '~/lib/auth/core';
+import { checkAuthStatus } from '~/lib/auth/core.server';
 
 // Zod 스키마 정의
 const inviteCodeSchema = z.object({

@@ -34,7 +34,7 @@ import { useFetcher } from 'react-router';
 import type { NotificationPageData } from '../types';
 
 // 데이터 함수 imports
-import { getCurrentUser } from '~/lib/auth/core';
+import { getCurrentUser } from '~/lib/auth/core.server';
 import {
   getUnreadNotificationCount,
   getNotifications,
@@ -56,15 +56,11 @@ export async function loader({
   request,
 }: Route.LoaderArgs): Promise<NotificationPageData> {
   try {
-    // 인증 확인
-    const user = await getCurrentUser(request);
-    if (!user) {
-      return {
-        notifications: [],
-        unreadCount: 0,
-        user: null,
-      };
-    }
+    // 🔥 구독 상태 확인 (트라이얼 만료 시 billing 페이지로 리다이렉트)
+    const { requireActiveSubscription } = await import(
+      '~/lib/auth/subscription-middleware.server'
+    );
+    const { user } = await requireActiveSubscription(request);
 
     // 모든 필요한 데이터를 병렬로 로딩
     const [unreadCount, notifications] = await Promise.all([

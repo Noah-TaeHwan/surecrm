@@ -21,7 +21,7 @@ import {
   setMonthlyGoal,
   deleteGoal,
 } from '../lib/dashboard-data';
-import { requireAuth } from '~/lib/auth/middleware';
+import { requireActiveSubscription } from '~/lib/auth/subscription-middleware.server';
 import { useFetcher, useRevalidator } from 'react-router';
 import { InsuranceAgentEvents } from '~/lib/utils/analytics';
 
@@ -47,8 +47,8 @@ export function meta({ data, params }: Route.MetaArgs) {
 }
 
 export async function loader({ request }: Route.LoaderArgs) {
-  // 인증 확인
-  const user = await requireAuth(request);
+  // 인증 및 구독 상태 확인
+  const { user } = await requireActiveSubscription(request);
 
   try {
     // 🆕 실제 상품 데이터 추가
@@ -198,7 +198,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export async function action({ request }: Route.ActionArgs) {
-  const user = await requireAuth(request);
+  const { user } = await requireActiveSubscription(request);
   const formData = await request.formData();
   const intent = formData.get('intent');
 

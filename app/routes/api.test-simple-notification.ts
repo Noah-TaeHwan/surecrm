@@ -5,7 +5,7 @@ export async function action({ request }: { request: Request }) {
     console.log('🧪 간단한 알림 테스트 시작');
 
     // 직접 데이터베이스에 알림 insert 시도
-    const { db } = await import('~/lib/core/db');
+    const { db } = await import('~/lib/core/db.server');
     const { appNotificationQueue } = await import(
       '~/features/notifications/lib/schema'
     );

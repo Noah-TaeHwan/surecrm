@@ -1,5 +1,5 @@
 import { redirect } from 'react-router';
-import { getCurrentUser } from './core';
+import { getCurrentUser } from './core.server';
 import { getUserId } from './session';
 
 /**

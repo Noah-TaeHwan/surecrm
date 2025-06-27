@@ -1,4 +1,4 @@
-import { requireAuth } from '~/lib/auth/middleware';
+import { requireAuth } from '~/lib/auth/middleware.server';
 import { createServerClient } from '~/lib/core/supabase';
 
 export async function loader({ request }: { request: Request }) {

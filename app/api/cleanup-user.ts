@@ -20,7 +20,7 @@ import {
 } from './shared/utils';
 import { ERROR_CODES, HTTP_STATUS } from './shared/types';
 import { createAdminClient } from '~/lib/core/supabase';
-import { db } from '~/lib/core/db';
+import { db } from '~/lib/core/db.server';
 import {
   profiles,
   clients,

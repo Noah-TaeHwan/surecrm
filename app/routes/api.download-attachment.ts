@@ -1,6 +1,6 @@
-import { requireAuth } from '~/lib/auth/middleware';
+import { requireAuth } from '~/lib/auth/middleware.server';
 import { createAdminClient } from '~/lib/core/supabase';
-import { db } from '~/lib/core/db';
+import { db } from '~/lib/core/db.server';
 import { contractAttachments } from '~/lib/schema/core';
 import { eq, and } from 'drizzle-orm';
 

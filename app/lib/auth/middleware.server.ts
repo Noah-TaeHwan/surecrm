@@ -1,5 +1,5 @@
 import { redirect } from 'react-router';
-import { getCurrentUser } from './core';
+import { getCurrentUser } from './core.server';
 
 /**
  * 인증이 필요한 라우트에서 사용하는 미들웨어

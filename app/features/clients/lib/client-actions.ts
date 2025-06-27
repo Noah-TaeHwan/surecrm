@@ -1,5 +1,5 @@
 import type { Route } from '../pages/+types/client-detail-page';
-import { requireAuth } from '~/lib/auth/middleware';
+import { requireAuth } from '~/lib/auth/middleware.server';
 
 export async function updateClientAction(
   request: Request,
@@ -782,7 +782,7 @@ export async function deleteConsultationNoteAction(
 
   try {
     // 상담 기록 삭제 함수 구현
-    const { db } = await import('~/lib/core/db');
+    const { db } = await import('~/lib/core/db.server');
     const { appClientConsultationNotes } = await import(
       '~/features/clients/lib/schema'
     );

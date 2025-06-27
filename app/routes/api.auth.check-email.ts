@@ -17,7 +17,7 @@ import {
   getUserAgent,
 } from '~/api/shared/utils';
 import { createAdminClient } from '~/lib/core/supabase';
-import { db } from '~/lib/core/db';
+import { db } from '~/lib/core/db.server';
 import { profiles } from '~/lib/schema';
 import { eq } from 'drizzle-orm';
 

@@ -1,5 +1,5 @@
-import { requireAuth } from '~/lib/auth/middleware';
-import { db } from '~/lib/core/db';
+import { requireAuth } from '~/lib/auth/middleware.server';
+import { db } from '~/lib/core/db.server';
 import { profiles } from '~/lib/schema/core';
 import { eq } from 'drizzle-orm';
 

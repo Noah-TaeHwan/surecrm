@@ -1,4 +1,4 @@
-import { db } from '~/lib/core/db';
+import { db } from '~/lib/core/db.server';
 import { eq, desc, and, or, count, sql } from 'drizzle-orm';
 import {
   appNotificationQueue,

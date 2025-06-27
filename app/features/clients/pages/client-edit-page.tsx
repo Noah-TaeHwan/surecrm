@@ -8,7 +8,7 @@ import { ClientEditForm } from '../components/client-edit-form';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { requireAuth } from '~/lib/auth/middleware';
+import { requireAuth } from '~/lib/auth/middleware.server';
 import { Separator } from '~/common/components/ui/separator';
 
 // 📝 고객 편집 폼 스키마
@@ -31,13 +31,7 @@ const clientEditSchema = z.object({
 
 type ClientEditFormData = z.infer<typeof clientEditSchema>;
 
-export async function loader({
-  request,
-  params,
-}: {
-  request: Request;
-  params: { id: string };
-}) {
+export async function loader({ request, params }: any) {
   const { id: clientId } = params;
 
   console.log('🔍 고객 편집 페이지 loader 시작:', { clientId });
@@ -48,8 +42,11 @@ export async function loader({
   }
 
   try {
-    // 🎯 실제 로그인된 보험설계사 정보 가져오기
-    const user = await requireAuth(request);
+    // 🔥 구독 상태 확인 (트라이얼 만료 시 billing 페이지로 리다이렉트)
+    const { requireActiveSubscription } = await import(
+      '~/lib/auth/subscription-middleware.server'
+    );
+    const { user } = await requireActiveSubscription(request);
     const agentId = user.id;
 
     console.log('👤 로그인된 보험설계사:', {
@@ -58,7 +55,7 @@ export async function loader({
     });
 
     // 🎯 실제 API 호출로 고객 상세 정보 조회
-    const { getClientById } = await import('~/api/shared/clients');
+    const { getClientById } = await import('~/api/shared/clients.server');
 
     console.log('📞 API 호출 시작:', { clientId, agentId });
 
@@ -93,13 +90,7 @@ export async function loader({
   }
 }
 
-export async function action({
-  request,
-  params,
-}: {
-  request: Request;
-  params: { id: string };
-}) {
+export async function action({ request, params }: any) {
   const { id: clientId } = params;
 
   if (!clientId) {
@@ -116,7 +107,7 @@ export async function action({
     console.log('📝 고객 정보 업데이트 시작:', { clientId, updateData });
 
     // 🎯 실제 API 호출로 고객 정보 업데이트
-    const { updateClient } = await import('~/api/shared/clients');
+    const { updateClient } = await import('~/api/shared/clients.server');
 
     const result = await updateClient(clientId, updateData, agentId);
 
@@ -146,7 +137,7 @@ export async function action({
   }
 }
 
-export function meta({ data }: { data: any }) {
+export function meta({ data }: any) {
   const clientName = data?.client?.fullName || '고객';
   return [
     { title: `${clientName} 편집 - SureCRM` },
@@ -154,13 +145,7 @@ export function meta({ data }: { data: any }) {
   ];
 }
 
-export default function ClientEditPage({
-  loaderData,
-  actionData,
-}: {
-  loaderData: any;
-  actionData?: any;
-}) {
+export default function ClientEditPage({ loaderData, actionData }: any) {
   const { client } = loaderData;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();

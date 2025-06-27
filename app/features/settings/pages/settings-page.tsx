@@ -7,7 +7,7 @@ namespace Route {
 }
 
 import { MainLayout } from '~/common/layouts/main-layout';
-import { getCurrentUser } from '~/lib/auth/core';
+import { getCurrentUser } from '~/lib/auth/core.server';
 import {
   getUserProfile,
   updateUserProfile,
@@ -64,9 +64,6 @@ import {
 import { useState, useEffect } from 'react';
 import { Form } from 'react-router';
 import { GoogleCalendarService } from '~/features/calendar/lib/google-calendar-service';
-import { eq } from 'drizzle-orm';
-import { db } from '~/lib/core/db';
-import { appCalendarSettings } from '~/features/calendar/lib/schema';
 
 // 설정 페이지 데이터 타입
 interface SettingsPageData {
@@ -111,34 +108,11 @@ export async function loader({
   console.log('설정 페이지 로드 시작');
 
   try {
-    // 인증 확인
-    const user = await getCurrentUser(request);
-    if (!user) {
-      console.log('인증 실패 - 로그인이 필요합니다');
-      return {
-        userProfile: {
-          id: 'guest',
-          name: '게스트',
-          email: '',
-          phone: '',
-          company: '',
-          position: '',
-          createdAt: new Date().toISOString(),
-        },
-        notificationSettings: {
-          emailNotifications: false,
-        },
-        calendarSettings: {
-          googleCalendarSync: false,
-          syncDirection: 'bidirectional' as const,
-          conflictResolution: 'manual' as const,
-          autoSyncInterval: 15,
-          lastSyncAt: undefined,
-          syncStatus: 'disconnected' as const,
-        },
-        user: null,
-      };
-    }
+    // 🔥 구독 상태 확인 (트라이얼 만료 시 billing 페이지로 리다이렉트)
+    const { requireActiveSubscription } = await import(
+      '~/lib/auth/subscription-middleware.server'
+    );
+    const { user } = await requireActiveSubscription(request);
 
     console.log('인증 성공:', user.email);
 
@@ -310,6 +284,12 @@ export async function action({ request }: Route.ActionArgs) {
           }
 
           // 캘린더 설정 업데이트
+          const { db } = await import('~/lib/core/db.server');
+          const { appCalendarSettings } = await import(
+            '~/features/calendar/lib/schema'
+          );
+          const { eq } = await import('drizzle-orm');
+
           await db
             .update(appCalendarSettings)
             .set({

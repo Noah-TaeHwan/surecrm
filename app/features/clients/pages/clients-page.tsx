@@ -2,7 +2,7 @@ import { MainLayout } from '~/common/layouts/main-layout';
 import { useState, useMemo, useEffect } from 'react';
 import { useFetcher, useNavigate } from 'react-router';
 import { z } from 'zod';
-// Route 타입은 라우트 파일에서 자동 생성됨
+import type { Route } from './+types/clients-page';
 import type {
   Client,
   AppClientTag,
@@ -199,33 +199,16 @@ export async function loader({ request }: { request: Request }) {
   try {
     console.log('🔄 Loader: 고객 목록 로딩 중...');
 
-    // 🎯 실제 사용자 ID 가져오기
-    const { getCurrentUser } = await import('~/lib/auth/core');
-    const user = await getCurrentUser(request);
-
-    if (!user) {
-      console.error('❌ Loader: 인증되지 않은 사용자');
-      return {
-        clients: [],
-        stats: {
-          totalClients: 0,
-          newThisMonth: 0,
-          activeDeals: 0,
-          totalRevenue: 0,
-          conversionRate: 0,
-          topStages: [],
-        },
-        pagination: {
-          total: 0,
-          page: 1,
-          totalPages: 0,
-        },
-        currentUser: null,
-      };
-    }
+    // 🎯 구독 상태 확인 (트라이얼 만료 시 billing 페이지로 리다이렉트)
+    const { requireActiveSubscription } = await import(
+      '~/lib/auth/subscription-middleware.server'
+    );
+    const { user } = await requireActiveSubscription(request);
 
     // 🎯 실제 API 호출
-    const { getClients, getClientStats } = await import('~/api/shared/clients');
+    const { getClients, getClientStats } = await import(
+      '~/api/shared/clients.server'
+    );
 
     // 병렬로 데이터 조회
     const [clientsResponse, statsResponse] = await Promise.all([
@@ -360,7 +343,7 @@ export async function action({ request }: { request: Request }) {
     console.log('🔄 Action: 고객 관리 액션 시작');
 
     // 실제 사용자 ID 가져오기
-    const { getCurrentUser } = await import('~/lib/auth/core');
+    const { getCurrentUser } = await import('~/lib/auth/core.server');
     const user = await getCurrentUser(request);
 
     if (!user) {
@@ -377,7 +360,7 @@ export async function action({ request }: { request: Request }) {
       console.log('➕ Action: 고객 생성 시작');
 
       // 서버사이드에서만 API 호출
-      const { createClient } = await import('~/api/shared/clients');
+      const { createClient } = await import('~/api/shared/clients.server');
       const { getPipelineStages } = await import(
         '~/features/pipeline/lib/supabase-pipeline-data'
       );
@@ -888,12 +871,22 @@ export default function ClientsPage({ loaderData }: { loaderData: any }) {
     if (!selectedClient) return;
 
     try {
-      // 🎯 실제 API 호출 (Phase 3에서 완전 구현)
-      const { deleteClient } = await import('~/api/shared/clients');
+      // 🎯 클라이언트에서 API 호출
+      const response = await fetch(`/api/clients/delete`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          clientId: selectedClient.id,
+          userId: loaderData.userId,
+        }),
+      });
 
-      const result = await deleteClient(selectedClient.id, loaderData.userId);
-      if (result.success) {
-        console.log('고객 삭제 성공:', result.data);
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        console.log('✅ 고객 삭제 성공:', result.data);
         alert(
           `${selectedClient.fullName} 고객이 삭제되었습니다.\n(Phase 3에서 실제 페이지 새로고침 및 연관 데이터 정리 구현 예정)`
         );
@@ -906,12 +899,13 @@ export default function ClientsPage({ loaderData }: { loaderData: any }) {
         setShowDeleteConfirmModal(false);
         setSelectedClient(null);
         // TODO: Phase 3에서 페이지 데이터 새로고침 구현
+        window.location.reload();
       } else {
-        console.error('고객 삭제 실패:', result.message);
+        console.error('❌ 고객 삭제 실패:', result.error);
         alert(result.message || '고객 삭제에 실패했습니다.');
       }
     } catch (error) {
-      console.error('고객 삭제 오류:', error);
+      console.error('❌ API 호출 오류:', error);
       alert('고객 삭제 중 오류가 발생했습니다.');
     }
   };

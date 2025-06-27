@@ -1,4 +1,4 @@
-import { db } from '../../core/db';
+import { db } from '../../core/db.server';
 import { profiles, teams, clients, invitations } from '../../schema';
 import { count, eq, gte, lt, and, sql } from 'drizzle-orm';
 

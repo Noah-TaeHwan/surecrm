@@ -5,9 +5,9 @@
  * 실시간 보안: 의심스러운 활동 패턴 감지
  */
 
-import { requireAdmin } from '~/lib/auth/middleware';
+import { requireAdmin } from '~/lib/auth/middleware.server';
 import { logAdminAction } from '../lib/utils';
-import { db } from '~/lib/core/db';
+import { db } from '~/lib/core/db.server';
 import { adminAuditLogs } from '~/lib/schema';
 import { desc, count, and, gte, like } from 'drizzle-orm';
 import { AdminHeader } from '../components/admin-header';

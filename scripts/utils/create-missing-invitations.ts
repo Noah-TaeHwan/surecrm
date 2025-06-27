@@ -1,4 +1,4 @@
-import { db } from '~/lib/core/db';
+import { db } from '~/lib/core/db.server';
 import { profiles, invitations } from '~/lib/schema/core';
 import { createInitialInvitations } from '~/features/invitations/lib/invitations-data';
 import { eq, isNull } from 'drizzle-orm';

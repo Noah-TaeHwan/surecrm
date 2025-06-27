@@ -1,6 +1,6 @@
 {
-  "id": "652518a3-c0ea-4902-ad63-b6836a0c7579",
-  "prevId": "c87651dd-cdd0-4e20-a0f8-df40d2d9242b",
+  "id": "0d3f7482-d7c4-4d53-98a0-dcf3a8b21d25",
+  "prevId": "652518a3-c0ea-4902-ad63-b6836a0c7579",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -1371,7 +1371,7 @@
           "name": "client_id",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "agent_id": {
           "name": "agent_id",
@@ -1396,7 +1396,7 @@
           "type": "app_meeting_type_enum",
           "typeSchema": "public",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "status": {
           "name": "status",
@@ -1439,61 +1439,56 @@
         },
         "priority": {
           "name": "priority",
-          "type": "app_meeting_priority_enum",
-          "typeSchema": "public",
+          "type": "text",
           "primaryKey": false,
           "notNull": false,
           "default": "'medium'"
         },
         "expected_outcome": {
           "name": "expected_outcome",
-          "type": "app_meeting_expected_outcome_enum",
-          "typeSchema": "public",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
         "contact_method": {
           "name": "contact_method",
-          "type": "app_meeting_contact_method_enum",
-          "typeSchema": "public",
+          "type": "text",
           "primaryKey": false,
           "notNull": false,
-          "default": "'phone'"
+          "default": "'in_person'"
         },
         "estimated_commission": {
           "name": "estimated_commission",
-          "type": "integer",
+          "type": "numeric(12, 0)",
           "primaryKey": false,
           "notNull": false
         },
         "product_interest": {
           "name": "product_interest",
-          "type": "app_meeting_product_interest_enum",
-          "typeSchema": "public",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
-        "reminder": {
-          "name": "reminder",
-          "type": "app_calendar_reminder_type_enum",
-          "typeSchema": "public",
+        "sync_to_google": {
+          "name": "sync_to_google",
+          "type": "boolean",
           "primaryKey": false,
           "notNull": false,
-          "default": "'30_minutes'"
+          "default": false
         },
         "send_client_invite": {
           "name": "send_client_invite",
           "type": "boolean",
           "primaryKey": false,
           "notNull": false,
-          "default": true
+          "default": false
         },
-        "google_meet_enabled": {
-          "name": "google_meet_enabled",
-          "type": "boolean",
+        "reminder": {
+          "name": "reminder",
+          "type": "text",
           "primaryKey": false,
           "notNull": false,
-          "default": false
+          "default": "'30_minutes'"
         },
         "created_at": {
           "name": "created_at",
@@ -1847,6 +1842,38 @@
           "primaryKey": false,
           "notNull": true,
           "default": true
+        },
+        "subscription_status": {
+          "name": "subscription_status",
+          "type": "app_subscription_status_enum",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'trial'"
+        },
+        "trial_ends_at": {
+          "name": "trial_ends_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "subscription_ends_at": {
+          "name": "subscription_ends_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "lemonsqueezy_subscription_id": {
+          "name": "lemonsqueezy_subscription_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "lemonsqueezy_customer_id": {
+          "name": "lemonsqueezy_customer_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         },
         "created_at": {
           "name": "created_at",
@@ -12228,18 +12255,6 @@
     }
   },
   "enums": {
-    "public.app_calendar_reminder_type_enum": {
-      "name": "app_calendar_reminder_type_enum",
-      "schema": "public",
-      "values": [
-        "none",
-        "5_minutes",
-        "15_minutes",
-        "30_minutes",
-        "1_hour",
-        "1_day"
-      ]
-    },
     "public.app_contract_document_type_enum": {
       "name": "app_contract_document_type_enum",
       "schema": "public",
@@ -12318,53 +12333,6 @@
         "cancelled"
       ]
     },
-    "public.app_meeting_contact_method_enum": {
-      "name": "app_meeting_contact_method_enum",
-      "schema": "public",
-      "values": [
-        "phone",
-        "video",
-        "in_person",
-        "hybrid"
-      ]
-    },
-    "public.app_meeting_expected_outcome_enum": {
-      "name": "app_meeting_expected_outcome_enum",
-      "schema": "public",
-      "values": [
-        "information_gathering",
-        "needs_analysis",
-        "proposal_presentation",
-        "objection_handling",
-        "contract_discussion",
-        "closing",
-        "relationship_building"
-      ]
-    },
-    "public.app_meeting_priority_enum": {
-      "name": "app_meeting_priority_enum",
-      "schema": "public",
-      "values": [
-        "low",
-        "medium",
-        "high",
-        "urgent"
-      ]
-    },
-    "public.app_meeting_product_interest_enum": {
-      "name": "app_meeting_product_interest_enum",
-      "schema": "public",
-      "values": [
-        "life",
-        "health",
-        "auto",
-        "prenatal",
-        "property",
-        "pension",
-        "investment",
-        "multiple"
-      ]
-    },
     "public.app_meeting_status_enum": {
       "name": "app_meeting_status_enum",
       "schema": "public",
@@ -12403,6 +12371,17 @@
       "values": [
         "active",
         "inactive"
+      ]
+    },
+    "public.app_subscription_status_enum": {
+      "name": "app_subscription_status_enum",
+      "schema": "public",
+      "values": [
+        "trial",
+        "active",
+        "past_due",
+        "cancelled",
+        "expired"
       ]
     },
     "public.app_theme_enum": {
@@ -12492,6 +12471,18 @@
         "weekly",
         "monthly",
         "yearly"
+      ]
+    },
+    "public.app_calendar_reminder_type_enum": {
+      "name": "app_calendar_reminder_type_enum",
+      "schema": "public",
+      "values": [
+        "none",
+        "5_minutes",
+        "15_minutes",
+        "30_minutes",
+        "1_hour",
+        "1_day"
       ]
     },
     "public.app_calendar_sync_status_enum": {

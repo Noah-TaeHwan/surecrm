@@ -1,5 +1,5 @@
 // 🏥 SureCRM - 고객 관리 API (실제 데이터베이스 연동)
-import { db } from '~/lib/core/db';
+import { db } from '~/lib/core/db.server';
 import {
   clients,
   insuranceInfo,

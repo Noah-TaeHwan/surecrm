@@ -1,4 +1,4 @@
-import { db } from '~/lib/core/db';
+import { db } from '~/lib/core/db.server';
 import { eq, and, gte, lte, sql, isNull } from 'drizzle-orm';
 import { clients, pipelineStages } from '~/lib/schema/core';
 import { clientDetails } from '~/features/clients/lib/schema';

@@ -1,4 +1,4 @@
-import { db } from '~/lib/core/db';
+import { db } from '~/lib/core/db.server';
 import { createNotification } from './notifications-data';
 
 // 🧪 실제 알림 데이터를 생성해서 시스템을 테스트하는 함수들

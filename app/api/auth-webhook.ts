@@ -16,7 +16,7 @@ import {
 } from './shared/utils';
 import { ERROR_CODES, HTTP_STATUS } from './shared/types';
 import { validateWebhookRequest } from './shared/auth';
-import { db } from '~/lib/core/db';
+import { db } from '~/lib/core/db.server';
 import { profiles, invitations } from '~/lib/schema';
 import { eq } from 'drizzle-orm';
 import { createInvitationsForUser } from '~/lib/data/business/invitations';
@@ -186,7 +186,10 @@ async function handleEmailConfirmation(user: UserRecord) {
       profile = updatedProfile[0];
       console.log('기존 프로필 업데이트 완료:', profile.id);
     } else {
-      // 새 프로필 생성
+      // 새 프로필 생성 - 14일 무료 체험 자동 설정
+      const now = new Date();
+      const trialEndDate = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000); // 14일 후
+
       const newProfile = await db
         .insert(profiles)
         .values({
@@ -198,6 +201,8 @@ async function handleEmailConfirmation(user: UserRecord) {
           invitedById: invitation.inviterId,
           role: 'agent',
           isActive: true,
+          subscriptionStatus: 'trial',
+          trialEndsAt: trialEndDate,
           createdAt: new Date(),
           updatedAt: new Date(),
         })

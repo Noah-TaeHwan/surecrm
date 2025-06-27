@@ -1,4 +1,4 @@
-import { db } from '~/lib/core/db';
+import { db } from '~/lib/core/db.server';
 import {
   appNotificationSettings,
   appNotificationTemplates,

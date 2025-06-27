@@ -1,4 +1,4 @@
-import { db } from '~/lib/core/db';
+import { db } from '~/lib/core/db.server';
 import { eq, desc, asc, and, count } from 'drizzle-orm';
 import {
   pipelineStages,

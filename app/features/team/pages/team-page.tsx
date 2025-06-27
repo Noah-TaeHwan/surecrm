@@ -21,12 +21,15 @@ import {
   removeTeamMember,
   resendInvitation,
 } from '../lib/supabase-team-data';
-import { requireAuth } from '~/lib/auth/middleware';
+import { requireAuth } from '~/lib/auth/middleware.server';
 
 export async function loader({ request }: Route.LoaderArgs) {
   try {
-    // 인증 확인
-    const user = await requireAuth(request);
+    // 🔥 구독 상태 확인 (트라이얼 만료 시 billing 페이지로 리다이렉트)
+    const { requireActiveSubscription } = await import(
+      '~/lib/auth/subscription-middleware.server'
+    );
+    const { user } = await requireActiveSubscription(request);
 
     // 실제 팀 데이터 조회
     const [teamMembersData, teamStats] = await Promise.all([

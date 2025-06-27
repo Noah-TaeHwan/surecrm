@@ -1,6 +1,6 @@
 import { redirect } from 'react-router';
 import SignupPage from '~/common/pages/auth/signup-page';
-import { checkAuthStatus } from '~/lib/auth/core';
+import { checkAuthStatus } from '~/lib/auth/core.server';
 import { signUpUser } from '~/lib/auth/registration';
 
 // 직접 타입 정의

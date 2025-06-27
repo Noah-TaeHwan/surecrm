@@ -1,5 +1,5 @@
 import type { Route } from './+types/auth-me';
-import { requireAuth } from '~/lib/auth/middleware';
+import { requireAuth } from '~/lib/auth/middleware.server';
 import { createServerClient } from '~/lib/core/supabase';
 
 // 🎯 현재 로그인한 사용자 정보 반환 API

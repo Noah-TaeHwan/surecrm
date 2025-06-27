@@ -1,5 +1,5 @@
 import { google, calendar_v3 } from 'googleapis';
-import { db } from '~/lib/core/db';
+import { db } from '~/lib/core/db.server';
 import { appCalendarSettings, appCalendarSyncLogs, meetings } from './schema';
 import { eq, desc, and } from 'drizzle-orm';
 import type { Meeting } from '~/lib/schema/core';

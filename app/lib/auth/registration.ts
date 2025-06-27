@@ -1,5 +1,5 @@
 import { createServerClient } from '../core/supabase';
-import { db } from '../core/db';
+import { db } from '../core/db.server';
 import { profiles, invitations } from '../schema';
 import { eq } from 'drizzle-orm';
 import { createInvitationsForUser } from '../data/business/invitations';
@@ -275,7 +275,10 @@ export async function completeUserRegistration(
 
     let profile;
     if (existingProfile.length > 0) {
-      // 기존 프로필 업데이트
+      // 기존 프로필 업데이트 - 체험 기간도 설정
+      const now = new Date();
+      const trialEndDate = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000); // 14일 후
+
       const updatedProfile = await db
         .update(profiles)
         .set({
@@ -284,6 +287,8 @@ export async function completeUserRegistration(
           company: signUpData.company,
           invitedById: invitation.inviterId,
           isActive: true, // 이메일 인증 완료로 활성화
+          subscriptionStatus: 'trial',
+          trialEndsAt: trialEndDate,
         })
         .where(eq(profiles.id, userId))
         .returning();
@@ -293,7 +298,10 @@ export async function completeUserRegistration(
       }
       profile = updatedProfile[0];
     } else {
-      // 새 프로필 생성
+      // 새 프로필 생성 - 14일 무료 체험 자동 설정
+      const now = new Date();
+      const trialEndDate = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000); // 14일 후
+
       const newProfile = await db
         .insert(profiles)
         .values({
@@ -304,6 +312,8 @@ export async function completeUserRegistration(
           invitedById: invitation.inviterId,
           role: 'agent',
           isActive: true,
+          subscriptionStatus: 'trial',
+          trialEndsAt: trialEndDate,
         })
         .returning();
 

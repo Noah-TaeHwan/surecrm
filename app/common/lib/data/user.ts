@@ -1,4 +1,4 @@
-import { db } from '~/lib/core/db';
+import { db } from '~/lib/core/db.server';
 import { eq, count, and, gte } from 'drizzle-orm';
 import { profiles } from '~/lib/schema';
 

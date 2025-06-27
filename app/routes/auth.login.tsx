@@ -1,6 +1,6 @@
 import { redirect } from 'react-router';
 import LoginPage from '~/common/pages/auth/login-page';
-import { checkAuthStatus, authenticateUser } from '~/lib/auth/core';
+import { checkAuthStatus, authenticateUser } from '~/lib/auth/core.server';
 import { createUserSession } from '~/lib/auth/session';
 
 // 직접 타입 정의

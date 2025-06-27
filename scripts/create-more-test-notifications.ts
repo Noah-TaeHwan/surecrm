@@ -2,7 +2,7 @@
  * 🧪 추가 다양한 테스트 알림 생성 스크립트
  */
 
-import { db } from '../app/lib/core/db';
+import { db } from '../app/lib/core/db.server';
 import { profiles } from '../app/lib/schema/core';
 import { appNotificationQueue } from '../app/features/notifications/lib/schema';
 import { eq } from 'drizzle-orm';

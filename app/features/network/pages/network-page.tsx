@@ -38,7 +38,7 @@ import type {
 
 // 실제 데이터베이스 함수들 import
 import { getNetworkData, searchNetwork } from '../lib/network-data';
-import { requireAuth } from '~/lib/auth/middleware';
+import { requireAuth } from '~/lib/auth/middleware.server';
 
 // 아이콘 import 추가
 import {
@@ -53,8 +53,11 @@ import {
 
 export async function loader({ request }: Route.LoaderArgs) {
   try {
-    // 인증 확인
-    const user = await requireAuth(request);
+    // 🔥 구독 상태 확인 (트라이얼 만료 시 billing 페이지로 리다이렉트)
+    const { requireActiveSubscription } = await import(
+      '~/lib/auth/subscription-middleware.server'
+    );
+    const { user } = await requireActiveSubscription(request);
 
     // 실제 네트워크 데이터 조회
     const networkData = await getNetworkData(user.id);
@@ -66,7 +69,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     const stages = await getPipelineStages(user.id);
 
     // 모든 활성 클라이언트의 상세 정보 조회
-    const { db } = await import('~/lib/core/db');
+    const { db } = await import('~/lib/core/db.server');
     const { clients, clientDetails, pipelineStages, profiles } = await import(
       '~/lib/schema/core'
     );
@@ -141,7 +144,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 
       // 소개한 고객들 찾기
       const referredClients = clientsWithDetails.filter(
-        c => c.referredById === client.id
+        (c: any) => c.referredById === client.id
       );
       referralData.set(client.id, {
         referredBy: client.referredById
@@ -356,7 +359,9 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
     return {
       nodes: nodes.map(node => {
         // 실제 고객 데이터에서 영업 단계 정보 찾기
-        const clientData = clientsData.find(client => client.id === node.id);
+        const clientData = clientsData.find(
+          (client: any) => client.id === node.id
+        );
 
         return {
           id: node.id,

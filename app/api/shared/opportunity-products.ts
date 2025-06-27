@@ -1,6 +1,6 @@
 // 🆕 영업 기회 상품 정보 관리 API
 import { eq, and, inArray, gte, lte } from 'drizzle-orm';
-import { db } from '~/lib/core/db';
+import { db } from '~/lib/core/db.server';
 import { opportunityProducts } from '~/lib/schema/core';
 import type {
   NewOpportunityProduct,

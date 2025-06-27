@@ -39,8 +39,7 @@ import { InvitedColleagues } from '../components/invited-colleagues';
 // 타입 imports
 import type { Invitation } from '../types';
 
-// 인증, 통계, 초대장 목록 함수 import (단계적 복구)
-import { requireAuth } from '~/lib/auth/middleware';
+// 통계, 초대장 목록 함수 import
 import {
   getInvitationStats,
   getUserInvitations,
@@ -53,8 +52,11 @@ export async function loader({ request }: Route.LoaderArgs) {
   console.log('초대장 페이지 로드 시작');
 
   try {
-    // 인증 확인
-    const user = await requireAuth(request);
+    // 구독 상태 확인 (트라이얼 만료 시 billing 페이지로 리다이렉트)
+    const { requireActiveSubscription } = await import(
+      '~/lib/auth/subscription-middleware.server'
+    );
+    const { user } = await requireActiveSubscription(request);
     const userId = user.id;
 
     // 모든 필요한 데이터를 병렬로 로딩

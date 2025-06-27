@@ -5,14 +5,14 @@
  * 감사 로깅: 모든 Admin 작업 추적
  */
 
-import { requireAdmin } from '~/lib/auth/middleware';
+import { requireAdmin } from '~/lib/auth/middleware.server';
 import { createInvitationsForUser } from '~/lib/data/business/invitations';
 import {
   logAdminAction,
   validateAdminOperation,
   getAdminStats,
 } from '../lib/utils';
-import { db } from '~/lib/core/db';
+import { db } from '~/lib/core/db.server';
 import { invitations, profiles } from '~/lib/schema';
 import { eq } from 'drizzle-orm';
 import { AdminHeader } from '../components/admin-header';

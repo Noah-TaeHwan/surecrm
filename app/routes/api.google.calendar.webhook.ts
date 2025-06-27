@@ -1,7 +1,7 @@
 import type { ActionFunctionArgs } from 'react-router';
 import { data } from 'react-router';
 import { GoogleCalendarService } from '~/features/calendar/lib/google-calendar-service';
-import { db } from '~/lib/core/db';
+import { db } from '~/lib/core/db.server';
 import { appCalendarSyncLogs } from '~/features/calendar/lib/schema';
 
 // 🔔 구글 캘린더 웹훅 처리

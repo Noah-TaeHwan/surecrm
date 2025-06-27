@@ -23,7 +23,7 @@ import {
   FormMessage,
 } from '~/common/components/ui/form';
 import { Alert, AlertDescription } from '~/common/components/ui/alert';
-import { checkAuthStatus } from '~/lib/auth/core';
+import { checkAuthStatus } from '~/lib/auth/core.server';
 import { signUpUser } from '~/lib/auth/registration';
 
 // Zod 스키마 정의

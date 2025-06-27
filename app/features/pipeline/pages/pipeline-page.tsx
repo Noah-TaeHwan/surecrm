@@ -43,7 +43,7 @@ import {
   getClientsByStage,
   createDefaultPipelineStages,
 } from '~/features/pipeline/lib/supabase-pipeline-data';
-import { requireAuth } from '~/lib/auth/middleware';
+import { requireAuth } from '~/lib/auth/middleware.server';
 import { redirect } from 'react-router';
 
 export function meta({ data, params }: Route.MetaArgs) {
@@ -129,7 +129,7 @@ export async function loader({ request }: Route.LoaderArgs) {
       allClients = clientsWithProducts;
 
       // 🎯 전체 고객 수 조회 (파이프라인에 없는 고객 포함)
-      const { getClients } = await import('~/api/shared/clients');
+      const { getClients } = await import('~/api/shared/clients.server');
       const allClientsResult = await getClients({
         agentId,
         limit: 1000, // 충분히 큰 숫자
@@ -210,7 +210,7 @@ export async function action({ request }: Route.ActionArgs) {
       }
 
       // 🎯 실제 Supabase API 호출
-      const { createClient } = await import('~/api/shared/clients');
+      const { createClient } = await import('~/api/shared/clients.server');
 
       const newClientData = {
         fullName: clientData.fullName,
@@ -256,7 +256,7 @@ export async function action({ request }: Route.ActionArgs) {
       }
 
       // 🎯 실제 Supabase API 호출
-      const { updateClientStage } = await import('~/api/shared/clients');
+      const { updateClientStage } = await import('~/api/shared/clients.server');
 
       const result = await updateClientStage(clientId, targetStageId, user.id);
 
@@ -307,7 +307,7 @@ export async function action({ request }: Route.ActionArgs) {
 
       // 고객 정보 업데이트 및 단계 이동
       const { updateClient, updateClientStage } = await import(
-        '~/api/shared/clients'
+        '~/api/shared/clients.server'
       );
 
       // 영업 기회 메모 추가
@@ -345,7 +345,7 @@ export async function action({ request }: Route.ActionArgs) {
       }
 
       // 현재 고객 정보 조회해서 기존 메모에 추가
-      const { getClientById } = await import('~/api/shared/clients');
+      const { getClientById } = await import('~/api/shared/clients.server');
       const existingClient = await getClientById(clientId, user.id);
 
       const updateData = {
@@ -445,7 +445,7 @@ export async function action({ request }: Route.ActionArgs) {
       }
 
       // 🎯 고객을 "제외됨" 단계로 이동
-      const { updateClientStage } = await import('~/api/shared/clients');
+      const { updateClientStage } = await import('~/api/shared/clients.server');
 
       const result = await updateClientStage(
         clientId,

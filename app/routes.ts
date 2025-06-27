@@ -49,6 +49,8 @@ export default [
 
   // 📈 보고서 & 설정
   route('reports', 'features/reports/pages/reports-page.tsx'),
+  route('billing', 'routes/billing.tsx'),
+  route('billing/success', 'routes/billing.success.tsx'),
   route('billing/subscribe', 'routes/billing.subscribe.tsx'),
   route('settings', 'features/settings/pages/settings-page.tsx'),
   route('notifications', 'features/notifications/pages/notifications-page.tsx'),
@@ -81,6 +83,10 @@ export default [
 
   // 🛠️ API 라우트들
   route('api/auth/me', 'routes/api.auth.me.ts'),
+  route(
+    'api/auth/subscription-status',
+    'routes/api.auth.subscription-status.ts'
+  ),
   route('api/auth/set-session', 'routes/api.auth.set-session.ts'),
   route('api/auth/new-password', 'routes/api.auth.new-password.ts'),
   route('api/auth/profile-debug', 'routes/api.auth.profile-debug.ts'),
@@ -100,6 +106,8 @@ export default [
   route('api/user/settings', 'routes/api.user.settings.ts'),
   route('api/admin/cleanup-user', 'routes/api.admin.cleanup-user.ts'),
   route('api/admin/seed-invitations', 'routes/api.admin.seed-invitations.ts'),
+  route('api/billing/checkout', 'routes/api.billing.checkout.ts'),
+  route('api/billing/webhook', 'routes/api.billing.webhook.ts'),
   route('api/clients/delete', 'routes/api.clients.delete.ts'),
   route('api/clients/tags', 'routes/api.clients.tags.ts'),
   route('api/clients/client-tags', 'routes/api.clients.client-tags.ts'),

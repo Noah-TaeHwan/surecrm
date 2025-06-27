@@ -3,7 +3,7 @@
  * 보안 최우선: 감사 로깅, 접근 제어, 데이터 보호
  */
 
-import { db } from '~/lib/core/db';
+import { db } from '~/lib/core/db.server';
 import { adminAuditLogs, adminStatsCache } from '~/lib/schema';
 import { profiles, invitations } from '~/lib/schema';
 import { eq, count } from 'drizzle-orm';

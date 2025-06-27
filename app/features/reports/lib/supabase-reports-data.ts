@@ -1,4 +1,4 @@
-import { db } from '~/lib/core/db';
+import { db } from '~/lib/core/db.server';
 import {
   clients,
   meetings,
@@ -723,9 +723,19 @@ export async function getReportStats(userId: string): Promise<ReportStats> {
   }
 }
 
-// 간단한 UUID 대체 함수 (응급 조치)
+// UUID v4 생성 함수
 function generateId(): string {
-  return Date.now().toString(36) + Math.random().toString(36).substr(2);
+  // crypto.randomUUID()가 있으면 사용, 없으면 폴백
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+
+  // 폴백: 간단한 UUID v4 형식 생성
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
 }
 
 // MVP 특화: 기본 보고서 템플릿 생성 (보험설계사 특화)

@@ -16,7 +16,7 @@ import {
   getUserAgent,
 } from '~/api/shared/utils';
 import { ERROR_CODES as EC, HTTP_STATUS as HS } from '~/api/shared/types';
-import { db } from '~/lib/core/db';
+import { db } from '~/lib/core/db.server';
 import { invitations, profiles } from '~/lib/schema';
 
 // ===== 응답 데이터 타입 =====

@@ -6,7 +6,7 @@ namespace Route {
   export type ComponentProps = any;
 }
 import CalendarPage from '~/features/calendar/pages/calendar-page';
-import { requireAuth } from '~/lib/auth/middleware';
+import { requireActiveSubscription } from '~/lib/auth/subscription-middleware.server';
 import {
   getMeetingsByMonth,
   getClientsByAgent,
@@ -19,8 +19,8 @@ import { data } from 'react-router';
 // 캘린더 페이지 loader
 export async function loader({ request }: Route.LoaderArgs) {
   try {
-    // 인증 확인
-    const user = await requireAuth(request);
+    // 구독 상태 확인 (트라이얼 만료 시 billing 페이지로 리다이렉트)
+    const { user } = await requireActiveSubscription(request);
     const agentId = user.id;
 
     // 🔒 구글 캘린더 연동 필수 확인
@@ -223,8 +223,8 @@ export async function loader({ request }: Route.LoaderArgs) {
 // 캘린더 액션 처리
 export async function action({ request }: Route.ActionArgs) {
   try {
-    // 인증 확인
-    const user = await requireAuth(request);
+    // 구독 상태 확인
+    const { user } = await requireActiveSubscription(request);
     const agentId = user.id;
 
     const formData = await request.formData();

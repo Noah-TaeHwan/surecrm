@@ -1,10 +1,10 @@
 import type { LoaderFunctionArgs } from 'react-router';
 import { redirect } from 'react-router';
 import { google } from 'googleapis';
-import { db } from '~/lib/core/db';
+import { db } from '~/lib/core/db.server';
 import { appCalendarSettings } from '~/features/calendar/lib/schema';
 import { eq } from 'drizzle-orm';
-import { requireAuth } from '~/lib/auth/middleware';
+import { requireAuth } from '~/lib/auth/middleware.server';
 
 // 구글 캘린더 OAuth 콜백 처리
 export async function loader({ request }: LoaderFunctionArgs) {

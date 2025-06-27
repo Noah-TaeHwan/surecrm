@@ -22,6 +22,7 @@ import {
   Settings,
   Bell,
   FileText,
+  CreditCard,
   X,
   ChevronRight,
   Home,
@@ -547,6 +548,12 @@ export function MobileNav({
       href: '/reports',
       icon: <FileText className="w-6 h-6" />,
       ariaLabel: '보고서 페이지로 이동',
+    },
+    {
+      label: '구독 관리',
+      href: '/billing',
+      icon: <CreditCard className="w-6 h-6" />,
+      ariaLabel: '구독 관리 페이지로 이동',
     },
     {
       label: '설정',

@@ -13,7 +13,7 @@ import {
   logAPIError,
   validateRequiredFields,
 } from '~/api/shared/utils';
-import { db } from '~/lib/core/db';
+import { db } from '~/lib/core/db.server';
 import { profiles } from '~/lib/schema';
 import { eq } from 'drizzle-orm';
 

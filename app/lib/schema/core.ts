@@ -107,7 +107,19 @@ export const appPaymentCycleEnum = pgEnum('app_payment_cycle_enum', [
 
 // ===== 핵심 공유 테이블들 =====
 
-// Profiles 테이블 (auth.users 확장)
+// 구독 상태 열거형 추가
+export const appSubscriptionStatusEnum = pgEnum(
+  'app_subscription_status_enum',
+  [
+    'trial', // 14일 무료 체험
+    'active', // 활성 구독
+    'past_due', // 결제 연체
+    'cancelled', // 취소된 구독
+    'expired', // 만료된 구독
+  ]
+);
+
+// Profiles 테이블 (auth.users 확장) - 실제 Supabase 테이블 구조에 맞춤
 export const profiles = pgTable('app_user_profiles', {
   id: uuid('id')
     .primaryKey()
@@ -131,6 +143,15 @@ export const profiles = pgTable('app_user_profiles', {
     .defaultNow()
     .notNull(),
   lastLoginAt: timestamp('last_login_at', { withTimezone: true }),
+
+  // 🔥 구독 관리 필드 (실제 Supabase 테이블 구조)
+  subscriptionStatus: appSubscriptionStatusEnum('subscription_status')
+    .default('trial')
+    .notNull(),
+  trialEndsAt: timestamp('trial_ends_at', { withTimezone: true }),
+  subscriptionEndsAt: timestamp('subscription_ends_at', { withTimezone: true }),
+  lemonSqueezySubscriptionId: text('lemonsqueezy_subscription_id'),
+  lemonSqueezyCustomerId: text('lemonsqueezy_customer_id'),
 });
 
 // Teams 테이블
@@ -667,6 +688,9 @@ export type ReferralStatus = (typeof appReferralStatusEnum.enumValues)[number];
 export type DocumentType = (typeof appDocumentTypeEnum.enumValues)[number];
 export type InvitationStatus =
   (typeof appInvitationStatusEnum.enumValues)[number];
+export type SubscriptionStatus =
+  (typeof appSubscriptionStatusEnum.enumValues)[number];
+export type PaymentCycle = (typeof appPaymentCycleEnum.enumValues)[number];
 
 // Opportunity Products Relations
 export const opportunityProductsRelations = relations(
@@ -700,7 +724,6 @@ export type NewContractAttachment = typeof contractAttachments.$inferInsert;
 export type ContractStatus = (typeof appContractStatusEnum.enumValues)[number];
 export type ContractDocumentType =
   (typeof appContractDocumentTypeEnum.enumValues)[number];
-export type PaymentCycle = (typeof appPaymentCycleEnum.enumValues)[number]; // 🆕 납입주기 타입
 
 // ===== 🆕 NEW: 보험계약 관리 테이블들 =====
 

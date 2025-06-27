@@ -7,7 +7,7 @@ import {
   useSearchParams,
 } from 'react-router';
 import { InsuranceAgentEvents } from '~/lib/utils/analytics';
-// Route 타입은 라우트 파일에서 자동 생성됨
+import type { Route } from './+types/client-detail-page';
 import { MainLayout } from '~/common/layouts/main-layout';
 import { Button } from '~/common/components/ui/button';
 import { Badge } from '~/common/components/ui/badge';
@@ -82,7 +82,7 @@ import type {
   ClientDetailProfile,
   ClientDetailLoaderData,
 } from '../types/client-detail';
-import { requireAuth } from '~/lib/auth/middleware';
+import { requireAuth } from '~/lib/auth/middleware.server';
 import { Input } from '~/common/components/ui/input';
 import { Textarea } from '~/common/components/ui/textarea';
 import {
@@ -143,13 +143,7 @@ import {
 
 // ✅ Zod 스키마 분리 완료 - import로 대체
 
-export async function loader({
-  request,
-  params,
-}: {
-  request: Request;
-  params: { id: string };
-}) {
+export async function loader({ request, params }: Route.LoaderArgs) {
   const { id: clientId } = params;
 
   console.log('🔍 고객 상세 페이지 loader 시작:', { clientId });
@@ -160,8 +154,13 @@ export async function loader({
   }
 
   try {
+    // 🔥 구독 상태 확인 (트라이얼 만료 시 billing 페이지로 리다이렉트)
+    const { requireActiveSubscription } = await import(
+      '~/lib/auth/subscription-middleware.server'
+    );
+    const { user } = await requireActiveSubscription(request);
+
     // 🎯 실제 로그인된 보험설계사 정보 가져오기
-    const user = await requireAuth(request);
     const agentId = user.id;
 
     console.log('👤 로그인된 보험설계사:', {

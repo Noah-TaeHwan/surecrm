@@ -1,5 +1,5 @@
 import { createServerClient } from '../core/supabase';
-import { db } from '../core/db';
+import { db } from '../core/db.server';
 import { invitations } from '../schema';
 import { eq } from 'drizzle-orm';
 import type { InvitationValidationResult } from './types';

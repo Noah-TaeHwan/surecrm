@@ -18,8 +18,6 @@ import {
   type TopPerformer,
 } from '../lib/supabase-reports-data';
 
-// 🔧 수정: 실제 인증 함수 import
-import { getCurrentUser } from '~/lib/auth/core';
 import { redirect } from 'react-router';
 
 // 🔧 추가: 설정에서 사용자 프로필 가져오기
@@ -79,13 +77,14 @@ export function meta({ data, params }: Route.MetaArgs) {
 
 export async function loader({ request }: Route.LoaderArgs) {
   try {
-    // 🔧 수정: 실제 인증된 사용자 정보 가져오기
-    const user = await getCurrentUser(request);
-    if (!user) {
-      throw redirect('/auth/login');
-    }
+    // 🔥 구독 상태 확인 (트라이얼 만료 시 billing 페이지로 리다이렉트)
+    const { requireActiveSubscription } = await import(
+      '~/lib/auth/subscription-middleware.server'
+    );
+    const { user } = await requireActiveSubscription(request);
 
-    const userId = user.id;
+    // 🎯 실제 데이터 조회 (수익 리포트 강화)
+    const agentId = user.id;
 
     // URL에서 기간 파라미터 확인
     const url = new URL(request.url);
@@ -95,16 +94,16 @@ export async function loader({ request }: Route.LoaderArgs) {
     const { startDate, endDate } = getDateRangeOnServer(period);
 
     // 🔧 추가: 사용자 프로필 정보 가져오기 (설정 페이지에서 관리하는 이름)
-    const userProfile = await getUserProfile(userId);
+    const userProfile = await getUserProfile(agentId);
 
     // 기본 리포트 템플릿 생성 (없는 경우)
-    await createDefaultReportTemplates(userId);
+    await createDefaultReportTemplates(agentId);
 
     // 성과 데이터, 최고 성과자 데이터, 사용자 목표 데이터를 병렬로 가져오기
     const [performance, topPerformers, userGoals] = await Promise.all([
-      getPerformanceData(userId, startDate, endDate),
-      getTopPerformers(userId, 5),
-      getUserGoals(userId), // 🔧 추가: 사용자 목표 데이터
+      getPerformanceData(agentId, startDate, endDate),
+      getTopPerformers(agentId, 5),
+      getUserGoals(agentId), // 🔧 추가: 사용자 목표 데이터
     ]);
 
     // 🔧 수정: 서버에서 날짜 포맷팅하여 Hydration 오류 방지

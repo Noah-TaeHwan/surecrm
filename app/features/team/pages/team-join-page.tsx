@@ -20,11 +20,8 @@ import {
   PersonIcon,
   EnvelopeClosedIcon,
 } from '@radix-ui/react-icons';
-import { getCurrentUser } from '~/lib/auth/core';
+import { getCurrentUser } from '~/lib/auth/core.server';
 import { getTeamByInvitationCode } from '../lib/supabase-team-data';
-import { db } from '~/lib/core/db';
-import { profiles, invitations } from '../lib/schema';
-import { eq, and } from 'drizzle-orm';
 import { createUserSession } from '~/lib/auth/session';
 import { toast } from 'sonner';
 
@@ -87,6 +84,10 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     const currentUser = await getCurrentUser(request);
 
     // 초대자 정보 조회
+    const { db } = await import('~/lib/core/db.server');
+    const { profiles } = await import('../lib/schema');
+    const { eq } = await import('drizzle-orm');
+
     const inviterProfile = await db
       .select({
         id: profiles.id,
@@ -141,6 +142,10 @@ export async function action({ request, params }: Route.ActionArgs) {
       }
 
       // 사용자 프로필 업데이트 (팀 합류)
+      const { db } = await import('~/lib/core/db.server');
+      const { profiles, invitations } = await import('../lib/schema');
+      const { eq } = await import('drizzle-orm');
+
       await db
         .update(profiles)
         .set({

@@ -24,7 +24,7 @@ import {
 } from '~/common/components/ui/form';
 import { Alert, AlertDescription } from '~/common/components/ui/alert';
 import { LogIn, Eye, EyeOff } from 'lucide-react';
-import { checkAuthStatus, authenticateUser } from '~/lib/auth/core';
+import { checkAuthStatus, authenticateUser } from '~/lib/auth/core.server';
 import { createUserSession } from '~/lib/auth/session';
 import type { Route } from './+types/login-page';
 

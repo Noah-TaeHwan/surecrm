@@ -1,6 +1,6 @@
 import { meetings, clients, profiles } from '~/lib/schema';
 import { createServerClient } from '~/lib/core/supabase';
-import { db } from '~/lib/core/db';
+import { db } from '~/lib/core/db.server';
 import {
   appCalendarMeetingChecklists,
   appCalendarMeetingNotes,

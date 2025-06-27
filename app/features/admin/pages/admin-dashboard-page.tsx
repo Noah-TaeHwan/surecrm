@@ -5,9 +5,9 @@
  * 실시간 모니터링: 핵심 지표들을 실시간 표시
  */
 
-import { requireAdmin } from '~/lib/auth/middleware';
+import { requireAdmin } from '~/lib/auth/middleware.server';
 import { logAdminAction, getAdminStats } from '../lib/utils';
-import { db } from '~/lib/core/db';
+import { db } from '~/lib/core/db.server';
 import { profiles, invitations, clients } from '~/lib/schema';
 import { count, eq, and, gte, lt } from 'drizzle-orm';
 import { AdminHeader } from '../components/admin-header';

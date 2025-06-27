@@ -2,7 +2,7 @@
 
 // 🏢 보험계약 관리 API
 import { eq, and, desc, count, sql, not } from 'drizzle-orm';
-import { db } from '~/lib/core/db';
+import { db } from '~/lib/core/db.server';
 import {
   insuranceContracts,
   contractAttachments,
@@ -112,7 +112,7 @@ export async function createInsuranceContract(
       const { getPipelineStages } = await import(
         '~/features/pipeline/lib/supabase-pipeline-data'
       );
-      const { updateClientStage } = await import('~/api/shared/clients');
+      const { updateClientStage } = await import('~/api/shared/clients.server');
 
       // 에이전트의 파이프라인 단계 조회
       const stages = await getPipelineStages(agentId);

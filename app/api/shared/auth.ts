@@ -3,8 +3,8 @@
  * 모든 보호된 API 엔드포인트에서 사용할 인증 함수들
  */
 
-import { getCurrentUser } from '~/lib/auth/core';
-import { db } from '~/lib/core/db';
+import { getCurrentUser } from '~/lib/auth/core.server';
+import { db } from '~/lib/core/db.server';
 import { profiles } from '~/lib/schema';
 import { eq } from 'drizzle-orm';
 import {

@@ -11,7 +11,7 @@ import {
 import { Alert, AlertDescription } from '~/common/components/ui/alert';
 import { Button } from '~/common/components/ui/button';
 import { XCircle, Loader2, Mail } from 'lucide-react';
-import { verifyMagicLink, checkAuthStatus } from '~/lib/auth/core';
+import { verifyMagicLink, checkAuthStatus } from '~/lib/auth/core.server';
 
 interface LoaderData {
   token?: string;

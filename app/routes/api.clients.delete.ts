@@ -1,5 +1,5 @@
 import { createClient } from '~/lib/core/supabase';
-import { db } from '~/lib/core/db';
+import { db } from '~/lib/core/db.server';
 import { clients } from '~/lib/schema/core';
 import { appClientContactHistory } from '~/features/clients/lib/schema';
 import { eq, and } from 'drizzle-orm';
