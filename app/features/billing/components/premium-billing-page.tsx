@@ -404,7 +404,7 @@ export function PremiumBillingPage({
                   궁금한 점이 있으시면 언제든 연락주세요.
                 </p>
                 <div className="text-sm">
-                  <p className="font-medium">이메일: support@surecrm.co.kr</p>
+                  <p className="font-medium">이메일: noah@surecrm.pro</p>
                   <p className="text-muted-foreground">평일 9:00 - 18:00</p>
                 </div>
               </CardContent>

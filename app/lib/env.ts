@@ -68,7 +68,7 @@ export const env: EnvConfig = {
   },
 
   support: {
-    email: getEnvVar('CUSTOMER_SUPPORT_EMAIL', 'support@surecrm.com'),
+    email: getEnvVar('CUSTOMER_SUPPORT_EMAIL', 'noah@surecrm.pro'),
   },
 };
 

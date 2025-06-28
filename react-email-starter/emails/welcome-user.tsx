@@ -986,7 +986,7 @@ export default function WelcomeUser({
                         <tr>
                           <td style={{ textAlign: 'center' }}>
                             <Button
-                              href="mailto:support@surecrm.pro"
+                              href="mailto:noah@surecrm.pro"
                               style={{
                                 backgroundColor: 'transparent',
                                 borderColor: '#E2E8F0',

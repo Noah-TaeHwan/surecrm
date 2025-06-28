@@ -240,10 +240,10 @@ export function SimpleSubscriptionPage({
         <p className="text-sm text-muted-foreground">궁금한 점이 있으신가요?</p>
         <div className="flex items-center justify-center gap-4 text-sm">
           <a
-            href="mailto:support@surecrm.com"
+            href="mailto:noah@surecrm.pro"
             className="text-primary hover:underline"
           >
-            support@surecrm.com
+            noah@surecrm.pro
           </a>
           <span className="text-muted-foreground">•</span>
           <a href="tel:1588-1234" className="text-primary hover:underline">

@@ -121,7 +121,7 @@ export default function BillingSuccessPage({ loaderData }: ComponentProps) {
             {/* 추가 정보 */}
             <div className="text-xs text-muted-foreground space-y-1">
               <p>구독 관리는 계정 설정에서 할 수 있습니다.</p>
-              <p>문의사항이 있으시면 support@surecrm.co.kr로 연락주세요.</p>
+              <p>문의사항이 있으시면 noah@surecrm.pro로 연락주세요.</p>
               {sessionId && <p className="font-mono">세션 ID: {sessionId}</p>}
             </div>
           </CardContent>

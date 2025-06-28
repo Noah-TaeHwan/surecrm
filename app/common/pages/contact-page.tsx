@@ -23,9 +23,7 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <h3 className="font-semibold">이메일</h3>
-                      <p className="text-muted-foreground">
-                        selfmadecero@gmail.com
-                      </p>
+                      <p className="text-muted-foreground">noah@surecrm.pro</p>
                       <p className="text-sm text-muted-foreground">
                         평일 9시-18시 내 답변
                       </p>
