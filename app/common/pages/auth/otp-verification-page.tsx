@@ -3,6 +3,7 @@ import { Link, type MetaFunction, redirect } from 'react-router';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { AuthLayout } from '~/common/layouts/auth-layout';
 import { Button } from '~/common/components/ui/button';
 import { Input } from '~/common/components/ui/input';
@@ -50,17 +51,6 @@ interface ComponentProps {
   } | null;
 }
 
-// OTP 검증 스키마
-const otpSchema = z.object({
-  otp: z
-    .string()
-    .min(6, { message: '인증 코드는 6자리입니다' })
-    .max(6, { message: '인증 코드는 6자리입니다' })
-    .regex(/^[0-9]+$/, { message: '인증 코드는 숫자만 입력 가능합니다' }),
-});
-
-type OTPFormData = z.infer<typeof otpSchema>;
-
 const supabase = createServerClient();
 
 export async function loader({ request }: LoaderArgs) {
@@ -91,6 +81,17 @@ export async function action({ request }: ActionArgs) {
   const formData = await request.formData();
   const actionType = formData.get('actionType') as string;
 
+  // OTP 검증 스키마 (서버 측에서는 영어 메시지 사용)
+  const otpSchema = z.object({
+    otp: z
+      .string()
+      .min(6, { message: 'Verification code must be 6 digits' })
+      .max(6, { message: 'Verification code must be 6 digits' })
+      .regex(/^[0-9]+$/, {
+        message: 'Verification code must contain only numbers',
+      }),
+  });
+
   if (actionType === 'verify') {
     // OTP 검증
     const otp = formData.get('otp') as string;
@@ -103,7 +104,7 @@ export async function action({ request }: ActionArgs) {
     if (!otp || !email || !invitationCode || !fullName) {
       return {
         success: false,
-        error: '필수 정보가 누락되었습니다.',
+        error: 'Required information is missing.',
       };
     }
 
@@ -127,7 +128,7 @@ export async function action({ request }: ActionArgs) {
 
     return {
       success: false,
-      error: result.error || 'OTP 인증에 실패했습니다.',
+      error: result.error || 'OTP verification failed.',
     };
   } else if (actionType === 'resend') {
     // OTP 재전송
@@ -136,7 +137,7 @@ export async function action({ request }: ActionArgs) {
     if (!email) {
       return {
         success: false,
-        error: '이메일 주소가 없습니다.',
+        error: 'Email address is missing.',
       };
     }
 
@@ -150,26 +151,29 @@ export async function action({ request }: ActionArgs) {
     if (error) {
       return {
         success: false,
-        error: error.message || 'OTP 재전송에 실패했습니다.',
+        error: error.message || 'Failed to resend OTP.',
       };
     }
 
     return {
       success: true,
-      message: '인증 코드가 재전송되었습니다.',
+      message: 'Verification code has been resent.',
     };
   }
 
   return {
     success: false,
-    error: '잘못된 요청입니다.',
+    error: 'Invalid request.',
   };
 }
 
 export const meta: MetaFunction = () => {
   return [
-    { title: 'OTP 인증 | SureCRM' },
-    { name: 'description', content: '이메일로 받은 인증 코드를 입력해주세요' },
+    { title: 'OTP Verification | SureCRM' },
+    {
+      name: 'description',
+      content: 'Enter the verification code sent to your email',
+    },
   ];
 };
 
@@ -177,8 +181,20 @@ export default function OTPVerificationPage({
   loaderData,
   actionData,
 }: ComponentProps) {
+  const { t } = useTranslation('auth');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isResending, setIsResending] = useState(false);
+
+  // OTP 검증 스키마 (클라이언트 측에서는 다국어 메시지 사용)
+  const otpSchema = z.object({
+    otp: z
+      .string()
+      .min(6, { message: t('error.invalidOtp') })
+      .max(6, { message: t('error.invalidOtp') })
+      .regex(/^[0-9]+$/, { message: t('error.invalidOtp') }),
+  });
+
+  type OTPFormData = z.infer<typeof otpSchema>;
 
   const form = useForm<OTPFormData>({
     resolver: zodResolver(otpSchema),
@@ -203,7 +219,7 @@ export default function OTPVerificationPage({
       // 페이지 새로고침을 통해 액션 결과 반영
       window.location.reload();
     } catch (error) {
-      console.error('OTP 재전송 오류:', error);
+      console.error('OTP resend error:', error);
     } finally {
       setIsResending(false);
     }
@@ -217,10 +233,10 @@ export default function OTPVerificationPage({
             <Mail className="w-8 h-8 text-blue-600 dark:text-blue-400" />
           </div>
           <CardTitle className="text-2xl font-bold text-slate-900 dark:text-slate-100 text-center">
-            이메일 인증 코드 입력
+            {t('otp.title')}
           </CardTitle>
           <CardDescription className="text-slate-600 dark:text-slate-400 text-center">
-            이메일로 받은 6자리 인증 코드를 입력해주세요
+            {t('otp.subtitle')}
           </CardDescription>
         </CardHeader>
 
@@ -248,7 +264,7 @@ export default function OTPVerificationPage({
           <div className="text-center space-y-4">
             {loaderData.email && (
               <p className="text-sm text-slate-600 dark:text-slate-400">
-                다음 이메일 주소로 인증 코드를 전송했습니다:
+                {t('otp.instructions')}
               </p>
             )}
 
@@ -259,10 +275,7 @@ export default function OTPVerificationPage({
             )}
 
             <div className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
-              <p>
-                이메일함에서 6자리 인증 코드를 확인하고 아래에 입력해주세요.
-              </p>
-              <p>스팸함도 확인해보시기 바랍니다.</p>
+              <p>{t('otp.codeExpiry')}</p>
             </div>
           </div>
 
@@ -289,12 +302,12 @@ export default function OTPVerificationPage({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-center block">
-                      인증 코드
+                      {t('otp.codeLabel')}
                     </FormLabel>
                     <FormControl>
                       <Input
                         type="text"
-                        placeholder="123456"
+                        placeholder={t('otp.codePlaceholder')}
                         disabled={isSubmitting}
                         className="text-center text-2xl tracking-widest font-mono"
                         maxLength={6}
@@ -308,7 +321,9 @@ export default function OTPVerificationPage({
               />
 
               <Button type="submit" className="w-full" disabled={isSubmitting}>
-                {isSubmitting ? '인증 중...' : '인증 코드 확인'}
+                {isSubmitting
+                  ? t('otp.verifyingButton')
+                  : t('otp.verifyButton')}
               </Button>
             </form>
           </Form>
@@ -323,30 +338,30 @@ export default function OTPVerificationPage({
               {isResending ? (
                 <>
                   <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                  재전송 중...
+                  {t('otp.resendingCode')}
                 </>
               ) : (
-                '인증 코드 다시 받기'
+                t('otp.resendCode')
               )}
             </Button>
 
             <div className="text-center text-sm text-slate-600 dark:text-slate-400">
-              이메일 주소가 잘못되었나요?{' '}
+              {t('otp.noCodeReceived')}{' '}
               <Link
                 to="/auth/signup"
                 className="font-medium text-slate-900 hover:text-slate-700 dark:text-slate-300 dark:hover:text-slate-200"
               >
-                다시 가입하기
+                {t('otp.backToSignup')}
               </Link>
             </div>
 
             <div className="text-center text-sm text-slate-600 dark:text-slate-400">
-              이미 계정이 있으신가요?{' '}
+              {t('signup.hasAccount')}{' '}
               <Link
                 to="/auth/login"
                 className="font-medium text-slate-900 hover:text-slate-700 dark:text-slate-300 dark:hover:text-slate-200"
               >
-                로그인
+                {t('login.title')}
               </Link>
             </div>
           </div>

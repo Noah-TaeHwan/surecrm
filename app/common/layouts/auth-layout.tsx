@@ -1,11 +1,13 @@
 import React from 'react';
 import type { ReactNode } from 'react';
 import { Link } from 'react-router';
+import { useTranslation } from 'react-i18next';
 import { Card } from '~/common/components/ui/card';
 import { BorderBeam } from '~/common/components/magicui/border-beam';
 import { DotPattern } from '~/common/components/magicui/dot-pattern';
 import { FlickeringGrid } from '~/common/components/magicui/flickering-grid';
 import { AnimatedGridPattern } from '~/common/components/magicui/animated-grid-pattern';
+import { LanguageSelector } from '~/common/components/i18n/language-selector';
 import { cn } from '~/lib/utils';
 
 interface AuthLayoutProps {
@@ -19,8 +21,15 @@ export function AuthLayout({
   title = 'SureCRM',
   showLogo = true,
 }: AuthLayoutProps) {
+  const { t } = useTranslation('auth');
+
   return (
     <div className="min-h-screen flex flex-col justify-center items-center relative overflow-hidden bg-gradient-to-br from-background to-background/90 p-3 sm:p-4 lg:p-6">
+      {/* 언어 선택기 - 우상단 고정 */}
+      <div className="absolute top-4 right-4 z-30">
+        <LanguageSelector variant="dropdown" size="sm" className="w-auto" />
+      </div>
+
       {/* 배경 애니메이션 - 도트 패턴 */}
       <DotPattern
         className="absolute inset-0 w-full h-full opacity-15 text-primary/30 pointer-events-none"
@@ -60,7 +69,7 @@ export function AuthLayout({
             </h1>
           </Link>
           <p className="mt-1 sm:mt-2 text-xs sm:text-sm lg:text-base text-muted-foreground px-2 sm:px-4 lg:px-0">
-            보험 영업의 소개 네트워크와 영업 파이프라인 관리
+            {t('branding.tagline')}
           </p>
         </div>
       )}
@@ -77,7 +86,8 @@ export function AuthLayout({
           {children}
 
           <div className="text-center text-xs text-muted-foreground mt-4 sm:mt-6">
-            &copy; {new Date().getFullYear()} SureCRM. All rights reserved.
+            &copy; {new Date().getFullYear()} SureCRM. {t('branding.copyright')}
+            .
           </div>
         </Card>
 

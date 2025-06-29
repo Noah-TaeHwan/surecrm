@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { type MetaFunction, redirect } from 'react-router';
+import { useTranslation } from 'react-i18next';
 import { AuthLayout } from '~/common/layouts/auth-layout';
 import {
   Card,
@@ -50,7 +51,7 @@ export async function loader({ request }: LoaderArgs): Promise<LoaderData> {
   // 필수 파라미터 검증
   if (!token || !type || !email) {
     return {
-      error: '잘못된 로그인 링크입니다. 다시 로그인을 시도해주세요.',
+      error: 'Invalid login link. Please try signing in again.',
     };
   }
 
@@ -76,7 +77,7 @@ export async function action({ request }: ActionArgs) {
   if (!token || !type || !email) {
     return {
       success: false,
-      error: '필수 정보가 누락되었습니다.',
+      error: 'Required information is missing.',
     };
   }
 
@@ -91,14 +92,14 @@ export async function action({ request }: ActionArgs) {
 
   return {
     success: false,
-    error: result.error || '로그인 링크 검증에 실패했습니다.',
+    error: result.error || 'Failed to verify login link.',
   };
 }
 
 export const meta: MetaFunction = () => {
   return [
-    { title: '매직링크 인증 | SureCRM' },
-    { name: 'description', content: '로그인 링크를 확인하고 있습니다' },
+    { title: 'Magic Link Verification | SureCRM' },
+    { name: 'description', content: 'Verifying your login link' },
   ];
 };
 
@@ -106,6 +107,7 @@ export default function MagicLinkVerifyPage({
   loaderData,
   actionData,
 }: ComponentProps) {
+  const { t } = useTranslation('auth');
   const [isVerifying, setIsVerifying] = useState(false);
   const [autoVerified, setAutoVerified] = useState(false);
 
@@ -159,10 +161,10 @@ export default function MagicLinkVerifyPage({
               <XCircle className="w-8 h-8 text-red-600 dark:text-red-400" />
             </div>
             <CardTitle className="text-2xl font-bold text-slate-900 dark:text-slate-100 text-center">
-              잘못된 로그인 링크
+              {t('magicLink.invalidTitle')}
             </CardTitle>
             <CardDescription className="text-slate-600 dark:text-slate-400 text-center">
-              로그인 링크가 올바르지 않거나 만료되었습니다
+              {t('magicLink.invalidSubtitle')}
             </CardDescription>
           </CardHeader>
 
@@ -177,7 +179,7 @@ export default function MagicLinkVerifyPage({
                 onClick={() => (window.location.href = '/auth/login')}
                 className="w-full"
               >
-                다시 로그인하기
+                {t('magicLink.retryLogin')}
               </Button>
             </div>
           </CardContent>
@@ -196,17 +198,17 @@ export default function MagicLinkVerifyPage({
               <Loader2 className="w-8 h-8 text-blue-600 dark:text-blue-400 animate-spin" />
             </div>
             <CardTitle className="text-2xl font-bold text-slate-900 dark:text-slate-100 text-center">
-              로그인 중...
+              {t('magicLink.verifyingTitle')}
             </CardTitle>
             <CardDescription className="text-slate-600 dark:text-slate-400 text-center">
-              로그인 링크를 확인하고 있습니다
+              {t('magicLink.verifyingSubtitle')}
             </CardDescription>
           </CardHeader>
 
           <CardContent className="text-center">
             <div className="space-y-4">
               <div className="text-sm text-slate-600 dark:text-slate-400">
-                잠시만 기다려주세요...
+                {t('magicLink.waiting')}
               </div>
             </div>
           </CardContent>
@@ -225,10 +227,10 @@ export default function MagicLinkVerifyPage({
               <XCircle className="w-8 h-8 text-red-600 dark:text-red-400" />
             </div>
             <CardTitle className="text-2xl font-bold text-slate-900 dark:text-slate-100 text-center">
-              로그인 실패
+              {t('magicLink.failedTitle')}
             </CardTitle>
             <CardDescription className="text-slate-600 dark:text-slate-400 text-center">
-              로그인 링크 검증에 실패했습니다
+              {t('magicLink.failedSubtitle')}
             </CardDescription>
           </CardHeader>
 
@@ -240,13 +242,13 @@ export default function MagicLinkVerifyPage({
 
             <div className="space-y-4">
               <p className="text-sm text-slate-600 dark:text-slate-400">
-                다음과 같은 이유로 로그인에 실패할 수 있습니다:
+                {t('magicLink.failureReasons')}
               </p>
               <ul className="text-sm text-slate-600 dark:text-slate-400 space-y-1">
-                <li>• 로그인 링크가 만료됨 (1시간 후 만료)</li>
-                <li>• 이미 사용된 로그인 링크</li>
-                <li>• 잘못된 링크 형식</li>
-                <li>• 계정이 비활성화됨</li>
+                <li>• {t('magicLink.expiredLink')}</li>
+                <li>• {t('magicLink.usedLink')}</li>
+                <li>• {t('magicLink.invalidFormat')}</li>
+                <li>• {t('magicLink.disabledAccount')}</li>
               </ul>
             </div>
 
@@ -255,7 +257,7 @@ export default function MagicLinkVerifyPage({
                 onClick={() => (window.location.href = '/auth/login')}
                 className="w-full"
               >
-                새로운 로그인 링크 요청
+                {t('magicLink.newLinkRequest')}
               </Button>
             </div>
           </CardContent>
@@ -273,10 +275,10 @@ export default function MagicLinkVerifyPage({
             <Mail className="w-8 h-8 text-blue-600 dark:text-blue-400" />
           </div>
           <CardTitle className="text-2xl font-bold text-slate-900 dark:text-slate-100 text-center">
-            로그인 링크 확인
+            {t('magicLink.preparingTitle')}
           </CardTitle>
           <CardDescription className="text-slate-600 dark:text-slate-400 text-center">
-            로그인 처리를 준비하고 있습니다
+            {t('magicLink.preparingSubtitle')}
           </CardDescription>
         </CardHeader>
 
@@ -287,7 +289,7 @@ export default function MagicLinkVerifyPage({
               variant="outline"
               className="w-full"
             >
-              로그인 페이지로 돌아가기
+              {t('magicLink.backToLogin')}
             </Button>
           </div>
         </CardContent>

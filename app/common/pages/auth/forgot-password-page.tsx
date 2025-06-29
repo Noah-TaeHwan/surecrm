@@ -3,6 +3,7 @@ import { Link, type MetaFunction } from 'react-router';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { AuthLayout } from '~/common/layouts/auth-layout';
 import { Button } from '~/common/components/ui/button';
 import { Input } from '~/common/components/ui/input';
@@ -28,7 +29,7 @@ import {
   AlertTitle,
 } from '~/common/components/ui/alert';
 import { ArrowLeft, Mail, CheckCircle } from 'lucide-react';
-import { sendPasswordResetEmail } from '~/lib/auth/password';
+import { createServerClient } from '~/lib/core/supabase';
 
 // 타입 정의
 interface LoaderData {
@@ -63,16 +64,6 @@ interface Route {
     actionData?: ActionData;
   };
 }
-
-// Zod 스키마 정의
-const forgotPasswordSchema = z.object({
-  email: z
-    .string()
-    .min(1, { message: '이메일을 입력해주세요' })
-    .email({ message: '유효한 이메일 주소를 입력해주세요' }),
-});
-
-type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 
 // 로더 함수
 export async function loader({ request }: Route['LoaderArgs']) {
@@ -132,30 +123,43 @@ export async function action({ request }: Route['ActionArgs']) {
   if (!email) {
     return {
       success: false,
-      error: '이메일을 입력해주세요.',
+      error: 'Email address is required.',
     };
   }
 
-  try {
-    // 실제 비밀번호 재설정 이메일 발송
-    const result = await sendPasswordResetEmail(email);
-
-    if (result.success) {
-      return {
-        success: true,
-        message: '비밀번호 재설정 링크가 이메일로 발송되었습니다.',
-      };
-    } else {
-      return {
-        success: false,
-        error: result.error || '이메일 발송에 실패했습니다.',
-      };
-    }
-  } catch (error) {
-    console.error('비밀번호 재설정 이메일 발송 실패:', error);
+  // 이메일 형식 검증
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
     return {
       success: false,
-      error: '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.',
+      error: 'Please enter a valid email address.',
+    };
+  }
+
+  const supabase = createServerClient();
+
+  try {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${request.url.split('/auth/forgot-password')[0]}/auth/reset-password`,
+    });
+
+    if (error) {
+      console.error('Password reset error:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to send password reset email.',
+      };
+    }
+
+    return {
+      success: true,
+      message: 'Password reset link has been sent to your email address.',
+    };
+  } catch (error) {
+    console.error('Unexpected error during password reset:', error);
+    return {
+      success: false,
+      error: 'An unexpected error occurred. Please try again.',
     };
   }
 }
@@ -163,8 +167,8 @@ export async function action({ request }: Route['ActionArgs']) {
 // 메타 정보
 export const meta: MetaFunction = () => {
   return [
-    { title: '비밀번호 재설정 | SureCRM' },
-    { name: 'description', content: 'SureCRM 계정의 비밀번호를 재설정하세요' },
+    { title: 'Forgot Password | SureCRM' },
+    { name: 'description', content: 'Reset your password' },
   ];
 };
 
@@ -173,8 +177,19 @@ export default function ForgotPasswordPage({
   loaderData,
   actionData,
 }: Route['ComponentProps']) {
+  const { t } = useTranslation('auth');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+
+  // Zod 스키마 정의 (다국어 메시지)
+  const forgotPasswordSchema = z.object({
+    email: z
+      .string()
+      .min(1, { message: t('error.emailRequired') })
+      .email({ message: t('error.invalidEmail') }),
+  });
+
+  type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 
   // react-hook-form과 zodResolver를 사용한 폼 설정
   const form = useForm<ForgotPasswordFormData>({
@@ -253,12 +268,12 @@ export default function ForgotPasswordPage({
           </div>
 
           <CardTitle className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-            {isSuccess ? '이메일 발송 완료' : '비밀번호 재설정'}
+            {isSuccess ? t('success.resetSent') : t('forgot.title')}
           </CardTitle>
           <CardDescription className="text-slate-600 dark:text-slate-400">
             {isSuccess
-              ? '비밀번호 재설정 링크를 확인하세요'
-              : '가입하신 이메일 주소를 입력하시면 비밀번호 재설정 링크를 보내드립니다'}
+              ? t('emailVerification.emailSent')
+              : t('forgot.subtitle')}
           </CardDescription>
         </CardHeader>
 
@@ -340,11 +355,11 @@ export default function ForgotPasswordPage({
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>이메일 주소</FormLabel>
+                      <FormLabel>{t('forgot.emailLabel')}</FormLabel>
                       <FormControl>
                         <Input
                           type="email"
-                          placeholder="your@email.com"
+                          placeholder={t('forgot.emailPlaceholder')}
                           {...field}
                         />
                       </FormControl>
@@ -359,7 +374,9 @@ export default function ForgotPasswordPage({
                     className="w-full"
                     disabled={isSubmitting}
                   >
-                    {isSubmitting ? '발송 중...' : '재설정 링크 발송'}
+                    {isSubmitting
+                      ? t('forgot.sendingButton')
+                      : t('forgot.sendButton')}
                   </Button>
                 </div>
               </form>
@@ -390,12 +407,12 @@ export default function ForgotPasswordPage({
 
         <CardFooter className="flex justify-center flex-col items-center">
           <div className="text-center text-sm text-slate-600 dark:text-slate-400 pt-4">
-            <span>계정이 기억나셨나요? </span>
+            <span>{t('signup.hasAccount')} </span>
             <Link
               to="/auth/login"
               className="font-medium text-slate-900 hover:text-slate-700 dark:text-slate-300 dark:hover:text-slate-200"
             >
-              로그인하기
+              {t('login.title')}
             </Link>
           </div>
           <div className="mt-2">
@@ -403,7 +420,7 @@ export default function ForgotPasswordPage({
               to="/invite-only"
               className="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-300"
             >
-              계정이 없으신가요? 초대 코드로 가입하기
+              {t('login.noAccount')} {t('login.signupLink')}
             </Link>
           </div>
         </CardFooter>

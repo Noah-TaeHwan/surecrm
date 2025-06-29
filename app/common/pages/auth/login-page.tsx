@@ -3,6 +3,7 @@ import { Link, type MetaFunction, redirect } from 'react-router';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { AuthLayout } from '~/common/layouts/auth-layout';
 import { Button } from '~/common/components/ui/button';
 import { Input } from '~/common/components/ui/input';
@@ -53,17 +54,6 @@ interface ComponentProps {
   actionData?: ActionData | null;
 }
 
-// Zod 스키마 정의 (클래식 이메일/비밀번호 방식)
-const loginSchema = z.object({
-  email: z
-    .string()
-    .min(1, { message: '이메일을 입력해주세요' })
-    .email({ message: '유효한 이메일 주소를 입력해주세요' }),
-  password: z.string().min(1, { message: '비밀번호를 입력해주세요' }),
-});
-
-type LoginFormData = z.infer<typeof loginSchema>;
-
 // 로더 함수 - 이미 로그인되어 있으면 대시보드로 리다이렉트
 export async function loader({ request }: LoaderArgs) {
   const isAuthenticated = await checkAuthStatus(request);
@@ -92,11 +82,19 @@ export async function action({ request }: ActionArgs) {
   if (!email || !password) {
     return {
       success: false,
-      error: '이메일과 비밀번호를 입력해주세요.',
+      error: 'Please enter both email and password.',
     };
   }
 
   // 이메일/비밀번호 형식 검증
+  const loginSchema = z.object({
+    email: z
+      .string()
+      .min(1, { message: 'Please enter your email' })
+      .email({ message: 'Please enter a valid email address' }),
+    password: z.string().min(1, { message: 'Please enter your password' }),
+  });
+
   const loginValidation = loginSchema.safeParse({ email, password });
   if (!loginValidation.success) {
     const firstError = loginValidation.error.errors[0];
@@ -116,23 +114,35 @@ export async function action({ request }: ActionArgs) {
 
   return {
     success: false,
-    error: result.error || '로그인에 실패했습니다.',
+    error: result.error || 'Sign in failed.',
   };
 }
 
 // 메타 정보
 export const meta: MetaFunction = () => {
   return [
-    { title: '로그인 | SureCRM' },
-    { name: 'description', content: 'SureCRM에 로그인하세요' },
+    { title: 'Sign In | SureCRM' },
+    { name: 'description', content: 'Sign in to SureCRM' },
   ];
 };
 
 // 로그인 페이지 컴포넌트
 export default function LoginPage({ loaderData, actionData }: ComponentProps) {
+  const { t } = useTranslation('auth');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
+
+  // Zod 스키마 정의 (다국어 메시지)
+  const loginSchema = z.object({
+    email: z
+      .string()
+      .min(1, { message: t('error.emailRequired') })
+      .email({ message: t('error.invalidEmail') }),
+    password: z.string().min(1, { message: t('error.passwordRequired') }),
+  });
+
+  type LoginFormData = z.infer<typeof loginSchema>;
 
   // react-hook-form과 zodResolver를 사용한 폼 설정
   const form = useForm<LoginFormData>({
@@ -151,10 +161,10 @@ export default function LoginPage({ loaderData, actionData }: ComponentProps) {
             <LogIn className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-blue-600 dark:text-blue-400" />
           </div>
           <CardTitle className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900 dark:text-slate-100 text-center">
-            로그인
+            {t('login.title')}
           </CardTitle>
           <CardDescription className="text-sm sm:text-base text-slate-600 dark:text-slate-400 text-center px-2 sm:px-0">
-            이메일과 비밀번호로 SureCRM에 로그인하세요
+            {t('login.subtitle')}
           </CardDescription>
         </CardHeader>
 
@@ -163,7 +173,7 @@ export default function LoginPage({ loaderData, actionData }: ComponentProps) {
           {loaderData.message === 'signup-success' && (
             <Alert className="mb-3 sm:mb-4 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800">
               <AlertDescription className="text-sm">
-                회원가입이 완료되었습니다! 이제 로그인하세요.
+                {t('messages.signupSuccess')}
               </AlertDescription>
             </Alert>
           )}
@@ -172,7 +182,7 @@ export default function LoginPage({ loaderData, actionData }: ComponentProps) {
           {loaderData.message === 'email-verified' && (
             <Alert className="mb-3 sm:mb-4 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800">
               <AlertDescription className="text-sm">
-                이메일 인증이 완료되었습니다! 이제 로그인하세요.
+                {t('messages.emailVerified')}
               </AlertDescription>
             </Alert>
           )}
@@ -181,7 +191,7 @@ export default function LoginPage({ loaderData, actionData }: ComponentProps) {
           {loaderData.message === 'logged-out' && (
             <Alert className="mb-3 sm:mb-4 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800">
               <AlertDescription className="text-sm">
-                성공적으로 로그아웃되었습니다.
+                {t('messages.loggedOut')}
               </AlertDescription>
             </Alert>
           )}
@@ -190,7 +200,7 @@ export default function LoginPage({ loaderData, actionData }: ComponentProps) {
           {loaderData.message === 'account-disabled' && (
             <Alert variant="destructive" className="mb-3 sm:mb-4">
               <AlertDescription className="text-sm">
-                계정이 비활성화되었습니다. 관리자에게 문의하세요.
+                {t('messages.accountDisabled')}
               </AlertDescription>
             </Alert>
           )}
@@ -212,12 +222,12 @@ export default function LoginPage({ loaderData, actionData }: ComponentProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm sm:text-base">
-                      이메일 주소
+                      {t('login.emailLabel')}
                     </FormLabel>
                     <FormControl>
                       <Input
                         type="email"
-                        placeholder="your@email.com"
+                        placeholder={t('login.emailPlaceholder')}
                         disabled={isSubmitting}
                         autoComplete="email"
                         className="h-10 sm:h-11 lg:h-12 text-sm sm:text-base"
@@ -239,13 +249,13 @@ export default function LoginPage({ loaderData, actionData }: ComponentProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm sm:text-base">
-                      비밀번호
+                      {t('login.passwordLabel')}
                     </FormLabel>
                     <FormControl>
                       <div className="relative">
                         <Input
                           type={showPassword ? 'text' : 'password'}
-                          placeholder="••••••••"
+                          placeholder={t('login.passwordPlaceholder')}
                           disabled={isSubmitting}
                           autoComplete="current-password"
                           className="h-10 sm:h-11 lg:h-12 text-sm sm:text-base"
@@ -264,7 +274,9 @@ export default function LoginPage({ loaderData, actionData }: ComponentProps) {
                             <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                           )}
                           <span className="sr-only">
-                            {showPassword ? '비밀번호 숨기기' : '비밀번호 보기'}
+                            {showPassword
+                              ? t('login.hidePassword')
+                              : t('login.showPassword')}
                           </span>
                         </Button>
                       </div>
@@ -282,12 +294,12 @@ export default function LoginPage({ loaderData, actionData }: ComponentProps) {
                 {isSubmitting ? (
                   <>
                     <LogIn className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-2 animate-pulse" />
-                    로그인 중...
+                    {t('login.loggingIn')}
                   </>
                 ) : (
                   <>
                     <LogIn className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-2" />
-                    로그인
+                    {t('login.loginButton')}
                   </>
                 )}
               </Button>
@@ -300,19 +312,19 @@ export default function LoginPage({ loaderData, actionData }: ComponentProps) {
               to="/auth/forgot-password"
               className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 underline underline-offset-4"
             >
-              비밀번호를 잊으셨나요?
+              {t('login.forgotPassword')}
             </Link>
           </div>
         </CardContent>
 
         <CardFooter className="flex flex-col space-y-3 sm:space-y-4 pt-2">
           <div className="text-xs sm:text-sm text-center text-slate-600 dark:text-slate-400">
-            계정이 없으신가요?{' '}
+            {t('login.noAccount')}{' '}
             <Link
               to="/invite-only"
               className="font-medium text-slate-900 hover:text-slate-700 dark:text-slate-300 dark:hover:text-slate-200 underline-offset-4 hover:underline"
             >
-              초대 코드로 가입하기
+              {t('login.signupLink')}
             </Link>
           </div>
         </CardFooter>

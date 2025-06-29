@@ -1,4 +1,5 @@
 import { Link, type MetaFunction, redirect } from 'react-router';
+import { useTranslation } from 'react-i18next';
 import { AuthLayout } from '~/common/layouts/auth-layout';
 import { Button } from '~/common/components/ui/button';
 import {
@@ -46,7 +47,7 @@ export async function loader({ request }: LoaderArgs) {
         console.error('이메일 인증 오류:', error);
         return {
           success: false,
-          error: '인증 토큰이 유효하지 않거나 만료되었습니다.',
+          error: 'The verification token is invalid or has expired.',
         };
       }
 
@@ -96,7 +97,7 @@ export async function loader({ request }: LoaderArgs) {
 
         return {
           success: true,
-          message: '이메일 인증이 성공적으로 완료되었습니다!',
+          message: 'Email verification completed successfully!',
           userEmail: data.user.email,
         };
       }
@@ -104,7 +105,7 @@ export async function loader({ request }: LoaderArgs) {
       console.error('이메일 인증 처리 오류:', error);
       return {
         success: false,
-        error: '이메일 인증 처리 중 오류가 발생했습니다.',
+        error: 'An error occurred during email verification.',
       };
     }
   }
@@ -112,18 +113,20 @@ export async function loader({ request }: LoaderArgs) {
   // 인증 토큰이 없거나 잘못된 경우
   return {
     success: false,
-    error: '인증 정보가 없습니다.',
+    error: 'No verification information found.',
   };
 }
 
 export const meta: MetaFunction = () => {
   return [
-    { title: '이메일 인증 완료 | SureCRM' },
-    { name: 'description', content: '이메일 인증이 완료되었습니다' },
+    { title: 'Email Verification Complete | SureCRM' },
+    { name: 'description', content: 'Email verification has been completed' },
   ];
 };
 
 export default function EmailConfirmedPage({ loaderData }: ComponentProps) {
+  const { t } = useTranslation('auth');
+
   return (
     <AuthLayout>
       <Card className="w-full bg-transparent border-none shadow-none">
@@ -142,12 +145,14 @@ export default function EmailConfirmedPage({ loaderData }: ComponentProps) {
             )}
           </div>
           <CardTitle className="text-2xl font-bold text-slate-900 dark:text-slate-100 text-center">
-            {loaderData.success ? '인증 완료!' : '인증 실패'}
+            {loaderData.success
+              ? t('emailConfirmed.successTitle')
+              : t('emailConfirmed.failureTitle')}
           </CardTitle>
           <CardDescription className="text-slate-600 dark:text-slate-400 text-center">
             {loaderData.success
-              ? '이메일 인증이 성공적으로 완료되었습니다'
-              : '이메일 인증에 실패했습니다'}
+              ? t('emailConfirmed.successSubtitle')
+              : t('emailConfirmed.failureSubtitle')}
           </CardDescription>
         </CardHeader>
 
@@ -158,34 +163,36 @@ export default function EmailConfirmedPage({ loaderData }: ComponentProps) {
                 {loaderData.userEmail && (
                   <p className="text-sm text-slate-600 dark:text-slate-400">
                     <span className="font-medium">{loaderData.userEmail}</span>{' '}
-                    계정이 활성화되었습니다.
+                    {t('emailConfirmed.accountActivated')}
                   </p>
                 )}
                 <p className="text-slate-600 dark:text-slate-400">
-                  {loaderData.message || '이제 SureCRM을 사용하실 수 있습니다.'}
+                  {loaderData.message || t('emailConfirmed.canUseService')}
                 </p>
                 <Button asChild className="w-full">
                   <Link to="/auth/login?message=email-verified">
-                    로그인하기
+                    {t('emailConfirmed.loginButton')}
                   </Link>
                 </Button>
               </div>
             ) : (
               <div className="space-y-4">
                 <p className="text-red-600 dark:text-red-400">
-                  {loaderData.error || '인증에 실패했습니다.'}
+                  {loaderData.error || t('error.verificationFailed')}
                 </p>
                 <div className="space-y-2">
                   <Button asChild variant="outline" className="w-full">
-                    <Link to="/auth/signup">다시 가입하기</Link>
+                    <Link to="/auth/signup">
+                      {t('emailConfirmed.signupAgainButton')}
+                    </Link>
                   </Button>
                   <p className="text-sm text-slate-600 dark:text-slate-400">
-                    또는{' '}
+                    {t('emailConfirmed.orText')}{' '}
                     <Link
                       to="/auth/login"
                       className="font-medium text-slate-900 hover:text-slate-700 dark:text-slate-300 dark:hover:text-slate-200"
                     >
-                      로그인 페이지로 이동
+                      {t('emailConfirmed.goToLogin')}
                     </Link>
                   </p>
                 </div>

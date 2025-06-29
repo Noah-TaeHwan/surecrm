@@ -3,6 +3,7 @@ import { Link, type MetaFunction, redirect } from 'react-router';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { AuthLayout } from '~/common/layouts/auth-layout';
 import { Button } from '~/common/components/ui/button';
 import { Input } from '~/common/components/ui/input';
@@ -25,36 +26,6 @@ import {
 import { Alert, AlertDescription } from '~/common/components/ui/alert';
 import { checkAuthStatus } from '~/lib/auth/core.server';
 import { signUpUser } from '~/lib/auth/registration';
-
-// Zod 스키마 정의
-const signUpSchema = z
-  .object({
-    invitationCode: z.string().min(1, { message: '초대 코드를 입력해주세요' }),
-    email: z
-      .string()
-      .min(1, { message: '이메일을 입력해주세요' })
-      .email({ message: '유효한 이메일 주소를 입력해주세요' }),
-    password: z
-      .string()
-      .min(6, { message: '비밀번호는 최소 6자 이상이어야 합니다' })
-      .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, {
-        message: '비밀번호는 대문자, 소문자, 숫자를 포함해야 합니다',
-      }),
-    confirmPassword: z
-      .string()
-      .min(1, { message: '비밀번호 확인을 입력해주세요' }),
-    fullName: z
-      .string()
-      .min(2, { message: '이름은 최소 2자 이상이어야 합니다' }),
-    phone: z.string().optional(),
-    company: z.string().optional(),
-  })
-  .refine(data => data.password === data.confirmPassword, {
-    message: '비밀번호가 일치하지 않습니다',
-    path: ['confirmPassword'],
-  });
-
-type SignUpFormData = z.infer<typeof signUpSchema>;
 
 interface LoaderArgs {
   request: Request;
@@ -105,6 +76,36 @@ export async function action({ request }: ActionArgs) {
     company: (formData.get('company') as string) || undefined,
   };
 
+  // Zod 스키마 정의 (서버 측에서는 영어 메시지 사용)
+  const signUpSchema = z
+    .object({
+      invitationCode: z
+        .string()
+        .min(1, { message: 'Please enter an invitation code' }),
+      email: z
+        .string()
+        .min(1, { message: 'Please enter your email' })
+        .email({ message: 'Please enter a valid email address' }),
+      password: z
+        .string()
+        .min(6, { message: 'Password must be at least 6 characters' })
+        .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, {
+          message: 'Password must include uppercase, lowercase, and numbers',
+        }),
+      confirmPassword: z
+        .string()
+        .min(1, { message: 'Please confirm your password' }),
+      fullName: z
+        .string()
+        .min(2, { message: 'Name must be at least 2 characters' }),
+      phone: z.string().optional(),
+      company: z.string().optional(),
+    })
+    .refine(data => data.password === data.confirmPassword, {
+      message: 'Passwords do not match',
+      path: ['confirmPassword'],
+    });
+
   // 필수 필드 검증
   if (
     !signUpData.invitationCode ||
@@ -115,7 +116,7 @@ export async function action({ request }: ActionArgs) {
   ) {
     return {
       success: false,
-      error: '필수 정보를 모두 입력해주세요.',
+      error: 'Please fill in all required fields.',
     };
   }
 
@@ -123,7 +124,7 @@ export async function action({ request }: ActionArgs) {
   if (signUpData.password !== signUpData.confirmPassword) {
     return {
       success: false,
-      error: '비밀번호가 일치하지 않습니다.',
+      error: 'Passwords do not match.',
     };
   }
 
@@ -140,7 +141,7 @@ export async function action({ request }: ActionArgs) {
     }
     return {
       success: false,
-      error: '입력 데이터가 유효하지 않습니다.',
+      error: 'Input data is not valid.',
     };
   }
 
@@ -169,7 +170,7 @@ export async function action({ request }: ActionArgs) {
         )}&company=${encodeURIComponent(
           signUpData.company || ''
         )}&message=${encodeURIComponent(
-          '회원가입 요청이 완료되었습니다. 이메일로 받은 인증 코드를 입력해주세요.'
+          'Registration request completed. Please enter the verification code sent to your email.'
         )}`
       );
     }
@@ -180,22 +181,53 @@ export async function action({ request }: ActionArgs) {
 
   return {
     success: false,
-    error: result.error || '회원가입에 실패했습니다.',
+    error: result.error || 'Registration failed.',
   };
 }
 
 // 메타 정보
 export const meta: MetaFunction = () => {
   return [
-    { title: '회원가입 | SureCRM' },
-    { name: 'description', content: '초대 코드로 SureCRM에 가입하세요' },
+    { title: 'Sign Up | SureCRM' },
+    { name: 'description', content: 'Join SureCRM with your invitation code' },
   ];
 };
 
 // 회원가입 페이지 컴포넌트
 export default function SignUpPage({ loaderData, actionData }: ComponentProps) {
+  const { t } = useTranslation('auth');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [invitationValid, setInvitationValid] = useState<boolean | null>(null);
+
+  // Zod 스키마 정의 (클라이언트 측에서는 다국어 메시지 사용)
+  const signUpSchema = z
+    .object({
+      invitationCode: z
+        .string()
+        .min(1, { message: t('error.invitationRequired') }),
+      email: z
+        .string()
+        .min(1, { message: t('error.emailRequired') })
+        .email({ message: t('error.invalidEmail') }),
+      password: z
+        .string()
+        .min(6, { message: t('error.passwordTooShort') })
+        .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, {
+          message: t('error.passwordComplexity'),
+        }),
+      confirmPassword: z
+        .string()
+        .min(1, { message: t('error.passwordRequired') }),
+      fullName: z.string().min(2, { message: t('error.nameTooShort') }),
+      phone: z.string().optional(),
+      company: z.string().optional(),
+    })
+    .refine(data => data.password === data.confirmPassword, {
+      message: t('error.passwordMismatch'),
+      path: ['confirmPassword'],
+    });
+
+  type SignUpFormData = z.infer<typeof signUpSchema>;
 
   // react-hook-form과 zodResolver를 사용한 폼 설정
   const form = useForm<SignUpFormData>({
@@ -241,7 +273,7 @@ export default function SignUpPage({ loaderData, actionData }: ComponentProps) {
           const errorMessage =
             validation.data?.error ||
             validation.error ||
-            '유효하지 않은 초대 코드입니다';
+            t('error.invalidInvitation');
           form.setError('invitationCode', {
             type: 'manual',
             message: errorMessage,
@@ -250,11 +282,11 @@ export default function SignUpPage({ loaderData, actionData }: ComponentProps) {
           form.clearErrors('invitationCode');
         }
       } catch (error) {
-        console.error('초대 코드 검증 오류:', error);
+        console.error('Invitation code validation error:', error);
         setInvitationValid(false);
         form.setError('invitationCode', {
           type: 'manual',
-          message: '초대 코드 검증 중 오류가 발생했습니다',
+          message: t('error.invitationValidationError'),
         });
       }
     }
@@ -267,7 +299,7 @@ export default function SignUpPage({ loaderData, actionData }: ComponentProps) {
     // 초대 코드 검증
     if (!invitationValid) {
       form.setError('invitationCode', {
-        message: '유효하지 않은 초대 코드입니다.',
+        message: t('error.invalidInvitation'),
       });
       setIsSubmitting(false);
       return;
@@ -306,10 +338,10 @@ export default function SignUpPage({ loaderData, actionData }: ComponentProps) {
       <Card className="w-full bg-transparent border-none shadow-none">
         <CardHeader className="space-y-1 pb-2 flex flex-col items-center">
           <CardTitle className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900 dark:text-slate-100">
-            회원가입
+            {t('signup.title')}
           </CardTitle>
           <CardDescription className="text-sm sm:text-base text-slate-600 dark:text-slate-400 px-2 sm:px-0">
-            초대 코드로 SureCRM에 가입하세요
+            {t('signup.subtitle')}
           </CardDescription>
         </CardHeader>
 
@@ -318,13 +350,13 @@ export default function SignUpPage({ loaderData, actionData }: ComponentProps) {
             <Alert variant="destructive" className="mb-3 sm:mb-4">
               <AlertDescription className="text-sm">
                 {actionData.error}
-                {actionData.error.includes('이미 등록된 이메일') && (
+                {actionData.error.includes('already registered') && (
                   <div className="mt-2">
                     <Link
                       to="/auth/login"
                       className="font-medium text-primary hover:text-primary/80 underline underline-offset-4"
                     >
-                      로그인 페이지로 이동하기
+                      {t('signup.loginLink')}
                     </Link>
                   </div>
                 )}
@@ -351,13 +383,14 @@ export default function SignUpPage({ loaderData, actionData }: ComponentProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm sm:text-base">
-                      초대 코드 *
+                      {t('signup.invitationCodeLabel')}{' '}
+                      {t('signup.requiredField')}
                     </FormLabel>
                     <FormControl>
                       <Input
                         {...field}
                         type="text"
-                        placeholder="INV-XXXXXX-XXXXXX"
+                        placeholder={t('signup.invitationCodePlaceholder')}
                         disabled={isSubmitting}
                         onBlur={handleInvitationCodeBlur}
                         className={`h-10 sm:h-11 lg:h-12 text-sm sm:text-base ${
@@ -372,7 +405,7 @@ export default function SignUpPage({ loaderData, actionData }: ComponentProps) {
                     <FormMessage className="text-xs sm:text-sm" />
                     {invitationValid === true && (
                       <p className="text-xs sm:text-sm text-green-600">
-                        ✓ 유효한 초대 코드입니다
+                        {t('signup.validInvitationCode')}
                       </p>
                     )}
                   </FormItem>
@@ -385,13 +418,13 @@ export default function SignUpPage({ loaderData, actionData }: ComponentProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm sm:text-base">
-                      이름 *
+                      {t('signup.nameLabel')} {t('signup.requiredField')}
                     </FormLabel>
                     <FormControl>
                       <Input
                         {...field}
                         type="text"
-                        placeholder="홍길동"
+                        placeholder={t('signup.namePlaceholder')}
                         disabled={isSubmitting}
                         className="h-10 sm:h-11 lg:h-12 text-sm sm:text-base"
                       />
@@ -407,13 +440,13 @@ export default function SignUpPage({ loaderData, actionData }: ComponentProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm sm:text-base">
-                      이메일 *
+                      {t('signup.emailLabel')} {t('signup.requiredField')}
                     </FormLabel>
                     <FormControl>
                       <Input
                         {...field}
                         type="email"
-                        placeholder="your@email.com"
+                        placeholder={t('signup.emailPlaceholder')}
                         disabled={isSubmitting}
                         className="h-10 sm:h-11 lg:h-12 text-sm sm:text-base"
                       />
@@ -429,13 +462,13 @@ export default function SignUpPage({ loaderData, actionData }: ComponentProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm sm:text-base">
-                      전화번호
+                      {t('signup.phoneLabel')}
                     </FormLabel>
                     <FormControl>
                       <Input
                         {...field}
                         type="tel"
-                        placeholder="010-1234-5678"
+                        placeholder={t('signup.phonePlaceholder')}
                         disabled={isSubmitting}
                         className="h-10 sm:h-11 lg:h-12 text-sm sm:text-base"
                       />
@@ -451,13 +484,13 @@ export default function SignUpPage({ loaderData, actionData }: ComponentProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm sm:text-base">
-                      회사명
+                      {t('signup.companyLabel')}
                     </FormLabel>
                     <FormControl>
                       <Input
                         {...field}
                         type="text"
-                        placeholder="회사명을 입력하세요"
+                        placeholder={t('signup.companyPlaceholder')}
                         disabled={isSubmitting}
                         className="h-10 sm:h-11 lg:h-12 text-sm sm:text-base"
                       />
@@ -473,13 +506,13 @@ export default function SignUpPage({ loaderData, actionData }: ComponentProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm sm:text-base">
-                      비밀번호 *
+                      {t('signup.passwordLabel')} {t('signup.requiredField')}
                     </FormLabel>
                     <FormControl>
                       <Input
                         {...field}
                         type="password"
-                        placeholder="••••••••"
+                        placeholder={t('signup.passwordPlaceholder')}
                         disabled={isSubmitting}
                         className="h-10 sm:h-11 lg:h-12 text-sm sm:text-base"
                       />
@@ -495,13 +528,14 @@ export default function SignUpPage({ loaderData, actionData }: ComponentProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm sm:text-base">
-                      비밀번호 확인 *
+                      {t('signup.confirmPasswordLabel')}{' '}
+                      {t('signup.requiredField')}
                     </FormLabel>
                     <FormControl>
                       <Input
                         {...field}
                         type="password"
-                        placeholder="••••••••"
+                        placeholder={t('signup.confirmPasswordPlaceholder')}
                         disabled={isSubmitting}
                         className="h-10 sm:h-11 lg:h-12 text-sm sm:text-base"
                       />
@@ -516,7 +550,9 @@ export default function SignUpPage({ loaderData, actionData }: ComponentProps) {
                 className="w-full h-10 sm:h-11 lg:h-12 text-sm sm:text-base"
                 disabled={isSubmitting || invitationValid !== true}
               >
-                {isSubmitting ? '가입 중...' : '회원가입'}
+                {isSubmitting
+                  ? t('signup.signingUp')
+                  : t('signup.signupButton')}
               </Button>
             </form>
           </Form>
@@ -524,12 +560,12 @@ export default function SignUpPage({ loaderData, actionData }: ComponentProps) {
 
         <CardFooter className="flex flex-col space-y-3 sm:space-y-4 pt-2">
           <div className="text-xs sm:text-sm text-center text-slate-600 dark:text-slate-400">
-            이미 계정이 있으신가요?{' '}
+            {t('signup.hasAccount')}{' '}
             <Link
               to="/auth/login"
               className="font-medium text-slate-900 hover:text-slate-700 dark:text-slate-300 dark:hover:text-slate-200 underline-offset-4 hover:underline"
             >
-              로그인
+              {t('login.title')}
             </Link>
           </div>
         </CardFooter>

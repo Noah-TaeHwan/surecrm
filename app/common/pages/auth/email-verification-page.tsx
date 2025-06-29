@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, type MetaFunction } from 'react-router';
+import { useTranslation } from 'react-i18next';
 import { AuthLayout } from '~/common/layouts/auth-layout';
 import { Button } from '~/common/components/ui/button';
 import {
@@ -36,12 +37,13 @@ export async function loader({ request }: LoaderArgs) {
 
 export const meta: MetaFunction = () => {
   return [
-    { title: '이메일 인증 | SureCRM' },
-    { name: 'description', content: '이메일 인증을 완료해주세요' },
+    { title: 'Email Verification | SureCRM' },
+    { name: 'description', content: 'Complete your email verification' },
   ];
 };
 
 export default function EmailVerificationPage({ loaderData }: ComponentProps) {
+  const { t } = useTranslation('auth');
   const [isResending, setIsResending] = useState(false);
   const [resendSuccess, setResendSuccess] = useState(false);
   const [resendError, setResendError] = useState<string | null>(null);
@@ -66,10 +68,10 @@ export default function EmailVerificationPage({ loaderData }: ComponentProps) {
       if (result.success) {
         setResendSuccess(true);
       } else {
-        setResendError(result.error || '이메일 재전송에 실패했습니다.');
+        setResendError(result.error || t('error.resendFailed'));
       }
     } catch (error) {
-      setResendError('이메일 재전송 중 오류가 발생했습니다.');
+      setResendError(t('error.resendError'));
     } finally {
       setIsResending(false);
     }
@@ -83,10 +85,10 @@ export default function EmailVerificationPage({ loaderData }: ComponentProps) {
             <Mail className="w-8 h-8 text-blue-600 dark:text-blue-400" />
           </div>
           <CardTitle className="text-2xl font-bold text-slate-900 dark:text-slate-100 text-center">
-            이메일 인증
+            {t('emailVerification.title')}
           </CardTitle>
           <CardDescription className="text-slate-600 dark:text-slate-400 text-center">
-            회원가입을 완료하기 위해 이메일 인증이 필요합니다
+            {t('emailVerification.subtitle')}
           </CardDescription>
         </CardHeader>
 
@@ -101,7 +103,7 @@ export default function EmailVerificationPage({ loaderData }: ComponentProps) {
           <div className="text-center space-y-4">
             {loaderData.email && (
               <p className="text-sm text-slate-600 dark:text-slate-400">
-                다음 이메일 주소로 인증 링크를 전송했습니다:
+                {t('emailVerification.instructions')}
               </p>
             )}
 
@@ -112,8 +114,8 @@ export default function EmailVerificationPage({ loaderData }: ComponentProps) {
             )}
 
             <div className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
-              <p>이메일함을 확인하고 인증 링크를 클릭해주세요.</p>
-              <p>스팸함도 확인해보시기 바랍니다.</p>
+              <p>{t('emailVerification.checkEmail')}</p>
+              <p>{t('emailVerification.checkSpam')}</p>
             </div>
           </div>
 
@@ -121,7 +123,7 @@ export default function EmailVerificationPage({ loaderData }: ComponentProps) {
             <Alert>
               <CheckCircle className="h-4 w-4" />
               <AlertDescription>
-                인증 이메일을 다시 전송했습니다. 이메일함을 확인해주세요.
+                {t('emailVerification.resendSuccessMessage')}
               </AlertDescription>
             </Alert>
           )}
@@ -143,33 +145,33 @@ export default function EmailVerificationPage({ loaderData }: ComponentProps) {
                 {isResending ? (
                   <>
                     <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                    재전송 중...
+                    {t('emailVerification.resendingButton')}
                   </>
                 ) : resendSuccess ? (
-                  '이메일이 재전송되었습니다'
+                  t('emailVerification.resendSuccess')
                 ) : (
-                  '인증 이메일 다시 보내기'
+                  t('emailVerification.resendButton')
                 )}
               </Button>
             )}
 
             <div className="text-center text-sm text-slate-600 dark:text-slate-400">
-              이메일 주소가 잘못되었나요?{' '}
+              {t('emailVerification.wrongEmail')}{' '}
               <Link
                 to="/auth/signup"
                 className="font-medium text-slate-900 hover:text-slate-700 dark:text-slate-300 dark:hover:text-slate-200"
               >
-                다시 가입하기
+                {t('emailVerification.signupAgain')}
               </Link>
             </div>
 
             <div className="text-center text-sm text-slate-600 dark:text-slate-400">
-              이미 계정이 있으신가요?{' '}
+              {t('signup.hasAccount')}{' '}
               <Link
                 to="/auth/login"
                 className="font-medium text-slate-900 hover:text-slate-700 dark:text-slate-300 dark:hover:text-slate-200"
               >
-                로그인
+                {t('login.title')}
               </Link>
             </div>
           </div>
