@@ -263,14 +263,40 @@ export async function action({ request }: ActionFunctionArgs) {
       });
     }
 
+    // 환경변수 검증
+    const emailUser = process.env.EMAIL_USER || process.env.GMAIL_USER;
+    const emailPass = process.env.EMAIL_PASSWORD || process.env.GMAIL_PASS;
+
+    if (!emailUser || !emailPass) {
+      console.error('이메일 환경변수 누락:', {
+        EMAIL_USER: !!process.env.EMAIL_USER,
+        GMAIL_USER: !!process.env.GMAIL_USER,
+        EMAIL_PASSWORD: !!process.env.EMAIL_PASSWORD,
+        GMAIL_PASS: !!process.env.GMAIL_PASS,
+      });
+
+      logSecurityEvent(clientIP, 'EMAIL_CONFIG_ERROR', {
+        missingEmailUser: !emailUser,
+        missingEmailPass: !emailPass,
+      });
+
+      return json(
+        {
+          success: false,
+          error: '메일 서비스 설정 오류입니다. 관리자에게 문의해주세요.',
+        },
+        { status: 500 }
+      );
+    }
+
     // Create transporter
     const transporter = nodemailer.createTransport({
       host: 'smtp.gmail.com',
       port: 587,
       secure: false,
       auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_PASS,
+        user: emailUser,
+        pass: emailPass,
       },
     });
 
@@ -313,8 +339,8 @@ export async function action({ request }: ActionFunctionArgs) {
 
     // Send email
     await transporter.sendMail({
-      from: process.env.GMAIL_USER,
-      to: process.env.GMAIL_USER,
+      from: emailUser,
+      to: emailUser,
       subject: `🛡️ [보안 검증 완료] SureCRM 문의: ${contactData.subject}`,
       html: htmlContent,
     });
