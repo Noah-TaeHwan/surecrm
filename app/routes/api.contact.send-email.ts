@@ -135,12 +135,19 @@ async function verifyTurnstileToken(
 ): Promise<boolean> {
   const secretKey = process.env.TURNSTILE_SECRET_KEY;
 
+  console.log('🔐 Turnstile verification details:', {
+    hasToken: !!token,
+    hasSecretKey: !!secretKey,
+    ip: ip,
+  });
+
   if (!secretKey) {
-    console.error('TURNSTILE_SECRET_KEY not found in environment variables');
+    console.error('❌ TURNSTILE_SECRET_KEY not found in environment variables');
     return false;
   }
 
   try {
+    console.log('📡 Sending Turnstile verification request...');
     const response = await fetch(
       'https://challenges.cloudflare.com/turnstile/v0/siteverify',
       {
@@ -157,9 +164,14 @@ async function verifyTurnstileToken(
     );
 
     const result = await response.json();
+    console.log('📝 Turnstile verification result:', {
+      success: result.success,
+      errorCodes: result['error-codes'],
+      responseStatus: response.status,
+    });
     return result.success === true;
   } catch (error) {
-    console.error('Turnstile verification error:', error);
+    console.error('❌ Turnstile verification error:', error);
     return false;
   }
 }
@@ -171,9 +183,18 @@ export async function action({ request }: ActionFunctionArgs) {
     request.headers.get('X-Real-IP') ||
     'unknown';
 
+  // 디버깅: 함수 시작 로그
+  console.log('🚀 Contact form action started:', {
+    ip: clientIP,
+    method: request.method,
+    url: request.url,
+    userAgent: request.headers.get('User-Agent')?.substring(0, 100),
+  });
+
   try {
     // Rate limiting check
     if (!checkRateLimit(clientIP)) {
+      console.log('❌ Rate limit exceeded for IP:', clientIP);
       logSecurityEvent(clientIP, 'RATE_LIMIT_EXCEEDED', {
         userAgent: request.headers.get('User-Agent'),
       });
@@ -187,7 +208,17 @@ export async function action({ request }: ActionFunctionArgs) {
       );
     }
 
+    console.log('✅ Rate limit check passed');
+
     const formData = await request.formData();
+    console.log('📋 Form data received:', {
+      name: !!formData.get('name'),
+      email: !!formData.get('email'),
+      subject: !!formData.get('subject'),
+      message: !!formData.get('message'),
+      turnstileToken: !!formData.get('turnstileToken'),
+    });
+
     const contactData: ContactFormData = {
       name: formData.get('name') as string,
       email: formData.get('email') as string,
@@ -203,14 +234,23 @@ export async function action({ request }: ActionFunctionArgs) {
       !contactData.subject ||
       !contactData.message
     ) {
+      console.log('❌ Required fields missing:', {
+        name: !contactData.name,
+        email: !contactData.email,
+        subject: !contactData.subject,
+        message: !contactData.message,
+      });
       return json(
         { success: false, error: '모든 필드를 입력해 주세요.' },
         { status: 400 }
       );
     }
 
+    console.log('✅ Required fields validation passed');
+
     // Verify Turnstile token first
     if (!contactData.turnstileToken) {
+      console.log('❌ Turnstile token missing');
       logSecurityEvent(clientIP, 'MISSING_TURNSTILE_TOKEN', contactData);
       return json(
         { success: false, error: '보안 인증이 필요합니다.' },
@@ -218,11 +258,13 @@ export async function action({ request }: ActionFunctionArgs) {
       );
     }
 
+    console.log('🔐 Verifying Turnstile token...');
     const isValidToken = await verifyTurnstileToken(
       contactData.turnstileToken,
       clientIP
     );
     if (!isValidToken) {
+      console.log('❌ Turnstile token verification failed');
       logSecurityEvent(clientIP, 'INVALID_TURNSTILE_TOKEN', {
         ...contactData,
         turnstileToken: '[REDACTED]',
@@ -238,9 +280,13 @@ export async function action({ request }: ActionFunctionArgs) {
       );
     }
 
+    console.log('✅ Turnstile verification passed');
+
     // Content validation and spam detection
+    console.log('🔍 Validating content...');
     const contentValidation = validateContent(contactData);
     if (!contentValidation.isValid) {
+      console.log('❌ Content validation failed:', contentValidation.reason);
       logSecurityEvent(clientIP, 'CONTENT_VALIDATION_FAILED', {
         reason: contentValidation.reason,
         name: contactData.name,
@@ -257,6 +303,8 @@ export async function action({ request }: ActionFunctionArgs) {
         { status: 400 }
       );
     }
+
+    console.log('✅ Content validation passed');
 
     // Additional security checks
     const userAgent = request.headers.get('User-Agent') || '';
@@ -275,11 +323,22 @@ export async function action({ request }: ActionFunctionArgs) {
     }
 
     // 환경변수 검증
+    console.log('🔧 Checking environment variables...');
     const emailUser = process.env.EMAIL_USER || process.env.GMAIL_USER;
     const emailPass = process.env.EMAIL_PASSWORD || process.env.GMAIL_PASS;
 
+    console.log('📧 Environment variables status:', {
+      EMAIL_USER: !!process.env.EMAIL_USER,
+      GMAIL_USER: !!process.env.GMAIL_USER,
+      EMAIL_PASSWORD: !!process.env.EMAIL_PASSWORD,
+      GMAIL_PASS: !!process.env.GMAIL_PASS,
+      finalEmailUser: !!emailUser,
+      finalEmailPass: !!emailPass,
+      TURNSTILE_SECRET_KEY: !!process.env.TURNSTILE_SECRET_KEY,
+    });
+
     if (!emailUser || !emailPass) {
-      console.error('이메일 환경변수 누락:', {
+      console.error('❌ 이메일 환경변수 누락:', {
         EMAIL_USER: !!process.env.EMAIL_USER,
         GMAIL_USER: !!process.env.GMAIL_USER,
         EMAIL_PASSWORD: !!process.env.EMAIL_PASSWORD,
@@ -300,7 +359,10 @@ export async function action({ request }: ActionFunctionArgs) {
       );
     }
 
+    console.log('✅ Environment variables check passed');
+
     // Create transporter
+    console.log('📮 Creating email transporter...');
     const transporter = nodemailer.createTransport({
       host: 'smtp.gmail.com',
       port: 587,
