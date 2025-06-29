@@ -36,7 +36,6 @@ export function RecentClients({
 }: RecentClientsProps) {
   const {
     t,
-    isHydrated,
     formatCurrency,
     formatDate: formatDateHydrationSafe,
   } = useHydrationSafeTranslation('dashboard');

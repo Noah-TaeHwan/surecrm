@@ -23,14 +23,9 @@ import {
   ActivityLogIcon,
   QuestionMarkCircledIcon,
 } from '@radix-ui/react-icons';
-import { useTranslation } from 'react-i18next';
 import { cn } from '~/lib/utils';
-import {
-  formatCurrencyTable,
-  type SupportedLocale,
-} from '~/lib/utils/currency';
 import { InsuranceAgentEvents } from '~/lib/utils/analytics';
-import { useState, useEffect } from 'react';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 
 // 새로운 타입 시스템 사용
 import type { DashboardKPIData } from '../types';
@@ -57,17 +52,7 @@ export function PerformanceKPICards({
   isLoading = false,
   salesStats,
 }: PerformanceKPICardsProps) {
-  const { t, i18n } = useTranslation('dashboard');
-  const locale = (
-    i18n.language === 'ko' ? 'ko' : i18n.language === 'ja' ? 'ja' : 'en'
-  ) as SupportedLocale;
-
-  // 🔧 Hydration mismatch 방지를 위한 클라이언트 상태 관리
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
+  const { t, formatCurrency } = useHydrationSafeTranslation('dashboard');
 
   // 🆕 실제 영업 데이터를 활용한 KPI 계산 (1건 계약 = 1회성 수수료)
   const totalExpectedCommission = salesStats ? salesStats.totalCommission : 0;
@@ -77,157 +62,82 @@ export function PerformanceKPICards({
       : 0
     : 0;
 
-  // 📊 KPI 아이템을 안전하게 생성하는 함수
-  const getKPIItems = () => {
-    if (!isClient) {
-      // 서버에서는 하드코딩된 기본값 사용
-      return [
-        {
-          title: '총 고객 수',
-          value: data.totalClients,
-          change: data.clientGrowthPercentage,
-          icon: PersonIcon,
-          color: 'primary',
-          description: '등록된 전체 고객 수',
-          tooltipKey: 'totalClients',
-        },
-        {
-          title: '활성 계약',
-          value: data.totalActiveContracts || 0,
-          change: data.monthlyGrowth.revenue,
-          icon: ActivityLogIcon,
-          color: 'success',
-          description: '현재 유지 중인 계약 수',
-          tooltipKey: 'activeContracts',
-        },
-        {
-          title: '월 보험료 합계',
-          value: formatCurrencyTable(data.totalMonthlyPremium || 0, locale),
-          change: data.monthlyGrowth.revenue,
-          icon: BarChartIcon,
-          color: 'info',
-          description: '월간 보험료 총액',
-          tooltipKey: 'monthlyPremium',
-        },
-        {
-          title: '총 수수료',
-          value: formatCurrencyTable(data.actualTotalCommission || 0, locale),
-          change: data.monthlyGrowth.revenue,
-          icon: Share1Icon,
-          color: 'warning',
-          description: '예상 총 수수료',
-          tooltipKey: 'totalCommission',
-        },
-      ];
-    }
-
-    // 클라이언트에서는 i18next 초기화 후 번역된 텍스트 사용
-    if (!i18n?.isInitialized) {
-      return [];
-    }
-
-    try {
-      if (!i18n.hasLoadedNamespace || !i18n.hasLoadedNamespace('dashboard')) {
-        return [];
-      }
-
-      return [
-        {
-          title: t('performanceKPI.totalClients', {
-            defaultValue: '총 고객 수',
-          }),
-          value: data.totalClients,
-          change: data.clientGrowthPercentage,
-          icon: PersonIcon,
-          color: 'primary',
-          description: t('performanceKPI.descriptions.totalClients', {
-            defaultValue: '등록된 전체 고객 수',
-          }),
-          tooltipKey: 'totalClients',
-        },
-        {
-          title: t('performanceKPI.activeContracts', {
-            defaultValue: '활성 계약',
-          }),
-          value: data.totalActiveContracts || 0,
-          change: data.monthlyGrowth.revenue,
-          icon: ActivityLogIcon,
-          color: 'success',
-          description: t('performanceKPI.descriptions.activeContracts', {
-            defaultValue: '현재 유지 중인 계약 수',
-          }),
-          tooltipKey: 'activeContracts',
-        },
-        {
-          title: t('performanceKPI.monthlyPremium', {
-            defaultValue: '월 보험료 합계',
-          }),
-          value: formatCurrencyTable(data.totalMonthlyPremium || 0, locale),
-          change: data.monthlyGrowth.revenue,
-          icon: BarChartIcon,
-          color: 'info',
-          description: t('performanceKPI.descriptions.monthlyPremium', {
-            defaultValue: '월간 보험료 총액',
-          }),
-          tooltipKey: 'monthlyPremium',
-        },
-        {
-          title: t('performanceKPI.totalCommission', {
-            defaultValue: '총 수수료',
-          }),
-          value: formatCurrencyTable(data.actualTotalCommission || 0, locale),
-          change: data.monthlyGrowth.revenue,
-          icon: Share1Icon,
-          color: 'warning',
-          description: t('performanceKPI.descriptions.totalCommission', {
-            defaultValue: '예상 총 수수료',
-          }),
-          tooltipKey: 'totalCommission',
-        },
-      ];
-    } catch (error) {
-      return [];
-    }
-  };
+  // 📊 KPI 아이템을 hydration-safe하게 생성하는 함수
+  const getKPIItems = () => [
+    {
+      title: t('performanceKPI.totalClients', '총 고객 수'),
+      value: data.totalClients,
+      change: data.clientGrowthPercentage,
+      icon: PersonIcon,
+      color: 'primary',
+      description: t(
+        'performanceKPI.descriptions.totalClients',
+        '등록된 전체 고객 수'
+      ),
+      tooltipKey: 'totalClients',
+    },
+    {
+      title: t('performanceKPI.activeContracts', '활성 계약'),
+      value: data.totalActiveContracts || 0,
+      change: data.monthlyGrowth.revenue,
+      icon: ActivityLogIcon,
+      color: 'success',
+      description: t(
+        'performanceKPI.descriptions.activeContracts',
+        '현재 유지 중인 계약 수'
+      ),
+      tooltipKey: 'activeContracts',
+    },
+    {
+      title: t('performanceKPI.monthlyPremium', '월 보험료 합계'),
+      value: formatCurrency(data.totalMonthlyPremium || 0),
+      change: data.monthlyGrowth.revenue,
+      icon: BarChartIcon,
+      color: 'info',
+      description: t(
+        'performanceKPI.descriptions.monthlyPremium',
+        '월간 보험료 총액'
+      ),
+      tooltipKey: 'monthlyPremium',
+    },
+    {
+      title: t('performanceKPI.totalCommission', '총 수수료'),
+      value: formatCurrency(data.actualTotalCommission || 0),
+      change: data.monthlyGrowth.revenue,
+      icon: Share1Icon,
+      color: 'warning',
+      description: t(
+        'performanceKPI.descriptions.totalCommission',
+        '예상 총 수수료'
+      ),
+      tooltipKey: 'totalCommission',
+    },
+  ];
 
   const kpiItems = getKPIItems();
 
-  // 📊 툴팁 내용을 안전하게 가져오는 함수
+  // 📊 툴팁 내용을 hydration-safe하게 가져오는 함수
   const getTooltipContent = (tooltipKey: string) => {
-    if (
-      !isClient ||
-      !i18n?.isInitialized ||
-      !i18n.hasLoadedNamespace?.('dashboard')
-    ) {
-      // 서버에서는 하드코딩된 기본값 반환
-      const defaultTooltips = {
-        totalClients:
-          '시스템에 등록된 모든 고객의 수입니다.\n신규 고객과 기존 고객을 모두 포함합니다.',
-        activeContracts:
-          '현재 효력이 있는 보험 계약의 수입니다.\n해지되거나 만료된 계약은 제외됩니다.',
-        monthlyPremium: '활성 계약들로부터 발생하는 월간 보험료의 총합입니다.',
-        totalCommission:
-          '계약에 따른 예상 수수료 총액입니다.\n평균 건당 수수료: ' +
-          (averageCommissionPerDeal / 10000).toFixed(0) +
-          '만원',
-      };
-      return defaultTooltips[tooltipKey as keyof typeof defaultTooltips] || '';
+    const defaultTooltips = {
+      totalClients:
+        '시스템에 등록된 모든 고객의 수입니다.\n신규 고객과 기존 고객을 모두 포함합니다.',
+      activeContracts:
+        '현재 효력이 있는 보험 계약의 수입니다.\n해지되거나 만료된 계약은 제외됩니다.',
+      monthlyPremium: '활성 계약들로부터 발생하는 월간 보험료의 총합입니다.',
+      totalCommission: `계약에 따른 예상 수수료 총액입니다.\n평균 건당 수수료: ${(averageCommissionPerDeal / 10000).toFixed(0)}만원`,
+    };
+
+    if (tooltipKey === 'totalCommission') {
+      return t(
+        'performanceKPI.tooltips.expectedCommission',
+        `계약에 따른 예상 수수료 총액입니다.\n평균 건당 수수료: ${(averageCommissionPerDeal / 10000).toFixed(0)}만원`
+      );
     }
 
-    try {
-      if (tooltipKey === 'totalCommission') {
-        return t('performanceKPI.tooltips.expectedCommission', {
-          average: (averageCommissionPerDeal / 10000).toFixed(0),
-          defaultValue:
-            '계약에 따른 예상 수수료 총액입니다.\n평균 건당 수수료: ' +
-            (averageCommissionPerDeal / 10000).toFixed(0) +
-            '만원',
-        });
-      }
-      return t(`performanceKPI.tooltips.${tooltipKey}`, { defaultValue: '' });
-    } catch (error) {
-      return '';
-    }
+    return t(
+      `performanceKPI.tooltips.${tooltipKey}`,
+      defaultTooltips[tooltipKey as keyof typeof defaultTooltips] || ''
+    );
   };
 
   // 📊 툴팁 텍스트를 줄바꿈 처리하는 함수
@@ -255,9 +165,7 @@ export function PerformanceKPICards({
         bgColor: 'bg-blue-100 dark:bg-blue-900/20',
         prefix: '',
         isSpecial: true,
-        label: isClient
-          ? t('performanceKPI.changeLabels.new', { defaultValue: '새로운' })
-          : '새로운',
+        label: t('performanceKPI.changeLabels.new', '새로운'),
       };
     }
 
@@ -274,16 +182,8 @@ export function PerformanceKPICards({
         isSpecial: true,
         label:
           change > 0
-            ? isClient
-              ? t('performanceKPI.changeLabels.majorIncrease', {
-                  defaultValue: '대폭 증가',
-                })
-              : '대폭 증가'
-            : isClient
-              ? t('performanceKPI.changeLabels.majorDecrease', {
-                  defaultValue: '대폭 감소',
-                })
-              : '대폭 감소',
+            ? t('performanceKPI.changeLabels.majorIncrease', '대폭 증가')
+            : t('performanceKPI.changeLabels.majorDecrease', '대폭 감소'),
       };
     }
 
@@ -495,15 +395,13 @@ export function PerformanceKPICards({
                     <div className="mt-2 p-2 md:p-3 bg-muted/20 rounded-lg">
                       <div className="flex items-center justify-between text-xs">
                         <span className="text-muted-foreground truncate">
-                          {isClient
-                            ? t(
-                                'performanceKPI.extraLabels.averageClientValue',
-                                { defaultValue: '평균 고객 가치' }
-                              )
-                            : '평균 고객 가치'}
+                          {t(
+                            'performanceKPI.extraLabels.averageClientValue',
+                            '평균 고객 가치'
+                          )}
                         </span>
                         <span className="font-medium text-foreground flex-shrink-0">
-                          {formatCurrencyTable(data.averageClientValue, locale)}
+                          {formatCurrency(data.averageClientValue)}
                         </span>
                       </div>
                     </div>
