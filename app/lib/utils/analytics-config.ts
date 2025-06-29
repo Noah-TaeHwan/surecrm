@@ -10,49 +10,25 @@ const GA_MEASUREMENT_ID = import.meta.env.VITE_GA_MEASUREMENT_ID;
 const GTM_CONTAINER_ID = import.meta.env.VITE_GTM_CONTAINER_ID;
 
 /**
- * 개발 환경 감지
+ * 프로덕션 도메인 확인 (surecrm.pro에서만 GA 활성화)
+ */
+export function isProductionDomain(): boolean {
+  if (typeof window === 'undefined') return false;
+
+  return (
+    window.location.hostname === 'surecrm.pro' ||
+    window.location.hostname === 'www.surecrm.pro'
+  );
+}
+
+/**
+ * 개발 환경 감지 (surecrm.pro가 아닌 모든 환경)
  */
 export function isDevelopmentEnvironment(): boolean {
   if (typeof window === 'undefined') return false;
 
-  // 🔧 개발 환경 조건들
-  const isLocalhost =
-    window.location.hostname === 'localhost' ||
-    window.location.hostname === '127.0.0.1' ||
-    window.location.hostname.includes('.local');
-
-  const isDevPort = [
-    '5173',
-    '5174',
-    '5175',
-    '5176',
-    '5177',
-    '5178',
-    '5179',
-    '5180',
-    '5181',
-    '5182',
-    '5183',
-    '5184',
-    '5185',
-    '5186',
-    '5187',
-    '3000',
-    '8080',
-  ].includes(window.location.port);
-
-  // 🚀 프로덕션 환경 명시적 제외 (새 도메인 포함)
-  const isProduction =
-    window.location.hostname.includes('.vercel.app') ||
-    window.location.hostname.includes('surecrm.pro');
-
-  // Vercel 프로덕션이면 무조건 개발환경 아님
-  if (isProduction) {
-    return false;
-  }
-
-  // 개발 환경 조건: localhost + dev port 조합
-  return isLocalhost && (isDevPort || import.meta.env.DEV === true);
+  // surecrm.pro 도메인이 아니면 모두 개발 환경으로 간주
+  return !isProductionDomain();
 }
 
 /**

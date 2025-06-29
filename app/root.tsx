@@ -111,43 +111,23 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
 
-        {/* 🚀 Google Tag Manager - 조건부 로드 */}
+        {/* 🚀 Google Tag Manager - surecrm.pro에서만 로드 */}
         {import.meta.env.VITE_GTM_CONTAINER_ID && (
           <script
             dangerouslySetInnerHTML={{
               __html: `
-                // 🔒 분석 수집 환경 확인
+                // 🔒 프로덕션 도메인 확인
                 (function() {
-                  // 개발 환경 감지
-                  const isDev = window.location.hostname === 'localhost' ||
-                               window.location.hostname === '127.0.0.1' ||
-                               window.location.hostname.includes('.local') ||
-                               window.location.port === '5173' ||
-                               window.location.port === '5174' ||
-                               window.location.port === '5175' ||
-                               window.location.port === '5176' ||
-                               window.location.port === '5177' ||
-                               window.location.port === '5178' ||
-                               window.location.port === '5179' ||
-                               window.location.port === '5180' ||
-                               window.location.port === '5181' ||
-                               window.location.port === '5182' ||
-                               window.location.port === '5183' ||
-                               window.location.port === '5184' ||
-                               window.location.port === '5185' ||
-                               window.location.port === '5186' ||
-                               window.location.port === '5187' ||
-                               window.location.port === '3000' ||
-                               window.location.port === '8080';
+                  // surecrm.pro 도메인에서만 GTM 로드
+                  const isProductionDomain = window.location.hostname === 'surecrm.pro' ||
+                                            window.location.hostname === 'www.surecrm.pro';
                   
-                  if (isDev) {
-                    // 한 번만 로그 출력 (페이지 로드마다 반복 방지)
-                    if (!window.__gtm_dev_logged) {
-                      console.log('🔧 개발환경: GTM 로딩 건너뛰기');
-                      window.__gtm_dev_logged = true;
-                    }
+                  if (!isProductionDomain) {
+                    console.log('🔧 GTM: surecrm.pro 도메인이 아니므로 로딩 건너뛰기 (' + window.location.hostname + ')');
                     return;
                   }
+                  
+                  console.log('🚀 GTM: surecrm.pro에서 로딩 중...');
                   
                   // GTM 로드
                   (function(w,d,s,l,i){
@@ -161,68 +141,32 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   })(window,document,'script','dataLayer','${
                     import.meta.env.VITE_GTM_CONTAINER_ID
                   }');
-                  
-                  // 로딩 완료 플래그만 설정 (프로덕션에서는 로그 없음)
-                  if (!window.__gtm_success_logged) {
-                    window.__gtm_success_logged = true;
-                  }
                 })();
               `,
             }}
           />
         )}
 
-        {/* 🚀 Google Analytics - 조건부 로드 */}
+        {/* 🚀 Google Analytics - surecrm.pro에서만 로드 */}
         {import.meta.env.VITE_GA_MEASUREMENT_ID && (
           <>
             <script
               dangerouslySetInnerHTML={{
                 __html: `
-                  // 🔒 은밀한 분석 수집 시스템
+                  // 🔒 프로덕션 도메인 확인
                   (function() {
-                    // 🔧 개발 환경 감지 (로컬 완전 차단)
-                    const isLocalhost = window.location.hostname === 'localhost' ||
-                                       window.location.hostname === '127.0.0.1' ||
-                                       window.location.hostname.includes('.local');
-
-                    const isDevPort = ['5173', '5174', '5175', '5176', '5177', '5178', '5179', 
-                                      '5180', '5181', '5182', '5183', '5184', '5185', '5186', 
-                                      '5187', '3000', '8080'].includes(window.location.port);
-
-                    // 🚀 프로덕션 환경 확인 (새 도메인 포함)
-                    const isProduction = window.location.hostname.includes('.vercel.app') ||
-                                         window.location.hostname.includes('surecrm.pro');
-
-                    // 개발 환경이면 GA 로딩 차단
-                    const isDev = !isProduction && isLocalhost && isDevPort;
-                    if (isDev) {
-                      return; // 개발환경에서는 GA 완전 차단
+                    // surecrm.pro 도메인에서만 GA 로드
+                    const isProductionDomain = window.location.hostname === 'surecrm.pro' ||
+                                              window.location.hostname === 'www.surecrm.pro';
+                    
+                    if (!isProductionDomain) {
+                      console.log('🔧 GA: surecrm.pro 도메인이 아니므로 로딩 건너뛰기 (' + window.location.hostname + ')');
+                      return;
                     }
 
-                    // 사용자 역할 확인 (프로덕션에서만)
-                    function getCurrentUserRole() {
-                      try {
-                        const role = localStorage.getItem('surecrm_user_role');
-                        if (role && role.trim() !== '') return role;
-                        
-                        const userSession = localStorage.getItem('supabase.auth.token');
-                        if (userSession) {
-                          const sessionData = JSON.parse(userSession);
-                          return sessionData?.user?.user_metadata?.role || null;
-                        }
-                        return null;
-                      } catch (error) {
-                        return null;
-                      }
-                    }
-
-                    // system_admin 사용자 체크 (프로덕션에서만)
-                    const userRole = getCurrentUserRole();
-                    if (userRole === 'system_admin') {
-                      return; // 관리자는 GA 로딩하지 않음
-                    }
-
-                    // 프로덕션에서 일반 사용자만 GA 로드
+                    console.log('🚀 GA: surecrm.pro에서 로딩 중...');
+                    
+                    // GA 스크립트 로드
                     const script = document.createElement('script');
                     script.async = true;
                     script.src = 'https://www.googletagmanager.com/gtag/js?id=${
@@ -230,7 +174,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     }';
                     document.head.appendChild(script);
                     
-                    // GA 초기화 (은밀하게)
+                    // GA 초기화
                     window.dataLayer = window.dataLayer || [];
                     function gtag(){dataLayer.push(arguments);}
                     window.gtag = gtag;
@@ -239,56 +183,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
                       import.meta.env.VITE_GA_MEASUREMENT_ID
                     }', {
                       send_page_view: true,
-                      cookie_domain: window.location.hostname.includes('.vercel.app') 
-                        ? '.vercel.app' 
-                        : window.location.hostname.includes('surecrm.pro')
-                        ? 'surecrm.pro'
-                        : window.location.hostname,
+                      cookie_domain: 'surecrm.pro',
                       cookie_flags: 'SameSite=Lax',
-                      cookie_expires: window.location.hostname === 'localhost' 
-                        ? 86400 // 1일 
-                        : 31536000, // 1년
-                      custom_map: {
-                        'custom_parameter_1': 'user_engagement_depth',
-                        'custom_parameter_2': 'behavior_prediction_score', 
-                        'custom_parameter_3': 'business_value_index'
-                      }
+                      cookie_expires: 31536000, // 1년
                     });
                   })();
-
-                  // 🔄 사용자 행동 분석 시스템 초기화
-                  document.addEventListener('DOMContentLoaded', function() {
-                    // 🔧 개발환경 감지 (동일한 로직 사용)
-                    const isLocalhost = window.location.hostname === 'localhost' ||
-                                       window.location.hostname === '127.0.0.1' ||
-                                       window.location.hostname.includes('.local');
-
-                    const isDevPort = ['5173', '5174', '5175', '5176', '5177', '5178', '5179', 
-                                      '5180', '5181', '5182', '5183', '5184', '5185', '5186', 
-                                      '5187', '3000', '8080'].includes(window.location.port);
-
-                    // 🚀 프로덕션 환경 명시적 허용 (새 도메인 포함)
-                    const isProduction = window.location.hostname.includes('.vercel.app') ||
-                                         window.location.hostname.includes('surecrm.pro');
-
-                    // 개발 환경 조건: localhost + dev port (프로덕션 도메인은 제외)
-                    const isDevelopment = !isProduction && isLocalhost && isDevPort;
-
-                    if (!isDevelopment) {
-                      // 🚀 프로덕션에서만 기본 분석 활성화
-                      setTimeout(() => {
-                        // GTM으로 기본 추적 활성화 알림
-                        if (window.dataLayer) {
-                          window.dataLayer.push({
-                            event: 'analytics_initialized',
-                            category: 'user_experience_optimization',
-                            systems_activated: ['basic_analytics'],
-                            timestamp: Date.now()
-                          });
-                        }
-                      }, 1000);
-                    }
-                  });
                 `,
               }}
             />
@@ -925,19 +824,30 @@ export function Layout({ children }: { children: React.ReactNode }) {
         />
       </head>
       <body className="dark font-sans text-foreground bg-background">
-        {/* 🚀 GTM noscript - 프로덕션에서만 */}
-        {import.meta.env.VITE_GTM_CONTAINER_ID && (
-          <noscript>
-            <iframe
-              src={`https://www.googletagmanager.com/ns.html?id=${
-                import.meta.env.VITE_GTM_CONTAINER_ID
-              }`}
-              height="0"
-              width="0"
-              style={{ display: 'none', visibility: 'hidden' }}
-            />
-          </noscript>
-        )}
+        {/* 🚀 GTM noscript - surecrm.pro에서만 */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              // surecrm.pro에서만 GTM noscript iframe 추가
+              (function() {
+                const isProductionDomain = window.location.hostname === 'surecrm.pro' ||
+                                          window.location.hostname === 'www.surecrm.pro';
+                
+                if (isProductionDomain) {
+                  const noscript = document.createElement('noscript');
+                  const iframe = document.createElement('iframe');
+                  iframe.src = 'https://www.googletagmanager.com/ns.html?id=${import.meta.env.VITE_GTM_CONTAINER_ID}';
+                  iframe.height = '0';
+                  iframe.width = '0';
+                  iframe.style.display = 'none';
+                  iframe.style.visibility = 'hidden';
+                  noscript.appendChild(iframe);
+                  document.body.insertBefore(noscript, document.body.firstChild);
+                }
+              })();
+            `,
+          }}
+        />
         <SubscriptionProvider>{children}</SubscriptionProvider>
         <ScrollRestoration />
         <Scripts />
