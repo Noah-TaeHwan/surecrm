@@ -77,6 +77,7 @@ export default [
   // 🔧 시스템 페이지
   route('.well-known/*', 'common/pages/well-known-fallback.tsx'),
   route('terms', 'common/pages/terms-page.tsx'),
+  route('privacy', 'common/pages/privacy-page.tsx'),
 
   // 📧 이메일 테스트 페이지
   route('email-test', 'routes/email-test.tsx'),

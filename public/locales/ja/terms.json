@@ -1,0 +1,18 @@
+{
+  "title": "サービス利用規約",
+  "subtitle": "SureCRMサービス利用に関する詳細な規約です",
+  "version": "バージョン: 2.0",
+  "effectiveDate": "施行日: 2025年6月26日",
+  "lastUpdated": "最終更新: {{date}}",
+  "loading": "規約を読み込み中...",
+  "error": "利用規約の読み込みに失敗しました。",
+  "contact": {
+    "title": "お問い合わせ",
+    "description": "本利用規約について何かご質問がございましたら、お気軽にお問い合わせください。",
+    "email": "noah@surecrm.pro"
+  },
+  "navigation": {
+    "home": "ホームに戻る",
+    "privacy": "プライバシーポリシー"
+  }
+}

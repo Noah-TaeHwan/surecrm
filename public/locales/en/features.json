@@ -1,0 +1,22 @@
+{
+  "title": "Key Features",
+  "subtitle": "Discover the powerful features of SureCRM",
+  "cards": {
+    "smart_customer": {
+      "title": "Smart Customer Management",
+      "description": "Build efficient customer relationships with AI-based customer analysis and personalized management system"
+    },
+    "sales_pipeline": {
+      "title": "Sales Pipeline",
+      "description": "Optimize sales processes with intuitive Kanban boards and automated workflows"
+    },
+    "realtime_analytics": {
+      "title": "Real-time Analytics",
+      "description": "Support data-driven decision making through advanced dashboards and reports"
+    },
+    "mobile_optimized": {
+      "title": "Mobile Optimized",
+      "description": "Responsive design and mobile app accessible anytime, anywhere"
+    }
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "title": "요금제",
+  "subtitle": "SureCRM Pro로 비즈니스를 한 단계 업그레이드하세요",
+  "plan": {
+    "name": "SureCRM Pro",
+    "price": "$20",
+    "currency": "USD",
+    "period": "/월",
+    "description": "모든 기능이 포함된 프리미엄 CRM 솔루션",
+    "badge": "프리미엄",
+    "button": "무료 체험 시작",
+    "note": "언제든지 취소 가능"
+  },
+  "features": {
+    "title": "핵심 기능",
+    "subtitle": "SureCRM Pro의 강력한 기능들을 만나보세요",
+    "list": [
+      {
+        "icon": "users",
+        "title": "무제한 고객 관리",
+        "description": "고객 정보와 관계를 체계적으로 관리"
+      },
+      {
+        "icon": "chart",
+        "title": "고급 분석 및 보고서",
+        "description": "실시간 성과 분석과 상세 보고서"
+      },
+      {
+        "icon": "zap",
+        "title": "자동화 도구",
+        "description": "반복 업무를 자동화하여 효율성 향상"
+      },
+      {
+        "icon": "shield",
+        "title": "고급 보안",
+        "description": "엔터프라이즈급 보안과 데이터 보호"
+      },
+      {
+        "icon": "phone",
+        "title": "고급 일정 관리",
+        "description": "Google Calendar 동기화 및 스마트 스케줄링"
+      },
+      {
+        "icon": "file",
+        "title": "문서 관리",
+        "description": "계약서, 정책서 등 모든 문서를 안전하게 보관"
+      },
+      {
+        "icon": "bell",
+        "title": "스마트 알림",
+        "description": "중요한 일정과 작업을 놓치지 않도록 알림"
+      },
+      {
+        "icon": "settings",
+        "title": "고급 설정",
+        "description": "워크플로우를 맞춤 설정하여 생산성 극대화"
+      }
+    ]
+  },
+  "upcoming": {
+    "title": "곧 출시될 기능",
+    "subtitle": "더 많은 혁신적인 기능들이 준비되고 있습니다",
+    "list": [
+      {
+        "title": "AI 고객 분석",
+        "description": "머신러닝 기반 고객 행동 예측"
+      },
+      {
+        "title": "모바일 앱",
+        "description": "언제 어디서나 CRM 접근"
+      },
+      {
+        "title": "팀 협업 도구",
+        "description": "팀원과의 실시간 협업"
+      },
+      {
+        "title": "API 통합",
+        "description": "다른 도구들과의 연동"
+      }
+    ]
+  },
+  "benefits": {
+    "title": "Pro 요금제 혜택",
+    "list": [
+      "무제한 고객 관리",
+      "고급 분석 도구",
+      "우선 고객 지원",
+      "엔터프라이즈 보안"
+    ]
+  }
+}

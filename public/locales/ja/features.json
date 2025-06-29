@@ -1,0 +1,22 @@
+{
+  "title": "主な機能",
+  "subtitle": "SureCRMの強力な機能をご紹介します",
+  "cards": {
+    "smart_customer": {
+      "title": "スマート顧客管理",
+      "description": "AI ベースの顧客分析とパーソナライズされた管理システムで効率的な顧客関係を構築"
+    },
+    "sales_pipeline": {
+      "title": "営業パイプライン",
+      "description": "直感的なカンバンボードと自動化されたワークフローで営業プロセスを最適化"
+    },
+    "realtime_analytics": {
+      "title": "リアルタイム分析",
+      "description": "高度なダッシュボードとレポートによるデータ駆動型の意思決定をサポート"
+    },
+    "mobile_optimized": {
+      "title": "モバイル最適化",
+      "description": "いつでもどこでもアクセス可能なレスポンシブデザインとモバイルアプリ"
+    }
+  }
+}

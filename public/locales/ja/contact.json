@@ -1,0 +1,59 @@
+{
+  "title": "お問い合わせ",
+  "subtitle": "ご質問やご提案がございましたら、いつでもお気軽にお声をかけください",
+  "contact_info": {
+    "title": "連絡先情報",
+    "email": {
+      "title": "メール",
+      "value": "noah@surecrm.pro",
+      "note": "平日9時-18時内回答"
+    },
+    "business": {
+      "title": "事業者情報",
+      "name": "SureCRM",
+      "description": "保険代理店専用CRMソリューション"
+    },
+    "support_hours": {
+      "title": "サポート時間",
+      "hours": "平日 09:00 - 18:00",
+      "note": "土日祝日を除く"
+    }
+  },
+  "form": {
+    "title": "お問い合わせフォーム",
+    "fields": {
+      "name": {
+        "label": "お名前",
+        "placeholder": "お名前をご入力ください",
+        "required": true
+      },
+      "email": {
+        "label": "メール",
+        "placeholder": "メールアドレスをご入力ください",
+        "required": true
+      },
+      "company": {
+        "label": "会社名",
+        "placeholder": "会社名をご入力ください",
+        "required": false
+      },
+      "inquiry_type": {
+        "label": "お問い合わせの種類",
+        "placeholder": "お問い合わせの種類を選択してください",
+        "options": {
+          "demo": "デモリクエスト",
+          "pricing": "料金のお問い合わせ",
+          "support": "技術サポート",
+          "partnership": "パートナーシップ",
+          "other": "その他"
+        }
+      },
+      "message": {
+        "label": "メッセージ",
+        "placeholder": "お問い合わせ内容を詳しくお書きください",
+        "required": true
+      }
+    },
+    "submit": "お問い合わせを送信"
+  }
+}

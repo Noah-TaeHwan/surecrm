@@ -1,0 +1,22 @@
+{
+  "title": "개인정보처리방침",
+  "subtitle": "SureCRM에서 수집하고 처리하는 개인정보에 대한 상세한 방침입니다",
+  "version": "버전: 2.0",
+  "effectiveDate": "시행일: 2025년 6월 26일",
+  "lastUpdated": "최종 업데이트: {{date}}",
+  "loading": "개인정보처리방침을 불러오는 중...",
+  "error": "개인정보처리방침을 불러오는데 실패했습니다.",
+  "contact": {
+    "title": "개인정보보호 문의",
+    "description": "개인정보 처리에 대한 문의사항이 있으시면 언제든지 연락해주세요.",
+    "officer": "개인정보보호책임자",
+    "name": "오태환",
+    "position": "정보보호최고책임자 (CISO)",
+    "email": "noah@surecrm.pro",
+    "phone": "+82 10-5814-3481"
+  },
+  "navigation": {
+    "home": "홈으로",
+    "terms": "이용약관"
+  }
+}

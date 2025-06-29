@@ -1,0 +1,18 @@
+{
+  "title": "Terms of Service",
+  "subtitle": "Detailed terms and conditions for using SureCRM services",
+  "version": "Version: 2.0",
+  "effectiveDate": "Effective Date: June 26, 2025",
+  "lastUpdated": "Last Updated: {{date}}",
+  "loading": "Loading terms...",
+  "error": "Failed to load terms of service.",
+  "contact": {
+    "title": "Contact Us",
+    "description": "If you have any questions about these Terms of Service, please feel free to contact us.",
+    "email": "noah@surecrm.pro"
+  },
+  "navigation": {
+    "home": "Back to Home",
+    "privacy": "Privacy Policy"
+  }
+}

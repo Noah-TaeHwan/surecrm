@@ -1,0 +1,18 @@
+{
+  "title": "서비스 이용약관",
+  "subtitle": "SureCRM 서비스 이용과 관련된 상세한 약관입니다",
+  "version": "버전: 2.0",
+  "effectiveDate": "시행일: 2025년 6월 26일",
+  "lastUpdated": "최종 업데이트: {{date}}",
+  "loading": "약관을 불러오는 중...",
+  "error": "약관을 불러오는데 실패했습니다.",
+  "contact": {
+    "title": "문의하기",
+    "description": "이용약관에 대한 문의사항이 있으시면 언제든지 연락해주세요.",
+    "email": "noah@surecrm.pro"
+  },
+  "navigation": {
+    "home": "홈으로",
+    "privacy": "개인정보처리방침"
+  }
+}

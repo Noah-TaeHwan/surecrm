@@ -1,0 +1,91 @@
+{
+  "title": "Pricing",
+  "subtitle": "Upgrade your business to the next level with SureCRM Pro",
+  "plan": {
+    "name": "SureCRM Pro",
+    "price": "$20",
+    "currency": "USD",
+    "period": "/month",
+    "description": "Premium CRM solution with all features included",
+    "badge": "Premium",
+    "button": "Start Free Trial",
+    "note": "Cancel anytime"
+  },
+  "features": {
+    "title": "Core Features",
+    "subtitle": "Discover the powerful features of SureCRM Pro",
+    "list": [
+      {
+        "icon": "users",
+        "title": "Unlimited Customer Management",
+        "description": "Systematically manage customer information and relationships"
+      },
+      {
+        "icon": "chart",
+        "title": "Advanced Analytics & Reports",
+        "description": "Real-time performance analysis and detailed reports"
+      },
+      {
+        "icon": "zap",
+        "title": "Automation Tools",
+        "description": "Automate repetitive tasks to improve efficiency"
+      },
+      {
+        "icon": "shield",
+        "title": "Advanced Security",
+        "description": "Enterprise-grade security and data protection"
+      },
+      {
+        "icon": "phone",
+        "title": "Advanced Calendar Management",
+        "description": "Google Calendar sync and smart scheduling"
+      },
+      {
+        "icon": "file",
+        "title": "Document Management",
+        "description": "Securely store all documents including contracts and policies"
+      },
+      {
+        "icon": "bell",
+        "title": "Smart Notifications",
+        "description": "Never miss important schedules and tasks"
+      },
+      {
+        "icon": "settings",
+        "title": "Advanced Settings",
+        "description": "Customize workflows to maximize productivity"
+      }
+    ]
+  },
+  "upcoming": {
+    "title": "Upcoming Features",
+    "subtitle": "More innovative features are in development",
+    "list": [
+      {
+        "title": "AI Customer Analytics",
+        "description": "Machine learning-based customer behavior prediction"
+      },
+      {
+        "title": "Mobile App",
+        "description": "Access CRM anywhere, anytime"
+      },
+      {
+        "title": "Team Collaboration Tools",
+        "description": "Real-time collaboration with team members"
+      },
+      {
+        "title": "API Integration",
+        "description": "Integration with other tools"
+      }
+    ]
+  },
+  "benefits": {
+    "title": "Pro Plan Benefits",
+    "list": [
+      "Unlimited customer management",
+      "Advanced analytics tools",
+      "Priority customer support",
+      "Enterprise security"
+    ]
+  }
+}

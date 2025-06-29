@@ -1,0 +1,87 @@
+{
+  "title": "연동 & 문서",
+  "subtitle": "SureCRM과 다양한 서비스를 연동하고 API 문서를 확인하세요",
+  "sections": {
+    "api": {
+      "title": "API 문서",
+      "rest": {
+        "title": "📘 REST API",
+        "description": "RESTful API를 통해 고객 데이터, 파이프라인, 리포트에 접근하세요",
+        "features": [
+          "고객 관리 API",
+          "파이프라인 API",
+          "분석 데이터 API",
+          "인증 및 권한 관리"
+        ]
+      },
+      "webhook": {
+        "title": "🔗 Webhook",
+        "description": "실시간 이벤트 알림을 받아 자동화된 워크플로우를 구축하세요",
+        "features": [
+          "고객 상태 변경",
+          "파이프라인 업데이트",
+          "작업 완료 알림",
+          "보안 이벤트"
+        ]
+      }
+    },
+    "services": {
+      "title": "지원 연동 서비스",
+      "email": {
+        "title": "이메일 서비스",
+        "description": "Gmail, Outlook과 연동하여 고객과의 이메일을 자동으로 관리하세요"
+      },
+      "calendar": {
+        "title": "캘린더 연동",
+        "description": "Google Calendar, Office 365와 연동하여 일정을 동기화하세요"
+      },
+      "messenger": {
+        "title": "메신저 연동",
+        "description": "Slack, Teams와 연동하여 팀 협업을 강화하세요"
+      },
+      "payment": {
+        "title": "결제 시스템",
+        "description": "Stripe, PayPal과 연동하여 결제를 자동화하세요"
+      },
+      "analytics": {
+        "title": "분석 도구",
+        "description": "Google Analytics, Mixpanel과 연동하여 심화 분석을 진행하세요"
+      },
+      "storage": {
+        "title": "클라우드 스토리지",
+        "description": "Google Drive, Dropbox와 연동하여 파일을 관리하세요"
+      }
+    },
+    "developer": {
+      "title": "개발자 도구",
+      "sdk": {
+        "title": "🛠️ SDK & 라이브러리",
+        "description": "다양한 프로그래밍 언어로 SureCRM을 쉽게 통합하세요",
+        "features": [
+          "JavaScript/TypeScript SDK",
+          "Python SDK",
+          "PHP SDK",
+          "REST Client 라이브러리"
+        ]
+      },
+      "testing": {
+        "title": "🧪 테스트 환경",
+        "description": "안전한 샌드박스 환경에서 연동을 테스트하세요",
+        "features": [
+          "테스트 API 키",
+          "모의 데이터 환경",
+          "실시간 로그 확인",
+          "에러 디버깅 도구"
+        ]
+      }
+    },
+    "cta": {
+      "title": "연동을 시작해보세요",
+      "description": "API 키를 발급받고 SureCRM과 다양한 서비스를 연동해보세요",
+      "buttons": {
+        "docs": "API 문서 보기",
+        "guide": "개발자 가이드"
+      }
+    }
+  }
+}

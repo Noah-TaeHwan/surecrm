@@ -1,0 +1,24 @@
+{
+  "title": "데모 체험",
+  "subtitle": "SureCRM의 강력한 기능을 직접 체험해보세요",
+  "trial": {
+    "title": "무료 체험 신청",
+    "description": "14일 무료 체험으로 모든 기능을 제한 없이 사용해보세요",
+    "form": {
+      "company": "회사명",
+      "email": "이메일 주소",
+      "phone": "연락처",
+      "submit": "무료 체험 시작하기"
+    }
+  },
+  "services": {
+    "custom_demo": {
+      "title": "🎯 맞춤형 데모",
+      "description": "귀하의 비즈니스에 특화된 1:1 맞춤형 데모를 제공합니다"
+    },
+    "expert_consultation": {
+      "title": "📞 전문가 상담",
+      "description": "CRM 전문가와의 상담을 통해 최적의 솔루션을 찾아보세요"
+    }
+  }
+}

@@ -1,0 +1,87 @@
+{
+  "title": "連携 & ドキュメント",
+  "subtitle": "SureCRMと様々なサービスを連携し、API文書をご確認ください",
+  "sections": {
+    "api": {
+      "title": "API文書",
+      "rest": {
+        "title": "📘 REST API",
+        "description": "RESTful APIを通じて顧客データ、パイプライン、レポートにアクセスしてください",
+        "features": [
+          "顧客管理API",
+          "パイプラインAPI",
+          "分析データAPI",
+          "認証・権限管理"
+        ]
+      },
+      "webhook": {
+        "title": "🔗 Webhook",
+        "description": "リアルタイムイベント通知を受け取り、自動化されたワークフローを構築してください",
+        "features": [
+          "顧客状態変更",
+          "パイプライン更新",
+          "タスク完了通知",
+          "セキュリティイベント"
+        ]
+      }
+    },
+    "services": {
+      "title": "対応連携サービス",
+      "email": {
+        "title": "メールサービス",
+        "description": "Gmail、Outlookと連携して顧客とのメールを自動管理してください"
+      },
+      "calendar": {
+        "title": "カレンダー連携",
+        "description": "Google Calendar、Office 365と連携してスケジュールを同期してください"
+      },
+      "messenger": {
+        "title": "メッセンジャー連携",
+        "description": "Slack、Teamsと連携してチームコラボレーションを強化してください"
+      },
+      "payment": {
+        "title": "決済システム",
+        "description": "Stripe、PayPalと連携して決済を自動化してください"
+      },
+      "analytics": {
+        "title": "分析ツール",
+        "description": "Google Analytics、Mixpanelと連携して高度な分析を実行してください"
+      },
+      "storage": {
+        "title": "クラウドストレージ",
+        "description": "Google Drive、Dropboxと連携してファイルを管理してください"
+      }
+    },
+    "developer": {
+      "title": "開発者ツール",
+      "sdk": {
+        "title": "🛠️ SDK & ライブラリ",
+        "description": "様々なプログラミング言語でSureCRMを簡単に統合してください",
+        "features": [
+          "JavaScript/TypeScript SDK",
+          "Python SDK",
+          "PHP SDK",
+          "RESTクライアントライブラリ"
+        ]
+      },
+      "testing": {
+        "title": "🧪 テスト環境",
+        "description": "安全なサンドボックス環境で連携をテストしてください",
+        "features": [
+          "テストAPIキー",
+          "モックデータ環境",
+          "リアルタイムログ確認",
+          "エラーデバッグツール"
+        ]
+      }
+    },
+    "cta": {
+      "title": "連携を始めましょう",
+      "description": "APIキーを発行してSureCRMと様々なサービスを連携してください",
+      "buttons": {
+        "docs": "API文書を見る",
+        "guide": "開発者ガイド"
+      }
+    }
+  }
+}

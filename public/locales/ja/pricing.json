@@ -1,0 +1,91 @@
+{
+  "title": "料金プラン",
+  "subtitle": "SureCRM Proでビジネスを次のレベルにアップグレードしましょう",
+  "plan": {
+    "name": "SureCRM Pro",
+    "price": "$20",
+    "currency": "USD",
+    "period": "/月",
+    "description": "全機能を含むプレミアムCRMソリューション",
+    "badge": "プレミアム",
+    "button": "無料トライアル開始",
+    "note": "いつでもキャンセル可能"
+  },
+  "features": {
+    "title": "コア機能",
+    "subtitle": "SureCRM Proの強力な機能をご覧ください",
+    "list": [
+      {
+        "icon": "users",
+        "title": "無制限の顧客管理",
+        "description": "顧客情報と関係を体系的に管理"
+      },
+      {
+        "icon": "chart",
+        "title": "高度な分析とレポート",
+        "description": "リアルタイムの業績分析と詳細レポート"
+      },
+      {
+        "icon": "zap",
+        "title": "自動化ツール",
+        "description": "繰り返し業務を自動化して効率向上"
+      },
+      {
+        "icon": "shield",
+        "title": "高度なセキュリティ",
+        "description": "エンタープライズ級セキュリティとデータ保護"
+      },
+      {
+        "icon": "phone",
+        "title": "高度なカレンダー管理",
+        "description": "Googleカレンダー同期とスマートスケジューリング"
+      },
+      {
+        "icon": "file",
+        "title": "文書管理",
+        "description": "契約書、ポリシーなどすべての文書を安全に保管"
+      },
+      {
+        "icon": "bell",
+        "title": "スマート通知",
+        "description": "重要なスケジュールとタスクを見逃さない通知"
+      },
+      {
+        "icon": "settings",
+        "title": "高度な設定",
+        "description": "ワークフローをカスタマイズして生産性を最大化"
+      }
+    ]
+  },
+  "upcoming": {
+    "title": "近日公開予定の機能",
+    "subtitle": "より多くの革新的な機能を開発中です",
+    "list": [
+      {
+        "title": "AI顧客分析",
+        "description": "機械学習ベースの顧客行動予測"
+      },
+      {
+        "title": "モバイルアプリ",
+        "description": "いつでもどこでもCRMアクセス"
+      },
+      {
+        "title": "チーム協働ツール",
+        "description": "チームメンバーとのリアルタイム協働"
+      },
+      {
+        "title": "API統合",
+        "description": "他のツールとの連携"
+      }
+    ]
+  },
+  "benefits": {
+    "title": "Proプランの特典",
+    "list": [
+      "無制限の顧客管理",
+      "高度な分析ツール",
+      "優先カスタマーサポート",
+      "エンタープライズセキュリティ"
+    ]
+  }
+}

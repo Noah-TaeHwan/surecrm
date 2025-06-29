@@ -1,0 +1,59 @@
+{
+  "title": "문의하기",
+  "subtitle": "궁금한 점이나 제안사항이 있으시면 언제든지 연락해주세요",
+  "contact_info": {
+    "title": "연락처 정보",
+    "email": {
+      "title": "이메일",
+      "value": "noah@surecrm.pro",
+      "note": "평일 9시-18시 내 답변"
+    },
+    "business": {
+      "title": "사업자 정보",
+      "name": "SureCRM",
+      "description": "보험설계사 전용 CRM 솔루션"
+    },
+    "support_hours": {
+      "title": "지원 시간",
+      "hours": "평일 09:00 - 18:00",
+      "note": "주말 및 공휴일 제외"
+    }
+  },
+  "form": {
+    "title": "문의 양식",
+    "fields": {
+      "name": {
+        "label": "이름",
+        "placeholder": "성함을 입력해주세요",
+        "required": true
+      },
+      "email": {
+        "label": "이메일",
+        "placeholder": "이메일 주소를 입력해주세요",
+        "required": true
+      },
+      "company": {
+        "label": "회사명",
+        "placeholder": "회사명을 입력해주세요",
+        "required": false
+      },
+      "inquiry_type": {
+        "label": "문의 유형",
+        "placeholder": "문의 유형을 선택해주세요",
+        "options": {
+          "demo": "데모 요청",
+          "pricing": "요금 문의",
+          "support": "기술 지원",
+          "partnership": "파트너십",
+          "other": "기타"
+        }
+      },
+      "message": {
+        "label": "메시지",
+        "placeholder": "문의 내용을 자세히 적어주세요",
+        "required": true
+      }
+    },
+    "submit": "문의 보내기"
+  }
+}

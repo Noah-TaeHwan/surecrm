@@ -1,0 +1,59 @@
+{
+  "title": "Contact Us",
+  "subtitle": "Please feel free to contact us with any questions or suggestions",
+  "contact_info": {
+    "title": "Contact Information",
+    "email": {
+      "title": "Email",
+      "value": "noah@surecrm.pro",
+      "note": "Response within weekdays 9am-6pm"
+    },
+    "business": {
+      "title": "Business Information",
+      "name": "SureCRM",
+      "description": "CRM solution dedicated to insurance agents"
+    },
+    "support_hours": {
+      "title": "Support Hours",
+      "hours": "Weekdays 09:00 - 18:00",
+      "note": "Excluding weekends and holidays"
+    }
+  },
+  "form": {
+    "title": "Contact Form",
+    "fields": {
+      "name": {
+        "label": "Name",
+        "placeholder": "Please enter your name",
+        "required": true
+      },
+      "email": {
+        "label": "Email",
+        "placeholder": "Please enter your email address",
+        "required": true
+      },
+      "company": {
+        "label": "Company",
+        "placeholder": "Please enter your company name",
+        "required": false
+      },
+      "inquiry_type": {
+        "label": "Inquiry Type",
+        "placeholder": "Please select inquiry type",
+        "options": {
+          "demo": "Demo Request",
+          "pricing": "Pricing Inquiry",
+          "support": "Technical Support",
+          "partnership": "Partnership",
+          "other": "Other"
+        }
+      },
+      "message": {
+        "label": "Message",
+        "placeholder": "Please describe your inquiry in detail",
+        "required": true
+      }
+    },
+    "submit": "Send Inquiry"
+  }
+}

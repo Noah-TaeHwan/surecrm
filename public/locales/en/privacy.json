@@ -1,0 +1,22 @@
+{
+  "title": "Privacy Policy",
+  "subtitle": "Detailed policy on personal information collected and processed by SureCRM",
+  "version": "Version: 2.0",
+  "effectiveDate": "Effective Date: June 26, 2025",
+  "lastUpdated": "Last Updated: {{date}}",
+  "loading": "Loading privacy policy...",
+  "error": "Failed to load privacy policy.",
+  "contact": {
+    "title": "Privacy Inquiry",
+    "description": "If you have any questions about our data processing, please feel free to contact us.",
+    "officer": "Data Protection Officer",
+    "name": "Taehwan Oh",
+    "position": "Chief Information Security Officer (CISO)",
+    "email": "noah@surecrm.pro",
+    "phone": "+82 10-5814-3481"
+  },
+  "navigation": {
+    "home": "Back to Home",
+    "terms": "Terms of Service"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "title": "Demo Experience",
+  "subtitle": "Experience the powerful features of SureCRM firsthand",
+  "trial": {
+    "title": "Request Free Trial",
+    "description": "Use all features without limitations with a 14-day free trial",
+    "form": {
+      "company": "Company Name",
+      "email": "Email Address",
+      "phone": "Phone Number",
+      "submit": "Start Free Trial"
+    }
+  },
+  "services": {
+    "custom_demo": {
+      "title": "🎯 Customized Demo",
+      "description": "We provide personalized 1:1 demos tailored to your business"
+    },
+    "expert_consultation": {
+      "title": "📞 Expert Consultation",
+      "description": "Find the optimal solution through consultation with CRM experts"
+    }
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "title": "Help",
+  "subtitle": "Check SureCRM usage guide and frequently asked questions",
+  "sections": {
+    "getting_started": {
+      "title": "Getting Started",
+      "items": [
+        {
+          "title": "Sign Up",
+          "description": "Create your SureCRM account and start your 14-day free trial"
+        },
+        {
+          "title": "Register Customer Information",
+          "description": "Register your first customer and set up the CRM system"
+        },
+        {
+          "title": "Configure Pipeline",
+          "description": "Set up a pipeline that fits your sales process"
+        }
+      ]
+    },
+    "features": {
+      "title": "Feature Guide",
+      "items": [
+        {
+          "title": "Customer Management",
+          "description": "Learn how to register, edit, and search customer information"
+        },
+        {
+          "title": "Sales Pipeline",
+          "description": "Learn how to systematically manage sales opportunities"
+        },
+        {
+          "title": "Analytics Dashboard",
+          "description": "Learn how to utilize real-time data and reports"
+        }
+      ]
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "items": [
+        {
+          "question": "How long is the free trial period?",
+          "answer": "You can use all features without limitations for 14 days."
+        },
+        {
+          "question": "Is my data stored securely?",
+          "answer": "Yes, all data is encrypted and stored securely."
+        },
+        {
+          "question": "Can I use it on mobile?",
+          "answer": "Yes, it's available on both web browsers and mobile apps."
+        }
+      ]
+    }
+  },
+  "contact_support": {
+    "title": "Need Additional Help?",
+    "description": "If you can't resolve the issue, please contact our support team",
+    "button": "Contact Support Team"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "title": "プライバシーポリシー",
+  "subtitle": "SureCRMが収集・処理する個人情報に関する詳細なポリシーです",
+  "version": "バージョン: 2.0",
+  "effectiveDate": "施行日: 2025年6月26日",
+  "lastUpdated": "最終更新: {{date}}",
+  "loading": "プライバシーポリシーを読み込み中...",
+  "error": "プライバシーポリシーの読み込みに失敗しました。",
+  "contact": {
+    "title": "プライバシーに関するお問い合わせ",
+    "description": "データ処理について何かご質問がございましたら、お気軽にお問い合わせください。",
+    "officer": "データ保護責任者",
+    "name": "オ・テファン",
+    "position": "最高情報セキュリティ責任者 (CISO)",
+    "email": "noah@surecrm.pro",
+    "phone": "+82 10-5814-3481"
+  },
+  "navigation": {
+    "home": "ホームに戻る",
+    "terms": "利用規約"
+  }
+}
