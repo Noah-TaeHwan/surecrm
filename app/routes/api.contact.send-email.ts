@@ -411,12 +411,15 @@ export async function action({ request }: ActionFunctionArgs) {
     `;
 
     // Send email
+    console.log('📤 Sending email...');
     await transporter.sendMail({
       from: emailUser,
       to: emailUser,
       subject: `🛡️ [보안 검증 완료] SureCRM 문의: ${contactData.subject}`,
       html: htmlContent,
     });
+
+    console.log('✅ Email sent successfully');
 
     // Log successful submission
     logSecurityEvent(clientIP, 'CONTACT_FORM_SUCCESS', {
@@ -427,16 +430,23 @@ export async function action({ request }: ActionFunctionArgs) {
       userAgent: userAgent.substring(0, 100),
     });
 
+    console.log('🎉 Contact form submission completed successfully');
+
     return json({
       success: true,
       message: '문의가 성공적으로 전송되었습니다!',
     });
   } catch (error) {
-    console.error('Contact form error:', error);
+    console.error('❌ Contact form error:', error);
+    console.error(
+      '❌ Error stack:',
+      error instanceof Error ? error.stack : 'No stack trace'
+    );
 
     // Log error with security context
     logSecurityEvent(clientIP, 'CONTACT_FORM_ERROR', {
       error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : 'No stack trace',
       userAgent: request.headers.get('User-Agent'),
     });
 
