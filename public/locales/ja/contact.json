@@ -54,12 +54,18 @@
         "required": true
       }
     },
-    "submit": "お問い合わせを送信"
+    "submit": "お問い合わせを送信",
+    "submitting": "送信中...",
+    "security_required": "セキュリティ認証を完了してください"
   },
   "messages": {
     "success": "お問い合わせが正常に送信されました！",
     "success_description": "できるだけ早くご回答いたします。ありがとうございます！",
     "error": "お問い合わせの送信に失敗しました。",
     "error_description": "しばらくしてから再度お試しください。"
+  },
+  "common": {
+    "confirm": "確認",
+    "close": "閉じる"
   }
 }

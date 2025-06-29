@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { Form, useActionData, useNavigation } from 'react-router';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 import type { Route } from './+types/contact-page';
 import { LandingLayout } from '~/common/layouts/landing-layout';
 import { Button } from '~/common/components/ui/button';
@@ -76,6 +76,8 @@ export async function action({ request }: Route.ActionArgs) {
 
 // Meta function for SEO
 export function meta() {
+  // Note: 서버에서 실행되므로 기본값을 한국어로 설정
+  // 향후 서버 사이드 다국어 지원시 업데이트 필요
   return [
     { title: '문의하기 - SureCRM' },
     {
@@ -87,8 +89,7 @@ export function meta() {
 }
 
 export default function ContactPage({ actionData }: Route.ComponentProps) {
-  const { t } = useTranslation('contact');
-  const [isHydrated, setIsHydrated] = useState(false);
+  const { t } = useHydrationSafeTranslation('contact');
   const [selectedType, setSelectedType] = useState('');
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
@@ -99,11 +100,6 @@ export default function ContactPage({ actionData }: Route.ComponentProps) {
   // Cloudflare Turnstile 사이트 키 (개발용 - 실제 배포시 환경변수로 설정)
   const TURNSTILE_SITE_KEY =
     import.meta.env.VITE_TURNSTILE_SITE_KEY || '1x00000000000000000000AA';
-
-  // 페이지 하이드레이션
-  useEffect(() => {
-    setIsHydrated(true);
-  }, []);
 
   // 성공 처리 로직
   useEffect(() => {
@@ -131,12 +127,13 @@ export default function ContactPage({ actionData }: Route.ComponentProps) {
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8 sm:mb-12">
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6">
-              {isHydrated ? t('title') : '문의하기'}
+              {t('title', '문의하기')}
             </h1>
             <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
-              {isHydrated
-                ? t('subtitle')
-                : '궁금한 점이나 제안사항이 있으시면 언제든지 연락해주세요'}
+              {t(
+                'subtitle',
+                '궁금한 점이나 제안사항이 있으시면 언제든지 연락해주세요'
+              )}
             </p>
           </div>
 
@@ -145,7 +142,7 @@ export default function ContactPage({ actionData }: Route.ComponentProps) {
             <div className="space-y-6 lg:space-y-8">
               <div>
                 <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">
-                  {isHydrated ? t('contact_info.title') : '연락처 정보'}
+                  {t('contact_info.title', '연락처 정보')}
                 </h2>
 
                 <div className="space-y-4 sm:space-y-6">
@@ -157,17 +154,13 @@ export default function ContactPage({ actionData }: Route.ComponentProps) {
                     </div>
                     <div>
                       <h3 className="font-semibold text-sm sm:text-base">
-                        {isHydrated ? t('contact_info.email.title') : '이메일'}
+                        {t('contact_info.email.title', '이메일')}
                       </h3>
                       <p className="text-muted-foreground text-sm sm:text-base">
-                        {isHydrated
-                          ? t('contact_info.email.value')
-                          : 'noah@surecrm.pro'}
+                        {t('contact_info.email.value', 'noah@surecrm.pro')}
                       </p>
                       <p className="text-xs sm:text-sm text-muted-foreground">
-                        {isHydrated
-                          ? t('contact_info.email.note')
-                          : '평일 9시-18시 내 답변'}
+                        {t('contact_info.email.note', '평일 9시-18시 내 답변')}
                       </p>
                     </div>
                   </div>
@@ -180,19 +173,16 @@ export default function ContactPage({ actionData }: Route.ComponentProps) {
                     </div>
                     <div>
                       <h3 className="font-semibold text-sm sm:text-base">
-                        {isHydrated
-                          ? t('contact_info.business.title')
-                          : '사업자 정보'}
+                        {t('contact_info.business.title', '사업자 정보')}
                       </h3>
                       <p className="text-muted-foreground text-sm sm:text-base">
-                        {isHydrated
-                          ? t('contact_info.business.name')
-                          : 'SureCRM'}
+                        {t('contact_info.business.name', 'SureCRM')}
                       </p>
                       <p className="text-xs sm:text-sm text-muted-foreground">
-                        {isHydrated
-                          ? t('contact_info.business.description')
-                          : '보험설계사 전용 CRM 솔루션'}
+                        {t(
+                          'contact_info.business.description',
+                          '보험설계사 전용 CRM 솔루션'
+                        )}
                       </p>
                     </div>
                   </div>
@@ -205,19 +195,19 @@ export default function ContactPage({ actionData }: Route.ComponentProps) {
                     </div>
                     <div>
                       <h3 className="font-semibold text-sm sm:text-base">
-                        {isHydrated
-                          ? t('contact_info.support_hours.title')
-                          : '지원 시간'}
+                        {t('contact_info.support_hours.title', '지원 시간')}
                       </h3>
                       <p className="text-muted-foreground text-sm sm:text-base">
-                        {isHydrated
-                          ? t('contact_info.support_hours.hours')
-                          : '평일 09:00 - 18:00'}
+                        {t(
+                          'contact_info.support_hours.hours',
+                          '평일 09:00 - 18:00'
+                        )}
                       </p>
                       <p className="text-xs sm:text-sm text-muted-foreground">
-                        {isHydrated
-                          ? t('contact_info.support_hours.note')
-                          : '주말 및 공휴일 제외'}
+                        {t(
+                          'contact_info.support_hours.note',
+                          '주말 및 공휴일 제외'
+                        )}
                       </p>
                     </div>
                   </div>
@@ -228,7 +218,7 @@ export default function ContactPage({ actionData }: Route.ComponentProps) {
             {/* 문의 양식 */}
             <div className="bg-card rounded-lg p-4 sm:p-6 lg:p-8 border">
               <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">
-                {isHydrated ? t('form.title') : '문의 양식'}
+                {t('form.title', '문의 양식')}
               </h2>
 
               {/* 에러 메시지 표시 */}
@@ -244,7 +234,7 @@ export default function ContactPage({ actionData }: Route.ComponentProps) {
               <Form method="post" className="space-y-4 sm:space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="name" className="text-sm sm:text-base">
-                    {isHydrated ? t('form.fields.name.label') : '이름'} *
+                    {t('form.fields.name.label', '이름')} *
                   </Label>
                   <Input
                     id="name"
@@ -252,18 +242,17 @@ export default function ContactPage({ actionData }: Route.ComponentProps) {
                     type="text"
                     required
                     disabled={isSubmitting}
-                    placeholder={
-                      isHydrated
-                        ? t('form.fields.name.placeholder')
-                        : '성함을 입력해주세요'
-                    }
+                    placeholder={t(
+                      'form.fields.name.placeholder',
+                      '성함을 입력해주세요'
+                    )}
                     className="w-full"
                   />
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="email" className="text-sm sm:text-base">
-                    {isHydrated ? t('form.fields.email.label') : '이메일'} *
+                    {t('form.fields.email.label', '이메일')} *
                   </Label>
                   <Input
                     id="email"
@@ -271,38 +260,34 @@ export default function ContactPage({ actionData }: Route.ComponentProps) {
                     type="email"
                     required
                     disabled={isSubmitting}
-                    placeholder={
-                      isHydrated
-                        ? t('form.fields.email.placeholder')
-                        : '이메일 주소를 입력해주세요'
-                    }
+                    placeholder={t(
+                      'form.fields.email.placeholder',
+                      '이메일 주소를 입력해주세요'
+                    )}
                     className="w-full"
                   />
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="company" className="text-sm sm:text-base">
-                    {isHydrated ? t('form.fields.company.label') : '회사명'}
+                    {t('form.fields.company.label', '회사명')}
                   </Label>
                   <Input
                     id="company"
                     name="company"
                     type="text"
                     disabled={isSubmitting}
-                    placeholder={
-                      isHydrated
-                        ? t('form.fields.company.placeholder')
-                        : '회사명을 입력해주세요'
-                    }
+                    placeholder={t(
+                      'form.fields.company.placeholder',
+                      '회사명을 입력해주세요'
+                    )}
                     className="w-full"
                   />
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="inquiryType" className="text-sm sm:text-base">
-                    {isHydrated
-                      ? t('form.fields.inquiry_type.label')
-                      : '문의 유형'}
+                    {t('form.fields.inquiry_type.label', '문의 유형')}
                   </Label>
                   <Select
                     name="inquiryType"
@@ -312,38 +297,39 @@ export default function ContactPage({ actionData }: Route.ComponentProps) {
                   >
                     <SelectTrigger id="inquiryType" className="w-full">
                       <SelectValue
-                        placeholder={
-                          isHydrated
-                            ? t('form.fields.inquiry_type.placeholder')
-                            : '문의 유형을 선택해주세요'
-                        }
+                        placeholder={t(
+                          'form.fields.inquiry_type.placeholder',
+                          '문의 유형을 선택해주세요'
+                        )}
                       />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="demo">
-                        {isHydrated
-                          ? t('form.fields.inquiry_type.options.demo')
-                          : '데모 요청'}
+                        {t(
+                          'form.fields.inquiry_type.options.demo',
+                          '데모 요청'
+                        )}
                       </SelectItem>
                       <SelectItem value="pricing">
-                        {isHydrated
-                          ? t('form.fields.inquiry_type.options.pricing')
-                          : '요금 문의'}
+                        {t(
+                          'form.fields.inquiry_type.options.pricing',
+                          '요금 문의'
+                        )}
                       </SelectItem>
                       <SelectItem value="support">
-                        {isHydrated
-                          ? t('form.fields.inquiry_type.options.support')
-                          : '기술 지원'}
+                        {t(
+                          'form.fields.inquiry_type.options.support',
+                          '기술 지원'
+                        )}
                       </SelectItem>
                       <SelectItem value="partnership">
-                        {isHydrated
-                          ? t('form.fields.inquiry_type.options.partnership')
-                          : '파트너십'}
+                        {t(
+                          'form.fields.inquiry_type.options.partnership',
+                          '파트너십'
+                        )}
                       </SelectItem>
                       <SelectItem value="other">
-                        {isHydrated
-                          ? t('form.fields.inquiry_type.options.other')
-                          : '기타'}
+                        {t('form.fields.inquiry_type.options.other', '기타')}
                       </SelectItem>
                     </SelectContent>
                   </Select>
@@ -356,7 +342,7 @@ export default function ContactPage({ actionData }: Route.ComponentProps) {
 
                 <div className="space-y-2">
                   <Label htmlFor="message" className="text-sm sm:text-base">
-                    {isHydrated ? t('form.fields.message.label') : '메시지'} *
+                    {t('form.fields.message.label', '메시지')} *
                   </Label>
                   <Textarea
                     id="message"
@@ -364,11 +350,10 @@ export default function ContactPage({ actionData }: Route.ComponentProps) {
                     required
                     rows={4}
                     disabled={isSubmitting}
-                    placeholder={
-                      isHydrated
-                        ? t('form.fields.message.placeholder')
-                        : '문의 내용을 자세히 적어주세요'
-                    }
+                    placeholder={t(
+                      'form.fields.message.placeholder',
+                      '문의 내용을 자세히 적어주세요'
+                    )}
                     className="w-full resize-none"
                   />
                 </div>
@@ -409,18 +394,16 @@ export default function ContactPage({ actionData }: Route.ComponentProps) {
                   {isSubmitting ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      전송 중...
+                      {t('form.submitting', '전송 중...')}
                     </>
-                  ) : isHydrated ? (
-                    t('form.submit')
                   ) : (
-                    '문의 보내기'
+                    t('form.submit', '문의 보내기')
                   )}
                 </Button>
 
                 {!turnstileToken && (
                   <p className="text-xs sm:text-sm text-muted-foreground text-center">
-                    보안 인증을 완료해주세요
+                    {t('form.security_required', '보안 인증을 완료해주세요')}
                   </p>
                 )}
               </Form>
@@ -439,14 +422,13 @@ export default function ContactPage({ actionData }: Route.ComponentProps) {
               </div>
               <div>
                 <DialogTitle className="text-lg text-green-900 dark:text-green-100">
-                  {isHydrated
-                    ? t('messages.success')
-                    : '문의가 성공적으로 전송되었습니다!'}
+                  {t('messages.success', '문의가 성공적으로 전송되었습니다!')}
                 </DialogTitle>
                 <DialogDescription className="text-sm text-green-700 dark:text-green-300">
-                  {isHydrated
-                    ? t('messages.success_description')
-                    : '빠른 시일 내에 답변 드리겠습니다. 감사합니다!'}
+                  {t(
+                    'messages.success_description',
+                    '빠른 시일 내에 답변 드리겠습니다. 감사합니다!'
+                  )}
                 </DialogDescription>
               </div>
             </div>
@@ -456,7 +438,7 @@ export default function ContactPage({ actionData }: Route.ComponentProps) {
               onClick={handleSuccessModalClose}
               className="w-full bg-green-600 hover:bg-green-700 text-white"
             >
-              확인
+              {t('common.confirm', '확인')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -475,15 +457,14 @@ export default function ContactPage({ actionData }: Route.ComponentProps) {
               </div>
               <div>
                 <DialogTitle className="text-lg text-red-900 dark:text-red-100">
-                  {isHydrated
-                    ? t('messages.error')
-                    : '문의 전송에 실패했습니다.'}
+                  {t('messages.error', '문의 전송에 실패했습니다.')}
                 </DialogTitle>
                 <DialogDescription className="text-sm text-red-700 dark:text-red-300">
                   {actionData?.error ||
-                    (isHydrated
-                      ? t('messages.error_description')
-                      : '잠시 후 다시 시도해주세요.')}
+                    t(
+                      'messages.error_description',
+                      '잠시 후 다시 시도해주세요.'
+                    )}
                 </DialogDescription>
               </div>
             </div>
@@ -495,7 +476,7 @@ export default function ContactPage({ actionData }: Route.ComponentProps) {
               className="w-full border-red-200 text-red-700 hover:bg-red-50 dark:border-red-800 dark:text-red-300 dark:hover:bg-red-900/30"
             >
               <XCircle className="h-4 w-4 mr-2" />
-              닫기
+              {t('common.close', '닫기')}
             </Button>
           </DialogFooter>
         </DialogContent>

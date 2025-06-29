@@ -54,12 +54,18 @@
         "required": true
       }
     },
-    "submit": "Send Inquiry"
+    "submit": "Send Inquiry",
+    "submitting": "Sending...",
+    "security_required": "Please complete security verification"
   },
   "messages": {
     "success": "Your inquiry has been sent successfully!",
     "success_description": "We will get back to you as soon as possible. Thank you!",
     "error": "Failed to send your inquiry.",
     "error_description": "Please try again later."
+  },
+  "common": {
+    "confirm": "Confirm",
+    "close": "Close"
   }
 }
