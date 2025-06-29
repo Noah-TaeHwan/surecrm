@@ -3,6 +3,8 @@ import { startTransition, StrictMode } from 'react';
 import { hydrateRoot } from 'react-dom/client';
 import { HydratedRouter } from 'react-router/dom';
 import '~/lib/i18n';
+// 클라이언트 언어 초기화
+import { initializeClientLanguage } from '~/lib/i18n/language-manager.client';
 
 // 🔧 환경 감지 함수
 function isProductionEnvironment(): boolean {
@@ -106,6 +108,9 @@ if (isProductionEnvironment()) {
 } else {
   // console.log('🔧 개발환경: Sentry 비활성화됨');
 }
+
+// 🌍 언어 설정 초기화
+initializeClientLanguage();
 
 startTransition(() => {
   hydrateRoot(

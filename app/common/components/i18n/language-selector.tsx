@@ -1,48 +1,71 @@
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useState } from 'react';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '~/common/components/ui/select';
 import { Button } from '~/common/components/ui/button';
 import {
-  SUPPORTED_LANGUAGES,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '~/common/components/ui/dropdown-menu';
+import { Badge } from '~/common/components/ui/badge';
+import { Globe, Check } from 'lucide-react';
+import {
+  changeLanguageClient,
+  detectClientLanguage,
+} from '~/lib/i18n/language-manager.client';
+import {
   LANGUAGE_CONFIG,
-  changeLanguage,
+  SUPPORTED_LANGUAGES,
   type SupportedLanguage,
-} from '~/lib/i18n';
+} from '~/lib/i18n/index';
 
 interface LanguageSelectorProps {
-  variant?: 'dropdown' | 'buttons';
-  size?: 'sm' | 'md' | 'lg';
-  showFlag?: boolean;
-  showNativeName?: boolean;
+  variant?: 'button' | 'minimal' | 'badge';
+  size?: 'sm' | 'default' | 'lg';
   className?: string;
+  showLabel?: boolean;
 }
 
 export function LanguageSelector({
-  variant = 'dropdown',
-  size = 'md',
-  showFlag = true,
-  showNativeName = true,
+  variant = 'button',
+  size = 'default',
   className = '',
+  showLabel = true,
 }: LanguageSelectorProps) {
-  const { i18n, t } = useTranslation('common');
+  const { t, i18n } = useTranslation();
+  const [isHydrated, setIsHydrated] = useState(false);
+  const [currentLanguage, setCurrentLanguage] =
+    useState<SupportedLanguage>('ko');
   const [isChanging, setIsChanging] = useState(false);
 
-  const currentLanguage = i18n.language as SupportedLanguage;
+  // Hydration 완료 후 언어 상태 동기화
+  useEffect(() => {
+    const detectedLanguage = detectClientLanguage();
+    setCurrentLanguage(detectedLanguage);
+    setIsHydrated(true);
+  }, []);
+
+  // i18next 언어 변경 감지
+  useEffect(() => {
+    if (isHydrated && i18n.language) {
+      setCurrentLanguage(i18n.language as SupportedLanguage);
+    }
+  }, [i18n.language, isHydrated]);
 
   const handleLanguageChange = async (language: SupportedLanguage) => {
     if (language === currentLanguage) return;
 
     setIsChanging(true);
+
     try {
-      await changeLanguage(language);
-      // 페이지 새로고침 없이 실시간 언어 변경
-      // 필요에 따라 URL도 변경할 수 있음
+      const success = await changeLanguageClient(language);
+      if (success) {
+        setCurrentLanguage(language);
+
+        // 페이지 새로고침으로 서버-클라이언트 완전 동기화
+        // (hydration 에러 방지를 위해)
+        window.location.reload();
+      }
     } catch (error) {
       console.error('언어 변경 실패:', error);
     } finally {
@@ -50,77 +73,143 @@ export function LanguageSelector({
     }
   };
 
-  // Button size prop 매핑
-  const getButtonSize = (size: 'sm' | 'md' | 'lg'): 'sm' | 'lg' | 'default' => {
-    if (size === 'sm') return 'sm';
-    if (size === 'lg') return 'lg';
-    return 'default';
-  };
+  // Hydration 전에는 한국어 기본값으로 렌더링
+  const displayLanguage = isHydrated ? currentLanguage : 'ko';
+  const displayConfig = LANGUAGE_CONFIG[displayLanguage];
 
-  if (variant === 'buttons') {
+  if (variant === 'badge') {
     return (
-      <div className={`flex gap-1 ${className}`}>
-        {SUPPORTED_LANGUAGES.map(lang => {
-          const config = LANGUAGE_CONFIG[lang];
-          const isActive = lang === currentLanguage;
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Badge
+            variant="outline"
+            className={`cursor-pointer hover:bg-accent ${className}`}
+          >
+            <span className="mr-1">{displayConfig.flag}</span>
+            {displayConfig.name}
+          </Badge>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-48">
+          {SUPPORTED_LANGUAGES.map(lang => {
+            const config = LANGUAGE_CONFIG[lang];
+            const isSelected = displayLanguage === lang;
 
-          return (
-            <Button
-              key={lang}
-              variant={isActive ? 'default' : 'outline'}
-              size={getButtonSize(size)}
-              onClick={() => handleLanguageChange(lang)}
-              disabled={isChanging}
-              className={`
-                ${size === 'sm' ? 'px-2 py-1 text-xs' : ''}
-                ${size === 'lg' ? 'px-4 py-2 text-lg' : ''}
-                ${isActive ? 'pointer-events-none' : ''}
-              `}
-            >
-              {showFlag && <span className="mr-1">{config.flag}</span>}
-              {showNativeName ? config.nativeName : config.name}
-            </Button>
-          );
-        })}
-      </div>
+            return (
+              <DropdownMenuItem
+                key={lang}
+                className={`cursor-pointer ${isSelected ? 'bg-accent' : ''}`}
+                onClick={() => handleLanguageChange(lang)}
+                disabled={isChanging}
+              >
+                <div className="flex items-center justify-between w-full">
+                  <div className="flex items-center gap-2">
+                    <span>{config.flag}</span>
+                    <span>{config.nativeName}</span>
+                  </div>
+                  {isSelected && <Check className="h-4 w-4" />}
+                </div>
+              </DropdownMenuItem>
+            );
+          })}
+        </DropdownMenuContent>
+      </DropdownMenu>
     );
   }
 
+  if (variant === 'minimal') {
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            className={`gap-1 ${className}`}
+            disabled={isChanging}
+          >
+            <span>{displayConfig.flag}</span>
+            <span className="text-xs">{displayLanguage.toUpperCase()}</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-44">
+          {SUPPORTED_LANGUAGES.map(lang => {
+            const config = LANGUAGE_CONFIG[lang];
+            const isSelected = displayLanguage === lang;
+
+            return (
+              <DropdownMenuItem
+                key={lang}
+                className={`cursor-pointer ${isSelected ? 'bg-accent' : ''}`}
+                onClick={() => handleLanguageChange(lang)}
+                disabled={isChanging}
+              >
+                <div className="flex items-center justify-between w-full">
+                  <div className="flex items-center gap-2">
+                    <span>{config.flag}</span>
+                    <span className="text-sm">{config.nativeName}</span>
+                  </div>
+                  {isSelected && <Check className="h-4 w-4" />}
+                </div>
+              </DropdownMenuItem>
+            );
+          })}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  }
+
+  // Default button variant
   return (
-    <Select
-      value={currentLanguage}
-      onValueChange={value => handleLanguageChange(value as SupportedLanguage)}
-      disabled={isChanging}
-    >
-      <SelectTrigger
-        className={`${className} ${size === 'sm' ? 'h-8 text-xs' : ''} ${
-          size === 'lg' ? 'h-12 text-lg' : ''
-        } w-auto px-2`}
-      >
-        <SelectValue>
-          <div className="flex items-center">
-            <span
-              className={`${size === 'sm' ? 'text-sm' : size === 'lg' ? 'text-xl' : 'text-base'}`}
-            >
-              {LANGUAGE_CONFIG[currentLanguage].flag}
-            </span>
-          </div>
-        </SelectValue>
-      </SelectTrigger>
-      <SelectContent>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="outline"
+          size={size}
+          className={`gap-2 ${className}`}
+          disabled={isChanging}
+        >
+          <Globe className="h-4 w-4" />
+          <span className="flex items-center gap-1">
+            <span>{displayConfig.flag}</span>
+            {showLabel && (
+              <span className="hidden sm:inline">
+                {isHydrated ? t('language') : '언어'}
+              </span>
+            )}
+          </span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-56">
+        <div className="px-2 py-1.5 text-sm font-medium text-muted-foreground border-b">
+          {isHydrated ? t('selectLanguage') : '언어 선택'}
+        </div>
         {SUPPORTED_LANGUAGES.map(lang => {
           const config = LANGUAGE_CONFIG[lang];
+          const isSelected = displayLanguage === lang;
+
           return (
-            <SelectItem key={lang} value={lang}>
-              <div className="flex items-center gap-2">
-                {showFlag && <span>{config.flag}</span>}
-                <span>{showNativeName ? config.nativeName : config.name}</span>
+            <DropdownMenuItem
+              key={lang}
+              className={`cursor-pointer ${isSelected ? 'bg-accent' : ''}`}
+              onClick={() => handleLanguageChange(lang)}
+              disabled={isChanging}
+            >
+              <div className="flex items-center justify-between w-full">
+                <div className="flex items-center gap-3">
+                  <span className="text-lg">{config.flag}</span>
+                  <div className="flex flex-col">
+                    <span className="font-medium">{config.nativeName}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {config.name}
+                    </span>
+                  </div>
+                </div>
+                {isSelected && <Check className="h-4 w-4 text-primary" />}
               </div>
-            </SelectItem>
+            </DropdownMenuItem>
           );
         })}
-      </SelectContent>
-    </Select>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
@@ -150,7 +239,7 @@ export function LanguageSelectorDemo() {
 
         <div>
           <label className="text-sm font-medium mb-2 block">버튼 형태</label>
-          <LanguageSelector variant="buttons" />
+          <LanguageSelector variant="button" />
         </div>
 
         <div>

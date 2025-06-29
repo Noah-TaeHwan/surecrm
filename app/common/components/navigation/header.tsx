@@ -439,7 +439,7 @@ export function Header({
         )}
 
         {/* 언어 선택기 */}
-        <LanguageSelector variant="dropdown" />
+        <LanguageSelector variant="minimal" />
 
         {/* 사용자 프로필 드롭다운 */}
         <DropdownMenu>

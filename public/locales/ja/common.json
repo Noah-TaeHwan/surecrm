@@ -148,5 +148,7 @@
   },
   "layout": {
     "defaultUserName": "ユーザー"
-  }
+  },
+  "language": "言語",
+  "selectLanguage": "言語選択"
 }
