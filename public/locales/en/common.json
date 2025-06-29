@@ -127,5 +127,26 @@
     "collapseSection": "Collapse section",
     "sortAscending": "Sort ascending",
     "sortDescending": "Sort descending"
+  },
+  "notFound": {
+    "code": "404",
+    "title": "Page Not Found",
+    "description": "Please check the address again",
+    "description2": "or use the button below to go to the main page.",
+    "goHome": "Go Home"
+  },
+  "testimonials": {
+    "badge": "Trusted Solution",
+    "title": "User Reviews",
+    "description": "Hear real experiences from insurance agents using SureCRM.",
+    "stats": {
+      "activeUsers": "Active Users",
+      "activeTeams": "Active Teams",
+      "managedClients": "Managed Clients",
+      "avgEfficiencyIncrease": "Avg. Efficiency Increase"
+    }
+  },
+  "layout": {
+    "defaultUserName": "User"
   }
 }

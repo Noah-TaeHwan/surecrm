@@ -8,17 +8,18 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useRef, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface BottomTabNavigationProps {
   isMenuOpen: boolean;
 }
 
 const navigationItems = [
-  { href: '/dashboard', icon: LayoutDashboard, label: '대시보드' },
-  { href: '/network', icon: Network, label: '네트워크' },
-  { href: '/pipeline', icon: ChartPie, label: '영업' },
-  { href: '/clients', icon: Users, label: '고객' },
-  { href: '/calendar', icon: Calendar, label: '일정' },
+  { href: '/dashboard', icon: LayoutDashboard, labelKey: 'dashboard' },
+  { href: '/network', icon: Network, labelKey: 'network' },
+  { href: '/pipeline', icon: ChartPie, labelKey: 'pipeline' },
+  { href: '/clients', icon: Users, labelKey: 'clients' },
+  { href: '/calendar', icon: Calendar, labelKey: 'calendar' },
 ];
 
 // 안전한 햅틱 피드백
@@ -163,6 +164,7 @@ function LiquidGlassButton({
 
 export function BottomTabNavigation({ isMenuOpen }: BottomTabNavigationProps) {
   const location = useLocation();
+  const { t } = useTranslation('navigation');
   const activeIndex = getActiveIndex(location.pathname);
   const isMinimized = useScrollDirection();
 
@@ -408,7 +410,7 @@ export function BottomTabNavigation({ isMenuOpen }: BottomTabNavigationProps) {
                 key={item.href}
                 href={item.href}
                 icon={item.icon}
-                label={item.label}
+                label={t(item.labelKey)}
                 isActive={isActive}
                 isMinimized={isMinimized}
                 onRef={el => {

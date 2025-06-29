@@ -76,6 +76,232 @@
     "contracted": "契約済み",
     "completed": "完了"
   },
+  "welcome": {
+    "morningGreeting": "おはようございます",
+    "afternoonGreeting": "こんにちは",
+    "eveningGreeting": "こんばんは",
+    "defaultGreeting": "こんにちは",
+    "loading": "読み込み中...",
+    "userSuffix": "さん",
+    "totalClientsLabel": "総顧客{{count}}名",
+    "referralsLabel": "紹介{{count}}件",
+    "monthlyNewClientsLabel": "今月新規{{count}}名"
+  },
+  "kpi": {
+    "error": "エラー",
+    "new": "新規",
+    "majorIncrease": "大幅増加",
+    "majorDecrease": "大幅減少"
+  },
+  "recentClients": {
+    "title": "最近の顧客状況",
+    "viewAll": "すべて表示",
+    "totalClients": "総顧客",
+    "recentActivity": "最近の活動",
+    "expectedValue": "予想価値"
+  },
+  "myGoals": {
+    "title": "私の目標",
+    "setGoal": "目標設定",
+    "currentMonth": "今月の目標",
+    "goalFor": "{{year}}年{{month}}月の目標",
+    "inProgress": "進行中",
+    "completed": "完了",
+    "target": "目標:",
+    "progress": "進捗",
+    "goalExceeded": "目標超過達成！(+{{percent}}%)",
+    "goalAchieved": "目標達成完了！",
+    "goalStatus": "目標状況",
+    "thisMonthStatus": "今月",
+    "monthlyStatus": "{{year}}年{{month}}月",
+    "achievedGoals": "達成済み",
+    "inProgressGoals": "進行中",
+    "unachievedGoals": "未達成",
+    "goalsCount": "{{count}}個",
+    "setGoalPrompt": "目標を設定してください",
+    "noGoalsSet": "設定された目標がありません",
+    "setGoalDescription": "月別または年別の目標を設定してパフォーマンスを追跡しましょう",
+    "noGoalsForMonth": "{{year}}年{{month}}月には設定された目標がありません",
+    "setFirstGoal": "最初の目標設定",
+    "previousMonth": "前月",
+    "nextMonth": "翌月",
+    "backToCurrentMonth": "現在の月に戻る",
+    "goalTypes": {
+      "revenue": "手数料目標",
+      "clients": "新規顧客",
+      "referrals": "紹介件数",
+      "conversion_rate": "転換率",
+      "default": "目標"
+    },
+    "units": {
+      "revenue": "万円",
+      "clients": "名",
+      "referrals": "件",
+      "conversion_rate": "%"
+    }
+  },
+  "goalModal": {
+    "setGoalTitle": "目標設定",
+    "editGoalTitle": "目標編集",
+    "setGoalDescription": "目標を設定してパフォーマンスを追跡しましょう",
+    "editGoalDescription": "設定された目標を編集または削除できます。",
+    "periodSetting": "期間設定",
+    "periodTip": "月別または年別の目標を選択してください",
+    "targetYear": "目標年度",
+    "targetMonth": "目標月",
+    "selectYear": "年度選択",
+    "selectMonth": "月選択",
+    "currentGoals": "現在設定された目標",
+    "newGoalSetting": "新しい目標設定",
+    "editGoalSetting": "目標編集",
+    "goalType": "目標タイプ",
+    "selectGoalType": "目標タイプを選択してください",
+    "goalTypes": {
+      "revenue": "手数料目標",
+      "clients": "新規顧客目標",
+      "referrals": "紹介目標"
+    },
+    "targetValue": "目標値",
+    "targetValuePlaceholder": "目標値を入力してください",
+    "revenueDescription": "万円単位で入力してください（例：5000 = 5千万円）",
+    "goalTitle": "目標タイトル（任意）",
+    "goalTitlePlaceholder": "目標の説明を入力してください",
+    "autoTitleNote": "空白の場合は自動生成されます",
+    "close": "閉じる",
+    "cancel": "キャンセル",
+    "saving": "保存中...",
+    "edit": "目標編集",
+    "set": "目標設定",
+    "monthlyGoal": "{{year}}年{{month}}月目標",
+    "yearSuffix": "年",
+    "monthSuffix": "月",
+    "autoTitle": {
+      "revenue": "{{year}}年{{month}}月手数料目標",
+      "clients": "{{year}}年{{month}}月新規顧客目標",
+      "referrals": "{{year}}年{{month}}月紹介目標",
+      "default": "{{year}}年{{month}}月目標"
+    }
+  },
+  "quickActions": {
+    "moreActions": "その他のアクション",
+    "refresh": "更新",
+    "addClient": "顧客追加",
+    "schedule": "スケジュール",
+    "filter": "フィルター",
+    "export": "エクスポート",
+    "analytics": "分析",
+    "settings": "設定",
+    "tooltips": {
+      "refresh": "ダッシュボードデータを更新",
+      "addClient": "新しい顧客を追加",
+      "schedule": "スケジュール管理",
+      "filter": "データフィルタリング",
+      "export": "データエクスポート",
+      "analytics": "詳細分析を表示",
+      "settings": "ダッシュボード設定"
+    }
+  },
+  "performanceKPI": {
+    "totalClients": "総顧客数",
+    "activeContracts": "有効契約",
+    "monthlyPremium": "月間保険料総額",
+    "totalCommission": "総手数料",
+    "descriptions": {
+      "totalClients": "登録された全顧客数",
+      "activeContracts": "現在維持中の契約数",
+      "monthlyPremium": "月間保険料総額",
+      "totalCommission": "予想総手数料"
+    },
+    "tooltips": {
+      "totalClients": "システムに登録されているすべての顧客の数です。\n新規顧客と既存顧客の両方を含みます。",
+      "activeContracts": "現在有効な保険契約の数です。\n解約または満期終了した契約は除外されます。",
+      "monthlyPremium": "すべての有効契約から発生する月間保険料の合計額です。",
+      "expectedCommission": "契約による予想手数料総額です。\n平均取引あたり手数料：{{average}}万円"
+    },
+    "changeLabels": {
+      "new": "新規",
+      "majorIncrease": "大幅増加",
+      "majorDecrease": "大幅減少"
+    },
+    "extraLabels": {
+      "averageClientValue": "平均顧客価値"
+    }
+  },
+  "pipelineOverview": {
+    "title": "営業パイプライン",
+    "viewDetails": "詳細表示",
+    "stageStatus": "段階別状況",
+    "units": {
+      "deals": "件",
+      "currency": "円"
+    },
+    "summary": {
+      "totalDeals": "総取引",
+      "expectedRevenue": "予想売上",
+      "averagePerDeal": "平均取引額"
+    },
+    "emptyState": {
+      "noPipeline": "まだパイプラインに顧客がありません",
+      "managePipeline": "パイプライン管理"
+    }
+  },
+  "referralInsights": {
+    "networkStatus": "ネットワーク現況",
+    "viewDetails": "詳しく見る",
+    "stats": {
+      "totalConnections": "総接続",
+      "maxDepth": "最大深度",
+      "activeReferrers": "活性紹介者",
+      "monthlyGrowth": "月間成長"
+    },
+    "tooltips": {
+      "totalConnections": "紹介を通じて接続された顧客の総数です。\n誰かが紹介してくれた顧客の全体数を表します。",
+      "maxDepth": "ネットワークの接続段階深度です。\n活性紹介者が多いほどネットワークがより深く拡散されます。",
+      "activeReferrers": "最近3ヶ月以内に顧客を紹介してくれた人の数です。\n現在活発に紹介活動をしている紹介者たちです。",
+      "monthlyGrowth": "今月の新規紹介顧客の割合です。\n全体紹介顧客に対して最近1ヶ月間増えた割合を示します。"
+    },
+    "insights": {
+      "title": "ネットワークインサイト",
+      "growthMessage": "今月ネットワークが{{growth}}%成長しました。",
+      "topPerformerMessage": " 最高成果者は{{name}}さんです。"
+    }
+  },
+  "pipelineStages": {
+    "첫 상담": "初回相談",
+    "니즈 분석": "ニーズ分析",
+    "상품 설명": "商品説明",
+    "계약 검토": "契約検討",
+    "계약 완료": "契約完了",
+    "상담 중": "相談中",
+    "제안": "提案",
+    "협상": "交渉",
+    "Initial Consultation": "初回相談",
+    "Needs Analysis": "ニーズ分析",
+    "Product Explanation": "商品説明",
+    "Contract Review": "契約検討",
+    "Contract Completed": "契約完了"
+  },
+  "stages": {
+    "prospect": "見込み客",
+    "contacted": "連絡済み",
+    "proposal": "提案書送付",
+    "contracted": "契約済み",
+    "completed": "完了",
+    "consultation": "相談中",
+    "negotiation": "交渉中",
+    "pending": "保留",
+    "follow_up": "フォローアップ",
+    "상담 중": "相談中",
+    "제안": "提案",
+    "협상": "交渉",
+    "보류": "保留",
+    "완료": "完了"
+  },
+  "dateFormat": {
+    "year": "{{year}}年",
+    "month": "{{month}}月",
+    "yearMonth": "{{year}}年{{month}}月"
+  },
   "referral": {
     "client": "紹介クライアント",
     "recent_activity": "最近{{count}}件の紹介を行いました。平均転換率{{rate}}%を記録しています。"

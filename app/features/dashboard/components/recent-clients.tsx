@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import {
   Card,
   CardContent,
@@ -12,6 +13,10 @@ import {
   ChevronRightIcon,
   CalendarIcon,
 } from '@radix-ui/react-icons';
+import {
+  formatCurrencyTable,
+  type SupportedLocale,
+} from '~/lib/utils/currency';
 import { Link } from 'react-router';
 
 interface Client {
@@ -33,6 +38,11 @@ export function RecentClients({
   recentClients,
   totalClients,
 }: RecentClientsProps) {
+  const { t, i18n } = useTranslation('dashboard');
+  const locale = (
+    i18n.language === 'ko' ? 'ko' : i18n.language === 'ja' ? 'ja' : 'en'
+  ) as SupportedLocale;
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'prospect':
@@ -51,24 +61,32 @@ export function RecentClients({
   };
 
   const getStatusText = (status: string) => {
-    switch (status) {
-      case 'prospect':
-        return '잠재고객';
-      case 'contacted':
-        return '접촉완료';
-      case 'proposal':
-        return '제안중';
-      case 'contracted':
-        return '계약체결';
-      case 'completed':
-        return '완료';
-      default:
-        return status;
+    return t(`stages.${status}`, { defaultValue: status });
+  };
+
+  const getStageText = (stage: string) => {
+    const translatedStage = t(`pipelineStages.${stage}`, { defaultValue: '' });
+    if (translatedStage && translatedStage !== stage) {
+      return translatedStage;
     }
+
+    const translatedStatus = t(`stages.${stage}`, { defaultValue: '' });
+    if (translatedStatus && translatedStatus !== stage) {
+      return translatedStatus;
+    }
+
+    return stage;
   };
 
   const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString('ko-KR', {
+    const locale =
+      i18n.language === 'ko'
+        ? 'ko-KR'
+        : i18n.language === 'ja'
+          ? 'ja-JP'
+          : 'en-US';
+
+    return new Date(dateStr).toLocaleDateString(locale, {
       month: 'short',
       day: 'numeric',
     });
@@ -82,7 +100,7 @@ export function RecentClients({
             <div className="p-1.5 bg-primary/10 rounded-lg">
               <PersonIcon className="h-4 w-4 text-primary" />
             </div>
-            최근 고객 현황
+            {t('recentClients.title')}
           </CardTitle>
           <Link to="/clients">
             <Button
@@ -90,7 +108,7 @@ export function RecentClients({
               size="sm"
               className="text-xs text-muted-foreground hover:text-primary"
             >
-              전체 보기
+              {t('recentClients.viewAll')}
               <ChevronRightIcon className="h-3 w-3 ml-1" />
             </Button>
           </Link>
@@ -103,14 +121,16 @@ export function RecentClients({
             <div className="text-2xl font-bold text-foreground mb-1">
               {totalClients}
             </div>
-            <div className="text-sm text-muted-foreground">총 고객 수</div>
+            <div className="text-sm text-muted-foreground">
+              {t('recentClients.totalClients')}
+            </div>
           </div>
         </div>
 
         {/* 최근 고객 목록 */}
         <div className="space-y-2">
           <h4 className="text-sm font-medium text-foreground mb-2">
-            최근 활동
+            {t('recentClients.recentActivity')}
           </h4>
           {recentClients.length > 0 ? (
             <>
@@ -141,7 +161,7 @@ export function RecentClients({
                       </div>
 
                       <div className="flex items-center justify-between text-xs text-muted-foreground">
-                        <span>{client.stage}</span>
+                        <span>{getStageText(client.stage)}</span>
                         <div className="flex items-center gap-1">
                           <CalendarIcon className="h-3 w-3" />
                           <span>{formatDate(client.lastContactDate)}</span>
@@ -151,7 +171,7 @@ export function RecentClients({
                       {client.referredBy && (
                         <div className="flex items-center gap-1 mt-1">
                           <span className="text-xs text-muted-foreground">
-                            소개:{' '}
+                            {t('recentClients.referredBy')}{' '}
                             <span className="font-medium">
                               {client.referredBy}
                             </span>
@@ -161,9 +181,9 @@ export function RecentClients({
 
                       <div className="mt-1">
                         <span className="text-xs text-muted-foreground">
-                          예상가치:{' '}
+                          {t('recentClients.expectedValue')}{' '}
                           <span className="font-medium text-primary">
-                            {client.potentialValue.toLocaleString()}만원
+                            {formatCurrencyTable(client.potentialValue, locale)}
                           </span>
                         </span>
                       </div>
@@ -181,7 +201,9 @@ export function RecentClients({
                 <div className="text-center pt-2">
                   <Link to="/clients">
                     <Button variant="outline" size="sm" className="text-xs">
-                      +{recentClients.length - 5}명 더 보기
+                      {t('recentClients.moreClients', {
+                        count: recentClients.length - 5,
+                      })}
                     </Button>
                   </Link>
                 </div>
@@ -193,11 +215,11 @@ export function RecentClients({
                 <PersonIcon className="h-6 w-6 text-muted-foreground" />
               </div>
               <p className="text-sm text-muted-foreground mb-3">
-                등록된 고객이 없습니다
+                {t('recentClients.noClients')}
               </p>
               <Link to="/clients">
                 <Button size="sm" variant="outline">
-                  고객 추가
+                  {t('recentClients.addClient')}
                 </Button>
               </Link>
             </div>

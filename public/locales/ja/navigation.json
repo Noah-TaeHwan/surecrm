@@ -136,14 +136,19 @@
     "view_all": "すべての通知を表示"
   },
   "subscription": {
-    "expired_notification": "サブスクリプション期限切れ - 通知機能を使用するには更新してください",
-    "notification_expired": "通知（期限切れ）",
-    "settings_locked": "サブスクリプション期限切れ - 設定へのアクセス不可"
+    "expired_notification": "サブスクリプション期限切れ - 通知機能を使用するにはサブスクリプションを更新してください",
+    "notification_expired": "通知（サブスクリプション期限切れ）",
+    "settings_locked": "サブスクリプション期限切れによりロック"
   },
   "profile": {
-    "description": "個人情報とアカウント管理"
+    "description": "プロフィール設定の管理"
   },
   "common": {
     "loading": "読み込み中..."
-  }
+  },
+  "dashboard": "ダッシュボード",
+  "network": "ネットワーク",
+  "pipeline": "営業",
+  "clients": "顧客",
+  "calendar": "カレンダー"
 }

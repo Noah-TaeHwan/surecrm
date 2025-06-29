@@ -2,6 +2,7 @@ import * as Sentry from '@sentry/react-router';
 import { startTransition, StrictMode } from 'react';
 import { hydrateRoot } from 'react-dom/client';
 import { HydratedRouter } from 'react-router/dom';
+import '~/lib/i18n';
 
 // 🔧 환경 감지 함수
 function isProductionEnvironment(): boolean {
@@ -103,7 +104,7 @@ if (isProductionEnvironment()) {
 
   console.log('🔒 Sentry 프로덕션 모드로 초기화됨');
 } else {
-  console.log('🔧 개발환경: Sentry 비활성화됨');
+  // console.log('🔧 개발환경: Sentry 비활성화됨');
 }
 
 startTransition(() => {

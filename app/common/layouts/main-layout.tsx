@@ -1,6 +1,7 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { Sidebar } from '~/common/components/navigation/sidebar';
 import { Header } from '~/common/components/navigation/header';
 import {
@@ -35,6 +36,7 @@ export function MainLayout({
   currentUser: propsCurrentUser,
   initialSubscriptionStatus,
 }: MainLayoutProps) {
+  const { t } = useTranslation('common');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { isMobile } = useViewport();
 
@@ -113,14 +115,14 @@ export function MainLayout({
                 userData.name ||
                 userData.fullName ||
                 userData.email?.split('@')[0] ||
-                '사용자',
+                t('layout.defaultUserName'),
             });
           } else {
             // 인증 실패 시 기본값 설정
             setCurrentUser({
               id: 'unknown',
               email: 'user@example.com',
-              name: '사용자',
+              name: t('layout.defaultUserName'),
             });
           }
         }
@@ -129,7 +131,7 @@ export function MainLayout({
         setCurrentUser({
           id: 'unknown',
           email: 'user@example.com',
-          name: '사용자',
+          name: t('layout.defaultUserName'),
         });
       } finally {
         setIsLoadingUser(false);

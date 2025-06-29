@@ -1,9 +1,17 @@
+/* eslint-env node */
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 import { createReadableStreamFromReadable } from '@react-router/node';
-import { ServerRouter, type HandleErrorFunction } from 'react-router';
+import {
+  ServerRouter,
+  type HandleErrorFunction,
+  type EntryContext,
+} from 'react-router';
 import { renderToPipeableStream } from 'react-dom/server';
 import * as Sentry from '@sentry/react-router';
 import { checkCriticalEnvs } from './lib/core/safe-env';
 import { PassThrough } from 'stream';
+import './lib/i18n';
 
 export const streamTimeout = 5_000;
 
@@ -14,12 +22,12 @@ checkCriticalEnvs();
 // 🔧 프로덕션 환경 감지 (서버사이드)
 function isProductionEnvironment(): boolean {
   // Vercel 환경변수 기반 판단
-  if (process.env.VERCEL_ENV === 'production') {
+  if (process?.env?.VERCEL_ENV === 'production') {
     return true;
   }
 
   // NODE_ENV 기반 판단
-  if (process.env.NODE_ENV === 'production') {
+  if (process?.env?.NODE_ENV === 'production') {
     return true;
   }
 
@@ -27,7 +35,12 @@ function isProductionEnvironment(): boolean {
 }
 
 // React 19 호환성을 위한 기본 핸들러 사용
-let handleRequest: any;
+let handleRequest: (
+  request: Request,
+  responseStatusCode: number,
+  responseHeaders: Headers,
+  routerContext: EntryContext
+) => Promise<Response>;
 
 // 🔒 프로덕션에서만 Sentry 핸들러 사용
 if (isProductionEnvironment()) {
@@ -37,7 +50,7 @@ if (isProductionEnvironment()) {
       ServerRouter,
       renderToPipeableStream,
       createReadableStreamFromReadable,
-    });
+    }) as typeof handleRequest;
     console.log('🔒 Sentry 서버 핸들러 활성화됨 (프로덕션)');
   } catch (error) {
     console.warn('⚠️ Sentry 핸들러 생성 실패, 기본 핸들러 사용:', error);
@@ -54,8 +67,8 @@ function createFallbackHandler() {
     request: Request,
     responseStatusCode: number,
     responseHeaders: Headers,
-    routerContext: any
-  ) {
+    routerContext: EntryContext
+  ): Promise<Response> {
     return new Promise((resolve, reject) => {
       const body = new PassThrough();
 

@@ -16,7 +16,12 @@
     "profile_menu": "프로필 메뉴",
     "user": "사용자",
     "default_initial": "사",
-    "logging_out": "로그아웃 중..."
+    "logging_out": "로그아웃 중...",
+    "theme": {
+      "light": "라이트 모드",
+      "dark": "다크 모드",
+      "system": "시스템 설정"
+    }
   },
   "sidebar": {
     "main": {
@@ -129,21 +134,26 @@
     "days_ago": "{{count}}일 전"
   },
   "notifications": {
-    "mark_all_read": "모두 읽음",
+    "mark_all_read": "모두 읽음으로 표시",
     "unread": "읽지 않음",
     "no_unread": "읽지 않은 알림이 없습니다",
-    "empty_message": "새로운 알림이 도착하면 여기에 표시됩니다",
+    "empty_message": "새 알림이 오면 여기에 표시됩니다",
     "view_all": "모든 알림 보기"
   },
   "subscription": {
     "expired_notification": "구독 만료 - 알림 기능을 사용하려면 구독을 갱신하세요",
     "notification_expired": "알림 (구독 만료)",
-    "settings_locked": "구독 만료 - 설정 접근 불가"
+    "settings_locked": "구독 만료로 잠김"
   },
   "profile": {
-    "description": "개인정보 및 계정 관리"
+    "description": "프로필 설정 관리"
   },
   "common": {
     "loading": "로딩 중..."
-  }
+  },
+  "dashboard": "대시보드",
+  "network": "네트워크",
+  "pipeline": "영업",
+  "clients": "고객",
+  "calendar": "일정"
 }

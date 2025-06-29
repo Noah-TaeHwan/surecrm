@@ -46,9 +46,9 @@ export function SubscriptionProvider({
     setIsLoading(true);
 
     try {
-      console.log('🔍 SubscriptionContext: 구독 상태 확인 시작', {
-        userId: currentUser.id,
-      });
+      // console.log('🔍 SubscriptionContext: 구독 상태 확인 시작', {
+      //   userId: currentUser.id,
+      // });
 
       const response = await fetch('/api/auth/subscription-status', {
         credentials: 'include',
@@ -61,7 +61,7 @@ export function SubscriptionProvider({
         const contentType = response.headers.get('content-type');
         if (contentType && contentType.includes('application/json')) {
           const statusData = await response.json();
-          console.log('✅ SubscriptionContext: 구독 상태 데이터', statusData);
+          // console.log('✅ SubscriptionContext: 구독 상태 데이터', statusData);
 
           const newStatus = {
             needsPayment: statusData.needsPayment || false,

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Dialog,
   DialogContent,
@@ -43,10 +44,10 @@ import * as z from 'zod';
 
 const goalSchema = z.object({
   goalType: z.enum(['revenue', 'clients', 'referrals']),
-  targetValue: z.string().min(1, '목표값을 입력해주세요'),
+  targetValue: z.string().min(1, 'targetValueRequired'),
   title: z.string().optional(),
-  targetYear: z.string().min(1, '목표 연도를 선택해주세요'),
-  targetMonth: z.string().min(1, '목표 월을 선택해주세요'),
+  targetYear: z.string().min(1, 'targetYearRequired'),
+  targetMonth: z.string().min(1, 'targetMonthRequired'),
 });
 
 type GoalFormData = z.infer<typeof goalSchema>;
@@ -87,6 +88,7 @@ export function GoalSettingModal({
   isOpen: externalIsOpen,
   onOpenChange: externalOnOpenChange,
 }: GoalSettingModalProps) {
+  const { t } = useTranslation('dashboard');
   const [internalIsOpen, setInternalIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
@@ -122,25 +124,17 @@ export function GoalSettingModal({
   const onSubmit = async (data: GoalFormData) => {
     setIsLoading(true);
     try {
-      // 🔧 수정: 제목이 비어있을 때 자동으로 한국어 제목 생성
+      // 🔧 수정: 제목이 비어있을 때 자동으로 번역된 제목 생성
       let autoTitle = data.title;
       if (!autoTitle || autoTitle.trim() === '') {
         const year = data.targetYear;
         const month = data.targetMonth;
 
-        switch (data.goalType) {
-          case 'referrals':
-            autoTitle = `소개 목표 (${year}년 ${month}월)`;
-            break;
-          case 'clients':
-            autoTitle = `신규 고객 목표 (${year}년 ${month}월)`;
-            break;
-          case 'revenue':
-            autoTitle = `수수료 목표 (${year}년 ${month}월)`;
-            break;
-          default:
-            autoTitle = `목표 (${year}년 ${month}월)`;
-        }
+        autoTitle = t(`goalModal.autoTitle.${data.goalType}`, {
+          year,
+          month,
+          defaultValue: t('goalModal.autoTitle.default', { year, month }),
+        });
       }
 
       await onSaveGoal({
@@ -192,29 +186,11 @@ export function GoalSettingModal({
   };
 
   const getGoalTypeLabel = (type: string) => {
-    switch (type) {
-      case 'revenue':
-        return '수수료';
-      case 'clients':
-        return '고객 수';
-      case 'referrals':
-        return '소개 건수';
-      default:
-        return type;
-    }
+    return t(`myGoals.goalTypes.${type}`, { defaultValue: type });
   };
 
   const getGoalTypeUnit = (type: string) => {
-    switch (type) {
-      case 'revenue':
-        return '만원';
-      case 'clients':
-        return '명';
-      case 'referrals':
-        return '건';
-      default:
-        return '';
-    }
+    return t(`myGoals.units.${type}`, { defaultValue: '' });
   };
 
   const getProgressColor = (progress: number) => {
@@ -255,13 +231,15 @@ export function GoalSettingModal({
           <DialogTitle className="flex items-center gap-2 text-sm sm:text-lg">
             <TargetIcon className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
             <span className="truncate">
-              {editingGoal ? '목표 수정' : '목표 설정'}
+              {editingGoal
+                ? t('goalModal.editGoalTitle')
+                : t('goalModal.setGoalTitle')}
             </span>
           </DialogTitle>
           <DialogDescription className="text-xs sm:text-sm text-muted-foreground">
             {editingGoal
-              ? '설정된 목표를 수정하거나 삭제할 수 있습니다.'
-              : '특정 월의 목표를 설정하고 달성률을 확인하세요.'}
+              ? t('goalModal.editGoalDescription')
+              : t('goalModal.setGoalDescription')}
           </DialogDescription>
         </DialogHeader>
 
@@ -275,7 +253,7 @@ export function GoalSettingModal({
               {/* 🗓️ STEP 1: 목표 기간 선택 */}
               <div className="p-4 sm:p-4 bg-primary/5 border border-primary/20 rounded-lg">
                 <h4 className="text-xs sm:text-sm font-medium text-primary mb-2 sm:mb-3 flex items-center gap-2">
-                  📅 목표 기간 설정
+                  📅 {t('goalModal.periodSetting')}
                 </h4>
                 <div className="grid grid-cols-2 gap-3 sm:gap-4">
                   <FormField
@@ -284,7 +262,7 @@ export function GoalSettingModal({
                     render={({ field }) => (
                       <FormItem className="space-y-2">
                         <FormLabel className="text-xs sm:text-sm font-medium">
-                          목표 연도
+                          {t('goalModal.targetYear')}
                         </FormLabel>
                         <Select
                           onValueChange={field.onChange}
@@ -292,7 +270,9 @@ export function GoalSettingModal({
                         >
                           <FormControl>
                             <SelectTrigger className="h-9 sm:h-10 text-xs sm:text-sm">
-                              <SelectValue placeholder="연도 선택" />
+                              <SelectValue
+                                placeholder={t('goalModal.selectYear')}
+                              />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -304,7 +284,8 @@ export function GoalSettingModal({
                                   value={year.toString()}
                                   className="text-xs sm:text-sm py-2"
                                 >
-                                  {year}년
+                                  {year}
+                                  {t('goalModal.yearSuffix')}
                                 </SelectItem>
                               );
                             })}
@@ -321,7 +302,7 @@ export function GoalSettingModal({
                     render={({ field }) => (
                       <FormItem className="space-y-2">
                         <FormLabel className="text-xs sm:text-sm font-medium">
-                          목표 월
+                          {t('goalModal.targetMonth')}
                         </FormLabel>
                         <Select
                           onValueChange={field.onChange}
@@ -329,7 +310,9 @@ export function GoalSettingModal({
                         >
                           <FormControl>
                             <SelectTrigger className="h-9 sm:h-10 text-xs sm:text-sm">
-                              <SelectValue placeholder="월 선택" />
+                              <SelectValue
+                                placeholder={t('goalModal.selectMonth')}
+                              />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -341,7 +324,8 @@ export function GoalSettingModal({
                                   value={month.toString()}
                                   className="text-xs sm:text-sm py-2"
                                 >
-                                  {month}월
+                                  {month}
+                                  {t('goalModal.monthSuffix')}
                                 </SelectItem>
                               );
                             })}
@@ -353,8 +337,7 @@ export function GoalSettingModal({
                   />
                 </div>
                 <p className="text-xs text-muted-foreground mt-2">
-                  💡 선택한 기간의 목표를 설정하고 실시간 달성률을 확인할 수
-                  있습니다
+                  💡 {t('goalModal.periodTip')}
                 </p>
               </div>
 
@@ -362,7 +345,7 @@ export function GoalSettingModal({
               {currentGoals.length > 0 && !editingGoal && (
                 <div className="space-y-3 pb-3 border-b border-border/30">
                   <h4 className="text-sm sm:text-base font-medium text-foreground flex items-center gap-2">
-                    🎯 현재 설정된 목표
+                    🎯 {t('goalModal.currentGoals')}
                   </h4>
                   <div className="space-y-2">
                     {filteredGoals.map(goal => (
@@ -377,8 +360,12 @@ export function GoalSettingModal({
                                 {goal.title || getGoalTypeLabel(goal.goalType)}
                               </span>
                               <div className="text-xs text-muted-foreground mt-1">
-                                📅 {new Date(goal.startDate).getFullYear()}년{' '}
-                                {new Date(goal.startDate).getMonth() + 1}월 목표
+                                📅{' '}
+                                {t('goalModal.monthlyGoal', {
+                                  year: new Date(goal.startDate).getFullYear(),
+                                  month:
+                                    new Date(goal.startDate).getMonth() + 1,
+                                })}
                               </div>
                             </div>
                             <div className="flex items-center gap-2 flex-shrink-0">
@@ -438,7 +425,10 @@ export function GoalSettingModal({
               {/* 🚀 STEP 3: 새 목표 설정 */}
               <div className="space-y-3 sm:space-y-4">
                 <h4 className="text-sm sm:text-base font-medium text-foreground flex items-center gap-2">
-                  🚀 {editingGoal ? '목표 수정' : '새 목표 설정'}
+                  🚀{' '}
+                  {editingGoal
+                    ? t('goalModal.editGoalSetting')
+                    : t('goalModal.newGoalSetting')}
                 </h4>
 
                 <FormField
@@ -447,7 +437,7 @@ export function GoalSettingModal({
                   render={({ field }) => (
                     <FormItem className="space-y-2">
                       <FormLabel className="text-xs sm:text-sm font-medium">
-                        목표 유형
+                        {t('goalModal.goalType')}
                       </FormLabel>
                       <Select
                         onValueChange={field.onChange}
@@ -455,7 +445,9 @@ export function GoalSettingModal({
                       >
                         <FormControl>
                           <SelectTrigger className="h-9 sm:h-10 text-xs sm:text-sm">
-                            <SelectValue placeholder="목표 유형을 선택하세요" />
+                            <SelectValue
+                              placeholder={t('goalModal.selectGoalType')}
+                            />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -463,19 +455,19 @@ export function GoalSettingModal({
                             value="revenue"
                             className="text-xs sm:text-sm py-2"
                           >
-                            💰 수수료 목표
+                            💰 {t('goalModal.goalTypes.revenue')}
                           </SelectItem>
                           <SelectItem
                             value="clients"
                             className="text-xs sm:text-sm py-2"
                           >
-                            👥 신규 고객 목표
+                            👥 {t('goalModal.goalTypes.clients')}
                           </SelectItem>
                           <SelectItem
                             value="referrals"
                             className="text-xs sm:text-sm py-2"
                           >
-                            🤝 소개 목표
+                            🤝 {t('goalModal.goalTypes.referrals')}
                           </SelectItem>
                         </SelectContent>
                       </Select>
@@ -490,19 +482,20 @@ export function GoalSettingModal({
                   render={({ field }) => (
                     <FormItem className="space-y-2">
                       <FormLabel className="text-xs sm:text-sm font-medium">
-                        목표값 ({getGoalTypeUnit(form.watch('goalType'))})
+                        {t('goalModal.targetValue')} (
+                        {getGoalTypeUnit(form.watch('goalType'))})
                       </FormLabel>
                       <FormControl>
                         <Input
                           type="number"
-                          placeholder="목표값을 입력하세요"
+                          placeholder={t('goalModal.targetValuePlaceholder')}
                           className="h-9 sm:h-10 text-xs sm:text-sm"
                           {...field}
                         />
                       </FormControl>
                       <FormDescription className="text-xs">
                         {form.watch('goalType') === 'revenue' &&
-                          '만원 단위로 입력하세요 (예: 5000 = 5천만원)'}
+                          t('goalModal.revenueDescription')}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -515,17 +508,17 @@ export function GoalSettingModal({
                   render={({ field }) => (
                     <FormItem className="space-y-2">
                       <FormLabel className="text-xs sm:text-sm font-medium">
-                        목표 제목 (선택사항)
+                        {t('goalModal.goalTitle')}
                       </FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="목표에 대한 설명을 입력하세요"
+                          placeholder={t('goalModal.goalTitlePlaceholder')}
                           className="h-9 sm:h-10 text-xs sm:text-sm"
                           {...field}
                         />
                       </FormControl>
                       <FormDescription className="text-xs">
-                        비워두면 자동으로 생성됩니다
+                        {t('goalModal.autoTitleNote')}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -545,7 +538,7 @@ export function GoalSettingModal({
               onClick={() => setIsOpen(false)}
               className="h-10 px-4 w-full sm:w-auto text-xs sm:text-sm"
             >
-              닫기
+              {t('goalModal.close')}
             </Button>
             {editingGoal && (
               <Button
@@ -555,7 +548,7 @@ export function GoalSettingModal({
                 className="gap-2 h-10 px-4 w-full sm:w-auto text-xs sm:text-sm"
               >
                 <Cross2Icon className="h-3 w-3" />
-                취소
+                {t('goalModal.cancel')}
               </Button>
             )}
             <Button
@@ -566,10 +559,10 @@ export function GoalSettingModal({
             >
               <CheckIcon className="h-3 w-3" />
               {isLoading
-                ? '저장 중...'
+                ? t('goalModal.saving')
                 : editingGoal
-                  ? '목표 수정'
-                  : '목표 설정'}
+                  ? t('goalModal.edit')
+                  : t('goalModal.set')}
             </Button>
           </div>
         </DialogFooter>

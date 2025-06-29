@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Badge } from '~/common/components/ui/badge';
 import { BlurFade } from '~/common/components/magicui/blur-fade';
 import { DotPattern } from '~/common/components/magicui/dot-pattern';
@@ -41,6 +42,8 @@ export function TestimonialsSection({
   stats,
   testimonials,
 }: TestimonialsSectionProps) {
+  const { t } = useTranslation('common');
+
   return (
     <section
       id="testimonials"
@@ -60,13 +63,15 @@ export function TestimonialsSection({
             variant="outline"
             className="mb-3 px-4 py-1.5 text-sm font-medium"
           >
-            신뢰할 수 있는 솔루션
+            {t('testimonials.badge')}
           </Badge>
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            <AnimatedGradientText>사용자 후기</AnimatedGradientText>
+            <AnimatedGradientText>
+              {t('testimonials.title')}
+            </AnimatedGradientText>
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto mb-8">
-            SureCRM을 사용하는 보험설계사들의 실제 경험을 들어보세요.
+            {t('testimonials.description')}
           </p>
         </div>
 
@@ -77,7 +82,9 @@ export function TestimonialsSection({
               <div className="text-3xl font-bold text-primary mb-2">
                 {stats.totalUsers.toLocaleString()}+
               </div>
-              <div className="text-sm text-muted-foreground">활성 사용자</div>
+              <div className="text-sm text-muted-foreground">
+                {t('testimonials.stats.activeUsers')}
+              </div>
             </div>
           </BlurFade>
           <BlurFade delay={0.2} inView>
@@ -85,7 +92,9 @@ export function TestimonialsSection({
               <div className="text-3xl font-bold text-primary mb-2">
                 {stats.totalTeams.toLocaleString()}+
               </div>
-              <div className="text-sm text-muted-foreground">활성 팀</div>
+              <div className="text-sm text-muted-foreground">
+                {t('testimonials.stats.activeTeams')}
+              </div>
             </div>
           </BlurFade>
           <BlurFade delay={0.3} inView>
@@ -94,7 +103,7 @@ export function TestimonialsSection({
                 {stats.totalClients.toLocaleString()}+
               </div>
               <div className="text-sm text-muted-foreground">
-                관리 중인 고객
+                {t('testimonials.stats.managedClients')}
               </div>
             </div>
           </BlurFade>
@@ -104,7 +113,7 @@ export function TestimonialsSection({
                 {stats.avgEfficiencyIncrease}%
               </div>
               <div className="text-sm text-muted-foreground">
-                평균 효율 증대
+                {t('testimonials.stats.avgEfficiencyIncrease')}
               </div>
             </div>
           </BlurFade>

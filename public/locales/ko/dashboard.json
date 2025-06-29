@@ -22,12 +22,6 @@
     "todaysMeetings": "오늘의 미팅",
     "notifications": "알림"
   },
-  "quickActions": {
-    "addClient": "고객 추가",
-    "scheduleMeeting": "미팅 일정 등록",
-    "createTask": "작업 생성",
-    "viewReports": "보고서 보기"
-  },
   "goals": {
     "monthlyGoals": "월별 목표",
     "quarterlyGoals": "분기별 목표",
@@ -76,8 +70,234 @@
     "contracted": "계약체결",
     "completed": "완료"
   },
+  "welcome": {
+    "defaultGreeting": "안녕하세요",
+    "morningGreeting": "좋은 아침입니다",
+    "afternoonGreeting": "안녕하세요",
+    "eveningGreeting": "좋은 저녁입니다",
+    "userSuffix": "님",
+    "loading": "로딩 중...",
+    "totalClientsLabel": "총 고객 {{count}}명",
+    "referralsLabel": "소개 {{count}}건",
+    "monthlyNewClientsLabel": "이번 달 신규 {{count}}명"
+  },
+  "kpi": {
+    "error": "오류",
+    "new": "신규",
+    "majorIncrease": "대폭증가",
+    "majorDecrease": "대폭감소"
+  },
+  "recentClients": {
+    "title": "최근 고객 현황",
+    "viewAll": "전체 보기",
+    "totalClients": "총 고객",
+    "recentActivity": "최근 활동",
+    "expectedValue": "예상 가치"
+  },
   "referral": {
     "client": "소개 고객",
     "recent_activity": "최근 {{count}}건의 소개를 진행했습니다. 평균 전환율 {{rate}}%를 기록하고 있습니다."
+  },
+  "myGoals": {
+    "title": "내 목표",
+    "setGoal": "목표 설정",
+    "currentMonth": "이번 달 목표",
+    "goalFor": "{{year}}년 {{month}}월 목표",
+    "inProgress": "진행 중",
+    "completed": "완료",
+    "target": "목표:",
+    "progress": "진행률",
+    "goalExceeded": "목표 초과 달성! (+{{percent}}%)",
+    "goalAchieved": "목표 달성 완료!",
+    "goalStatus": "목표 현황",
+    "thisMonthStatus": "이번 달",
+    "monthlyStatus": "{{year}}년 {{month}}월",
+    "achievedGoals": "달성 완료",
+    "inProgressGoals": "진행 중",
+    "unachievedGoals": "미달성",
+    "goalsCount": "{{count}}개",
+    "setGoalPrompt": "목표를 설정하세요",
+    "noGoalsSet": "설정된 목표가 없습니다",
+    "setGoalDescription": "월별 또는 연별 목표를 설정하여 성과를 추적해보세요",
+    "noGoalsForMonth": "{{year}}년 {{month}}월에는 설정된 목표가 없습니다",
+    "setFirstGoal": "첫 번째 목표 설정",
+    "previousMonth": "이전 달",
+    "nextMonth": "다음 달",
+    "backToCurrentMonth": "현재 월로 돌아가기",
+    "goalTypes": {
+      "revenue": "수수료 목표",
+      "clients": "신규 고객",
+      "referrals": "소개 건수",
+      "conversion_rate": "전환율",
+      "default": "목표"
+    },
+    "units": {
+      "revenue": "만원",
+      "clients": "명",
+      "referrals": "건",
+      "conversion_rate": "%"
+    }
+  },
+  "goalModal": {
+    "setGoalTitle": "목표 설정",
+    "editGoalTitle": "목표 수정",
+    "setGoalDescription": "목표를 설정하여 성과를 추적하세요",
+    "editGoalDescription": "설정된 목표를 수정하거나 삭제할 수 있습니다.",
+    "periodSetting": "기간 설정",
+    "periodTip": "월별 또는 연별 목표를 선택하세요",
+    "targetYear": "목표 연도",
+    "targetMonth": "목표 월",
+    "selectYear": "연도 선택",
+    "selectMonth": "월 선택",
+    "currentGoals": "현재 설정된 목표",
+    "newGoalSetting": "새 목표 설정",
+    "editGoalSetting": "목표 수정",
+    "goalType": "목표 타입",
+    "selectGoalType": "목표 타입을 선택하세요",
+    "goalTypes": {
+      "revenue": "수수료 목표",
+      "clients": "신규 고객 목표",
+      "referrals": "소개 목표"
+    },
+    "targetValue": "목표값",
+    "targetValuePlaceholder": "목표값을 입력하세요",
+    "revenueDescription": "만원 단위로 입력하세요 (예: 5000 = 5천만원)",
+    "goalTitle": "목표 제목 (선택사항)",
+    "goalTitlePlaceholder": "목표에 대한 설명을 입력하세요",
+    "autoTitleNote": "비워두면 자동으로 생성됩니다",
+    "close": "닫기",
+    "cancel": "취소",
+    "saving": "저장 중...",
+    "edit": "목표 수정",
+    "set": "목표 설정",
+    "monthlyGoal": "{{year}}년 {{month}}월 목표",
+    "yearSuffix": "년",
+    "monthSuffix": "월",
+    "autoTitle": {
+      "revenue": "{{year}}년 {{month}}월 수수료 목표",
+      "clients": "{{year}}년 {{month}}월 신규 고객 목표",
+      "referrals": "{{year}}년 {{month}}월 소개 목표",
+      "default": "{{year}}년 {{month}}월 목표"
+    }
+  },
+  "quickActions": {
+    "moreActions": "추가 액션",
+    "refresh": "새로고침",
+    "addClient": "고객 추가",
+    "schedule": "일정 관리",
+    "filter": "필터",
+    "export": "내보내기",
+    "analytics": "분석",
+    "settings": "설정",
+    "tooltips": {
+      "refresh": "대시보드 데이터 새로고침",
+      "addClient": "새 고객 추가",
+      "schedule": "일정 관리",
+      "filter": "데이터 필터링",
+      "export": "데이터 내보내기",
+      "analytics": "상세 분석 보기",
+      "settings": "대시보드 설정"
+    }
+  },
+  "performanceKPI": {
+    "totalClients": "총 고객 수",
+    "activeContracts": "활성 계약",
+    "monthlyPremium": "월 보험료 합계",
+    "totalCommission": "총 수수료",
+    "descriptions": {
+      "totalClients": "등록된 전체 고객 수",
+      "activeContracts": "현재 유지 중인 계약 수",
+      "monthlyPremium": "월간 보험료 총액",
+      "totalCommission": "예상 총 수수료"
+    },
+    "tooltips": {
+      "totalClients": "시스템에 등록된 모든 고객의 수입니다.\n신규 고객과 기존 고객을 모두 포함합니다.",
+      "activeContracts": "현재 효력이 있는 보험 계약의 수입니다.\n해지되거나 만료된 계약은 제외됩니다.",
+      "monthlyPremium": "활성 계약들로부터 발생하는 월간 보험료의 총합입니다.",
+      "expectedCommission": "계약에 따른 예상 수수료 총액입니다.\n평균 건당 수수료: {{average}}만원"
+    },
+    "changeLabels": {
+      "new": "새로운",
+      "majorIncrease": "대폭 증가",
+      "majorDecrease": "대폭 감소"
+    },
+    "extraLabels": {
+      "averageClientValue": "평균 고객 가치"
+    }
+  },
+  "pipelineOverview": {
+    "title": "영업 파이프라인",
+    "viewDetails": "자세히 보기",
+    "stageStatus": "단계별 현황",
+    "units": {
+      "deals": "건",
+      "currency": "원"
+    },
+    "summary": {
+      "totalDeals": "전체 거래",
+      "expectedRevenue": "예상 매출",
+      "averagePerDeal": "평균 거래액"
+    },
+    "emptyState": {
+      "noPipeline": "아직 파이프라인에 고객이 없습니다",
+      "managePipeline": "파이프라인 관리"
+    }
+  },
+  "referralInsights": {
+    "networkStatus": "네트워크 현황",
+    "viewDetails": "자세히 보기",
+    "stats": {
+      "totalConnections": "총 연결",
+      "maxDepth": "최대 깊이",
+      "activeReferrers": "활성 소개자",
+      "monthlyGrowth": "월간 성장"
+    },
+    "tooltips": {
+      "totalConnections": "소개를 통해 연결된 고객의 총 수입니다.\n누군가가 소개해준 고객들의 전체 수를 나타냅니다.",
+      "maxDepth": "네트워크의 연결 단계 깊이입니다.\n활성 소개자가 많을수록 네트워크가 더 깊게 확산됩니다.",
+      "activeReferrers": "최근 3개월 내에 고객을 소개해준 사람의 수입니다.\n현재 활발하게 소개 활동을 하고 있는 소개자들입니다.",
+      "monthlyGrowth": "이번 달 신규 소개 고객의 비율입니다.\n전체 소개 고객 대비 최근 한 달간 늘어난 비율을 보여줍니다."
+    },
+    "insights": {
+      "title": "네트워크 인사이트",
+      "growthMessage": "이번 달 네트워크가 {{growth}}% 성장했습니다.",
+      "topPerformerMessage": " 최고 성과자는 {{name}}님입니다."
+    }
+  },
+  "pipelineStages": {
+    "첫 상담": "첫 상담",
+    "니즈 분석": "니즈 분석",
+    "상품 설명": "상품 설명",
+    "계약 검토": "계약 검토",
+    "계약 완료": "계약 완료",
+    "상담 중": "상담 중",
+    "제안": "제안",
+    "협상": "협상",
+    "Initial Consultation": "첫 상담",
+    "Needs Analysis": "니즈 분석",
+    "Product Explanation": "상품 설명",
+    "Contract Review": "계약 검토",
+    "Contract Completed": "계약 완료"
+  },
+  "stages": {
+    "prospect": "잠재 고객",
+    "contacted": "연락 완료",
+    "proposal": "제안서 전달",
+    "contracted": "계약 완료",
+    "completed": "완료",
+    "consultation": "상담 중",
+    "negotiation": "협상 중",
+    "pending": "보류",
+    "follow_up": "추가 상담",
+    "상담 중": "상담 중",
+    "제안": "제안",
+    "협상": "협상",
+    "보류": "보류",
+    "완료": "완료"
+  },
+  "dateFormat": {
+    "year": "{{year}}년",
+    "month": "{{month}}월",
+    "yearMonth": "{{year}}년 {{month}}월"
   }
 }

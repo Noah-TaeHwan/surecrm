@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '~/lib/utils';
 import { Button } from '~/common/components/ui/button';
 import {
@@ -67,6 +68,7 @@ export function QuickActionBar({
   maxPrimaryActions = 3,
   enableNotifications = true,
 }: QuickActionBarProps) {
+  const { t } = useTranslation('dashboard');
   const [isMobile, setIsMobile] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -224,7 +226,9 @@ export function QuickActionBar({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuLabel>추가 액션</DropdownMenuLabel>
+              <DropdownMenuLabel>
+                {t('quickActions.moreActions')}
+              </DropdownMenuLabel>
               <DropdownMenuSeparator />
               {overflowActions.map(action => (
                 <DropdownMenuItem
@@ -359,82 +363,87 @@ function DesktopActionButton({ action, onAction }: DesktopActionButtonProps) {
 /**
  * 기본 대시보드 액션들
  */
-export const defaultDashboardActions: QuickAction[] = [
-  {
-    id: 'refresh',
-    label: '새로고침',
-    icon: RefreshCwIcon,
-    onClick: () => window.location.reload(),
-    primary: true,
-    tooltip: '대시보드 데이터 새로고침',
-    category: 'utility',
-  },
-  {
-    id: 'add-client',
-    label: '고객 추가',
-    icon: UserPlusIcon,
-    onClick: () => {
-      // 고객 추가 페이지로 이동
-      window.location.href = '/clients/new';
+export function createDefaultDashboardActions(t: any): QuickAction[] {
+  return [
+    {
+      id: 'refresh',
+      label: t('quickActions.refresh'),
+      icon: RefreshCwIcon,
+      onClick: () => window.location.reload(),
+      primary: true,
+      tooltip: t('quickActions.tooltips.refresh'),
+      category: 'utility',
     },
-    primary: true,
-    tooltip: '새 고객 추가',
-    category: 'primary',
-  },
-  {
-    id: 'schedule',
-    label: '일정 관리',
-    icon: CalendarIcon,
-    onClick: () => {
-      // 일정 관리 페이지로 이동
-      window.location.href = '/schedule';
+    {
+      id: 'add-client',
+      label: t('quickActions.addClient'),
+      icon: UserPlusIcon,
+      onClick: () => {
+        // 고객 추가 페이지로 이동
+        window.location.href = '/clients/new';
+      },
+      primary: true,
+      tooltip: t('quickActions.tooltips.addClient'),
+      category: 'primary',
     },
-    primary: true,
-    tooltip: '일정 관리',
-    category: 'primary',
-  },
-  {
-    id: 'filter',
-    label: '필터',
-    icon: FilterIcon,
-    onClick: () => {
-      // 필터 모달 열기
-      console.log('필터 모달 열기');
+    {
+      id: 'schedule',
+      label: t('quickActions.schedule'),
+      icon: CalendarIcon,
+      onClick: () => {
+        // 일정 관리 페이지로 이동
+        window.location.href = '/schedule';
+      },
+      primary: true,
+      tooltip: t('quickActions.tooltips.schedule'),
+      category: 'primary',
     },
-    tooltip: '데이터 필터링',
-    category: 'utility',
-  },
-  {
-    id: 'export',
-    label: '내보내기',
-    icon: DownloadIcon,
-    onClick: () => {
-      // 데이터 내보내기
-      console.log('데이터 내보내기');
+    {
+      id: 'filter',
+      label: t('quickActions.filter'),
+      icon: FilterIcon,
+      onClick: () => {
+        // 필터 모달 열기
+        console.log('필터 모달 열기');
+      },
+      tooltip: t('quickActions.tooltips.filter'),
+      category: 'utility',
     },
-    tooltip: '데이터 내보내기',
-    category: 'utility',
-  },
-  {
-    id: 'analytics',
-    label: '분석',
-    icon: TrendingUpIcon,
-    onClick: () => {
-      // 분석 페이지로 이동
-      window.location.href = '/analytics';
+    {
+      id: 'export',
+      label: t('quickActions.export'),
+      icon: DownloadIcon,
+      onClick: () => {
+        // 데이터 내보내기
+        console.log('데이터 내보내기');
+      },
+      tooltip: t('quickActions.tooltips.export'),
+      category: 'utility',
     },
-    tooltip: '상세 분석 보기',
-    category: 'secondary',
-  },
-  {
-    id: 'settings',
-    label: '설정',
-    icon: SettingsIcon,
-    onClick: () => {
-      // 설정 페이지로 이동
-      window.location.href = '/settings';
+    {
+      id: 'analytics',
+      label: t('quickActions.analytics'),
+      icon: TrendingUpIcon,
+      onClick: () => {
+        // 분석 페이지로 이동
+        window.location.href = '/analytics';
+      },
+      tooltip: t('quickActions.tooltips.analytics'),
+      category: 'secondary',
     },
-    tooltip: '대시보드 설정',
-    category: 'utility',
-  },
-];
+    {
+      id: 'settings',
+      label: t('quickActions.settings'),
+      icon: SettingsIcon,
+      onClick: () => {
+        // 설정 페이지로 이동
+        window.location.href = '/settings';
+      },
+      tooltip: t('quickActions.tooltips.settings'),
+      category: 'utility',
+    },
+  ];
+}
+
+// 기존 호환성을 위한 export (deprecated)
+export const defaultDashboardActions: QuickAction[] = [];

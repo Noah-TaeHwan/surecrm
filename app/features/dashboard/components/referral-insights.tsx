@@ -23,6 +23,7 @@ import {
   BarChartIcon,
   QuestionMarkCircledIcon,
 } from '@radix-ui/react-icons';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 
 interface TopReferrer {
@@ -53,6 +54,8 @@ export function ReferralInsights({
   topReferrers,
   networkStats,
 }: ReferralInsightsProps) {
+  const { t } = useTranslation('dashboard');
+
   const getRankIcon = (rank: number) => {
     switch (rank) {
       case 1:
@@ -209,7 +212,7 @@ export function ReferralInsights({
               <div className="p-1.5 bg-primary/10 rounded-lg">
                 <Link2Icon className="h-4 w-4 text-primary" />
               </div>
-              네트워크 현황
+              {t('referralInsights.networkStatus')}
             </CardTitle>
             <Link to="/network">
               <Button
@@ -217,7 +220,7 @@ export function ReferralInsights({
                 size="sm"
                 className="text-xs text-muted-foreground hover:text-primary"
               >
-                자세히 보기
+                {t('referralInsights.viewDetails')}
                 <ChevronRightIcon className="h-3 w-3 ml-1" />
               </Button>
             </Link>
@@ -233,17 +236,15 @@ export function ReferralInsights({
                   {networkStats.totalConnections}
                 </div>
                 <div className="flex items-center justify-center gap-1">
-                  <span className="text-xs text-muted-foreground">총 연결</span>
+                  <span className="text-xs text-muted-foreground">
+                    {t('referralInsights.stats.totalConnections')}
+                  </span>
                   <Tooltip>
                     <TooltipTrigger>
                       <QuestionMarkCircledIcon className="h-3 w-3 text-muted-foreground hover:text-foreground transition-colors" />
                     </TooltipTrigger>
                     <TooltipContent side="top" className="max-w-xs">
-                      <p>
-                        소개를 통해 연결된 고객의 총 수입니다.
-                        <br />
-                        누군가가 소개해준 고객들의 전체 수를 나타냅니다.
-                      </p>
+                      <p>{t('referralInsights.tooltips.totalConnections')}</p>
                     </TooltipContent>
                   </Tooltip>
                 </div>
@@ -256,18 +257,14 @@ export function ReferralInsights({
                 </div>
                 <div className="flex items-center justify-center gap-1">
                   <span className="text-xs text-muted-foreground">
-                    최대 깊이
+                    {t('referralInsights.stats.maxDepth')}
                   </span>
                   <Tooltip>
                     <TooltipTrigger>
                       <QuestionMarkCircledIcon className="h-3 w-3 text-muted-foreground hover:text-foreground transition-colors" />
                     </TooltipTrigger>
                     <TooltipContent side="top" className="max-w-xs">
-                      <p>
-                        네트워크의 연결 단계 깊이입니다.
-                        <br />
-                        활성 소개자가 많을수록 네트워크가 더 깊게 확산됩니다.
-                      </p>
+                      <p>{t('referralInsights.tooltips.maxDepth')}</p>
                     </TooltipContent>
                   </Tooltip>
                 </div>
@@ -280,18 +277,14 @@ export function ReferralInsights({
                 </div>
                 <div className="flex items-center justify-center gap-1">
                   <span className="text-xs text-muted-foreground">
-                    활성 소개자
+                    {t('referralInsights.stats.activeReferrers')}
                   </span>
                   <Tooltip>
                     <TooltipTrigger>
                       <QuestionMarkCircledIcon className="h-3 w-3 text-muted-foreground hover:text-foreground transition-colors" />
                     </TooltipTrigger>
                     <TooltipContent side="top" className="max-w-xs">
-                      <p>
-                        최근 3개월 내에 고객을 소개해준 사람의 수입니다.
-                        <br />
-                        현재 활발하게 소개 활동을 하고 있는 소개자들입니다.
-                      </p>
+                      <p>{t('referralInsights.tooltips.activeReferrers')}</p>
                     </TooltipContent>
                   </Tooltip>
                 </div>
@@ -304,19 +297,14 @@ export function ReferralInsights({
                 </div>
                 <div className="flex items-center justify-center gap-1">
                   <span className="text-xs text-muted-foreground">
-                    월간 성장
+                    {t('referralInsights.stats.monthlyGrowth')}
                   </span>
                   <Tooltip>
                     <TooltipTrigger>
                       <QuestionMarkCircledIcon className="h-3 w-3 text-muted-foreground hover:text-foreground transition-colors" />
                     </TooltipTrigger>
                     <TooltipContent side="top" className="max-w-xs">
-                      <p>
-                        이번 달 신규 소개 고객의 비율입니다.
-                        <br />
-                        전체 소개 고객 대비 최근 한 달간 늘어난 비율을
-                        보여줍니다.
-                      </p>
+                      <p>{t('referralInsights.tooltips.monthlyGrowth')}</p>
                     </TooltipContent>
                   </Tooltip>
                 </div>
@@ -330,22 +318,17 @@ export function ReferralInsights({
               <BarChartIcon className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
               <div>
                 <p className="text-sm font-medium text-foreground mb-1">
-                  네트워크 인사이트
+                  {t('referralInsights.insights.title')}
                 </p>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  이번 달 네트워크가{' '}
-                  <span className="font-medium text-primary">
-                    {networkStats.monthlyGrowth}%
-                  </span>{' '}
-                  성장했습니다.
+                  {t('referralInsights.insights.growthMessage', {
+                    growth: networkStats.monthlyGrowth,
+                  })}
                   {topReferrers[0] && (
                     <>
-                      {' '}
-                      최고 성과자는{' '}
-                      <span className="font-medium text-primary">
-                        {topReferrers[0].name}
-                      </span>
-                      님입니다.
+                      {t('referralInsights.insights.topPerformerMessage', {
+                        name: topReferrers[0].name,
+                      })}
                     </>
                   )}
                 </p>

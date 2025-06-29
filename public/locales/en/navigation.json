@@ -16,7 +16,12 @@
     "profile_menu": "Profile menu",
     "user": "User",
     "default_initial": "U",
-    "logging_out": "Logging out..."
+    "logging_out": "Logging out...",
+    "theme": {
+      "light": "Light Mode",
+      "dark": "Dark Mode",
+      "system": "System Setting"
+    }
   },
   "sidebar": {
     "main": {
@@ -124,29 +129,34 @@
   },
   "time": {
     "just_now": "Just now",
-    "minutes_ago": "{{count}} minute ago",
+    "minutes_ago": "{{count}} minutes ago",
     "minutes_ago_plural": "{{count}} minutes ago",
-    "hours_ago": "{{count}} hour ago",
+    "hours_ago": "{{count}} hours ago",
     "hours_ago_plural": "{{count}} hours ago",
-    "days_ago": "{{count}} day ago",
+    "days_ago": "{{count}} days ago",
     "days_ago_plural": "{{count}} days ago"
   },
   "notifications": {
-    "mark_all_read": "Mark all read",
+    "mark_all_read": "Mark all as read",
     "unread": "Unread",
     "no_unread": "No unread notifications",
     "empty_message": "New notifications will appear here",
     "view_all": "View all notifications"
   },
   "subscription": {
-    "expired_notification": "Subscription expired - Please renew to use notifications",
-    "notification_expired": "Notifications (Expired)",
-    "settings_locked": "Subscription expired - Settings access denied"
+    "expired_notification": "Subscription Expired - Please renew your subscription to use notification features",
+    "notification_expired": "Notifications (Subscription Expired)",
+    "settings_locked": "Locked due to subscription expiry"
   },
   "profile": {
-    "description": "Personal information and account management"
+    "description": "Manage profile settings"
   },
   "common": {
     "loading": "Loading..."
-  }
+  },
+  "dashboard": "Dashboard",
+  "network": "Network",
+  "pipeline": "Sales",
+  "clients": "Clients",
+  "calendar": "Calendar"
 }

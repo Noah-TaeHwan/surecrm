@@ -76,6 +76,232 @@
     "contracted": "Contracted",
     "completed": "Completed"
   },
+  "welcome": {
+    "defaultGreeting": "Hello",
+    "morningGreeting": "Good morning",
+    "afternoonGreeting": "Hello",
+    "eveningGreeting": "Good evening",
+    "userSuffix": "",
+    "loading": "Loading...",
+    "totalClientsLabel": "{{count}} total clients",
+    "referralsLabel": "{{count}} referrals",
+    "monthlyNewClientsLabel": "{{count}} new this month"
+  },
+  "kpi": {
+    "error": "Error",
+    "new": "New",
+    "majorIncrease": "Major increase",
+    "majorDecrease": "Major decrease"
+  },
+  "recentClients": {
+    "title": "Recent Client Status",
+    "viewAll": "View All",
+    "totalClients": "Total Clients",
+    "recentActivity": "Recent Activity",
+    "expectedValue": "Expected Value"
+  },
+  "myGoals": {
+    "title": "My Goals",
+    "setGoal": "Set Goal",
+    "currentMonth": "This Month's Goals",
+    "goalFor": "{{year}}/{{month}} Goals",
+    "inProgress": "In Progress",
+    "completed": "Completed",
+    "target": "Target:",
+    "progress": "Progress",
+    "goalExceeded": "Goal exceeded! (+{{percent}}%)",
+    "goalAchieved": "Goal achieved!",
+    "goalStatus": "Goal Status",
+    "thisMonthStatus": "This Month",
+    "monthlyStatus": "{{year}}/{{month}}",
+    "achievedGoals": "Achieved",
+    "inProgressGoals": "In Progress",
+    "unachievedGoals": "Not Achieved",
+    "goalsCount": "{{count}} goals",
+    "setGoalPrompt": "Set your goals",
+    "noGoalsSet": "No goals set",
+    "setGoalDescription": "Set monthly or yearly goals to track your performance",
+    "noGoalsForMonth": "No goals set for {{year}}/{{month}}",
+    "setFirstGoal": "Set First Goal",
+    "previousMonth": "Previous Month",
+    "nextMonth": "Next Month",
+    "backToCurrentMonth": "Back to Current Month",
+    "goalTypes": {
+      "revenue": "Revenue Goal",
+      "clients": "New Clients",
+      "referrals": "Referrals",
+      "conversion_rate": "Conversion Rate",
+      "default": "Goal"
+    },
+    "units": {
+      "revenue": "K",
+      "clients": "",
+      "referrals": "",
+      "conversion_rate": "%"
+    }
+  },
+  "goalModal": {
+    "setGoalTitle": "Set Goal",
+    "editGoalTitle": "Edit Goal",
+    "setGoalDescription": "Set goals to track your performance",
+    "editGoalDescription": "You can edit or delete existing goals.",
+    "periodSetting": "Period Setting",
+    "periodTip": "Choose monthly or yearly goals",
+    "targetYear": "Target Year",
+    "targetMonth": "Target Month",
+    "selectYear": "Select Year",
+    "selectMonth": "Select Month",
+    "currentGoals": "Current Goals",
+    "newGoalSetting": "New Goal Setting",
+    "editGoalSetting": "Edit Goal",
+    "goalType": "Goal Type",
+    "selectGoalType": "Select goal type",
+    "goalTypes": {
+      "revenue": "Revenue Goal",
+      "clients": "New Client Goal",
+      "referrals": "Referral Goal"
+    },
+    "targetValue": "Target Value",
+    "targetValuePlaceholder": "Enter target value",
+    "revenueDescription": "Enter in 10K units (e.g., 5000 = 50M)",
+    "goalTitle": "Goal Title (Optional)",
+    "goalTitlePlaceholder": "Enter goal description",
+    "autoTitleNote": "Will be auto-generated if left empty",
+    "close": "Close",
+    "cancel": "Cancel",
+    "saving": "Saving...",
+    "edit": "Edit Goal",
+    "set": "Set Goal",
+    "monthlyGoal": "{{month}}/{{year}} Goal",
+    "yearSuffix": "",
+    "monthSuffix": "",
+    "autoTitle": {
+      "revenue": "{{month}}/{{year}} Revenue Goal",
+      "clients": "{{month}}/{{year}} New Client Goal",
+      "referrals": "{{month}}/{{year}} Referral Goal",
+      "default": "{{month}}/{{year}} Goal"
+    }
+  },
+  "quickActions": {
+    "moreActions": "More Actions",
+    "refresh": "Refresh",
+    "addClient": "Add Client",
+    "schedule": "Schedule",
+    "filter": "Filter",
+    "export": "Export",
+    "analytics": "Analytics",
+    "settings": "Settings",
+    "tooltips": {
+      "refresh": "Refresh dashboard data",
+      "addClient": "Add new client",
+      "schedule": "Manage schedule",
+      "filter": "Filter data",
+      "export": "Export data",
+      "analytics": "View detailed analytics",
+      "settings": "Dashboard settings"
+    }
+  },
+  "performanceKPI": {
+    "totalClients": "Total Clients",
+    "activeContracts": "Active Contracts",
+    "monthlyPremium": "Monthly Premium Total",
+    "totalCommission": "Total Commission",
+    "descriptions": {
+      "totalClients": "Total number of registered clients",
+      "activeContracts": "Number of currently active contracts",
+      "monthlyPremium": "Total monthly premium amount",
+      "totalCommission": "Expected total commission"
+    },
+    "tooltips": {
+      "totalClients": "The total number of all clients registered in the system.\nIncludes both new and existing clients.",
+      "activeContracts": "The number of insurance contracts currently in effect.\nExcludes cancelled or expired contracts.",
+      "monthlyPremium": "The total sum of monthly premiums from all active contracts.",
+      "expectedCommission": "The total expected commission amount from contracts.\nAverage commission per deal: ${{average}}K"
+    },
+    "changeLabels": {
+      "new": "New",
+      "majorIncrease": "Major Increase",
+      "majorDecrease": "Major Decrease"
+    },
+    "extraLabels": {
+      "averageClientValue": "Avg Client Value"
+    }
+  },
+  "pipelineOverview": {
+    "title": "Sales Pipeline",
+    "viewDetails": "View Details",
+    "stageStatus": "Stage Status",
+    "units": {
+      "deals": "deals",
+      "currency": "USD"
+    },
+    "summary": {
+      "totalDeals": "Total Deals",
+      "expectedRevenue": "Expected Revenue",
+      "averagePerDeal": "Average Per Deal"
+    },
+    "emptyState": {
+      "noPipeline": "No clients in pipeline yet",
+      "managePipeline": "Manage Pipeline"
+    }
+  },
+  "referralInsights": {
+    "networkStatus": "Network Status",
+    "viewDetails": "View Details",
+    "stats": {
+      "totalConnections": "Total Connections",
+      "maxDepth": "Max Depth",
+      "activeReferrers": "Active Referrers",
+      "monthlyGrowth": "Monthly Growth"
+    },
+    "tooltips": {
+      "totalConnections": "Total number of clients connected through referrals.\nRepresents the total count of clients referred by someone.",
+      "maxDepth": "Connection stage depth of the network.\nThe more active referrers, the deeper the network spreads.",
+      "activeReferrers": "Number of people who referred clients within the last 3 months.\nReferrers currently actively engaged in referral activities.",
+      "monthlyGrowth": "Percentage of new referred clients this month.\nShows the proportion increased in the last month relative to total referred clients."
+    },
+    "insights": {
+      "title": "Network Insights",
+      "growthMessage": "Network grew {{growth}}% this month.",
+      "topPerformerMessage": " Top performer is {{name}}."
+    }
+  },
+  "pipelineStages": {
+    "첫 상담": "Initial Consultation",
+    "니즈 분석": "Needs Analysis",
+    "상품 설명": "Product Explanation",
+    "계약 검토": "Contract Review",
+    "계약 완료": "Contract Completed",
+    "상담 중": "In Consultation",
+    "제안": "Proposal",
+    "협상": "Negotiation",
+    "Initial Consultation": "Initial Consultation",
+    "Needs Analysis": "Needs Analysis",
+    "Product Explanation": "Product Explanation",
+    "Contract Review": "Contract Review",
+    "Contract Completed": "Contract Completed"
+  },
+  "stages": {
+    "prospect": "Prospect",
+    "contacted": "Contacted",
+    "proposal": "Proposal Sent",
+    "contracted": "Contracted",
+    "completed": "Completed",
+    "consultation": "In Consultation",
+    "negotiation": "Negotiating",
+    "pending": "Pending",
+    "follow_up": "Follow-up",
+    "상담 중": "In Consultation",
+    "제안": "Proposal",
+    "협상": "Negotiation",
+    "보류": "Pending",
+    "완료": "Completed"
+  },
+  "dateFormat": {
+    "year": "{{year}}",
+    "month": "{{month}}",
+    "yearMonth": "{{month}}/{{year}}"
+  },
   "referral": {
     "client": "Referred client",
     "recent_activity": "Recently made {{count}} referrals. Recording an average conversion rate of {{rate}}%."

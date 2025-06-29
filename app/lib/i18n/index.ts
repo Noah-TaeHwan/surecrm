@@ -52,20 +52,13 @@ export const LANGUAGE_CONFIG = {
     nativeName: '日本語',
     flag: '🇯🇵',
     dir: 'ltr' as const,
-    dateFormat: 'yyyy年MM月dd日',
+    dateFormat: 'yyyy年MM月dd일',
     timeFormat: 'HH:mm',
     currency: 'JPY',
     currencySymbol: '¥',
     locale: 'ja-JP',
   },
 } as const;
-
-// 🔧 개발 환경 설정
-const isDevelopment =
-  typeof window !== 'undefined' &&
-  (window.location.hostname === 'localhost' ||
-    window.location.hostname === '127.0.0.1' ||
-    window.location.port !== '');
 
 i18n
   // 🌐 백엔드에서 번역 파일 로드
@@ -77,7 +70,7 @@ i18n
   // ⚛️ React와 연동
   .use(initReactI18next)
 
-  // ⚙️ 초기화 (간소화된 설정)
+  // ⚙️ 초기화
   .init({
     // 기본 언어 설정
     lng: 'ko',
@@ -95,8 +88,8 @@ i18n
       loadPath: '/locales/{{lng}}/{{ns}}.json',
     },
 
-    // 디버그 모드 (개발 환경에서만)
-    debug: isDevelopment,
+    // 디버그 모드 (필요시에만 활성화)
+    debug: false, // 대량 로그 방지
 
     // 인터폴레이션 설정
     interpolation: {

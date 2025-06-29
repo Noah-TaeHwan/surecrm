@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '~/lib/utils';
 import { Card, CardContent } from '~/common/components/ui/card';
 import {
@@ -54,6 +55,7 @@ export function KPICard({
   tooltipContent,
   priority = 'medium',
 }: KPICardProps) {
+  const { t } = useTranslation('dashboard');
   const [isPressed, setIsPressed] = useState(false);
 
   // 햅틱 피드백이 있는 클릭 핸들러
@@ -126,7 +128,7 @@ export function KPICard({
         color: 'text-blue-600 dark:text-blue-400',
         bgColor: 'bg-blue-100 dark:bg-blue-900/20',
         prefix: '',
-        label: '신규',
+        label: t('kpi.new'),
         isSpecial: true,
       };
     }
@@ -140,7 +142,8 @@ export function KPICard({
             ? 'bg-green-100 dark:bg-green-900/20'
             : 'bg-red-100 dark:bg-red-900/20',
         prefix: changeValue > 0 ? '+' : '',
-        label: changeValue > 0 ? '대폭증가' : '대폭감소',
+        label:
+          changeValue > 0 ? t('kpi.majorIncrease') : t('kpi.majorDecrease'),
         isSpecial: true,
       };
     }
@@ -232,7 +235,9 @@ export function KPICard({
       <Card className={cn('border-destructive/20 bg-destructive/5', className)}>
         <CardContent className={sizeClasses.padding}>
           <div className="text-center space-y-2">
-            <p className="text-sm font-medium text-destructive">오류</p>
+            <p className="text-sm font-medium text-destructive">
+              {t('kpi.error')}
+            </p>
             <p className="text-xs text-muted-foreground">{error}</p>
           </div>
         </CardContent>

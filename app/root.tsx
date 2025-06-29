@@ -126,7 +126,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                                             window.location.hostname === 'www.surecrm.pro';
                   
                   if (!isProductionDomain) {
-                    console.log('🔧 GTM: surecrm.pro 도메인이 아니므로 로딩 건너뛰기 (' + window.location.hostname + ')');
+                    // console.log('🔧 GTM: surecrm.pro 도메인이 아니므로 로딩 건너뛰기 (' + window.location.hostname + ')');
                     return;
                   }
                   
@@ -163,7 +163,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                                               window.location.hostname === 'www.surecrm.pro';
                     
                     if (!isProductionDomain) {
-                      console.log('🔧 GA: surecrm.pro 도메인이 아니므로 로딩 건너뛰기 (' + window.location.hostname + ')');
+                      // console.log('🔧 GA: surecrm.pro 도메인이 아니므로 로딩 건너뛰기 (' + window.location.hostname + ')');
                       return;
                     }
 
@@ -626,7 +626,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   // MVP에서는 무조건 다크모드만 제공
                     document.documentElement.classList.add('dark');
                   localStorage.setItem('surecrm-theme', 'dark');
-                  console.log('🌙 강제 다크모드 적용 완료');
+                                      // console.log('🌙 강제 다크모드 적용 완료');
                 } catch (e) {
                   // 오류 발생 시에도 다크모드 강제 적용
                   document.documentElement.classList.add('dark');

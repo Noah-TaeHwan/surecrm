@@ -127,5 +127,26 @@
     "collapseSection": "セクションを折りたたみ",
     "sortAscending": "昇順でソート",
     "sortDescending": "降順でソート"
+  },
+  "notFound": {
+    "code": "404",
+    "title": "ページが見つかりません",
+    "description": "アドレスを再度確認するか",
+    "description2": "下のボタンでメインページに移動してください。",
+    "goHome": "ホームに戻る"
+  },
+  "testimonials": {
+    "badge": "信頼できるソリューション",
+    "title": "ユーザーレビュー",
+    "description": "SureCRMを使用している保険設計士の実際の体験をお聞きください。",
+    "stats": {
+      "activeUsers": "アクティブユーザー",
+      "activeTeams": "アクティブチーム",
+      "managedClients": "管理中の顧客",
+      "avgEfficiencyIncrease": "平均効率向上"
+    }
+  },
+  "layout": {
+    "defaultUserName": "ユーザー"
   }
 }

@@ -7,6 +7,7 @@ import {
 import { Button } from '~/common/components/ui/button';
 import { Badge } from '~/common/components/ui/badge';
 import { BarChartIcon, ChevronRightIcon } from '@radix-ui/react-icons';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 
 interface PipelineStage {
@@ -28,10 +29,25 @@ export function PipelineOverview({
   totalValue,
   monthlyTarget,
 }: PipelineOverviewProps) {
+  const { t } = useTranslation('dashboard');
   const totalDeals = stages.reduce((sum, stage) => sum + stage.count, 0);
 
   // 파이프라인에 데이터가 있는지 확인
   const hasData = totalDeals > 0 || totalValue > 0;
+
+  // 파이프라인 단계명을 번역키로 변환하는 함수
+  const translateStageName = (stageName: string) => {
+    // 기존 한국어 키들을 번역키로 변환
+    const translatedStage = t(`pipelineStages.${stageName}`, {
+      defaultValue: '',
+    });
+    if (translatedStage && translatedStage !== stageName) {
+      return translatedStage;
+    }
+
+    // fallback: 원본 이름 반환
+    return stageName;
+  };
 
   return (
     <Card className="border-border/50">
@@ -41,7 +57,7 @@ export function PipelineOverview({
             <div className="p-1.5 bg-primary/10 rounded-lg">
               <BarChartIcon className="h-4 w-4 text-primary" />
             </div>
-            영업 파이프라인
+            {t('pipelineOverview.title')}
           </CardTitle>
           <div className="flex items-center gap-2">
             <Link to="/pipeline">
@@ -50,7 +66,7 @@ export function PipelineOverview({
                 size="sm"
                 className="text-xs text-muted-foreground hover:text-primary"
               >
-                상세 보기
+                {t('pipelineOverview.viewDetails')}
                 <ChevronRightIcon className="h-3 w-3 ml-1" />
               </Button>
             </Link>
@@ -63,7 +79,7 @@ export function PipelineOverview({
             {/* 파이프라인 단계별 현황 */}
             <div className="space-y-2">
               <h4 className="text-sm font-medium text-foreground mb-3">
-                단계별 현황
+                {t('pipelineOverview.stageStatus')}
               </h4>
               {stages.map((stage, index) => {
                 // 단계별 색상 매핑 (톤다운된 색상으로 통일)
@@ -87,16 +103,18 @@ export function PipelineOverview({
                         className={`w-3 h-3 rounded-full ${dotColor} group-hover:scale-110 transition-transform`}
                       />
                       <span className="text-sm text-foreground font-medium">
-                        {stage.name}
+                        {translateStageName(stage.name)}
                       </span>
                     </div>
                     <div className="flex items-center gap-3">
                       <div className="text-right">
                         <div className="text-sm font-medium text-foreground">
-                          {stage.count}건
+                          {stage.count}
+                          {t('pipelineOverview.units.deals')}
                         </div>
                         <div className="text-xs text-muted-foreground">
-                          {stage.value.toLocaleString()}만원
+                          {stage.value.toLocaleString()}
+                          {t('pipelineOverview.units.currency')}
                         </div>
                       </div>
                       {stage.conversionRate && stage.conversionRate > 0 && (
@@ -120,21 +138,23 @@ export function PipelineOverview({
                   {totalDeals}
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  총 진행 건수
+                  {t('pipelineOverview.summary.totalDeals')}
                 </div>
               </div>
               <div className="text-center p-2 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors">
                 <div className="text-lg font-semibold text-primary">
                   {totalValue.toLocaleString()}
                 </div>
-                <div className="text-xs text-primary/80">예상 매출(만원)</div>
+                <div className="text-xs text-primary/80">
+                  {t('pipelineOverview.summary.expectedRevenue')}
+                </div>
               </div>
               <div className="text-center p-2 rounded-lg bg-muted/30 hover:bg-muted/40 transition-colors">
                 <div className="text-lg font-semibold text-foreground">
                   {totalDeals > 0 ? (totalValue / totalDeals).toFixed(0) : '0'}
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  평균 건당(만원)
+                  {t('pipelineOverview.summary.averagePerDeal')}
                 </div>
               </div>
             </div>
@@ -146,12 +166,12 @@ export function PipelineOverview({
               <BarChartIcon className="h-8 w-8 text-muted-foreground" />
             </div>
             <p className="text-sm text-muted-foreground mb-3">
-              아직 파이프라인에 고객이 없습니다
+              {t('pipelineOverview.emptyState.noPipeline')}
             </p>
             <div className="flex flex-col gap-2 items-center">
               <Link to="/pipeline">
                 <Button size="sm" variant="outline">
-                  파이프라인 관리
+                  {t('pipelineOverview.emptyState.managePipeline')}
                 </Button>
               </Link>
             </div>
