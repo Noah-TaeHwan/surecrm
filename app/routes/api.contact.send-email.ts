@@ -12,6 +12,17 @@ function json(object: any, init?: ResponseInit): Response {
   });
 }
 
+// GET 요청 처리를 위한 loader 함수 추가
+export async function loader() {
+  return json(
+    {
+      success: false,
+      error: 'GET 메서드는 지원되지 않습니다. POST 메서드를 사용해주세요.',
+    },
+    { status: 405 } // Method Not Allowed
+  );
+}
+
 // Rate limiting store (in production, use Redis or database)
 const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
 
