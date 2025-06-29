@@ -1,22 +1,188 @@
 {
-  "title": "主な機能",
-  "subtitle": "SureCRMの強力な機能をご紹介します",
-  "cards": {
-    "smart_customer": {
-      "title": "スマート顧客管理",
-      "description": "AI ベースの顧客分析とパーソナライズされた管理システムで効率的な顧客関係を構築"
+  "title": "強力なCRM機能",
+  "subtitle": "保険営業マン向けに特別に設計されたプロフェッショナル機能をご覧ください",
+  "hero": {
+    "title": "ビジネス成長のための\n完璧なCRMソリューション",
+    "description": "SureCRMは保険営業マンの日常業務を革新し、顧客関係を強化する包括的なツールを提供します。",
+    "cta": "無料トライアル開始"
+  },
+  "categories": {
+    "customer_management": {
+      "title": "顧客管理",
+      "description": "体系的で効率的な顧客情報管理",
+      "features": [
+        {
+          "icon": "users",
+          "title": "統合顧客データベース",
+          "description": "すべての顧客情報を一箇所で体系的に管理し、素早く検索できます",
+          "highlights": [
+            "無制限顧客保存",
+            "高度検索・フィルタリング",
+            "重複防止システム"
+          ]
+        },
+        {
+          "icon": "calendar",
+          "title": "スケジュール・ミーティング管理",
+          "description": "顧客との約束を体系的に管理し、自動リマインダーを受け取ることができます",
+          "highlights": [
+            "Googleカレンダー連携",
+            "自動リマインダー",
+            "ミーティングノート管理"
+          ]
+        },
+        {
+          "icon": "phone",
+          "title": "相談履歴追跡",
+          "description": "すべての顧客相談内容を記録し、履歴を管理できます",
+          "highlights": ["相談内容記録", "通話履歴管理", "顧客嗜好追跡"]
+        }
+      ]
     },
     "sales_pipeline": {
       "title": "営業パイプライン",
-      "description": "直感的なカンバンボードと自動化されたワークフローで営業プロセスを最適化"
+      "description": "体系的な営業プロセス管理",
+      "features": [
+        {
+          "icon": "trending-up",
+          "title": "ビジュアルパイプライン",
+          "description": "ドラッグ＆ドロップで営業段階を簡単に管理し、進行状況を一目で把握できます",
+          "highlights": ["かんばんボード方式", "段階別自動化", "進捗率視覚化"]
+        },
+        {
+          "icon": "target",
+          "title": "営業目標管理",
+          "description": "個人およびチーム目標を設定し、達成率をリアルタイムで追跡できます",
+          "highlights": [
+            "目標設定・追跡",
+            "成果ダッシュボード",
+            "月別・年別統計"
+          ]
+        },
+        {
+          "icon": "bell",
+          "title": "自動通知システム",
+          "description": "重要なフォローアップと期限を見逃さないよう自動で通知を受けます",
+          "highlights": [
+            "スマート通知",
+            "カスタム通知設定",
+            "モバイルプッシュ通知"
+          ]
+        }
+      ]
     },
-    "realtime_analytics": {
-      "title": "リアルタイム分析",
-      "description": "高度なダッシュボードとレポートによるデータ駆動型の意思決定をサポート"
+    "analytics": {
+      "title": "分析・レポート",
+      "description": "データに基づく意思決定支援",
+      "features": [
+        {
+          "icon": "bar-chart",
+          "title": "リアルタイムダッシュボード",
+          "description": "ビジネス成果をリアルタイムでモニタリングし、主要指標を一目で確認できます",
+          "highlights": [
+            "リアルタイムデータ",
+            "カスタマイズ可能",
+            "モバイル最適化"
+          ]
+        },
+        {
+          "icon": "pie-chart",
+          "title": "詳細レポート",
+          "description": "売上、顧客分析、成果など様々なレポートを自動生成できます",
+          "highlights": [
+            "自動レポート生成",
+            "PDF/Excel出力",
+            "定期レポートメール"
+          ]
+        },
+        {
+          "icon": "activity",
+          "title": "成果分析",
+          "description": "個人およびチームの成果を分析し、改善点を見つけることができます",
+          "highlights": ["成果比較分析", "トレンド分析", "予測分析"]
+        }
+      ]
     },
-    "mobile_optimized": {
-      "title": "モバイル最適化",
-      "description": "いつでもどこでもアクセス可能なレスポンシブデザインとモバイルアプリ"
+    "productivity": {
+      "title": "生産性ツール",
+      "description": "業務効率性を最大化するツール",
+      "features": [
+        {
+          "icon": "smartphone",
+          "title": "モバイル最適化",
+          "description": "いつでもどこでもモバイルデバイスですべての機能を使用できます",
+          "highlights": [
+            "レスポンシブデザイン",
+            "タッチ最適化",
+            "オフライン同期"
+          ]
+        },
+        {
+          "icon": "file-text",
+          "title": "文書管理",
+          "description": "顧客関連文書と契約書を体系的に管理できます",
+          "highlights": ["クラウドストレージ", "バージョン管理", "セキュア共有"]
+        },
+        {
+          "icon": "users-2",
+          "title": "チーム協業",
+          "description": "チームメンバーと情報を共有し、協業できます",
+          "highlights": ["リアルタイム協業", "権限管理", "チームチャット"]
+        }
+      ]
     }
+  },
+  "benefits": {
+    "title": "SureCRMがもたらす変化",
+    "subtitle": "実際の保険営業マンが経験した成果です",
+    "items": [
+      {
+        "metric": "300%",
+        "title": "生産性向上",
+        "description": "体系的な顧客管理により業務効率大幅改善"
+      },
+      {
+        "metric": "50%",
+        "title": "売上増加",
+        "description": "見逃していた機会を体系的に管理して売上上昇"
+      },
+      {
+        "metric": "90%",
+        "title": "顧客満足度",
+        "description": "個人化されたサービスで顧客満足度向上"
+      },
+      {
+        "metric": "24/7",
+        "title": "モバイルアクセス",
+        "description": "いつでもどこでも顧客情報確認・管理"
+      }
+    ]
+  },
+  "security": {
+    "title": "エンタープライズ級セキュリティ",
+    "description": "顧客の大切な情報を安全に保護します",
+    "features": [
+      {
+        "icon": "shield",
+        "title": "データ暗号化",
+        "description": "AES-256暗号化ですべてのデータ保護"
+      },
+      {
+        "icon": "lock",
+        "title": "アクセス権限管理",
+        "description": "細かい権限設定で情報セキュリティ強化"
+      },
+      {
+        "icon": "server",
+        "title": "バックアップ・復旧",
+        "description": "自動バックアップでデータ損失防止"
+      }
+    ]
+  },
+  "cta": {
+    "title": "今すぐ開始",
+    "description": "14日間無料トライアルでSureCRMのすべての機能を体験してください",
+    "button": "無料トライアル開始",
+    "note": "クレジットカード不要で即座に開始可能"
   }
 }

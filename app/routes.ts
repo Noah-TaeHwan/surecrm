@@ -96,6 +96,7 @@ export default [
   route('api/auth/profile-debug', 'routes/api.auth.profile-debug.ts'),
   route('api/email/send-test', 'routes/api.email.send-test.ts'),
   route('api/email/welcome-preview', 'routes/api.email.welcome-preview.ts'),
+  route('api/contact/send-email', 'routes/api.contact.send-email.ts'),
   route('api/notifications', 'routes/api.notifications.ts'),
   route('api/auth/check-email', 'routes/api.auth.check-email.ts'),
   route(
@@ -138,10 +139,8 @@ export default [
 
   // 📄 랜딩페이지 관련 정적 페이지들
   route('contact', 'common/pages/contact-page.tsx'),
-  route('demo', 'common/pages/demo-page.tsx'),
   route('features', 'common/pages/features-page.tsx'),
   route('help', 'common/pages/help-page.tsx'),
-  route('integrations', 'common/pages/integrations-page.tsx'),
   route('pricing', 'common/pages/pricing-page.tsx'),
 
   // 🚫 Catch-all (404 처리) - API 라우트 이후에 배치

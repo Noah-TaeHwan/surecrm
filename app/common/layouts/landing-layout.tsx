@@ -130,22 +130,6 @@ export function LandingLayout({ children }: LandingLayoutProps) {
                         {isHydrated ? t('nav.pricing') : '요금제'}
                       </Link>
                     </li>
-                    <li>
-                      <Link
-                        to="/demo"
-                        className="footer-link-hover hover:text-primary transition-colors duration-200 hover:translate-x-1 inline-block"
-                      >
-                        {isHydrated ? t('hero.cta_secondary') : '데모 보기'}
-                      </Link>
-                    </li>
-                    <li>
-                      <Link
-                        to="/integrations"
-                        className="footer-link-hover hover:text-primary transition-colors duration-200 hover:translate-x-1 inline-block"
-                      >
-                        {isHydrated ? t('footer.documentation') : '문서'}
-                      </Link>
-                    </li>
                   </ul>
                 </div>
 
@@ -204,8 +188,8 @@ export function LandingLayout({ children }: LandingLayoutProps) {
                 <div className="text-xs lg:text-sm text-muted-foreground text-center md:text-left">
                   <p>
                     {isHydrated
-                      ? t('footer.copyright')
-                      : '© 2024 SureCRM. All rights reserved.'}
+                      ? `© ${new Date().getFullYear()} ${t('footer.copyright').replace('© ', '')}`
+                      : `© ${new Date().getFullYear()} SureCRM. All rights reserved.`}
                   </p>
                   <p className="mt-1 opacity-80">
                     {isHydrated

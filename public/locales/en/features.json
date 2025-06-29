@@ -1,22 +1,196 @@
 {
-  "title": "Key Features",
-  "subtitle": "Discover the powerful features of SureCRM",
-  "cards": {
-    "smart_customer": {
-      "title": "Smart Customer Management",
-      "description": "Build efficient customer relationships with AI-based customer analysis and personalized management system"
+  "title": "Powerful CRM Features",
+  "subtitle": "Discover professional features specially designed for insurance agents",
+  "hero": {
+    "title": "Complete CRM Solution\nfor Business Growth",
+    "description": "SureCRM provides comprehensive tools that revolutionize insurance agents' daily work and strengthen customer relationships.",
+    "cta": "Start Free Trial"
+  },
+  "categories": {
+    "customer_management": {
+      "title": "Customer Management",
+      "description": "Systematic and efficient customer information management",
+      "features": [
+        {
+          "icon": "users",
+          "title": "Integrated Customer Database",
+          "description": "Systematically manage all customer information in one place and search quickly",
+          "highlights": [
+            "Unlimited customer storage",
+            "Advanced search & filtering",
+            "Duplicate prevention system"
+          ]
+        },
+        {
+          "icon": "calendar",
+          "title": "Schedule & Meeting Management",
+          "description": "Systematically manage appointments with customers and receive automatic reminders",
+          "highlights": [
+            "Google Calendar integration",
+            "Automatic reminders",
+            "Meeting notes management"
+          ]
+        },
+        {
+          "icon": "phone",
+          "title": "Consultation History Tracking",
+          "description": "Record all customer consultation content and manage history",
+          "highlights": [
+            "Consultation recording",
+            "Call history management",
+            "Customer preference tracking"
+          ]
+        }
+      ]
     },
     "sales_pipeline": {
       "title": "Sales Pipeline",
-      "description": "Optimize sales processes with intuitive Kanban boards and automated workflows"
+      "description": "Systematic sales process management",
+      "features": [
+        {
+          "icon": "trending-up",
+          "title": "Visual Pipeline",
+          "description": "Easily manage sales stages with drag and drop and see progress at a glance",
+          "highlights": [
+            "Kanban board style",
+            "Stage automation",
+            "Progress visualization"
+          ]
+        },
+        {
+          "icon": "target",
+          "title": "Sales Goal Management",
+          "description": "Set individual and team goals and track achievement rates in real-time",
+          "highlights": [
+            "Goal setting & tracking",
+            "Performance dashboard",
+            "Monthly/yearly statistics"
+          ]
+        },
+        {
+          "icon": "bell",
+          "title": "Automatic Notification System",
+          "description": "Receive automatic notifications so you don't miss important follow-ups and deadlines",
+          "highlights": [
+            "Smart notifications",
+            "Custom notification settings",
+            "Mobile push notifications"
+          ]
+        }
+      ]
     },
-    "realtime_analytics": {
-      "title": "Real-time Analytics",
-      "description": "Support data-driven decision making through advanced dashboards and reports"
+    "analytics": {
+      "title": "Analytics & Reports",
+      "description": "Data-driven decision support",
+      "features": [
+        {
+          "icon": "bar-chart",
+          "title": "Real-time Dashboard",
+          "description": "Monitor business performance in real-time and check key metrics at a glance",
+          "highlights": ["Real-time data", "Customizable", "Mobile optimized"]
+        },
+        {
+          "icon": "pie-chart",
+          "title": "Detailed Reports",
+          "description": "Automatically generate various reports including sales, customer analysis, and performance",
+          "highlights": [
+            "Automatic report generation",
+            "PDF/Excel export",
+            "Scheduled email reports"
+          ]
+        },
+        {
+          "icon": "activity",
+          "title": "Performance Analysis",
+          "description": "Analyze individual and team performance and find areas for improvement",
+          "highlights": [
+            "Performance comparison analysis",
+            "Trend analysis",
+            "Predictive analysis"
+          ]
+        }
+      ]
     },
-    "mobile_optimized": {
-      "title": "Mobile Optimized",
-      "description": "Responsive design and mobile app accessible anytime, anywhere"
+    "productivity": {
+      "title": "Productivity Tools",
+      "description": "Tools that maximize work efficiency",
+      "features": [
+        {
+          "icon": "smartphone",
+          "title": "Mobile Optimization",
+          "description": "Use all features on mobile devices anytime, anywhere",
+          "highlights": ["Responsive design", "Touch optimized", "Offline sync"]
+        },
+        {
+          "icon": "file-text",
+          "title": "Document Management",
+          "description": "Systematically manage customer-related documents and contracts",
+          "highlights": ["Cloud storage", "Version control", "Secure sharing"]
+        },
+        {
+          "icon": "users-2",
+          "title": "Team Collaboration",
+          "description": "Share information and collaborate with team members",
+          "highlights": [
+            "Real-time collaboration",
+            "Permission management",
+            "Team chat"
+          ]
+        }
+      ]
     }
+  },
+  "benefits": {
+    "title": "Changes SureCRM Brings",
+    "subtitle": "Results experienced by actual insurance agents",
+    "items": [
+      {
+        "metric": "300%",
+        "title": "Productivity Improvement",
+        "description": "Dramatic improvement in work efficiency through systematic customer management"
+      },
+      {
+        "metric": "50%",
+        "title": "Revenue Increase",
+        "description": "Systematic management of missed opportunities leading to revenue growth"
+      },
+      {
+        "metric": "90%",
+        "title": "Customer Satisfaction",
+        "description": "Improved customer satisfaction through personalized service"
+      },
+      {
+        "metric": "24/7",
+        "title": "Mobile Access",
+        "description": "Check and manage customer information anytime, anywhere"
+      }
+    ]
+  },
+  "security": {
+    "title": "Enterprise-grade Security",
+    "description": "Safely protect your customers' valuable information",
+    "features": [
+      {
+        "icon": "shield",
+        "title": "Data Encryption",
+        "description": "Protect all data with AES-256 encryption"
+      },
+      {
+        "icon": "lock",
+        "title": "Access Control",
+        "description": "Strengthen information security with detailed permission settings"
+      },
+      {
+        "icon": "server",
+        "title": "Backup & Recovery",
+        "description": "Prevent data loss with automatic backup"
+      }
+    ]
+  },
+  "cta": {
+    "title": "Start Now",
+    "description": "Experience all features of SureCRM with a 14-day free trial",
+    "button": "Start Free Trial",
+    "note": "Start immediately without credit card"
   }
 }

@@ -1,22 +1,168 @@
 {
-  "title": "주요 기능",
-  "subtitle": "SureCRM의 강력한 기능들을 만나보세요",
-  "cards": {
-    "smart_customer": {
-      "title": "스마트 고객 관리",
-      "description": "AI 기반 고객 분석과 개인화된 관리 시스템으로 효율적인 고객 관계 구축"
+  "title": "강력한 CRM 기능",
+  "subtitle": "보험설계사를 위해 특별히 설계된 전문 기능들을 만나보세요",
+  "hero": {
+    "title": "비즈니스 성장을 위한\n완벽한 CRM 솔루션",
+    "description": "SureCRM은 보험설계사의 일상 업무를 혁신하고 고객 관계를 강화하는 포괄적인 도구를 제공합니다.",
+    "cta": "무료 체험 시작"
+  },
+  "categories": {
+    "customer_management": {
+      "title": "고객 관리",
+      "description": "체계적이고 효율적인 고객 정보 관리",
+      "features": [
+        {
+          "icon": "users",
+          "title": "통합 고객 데이터베이스",
+          "description": "고객의 모든 정보를 한 곳에서 체계적으로 관리하고 빠르게 검색할 수 있습니다",
+          "highlights": [
+            "무제한 고객 저장",
+            "고급 검색 및 필터링",
+            "중복 방지 시스템"
+          ]
+        },
+        {
+          "icon": "calendar",
+          "title": "일정 및 미팅 관리",
+          "description": "고객과의 약속을 체계적으로 관리하고 자동 알림을 받을 수 있습니다",
+          "highlights": ["구글 캘린더 연동", "자동 리마인더", "미팅 노트 관리"]
+        },
+        {
+          "icon": "phone",
+          "title": "상담 이력 추적",
+          "description": "모든 고객 상담 내용을 기록하고 히스토리를 관리할 수 있습니다",
+          "highlights": ["상담 내용 기록", "통화 이력 관리", "고객 선호도 추적"]
+        }
+      ]
     },
     "sales_pipeline": {
       "title": "영업 파이프라인",
-      "description": "직관적인 칸반 보드와 자동화된 워크플로우로 영업 프로세스 최적화"
+      "description": "체계적인 영업 프로세스 관리",
+      "features": [
+        {
+          "icon": "trending-up",
+          "title": "시각적 파이프라인",
+          "description": "드래그 앤 드롭으로 영업 단계를 쉽게 관리하고 진행 상황을 한눈에 파악할 수 있습니다",
+          "highlights": ["칸반 보드 방식", "단계별 자동화", "진행률 시각화"]
+        },
+        {
+          "icon": "target",
+          "title": "영업 목표 관리",
+          "description": "개인 및 팀 목표를 설정하고 달성률을 실시간으로 추적할 수 있습니다",
+          "highlights": ["목표 설정 및 추적", "성과 대시보드", "월별/연별 통계"]
+        },
+        {
+          "icon": "bell",
+          "title": "자동 알림 시스템",
+          "description": "중요한 팔로업과 마감일을 놓치지 않도록 자동으로 알림을 받습니다",
+          "highlights": ["스마트 알림", "커스텀 알림 설정", "모바일 푸시 알림"]
+        }
+      ]
     },
-    "realtime_analytics": {
-      "title": "실시간 분석",
-      "description": "고급 대시보드와 리포트를 통한 데이터 기반 의사결정 지원"
+    "analytics": {
+      "title": "분석 및 보고서",
+      "description": "데이터 기반 의사결정 지원",
+      "features": [
+        {
+          "icon": "bar-chart",
+          "title": "실시간 대시보드",
+          "description": "비즈니스 성과를 실시간으로 모니터링하고 주요 지표를 한눈에 확인할 수 있습니다",
+          "highlights": ["실시간 데이터", "커스터마이징 가능", "모바일 최적화"]
+        },
+        {
+          "icon": "pie-chart",
+          "title": "상세 보고서",
+          "description": "매출, 고객 분석, 성과 등 다양한 보고서를 자동으로 생성할 수 있습니다",
+          "highlights": [
+            "자동 보고서 생성",
+            "PDF/Excel 내보내기",
+            "정기 보고서 이메일"
+          ]
+        },
+        {
+          "icon": "activity",
+          "title": "성과 분석",
+          "description": "개인 및 팀의 성과를 분석하고 개선점을 찾을 수 있습니다",
+          "highlights": ["성과 비교 분석", "트렌드 분석", "예측 분석"]
+        }
+      ]
     },
-    "mobile_optimized": {
-      "title": "모바일 최적화",
-      "description": "언제 어디서나 접근 가능한 반응형 디자인과 모바일 앱"
+    "productivity": {
+      "title": "생산성 도구",
+      "description": "업무 효율성을 극대화하는 도구들",
+      "features": [
+        {
+          "icon": "smartphone",
+          "title": "모바일 최적화",
+          "description": "언제 어디서나 모바일 기기로 모든 기능을 사용할 수 있습니다",
+          "highlights": ["반응형 디자인", "터치 최적화", "오프라인 동기화"]
+        },
+        {
+          "icon": "file-text",
+          "title": "문서 관리",
+          "description": "고객 관련 문서와 계약서를 체계적으로 관리할 수 있습니다",
+          "highlights": ["클라우드 저장소", "버전 관리", "보안 공유"]
+        },
+        {
+          "icon": "users-2",
+          "title": "팀 협업",
+          "description": "팀원들과 정보를 공유하고 협업할 수 있습니다",
+          "highlights": ["실시간 협업", "권한 관리", "팀 채팅"]
+        }
+      ]
     }
+  },
+  "benefits": {
+    "title": "SureCRM이 가져다주는 변화",
+    "subtitle": "실제 보험설계사들이 경험한 성과들입니다",
+    "items": [
+      {
+        "metric": "300%",
+        "title": "생산성 향상",
+        "description": "체계적인 고객 관리로 업무 효율 대폭 개선"
+      },
+      {
+        "metric": "50%",
+        "title": "매출 증가",
+        "description": "놓치던 기회들을 체계적으로 관리하여 매출 상승"
+      },
+      {
+        "metric": "90%",
+        "title": "고객 만족도",
+        "description": "개인화된 서비스로 고객 만족도 향상"
+      },
+      {
+        "metric": "24/7",
+        "title": "모바일 접근",
+        "description": "언제 어디서나 고객 정보 확인 및 관리"
+      }
+    ]
+  },
+  "security": {
+    "title": "엔터프라이즈급 보안",
+    "description": "고객의 소중한 정보를 안전하게 보호합니다",
+    "features": [
+      {
+        "icon": "shield",
+        "title": "데이터 암호화",
+        "description": "AES-256 암호화로 모든 데이터 보호"
+      },
+      {
+        "icon": "lock",
+        "title": "접근 권한 관리",
+        "description": "세밀한 권한 설정으로 정보 보안 강화"
+      },
+      {
+        "icon": "server",
+        "title": "백업 및 복구",
+        "description": "자동 백업으로 데이터 손실 방지"
+      }
+    ]
+  },
+  "cta": {
+    "title": "지금 시작하세요",
+    "description": "14일 무료 체험으로 SureCRM의 모든 기능을 경험해보세요",
+    "button": "무료 체험 시작",
+    "note": "신용카드 없이 즉시 시작 가능"
   }
 }
