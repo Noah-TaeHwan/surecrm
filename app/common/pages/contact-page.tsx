@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Form, useActionData, useNavigation } from 'react-router';
+import type { Route } from './+types/contact-page';
 import { LandingLayout } from '~/common/layouts/landing-layout';
 import { Button } from '~/common/components/ui/button';
 import { Input } from '~/common/components/ui/input';
@@ -25,13 +26,72 @@ import {
 import { CheckCircle2, XCircle, Loader2, Shield } from 'lucide-react';
 import { Turnstile } from '@marsidev/react-turnstile';
 
-export default function ContactPage() {
+// Response utility function
+function json(object: any, init?: ResponseInit): Response {
+  return new Response(JSON.stringify(object), {
+    ...init,
+    headers: {
+      'Content-Type': 'application/json',
+      ...init?.headers,
+    },
+  });
+}
+
+// Action function to handle form submission
+export async function action({ request }: Route.ActionArgs) {
+  const formData = await request.formData();
+
+  console.log('📋 Contact form action called', {
+    method: request.method,
+    url: request.url,
+  });
+
+  try {
+    // Call the API endpoint
+    const response = await fetch(
+      `${new URL(request.url).origin}/api/contact/send-email`,
+      {
+        method: 'POST',
+        body: formData,
+      }
+    );
+
+    const result = await response.json();
+
+    if (response.ok && result.success) {
+      console.log('✅ Contact form API call successful');
+      return { success: true, message: result.message };
+    } else {
+      console.error('❌ Contact form API call failed:', result);
+      return {
+        success: false,
+        error: result.error || '문의 전송에 실패했습니다.',
+      };
+    }
+  } catch (error) {
+    console.error('❌ Contact form action error:', error);
+    return { success: false, error: '문의 전송 중 오류가 발생했습니다.' };
+  }
+}
+
+// Meta function for SEO
+export function meta() {
+  return [
+    { title: '문의하기 - SureCRM' },
+    {
+      name: 'description',
+      content:
+        'SureCRM에 대한 문의사항을 남겨주세요. 빠른 시일 내에 답변드리겠습니다.',
+    },
+  ];
+}
+
+export default function ContactPage({ actionData }: Route.ComponentProps) {
   const { t } = useTranslation('contact');
   const [isHydrated, setIsHydrated] = useState(false);
   const [selectedType, setSelectedType] = useState('');
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
-  const actionData = useActionData();
   const navigation = useNavigation();
 
   const isSubmitting = navigation.state === 'submitting';
@@ -181,11 +241,7 @@ export default function ContactPage() {
                 </Alert>
               )}
 
-              <Form
-                method="post"
-                action="/api/contact/send-email"
-                className="space-y-4 sm:space-y-6"
-              >
+              <Form method="post" className="space-y-4 sm:space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="name" className="text-sm sm:text-base">
                     {isHydrated ? t('form.fields.name.label') : '이름'} *
