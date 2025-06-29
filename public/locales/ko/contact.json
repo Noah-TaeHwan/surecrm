@@ -55,5 +55,11 @@
       }
     },
     "submit": "문의 보내기"
+  },
+  "messages": {
+    "success": "문의가 성공적으로 전송되었습니다!",
+    "success_description": "빠른 시일 내에 답변 드리겠습니다. 감사합니다!",
+    "error": "문의 전송에 실패했습니다.",
+    "error_description": "잠시 후 다시 시도해주세요."
   }
 }

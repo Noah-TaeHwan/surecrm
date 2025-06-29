@@ -432,27 +432,70 @@ export default function ContactPage({ actionData }: Route.ComponentProps) {
       {/* 성공 모달 */}
       <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
         <DialogContent className="sm:max-w-md">
-          <DialogHeader className="text-center">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <CheckCircle2 className="h-8 w-8 text-green-600" />
+          <DialogHeader>
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                <CheckCircle2 className="h-6 w-6 text-green-600 dark:text-green-400" />
+              </div>
+              <div>
+                <DialogTitle className="text-lg text-green-900 dark:text-green-100">
+                  {isHydrated
+                    ? t('messages.success')
+                    : '문의가 성공적으로 전송되었습니다!'}
+                </DialogTitle>
+                <DialogDescription className="text-sm text-green-700 dark:text-green-300">
+                  {isHydrated
+                    ? t('messages.success_description')
+                    : '빠른 시일 내에 답변 드리겠습니다. 감사합니다!'}
+                </DialogDescription>
+              </div>
             </div>
-            <DialogTitle className="text-xl sm:text-2xl font-bold text-green-900">
-              {isHydrated
-                ? t('messages.success')
-                : '문의가 성공적으로 전송되었습니다!'}
-            </DialogTitle>
-            <DialogDescription className="text-green-700 text-sm sm:text-base">
-              {isHydrated
-                ? t('messages.success_description')
-                : '빠른 시일 내에 답변 드리겠습니다. 감사합니다!'}
-            </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="sm:justify-center">
+          <DialogFooter>
             <Button
               onClick={handleSuccessModalClose}
-              className="w-full sm:w-auto"
+              className="w-full bg-green-600 hover:bg-green-700 text-white"
             >
               확인
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 에러 모달 */}
+      <Dialog
+        open={!!actionData?.error}
+        onOpenChange={() => window.location.reload()}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                <XCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
+              </div>
+              <div>
+                <DialogTitle className="text-lg text-red-900 dark:text-red-100">
+                  {isHydrated
+                    ? t('messages.error')
+                    : '문의 전송에 실패했습니다.'}
+                </DialogTitle>
+                <DialogDescription className="text-sm text-red-700 dark:text-red-300">
+                  {actionData?.error ||
+                    (isHydrated
+                      ? t('messages.error_description')
+                      : '잠시 후 다시 시도해주세요.')}
+                </DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              onClick={() => window.location.reload()}
+              variant="outline"
+              className="w-full border-red-200 text-red-700 hover:bg-red-50 dark:border-red-800 dark:text-red-300 dark:hover:bg-red-900/30"
+            >
+              <XCircle className="h-4 w-4 mr-2" />
+              닫기
             </Button>
           </DialogFooter>
         </DialogContent>

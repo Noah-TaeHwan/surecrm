@@ -1,17 +1,17 @@
 {
   "title": "お問い合わせ",
-  "subtitle": "ご質問やご提案がございましたら、いつでもお気軽にお声をかけください",
+  "subtitle": "ご質問やご提案がございましたら、お気軽にお問い合わせください",
   "contact_info": {
     "title": "連絡先情報",
     "email": {
       "title": "メール",
       "value": "noah@surecrm.pro",
-      "note": "平日9時-18時内回答"
+      "note": "平日9時-18時に回答"
     },
     "business": {
       "title": "事業者情報",
       "name": "SureCRM",
-      "description": "保険代理店専用CRMソリューション"
+      "description": "保険営業担当者専用CRMソリューション"
     },
     "support_hours": {
       "title": "サポート時間",
@@ -24,21 +24,21 @@
     "fields": {
       "name": {
         "label": "お名前",
-        "placeholder": "お名前をご入力ください",
+        "placeholder": "お名前を入力してください",
         "required": true
       },
       "email": {
-        "label": "メール",
-        "placeholder": "メールアドレスをご入力ください",
+        "label": "メールアドレス",
+        "placeholder": "メールアドレスを入力してください",
         "required": true
       },
       "company": {
         "label": "会社名",
-        "placeholder": "会社名をご入力ください",
+        "placeholder": "会社名を入力してください",
         "required": false
       },
       "inquiry_type": {
-        "label": "お問い合わせの種類",
+        "label": "お問い合わせ種類",
         "placeholder": "お問い合わせの種類を選択してください",
         "options": {
           "demo": "デモリクエスト",
@@ -50,10 +50,16 @@
       },
       "message": {
         "label": "メッセージ",
-        "placeholder": "お問い合わせ内容を詳しくお書きください",
+        "placeholder": "お問い合わせ内容を詳しくご記入ください",
         "required": true
       }
     },
     "submit": "お問い合わせを送信"
+  },
+  "messages": {
+    "success": "お問い合わせが正常に送信されました！",
+    "success_description": "できるだけ早くご回答いたします。ありがとうございます！",
+    "error": "お問い合わせの送信に失敗しました。",
+    "error_description": "しばらくしてから再度お試しください。"
   }
 }

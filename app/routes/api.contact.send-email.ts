@@ -465,9 +465,18 @@ export async function action({ request }: ActionFunctionArgs) {
 
     // Send email
     console.log('📤 Sending email...');
+    const recipientEmail =
+      process.env.CONTACT_RECIPIENT_EMAIL || 'noah@surecrm.pro';
+
+    console.log('📧 Email details:', {
+      from: emailUser,
+      to: recipientEmail,
+      subject: `🛡️ [보안 검증 완료] SureCRM 문의: ${contactData.subject}`,
+    });
+
     await transporter.sendMail({
       from: emailUser,
-      to: emailUser,
+      to: recipientEmail,
       subject: `🛡️ [보안 검증 완료] SureCRM 문의: ${contactData.subject}`,
       html: htmlContent,
     });
