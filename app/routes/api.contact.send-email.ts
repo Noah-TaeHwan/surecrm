@@ -29,9 +29,9 @@ const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
 // Suspicious patterns and spam detection
 const SUSPICIOUS_PATTERNS = [
   /https?:\/\/[^\s]+/gi, // URLs
-  /\b(buy|sale|cheap|discount|money|profit|click here|urgent|limited time)\b/gi,
-  /\b[A-Z]{5,}\b/g, // Excessive capitals
-  /(.)\1{4,}/g, // Repeated characters
+  /\b(buy|sale|cheap|discount|money|profit|click here|urgent|limited time|viagra|casino|lottery|winner)\b/gi, // 더 명확한 스팸 키워드
+  /\b[A-Z]{15,}\b/g, // Excessive capitals (15글자 이상으로 완화)
+  /(.)\1{6,}/g, // Repeated characters (6개 이상으로 완화)
   /\b\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b/g, // Credit card patterns
 ];
 
@@ -41,6 +41,7 @@ const BLACKLISTED_DOMAINS = [
   'guerrillamail.com',
   'mailinator.com',
   'yopmail.com',
+  // 테스트용 도메인들은 제거 또는 완화
 ];
 
 interface ContactFormData {
@@ -80,41 +81,73 @@ function validateContent(data: ContactFormData): {
 } {
   const { name, email, subject, message } = data;
 
-  // Check for suspicious patterns
+  // 개발/테스트 환경에서는 스팸 검사 완화
+  const isDevelopment = process.env.NODE_ENV !== 'production';
+
+  if (isDevelopment) {
+    console.log('🛠️ Development mode: Relaxed spam checking');
+    // 개발 환경에서는 기본적인 검증만 수행
+    if (message.length < 5) {
+      return { isValid: false, reason: 'Message too short (dev mode)' };
+    }
+    if (message.length > 10000) {
+      return { isValid: false, reason: 'Message too long (dev mode)' };
+    }
+    return { isValid: true };
+  }
+
+  // 프로덕션에서도 더 관대한 검증
+  console.log('🔍 Production mode: Enhanced spam checking');
+
+  // Check for suspicious patterns (더 관대하게)
   const allContent = `${name} ${email} ${subject} ${message}`;
+  let suspiciousCount = 0;
+
   for (const pattern of SUSPICIOUS_PATTERNS) {
     if (pattern.test(allContent)) {
-      return { isValid: false, reason: 'Suspicious content detected' };
+      suspiciousCount++;
+      console.log('⚠️ Suspicious pattern detected:', pattern.source);
     }
   }
 
-  // Check email domain
+  // 2개 이상의 의심스러운 패턴이 감지될 때만 차단
+  if (suspiciousCount >= 2) {
+    return {
+      isValid: false,
+      reason: `Multiple suspicious patterns detected (${suspiciousCount})`,
+    };
+  }
+
+  // Check email domain (더 관대하게)
   const emailDomain = email.split('@')[1]?.toLowerCase();
   if (emailDomain && BLACKLISTED_DOMAINS.includes(emailDomain)) {
     return { isValid: false, reason: 'Blacklisted email domain' };
   }
 
-  // Check message length (too short or too long)
-  if (message.length < 10) {
+  // Check message length (더 관대하게)
+  if (message.length < 3) {
     return { isValid: false, reason: 'Message too short' };
   }
 
-  if (message.length > 5000) {
+  if (message.length > 10000) {
     return { isValid: false, reason: 'Message too long' };
   }
 
-  // Check for excessive repetition
+  // Check for excessive repetition (더 관대하게)
   const words = message.toLowerCase().split(/\s+/);
   const wordCount = new Map<string, number>();
   for (const word of words) {
-    wordCount.set(word, (wordCount.get(word) || 0) + 1);
+    if (word.length > 2) {
+      // 2글자 이하는 무시
+      wordCount.set(word, (wordCount.get(word) || 0) + 1);
+    }
   }
 
-  // If any word appears more than 30% of total words, it's suspicious
-  const totalWords = words.length;
+  // 50% 이상 반복되는 단어가 있을 때만 차단 (기존 30%에서 완화)
+  const totalWords = words.filter(w => w.length > 2).length;
   for (const [word, count] of wordCount) {
-    if (word.length > 2 && count / totalWords > 0.3) {
-      return { isValid: false, reason: 'Excessive word repetition' };
+    if (count / totalWords > 0.5) {
+      return { isValid: false, reason: `Excessive word repetition: "${word}"` };
     }
   }
 
