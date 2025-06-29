@@ -1,6 +1,7 @@
 import { redirect, data } from 'react-router';
 import { z } from 'zod';
 import { createServerClient } from '~/lib/core/supabase';
+import { createServerTranslator } from '~/lib/i18n/language-manager.server';
 
 interface Route {
   LoaderArgs: {
@@ -12,6 +13,19 @@ interface Route {
   ComponentProps: {
     loaderData?: any;
     actionData?: any;
+  };
+}
+
+interface MetaArgs {
+  data?: {
+    meta?: {
+      title: string;
+      description: string;
+    };
+    hasSession?: boolean;
+    user?: any;
+    debugInfo?: any;
+    error?: string;
   };
 }
 
@@ -28,6 +42,25 @@ const newPasswordSchema = z
 
 export async function loader({ request }: Route['LoaderArgs']) {
   console.log('🔐 [NEW-PASSWORD LOADER] 시작');
+
+  // 🌍 다국어 번역 로드 (에러가 발생해도 계속 진행)
+  let meta = {
+    title: '새 비밀번호 설정 | SureCRM',
+    description: '새로운 비밀번호를 설정하세요',
+  };
+
+  try {
+    const { t } = await createServerTranslator(request, 'auth');
+    meta = {
+      title: t('newPassword.title', '새 비밀번호 설정') + ' | SureCRM',
+      description: t('newPassword.subtitle', '새로운 비밀번호를 설정하세요'),
+    };
+  } catch (translationError) {
+    console.warn(
+      '⚠️ [TRANSLATION] 번역 로드 실패, 기본값 사용:',
+      translationError
+    );
+  }
 
   const debugInfo: any = {
     timestamp: new Date().toISOString(),
@@ -85,6 +118,7 @@ export async function loader({ request }: Route['LoaderArgs']) {
               id: directSessionData.user.id,
               email: directSessionData.user.email,
             },
+            meta, // 🌍 다국어 meta 데이터 추가
             debugInfo: { ...debugInfo, sessionSource: 'cookie' },
           };
         } else {
@@ -165,6 +199,7 @@ export async function loader({ request }: Route['LoaderArgs']) {
               id: sessionData.user.id,
               email: sessionData.user.email,
             },
+            meta, // 🌍 다국어 meta 데이터 추가
             debugInfo: { ...debugInfo, sessionSource: 'temp_fix' },
           };
         }
@@ -182,6 +217,7 @@ export async function loader({ request }: Route['LoaderArgs']) {
       // 임시로 debugInfo를 반환해서 클라이언트에서 확인할 수 있도록
       return {
         hasSession: false,
+        meta, // 🌍 다국어 meta 데이터 추가
         debugInfo: { ...debugInfo, sessionSource: 'failed' },
         error: 'session_required',
       };
@@ -194,6 +230,7 @@ export async function loader({ request }: Route['LoaderArgs']) {
         id: user.id,
         email: user.email,
       },
+      meta, // 🌍 다국어 meta 데이터 추가
       debugInfo: { ...debugInfo, sessionSource: 'supabase' },
     };
   } catch (error) {
@@ -357,10 +394,21 @@ export async function action({ request }: Route['ActionArgs']) {
   }
 }
 
-export function meta() {
+// 🌍 다국어 메타 정보
+export function meta({ data }: MetaArgs) {
+  const meta = data?.meta;
+
+  if (!meta) {
+    // 기본값 fallback
+    return [
+      { title: '새 비밀번호 설정 | SureCRM' },
+      { name: 'description', content: '새로운 비밀번호를 설정하세요' },
+    ];
+  }
+
   return [
-    { title: '새 비밀번호 설정 | SureCRM' },
-    { name: 'description', content: '새로운 비밀번호를 설정하세요' },
+    { title: meta.title },
+    { name: 'description', content: meta.description },
   ];
 }
 

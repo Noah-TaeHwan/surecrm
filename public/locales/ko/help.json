@@ -1,4 +1,8 @@
 {
+  "meta": {
+    "title": "도움말",
+    "description": "SureCRM 사용법과 자주 묻는 질문을 확인하세요. 고객 지원팀이 도움을 드립니다."
+  },
   "title": "도움말",
   "subtitle": "SureCRM 사용법과 자주 묻는 질문을 확인하세요",
   "sections": {

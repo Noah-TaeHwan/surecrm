@@ -1,4 +1,8 @@
 {
+  "meta": {
+    "title": "Help",
+    "description": "Check out SureCRM usage instructions and frequently asked questions. Our customer support team is here to help."
+  },
   "title": "Help",
   "subtitle": "Check SureCRM usage guide and frequently asked questions",
   "sections": {

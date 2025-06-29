@@ -33,6 +33,73 @@ import {
   Zap,
   Star,
 } from 'lucide-react';
+import { createServerTranslator } from '~/lib/i18n/language-manager.server';
+
+// 직접 타입 정의
+interface LoaderArgs {
+  request: Request;
+}
+
+interface MetaArgs {
+  data?: {
+    meta?: {
+      title: string;
+      description: string;
+    };
+  };
+}
+
+// Loader function
+export async function loader({ request }: LoaderArgs) {
+  // 🌍 서버에서 다국어 번역 로드
+  try {
+    const { t } = await createServerTranslator(request, 'features');
+
+    return {
+      // 🌍 meta용 번역 데이터
+      meta: {
+        title: t('meta.title', '기능 소개') + ' | SureCRM',
+        description: t(
+          'meta.description',
+          'SureCRM의 강력한 기능들을 확인해보세요. 보험설계사를 위한 완벽한 CRM 솔루션을 제공합니다.'
+        ),
+      },
+    };
+  } catch (error) {
+    console.error('Features page loader 에러:', error);
+
+    // 에러 시 한국어 기본값
+    return {
+      meta: {
+        title: '기능 소개 | SureCRM',
+        description:
+          'SureCRM의 강력한 기능들을 확인해보세요. 보험설계사를 위한 완벽한 CRM 솔루션을 제공합니다.',
+      },
+    };
+  }
+}
+
+// 🌍 다국어 메타 정보
+export function meta({ data }: MetaArgs) {
+  const meta = data?.meta;
+
+  if (!meta) {
+    // 기본값 fallback
+    return [
+      { title: '기능 소개 | SureCRM' },
+      {
+        name: 'description',
+        content:
+          'SureCRM의 강력한 기능들을 확인해보세요. 보험설계사를 위한 완벽한 CRM 솔루션을 제공합니다.',
+      },
+    ];
+  }
+
+  return [
+    { title: meta.title },
+    { name: 'description', content: meta.description },
+  ];
+}
 
 const iconMap = {
   users: Users,
@@ -55,33 +122,51 @@ const iconMap = {
 export default function FeaturesPage() {
   const { t, ready } = useTranslation('features');
   const [isHydrated, setIsHydrated] = useState(false);
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     setIsHydrated(true);
-  }, []);
+
+    // 🔧 타임아웃으로 무한 로딩 방지 (3초 후 강제 렌더링)
+    const timeoutId = setTimeout(() => {
+      console.warn(
+        'Features page: Translation loading timeout, forcing render'
+      );
+      setIsReady(true);
+    }, 3000);
+
+    // ready가 되면 즉시 렌더링
+    if (ready) {
+      clearTimeout(timeoutId);
+      setIsReady(true);
+    }
+
+    return () => clearTimeout(timeoutId);
+  }, [ready]);
 
   // 안전한 번역 함수 - 네임스페이스 로딩과 Hydration 체크
   const safeT = (key: string, options?: any): string => {
-    if (!isHydrated || !ready) return '';
+    if (!isHydrated) return '';
     const result = t(key, options);
     return typeof result === 'string' ? result : '';
   };
 
   // 안전한 배열 번역 함수
   const safeArrayT = (key: string, fallback: any[] = []) => {
-    if (!isHydrated || !ready) return fallback;
+    if (!isHydrated) return fallback;
     const result = t(key, { returnObjects: true });
     return Array.isArray(result) ? result : fallback;
   };
 
   // 안전한 객체 번역 함수
   const safeObjectT = (key: string, fallback: any = {}) => {
-    if (!isHydrated || !ready) return fallback;
+    if (!isHydrated) return fallback;
     const result = t(key, { returnObjects: true });
     return typeof result === 'object' && result !== null ? result : fallback;
   };
 
-  if (!isHydrated || !ready) {
+  // 🔧 수정된 로딩 조건 - isReady 사용으로 무한 로딩 방지
+  if (!isHydrated || !isReady) {
     return (
       <LandingLayout>
         <div className="container mx-auto px-4 py-16">
@@ -89,6 +174,10 @@ export default function FeaturesPage() {
             <div className="text-center">
               <div className="h-12 bg-gray-200 rounded-lg mb-4 animate-pulse"></div>
               <div className="h-6 bg-gray-200 rounded-lg mb-8 animate-pulse"></div>
+              {/* 로딩 타임아웃 표시 */}
+              <div className="mt-4 text-sm text-muted-foreground">
+                기능 소개 페이지를 로드하고 있습니다...
+              </div>
             </div>
           </div>
         </div>

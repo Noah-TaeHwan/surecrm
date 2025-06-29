@@ -1,4 +1,8 @@
 {
+  "meta": {
+    "title": "Contact Us",
+    "description": "Get in touch with us about SureCRM. We'll respond to your inquiry as soon as possible."
+  },
   "title": "Contact Us",
   "subtitle": "Please feel free to contact us with any questions or suggestions",
   "contact_info": {

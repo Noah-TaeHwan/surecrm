@@ -2,6 +2,73 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { LandingLayout } from '~/common/layouts/landing-layout';
+import { createServerTranslator } from '~/lib/i18n/language-manager.server';
+
+// 직접 타입 정의
+interface LoaderArgs {
+  request: Request;
+}
+
+interface MetaArgs {
+  data?: {
+    meta?: {
+      title: string;
+      description: string;
+    };
+  };
+}
+
+// Loader function
+export async function loader({ request }: LoaderArgs) {
+  // 🌍 서버에서 다국어 번역 로드
+  try {
+    const { t } = await createServerTranslator(request, 'help');
+
+    return {
+      // 🌍 meta용 번역 데이터
+      meta: {
+        title: t('meta.title', '도움말') + ' | SureCRM',
+        description: t(
+          'meta.description',
+          'SureCRM 사용법과 자주 묻는 질문을 확인하세요. 고객 지원팀이 도움을 드립니다.'
+        ),
+      },
+    };
+  } catch (error) {
+    console.error('Help page loader 에러:', error);
+
+    // 에러 시 한국어 기본값
+    return {
+      meta: {
+        title: '도움말 | SureCRM',
+        description:
+          'SureCRM 사용법과 자주 묻는 질문을 확인하세요. 고객 지원팀이 도움을 드립니다.',
+      },
+    };
+  }
+}
+
+// 🌍 다국어 메타 정보
+export function meta({ data }: MetaArgs) {
+  const meta = data?.meta;
+
+  if (!meta) {
+    // 기본값 fallback
+    return [
+      { title: '도움말 | SureCRM' },
+      {
+        name: 'description',
+        content:
+          'SureCRM 사용법과 자주 묻는 질문을 확인하세요. 고객 지원팀이 도움을 드립니다.',
+      },
+    ];
+  }
+
+  return [
+    { title: meta.title },
+    { name: 'description', content: meta.description },
+  ];
+}
 
 export default function HelpPage() {
   const { t, ready } = useTranslation('help');

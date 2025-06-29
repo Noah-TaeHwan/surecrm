@@ -24,6 +24,7 @@ import {
 } from '../lib/dashboard-data';
 import { useFetcher, useRevalidator } from 'react-router';
 import { InsuranceAgentEvents } from '~/lib/utils/analytics';
+import { createServerTranslator } from '~/lib/i18n/language-manager.server';
 
 // 새로운 타입 시스템 import
 import type {
@@ -49,15 +50,33 @@ interface ComponentProps {
   loaderData: any;
 }
 
-export function meta() {
-  // Note: meta 함수는 SSR에서 실행되므로 여기서는 기본 한국어 사용
-  // 실제 다국어 지원은 클라이언트 컴포넌트에서 처리
+interface MetaArgs {
+  data?: {
+    meta?: {
+      title: string;
+      description: string;
+    };
+  };
+}
+
+// 🌍 다국어 메타 정보
+export function meta({ data }: MetaArgs) {
+  const meta = data?.meta;
+
+  if (!meta) {
+    // 기본값 fallback
+    return [
+      { title: '대시보드 - SureCRM' },
+      {
+        name: 'description',
+        content: 'SureCRM 대시보드 - 업무 현황을 한눈에 확인하세요',
+      },
+    ];
+  }
+
   return [
-    { title: '대시보드 - SureCRM' },
-    {
-      name: 'description',
-      content: 'SureCRM 대시보드 - 업무 현황을 한눈에 확인하세요',
-    },
+    { title: meta.title },
+    { name: 'description', content: meta.description },
   ];
 }
 
@@ -69,6 +88,9 @@ export async function loader({ request }: LoaderArgs) {
   const { user } = await requireActiveSubscription(request);
 
   try {
+    // 🌍 서버에서 다국어 번역 로드
+    const { t } = await createServerTranslator(request, 'dashboard');
+
     // 🆕 실제 상품 데이터 추가
     const { getOpportunityProductStats } = await import(
       '~/api/shared/opportunity-products'
@@ -98,6 +120,14 @@ export async function loader({ request }: LoaderArgs) {
     ]);
 
     return {
+      // 🌍 meta용 번역 데이터
+      meta: {
+        title: t('meta.title', '대시보드') + ' - SureCRM',
+        description: t(
+          'meta.description',
+          'SureCRM 대시보드 - 업무 현황을 한눈에 확인하세요'
+        ),
+      },
       user: userInfo,
       todayStats,
       kpiData,

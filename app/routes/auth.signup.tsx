@@ -2,6 +2,7 @@ import { redirect } from 'react-router';
 import SignupPage from '~/common/pages/auth/signup-page';
 import { checkAuthStatus } from '~/lib/auth/core.server';
 import { signUpUser } from '~/lib/auth/registration';
+import { createServerTranslator } from '~/lib/i18n/language-manager.server';
 
 // 직접 타입 정의
 interface LoaderArgs {
@@ -10,6 +11,17 @@ interface LoaderArgs {
 
 interface ActionArgs {
   request: Request;
+}
+
+interface MetaArgs {
+  data?: {
+    meta?: {
+      title: string;
+      description: string;
+    };
+    isAuthenticated?: boolean;
+    invitationCode?: string;
+  };
 }
 
 // Loader function - redirect if already authenticated
@@ -25,10 +37,32 @@ export async function loader({ request }: LoaderArgs) {
   const url = new URL(request.url);
   const invitationCode = url.searchParams.get('code') || '';
 
-  return {
-    isAuthenticated: false,
-    invitationCode,
-  };
+  // 🌍 서버에서 다국어 번역 로드
+  try {
+    const { t } = await createServerTranslator(request, 'auth');
+
+    return {
+      isAuthenticated: false,
+      invitationCode,
+      // 🌍 meta용 번역 데이터
+      meta: {
+        title: t('signup.title', '회원가입') + ' | SureCRM',
+        description: t('signup.subtitle', '초대 코드로 SureCRM에 가입하세요'),
+      },
+    };
+  } catch (error) {
+    console.error('Auth signup loader 에러:', error);
+
+    // 에러 시 한국어 기본값
+    return {
+      isAuthenticated: false,
+      invitationCode,
+      meta: {
+        title: '회원가입 | SureCRM',
+        description: '초대 코드로 SureCRM에 가입하세요',
+      },
+    };
+  }
 }
 
 // Action function - handle signup form submission
@@ -106,11 +140,21 @@ export async function action({ request }: ActionArgs) {
   };
 }
 
-// Meta information
-export function meta() {
+// 🌍 다국어 메타 정보
+export function meta({ data }: MetaArgs) {
+  const meta = data?.meta;
+
+  if (!meta) {
+    // 기본값 fallback
+    return [
+      { title: '회원가입 | SureCRM' },
+      { name: 'description', content: '초대 코드로 SureCRM에 가입하세요' },
+    ];
+  }
+
   return [
-    { title: '회원가입 | SureCRM' },
-    { name: 'description', content: '초대 코드로 SureCRM에 가입하세요' },
+    { title: meta.title },
+    { name: 'description', content: meta.description },
   ];
 }
 

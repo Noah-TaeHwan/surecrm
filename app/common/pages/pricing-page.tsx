@@ -25,6 +25,73 @@ import {
   Bell,
   Settings2,
 } from 'lucide-react';
+import { createServerTranslator } from '~/lib/i18n/language-manager.server';
+
+// 직접 타입 정의
+interface LoaderArgs {
+  request: Request;
+}
+
+interface MetaArgs {
+  data?: {
+    meta?: {
+      title: string;
+      description: string;
+    };
+  };
+}
+
+// Loader function
+export async function loader({ request }: LoaderArgs) {
+  // 🌍 서버에서 다국어 번역 로드
+  try {
+    const { t } = await createServerTranslator(request, 'pricing');
+
+    return {
+      // 🌍 meta용 번역 데이터
+      meta: {
+        title: t('meta.title', '요금제') + ' | SureCRM',
+        description: t(
+          'meta.description',
+          'SureCRM Pro 요금제를 확인하고 14일 무료 체험을 시작하세요. 보험설계사를 위한 전문 CRM 솔루션.'
+        ),
+      },
+    };
+  } catch (error) {
+    console.error('Pricing page loader 에러:', error);
+
+    // 에러 시 한국어 기본값
+    return {
+      meta: {
+        title: '요금제 | SureCRM',
+        description:
+          'SureCRM Pro 요금제를 확인하고 14일 무료 체험을 시작하세요. 보험설계사를 위한 전문 CRM 솔루션.',
+      },
+    };
+  }
+}
+
+// 🌍 다국어 메타 정보
+export function meta({ data }: MetaArgs) {
+  const meta = data?.meta;
+
+  if (!meta) {
+    // 기본값 fallback
+    return [
+      { title: '요금제 | SureCRM' },
+      {
+        name: 'description',
+        content:
+          'SureCRM Pro 요금제를 확인하고 14일 무료 체험을 시작하세요. 보험설계사를 위한 전문 CRM 솔루션.',
+      },
+    ];
+  }
+
+  return [
+    { title: meta.title },
+    { name: 'description', content: meta.description },
+  ];
+}
 
 export default function PricingPage() {
   const { t, ready } = useTranslation('pricing');

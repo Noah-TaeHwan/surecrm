@@ -17,10 +17,14 @@ import {
   type PublicStats,
   type Testimonial,
 } from '~/lib/data/public';
+import { createServerTranslator } from '~/lib/i18n/language-manager.server';
 
 // Loader 함수 - 실제 데이터베이스에서 데이터 가져오기
-export async function loader() {
+export async function loader({ request }: Route.LoaderArgs) {
   try {
+    // 🌍 서버에서 다국어 번역 로드
+    const { t, language } = await createServerTranslator(request, 'landing');
+
     const [stats, testimonials] = await Promise.all([
       getPublicStats(),
       getPublicTestimonials(),
@@ -29,6 +33,30 @@ export async function loader() {
     return {
       stats,
       testimonials,
+      // 🌍 meta용 번역 데이터
+      meta: {
+        title: t(
+          'meta.title',
+          'SureCRM - 보험설계사를 위한 소개 네트워크 관리 솔루션'
+        ),
+        description: t(
+          'meta.description',
+          '누가 누구를 소개했는지 시각적으로 체계화하고 소개 네트워크의 힘을 극대화하세요. 보험설계사 전용 CRM 솔루션.'
+        ),
+        keywords: t(
+          'meta.keywords',
+          '보험설계사, CRM, 소개 네트워크, 고객 관리, 영업 관리'
+        ),
+        ogTitle: t(
+          'meta.og_title',
+          'SureCRM - 보험설계사를 위한 소개 네트워크 관리 솔루션'
+        ),
+        ogDescription: t(
+          'meta.og_description',
+          '누가 누구를 소개했는지 시각적으로 체계화하고 소개 네트워크의 힘을 극대화하세요.'
+        ),
+      },
+      language,
     };
   } catch (error) {
     console.error('landing:errors.loading_failed', error);
@@ -44,31 +72,55 @@ export async function loader() {
         successRate: 89,
       } as PublicStats,
       testimonials: [] as Testimonial[],
+      // 🌍 에러 시 한국어 기본값
+      meta: {
+        title: 'SureCRM - 보험설계사를 위한 소개 네트워크 관리 솔루션',
+        description:
+          '누가 누구를 소개했는지 시각적으로 체계화하고 소개 네트워크의 힘을 극대화하세요. 보험설계사 전용 CRM 솔루션.',
+        keywords: '보험설계사, CRM, 소개 네트워크, 고객 관리, 영업 관리',
+        ogTitle: 'SureCRM - 보험설계사를 위한 소개 네트워크 관리 솔루션',
+        ogDescription:
+          '누가 누구를 소개했는지 시각적으로 체계화하고 소개 네트워크의 힘을 극대화하세요.',
+      },
+      language: 'ko' as const,
     };
   }
 }
 
-// 메타 정보
-export function meta() {
+// 🌍 다국어 메타 정보
+export function meta({ data }: Route.MetaArgs) {
+  const meta = data?.meta;
+
+  if (!meta) {
+    // 기본값 fallback
+    return [
+      { title: 'SureCRM - 보험설계사를 위한 소개 네트워크 관리 솔루션' },
+      {
+        name: 'description',
+        content:
+          '누가 누구를 소개했는지 시각적으로 체계화하고 소개 네트워크의 힘을 극대화하세요. 보험설계사 전용 CRM 솔루션.',
+      },
+      { property: 'og:type', content: 'website' },
+    ];
+  }
+
   return [
-    { title: 'SureCRM - 보험설계사를 위한 소개 네트워크 관리 솔루션' },
+    { title: meta.title },
     {
       name: 'description',
-      content:
-        '누가 누구를 소개했는지 시각적으로 체계화하고 소개 네트워크의 힘을 극대화하세요. 보험설계사 전용 CRM 솔루션.',
+      content: meta.description,
     },
     {
       name: 'keywords',
-      content: '보험설계사, CRM, 소개 네트워크, 고객 관리, 영업 관리',
+      content: meta.keywords,
     },
     {
       property: 'og:title',
-      content: 'SureCRM - 보험설계사를 위한 소개 네트워크 관리 솔루션',
+      content: meta.ogTitle,
     },
     {
       property: 'og:description',
-      content:
-        '누가 누구를 소개했는지 시각적으로 체계화하고 소개 네트워크의 힘을 극대화하세요.',
+      content: meta.ogDescription,
     },
     { property: 'og:type', content: 'website' },
   ];

@@ -1,4 +1,8 @@
 {
+  "meta": {
+    "title": "ヘルプ",
+    "description": "SureCRMの使用方法とよくある質問をご確認ください。カスタマーサポートチームがお手伝いいたします。"
+  },
   "title": "ヘルプ",
   "subtitle": "SureCRMの使い方とよくある質問をご確認ください",
   "sections": {

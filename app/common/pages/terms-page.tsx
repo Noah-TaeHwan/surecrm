@@ -1,6 +1,73 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LandingLayout } from '~/common/layouts/landing-layout';
+import { createServerTranslator } from '~/lib/i18n/language-manager.server';
+
+// 직접 타입 정의
+interface LoaderArgs {
+  request: Request;
+}
+
+interface MetaArgs {
+  data?: {
+    meta?: {
+      title: string;
+      description: string;
+    };
+  };
+}
+
+// Loader function
+export async function loader({ request }: LoaderArgs) {
+  // 🌍 서버에서 다국어 번역 로드
+  try {
+    const { t } = await createServerTranslator(request, 'terms');
+
+    return {
+      // 🌍 meta용 번역 데이터
+      meta: {
+        title: t('meta.title', '이용약관') + ' | SureCRM',
+        description: t(
+          'meta.description',
+          'SureCRM 서비스 이용약관을 확인하세요. 서비스 이용에 관한 권리와 의무를 안내합니다.'
+        ),
+      },
+    };
+  } catch (error) {
+    console.error('Terms page loader 에러:', error);
+
+    // 에러 시 한국어 기본값
+    return {
+      meta: {
+        title: '이용약관 | SureCRM',
+        description:
+          'SureCRM 서비스 이용약관을 확인하세요. 서비스 이용에 관한 권리와 의무를 안내합니다.',
+      },
+    };
+  }
+}
+
+// 🌍 다국어 메타 정보
+export function meta({ data }: MetaArgs) {
+  const meta = data?.meta;
+
+  if (!meta) {
+    // 기본값 fallback
+    return [
+      { title: '이용약관 | SureCRM' },
+      {
+        name: 'description',
+        content:
+          'SureCRM 서비스 이용약관을 확인하세요. 서비스 이용에 관한 권리와 의무를 안내합니다.',
+      },
+    ];
+  }
+
+  return [
+    { title: meta.title },
+    { name: 'description', content: meta.description },
+  ];
+}
 
 export default function TermsPage() {
   const { t } = useTranslation('common');
@@ -144,8 +211,8 @@ export default function TermsPage() {
                       동의함으로써 효력이 발생합니다.
                     </p>
                     <p className="text-muted-foreground">
-                      <strong>3.</strong> 회사는 「약관의 규제에 관한 법률」,
-                      「정보통신망 이용촉진 및 정보보호 등에 관한 법률」 등 관련
+                      <strong>3.</strong> 회사는 "약관의 규제에 관한 법률",
+                      "정보통신망 이용촉진 및 정보보호 등에 관한 법률" 등 관련
                       법령을 위배하지 않는 범위에서 본 약관을 개정할 수
                       있습니다.
                     </p>
@@ -431,9 +498,9 @@ export default function TermsPage() {
                       있습니다. 해지 신청 시, 이용계약은 즉시 종료됩니다.
                     </p>
                     <p className="text-muted-foreground">
-                      <strong>2.</strong> 본 서비스는 그 특성상 「전자상거래
-                      등에서의 소비자보호에 관한 법률」 제17조 제2항 제5호에
-                      따라 청약철회가 제한될 수 있는 디지털 콘텐츠에 해당할 수
+                      <strong>2.</strong> 본 서비스는 그 특성상 "전자상거래
+                      등에서의 소비자보호에 관한 법률" 제17조 제2항 제5호에 따라
+                      청약철회가 제한될 수 있는 디지털 콘텐츠에 해당할 수
                       있습니다. 회사가 사전에 이러한 사실을 고지한 경우, 회원의
                       단순 변심이나 착오 구매에 의한 청약철회 및 환불은
                       불가능합니다. 이는 분쟁을 최소화하고 안정적인 서비스를
@@ -469,12 +536,12 @@ export default function TermsPage() {
                       </p>
                     </div>
                     <p className="text-muted-foreground">
-                      <strong>4.</strong> 환불 절차, 분쟁 해결 등은 「전자상거래
-                      등에서의 소비자보호에 관한 법률」 및
-                      「소비자분쟁해결기준」 등 관련 법규에 따릅니다. 명확한
-                      환불 정책은 결제 대행사(PG)와의 관계에서 발생할 수 있는
-                      지불 거절(Chargeback) 분쟁을 예방하고, 안정적인 결제
-                      시스템을 유지하는 데 필수적입니다.
+                      <strong>4.</strong> 환불 절차, 분쟁 해결 등은 "전자상거래
+                      등에서의 소비자보호에 관한 법률" 및 "소비자분쟁해결기준"
+                      등 관련 법규에 따릅니다. 명확한 환불 정책은 결제
+                      대행사(PG)와의 관계에서 발생할 수 있는 지불
+                      거절(Chargeback) 분쟁을 예방하고, 안정적인 결제 시스템을
+                      유지하는 데 필수적입니다.
                     </p>
                   </div>
                 </div>

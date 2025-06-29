@@ -1,5 +1,3 @@
-import 'server-only';
-import { cookies } from 'next/headers';
 import type { SupportedLanguage } from './index';
 import { SUPPORTED_LANGUAGES } from './index';
 
@@ -8,64 +6,64 @@ const LANGUAGE_COOKIE_NAME = 'preferred-language';
 const COOKIE_MAX_AGE = 365 * 24 * 60 * 60; // 1년
 
 /**
- * 🌍 서버에서 사용자 언어 감지 (쿠키 기반)
+ * 🌍 서버에서 사용자 언어 감지 (React Router 쿠키 기반)
  */
-export async function detectUserLanguage(
-  acceptLanguageHeader?: string
-): Promise<SupportedLanguage> {
+export function detectUserLanguageFromRequest(
+  request: Request
+): SupportedLanguage {
   let detectedLanguage: SupportedLanguage = 'ko';
 
   try {
     // 1️⃣ 쿠키에서 언어 설정 조회
-    const cookieStore = await cookies();
-    const cookieLanguage = cookieStore.get(LANGUAGE_COOKIE_NAME)?.value;
-
-    if (
-      cookieLanguage &&
-      SUPPORTED_LANGUAGES.includes(cookieLanguage as SupportedLanguage)
-    ) {
-      detectedLanguage = cookieLanguage as SupportedLanguage;
-      return detectedLanguage;
+    const cookieHeader = request.headers.get('Cookie');
+    if (cookieHeader) {
+      const cookieLanguage = getCookieValue(cookieHeader, LANGUAGE_COOKIE_NAME);
+      if (
+        cookieLanguage &&
+        SUPPORTED_LANGUAGES.includes(cookieLanguage as SupportedLanguage)
+      ) {
+        return cookieLanguage as SupportedLanguage;
+      }
     }
 
     // 2️⃣ 브라우저 Accept-Language 헤더에서 감지
+    const acceptLanguageHeader = request.headers.get('Accept-Language');
     if (acceptLanguageHeader) {
       const browserLanguage = detectFromAcceptLanguage(acceptLanguageHeader);
       if (browserLanguage) {
         detectedLanguage = browserLanguage;
-        // 🍪 감지된 언어를 쿠키에 저장
-        await setLanguageCookie(detectedLanguage);
         return detectedLanguage;
       }
     }
 
-    // 3️⃣ 기본값 사용 및 쿠키 저장
-    await setLanguageCookie(detectedLanguage);
+    // 3️⃣ 기본값 사용
     return detectedLanguage;
   } catch (error) {
     console.error('언어 감지 중 오류 발생:', error);
-    await setLanguageCookie(detectedLanguage);
     return detectedLanguage;
   }
 }
 
 /**
- * 🍪 언어 설정을 쿠키에 저장
+ * 🍪 쿠키에서 값 추출 (React Router용)
  */
-export async function setLanguageCookie(language: SupportedLanguage) {
-  try {
-    const cookieStore = await cookies();
-    cookieStore.set(LANGUAGE_COOKIE_NAME, language, {
-      maxAge: COOKIE_MAX_AGE,
-      httpOnly: false, // 클라이언트에서도 접근 가능하도록
-      secure:
-        typeof process !== 'undefined' && process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-    });
-  } catch (error) {
-    console.error('쿠키 저장 중 오류 발생:', error);
+function getCookieValue(cookieHeader: string, name: string): string | null {
+  const cookies = cookieHeader.split(';');
+  for (const cookie of cookies) {
+    const [key, value] = cookie.trim().split('=');
+    if (key === name) {
+      return decodeURIComponent(value);
+    }
   }
+  return null;
+}
+
+/**
+ * 🍪 언어 설정 쿠키 생성 (React Router Response용)
+ */
+export function createLanguageCookie(language: SupportedLanguage): string {
+  const secure = process.env.NODE_ENV === 'production';
+  return `${LANGUAGE_COOKIE_NAME}=${language}; Max-Age=${COOKIE_MAX_AGE}; Path=/; SameSite=Lax; HttpOnly=false${secure ? '; Secure' : ''}`;
 }
 
 /**
@@ -127,23 +125,46 @@ export async function loadServerTranslations(
 }
 
 /**
- * 🔍 현재 요청의 언어 설정 조회
+ * 🔍 서버에서 번역 키 조회
  */
-export async function getCurrentLanguage(): Promise<SupportedLanguage> {
+export function getTranslation(
+  translations: Record<string, any>,
+  key: string,
+  fallback?: string
+): string {
   try {
-    const cookieStore = await cookies();
-    const language = cookieStore.get(LANGUAGE_COOKIE_NAME)?.value;
+    const keys = key.split('.');
+    let value = translations;
 
-    if (
-      language &&
-      SUPPORTED_LANGUAGES.includes(language as SupportedLanguage)
-    ) {
-      return language as SupportedLanguage;
+    for (const k of keys) {
+      if (value && typeof value === 'object' && k in value) {
+        value = value[k];
+      } else {
+        return fallback || key;
+      }
     }
 
-    return 'ko';
+    return typeof value === 'string' ? value : fallback || key;
   } catch (error) {
-    console.error('현재 언어 조회 실패:', error);
-    return 'ko';
+    console.error(`번역 키 조회 실패: ${key}`, error);
+    return fallback || key;
   }
+}
+
+/**
+ * 🛡 서버 사이드 번역 함수 (meta용)
+ */
+export async function createServerTranslator(
+  request: Request,
+  namespace: string = 'common'
+) {
+  const language = detectUserLanguageFromRequest(request);
+  const translations = await loadServerTranslations(language, namespace);
+
+  return {
+    t: (key: string, fallback?: string) =>
+      getTranslation(translations, key, fallback),
+    language,
+    translations,
+  };
 }

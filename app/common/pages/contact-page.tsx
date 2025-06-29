@@ -25,6 +25,26 @@ import {
 } from '~/common/components/ui/dialog';
 import { CheckCircle2, XCircle, Loader2, Shield } from 'lucide-react';
 import { Turnstile } from '@marsidev/react-turnstile';
+import { createServerTranslator } from '~/lib/i18n/language-manager.server';
+
+// 직접 타입 정의
+interface LoaderArgs {
+  request: Request;
+}
+
+interface ActionArgs {
+  request: Request;
+}
+
+interface MetaArgs {
+  data?: {
+    meta?: {
+      title: string;
+      description: string;
+    };
+    language?: string;
+  };
+}
 
 // Response utility function
 function json(object: any, init?: ResponseInit): Response {
@@ -37,8 +57,38 @@ function json(object: any, init?: ResponseInit): Response {
   });
 }
 
+// 🌍 Loader 함수 - 다국어 번역 로드
+export async function loader({ request }: LoaderArgs) {
+  try {
+    const { t, language } = await createServerTranslator(request, 'contact');
+
+    return {
+      // 🌍 meta용 번역 데이터
+      meta: {
+        title: t('title', '문의하기') + ' - SureCRM',
+        description: t(
+          'subtitle',
+          '궁금한 점이나 제안사항이 있으시면 언제든지 연락해주세요'
+        ),
+      },
+      language,
+    };
+  } catch (error) {
+    console.error('Contact page loader 에러:', error);
+
+    // 에러 시 한국어 기본값
+    return {
+      meta: {
+        title: '문의하기 - SureCRM',
+        description: '궁금한 점이나 제안사항이 있으시면 언제든지 연락해주세요',
+      },
+      language: 'ko' as const,
+    };
+  }
+}
+
 // Action function to handle form submission
-export async function action({ request }: Route.ActionArgs) {
+export async function action({ request }: ActionArgs) {
   const formData = await request.formData();
 
   console.log('📋 Contact form action called', {
@@ -74,16 +124,27 @@ export async function action({ request }: Route.ActionArgs) {
   }
 }
 
-// Meta function for SEO
-export function meta() {
-  // Note: 서버에서 실행되므로 기본값을 한국어로 설정
-  // 향후 서버 사이드 다국어 지원시 업데이트 필요
+// 🌍 다국어 메타 정보
+export function meta({ data }: MetaArgs) {
+  const meta = data?.meta;
+
+  if (!meta) {
+    // 기본값 fallback
+    return [
+      { title: '문의하기 - SureCRM' },
+      {
+        name: 'description',
+        content:
+          'SureCRM에 대한 문의사항을 남겨주세요. 빠른 시일 내에 답변드리겠습니다.',
+      },
+    ];
+  }
+
   return [
-    { title: '문의하기 - SureCRM' },
+    { title: meta.title },
     {
       name: 'description',
-      content:
-        'SureCRM에 대한 문의사항을 남겨주세요. 빠른 시일 내에 답변드리겠습니다.',
+      content: meta.description,
     },
   ];
 }

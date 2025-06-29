@@ -1,4 +1,8 @@
 {
+  "meta": {
+    "title": "요금제",
+    "description": "SureCRM Pro 요금제를 확인하고 14일 무료 체험을 시작하세요. 보험설계사를 위한 전문 CRM 솔루션."
+  },
   "title": "요금제",
   "subtitle": "SureCRM Pro로 비즈니스를 한 단계 업그레이드하세요",
   "plan": {

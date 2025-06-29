@@ -1,4 +1,8 @@
 {
+  "meta": {
+    "title": "Terms of Service",
+    "description": "Check out SureCRM's Terms of Service. We guide you through your rights and obligations regarding service usage."
+  },
   "title": "Terms of Service",
   "subtitle": "Detailed terms and conditions for using SureCRM services",
   "version": "Version: 2.0",
