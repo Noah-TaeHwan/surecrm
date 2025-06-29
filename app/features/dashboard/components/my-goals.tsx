@@ -1,4 +1,5 @@
 /* eslint-disable no-unused-vars */
+import { useState } from 'react';
 import {
   Card,
   CardContent,
@@ -8,11 +9,6 @@ import {
 import { Button } from '~/common/components/ui/button';
 import { Badge } from '~/common/components/ui/badge';
 import { Progress } from '~/common/components/ui/progress';
-import { useTranslation } from 'react-i18next';
-import {
-  formatCurrencyTable,
-  type SupportedLocale,
-} from '~/lib/utils/currency';
 import {
   TargetIcon,
   PlusIcon,
@@ -22,8 +18,8 @@ import {
   ChevronRightIcon,
   HomeIcon,
 } from '@radix-ui/react-icons';
-import { useState, useEffect } from 'react';
 import { GoalSettingModal } from './goal-setting-modal';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 
 interface Goal {
   id: string;
@@ -72,19 +68,10 @@ export function MyGoals({
   onGoalUpdate,
   onGoalDelete,
 }: MyGoalsProps) {
-  const { t, i18n } = useTranslation('dashboard');
-  const locale = (
-    i18n.language === 'ko' ? 'ko' : i18n.language === 'ja' ? 'ja' : 'en'
-  ) as SupportedLocale;
+  const { t, formatCurrency } = useHydrationSafeTranslation('dashboard');
 
   const [selectedPeriod, setSelectedPeriod] = useState(currentPeriod);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isHydrated, setIsHydrated] = useState(false);
-
-  // hydration 완료 후에만 번역된 텍스트 렌더링
-  useEffect(() => {
-    setIsHydrated(true);
-  }, []);
 
   // 선택된 기간의 목표들 필터링
   const periodGoals = goals.filter(goal => {
@@ -102,10 +89,14 @@ export function MyGoals({
 
   // 기간 포맷팅 함수 (hydration-safe)
   const formatPeriod = (year: number, month: number) => {
-    if (!isHydrated) {
-      return `${year}년 ${month}월`; // hydration 전 기본값
-    }
-    return t('dateFormat.yearMonth', { year, month });
+    // 각 언어별 포맷 정의
+    const formats = {
+      ko: `${year}년 ${month}월`,
+      en: `${year}.${month.toString().padStart(2, '0')}`,
+      ja: `${year}年${month}月`,
+    };
+
+    return t('dateFormat.yearMonth', formats.ko, { year, month });
   };
 
   // 월 이동 함수
@@ -129,32 +120,27 @@ export function MyGoals({
 
   // 목표 타입별 라벨 가져오기 (hydration-safe)
   const getGoalTypeLabel = (goalType: string) => {
-    if (!isHydrated) {
-      const defaultLabels: Record<string, string> = {
-        revenue: '매출',
-        clients: '고객',
-        referrals: '소개',
-        conversion_rate: '전환율',
-      };
-      return defaultLabels[goalType] || '기타';
-    }
-    return t(`myGoals.goalTypes.${goalType}`, {
-      defaultValue: t('myGoals.goalTypes.default'),
-    });
+    const defaultLabels: Record<string, string> = {
+      revenue: '매출',
+      clients: '고객',
+      referrals: '소개',
+      conversion_rate: '전환율',
+    };
+    return t(
+      `myGoals.goalTypes.${goalType}`,
+      defaultLabels[goalType] || '기타'
+    );
   };
 
   // 목표 타입별 단위 가져오기 (hydration-safe)
   const getGoalTypeUnit = (goalType: string) => {
-    if (!isHydrated) {
-      const defaultUnits: Record<string, string> = {
-        revenue: '만원',
-        clients: '명',
-        referrals: '건',
-        conversion_rate: '%',
-      };
-      return defaultUnits[goalType] || '';
-    }
-    return t(`myGoals.units.${goalType}`, { defaultValue: '' });
+    const defaultUnits: Record<string, string> = {
+      revenue: '만원',
+      clients: '명',
+      referrals: '건',
+      conversion_rate: '%',
+    };
+    return t(`myGoals.units.${goalType}`, defaultUnits[goalType] || '');
   };
 
   // 목표 달성률에 따른 색상 결정
@@ -169,13 +155,13 @@ export function MyGoals({
   const getGoalStatus = (progress: number) => {
     if (progress >= 100) {
       return {
-        status: isHydrated ? t('myGoals.completed') : '완료',
+        status: t('myGoals.completed', '완료'),
         color:
           'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400',
       };
     }
     return {
-      status: isHydrated ? t('myGoals.inProgress') : '진행 중',
+      status: t('myGoals.inProgress', '진행 중'),
       color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400',
     };
   };
@@ -183,7 +169,7 @@ export function MyGoals({
   // 목표값 포맷팅
   const formatGoalValue = (value: number, goalType: string) => {
     if (goalType === 'revenue') {
-      return formatCurrencyTable(value * 10000, locale); // 만원 단위를 원 단위로 변환
+      return formatCurrency(value * 10000); // 만원 단위를 원 단위로 변환
     }
     return `${value.toLocaleString()}${getGoalTypeUnit(goalType)}`;
   };
@@ -196,7 +182,7 @@ export function MyGoals({
             <div className="p-1.5 bg-primary/10 rounded-lg">
               <TargetIcon className="h-4 w-4 text-primary" />
             </div>
-            {isHydrated ? t('myGoals.title') : '내 목표'}
+            {t('myGoals.title', '내 목표')}
           </CardTitle>
           <Button
             onClick={() => setIsModalOpen(true)}
@@ -205,7 +191,7 @@ export function MyGoals({
             className="text-xs"
           >
             <PlusIcon className="h-3 w-3 mr-1" />
-            {isHydrated ? t('myGoals.setGoal') : '목표 설정'}
+            {t('myGoals.setGoal', '목표 설정')}
           </Button>
         </div>
 
@@ -243,9 +229,7 @@ export function MyGoals({
               className="text-xs text-primary hover:text-primary/80"
             >
               <HomeIcon className="h-3 w-3 mr-1" />
-              {isHydrated
-                ? t('myGoals.backToCurrentMonth')
-                : '현재 월로 돌아가기'}
+              {t('myGoals.backToCurrentMonth', '현재 월로 돌아가기')}
             </Button>
           )}
         </div>
@@ -261,7 +245,7 @@ export function MyGoals({
                   {periodGoals.filter(goal => goal.progress >= 100).length}
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  {isHydrated ? t('myGoals.achievedGoals') : '달성한 목표'}
+                  {t('myGoals.achievedGoals', '달성한 목표')}
                 </div>
               </div>
               <div className="text-center">
@@ -273,7 +257,7 @@ export function MyGoals({
                   }
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  {isHydrated ? t('myGoals.inProgressGoals') : '진행 중인 목표'}
+                  {t('myGoals.inProgressGoals', '진행 중인 목표')}
                 </div>
               </div>
               <div className="text-center">
@@ -281,7 +265,7 @@ export function MyGoals({
                   {periodGoals.filter(goal => goal.progress === 0).length}
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  {isHydrated ? t('myGoals.unachievedGoals') : '미시작 목표'}
+                  {t('myGoals.unachievedGoals', '미시작 목표')}
                 </div>
               </div>
             </div>
@@ -316,7 +300,7 @@ export function MyGoals({
                       </div>
                       <div className="text-right">
                         <div className="text-xs text-muted-foreground">
-                          {isHydrated ? t('myGoals.target') : '목표'}
+                          {t('myGoals.target', '목표')}
                         </div>
                         <div className="font-medium text-sm">
                           {formatGoalValue(goal.targetValue, goal.goalType)}
@@ -327,7 +311,7 @@ export function MyGoals({
                     <div className="space-y-2">
                       <div className="flex items-center justify-between text-xs">
                         <span className="text-muted-foreground">
-                          {isHydrated ? t('myGoals.progress') : '진행률'}
+                          {t('myGoals.progress', '진행률')}
                         </span>
                         <div className="flex items-center gap-2">
                           <span className={getProgressColor(goal.progress)}>
@@ -350,16 +334,13 @@ export function MyGoals({
                             goal.progress > 100 ? (
                               <span className="flex items-center gap-1">
                                 <TriangleUpIcon className="h-3 w-3" />
-                                {isHydrated
-                                  ? t('myGoals.goalExceeded', {
-                                      percent: (goal.progress - 100).toFixed(1),
-                                    })
-                                  : `목표 초과 달성 (+${(goal.progress - 100).toFixed(1)}%)`}
+                                {t(
+                                  'myGoals.goalExceeded',
+                                  `목표 초과 달성 (+${(goal.progress - 100).toFixed(1)}%)`
+                                )}
                               </span>
-                            ) : isHydrated ? (
-                              t('myGoals.goalAchieved')
                             ) : (
-                              '목표 달성'
+                              t('myGoals.goalAchieved', '목표 달성')
                             )
                           ) : (
                             `${goal.progress.toFixed(1)}%`
@@ -380,17 +361,13 @@ export function MyGoals({
             {isCurrentMonth ? (
               <>
                 <h3 className="font-medium text-foreground mb-2">
-                  {isHydrated
-                    ? t('myGoals.setGoalPrompt')
-                    : '목표를 설정하세요'}
+                  {t('myGoals.setGoalPrompt', '목표를 설정하세요')}
                 </h3>
                 <p className="text-sm text-muted-foreground mb-4">
-                  {isHydrated
-                    ? t('myGoals.setGoalDescription', {
-                        year: selectedPeriod.year,
-                        month: selectedPeriod.month,
-                      })
-                    : `${selectedPeriod.year}년 ${selectedPeriod.month}월의 목표를 설정해보세요.`}
+                  {t(
+                    'myGoals.setGoalDescription',
+                    `${selectedPeriod.year}년 ${selectedPeriod.month}월의 목표를 설정해보세요.`
+                  )}
                 </p>
                 <Button
                   onClick={() => setIsModalOpen(true)}
@@ -398,23 +375,19 @@ export function MyGoals({
                   variant="outline"
                 >
                   <PlusIcon className="h-4 w-4 mr-1" />
-                  {isHydrated ? t('myGoals.setFirstGoal') : '첫 번째 목표 설정'}
+                  {t('myGoals.setFirstGoal', '첫 번째 목표 설정')}
                 </Button>
               </>
             ) : (
               <>
                 <h3 className="font-medium text-foreground mb-2">
-                  {isHydrated
-                    ? t('myGoals.noGoalsSet')
-                    : '설정된 목표가 없습니다'}
+                  {t('myGoals.noGoalsSet', '설정된 목표가 없습니다')}
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  {isHydrated
-                    ? t('myGoals.noGoalsForMonth', {
-                        year: selectedPeriod.year,
-                        month: selectedPeriod.month,
-                      })
-                    : `${selectedPeriod.year}년 ${selectedPeriod.month}월에 설정된 목표가 없습니다.`}
+                  {t(
+                    'myGoals.noGoalsForMonth',
+                    `${selectedPeriod.year}년 ${selectedPeriod.month}월에 설정된 목표가 없습니다.`
+                  )}
                 </p>
               </>
             )}

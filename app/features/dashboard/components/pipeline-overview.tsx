@@ -7,9 +7,8 @@ import {
 import { Button } from '~/common/components/ui/button';
 import { Badge } from '~/common/components/ui/badge';
 import { BarChartIcon, ChevronRightIcon } from '@radix-ui/react-icons';
-import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-import { useState, useEffect } from 'react';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 
 interface PipelineStage {
   id: string;
@@ -30,13 +29,7 @@ export function PipelineOverview({
   totalValue,
   monthlyTarget,
 }: PipelineOverviewProps) {
-  const { t } = useTranslation('dashboard');
-  const [isHydrated, setIsHydrated] = useState(false);
-
-  // hydration 완료 후에만 번역된 텍스트 렌더링
-  useEffect(() => {
-    setIsHydrated(true);
-  }, []);
+  const { t, isHydrated } = useHydrationSafeTranslation('dashboard');
 
   const totalDeals = stages.reduce((sum, stage) => sum + stage.count, 0);
 
@@ -45,15 +38,9 @@ export function PipelineOverview({
 
   // 파이프라인 단계명을 번역키로 변환하는 함수 (hydration-safe)
   const translateStageName = (stageName: string) => {
-    if (!isHydrated) {
-      return stageName; // hydration 전에는 원본 이름 반환
-    }
-
-    // 기존 한국어 키들을 번역키로 변환
-    const translatedStage = t(`pipelineStages.${stageName}`, {
-      defaultValue: '',
-    });
-    if (translatedStage && translatedStage !== stageName) {
+    // 번역된 단계명 시도
+    const translatedStage = t(`pipelineStages.${stageName}`, '');
+    if (translatedStage) {
       return translatedStage;
     }
 
@@ -69,7 +56,7 @@ export function PipelineOverview({
             <div className="p-1.5 bg-primary/10 rounded-lg">
               <BarChartIcon className="h-4 w-4 text-primary" />
             </div>
-            {isHydrated ? t('pipelineOverview.title') : '영업 파이프라인'}
+            {t('pipelineOverview.title', '영업 파이프라인')}
           </CardTitle>
           <div className="flex items-center gap-2">
             <Link to="/pipeline">
@@ -78,7 +65,7 @@ export function PipelineOverview({
                 size="sm"
                 className="text-xs text-muted-foreground hover:text-primary"
               >
-                {isHydrated ? t('pipelineOverview.viewDetails') : '자세히 보기'}
+                {t('pipelineOverview.viewDetails', '자세히 보기')}
                 <ChevronRightIcon className="h-3 w-3 ml-1" />
               </Button>
             </Link>
@@ -91,7 +78,7 @@ export function PipelineOverview({
             {/* 파이프라인 단계별 현황 */}
             <div className="space-y-2">
               <h4 className="text-sm font-medium text-foreground mb-3">
-                {isHydrated ? t('pipelineOverview.stageStatus') : '단계별 현황'}
+                {t('pipelineOverview.stageStatus', '단계별 현황')}
               </h4>
               {stages.map((stage, index) => {
                 // 단계별 색상 매핑 (톤다운된 색상으로 통일)
@@ -122,15 +109,11 @@ export function PipelineOverview({
                       <div className="text-right">
                         <div className="text-sm font-medium text-foreground">
                           {stage.count}
-                          {isHydrated
-                            ? t('pipelineOverview.units.deals')
-                            : '건'}
+                          {t('pipelineOverview.units.deals', '건')}
                         </div>
                         <div className="text-xs text-muted-foreground">
                           {stage.value.toLocaleString()}
-                          {isHydrated
-                            ? t('pipelineOverview.units.currency')
-                            : '만원'}
+                          {t('pipelineOverview.units.currency', '만원')}
                         </div>
                       </div>
                       {stage.conversionRate && stage.conversionRate > 0 && (
@@ -154,9 +137,7 @@ export function PipelineOverview({
                   {totalDeals}
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  {isHydrated
-                    ? t('pipelineOverview.summary.totalDeals')
-                    : '총 거래'}
+                  {t('pipelineOverview.summary.totalDeals', '총 거래')}
                 </div>
               </div>
               <div className="text-center p-2 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors">
@@ -164,9 +145,7 @@ export function PipelineOverview({
                   {totalValue.toLocaleString()}
                 </div>
                 <div className="text-xs text-primary/80">
-                  {isHydrated
-                    ? t('pipelineOverview.summary.expectedRevenue')
-                    : '예상 매출'}
+                  {t('pipelineOverview.summary.expectedRevenue', '예상 매출')}
                 </div>
               </div>
               <div className="text-center p-2 rounded-lg bg-muted/30 hover:bg-muted/40 transition-colors">
@@ -174,9 +153,7 @@ export function PipelineOverview({
                   {totalDeals > 0 ? (totalValue / totalDeals).toFixed(0) : '0'}
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  {isHydrated
-                    ? t('pipelineOverview.summary.averagePerDeal')
-                    : '평균 거래액'}
+                  {t('pipelineOverview.summary.averagePerDeal', '평균 거래액')}
                 </div>
               </div>
             </div>
@@ -188,16 +165,18 @@ export function PipelineOverview({
               <BarChartIcon className="h-8 w-8 text-muted-foreground" />
             </div>
             <p className="text-sm text-muted-foreground mb-3">
-              {isHydrated
-                ? t('pipelineOverview.emptyState.noPipeline')
-                : '파이프라인 데이터가 없습니다.'}
+              {t(
+                'pipelineOverview.emptyState.noPipeline',
+                '파이프라인 데이터가 없습니다.'
+              )}
             </p>
             <div className="flex flex-col gap-2 items-center">
               <Link to="/pipeline">
                 <Button size="sm" variant="outline">
-                  {isHydrated
-                    ? t('pipelineOverview.emptyState.managePipeline')
-                    : '파이프라인 관리'}
+                  {t(
+                    'pipelineOverview.emptyState.managePipeline',
+                    '파이프라인 관리'
+                  )}
                 </Button>
               </Link>
             </div>

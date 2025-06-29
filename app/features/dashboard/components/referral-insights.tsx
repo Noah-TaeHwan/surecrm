@@ -23,9 +23,8 @@ import {
   BarChartIcon,
   QuestionMarkCircledIcon,
 } from '@radix-ui/react-icons';
-import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-import { useState, useEffect } from 'react';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 
 interface TopReferrer {
   id: string;
@@ -55,13 +54,7 @@ export function ReferralInsights({
   topReferrers,
   networkStats,
 }: ReferralInsightsProps) {
-  const { t } = useTranslation('dashboard');
-  const [isHydrated, setIsHydrated] = useState(false);
-
-  // hydration 완료 후에만 번역된 텍스트 렌더링
-  useEffect(() => {
-    setIsHydrated(true);
-  }, []);
+  const { t, isHydrated } = useHydrationSafeTranslation('dashboard');
 
   const getRankIcon = (rank: number) => {
     switch (rank) {
@@ -219,9 +212,7 @@ export function ReferralInsights({
               <div className="p-1.5 bg-primary/10 rounded-lg">
                 <Link2Icon className="h-4 w-4 text-primary" />
               </div>
-              {isHydrated
-                ? t('referralInsights.networkStatus')
-                : '네트워크 현황'}
+              {t('referralInsights.networkStatus', '네트워크 현황')}
             </CardTitle>
             <Link to="/network">
               <Button
@@ -229,7 +220,7 @@ export function ReferralInsights({
                 size="sm"
                 className="text-xs text-muted-foreground hover:text-primary"
               >
-                {isHydrated ? t('referralInsights.viewDetails') : '자세히 보기'}
+                {t('referralInsights.viewDetails', '자세히 보기')}
                 <ChevronRightIcon className="h-3 w-3 ml-1" />
               </Button>
             </Link>
