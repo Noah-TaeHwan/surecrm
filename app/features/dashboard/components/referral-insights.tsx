@@ -25,6 +25,7 @@ import {
 } from '@radix-ui/react-icons';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
+import { useState, useEffect } from 'react';
 
 interface TopReferrer {
   id: string;
@@ -55,6 +56,12 @@ export function ReferralInsights({
   networkStats,
 }: ReferralInsightsProps) {
   const { t } = useTranslation('dashboard');
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // hydration 완료 후에만 번역된 텍스트 렌더링
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
   const getRankIcon = (rank: number) => {
     switch (rank) {
@@ -212,7 +219,9 @@ export function ReferralInsights({
               <div className="p-1.5 bg-primary/10 rounded-lg">
                 <Link2Icon className="h-4 w-4 text-primary" />
               </div>
-              {t('referralInsights.networkStatus')}
+              {isHydrated
+                ? t('referralInsights.networkStatus')
+                : '네트워크 현황'}
             </CardTitle>
             <Link to="/network">
               <Button
@@ -220,7 +229,7 @@ export function ReferralInsights({
                 size="sm"
                 className="text-xs text-muted-foreground hover:text-primary"
               >
-                {t('referralInsights.viewDetails')}
+                {isHydrated ? t('referralInsights.viewDetails') : '자세히 보기'}
                 <ChevronRightIcon className="h-3 w-3 ml-1" />
               </Button>
             </Link>
@@ -237,14 +246,20 @@ export function ReferralInsights({
                 </div>
                 <div className="flex items-center justify-center gap-1">
                   <span className="text-xs text-muted-foreground">
-                    {t('referralInsights.stats.totalConnections')}
+                    {isHydrated
+                      ? t('referralInsights.stats.totalConnections')
+                      : '총 연결'}
                   </span>
                   <Tooltip>
                     <TooltipTrigger>
                       <QuestionMarkCircledIcon className="h-3 w-3 text-muted-foreground hover:text-foreground transition-colors" />
                     </TooltipTrigger>
                     <TooltipContent side="top" className="max-w-xs">
-                      <p>{t('referralInsights.tooltips.totalConnections')}</p>
+                      <p>
+                        {isHydrated
+                          ? t('referralInsights.tooltips.totalConnections')
+                          : '네트워크에 연결된 총 인원 수'}
+                      </p>
                     </TooltipContent>
                   </Tooltip>
                 </div>
@@ -257,14 +272,20 @@ export function ReferralInsights({
                 </div>
                 <div className="flex items-center justify-center gap-1">
                   <span className="text-xs text-muted-foreground">
-                    {t('referralInsights.stats.maxDepth')}
+                    {isHydrated
+                      ? t('referralInsights.stats.maxDepth')
+                      : '최대 깊이'}
                   </span>
                   <Tooltip>
                     <TooltipTrigger>
                       <QuestionMarkCircledIcon className="h-3 w-3 text-muted-foreground hover:text-foreground transition-colors" />
                     </TooltipTrigger>
                     <TooltipContent side="top" className="max-w-xs">
-                      <p>{t('referralInsights.tooltips.maxDepth')}</p>
+                      <p>
+                        {isHydrated
+                          ? t('referralInsights.tooltips.maxDepth')
+                          : '소개 네트워크의 최대 단계 수'}
+                      </p>
                     </TooltipContent>
                   </Tooltip>
                 </div>
@@ -277,14 +298,20 @@ export function ReferralInsights({
                 </div>
                 <div className="flex items-center justify-center gap-1">
                   <span className="text-xs text-muted-foreground">
-                    {t('referralInsights.stats.activeReferrers')}
+                    {isHydrated
+                      ? t('referralInsights.stats.activeReferrers')
+                      : '활성 소개자'}
                   </span>
                   <Tooltip>
                     <TooltipTrigger>
                       <QuestionMarkCircledIcon className="h-3 w-3 text-muted-foreground hover:text-foreground transition-colors" />
                     </TooltipTrigger>
                     <TooltipContent side="top" className="max-w-xs">
-                      <p>{t('referralInsights.tooltips.activeReferrers')}</p>
+                      <p>
+                        {isHydrated
+                          ? t('referralInsights.tooltips.activeReferrers')
+                          : '최근 30일간 활동한 소개자 수'}
+                      </p>
                     </TooltipContent>
                   </Tooltip>
                 </div>
@@ -297,14 +324,20 @@ export function ReferralInsights({
                 </div>
                 <div className="flex items-center justify-center gap-1">
                   <span className="text-xs text-muted-foreground">
-                    {t('referralInsights.stats.monthlyGrowth')}
+                    {isHydrated
+                      ? t('referralInsights.stats.monthlyGrowth')
+                      : '월간 성장률'}
                   </span>
                   <Tooltip>
                     <TooltipTrigger>
                       <QuestionMarkCircledIcon className="h-3 w-3 text-muted-foreground hover:text-foreground transition-colors" />
                     </TooltipTrigger>
                     <TooltipContent side="top" className="max-w-xs">
-                      <p>{t('referralInsights.tooltips.monthlyGrowth')}</p>
+                      <p>
+                        {isHydrated
+                          ? t('referralInsights.tooltips.monthlyGrowth')
+                          : '지난 달 대비 네트워크 성장률'}
+                      </p>
                     </TooltipContent>
                   </Tooltip>
                 </div>
@@ -318,17 +351,23 @@ export function ReferralInsights({
               <BarChartIcon className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
               <div>
                 <p className="text-sm font-medium text-foreground mb-1">
-                  {t('referralInsights.insights.title')}
+                  {isHydrated
+                    ? t('referralInsights.insights.title')
+                    : '인사이트'}
                 </p>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  {t('referralInsights.insights.growthMessage', {
-                    growth: networkStats.monthlyGrowth,
-                  })}
+                  {isHydrated
+                    ? t('referralInsights.insights.growthMessage', {
+                        growth: networkStats.monthlyGrowth,
+                      })
+                    : `이번 달 네트워크가 ${networkStats.monthlyGrowth}% 성장했습니다.`}
                   {topReferrers[0] && (
                     <>
-                      {t('referralInsights.insights.topPerformerMessage', {
-                        name: topReferrers[0].name,
-                      })}
+                      {isHydrated
+                        ? t('referralInsights.insights.topPerformerMessage', {
+                            name: topReferrers[0].name,
+                          })
+                        : ` ${topReferrers[0].name}님이 가장 활발하게 활동하고 있습니다.`}
                     </>
                   )}
                 </p>

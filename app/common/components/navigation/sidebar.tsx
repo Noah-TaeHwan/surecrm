@@ -18,6 +18,8 @@ import { cn } from '~/lib/utils';
 import { Separator } from '~/common/components/ui/separator';
 import { VersionDisplay } from '~/common/components/navigation/version-display';
 import { InsuranceAgentEvents } from '~/lib/utils/analytics';
+import { useTranslation } from 'react-i18next';
+import { useState, useEffect } from 'react';
 
 interface SidebarProps {
   className?: string;
@@ -41,31 +43,38 @@ export function Sidebar({
   'aria-label': ariaLabel,
 }: SidebarProps) {
   const location = useLocation();
+  const { t } = useTranslation('navigation');
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // hydration 완료 후에만 번역된 텍스트 렌더링
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
   // 기본 네비게이션 아이템들 (모바일과 동일)
   const mainNavItems: NavItem[] = [
     {
-      label: '대시보드',
+      label: isHydrated ? t('sidebar.main.dashboard') : '대시보드',
       href: '/dashboard',
       icon: <LayoutDashboard className="h-5 w-5" />,
     },
     {
-      label: '소개 네트워크',
+      label: isHydrated ? t('sidebar.tools.network') : '소개 네트워크',
       href: '/network',
       icon: <Network className="h-5 w-5" />,
     },
     {
-      label: '영업 파이프라인',
+      label: isHydrated ? t('sidebar.main.pipeline') : '영업 파이프라인',
       href: '/pipeline',
       icon: <PieChart className="h-5 w-5" />,
     },
     {
-      label: '고객 관리',
+      label: isHydrated ? t('sidebar.main.clients') : '고객 관리',
       href: '/clients',
       icon: <Users className="h-5 w-5" />,
     },
     {
-      label: '일정 관리',
+      label: isHydrated ? t('sidebar.main.calendar') : '일정 관리',
       href: '/calendar',
       icon: <Calendar className="h-5 w-5" />,
     },
@@ -74,27 +83,27 @@ export function Sidebar({
   // 추가 기능 메뉴들 (데스크톱에서만 표시)
   const additionalNavItems: NavItem[] = [
     {
-      label: '초대장 관리',
+      label: isHydrated ? t('sidebar.management.invitations') : '초대장 관리',
       href: '/invitations',
       icon: <Mail className="h-5 w-5" />,
     },
     {
-      label: '알림',
+      label: isHydrated ? t('sidebar.tools.notifications') : '알림',
       href: '/notifications',
       icon: <Bell className="h-5 w-5" />,
     },
     {
-      label: '보고서',
+      label: isHydrated ? t('sidebar.main.reports') : '보고서',
       href: '/reports',
       icon: <FileText className="h-5 w-5" />,
     },
     {
-      label: '구독 관리',
+      label: isHydrated ? t('sidebar.management.billing') : '구독 관리',
       href: '/billing',
       icon: <CreditCard className="h-5 w-5" />,
     },
     {
-      label: '설정',
+      label: isHydrated ? t('sidebar.management.settings') : '설정',
       href: '/settings',
       icon: <Settings className="h-5 w-5" />,
     },

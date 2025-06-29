@@ -18,6 +18,7 @@ import {
   type SupportedLocale,
 } from '~/lib/utils/currency';
 import { Link } from 'react-router';
+import { useState, useEffect } from 'react';
 
 interface Client {
   id: string;
@@ -39,6 +40,13 @@ export function RecentClients({
   totalClients,
 }: RecentClientsProps) {
   const { t, i18n } = useTranslation('dashboard');
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // hydration 완료 후에만 번역된 텍스트 렌더링
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
   const locale = (
     i18n.language === 'ko' ? 'ko' : i18n.language === 'ja' ? 'ja' : 'en'
   ) as SupportedLocale;
@@ -60,11 +68,27 @@ export function RecentClients({
     }
   };
 
+  // hydration-safe 상태 텍스트
   const getStatusText = (status: string) => {
+    if (!isHydrated) {
+      const defaultStatus: Record<string, string> = {
+        prospect: '잠재고객',
+        contacted: '연락됨',
+        proposal: '제안',
+        contracted: '계약',
+        completed: '완료',
+      };
+      return defaultStatus[status] || status;
+    }
     return t(`stages.${status}`, { defaultValue: status });
   };
 
+  // hydration-safe 단계 텍스트
   const getStageText = (stage: string) => {
+    if (!isHydrated) {
+      return stage; // hydration 전에는 원본 텍스트 반환
+    }
+
     const translatedStage = t(`pipelineStages.${stage}`, { defaultValue: '' });
     if (translatedStage && translatedStage !== stage) {
       return translatedStage;
@@ -78,7 +102,14 @@ export function RecentClients({
     return stage;
   };
 
+  // hydration-safe 날짜 포맷
   const formatDate = (dateStr: string) => {
+    if (!isHydrated) {
+      // hydration 전에는 간단한 형식으로 반환
+      const date = new Date(dateStr);
+      return `${date.getMonth() + 1}/${date.getDate()}`;
+    }
+
     const locale =
       i18n.language === 'ko'
         ? 'ko-KR'
@@ -100,7 +131,7 @@ export function RecentClients({
             <div className="p-1.5 bg-primary/10 rounded-lg">
               <PersonIcon className="h-4 w-4 text-primary" />
             </div>
-            {t('recentClients.title')}
+            {isHydrated ? t('recentClients.title') : '최근 고객 현황'}
           </CardTitle>
           <Link to="/clients">
             <Button
@@ -108,7 +139,7 @@ export function RecentClients({
               size="sm"
               className="text-xs text-muted-foreground hover:text-primary"
             >
-              {t('recentClients.viewAll')}
+              {isHydrated ? t('recentClients.viewAll') : '전체 보기'}
               <ChevronRightIcon className="h-3 w-3 ml-1" />
             </Button>
           </Link>
@@ -122,7 +153,7 @@ export function RecentClients({
               {totalClients}
             </div>
             <div className="text-sm text-muted-foreground">
-              {t('recentClients.totalClients')}
+              {isHydrated ? t('recentClients.totalClients') : '총 고객'}
             </div>
           </div>
         </div>
@@ -130,7 +161,7 @@ export function RecentClients({
         {/* 최근 고객 목록 */}
         <div className="space-y-2">
           <h4 className="text-sm font-medium text-foreground mb-2">
-            {t('recentClients.recentActivity')}
+            {isHydrated ? t('recentClients.recentActivity') : '최근 활동'}
           </h4>
           {recentClients.length > 0 ? (
             <>
@@ -171,7 +202,9 @@ export function RecentClients({
                       {client.referredBy && (
                         <div className="flex items-center gap-1 mt-1">
                           <span className="text-xs text-muted-foreground">
-                            {t('recentClients.referredBy')}{' '}
+                            {isHydrated
+                              ? t('recentClients.referredBy')
+                              : '추천인'}{' '}
                             <span className="font-medium">
                               {client.referredBy}
                             </span>
@@ -181,7 +214,9 @@ export function RecentClients({
 
                       <div className="mt-1">
                         <span className="text-xs text-muted-foreground">
-                          {t('recentClients.expectedValue')}{' '}
+                          {isHydrated
+                            ? t('recentClients.expectedValue')
+                            : '예상 가치'}{' '}
                           <span className="font-medium text-primary">
                             {formatCurrencyTable(client.potentialValue, locale)}
                           </span>
@@ -201,9 +236,11 @@ export function RecentClients({
                 <div className="text-center pt-2">
                   <Link to="/clients">
                     <Button variant="outline" size="sm" className="text-xs">
-                      {t('recentClients.moreClients', {
-                        count: recentClients.length - 5,
-                      })}
+                      {isHydrated
+                        ? t('recentClients.moreClients', {
+                            count: recentClients.length - 5,
+                          })
+                        : `${recentClients.length - 5}명 더 보기`}
                     </Button>
                   </Link>
                 </div>
@@ -215,11 +252,11 @@ export function RecentClients({
                 <PersonIcon className="h-6 w-6 text-muted-foreground" />
               </div>
               <p className="text-sm text-muted-foreground mb-3">
-                {t('recentClients.noClients')}
+                {isHydrated ? t('recentClients.noClients') : '고객이 없습니다.'}
               </p>
               <Link to="/clients">
                 <Button size="sm" variant="outline">
-                  {t('recentClients.addClient')}
+                  {isHydrated ? t('recentClients.addClient') : '고객 추가'}
                 </Button>
               </Link>
             </div>
