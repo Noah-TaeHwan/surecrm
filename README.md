@@ -109,8 +109,61 @@ Built with ❤️ using React Router.
 - **Database**: Supabase (PostgreSQL)
 - **ORM**: Drizzle ORM
 - **UI Components**: Shadcn UI, Radix UI
+- **Internationalization**: react-i18next
 - **Analytics**: Google Analytics 4
 - **Deployment**: Vercel
+
+## 🌍 다국어 지원 (v0.5.0+)
+
+SureCRM은 글로벌 SaaS 서비스로 확장하기 위해 다국어 지원을 제공합니다.
+
+### 지원 언어
+
+- 🇰🇷 **한국어** (ko) - 기본 언어
+- 🇺🇸 **영어** (en) - 글로벌 시장 대상
+- 🇯🇵 **일본어** (ja) - 일본 시장 진출
+
+### 기능
+
+- ⚡ **실시간 언어 변경**: 페이지 새로고침 없이 즉시 언어 전환
+- 🗂️ **네임스페이스 기반**: 기능별로 분리된 번역 파일 관리
+- 🔄 **폴백 시스템**: 번역 누락 시 자동 폴백 언어 제공
+- 🎯 **타입 안전성**: TypeScript 기반 번역 키 타입 체크
+- 💾 **설정 저장**: 사용자 언어 설정 자동 저장
+
+### 번역 파일 구조
+
+```
+public/locales/
+├── ko/                 # 한국어
+│   ├── common.json     # 공통 UI 요소
+│   ├── navigation.json # 메뉴, 네비게이션
+│   ├── forms.json      # 폼, 에러 메시지
+│   ├── clients.json    # 고객 관리
+│   └── calendar.json   # 일정 관리
+├── en/                 # 영어 (동일한 구조)
+└── ja/                 # 일본어 (동일한 구조)
+```
+
+### 개발자 도구
+
+```bash
+# 번역 키 추출
+npm run i18n:extract
+
+# 번역 완성도 검증
+npm run i18n:validate
+
+# 누락된 번역 키 찾기
+npm run i18n:missing
+
+# 번역 통계 확인
+npm run i18n:stats
+```
+
+### 테스트 페이지
+
+개발 서버 실행 후 `/test-i18n`에서 다국어 지원 기능을 테스트할 수 있습니다.
 
 ## 🚀 빠른 시작
 

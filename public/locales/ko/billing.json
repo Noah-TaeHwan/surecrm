@@ -1,0 +1,76 @@
+{
+  "title": "결제 관리",
+  "subscription": {
+    "current": "현재 구독",
+    "upgrade": "업그레이드",
+    "downgrade": "다운그레이드",
+    "cancel": "구독 취소",
+    "renew": "갱신",
+    "expired": "만료됨",
+    "active": "활성",
+    "trial": "체험",
+    "trialEnds": "체험 종료"
+  },
+  "plans": {
+    "free": "무료",
+    "basic": "베이직",
+    "professional": "프로페셔널",
+    "enterprise": "엔터프라이즈",
+    "monthly": "월간",
+    "yearly": "연간",
+    "perMonth": "월",
+    "perYear": "년",
+    "savings": "절약",
+    "mostPopular": "가장 인기"
+  },
+  "features": {
+    "clients": "고객",
+    "storage": "저장 공간",
+    "users": "사용자",
+    "support": "지원",
+    "integrations": "연동",
+    "reports": "보고서",
+    "unlimited": "무제한",
+    "limited": "제한됨"
+  },
+  "payment": {
+    "method": "결제 수단",
+    "creditCard": "신용카드",
+    "debitCard": "체크카드",
+    "paypal": "페이팔",
+    "bankTransfer": "계좌이체",
+    "cardNumber": "카드 번호",
+    "expiryDate": "만료일",
+    "cvv": "CVV",
+    "nameOnCard": "카드 소유자명",
+    "billingAddress": "청구지 주소"
+  },
+  "invoice": {
+    "invoices": "청구서",
+    "download": "다운로드",
+    "print": "인쇄",
+    "paid": "결제 완료",
+    "pending": "결제 대기",
+    "overdue": "연체",
+    "amount": "금액",
+    "dueDate": "결제 기한",
+    "issueDate": "발행일"
+  },
+  "actions": {
+    "subscribe": "구독하기",
+    "updatePayment": "결제 정보 업데이트",
+    "viewInvoices": "청구서 보기",
+    "changePlan": "플랜 변경",
+    "addCard": "카드 추가",
+    "removeCard": "카드 제거",
+    "setDefault": "기본 카드로 설정"
+  },
+  "messages": {
+    "subscriptionSuccess": "구독이 완료되었습니다",
+    "paymentSuccess": "결제가 완료되었습니다",
+    "updateSuccess": "결제 정보가 업데이트되었습니다",
+    "cancellationSuccess": "구독이 취소되었습니다",
+    "paymentFailed": "결제에 실패했습니다",
+    "trialExpired": "체험 기간이 만료되었습니다"
+  }
+}

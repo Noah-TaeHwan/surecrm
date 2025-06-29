@@ -1,0 +1,62 @@
+{
+  "validation": {
+    "required": "This field is required.",
+    "email": "Please enter a valid email address.",
+    "phone": "Please enter a valid phone number.",
+    "password": "Please enter a password.",
+    "passwordConfirm": "Passwords do not match.",
+    "minLength": "Please enter at least {{min}} characters.",
+    "maxLength": "Maximum {{max}} characters allowed.",
+    "number": "Please enter numbers only.",
+    "date": "Please select a valid date.",
+    "url": "Please enter a valid URL.",
+    "ssn": "Please enter a valid social security number."
+  },
+  "placeholder": {
+    "name": "Enter your name",
+    "email": "Enter your email address",
+    "phone": "Enter your phone number",
+    "password": "Enter your password",
+    "confirmPassword": "Confirm your password",
+    "search": "Enter search term",
+    "memo": "Enter memo",
+    "amount": "Enter amount",
+    "selectOption": "Select an option",
+    "selectDate": "Select a date",
+    "selectTime": "Select a time"
+  },
+  "label": {
+    "name": "Name",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "email": "Email",
+    "phone": "Phone",
+    "mobile": "Mobile",
+    "address": "Address",
+    "zipCode": "ZIP Code",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "rememberMe": "Remember me",
+    "agreeTerms": "I agree to the Terms of Service",
+    "agreePrivacy": "I agree to the Privacy Policy",
+    "agreeMarketing": "I agree to receive marketing communications",
+    "birthDate": "Date of Birth",
+    "gender": "Gender",
+    "occupation": "Occupation",
+    "company": "Company",
+    "department": "Department",
+    "position": "Position"
+  },
+  "error": {
+    "networkError": "A network error occurred.",
+    "serverError": "A server error occurred.",
+    "unauthorized": "Authentication required.",
+    "forbidden": "Access denied.",
+    "notFound": "The requested information could not be found.",
+    "validationFailed": "Please check your input.",
+    "uploadFailed": "File upload failed.",
+    "saveFailed": "Save operation failed.",
+    "deleteFailed": "Delete operation failed.",
+    "loadFailed": "Failed to load data."
+  }
+}

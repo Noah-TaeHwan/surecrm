@@ -1,0 +1,152 @@
+{
+  "header": {
+    "logo": "SureCRM",
+    "dashboard": "Dashboard",
+    "clients": "Client Management",
+    "calendar": "Calendar",
+    "pipeline": "Sales Pipeline",
+    "reports": "Reports",
+    "team": "Team Management",
+    "settings": "Settings",
+    "profile": "Profile",
+    "logout": "Logout",
+    "notifications": "Notifications",
+    "help": "Help",
+    "open_menu": "Open menu",
+    "profile_menu": "Profile menu",
+    "user": "User",
+    "default_initial": "U",
+    "logging_out": "Logging out..."
+  },
+  "sidebar": {
+    "main": {
+      "dashboard": "Dashboard",
+      "clients": "Client Management",
+      "calendar": "Calendar",
+      "pipeline": "Sales Pipeline",
+      "reports": "Reports",
+      "analytics": "Analytics"
+    },
+    "management": {
+      "title": "Management",
+      "team": "Team Management",
+      "invitations": "Invitation Management",
+      "settings": "Settings",
+      "billing": "Billing Management"
+    },
+    "tools": {
+      "title": "Tools",
+      "network": "Network Analysis",
+      "notifications": "Notification Center",
+      "integrations": "Integration Management"
+    },
+    "support": {
+      "title": "Support",
+      "help": "Help",
+      "contact": "Contact Us",
+      "feedback": "Feedback"
+    }
+  },
+  "breadcrumb": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "clients": "Clients",
+    "clientDetail": "Client Details",
+    "clientEdit": "Edit Client",
+    "calendar": "Calendar",
+    "meetings": "Meetings",
+    "pipeline": "Pipeline",
+    "reports": "Reports",
+    "analytics": "Analytics",
+    "team": "Team",
+    "settings": "Settings",
+    "profile": "Profile",
+    "billing": "Billing",
+    "notifications": "Notifications",
+    "invitations": "Invitations"
+  },
+  "tabs": {
+    "overview": "Overview",
+    "details": "Details",
+    "insurance": "Insurance",
+    "documents": "Documents",
+    "notes": "Notes",
+    "history": "History",
+    "contacts": "Contacts",
+    "meetings": "Meetings",
+    "tasks": "Tasks",
+    "files": "Files",
+    "activity": "Activity",
+    "timeline": "Timeline"
+  },
+  "bottomNav": {
+    "dashboard": "Dashboard",
+    "clients": "Clients",
+    "calendar": "Calendar",
+    "reports": "Reports",
+    "more": "More"
+  },
+  "menu": {
+    "file": {
+      "title": "File",
+      "new": "New",
+      "open": "Open",
+      "save": "Save",
+      "saveAs": "Save As",
+      "export": "Export",
+      "import": "Import",
+      "print": "Print"
+    },
+    "edit": {
+      "title": "Edit",
+      "undo": "Undo",
+      "redo": "Redo",
+      "cut": "Cut",
+      "copy": "Copy",
+      "paste": "Paste",
+      "delete": "Delete",
+      "selectAll": "Select All"
+    },
+    "view": {
+      "title": "View",
+      "list": "List View",
+      "grid": "Grid View",
+      "card": "Card View",
+      "fullscreen": "Full Screen",
+      "zoom": "Zoom"
+    },
+    "tools": {
+      "title": "Tools",
+      "preferences": "Preferences",
+      "extensions": "Extensions",
+      "plugins": "Plugins"
+    }
+  },
+  "time": {
+    "just_now": "Just now",
+    "minutes_ago": "{{count}} minute ago",
+    "minutes_ago_plural": "{{count}} minutes ago",
+    "hours_ago": "{{count}} hour ago",
+    "hours_ago_plural": "{{count}} hours ago",
+    "days_ago": "{{count}} day ago",
+    "days_ago_plural": "{{count}} days ago"
+  },
+  "notifications": {
+    "mark_all_read": "Mark all read",
+    "unread": "Unread",
+    "no_unread": "No unread notifications",
+    "empty_message": "New notifications will appear here",
+    "view_all": "View all notifications"
+  },
+  "subscription": {
+    "expired_notification": "Subscription expired - Please renew to use notifications",
+    "notification_expired": "Notifications (Expired)",
+    "settings_locked": "Subscription expired - Settings access denied"
+  },
+  "profile": {
+    "description": "Personal information and account management"
+  },
+  "common": {
+    "loading": "Loading..."
+  }
+}

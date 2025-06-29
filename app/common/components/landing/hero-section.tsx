@@ -1,3 +1,5 @@
+import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '~/common/components/ui/button';
 import { Badge } from '~/common/components/ui/badge';
 import { Link } from 'react-router';
@@ -8,6 +10,14 @@ import { TextReveal } from '~/common/components/magicui/text-reveal';
 import { AnimatedShinyText } from '~/common/components/magicui/animated-shiny-text';
 
 export function HeroSection() {
+  const { t } = useTranslation('landing');
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // 🎯 Hydration 완료 감지 (SSR/CSR mismatch 방지)
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
   return (
     <section
       id="hero"
@@ -21,94 +31,119 @@ export function HeroSection() {
             className="px-3 sm:px-4 py-1 sm:py-1.5 text-xs sm:text-sm font-medium"
             variant="secondary"
           >
-            초대 전용 MVP
+            {isHydrated ? t('hero.badge') : '초대 전용 MVP'}
           </Badge>
 
           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight leading-tight">
             <div className="mb-2 sm:mb-3 lg:mb-4">
-              <TextReveal text="보험설계사를 위한" />
+              <TextReveal
+                text={isHydrated ? t('hero.title_part1') : '보험설계사를 위한'}
+              />
             </div>
             <div className="mb-2 sm:mb-3 lg:mb-4">
               <span className="text-primary">
                 <AnimatedShinyText shimmerWidth={200}>
-                  소개 네트워크
+                  {isHydrated ? t('hero.title_part2') : '소개 네트워크'}
                 </AnimatedShinyText>
               </span>
             </div>
             <div>
-              <TextReveal text="관리 솔루션" />
+              <TextReveal
+                text={isHydrated ? t('hero.title_part3') : '관리 솔루션'}
+              />
             </div>
           </h1>
 
           <p className="text-sm sm:text-base lg:text-lg xl:text-xl text-muted-foreground max-w-xs sm:max-w-lg lg:max-w-2xl mx-auto leading-relaxed px-2 sm:px-4 lg:px-0">
-            누가 누구를 소개했는지 시각적으로 체계화하고 소개 네트워크의 힘을
-            극대화하세요
+            {isHydrated
+              ? t('hero.subtitle_short')
+              : '누가 누구를 소개했는지 시각적으로 체계화하고 소개 네트워크의 힘을 극대화하세요'}
           </p>
 
           {/* MVP 기능 목록 - 모바일 최적화 */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 max-w-xs sm:max-w-2xl lg:max-w-3xl mx-auto pt-6 sm:pt-8">
             <div className="bg-card/40 rounded-lg p-2.5 sm:p-3 lg:p-4 border border-border/30 backdrop-blur-sm">
               <div className="text-xs sm:text-sm font-semibold text-primary">
-                구글 캘린더
+                {isHydrated
+                  ? t('hero.features.google_calendar.title')
+                  : '구글 캘린더'}
               </div>
               <div className="text-[10px] sm:text-xs text-muted-foreground">
-                연동
+                {isHydrated
+                  ? t('hero.features.google_calendar.subtitle')
+                  : '연동'}
               </div>
             </div>
             <div className="bg-card/40 rounded-lg p-2.5 sm:p-3 lg:p-4 border border-border/30 backdrop-blur-sm">
               <div className="text-xs sm:text-sm font-semibold text-primary">
-                고객 관리
+                {isHydrated
+                  ? t('hero.features.client_management.title')
+                  : '고객 관리'}
               </div>
               <div className="text-[10px] sm:text-xs text-muted-foreground">
-                체계화
+                {isHydrated
+                  ? t('hero.features.client_management.subtitle')
+                  : '체계화'}
               </div>
             </div>
             <div className="bg-card/40 rounded-lg p-2.5 sm:p-3 lg:p-4 border border-border/30 backdrop-blur-sm">
               <div className="text-xs sm:text-sm font-semibold text-primary">
-                영업 파이프라인
+                {isHydrated
+                  ? t('hero.features.sales_pipeline.title')
+                  : '영업 파이프라인'}
               </div>
               <div className="text-[10px] sm:text-xs text-muted-foreground">
-                관리
+                {isHydrated
+                  ? t('hero.features.sales_pipeline.subtitle')
+                  : '관리'}
               </div>
             </div>
             <div className="bg-card/40 rounded-lg p-2.5 sm:p-3 lg:p-4 border border-border/30 backdrop-blur-sm">
               <div className="text-xs sm:text-sm font-semibold text-primary">
-                대시보드
+                {isHydrated ? t('hero.features.dashboard.title') : '대시보드'}
               </div>
               <div className="text-[10px] sm:text-xs text-muted-foreground">
-                분석
+                {isHydrated ? t('hero.features.dashboard.subtitle') : '분석'}
               </div>
             </div>
             <div className="bg-card/40 rounded-lg p-2.5 sm:p-3 lg:p-4 border border-border/30 backdrop-blur-sm">
               <div className="text-xs sm:text-sm font-semibold text-primary">
-                소개 네트워크
+                {isHydrated
+                  ? t('hero.features.referral_network.title')
+                  : '소개 네트워크'}
               </div>
               <div className="text-[10px] sm:text-xs text-muted-foreground">
-                시각화
+                {isHydrated
+                  ? t('hero.features.referral_network.subtitle')
+                  : '시각화'}
               </div>
             </div>
             <div className="bg-card/40 rounded-lg p-2.5 sm:p-3 lg:p-4 border border-border/30 backdrop-blur-sm">
               <div className="text-xs sm:text-sm font-semibold text-primary">
-                초대장
+                {isHydrated ? t('hero.features.invitations.title') : '초대장'}
               </div>
               <div className="text-[10px] sm:text-xs text-muted-foreground">
-                관리
+                {isHydrated ? t('hero.features.invitations.subtitle') : '관리'}
               </div>
             </div>
             <div className="bg-card/40 rounded-lg p-2.5 sm:p-3 lg:p-4 border border-border/30 backdrop-blur-sm">
               <div className="text-xs sm:text-sm font-semibold text-primary">
-                보고서
+                {isHydrated ? t('hero.features.reports.title') : '보고서'}
               </div>
               <div className="text-[10px] sm:text-xs text-muted-foreground">
-                생성
+                {isHydrated ? t('hero.features.reports.subtitle') : '생성'}
               </div>
             </div>
             <div className="bg-card/40 rounded-lg p-2.5 sm:p-3 lg:p-4 border border-border/30 backdrop-blur-sm">
               <div className="text-xs sm:text-sm font-semibold text-primary">
-                주간 업데이트
+                {isHydrated
+                  ? t('hero.features.weekly_updates.title')
+                  : '주간 업데이트'}
               </div>
               <div className="text-[10px] sm:text-xs text-muted-foreground">
-                지속 개선
+                {isHydrated
+                  ? t('hero.features.weekly_updates.subtitle')
+                  : '지속 개선'}
               </div>
             </div>
           </div>
@@ -119,7 +154,7 @@ export function HeroSection() {
               className="rounded-full px-4 sm:px-6 h-11 sm:h-12 shadow-lg text-sm sm:text-base hover:shadow-xl transition-all duration-200"
             >
               <Link to="/invite-only" className="flex items-center gap-2">
-                초대 코드로 시작하기
+                {isHydrated ? t('hero.cta_invite') : '초대 코드로 시작하기'}
                 <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4" />
               </Link>
             </Button>
@@ -129,7 +164,9 @@ export function HeroSection() {
               asChild
               className="rounded-full px-4 sm:px-6 h-11 sm:h-12 text-sm sm:text-base hover:bg-accent transition-colors duration-200"
             >
-              <Link to="/auth/login">계정이 있다면 로그인</Link>
+              <Link to="/auth/login">
+                {isHydrated ? t('hero.cta_login') : '계정이 있다면 로그인'}
+              </Link>
             </Button>
           </div>
         </div>

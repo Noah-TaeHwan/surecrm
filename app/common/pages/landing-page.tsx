@@ -1,3 +1,5 @@
+import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Route } from './+types/landing-page';
 import { LandingLayout } from '~/common/layouts/landing-layout';
 import { ScrollProgress } from '~/common/components/magicui/scroll-progress';
@@ -6,34 +8,30 @@ import {
   HeroSection,
   FeaturesSection,
   UseCasesSection,
-  TestimonialsSection,
   FAQSection,
   CTASection,
 } from '~/common/components/landing';
 import {
   getPublicStats,
   getPublicTestimonials,
-  getFAQs,
   type PublicStats,
   type Testimonial,
 } from '~/lib/data/public';
 
 // Loader 함수 - 실제 데이터베이스에서 데이터 가져오기
-export async function loader({ request }: Route.LoaderArgs) {
+export async function loader() {
   try {
-    const [stats, testimonials, faqs] = await Promise.all([
+    const [stats, testimonials] = await Promise.all([
       getPublicStats(),
       getPublicTestimonials(),
-      getFAQs(),
     ]);
 
     return {
       stats,
       testimonials,
-      faqs,
     };
   } catch (error) {
-    console.error('랜딩 페이지 데이터 로드 실패:', error);
+    console.error('landing:errors.loading_failed', error);
 
     // 에러 시 기본값 반환
     return {
@@ -46,13 +44,12 @@ export async function loader({ request }: Route.LoaderArgs) {
         successRate: 89,
       } as PublicStats,
       testimonials: [] as Testimonial[],
-      faqs: [],
     };
   }
 }
 
 // 메타 정보
-export function meta({ data }: Route.MetaArgs) {
+export function meta() {
   return [
     { title: 'SureCRM - 보험설계사를 위한 소개 네트워크 관리 솔루션' },
     {
@@ -78,14 +75,25 @@ export function meta({ data }: Route.MetaArgs) {
 }
 
 export default function LandingPage({ loaderData }: Route.ComponentProps) {
-  const { stats, testimonials, faqs } = loaderData;
+  const { t } = useTranslation('landing');
+  // loaderData는 현재 사용하지 않지만 Route.ComponentProps 타입을 위해 유지
+  loaderData;
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // 🎯 Hydration 완료 감지 (SSR/CSR mismatch 방지)
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
   const navItems = [
-    { label: '홈', href: '#hero' },
-    { label: '특징', href: '#features' },
-    { label: '활용 사례', href: '#use-cases' },
-    // { label: '후기', href: '#testimonials' },
-    { label: 'FAQ', href: '#faq' },
+    { label: isHydrated ? t('nav.home') : '홈', href: '#hero' },
+    { label: isHydrated ? t('nav.features') : '특징', href: '#features' },
+    {
+      label: isHydrated ? t('nav.use_cases') : '활용 사례',
+      href: '#use-cases',
+    },
+    // { label: isHydrated ? t('nav.testimonials') : '후기', href: '#testimonials' },
+    { label: isHydrated ? t('nav.faq') : 'FAQ', href: '#faq' },
   ];
 
   return (
@@ -106,7 +114,7 @@ export default function LandingPage({ loaderData }: Route.ComponentProps) {
       {/* <TestimonialsSection stats={stats} testimonials={testimonials} /> */}
 
       {/* FAQ 섹션 */}
-      <FAQSection faqs={faqs} />
+      <FAQSection />
 
       {/* CTA 섹션 */}
       <CTASection />

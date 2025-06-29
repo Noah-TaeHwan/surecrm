@@ -1,0 +1,76 @@
+{
+  "title": "Billing & Subscription",
+  "subscription": {
+    "current": "Current Subscription",
+    "upgrade": "Upgrade",
+    "downgrade": "Downgrade",
+    "cancel": "Cancel Subscription",
+    "renew": "Renew",
+    "expired": "Expired",
+    "active": "Active",
+    "trial": "Trial",
+    "trialEnds": "Trial Ends"
+  },
+  "plans": {
+    "free": "Free",
+    "basic": "Basic",
+    "professional": "Professional",
+    "enterprise": "Enterprise",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "perMonth": "month",
+    "perYear": "year",
+    "savings": "savings",
+    "mostPopular": "Most Popular"
+  },
+  "features": {
+    "clients": "Clients",
+    "storage": "Storage",
+    "users": "Users",
+    "support": "Support",
+    "integrations": "Integrations",
+    "reports": "Reports",
+    "unlimited": "Unlimited",
+    "limited": "Limited"
+  },
+  "payment": {
+    "method": "Payment Method",
+    "creditCard": "Credit Card",
+    "debitCard": "Debit Card",
+    "paypal": "PayPal",
+    "bankTransfer": "Bank Transfer",
+    "cardNumber": "Card Number",
+    "expiryDate": "Expiry Date",
+    "cvv": "CVV",
+    "nameOnCard": "Name on Card",
+    "billingAddress": "Billing Address"
+  },
+  "invoice": {
+    "invoices": "Invoices",
+    "download": "Download",
+    "print": "Print",
+    "paid": "Paid",
+    "pending": "Pending",
+    "overdue": "Overdue",
+    "amount": "Amount",
+    "dueDate": "Due Date",
+    "issueDate": "Issue Date"
+  },
+  "actions": {
+    "subscribe": "Subscribe",
+    "updatePayment": "Update Payment",
+    "viewInvoices": "View Invoices",
+    "changePlan": "Change Plan",
+    "addCard": "Add Card",
+    "removeCard": "Remove Card",
+    "setDefault": "Set as Default"
+  },
+  "messages": {
+    "subscriptionSuccess": "Subscription successful",
+    "paymentSuccess": "Payment completed",
+    "updateSuccess": "Payment information updated",
+    "cancellationSuccess": "Subscription cancelled",
+    "paymentFailed": "Payment failed",
+    "trialExpired": "Trial period has expired"
+  }
+}

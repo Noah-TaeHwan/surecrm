@@ -1,0 +1,194 @@
+{
+  "meta": {
+    "title": "SureCRM - 보험설계사를 위한 소개 네트워크 관리 솔루션",
+    "description": "누가 누구를 소개했는지 시각적으로 체계화하고 소개 네트워크의 힘을 극대화하세요. 보험설계사 전용 CRM 솔루션.",
+    "keywords": "보험설계사, CRM, 소개 네트워크, 고객 관리, 영업 관리",
+    "og_title": "SureCRM - 보험설계사를 위한 소개 네트워크 관리 솔루션",
+    "og_description": "누가 누구를 소개했는지 시각적으로 체계화하고 소개 네트워크의 힘을 극대화하세요."
+  },
+  "nav": {
+    "home": "홈",
+    "features": "특징",
+    "use_cases": "활용 사례",
+    "testimonials": "후기",
+    "faq": "FAQ",
+    "pricing": "요금제",
+    "login": "로그인",
+    "signup": "회원가입",
+    "get_started": "시작하기"
+  },
+  "hero": {
+    "title": "보험설계사를 위한\n소개 네트워크 관리 솔루션",
+    "subtitle": "누가 누구를 소개했는지 시각적으로 체계화하고\n소개 네트워크의 힘을 극대화하세요",
+    "description": "SureCRM은 보험설계사 전용 CRM으로, 복잡한 소개 관계를 명확하게 추적하고 관리할 수 있습니다. 효율적인 고객 관리와 체계적인 소개 네트워크 구축으로 비즈니스 성장을 가속화하세요.",
+    "cta_primary": "무료로 시작하기",
+    "cta_secondary": "데모 보기",
+    "trust_badge": "이미 {{count}}명의 보험설계사가 사용 중",
+    "free_trial": "14일 무료 체험",
+    "no_credit_card": "신용카드 불필요",
+    "badge": "초대 전용 MVP",
+    "title_part1": "보험설계사를 위한",
+    "title_part2": "소개 네트워크",
+    "title_part3": "관리 솔루션",
+    "subtitle_short": "누가 누구를 소개했는지 시각적으로 체계화하고 소개 네트워크의 힘을 극대화하세요",
+    "cta_invite": "초대 코드로 시작하기",
+    "cta_login": "계정이 있다면 로그인",
+    "features": {
+      "google_calendar": {
+        "title": "구글 캘린더",
+        "subtitle": "연동"
+      },
+      "client_management": {
+        "title": "고객 관리",
+        "subtitle": "체계화"
+      },
+      "sales_pipeline": {
+        "title": "영업 파이프라인",
+        "subtitle": "관리"
+      },
+      "dashboard": {
+        "title": "대시보드",
+        "subtitle": "분석"
+      },
+      "referral_network": {
+        "title": "소개 네트워크",
+        "subtitle": "시각화"
+      },
+      "invitations": {
+        "title": "초대장",
+        "subtitle": "관리"
+      },
+      "reports": {
+        "title": "보고서",
+        "subtitle": "생성"
+      },
+      "weekly_updates": {
+        "title": "주간 업데이트",
+        "subtitle": "지속 개선"
+      }
+    }
+  },
+  "features": {
+    "title": "SureCRM만의 특별한 기능",
+    "subtitle": "보험설계사의 실제 업무 환경에 최적화된 기능들",
+    "badge": "주요 특징",
+    "headline": "효율적인 소개 네트워크 관리를 위한 모든 것",
+    "description": "SureCRM은 보험설계사가 소개 네트워크를 효과적으로 관리하고 영업 성과를 높이는 데 필요한 모든 도구를 제공합니다.",
+    "network_visualization": {
+      "title": "소개 네트워크 시각화",
+      "description": "마인드맵 스타일의 그래프로 고객 소개 관계를 시각적으로 파악하고 핵심 소개자를 쉽게 발견하세요."
+    },
+    "sales_pipeline": {
+      "title": "영업 파이프라인 관리",
+      "description": "칸반보드 방식으로 고객을 영업 단계별로 체계적으로 관리하고 계약 전환율을 높이세요."
+    },
+    "key_referrer_analysis": {
+      "title": "핵심 소개자 분석",
+      "description": "가장 많은 소개를 제공한 고객을 발견하고 관계를 강화하여 소개 네트워크를 확장하세요."
+    },
+    "custom_reports": {
+      "title": "맞춤형 보고서",
+      "description": "소개 패턴과 성공률을 분석하고 맞춤형 보고서로 영업 전략을 최적화하세요."
+    },
+    "team_collaboration": {
+      "title": "팀 협업 기능",
+      "description": "팀원들과 함께 소개 네트워크를 관리하고 효과적으로 협업하세요."
+    },
+    "data_security": {
+      "title": "데이터 보안",
+      "description": "고객 데이터를 안전하게 암호화하여 저장하고 개인정보 보호 규정을 준수합니다."
+    }
+  },
+  "use_cases": {
+    "title": "SureCRM 활용 사례",
+    "subtitle": "실제 보험설계사들이 SureCRM을 어떻게 활용하고 있는지 확인해보세요",
+    "badge": "활용 사례",
+    "headline": "어떻게 활용할 수 있나요?",
+    "description": "다양한 상황에서 SureCRM이 어떻게 도움이 되는지 확인해보세요.",
+    "network": {
+      "title": "소개 관계 시각화",
+      "description": "고객 간의 복잡한 소개 관계를 직관적인 그래프로 표현하여 핵심 소개자를 한눈에 파악할 수 있습니다.",
+      "features": [
+        "시각적 네트워크 표시",
+        "핵심 소개자 발견",
+        "소개 패턴 분석",
+        "관계 깊이 파악"
+      ]
+    },
+    "pipeline": {
+      "title": "영업 단계 관리",
+      "description": "고객을 영업 단계별로 체계적으로 분류하고 관리하여 효율적인 영업 프로세스를 구축할 수 있습니다.",
+      "features": [
+        "단계별 고객 분류",
+        "진행 상황 추적",
+        "전환율 개선",
+        "업무 효율 향상"
+      ]
+    },
+    "data": {
+      "title": "데이터 인사이트",
+      "description": "소개 현황과 영업 성과를 직관적인 차트와 통계로 확인하여 데이터 기반 의사결정을 지원합니다.",
+      "features": [
+        "월별 성과 추적",
+        "핵심 지표 요약",
+        "트렌드 분석",
+        "성과 비교"
+      ]
+    },
+    "tabs": {
+      "network": "관계 시각화",
+      "network_short": "관계",
+      "pipeline": "영업 관리",
+      "pipeline_short": "영업",
+      "data": "분석",
+      "data_short": "분석"
+    }
+  },
+  "testimonials": {
+    "title": "고객 후기",
+    "subtitle": "SureCRM을 사용하는 보험설계사들의 생생한 후기"
+  },
+  "faq": {
+    "title": "자주 묻는 질문",
+    "subtitle": "SureCRM에 대해 궁금한 점들을 확인해보세요",
+    "badge": "자주 묻는 질문",
+    "headline": "궁금한 점이 있으신가요?",
+    "description": "SureCRM에 대해 궁금한 점을 확인하세요."
+  },
+  "cta": {
+    "title": "지금 시작하세요",
+    "subtitle": "14일 무료 체험으로 SureCRM의 강력한 기능을 직접 경험해보세요",
+    "description": "신용카드 없이 간편하게 시작할 수 있습니다. 언제든지 취소 가능합니다.",
+    "primary_button": "무료로 시작하기",
+    "secondary_button": "영업팀과 상담하기",
+    "features": [
+      "14일 무료 체험",
+      "신용카드 불필요",
+      "언제든지 취소 가능",
+      "24/7 고객 지원"
+    ],
+    "badge": "지금 시작하세요",
+    "headline": "성공적인 소개 네트워크 관리의 시작",
+    "cta_description": "소개 네트워크의 힘을 극대화하고 영업 성과를 높일 준비가 되셨나요? SureCRM과 함께 더 체계적인 고객 관리를 시작하세요.",
+    "cta_button": "초대 코드로 시작하기"
+  },
+  "footer": {
+    "company": "회사",
+    "product": "제품",
+    "support": "지원",
+    "legal": "법적 고지",
+    "about": "회사 소개",
+    "careers": "채용",
+    "contact": "문의하기",
+    "privacy": "개인정보처리방침",
+    "terms": "이용약관",
+    "help": "도움말",
+    "documentation": "문서",
+    "status": "서비스 운영중",
+    "copyright": "© 2024 SureCRM. All rights reserved.",
+    "description": "보험설계사를 위한 전문 CRM 솔루션"
+  },
+  "errors": {
+    "loading_failed": "랜딩 페이지 데이터 로드 실패:"
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "title": "Settings",
+  "sections": {
+    "profile": "Profile",
+    "account": "Account",
+    "notifications": "Notifications",
+    "appearance": "Appearance",
+    "privacy": "Privacy",
+    "billing": "Billing",
+    "integrations": "Integrations",
+    "advanced": "Advanced"
+  },
+  "profile": {
+    "personalInfo": "Personal Information",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "company": "Company",
+    "position": "Position",
+    "avatar": "Profile Picture",
+    "uploadAvatar": "Upload Picture",
+    "removeAvatar": "Remove Picture"
+  },
+  "account": {
+    "security": "Security",
+    "changePassword": "Change Password",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm Password",
+    "twoFactorAuth": "Two-Factor Authentication",
+    "enableTwoFactor": "Enable 2FA",
+    "disableTwoFactor": "Disable 2FA",
+    "sessions": "Active Sessions",
+    "logoutAllDevices": "Logout All Devices"
+  },
+  "appearance": {
+    "theme": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "auto": "Auto",
+    "language": "Language",
+    "timezone": "Timezone",
+    "dateFormat": "Date Format",
+    "timeFormat": "Time Format",
+    "currency": "Currency",
+    "numberFormat": "Number Format"
+  },
+  "privacy": {
+    "dataUsage": "Data Usage",
+    "analytics": "Analytics Data Collection",
+    "marketing": "Marketing Communications",
+    "thirdParty": "Third-party Data Sharing",
+    "dataExport": "Export Data",
+    "dataDelete": "Delete Account",
+    "cookieConsent": "Cookie Consent"
+  },
+  "integrations": {
+    "available": "Available Integrations",
+    "connected": "Connected Services",
+    "googleCalendar": "Google Calendar",
+    "outlook": "Outlook",
+    "slack": "Slack",
+    "zapier": "Zapier",
+    "webhook": "Webhooks",
+    "api": "API Keys",
+    "connect": "Connect",
+    "disconnect": "Disconnect",
+    "configure": "Configure"
+  },
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "reset": "Reset",
+    "export": "Export",
+    "import": "Import",
+    "backup": "Backup",
+    "restore": "Restore"
+  },
+  "messages": {
+    "saveSuccess": "Settings saved successfully",
+    "saveError": "Failed to save settings",
+    "passwordChanged": "Password changed successfully",
+    "invalidPassword": "Current password is incorrect",
+    "confirmDelete": "Are you sure you want to delete your account? This action cannot be undone."
+  }
+}

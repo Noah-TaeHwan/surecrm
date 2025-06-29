@@ -1,0 +1,76 @@
+{
+  "title": "請求・サブスクリプション",
+  "subscription": {
+    "current": "現在のサブスクリプション",
+    "upgrade": "アップグレード",
+    "downgrade": "ダウングレード",
+    "cancel": "サブスクリプション解約",
+    "renew": "更新",
+    "expired": "期限切れ",
+    "active": "アクティブ",
+    "trial": "試用版",
+    "trialEnds": "試用版終了"
+  },
+  "plans": {
+    "free": "無料",
+    "basic": "ベーシック",
+    "professional": "プロフェッショナル",
+    "enterprise": "エンタープライズ",
+    "monthly": "月額",
+    "yearly": "年額",
+    "perMonth": "月",
+    "perYear": "年",
+    "savings": "節約",
+    "mostPopular": "最も人気"
+  },
+  "features": {
+    "clients": "顧客",
+    "storage": "ストレージ",
+    "users": "ユーザー",
+    "support": "サポート",
+    "integrations": "連携",
+    "reports": "レポート",
+    "unlimited": "無制限",
+    "limited": "制限あり"
+  },
+  "payment": {
+    "method": "支払い方法",
+    "creditCard": "クレジットカード",
+    "debitCard": "デビットカード",
+    "paypal": "PayPal",
+    "bankTransfer": "銀行振込",
+    "cardNumber": "カード番号",
+    "expiryDate": "有効期限",
+    "cvv": "CVV",
+    "nameOnCard": "カード名義",
+    "billingAddress": "請求先住所"
+  },
+  "invoice": {
+    "invoices": "請求書",
+    "download": "ダウンロード",
+    "print": "印刷",
+    "paid": "支払い済み",
+    "pending": "支払い待ち",
+    "overdue": "期限切れ",
+    "amount": "金額",
+    "dueDate": "支払い期限",
+    "issueDate": "発行日"
+  },
+  "actions": {
+    "subscribe": "サブスクライブ",
+    "updatePayment": "支払い情報更新",
+    "viewInvoices": "請求書表示",
+    "changePlan": "プラン変更",
+    "addCard": "カード追加",
+    "removeCard": "カード削除",
+    "setDefault": "デフォルトに設定"
+  },
+  "messages": {
+    "subscriptionSuccess": "サブスクリプションが完了しました",
+    "paymentSuccess": "支払いが完了しました",
+    "updateSuccess": "支払い情報が更新されました",
+    "cancellationSuccess": "サブスクリプションが解約されました",
+    "paymentFailed": "支払いに失敗しました",
+    "trialExpired": "試用期間が終了しました"
+  }
+}

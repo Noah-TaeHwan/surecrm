@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router';
-import { Bell, User, LogOut, Settings, Menu, Eye, Lock } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { Bell, User, LogOut, Menu, Eye, Lock } from 'lucide-react';
 import { cn } from '~/lib/utils';
 import { Button } from '~/common/components/ui/button';
 import { Avatar, AvatarFallback } from '~/common/components/ui/avatar';
@@ -13,9 +14,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '~/common/components/ui/dropdown-menu';
-import { Badge } from '~/common/components/ui/badge';
-import { ScrollArea } from '~/common/components/ui/scroll-area';
 import { useSubscription } from '~/lib/contexts/subscription-context';
+import { LanguageSelector } from '~/common/components/i18n/language-selector';
 
 interface HeaderProps {
   title?: string;
@@ -42,13 +42,13 @@ interface BasicNotification {
 }
 
 export function Header({
-  title = '',
   className,
   showMenuButton = false,
   onMenuButtonClick,
   currentUser,
   isLoadingUser = false,
 }: HeaderProps) {
+  const { t } = useTranslation('navigation');
   const { subscriptionStatus, isLoading: isSubscriptionLoading } =
     useSubscription();
   const [isLoggingOut, setIsLoggingOut] = React.useState(false);
@@ -57,6 +57,12 @@ export function Header({
   );
   const [unreadCount, setUnreadCount] = React.useState(0);
   const [isLoading, setIsLoading] = React.useState(false);
+  const [isHydrated, setIsHydrated] = React.useState(false);
+
+  // Hydration 완료 감지
+  React.useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
   // 구독 상태 확인 함수
   const isSubscriptionActive = () => {
@@ -99,7 +105,7 @@ export function Header({
         try {
           const errorData = await response.text();
           console.warn('❌ 에러 응답 내용:', errorData);
-        } catch (e) {
+        } catch {
           console.warn('❌ 에러 응답 파싱 실패');
         }
 
@@ -202,14 +208,23 @@ export function Header({
     const diff = now.getTime() - date.getTime();
     const minutes = Math.floor(diff / 60000);
 
-    if (minutes < 1) return '방금 전';
-    if (minutes < 60) return `${minutes}분 전`;
+    if (!isHydrated) {
+      if (minutes < 1) return '방금 전';
+      if (minutes < 60) return `${minutes}분 전`;
+      const hours = Math.floor(minutes / 60);
+      if (hours < 24) return `${hours}시간 전`;
+      const days = Math.floor(hours / 24);
+      return `${days}일 전`;
+    }
+
+    if (minutes < 1) return t('time.just_now');
+    if (minutes < 60) return t('time.minutes_ago', { count: minutes });
 
     const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours}시간 전`;
+    if (hours < 24) return t('time.hours_ago', { count: hours });
 
     const days = Math.floor(hours / 24);
-    return `${days}일 전`;
+    return t('time.days_ago', { count: days });
   };
 
   // 아이콘 가져오기 함수
@@ -249,7 +264,9 @@ export function Header({
             className="lg:hidden"
           >
             <Menu className="h-5 w-5" />
-            <span className="sr-only">메뉴 열기</span>
+            <span className="sr-only">
+              {isHydrated ? t('header.open_menu') : '메뉴 열기'}
+            </span>
           </Button>
         )}
       </div>
@@ -267,12 +284,16 @@ export function Header({
                     {unreadCount > 9 ? '9+' : unreadCount}
                   </div>
                 )}
-                <span className="sr-only">알림</span>
+                <span className="sr-only">
+                  {isHydrated ? t('header.notifications') : '알림'}
+                </span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-80" align="end">
               <DropdownMenuLabel className="flex items-center justify-between py-3">
-                <span className="font-medium">알림</span>
+                <span className="font-medium">
+                  {isHydrated ? t('header.notifications') : '알림'}
+                </span>
                 {unreadCount > 0 && (
                   <Button
                     variant="ghost"
@@ -280,7 +301,9 @@ export function Header({
                     className="h-auto p-1 text-xs text-muted-foreground hover:text-foreground"
                     onClick={handleMarkAllAsRead}
                   >
-                    모두 읽음
+                    {isHydrated
+                      ? t('notifications.mark_all_read')
+                      : '모두 읽음으로 표시'}
                   </Button>
                 )}
               </DropdownMenuLabel>
@@ -290,7 +313,7 @@ export function Header({
                 <div className="p-8 text-center">
                   <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
                   <p className="text-sm text-muted-foreground mt-2">
-                    로딩 중...
+                    {isHydrated ? t('common.loading') : '로딩 중...'}
                   </p>
                 </div>
               ) : notifications.length > 0 ? (
@@ -354,7 +377,9 @@ export function Header({
                               </p>
                               {!notification.readAt && (
                                 <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-medium">
-                                  읽지 않음
+                                  {isHydrated
+                                    ? t('notifications.unread')
+                                    : '읽지 않음'}
                                 </span>
                               )}
                             </div>
@@ -367,10 +392,14 @@ export function Header({
                 <div className="p-8 text-center">
                   <Bell className="h-12 w-12 mx-auto mb-4 text-muted-foreground/30" />
                   <p className="text-sm font-medium text-foreground mb-1">
-                    읽지 않은 알림이 없습니다
+                    {isHydrated
+                      ? t('notifications.no_unread')
+                      : '읽지 않은 알림이 없습니다'}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    새로운 알림이 도착하면 여기에 표시됩니다
+                    {isHydrated
+                      ? t('notifications.empty_message')
+                      : '새 알림이 오면 여기에 표시됩니다'}
                   </p>
                 </div>
               )}
@@ -382,7 +411,7 @@ export function Header({
                   className="w-full justify-center py-3"
                 >
                   <Eye className="mr-2 h-4 w-4" />
-                  모든 알림 보기
+                  {isHydrated ? t('notifications.view_all') : '모든 알림 보기'}
                 </Link>
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -393,13 +422,24 @@ export function Header({
             size="icon"
             className="relative opacity-50 cursor-not-allowed"
             disabled
-            title="구독 만료 - 알림 기능을 사용하려면 구독을 갱신하세요"
+            title={
+              isHydrated
+                ? t('subscription.expired_notification')
+                : '구독 만료 - 알림 기능을 사용하려면 구독을 갱신하세요'
+            }
           >
             <Bell className="h-4 w-4" />
             <Lock className="h-2 w-2 absolute -bottom-0.5 -right-0.5 text-muted-foreground" />
-            <span className="sr-only">알림 (구독 만료)</span>
+            <span className="sr-only">
+              {isHydrated
+                ? t('subscription.notification_expired')
+                : '알림 (구독 만료)'}
+            </span>
           </Button>
         )}
+
+        {/* 언어 선택기 */}
+        <LanguageSelector variant="dropdown" />
 
         {/* 사용자 프로필 드롭다운 */}
         <DropdownMenu>
@@ -420,7 +460,9 @@ export function Header({
                   </AvatarFallback>
                 )}
               </Avatar>
-              <span className="sr-only">프로필 메뉴</span>
+              <span className="sr-only">
+                {isHydrated ? t('header.profile_menu') : '프로필 메뉴'}
+              </span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56" align="end">
@@ -434,7 +476,8 @@ export function Header({
                 ) : (
                   <>
                     <p className="text-sm font-medium">
-                      {currentUser?.name || '사용자'}
+                      {currentUser?.name ||
+                        (isHydrated ? t('header.user') : '사용자')}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {currentUser?.email || 'email@example.com'}
@@ -450,9 +493,11 @@ export function Header({
                   <Link to="/settings" className="cursor-pointer">
                     <User className="mr-2 h-4 w-4" />
                     <div className="flex flex-col">
-                      <span>내 프로필</span>
+                      <span>{isHydrated ? t('header.profile') : '프로필'}</span>
                       <span className="text-xs text-muted-foreground">
-                        개인정보 및 계정 관리
+                        {isHydrated
+                          ? t('profile.description')
+                          : '프로필 설정 관리'}
                       </span>
                     </div>
                   </Link>
@@ -465,9 +510,11 @@ export function Header({
                   <div className="flex items-center">
                     <User className="mr-2 h-4 w-4" />
                     <div className="flex flex-col flex-1">
-                      <span>내 프로필</span>
+                      <span>{isHydrated ? t('header.profile') : '프로필'}</span>
                       <span className="text-xs text-muted-foreground">
-                        구독 만료 - 설정 접근 불가
+                        {isHydrated
+                          ? t('subscription.settings_locked')
+                          : '구독 만료로 잠김'}
                       </span>
                     </div>
                     <Lock className="h-3 w-3 ml-2 text-muted-foreground" />
@@ -482,7 +529,15 @@ export function Header({
               disabled={isLoggingOut}
             >
               <LogOut className="mr-2 h-4 w-4" />
-              <span>{isLoggingOut ? '로그아웃 중...' : '로그아웃'}</span>
+              <span>
+                {isLoggingOut
+                  ? isHydrated
+                    ? t('header.logging_out')
+                    : '로그아웃 중...'
+                  : isHydrated
+                    ? t('header.logout')
+                    : '로그아웃'}
+              </span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

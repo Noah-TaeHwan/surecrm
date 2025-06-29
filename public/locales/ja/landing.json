@@ -1,0 +1,189 @@
+{
+  "meta": {
+    "title": "SureCRM - 保険設計士のための紹介ネットワーク管理ソリューション",
+    "description": "誰が誰を紹介したかを視覚的に体系化し、紹介ネットワークの力を最大化しましょう。保険設計士専用CRMソリューション。",
+    "keywords": "保険設計士, CRM, 紹介ネットワーク, 顧客管理, 営業管理",
+    "og_title": "SureCRM - 保険設計士のための紹介ネットワーク管理ソリューション",
+    "og_description": "誰が誰を紹介したかを視覚的に体系化し、紹介ネットワークの力を最大化しましょう。"
+  },
+  "nav": {
+    "home": "ホーム",
+    "features": "機能",
+    "use_cases": "活用事例",
+    "testimonials": "お客様の声",
+    "faq": "よくある質問",
+    "pricing": "料金",
+    "login": "ログイン",
+    "signup": "サインアップ",
+    "get_started": "今すぐ始める"
+  },
+  "hero": {
+    "title": "保険設計士のための\n紹介ネットワーク管理ソリューション",
+    "subtitle": "誰が誰を紹介したかを視覚的に体系化し\n紹介ネットワークの力を最大化しましょう",
+    "description": "SureCRMは保険設計士専用のCRMとして、複雑な紹介関係を明確に追跡・管理できます。効率的な顧客管理と体系的な紹介ネットワーク構築により、ビジネスの成長を加速させます。",
+    "cta_primary": "無料で始める",
+    "cta_secondary": "デモを見る",
+    "trust_badge": "既に{{count}}人の保険設計士が利用中",
+    "free_trial": "14日間無料トライアル",
+    "no_credit_card": "クレジットカード不要",
+    "badge": "招待制MVP",
+    "title_part1": "保険設計士のための",
+    "title_part2": "紹介ネットワーク",
+    "title_part3": "管理ソリューション",
+    "subtitle_short": "誰が誰を紹介したかを視覚的に体系化し紹介ネットワークの力を最大化しましょう",
+    "cta_invite": "招待コードで始める",
+    "cta_login": "アカウントをお持ちの方はログイン",
+    "features": {
+      "google_calendar": {
+        "title": "Googleカレンダー",
+        "subtitle": "連携"
+      },
+      "client_management": {
+        "title": "顧客管理",
+        "subtitle": "体系化"
+      },
+      "sales_pipeline": {
+        "title": "営業パイプライン",
+        "subtitle": "管理"
+      },
+      "dashboard": {
+        "title": "ダッシュボード",
+        "subtitle": "分析"
+      },
+      "referral_network": {
+        "title": "紹介ネットワーク",
+        "subtitle": "可視化"
+      },
+      "invitations": {
+        "title": "招待状",
+        "subtitle": "管理"
+      },
+      "reports": {
+        "title": "レポート",
+        "subtitle": "生成"
+      },
+      "weekly_updates": {
+        "title": "週次アップデート",
+        "subtitle": "継続改善"
+      }
+    }
+  },
+  "features": {
+    "title": "SureCRMの特別な機能",
+    "subtitle": "保険設計士の実際の業務環境に最適化された機能",
+    "badge": "主要機能",
+    "headline": "効率的な紹介ネットワーク管理のためのすべて",
+    "description": "SureCRMは保険設計士が紹介ネットワークを効果的に管理し、営業成果を向上させるために必要なすべてのツールを提供します。",
+    "network_visualization": {
+      "title": "紹介ネットワーク可視化",
+      "description": "マインドマップスタイルのグラフで顧客紹介関係を視覚的に把握し、主要紹介者を簡単に発見。"
+    },
+    "sales_pipeline": {
+      "title": "営業パイプライン管理",
+      "description": "カンバンボード方式で顧客を営業段階別に体系的に管理し、契約転換率を向上。"
+    },
+    "key_referrer_analysis": {
+      "title": "主要紹介者分析",
+      "description": "最も多くの紹介を提供する顧客を発見し、関係を強化して紹介ネットワークを拡張。"
+    },
+    "custom_reports": {
+      "title": "カスタムレポート",
+      "description": "紹介パターンと成功率を分析し、カスタマイズされたレポートで営業戦略を最適化。"
+    },
+    "team_collaboration": {
+      "title": "チーム協業機能",
+      "description": "チームメンバーと一緒に紹介ネットワークを管理し、効果的に協業。"
+    },
+    "data_security": {
+      "title": "データセキュリティ",
+      "description": "顧客データを安全に暗号化して保存し、個人情報保護規定を遵守。"
+    }
+  },
+  "use_cases": {
+    "title": "SureCRM活用事例",
+    "subtitle": "実際の保険設計士がSureCRMをどのように活用しているかご確認ください",
+    "badge": "活用事例",
+    "headline": "どのように活用できますか？",
+    "description": "さまざまな状況でSureCRMがどのように役立つかをご確認ください。",
+    "network": {
+      "title": "紹介関係可視化",
+      "description": "顧客間の複雑な紹介関係を直感的なグラフで表現し、主要紹介者を一目で把握できます。",
+      "features": [
+        "視覚的ネットワーク表示",
+        "主要紹介者発見",
+        "紹介パターン分析",
+        "関係の深さ把握"
+      ]
+    },
+    "pipeline": {
+      "title": "営業段階管理",
+      "description": "顧客を営業段階別に体系的に分類・管理し、効率的な営業プロセスを構築できます。",
+      "features": [
+        "段階別顧客分類",
+        "進捗状況追跡",
+        "転換率改善",
+        "業務効率向上"
+      ]
+    },
+    "data": {
+      "title": "データインサイト",
+      "description": "紹介状況と営業成果を直感的なチャートと統計で確認し、データ基盤の意思決定を支援します。",
+      "features": ["月別成果追跡", "主要指標要約", "トレンド分析", "成果比較"]
+    },
+    "tabs": {
+      "network": "関係可視化",
+      "network_short": "関係",
+      "pipeline": "営業管理",
+      "pipeline_short": "営業",
+      "data": "分析",
+      "data_short": "分析"
+    }
+  },
+  "testimonials": {
+    "title": "お客様の声",
+    "subtitle": "SureCRMを使用している保険設計士の生の声"
+  },
+  "faq": {
+    "title": "よくある質問",
+    "subtitle": "SureCRMについて気になる点をご確認ください",
+    "badge": "よくある質問",
+    "headline": "ご質問がございますか？",
+    "description": "SureCRMについて気になる点をご確認ください。"
+  },
+  "cta": {
+    "title": "今すぐ始めましょう",
+    "subtitle": "14日間無料トライアルでSureCRMの強力な機能を直接体験してください",
+    "description": "クレジットカードなしで簡単に始められます。いつでもキャンセル可能です。",
+    "primary_button": "無料で始める",
+    "secondary_button": "営業チームに相談",
+    "features": [
+      "14日間無料トライアル",
+      "クレジットカード不要",
+      "いつでもキャンセル可能",
+      "24/7顧客サポート"
+    ],
+    "badge": "今すぐ始める",
+    "headline": "成功的な紹介ネットワーク管理の始まり",
+    "cta_description": "紹介ネットワークの力を最大化し、営業成果を向上させる準備はできていますか？SureCRMと一緒により体系的な顧客管理を始めましょう。",
+    "cta_button": "招待コードで始める"
+  },
+  "footer": {
+    "company": "会社",
+    "product": "製品",
+    "support": "サポート",
+    "legal": "法的事項",
+    "about": "会社概要",
+    "careers": "採用",
+    "contact": "お問い合わせ",
+    "privacy": "プライバシーポリシー",
+    "terms": "利用規約",
+    "help": "ヘルプ",
+    "documentation": "ドキュメント",
+    "status": "サービス稼働中",
+    "copyright": "© 2024 SureCRM. All rights reserved.",
+    "description": "保険設計士のための専門CRMソリューション"
+  },
+  "errors": {
+    "loading_failed": "ランディングページデータの読み込みに失敗しました:"
+  }
+}

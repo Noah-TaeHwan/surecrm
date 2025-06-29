@@ -1,0 +1,73 @@
+{
+  "title": "カレンダー",
+  "views": {
+    "month": "月表示",
+    "week": "週表示",
+    "day": "日表示",
+    "agenda": "予定表"
+  },
+  "actions": {
+    "addEvent": "イベント追加",
+    "editEvent": "イベント編集",
+    "deleteEvent": "イベント削除",
+    "today": "今日",
+    "prev": "前",
+    "next": "次",
+    "sync": "同期"
+  },
+  "event": {
+    "title": "タイトル",
+    "description": "説明",
+    "startDate": "開始日",
+    "endDate": "終了日",
+    "startTime": "開始時間",
+    "endTime": "終了時間",
+    "allDay": "終日",
+    "location": "場所",
+    "attendees": "参加者",
+    "reminder": "リマインダー",
+    "repeat": "繰り返し",
+    "category": "カテゴリ"
+  },
+  "meeting": {
+    "scheduleMeeting": "会議のスケジュール",
+    "clientMeeting": "顧客との会議",
+    "teamMeeting": "チーム会議",
+    "onlineMeeting": "オンライン会議",
+    "officeMeeting": "オフィス会議",
+    "meetingRoom": "会議室",
+    "duration": "所要時間",
+    "agenda": "議題",
+    "minutes": "議事録"
+  },
+  "reminder": {
+    "none": "なし",
+    "5min": "5分前",
+    "15min": "15分前",
+    "30min": "30分前",
+    "1hour": "1時間前",
+    "1day": "1日前",
+    "1week": "1週間前"
+  },
+  "repeat": {
+    "none": "繰り返しなし",
+    "daily": "毎日",
+    "weekly": "毎週",
+    "monthly": "毎月",
+    "yearly": "毎年",
+    "weekdays": "平日",
+    "custom": "カスタム"
+  },
+  "status": {
+    "confirmed": "確定",
+    "tentative": "未定",
+    "cancelled": "キャンセル",
+    "completed": "完了"
+  },
+  "google": {
+    "connect": "Googleカレンダー連携",
+    "disconnect": "連携解除",
+    "sync": "同期",
+    "lastSync": "最終同期"
+  }
+}

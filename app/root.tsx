@@ -24,6 +24,9 @@ import {
 import * as Sentry from '@sentry/react-router';
 import { SubscriptionProvider } from '~/lib/contexts/subscription-context';
 
+// 🌍 다국어 지원 초기화
+import './lib/i18n';
+
 // Root.tsx 전용 타입 정의
 
 export const links: LinksFunction = () => [

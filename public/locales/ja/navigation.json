@@ -1,0 +1,149 @@
+{
+  "header": {
+    "logo": "SureCRM",
+    "dashboard": "ダッシュボード",
+    "clients": "顧客管理",
+    "calendar": "スケジュール管理",
+    "pipeline": "営業パイプライン",
+    "reports": "レポート",
+    "team": "チーム管理",
+    "settings": "設定",
+    "profile": "プロフィール",
+    "logout": "ログアウト",
+    "notifications": "通知",
+    "help": "ヘルプ",
+    "open_menu": "メニューを開く",
+    "profile_menu": "プロフィールメニュー",
+    "user": "ユーザー",
+    "default_initial": "ユ",
+    "logging_out": "ログアウト中..."
+  },
+  "sidebar": {
+    "main": {
+      "dashboard": "ダッシュボード",
+      "clients": "顧客管理",
+      "calendar": "スケジュール管理",
+      "pipeline": "営業パイプライン",
+      "reports": "レポート",
+      "analytics": "分析"
+    },
+    "management": {
+      "title": "管理",
+      "team": "チーム管理",
+      "invitations": "招待管理",
+      "settings": "設定",
+      "billing": "料金管理"
+    },
+    "tools": {
+      "title": "ツール",
+      "network": "ネットワーク分析",
+      "notifications": "通知センター",
+      "integrations": "連携管理"
+    },
+    "support": {
+      "title": "サポート",
+      "help": "ヘルプ",
+      "contact": "お問い合わせ",
+      "feedback": "フィードバック"
+    }
+  },
+  "breadcrumb": {
+    "home": "ホーム",
+    "dashboard": "ダッシュボード",
+    "clients": "顧客",
+    "clientDetail": "顧客詳細",
+    "clientEdit": "顧客編集",
+    "calendar": "スケジュール",
+    "meetings": "ミーティング",
+    "pipeline": "パイプライン",
+    "reports": "レポート",
+    "analytics": "分析",
+    "team": "チーム",
+    "settings": "設定",
+    "profile": "プロフィール",
+    "billing": "料金",
+    "notifications": "通知",
+    "invitations": "招待"
+  },
+  "tabs": {
+    "overview": "概要",
+    "details": "詳細情報",
+    "insurance": "保険",
+    "documents": "ドキュメント",
+    "notes": "ノート",
+    "history": "履歴",
+    "contacts": "連絡先",
+    "meetings": "ミーティング",
+    "tasks": "タスク",
+    "files": "ファイル",
+    "activity": "アクティビティ",
+    "timeline": "タイムライン"
+  },
+  "bottomNav": {
+    "dashboard": "ダッシュボード",
+    "clients": "顧客",
+    "calendar": "スケジュール",
+    "reports": "レポート",
+    "more": "その他"
+  },
+  "menu": {
+    "file": {
+      "title": "ファイル",
+      "new": "新規作成",
+      "open": "開く",
+      "save": "保存",
+      "saveAs": "名前を付けて保存",
+      "export": "エクスポート",
+      "import": "インポート",
+      "print": "印刷"
+    },
+    "edit": {
+      "title": "編集",
+      "undo": "元に戻す",
+      "redo": "やり直し",
+      "cut": "切り取り",
+      "copy": "コピー",
+      "paste": "貼り付け",
+      "delete": "削除",
+      "selectAll": "すべて選択"
+    },
+    "view": {
+      "title": "表示",
+      "list": "リスト表示",
+      "grid": "グリッド表示",
+      "card": "カード表示",
+      "fullscreen": "フルスクリーン",
+      "zoom": "ズーム"
+    },
+    "tools": {
+      "title": "ツール",
+      "preferences": "環境設定",
+      "extensions": "拡張機能",
+      "plugins": "プラグイン"
+    }
+  },
+  "time": {
+    "just_now": "たった今",
+    "minutes_ago": "{{count}}分前",
+    "hours_ago": "{{count}}時間前",
+    "days_ago": "{{count}}日前"
+  },
+  "notifications": {
+    "mark_all_read": "すべて既読",
+    "unread": "未読",
+    "no_unread": "未読の通知はありません",
+    "empty_message": "新しい通知がここに表示されます",
+    "view_all": "すべての通知を表示"
+  },
+  "subscription": {
+    "expired_notification": "サブスクリプション期限切れ - 通知機能を使用するには更新してください",
+    "notification_expired": "通知（期限切れ）",
+    "settings_locked": "サブスクリプション期限切れ - 設定へのアクセス不可"
+  },
+  "profile": {
+    "description": "個人情報とアカウント管理"
+  },
+  "common": {
+    "loading": "読み込み中..."
+  }
+}

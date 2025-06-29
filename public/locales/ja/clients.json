@@ -1,0 +1,77 @@
+{
+  "title": "顧客管理",
+  "list": {
+    "allClients": "全顧客",
+    "activeClients": "アクティブ顧客",
+    "prospects": "見込み客",
+    "totalCount": "合計{{count}}名"
+  },
+  "actions": {
+    "addClient": "顧客追加",
+    "editClient": "顧客編集",
+    "deleteClient": "顧客削除",
+    "viewDetails": "詳細表示",
+    "export": "エクスポート",
+    "import": "インポート",
+    "filter": "フィルター",
+    "search": "検索"
+  },
+  "fields": {
+    "name": "名前",
+    "email": "メール",
+    "phone": "電話番号",
+    "company": "会社",
+    "position": "役職",
+    "address": "住所",
+    "birthDate": "生年月日",
+    "status": "ステータス",
+    "stage": "ステージ",
+    "source": "流入経路",
+    "assignedTo": "担当者",
+    "createdAt": "登録日",
+    "lastContact": "最終連絡",
+    "notes": "メモ",
+    "tags": "タグ"
+  },
+  "status": {
+    "active": "アクティブ",
+    "inactive": "非アクティブ",
+    "prospect": "見込み客",
+    "customer": "顧客",
+    "former": "元顧客"
+  },
+  "stages": {
+    "lead": "リード",
+    "qualified": "認定済み",
+    "proposal": "提案",
+    "negotiation": "交渉",
+    "closed": "成約",
+    "lost": "失注"
+  },
+  "modal": {
+    "addClient": "顧客追加",
+    "editClient": "顧客情報編集",
+    "deleteConfirm": "この顧客を削除してもよろしいですか？",
+    "required": "必須項目をすべて入力してください",
+    "saveSuccess": "顧客情報が保存されました",
+    "deleteSuccess": "顧客が削除されました"
+  },
+  "insurance": {
+    "title": "保険契約",
+    "type": "保険の種類",
+    "premium": "保険料",
+    "startDate": "開始日",
+    "endDate": "終了日",
+    "status": "契約状況",
+    "addContract": "契約追加"
+  },
+  "documents": {
+    "title": "書類",
+    "addDocument": "書類追加",
+    "fileName": "ファイル名",
+    "uploadDate": "アップロード日",
+    "size": "サイズ",
+    "download": "ダウンロード",
+    "delete": "削除"
+  }
+}

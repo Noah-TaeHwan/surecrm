@@ -1,0 +1,61 @@
+{
+  "title": "알림",
+  "types": {
+    "system": "시스템",
+    "meeting": "미팅",
+    "client": "고객",
+    "task": "작업",
+    "payment": "결제",
+    "security": "보안",
+    "marketing": "마케팅"
+  },
+  "status": {
+    "unread": "읽지 않음",
+    "read": "읽음",
+    "archived": "보관됨",
+    "deleted": "삭제됨"
+  },
+  "actions": {
+    "markRead": "읽음으로 표시",
+    "markUnread": "읽지 않음으로 표시",
+    "archive": "보관",
+    "delete": "삭제",
+    "deleteAll": "모두 삭제",
+    "markAllRead": "모두 읽음으로 표시"
+  },
+  "settings": {
+    "title": "알림 설정",
+    "emailNotifications": "이메일 알림",
+    "pushNotifications": "푸시 알림",
+    "smsNotifications": "SMS 알림",
+    "desktopNotifications": "데스크톱 알림",
+    "soundEnabled": "알림음 사용",
+    "doNotDisturb": "방해 금지 모드",
+    "frequency": "알림 빈도",
+    "immediately": "즉시",
+    "hourly": "매시간",
+    "daily": "매일",
+    "weekly": "매주"
+  },
+  "templates": {
+    "newClient": "새 고객이 등록되었습니다",
+    "meetingReminder": "미팅 일정이 {{time}}분 후 시작됩니다",
+    "taskDue": "작업 마감일이 임박했습니다",
+    "paymentSuccess": "결제가 완료되었습니다",
+    "paymentFailed": "결제에 실패했습니다",
+    "systemMaintenance": "시스템 점검이 예정되어 있습니다",
+    "securityAlert": "보안 경고: 비정상적인 로그인 시도가 감지되었습니다"
+  },
+  "filters": {
+    "all": "전체",
+    "today": "오늘",
+    "thisWeek": "이번 주",
+    "thisMonth": "이번 달",
+    "priority": "중요",
+    "byType": "유형별"
+  },
+  "empty": {
+    "noNotifications": "알림이 없습니다",
+    "allClear": "모든 알림을 확인했습니다"
+  }
+}

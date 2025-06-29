@@ -1,3 +1,5 @@
+import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Badge } from '~/common/components/ui/badge';
 import { BlurFade } from '~/common/components/magicui/blur-fade';
 import { DotPattern } from '~/common/components/magicui/dot-pattern';
@@ -74,19 +76,42 @@ function UseCaseTab({
 }
 
 export function UseCasesSection() {
+  const { t } = useTranslation('landing');
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // 🎯 Hydration 완료 감지 (SSR/CSR mismatch 방지)
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
   const useCases = [
     {
       id: 'network',
       icon: <GlobeIcon className="w-8 h-8 text-white" />,
-      title: '소개 관계 시각화',
-      description:
-        '고객 간의 복잡한 소개 관계를 직관적인 그래프로 표현하여 핵심 소개자를 한눈에 파악할 수 있습니다.',
-      features: [
-        '시각적 네트워크 표시',
-        '핵심 소개자 발견',
-        '소개 패턴 분석',
-        '관계 깊이 파악',
-      ],
+      title: isHydrated ? t('use_cases.network.title') : '소개 관계 시각화',
+      description: isHydrated
+        ? t('use_cases.network.description')
+        : '고객 간의 복잡한 소개 관계를 직관적인 그래프로 표현하여 핵심 소개자를 한눈에 파악할 수 있습니다.',
+      features: isHydrated
+        ? (() => {
+            const translatedFeatures = t('use_cases.network.features', {
+              returnObjects: true,
+            });
+            return Array.isArray(translatedFeatures)
+              ? translatedFeatures
+              : [
+                  '시각적 네트워크 표시',
+                  '핵심 소개자 발견',
+                  '소개 패턴 분석',
+                  '관계 깊이 파악',
+                ];
+          })()
+        : [
+            '시각적 네트워크 표시',
+            '핵심 소개자 발견',
+            '소개 패턴 분석',
+            '관계 깊이 파악',
+          ],
       backgroundComponent: (
         <DotPattern
           className="opacity-30"
@@ -101,15 +126,30 @@ export function UseCasesSection() {
     {
       id: 'pipeline',
       icon: <TrendingUp className="w-8 h-8 text-white" />,
-      title: '영업 단계 관리',
-      description:
-        '고객을 영업 단계별로 체계적으로 분류하고 관리하여 효율적인 영업 프로세스를 구축할 수 있습니다.',
-      features: [
-        '단계별 고객 분류',
-        '진행 상황 추적',
-        '전환율 개선',
-        '업무 효율 향상',
-      ],
+      title: isHydrated ? t('use_cases.pipeline.title') : '영업 단계 관리',
+      description: isHydrated
+        ? t('use_cases.pipeline.description')
+        : '고객을 영업 단계별로 체계적으로 분류하고 관리하여 효율적인 영업 프로세스를 구축할 수 있습니다.',
+      features: isHydrated
+        ? (() => {
+            const translatedFeatures = t('use_cases.pipeline.features', {
+              returnObjects: true,
+            });
+            return Array.isArray(translatedFeatures)
+              ? translatedFeatures
+              : [
+                  '단계별 고객 분류',
+                  '진행 상황 추적',
+                  '전환율 개선',
+                  '업무 효율 향상',
+                ];
+          })()
+        : [
+            '단계별 고객 분류',
+            '진행 상황 추적',
+            '전환율 개선',
+            '업무 효율 향상',
+          ],
       backgroundComponent: (
         <FlickeringGrid
           className="opacity-20"
@@ -124,15 +164,25 @@ export function UseCasesSection() {
     {
       id: 'data',
       icon: <BarChart2 className="w-8 h-8 text-white" />,
-      title: '데이터 인사이트',
-      description:
-        '소개 현황과 영업 성과를 직관적인 차트와 통계로 확인하여 데이터 기반 의사결정을 지원합니다.',
-      features: [
-        '월별 성과 추적',
-        '핵심 지표 요약',
-        '트렌드 분석',
-        '성과 비교',
-      ],
+      title: isHydrated ? t('use_cases.data.title') : '데이터 인사이트',
+      description: isHydrated
+        ? t('use_cases.data.description')
+        : '소개 현황과 영업 성과를 직관적인 차트와 통계로 확인하여 데이터 기반 의사결정을 지원합니다.',
+      features: isHydrated
+        ? (() => {
+            const translatedFeatures = t('use_cases.data.features', {
+              returnObjects: true,
+            });
+            return Array.isArray(translatedFeatures)
+              ? translatedFeatures
+              : [
+                  '월별 성과 추적',
+                  '핵심 지표 요약',
+                  '트렌드 분석',
+                  '성과 비교',
+                ];
+          })()
+        : ['월별 성과 추적', '핵심 지표 요약', '트렌드 분석', '성과 비교'],
       backgroundComponent: (
         <AnimatedGridPattern
           className="opacity-20"
@@ -165,19 +215,27 @@ export function UseCasesSection() {
             variant="outline"
             className="mb-3 px-3 sm:px-4 py-1 sm:py-1.5 text-xs sm:text-sm font-medium"
           >
-            활용 사례
+            {isHydrated ? t('use_cases.badge') : '활용 사례'}
           </Badge>
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 leading-tight">
-            <span className="text-primary">어떻게</span>{' '}
-            <SparklesText
-              sparklesCount={8}
-              colors={{ first: '#F4731F', second: '#A73F03' }}
-            >
-              활용할 수 있나요?
-            </SparklesText>
+            {isHydrated ? (
+              t('use_cases.headline')
+            ) : (
+              <>
+                <span className="text-primary">어떻게</span>{' '}
+                <SparklesText
+                  sparklesCount={8}
+                  colors={{ first: '#F4731F', second: '#A73F03' }}
+                >
+                  활용할 수 있나요?
+                </SparklesText>
+              </>
+            )}
           </h2>
           <p className="text-sm sm:text-base text-muted-foreground max-w-xs sm:max-w-lg lg:max-w-2xl mx-auto leading-relaxed px-2 sm:px-0">
-            다양한 상황에서 SureCRM이 어떻게 도움이 되는지 확인해보세요.
+            {isHydrated
+              ? t('use_cases.description')
+              : '다양한 상황에서 SureCRM이 어떻게 도움이 되는지 확인해보세요.'}
           </p>
         </div>
 
@@ -188,24 +246,36 @@ export function UseCasesSection() {
               className="rounded-lg sm:rounded-xl py-2 sm:py-3 px-2 sm:px-6 text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300"
             >
               <GlobeIcon className="w-3 sm:w-4 h-3 sm:h-4 mr-1 sm:mr-2" />
-              <span className="hidden sm:inline">관계 시각화</span>
-              <span className="sm:hidden">관계</span>
+              <span className="hidden sm:inline">
+                {isHydrated ? t('use_cases.tabs.network') : '관계 시각화'}
+              </span>
+              <span className="sm:hidden">
+                {isHydrated ? t('use_cases.tabs.network_short') : '관계'}
+              </span>
             </TabsTrigger>
             <TabsTrigger
               value="pipeline"
               className="rounded-lg sm:rounded-xl py-2 sm:py-3 px-2 sm:px-6 text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300"
             >
               <TrendingUp className="w-3 sm:w-4 h-3 sm:h-4 mr-1 sm:mr-2" />
-              <span className="hidden sm:inline">영업 관리</span>
-              <span className="sm:hidden">영업</span>
+              <span className="hidden sm:inline">
+                {isHydrated ? t('use_cases.tabs.pipeline') : '영업 관리'}
+              </span>
+              <span className="sm:hidden">
+                {isHydrated ? t('use_cases.tabs.pipeline_short') : '영업'}
+              </span>
             </TabsTrigger>
             <TabsTrigger
               value="data"
               className="rounded-lg sm:rounded-xl py-2 sm:py-3 px-2 sm:px-6 text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300"
             >
               <BarChart2 className="w-3 sm:w-4 h-3 sm:h-4 mr-1 sm:mr-2" />
-              <span className="hidden sm:inline">분석</span>
-              <span className="sm:hidden">분석</span>
+              <span className="hidden sm:inline">
+                {isHydrated ? t('use_cases.tabs.data') : '분석'}
+              </span>
+              <span className="sm:hidden">
+                {isHydrated ? t('use_cases.tabs.data_short') : '분석'}
+              </span>
             </TabsTrigger>
           </TabsList>
 

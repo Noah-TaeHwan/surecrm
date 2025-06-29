@@ -1,0 +1,73 @@
+{
+  "title": "Calendar",
+  "views": {
+    "month": "Month",
+    "week": "Week",
+    "day": "Day",
+    "agenda": "Agenda"
+  },
+  "actions": {
+    "addEvent": "Add Event",
+    "editEvent": "Edit Event",
+    "deleteEvent": "Delete Event",
+    "today": "Today",
+    "prev": "Previous",
+    "next": "Next",
+    "sync": "Sync"
+  },
+  "event": {
+    "title": "Title",
+    "description": "Description",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "startTime": "Start Time",
+    "endTime": "End Time",
+    "allDay": "All Day",
+    "location": "Location",
+    "attendees": "Attendees",
+    "reminder": "Reminder",
+    "repeat": "Repeat",
+    "category": "Category"
+  },
+  "meeting": {
+    "scheduleMeeting": "Schedule Meeting",
+    "clientMeeting": "Client Meeting",
+    "teamMeeting": "Team Meeting",
+    "onlineMeeting": "Online Meeting",
+    "officeMeeting": "Office Meeting",
+    "meetingRoom": "Meeting Room",
+    "duration": "Duration",
+    "agenda": "Agenda",
+    "minutes": "Meeting Minutes"
+  },
+  "reminder": {
+    "none": "None",
+    "5min": "5 minutes before",
+    "15min": "15 minutes before",
+    "30min": "30 minutes before",
+    "1hour": "1 hour before",
+    "1day": "1 day before",
+    "1week": "1 week before"
+  },
+  "repeat": {
+    "none": "No repeat",
+    "daily": "Daily",
+    "weekly": "Weekly",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "weekdays": "Weekdays",
+    "custom": "Custom"
+  },
+  "status": {
+    "confirmed": "Confirmed",
+    "tentative": "Tentative",
+    "cancelled": "Cancelled",
+    "completed": "Completed"
+  },
+  "google": {
+    "connect": "Connect Google Calendar",
+    "disconnect": "Disconnect",
+    "sync": "Sync",
+    "lastSync": "Last Sync"
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "title": "設定",
+  "sections": {
+    "profile": "プロフィール",
+    "account": "アカウント",
+    "notifications": "通知",
+    "appearance": "外観",
+    "privacy": "プライバシー",
+    "billing": "請求",
+    "integrations": "連携",
+    "advanced": "詳細設定"
+  },
+  "profile": {
+    "personalInfo": "個人情報",
+    "name": "名前",
+    "email": "メール",
+    "phone": "電話番号",
+    "company": "会社",
+    "position": "役職",
+    "avatar": "プロフィール画像",
+    "uploadAvatar": "画像をアップロード",
+    "removeAvatar": "画像を削除"
+  },
+  "account": {
+    "security": "セキュリティ",
+    "changePassword": "パスワード変更",
+    "currentPassword": "現在のパスワード",
+    "newPassword": "新しいパスワード",
+    "confirmPassword": "パスワード確認",
+    "twoFactorAuth": "二段階認証",
+    "enableTwoFactor": "二段階認証を有効にする",
+    "disableTwoFactor": "二段階認証を無効にする",
+    "sessions": "アクティブセッション",
+    "logoutAllDevices": "すべてのデバイスからログアウト"
+  },
+  "appearance": {
+    "theme": "テーマ",
+    "light": "ライト",
+    "dark": "ダーク",
+    "auto": "自動",
+    "language": "言語",
+    "timezone": "タイムゾーン",
+    "dateFormat": "日付形式",
+    "timeFormat": "時間形式",
+    "currency": "通貨",
+    "numberFormat": "数値形式"
+  },
+  "privacy": {
+    "dataUsage": "データ使用",
+    "analytics": "分析データ収集",
+    "marketing": "マーケティング情報受信",
+    "thirdParty": "第三者データ共有",
+    "dataExport": "データエクスポート",
+    "dataDelete": "アカウント削除",
+    "cookieConsent": "Cookieの同意"
+  },
+  "integrations": {
+    "available": "利用可能な連携",
+    "connected": "接続済みサービス",
+    "googleCalendar": "Googleカレンダー",
+    "outlook": "Outlook",
+    "slack": "Slack",
+    "zapier": "Zapier",
+    "webhook": "Webhook",
+    "api": "APIキー",
+    "connect": "接続",
+    "disconnect": "接続解除",
+    "configure": "設定"
+  },
+  "actions": {
+    "save": "保存",
+    "cancel": "キャンセル",
+    "reset": "リセット",
+    "export": "エクスポート",
+    "import": "インポート",
+    "backup": "バックアップ",
+    "restore": "復元"
+  },
+  "messages": {
+    "saveSuccess": "設定が保存されました",
+    "saveError": "設定の保存に失敗しました",
+    "passwordChanged": "パスワードが変更されました",
+    "invalidPassword": "現在のパスワードが正しくありません",
+    "confirmDelete": "アカウントを削除してもよろしいですか？この操作は元に戻せません。"
+  }
+}

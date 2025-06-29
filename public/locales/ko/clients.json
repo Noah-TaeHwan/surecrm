@@ -1,0 +1,77 @@
+{
+  "title": "고객 관리",
+  "list": {
+    "allClients": "전체 고객",
+    "activeClients": "활성 고객",
+    "prospects": "잠재 고객",
+    "totalCount": "총 {{count}}명"
+  },
+  "actions": {
+    "addClient": "고객 추가",
+    "editClient": "고객 수정",
+    "deleteClient": "고객 삭제",
+    "viewDetails": "상세 보기",
+    "export": "내보내기",
+    "import": "가져오기",
+    "filter": "필터",
+    "search": "검색"
+  },
+  "fields": {
+    "name": "이름",
+    "email": "이메일",
+    "phone": "전화번호",
+    "company": "회사",
+    "position": "직책",
+    "address": "주소",
+    "birthDate": "생년월일",
+    "status": "상태",
+    "stage": "단계",
+    "source": "유입 경로",
+    "assignedTo": "담당자",
+    "createdAt": "등록일",
+    "lastContact": "마지막 연락",
+    "notes": "메모",
+    "tags": "태그"
+  },
+  "status": {
+    "active": "활성",
+    "inactive": "비활성",
+    "prospect": "잠재 고객",
+    "customer": "고객",
+    "former": "이전 고객"
+  },
+  "stages": {
+    "lead": "리드",
+    "qualified": "검증됨",
+    "proposal": "제안",
+    "negotiation": "협상",
+    "closed": "성사",
+    "lost": "실패"
+  },
+  "modal": {
+    "addClient": "고객 추가",
+    "editClient": "고객 정보 수정",
+    "deleteConfirm": "정말로 이 고객을 삭제하시겠습니까?",
+    "required": "필수 정보를 모두 입력해주세요",
+    "saveSuccess": "고객 정보가 저장되었습니다",
+    "deleteSuccess": "고객이 삭제되었습니다"
+  },
+  "insurance": {
+    "title": "보험 계약",
+    "type": "보험 종류",
+    "premium": "보험료",
+    "startDate": "시작일",
+    "endDate": "종료일",
+    "status": "계약 상태",
+    "addContract": "계약 추가"
+  },
+  "documents": {
+    "title": "문서",
+    "addDocument": "문서 추가",
+    "fileName": "파일명",
+    "uploadDate": "업로드일",
+    "size": "크기",
+    "download": "다운로드",
+    "delete": "삭제"
+  }
+}

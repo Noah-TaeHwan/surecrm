@@ -1,0 +1,62 @@
+{
+  "validation": {
+    "required": "この項目は必須です。",
+    "email": "有効なメールアドレスを入力してください。",
+    "phone": "有効な電話番号を入力してください。",
+    "password": "パスワードを入力してください。",
+    "passwordConfirm": "パスワードが一致しません。",
+    "minLength": "{{min}}文字以上で入力してください。",
+    "maxLength": "{{max}}文字以内で入力してください。",
+    "number": "数字のみを入力してください。",
+    "date": "有効な日付を選択してください。",
+    "url": "有効なURLを入力してください。",
+    "ssn": "有効な社会保障番号を入力してください。"
+  },
+  "placeholder": {
+    "name": "名前を入力してください",
+    "email": "メールアドレスを入力してください",
+    "phone": "電話番号を入力してください",
+    "password": "パスワードを入力してください",
+    "confirmPassword": "パスワードを再入力してください",
+    "search": "検索語を入力してください",
+    "memo": "メモを入力してください",
+    "amount": "金額を入力してください",
+    "selectOption": "オプションを選択してください",
+    "selectDate": "日付を選択してください",
+    "selectTime": "時間を選択してください"
+  },
+  "label": {
+    "name": "名前",
+    "firstName": "姓",
+    "lastName": "名",
+    "email": "メール",
+    "phone": "電話番号",
+    "mobile": "携帯電話",
+    "address": "住所",
+    "zipCode": "郵便番号",
+    "password": "パスワード",
+    "confirmPassword": "パスワード確認",
+    "rememberMe": "ログイン状態を保持",
+    "agreeTerms": "利用規約に同意します",
+    "agreePrivacy": "プライバシーポリシーに同意します",
+    "agreeMarketing": "マーケティング情報の受信に同意します",
+    "birthDate": "生年月日",
+    "gender": "性別",
+    "occupation": "職業",
+    "company": "会社",
+    "department": "部署",
+    "position": "役職"
+  },
+  "error": {
+    "networkError": "ネットワークエラーが発生しました。",
+    "serverError": "サーバーエラーが発生しました。",
+    "unauthorized": "認証が必要です。",
+    "forbidden": "アクセス権限がありません。",
+    "notFound": "要求された情報が見つかりません。",
+    "validationFailed": "入力内容を確認してください。",
+    "uploadFailed": "ファイルのアップロードに失敗しました。",
+    "saveFailed": "保存に失敗しました。",
+    "deleteFailed": "削除に失敗しました。",
+    "loadFailed": "データの読み込みに失敗しました。"
+  }
+}

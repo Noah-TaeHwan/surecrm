@@ -81,6 +81,9 @@ export default [
   // 📧 이메일 테스트 페이지
   route('email-test', 'routes/email-test.tsx'),
 
+  // 🌍 다국어 테스트 페이지
+  route('test-i18n', 'routes/test-i18n.tsx'),
+
   // 🛠️ API 라우트들
   route('api/auth/me', 'routes/api.auth.me.ts'),
   route(

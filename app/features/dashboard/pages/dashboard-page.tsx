@@ -1,5 +1,6 @@
 // React Router v7 타입 import 제거 - 직접 타입 정의 사용
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { MainLayout } from '~/common/layouts/main-layout';
 import { WelcomeSection } from '../components/welcome-section';
 import { PerformanceKPICards } from '../components/performance-kpi-cards';
@@ -49,6 +50,8 @@ interface ComponentProps {
 }
 
 export function meta() {
+  // Note: meta 함수는 SSR에서 실행되므로 여기서는 기본 한국어 사용
+  // 실제 다국어 지원은 클라이언트 컴포넌트에서 처리
   return [
     { title: '대시보드 - SureCRM' },
     {
@@ -207,7 +210,7 @@ export async function loader({ request }: LoaderArgs) {
       topReferrers: fallbackReferralInsights.topReferrers,
       networkStats: fallbackReferralInsights.networkStats,
       userGoals: [],
-      error: '데이터를 불러오는 중 오류가 발생했습니다.',
+      error: 'dashboard:errors.data_loading',
     };
   }
 }
@@ -245,16 +248,19 @@ export async function action({ request }: ActionArgs) {
       return {
         success: true,
         message: goalId
-          ? '목표가 성공적으로 수정되었습니다.'
-          : '목표가 성공적으로 설정되었습니다.',
+          ? 'dashboard:actions.update_success'
+          : 'dashboard:actions.set_success',
         timestamp: new Date().toISOString(),
       };
     } catch (error) {
-      console.error('목표 설정 오류:', error);
+      console.error('dashboard:errors.goal_setting_error', error);
       return {
         success: false,
-        message: '목표 설정에 실패했습니다. 다시 시도해주세요.',
-        error: error instanceof Error ? error.message : '알 수 없는 오류',
+        message: 'dashboard:actions.set_error',
+        error:
+          error instanceof Error
+            ? error.message
+            : 'dashboard:errors.unknown_error',
       };
     }
   }
@@ -266,7 +272,7 @@ export async function action({ request }: ActionArgs) {
       if (!goalId) {
         return {
           success: false,
-          message: '삭제할 목표를 찾을 수 없습니다.',
+          message: 'dashboard:actions.delete_not_found',
         };
       }
 
@@ -274,26 +280,37 @@ export async function action({ request }: ActionArgs) {
 
       return {
         success: true,
-        message: '목표가 성공적으로 삭제되었습니다.',
+        message: 'dashboard:actions.delete_success',
         timestamp: new Date().toISOString(),
       };
     } catch (error) {
-      console.error('목표 삭제 오류:', error);
+      console.error('dashboard:errors.goal_delete_error', error);
       return {
         success: false,
-        message: '목표 삭제에 실패했습니다. 다시 시도해주세요.',
-        error: error instanceof Error ? error.message : '알 수 없는 오류',
+        message: 'dashboard:actions.delete_error',
+        error:
+          error instanceof Error
+            ? error.message
+            : 'dashboard:errors.unknown_error',
       };
     }
   }
 
   return {
     success: false,
-    message: '알 수 없는 요청입니다.',
+    message: 'dashboard:errors.unknown_request',
   };
 }
 
 export default function DashboardPage({ loaderData }: ComponentProps) {
+  const { t } = useTranslation('dashboard');
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // 🎯 Hydration 완료 감지 (SSR/CSR mismatch 방지)
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
   const {
     user,
     todayStats,
@@ -480,23 +497,26 @@ export default function DashboardPage({ loaderData }: ComponentProps) {
   const transformedRecentClients = recentClientsData.recentClients.map(
     (client: any) => ({
       id: client.id,
-      name: client.fullName || client.name || '이름 없음',
+      name:
+        client.fullName ||
+        client.name ||
+        (isHydrated ? t('fallback.no_name') : '이름 없음'),
       status: (() => {
         if (!client.currentStage) return 'prospect';
-        switch (client.currentStage) {
-          case '잠재고객':
-            return 'prospect';
-          case '접촉완료':
-            return 'contacted';
-          case '제안중':
-            return 'proposal';
-          case '계약체결':
-            return 'contracted';
-          case '완료':
-            return 'completed';
-          default:
-            return 'prospect';
-        }
+
+        // Hydration 전후에 관계없이 한국어로 매칭 (서버에서 한국어로 저장됨)
+        const stageMapping: Record<
+          string,
+          'prospect' | 'contacted' | 'proposal' | 'contracted' | 'completed'
+        > = {
+          잠재고객: 'prospect',
+          접촉완료: 'contacted',
+          제안중: 'proposal',
+          계약체결: 'contracted',
+          완료: 'completed',
+        };
+
+        return stageMapping[client.currentStage] || 'prospect';
       })() as
         | 'prospect'
         | 'contacted'
@@ -505,8 +525,16 @@ export default function DashboardPage({ loaderData }: ComponentProps) {
         | 'completed',
       lastContactDate: client.lastContactDate || new Date().toISOString(),
       potentialValue: (client.contractAmount || 0) / 10000, // 원을 만원으로 변환
-      referredBy: client.referralDepth > 0 ? '소개 고객' : undefined,
-      stage: client.currentStage || client.stage || '잠재고객',
+      referredBy:
+        client.referralDepth > 0
+          ? isHydrated
+            ? t('referral.client')
+            : '소개 고객'
+          : undefined,
+      stage:
+        client.currentStage ||
+        client.stage ||
+        (isHydrated ? t('stages.prospect') : '잠재고객'),
     })
   );
 
@@ -514,7 +542,10 @@ export default function DashboardPage({ loaderData }: ComponentProps) {
   const transformedTopReferrers = topReferrers.map(
     (referrer: any, index: number) => ({
       id: referrer.id,
-      name: referrer.fullName || referrer.name || '이름 없음',
+      name:
+        referrer.fullName ||
+        referrer.name ||
+        (isHydrated ? t('fallback.no_name') : '이름 없음'),
       totalReferrals: referrer.referralCount || referrer.totalReferrals || 0,
       successfulConversions: Math.round(
         ((referrer.conversionRate || 0) / 100) *
@@ -523,11 +554,12 @@ export default function DashboardPage({ loaderData }: ComponentProps) {
       conversionRate: referrer.conversionRate || 0,
       lastReferralDate: referrer.lastReferralDate || new Date().toISOString(),
       rank: index + 1,
-      recentActivity: `최근 ${
-        referrer.referralCount || referrer.totalReferrals || 0
-      }건의 소개를 진행했습니다. 평균 전환율 ${(
-        referrer.conversionRate || 0
-      ).toFixed(1)}%를 기록하고 있습니다.`,
+      recentActivity: isHydrated
+        ? t('referral.recent_activity', {
+            count: referrer.referralCount || referrer.totalReferrals || 0,
+            rate: (referrer.conversionRate || 0).toFixed(1),
+          })
+        : `최근 ${referrer.referralCount || referrer.totalReferrals || 0}건의 소개를 진행했습니다. 평균 전환율 ${(referrer.conversionRate || 0).toFixed(1)}%를 기록하고 있습니다.`,
     })
   );
 
@@ -611,17 +643,19 @@ export default function DashboardPage({ loaderData }: ComponentProps) {
   // 에러 상태 표시
   if (error) {
     return (
-      <MainLayout title="대시보드">
+      <MainLayout title={isHydrated ? t('title') : '대시보드'}>
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center space-y-4">
             <div className="text-lg font-medium text-muted-foreground">
-              {error}
+              {isHydrated
+                ? t(error.replace('dashboard:', ''))
+                : '데이터를 불러오는 중 오류가 발생했습니다.'}
             </div>
             <button
               onClick={() => window.location.reload()}
               className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
             >
-              다시 시도
+              {isHydrated ? t('errors.retry') : '다시 시도'}
             </button>
           </div>
         </div>
@@ -630,7 +664,7 @@ export default function DashboardPage({ loaderData }: ComponentProps) {
   }
 
   return (
-    <MainLayout title="대시보드">
+    <MainLayout title={isHydrated ? t('title') : '대시보드'}>
       <div className="space-y-8">
         {/* 환영 섹션 */}
         <WelcomeSection
@@ -680,14 +714,18 @@ export default function DashboardPage({ loaderData }: ComponentProps) {
         {/* 성공 메시지 표시 */}
         {fetcher.data?.success && (
           <div className="fixed bottom-4 right-4 bg-orange-600 text-white px-4 py-2 rounded-md shadow-lg">
-            {fetcher.data.message}
+            {isHydrated
+              ? t(fetcher.data.message.replace('dashboard:', ''))
+              : fetcher.data.message}
           </div>
         )}
 
         {/* 에러 메시지 표시 */}
         {fetcher.data?.success === false && (
           <div className="fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded-md shadow-lg">
-            {fetcher.data.message}
+            {isHydrated
+              ? t(fetcher.data.message.replace('dashboard:', ''))
+              : fetcher.data.message}
           </div>
         )}
       </div>

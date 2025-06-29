@@ -37,11 +37,12 @@ export function SimpleSubscriptionPage({
 
   const plan = {
     id: 'surecrm-pro',
-    name: 'SureCRM Pro',
+    name: 'Pro Plan',
     description: '보험설계사를 위한 완전한 CRM 솔루션',
-    monthlyPrice: 39000,
-    yearlyPrice: 390000, // 10개월 가격 (2개월 무료)
-    currency: 'KRW',
+    monthlyPrice: 20,
+    yearlyPrice: 200, // 10개월 가격 (2개월 무료)
+    currency: 'USD',
+    trialDays: 14,
   };
 
   const currentPrice =
@@ -77,9 +78,9 @@ export function SimpleSubscriptionPage({
       <div className="text-center mb-8">
         <Badge variant="secondary" className="mb-4">
           <Sparkles className="w-3 h-3 mr-1" />
-          MVP 출시 기념
+          Pro Plan 출시
         </Badge>
-        <h1 className="text-2xl font-bold mb-2">SureCRM Pro로 업그레이드</h1>
+        <h1 className="text-2xl font-bold mb-2">Pro Plan으로 업그레이드</h1>
         <p className="text-muted-foreground">
           보험설계사 전용 CRM으로 영업 효율을 극대화하세요
         </p>
@@ -121,7 +122,7 @@ export function SimpleSubscriptionPage({
         <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
           <Badge className="bg-primary text-primary-foreground">
             <Star className="w-3 h-3 mr-1" />
-            현재 MVP
+            추천 플랜
           </Badge>
         </div>
 
@@ -132,9 +133,7 @@ export function SimpleSubscriptionPage({
           </CardDescription>
           <div className="mt-4">
             <div className="flex items-baseline justify-center">
-              <span className="text-3xl font-bold">
-                ₩{currentPrice.toLocaleString()}
-              </span>
+              <span className="text-3xl font-bold">${currentPrice}</span>
               <span className="text-muted-foreground ml-1">
                 / {currentPeriod}
               </span>
@@ -148,11 +147,11 @@ export function SimpleSubscriptionPage({
         </CardHeader>
 
         <CardContent className="space-y-6">
-          {/* 30일 무료 체험 강조 */}
+          {/* 14일 무료 체험 강조 */}
           <div className="bg-blue-50 dark:bg-blue-950 rounded-lg p-4 text-center">
             <div className="flex items-center justify-center gap-2 text-blue-700 dark:text-blue-300">
               <Clock className="w-4 h-4" />
-              <span className="font-medium">30일 무료 체험</span>
+              <span className="font-medium">14일 무료 체험</span>
             </div>
             <p className="text-sm text-blue-600 dark:text-blue-400 mt-1">
               언제든 취소 가능, 신용카드 불필요
@@ -170,7 +169,7 @@ export function SimpleSubscriptionPage({
               '처리 중...'
             ) : (
               <>
-                30일 무료로 시작하기
+                14일 무료로 시작하기
                 <ArrowRight className="ml-2 w-4 h-4" />
               </>
             )}

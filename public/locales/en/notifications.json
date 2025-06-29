@@ -1,0 +1,61 @@
+{
+  "title": "Notifications",
+  "types": {
+    "system": "System",
+    "meeting": "Meeting",
+    "client": "Client",
+    "task": "Task",
+    "payment": "Payment",
+    "security": "Security",
+    "marketing": "Marketing"
+  },
+  "status": {
+    "unread": "Unread",
+    "read": "Read",
+    "archived": "Archived",
+    "deleted": "Deleted"
+  },
+  "actions": {
+    "markRead": "Mark as Read",
+    "markUnread": "Mark as Unread",
+    "archive": "Archive",
+    "delete": "Delete",
+    "deleteAll": "Delete All",
+    "markAllRead": "Mark All as Read"
+  },
+  "settings": {
+    "title": "Notification Settings",
+    "emailNotifications": "Email Notifications",
+    "pushNotifications": "Push Notifications",
+    "smsNotifications": "SMS Notifications",
+    "desktopNotifications": "Desktop Notifications",
+    "soundEnabled": "Enable Sound",
+    "doNotDisturb": "Do Not Disturb",
+    "frequency": "Notification Frequency",
+    "immediately": "Immediately",
+    "hourly": "Hourly",
+    "daily": "Daily",
+    "weekly": "Weekly"
+  },
+  "templates": {
+    "newClient": "New client has been registered",
+    "meetingReminder": "Meeting starts in {{time}} minutes",
+    "taskDue": "Task deadline is approaching",
+    "paymentSuccess": "Payment completed successfully",
+    "paymentFailed": "Payment failed",
+    "systemMaintenance": "System maintenance is scheduled",
+    "securityAlert": "Security Alert: Unusual login attempt detected"
+  },
+  "filters": {
+    "all": "All",
+    "today": "Today",
+    "thisWeek": "This Week",
+    "thisMonth": "This Month",
+    "priority": "Priority",
+    "byType": "By Type"
+  },
+  "empty": {
+    "noNotifications": "No notifications",
+    "allClear": "All notifications have been checked"
+  }
+}

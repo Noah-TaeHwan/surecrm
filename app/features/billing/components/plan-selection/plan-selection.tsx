@@ -1,18 +1,11 @@
-import { useState } from 'react';
 import { PlanCard } from './plan-card';
 import {
   Shield,
-  Users,
   Database,
-  Zap,
   HeadphonesIcon,
-  TrendingUp,
   Network,
   PieChart,
   FileText,
-  Calendar,
-  Bell,
-  CreditCard,
 } from 'lucide-react';
 import {
   Card,
@@ -21,7 +14,6 @@ import {
   CardHeader,
   CardTitle,
 } from '~/common/components/ui/card';
-import { Badge } from '~/common/components/ui/badge';
 
 interface PlanSelectionProps {
   onPlanSelect: (planId: string) => void;
@@ -39,8 +31,8 @@ export function PlanSelection({
     id: 'surecrm-pro',
     name: 'SureCRM Pro',
     description: '보험설계사를 위한 완전한 CRM 솔루션',
-    price: 39000,
-    currency: 'KRW',
+    price: 20,
+    currency: 'USD',
     billingInterval: 'month',
     isPopular: true,
     isSelected: selectedPlanId === 'surecrm-pro',

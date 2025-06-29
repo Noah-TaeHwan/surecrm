@@ -4,16 +4,10 @@ import {
   Shield,
   Users,
   Database,
-  Zap,
   HeadphonesIcon,
   TrendingUp,
   Network,
   PieChart,
-  FileText,
-  Calendar,
-  Bell,
-  CreditCard,
-  Star,
   CheckCircle,
   ArrowRight,
   Sparkles,
@@ -26,7 +20,6 @@ import {
   CardTitle,
 } from '~/common/components/ui/card';
 import { Badge } from '~/common/components/ui/badge';
-import { Button } from '~/common/components/ui/button';
 
 interface EnhancedPlanSelectionProps {
   onPlanSelect: (planId: string) => void;
@@ -46,8 +39,8 @@ export function EnhancedPlanSelection({
     id: 'surecrm-pro',
     name: 'SureCRM Pro',
     description: '보험설계사를 위한 완전한 CRM 솔루션',
-    price: 39000,
-    currency: 'KRW',
+    price: 20,
+    currency: 'USD',
     billingInterval: 'month',
     isPopular: true,
     isSelected: selectedPlanId === 'surecrm-pro',
@@ -203,7 +196,7 @@ export function EnhancedPlanSelection({
             <div className="space-y-2">
               <h2 className="text-2xl font-bold">지금 시작하세요</h2>
               <p className="text-muted-foreground">
-                30일 무료 체험으로 SureCRM Pro의 모든 기능을 경험해보세요
+                14일 무료 체험으로 SureCRM Pro의 모든 기능을 경험해보세요
               </p>
             </div>
 
@@ -221,7 +214,7 @@ export function EnhancedPlanSelection({
             <div className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
               <div className="flex items-center gap-1">
                 <CheckCircle className="w-4 h-4 text-green-600" />
-                <span>30일 무료 체험</span>
+                <span>14일 무료 체험</span>
               </div>
               <div className="flex items-center gap-1">
                 <CheckCircle className="w-4 h-4 text-green-600" />
@@ -302,7 +295,7 @@ export function EnhancedPlanSelection({
           {[
             {
               q: '무료 체험 기간 동안 모든 기능을 사용할 수 있나요?',
-              a: '네, 30일 동안 SureCRM Pro의 모든 기능을 제한 없이 사용하실 수 있습니다.',
+              a: '네, 14일 동안 SureCRM Pro의 모든 기능을 제한 없이 사용하실 수 있습니다.',
             },
             {
               q: '기존 데이터를 쉽게 옮길 수 있나요?',

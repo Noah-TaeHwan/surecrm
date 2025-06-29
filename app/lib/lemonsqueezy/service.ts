@@ -146,7 +146,7 @@ export class LemonSqueezyService {
             name: variantAttributes.name,
             description: variantAttributes.description,
             price: price?.toString() ?? '0',
-            currency: 'KRW', // 기본값
+            currency: 'USD',
             interval: priceObj.attributes.renewal_interval_unit ?? 'month',
             intervalCount: priceObj.attributes.renewal_interval_quantity ?? 1,
             isUsageBased,

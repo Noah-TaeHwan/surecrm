@@ -1,12 +1,22 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '~/common/components/ui/button';
 import { Link } from 'react-router';
+import { LanguageSelector } from '~/common/components/i18n/language-selector';
 
 interface LandingLayoutProps {
   children: React.ReactNode;
 }
 
 export function LandingLayout({ children }: LandingLayoutProps) {
+  const { t } = useTranslation('landing');
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // 🎯 Hydration 완료 감지 (SSR/CSR mismatch 방지)
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
   // 모바일에서 랜딩페이지 스크롤을 허용하기 위한 body 클래스 관리
   useEffect(() => {
     const body = document.body;
@@ -28,22 +38,29 @@ export function LandingLayout({ children }: LandingLayoutProps) {
             </Link>
           </h1>
 
-          {/* 로그인/회원가입 버튼 */}
+          {/* 언어 선택기 & 로그인/회원가입 버튼 */}
           <div className="flex items-center gap-2 sm:gap-3">
+            {/* 언어 선택기 */}
+            <LanguageSelector variant="dropdown" size="sm" className="w-auto" />
+
             <Button
               variant="outline"
               size="sm"
               asChild
               className="text-sm border-border hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-200"
             >
-              <Link to="/auth/login">로그인</Link>
+              <Link to="/auth/login">
+                {isHydrated ? t('nav.login') : '로그인'}
+              </Link>
             </Button>
             <Button
               size="sm"
               asChild
               className="text-sm bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm"
             >
-              <Link to="/auth/signup">회원가입</Link>
+              <Link to="/auth/signup">
+                {isHydrated ? t('nav.signup') : '회원가입'}
+              </Link>
             </Button>
           </div>
         </div>
@@ -74,16 +91,18 @@ export function LandingLayout({ children }: LandingLayoutProps) {
                       </h2>
                     </Link>
                     <p className="text-muted-foreground text-sm lg:text-base max-w-md leading-relaxed">
-                      보험 영업의 새로운 기준을 제시하는 스마트 CRM 솔루션.
-                      <br />
-                      고객 관리부터 영업 기회 창출까지, 모든 것을 하나로.
+                      {isHydrated
+                        ? t('footer.description')
+                        : '보험설계사를 위한 전문 CRM 솔루션'}
                     </p>
 
                     {/* 소셜 링크 */}
                     <div className="flex items-center gap-3 pt-2">
                       <div className="service-badge flex items-center gap-2 text-xs text-muted-foreground">
                         <div className="w-2 h-2 bg-green-500 rounded-full status-indicator" />
-                        <span>서비스 운영중</span>
+                        <span>
+                          {isHydrated ? t('footer.status') : '서비스 상태'}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -92,7 +111,7 @@ export function LandingLayout({ children }: LandingLayoutProps) {
                 {/* 제품 링크 */}
                 <div className="space-y-4 footer-section-animate">
                   <h3 className="font-semibold text-foreground text-sm lg:text-base">
-                    제품
+                    {isHydrated ? t('footer.product') : '제품'}
                   </h3>
                   <ul className="space-y-3 text-sm text-muted-foreground">
                     <li>
@@ -100,7 +119,7 @@ export function LandingLayout({ children }: LandingLayoutProps) {
                         to="/features"
                         className="footer-link-hover hover:text-primary transition-colors duration-200 hover:translate-x-1 inline-block"
                       >
-                        주요 기능
+                        {isHydrated ? t('nav.features') : '특징'}
                       </Link>
                     </li>
                     <li>
@@ -108,7 +127,7 @@ export function LandingLayout({ children }: LandingLayoutProps) {
                         to="/pricing"
                         className="footer-link-hover hover:text-primary transition-colors duration-200 hover:translate-x-1 inline-block"
                       >
-                        요금제
+                        {isHydrated ? t('nav.pricing') : '요금제'}
                       </Link>
                     </li>
                     <li>
@@ -116,7 +135,7 @@ export function LandingLayout({ children }: LandingLayoutProps) {
                         to="/demo"
                         className="footer-link-hover hover:text-primary transition-colors duration-200 hover:translate-x-1 inline-block"
                       >
-                        데모 체험
+                        {isHydrated ? t('hero.cta_secondary') : '데모 보기'}
                       </Link>
                     </li>
                     <li>
@@ -124,7 +143,7 @@ export function LandingLayout({ children }: LandingLayoutProps) {
                         to="/integrations"
                         className="footer-link-hover hover:text-primary transition-colors duration-200 hover:translate-x-1 inline-block"
                       >
-                        연동 서비스
+                        {isHydrated ? t('footer.documentation') : '문서'}
                       </Link>
                     </li>
                   </ul>
@@ -133,7 +152,7 @@ export function LandingLayout({ children }: LandingLayoutProps) {
                 {/* 지원 링크 */}
                 <div className="space-y-4 footer-section-animate">
                   <h3 className="font-semibold text-foreground text-sm lg:text-base">
-                    지원
+                    {isHydrated ? t('footer.support') : '지원'}
                   </h3>
                   <ul className="space-y-3 text-sm text-muted-foreground">
                     <li>
@@ -141,7 +160,7 @@ export function LandingLayout({ children }: LandingLayoutProps) {
                         to="/help"
                         className="footer-link-hover hover:text-primary transition-colors duration-200 hover:translate-x-1 inline-block"
                       >
-                        도움말
+                        {isHydrated ? t('footer.help') : '도움말'}
                       </Link>
                     </li>
                     <li>
@@ -149,7 +168,7 @@ export function LandingLayout({ children }: LandingLayoutProps) {
                         to="/contact"
                         className="footer-link-hover hover:text-primary transition-colors duration-200 hover:translate-x-1 inline-block"
                       >
-                        문의하기
+                        {isHydrated ? t('footer.contact') : '문의하기'}
                       </Link>
                     </li>
                     <li>
@@ -157,15 +176,15 @@ export function LandingLayout({ children }: LandingLayoutProps) {
                         to="/terms"
                         className="footer-link-hover hover:text-primary transition-colors duration-200 hover:translate-x-1 inline-block"
                       >
-                        이용약관
+                        {isHydrated ? t('footer.terms') : '이용약관'}
                       </Link>
                     </li>
                     <li>
                       <Link
-                        to="/terms"
+                        to="/privacy"
                         className="footer-link-hover hover:text-primary transition-colors duration-200 hover:translate-x-1 inline-block"
                       >
-                        개인정보처리방침
+                        {isHydrated ? t('footer.privacy') : '개인정보처리방침'}
                       </Link>
                     </li>
                   </ul>
@@ -183,9 +202,15 @@ export function LandingLayout({ children }: LandingLayoutProps) {
               <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                 {/* 저작권 정보 */}
                 <div className="text-xs lg:text-sm text-muted-foreground text-center md:text-left">
-                  <p>© 2024 SureCRM. All rights reserved.</p>
+                  <p>
+                    {isHydrated
+                      ? t('footer.copyright')
+                      : '© 2024 SureCRM. All rights reserved.'}
+                  </p>
                   <p className="mt-1 opacity-80">
-                    보험 영업을 위한 스마트 CRM 솔루션
+                    {isHydrated
+                      ? t('footer.description')
+                      : '보험설계사를 위한 전문 CRM 솔루션'}
                   </p>
                 </div>
               </div>

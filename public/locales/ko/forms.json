@@ -1,0 +1,62 @@
+{
+  "validation": {
+    "required": "이 필드는 필수입니다.",
+    "email": "유효한 이메일 주소를 입력해주세요.",
+    "phone": "유효한 전화번호를 입력해주세요.",
+    "password": "비밀번호를 입력해주세요.",
+    "passwordConfirm": "비밀번호가 일치하지 않습니다.",
+    "minLength": "최소 {{min}}자 이상 입력해주세요.",
+    "maxLength": "최대 {{max}}자까지만 입력 가능합니다.",
+    "number": "숫자만 입력해주세요.",
+    "date": "유효한 날짜를 선택해주세요.",
+    "url": "유효한 URL을 입력해주세요.",
+    "ssn": "유효한 주민등록번호를 입력해주세요."
+  },
+  "placeholder": {
+    "name": "이름을 입력하세요",
+    "email": "이메일 주소를 입력하세요",
+    "phone": "전화번호를 입력하세요",
+    "password": "비밀번호를 입력하세요",
+    "confirmPassword": "비밀번호를 다시 입력하세요",
+    "search": "검색어를 입력하세요",
+    "memo": "메모를 입력하세요",
+    "amount": "금액을 입력하세요",
+    "selectOption": "옵션을 선택하세요",
+    "selectDate": "날짜를 선택하세요",
+    "selectTime": "시간을 선택하세요"
+  },
+  "label": {
+    "name": "이름",
+    "firstName": "성",
+    "lastName": "이름",
+    "email": "이메일",
+    "phone": "전화번호",
+    "mobile": "휴대폰",
+    "address": "주소",
+    "zipCode": "우편번호",
+    "password": "비밀번호",
+    "confirmPassword": "비밀번호 확인",
+    "rememberMe": "로그인 상태 유지",
+    "agreeTerms": "이용약관에 동의합니다",
+    "agreePrivacy": "개인정보처리방침에 동의합니다",
+    "agreeMarketing": "마케팅 정보 수신에 동의합니다",
+    "birthDate": "생년월일",
+    "gender": "성별",
+    "occupation": "직업",
+    "company": "회사",
+    "department": "부서",
+    "position": "직책"
+  },
+  "error": {
+    "networkError": "네트워크 오류가 발생했습니다.",
+    "serverError": "서버 오류가 발생했습니다.",
+    "unauthorized": "인증이 필요합니다.",
+    "forbidden": "접근 권한이 없습니다.",
+    "notFound": "요청한 정보를 찾을 수 없습니다.",
+    "validationFailed": "입력 정보를 확인해주세요.",
+    "uploadFailed": "파일 업로드에 실패했습니다.",
+    "saveFailed": "저장에 실패했습니다.",
+    "deleteFailed": "삭제에 실패했습니다.",
+    "loadFailed": "데이터를 불러오는데 실패했습니다."
+  }
+}

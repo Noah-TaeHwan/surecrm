@@ -49,8 +49,8 @@ export function PremiumBillingPage({
     id: 'surecrm-pro',
     name: 'Pro Plan',
     description: '보험설계사를 위한 완전한 CRM 솔루션',
-    monthlyPrice: 39000,
-    currency: 'KRW',
+    monthlyPrice: 20,
+    currency: 'USD',
   };
 
   const coreFeatures = [

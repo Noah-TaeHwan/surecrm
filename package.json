@@ -1,6 +1,6 @@
 {
   "name": "surecrm",
-  "version": "0.4.37",
+  "version": "0.5.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -32,7 +32,11 @@
     "version:info": "tsx scripts/utils/version-info.ts",
     "setup:hooks": "tsx scripts/utils/setup-hooks.ts",
     "cleanup:imports": "tsx scripts/cleanup-imports.ts",
-    "analyze:bundle": "npx vite-bundle-analyzer build/client"
+    "analyze:bundle": "npx vite-bundle-analyzer build/client",
+    "i18n:extract": "tsx scripts/i18n/extract-keys.ts",
+    "i18n:validate": "tsx scripts/i18n/validate-translations.ts",
+    "i18n:missing": "tsx scripts/i18n/find-missing-keys.ts",
+    "i18n:stats": "tsx scripts/i18n/translation-stats.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -94,6 +98,9 @@
     "embla-carousel-react": "^8.6.0",
     "events": "^3.3.0",
     "googleapis": "^150.0.1",
+    "i18next": "^25.2.1",
+    "i18next-browser-languagedetector": "^8.2.0",
+    "i18next-http-backend": "^3.0.2",
     "input-otp": "^1.4.2",
     "isbot": "^5.1.27",
     "lucide-react": "^0.511.0",
@@ -109,6 +116,7 @@
     "react-error-boundary": "^6.0.0",
     "react-force-graph-2d": "^1.27.1",
     "react-hook-form": "^7.56.4",
+    "react-i18next": "^15.5.3",
     "react-resizable-panels": "^3.0.2",
     "react-router": "^7.5.3",
     "recharts": "^2.15.3",

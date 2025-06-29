@@ -10,6 +10,7 @@ export function configureLemonSqueezy() {
     'LEMONSQUEEZY_API_KEY',
     'LEMONSQUEEZY_STORE_ID',
     'LEMONSQUEEZY_WEBHOOK_SECRET',
+    'LEMONSQUEEZY_VARIANT_ID',
   ];
 
   console.log('🍋 Lemon Squeezy 환경 변수 확인:', {
@@ -36,6 +37,9 @@ export function configureLemonSqueezy() {
   }
 
   console.log('🍋 Lemon Squeezy SDK 설정 중...');
+  console.log(
+    `💰 Pro Plan 설정: Variant ${env.lemonSqueezy.variantId}, $${env.subscription.price} ${env.subscription.currency}/월, ${env.subscription.trialDays}일 무료체험`
+  );
 
   lemonSqueezySetup({
     apiKey: env.lemonSqueezy.apiKey,
@@ -55,4 +59,10 @@ export const lemonSqueezyConfig = {
   storeId: env.lemonSqueezy.storeId,
   webhookSecret: env.lemonSqueezy.webhookSecret,
   baseUrl: env.lemonSqueezy.baseUrl,
+  variantId: env.lemonSqueezy.variantId,
+  subscription: {
+    price: env.subscription.price,
+    currency: env.subscription.currency,
+    trialDays: env.subscription.trialDays,
+  },
 } as const;

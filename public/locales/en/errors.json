@@ -1,0 +1,68 @@
+{
+  "general": {
+    "unknown": "An unknown error occurred",
+    "tryAgain": "Please try again",
+    "contactSupport": "If the problem persists, please contact support",
+    "maintenance": "System is under maintenance"
+  },
+  "network": {
+    "offline": "Please check your internet connection",
+    "timeout": "Request timed out",
+    "serverError": "Server error occurred",
+    "badRequest": "Bad request"
+  },
+  "auth": {
+    "unauthorized": "Authentication required",
+    "forbidden": "Access denied",
+    "sessionExpired": "Session expired. Please sign in again",
+    "invalidCredentials": "Invalid email or password",
+    "accountLocked": "Account is locked",
+    "emailNotVerified": "Email verification required",
+    "weakPassword": "Password is too weak",
+    "passwordMismatch": "Passwords do not match"
+  },
+  "validation": {
+    "required": "{{field}} is required",
+    "invalid": "{{field}} is invalid",
+    "tooShort": "{{field}} is too short",
+    "tooLong": "{{field}} is too long",
+    "invalidEmail": "Please enter a valid email address",
+    "invalidPhone": "Please enter a valid phone number",
+    "invalidDate": "Please select a valid date",
+    "invalidFile": "Unsupported file format",
+    "fileTooLarge": "File size is too large"
+  },
+  "database": {
+    "notFound": "Requested data not found",
+    "duplicate": "Data already exists",
+    "constraint": "Data constraint violation",
+    "connection": "Database connection failed"
+  },
+  "payment": {
+    "cardDeclined": "Card was declined",
+    "insufficientFunds": "Insufficient funds",
+    "expiredCard": "Card has expired",
+    "invalidCard": "Invalid card",
+    "processingError": "Payment processing error"
+  },
+  "upload": {
+    "failed": "File upload failed",
+    "tooLarge": "File size exceeds maximum limit",
+    "invalidType": "Unsupported file type",
+    "virusDetected": "Malicious file detected"
+  },
+  "http": {
+    "400": "Bad Request",
+    "401": "Unauthorized",
+    "403": "Forbidden",
+    "404": "Page Not Found",
+    "408": "Request Timeout",
+    "409": "Conflict",
+    "422": "Unprocessable Entity",
+    "429": "Too Many Requests. Please try again later",
+    "500": "Internal Server Error",
+    "502": "Bad Gateway",
+    "503": "Service Unavailable",
+    "504": "Gateway Timeout"
+  }
+}

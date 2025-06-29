@@ -41,7 +41,6 @@ import {
 } from 'lucide-react';
 import { Form } from 'react-router';
 import { data } from 'react-router';
-import { env } from '~/lib/env';
 
 export function meta() {
   return [
@@ -59,6 +58,7 @@ export async function action({ request }: ActionArgs) {
 
   if (action === 'start_subscription') {
     try {
+      const { env } = await import('~/lib/env');
       // Lemon Squeezy 체크아웃 URL 생성 API 호출
       const checkoutResponse = await fetch(
         `${new URL(request.url).origin}/api/billing/checkout`,
@@ -106,19 +106,50 @@ export async function loader({ request }: LoaderArgs) {
     const { getSubscriptionStatusForUser } = await import(
       '~/lib/auth/subscription-middleware.server'
     );
+    const { env } = await import('~/lib/env');
     const userStatus = await getSubscriptionStatusForUser(request);
+
+    console.log('💰 Billing Loader - 환경변수에서 가져온 가격:', {
+      price: env.subscription.price,
+      currency: env.subscription.currency,
+      variantId: env.lemonSqueezy.variantId,
+    });
 
     return {
       user: userStatus?.user || null,
       subscriptionStatus: userStatus?.subscriptionStatus || null,
+      env: {
+        lemonSqueezy: {
+          variantId: env.lemonSqueezy.variantId,
+        },
+        subscription: {
+          price: env.subscription.price,
+          currency: env.subscription.currency,
+        },
+      },
     };
   } catch (error) {
     console.error('구독 정보 조회 오류:', error);
+
+    console.log('💰 Billing Loader - Fallback 가격 사용:', {
+      price: 20,
+      currency: 'USD',
+      reason: 'env 로드 실패',
+    });
 
     // 로그인하지 않은 사용자도 페이지는 볼 수 있음
     return {
       user: null,
       subscriptionStatus: null,
+      env: {
+        lemonSqueezy: {
+          variantId: '876185',
+        },
+        subscription: {
+          price: 20,
+          currency: 'USD',
+        },
+      },
     };
   }
 }
@@ -127,7 +158,7 @@ export default function BillingPage({
   loaderData,
   actionData,
 }: ComponentProps) {
-  const { user, subscriptionStatus } = loaderData;
+  const { user, subscriptionStatus, env } = loaderData;
 
   // URL 파라미터에서 리다이렉트 이유 확인
   const [reason, setReason] = React.useState<string | null>(null);
@@ -137,6 +168,15 @@ export default function BillingPage({
     const searchParams = new URLSearchParams(window.location.search);
     setReason(searchParams.get('reason'));
   }, []);
+
+  // 클라이언트에서 받은 환경변수 정보 로깅
+  React.useEffect(() => {
+    console.log('🖥️ Billing Client - 받은 환경변수:', {
+      price: env?.subscription?.price,
+      currency: env?.subscription?.currency,
+      variantId: env?.lemonSqueezy?.variantId,
+    });
+  }, [env]);
 
   // 상태에 따른 메시지와 스타일링
   const getStatusInfo = () => {
@@ -347,8 +387,8 @@ export default function BillingPage({
                   </Button>
                 </Form>
                 <div className="text-sm text-muted-foreground flex items-center">
-                  <Star className="mr-1 h-4 w-4" />월 39,000원 · 언제든지 취소
-                  가능
+                  <Star className="mr-1 h-4 w-4" />월 ${env.subscription.price}{' '}
+                  {env.subscription.currency} · 언제든지 취소 가능
                 </div>
               </div>
               {actionData?.error && (
@@ -405,8 +445,12 @@ export default function BillingPage({
               </CardHeader>
               <CardContent>
                 <div className="text-center mb-4">
-                  <div className="text-3xl font-bold">₩39,000</div>
-                  <div className="text-sm text-muted-foreground">월간 구독</div>
+                  <div className="text-3xl font-bold">
+                    ${env.subscription.price}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    월간 구독 ({env.subscription.currency})
+                  </div>
                 </div>
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center gap-2">

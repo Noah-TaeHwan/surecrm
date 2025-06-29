@@ -1,0 +1,61 @@
+{
+  "title": "通知",
+  "types": {
+    "system": "システム",
+    "meeting": "会議",
+    "client": "顧客",
+    "task": "タスク",
+    "payment": "支払い",
+    "security": "セキュリティ",
+    "marketing": "マーケティング"
+  },
+  "status": {
+    "unread": "未読",
+    "read": "既読",
+    "archived": "アーカイブ済み",
+    "deleted": "削除済み"
+  },
+  "actions": {
+    "markRead": "既読にする",
+    "markUnread": "未読にする",
+    "archive": "アーカイブ",
+    "delete": "削除",
+    "deleteAll": "すべて削除",
+    "markAllRead": "すべて既読にする"
+  },
+  "settings": {
+    "title": "通知設定",
+    "emailNotifications": "メール通知",
+    "pushNotifications": "プッシュ通知",
+    "smsNotifications": "SMS通知",
+    "desktopNotifications": "デスクトップ通知",
+    "soundEnabled": "音を有効にする",
+    "doNotDisturb": "おやすみモード",
+    "frequency": "通知頻度",
+    "immediately": "即座に",
+    "hourly": "毎時",
+    "daily": "毎日",
+    "weekly": "毎週"
+  },
+  "templates": {
+    "newClient": "新しい顧客が登録されました",
+    "meetingReminder": "会議が{{time}}分後に始まります",
+    "taskDue": "タスクの期限が近づいています",
+    "paymentSuccess": "支払いが完了しました",
+    "paymentFailed": "支払いに失敗しました",
+    "systemMaintenance": "システムメンテナンスが予定されています",
+    "securityAlert": "セキュリティ警告：異常なログイン試行が検出されました"
+  },
+  "filters": {
+    "all": "すべて",
+    "today": "今日",
+    "thisWeek": "今週",
+    "thisMonth": "今月",
+    "priority": "重要",
+    "byType": "種類別"
+  },
+  "empty": {
+    "noNotifications": "通知がありません",
+    "allClear": "すべての通知を確認しました"
+  }
+}

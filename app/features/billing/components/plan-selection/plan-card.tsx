@@ -119,7 +119,7 @@ export function PlanCard({ plan, onSelect, isLoading = false }: PlanCardProps) {
 
         {/* 추가 정보 */}
         <div className="text-center text-xs text-muted-foreground">
-          언제든지 취소 가능 • 첫 달 무료 체험
+          언제든지 취소 가능 • 14일 무료 체험
         </div>
       </CardContent>
     </Card>

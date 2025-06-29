@@ -1,0 +1,83 @@
+{
+  "title": "Dashboard",
+  "stats": {
+    "totalClients": "Total Clients",
+    "newClientsThisMonth": "New Clients This Month",
+    "conversionRate": "Conversion Rate",
+    "revenue": "Revenue",
+    "meetings": "Meetings",
+    "pendingTasks": "Pending Tasks",
+    "completedTasks": "Completed Tasks",
+    "overdueTasks": "Overdue Tasks"
+  },
+  "charts": {
+    "monthlyRevenue": "Monthly Revenue",
+    "clientAcquisition": "Client Acquisition",
+    "salesPipeline": "Sales Pipeline",
+    "performanceMetrics": "Performance Metrics"
+  },
+  "activities": {
+    "recentActivities": "Recent Activities",
+    "upcomingTasks": "Upcoming Tasks",
+    "todaysMeetings": "Today's Meetings",
+    "notifications": "Notifications"
+  },
+  "quickActions": {
+    "addClient": "Add Client",
+    "scheduleMeeting": "Schedule Meeting",
+    "createTask": "Create Task",
+    "viewReports": "View Reports"
+  },
+  "goals": {
+    "monthlyGoals": "Monthly Goals",
+    "quarterlyGoals": "Quarterly Goals",
+    "yearlyGoals": "Yearly Goals",
+    "setGoal": "Set Goal",
+    "editGoal": "Edit Goal",
+    "progress": "Progress",
+    "achieved": "Achieved",
+    "remaining": "Remaining"
+  },
+  "widgets": {
+    "customize": "Customize Widgets",
+    "add": "Add Widget",
+    "remove": "Remove Widget",
+    "resize": "Resize",
+    "move": "Move"
+  },
+  "meta": {
+    "title": "Dashboard - SureCRM",
+    "description": "SureCRM Dashboard - Check your business status at a glance"
+  },
+  "actions": {
+    "set_success": "Goal has been successfully set.",
+    "update_success": "Goal has been successfully updated.",
+    "delete_success": "Goal has been successfully deleted.",
+    "set_error": "Failed to set goal. Please try again.",
+    "delete_error": "Failed to delete goal. Please try again.",
+    "delete_not_found": "Goal to delete was not found."
+  },
+  "errors": {
+    "data_loading": "An error occurred while loading data.",
+    "unknown_request": "Unknown request.",
+    "unknown_error": "Unknown error",
+    "goal_setting_error": "Goal setting error:",
+    "goal_delete_error": "Goal deletion error:",
+    "retry": "Retry"
+  },
+  "fallback": {
+    "user": "User",
+    "no_name": "No name"
+  },
+  "stages": {
+    "prospect": "Prospect",
+    "contacted": "Contacted",
+    "proposal": "Proposal",
+    "contracted": "Contracted",
+    "completed": "Completed"
+  },
+  "referral": {
+    "client": "Referred client",
+    "recent_activity": "Recently made {{count}} referrals. Recording an average conversion rate of {{rate}}%."
+  }
+}

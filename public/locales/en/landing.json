@@ -1,0 +1,194 @@
+{
+  "meta": {
+    "title": "SureCRM - Referral Network Management Solution for Insurance Agents",
+    "description": "Systematically organize who referred whom and maximize the power of your referral network. A dedicated CRM solution for insurance agents.",
+    "keywords": "insurance agent, CRM, referral network, client management, sales management",
+    "og_title": "SureCRM - Referral Network Management Solution for Insurance Agents",
+    "og_description": "Systematically organize who referred whom and maximize the power of your referral network."
+  },
+  "nav": {
+    "home": "Home",
+    "features": "Features",
+    "use_cases": "Use Cases",
+    "testimonials": "Testimonials",
+    "faq": "FAQ",
+    "pricing": "Pricing",
+    "login": "Login",
+    "signup": "Sign Up",
+    "get_started": "Get Started"
+  },
+  "hero": {
+    "title": "Referral Network Management\nSolution for Insurance Agents",
+    "subtitle": "Systematically organize who referred whom and\nmaximize the power of your referral network",
+    "description": "SureCRM is a dedicated CRM for insurance agents that allows you to clearly track and manage complex referral relationships. Accelerate business growth with efficient client management and systematic referral network building.",
+    "cta_primary": "Start Free Trial",
+    "cta_secondary": "Watch Demo",
+    "trust_badge": "Already trusted by {{count}} insurance agents",
+    "free_trial": "14-day free trial",
+    "no_credit_card": "No credit card required",
+    "badge": "Invite-Only MVP",
+    "title_part1": "For Insurance Agents",
+    "title_part2": "Referral Network",
+    "title_part3": "Management Solution",
+    "subtitle_short": "Systematically organize who referred whom and maximize the power of your referral network",
+    "cta_invite": "Start with Invite Code",
+    "cta_login": "Login if you have an account",
+    "features": {
+      "google_calendar": {
+        "title": "Google Calendar",
+        "subtitle": "Integration"
+      },
+      "client_management": {
+        "title": "Client Management",
+        "subtitle": "Organization"
+      },
+      "sales_pipeline": {
+        "title": "Sales Pipeline",
+        "subtitle": "Management"
+      },
+      "dashboard": {
+        "title": "Dashboard",
+        "subtitle": "Analytics"
+      },
+      "referral_network": {
+        "title": "Referral Network",
+        "subtitle": "Visualization"
+      },
+      "invitations": {
+        "title": "Invitations",
+        "subtitle": "Management"
+      },
+      "reports": {
+        "title": "Reports",
+        "subtitle": "Generation"
+      },
+      "weekly_updates": {
+        "title": "Weekly Updates",
+        "subtitle": "Continuous Improvement"
+      }
+    }
+  },
+  "features": {
+    "title": "SureCRM's Special Features",
+    "subtitle": "Features optimized for the actual work environment of insurance agents",
+    "badge": "Key Features",
+    "headline": "Everything for Efficient Referral Network Management",
+    "description": "SureCRM provides all the tools insurance agents need to effectively manage referral networks and improve sales performance.",
+    "network_visualization": {
+      "title": "Referral Network Visualization",
+      "description": "Visualize customer referral relationships with mind-map style graphs and easily discover key referrers."
+    },
+    "sales_pipeline": {
+      "title": "Sales Pipeline Management",
+      "description": "Systematically manage customers by sales stages using Kanban board approach and increase contract conversion rates."
+    },
+    "key_referrer_analysis": {
+      "title": "Key Referrer Analysis",
+      "description": "Discover customers who provide the most referrals and strengthen relationships to expand your referral network."
+    },
+    "custom_reports": {
+      "title": "Custom Reports",
+      "description": "Analyze referral patterns and success rates, and optimize sales strategies with customized reports."
+    },
+    "team_collaboration": {
+      "title": "Team Collaboration Features",
+      "description": "Manage referral networks together with team members and collaborate effectively."
+    },
+    "data_security": {
+      "title": "Data Security",
+      "description": "Securely encrypt and store customer data while complying with privacy protection regulations."
+    }
+  },
+  "use_cases": {
+    "title": "SureCRM Use Cases",
+    "subtitle": "See how actual insurance agents are using SureCRM",
+    "badge": "Use Cases",
+    "headline": "How Can You Use It?",
+    "description": "See how SureCRM can help in various situations.",
+    "network": {
+      "title": "Referral Relationship Visualization",
+      "description": "Visualize complex referral relationships between customers with intuitive graphs to identify key referrers at a glance.",
+      "features": [
+        "Visual network display",
+        "Key referrer discovery",
+        "Referral pattern analysis",
+        "Relationship depth understanding"
+      ]
+    },
+    "pipeline": {
+      "title": "Sales Stage Management",
+      "description": "Systematically categorize and manage customers by sales stages to build an efficient sales process.",
+      "features": [
+        "Stage-based customer categorization",
+        "Progress tracking",
+        "Conversion rate improvement",
+        "Work efficiency enhancement"
+      ]
+    },
+    "data": {
+      "title": "Data Insights",
+      "description": "Check referral status and sales performance with intuitive charts and statistics to support data-driven decision making.",
+      "features": [
+        "Monthly performance tracking",
+        "Key metrics summary",
+        "Trend analysis",
+        "Performance comparison"
+      ]
+    },
+    "tabs": {
+      "network": "Relationship Visualization",
+      "network_short": "Relationships",
+      "pipeline": "Sales Management",
+      "pipeline_short": "Sales",
+      "data": "Analytics",
+      "data_short": "Analytics"
+    }
+  },
+  "testimonials": {
+    "title": "Customer Reviews",
+    "subtitle": "Real reviews from insurance agents using SureCRM"
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "subtitle": "Check out answers to common questions about SureCRM",
+    "badge": "Frequently Asked Questions",
+    "headline": "Have Any Questions?",
+    "description": "Check out answers to common questions about SureCRM."
+  },
+  "cta": {
+    "title": "Start Now",
+    "subtitle": "Experience SureCRM's powerful features firsthand with a 14-day free trial",
+    "description": "You can start easily without a credit card. Cancel anytime.",
+    "primary_button": "Start Free Trial",
+    "secondary_button": "Contact Sales Team",
+    "features": [
+      "14-day free trial",
+      "No credit card required",
+      "Cancel anytime",
+      "24/7 customer support"
+    ],
+    "badge": "Start Now",
+    "headline": "The Beginning of Successful Referral Network Management",
+    "cta_description": "Ready to maximize the power of your referral network and improve sales performance? Start more systematic customer management with SureCRM.",
+    "cta_button": "Start with Invite Code"
+  },
+  "footer": {
+    "company": "Company",
+    "product": "Product",
+    "support": "Support",
+    "legal": "Legal",
+    "about": "About Us",
+    "careers": "Careers",
+    "contact": "Contact",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "help": "Help",
+    "documentation": "Documentation",
+    "status": "Service Online",
+    "copyright": "© 2024 SureCRM. All rights reserved.",
+    "description": "Professional CRM solution for insurance agents"
+  },
+  "errors": {
+    "loading_failed": "Landing page data loading failed:"
+  }
+}

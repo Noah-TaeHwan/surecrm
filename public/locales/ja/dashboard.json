@@ -1,0 +1,83 @@
+{
+  "title": "ダッシュボード",
+  "stats": {
+    "totalClients": "総顧客数",
+    "newClientsThisMonth": "今月の新規顧客",
+    "conversionRate": "コンバージョン率",
+    "revenue": "売上",
+    "meetings": "会議",
+    "pendingTasks": "保留中のタスク",
+    "completedTasks": "完了したタスク",
+    "overdueTasks": "期限切れのタスク"
+  },
+  "charts": {
+    "monthlyRevenue": "月次売上",
+    "clientAcquisition": "顧客獲得",
+    "salesPipeline": "営業パイプライン",
+    "performanceMetrics": "パフォーマンス指標"
+  },
+  "activities": {
+    "recentActivities": "最近の活動",
+    "upcomingTasks": "予定されたタスク",
+    "todaysMeetings": "本日の会議",
+    "notifications": "通知"
+  },
+  "quickActions": {
+    "addClient": "顧客追加",
+    "scheduleMeeting": "会議をスケジュール",
+    "createTask": "タスク作成",
+    "viewReports": "レポート表示"
+  },
+  "goals": {
+    "monthlyGoals": "月次目標",
+    "quarterlyGoals": "四半期目標",
+    "yearlyGoals": "年次目標",
+    "setGoal": "目標設定",
+    "editGoal": "目標編集",
+    "progress": "進捗",
+    "achieved": "達成",
+    "remaining": "残り"
+  },
+  "widgets": {
+    "customize": "ウィジェットカスタマイズ",
+    "add": "ウィジェット追加",
+    "remove": "ウィジェット削除",
+    "resize": "サイズ変更",
+    "move": "移動"
+  },
+  "meta": {
+    "title": "ダッシュボード - SureCRM",
+    "description": "SureCRMダッシュボード - ビジネス状況を一目で確認"
+  },
+  "actions": {
+    "set_success": "目標が正常に設定されました。",
+    "update_success": "目標が正常に更新されました。",
+    "delete_success": "目標が正常に削除されました。",
+    "set_error": "目標の設定に失敗しました。もう一度お試しください。",
+    "delete_error": "目標の削除に失敗しました。もう一度お試しください。",
+    "delete_not_found": "削除する目標が見つかりませんでした。"
+  },
+  "errors": {
+    "data_loading": "データの読み込み中にエラーが発生しました。",
+    "unknown_request": "不明なリクエストです。",
+    "unknown_error": "不明なエラー",
+    "goal_setting_error": "目標設定エラー:",
+    "goal_delete_error": "目標削除エラー:",
+    "retry": "再試行"
+  },
+  "fallback": {
+    "user": "ユーザー",
+    "no_name": "名前なし"
+  },
+  "stages": {
+    "prospect": "見込み客",
+    "contacted": "接触済み",
+    "proposal": "提案中",
+    "contracted": "契約済み",
+    "completed": "完了"
+  },
+  "referral": {
+    "client": "紹介クライアント",
+    "recent_activity": "最近{{count}}件の紹介を行いました。平均転換率{{rate}}%を記録しています。"
+  }
+}

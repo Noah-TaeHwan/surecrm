@@ -1,0 +1,86 @@
+{
+  "title": "설정",
+  "sections": {
+    "profile": "프로필",
+    "account": "계정",
+    "notifications": "알림",
+    "appearance": "화면 설정",
+    "privacy": "개인정보",
+    "billing": "결제",
+    "integrations": "연동",
+    "advanced": "고급 설정"
+  },
+  "profile": {
+    "personalInfo": "개인 정보",
+    "name": "이름",
+    "email": "이메일",
+    "phone": "전화번호",
+    "company": "회사",
+    "position": "직책",
+    "avatar": "프로필 사진",
+    "uploadAvatar": "사진 업로드",
+    "removeAvatar": "사진 제거"
+  },
+  "account": {
+    "security": "보안",
+    "changePassword": "비밀번호 변경",
+    "currentPassword": "현재 비밀번호",
+    "newPassword": "새 비밀번호",
+    "confirmPassword": "비밀번호 확인",
+    "twoFactorAuth": "2단계 인증",
+    "enableTwoFactor": "2단계 인증 활성화",
+    "disableTwoFactor": "2단계 인증 비활성화",
+    "sessions": "활성 세션",
+    "logoutAllDevices": "모든 기기에서 로그아웃"
+  },
+  "appearance": {
+    "theme": "테마",
+    "light": "라이트",
+    "dark": "다크",
+    "auto": "자동",
+    "language": "언어",
+    "timezone": "시간대",
+    "dateFormat": "날짜 형식",
+    "timeFormat": "시간 형식",
+    "currency": "통화",
+    "numberFormat": "숫자 형식"
+  },
+  "privacy": {
+    "dataUsage": "데이터 사용",
+    "analytics": "분석 데이터 수집",
+    "marketing": "마케팅 정보 수신",
+    "thirdParty": "제3자 데이터 공유",
+    "dataExport": "데이터 내보내기",
+    "dataDelete": "계정 삭제",
+    "cookieConsent": "쿠키 동의"
+  },
+  "integrations": {
+    "available": "사용 가능한 연동",
+    "connected": "연결된 서비스",
+    "googleCalendar": "구글 캘린더",
+    "outlook": "아웃룩",
+    "slack": "슬랙",
+    "zapier": "자피어",
+    "webhook": "웹훅",
+    "api": "API 키",
+    "connect": "연결",
+    "disconnect": "연결 해제",
+    "configure": "설정"
+  },
+  "actions": {
+    "save": "저장",
+    "cancel": "취소",
+    "reset": "초기화",
+    "export": "내보내기",
+    "import": "가져오기",
+    "backup": "백업",
+    "restore": "복원"
+  },
+  "messages": {
+    "saveSuccess": "설정이 저장되었습니다",
+    "saveError": "설정 저장에 실패했습니다",
+    "passwordChanged": "비밀번호가 변경되었습니다",
+    "invalidPassword": "현재 비밀번호가 올바르지 않습니다",
+    "confirmDelete": "정말로 계정을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다."
+  }
+}
