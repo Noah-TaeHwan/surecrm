@@ -46,7 +46,9 @@ const BLACKLISTED_DOMAINS = [
 interface ContactFormData {
   name: string;
   email: string;
-  subject: string;
+  subject?: string;
+  inquiryType?: string;
+  company?: string;
   message: string;
   turnstileToken: string;
 }
@@ -215,6 +217,8 @@ export async function action({ request }: ActionFunctionArgs) {
       name: !!formData.get('name'),
       email: !!formData.get('email'),
       subject: !!formData.get('subject'),
+      inquiryType: !!formData.get('inquiryType'),
+      company: !!formData.get('company'),
       message: !!formData.get('message'),
       turnstileToken: !!formData.get('turnstileToken'),
     });
@@ -223,25 +227,41 @@ export async function action({ request }: ActionFunctionArgs) {
       name: formData.get('name') as string,
       email: formData.get('email') as string,
       subject: formData.get('subject') as string,
+      inquiryType: formData.get('inquiryType') as string,
+      company: formData.get('company') as string,
       message: formData.get('message') as string,
       turnstileToken: formData.get('turnstileToken') as string,
     };
 
-    // Validate required fields
-    if (
-      !contactData.name ||
-      !contactData.email ||
-      !contactData.subject ||
-      !contactData.message
-    ) {
+    // inquiryType을 기반으로 subject 자동 생성
+    if (!contactData.subject && contactData.inquiryType) {
+      const subjectMap: Record<string, string> = {
+        demo: '[데모 요청] SureCRM 데모 신청',
+        pricing: '[요금 문의] SureCRM 요금 정보 문의',
+        support: '[기술 지원] SureCRM 기술 지원 요청',
+        partnership: '[파트너십] SureCRM 파트너십 문의',
+        other: '[기타 문의] SureCRM 일반 문의',
+      };
+      contactData.subject =
+        subjectMap[contactData.inquiryType] || '[일반 문의] SureCRM 문의';
+    }
+
+    // 기본 subject가 없는 경우 설정
+    if (!contactData.subject) {
+      contactData.subject = '[일반 문의] SureCRM 문의';
+    }
+
+    console.log('📝 Generated subject:', contactData.subject);
+
+    // Validate required fields (subject는 이제 자동 생성되므로 제외)
+    if (!contactData.name || !contactData.email || !contactData.message) {
       console.log('❌ Required fields missing:', {
         name: !contactData.name,
         email: !contactData.email,
-        subject: !contactData.subject,
         message: !contactData.message,
       });
       return json(
-        { success: false, error: '모든 필드를 입력해 주세요.' },
+        { success: false, error: '모든 필수 필드를 입력해 주세요.' },
         { status: 400 }
       );
     }
