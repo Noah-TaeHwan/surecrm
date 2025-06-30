@@ -398,6 +398,7 @@
     "description": "Changes have been successfully saved.",
     "consultationAdded": "Consultation note has been successfully added.",
     "consultationUpdated": "Consultation note has been successfully updated.",
+    "medicalHistorySaved": "Medical history has been successfully saved.",
     "button": "OK"
   },
   "deleteModal": {
@@ -499,5 +500,31 @@
     "addButton": "Add Note",
     "saveButton": "Save",
     "savingButton": "Saving..."
+  },
+  "medicalHistoryTab": {
+    "title": "Medical History",
+    "saveButton": "Save",
+    "saveButtonFull": "Save Medical History",
+    "recentMedicalSection": "Medical Matters within 3 Months",
+    "additionalExamSection": "Re-examination Related within 1 Year",
+    "majorMedicalSection": "Major Medical History within 5 Years",
+    "detailsSection": "Detailed Information",
+    "recentDiagnosis": "Confirmed Disease Diagnosis",
+    "recentSuspicion": "Suspected Disease Findings",
+    "recentMedication": "Medication",
+    "recentTreatment": "Treatment",
+    "recentHospitalization": "Hospitalization",
+    "recentSurgery": "Surgery",
+    "additionalExam": "Whether there are findings for additional examinations (re-examinations) through examination or tests by a doctor",
+    "additionalExamDetails": "Additional Examination Details",
+    "majorHospitalization": "Hospitalization",
+    "majorSurgery": "Surgery",
+    "longTermTreatment": "Treatment for 7+ days",
+    "longTermMedication": "Medication for 30+ days",
+    "recentDetailsLabel": "Details within 3 Months",
+    "majorDetailsLabel": "Major Medical History Details within 5 Years",
+    "additionalExamPlaceholder": "Please enter detailed information about additional examinations or re-examinations...",
+    "recentDetailsPlaceholder": "Please enter detailed medical information within 3 months...",
+    "majorDetailsPlaceholder": "Please enter detailed major medical history within 5 years..."
   }
 }

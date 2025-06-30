@@ -405,6 +405,7 @@
     "description": "변경사항이 성공적으로 저장되었습니다.",
     "consultationAdded": "상담내용이 성공적으로 추가되었습니다.",
     "consultationUpdated": "상담내용이 성공적으로 수정되었습니다.",
+    "medicalHistorySaved": "병력사항이 성공적으로 저장되었습니다.",
     "button": "확인"
   },
   "deleteModal": {
@@ -517,5 +518,31 @@
     "add": "추가",
     "confirm": "확인",
     "close": "닫기"
+  },
+  "medicalHistoryTab": {
+    "title": "병력사항",
+    "saveButton": "저장",
+    "saveButtonFull": "병력사항 저장",
+    "recentMedicalSection": "3개월 이내 의료 관련 사항",
+    "additionalExamSection": "1년 이내 재검사 관련",
+    "majorMedicalSection": "5년 이내 주요 의료 이력",
+    "detailsSection": "상세 내용",
+    "recentDiagnosis": "질병 확정진단",
+    "recentSuspicion": "질병 의심소견",
+    "recentMedication": "투약",
+    "recentTreatment": "치료",
+    "recentHospitalization": "입원",
+    "recentSurgery": "수술",
+    "additionalExam": "의사로부터 진찰 또는 검사를 통하여 추가검사(재검사) 소견 여부",
+    "additionalExamDetails": "추가검사 상세 내용",
+    "majorHospitalization": "입원",
+    "majorSurgery": "수술",
+    "longTermTreatment": "7일 이상 치료",
+    "longTermMedication": "30일 이상 투약",
+    "recentDetailsLabel": "3개월 이내 상세 내용",
+    "majorDetailsLabel": "5년 이내 주요 의료 이력 상세 내용",
+    "additionalExamPlaceholder": "추가검사나 재검사 관련 상세 내용을 입력해주세요...",
+    "recentDetailsPlaceholder": "3개월 이내 의료 관련 상세 내용을 입력해주세요...",
+    "majorDetailsPlaceholder": "5년 이내 주요 의료 이력 상세 내용을 입력해주세요..."
   }
 }

@@ -393,6 +393,7 @@
     "description": "変更内容が正常に保存されました。",
     "consultationAdded": "相談内容が正常に追加されました。",
     "consultationUpdated": "相談内容が正常に更新されました。",
+    "medicalHistorySaved": "病歴情報が正常に保存されました。",
     "button": "確認"
   },
   "deleteModal": {
@@ -494,5 +495,31 @@
     "addButton": "メモ追加",
     "saveButton": "保存",
     "savingButton": "保存中..."
+  },
+  "medicalHistoryTab": {
+    "title": "病歴情報",
+    "saveButton": "保存",
+    "saveButtonFull": "病歴情報保存",
+    "recentMedicalSection": "3ヶ月以内の医療関連事項",
+    "additionalExamSection": "1年以内の再検査関連",
+    "majorMedicalSection": "5年以内の主要医療履歴",
+    "detailsSection": "詳細情報",
+    "recentDiagnosis": "疾病確定診断",
+    "recentSuspicion": "疾病疑いの所見",
+    "recentMedication": "投薬",
+    "recentTreatment": "治療",
+    "recentHospitalization": "入院",
+    "recentSurgery": "手術",
+    "additionalExam": "医師による診察や検査を通して追加検査（再検査）の所見があるかどうか",
+    "additionalExamDetails": "追加検査詳細内容",
+    "majorHospitalization": "入院",
+    "majorSurgery": "手術",
+    "longTermTreatment": "7日以上の治療",
+    "longTermMedication": "30日以上の投薬",
+    "recentDetailsLabel": "3ヶ月以内の詳細内容",
+    "majorDetailsLabel": "5年以内の主要医療履歴詳細内容",
+    "additionalExamPlaceholder": "追加検査や再検査に関する詳細内容を入力してください...",
+    "recentDetailsPlaceholder": "3ヶ月以内の医療関連詳細内容を入力してください...",
+    "majorDetailsPlaceholder": "5年以内の主要医療履歴詳細内容を入力してください..."
   }
 }
