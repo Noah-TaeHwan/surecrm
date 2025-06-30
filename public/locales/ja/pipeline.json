@@ -385,5 +385,24 @@
     "pipeline": "パイプラインに顧客がいません",
     "search": "検索結果が見つかりません",
     "filter": "フィルター条件に合う顧客がいません"
+  },
+  "interests": {
+    "autoInsurance": "自動車",
+    "dementia": "認知症",
+    "dental": "歯科",
+    "driverInsurance": "運転者",
+    "healthCheckup": "健康診断",
+    "medicalExpenses": "実費",
+    "fireInsurance": "火災",
+    "caregiver": "介護",
+    "cancer": "がん",
+    "savings": "貯蓄",
+    "liability": "賠償責任",
+    "legalAdvice": "法務",
+    "tax": "税務",
+    "investment": "投資",
+    "petInsurance": "ペット",
+    "accidentInsurance": "傷害",
+    "trafficAccident": "交通事故"
   }
 }

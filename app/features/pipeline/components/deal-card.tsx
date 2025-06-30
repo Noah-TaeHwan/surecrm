@@ -41,6 +41,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router';
 import type { InsuranceInfo } from '~/features/pipeline/types/types';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 
 // 🎯 DealCard Props
 interface DealCardProps {
@@ -124,6 +125,24 @@ export function DealCard({
   onArchive,
   onSetPriority,
 }: DealCardProps) {
+  const { t, getCurrentLanguage } = useHydrationSafeTranslation('pipeline');
+
+  // 🌐 현재 언어에 맞는 통화 locale 매핑
+  const getCurrencyLocale = () => {
+    const currentLang = getCurrentLanguage();
+    switch (currentLang) {
+      case 'en':
+        return 'en';
+      case 'ja':
+        return 'ja';
+      case 'ko':
+      default:
+        return 'ko';
+    }
+  };
+
+  const currencyLocale = getCurrencyLocale();
+
   // 🎯 스와이프 상태 관리
   const [swipeState, setSwipeState] = useState<SwipeState>({
     startX: 0,
@@ -431,8 +450,11 @@ export function DealCard({
               </div>
               <div className="font-semibold text-sm text-green-600">
                 {dealValue > 0
-                  ? formatCurrencyTable(dealValue)
-                  : formatCurrencyTable(totalMonthlyPremium * 12)}
+                  ? formatCurrencyTable(dealValue, currencyLocale)
+                  : formatCurrencyTable(
+                      totalMonthlyPremium * 12,
+                      currencyLocale
+                    )}
               </div>
             </div>
 
@@ -445,7 +467,7 @@ export function DealCard({
                 </span>
               </div>
               <div className="font-semibold text-sm text-blue-600">
-                {formatCurrencyTable(totalExpectedCommission)}
+                {formatCurrencyTable(totalExpectedCommission, currencyLocale)}
               </div>
             </div>
           </div>

@@ -19,6 +19,7 @@ import { Separator } from '~/common/components/ui/separator';
 import { VersionDisplay } from '~/common/components/navigation/version-display';
 import { InsuranceAgentEvents } from '~/lib/utils/analytics';
 import { useTranslation } from 'react-i18next';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 import { useState, useEffect } from 'react';
 
 interface SidebarProps {
@@ -43,7 +44,7 @@ export function Sidebar({
   'aria-label': ariaLabel,
 }: SidebarProps) {
   const location = useLocation();
-  const { t } = useTranslation('navigation');
+  const { t } = useHydrationSafeTranslation('navigation');
   const [isHydrated, setIsHydrated] = useState(false);
 
   // hydration 완료 후에만 번역된 텍스트 렌더링

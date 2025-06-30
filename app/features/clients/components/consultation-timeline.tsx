@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars, no-unused-vars */
+/* eslint-disable no-unused-vars */
 import { Button } from '~/common/components/ui/button';
 import { Plus, Edit2, Trash2 } from 'lucide-react';
 import type { ConsultationNote } from '../types/client-detail';

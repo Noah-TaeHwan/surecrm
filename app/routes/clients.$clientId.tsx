@@ -221,6 +221,14 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       console.error('❌ 소개자 목록 조회 실패:', referrerError);
     }
 
+    // 🌍 메타 데이터 생성 (다국어 지원)
+    const clientName =
+      (clientOverview.client as any)?.fullName || t('labels.client', '고객');
+    const metaData = {
+      title: `${clientName} - ${t('meta.clientDetail', '고객 상세')} | SureCRM`,
+      description: `${clientName} ${t('meta.clientDetailDescription', '고객의 상세 정보를 관리합니다')}`,
+    };
+
     return {
       client: clientOverview.client,
       clientOverview: clientOverview, // 🆕 통합 고객 데이터 추가
@@ -234,6 +242,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
         name: user.fullName || user.email.split('@')[0],
       },
       isEmpty: false,
+      meta: metaData, // 🌍 메타 데이터 추가
     };
   } catch (error) {
     console.error('❌ 고객 상세 정보 조회 실패:', error);
@@ -326,13 +335,26 @@ export async function action({ request, params }: Route.ActionArgs) {
   }
 }
 
-// ✅ meta 함수에서 간단한 하드코딩 사용
+// ✅ meta 함수 - 다국어 지원 (타입 안전)
 export function meta({ data }: Route.MetaArgs) {
+  // 타입 안전한 메타 데이터 처리
   const clientName = data?.client?.fullName || '고객';
+  const metaData = (data as any)?.meta; // 타입 단언으로 안전하게 접근
 
+  if (metaData && metaData.title && metaData.description) {
+    return [
+      { title: metaData.title },
+      { name: 'description', content: metaData.description },
+    ];
+  }
+
+  // 기본 메타 데이터 (다국어는 클라이언트에서 처리)
   return [
     { title: `${clientName} - 고객 상세 | SureCRM` },
-    { name: 'description', content: `${clientName}의 상세 정보를 확인하세요.` },
+    {
+      name: 'description',
+      content: `${clientName} 고객의 상세 정보를 관리합니다`,
+    },
   ];
 }
 

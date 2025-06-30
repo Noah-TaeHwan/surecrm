@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 import { Button } from '~/common/components/ui/button';
 import {
   DropdownMenu,
@@ -8,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from '~/common/components/ui/dropdown-menu';
 import { Badge } from '~/common/components/ui/badge';
-import { Globe, Check } from 'lucide-react';
+import { Globe, Check, X } from 'lucide-react';
 import {
   changeLanguageClient,
   detectClientLanguage,
@@ -32,7 +33,8 @@ export function LanguageSelector({
   className = '',
   showLabel = true,
 }: LanguageSelectorProps) {
-  const { t, i18n } = useTranslation();
+  const { t, i18n } = useHydrationSafeTranslation('common');
+  const { t: safeT } = useHydrationSafeTranslation();
   const [isHydrated, setIsHydrated] = useState(false);
   const [currentLanguage, setCurrentLanguage] =
     useState<SupportedLanguage>('ko');

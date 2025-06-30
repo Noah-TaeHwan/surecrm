@@ -178,10 +178,8 @@
   "layout": {
     "defaultUserName": "User"
   },
-  "language": {
-    "language": "Language",
-    "selectLanguage": "Select Language"
-  },
+  "language": "Language",
+  "selectLanguage": "Select Language",
   "labels": {
     "this": "this"
   },

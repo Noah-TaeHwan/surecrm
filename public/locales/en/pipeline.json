@@ -398,5 +398,24 @@
     "pipeline": "No clients in the pipeline",
     "search": "No search results found",
     "filter": "No clients match the filter criteria"
+  },
+  "interests": {
+    "autoInsurance": "Auto",
+    "dementia": "Dementia",
+    "dental": "Dental",
+    "driverInsurance": "Driver",
+    "healthCheckup": "Checkup",
+    "medicalExpenses": "Medical",
+    "fireInsurance": "Fire",
+    "caregiver": "Caregiver",
+    "cancer": "Cancer",
+    "savings": "Savings",
+    "liability": "Liability",
+    "legalAdvice": "Legal",
+    "tax": "Tax",
+    "investment": "Investment",
+    "petInsurance": "Pet",
+    "accidentInsurance": "Accident",
+    "trafficAccident": "Traffic"
   }
 }

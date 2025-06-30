@@ -44,6 +44,7 @@ import {
 } from 'lucide-react';
 import { formatCurrencyTable } from '~/lib/utils/currency';
 import type { Client } from '~/features/pipeline/types/types';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 
 // 🎯 빠른 편집 모달 Props
 interface QuickEditModalProps {
@@ -82,6 +83,24 @@ export function QuickEditModal({
   onSave,
   isMobile = false,
 }: QuickEditModalProps) {
+  const { t, getCurrentLanguage } = useHydrationSafeTranslation('pipeline');
+
+  // 🌐 현재 언어에 맞는 통화 locale 매핑
+  const getCurrencyLocale = () => {
+    const currentLang = getCurrentLanguage();
+    switch (currentLang) {
+      case 'en':
+        return 'en';
+      case 'ja':
+        return 'ja';
+      case 'ko':
+      default:
+        return 'ko';
+    }
+  };
+
+  const currencyLocale = getCurrencyLocale();
+
   const [editFields, setEditFields] = useState<EditableFields>({
     importance: 'medium',
     nextAction: '',
@@ -255,13 +274,19 @@ export function QuickEditModal({
               <div className="text-center p-2 bg-background rounded-md">
                 <div className="text-xs text-muted-foreground">월 보험료</div>
                 <div className="font-semibold text-green-600">
-                  {formatCurrencyTable(client.totalMonthlyPremium || 0)}
+                  {formatCurrencyTable(
+                    client.totalMonthlyPremium || 0,
+                    currencyLocale
+                  )}
                 </div>
               </div>
               <div className="text-center p-2 bg-background rounded-md">
                 <div className="text-xs text-muted-foreground">예상 수수료</div>
                 <div className="font-semibold text-blue-600">
-                  {formatCurrencyTable(client.totalExpectedCommission || 0)}
+                  {formatCurrencyTable(
+                    client.totalExpectedCommission || 0,
+                    currencyLocale
+                  )}
                 </div>
               </div>
             </div>

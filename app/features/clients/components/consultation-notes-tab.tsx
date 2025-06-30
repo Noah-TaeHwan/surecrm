@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars, no-unused-vars */
+/* eslint-disable no-unused-vars */
 import { TabsContent } from '~/common/components/ui/tabs';
 import {
   Card,

@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useRef, useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 
 interface BottomTabNavigationProps {
   isMenuOpen: boolean;
@@ -164,7 +164,7 @@ function LiquidGlassButton({
 
 export function BottomTabNavigation({ isMenuOpen }: BottomTabNavigationProps) {
   const location = useLocation();
-  const { t } = useTranslation('navigation');
+  const { t } = useHydrationSafeTranslation('navigation');
   const activeIndex = getActiveIndex(location.pathname);
   const isMinimized = useScrollDirection();
 

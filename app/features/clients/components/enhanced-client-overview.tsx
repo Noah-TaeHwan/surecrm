@@ -29,6 +29,7 @@ import {
   AlertTriangle,
   Activity,
 } from 'lucide-react';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 
 interface Client {
   id: string;
@@ -72,6 +73,24 @@ export function EnhancedClientOverview({
   onScheduleMeeting,
   onAddNote,
 }: EnhancedClientOverviewProps) {
+  const { t, getCurrentLanguage } = useHydrationSafeTranslation('clients');
+
+  // 🌐 현재 언어에 맞는 통화 locale 매핑
+  const getCurrencyLocale = () => {
+    const currentLang = getCurrentLanguage();
+    switch (currentLang) {
+      case 'en':
+        return 'en';
+      case 'ja':
+        return 'ja';
+      case 'ko':
+      default:
+        return 'ko';
+    }
+  };
+
+  const currencyLocale = getCurrencyLocale();
+
   const [showMoreDetails, setShowMoreDetails] = useState(false);
 
   const getImportanceBadge = (importance: string) => {
@@ -216,7 +235,7 @@ export function EnhancedClientOverview({
               <p className="text-sm text-muted-foreground">예상 LTV</p>
               <p className="text-lg font-bold text-blue-600">
                 {client.lifetimeValue
-                  ? formatCurrencyTable(client.lifetimeValue)
+                  ? formatCurrencyTable(client.lifetimeValue, currencyLocale)
                   : '미산출'}
               </p>
             </div>
@@ -343,7 +362,10 @@ export function EnhancedClientOverview({
                             월 보험료
                           </span>
                           <span className="font-medium">
-                            {formatCurrencyTable(client.totalPremium)}
+                            {formatCurrencyTable(
+                              client.totalPremium,
+                              currencyLocale
+                            )}
                           </span>
                         </div>
                       )}

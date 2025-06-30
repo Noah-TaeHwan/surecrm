@@ -47,11 +47,11 @@ import { requireAuth } from '~/lib/auth/middleware.server';
 import { redirect } from 'react-router';
 import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 
-export function meta() {
-  // 다국어 지원을 위한 기본 언어 설정 (향후 확장 가능)
-  const title = '영업 파이프라인 - SureCRM';
+export function meta({ data }: Route.MetaArgs) {
+  // 기본 메타 데이터 (다국어는 클라이언트에서 처리)
+  const title = 'Sales Pipeline - SureCRM';
   const description =
-    '영업 단계별 고객 관리 파이프라인으로 효율적인 영업 프로세스를 구축하세요.';
+    'Build an efficient sales process with stage-based customer management pipeline.';
 
   return [
     { title },
@@ -1265,19 +1265,16 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
     setClientToRemove(null);
   };
 
-  // 🏢 계약 전환 핸들러
+  // 🏢 계약 전환 핸들러 - 간단한 프로세스
   const handleCreateContract = (
     clientId: string,
     clientName: string,
     products: any[]
   ) => {
-    // 🏢 파이프라인에서 계약 완료 처리
-    // 1. 파이프라인 상태를 "계약완료" 단계로 이동
-    // 2. 고객 상세 페이지의 보험 계약 탭으로 이동하여 계약 등록
+    // 🏢 직접 고객 상세 페이지의 보험 계약 탭으로 이동 (간단한 프로세스)
+    // shouldOpenModal=true로 설정하여 모달이 자동으로 열리게 함
     navigate(
-      `/clients/${clientId}?tab=insurance&createContract=true&fromPipeline=true&products=${JSON.stringify(
-        products
-      )}`
+      `/clients/${clientId}?tab=insurance&shouldOpenModal=true&fromPipeline=true`
     );
   };
 

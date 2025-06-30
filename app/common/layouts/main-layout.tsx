@@ -2,6 +2,7 @@ import React from 'react';
 import { useState, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 import { Sidebar } from '~/common/components/navigation/sidebar';
 import { Header } from '~/common/components/navigation/header';
 import {
@@ -36,7 +37,6 @@ export function MainLayout({
   currentUser: propsCurrentUser,
   initialSubscriptionStatus,
 }: MainLayoutProps) {
-  const { t } = useTranslation('common');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { isMobile } = useViewport();
 
@@ -220,6 +220,9 @@ export function MainLayout({
     // 한 번 로드된 구독 상태는 Context에서 유지되므로 페이지 이동 시에도 유지됨
     return true;
   }, [isHydrated, subscriptionStatus, initialSubscriptionStatus]);
+
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const { t } = useHydrationSafeTranslation('common');
 
   return (
     <div

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 import { Bell, User, LogOut, Menu, Eye, Lock } from 'lucide-react';
 import { cn } from '~/lib/utils';
 import { Button } from '~/common/components/ui/button';
@@ -29,6 +30,7 @@ interface HeaderProps {
     profileImage?: string;
   } | null;
   isLoadingUser?: boolean;
+  onMobileMenuToggle?: () => void;
 }
 
 // 기본 알림 타입 정의
@@ -47,8 +49,9 @@ export function Header({
   onMenuButtonClick,
   currentUser,
   isLoadingUser = false,
+  onMobileMenuToggle,
 }: HeaderProps) {
-  const { t } = useTranslation('navigation');
+  const { t } = useHydrationSafeTranslation('navigation');
   const { subscriptionStatus, isLoading: isSubscriptionLoading } =
     useSubscription();
   const [isLoggingOut, setIsLoggingOut] = React.useState(false);

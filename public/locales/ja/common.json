@@ -178,10 +178,8 @@
   "layout": {
     "defaultUserName": "ユーザー"
   },
-  "language": {
-    "language": "言語",
-    "selectLanguage": "言語選択"
-  },
+  "language": "言語",
+  "selectLanguage": "言語選択",
   "labels": {
     "this": "この"
   },

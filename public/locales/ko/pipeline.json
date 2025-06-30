@@ -389,5 +389,24 @@
     "pipeline": "파이프라인에 고객이 없습니다",
     "search": "검색 결과가 없습니다",
     "filter": "필터 조건에 맞는 고객이 없습니다"
+  },
+  "interests": {
+    "autoInsurance": "자동차",
+    "dementia": "치매",
+    "dental": "치아",
+    "driverInsurance": "운전자",
+    "healthCheckup": "건강검진",
+    "medicalExpenses": "실비",
+    "fireInsurance": "화재",
+    "caregiver": "간병",
+    "cancer": "암",
+    "savings": "저축",
+    "liability": "배상책임",
+    "legalAdvice": "법률",
+    "tax": "세금",
+    "investment": "재테크",
+    "petInsurance": "펫보험",
+    "accidentInsurance": "상해",
+    "trafficAccident": "교통사고"
   }
 }

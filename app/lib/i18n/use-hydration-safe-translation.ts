@@ -17,17 +17,36 @@ export function useHydrationSafeTranslation(namespace?: string) {
   /**
    * 🌐 Hydration-Safe 번역 함수
    * @param key 번역 키
-   * @param fallback 한국어 기본값 (hydration 전에 사용)
+   * @param fallbackOrOptions 한국어 기본값 또는 i18next 옵션
    * @param options i18next 옵션 (interpolation 등)
    */
-  const safeT = (key: string, fallback: string, options?: any): string => {
+  const safeT = (
+    key: string,
+    fallbackOrOptions?: string | any,
+    options?: any
+  ): string => {
+    // 매개변수 파싱
+    let fallback: string;
+    let translationOptions: any;
+
+    if (typeof fallbackOrOptions === 'string') {
+      fallback = fallbackOrOptions;
+      translationOptions = options;
+    } else if (typeof fallbackOrOptions === 'object') {
+      fallback = key; // 키를 기본값으로 사용
+      translationOptions = fallbackOrOptions;
+    } else {
+      fallback = key; // 키를 기본값으로 사용
+      translationOptions = options;
+    }
+
     if (!isHydrated) {
-      // Hydration 전에는 한국어 기본값 사용
+      // Hydration 전에는 기본값 사용
       return fallback;
     }
 
     try {
-      return t(key, options) as string;
+      return t(key, translationOptions) as string;
     } catch {
       console.error(`번역 실패: ${key}`);
       return fallback;

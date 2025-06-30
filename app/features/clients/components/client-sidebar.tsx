@@ -48,7 +48,7 @@ interface ClientSidebarProps {
   isEditing: boolean;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   editFormData: Record<string, any>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, no-unused-vars
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setEditFormData: React.Dispatch<React.SetStateAction<any>>;
   handleEditStart: () => void;
   handleEditSave: () => void;
