@@ -49,6 +49,7 @@ import type {
   PipelineStage,
   InsuranceInfo,
 } from '~/features/pipeline/types/types';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 
 interface AddClientModalProps {
   open: boolean;
@@ -83,6 +84,8 @@ export function AddClientModal({
   initialStageId = '',
   onAddClient,
 }: AddClientModalProps) {
+  const { t } = useHydrationSafeTranslation('pipeline');
+
   // 현재 활성 탭 상태
   const [activeTab, setActiveTab] = useState('basic');
 
@@ -165,7 +168,7 @@ export function AddClientModal({
     const newErrors: Record<string, string> = {};
 
     if (!name.trim()) {
-      newErrors.name = '고객명을 입력해주세요';
+      newErrors.name = t('forms.validation.required', '필수 입력 항목입니다');
     }
 
     // 전화번호는 선택사항으로 변경 - 값이 있을 때만 형식 검증
@@ -173,15 +176,24 @@ export function AddClientModal({
       phone.trim() &&
       !/^01[0-9]-?[0-9]{4}-?[0-9]{4}$/.test(phone.replace(/-/g, ''))
     ) {
-      newErrors.phone = '올바른 전화번호 형식이 아닙니다';
+      newErrors.phone = t(
+        'forms.validation.invalidPhone',
+        '올바른 전화번호 형식이 아닙니다'
+      );
     }
 
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      newErrors.email = '올바른 이메일 형식이 아닙니다';
+      newErrors.email = t(
+        'forms.validation.invalidEmail',
+        '올바른 이메일 형식이 아닙니다'
+      );
     }
 
     if (!stageId) {
-      newErrors.stageId = '진행 단계를 선택해주세요';
+      newErrors.stageId = t(
+        'forms.validation.selectStage',
+        '진행 단계를 선택해주세요'
+      );
     }
 
     setErrors(newErrors);
@@ -392,10 +404,15 @@ export function AddClientModal({
         <DialogHeader className="flex-shrink-0 px-4 sm:px-6 py-4 sm:py-4 border-b border-border/30">
           <DialogTitle className="flex items-center gap-2 text-sm sm:text-lg">
             <User className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
-            <span className="truncate">신규 고객 추가</span>
+            <span className="truncate">
+              {t('forms.addClient.title', '신규 고객 추가')}
+            </span>
           </DialogTitle>
           <DialogDescription className="text-xs sm:text-sm text-muted-foreground">
-            새로운 고객 정보를 입력하고 영업 파이프라인에 추가하세요.
+            {t(
+              'forms.addClient.subtitle',
+              '새로운 고객 정보를 입력하고 영업 파이프라인에 추가하세요.'
+            )}
           </DialogDescription>
         </DialogHeader>
 
@@ -405,11 +422,13 @@ export function AddClientModal({
             {/* 진행 상황 표시 */}
             <div className="p-4 sm:p-4 bg-primary/5 border border-primary/20 rounded-lg">
               <h4 className="text-xs sm:text-sm font-medium text-primary mb-2 sm:mb-3 flex items-center gap-2">
-                📋 입력 진행률
+                📋 {t('forms.addClient.progress', '입력 진행률')}
               </h4>
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <span className="text-xs text-muted-foreground">완성도</span>
+                  <span className="text-xs text-muted-foreground">
+                    {t('forms.addClient.completion', '완성도')}
+                  </span>
                   <span className="text-xs font-medium text-primary">
                     {getFormProgress()}%
                   </span>
@@ -417,7 +436,11 @@ export function AddClientModal({
                 <Progress value={getFormProgress()} className="h-2" />
               </div>
               <p className="text-xs text-muted-foreground mt-2">
-                💡 필수 정보만 입력해도 고객 등록이 가능합니다
+                💡{' '}
+                {t(
+                  'forms.addClient.helpText',
+                  '필수 정보만 입력해도 고객 등록이 가능합니다'
+                )}
               </p>
             </div>
 
@@ -432,7 +455,7 @@ export function AddClientModal({
                   value="basic"
                   className="text-xs sm:text-sm relative"
                 >
-                  기본정보
+                  {t('forms.addClient.tabs.basic', '기본정보')}
                   {getTabStatus('basic') && (
                     <Check className="h-3 w-3 absolute -top-1 -right-1 text-primary" />
                   )}
@@ -441,7 +464,7 @@ export function AddClientModal({
                   value="physical"
                   className="text-xs sm:text-sm relative"
                 >
-                  신체정보
+                  {t('forms.addClient.tabs.physical', '신체정보')}
                   {getTabStatus('physical') && (
                     <Check className="h-3 w-3 absolute -top-1 -right-1 text-primary" />
                   )}
@@ -450,7 +473,7 @@ export function AddClientModal({
                   value="sales"
                   className="text-xs sm:text-sm relative"
                 >
-                  영업정보
+                  {t('forms.addClient.tabs.sales', '영업정보')}
                   {getTabStatus('sales') && (
                     <Check className="h-3 w-3 absolute -top-1 -right-1 text-primary" />
                   )}
@@ -459,7 +482,7 @@ export function AddClientModal({
                   value="insurance"
                   className="text-xs sm:text-sm relative"
                 >
-                  보험정보
+                  {t('forms.addClient.tabs.insurance', '보험정보')}
                   {getTabStatus('insurance') && (
                     <Check className="h-3 w-3 absolute -top-1 -right-1 text-primary" />
                   )}
@@ -1128,7 +1151,7 @@ export function AddClientModal({
               onClick={() => onOpenChange(false)}
               className="h-10 px-4 w-full sm:w-auto text-xs sm:text-sm"
             >
-              취소
+              {t('forms.common.cancel', '취소')}
             </Button>
             <Button
               type="submit"
@@ -1136,7 +1159,7 @@ export function AddClientModal({
               className="gap-2 h-10 px-4 w-full sm:w-auto text-xs sm:text-sm bg-primary text-primary-foreground"
             >
               <Plus className="h-3 w-3" />
-              고객 추가
+              {t('actions.addClient', '고객 추가')}
             </Button>
           </div>
         </DialogFooter>

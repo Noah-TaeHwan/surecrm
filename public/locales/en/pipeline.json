@@ -116,7 +116,16 @@
   "forms": {
     "addClient": {
       "title": "Add New Client",
-      "subtitle": "Enter new client information",
+      "subtitle": "Enter new client information and add to sales pipeline.",
+      "progress": "Input Progress",
+      "completion": "Completion",
+      "helpText": "You can register a client with just the required information",
+      "tabs": {
+        "basic": "Basic Info",
+        "physical": "Physical Info",
+        "sales": "Sales Info",
+        "insurance": "Insurance Info"
+      },
       "fields": {
         "fullName": "Client Name",
         "phone": "Phone",
@@ -124,10 +133,20 @@
         "address": "Address",
         "occupation": "Occupation",
         "telecomProvider": "Telecom Provider",
+        "height": "Height (cm)",
+        "weight": "Weight (kg)",
+        "drivingLicense": "Driving License",
+        "stage": "Stage",
         "importance": "Importance",
+        "referrer": "Referrer",
         "tags": "Tags",
         "notes": "Notes",
-        "referredBy": "Referred By"
+        "insuranceCompany": "Insurance Company",
+        "productName": "Product Name",
+        "monthlyPremium": "Monthly Premium",
+        "coverageAmount": "Coverage Amount",
+        "startDate": "Start Date",
+        "endDate": "End Date"
       },
       "placeholders": {
         "fullName": "Enter client name",
@@ -135,28 +154,85 @@
         "email": "example@email.com",
         "address": "Enter address",
         "occupation": "Enter occupation",
-        "tags": "Enter tags (comma separated)",
-        "notes": "Enter additional notes"
+        "height": "170",
+        "weight": "70",
+        "stage": "Select stage",
+        "importance": "Select importance",
+        "referrer": "Select referrer",
+        "tags": "Enter tag and press Enter",
+        "notes": "Enter notes about the client",
+        "insuranceCompany": "Insurance company name",
+        "productName": "Product name"
+      },
+      "options": {
+        "hasLicense": "Yes",
+        "noLicense": "No",
+        "noReferrer": "No referrer"
+      },
+      "sections": {
+        "basicInfo": "Basic Information",
+        "physicalInfo": "Physical Information",
+        "salesInfo": "Sales Information",
+        "insuranceInfo": "Insurance Information"
+      },
+      "buttons": {
+        "addInsurance": {
+          "life": "Life Insurance",
+          "health": "Health Insurance",
+          "auto": "Auto Insurance"
+        }
+      },
+      "messages": {
+        "noInsurance": "No insurance information registered",
+        "addInsuranceHelp": "Click the buttons above to add insurance information"
       }
     },
     "existingClientOpportunity": {
-      "title": "Existing Client Opportunity",
-      "subtitle": "Propose new products to existing clients",
+      "title": "Add Existing Client Opportunity",
+      "subtitle": "Propose new insurance products to existing clients and create opportunities.",
+      "descriptions": {
+        "auto": "Vehicle accident and damage coverage",
+        "life": "Life protection and savings features",
+        "health": "Medical expense coverage for illness and injury",
+        "home": "Home and contents damage protection",
+        "business": "Business-related risk coverage"
+      },
+      "steps": {
+        "selectClient": "Select Client",
+        "selectProduct": "Select Insurance Product",
+        "details": "Details"
+      },
       "fields": {
-        "clientName": "Client Name",
-        "insuranceType": "Insurance Product",
+        "clientSearch": "Search by client name",
         "productName": "Product Name",
         "insuranceCompany": "Insurance Company",
-        "monthlyPremium": "Monthly Premium",
-        "expectedCommission": "Expected Commission",
-        "notes": "Sales Notes"
+        "monthlyPremium": "Monthly Premium (amount)",
+        "expectedCommission": "Expected Commission (amount)",
+        "notes": "Notes"
       },
       "placeholders": {
         "productName": "Enter product name",
-        "insuranceCompany": "Enter insurance company name",
-        "monthlyPremium": "Monthly premium (currency)",
-        "expectedCommission": "Expected commission (currency)",
-        "notes": "Enter sales-related notes"
+        "insuranceCompany": "Enter insurance company",
+        "monthlyPremium": "100000",
+        "expectedCommission": "15000",
+        "notes": "Enter notes about the opportunity"
+      },
+      "summary": {
+        "title": "Selected Information",
+        "client": "Client:",
+        "insuranceType": "Insurance Type:",
+        "monthlyPremium": "Monthly Premium:",
+        "expectedCommission": "Expected Commission:"
+      },
+      "messages": {
+        "noSearchResults": "No search results",
+        "tryDifferentSearch": "Try a different search term"
+      },
+      "buttons": {
+        "next": "Next",
+        "previous": "Previous",
+        "addOpportunity": "Add Opportunity",
+        "adding": "Adding..."
       }
     },
     "quickEdit": {
@@ -167,6 +243,20 @@
       "title": "Exclude from Pipeline",
       "message": "Do you want to exclude this client from the sales pipeline?",
       "description": "Client information will be retained but excluded from the pipeline."
+    },
+    "validation": {
+      "required": "This field is required",
+      "invalidPhone": "Please enter a valid phone number",
+      "invalidEmail": "Please enter a valid email address",
+      "selectStage": "Please select a stage"
+    },
+    "common": {
+      "required": "*",
+      "optional": "(optional)",
+      "cancel": "Cancel",
+      "save": "Save",
+      "submit": "Submit",
+      "close": "Close"
     }
   },
   "cards": {
@@ -238,7 +328,8 @@
     "healthGood": "Healthy",
     "healthIssues": "Health Issues",
     "urgentContact": "Contact Needed",
-    "longStay": "Long Term"
+    "longStay": "Long Term",
+    "currency": ""
   },
   "tooltips": {
     "addClient": "Add a new client to the pipeline",

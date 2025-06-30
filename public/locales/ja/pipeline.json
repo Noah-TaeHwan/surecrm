@@ -116,7 +116,16 @@
   "forms": {
     "addClient": {
       "title": "新規顧客追加",
-      "subtitle": "新しい顧客情報を入力してください",
+      "subtitle": "新しい顧客情報を入力し、営業パイプラインに追加します。",
+      "progress": "入力進捗",
+      "completion": "完成度",
+      "helpText": "必須情報のみで顧客登録が可能です",
+      "tabs": {
+        "basic": "基本情報",
+        "physical": "身体情報",
+        "sales": "営業情報",
+        "insurance": "保険情報"
+      },
       "fields": {
         "fullName": "顧客名",
         "phone": "電話番号",
@@ -124,10 +133,20 @@
         "address": "住所",
         "occupation": "職業",
         "telecomProvider": "通信会社",
+        "height": "身長 (cm)",
+        "weight": "体重 (kg)",
+        "drivingLicense": "運転免許",
+        "stage": "ステージ",
         "importance": "重要度",
+        "referrer": "紹介者",
         "tags": "タグ",
         "notes": "メモ",
-        "referredBy": "紹介者"
+        "insuranceCompany": "保険会社",
+        "productName": "商品名",
+        "monthlyPremium": "月額保険料",
+        "coverageAmount": "保障金額",
+        "startDate": "開始日",
+        "endDate": "終了日"
       },
       "placeholders": {
         "fullName": "顧客名を入力してください",
@@ -135,28 +154,85 @@
         "email": "example@email.com",
         "address": "住所を入力してください",
         "occupation": "職業を入力してください",
-        "tags": "タグを入力してください（カンマ区切り）",
-        "notes": "追加メモがあれば入力してください"
+        "height": "170",
+        "weight": "70",
+        "stage": "ステージを選択",
+        "importance": "重要度を選択",
+        "referrer": "紹介者を選択",
+        "tags": "タグを入力してEnterキーを押してください",
+        "notes": "顧客についてのメモを入力してください",
+        "insuranceCompany": "保険会社名",
+        "productName": "商品名"
+      },
+      "options": {
+        "hasLicense": "あり",
+        "noLicense": "なし",
+        "noReferrer": "紹介者なし"
+      },
+      "sections": {
+        "basicInfo": "基本情報",
+        "physicalInfo": "身体情報",
+        "salesInfo": "営業情報",
+        "insuranceInfo": "保険情報"
+      },
+      "buttons": {
+        "addInsurance": {
+          "life": "生命保険",
+          "health": "健康保険",
+          "auto": "自動車保険"
+        }
+      },
+      "messages": {
+        "noInsurance": "登録された保険情報がありません",
+        "addInsuranceHelp": "上記のボタンをクリックして保険情報を追加してください"
       }
     },
     "existingClientOpportunity": {
-      "title": "既存顧客営業機会",
-      "subtitle": "既存顧客に新しい商品を提案しましょう",
+      "title": "既存顧客営業機会追加",
+      "subtitle": "既存顧客に新しい保険商品を提案し、営業機会を作成します。",
+      "descriptions": {
+        "auto": "自動車事故および損害保障",
+        "life": "生命保障および貯蓄機能",
+        "health": "疾病および傷害医療費保障",
+        "home": "住宅および家財損害保障",
+        "business": "事業関連リスク保障"
+      },
+      "steps": {
+        "selectClient": "顧客選択",
+        "selectProduct": "保険商品選択",
+        "details": "詳細情報"
+      },
       "fields": {
-        "clientName": "顧客名",
-        "insuranceType": "保険商品",
+        "clientSearch": "顧客名で検索",
         "productName": "商品名",
         "insuranceCompany": "保険会社",
-        "monthlyPremium": "月額保険料",
-        "expectedCommission": "予想手数料",
-        "notes": "営業メモ"
+        "monthlyPremium": "月額保険料（金額）",
+        "expectedCommission": "予想手数料（金額）",
+        "notes": "メモ"
       },
       "placeholders": {
         "productName": "商品名を入力してください",
-        "insuranceCompany": "保険会社名を入力してください",
-        "monthlyPremium": "月額保険料（円）",
-        "expectedCommission": "予想手数料（円）",
-        "notes": "営業関連のメモを入力してください"
+        "insuranceCompany": "保険会社を入力してください",
+        "monthlyPremium": "100000",
+        "expectedCommission": "15000",
+        "notes": "営業機会についてのメモを入力してください"
+      },
+      "summary": {
+        "title": "選択された情報",
+        "client": "顧客：",
+        "insuranceType": "保険種類：",
+        "monthlyPremium": "月額保険料：",
+        "expectedCommission": "予想手数料："
+      },
+      "messages": {
+        "noSearchResults": "検索結果がありません",
+        "tryDifferentSearch": "別の検索キーワードを試してください"
+      },
+      "buttons": {
+        "next": "次へ",
+        "previous": "前へ",
+        "addOpportunity": "営業機会追加",
+        "adding": "追加中..."
       }
     },
     "quickEdit": {
@@ -167,6 +243,20 @@
       "title": "パイプラインから除外",
       "message": "この顧客を営業パイプラインから除外しますか？",
       "description": "顧客情報は保持されますが、パイプラインからは除外されます。"
+    },
+    "validation": {
+      "required": "必須入力項目です",
+      "invalidPhone": "正しい電話番号を入力してください",
+      "invalidEmail": "正しいメールアドレスを入力してください",
+      "selectStage": "ステージを選択してください"
+    },
+    "common": {
+      "required": "*",
+      "optional": "（任意）",
+      "cancel": "キャンセル",
+      "save": "保存",
+      "submit": "登録",
+      "close": "閉じる"
     }
   },
   "cards": {
@@ -238,7 +328,8 @@
     "healthGood": "健康",
     "healthIssues": "要注意",
     "urgentContact": "連絡必要",
-    "longStay": "長期滞在"
+    "longStay": "長期滞在",
+    "currency": "円"
   },
   "tooltips": {
     "addClient": "パイプラインに新しい顧客を追加します",

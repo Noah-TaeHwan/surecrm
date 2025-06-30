@@ -35,6 +35,7 @@ import {
   DollarSign,
   Banknote,
 } from 'lucide-react';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 
 interface ExistingClientOpportunityModalProps {
   isOpen: boolean;
@@ -54,41 +55,56 @@ interface ExistingClientOpportunityModalProps {
   preSelectedClientId?: string; // 특정 고객 자동 선택
 }
 
-// 보험 상품 타입 정의 (새 영업 기회 모달과 동일)
-const insuranceTypes = [
+// 보험 상품 타입 정의 함수 (번역 지원)
+const getInsuranceTypes = (t: any) => [
   {
     id: 'auto',
-    name: '자동차보험',
+    name: t('insurance.types.auto', '자동차보험'),
     icon: <Car className="h-5 w-5" />,
-    description: '자동차 사고 및 손해 보장',
+    description: t(
+      'forms.existingClientOpportunity.descriptions.auto',
+      '자동차 사고 및 손해 보장'
+    ),
     color: 'bg-blue-50 text-blue-700 border-blue-200',
   },
   {
     id: 'life',
-    name: '생명보험',
+    name: t('insurance.types.life', '생명보험'),
     icon: <Heart className="h-5 w-5" />,
-    description: '생명 보장 및 저축 기능',
+    description: t(
+      'forms.existingClientOpportunity.descriptions.life',
+      '생명 보장 및 저축 기능'
+    ),
     color: 'bg-red-50 text-red-700 border-red-200',
   },
   {
     id: 'health',
-    name: '건강보험',
+    name: t('insurance.types.health', '건강보험'),
     icon: <Shield className="h-5 w-5" />,
-    description: '질병 및 상해 의료비 보장',
+    description: t(
+      'forms.existingClientOpportunity.descriptions.health',
+      '질병 및 상해 의료비 보장'
+    ),
     color: 'bg-green-50 text-green-700 border-green-200',
   },
   {
     id: 'home',
-    name: '주택보험',
+    name: t('insurance.types.home', '주택보험'),
     icon: <Home className="h-5 w-5" />,
-    description: '주택 및 가재도구 손해 보장',
+    description: t(
+      'forms.existingClientOpportunity.descriptions.home',
+      '주택 및 가재도구 손해 보장'
+    ),
     color: 'bg-orange-50 text-orange-700 border-orange-200',
   },
   {
     id: 'business',
-    name: '사업자보험',
+    name: t('insurance.types.business', '사업자보험'),
     icon: <Briefcase className="h-5 w-5" />,
-    description: '사업 관련 리스크 보장',
+    description: t(
+      'forms.existingClientOpportunity.descriptions.business',
+      '사업 관련 리스크 보장'
+    ),
     color: 'bg-purple-50 text-purple-700 border-purple-200',
   },
 ];
@@ -101,6 +117,36 @@ export function ExistingClientOpportunityModal({
   isLoading = false,
   preSelectedClientId, // 특정 고객 자동 선택
 }: ExistingClientOpportunityModalProps) {
+  const { t } = useHydrationSafeTranslation('pipeline');
+  const insuranceTypes = getInsuranceTypes(t);
+
+  // 🎯 스테이지 이름을 번역 키로 매핑하는 헬퍼 함수 (pipeline-board.tsx와 동일)
+  const getStageTranslationKey = (stageName: string) => {
+    switch (stageName) {
+      case '첫 상담':
+        return 'firstConsultation';
+      case '니즈 분석':
+        return 'needsAnalysis';
+      case '상품 설명':
+        return 'productExplanation';
+      case '계약 검토':
+        return 'contractReview';
+      case '계약 완료':
+        return 'contractCompleted';
+      default:
+        return null;
+    }
+  };
+
+  // 🎯 스테이지 이름을 번역된 텍스트로 변환하는 함수
+  const getTranslatedStageName = (stageName: string) => {
+    const stageKey = getStageTranslationKey(stageName);
+    if (stageKey) {
+      return t(`stages.${stageKey}`, stageName);
+    }
+    return stageName;
+  };
+
   const [selectedClientId, setSelectedClientId] = useState<string>(
     preSelectedClientId || ''
   );
@@ -282,10 +328,18 @@ export function ExistingClientOpportunityModal({
         <DialogHeader className="flex-shrink-0 px-4 sm:px-6 py-4 sm:py-4 border-b border-border/30">
           <DialogTitle className="flex items-center gap-2 text-sm sm:text-lg">
             <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
-            <span className="truncate">기존 고객 영업 기회 추가</span>
+            <span className="truncate">
+              {t(
+                'forms.existingClientOpportunity.title',
+                '기존 고객 영업 기회 추가'
+              )}
+            </span>
           </DialogTitle>
           <DialogDescription className="text-xs sm:text-sm text-muted-foreground">
-            기존 고객에게 새로운 보험 상품을 제안하고 영업 기회를 만들어보세요.
+            {t(
+              'forms.existingClientOpportunity.subtitle',
+              '기존 고객에게 새로운 보험 상품을 제안하고 영업 기회를 만들어보세요.'
+            )}
           </DialogDescription>
         </DialogHeader>
 
@@ -298,14 +352,21 @@ export function ExistingClientOpportunityModal({
           {step === 'selectClient' && (
             <div className="space-y-3 sm:space-y-4">
               <h4 className="text-sm sm:text-base font-medium text-foreground flex items-center gap-2">
-                👤 고객 선택
+                👤{' '}
+                {t(
+                  'forms.existingClientOpportunity.steps.selectClient',
+                  '고객 선택'
+                )}
               </h4>
 
               {/* 검색 입력 */}
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="고객명으로 검색하세요"
+                  placeholder={t(
+                    'forms.existingClientOpportunity.fields.clientSearch',
+                    '고객명으로 검색하세요'
+                  )}
                   value={clientSearchQuery}
                   onChange={e => setClientSearchQuery(e.target.value)}
                   className="h-9 sm:h-10 text-xs sm:text-sm pl-10"
@@ -352,7 +413,7 @@ export function ExistingClientOpportunityModal({
                                 variant="secondary"
                                 className="text-xs mt-1"
                               >
-                                {client.currentStage}
+                                {getTranslatedStageName(client.currentStage)}
                               </Badge>
                             )}
                           </div>
@@ -369,9 +430,17 @@ export function ExistingClientOpportunityModal({
               {filteredClients.length === 0 && (
                 <div className="text-center py-8 text-muted-foreground">
                   <User className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                  <p className="text-xs sm:text-sm">검색 결과가 없습니다</p>
+                  <p className="text-xs sm:text-sm">
+                    {t(
+                      'forms.existingClientOpportunity.messages.noSearchResults',
+                      '검색 결과가 없습니다'
+                    )}
+                  </p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    다른 검색어로 시도해보세요
+                    {t(
+                      'forms.existingClientOpportunity.messages.tryDifferentSearch',
+                      '다른 검색어로 시도해보세요'
+                    )}
                   </p>
                 </div>
               )}
@@ -382,7 +451,11 @@ export function ExistingClientOpportunityModal({
           {step === 'selectProduct' && (
             <div className="space-y-3 sm:space-y-4">
               <h4 className="text-sm sm:text-base font-medium text-foreground flex items-center gap-2">
-                🛡️ 보험 상품 선택
+                🛡️{' '}
+                {t(
+                  'forms.existingClientOpportunity.steps.selectProduct',
+                  '보험 상품 선택'
+                )}
               </h4>
 
               <div className="grid grid-cols-1 gap-3">
@@ -428,16 +501,26 @@ export function ExistingClientOpportunityModal({
           {step === 'details' && (
             <div className="space-y-3 sm:space-y-4">
               <h4 className="text-sm sm:text-base font-medium text-foreground flex items-center gap-2">
-                📝 상세 정보
+                📝{' '}
+                {t(
+                  'forms.existingClientOpportunity.steps.details',
+                  '상세 정보'
+                )}
               </h4>
 
               <div className="space-y-3 sm:space-y-4">
                 <div className="space-y-2">
                   <label className="text-xs sm:text-sm font-medium">
-                    상품명
+                    {t(
+                      'forms.existingClientOpportunity.fields.productName',
+                      '상품명'
+                    )}
                   </label>
                   <Input
-                    placeholder="상품명을 입력하세요"
+                    placeholder={t(
+                      'forms.existingClientOpportunity.placeholders.productName',
+                      '상품명을 입력하세요'
+                    )}
                     value={productName}
                     onChange={e => setProductName(e.target.value)}
                     className="h-9 sm:h-10 text-xs sm:text-sm"
@@ -446,10 +529,16 @@ export function ExistingClientOpportunityModal({
 
                 <div className="space-y-2">
                   <label className="text-xs sm:text-sm font-medium">
-                    보험사
+                    {t(
+                      'forms.existingClientOpportunity.fields.insuranceCompany',
+                      '보험사'
+                    )}
                   </label>
                   <Input
-                    placeholder="보험사를 입력하세요"
+                    placeholder={t(
+                      'forms.existingClientOpportunity.placeholders.insuranceCompany',
+                      '보험사를 입력하세요'
+                    )}
                     value={insuranceCompany}
                     onChange={e => setInsuranceCompany(e.target.value)}
                     className="h-9 sm:h-10 text-xs sm:text-sm"
@@ -459,13 +548,19 @@ export function ExistingClientOpportunityModal({
                 <div className="grid grid-cols-2 gap-3 sm:gap-4">
                   <div className="space-y-2">
                     <label className="text-xs sm:text-sm font-medium">
-                      월 보험료 (원)
+                      {t(
+                        'forms.existingClientOpportunity.fields.monthlyPremium',
+                        '월 보험료 (원)'
+                      )}
                     </label>
                     <div className="relative">
                       <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
                         type="number"
-                        placeholder="100000"
+                        placeholder={t(
+                          'forms.existingClientOpportunity.placeholders.monthlyPremium',
+                          '100000'
+                        )}
                         value={monthlyPremium}
                         onChange={e => setMonthlyPremium(e.target.value)}
                         className="h-9 sm:h-10 text-xs sm:text-sm pl-10"
@@ -475,13 +570,19 @@ export function ExistingClientOpportunityModal({
 
                   <div className="space-y-2">
                     <label className="text-xs sm:text-sm font-medium">
-                      예상 수수료 (원)
+                      {t(
+                        'forms.existingClientOpportunity.fields.expectedCommission',
+                        '예상 수수료 (원)'
+                      )}
                     </label>
                     <div className="relative">
                       <Banknote className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
                         type="number"
-                        placeholder="15000"
+                        placeholder={t(
+                          'forms.existingClientOpportunity.placeholders.expectedCommission',
+                          '15000'
+                        )}
                         value={expectedCommission}
                         onChange={e => setExpectedCommission(e.target.value)}
                         className="h-9 sm:h-10 text-xs sm:text-sm pl-10"
@@ -491,9 +592,14 @@ export function ExistingClientOpportunityModal({
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs sm:text-sm font-medium">메모</label>
+                  <label className="text-xs sm:text-sm font-medium">
+                    {t('forms.existingClientOpportunity.fields.notes', '메모')}
+                  </label>
                   <Textarea
-                    placeholder="영업 기회에 대한 메모를 입력하세요"
+                    placeholder={t(
+                      'forms.existingClientOpportunity.placeholders.notes',
+                      '영업 기회에 대한 메모를 입력하세요'
+                    )}
                     value={notes}
                     onChange={e => setNotes(e.target.value)}
                     className="text-xs sm:text-sm min-h-[80px] resize-none"
@@ -504,17 +610,30 @@ export function ExistingClientOpportunityModal({
                 {/* 선택된 정보 요약 */}
                 <div className="p-4 bg-muted/50 rounded-lg">
                   <h5 className="text-xs sm:text-sm font-medium mb-2">
-                    선택된 정보
+                    {t(
+                      'forms.existingClientOpportunity.summary.title',
+                      '선택된 정보'
+                    )}
                   </h5>
                   <div className="space-y-1">
                     <div className="flex justify-between text-xs">
-                      <span className="text-muted-foreground">고객:</span>
+                      <span className="text-muted-foreground">
+                        {t(
+                          'forms.existingClientOpportunity.summary.client',
+                          '고객:'
+                        )}
+                      </span>
                       <span className="font-medium">
                         {clients.find(c => c.id === selectedClientId)?.name}
                       </span>
                     </div>
                     <div className="flex justify-between text-xs">
-                      <span className="text-muted-foreground">보험 종류:</span>
+                      <span className="text-muted-foreground">
+                        {t(
+                          'forms.existingClientOpportunity.summary.insuranceType',
+                          '보험 종류:'
+                        )}
+                      </span>
                       <span className="font-medium">
                         {insuranceTypes.find(t => t.id === selectedType)?.name}
                       </span>
@@ -522,20 +641,28 @@ export function ExistingClientOpportunityModal({
                     {monthlyPremium && (
                       <div className="flex justify-between text-xs">
                         <span className="text-muted-foreground">
-                          월 보험료:
+                          {t(
+                            'forms.existingClientOpportunity.summary.monthlyPremium',
+                            '월 보험료:'
+                          )}
                         </span>
                         <span className="font-medium">
-                          {parseFloat(monthlyPremium).toLocaleString()}원
+                          {parseFloat(monthlyPremium).toLocaleString()}
+                          {t('labels.currency', '원')}
                         </span>
                       </div>
                     )}
                     {expectedCommission && (
                       <div className="flex justify-between text-xs">
                         <span className="text-muted-foreground">
-                          예상 수수료:
+                          {t(
+                            'forms.existingClientOpportunity.summary.expectedCommission',
+                            '예상 수수료:'
+                          )}
                         </span>
                         <span className="font-medium text-primary">
-                          {parseFloat(expectedCommission).toLocaleString()}원
+                          {parseFloat(expectedCommission).toLocaleString()}
+                          {t('labels.currency', '원')}
                         </span>
                       </div>
                     )}
@@ -555,7 +682,7 @@ export function ExistingClientOpportunityModal({
               onClick={handleClose}
               className="h-10 px-4 w-full sm:w-auto text-xs sm:text-sm"
             >
-              취소
+              {t('forms.common.cancel', '취소')}
             </Button>
 
             {step !== 'selectClient' && (
@@ -565,7 +692,7 @@ export function ExistingClientOpportunityModal({
                 onClick={handleBack}
                 className="h-10 px-4 w-full sm:w-auto text-xs sm:text-sm"
               >
-                이전
+                {t('forms.existingClientOpportunity.buttons.previous', '이전')}
               </Button>
             )}
 
@@ -576,7 +703,7 @@ export function ExistingClientOpportunityModal({
                 className="gap-2 h-10 px-4 w-full sm:w-auto text-xs sm:text-sm bg-primary text-primary-foreground"
               >
                 <ArrowRight className="h-3 w-3" />
-                다음
+                {t('forms.existingClientOpportunity.buttons.next', '다음')}
               </Button>
             )}
 
@@ -587,7 +714,7 @@ export function ExistingClientOpportunityModal({
                 className="gap-2 h-10 px-4 w-full sm:w-auto text-xs sm:text-sm bg-primary text-primary-foreground"
               >
                 <ArrowRight className="h-3 w-3" />
-                다음
+                {t('forms.existingClientOpportunity.buttons.next', '다음')}
               </Button>
             )}
 
@@ -598,7 +725,15 @@ export function ExistingClientOpportunityModal({
                 className="gap-2 h-10 px-4 w-full sm:w-auto text-xs sm:text-sm bg-primary text-primary-foreground"
               >
                 <Plus className="h-3 w-3" />
-                {isLoading ? '추가 중...' : '영업 기회 추가'}
+                {isLoading
+                  ? t(
+                      'forms.existingClientOpportunity.buttons.adding',
+                      '추가 중...'
+                    )
+                  : t(
+                      'forms.existingClientOpportunity.buttons.addOpportunity',
+                      '영업 기회 추가'
+                    )}
               </Button>
             )}
           </div>

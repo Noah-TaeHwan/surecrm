@@ -115,8 +115,17 @@
   },
   "forms": {
     "addClient": {
-      "title": "새 고객 추가",
-      "subtitle": "새로운 고객 정보를 입력하세요",
+      "title": "신규 고객 추가",
+      "subtitle": "새로운 고객 정보를 입력하고 영업 파이프라인에 추가하세요.",
+      "progress": "입력 진행률",
+      "completion": "완성도",
+      "helpText": "필수 정보만 입력해도 고객 등록이 가능합니다",
+      "tabs": {
+        "basic": "기본정보",
+        "physical": "신체정보",
+        "sales": "영업정보",
+        "insurance": "보험정보"
+      },
       "fields": {
         "fullName": "고객명",
         "phone": "연락처",
@@ -124,39 +133,106 @@
         "address": "주소",
         "occupation": "직업",
         "telecomProvider": "통신사",
+        "height": "키 (cm)",
+        "weight": "몸무게 (kg)",
+        "drivingLicense": "운전면허 보유",
+        "stage": "진행 단계",
         "importance": "중요도",
+        "referrer": "소개자",
         "tags": "태그",
         "notes": "메모",
-        "referredBy": "소개자"
+        "insuranceCompany": "보험사",
+        "productName": "상품명",
+        "monthlyPremium": "보험료 (월)",
+        "coverageAmount": "보장금액",
+        "startDate": "가입일",
+        "endDate": "만료일"
       },
       "placeholders": {
-        "fullName": "고객 이름을 입력하세요",
+        "fullName": "고객명을 입력하세요",
         "phone": "010-1234-5678",
         "email": "example@email.com",
         "address": "주소를 입력하세요",
         "occupation": "직업을 입력하세요",
-        "tags": "태그를 입력하세요 (쉼표로 구분)",
-        "notes": "추가 메모가 있다면 입력하세요"
+        "height": "170",
+        "weight": "70",
+        "stage": "진행 단계를 선택하세요",
+        "importance": "중요도를 선택하세요",
+        "referrer": "소개자를 선택하세요",
+        "tags": "태그를 입력하고 Enter를 누르세요",
+        "notes": "고객에 대한 메모를 입력하세요",
+        "insuranceCompany": "보험사명",
+        "productName": "상품명"
+      },
+      "options": {
+        "hasLicense": "있음",
+        "noLicense": "없음",
+        "noReferrer": "소개자 없음"
+      },
+      "sections": {
+        "basicInfo": "기본 정보",
+        "physicalInfo": "신체 정보",
+        "salesInfo": "영업 정보",
+        "insuranceInfo": "보험 정보"
+      },
+      "buttons": {
+        "addInsurance": {
+          "life": "생명보험",
+          "health": "건강보험",
+          "auto": "자동차보험"
+        }
+      },
+      "messages": {
+        "noInsurance": "등록된 보험 정보가 없습니다",
+        "addInsuranceHelp": "위 버튼을 클릭하여 보험 정보를 추가하세요"
       }
     },
     "existingClientOpportunity": {
-      "title": "기존 고객 영업 기회",
-      "subtitle": "기존 고객에게 새로운 상품을 제안하세요",
+      "title": "기존 고객 영업 기회 추가",
+      "subtitle": "기존 고객에게 새로운 보험 상품을 제안하고 영업 기회를 만들어보세요.",
+      "descriptions": {
+        "auto": "자동차 사고 및 손해 보장",
+        "life": "생명 보장 및 저축 기능",
+        "health": "질병 및 상해 의료비 보장",
+        "home": "주택 및 가재도구 손해 보장",
+        "business": "사업 관련 리스크 보장"
+      },
+      "steps": {
+        "selectClient": "고객 선택",
+        "selectProduct": "보험 상품 선택",
+        "details": "상세 정보"
+      },
       "fields": {
-        "clientName": "고객명",
-        "insuranceType": "보험 상품",
+        "clientSearch": "고객명으로 검색하세요",
         "productName": "상품명",
-        "insuranceCompany": "보험회사",
-        "monthlyPremium": "월 납입료",
-        "expectedCommission": "예상 수수료",
-        "notes": "영업 메모"
+        "insuranceCompany": "보험사",
+        "monthlyPremium": "월 보험료 (원)",
+        "expectedCommission": "예상 수수료 (원)",
+        "notes": "메모"
       },
       "placeholders": {
         "productName": "상품명을 입력하세요",
-        "insuranceCompany": "보험사명을 입력하세요",
-        "monthlyPremium": "월 납입료 (원)",
-        "expectedCommission": "예상 수수료 (원)",
-        "notes": "영업 관련 메모를 입력하세요"
+        "insuranceCompany": "보험사를 입력하세요",
+        "monthlyPremium": "100000",
+        "expectedCommission": "15000",
+        "notes": "영업 기회에 대한 메모를 입력하세요"
+      },
+      "summary": {
+        "title": "선택된 정보",
+        "client": "고객:",
+        "insuranceType": "보험 종류:",
+        "monthlyPremium": "월 보험료:",
+        "expectedCommission": "예상 수수료:"
+      },
+      "messages": {
+        "noSearchResults": "검색 결과가 없습니다",
+        "tryDifferentSearch": "다른 검색어로 시도해보세요"
+      },
+      "buttons": {
+        "next": "다음",
+        "previous": "이전",
+        "addOpportunity": "영업 기회 추가",
+        "adding": "추가 중..."
       }
     },
     "quickEdit": {
@@ -167,6 +243,20 @@
       "title": "파이프라인에서 제외",
       "message": "이 고객을 영업 파이프라인에서 제외하시겠습니까?",
       "description": "고객 정보는 유지되지만 파이프라인에서는 제외됩니다."
+    },
+    "validation": {
+      "required": "필수 입력 항목입니다",
+      "invalidPhone": "올바른 전화번호 형식이 아닙니다",
+      "invalidEmail": "올바른 이메일 형식이 아닙니다",
+      "selectStage": "진행 단계를 선택해주세요"
+    },
+    "common": {
+      "required": "*",
+      "optional": "(선택사항)",
+      "cancel": "취소",
+      "save": "저장",
+      "submit": "등록",
+      "close": "닫기"
     }
   },
   "cards": {
@@ -238,7 +328,8 @@
     "healthGood": "건강",
     "healthIssues": "주의",
     "urgentContact": "연락 필요",
-    "longStay": "장기 체류"
+    "longStay": "장기 체류",
+    "currency": "원"
   },
   "tooltips": {
     "addClient": "새 고객을 파이프라인에 추가합니다",
