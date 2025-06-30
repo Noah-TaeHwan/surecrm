@@ -78,9 +78,9 @@ export default function NetworkControls({
 
   // 검색 결과 정렬 및 우선순위 (옵시디언 방식)
   const sortedResults = useMemo(() => {
-    if (!searchTerm.trim() || searchResults.length === 0) return [];
+    if (!debouncedSearchTerm.trim() || searchResults.length === 0) return [];
 
-    const query = searchTerm.toLowerCase();
+    const query = debouncedSearchTerm.toLowerCase();
 
     return searchResults
       .map(result => {
@@ -105,7 +105,7 @@ export default function NetworkControls({
       .filter(result => result._score > 0)
       .sort((a, b) => b._score - a._score)
       .slice(0, 8); // 최대 8개 결과만 표시
-  }, [searchTerm, searchResults]);
+  }, [debouncedSearchTerm, searchResults]);
 
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {

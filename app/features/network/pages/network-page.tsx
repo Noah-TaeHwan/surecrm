@@ -1139,6 +1139,7 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
                 <NetworkControls
                   onSearch={executeSearch}
                   onNodeFocus={handleNodeFocus}
+                  searchResults={searchResults}
                 />
               </div>
             </CardHeader>
@@ -1286,6 +1287,7 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
                 <NetworkControls
                   onSearch={executeSearch}
                   onNodeFocus={handleNodeFocus}
+                  searchResults={searchResults}
                 />
               </div>
             </CardHeader>
