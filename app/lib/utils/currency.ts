@@ -91,33 +91,11 @@ function formatKoreanCurrency(amount: number): string {
 }
 
 /**
- * 영어 통화 포맷팅 (USD 기준)
+ * 영어 통화 포맷팅 (USD 기준) - 축약 없이 전체 금액 표시
  */
 function formatEnglishCurrency(amount: number): string {
-  const absAmount = Math.abs(amount);
-
-  if (absAmount >= 1000000000) {
-    // 1B 이상
-    const bValue = amount / 1000000000;
-    return bValue >= 10
-      ? `$${Math.round(bValue).toLocaleString('en-US')}B`
-      : `$${(Math.round(bValue * 10) / 10).toLocaleString('en-US')}B`;
-  } else if (absAmount >= 1000000) {
-    // 1M 이상
-    const mValue = amount / 1000000;
-    return mValue >= 10
-      ? `$${Math.round(mValue).toLocaleString('en-US')}M`
-      : `$${(Math.round(mValue * 10) / 10).toLocaleString('en-US')}M`;
-  } else if (absAmount >= 1000) {
-    // 1K 이상
-    const kValue = amount / 1000;
-    return kValue >= 100
-      ? `$${Math.round(kValue).toLocaleString('en-US')}K`
-      : `$${(Math.round(kValue * 10) / 10).toLocaleString('en-US')}K`;
-  } else {
-    // 1K 미만
-    return `$${Math.round(amount).toLocaleString('en-US')}`;
-  }
+  // 축약 없이 전체 금액 표시
+  return `$${Math.round(amount).toLocaleString('en-US')}`;
 }
 
 /**
