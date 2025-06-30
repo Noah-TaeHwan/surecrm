@@ -1,11 +1,15 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable no-unused-vars */
 import { useState, useEffect, useCallback } from 'react';
 import {
+  type LoaderFunctionArgs,
+  type ActionFunctionArgs,
   Link,
-  useNavigate,
+  useLoaderData,
   useFetcher,
   useSubmit,
   useSearchParams,
-  useLoaderData,
+  useNavigate,
 } from 'react-router';
 import { InsuranceAgentEvents } from '~/lib/utils/analytics';
 import { MainLayout } from '~/common/layouts/main-layout';
@@ -521,6 +525,57 @@ export default function ClientDetailPage() {
       }
     }
   }, [clientOverview]);
+
+  // 🏷️ 태그 관련 함수들 (Hook들을 early return 위로 이동)
+  const loadClientTags = useCallback(async () => {
+    if (!client?.id || !currentUser?.id) return;
+
+    try {
+      setIsLoadingTags(true);
+      const response = await fetch(
+        `/api/clients/client-tags?clientId=${client.id}`,
+        {
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+
+      if (response.ok) {
+        const tags = await response.json();
+        setClientTags(tags);
+      }
+    } catch (error) {
+      console.error('태그 로딩 실패:', error);
+    } finally {
+      setIsLoadingTags(false);
+    }
+  }, [client?.id, currentUser?.id]);
+
+  const loadAvailableTags = useCallback(async () => {
+    if (!currentUser?.id) return;
+
+    try {
+      const response = await fetch('/api/clients/tags', {
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      if (response.ok) {
+        const tags = await response.json();
+        setAvailableTags(tags);
+      }
+    } catch (error) {
+      console.error(
+        t('errors.tagLoadFailed', '사용 가능한 태그 로딩 실패:'),
+        error
+      );
+    }
+  }, [currentUser?.id, t]);
+
+  // 🏷️ 페이지 로드 시 태그 데이터 로딩
+  useEffect(() => {
+    if (client?.id && currentUser?.id) {
+      loadClientTags();
+    }
+  }, [client?.id, currentUser?.id, loadClientTags]);
 
   // 🎨 중요도별 은은한 색상 스타일 (왼쪽 보더 제거)
   // ✅ 유틸리티 함수 분리 완료 - import로 대체
@@ -1067,11 +1122,11 @@ export default function ClientDetailPage() {
 
       if (editingCompanion.id) {
         // 수정
-        formData.append('intent', 'updateConsultationCompanion');
+        formData.append('intent', 'update-companion');
         formData.append('companionId', editingCompanion.id);
       } else {
         // 추가
-        formData.append('intent', 'createConsultationCompanion');
+        formData.append('intent', 'create-companion');
       }
 
       formData.append('companionName', editingCompanion.name);
@@ -1086,9 +1141,15 @@ export default function ClientDetailPage() {
 
       // 성공 모달 표시
       setSuccessMessage(
-        `동반자가 성공적으로 ${
-          editingCompanion.id ? '수정' : '추가'
-        }되었습니다.`
+        editingCompanion.id
+          ? t(
+              'successModal.companionUpdated',
+              '상담동반자가 성공적으로 수정되었습니다.'
+            )
+          : t(
+              'successModal.companionAdded',
+              '상담동반자가 성공적으로 추가되었습니다.'
+            )
       );
       setShowSuccessModal(true);
       setShowAddCompanionModal(false);
@@ -1119,7 +1180,7 @@ export default function ClientDetailPage() {
 
     try {
       const formData = new FormData();
-      formData.append('intent', 'deleteConsultationCompanion');
+      formData.append('intent', 'delete-companion');
       formData.append('companionId', companionToDelete.id);
 
       submit(formData, { method: 'post' });
@@ -1129,7 +1190,12 @@ export default function ClientDetailPage() {
       setCompanionToDelete(null);
 
       // 성공 모달 표시
-      setSuccessMessage('동반자가 성공적으로 삭제되었습니다.');
+      setSuccessMessage(
+        t(
+          'successModal.companionDeleted',
+          '상담동반자가 성공적으로 삭제되었습니다.'
+        )
+      );
       setShowSuccessModal(true);
     } catch (error) {
       console.error('상담동반자 삭제 실패:', error);
@@ -1280,50 +1346,6 @@ export default function ClientDetailPage() {
 
   // ✅ 유틸리티 함수 분리 완료 - import로 대체
 
-  // 🏷️ 태그 관련 함수들
-  const loadClientTags = useCallback(async () => {
-    if (!client?.id || !currentUser?.id) return;
-
-    try {
-      setIsLoadingTags(true);
-      const response = await fetch(
-        `/api/clients/client-tags?clientId=${client.id}`,
-        {
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
-
-      if (response.ok) {
-        const tags = await response.json();
-        setClientTags(tags);
-      }
-    } catch (error) {
-      console.error('태그 로딩 실패:', error);
-    } finally {
-      setIsLoadingTags(false);
-    }
-  }, [client?.id, currentUser?.id]);
-
-  const loadAvailableTags = useCallback(async () => {
-    if (!currentUser?.id) return;
-
-    try {
-      const response = await fetch('/api/clients/tags', {
-        headers: { 'Content-Type': 'application/json' },
-      });
-
-      if (response.ok) {
-        const tags = await response.json();
-        setAvailableTags(tags);
-      }
-    } catch (error) {
-      console.error(
-        t('errors.tagLoadFailed', '사용 가능한 태그 로딩 실패:'),
-        error
-      );
-    }
-  }, [currentUser?.id]);
-
   const handleOpenTagModal = () => {
     setSelectedTagIds(clientTags.map(tag => tag.id));
     setShowTagModal(true);
@@ -1426,9 +1448,12 @@ export default function ClientDetailPage() {
   });
 
   const handleSaveCheckupPurposes = createSaveHandler({
-    intent: 'updateCheckupPurposes',
+    intent: 'update-checkup-purposes',
     data: checkupPurposes,
-    successMessage: '점검목적이 성공적으로 저장되었습니다.',
+    successMessage: t(
+      'successModal.checkupPurposesSaved',
+      '점검목적이 성공적으로 저장되었습니다.'
+    ),
     submit,
     setSuccessMessage,
     setShowSuccessModal,
@@ -1436,9 +1461,12 @@ export default function ClientDetailPage() {
   });
 
   const handleSaveInterestCategories = createSaveHandler({
-    intent: 'updateInterestCategories',
+    intent: 'update-interest-categories',
     data: interestCategories,
-    successMessage: '관심사항이 성공적으로 저장되었습니다.',
+    successMessage: t(
+      'successModal.interestCategoriesSaved',
+      '관심사항이 성공적으로 저장되었습니다.'
+    ),
     submit,
     setSuccessMessage,
     setShowSuccessModal,
@@ -1477,13 +1505,6 @@ export default function ClientDetailPage() {
       showError('태그 제거 실패', '네트워크 오류가 발생했습니다.');
     }
   };
-
-  // 🏷️ 페이지 로드 시 태그 데이터 로딩
-  useEffect(() => {
-    if (client?.id && currentUser?.id) {
-      loadClientTags();
-    }
-  }, [client?.id, currentUser?.id, loadClientTags]);
 
   return (
     <MainLayout

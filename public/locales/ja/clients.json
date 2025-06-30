@@ -394,6 +394,12 @@
     "consultationAdded": "相談内容が正常に追加されました。",
     "consultationUpdated": "相談内容が正常に更新されました。",
     "medicalHistorySaved": "病歴情報が正常に保存されました。",
+    "checkupPurposesSaved": "検診目的が正常に保存されました。",
+    "interestCategoriesSaved": "関心事項が正常に保存されました。",
+    "companionSaved": "相談同伴者が正常に保存されました。",
+    "companionAdded": "相談同伴者が正常に追加されました。",
+    "companionUpdated": "相談同伴者が正常に更新されました。",
+    "companionDeleted": "相談同伴者が正常に削除されました。",
     "button": "確認"
   },
   "deleteModal": {
@@ -533,5 +539,128 @@
     "additionalExamPlaceholder": "追加検査や再検査に関する詳細内容を入力してください...",
     "recentDetailsPlaceholder": "3ヶ月以内の医療関連詳細内容を入力してください...",
     "majorDetailsPlaceholder": "5年以内の主要医療履歴詳細内容を入力してください..."
+  },
+  "checkupPurposesTab": {
+    "title": "検診目的",
+    "saveButton": "保存",
+    "saveButtonFull": "検診目的保存",
+    "currentConcernsSection": "現在の心配事項",
+    "savingsSection": "貯蓄状況関連",
+    "neededItemsSection": "必要事項",
+    "detailsSection": "詳細内容",
+    "concernsPremium": "現在の保険料が心配ですか？",
+    "concernsCoverage": "現在の保障が心配ですか？",
+    "concernsMedicalHistory": "現在病歴があって心配ですか？",
+    "currentSavingsLocation": "現在貯蓄はどちらでされていますか？",
+    "currentSavingsPlaceholder": "貯蓄状況について詳しく入力してください...",
+    "needsDeathBenefit": "現在死亡保険金が必要ですか？",
+    "needsImplantPlan": "2年後インプラント計画がありますか？",
+    "needsCaregiverInsurance": "現在介護保険が必要ですか？",
+    "needsDementiaInsurance": "現在認知症保険が必要ですか？",
+    "additionalConcerns": "その他の心配事項",
+    "additionalConcernsPlaceholder": "その他の心配事項や追加で話し合いたい内容を入力してください..."
+  },
+  "interestCategoriesTab": {
+    "title": "関心事項",
+    "saveButton": "保存",
+    "saveButtonFull": "関心事項保存",
+    "insuranceSection": "保険関連関心事項",
+    "healthSection": "健康関連関心事項",
+    "financeSection": "財政関連関心事項",
+    "legalSection": "法律関連関心事項",
+    "additionalSection": "その他の関心事項",
+    "autoInsurance": "自動車保険",
+    "driverInsurance": "運転者保険",
+    "fireInsurance": "火災保険",
+    "liability": "日常賠償責任",
+    "accidentInsurance": "傷害保険",
+    "petInsurance": "ペット保険",
+    "dementia": "認知症",
+    "dental": "歯科（インプラント）",
+    "healthCheckup": "健康診断",
+    "medicalExpenses": "実費補償",
+    "caregiver": "介護",
+    "cancer": "がん（分子標的療法、ロボット手術）",
+    "savings": "貯蓄（年金、老後、まとまった資金）",
+    "investment": "資産運用",
+    "tax": "相続税、譲渡所得税",
+    "legalAdvice": "民事訴訟法律",
+    "trafficAccident": "交通事故（示談）",
+    "additionalNotesLabel": "上記リストにない関心事項や追加で知りたい内容を入力してください",
+    "additionalNotesPlaceholder": "その他の関心事項を詳しく入力してください..."
+  },
+  "companionsTab": {
+    "title": "相談同伴者",
+    "addButton": "同伴者追加",
+    "addButtonMobile": "追加",
+    "addButtonShort": "追加",
+    "editButton": "編集",
+    "deleteButton": "削除",
+    "registeredCompanions": "登録済み同伴者",
+    "companionGuidance": "同伴者ガイダンス",
+    "emptyStateTitle": "同伴者が登録されていません",
+    "emptyStateDescription": "相談に一緒に参加する同伴者を追加してください。",
+    "addFirstCompanion": "最初の同伴者を追加",
+    "guidance": {
+      "preRegister": "相談に一緒に参加される方の情報を事前に登録してください。",
+      "primaryContact": "主同伴者に設定すると優先的にご連絡いたします。",
+      "relationships": "配偶者、お子様、ご両親など関係を明確に記録してください。"
+    },
+    "fields": {
+      "name": "お名前",
+      "relationship": "関係",
+      "phone": "連絡先",
+      "status": "ステータス",
+      "primaryCompanion": "主同伴者"
+    },
+    "companionInfo": "同伴者情報",
+    "companionActions": "同伴者管理"
+  },
+  "companionModal": {
+    "title": "同伴者追加",
+    "titleEdit": "同伴者編集",
+    "description": "相談に一緒に参加する同伴者の情報を入力してください。",
+    "fields": {
+      "name": "お名前",
+      "relationship": "関係",
+      "phone": "連絡先",
+      "isPrimary": "主同伴者に設定"
+    },
+    "placeholders": {
+      "name": "同伴者のお名前",
+      "phone": "090-0000-0000",
+      "relationshipSelect": "関係を選択"
+    },
+    "labels": {
+      "nameRequired": "お名前 *",
+      "relationshipRequired": "関係 *",
+      "phoneOptional": "連絡先",
+      "primaryDescription": "主同伴者は相談の主要参加者として表示されます。"
+    },
+    "buttons": {
+      "save": "保存",
+      "add": "追加",
+      "edit": "編集",
+      "cancel": "キャンセル",
+      "saving": "保存中..."
+    },
+    "validation": {
+      "nameRequired": "お名前は必須入力項目です。",
+      "relationshipRequired": "関係は必須選択項目です。"
+    }
+  },
+  "companionRelationships": {
+    "spouse": "配偶者",
+    "child": "お子様",
+    "parent": "ご両親",
+    "sibling": "ご兄弟・姉妹",
+    "grandparent": "祖父母",
+    "grandchild": "お孫さん",
+    "friend": "友人",
+    "colleague": "同僚",
+    "caregiver": "介護者",
+    "guardian": "保護者",
+    "relative": "ご親戚",
+    "other": "その他"
   }
 }

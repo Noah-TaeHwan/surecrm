@@ -6,6 +6,7 @@ import { Label } from '~/common/components/ui/label';
 import { Textarea } from '~/common/components/ui/textarea';
 import { cn } from '~/lib/utils';
 import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
+import type { SubmitFunction } from 'react-router';
 
 interface MedicalHistoryData {
   hasRecentDiagnosis: boolean;
@@ -31,7 +32,7 @@ type MedicalHistoryTabProps = {
       | MedicalHistoryData
       | ((prev: MedicalHistoryData) => MedicalHistoryData)
   ) => void;
-  submit: (formData: FormData, options?: { method: string }) => void;
+  submit: SubmitFunction;
   setSuccessMessage: (message: string) => void;
   setShowSuccessModal: (show: boolean) => void;
 };

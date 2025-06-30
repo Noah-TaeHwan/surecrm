@@ -399,6 +399,12 @@
     "consultationAdded": "Consultation note has been successfully added.",
     "consultationUpdated": "Consultation note has been successfully updated.",
     "medicalHistorySaved": "Medical history has been successfully saved.",
+    "checkupPurposesSaved": "Checkup purposes have been successfully saved.",
+    "interestCategoriesSaved": "Interest categories have been successfully saved.",
+    "companionSaved": "Consultation companion has been successfully saved.",
+    "companionAdded": "Consultation companion has been successfully added.",
+    "companionUpdated": "Consultation companion has been successfully updated.",
+    "companionDeleted": "Consultation companion has been successfully deleted.",
     "button": "OK"
   },
   "deleteModal": {
@@ -538,5 +544,128 @@
     "additionalExamPlaceholder": "Please enter detailed information about additional examinations or re-examinations...",
     "recentDetailsPlaceholder": "Please enter detailed medical information within 3 months...",
     "majorDetailsPlaceholder": "Please enter detailed major medical history within 5 years..."
+  },
+  "checkupPurposesTab": {
+    "title": "Checkup Purposes",
+    "saveButton": "Save",
+    "saveButtonFull": "Save Checkup Purposes",
+    "currentConcernsSection": "Current Concerns",
+    "savingsSection": "Savings Status Related",
+    "neededItemsSection": "Needed Items",
+    "detailsSection": "Detailed Information",
+    "concernsPremium": "Are you worried about current insurance premiums?",
+    "concernsCoverage": "Are you worried about current coverage?",
+    "concernsMedicalHistory": "Are you worried because you have a current medical history?",
+    "currentSavingsLocation": "Where are you currently saving?",
+    "currentSavingsPlaceholder": "Please provide details about your savings status...",
+    "needsDeathBenefit": "Do you currently need death benefit insurance?",
+    "needsImplantPlan": "Do you have plans for dental implants in 2 years?",
+    "needsCaregiverInsurance": "Do you currently need caregiver insurance?",
+    "needsDementiaInsurance": "Do you currently need dementia insurance?",
+    "additionalConcerns": "Other Concerns",
+    "additionalConcernsPlaceholder": "Please enter any other concerns or topics you'd like to discuss..."
+  },
+  "interestCategoriesTab": {
+    "title": "Interest Categories",
+    "saveButton": "Save",
+    "saveButtonFull": "Save Interest Categories",
+    "insuranceSection": "Insurance Related Interests",
+    "healthSection": "Health Related Interests",
+    "financeSection": "Financial Related Interests",
+    "legalSection": "Legal Related Interests",
+    "additionalSection": "Other Interests",
+    "autoInsurance": "Auto Insurance",
+    "driverInsurance": "Driver Insurance",
+    "fireInsurance": "Fire Insurance",
+    "liability": "Daily Liability",
+    "accidentInsurance": "Accident Insurance",
+    "petInsurance": "Pet Insurance",
+    "dementia": "Dementia",
+    "dental": "Dental (Implants)",
+    "healthCheckup": "Health Checkup",
+    "medicalExpenses": "Medical Expenses",
+    "caregiver": "Caregiver",
+    "cancer": "Cancer (Targeted Therapy, Robotic Surgery)",
+    "savings": "Savings (Pension, Retirement, Lump Sum)",
+    "investment": "Investment & Financial Planning",
+    "tax": "Inheritance Tax, Capital Gains Tax",
+    "legalAdvice": "Civil Litigation Legal",
+    "trafficAccident": "Traffic Accident (Settlement)",
+    "additionalNotesLabel": "Please enter any interests not listed above or additional information you'd like to know",
+    "additionalNotesPlaceholder": "Please enter other interests in detail..."
+  },
+  "companionsTab": {
+    "title": "Consultation Companions",
+    "addButton": "Add Companion",
+    "addButtonMobile": "Add",
+    "addButtonShort": "Add",
+    "editButton": "Edit",
+    "deleteButton": "Delete",
+    "registeredCompanions": "Registered Companions",
+    "companionGuidance": "Companion Guidelines",
+    "emptyStateTitle": "No companions registered",
+    "emptyStateDescription": "Add companions who will attend consultations together.",
+    "addFirstCompanion": "Add First Companion",
+    "guidance": {
+      "preRegister": "Pre-register information of those who will attend consultations together.",
+      "primaryContact": "Setting as primary companion ensures priority contact.",
+      "relationships": "Clearly record relationships such as spouse, children, parents, etc."
+    },
+    "fields": {
+      "name": "Name",
+      "relationship": "Relationship",
+      "phone": "Phone",
+      "status": "Status",
+      "primaryCompanion": "Primary Companion"
+    },
+    "companionInfo": "Companion Information",
+    "companionActions": "Companion Management"
+  },
+  "companionModal": {
+    "title": "Add Companion",
+    "titleEdit": "Edit Companion",
+    "description": "Enter information of companions who will attend consultations together.",
+    "fields": {
+      "name": "Name",
+      "relationship": "Relationship",
+      "phone": "Phone",
+      "isPrimary": "Set as Primary Companion"
+    },
+    "placeholders": {
+      "name": "Companion name",
+      "phone": "010-0000-0000",
+      "relationshipSelect": "Select relationship"
+    },
+    "labels": {
+      "nameRequired": "Name *",
+      "relationshipRequired": "Relationship *",
+      "phoneOptional": "Phone",
+      "primaryDescription": "Primary companions are marked as main attendees for consultations."
+    },
+    "buttons": {
+      "save": "Save",
+      "add": "Add",
+      "edit": "Edit",
+      "cancel": "Cancel",
+      "saving": "Saving..."
+    },
+    "validation": {
+      "nameRequired": "Name is a required field.",
+      "relationshipRequired": "Relationship is a required selection."
+    }
+  },
+  "companionRelationships": {
+    "spouse": "Spouse",
+    "child": "Child",
+    "parent": "Parent",
+    "sibling": "Sibling",
+    "grandparent": "Grandparent",
+    "grandchild": "Grandchild",
+    "friend": "Friend",
+    "colleague": "Colleague",
+    "caregiver": "Caregiver",
+    "guardian": "Guardian",
+    "relative": "Relative",
+    "other": "Other"
   }
 }

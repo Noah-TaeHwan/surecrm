@@ -431,9 +431,13 @@ export async function updateCheckupPurposesAction(
   clientId: string,
   formData: FormData
 ) {
+  console.log('🔥 updateCheckupPurposesAction 시작:', { clientId });
+
   // 🎯 실제 로그인된 보험설계사 정보 가져오기
   const user = await requireAuth(request);
   const agentId = user.id;
+
+  console.log('👤 로그인된 사용자:', { agentId, userEmail: user.email });
 
   try {
     const { updateCheckupPurposes } = await import(
@@ -462,7 +466,12 @@ export async function updateCheckupPurposesAction(
       lastUpdatedBy: agentId,
     };
 
+    console.log('📝 점검목적 데이터:', checkupData);
+    console.log('🚀 데이터베이스에 점검목적 저장 중...');
+
     await updateCheckupPurposes(clientId, checkupData, agentId);
+
+    console.log('✅ 점검목적 저장 성공');
 
     return {
       success: true,
@@ -486,9 +495,13 @@ export async function updateInterestCategoriesAction(
   clientId: string,
   formData: FormData
 ) {
+  console.log('🔥 updateInterestCategoriesAction 시작:', { clientId });
+
   // 🎯 실제 로그인된 보험설계사 정보 가져오기
   const user = await requireAuth(request);
   const agentId = user.id;
+
+  console.log('👤 로그인된 사용자:', { agentId, userEmail: user.email });
 
   try {
     const { updateInterestCategories } = await import(
@@ -527,7 +540,20 @@ export async function updateInterestCategoriesAction(
       lastUpdatedBy: agentId,
     };
 
-    await updateInterestCategories(clientId, interestData, agentId);
+    console.log('📝 FormData 내용 확인:');
+    for (const [key, value] of formData.entries()) {
+      console.log(`  ${key}: ${value}`);
+    }
+
+    console.log('📊 처리된 관심사항 데이터:', interestData);
+
+    const result = await updateInterestCategories(
+      clientId,
+      interestData,
+      agentId
+    );
+
+    console.log('✅ 관심사항 업데이트 성공:', result);
 
     return {
       success: true,
@@ -536,6 +562,10 @@ export async function updateInterestCategoriesAction(
     };
   } catch (error) {
     console.error('❌ 관심사항 업데이트 실패:', error);
+    console.error(
+      '❌ 에러 스택:',
+      error instanceof Error ? error.stack : 'No stack trace'
+    );
     return {
       success: false,
       message: `관심사항 업데이트에 실패했습니다: ${

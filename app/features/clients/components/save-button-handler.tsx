@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button } from '~/common/components/ui/button';
+import type { SubmitFunction } from 'react-router';
 
 interface SaveButtonProps {
   onSave: () => void;
@@ -34,7 +35,7 @@ export function createSaveHandler({
   intent: string;
   data: Record<string, any>;
   successMessage: string;
-  submit: any;
+  submit: SubmitFunction;
   setSuccessMessage: (message: string) => void;
   setShowSuccessModal: (show: boolean) => void;
   errorPrefix?: string;
