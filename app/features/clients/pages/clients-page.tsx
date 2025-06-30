@@ -13,6 +13,8 @@ import type {
 } from '~/features/clients/lib/schema';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
+import { createServerTranslator } from '~/lib/i18n/language-manager.server';
 
 import { ClientStatsSection } from '../components/client-stats-section';
 import { ClientFiltersSection } from '../components/client-filters-section';
@@ -199,6 +201,9 @@ export async function loader({ request }: { request: Request }) {
   try {
     console.log('🔄 Loader: 고객 목록 로딩 중...');
 
+    // 🌍 서버에서 다국어 번역 로드
+    const { t } = await createServerTranslator(request, 'clients');
+
     // 🎯 구독 상태 확인 (트라이얼 만료 시 billing 페이지로 리다이렉트)
     const { requireActiveSubscription } = await import(
       '~/lib/auth/subscription-middleware.server'
@@ -287,11 +292,19 @@ export async function loader({ request }: { request: Request }) {
         email: user.email,
         name: user.email.split('@')[0], // 이메일 앞부분을 이름으로 사용
       },
+      // 🌍 meta용 번역 데이터
+      meta: {
+        title: t('title', '고객 관리') + ' | SureCRM',
+        description: t(
+          'meta.description',
+          '고객 정보를 체계적으로 관리하고 영업 파이프라인을 통해 효율적인 고객 관계를 구축하세요.'
+        ),
+      },
     };
   } catch (error) {
     console.error('❌ Loader: 데이터 로딩 실패:', error);
 
-    // 오류 시 빈 데이터 반환
+    // 오류 시 빈 데이터 반환 (한국어 기본값으로 meta 정보 포함)
     return {
       clients: [],
       stats: {
@@ -308,29 +321,41 @@ export async function loader({ request }: { request: Request }) {
         totalPages: 0,
       },
       currentUser: null,
+      // 에러 시 한국어 기본값
+      meta: {
+        title: '고객 관리 | SureCRM',
+        description:
+          '고객 정보를 체계적으로 관리하고 영업 파이프라인을 통해 효율적인 고객 관계를 구축하세요.',
+      },
     };
   }
 }
 
-export function meta() {
-  return [{ title: '고객 관리 | SureCRM' }];
+export function meta({ data }: { data: any }) {
+  const metaData = data?.meta;
+  return [
+    { title: metaData?.title || '고객 관리 | SureCRM' },
+    {
+      name: 'description',
+      content:
+        metaData?.description ||
+        '고객 정보를 체계적으로 관리하고 영업 파이프라인을 통해 효율적인 고객 관계를 구축하세요.',
+    },
+  ];
 }
 
-// 🎯 고객 데이터 유효성 검사 스키마 (전화번호 선택사항으로 변경)
+// 🎯 고객 데이터 유효성 검사 스키마 - 다국어 지원
+// (실제 검증은 서버에서 처리하므로 여기서는 기본 구조만 유지)
 const clientValidationSchema = z.object({
-  fullName: z.string().min(2, '이름은 2글자 이상이어야 합니다'),
+  fullName: z.string().min(2),
   phone: z
     .string()
     .optional()
     .refine(val => {
-      if (!val || val.trim() === '') return true; // 빈 값 허용
-      return /^010-\d{4}-\d{4}$/.test(val); // 값이 있으면 형식 검증
-    }, '올바른 전화번호 형식이 아닙니다 (010-0000-0000)'),
-  email: z
-    .string()
-    .email('올바른 이메일 주소를 입력해주세요')
-    .optional()
-    .or(z.literal('')),
+      if (!val || val.trim() === '') return true;
+      return /^010-\d{4}-\d{4}$/.test(val);
+    }),
+  email: z.string().email().optional().or(z.literal('')),
   address: z.string().optional(),
   occupation: z.string().optional(),
   importance: z.enum(['high', 'medium', 'low']).default('medium'),
@@ -342,6 +367,9 @@ export async function action({ request }: { request: Request }) {
   try {
     console.log('🔄 Action: 고객 관리 액션 시작');
 
+    // 🌍 서버에서 다국어 번역 로드
+    const { t } = await createServerTranslator(request, 'clients');
+
     // 실제 사용자 ID 가져오기
     const { getCurrentUser } = await import('~/lib/auth/core.server');
     const user = await getCurrentUser(request);
@@ -349,7 +377,7 @@ export async function action({ request }: { request: Request }) {
     if (!user) {
       return {
         success: false,
-        message: '인증이 필요합니다.',
+        message: t('errors.authRequired', '인증이 필요합니다.'),
       };
     }
 
@@ -381,8 +409,10 @@ export async function action({ request }: { request: Request }) {
           console.error('❌ 기본 파이프라인 단계 생성 실패:', createError);
           return {
             success: false,
-            message:
-              '파이프라인 단계 정보를 가져올 수 없습니다. 관리자에게 문의하세요.',
+            message: t(
+              'errors.pipelineStageError',
+              '파이프라인 단계 정보를 가져올 수 없습니다. 관리자에게 문의하세요.'
+            ),
           };
         }
       }
@@ -400,7 +430,7 @@ export async function action({ request }: { request: Request }) {
       if (!fullName) {
         return {
           success: false,
-          message: '이름은 필수 항목입니다.',
+          message: t('errors.nameRequired', '이름은 필수 항목입니다.'),
         };
       }
 
@@ -457,10 +487,20 @@ export async function action({ request }: { request: Request }) {
     };
   } catch (error) {
     console.error('❌ Action: 처리 중 오류:', error);
-    return {
-      success: false,
-      message: '서버 오류가 발생했습니다.',
-    };
+
+    // 🌍 에러 시에도 번역 시도
+    try {
+      const { t } = await createServerTranslator(request, 'clients');
+      return {
+        success: false,
+        message: t('errors.serverError', '서버 오류가 발생했습니다.'),
+      };
+    } catch (translationError) {
+      return {
+        success: false,
+        message: '서버 오류가 발생했습니다.',
+      };
+    }
   }
 }
 
@@ -468,6 +508,7 @@ export default function ClientsPage({ loaderData }: { loaderData: any }) {
   const fetcher = useFetcher();
   const navigate = useNavigate();
   const deviceType = useDeviceType();
+  const { t, isHydrated } = useHydrationSafeTranslation('clients');
 
   // 🎯 상태 관리
   const [searchQuery, setSearchQuery] = useState('');
@@ -1035,7 +1076,7 @@ export default function ClientsPage({ loaderData }: { loaderData: any }) {
     .sort((a: any, b: any) => a.name.localeCompare(b.name)); // 이름순 정렬
 
   return (
-    <MainLayout title="고객 관리">
+    <MainLayout title={isHydrated ? t('title', '고객 관리') : '고객 관리'}>
       <div className="space-y-8">
         {/* 🎯 고객 관리 핵심 액션 */}
         <ClientStatsSection

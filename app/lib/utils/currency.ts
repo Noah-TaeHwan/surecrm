@@ -217,9 +217,10 @@ export function formatWon(amount: number | string): string {
 
 export function formatCurrencyByUnit(
   amount: number | string,
+  locale: SupportedLocale = 'ko',
   preferredUnit?: 'auto' | 'won' | 'man' | 'baek' | 'cheon' | 'eok'
 ): string {
-  return formatCurrency(amount, 'ko');
+  return formatCurrency(amount, locale);
 }
 
 /**

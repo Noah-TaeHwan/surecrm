@@ -60,14 +60,14 @@ export function RecentClients({
   // hydration-safe 상태 텍스트
   const getStatusText = (status: string) => {
     const defaultStatus: Record<string, string> = {
-      prospect: '잠재고객',
-      contacted: '연락됨',
-      proposal: '제안',
-      contracted: '계약',
-      completed: '완료',
+      prospect: t('stages.prospect', '잠재고객'),
+      contacted: t('stages.consultation', '연락됨'),
+      proposal: t('stages.proposal', '제안'),
+      contracted: t('stages.negotiation', '계약'),
+      completed: t('stages.closed_won', '완료'),
     };
 
-    return t(`stages.${status}`, defaultStatus[status] || status);
+    return defaultStatus[status] || status;
   };
 
   // hydration-safe 단계 텍스트

@@ -541,6 +541,11 @@ export default function DashboardPage({ loaderData }: ComponentProps) {
           'prospect' | 'contacted' | 'proposal' | 'contracted' | 'completed'
         > = {
           잠재고객: 'prospect',
+          '첫 상담': 'contacted',
+          '니즈 분석': 'proposal',
+          '상품 설명': 'proposal',
+          '계약 검토': 'contracted',
+          '계약 완료': 'completed',
           접촉완료: 'contacted',
           제안중: 'proposal',
           계약체결: 'contracted',

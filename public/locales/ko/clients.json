@@ -1,16 +1,34 @@
 {
   "title": "고객 관리",
+  "meta": {
+    "title": "고객 관리",
+    "description": "보험 고객 관리 시스템"
+  },
+  "errors": {
+    "authRequired": "인증이 필요합니다.",
+    "nameRequired": "이름은 필수 항목입니다.",
+    "pipelineStageError": "파이프라인 단계 정보를 가져올 수 없습니다. 관리자에게 문의하세요.",
+    "unknownAction": "알 수 없는 작업입니다.",
+    "serverError": "서버 오류가 발생했습니다.",
+    "unauthorized": "로그인이 필요합니다",
+    "validation": "입력 정보를 확인해주세요"
+  },
   "list": {
-    "allClients": "전체 고객",
+    "allClients": "고객 목록",
     "activeClients": "활성 고객",
     "prospects": "잠재 고객",
-    "totalCount": "총 {{count}}명"
+    "totalCount": "총 {{count}}명",
+    "cardViewDescription": "카드 뷰로 고객 상세 정보를 확인하세요",
+    "tableViewDescription": "테이블 뷰로 고객을 빠르게 비교하세요",
+    "noResults": "검색 결과가 없습니다",
+    "noResultsDescription": "검색 조건을 변경하거나 새 고객을 추가해보세요.",
+    "additionalInsurance": "추가 보험:"
   },
   "actions": {
-    "addClient": "고객 추가",
+    "addClient": "새 고객 추가하기",
     "editClient": "고객 수정",
     "deleteClient": "고객 삭제",
-    "viewDetails": "상세 보기",
+    "viewDetails": "상세보기",
     "export": "내보내기",
     "import": "가져오기",
     "filter": "필터",
@@ -25,28 +43,47 @@
     "address": "주소",
     "birthDate": "생년월일",
     "status": "상태",
-    "stage": "단계",
+    "stage": "영업 단계",
     "source": "유입 경로",
     "assignedTo": "담당자",
     "createdAt": "등록일",
     "lastContact": "마지막 연락",
     "notes": "메모",
-    "tags": "태그"
+    "tags": "태그",
+    "medium": "일반",
+    "low": "관심",
+    "notSet": "미설정",
+    "monthlyPremium": "월 보험료",
+    "referralPerformance": "소개 실적",
+    "insuranceInterests": "보험 관심사",
+    "referredBy": "{{name}} 소개",
+    "clientInfo": "고객 정보",
+    "contact": "연락처",
+    "referralRelation": "소개 관계",
+    "importance": "중요도",
+    "performance": "성과",
+    "notEntered": "미입력",
+    "addressNotEntered": "주소 미입력",
+    "directClient": "직접 고객",
+    "referralCount": "{{count}}명 소개",
+    "monthlyPayment": "월납"
   },
   "status": {
     "active": "활성",
     "inactive": "비활성",
     "prospect": "잠재 고객",
     "customer": "고객",
-    "former": "이전 고객"
+    "former": "이전 고객",
+    "active": "키맨"
   },
   "stages": {
-    "lead": "리드",
-    "qualified": "검증됨",
-    "proposal": "제안",
-    "negotiation": "협상",
-    "closed": "성사",
-    "lost": "실패"
+    "all": "모든 단계",
+    "prospect": "잠재고객",
+    "consultation": "첫 상담",
+    "needs_analysis": "니즈 분석",
+    "proposal": "상품 설명",
+    "negotiation": "계약 검토",
+    "closed_won": "계약 완료"
   },
   "modal": {
     "addClient": "고객 추가",
@@ -73,5 +110,65 @@
     "size": "크기",
     "download": "다운로드",
     "delete": "삭제"
+  },
+  "stats": {
+    "newClientRegistration": "새 고객 등록",
+    "quickAddDescription": "새 고객을 빠르게 추가하고 관리를 시작하세요",
+    "clientStatusSummary": "고객 현황 요약",
+    "keyMetricsDescription": "현재 관리 중인 고객들의 핵심 지표",
+    "totalClients": "전체 고객",
+    "activeManagement": "활성 관리 중",
+    "keyClients": "키맨 고객",
+    "contractCompleted": "계약 완료",
+    "conversionRate": "전환율",
+    "mvpNotAvailable": "MVP에서는 제공되지 않는 기능입니다",
+    "addNewClient": "새 고객 등록",
+    "addClientDescription": "새로운 보험 고객을 등록하고 관리하세요",
+    "addClientButton": "고객 추가하기",
+    "statusSummary": "고객 현황 요약",
+    "mvpNotice": "MVP에서는 제공되지 않는 기능입니다"
+  },
+  "filters": {
+    "searchAndFilter": "고객 검색 및 필터",
+    "searchResults": "{{count}}명의 고객이 검색되었습니다",
+    "advancedFilter": "고급 필터",
+    "filter": "필터",
+    "cardView": "카드뷰",
+    "tableView": "테이블뷰",
+    "cardViewDescription": "카드뷰로 보기",
+    "tableViewDescription": "테이블뷰로 보기",
+    "importance": "중요도",
+    "stage": "단계",
+    "sources": "출처",
+    "searchPlaceholder": "이름, 전화번호, 이메일, 직업, 주소로 검색...",
+    "allImportance": "모든 중요도",
+    "activeFilters": "활성 필터:",
+    "resetAll": "전체 초기화",
+    "salesStageLabel": "영업 단계",
+    "referralStatusLabel": "소개 상태",
+    "dataManagementLabel": "데이터 관리",
+    "exportButton": "내보내기",
+    "stagePlaceholder": "단계 선택",
+    "statusPlaceholder": "상태 선택"
+  },
+  "referralStatus": {
+    "all": "모든 고객",
+    "has_referrer": "소개받은 고객",
+    "no_referrer": "직접 영업 고객",
+    "top_referrer": "핵심 소개자 (3명+)"
+  },
+  "importance": {
+    "high": "키맨",
+    "medium": "일반",
+    "low": "관찰"
+  },
+  "relationships": {
+    "clientReferral": "고객 소개",
+    "friend": "친구",
+    "family": "가족",
+    "colleague": "동료",
+    "acquaintance": "지인",
+    "company": "회사",
+    "other": "기타"
   }
 }

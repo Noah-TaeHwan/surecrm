@@ -30,10 +30,12 @@ import {
 } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import { useDeviceType } from '~/common/hooks';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 import MobileFilterModal, {
   type MobileFilterOptions,
 } from './mobile-filter-modal';
 
+/* eslint-disable no-unused-vars */
 interface ClientFiltersProps {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
@@ -52,6 +54,7 @@ interface ClientFiltersProps {
   advancedFilters?: MobileFilterOptions;
   onAdvancedFiltersChange?: (filters: MobileFilterOptions) => void;
 }
+/* eslint-enable no-unused-vars */
 
 export function ClientFiltersSection({
   searchQuery,
@@ -71,6 +74,8 @@ export function ClientFiltersSection({
   onAdvancedFiltersChange,
 }: ClientFiltersProps) {
   const deviceType = useDeviceType();
+  const { t } = useHydrationSafeTranslation('clients');
+  const { t: tCommon } = useHydrationSafeTranslation('common');
   const [isAdvancedFilterOpen, setIsAdvancedFilterOpen] = useState(false);
 
   // 기본 고급 필터 상태
@@ -141,7 +146,12 @@ export function ClientFiltersSection({
           variant="secondary"
           className="gap-1 text-xs py-1 px-2"
         >
-          중요도: {filterImportance}
+          {t('filters.importance', '중요도')}:{' '}
+          {filterImportance === 'high'
+            ? t('importance.high', '키맨')
+            : filterImportance === 'medium'
+              ? t('importance.medium', '일반')
+              : t('importance.low', '관찰')}
           <X
             className="h-3 w-3 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full p-0.5"
             onClick={() => setFilterImportance('all')}
@@ -157,7 +167,7 @@ export function ClientFiltersSection({
           variant="secondary"
           className="gap-1 text-xs py-1 px-2"
         >
-          단계: {filterStage}
+          {t('filters.stage', '단계')}: {filterStage}
           <X
             className="h-3 w-3 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full p-0.5"
             onClick={() => setFilterStage('all')}
@@ -173,7 +183,8 @@ export function ClientFiltersSection({
           variant="secondary"
           className="gap-1 text-xs py-1 px-2"
         >
-          출처: {currentAdvancedFilters.sources.length}개
+          {t('filters.sources', '출처')}:{' '}
+          {currentAdvancedFilters.sources.length}개
           <X
             className="h-3 w-3 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full p-0.5"
             onClick={() =>
@@ -198,7 +209,7 @@ export function ClientFiltersSection({
           {/* 제목과 결과 개수 - 모바일에서 전체 너비 */}
           <div className="flex flex-col gap-2 md:gap-1">
             <CardTitle className="flex items-center gap-2 text-base md:text-lg">
-              고객 검색 및 필터
+              {t('filters.searchAndFilter', '고객 검색 및 필터')}
               {activeFilterCount > 0 && (
                 <Badge variant="default" className="px-2 py-1 text-xs">
                   {activeFilterCount}
@@ -206,7 +217,11 @@ export function ClientFiltersSection({
               )}
             </CardTitle>
             <p className="text-sm text-muted-foreground">
-              {filteredClientsCount}명의 고객이 검색되었습니다
+              {t(
+                'filters.searchResults',
+                '{{count}}명의 고객이 검색되었습니다',
+                { count: filteredClientsCount }
+              )}
             </p>
           </div>
 
@@ -222,7 +237,7 @@ export function ClientFiltersSection({
                   onClick={() => setIsAdvancedFilterOpen(true)}
                 >
                   <Settings className="h-4 w-4 mr-2" />
-                  고급 필터
+                  {t('filters.advancedFilter', '고급 필터')}
                 </Button>
               )}
 
@@ -234,7 +249,10 @@ export function ClientFiltersSection({
                   onClick={() => setShowFilters(!showFilters)}
                 >
                   <Filter className="h-4 w-4 mr-2" />
-                  필터 {showFilters ? '숨기기' : '보기'}
+                  {t('filters.filter', '필터')}{' '}
+                  {showFilters
+                    ? tCommon('actions.hide', '숨기기')
+                    : tCommon('actions.show', '보기')}
                 </Button>
               )}
             </div>
@@ -257,7 +275,7 @@ export function ClientFiltersSection({
               >
                 <ToggleGroupItem
                   value="grid"
-                  aria-label="카드뷰로 보기"
+                  aria-label={t('filters.cardView', '카드뷰로 보기')}
                   className="flex items-center gap-2 px-3 py-2 text-sm font-medium transition-all
                            data-[state=on]:bg-primary data-[state=on]:text-primary-foreground 
                            data-[state=off]:bg-background data-[state=off]:text-muted-foreground
@@ -265,11 +283,13 @@ export function ClientFiltersSection({
                            border-r border-border last:border-r-0"
                 >
                   <LayoutGrid className="h-4 w-4" />
-                  <span className="hidden sm:inline">카드뷰</span>
+                  <span className="hidden sm:inline">
+                    {t('filters.cardView', '카드뷰')}
+                  </span>
                 </ToggleGroupItem>
                 <ToggleGroupItem
                   value="table"
-                  aria-label="테이블뷰로 보기"
+                  aria-label={t('filters.tableView', '테이블뷰로 보기')}
                   className="flex items-center gap-2 px-3 py-2 text-sm font-medium transition-all
                            data-[state=on]:bg-primary data-[state=on]:text-primary-foreground 
                            data-[state=off]:bg-background data-[state=off]:text-muted-foreground
@@ -277,7 +297,9 @@ export function ClientFiltersSection({
                            border-r border-border last:border-r-0"
                 >
                   <LayoutList className="h-4 w-4" />
-                  <span className="hidden sm:inline">테이블뷰</span>
+                  <span className="hidden sm:inline">
+                    {t('filters.tableView', '테이블뷰')}
+                  </span>
                 </ToggleGroupItem>
               </ToggleGroup>
             </div>
@@ -293,7 +315,10 @@ export function ClientFiltersSection({
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="이름, 전화번호, 이메일, 직업, 주소로 검색..."
+                  placeholder={t(
+                    'filters.searchPlaceholder',
+                    '이름, 전화번호, 이메일, 직업, 주소로 검색...'
+                  )}
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   className="pl-10 h-10 w-full"
@@ -315,10 +340,18 @@ export function ClientFiltersSection({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">모든 중요도</SelectItem>
-                  <SelectItem value="high">키맨</SelectItem>
-                  <SelectItem value="medium">일반</SelectItem>
-                  <SelectItem value="low">관찰</SelectItem>
+                  <SelectItem value="all">
+                    {t('filters.allImportance', '모든 중요도')}
+                  </SelectItem>
+                  <SelectItem value="high">
+                    {t('importance.high', '키맨')}
+                  </SelectItem>
+                  <SelectItem value="medium">
+                    {t('importance.medium', '일반')}
+                  </SelectItem>
+                  <SelectItem value="low">
+                    {t('importance.low', '관찰')}
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -330,7 +363,7 @@ export function ClientFiltersSection({
               {/* 라벨과 초기화 버튼 - 모바일에서 한 줄 */}
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">
-                  활성 필터:
+                  {t('filters.activeFilters', '활성 필터:')}
                 </span>
                 <Button
                   variant="ghost"
@@ -338,7 +371,7 @@ export function ClientFiltersSection({
                   onClick={handleResetAllFilters}
                   className="h-6 px-2 text-xs"
                 >
-                  전체 초기화
+                  {t('filters.resetAll', '전체 초기화')}
                 </Button>
               </div>
 
@@ -361,20 +394,36 @@ export function ClientFiltersSection({
                 {/* 영업 단계 필터 */}
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                    영업 단계
+                    {t('filters.salesStageLabel', '영업 단계')}
                   </label>
                   <Select value={filterStage} onValueChange={setFilterStage}>
                     <SelectTrigger className="h-10 w-full">
-                      <SelectValue placeholder="단계 선택" />
+                      <SelectValue
+                        placeholder={t('filters.stagePlaceholder', '단계 선택')}
+                      />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">모든 단계</SelectItem>
-                      <SelectItem value="prospect">잠재고객</SelectItem>
-                      <SelectItem value="consultation">첫 상담</SelectItem>
-                      <SelectItem value="needs_analysis">니즈 분석</SelectItem>
-                      <SelectItem value="proposal">상품 설명</SelectItem>
-                      <SelectItem value="negotiation">계약 검토</SelectItem>
-                      <SelectItem value="closed_won">계약 완료</SelectItem>
+                      <SelectItem value="all">
+                        {t('stages.all', '모든 단계')}
+                      </SelectItem>
+                      <SelectItem value="prospect">
+                        {t('stages.prospect', '잠재고객')}
+                      </SelectItem>
+                      <SelectItem value="consultation">
+                        {t('stages.consultation', '첫 상담')}
+                      </SelectItem>
+                      <SelectItem value="needs_analysis">
+                        {t('stages.needs_analysis', '니즈 분석')}
+                      </SelectItem>
+                      <SelectItem value="proposal">
+                        {t('stages.proposal', '상품 설명')}
+                      </SelectItem>
+                      <SelectItem value="negotiation">
+                        {t('stages.negotiation', '계약 검토')}
+                      </SelectItem>
+                      <SelectItem value="closed_won">
+                        {t('stages.closed_won', '계약 완료')}
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -382,25 +431,32 @@ export function ClientFiltersSection({
                 {/* 소개 상태 필터 */}
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                    소개 상태
+                    {t('filters.referralStatusLabel', '소개 상태')}
                   </label>
                   <Select
                     value={filterReferralStatus}
                     onValueChange={setFilterReferralStatus}
                   >
                     <SelectTrigger className="h-10 w-full">
-                      <SelectValue placeholder="상태 선택" />
+                      <SelectValue
+                        placeholder={t(
+                          'filters.statusPlaceholder',
+                          '상태 선택'
+                        )}
+                      />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">모든 고객</SelectItem>
+                      <SelectItem value="all">
+                        {t('referralStatus.all', '모든 고객')}
+                      </SelectItem>
                       <SelectItem value="has_referrer">
-                        소개받은 고객
+                        {t('referralStatus.has_referrer', '소개받은 고객')}
                       </SelectItem>
                       <SelectItem value="no_referrer">
-                        직접 영업 고객
+                        {t('referralStatus.no_referrer', '직접 영업 고객')}
                       </SelectItem>
                       <SelectItem value="top_referrer">
-                        핵심 소개자 (3명+)
+                        {t('referralStatus.top_referrer', '핵심 소개자 (3명+)')}
                       </SelectItem>
                     </SelectContent>
                   </Select>
@@ -409,7 +465,7 @@ export function ClientFiltersSection({
                 {/* 내보내기 버튼 */}
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                    데이터 관리
+                    {t('filters.dataManagementLabel', '데이터 관리')}
                   </label>
                   <div className="space-y-2">
                     <Button
@@ -418,10 +474,13 @@ export function ClientFiltersSection({
                       disabled
                     >
                       <Download className="h-4 w-4 mr-2" />
-                      내보내기
+                      {t('filters.exportButton', '내보내기')}
                     </Button>
                     <p className="text-xs text-muted-foreground">
-                      MVP에서는 제공되지 않는 기능입니다
+                      {t(
+                        'stats.mvpNotice',
+                        'MVP에서는 제공되지 않는 기능입니다'
+                      )}
                     </p>
                   </div>
                 </div>
@@ -445,23 +504,32 @@ export function ClientFiltersSection({
           onAdvancedFiltersChange?.(defaultAdvancedFilters);
         }}
         availableStages={[
-          { id: 'prospect', name: '잠재고객' },
-          { id: 'consultation', name: '첫 상담' },
-          { id: 'needs_analysis', name: '니즈 분석' },
-          { id: 'proposal', name: '상품 설명' },
-          { id: 'negotiation', name: '계약 검토' },
-          { id: 'closed_won', name: '계약 완료' },
+          { id: 'prospect', name: t('stages.prospect', '잠재고객') },
+          { id: 'consultation', name: t('stages.consultation', '첫 상담') },
+          {
+            id: 'needs_analysis',
+            name: t('stages.needs_analysis', '니즈 분석'),
+          },
+          { id: 'proposal', name: t('stages.proposal', '상품 설명') },
+          { id: 'negotiation', name: t('stages.negotiation', '계약 검토') },
+          { id: 'closed_won', name: t('stages.closed_won', '계약 완료') },
         ]}
         availableImportance={[
-          { value: 'high', label: '키맨' },
-          { value: 'medium', label: '일반' },
-          { value: 'low', label: '관찰' },
+          { value: 'high', label: t('importance.high', '키맨') },
+          { value: 'medium', label: t('importance.medium', '일반') },
+          { value: 'low', label: t('importance.low', '관찰') },
         ]}
         availableSources={[
-          { value: 'referral', label: '소개' },
-          { value: 'direct', label: '직접 영업' },
-          { value: 'online', label: '온라인' },
-          { value: 'event', label: '이벤트' },
+          {
+            value: 'referral',
+            label: t('referralStatus.has_referrer', '소개'),
+          },
+          {
+            value: 'direct',
+            label: t('referralStatus.no_referrer', '직접 영업'),
+          },
+          { value: 'online', label: 'Online' },
+          { value: 'event', label: 'Event' },
         ]}
         activeFiltersCount={activeFilterCount}
       />

@@ -1,10 +1,28 @@
 {
   "title": "Client Management",
+  "meta": {
+    "description": "Systematically manage client information and build efficient client relationships through sales pipelines."
+  },
+  "errors": {
+    "authRequired": "Authentication required.",
+    "nameRequired": "Name is required.",
+    "pipelineStageError": "Unable to retrieve pipeline stage information. Please contact the administrator.",
+    "unknownAction": "Unknown action.",
+    "serverError": "A server error occurred.",
+    "unauthorized": "Login required",
+    "server": "Server error occurred",
+    "validation": "Please check your input information"
+  },
   "list": {
-    "allClients": "All Clients",
+    "allClients": "Client List",
     "activeClients": "Active Clients",
     "prospects": "Prospects",
-    "totalCount": "Total {{count}}"
+    "totalCount": "Total {{count}}",
+    "cardViewDescription": "View detailed client information in card view",
+    "tableViewDescription": "Quickly compare clients in table view",
+    "noResults": "No search results found",
+    "noResultsDescription": "Change your search criteria or add new clients.",
+    "additionalInsurance": "Additional insurance:"
   },
   "actions": {
     "addClient": "Add Client",
@@ -14,7 +32,8 @@
     "export": "Export",
     "import": "Import",
     "filter": "Filter",
-    "search": "Search"
+    "search": "Search",
+    "addNewClient": "Add New Client"
   },
   "fields": {
     "name": "Name",
@@ -25,27 +44,48 @@
     "address": "Address",
     "birthDate": "Date of Birth",
     "status": "Status",
-    "stage": "Stage",
+    "stage": "Sales Stage",
     "source": "Source",
     "assignedTo": "Assigned To",
     "createdAt": "Created Date",
     "lastContact": "Last Contact",
     "notes": "Notes",
-    "tags": "Tags"
+    "tags": "Tags",
+    "medium": "Regular",
+    "low": "Interest",
+    "notSet": "Not Set",
+    "monthlyPremium": "Monthly Premium",
+    "referralPerformance": "Referral Performance",
+    "insuranceInterests": "Insurance Interests",
+    "referredBy": "Referred by {{name}}",
+    "clientInfo": "Client Info",
+    "contact": "Contact",
+    "referralRelation": "Referral Relation",
+    "importance": "Importance",
+    "performance": "Performance",
+    "notEntered": "Not Entered",
+    "addressNotEntered": "Address Not Entered",
+    "directClient": "Direct Client",
+    "referralCount": "{{count}} referrals",
+    "monthlyPayment": "Monthly"
   },
   "status": {
-    "active": "Active",
+    "active": "Key Person",
     "inactive": "Inactive",
     "prospect": "Prospect",
     "customer": "Customer",
     "former": "Former Client"
   },
   "stages": {
-    "lead": "Lead",
-    "qualified": "Qualified",
+    "all": "All Stages",
+    "prospect": "Prospect",
+    "consultation": "First Meeting",
+    "needs_analysis": "Needs Analysis",
     "proposal": "Proposal",
     "negotiation": "Negotiation",
-    "closed": "Closed Won",
+    "closed_won": "Closed Won",
+    "lead": "Lead",
+    "qualified": "Qualified",
     "lost": "Closed Lost"
   },
   "modal": {
@@ -73,5 +113,65 @@
     "size": "Size",
     "download": "Download",
     "delete": "Delete"
+  },
+  "stats": {
+    "newClientRegistration": "New Client Registration",
+    "quickAddDescription": "Quickly add new clients and start managing them",
+    "clientStatusSummary": "Client Status Summary",
+    "keyMetricsDescription": "Key metrics of currently managed clients",
+    "totalClients": "Total Clients",
+    "activeManagement": "Active Management",
+    "keyClients": "Key Clients",
+    "contractCompleted": "Contract Completed",
+    "conversionRate": "Conversion Rate",
+    "mvpNotAvailable": "This feature is not available in MVP",
+    "addNewClient": "Add New Client",
+    "addClientDescription": "Register and manage new insurance clients",
+    "addClientButton": "Add Client",
+    "statusSummary": "Client Status Summary",
+    "mvpNotice": "This feature is not available in MVP"
+  },
+  "filters": {
+    "searchAndFilter": "Client Search & Filter",
+    "searchResults": "{{count}} clients found",
+    "advancedFilter": "Advanced Filter",
+    "filter": "Filter",
+    "cardView": "Card View",
+    "tableView": "Table View",
+    "cardViewDescription": "View in Card Mode",
+    "tableViewDescription": "View in Table Mode",
+    "importance": "Importance",
+    "stage": "Stage",
+    "sources": "Sources",
+    "searchPlaceholder": "Search by name, phone, email, occupation, address...",
+    "allImportance": "All Importance",
+    "activeFilters": "Active Filters:",
+    "resetAll": "Reset All",
+    "salesStageLabel": "Sales Stage",
+    "referralStatusLabel": "Referral Status",
+    "dataManagementLabel": "Data Management",
+    "exportButton": "Export",
+    "stagePlaceholder": "Select Stage",
+    "statusPlaceholder": "Select Status"
+  },
+  "referralStatus": {
+    "all": "All Clients",
+    "has_referrer": "Referred Clients",
+    "no_referrer": "Direct Sales Clients",
+    "top_referrer": "Top Referrer (3+)"
+  },
+  "importance": {
+    "high": "Key Person",
+    "medium": "Regular",
+    "low": "Interest"
+  },
+  "relationships": {
+    "clientReferral": "Client Referral",
+    "friend": "Friend",
+    "family": "Family",
+    "colleague": "Colleague",
+    "acquaintance": "Acquaintance",
+    "company": "Company",
+    "other": "Other"
   }
 }

@@ -1,6 +1,6 @@
 import { Button } from '~/common/components/ui/button';
 import { Badge } from '~/common/components/ui/badge';
-import { formatCurrencyByUnit } from '~/lib/utils/currency';
+import { formatCurrency } from '~/lib/utils/currency';
 import {
   Card,
   CardContent,
@@ -16,11 +16,11 @@ import {
   TableRow,
 } from '~/common/components/ui/table';
 import { format } from 'date-fns';
-import { ko } from 'date-fns/locale';
+import { ko, ja } from 'date-fns/locale';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 import {
   Users,
   Plus,
-  Star,
   Building2,
   DollarSign,
   TrendingUp,
@@ -29,8 +29,6 @@ import {
   Shield,
   ChevronRight,
 } from 'lucide-react';
-import { formatCurrencyTable } from '~/lib/utils/currency';
-import { ClientCard, type ClientCardData } from './client-card';
 
 // 클라이언트 프로필 타입 정의
 interface ClientProfile {
@@ -58,12 +56,14 @@ interface ClientProfile {
   createdAt: Date;
 }
 
+/* eslint-disable no-unused-vars */
 interface ClientListProps {
   filteredClients: ClientProfile[];
   viewMode: 'grid' | 'table';
   onClientRowClick: (clientId: string) => void;
   onAddClient: () => void;
 }
+/* eslint-enable no-unused-vars */
 
 export function ClientListSection({
   filteredClients,
@@ -71,6 +71,8 @@ export function ClientListSection({
   onClientRowClick,
   onAddClient,
 }: ClientListProps) {
+  const { t, i18n } = useHydrationSafeTranslation('clients');
+
   // 헬퍼 함수들
   const getImportanceBadgeColor = (importance: string) => {
     switch (importance) {
@@ -88,57 +90,101 @@ export function ClientListSection({
   const getImportanceText = (importance: string) => {
     switch (importance) {
       case 'high':
-        return '키맨';
+        return t('importance.high', '키맨');
       case 'medium':
-        return '일반';
+        return t('importance.medium', '일반');
       case 'low':
-        return '관심';
+        return t('importance.low', '관심');
       default:
-        return '미설정';
+        return t('fields.notSet', '미설정');
     }
   };
 
-  // 통일된 통화 포맷팅 함수 사용
-  const formatCurrency = (amount: number) => {
-    return formatCurrencyByUnit(amount);
+  // 영업 단계 번역 함수
+  const getStageText = (stageName: string) => {
+    // 데이터베이스에 저장된 한국어 값을 번역 키로 매핑
+    const stageMap: Record<string, string> = {
+      잠재고객: 'stages.prospect',
+      '첫 상담': 'stages.consultation',
+      '니즈 분석': 'stages.needs_analysis',
+      '상품 설명': 'stages.proposal',
+      '계약 검토': 'stages.negotiation',
+      '계약 완료': 'stages.closed_won',
+      prospect: 'stages.prospect',
+      consultation: 'stages.consultation',
+      needs_analysis: 'stages.needs_analysis',
+      proposal: 'stages.proposal',
+      negotiation: 'stages.negotiation',
+      closed_won: 'stages.closed_won',
+    };
+
+    const translationKey = stageMap[stageName];
+    if (translationKey) {
+      return t(translationKey, stageName);
+    }
+    // 매핑되지 않은 경우 원본 반환
+    return stageName;
   };
 
+  // 소개 관계 번역 함수
+  const getRelationshipText = (relationship: string) => {
+    // 데이터베이스에 저장된 한국어 값을 번역 키로 매핑
+    const relationshipMap: Record<string, string> = {
+      '고객 소개': 'relationships.clientReferral',
+      친구: 'relationships.friend',
+      가족: 'relationships.family',
+      동료: 'relationships.colleague',
+      지인: 'relationships.acquaintance',
+      회사: 'relationships.company',
+      기타: 'relationships.other',
+    };
+
+    const translationKey = relationshipMap[relationship];
+    if (translationKey) {
+      return t(translationKey, relationship);
+    }
+    // 매핑되지 않은 경우 원본 반환
+    return relationship;
+  };
+
+  // 언어별 통화 포맷팅 함수
+  const formatCurrencyLocale = (amount: number) => {
+    const currentLocale = i18n.language as 'ko' | 'en' | 'ja';
+    return formatCurrency(amount, currentLocale);
+  };
+
+  // 언어별 날짜 포맷팅 함수
   const formatDate = (dateString?: string) => {
     if (!dateString) return '-';
-    return format(new Date(dateString), 'yyyy.MM.dd', { locale: ko });
-  };
 
-  // 중요도별 카드 스타일
-  const getClientCardStyle = (importance: string) => {
-    switch (importance) {
-      case 'high':
-        return {
-          bgGradient:
-            'bg-gradient-to-br from-orange-50/50 to-white dark:from-orange-950/20 dark:to-background',
-          borderClass: 'client-card-keyman', // 키맨 전용 애니메이션 클래스
-        };
-      case 'medium':
-        return {
-          bgGradient:
-            'bg-gradient-to-br from-blue-50/50 to-white dark:from-blue-950/20 dark:to-background',
-          borderClass: 'client-card-normal', // 일반 고객 은은한 효과
-        };
-      case 'low':
-        return {
-          bgGradient:
-            'bg-gradient-to-br from-muted/30 to-white dark:from-muted/10 dark:to-background',
-          borderClass: 'client-card-low', // 은은한 회색 효과
-        };
+    const currentLocale = i18n.language;
+    let locale;
+    let formatPattern;
+
+    switch (currentLocale) {
+      case 'ja':
+        locale = ja;
+        formatPattern = 'yyyy年MM月dd日';
+        break;
+      case 'en':
+        locale = undefined; // 영어는 기본 locale
+        formatPattern = 'MMM dd, yyyy';
+        break;
+      case 'ko':
       default:
-        return {
-          bgGradient:
-            'bg-gradient-to-br from-muted/30 to-white dark:from-muted/10 dark:to-background',
-          borderClass: '',
-        };
+        locale = ko;
+        formatPattern = 'yyyy.MM.dd';
+        break;
     }
+
+    return format(
+      new Date(dateString),
+      formatPattern,
+      locale ? { locale } : {}
+    );
   };
 
-  // �� 모바일 반응형 카드 뷰 렌더링 (영업 파이프라인 스타일 적용)
+  // 모바일 반응형 카드 뷰 렌더링 (영업 파이프라인 스타일 적용)
   const renderCardView = () => {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
@@ -228,14 +274,16 @@ export function ClientListSection({
                     <div className="flex items-center gap-2 mb-1">
                       <DollarSign className="h-3.5 w-3.5 text-green-600" />
                       <span className="text-xs text-muted-foreground">
-                        월 보험료
+                        {t('fields.monthlyPremium', '월 보험료')}
                       </span>
                     </div>
                     <p className="text-sm font-semibold text-foreground text-center">
                       {client.totalPremium > 0 ? (
-                        formatCurrency(client.totalPremium)
+                        formatCurrencyLocale(client.totalPremium)
                       ) : (
-                        <span className="text-muted-foreground">미설정</span>
+                        <span className="text-muted-foreground">
+                          {t('fields.notSet', '미설정')}
+                        </span>
                       )}
                     </p>
                   </div>
@@ -244,14 +292,18 @@ export function ClientListSection({
                     <div className="flex items-center gap-2 mb-1">
                       <Users className="h-3.5 w-3.5 text-blue-600" />
                       <span className="text-xs text-muted-foreground">
-                        소개 실적
+                        {t('fields.referralPerformance', '소개 실적')}
                       </span>
                     </div>
                     <p className="text-sm font-semibold text-foreground text-center">
                       {client.referralCount > 0 ? (
-                        `${client.referralCount}명`
+                        t('list.totalCount', '총 {{count}}명', {
+                          count: client.referralCount,
+                        })
                       ) : (
-                        <span className="text-muted-foreground">0명</span>
+                        <span className="text-muted-foreground">
+                          {t('list.totalCount', '총 {{count}}명', { count: 0 })}
+                        </span>
                       )}
                     </p>
                   </div>
@@ -263,7 +315,7 @@ export function ClientListSection({
                     <div className="flex items-center gap-2">
                       <TrendingUp className="h-3.5 w-3.5 text-muted-foreground" />
                       <span className="text-xs text-muted-foreground">
-                        영업 단계
+                        {t('fields.stage', '영업 단계')}
                       </span>
                     </div>
                     <Badge
@@ -274,7 +326,7 @@ export function ClientListSection({
                       }}
                       className="text-xs"
                     >
-                      {client.currentStage.name}
+                      {getStageText(client.currentStage.name)}
                     </Badge>
                   </div>
 
@@ -284,7 +336,7 @@ export function ClientListSection({
                       <div className="flex items-center gap-2">
                         <Clock className="h-3.5 w-3.5 text-muted-foreground" />
                         <span className="text-xs text-muted-foreground">
-                          마지막 연락
+                          {t('fields.lastContact', '마지막 연락')}
                         </span>
                       </div>
                       <span className="text-xs font-medium text-foreground">
@@ -299,7 +351,10 @@ export function ClientListSection({
                   <div className="flex items-center gap-2 p-2 bg-blue-50/50 dark:bg-blue-950/20 rounded-lg">
                     <Network className="h-3.5 w-3.5 text-blue-600" />
                     <span className="text-xs text-blue-700 dark:text-blue-300 truncate">
-                      {client.referredBy.name} 소개
+                      {t('fields.referredBy', '{{name}} 소개', {
+                        name: client.referredBy.name,
+                      })}{' '}
+                      ({getRelationshipText(client.referredBy.relationship)})
                     </span>
                   </div>
                 )}
@@ -310,7 +365,7 @@ export function ClientListSection({
                     <div className="flex items-center gap-1">
                       <Shield className="h-3.5 w-3.5 text-muted-foreground" />
                       <span className="text-xs text-muted-foreground">
-                        보험 관심사
+                        {t('fields.insuranceInterests', '보험 관심사')}
                       </span>
                     </div>
                     <div className="flex items-center gap-1 flex-wrap">
@@ -327,7 +382,7 @@ export function ClientListSection({
                         <Badge
                           variant="secondary"
                           className="text-xs bg-muted/30 text-muted-foreground"
-                          title={`추가 보험: ${client.insuranceTypes
+                          title={`${t('list.additionalInsurance', '추가 보험:')} ${client.insuranceTypes
                             .slice(2)
                             .join(', ')}`}
                         >
@@ -347,7 +402,7 @@ export function ClientListSection({
                       onClientRowClick(client.id);
                     }}
                   >
-                    <span>상세보기</span>
+                    <span>{t('actions.viewDetails', '상세보기')}</span>
                     <ChevronRight className="h-3.5 w-3.5 group-hover/link:translate-x-0.5 transition-transform" />
                   </div>
                 </div>
@@ -364,12 +419,24 @@ export function ClientListSection({
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead className="text-left">고객 정보</TableHead>
-          <TableHead className="text-left">연락처</TableHead>
-          <TableHead className="text-left">소개 관계</TableHead>
-          <TableHead className="text-left">중요도</TableHead>
-          <TableHead className="text-left">영업 단계</TableHead>
-          <TableHead className="text-left">성과</TableHead>
+          <TableHead className="text-left">
+            {t('fields.clientInfo', '고객 정보')}
+          </TableHead>
+          <TableHead className="text-left">
+            {t('fields.contact', '연락처')}
+          </TableHead>
+          <TableHead className="text-left">
+            {t('fields.referralRelation', '소개 관계')}
+          </TableHead>
+          <TableHead className="text-left">
+            {t('fields.importance', '중요도')}
+          </TableHead>
+          <TableHead className="text-left">
+            {t('fields.stage', '영업 단계')}
+          </TableHead>
+          <TableHead className="text-left">
+            {t('fields.performance', '성과')}
+          </TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -396,9 +463,12 @@ export function ClientListSection({
             </TableCell>
             <TableCell>
               <div>
-                <p className="text-sm">{client.occupation || '미입력'}</p>
+                <p className="text-sm">
+                  {client.occupation || t('fields.notEntered', '미입력')}
+                </p>
                 <p className="text-xs text-muted-foreground">
-                  {client.address || '주소 미입력'}
+                  {client.address ||
+                    t('fields.addressNotEntered', '주소 미입력')}
                 </p>
               </div>
             </TableCell>
@@ -409,11 +479,13 @@ export function ClientListSection({
                     {client.referredBy.name}
                   </Badge>
                   <span className="text-xs text-muted-foreground">
-                    ({client.referredBy.relationship})
+                    ({getRelationshipText(client.referredBy.relationship)})
                   </span>
                 </div>
               ) : (
-                <span className="text-sm text-muted-foreground">직접 고객</span>
+                <span className="text-sm text-muted-foreground">
+                  {t('fields.directClient', '직접 고객')}
+                </span>
               )}
             </TableCell>
             <TableCell>
@@ -430,14 +502,21 @@ export function ClientListSection({
                 <div
                   className={`w-2 h-2 rounded-full ${client.currentStage.color}`}
                 />
-                <span className="text-sm">{client.currentStage.name}</span>
+                <span className="text-sm">
+                  {getStageText(client.currentStage.name)}
+                </span>
               </div>
             </TableCell>
             <TableCell className="text-left">
               <div className="text-sm">
-                <div className="font-medium">{client.referralCount}명 소개</div>
+                <div className="font-medium">
+                  {t('fields.referralCount', '{{count}}명 소개', {
+                    count: client.referralCount,
+                  })}
+                </div>
                 <div className="text-xs text-muted-foreground">
-                  {formatCurrencyTable(client.totalPremium)} 월납
+                  {formatCurrencyLocale(client.totalPremium)}{' '}
+                  {t('fields.monthlyPayment', '월납')}
                 </div>
               </div>
             </TableCell>
@@ -454,15 +533,23 @@ export function ClientListSection({
           <div className="flex flex-col gap-2">
             <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5" />
-              고객 목록
+              {t('list.allClients', '고객 목록')}
               <Badge variant="outline" className="ml-2">
-                {filteredClients.length}명
+                {t('list.totalCount', '총 {{count}}명', {
+                  count: filteredClients.length,
+                })}
               </Badge>
             </CardTitle>
             <p className="text-sm text-muted-foreground pb-4">
               {viewMode === 'grid'
-                ? '카드 뷰로 고객 상세 정보를 확인하세요'
-                : '테이블 뷰로 고객을 빠르게 비교하세요'}
+                ? t(
+                    'list.cardViewDescription',
+                    '카드 뷰로 고객 상세 정보를 확인하세요'
+                  )
+                : t(
+                    'list.tableViewDescription',
+                    '테이블 뷰로 고객을 빠르게 비교하세요'
+                  )}
             </p>
           </div>
         </div>
@@ -474,13 +561,17 @@ export function ClientListSection({
               <Users className="h-12 w-12 text-primary" />
             </div>
             <h3 className="text-xl font-semibold text-foreground mb-2">
-              검색 결과가 없습니다
+              {t('list.noResults', '검색 결과가 없습니다')}
             </h3>
             <p className="text-muted-foreground text-center max-w-md mb-6">
-              검색 조건을 변경하거나 새 고객을 추가해보세요.
+              {t(
+                'list.noResultsDescription',
+                '검색 조건을 변경하거나 새 고객을 추가해보세요.'
+              )}
             </p>
             <Button onClick={onAddClient}>
-              <Plus className="h-4 w-4 mr-2" />새 고객 추가하기
+              <Plus className="h-4 w-4 mr-2" />
+              {t('actions.addClient', '새 고객 추가하기')}
             </Button>
           </div>
         ) : viewMode === 'grid' ? (

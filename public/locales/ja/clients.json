@@ -1,16 +1,34 @@
 {
   "title": "顧客管理",
+  "meta": {
+    "title": "顧客管理",
+    "description": "保険顧客管理システム"
+  },
+  "errors": {
+    "authRequired": "認証が必要です。",
+    "nameRequired": "名前は必須項目です。",
+    "pipelineStageError": "パイプラインステージ情報を取得できません。管理者にお問い合わせください。",
+    "unknownAction": "不明なアクションです。",
+    "serverError": "サーバーエラーが発生しました",
+    "unauthorized": "ログインが必要です",
+    "validation": "入力情報を確認してください"
+  },
   "list": {
-    "allClients": "全顧客",
+    "allClients": "顧客リスト",
     "activeClients": "アクティブ顧客",
     "prospects": "見込み客",
-    "totalCount": "合計{{count}}名"
+    "totalCount": "合計{{count}}名",
+    "cardViewDescription": "カードビューで顧客の詳細情報を確認",
+    "tableViewDescription": "テーブルビューで顧客を素早く比較",
+    "noResults": "検索結果がありません",
+    "noResultsDescription": "検索条件を変更するか、新しい顧客を追加してください。",
+    "additionalInsurance": "追加保険:"
   },
   "actions": {
-    "addClient": "顧客追加",
+    "addClient": "新しい顧客を追加",
     "editClient": "顧客編集",
     "deleteClient": "顧客削除",
-    "viewDetails": "詳細表示",
+    "viewDetails": "詳細を見る",
     "export": "エクスポート",
     "import": "インポート",
     "filter": "フィルター",
@@ -25,27 +43,48 @@
     "address": "住所",
     "birthDate": "生年月日",
     "status": "ステータス",
-    "stage": "ステージ",
+    "stage": "営業ステージ",
     "source": "流入経路",
     "assignedTo": "担当者",
     "createdAt": "登録日",
     "lastContact": "最終連絡",
     "notes": "メモ",
-    "tags": "タグ"
+    "tags": "タグ",
+    "medium": "一般",
+    "low": "関心",
+    "notSet": "未設定",
+    "monthlyPremium": "月額保険料",
+    "referralPerformance": "紹介実績",
+    "insuranceInterests": "保険関心事",
+    "referredBy": "{{name}}の紹介",
+    "clientInfo": "顧客情報",
+    "contact": "連絡先",
+    "referralRelation": "紹介関係",
+    "importance": "重要度",
+    "performance": "実績",
+    "notEntered": "未入力",
+    "addressNotEntered": "住所未入力",
+    "directClient": "直接顧客",
+    "referralCount": "{{count}}名紹介",
+    "monthlyPayment": "月払い"
   },
   "status": {
-    "active": "アクティブ",
+    "active": "キーパーソン",
     "inactive": "非アクティブ",
     "prospect": "見込み客",
     "customer": "顧客",
     "former": "元顧客"
   },
   "stages": {
-    "lead": "リード",
-    "qualified": "認定済み",
+    "all": "すべてのステージ",
+    "prospect": "見込み客",
+    "consultation": "初回面談",
+    "needs_analysis": "ニーズ分析",
     "proposal": "提案",
     "negotiation": "交渉",
-    "closed": "成約",
+    "closed_won": "成約",
+    "lead": "リード",
+    "qualified": "認定済み",
     "lost": "失注"
   },
   "modal": {
@@ -73,5 +112,65 @@
     "size": "サイズ",
     "download": "ダウンロード",
     "delete": "削除"
+  },
+  "stats": {
+    "addNewClient": "新規顧客登録",
+    "addClientDescription": "新しい保険顧客を登録・管理します",
+    "addClientButton": "顧客を追加",
+    "statusSummary": "顧客ステータス概要",
+    "mvpNotice": "MVPでは提供されない機能です",
+    "newClientRegistration": "新規顧客登録",
+    "quickAddDescription": "新しい顧客を素早く追加し、管理を開始してください",
+    "clientStatusSummary": "顧客状況サマリー",
+    "keyMetricsDescription": "現在管理中の顧客の主要指標",
+    "totalClients": "全顧客",
+    "activeManagement": "アクティブ管理中",
+    "keyClients": "キーマン顧客",
+    "contractCompleted": "契約完了",
+    "conversionRate": "コンバージョン率",
+    "mvpNotAvailable": "この機能はMVPでは提供されません"
+  },
+  "filters": {
+    "searchAndFilter": "顧客検索・フィルター",
+    "searchResults": "{{count}}名の顧客が見つかりました",
+    "advancedFilter": "高度なフィルター",
+    "filter": "フィルター",
+    "cardView": "カードビュー",
+    "tableView": "テーブルビュー",
+    "cardViewDescription": "カードビューで表示",
+    "tableViewDescription": "テーブルビューで表示",
+    "importance": "重要度",
+    "stage": "ステージ",
+    "sources": "ソース",
+    "searchPlaceholder": "名前、電話番号、メール、職業、住所で検索...",
+    "allImportance": "すべての重要度",
+    "activeFilters": "アクティブフィルター:",
+    "resetAll": "すべてリセット",
+    "salesStageLabel": "営業ステージ",
+    "referralStatusLabel": "紹介ステータス",
+    "dataManagementLabel": "データ管理",
+    "exportButton": "エクスポート",
+    "stagePlaceholder": "ステージを選択",
+    "statusPlaceholder": "ステータスを選択"
+  },
+  "referralStatus": {
+    "all": "すべての顧客",
+    "has_referrer": "紹介された顧客",
+    "no_referrer": "直接営業顧客",
+    "top_referrer": "主要紹介者 (3名+)"
+  },
+  "importance": {
+    "high": "キーマン",
+    "medium": "一般",
+    "low": "関心"
+  },
+  "relationships": {
+    "clientReferral": "顧客紹介",
+    "friend": "友人",
+    "family": "家族",
+    "colleague": "同僚",
+    "acquaintance": "知人",
+    "company": "会社",
+    "other": "その他"
   }
 }

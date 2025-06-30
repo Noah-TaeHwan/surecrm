@@ -1,37 +1,28 @@
-import { useState, useRef } from 'react';
-import { Badge } from '~/common/components/ui/badge';
-import { Button } from '~/common/components/ui/button';
+import { cn } from '~/lib/utils';
 import { Card, CardContent } from '~/common/components/ui/card';
+import { Button } from '~/common/components/ui/button';
+import { Badge } from '~/common/components/ui/badge';
 import { Input } from '~/common/components/ui/input';
 import { Separator } from '~/common/components/ui/separator';
-import { cn } from '~/lib/utils';
-import { formatCurrencyTable } from '~/lib/utils/currency';
 import {
-  Search,
   Plus,
-  Grid3X3,
-  List,
-  Users,
-  TrendingUp,
-  DollarSign,
-  Target,
   UserPlus,
-  Eye,
-  Clock,
-  CheckCircle,
+  Search,
+  Users,
   BarChart3,
+  Target,
+  DollarSign,
+  TrendingUp,
+  Eye,
   Activity,
-  Timer,
-  ChevronRight,
-  ShieldCheck,
-  Archive,
-  AlertTriangle,
-  Building2,
+  CheckCircle,
+  Clock,
 } from 'lucide-react';
-import { Link } from 'react-router';
-import type { PipelineStage, Client } from '~/features/pipeline/types/types';
-import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
+import { useState, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ClientCard } from './client-card';
+import type { PipelineStage } from '../types/types';
+import type { Client } from '../types/types';
 
 interface ResponsivePipelineProps {
   stages: (PipelineStage & {
@@ -70,7 +61,7 @@ export function ResponsivePipeline({
   children,
   className,
 }: ResponsivePipelineProps) {
-  const { t } = useHydrationSafeTranslation('pipeline');
+  const { t } = useTranslation('pipeline');
   const [isStatsExpanded, setIsStatsExpanded] = useState(false);
 
   // 캐러셀 스크롤 제어를 위한 ref
@@ -133,24 +124,44 @@ export function ResponsivePipeline({
 
   // 단계별 아이콘 매핑
   function getStageIcon(stageName: string) {
-    switch (stageName.toLowerCase()) {
-      case '잠재고객':
-      case 'lead':
-        return Eye;
-      case '접촉':
-      case 'contact':
-        return Activity;
-      case '상담':
-      case 'consultation':
-        return Users;
-      case '제안':
-      case 'proposal':
-        return Target;
-      case '계약':
-      case 'contract':
-        return CheckCircle;
-      default:
-        return Clock;
+    // 영업 단계를 정규화 (한국어와 영어 모두 지원)
+    const normalizedStage = stageName.toLowerCase();
+
+    // 번역 키 또는 데이터베이스 값에 따른 매핑
+    if (
+      normalizedStage.includes('잠재') ||
+      normalizedStage.includes('prospect') ||
+      normalizedStage.includes('lead')
+    ) {
+      return Eye;
+    } else if (
+      normalizedStage.includes('접촉') ||
+      normalizedStage.includes('contact') ||
+      normalizedStage.includes('첫') ||
+      normalizedStage.includes('consultation')
+    ) {
+      return Activity;
+    } else if (
+      normalizedStage.includes('상담') ||
+      normalizedStage.includes('니즈') ||
+      normalizedStage.includes('analysis')
+    ) {
+      return Users;
+    } else if (
+      normalizedStage.includes('제안') ||
+      normalizedStage.includes('상품') ||
+      normalizedStage.includes('proposal')
+    ) {
+      return Target;
+    } else if (
+      normalizedStage.includes('계약') ||
+      normalizedStage.includes('contract') ||
+      normalizedStage.includes('완료') ||
+      normalizedStage.includes('closed')
+    ) {
+      return CheckCircle;
+    } else {
+      return Clock;
     }
   }
 
