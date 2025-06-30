@@ -68,7 +68,8 @@ export function MyGoals({
   onGoalUpdate,
   onGoalDelete,
 }: MyGoalsProps) {
-  const { t, formatCurrency, i18n } = useHydrationSafeTranslation('dashboard');
+  const { t, formatCurrency, i18n, isHydrated } =
+    useHydrationSafeTranslation('dashboard');
 
   const [selectedPeriod, setSelectedPeriod] = useState(currentPeriod);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -172,9 +173,15 @@ export function MyGoals({
     };
   };
 
-  // 목표값 포맷팅 (언어별 처리)
+  // 목표값 포맷팅 (hydration-safe 처리)
   const formatGoalValue = (value: number, goalType: string) => {
     if (goalType === 'revenue') {
+      // 🔧 Hydration-safe: isHydrated 상태 확인 후 언어별 처리
+      if (!isHydrated) {
+        // 서버/Hydration 전: 항상 한국어 기본값 사용
+        return formatCurrency(value * 10000);
+      }
+
       const currentLang = i18n?.language || 'ko';
 
       if (currentLang === 'en') {

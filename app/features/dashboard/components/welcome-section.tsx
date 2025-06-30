@@ -72,11 +72,11 @@ export function WelcomeSection({ userName, todayStats }: WelcomeSectionProps) {
     // Hydration 오류 방지: 클라이언트에서만 실제 날짜 표시
     if (!isClient || !date) return '로딩 중...'; // 직접 하드코딩된 기본값
 
-    // 현재 언어에 따라 로케일 설정
+    // 🔧 Hydration-safe: 현재 언어에 따라 로케일 설정
     const locale =
-      i18n.language === 'ko'
+      isClient && i18n.language === 'ko'
         ? 'ko-KR'
-        : i18n.language === 'ja'
+        : isClient && i18n.language === 'ja'
           ? 'ja-JP'
           : 'en-US';
 
@@ -92,10 +92,11 @@ export function WelcomeSection({ userName, todayStats }: WelcomeSectionProps) {
     // Hydration 오류 방지: 클라이언트에서만 실제 시간 표시
     if (!isClient || !date) return '--:--';
 
+    // 🔧 Hydration-safe: 현재 언어에 따라 로케일 설정
     const locale =
-      i18n.language === 'ko'
+      isClient && i18n.language === 'ko'
         ? 'ko-KR'
-        : i18n.language === 'ja'
+        : isClient && i18n.language === 'ja'
           ? 'ja-JP'
           : 'en-US';
 

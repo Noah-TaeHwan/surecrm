@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Dialog,
@@ -89,6 +89,12 @@ export function GoalSettingModal({
   onOpenChange: externalOnOpenChange,
 }: GoalSettingModalProps) {
   const { t, i18n } = useTranslation('dashboard');
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // Client-side hydration 체크
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
   const [internalIsOpen, setInternalIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
@@ -98,8 +104,16 @@ export function GoalSettingModal({
   const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
   const setIsOpen = externalOnOpenChange || setInternalIsOpen;
 
-  // 언어별 기본값 설정
+  // 🔧 Hydration-safe 언어별 기본값 설정
   const getDefaultPlaceholder = (goalType: string) => {
+    // Hydration 전에는 항상 한국어 기본값 사용
+    if (!isHydrated) {
+      if (goalType === 'revenue') return '1000'; // 1000만원
+      if (goalType === 'clients') return '10'; // 10명
+      if (goalType === 'referrals') return '5'; // 5건
+      return '';
+    }
+
     const currentLang = i18n.language || 'ko';
 
     if (goalType === 'revenue') {
