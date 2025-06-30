@@ -137,6 +137,7 @@ import {
   SaveButton,
   createSaveHandler,
 } from '../components/save-button-handler';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 
 // ✅ 타입 정의들 분리 완료 - import로 대체
 
@@ -145,6 +146,9 @@ import {
 // ✅ React Router v7 - useLoaderData 훅 사용으로 타입 import 불필요
 
 export default function ClientDetailPage() {
+  // 🌐 다국어 번역 훅
+  const { t, i18n } = useHydrationSafeTranslation('clients');
+
   // ✅ React Router v7에서는 useLoaderData() 훅을 사용
   const data = useLoaderData() as any;
 
@@ -1305,7 +1309,10 @@ export default function ClientDetailPage() {
         setAvailableTags(tags);
       }
     } catch (error) {
-      console.error('사용 가능한 태그 로딩 실패:', error);
+      console.error(
+        t('errors.tagLoadFailed', '사용 가능한 태그 로딩 실패:'),
+        error
+      );
     }
   }, [currentUser?.id]);
 
@@ -1334,7 +1341,9 @@ export default function ClientDetailPage() {
       if (response.ok) {
         await loadClientTags();
         setShowTagModal(false);
-        setTagSuccessMessage('태그가 성공적으로 저장되었습니다.');
+        setTagSuccessMessage(
+          t('messages.tagSaveSuccess', '태그가 성공적으로 저장되었습니다.')
+        );
         setShowTagSuccessModal(true);
       } else {
         const error = await response.json();
@@ -1375,7 +1384,9 @@ export default function ClientDetailPage() {
         await loadAvailableTags();
         setShowCreateTagModal(false);
         setTagForm({ id: '', name: '', color: '#3b82f6', description: '' });
-        setTagSuccessMessage('새 태그가 성공적으로 생성되었습니다.');
+        setTagSuccessMessage(
+          t('messages.tagCreateSuccess', '새 태그가 성공적으로 생성되었습니다.')
+        );
         setShowTagSuccessModal(true);
 
         // 새로 생성된 태그를 자동으로 선택상태로 만들기
@@ -1442,7 +1453,9 @@ export default function ClientDetailPage() {
 
       if (response.ok) {
         await loadClientTags();
-        setTagSuccessMessage('태그가 성공적으로 제거되었습니다.');
+        setTagSuccessMessage(
+          t('messages.tagRemoveSuccess', '태그가 성공적으로 제거되었습니다.')
+        );
         setShowTagSuccessModal(true);
       } else {
         const error = await response.json();
@@ -1465,7 +1478,9 @@ export default function ClientDetailPage() {
   }, [client?.id, currentUser?.id, loadClientTags]);
 
   return (
-    <MainLayout title={`${client?.fullName || '고객'} - 고객 상세`}>
+    <MainLayout
+      title={`${client?.fullName || t('labels.client', '고객')} - ${t('tabs.overview', '고객 상세')}`}
+    >
       <ResponsiveClientDetail
         client={client}
         clientTags={clientTags}
@@ -1512,20 +1527,34 @@ export default function ClientDetailPage() {
                 className="space-y-6"
               >
                 <TabsList className="grid w-full grid-cols-4 lg:grid-cols-7 h-auto lg:h-9 gap-1 lg:gap-0 p-1">
-                  <TabsTrigger value="notes">상담내용</TabsTrigger>
-                  <TabsTrigger value="medical">병력사항</TabsTrigger>
-                  <TabsTrigger value="checkup">점검목적</TabsTrigger>
-                  <TabsTrigger value="interests">관심사항</TabsTrigger>
-                  <TabsTrigger value="companions">상담동반자</TabsTrigger>
-                  <TabsTrigger value="insurance">보험계약</TabsTrigger>
-                  <TabsTrigger value="family">가족</TabsTrigger>
+                  <TabsTrigger value="notes">
+                    {t('tabs.notes', '상담내용')}
+                  </TabsTrigger>
+                  <TabsTrigger value="medical">
+                    {t('tabs.medical', '병력사항')}
+                  </TabsTrigger>
+                  <TabsTrigger value="checkup">
+                    {t('tabs.purposes', '점검목적')}
+                  </TabsTrigger>
+                  <TabsTrigger value="interests">
+                    {t('tabs.interests', '관심사항')}
+                  </TabsTrigger>
+                  <TabsTrigger value="companions">
+                    {t('tabs.companions', '상담동반자')}
+                  </TabsTrigger>
+                  <TabsTrigger value="insurance">
+                    {t('tabs.contracts', '보험계약')}
+                  </TabsTrigger>
+                  <TabsTrigger value="family">
+                    {t('tabs.family', '가족')}
+                  </TabsTrigger>
                 </TabsList>
 
                 {/* 탭 컨텐츠들 */}
                 <TabsContent value="insurance" className="space-y-6">
                   <InsuranceContractsTab
                     clientId={client?.id}
-                    clientName={client?.fullName || '고객'}
+                    clientName={client?.fullName || t('labels.client', '고객')}
                     agentId={data?.currentUserId}
                     initialContracts={insuranceContracts}
                     shouldOpenModal={shouldCreateContract}
@@ -1537,14 +1566,17 @@ export default function ClientDetailPage() {
                     <CardHeader>
                       <CardTitle className="text-lg flex items-center gap-2">
                         <User className="h-5 w-5" />
-                        가족 구성원
+                        {t('overview.familyMembers', '가족 구성원')}
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="p-6">
                       <div className="text-center py-8">
                         <User className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
                         <p className="text-sm text-muted-foreground">
-                          가족 정보가 준비 중입니다.
+                          {t(
+                            'messages.familyInfoPending',
+                            '가족 정보가 준비 중입니다.'
+                          )}
                         </p>
                       </div>
                     </CardContent>

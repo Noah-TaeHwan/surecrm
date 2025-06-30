@@ -1,8 +1,8 @@
 {
   "title": "고객 관리",
   "meta": {
-    "title": "고객 관리",
-    "description": "보험 고객 관리 시스템"
+    "title": "{{clientName}} - 고객 상세 | SureCRM",
+    "description": "{{clientName}}의 상세 정보를 확인하세요."
   },
   "errors": {
     "authRequired": "인증이 필요합니다.",
@@ -11,7 +11,9 @@
     "unknownAction": "알 수 없는 작업입니다.",
     "serverError": "서버 오류가 발생했습니다.",
     "unauthorized": "로그인이 필요합니다",
-    "validation": "입력 정보를 확인해주세요"
+    "validation": "입력 정보를 확인해주세요",
+    "clientDataLoad": "고객 정보를 불러올 수 없습니다",
+    "tagLoadFailed": "사용 가능한 태그 로딩 실패:"
   },
   "list": {
     "allClients": "고객 목록",
@@ -22,7 +24,15 @@
     "tableViewDescription": "테이블 뷰로 고객을 빠르게 비교하세요",
     "noResults": "검색 결과가 없습니다",
     "noResultsDescription": "검색 조건을 변경하거나 새 고객을 추가해보세요.",
-    "additionalInsurance": "추가 보험:"
+    "additionalInsurance": "추가 보험:",
+    "title": "고객 목록",
+    "emptyTitle": "등록된 고객이 없습니다",
+    "emptyDescription": "첫 번째 고객을 추가해보세요",
+    "clientInfo": "고객 정보",
+    "contactHistory": "연락 이력",
+    "insuranceInfo": "보험 정보",
+    "performance": "성과",
+    "actions": "액션"
   },
   "actions": {
     "addClient": "새 고객 추가하기",
@@ -32,7 +42,15 @@
     "export": "내보내기",
     "import": "가져오기",
     "filter": "필터",
-    "search": "검색"
+    "search": "검색",
+    "addCompanion": "동반자 추가",
+    "addNote": "상담내용 추가",
+    "addTag": "태그 추가",
+    "addContract": "계약 추가",
+    "addDocument": "서류 추가",
+    "editInfo": "정보 수정",
+    "saveChanges": "변경사항 저장",
+    "confirmDelete": "삭제 확인"
   },
   "fields": {
     "name": "이름",
@@ -66,7 +84,23 @@
     "addressNotEntered": "주소 미입력",
     "directClient": "직접 고객",
     "referralCount": "{{count}}명 소개",
-    "monthlyPayment": "월납"
+    "monthlyPayment": "월납",
+    "fullName": "고객명",
+    "occupation": "직업",
+    "telecomProvider": "통신사",
+    "height": "키",
+    "weight": "몸무게",
+    "gender": "성별",
+    "hasDrivingLicense": "운전면허",
+    "ssn": "주민등록번호",
+    "referrer": "소개자",
+    "relationship": "관계",
+    "insuranceType": "보험 종류",
+    "stageName": "영업 단계",
+    "totalPremium": "총 보험료",
+    "referralHistory": "소개 내역",
+    "age": "나이",
+    "bmi": "BMI"
   },
   "status": {
     "active": "활성",
@@ -80,10 +114,19 @@
     "all": "모든 단계",
     "prospect": "잠재고객",
     "consultation": "첫 상담",
+    "firstConsultation": "첫 상담",
     "needs_analysis": "니즈 분석",
+    "needsAnalysis": "니즈 분석",
     "proposal": "상품 설명",
+    "productExplanation": "상품 설명",
     "negotiation": "계약 검토",
-    "closed_won": "계약 완료"
+    "contractReview": "계약 검토",
+    "closed_won": "계약 완료",
+    "contractCompleted": "계약 완료",
+    "lead": "리드",
+    "qualified": "검증됨",
+    "lost": "실패",
+    "excluded": "제외됨"
   },
   "modal": {
     "addClient": "고객 추가",
@@ -142,8 +185,11 @@
     "sources": "출처",
     "searchPlaceholder": "이름, 전화번호, 이메일, 직업, 주소로 검색...",
     "allImportance": "모든 중요도",
+    "allStages": "모든 단계",
+    "allSources": "모든 출처",
     "activeFilters": "활성 필터:",
-    "resetAll": "전체 초기화",
+    "clearAll": "전체 초기화",
+    "dataManagement": "데이터 관리",
     "salesStageLabel": "영업 단계",
     "referralStatusLabel": "소개 상태",
     "dataManagementLabel": "데이터 관리",
@@ -155,12 +201,12 @@
     "all": "모든 고객",
     "has_referrer": "소개받은 고객",
     "no_referrer": "직접 영업 고객",
-    "top_referrer": "핵심 소개자 (3명+)"
+    "top_referrer": "최상위 소개자 (3+)"
   },
   "importance": {
     "high": "키맨",
     "medium": "일반",
-    "low": "관찰"
+    "low": "관심"
   },
   "relationships": {
     "clientReferral": "고객 소개",
@@ -170,5 +216,190 @@
     "acquaintance": "지인",
     "company": "회사",
     "other": "기타"
+  },
+  "labels": {
+    "client": "고객"
+  },
+  "tabs": {
+    "overview": "개요",
+    "notes": "상담내용",
+    "medical": "병력사항",
+    "purposes": "점검목적",
+    "interests": "관심사항",
+    "companions": "상담동반자",
+    "contracts": "보험계약",
+    "documents": "서류",
+    "family": "가족"
+  },
+  "header": {
+    "backToClients": "고객 목록으로",
+    "edit": "편집",
+    "delete": "삭제",
+    "createOpportunity": "영업 기회 생성",
+    "editMode": "수정 모드",
+    "save": "저장",
+    "cancel": "취소"
+  },
+  "overview": {
+    "basicInfo": "기본 정보",
+    "contactInfo": "연락처",
+    "personalInfo": "개인 정보",
+    "referralInfo": "소개 정보",
+    "notes": "메모",
+    "familyMembers": "가족 구성원"
+  },
+  "modals": {
+    "deleteTitle": "고객 삭제",
+    "deleteMessage": "정말로 이 고객을 삭제하시겠습니까?",
+    "saveSuccessTitle": "저장 완료",
+    "saveSuccessMessage": "고객 정보가 성공적으로 저장되었습니다",
+    "errorTitle": "오류",
+    "opportunityTitle": "새 영업 기회",
+    "companionTitle": "상담 동반자",
+    "noteTitle": "상담 내용"
+  },
+  "messages": {
+    "noData": "데이터가 없습니다",
+    "loading": "로딩 중...",
+    "saveSuccess": "저장되었습니다",
+    "deleteSuccess": "삭제되었습니다",
+    "createSuccess": "생성되었습니다",
+    "familyInfoPending": "가족 정보가 준비 중입니다.",
+    "tagSaveSuccess": "태그가 성공적으로 저장되었습니다.",
+    "tagCreateSuccess": "새 태그가 성공적으로 생성되었습니다.",
+    "tagRemoveSuccess": "태그가 성공적으로 제거되었습니다."
+  },
+  "sidebar": {
+    "editTooltip": "고객 정보 편집",
+    "deleteTooltip": "고객 삭제",
+    "noInfo": "정보 없음",
+    "clickToInput": "클릭하여 입력",
+    "clickToSelect": "클릭하여 선택",
+    "emailNotSet": "이메일 미입력",
+    "addressNotSet": "주소 미입력",
+    "occupationNotSet": "직업 미입력",
+    "telecomLabel": "통신사",
+    "selectTelecom": "통신사 선택",
+    "customTelecom": "기타 (직접 입력)",
+    "telecomPlaceholder": "통신사명을 직접 입력하세요",
+    "telecomExample": "💡 예: Verizon, AT&T, T-Mobile, Vodafone 등",
+    "notSelected": "미선택",
+    "currentStage": "현재 단계",
+    "notSet": "미설정",
+    "notInPipelineHelp": "은 아직 영업 파이프라인에 진입하지 않은 상태입니다. \"새 영업 기회\" 버튼을 눌러 파이프라인에 추가할 수 있습니다.",
+    "personalInfo": "개인 정보",
+    "birthDate": "생년월일",
+    "birthDateNotSet": "생년월일 미입력",
+    "standardAge": "만 나이",
+    "koreanAge": "한국 나이",
+    "insuranceAge": "보험 나이",
+    "ageUnit": "세",
+    "agePreview": "나이 미리보기",
+    "gender": "성별",
+    "male": "남성",
+    "female": "여성",
+    "genderNotSet": "성별 미입력",
+    "bodyInfo": "신체 정보",
+    "height": "키",
+    "weight": "몸무게",
+    "bmi": "BMI",
+    "cmUnit": "cm",
+    "kgUnit": "kg",
+    "notEntered": "미입력",
+    "driving": "운전",
+    "canDrive": "운전 가능",
+    "cannotDrive": "운전 불가",
+    "sensitiveDataManagement": "민감정보 관리",
+    "ssnLabel": "주민등록번호",
+    "sensitiveData": "민감정보",
+    "ssnAutoCalculate": "주민등록번호 입력 시 자동으로 생년월일이 계산됩니다.",
+    "ssnFrontHelp": "앞자리: 생년월일 6자리 (YYMMDD)",
+    "ssnBackHelp": "뒷자리: 성별 및 세기 포함 7자리",
+    "referralInfo": "소개 정보",
+    "whoReferredClient": "이 고객을 소개한 사람",
+    "selectReferrer": "소개자 선택",
+    "directDevelopment": "직접 개발 (소개자 없음)",
+    "referrerChangeHelp": "소개자를 변경하면 소개 네트워크가 업데이트됩니다.",
+    "referrerBadge": "소개자",
+    "directClient": "직접 개발 고객",
+    "newDevelopment": "신규 개발",
+    "clientsReferredBy": "이 고객이 소개한 사람들",
+    "totalReferrals": "총 {{count}}명 소개",
+    "referralContributor": "소개 기여자",
+    "noReferralsYet": "아직 소개한 고객이 없습니다",
+    "potentialReferrer": "잠재 소개자",
+    "tags": "태그",
+    "noTags": "태그가 없습니다",
+    "addTag": "태그 추가",
+    "importanceHigh": "키맨",
+    "importanceMedium": "일반",
+    "importanceLow": "관심",
+    "telecomNone": "선택 안함",
+    "telecomSKT": "SKT",
+    "telecomKT": "KT",
+    "telecomLGU": "LG U+",
+    "telecomBudgetSKT": "알뜰폰 SKT",
+    "telecomBudgetKT": "알뜰폰 KT",
+    "telecomBudgetLGU": "알뜰폰 LG U+",
+    "relationshipSpouse": "배우자",
+    "relationshipChild": "자녀",
+    "relationshipParent": "부모",
+    "relationshipSibling": "형제/자매",
+    "relationshipFriend": "친구",
+    "relationshipColleague": "동료",
+    "relationshipOther": "기타"
+  },
+  "tagModal": {
+    "title": "태그 관리",
+    "description": "고객에게 적용할 태그를 선택하거나 새로운 태그를 생성하세요. 체크박스를 통해 태그를 선택하고 적용 버튼을 눌러 저장하세요.",
+    "createNewTag": "새 태그 생성",
+    "create": "생성",
+    "createDescription": "새로운 태그를 생성하여 고객을 분류하고 관리하세요.",
+    "availableTags": "사용 가능한 태그",
+    "loadingTags": "태그를 불러오는 중...",
+    "noTagsAvailable": "사용 가능한 태그가 없습니다.",
+    "createNewTagSuggestion": "새 태그를 생성해보세요.",
+    "saving": "저장 중...",
+    "apply": "적용",
+    "creating": "생성 중..."
+  },
+  "createTagModal": {
+    "title": "새 태그 생성",
+    "description": "새로운 태그를 생성하여 고객을 효율적으로 분류하세요. 태그 이름과 색상을 설정할 수 있습니다.",
+    "tagName": "태그 이름",
+    "tagNamePlaceholder": "예: 키맨 고객, 신규 고객, 관심 고객",
+    "tagColor": "태그 색상",
+    "description": "설명",
+    "optional": "선택사항",
+    "descriptionPlaceholder": "태그에 대한 설명을 입력하세요",
+    "preview": "미리보기",
+    "previewPlaceholder": "태그 이름을 입력하면 미리보기가 표시됩니다."
+  },
+  "successModal": {
+    "title": "태그 저장 완료",
+    "description": "태그 변경사항이 성공적으로 저장되었습니다.",
+    "confirm": "확인"
+  },
+  "deleteModal": {
+    "title": "고객 삭제 확인",
+    "description": "정말로 \"{{clientName}}\" 고객을 삭제하시겠습니까?",
+    "warning": "이 고객과 관련된 모든 데이터(보험 정보, 미팅 기록, 연락 이력 등)가 함께 삭제됩니다."
+  },
+  "saveModal": {
+    "title": "저장 완료",
+    "description": "고객 정보가 성공적으로 업데이트되었습니다.",
+    "confirm": "확인"
+  },
+  "deleteSuccessModal": {
+    "title": "삭제 완료",
+    "description": "'{{clientName}}' 고객이 성공적으로 삭제되었습니다.",
+    "redirectInfo": "잠시 후 고객 목록으로 이동합니다.",
+    "goToClientsList": "고객 목록으로 이동"
+  },
+  "companionDeleteModal": {
+    "title": "상담동반자 삭제 확인",
+    "description": "정말로 \"{{companionName}}\" 동반자를 삭제하시겠습니까?",
+    "itemType": "상담동반자",
+    "warning": "삭제된 동반자 정보는 복구할 수 없습니다."
   }
 }

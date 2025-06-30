@@ -8,6 +8,7 @@ import {
   DialogTitle,
 } from '~/common/components/ui/dialog';
 import { CheckCircle } from 'lucide-react';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 import { NewOpportunityModal } from './new-opportunity-modal';
 import { DeleteConfirmationModal } from '~/common/components/ui/delete-confirmation-modal';
 import { OpportunitySuccessModal } from './opportunity-success-modal';
@@ -177,6 +178,7 @@ export function ClientModalsSection({
   tagSuccessMessage,
 }: ClientModalsSectionProps) {
   const navigate = useNavigate();
+  const { t } = useHydrationSafeTranslation('clients');
 
   return (
     <>
@@ -194,11 +196,18 @@ export function ClientModalsSection({
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onConfirm={onConfirmDelete}
-        title="고객 삭제 확인"
-        description={`정말로 "${clientName}" 고객을 삭제하시겠습니까?`}
+        title={t('deleteModal.title', '고객 삭제 확인')}
+        description={t(
+          'deleteModal.description',
+          `정말로 "${clientName}" 고객을 삭제하시겠습니까?`,
+          { clientName }
+        )}
         itemName={clientName}
-        itemType="고객"
-        warningMessage="이 고객과 관련된 모든 데이터(보험 정보, 미팅 기록, 연락 이력 등)가 함께 삭제됩니다."
+        itemType={t('labels.client', '고객')}
+        warningMessage={t(
+          'deleteModal.warning',
+          '이 고객과 관련된 모든 데이터(보험 정보, 미팅 기록, 연락 이력 등)가 함께 삭제됩니다.'
+        )}
         isLoading={isDeleting}
       />
 
@@ -213,16 +222,19 @@ export function ClientModalsSection({
               <CheckCircle className="h-6 w-6 text-green-600" />
             </div>
             <DialogHeader>
-              <DialogTitle>저장 완료</DialogTitle>
+              <DialogTitle>{t('saveModal.title', '저장 완료')}</DialogTitle>
               <DialogDescription>
-                고객 정보가 성공적으로 업데이트되었습니다.
+                {t(
+                  'saveModal.description',
+                  '고객 정보가 성공적으로 업데이트되었습니다.'
+                )}
               </DialogDescription>
             </DialogHeader>
             <Button
               onClick={() => setShowSaveSuccessModal(false)}
               className="w-full"
             >
-              확인
+              {t('saveModal.confirm', '확인')}
             </Button>
           </div>
         </DialogContent>
@@ -239,12 +251,21 @@ export function ClientModalsSection({
               <CheckCircle className="h-6 w-6 text-red-600" />
             </div>
             <DialogHeader>
-              <DialogTitle>삭제 완료</DialogTitle>
+              <DialogTitle>
+                {t('deleteSuccessModal.title', '삭제 완료')}
+              </DialogTitle>
               <DialogDescription>
-                '{clientName}' 고객이 성공적으로 삭제되었습니다.
+                {t(
+                  'deleteSuccessModal.description',
+                  `'${clientName}' 고객이 성공적으로 삭제되었습니다.`,
+                  { clientName }
+                )}
                 <br />
                 <span className="text-sm text-muted-foreground mt-2 block">
-                  잠시 후 고객 목록으로 이동합니다.
+                  {t(
+                    'deleteSuccessModal.redirectInfo',
+                    '잠시 후 고객 목록으로 이동합니다.'
+                  )}
                 </span>
               </DialogDescription>
             </DialogHeader>
@@ -255,7 +276,7 @@ export function ClientModalsSection({
               }}
               className="w-full bg-red-600 hover:bg-red-700"
             >
-              고객 목록으로 이동
+              {t('deleteSuccessModal.goToClientsList', '고객 목록으로 이동')}
             </Button>
           </div>
         </DialogContent>
@@ -307,11 +328,18 @@ export function ClientModalsSection({
         isOpen={showDeleteCompanionModal}
         onClose={() => setShowDeleteCompanionModal(false)}
         onConfirm={onConfirmDeleteCompanion}
-        title="상담동반자 삭제 확인"
-        description={`정말로 "${companionToDelete?.name}" 동반자를 삭제하시겠습니까?`}
+        title={t('companionDeleteModal.title', '상담동반자 삭제 확인')}
+        description={t(
+          'companionDeleteModal.description',
+          `정말로 "${companionToDelete?.name}" 동반자를 삭제하시겠습니까?`,
+          { companionName: companionToDelete?.name }
+        )}
         itemName={companionToDelete?.name || ''}
-        itemType="상담동반자"
-        warningMessage="삭제된 동반자 정보는 복구할 수 없습니다."
+        itemType={t('companionDeleteModal.itemType', '상담동반자')}
+        warningMessage={t(
+          'companionDeleteModal.warning',
+          '삭제된 동반자 정보는 복구할 수 없습니다.'
+        )}
         isLoading={false}
       />
 

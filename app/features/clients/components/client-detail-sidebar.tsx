@@ -121,7 +121,7 @@ export function ClientDetailSidebar({
                   <SelectContent>
                     {IMPORTANCE_OPTIONS.map(option => (
                       <SelectItem key={option.value} value={option.value}>
-                        {option.label}
+                        {option.fallback}
                       </SelectItem>
                     ))}
                   </SelectContent>

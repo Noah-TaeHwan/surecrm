@@ -1,4 +1,4 @@
-import { useState } from 'react';
+// useState는 현재 사용되지 않지만 향후 상태 관리를 위해 유지
 import { Plus, Target, Check } from 'lucide-react';
 import {
   Dialog,
@@ -10,6 +10,7 @@ import {
 } from '~/common/components/ui/dialog';
 import { Button } from '~/common/components/ui/button';
 import { Badge } from '~/common/components/ui/badge';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 
 interface TagForm {
   id: string;
@@ -27,19 +28,24 @@ interface Tag {
 
 interface ClientTagModalProps {
   showTagModal: boolean;
-  setShowTagModal: (show: boolean) => void;
+  // eslint-disable-next-line no-unused-vars
+  setShowTagModal: (_show: boolean) => void;
   availableTags: Tag[];
   selectedTagIds: string[];
-  setSelectedTagIds: (ids: string[] | ((prev: string[]) => string[])) => void;
+  // eslint-disable-next-line no-unused-vars
+  setSelectedTagIds: (_ids: string[] | ((_prev: string[]) => string[])) => void;
   isLoadingTags: boolean;
   onSaveTags: () => void;
   onCreateTag: () => void;
   tagForm: TagForm;
-  setTagForm: (form: TagForm | ((prev: TagForm) => TagForm)) => void;
+  // eslint-disable-next-line no-unused-vars
+  setTagForm: (_form: TagForm | ((_prev: TagForm) => TagForm)) => void;
   showCreateTagModal: boolean;
-  setShowCreateTagModal: (show: boolean) => void;
+  // eslint-disable-next-line no-unused-vars
+  setShowCreateTagModal: (_show: boolean) => void;
   showTagSuccessModal: boolean;
-  setShowTagSuccessModal: (show: boolean) => void;
+  // eslint-disable-next-line no-unused-vars
+  setShowTagSuccessModal: (_show: boolean) => void;
   tagSuccessMessage: string;
 }
 
@@ -60,6 +66,8 @@ export function ClientTagModal({
   setShowTagSuccessModal,
   tagSuccessMessage,
 }: ClientTagModalProps) {
+  const { t } = useHydrationSafeTranslation('clients');
+
   return (
     <>
       {/* 🏷️ 태그 관리 모달 */}
@@ -73,11 +81,13 @@ export function ClientTagModal({
               <span className="text-lg" aria-hidden="true">
                 🏷️
               </span>
-              태그 관리
+              {t('tagModal.title', '태그 관리')}
             </DialogTitle>
             <DialogDescription id="tag-modal-description">
-              고객에게 적용할 태그를 선택하거나 새로운 태그를 생성하세요.
-              체크박스를 통해 태그를 선택하고 적용 버튼을 눌러 저장하세요.
+              {t(
+                'tagModal.description',
+                '고객에게 적용할 태그를 선택하거나 새로운 태그를 생성하세요. 체크박스를 통해 태그를 선택하고 적용 버튼을 눌러 저장하세요.'
+              )}
             </DialogDescription>
           </DialogHeader>
 
@@ -85,28 +95,35 @@ export function ClientTagModal({
             {/* 새 태그 생성 섹션 */}
             <div className="border rounded-lg p-4 bg-muted/20">
               <div className="flex items-center justify-between mb-3">
-                <h4 className="font-medium text-sm">새 태그 생성</h4>
+                <h4 className="font-medium text-sm">
+                  {t('tagModal.createNewTag', '새 태그 생성')}
+                </h4>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setShowCreateTagModal(true)}
                 >
                   <Plus className="h-3 w-3 mr-1" />
-                  생성
+                  {t('tagModal.create', '생성')}
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground">
-                새로운 태그를 생성하여 고객을 분류하고 관리하세요.
+                {t(
+                  'tagModal.createDescription',
+                  '새로운 태그를 생성하여 고객을 분류하고 관리하세요.'
+                )}
               </p>
             </div>
 
             {/* 사용 가능한 태그 목록 */}
             <div className="space-y-3">
-              <h4 className="font-medium text-sm">사용 가능한 태그</h4>
+              <h4 className="font-medium text-sm">
+                {t('tagModal.availableTags', '사용 가능한 태그')}
+              </h4>
               {isLoadingTags ? (
                 <div className="text-center py-8">
                   <p className="text-sm text-muted-foreground">
-                    태그를 불러오는 중...
+                    {t('tagModal.loadingTags', '태그를 불러오는 중...')}
                   </p>
                 </div>
               ) : availableTags.length > 0 ? (
@@ -153,10 +170,16 @@ export function ClientTagModal({
                 <div className="text-center py-8">
                   <Target className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
                   <p className="text-sm text-muted-foreground">
-                    사용 가능한 태그가 없습니다.
+                    {t(
+                      'tagModal.noTagsAvailable',
+                      '사용 가능한 태그가 없습니다.'
+                    )}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    새 태그를 생성해보세요.
+                    {t(
+                      'tagModal.createNewTagSuggestion',
+                      '새 태그를 생성해보세요.'
+                    )}
                   </p>
                 </div>
               )}
@@ -171,10 +194,12 @@ export function ClientTagModal({
                 setSelectedTagIds([]);
               }}
             >
-              취소
+              {t('header.cancel', '취소')}
             </Button>
             <Button onClick={onSaveTags} disabled={isLoadingTags}>
-              {isLoadingTags ? '저장 중...' : '적용'}
+              {isLoadingTags
+                ? t('tagModal.saving', '저장 중...')
+                : t('tagModal.apply', '적용')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -191,22 +216,27 @@ export function ClientTagModal({
               <span className="text-lg" aria-hidden="true">
                 🎨
               </span>
-              새 태그 생성
+              {t('createTagModal.title', '새 태그 생성')}
             </DialogTitle>
             <DialogDescription id="create-tag-modal-description">
-              새로운 태그를 생성하여 고객을 효율적으로 분류하세요. 태그 이름과
-              색상을 설정할 수 있습니다.
+              {t(
+                'createTagModal.description',
+                '새로운 태그를 생성하여 고객을 효율적으로 분류하세요. 태그 이름과 색상을 설정할 수 있습니다.'
+              )}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-muted-foreground mb-1">
-                태그 이름 *
+                {t('createTagModal.tagName', '태그 이름')} *
               </label>
               <input
                 type="text"
                 className="w-full p-3 border rounded-lg text-sm"
-                placeholder="예: 키맨 고객, 신규 고객, 관심 고객"
+                placeholder={t(
+                  'createTagModal.tagNamePlaceholder',
+                  '예: 키맨 고객, 신규 고객, 관심 고객'
+                )}
                 value={tagForm.name}
                 onChange={e =>
                   setTagForm(prev => ({ ...prev, name: e.target.value }))
@@ -217,7 +247,7 @@ export function ClientTagModal({
 
             <div>
               <label className="block text-sm font-medium text-muted-foreground mb-1">
-                태그 색상
+                {t('createTagModal.tagColor', '태그 색상')}
               </label>
               <div className="flex items-center gap-3">
                 <input
@@ -253,11 +283,15 @@ export function ClientTagModal({
 
             <div>
               <label className="block text-sm font-medium text-muted-foreground mb-1">
-                설명 (선택사항)
+                {t('createTagModal.description', '설명')} (
+                {t('createTagModal.optional', '선택사항')})
               </label>
               <textarea
                 className="w-full p-3 border rounded-lg text-sm resize-none"
-                placeholder="태그에 대한 설명을 입력하세요"
+                placeholder={t(
+                  'createTagModal.descriptionPlaceholder',
+                  '태그에 대한 설명을 입력하세요'
+                )}
                 rows={3}
                 value={tagForm.description}
                 onChange={e =>
@@ -273,7 +307,7 @@ export function ClientTagModal({
             {/* 미리보기 */}
             <div>
               <label className="block text-sm font-medium text-muted-foreground mb-1">
-                미리보기
+                {t('createTagModal.preview', '미리보기')}
               </label>
               <div className="p-3 border rounded-lg bg-muted/30">
                 {tagForm.name ? (
@@ -290,7 +324,10 @@ export function ClientTagModal({
                   </Badge>
                 ) : (
                   <p className="text-xs text-muted-foreground">
-                    태그 이름을 입력하면 미리보기가 표시됩니다.
+                    {t(
+                      'createTagModal.previewPlaceholder',
+                      '태그 이름을 입력하면 미리보기가 표시됩니다.'
+                    )}
                   </p>
                 )}
               </div>
@@ -309,13 +346,15 @@ export function ClientTagModal({
                 });
               }}
             >
-              취소
+              {t('header.cancel', '취소')}
             </Button>
             <Button
               onClick={onCreateTag}
               disabled={!tagForm.name.trim() || isLoadingTags}
             >
-              {isLoadingTags ? '생성 중...' : '생성'}
+              {isLoadingTags
+                ? t('tagModal.creating', '생성 중...')
+                : t('tagModal.create', '생성')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -332,10 +371,13 @@ export function ClientTagModal({
               <span className="text-green-600" aria-hidden="true">
                 ✅
               </span>
-              태그 저장 완료
+              {t('successModal.title', '태그 저장 완료')}
             </DialogTitle>
             <DialogDescription id="tag-success-modal-description">
-              태그 변경사항이 성공적으로 저장되었습니다.
+              {t(
+                'successModal.description',
+                '태그 변경사항이 성공적으로 저장되었습니다.'
+              )}
             </DialogDescription>
           </DialogHeader>
           <div className="flex items-center space-x-2">
@@ -349,7 +391,7 @@ export function ClientTagModal({
               onClick={() => setShowTagSuccessModal(false)}
               className="px-6"
             >
-              확인
+              {t('successModal.confirm', '확인')}
             </Button>
           </DialogFooter>
         </DialogContent>

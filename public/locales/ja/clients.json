@@ -1,17 +1,19 @@
 {
   "title": "顧客管理",
   "meta": {
-    "title": "顧客管理",
-    "description": "保険顧客管理システム"
+    "title": "{{clientName}} - 顧客詳細 | SureCRM",
+    "description": "{{clientName}}の詳細情報をご確認ください。"
   },
   "errors": {
     "authRequired": "認証が必要です。",
     "nameRequired": "名前は必須項目です。",
     "pipelineStageError": "パイプラインステージ情報を取得できません。管理者にお問い合わせください。",
     "unknownAction": "不明なアクションです。",
-    "serverError": "サーバーエラーが発生しました",
+    "server": "サーバーエラーが発生しました",
     "unauthorized": "ログインが必要です",
-    "validation": "入力情報を確認してください"
+    "validation": "入力情報を確認してください",
+    "clientDataLoad": "顧客情報を読み込めません",
+    "tagLoadFailed": "利用可能なタグの読み込みに失敗:"
   },
   "list": {
     "allClients": "顧客リスト",
@@ -22,7 +24,15 @@
     "tableViewDescription": "テーブルビューで顧客を素早く比較",
     "noResults": "検索結果がありません",
     "noResultsDescription": "検索条件を変更するか、新しい顧客を追加してください。",
-    "additionalInsurance": "追加保険:"
+    "additionalInsurance": "追加保険:",
+    "title": "顧客一覧",
+    "emptyTitle": "登録された顧客がいません",
+    "emptyDescription": "最初の顧客を追加してみてください",
+    "clientInfo": "顧客情報",
+    "contactHistory": "連絡履歴",
+    "insuranceInfo": "保険情報",
+    "performance": "成果",
+    "actions": "アクション"
   },
   "actions": {
     "addClient": "新しい顧客を追加",
@@ -32,7 +42,15 @@
     "export": "エクスポート",
     "import": "インポート",
     "filter": "フィルター",
-    "search": "検索"
+    "search": "検索",
+    "addCompanion": "同伴者追加",
+    "addNote": "相談内容追加",
+    "addTag": "タグ追加",
+    "addContract": "契約追加",
+    "addDocument": "書類追加",
+    "editInfo": "情報編集",
+    "saveChanges": "変更を保存",
+    "confirmDelete": "削除確認"
   },
   "fields": {
     "name": "名前",
@@ -66,7 +84,23 @@
     "addressNotEntered": "住所未入力",
     "directClient": "直接顧客",
     "referralCount": "{{count}}名紹介",
-    "monthlyPayment": "月払い"
+    "monthlyPayment": "月払い",
+    "fullName": "顧客名",
+    "occupation": "職業",
+    "telecomProvider": "通信会社",
+    "height": "身長",
+    "weight": "体重",
+    "gender": "性別",
+    "hasDrivingLicense": "運転免許",
+    "ssn": "個人番号",
+    "referrer": "紹介者",
+    "relationship": "関係",
+    "insuranceType": "保険種類",
+    "stageName": "営業段階",
+    "totalPremium": "総保険料",
+    "referralHistory": "紹介履歴",
+    "age": "年齢",
+    "bmi": "BMI"
   },
   "status": {
     "active": "キーパーソン",
@@ -79,13 +113,19 @@
     "all": "すべてのステージ",
     "prospect": "見込み客",
     "consultation": "初回面談",
+    "firstConsultation": "初回面談",
     "needs_analysis": "ニーズ分析",
+    "needsAnalysis": "ニーズ分析",
     "proposal": "提案",
+    "productExplanation": "商品説明",
     "negotiation": "交渉",
+    "contractReview": "契約審査",
     "closed_won": "成約",
+    "contractCompleted": "契約完了",
     "lead": "リード",
     "qualified": "認定済み",
-    "lost": "失注"
+    "lost": "失注",
+    "excluded": "除外"
   },
   "modal": {
     "addClient": "顧客追加",
@@ -151,7 +191,11 @@
     "dataManagementLabel": "データ管理",
     "exportButton": "エクスポート",
     "stagePlaceholder": "ステージを選択",
-    "statusPlaceholder": "ステータスを選択"
+    "statusPlaceholder": "ステータスを選択",
+    "allStages": "すべてのステージ",
+    "allSources": "すべてのソース",
+    "clearAll": "すべてクリア",
+    "dataManagement": "データ管理"
   },
   "referralStatus": {
     "all": "すべての顧客",
@@ -172,5 +216,189 @@
     "acquaintance": "知人",
     "company": "会社",
     "other": "その他"
+  },
+  "labels": {
+    "client": "顧客"
+  },
+  "tabs": {
+    "overview": "概要",
+    "notes": "相談内容",
+    "medical": "病歴",
+    "purposes": "検査目的",
+    "interests": "関心事項",
+    "companions": "相談同伴者",
+    "contracts": "保険契約",
+    "documents": "書類",
+    "family": "家族"
+  },
+  "header": {
+    "backToClients": "顧客一覧に戻る",
+    "edit": "編集",
+    "delete": "削除",
+    "createOpportunity": "営業機会作成",
+    "editMode": "編集モード",
+    "save": "保存",
+    "cancel": "キャンセル"
+  },
+  "overview": {
+    "basicInfo": "基本情報",
+    "contactInfo": "連絡先",
+    "personalInfo": "個人情報",
+    "referralInfo": "紹介情報",
+    "notes": "メモ",
+    "familyMembers": "家族構成員"
+  },
+  "modals": {
+    "deleteTitle": "顧客削除",
+    "deleteMessage": "本当にこの顧客を削除しますか？",
+    "saveSuccessTitle": "保存完了",
+    "saveSuccessMessage": "顧客情報が正常に保存されました",
+    "errorTitle": "エラー",
+    "opportunityTitle": "新規営業機会",
+    "companionTitle": "相談同伴者",
+    "noteTitle": "相談内容"
+  },
+  "messages": {
+    "noData": "データがありません",
+    "loading": "読み込み中...",
+    "saveSuccess": "保存しました",
+    "deleteSuccess": "削除しました",
+    "createSuccess": "作成しました",
+    "familyInfoPending": "家族情報を準備中です。",
+    "tagSaveSuccess": "タグが正常に保存されました。",
+    "tagCreateSuccess": "新しいタグが正常に作成されました。",
+    "tagRemoveSuccess": "タグが正常に削除されました。"
+  },
+  "sidebar": {
+    "editTooltip": "顧客情報編集",
+    "deleteTooltip": "顧客削除",
+    "noInfo": "情報なし",
+    "clickToInput": "クリックして入力",
+    "clickToSelect": "クリックして選択",
+    "emailNotSet": "メール未入力",
+    "addressNotSet": "住所未入力",
+    "occupationNotSet": "職業未入力",
+    "telecomLabel": "通信会社",
+    "selectTelecom": "通信会社選択",
+    "customTelecom": "その他（直接入力）",
+    "telecomPlaceholder": "通信会社名を直接入力してください",
+    "telecomExample": "💡 例：NTTドコモ、au、ソフトバンク、楽天モバイル等",
+    "notSelected": "未選択",
+    "currentStage": "現在のステージ",
+    "notSet": "未設定",
+    "notInPipelineHelp": "は営業パイプラインにまだ入っていない状態です。「営業機会作成」ボタンでパイプラインに追加できます。",
+    "personalInfo": "個人情報",
+    "birthDate": "生年月日",
+    "birthDateNotSet": "生年月日未入力",
+    "standardAge": "満年齢",
+    "koreanAge": "韓国式年齢",
+    "insuranceAge": "保険年齢",
+    "ageUnit": "歳",
+    "agePreview": "年齢プレビュー",
+    "gender": "性別",
+    "male": "男性",
+    "female": "女性",
+    "genderNotSet": "性別未入力",
+    "bodyInfo": "身体情報",
+    "height": "身長",
+    "weight": "体重",
+    "bmi": "BMI",
+    "cmUnit": "cm",
+    "kgUnit": "kg",
+    "notEntered": "未入力",
+    "driving": "運転",
+    "canDrive": "運転可能",
+    "cannotDrive": "運転不可",
+    "sensitiveDataManagement": "機密情報管理",
+    "ssnLabel": "マイナンバー",
+    "sensitiveData": "機密情報",
+    "ssnAutoCalculate": "マイナンバー入力時に自動的に生年月日が計算されます。",
+    "ssnFrontHelp": "前6桁：生年月日（YYMMDD）",
+    "ssnBackHelp": "後7桁：性別および世紀を含む",
+    "referralInfo": "紹介情報",
+    "whoReferredClient": "この顧客を紹介した人",
+    "selectReferrer": "紹介者選択",
+    "directDevelopment": "直接開発（紹介者なし）",
+    "referrerChangeHelp": "紹介者を変更すると紹介ネットワークが更新されます。",
+    "referrerBadge": "紹介者",
+    "directClient": "直接開発顧客",
+    "newDevelopment": "新規開発",
+    "clientsReferredBy": "この顧客が紹介した人々",
+    "totalReferrals": "合計{{count}}名紹介",
+    "referralContributor": "紹介貢献者",
+    "noReferralsYet": "まだ紹介した顧客がいません",
+    "potentialReferrer": "潜在的紹介者",
+    "noTags": "タグがありません",
+    "addTag": "タグ追加",
+    "importanceHigh": "キーパーソン",
+    "importanceMedium": "一般",
+    "importanceLow": "見込み",
+    "telecomNone": "選択なし",
+    "telecomSKT": "SKT",
+    "telecomKT": "KT",
+    "telecomLGU": "LG U+",
+    "telecomBudgetSKT": "格安SKT",
+    "telecomBudgetKT": "格安KT",
+    "telecomBudgetLGU": "格安LG U+",
+    "relationshipSpouse": "配偶者",
+    "relationshipChild": "子供",
+    "relationshipParent": "親",
+    "relationshipSibling": "兄弟・姉妹",
+    "relationshipFriend": "友人",
+    "relationshipColleague": "同僚",
+    "relationshipOther": "その他"
+  },
+  "tagModal": {
+    "title": "タグ管理",
+    "description": "顧客に適用するタグを選択するか、新しいタグを作成してください。チェックボックスでタグを選択し、適用ボタンをクリックして保存してください。",
+    "createNewTag": "新しいタグを作成",
+    "create": "作成",
+    "createDescription": "新しいタグを作成して顧客を分類・管理してください。",
+    "availableTags": "利用可能なタグ",
+    "loadingTags": "タグを読み込み中...",
+    "noTagsAvailable": "利用可能なタグがありません。",
+    "createNewTagSuggestion": "新しいタグを作成してみてください。",
+    "saving": "保存中...",
+    "apply": "適用",
+    "creating": "作成中..."
+  },
+  "createTagModal": {
+    "title": "新しいタグを作成",
+    "description": "新しいタグを作成して顧客を効率的に分類してください。タグ名と色を設定できます。",
+    "tagName": "タグ名",
+    "tagNamePlaceholder": "例：キー顧客、新規顧客、見込み顧客",
+    "tagColor": "タグの色",
+    "description": "説明",
+    "optional": "任意",
+    "descriptionPlaceholder": "タグの説明を入力してください",
+    "preview": "プレビュー",
+    "previewPlaceholder": "タグ名を入力するとプレビューが表示されます。"
+  },
+  "successModal": {
+    "title": "タグ保存完了",
+    "description": "タグの変更が正常に保存されました。",
+    "confirm": "確認"
+  },
+  "deleteModal": {
+    "title": "顧客削除確認",
+    "description": "本当に「{{clientName}}」顧客を削除しますか？",
+    "warning": "この顧客に関連するすべてのデータ（保険情報、会議記録、連絡履歴など）が一緒に削除されます。"
+  },
+  "saveModal": {
+    "title": "保存完了",
+    "description": "顧客情報が正常に更新されました。",
+    "confirm": "確認"
+  },
+  "deleteSuccessModal": {
+    "title": "削除完了",
+    "description": "「{{clientName}}」顧客が正常に削除されました。",
+    "redirectInfo": "間もなく顧客リストに移動します。",
+    "goToClientsList": "顧客リストに移動"
+  },
+  "companionDeleteModal": {
+    "title": "同伴者削除確認",
+    "description": "本当に「{{companionName}}」同伴者を削除しますか？",
+    "itemType": "相談同伴者",
+    "warning": "削除された同伴者情報は復元できません。"
   }
 }

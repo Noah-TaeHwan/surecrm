@@ -2,20 +2,31 @@ import { z } from 'zod';
 
 // 🎯 상수 정의 (하드코딩 제거)
 export const IMPORTANCE_OPTIONS = [
-  { value: 'high', label: '키맨' },
-  { value: 'medium', label: '일반' },
-  { value: 'low', label: '관심' },
+  { value: 'high', labelKey: 'sidebar.importanceHigh', fallback: '키맨' },
+  { value: 'medium', labelKey: 'sidebar.importanceMedium', fallback: '일반' },
+  { value: 'low', labelKey: 'sidebar.importanceLow', fallback: '관심' },
 ] as const;
 
 export const TELECOM_PROVIDER_OPTIONS = [
-  { value: 'none', label: '선택 안함' },
-  { value: 'SKT', label: 'SKT' },
-  { value: 'KT', label: 'KT' },
-  { value: 'LG U+', label: 'LG U+' },
-  { value: '알뜰폰 SKT', label: '알뜰폰 SKT' },
-  { value: '알뜰폰 KT', label: '알뜰폰 KT' },
-  { value: '알뜰폰 LG U+', label: '알뜰폰 LG U+' },
-  { value: 'custom', label: '기타 (직접 입력)' },
+  { value: 'none', labelKey: 'sidebar.telecomNone', fallback: '선택 안함' },
+  { value: 'SKT', labelKey: 'sidebar.telecomSKT', fallback: 'SKT' },
+  { value: 'KT', labelKey: 'sidebar.telecomKT', fallback: 'KT' },
+  { value: 'LG U+', labelKey: 'sidebar.telecomLGU', fallback: 'LG U+' },
+  {
+    value: '알뜰폰 SKT',
+    labelKey: 'sidebar.telecomBudgetSKT',
+    fallback: '알뜰폰 SKT',
+  },
+  {
+    value: '알뜰폰 KT',
+    labelKey: 'sidebar.telecomBudgetKT',
+    fallback: '알뜰폰 KT',
+  },
+  {
+    value: '알뜰폰 LG U+',
+    labelKey: 'sidebar.telecomBudgetLGU',
+    fallback: '알뜰폰 LG U+',
+  },
 ] as const;
 
 // 🌍 해외 통신사 옵션 추가 (선택적으로 사용)
@@ -32,13 +43,13 @@ export const GLOBAL_TELECOM_PROVIDERS = [
 ] as const;
 
 export const RELATIONSHIP_OPTIONS = [
-  { value: '배우자', label: '배우자', icon: '💑' },
-  { value: '자녀', label: '자녀', icon: '👶' },
-  { value: '부모', label: '부모', icon: '👨‍👩‍👧‍👦' },
-  { value: '형제/자매', label: '형제/자매', icon: '👫' },
-  { value: '친구', label: '친구', icon: '👭' },
-  { value: '동료', label: '동료', icon: '🤝' },
-  { value: '기타', label: '기타', icon: '👤' },
+  { value: '배우자', labelKey: 'sidebar.relationshipSpouse', icon: '💑' },
+  { value: '자녀', labelKey: 'sidebar.relationshipChild', icon: '👶' },
+  { value: '부모', labelKey: 'sidebar.relationshipParent', icon: '👨‍👩‍👧‍👦' },
+  { value: '형제/자매', labelKey: 'sidebar.relationshipSibling', icon: '👫' },
+  { value: '친구', labelKey: 'sidebar.relationshipFriend', icon: '👭' },
+  { value: '동료', labelKey: 'sidebar.relationshipColleague', icon: '🤝' },
+  { value: '기타', labelKey: 'sidebar.relationshipOther', icon: '👤' },
 ] as const;
 import type {
   MedicalHistory,
@@ -247,8 +258,11 @@ export function getClientCardStyle(importance: string) {
   }
 }
 
-// 중요도 배지 가져오기 (원본과 동일한 스타일)
-export function getImportanceBadge(importance: string) {
+// 중요도 배지 가져오기 (번역 키 사용)
+export function getImportanceBadge(
+  importance: string,
+  t?: (key: string, fallback: string) => string
+) {
   // 🎨 중요도별 통일된 색상 시스템 (CSS 변수 사용)
   const importanceStyles = {
     high: 'border bg-[var(--importance-high-badge-bg)] text-[var(--importance-high-badge-text)] border-[var(--importance-high-border)]',
@@ -257,7 +271,13 @@ export function getImportanceBadge(importance: string) {
     low: 'border bg-[var(--importance-low-badge-bg)] text-[var(--importance-low-badge-text)] border-[var(--importance-low-border)]',
   };
 
-  const importanceText = {
+  const importanceTextKeys = {
+    high: 'sidebar.importanceHigh',
+    medium: 'sidebar.importanceMedium',
+    low: 'sidebar.importanceLow',
+  };
+
+  const importanceFallback = {
     high: '키맨',
     medium: '일반',
     low: '관심',
@@ -266,8 +286,14 @@ export function getImportanceBadge(importance: string) {
   const style =
     importanceStyles[importance as keyof typeof importanceStyles] ||
     importanceStyles.medium;
-  const text =
-    importanceText[importance as keyof typeof importanceText] || importance;
+
+  // 번역 함수가 제공되면 번역 키 사용, 없으면 기본값 사용
+  const textKey =
+    importanceTextKeys[importance as keyof typeof importanceTextKeys];
+  const fallback =
+    importanceFallback[importance as keyof typeof importanceFallback] ||
+    importance;
+  const text = t && textKey ? t(textKey, fallback) : fallback;
 
   return { style, text };
 }
@@ -434,4 +460,36 @@ export function createEditFormDataFromClient(client: any): EditFormData {
     gender: client?.gender || '',
     ssnError: undefined,
   };
+}
+
+// 🆕 파이프라인 단계 이름 번역 함수
+export function getTranslatedStageName(
+  stageName: string | null | undefined,
+  t: (key: string, fallback: string, options?: any) => string
+): string {
+  if (!stageName) {
+    return t('sidebar.notSet', '미설정');
+  }
+
+  // 한국어 단계명을 번역 키로 매핑
+  const stageKeyMap: Record<string, string> = {
+    '첫 상담': 'stages.firstConsultation',
+    '니즈 분석': 'stages.needsAnalysis',
+    '상품 설명': 'stages.productExplanation',
+    '계약 검토': 'stages.contractReview',
+    '계약 완료': 'stages.contractCompleted',
+    잠재고객: 'stages.prospect',
+    리드: 'stages.lead',
+    검증됨: 'stages.qualified',
+    실패: 'stages.lost',
+    제외됨: 'stages.excluded',
+  };
+
+  const translationKey = stageKeyMap[stageName];
+  if (translationKey) {
+    return t(translationKey, stageName); // 번역 키가 있으면 번역, 없으면 원래 값을 fallback으로 사용
+  }
+
+  // 매핑되지 않은 단계명은 그대로 반환
+  return stageName;
 }

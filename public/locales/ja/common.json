@@ -178,6 +178,26 @@
   "layout": {
     "defaultUserName": "ユーザー"
   },
-  "language": "言語",
-  "selectLanguage": "言語選択"
+  "language": {
+    "language": "言語",
+    "selectLanguage": "言語選択"
+  },
+  "labels": {
+    "this": "この"
+  },
+  "deleteConfirmationModal": {
+    "defaultTitle": "削除",
+    "defaultDescription": "本当に削除しますか？",
+    "warningTitle": "注意事項",
+    "warningItems": {
+      "irreversible": "この操作は元に戻せません。",
+      "allDataDeleted": "関連するすべてのデータが一緒に削除されます。",
+      "noRecovery": "削除後の復旧は不可能です。"
+    },
+    "buttons": {
+      "cancel": "キャンセル",
+      "delete": "削除",
+      "deleting": "削除中..."
+    }
+  }
 }

@@ -28,6 +28,12 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   }
 
   try {
+    // 🌐 서버사이드 번역 추가
+    const { createServerTranslator } = await import(
+      '~/lib/i18n/language-manager.server'
+    );
+    const { t } = await createServerTranslator(request, 'clients');
+
     // 🔥 구독 상태 확인 (트라이얼 만료 시 billing 페이지로 리다이렉트)
     const { requireActiveSubscription } = await import(
       '~/lib/auth/subscription-middleware.server'
@@ -97,7 +103,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
           error:
             overviewError instanceof Error
               ? overviewError.message
-              : '고객 정보를 불러올 수 없습니다.',
+              : t('errors.clientDataLoad', '고객 정보를 불러올 수 없습니다.'),
         };
       }
 
@@ -301,9 +307,10 @@ export async function action({ request, params }: Route.ActionArgs) {
   }
 }
 
-// ✅ meta 함수를 라우트 파일에서 직접 정의
+// ✅ meta 함수에서 간단한 하드코딩 사용
 export function meta({ data }: Route.MetaArgs) {
   const clientName = data?.client?.fullName || '고객';
+
   return [
     { title: `${clientName} - 고객 상세 | SureCRM` },
     { name: 'description', content: `${clientName}의 상세 정보를 확인하세요.` },

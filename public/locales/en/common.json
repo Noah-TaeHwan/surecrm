@@ -178,6 +178,26 @@
   "layout": {
     "defaultUserName": "User"
   },
-  "language": "Language",
-  "selectLanguage": "Select Language"
+  "language": {
+    "language": "Language",
+    "selectLanguage": "Select Language"
+  },
+  "labels": {
+    "this": "this"
+  },
+  "deleteConfirmationModal": {
+    "defaultTitle": "Delete",
+    "defaultDescription": "Are you sure you want to delete?",
+    "warningTitle": "Important Notes",
+    "warningItems": {
+      "irreversible": "This action cannot be undone.",
+      "allDataDeleted": "All related data will be deleted together.",
+      "noRecovery": "Recovery after deletion is not possible."
+    },
+    "buttons": {
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "deleting": "Deleting..."
+    }
+  }
 }

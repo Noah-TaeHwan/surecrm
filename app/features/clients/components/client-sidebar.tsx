@@ -32,6 +32,7 @@ import { Separator } from '~/common/components/ui/separator';
 import {
   getClientCardStyle,
   getImportanceBadge,
+  getTranslatedStageName,
   IMPORTANCE_OPTIONS,
   TELECOM_PROVIDER_OPTIONS,
   calculateAge,
@@ -45,15 +46,19 @@ import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-trans
 interface ClientSidebarProps {
   client: ClientDetailProfile | null;
   isEditing: boolean;
-  editFormData: any;
-  setEditFormData: (data: any) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  editFormData: Record<string, any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, no-unused-vars
+  setEditFormData: React.Dispatch<React.SetStateAction<any>>;
   handleEditStart: () => void;
   handleEditSave: () => void;
   handleEditCancel: () => void;
-  handleSsnChange: (ssnFront: string, ssnBack: string) => void;
-  clientTags: any[];
+  // eslint-disable-next-line no-unused-vars
+  handleSsnChange: (_ssnFront: string, _ssnBack: string) => void;
+  clientTags: Array<{ id: string; name: string; color: string }>;
   handleOpenTagModal: () => void;
-  removeClientTag: (tagId: string) => void;
+  // eslint-disable-next-line no-unused-vars
+  removeClientTag: (_tagId: string) => void;
   availableReferrers?: Array<{ id: string; name: string }>; // 소개자 후보 목록
   onDeleteClient: () => void; // 고객 삭제 콜백
 }
@@ -73,7 +78,7 @@ export function ClientSidebar({
   availableReferrers = [], // 소개자 후보 목록
   onDeleteClient,
 }: ClientSidebarProps) {
-  const { t } = useHydrationSafeTranslation('pipeline');
+  const { t } = useHydrationSafeTranslation('clients');
 
   const cardStyle = getClientCardStyle(client?.importance || 'medium');
 
@@ -141,7 +146,7 @@ export function ClientSidebar({
                       className="bg-primary hover:bg-primary/90 text-primary-foreground"
                     >
                       <Save className="h-4 w-4 mr-1" />
-                      저장
+                      {t('header.save', '저장')}
                     </Button>
                     <Button
                       onClick={handleEditCancel}
@@ -149,7 +154,7 @@ export function ClientSidebar({
                       variant="outline"
                     >
                       <X className="h-4 w-4 mr-1" />
-                      취소
+                      {t('header.cancel', '취소')}
                     </Button>
                   </div>
                 ) : (
@@ -159,7 +164,7 @@ export function ClientSidebar({
                       size="sm"
                       variant="outline"
                       className="hover:bg-primary/10"
-                      title="고객 정보 편집"
+                      title={t('sidebar.editTooltip', '고객 정보 편집')}
                     >
                       <Edit2 className="h-4 w-4" />
                     </Button>
@@ -168,7 +173,7 @@ export function ClientSidebar({
                       size="sm"
                       variant="outline"
                       className="hover:bg-red-50 hover:text-red-600 hover:border-red-200"
-                      title="고객 삭제"
+                      title={t('sidebar.deleteTooltip', '고객 삭제')}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -180,7 +185,7 @@ export function ClientSidebar({
               <div className="space-y-3">
                 <div>
                   <label className="text-xs font-medium text-muted-foreground mb-1 block">
-                    고객명
+                    {t('fields.fullName', '고객명')}
                   </label>
                   <Input
                     value={editFormData.fullName}
@@ -191,12 +196,12 @@ export function ClientSidebar({
                       })
                     }
                     className="text-center text-lg font-semibold"
-                    placeholder="고객명"
+                    placeholder={t('fields.fullName', '고객명')}
                   />
                 </div>
                 <div>
                   <label className="text-xs font-medium text-muted-foreground mb-1 block">
-                    중요도
+                    {t('fields.importance', '중요도')}
                   </label>
                   <Select
                     value={editFormData.importance}
@@ -208,12 +213,14 @@ export function ClientSidebar({
                     }
                   >
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="중요도" />
+                      <SelectValue
+                        placeholder={t('fields.importance', '중요도')}
+                      />
                     </SelectTrigger>
                     <SelectContent>
                       {IMPORTANCE_OPTIONS.map(option => (
                         <SelectItem key={option.value} value={option.value}>
-                          {option.label}
+                          {t(option.labelKey, option.fallback)}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -223,12 +230,13 @@ export function ClientSidebar({
             ) : (
               <>
                 <CardTitle className="text-xl">
-                  {client?.fullName || '고객'}
+                  {client?.fullName || t('labels.client', '고객')}
                 </CardTitle>
                 <div className="flex justify-center">
                   {(() => {
                     const { style, text } = getImportanceBadge(
-                      client?.importance || 'medium'
+                      client?.importance || 'medium',
+                      t
                     );
                     return <Badge className={style}>{text}</Badge>;
                   })()}
@@ -251,12 +259,12 @@ export function ClientSidebar({
                         phone: e.target.value,
                       })
                     }
-                    placeholder="전화번호"
+                    placeholder={t('fields.phone', '전화번호')}
                     className="text-sm"
                   />
                 ) : (
                   <span className="text-sm">
-                    {client?.phone || '정보 없음'}
+                    {client?.phone || t('sidebar.noInfo', '정보 없음')}
                   </span>
                 )}
               </div>
@@ -283,9 +291,9 @@ export function ClientSidebar({
                       <span
                         className="text-muted-foreground italic cursor-pointer hover:text-foreground transition-colors"
                         onClick={handleEditStart}
-                        title="클릭하여 입력"
+                        title={t('sidebar.clickToInput', '클릭하여 입력')}
                       >
-                        이메일 미입력
+                        {t('sidebar.emailNotSet', '이메일 미입력')}
                       </span>
                     )}
                   </span>
@@ -304,7 +312,7 @@ export function ClientSidebar({
                         address: e.target.value,
                       })
                     }
-                    placeholder="주소"
+                    placeholder={t('fields.address', '주소')}
                     className="text-sm"
                   />
                 ) : (
@@ -313,9 +321,9 @@ export function ClientSidebar({
                       <span
                         className="text-muted-foreground italic cursor-pointer hover:text-foreground transition-colors"
                         onClick={handleEditStart}
-                        title="클릭하여 입력"
+                        title={t('sidebar.clickToInput', '클릭하여 입력')}
                       >
-                        주소 미입력
+                        {t('sidebar.addressNotSet', '주소 미입력')}
                       </span>
                     )}
                   </span>
@@ -334,7 +342,7 @@ export function ClientSidebar({
                         occupation: e.target.value,
                       })
                     }
-                    placeholder="직업"
+                    placeholder={t('fields.occupation', '직업')}
                     className="text-sm"
                   />
                 ) : (
@@ -343,9 +351,9 @@ export function ClientSidebar({
                       <span
                         className="text-muted-foreground italic cursor-pointer hover:text-foreground transition-colors"
                         onClick={handleEditStart}
-                        title="클릭하여 입력"
+                        title={t('sidebar.clickToInput', '클릭하여 입력')}
                       >
-                        직업 미입력
+                        {t('sidebar.occupationNotSet', '직업 미입력')}
                       </span>
                     )}
                   </span>
@@ -389,16 +397,21 @@ export function ClientSidebar({
                         }}
                       >
                         <SelectTrigger className="text-sm">
-                          <SelectValue placeholder="통신사 선택" />
+                          <SelectValue
+                            placeholder={t(
+                              'sidebar.selectTelecom',
+                              '통신사 선택'
+                            )}
+                          />
                         </SelectTrigger>
                         <SelectContent>
                           {TELECOM_PROVIDER_OPTIONS.map(option => (
                             <SelectItem key={option.value} value={option.value}>
-                              {option.label}
+                              {t(option.labelKey, option.fallback)}
                             </SelectItem>
                           ))}
                           <SelectItem value="custom" className="font-medium">
-                            🌍 기타 (직접 입력)
+                            🌍 {t('sidebar.customTelecom', '기타 (직접 입력)')}
                           </SelectItem>
                         </SelectContent>
                       </Select>
@@ -408,7 +421,10 @@ export function ClientSidebar({
                         <div className="ml-6 space-y-1">
                           <Input
                             type="text"
-                            placeholder="통신사명을 직접 입력하세요"
+                            placeholder={t(
+                              'sidebar.telecomPlaceholder',
+                              '통신사명을 직접 입력하세요'
+                            )}
                             value={customTelecomProvider}
                             onChange={e => {
                               const value = e.target.value;
@@ -422,7 +438,7 @@ export function ClientSidebar({
                           />
                           <p className="text-xs text-muted-foreground">
                             {t(
-                              'forms.addClient.telecom.exampleText',
+                              'sidebar.telecomExample',
                               '💡 예: Verizon, AT&T, T-Mobile, Vodafone 등'
                             )}
                           </p>
@@ -432,15 +448,15 @@ export function ClientSidebar({
                   ) : (
                     <span className="text-sm">
                       <span className="text-xs text-muted-foreground mr-2">
-                        통신사
+                        {t('sidebar.telecomLabel', '통신사')}
                       </span>
                       {client?.telecomProvider || (
                         <span
                           className="text-muted-foreground italic cursor-pointer hover:text-foreground transition-colors"
                           onClick={handleEditStart}
-                          title="클릭하여 선택"
+                          title={t('sidebar.clickToSelect', '클릭하여 선택')}
                         >
-                          미선택
+                          {t('sidebar.notSelected', '미선택')}
                         </span>
                       )}
                     </span>
@@ -453,18 +469,22 @@ export function ClientSidebar({
 
             {/* 현재 단계 - 위로 이동 */}
             <div className="space-y-2">
-              <h4 className="text-sm font-medium">현재 단계</h4>
+              <h4 className="text-sm font-medium">
+                {t('sidebar.currentStage', '현재 단계')}
+              </h4>
               <Badge
                 variant="outline"
                 className="w-full justify-center h-10 text-md font-semibold"
               >
-                {client?.currentStage?.name || '미설정'}
+                {getTranslatedStageName(client?.currentStage?.name, t)}
               </Badge>
               {!client?.currentStage?.name && (
                 <div className="text-xs text-muted-foreground bg-muted/20 p-2 rounded border-l-2 border-muted-foreground/30">
-                  💡 <strong>미설정</strong>은 아직 영업 파이프라인에 진입하지
-                  않은 상태입니다. "새 영업 기회" 버튼을 눌러 파이프라인에
-                  추가할 수 있습니다.
+                  💡 <strong>{t('sidebar.notSet', '미설정')}</strong>
+                  {t(
+                    'sidebar.notInPipelineHelp',
+                    '은 아직 영업 파이프라인에 진입하지 않은 상태입니다. "새 영업 기회" 버튼을 눌러 파이프라인에 추가할 수 있습니다.'
+                  )}
                 </div>
               )}
             </div>
@@ -473,12 +493,14 @@ export function ClientSidebar({
 
             {/* 개인 상세 정보 */}
             <div className="space-y-3">
-              <h4 className="text-sm font-medium">개인 정보</h4>
+              <h4 className="text-sm font-medium">
+                {t('sidebar.personalInfo', '개인 정보')}
+              </h4>
 
               {/* 생년월일 - 항상 표시 */}
               <div className="flex items-center gap-3">
                 <span className="text-sm text-muted-foreground min-w-[50px]">
-                  생년월일
+                  {t('sidebar.birthDate', '생년월일')}
                 </span>
                 {!isEditing ? (
                   client?.extendedDetails?.birthDate ? (
@@ -491,28 +513,28 @@ export function ClientSidebar({
                       {/* 3가지 나이 표시 */}
                       <div className="text-xs text-muted-foreground space-y-1">
                         <div>
-                          만 나이:{' '}
+                          {t('sidebar.standardAge', '만 나이')}:{' '}
                           {calculateAge(
                             new Date(client.extendedDetails.birthDate),
                             'standard'
                           )}
-                          세
+                          {t('sidebar.ageUnit', '세')}
                         </div>
                         <div>
-                          한국 나이:{' '}
+                          {t('sidebar.koreanAge', '한국 나이')}:{' '}
                           {calculateAge(
                             new Date(client.extendedDetails.birthDate),
                             'korean'
                           )}
-                          세
+                          {t('sidebar.ageUnit', '세')}
                         </div>
                         <div>
-                          보험 나이:{' '}
+                          {t('sidebar.insuranceAge', '보험 나이')}:{' '}
                           {calculateAge(
                             new Date(client.extendedDetails.birthDate),
                             'insurance'
                           )}
-                          세
+                          {t('sidebar.ageUnit', '세')}
                         </div>
                       </div>
                     </div>
@@ -520,9 +542,9 @@ export function ClientSidebar({
                     <span
                       className="text-sm text-muted-foreground italic cursor-pointer hover:text-foreground transition-colors"
                       onClick={handleEditStart}
-                      title="클릭하여 입력"
+                      title={t('sidebar.clickToInput', '클릭하여 입력')}
                     >
-                      생년월일 미입력
+                      {t('sidebar.birthDateNotSet', '생년월일 미입력')}
                     </span>
                   )
                 ) : (
@@ -543,43 +565,43 @@ export function ClientSidebar({
                       {editFormData.birthDate && (
                         <div className="mt-2 p-2 border rounded-md bg-muted/20">
                           <div className="text-xs text-foreground font-medium mb-1">
-                            📅 나이 미리보기:
+                            📅 {t('sidebar.agePreview', '나이 미리보기')}:
                           </div>
                           <div className="text-xs space-y-1">
                             <div>
                               <span className="text-green-700 dark:text-green-400">
-                                만 나이:
+                                {t('sidebar.standardAge', '만 나이')}:
                               </span>
                               <span className="ml-1 font-medium text-foreground">
                                 {calculateAge(
                                   new Date(editFormData.birthDate),
                                   'standard'
                                 )}
-                                세
+                                {t('sidebar.ageUnit', '세')}
                               </span>
                             </div>
                             <div>
                               <span className="text-amber-700 dark:text-amber-400">
-                                한국 나이:
+                                {t('sidebar.koreanAge', '한국 나이')}:
                               </span>
                               <span className="ml-1 font-medium text-foreground">
                                 {calculateAge(
                                   new Date(editFormData.birthDate),
                                   'korean'
                                 )}
-                                세
+                                {t('sidebar.ageUnit', '세')}
                               </span>
                             </div>
                             <div>
                               <span className="text-blue-700 dark:text-blue-400">
-                                보험 나이:
+                                {t('sidebar.insuranceAge', '보험 나이')}:
                               </span>
                               <span className="ml-1 font-medium text-foreground">
                                 {calculateAge(
                                   new Date(editFormData.birthDate),
                                   'insurance'
                                 )}
-                                세
+                                {t('sidebar.ageUnit', '세')}
                               </span>
                             </div>
                           </div>
@@ -593,22 +615,22 @@ export function ClientSidebar({
               {/* 성별 - 항상 표시 */}
               <div className="flex items-center gap-3">
                 <span className="text-sm text-muted-foreground min-w-[50px]">
-                  성별
+                  {t('sidebar.gender', '성별')}
                 </span>
                 {!isEditing ? (
                   client?.extendedDetails?.gender ? (
                     <Badge variant="outline" className="text-xs">
                       {client.extendedDetails.gender === 'male'
-                        ? '남성'
-                        : '여성'}
+                        ? t('sidebar.male', '남성')
+                        : t('sidebar.female', '여성')}
                     </Badge>
                   ) : (
                     <span
                       className="text-sm text-muted-foreground italic cursor-pointer hover:text-foreground transition-colors"
                       onClick={handleEditStart}
-                      title="클릭하여 입력"
+                      title={t('sidebar.clickToInput', '클릭하여 입력')}
                     >
-                      성별 미입력
+                      {t('sidebar.genderNotSet', '성별 미입력')}
                     </span>
                   )
                 ) : (
@@ -627,7 +649,9 @@ export function ClientSidebar({
                         }
                         className="text-xs"
                       />
-                      <span className="text-xs">남성</span>
+                      <span className="text-xs">
+                        {t('sidebar.male', '남성')}
+                      </span>
                     </label>
                     <label className="flex items-center gap-1 cursor-pointer">
                       <input
@@ -643,7 +667,9 @@ export function ClientSidebar({
                         }
                         className="text-xs"
                       />
-                      <span className="text-xs">여성</span>
+                      <span className="text-xs">
+                        {t('sidebar.female', '여성')}
+                      </span>
                     </label>
                   </div>
                 )}
@@ -654,12 +680,14 @@ export function ClientSidebar({
 
             {/* 신체 정보 */}
             <div className="space-y-3">
-              <h4 className="text-sm font-medium">신체 정보</h4>
+              <h4 className="text-sm font-medium">
+                {t('sidebar.bodyInfo', '신체 정보')}
+              </h4>
 
               {/* 키 - 항상 표시 */}
               <div className="flex items-center gap-3">
                 <span className="text-sm text-muted-foreground min-w-[40px]">
-                  키
+                  {t('sidebar.height', '키')}
                 </span>
                 {isEditing ? (
                   <Input
@@ -675,25 +703,30 @@ export function ClientSidebar({
                     className="text-sm"
                   />
                 ) : client?.height ? (
-                  <span className="text-sm">{client.height}cm</span>
+                  <span className="text-sm">
+                    {client.height}
+                    {t('sidebar.cmUnit', 'cm')}
+                  </span>
                 ) : (
                   <span
                     className="text-sm text-muted-foreground italic cursor-pointer hover:text-foreground transition-colors"
                     onClick={handleEditStart}
-                    title="클릭하여 입력"
+                    title={t('sidebar.clickToInput', '클릭하여 입력')}
                   >
-                    미입력
+                    {t('sidebar.notEntered', '미입력')}
                   </span>
                 )}
                 {isEditing && (
-                  <span className="text-xs text-muted-foreground">cm</span>
+                  <span className="text-xs text-muted-foreground">
+                    {t('sidebar.cmUnit', 'cm')}
+                  </span>
                 )}
               </div>
 
               {/* 몸무게 - 항상 표시 */}
               <div className="flex items-center gap-3">
                 <span className="text-sm text-muted-foreground min-w-[40px]">
-                  몸무게
+                  {t('sidebar.weight', '몸무게')}
                 </span>
                 {isEditing ? (
                   <Input
@@ -709,18 +742,23 @@ export function ClientSidebar({
                     className="text-sm"
                   />
                 ) : client?.weight ? (
-                  <span className="text-sm">{client.weight}kg</span>
+                  <span className="text-sm">
+                    {client.weight}
+                    {t('sidebar.kgUnit', 'kg')}
+                  </span>
                 ) : (
                   <span
                     className="text-sm text-muted-foreground italic cursor-pointer hover:text-foreground transition-colors"
                     onClick={handleEditStart}
-                    title="클릭하여 입력"
+                    title={t('sidebar.clickToInput', '클릭하여 입력')}
                   >
-                    미입력
+                    {t('sidebar.notEntered', '미입력')}
                   </span>
                 )}
                 {isEditing && (
-                  <span className="text-xs text-muted-foreground">kg</span>
+                  <span className="text-xs text-muted-foreground">
+                    {t('sidebar.kgUnit', 'kg')}
+                  </span>
                 )}
               </div>
 
@@ -728,7 +766,7 @@ export function ClientSidebar({
               {((isEditing && editingBMI) || (!isEditing && currentBMI)) && (
                 <div className="flex items-center gap-3">
                   <span className="text-sm text-muted-foreground min-w-[40px]">
-                    BMI
+                    {t('sidebar.bmi', 'BMI')}
                   </span>
                   <div className="flex flex-col gap-1">
                     <div className="flex items-center gap-2">
@@ -775,7 +813,7 @@ export function ClientSidebar({
               {/* 운전 여부 - 항상 표시 */}
               <div className="flex items-center gap-3">
                 <span className="text-sm text-muted-foreground min-w-[40px]">
-                  운전
+                  {t('sidebar.driving', '운전')}
                 </span>
                 {isEditing ? (
                   <label className="flex items-center gap-2 cursor-pointer">
@@ -790,7 +828,9 @@ export function ClientSidebar({
                       }
                       className="rounded"
                     />
-                    <span className="text-sm">운전 가능</span>
+                    <span className="text-sm">
+                      {t('sidebar.canDrive', '운전 가능')}
+                    </span>
                   </label>
                 ) : (
                   <Badge
@@ -801,9 +841,9 @@ export function ClientSidebar({
                   >
                     {client?.hasDrivingLicense !== undefined
                       ? client.hasDrivingLicense
-                        ? '운전 가능'
-                        : '운전 불가'
-                      : '미설정'}
+                        ? t('sidebar.canDrive', '운전 가능')
+                        : t('sidebar.cannotDrive', '운전 불가')
+                      : t('sidebar.notSet', '미설정')}
                   </Badge>
                 )}
               </div>
@@ -815,16 +855,16 @@ export function ClientSidebar({
                 <Separator />
                 <div className="space-y-4">
                   <h4 className="text-sm font-medium text-foreground flex items-center gap-2">
-                    🔒 민감정보 관리
+                    🔒 {t('sidebar.sensitiveDataManagement', '민감정보 관리')}
                   </h4>
                   <div className="border border-border rounded-lg p-4 bg-muted/30">
                     <div className="space-y-3">
                       <div className="flex items-center gap-2 mb-3">
                         <span className="text-xs font-medium text-foreground">
-                          주민등록번호
+                          {t('sidebar.ssnLabel', '주민등록번호')}
                         </span>
                         <span className="text-xs text-amber-800 bg-amber-100 px-2 py-1 rounded border border-amber-200 dark:text-amber-300 dark:bg-amber-900/30 dark:border-amber-800">
-                          ⚠️ 민감정보
+                          ⚠️ {t('sidebar.sensitiveData', '민감정보')}
                         </span>
                       </div>
 
@@ -867,15 +907,25 @@ export function ClientSidebar({
                           <div className="flex items-center gap-1">
                             <span>ℹ️</span>
                             <span className="font-medium">
-                              주민등록번호 입력 시 자동으로 생년월일이
-                              계산됩니다.
+                              {t(
+                                'sidebar.ssnAutoCalculate',
+                                '주민등록번호 입력 시 자동으로 생년월일이 계산됩니다.'
+                              )}
                             </span>
                           </div>
                           <div className="text-xs text-amber-700 dark:text-amber-300">
-                            • 앞자리: 생년월일 6자리 (YYMMDD)
+                            •{' '}
+                            {t(
+                              'sidebar.ssnFrontHelp',
+                              '앞자리: 생년월일 6자리 (YYMMDD)'
+                            )}
                           </div>
                           <div className="text-xs text-amber-700 dark:text-amber-300">
-                            • 뒷자리: 성별 및 세기 포함 7자리
+                            •{' '}
+                            {t(
+                              'sidebar.ssnBackHelp',
+                              '뒷자리: 성별 및 세기 포함 7자리'
+                            )}
                           </div>
                         </div>
                       </div>
@@ -889,14 +939,16 @@ export function ClientSidebar({
 
             {/* 소개 정보 */}
             <div className="space-y-3">
-              <h4 className="text-sm font-medium">소개 정보</h4>
+              <h4 className="text-sm font-medium">
+                {t('sidebar.referralInfo', '소개 정보')}
+              </h4>
 
               {/* 누가 이 고객을 소개했는지 */}
               <div className="flex items-center gap-3">
                 <Network className="h-4 w-4 text-muted-foreground" />
                 <div className="flex-1">
                   <div className="text-xs text-muted-foreground mb-1">
-                    이 고객을 소개한 사람
+                    {t('sidebar.whoReferredClient', '이 고객을 소개한 사람')}
                   </div>
                   {isEditing ? (
                     <div className="space-y-2">
@@ -912,11 +964,19 @@ export function ClientSidebar({
                         }}
                       >
                         <SelectTrigger className="w-full text-sm">
-                          <SelectValue placeholder="소개자 선택" />
+                          <SelectValue
+                            placeholder={t(
+                              'sidebar.selectReferrer',
+                              '소개자 선택'
+                            )}
+                          />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="none">
-                            직접 개발 (소개자 없음)
+                            {t(
+                              'sidebar.directDevelopment',
+                              '직접 개발 (소개자 없음)'
+                            )}
                           </SelectItem>
                           {/* 실제 고객 목록 렌더링 */}
                           {availableReferrers.map(referrer => (
@@ -930,7 +990,10 @@ export function ClientSidebar({
                         <div className="flex items-center gap-1">
                           <span>💡</span>
                           <span>
-                            소개자를 변경하면 소개 네트워크가 업데이트됩니다.
+                            {t(
+                              'sidebar.referrerChangeHelp',
+                              '소개자를 변경하면 소개 네트워크가 업데이트됩니다.'
+                            )}
                           </span>
                         </div>
                       </div>
@@ -944,16 +1007,16 @@ export function ClientSidebar({
                         {client.referredBy.name}
                       </Link>
                       <Badge variant="outline" className="text-xs">
-                        소개자
+                        {t('sidebar.referrerBadge', '소개자')}
                       </Badge>
                     </div>
                   ) : (
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-muted-foreground">
-                        직접 개발 고객
+                        {t('sidebar.directClient', '직접 개발 고객')}
                       </span>
                       <Badge variant="secondary" className="text-xs">
-                        신규 개발
+                        {t('sidebar.newDevelopment', '신규 개발')}
                       </Badge>
                     </div>
                   )}
@@ -965,26 +1028,35 @@ export function ClientSidebar({
                 <Network className="h-4 w-4 text-muted-foreground mt-1" />
                 <div className="flex-1">
                   <div className="text-xs text-muted-foreground mb-1">
-                    이 고객이 소개한 사람들
+                    {t('sidebar.clientsReferredBy', '이 고객이 소개한 사람들')}
                   </div>
                   {client?.referredClients &&
                   client.referredClients.length > 0 ? (
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 mb-2">
                         <span className="text-sm font-medium">
-                          총 {client.referralCount}명 소개
+                          {t('sidebar.totalReferrals', '총 {{count}}명 소개', {
+                            count: client.referralCount,
+                          })}
                         </span>
                         <Badge
                           variant="default"
                           className="text-xs bg-green-100 text-green-700 border-green-300"
                         >
-                          소개 기여자
+                          {t('sidebar.referralContributor', '소개 기여자')}
                         </Badge>
                       </div>
                       {/* 실제 소개한 사람들 이름 목록 */}
                       <div className="space-y-1">
                         {client.referredClients.map(
-                          (referredClient: any, index: number) => (
+                          (
+                            referredClient: {
+                              id: string;
+                              name: string;
+                              createdAt: string;
+                            },
+                            index: number
+                          ) => (
                             <div
                               key={referredClient.id}
                               className="flex items-center gap-2"
@@ -1008,10 +1080,13 @@ export function ClientSidebar({
                   ) : (
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-muted-foreground">
-                        아직 소개한 고객이 없습니다
+                        {t(
+                          'sidebar.noReferralsYet',
+                          '아직 소개한 고객이 없습니다'
+                        )}
                       </span>
                       <Badge variant="outline" className="text-xs">
-                        잠재 소개자
+                        {t('sidebar.potentialReferrer', '잠재 소개자')}
                       </Badge>
                     </div>
                   )}
@@ -1024,7 +1099,9 @@ export function ClientSidebar({
             {/* 태그 섹션 */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <h4 className="text-sm font-medium">태그</h4>
+                <h4 className="text-sm font-medium">
+                  {t('sidebar.tags', '태그')}
+                </h4>
                 {clientTags.length > 0 && (
                   <Button
                     variant="ghost"
@@ -1033,13 +1110,13 @@ export function ClientSidebar({
                     className="h-6 text-xs"
                   >
                     <Edit2 className="h-3 w-3 mr-1" />
-                    편집
+                    {t('header.edit', '편집')}
                   </Button>
                 )}
               </div>
               <div className="flex flex-wrap gap-2">
                 {clientTags.length > 0 ? (
-                  clientTags.map((tag: any) => (
+                  clientTags.map(tag => (
                     <Badge
                       key={tag.id}
                       variant="secondary"
@@ -1065,7 +1142,7 @@ export function ClientSidebar({
                   <div className="text-center py-3 w-full">
                     <Target className="h-5 w-5 text-muted-foreground mx-auto mb-2" />
                     <p className="text-xs text-muted-foreground mb-2">
-                      태그가 없습니다
+                      {t('sidebar.noTags', '태그가 없습니다')}
                     </p>
                     <Button
                       variant="outline"
@@ -1074,7 +1151,7 @@ export function ClientSidebar({
                       onClick={handleOpenTagModal}
                     >
                       <Plus className="h-3 w-3 mr-1" />
-                      태그 추가
+                      {t('sidebar.addTag', '태그 추가')}
                     </Button>
                   </div>
                 )}
