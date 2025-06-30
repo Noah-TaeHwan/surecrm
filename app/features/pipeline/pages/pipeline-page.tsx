@@ -45,11 +45,28 @@ import {
 } from '~/features/pipeline/lib/supabase-pipeline-data';
 import { requireAuth } from '~/lib/auth/middleware.server';
 import { redirect } from 'react-router';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 
-export function meta({ data, params }: Route.MetaArgs) {
+export function meta() {
   return [
     { title: '영업 파이프라인 - SureCRM' },
-    { name: 'description', content: '영업 단계별 고객 관리 파이프라인' },
+    {
+      name: 'description',
+      content:
+        '영업 단계별 고객 관리 파이프라인으로 효율적인 영업 프로세스를 구축하세요.',
+    },
+    { property: 'og:title', content: '영업 파이프라인 - SureCRM' },
+    {
+      property: 'og:description',
+      content:
+        '영업 단계별 고객 관리 파이프라인으로 효율적인 영업 프로세스를 구축하세요.',
+    },
+    { name: 'twitter:title', content: '영업 파이프라인 - SureCRM' },
+    {
+      name: 'twitter:description',
+      content:
+        '영업 단계별 고객 관리 파이프라인으로 효율적인 영업 프로세스를 구축하세요.',
+    },
   ];
 }
 
@@ -480,6 +497,7 @@ export async function action({ request }: Route.ActionArgs) {
 
 export default function PipelinePage({ loaderData }: Route.ComponentProps) {
   const { stages, clients, totalAllClients, currentUser, error } = loaderData;
+  const { t } = useHydrationSafeTranslation('pipeline');
 
   // 🎯 로딩 상태 감지
   const [isLoading, setIsLoading] = useState(false);
@@ -1308,41 +1326,41 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
   const statsCards = [
     {
       id: 'total-clients',
-      title: '전체 고객',
+      title: t('stats.totalClients', '전체 고객'),
       value: totalStats.totalAllClients,
-      description: '고객 관리의 모든 고객',
+      description: t('stats.totalClientsDesc', '고객 관리의 모든 고객'),
       icon: Users,
       color: 'blue' as StatsCardColor,
     },
     {
       id: 'pipeline-clients',
-      title: '영업 관리 중',
+      title: t('stats.activeClients', '영업 관리 중'),
       value: totalStats.pipelineClients,
-      description: '현재 파이프라인 진행 중',
+      description: t('stats.activeClientsDesc', '현재 파이프라인 진행 중'),
       icon: TrendingUp,
       color: 'orange' as StatsCardColor,
     },
     {
       id: 'contracted-clients',
-      title: '계약 완료',
+      title: t('stats.contractedClients', '계약 완료'),
       value: totalStats.contractedClients,
-      description: '실제 성과 달성 고객',
+      description: t('stats.contractedClientsDesc', '실제 성과 달성 고객'),
       icon: Target,
       color: 'green' as StatsCardColor,
     },
     {
       id: 'high-value-clients',
-      title: '키맨 고객',
+      title: t('importance.high', '키맨 고객'),
       value: totalStats.highValueClients,
-      description: '고가치 중요 고객',
+      description: t('stats.highValueClientsDesc', '고가치 중요 고객'),
       icon: Users,
       color: 'red' as StatsCardColor,
     },
     {
       id: 'conversion-rate',
-      title: '전환율',
+      title: t('stats.conversionRate', '전환율'),
       value: `${totalStats.conversionRate}%`,
-      description: '계약 완료 성공률',
+      description: t('stats.conversionRateDesc', '계약 완료 성공률'),
       icon: TrendingUp,
       color: 'emerald' as StatsCardColor,
     },
@@ -1381,7 +1399,7 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
   // 🎯 에러 상태 처리
   if (error) {
     return (
-      <MainLayout title="영업 파이프라인">
+      <MainLayout title={t('page.title', '영업 파이프라인')}>
         <PipelineErrorBoundary
           error={new Error(error)}
           reset={() => {
@@ -1396,18 +1414,18 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
   // 🎯 로딩 상태 처리 (데이터가 없거나 재시도 중)
   if (!stages || !clients || isLoading) {
     return (
-      <MainLayout title="영업 파이프라인">
+      <MainLayout title={t('page.title', '영업 파이프라인')}>
         <PipelineLoadingSkeleton
           stageCount={4}
           itemsPerStage={3}
-          aria-label="영업 파이프라인 데이터 로딩 중"
+          aria-label={t('page.loading', '영업 파이프라인 데이터 로딩 중')}
         />
       </MainLayout>
     );
   }
 
   return (
-    <MainLayout title="영업 파이프라인">
+    <MainLayout title={t('page.title', '영업 파이프라인')}>
       <style>
         {`
           /* 🎯 데스크톱 기존 스타일 복원 */
@@ -1481,7 +1499,10 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       type="search"
-                      placeholder="고객명, 전화번호 검색..."
+                      placeholder={t(
+                        'search.placeholder',
+                        '고객명, 전화번호 검색...'
+                      )}
                       value={searchQuery}
                       onChange={e => setSearchQuery(e.target.value)}
                       className="pl-10 w-full"
@@ -1496,22 +1517,22 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
                     <div className="flex items-center gap-2">
                       {searchQuery && (
                         <Badge variant="secondary" className="text-xs">
-                          검색: {searchQuery}
+                          {t('search.searching', '검색')}: {searchQuery}
                         </Badge>
                       )}
                       {selectedImportance !== 'all' && (
                         <Badge variant="secondary" className="text-xs">
-                          중요도:{' '}
+                          {t('filters.importance', '중요도')}:{' '}
                           {selectedImportance === 'high'
-                            ? '높음'
+                            ? t('importance.highValue', '높음')
                             : selectedImportance === 'medium'
-                              ? '보통'
-                              : '낮음'}
+                              ? t('importance.mediumValue', '보통')
+                              : t('importance.lowValue', '낮음')}
                         </Badge>
                       )}
                       {selectedReferrerId && (
                         <Badge variant="secondary" className="text-xs">
-                          소개자:{' '}
+                          {t('forms.addClient.fields.referredBy', '소개자')}:{' '}
                           {
                             potentialReferrers.find(
                               (r: { id: string; name: string }) =>
@@ -1531,7 +1552,7 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
                         className="flex items-center gap-2"
                       >
                         <SlidersHorizontal className="h-4 w-4" />
-                        <span>필터</span>
+                        <span>{t('actions.filter', '필터')}</span>
                         {isFilterActive && (
                           <Badge
                             variant="destructive"
@@ -1567,7 +1588,9 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
                   className="flex items-center gap-2"
                 >
                   <UserPlus className="h-4 w-4" />
-                  <span>기존 고객 영업 기회 추가</span>
+                  <span>
+                    {t('actions.addExistingClient', '기존 고객 영업 기회 추가')}
+                  </span>
                 </Button>
 
                 <Button
@@ -1575,7 +1598,7 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
                   className="flex items-center gap-2"
                 >
                   <Plus className="h-4 w-4" />
-                  <span>신규 고객 추가</span>
+                  <span>{t('actions.addClient', '신규 고객 추가')}</span>
                 </Button>
               </div>
             </div>
@@ -1603,8 +1626,9 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
               <div className="flex items-center gap-2">
                 <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm font-medium">
-                  필터 적용됨: {filteredClients.length}명의 고객이 표시되고
-                  있습니다
+                  {t('filters.applied', '필터 적용됨')}:{' '}
+                  {filteredClients.length}
+                  {t('labels.clients', '명의 고객이 표시되고 있습니다')}
                 </span>
               </div>
               <Button
@@ -1616,7 +1640,7 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
                   setSelectedImportance('all');
                 }}
               >
-                필터 초기화
+                {t('filters.clear', '필터 초기화')}
               </Button>
             </div>
           )}

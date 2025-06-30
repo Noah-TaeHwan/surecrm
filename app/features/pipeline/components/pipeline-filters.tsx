@@ -1,6 +1,7 @@
 import { Button } from '~/common/components/ui/button';
 import { Badge } from '~/common/components/ui/badge';
 import { Filter, Tag, Users } from 'lucide-react';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 import {
   Card,
   CardContent,
@@ -37,16 +38,18 @@ export function PipelineFilters({
   selectedImportance,
   onImportanceChange,
 }: PipelineFiltersProps) {
+  const { t } = useHydrationSafeTranslation('pipeline');
+
   const getImportanceLabel = (importance: string) => {
     switch (importance) {
       case 'high':
-        return '높음';
+        return t('importance.highValue', '높음');
       case 'medium':
-        return '중간';
+        return t('importance.mediumValue', '중간');
       case 'low':
-        return '낮음';
+        return t('importance.lowValue', '낮음');
       default:
-        return '전체';
+        return t('importance.all', '전체');
     }
   };
 
@@ -70,9 +73,11 @@ export function PipelineFilters({
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center">
             <Tag className="h-4 w-4 mr-2" />
-            중요도 필터
+            {t('filters.importance', '중요도 필터')}
           </CardTitle>
-          <CardDescription>고객의 중요도 수준으로 필터링합니다</CardDescription>
+          <CardDescription>
+            {t('filters.importanceDesc', '고객의 중요도 수준으로 필터링합니다')}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <RadioGroup
@@ -116,16 +121,19 @@ export function PipelineFilters({
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center">
             <Users className="h-4 w-4 mr-2" />
-            소개자 필터
+            {t('filters.referrer', '소개자 필터')}
           </CardTitle>
-          <CardDescription>소개자별로 고객을 필터링합니다</CardDescription>
+          <CardDescription>
+            {t('filters.referrerDesc', '소개자별로 고객을 필터링합니다')}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {referrers.length > 0 ? (
             <Accordion type="single" collapsible className="w-full">
               <AccordionItem value="referrers">
                 <AccordionTrigger className="text-sm">
-                  소개자 목록 ({referrers.length}명)
+                  {t('filters.referrerList', '소개자 목록')} ({referrers.length}
+                  {t('labels.people', '명')})
                 </AccordionTrigger>
                 <AccordionContent>
                   <RadioGroup
@@ -137,7 +145,9 @@ export function PipelineFilters({
                   >
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="all" id="referrer-all" />
-                      <Label htmlFor="referrer-all">모든 고객</Label>
+                      <Label htmlFor="referrer-all">
+                        {t('filters.allClients', '모든 고객')}
+                      </Label>
                     </div>
                     {referrers.map(referrer => (
                       <div
@@ -159,7 +169,7 @@ export function PipelineFilters({
             </Accordion>
           ) : (
             <div className="text-center text-muted-foreground py-4">
-              소개자 데이터가 없습니다
+              {t('filters.noReferrers', '소개자 데이터가 없습니다')}
             </div>
           )}
         </CardContent>
@@ -175,7 +185,7 @@ export function PipelineFilters({
         }}
       >
         <Filter className="h-4 w-4 mr-2" />
-        필터 초기화
+        {t('filters.clear', '필터 초기화')}
       </Button>
     </div>
   );

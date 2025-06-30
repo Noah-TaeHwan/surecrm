@@ -15,6 +15,7 @@ import {
   CarouselItem,
 } from '~/common/components/ui/carousel';
 import { triggerHapticFeedback } from '../utils/haptic-feedback';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 
 interface PipelineBoardProps {
   stages: (PipelineStage & {
@@ -45,6 +46,8 @@ export function PipelineBoard({
   onCreateContract, // 🏢 계약 전환 핸들러
   onEditOpportunity, // 🏢 영업 기회 편집 핸들러
 }: PipelineBoardProps) {
+  const { t } = useHydrationSafeTranslation('pipeline');
+
   const [draggedClientId, setDraggedClientId] = useState<string | null>(null);
   const dragSourceStageId = useRef<string | null>(null);
   const [draggingOver, setDraggingOver] = useState<string | null>(null);
@@ -456,20 +459,44 @@ export function PipelineBoard({
   // 🎯 단계별 표시 텍스트 생성
   const getStageDisplayText = (stage: PipelineStage) => {
     const stageClients = clientsByStage[stage.id] || [];
-    switch (stage.name) {
-      case '첫 상담':
-        return `${stageClients.length}명 상담 대기`;
-      case '니즈 분석':
-        return `${stageClients.length}명 분석 중`;
-      case '상품 설명':
-        return `${stageClients.length}명 설명 중`;
-      case '계약 검토':
-        return `${stageClients.length}명 검토 중`;
-      case '계약 완료':
-        return `${stageClients.length}명 완료`;
-      default:
-        return `${stageClients.length}명`;
+    const count = stageClients.length;
+
+    // 번역 키 매핑
+    const stageTranslationKey = getStageTranslationKey(stage.name);
+    if (stageTranslationKey) {
+      return t(`stages.stageTexts.${stageTranslationKey}`, `${count}명`, {
+        count,
+      });
     }
+
+    return t('stages.stageTexts.default', `${count}명`, { count });
+  };
+
+  // 🎯 스테이지 이름을 번역 키로 매핑하는 헬퍼 함수
+  const getStageTranslationKey = (stageName: string) => {
+    switch (stageName) {
+      case '첫 상담':
+        return 'firstConsultation';
+      case '니즈 분석':
+        return 'needsAnalysis';
+      case '상품 설명':
+        return 'productExplanation';
+      case '계약 검토':
+        return 'contractReview';
+      case '계약 완료':
+        return 'contractCompleted';
+      default:
+        return null;
+    }
+  };
+
+  // 🎯 스테이지 이름을 번역된 텍스트로 변환하는 함수
+  const getTranslatedStageName = (stageName: string) => {
+    const stageKey = getStageTranslationKey(stageName);
+    if (stageKey) {
+      return t(`stages.${stageKey}`, stageName);
+    }
+    return stageName;
   };
 
   // 🎯 카드 스타일 계산 함수 (하드웨어 가속 최적화)
@@ -546,7 +573,7 @@ export function PipelineBoard({
                             }}
                           />
                           <h3 className="font-semibold text-foreground text-base truncate">
-                            {stage.name}
+                            {getTranslatedStageName(stage.name)}
                           </h3>
                         </div>
 
@@ -562,8 +589,8 @@ export function PipelineBoard({
                           }}
                           title={
                             collapsedStages[stage.id]
-                              ? '고객 카드 보기'
-                              : '고객 카드 숨기기'
+                              ? t('labels.showCards', '고객 카드 보기')
+                              : t('labels.hideCards', '고객 카드 숨기기')
                           }
                         >
                           {collapsedStages[stage.id] ? (
@@ -579,14 +606,18 @@ export function PipelineBoard({
                         <div className="flex items-center space-x-2 text-muted-foreground">
                           <Users className="h-3 w-3" />
                           <span className="font-medium">
-                            {stage.stats.clientCount}명
+                            {t('labels.people', '명', {
+                              count: stage.stats.clientCount,
+                            })}
                           </span>
                         </div>
                         {stage.stats.highImportanceCount > 0 && (
                           <div className="flex items-center space-x-1">
                             <AlertCircle className="h-3 w-3 text-red-500" />
                             <span className="text-xs text-red-600 font-medium">
-                              중요 {stage.stats.highImportanceCount}명
+                              {t('labels.important', '중요 {{count}}명', {
+                                count: stage.stats.highImportanceCount,
+                              })}
                             </span>
                           </div>
                         )}
@@ -657,13 +688,15 @@ export function PipelineBoard({
                                 {getStageDisplayText(stage)}
                               </p>
                               <p className="text-xs text-muted-foreground">
-                                카드가 숨겨짐
+                                {t('labels.cardsHidden', '카드가 숨겨짐')}
                               </p>
 
                               {/* 접힌 상태에서도 드래그 앤 드롭 지원 */}
                               {isDragTarget && canDrop && (
                                 <div className="mt-2 text-xs text-primary font-medium">
-                                  {stage.name}로 이동
+                                  {t('labels.moveTo', '{{stageName}}로 이동', {
+                                    stageName: stage.name,
+                                  })}
                                 </div>
                               )}
                             </div>
@@ -737,7 +770,10 @@ export function PipelineBoard({
                                     <TrendingUp className="h-5 w-5 text-primary" />
                                   </div>
                                   <p className="text-sm font-medium">
-                                    여기에 고객을 놓으세요
+                                    {t(
+                                      'labels.dropClientHere',
+                                      '여기에 고객을 놓으세요'
+                                    )}
                                   </p>
                                 </>
                               ) : (
@@ -746,7 +782,7 @@ export function PipelineBoard({
                                     <Users className="h-5 w-5 text-muted-foreground" />
                                   </div>
                                   <p className="text-sm text-muted-foreground">
-                                    고객이 없습니다
+                                    {t('labels.noClients', '고객이 없습니다')}
                                   </p>
                                 </>
                               )}

@@ -1,0 +1,256 @@
+{
+  "meta": {
+    "title": "営業パイプライン - SureCRM",
+    "description": "段階別顧客管理パイプラインで効率的な営業プロセスを構築しましょう。"
+  },
+  "page": {
+    "title": "営業パイプライン",
+    "description": "営業段階別顧客管理",
+    "errorLoading": "パイプラインデータの読み込みに失敗しました",
+    "errorDescription": "パイプラインデータの読み込み中にエラーが発生しました。",
+    "loading": "営業パイプラインデータ読み込み中"
+  },
+  "stages": {
+    "firstConsultation": "初回相談",
+    "needsAnalysis": "ニーズ分析",
+    "productExplanation": "商品説明",
+    "contractReview": "契約審査",
+    "contractCompleted": "契約完了",
+    "excluded": "除外",
+    "potentialClient": "見込み客",
+    "contact": "接触",
+    "consultation": "相談",
+    "proposal": "提案",
+    "contract": "契約",
+    "stageTexts": {
+      "firstConsultation": "{{count}}名 相談待ち",
+      "needsAnalysis": "{{count}}名 分析中",
+      "productExplanation": "{{count}}名 説明中",
+      "contractReview": "{{count}}名 審査中",
+      "contractCompleted": "{{count}}名 完了",
+      "default": "{{count}}名"
+    }
+  },
+  "importance": {
+    "all": "すべて",
+    "high": "キーパーソン",
+    "medium": "一般",
+    "low": "関心",
+    "highValue": "高",
+    "mediumValue": "中",
+    "lowValue": "低"
+  },
+  "insurance": {
+    "types": {
+      "auto": "自動車保険",
+      "life": "生命保険",
+      "health": "健康保険",
+      "home": "住宅保険",
+      "business": "事業者保険",
+      "prenatal": "胎児保険",
+      "property": "財産保険",
+      "other": "その他保険"
+    }
+  },
+  "stats": {
+    "title": "パイプライン状況",
+    "totalClients": "総顧客数",
+    "totalClientsDesc": "管理中の全顧客",
+    "activeClients": "営業管理中",
+    "activeClientsDesc": "現在パイプライン進行中",
+    "contractedClients": "契約完了",
+    "contractedClientsDesc": "実際の成果達成顧客",
+    "highValueClientsDesc": "高価値重要顧客",
+    "conversionRate": "コンバージョン率",
+    "conversionRateDesc": "契約完了成功率",
+    "avgDealSize": "平均取引規模",
+    "totalRevenue": "総売上",
+    "monthlyTarget": "月間目標",
+    "pipelineValue": "パイプライン価値",
+    "closingRate": "成約率"
+  },
+  "actions": {
+    "addClient": "顧客追加",
+    "addExistingClient": "既存顧客追加",
+    "editClient": "顧客編集",
+    "removeClient": "顧客削除",
+    "moveClient": "段階移動",
+    "createContract": "契約作成",
+    "viewDetails": "詳細表示",
+    "contractConversion": "契約転換",
+    "archive": "アーカイブ",
+    "editOpportunity": "営業機会編集",
+    "save": "保存",
+    "saving": "保存中...",
+    "cancel": "キャンセル",
+    "confirm": "確認",
+    "delete": "削除",
+    "refresh": "更新",
+    "filter": "フィルター",
+    "search": "検索",
+    "export": "エクスポート",
+    "import": "インポート",
+    "click": "クリック"
+  },
+  "filters": {
+    "title": "フィルター",
+    "all": "すべて",
+    "stage": "営業段階",
+    "importance": "重要度フィルター",
+    "importanceDesc": "顧客の重要度レベルでフィルタリングします",
+    "referrer": "紹介者フィルター",
+    "referrerDesc": "紹介者別に顧客をフィルタリングします",
+    "referrerList": "紹介者リスト",
+    "allClients": "すべての顧客",
+    "noReferrers": "紹介者データがありません",
+    "dateRange": "期間",
+    "clear": "フィルタークリア",
+    "apply": "適用",
+    "applied": "フィルター適用済み"
+  },
+  "search": {
+    "placeholder": "顧客名または連絡先で検索...",
+    "noResults": "検索結果が見つかりません",
+    "searching": "検索"
+  },
+  "forms": {
+    "addClient": {
+      "title": "新規顧客追加",
+      "subtitle": "新しい顧客情報を入力してください",
+      "fields": {
+        "fullName": "顧客名",
+        "phone": "電話番号",
+        "email": "メール",
+        "address": "住所",
+        "occupation": "職業",
+        "telecomProvider": "通信会社",
+        "importance": "重要度",
+        "tags": "タグ",
+        "notes": "メモ",
+        "referredBy": "紹介者"
+      },
+      "placeholders": {
+        "fullName": "顧客名を入力してください",
+        "phone": "090-1234-5678",
+        "email": "example@email.com",
+        "address": "住所を入力してください",
+        "occupation": "職業を入力してください",
+        "tags": "タグを入力してください（カンマ区切り）",
+        "notes": "追加メモがあれば入力してください"
+      }
+    },
+    "existingClientOpportunity": {
+      "title": "既存顧客営業機会",
+      "subtitle": "既存顧客に新しい商品を提案しましょう",
+      "fields": {
+        "clientName": "顧客名",
+        "insuranceType": "保険商品",
+        "productName": "商品名",
+        "insuranceCompany": "保険会社",
+        "monthlyPremium": "月額保険料",
+        "expectedCommission": "予想手数料",
+        "notes": "営業メモ"
+      },
+      "placeholders": {
+        "productName": "商品名を入力してください",
+        "insuranceCompany": "保険会社名を入力してください",
+        "monthlyPremium": "月額保険料（円）",
+        "expectedCommission": "予想手数料（円）",
+        "notes": "営業関連のメモを入力してください"
+      }
+    },
+    "quickEdit": {
+      "title": "クイック編集",
+      "subtitle": "顧客情報を素早く修正します"
+    },
+    "removeClient": {
+      "title": "パイプラインから除外",
+      "message": "この顧客を営業パイプラインから除外しますか？",
+      "description": "顧客情報は保持されますが、パイプラインからは除外されます。"
+    }
+  },
+  "cards": {
+    "client": {
+      "priority": "優先度",
+      "stage": "段階",
+      "lastContact": "最終連絡",
+      "revenue": "売上",
+      "commission": "手数料",
+      "products": "商品",
+      "notes": "メモ",
+      "monthlyPremium": "月額保険料",
+      "contractCommission": "契約手数料",
+      "pipelineStay": "パイプライン滞在",
+      "lastConsultation": "最終相談"
+    },
+    "deal": {
+      "value": "取引価値",
+      "probability": "成功確率",
+      "expectedClose": "予想クロージング日",
+      "age": "進行期間"
+    }
+  },
+  "notifications": {
+    "clientAdded": "顧客が正常に追加されました",
+    "clientMoved": "顧客が{{stageName}}段階に移動されました",
+    "clientRemoved": "顧客がパイプラインから除外されました",
+    "opportunityCreated": "{{clientName}}顧客の新しい営業機会が作成されました",
+    "saveSuccess": "変更が保存されました",
+    "saveError": "保存中にエラーが発生しました",
+    "loadError": "データの読み込みに失敗しました"
+  },
+  "errors": {
+    "requiredField": "必須入力項目です",
+    "invalidPhone": "有効な電話番号を入力してください",
+    "invalidEmail": "有効なメールアドレスを入力してください",
+    "clientNotFound": "顧客が見つかりません",
+    "stageNotFound": "営業段階が見つかりません",
+    "networkError": "ネットワークエラーが発生しました",
+    "serverError": "サーバーエラーが発生しました",
+    "unknownError": "不明なエラーが発生しました"
+  },
+  "labels": {
+    "direction": {
+      "horizontal": "左右",
+      "vertical": "上下",
+      "free": "自由"
+    },
+    "status": {
+      "active": "アクティブ",
+      "inactive": "非アクティブ",
+      "pending": "保留中",
+      "completed": "完了"
+    },
+    "clients": "人の顧客が表示されています",
+    "people": "人",
+    "notSet": "未設定",
+    "important": "重要 {{count}}名",
+    "cardsHidden": "カードが非表示",
+    "dropClientHere": "クライアントをここに配置",
+    "noClients": "クライアントがいません",
+    "showCards": "クライアントカードを表示",
+    "hideCards": "クライアントカードを非表示",
+    "moveTo": "{{stageName}}に移動",
+    "days": "{{count}}日",
+    "daysAgo": "{{count}}日前",
+    "referralBy": "{{name}}紹介",
+    "interests": "関心事項",
+    "healthGood": "健康",
+    "healthIssues": "要注意",
+    "urgentContact": "連絡必要",
+    "longStay": "長期滞在"
+  },
+  "tooltips": {
+    "addClient": "パイプラインに新しい顧客を追加します",
+    "moveStage": "顧客を別の営業段階に移動します",
+    "editClient": "顧客情報を編集します",
+    "removeClient": "顧客をパイプラインから除外します",
+    "viewDetails": "顧客の詳細情報を確認します"
+  },
+  "empty": {
+    "stage": "この段階にはまだ顧客がいません",
+    "pipeline": "パイプラインに顧客がいません",
+    "search": "検索結果が見つかりません",
+    "filter": "フィルター条件に合う顧客がいません"
+  }
+}

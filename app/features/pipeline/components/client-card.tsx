@@ -36,6 +36,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router';
 import type { InsuranceInfo } from '~/features/pipeline/types/types';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 
 // 🎨 매직UI 컴포넌트 import
 const BorderBeam = ({
@@ -171,6 +172,7 @@ export function ClientCard({
   totalMonthlyPremium = 0,
   totalExpectedCommission = 0,
 }: ClientCardProps) {
+  const { t } = useHydrationSafeTranslation('pipeline');
   // 🎯 중요도별 스타일 (왼쪽 보더 제거)
   const importanceStyles = {
     high: {
@@ -278,10 +280,10 @@ export function ClientCard({
               className={`${styles.badge} text-xs font-medium flex-shrink-0`}
             >
               {importance === 'high'
-                ? '키맨'
+                ? t('importance.high', '키맨')
                 : importance === 'medium'
-                  ? '일반'
-                  : '관심'}
+                  ? t('importance.medium', '일반')
+                  : t('importance.low', '관심')}
             </Badge>
           </div>
 
@@ -306,14 +308,17 @@ export function ClientCard({
             >
               <div className="flex items-center gap-2 mb-1">
                 <DollarSign className="h-3.5 w-3.5 text-green-600" />
-                <span className="text-xs text-muted-foreground">월 보험료</span>
+                <span className="text-xs text-muted-foreground">
+                  {t('cards.client.monthlyPremium', '월 보험료')}
+                </span>
               </div>
               <p className="text-sm font-semibold text-foreground text-center">
                 {monthlyPremium > 0 ? (
                   formatCurrencyTable(monthlyPremium)
                 ) : (
                   <span className="text-muted-foreground hover:text-foreground transition-colors">
-                    미설정 (클릭)
+                    {t('labels.notSet', '미설정')} ({t('actions.click', '클릭')}
+                    )
                   </span>
                 )}
               </p>
@@ -327,7 +332,7 @@ export function ClientCard({
               <div className="flex items-center gap-2 mb-1">
                 <TrendingUp className="h-3.5 w-3.5 text-blue-600" />
                 <span className="text-xs text-muted-foreground">
-                  계약 수수료
+                  {t('cards.client.contractCommission', '계약 수수료')}
                 </span>
               </div>
               <p className="text-sm font-semibold text-foreground text-center">
@@ -335,7 +340,8 @@ export function ClientCard({
                   formatCurrencyTable(contractCommission)
                 ) : (
                   <span className="text-muted-foreground hover:text-foreground transition-colors">
-                    미설정 (클릭)
+                    {t('labels.notSet', '미설정')} ({t('actions.click', '클릭')}
+                    )
                   </span>
                 )}
               </p>
@@ -352,7 +358,7 @@ export function ClientCard({
                   }`}
                 />
                 <span className="text-xs text-muted-foreground">
-                  파이프라인 체류
+                  {t('cards.client.pipelineStay', '파이프라인 체류')}
                 </span>
               </div>
               <span
@@ -360,7 +366,7 @@ export function ClientCard({
                   isStale ? 'text-orange-600' : 'text-foreground'
                 }`}
               >
-                {daysInPipeline}일
+                {t('labels.days', '{{count}}일', { count: daysInPipeline })}
               </span>
             </div>
 
@@ -373,7 +379,7 @@ export function ClientCard({
                     }`}
                   />
                   <span className="text-xs text-muted-foreground">
-                    마지막 상담
+                    {t('cards.client.lastConsultation', '마지막 상담')}
                   </span>
                 </div>
                 <span
@@ -381,7 +387,9 @@ export function ClientCard({
                     isUrgent ? 'text-red-600' : 'text-foreground'
                   }`}
                 >
-                  {daysSinceLastConsultation}일 전
+                  {t('labels.daysAgo', '{{count}}일 전', {
+                    count: daysSinceLastConsultation,
+                  })}
                 </span>
               </div>
             )}
@@ -392,7 +400,9 @@ export function ClientCard({
             <div className="flex items-center gap-2 p-2 bg-blue-50/50 dark:bg-blue-950/20 rounded-lg">
               <Users className="h-3.5 w-3.5 text-blue-600" />
               <span className="text-xs text-blue-700 dark:text-blue-300 truncate">
-                {referredBy.name} 소개
+                {t('labels.referralBy', '{{name}} 소개', {
+                  name: referredBy.name,
+                })}
               </span>
             </div>
           )}
@@ -401,7 +411,9 @@ export function ClientCard({
           {interestCategories && interestCategories.length > 0 && (
             <div className="space-y-1">
               <div className="flex items-center gap-1">
-                <span className="text-xs text-muted-foreground">관심사항</span>
+                <span className="text-xs text-muted-foreground">
+                  {t('labels.interests', '관심사항')}
+                </span>
               </div>
               <div className="flex items-center gap-1 flex-wrap">
                 {interestCategories.slice(0, 3).map((interest, index) => (
@@ -441,14 +453,16 @@ export function ClientCard({
                 <div className="flex items-center gap-1">
                   <ShieldCheck className="h-3.5 w-3.5 text-green-600" />
                   <span className="text-xs text-green-700 dark:text-green-300">
-                    건강
+                    {t('labels.healthGood', '건강')}
                   </span>
                 </div>
               )}
               {hasHealthIssues === true && (
                 <div className="flex items-center gap-1">
                   <AlertTriangle className="h-3.5 w-3.5 text-orange-500" />
-                  <span className="text-xs text-orange-600">주의</span>
+                  <span className="text-xs text-orange-600">
+                    {t('labels.healthIssues', '주의')}
+                  </span>
                 </div>
               )}
             </div>
@@ -465,7 +479,9 @@ export function ClientCard({
             >
               <AlertTriangle className="h-3.5 w-3.5" />
               <span className="text-xs font-medium">
-                {isUrgent ? '연락 필요' : '장기 체류'}
+                {isUrgent
+                  ? t('labels.urgentContact', '연락 필요')
+                  : t('labels.longStay', '장기 체류')}
               </span>
             </div>
           )}
@@ -477,7 +493,7 @@ export function ClientCard({
               to={`/clients/${id}`}
               className="flex items-center justify-center gap-2 w-full p-2 text-sm text-primary hover:text-primary/80 hover:bg-primary/5 rounded-lg transition-colors group/link"
             >
-              <span>상세보기</span>
+              <span>{t('actions.viewDetails', '상세보기')}</span>
               <ChevronRight className="h-3.5 w-3.5 group-hover/link:translate-x-0.5 transition-transform" />
             </Link>
 
@@ -491,7 +507,7 @@ export function ClientCard({
                 onClick={() => onCreateContract?.(id, name, products)}
               >
                 <ShieldCheck className="h-3 w-3 mr-1" />
-                계약전환
+                {t('actions.contractConversion', '계약전환')}
               </Button>
 
               {/* 📁 영업에서 보관 버튼 */}
@@ -502,7 +518,7 @@ export function ClientCard({
                 onClick={() => onRemoveFromPipeline?.(id, name)}
               >
                 <Archive className="h-3 w-3 mr-1" />
-                보관
+                {t('actions.archive', '보관')}
               </Button>
             </div>
           </div>

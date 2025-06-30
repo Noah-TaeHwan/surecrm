@@ -1,0 +1,256 @@
+{
+  "meta": {
+    "title": "영업 파이프라인 - SureCRM",
+    "description": "영업 단계별 고객 관리 파이프라인으로 효율적인 영업 프로세스를 구축하세요."
+  },
+  "page": {
+    "title": "영업 파이프라인",
+    "description": "영업 단계별 고객 관리",
+    "errorLoading": "파이프라인 데이터 로딩 실패",
+    "errorDescription": "파이프라인 데이터를 불러오는 중 오류가 발생했습니다.",
+    "loading": "영업 파이프라인 데이터 로딩 중"
+  },
+  "stages": {
+    "firstConsultation": "첫 상담",
+    "needsAnalysis": "니즈 분석",
+    "productExplanation": "상품 설명",
+    "contractReview": "계약 검토",
+    "contractCompleted": "계약 완료",
+    "excluded": "제외됨",
+    "potentialClient": "잠재고객",
+    "contact": "접촉",
+    "consultation": "상담",
+    "proposal": "제안",
+    "contract": "계약",
+    "stageTexts": {
+      "firstConsultation": "{{count}}명 상담 대기",
+      "needsAnalysis": "{{count}}명 분석 중",
+      "productExplanation": "{{count}}명 설명 중",
+      "contractReview": "{{count}}명 검토 중",
+      "contractCompleted": "{{count}}명 완료",
+      "default": "{{count}}명"
+    }
+  },
+  "importance": {
+    "all": "전체",
+    "high": "키맨",
+    "medium": "일반",
+    "low": "관심",
+    "highValue": "높음",
+    "mediumValue": "보통",
+    "lowValue": "낮음"
+  },
+  "insurance": {
+    "types": {
+      "auto": "자동차보험",
+      "life": "생명보험",
+      "health": "건강보험",
+      "home": "주택보험",
+      "business": "사업자보험",
+      "prenatal": "태아보험",
+      "property": "재산보험",
+      "other": "기타보험"
+    }
+  },
+  "stats": {
+    "title": "파이프라인 현황",
+    "totalClients": "총 고객 수",
+    "totalClientsDesc": "고객 관리의 모든 고객",
+    "activeClients": "영업 관리 중",
+    "activeClientsDesc": "현재 파이프라인 진행 중",
+    "contractedClients": "계약 완료",
+    "contractedClientsDesc": "실제 성과 달성 고객",
+    "highValueClientsDesc": "고가치 중요 고객",
+    "conversionRate": "전환율",
+    "conversionRateDesc": "계약 완료 성공률",
+    "avgDealSize": "평균 거래 규모",
+    "totalRevenue": "총 매출",
+    "monthlyTarget": "월간 목표",
+    "pipelineValue": "파이프라인 가치",
+    "closingRate": "성약률"
+  },
+  "actions": {
+    "addClient": "고객 추가",
+    "addExistingClient": "기존 고객 추가",
+    "editClient": "고객 편집",
+    "removeClient": "고객 제거",
+    "moveClient": "단계 이동",
+    "createContract": "계약 생성",
+    "viewDetails": "상세보기",
+    "contractConversion": "계약전환",
+    "archive": "보관",
+    "editOpportunity": "영업 기회 편집",
+    "save": "저장",
+    "saving": "저장 중...",
+    "cancel": "취소",
+    "confirm": "확인",
+    "delete": "삭제",
+    "refresh": "새로고침",
+    "filter": "필터",
+    "search": "검색",
+    "export": "내보내기",
+    "import": "가져오기",
+    "click": "클릭"
+  },
+  "filters": {
+    "title": "필터",
+    "all": "전체",
+    "stage": "영업 단계",
+    "importance": "중요도 필터",
+    "importanceDesc": "고객의 중요도 수준으로 필터링합니다",
+    "referrer": "소개자 필터",
+    "referrerDesc": "소개자별로 고객을 필터링합니다",
+    "referrerList": "소개자 목록",
+    "allClients": "모든 고객",
+    "noReferrers": "소개자 데이터가 없습니다",
+    "dateRange": "기간",
+    "clear": "필터 초기화",
+    "apply": "적용",
+    "applied": "필터 적용됨"
+  },
+  "search": {
+    "placeholder": "고객명, 전화번호 검색...",
+    "noResults": "검색 결과가 없습니다",
+    "searching": "검색"
+  },
+  "forms": {
+    "addClient": {
+      "title": "새 고객 추가",
+      "subtitle": "새로운 고객 정보를 입력하세요",
+      "fields": {
+        "fullName": "고객명",
+        "phone": "연락처",
+        "email": "이메일",
+        "address": "주소",
+        "occupation": "직업",
+        "telecomProvider": "통신사",
+        "importance": "중요도",
+        "tags": "태그",
+        "notes": "메모",
+        "referredBy": "소개자"
+      },
+      "placeholders": {
+        "fullName": "고객 이름을 입력하세요",
+        "phone": "010-1234-5678",
+        "email": "example@email.com",
+        "address": "주소를 입력하세요",
+        "occupation": "직업을 입력하세요",
+        "tags": "태그를 입력하세요 (쉼표로 구분)",
+        "notes": "추가 메모가 있다면 입력하세요"
+      }
+    },
+    "existingClientOpportunity": {
+      "title": "기존 고객 영업 기회",
+      "subtitle": "기존 고객에게 새로운 상품을 제안하세요",
+      "fields": {
+        "clientName": "고객명",
+        "insuranceType": "보험 상품",
+        "productName": "상품명",
+        "insuranceCompany": "보험회사",
+        "monthlyPremium": "월 납입료",
+        "expectedCommission": "예상 수수료",
+        "notes": "영업 메모"
+      },
+      "placeholders": {
+        "productName": "상품명을 입력하세요",
+        "insuranceCompany": "보험사명을 입력하세요",
+        "monthlyPremium": "월 납입료 (원)",
+        "expectedCommission": "예상 수수료 (원)",
+        "notes": "영업 관련 메모를 입력하세요"
+      }
+    },
+    "quickEdit": {
+      "title": "빠른 편집",
+      "subtitle": "고객 정보를 빠르게 수정하세요"
+    },
+    "removeClient": {
+      "title": "파이프라인에서 제외",
+      "message": "이 고객을 영업 파이프라인에서 제외하시겠습니까?",
+      "description": "고객 정보는 유지되지만 파이프라인에서는 제외됩니다."
+    }
+  },
+  "cards": {
+    "client": {
+      "priority": "우선순위",
+      "stage": "단계",
+      "lastContact": "최근 연락",
+      "revenue": "매출",
+      "commission": "수수료",
+      "products": "상품",
+      "notes": "메모",
+      "monthlyPremium": "월 보험료",
+      "contractCommission": "계약 수수료",
+      "pipelineStay": "파이프라인 체류",
+      "lastConsultation": "마지막 상담"
+    },
+    "deal": {
+      "value": "거래가치",
+      "probability": "성사확률",
+      "expectedClose": "예상 마감일",
+      "age": "진행 기간"
+    }
+  },
+  "notifications": {
+    "clientAdded": "고객이 성공적으로 추가되었습니다",
+    "clientMoved": "고객이 {{stageName}} 단계로 이동되었습니다",
+    "clientRemoved": "고객이 파이프라인에서 제외되었습니다",
+    "opportunityCreated": "{{clientName}} 고객의 새 영업 기회가 생성되었습니다",
+    "saveSuccess": "변경사항이 저장되었습니다",
+    "saveError": "저장 중 오류가 발생했습니다",
+    "loadError": "데이터를 불러오는데 실패했습니다"
+  },
+  "errors": {
+    "requiredField": "필수 입력 항목입니다",
+    "invalidPhone": "유효한 전화번호를 입력하세요",
+    "invalidEmail": "유효한 이메일 주소를 입력하세요",
+    "clientNotFound": "고객을 찾을 수 없습니다",
+    "stageNotFound": "영업 단계를 찾을 수 없습니다",
+    "networkError": "네트워크 오류가 발생했습니다",
+    "serverError": "서버 오류가 발생했습니다",
+    "unknownError": "알 수 없는 오류가 발생했습니다"
+  },
+  "labels": {
+    "direction": {
+      "horizontal": "좌우",
+      "vertical": "상하",
+      "free": "자유"
+    },
+    "status": {
+      "active": "활성",
+      "inactive": "비활성",
+      "pending": "대기중",
+      "completed": "완료"
+    },
+    "clients": "명의 고객이 표시되고 있습니다",
+    "people": "명",
+    "notSet": "미설정",
+    "important": "중요 {{count}}명",
+    "cardsHidden": "카드가 숨겨짐",
+    "dropClientHere": "여기에 고객을 놓으세요",
+    "noClients": "고객이 없습니다",
+    "showCards": "고객 카드 보기",
+    "hideCards": "고객 카드 숨기기",
+    "moveTo": "{{stageName}}로 이동",
+    "days": "{{count}}일",
+    "daysAgo": "{{count}}일 전",
+    "referralBy": "{{name}} 소개",
+    "interests": "관심사항",
+    "healthGood": "건강",
+    "healthIssues": "주의",
+    "urgentContact": "연락 필요",
+    "longStay": "장기 체류"
+  },
+  "tooltips": {
+    "addClient": "새 고객을 파이프라인에 추가합니다",
+    "moveStage": "고객을 다른 영업 단계로 이동합니다",
+    "editClient": "고객 정보를 편집합니다",
+    "removeClient": "고객을 파이프라인에서 제외합니다",
+    "viewDetails": "고객의 상세 정보를 확인합니다"
+  },
+  "empty": {
+    "stage": "이 단계에는 아직 고객이 없습니다",
+    "pipeline": "파이프라인에 고객이 없습니다",
+    "search": "검색 결과가 없습니다",
+    "filter": "필터 조건에 맞는 고객이 없습니다"
+  }
+}

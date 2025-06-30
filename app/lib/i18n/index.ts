@@ -21,6 +21,7 @@ export const NAMESPACES = [
   'settings', // 설정
   'notifications', // 알림
   'network', // 소개 네트워크
+  'pipeline', // 영업 파이프라인
   'errors', // 에러 메시지
 ] as const;
 

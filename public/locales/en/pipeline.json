@@ -1,0 +1,256 @@
+{
+  "meta": {
+    "title": "Sales Pipeline - SureCRM",
+    "description": "Build an efficient sales process with stage-based customer management pipeline."
+  },
+  "page": {
+    "title": "Sales Pipeline",
+    "description": "Stage-based customer management",
+    "errorLoading": "Failed to load pipeline data",
+    "errorDescription": "An error occurred while loading pipeline data.",
+    "loading": "Loading sales pipeline data"
+  },
+  "stages": {
+    "firstConsultation": "Initial Consultation",
+    "needsAnalysis": "Needs Analysis",
+    "productExplanation": "Product Explanation",
+    "contractReview": "Contract Review",
+    "contractCompleted": "Contract Completed",
+    "excluded": "Excluded",
+    "potentialClient": "Potential Client",
+    "contact": "Contact",
+    "consultation": "Consultation",
+    "proposal": "Proposal",
+    "contract": "Contract",
+    "stageTexts": {
+      "firstConsultation": "{{count}} awaiting consultation",
+      "needsAnalysis": "{{count}} in analysis",
+      "productExplanation": "{{count}} in presentation",
+      "contractReview": "{{count}} in review",
+      "contractCompleted": "{{count}} completed",
+      "default": "{{count}} clients"
+    }
+  },
+  "importance": {
+    "all": "All",
+    "high": "Key Person",
+    "medium": "Regular",
+    "low": "Interest",
+    "highValue": "High",
+    "mediumValue": "Medium",
+    "lowValue": "Low"
+  },
+  "insurance": {
+    "types": {
+      "auto": "Auto Insurance",
+      "life": "Life Insurance",
+      "health": "Health Insurance",
+      "home": "Home Insurance",
+      "business": "Business Insurance",
+      "prenatal": "Prenatal Insurance",
+      "property": "Property Insurance",
+      "other": "Other Insurance"
+    }
+  },
+  "stats": {
+    "title": "Pipeline Status",
+    "totalClients": "Total Clients",
+    "totalClientsDesc": "All clients in management",
+    "activeClients": "Active Clients",
+    "activeClientsDesc": "Currently in pipeline",
+    "contractedClients": "Contracted Clients",
+    "contractedClientsDesc": "Successfully closed deals",
+    "highValueClientsDesc": "High-value key clients",
+    "conversionRate": "Conversion Rate",
+    "conversionRateDesc": "Contract completion rate",
+    "avgDealSize": "Average Deal Size",
+    "totalRevenue": "Total Revenue",
+    "monthlyTarget": "Monthly Target",
+    "pipelineValue": "Pipeline Value",
+    "closingRate": "Closing Rate"
+  },
+  "actions": {
+    "addClient": "Add Client",
+    "addExistingClient": "Add Existing Client",
+    "editClient": "Edit Client",
+    "removeClient": "Remove Client",
+    "moveClient": "Move Stage",
+    "createContract": "Create Contract",
+    "viewDetails": "View Details",
+    "contractConversion": "Convert to Contract",
+    "archive": "Archive",
+    "editOpportunity": "Edit Opportunity",
+    "save": "Save",
+    "saving": "Saving...",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "refresh": "Refresh",
+    "filter": "Filter",
+    "search": "Search",
+    "export": "Export",
+    "import": "Import",
+    "click": "Click"
+  },
+  "filters": {
+    "title": "Filters",
+    "all": "All",
+    "stage": "Sales Stage",
+    "importance": "Importance Filter",
+    "importanceDesc": "Filter customers by importance level",
+    "referrer": "Referrer Filter",
+    "referrerDesc": "Filter customers by referrer",
+    "referrerList": "Referrer List",
+    "allClients": "All Clients",
+    "noReferrers": "No referrer data available",
+    "dateRange": "Date Range",
+    "clear": "Clear Filters",
+    "apply": "Apply",
+    "applied": "Filters Applied"
+  },
+  "search": {
+    "placeholder": "Search by client name or contact...",
+    "noResults": "No search results found",
+    "searching": "Search"
+  },
+  "forms": {
+    "addClient": {
+      "title": "Add New Client",
+      "subtitle": "Enter new client information",
+      "fields": {
+        "fullName": "Client Name",
+        "phone": "Phone",
+        "email": "Email",
+        "address": "Address",
+        "occupation": "Occupation",
+        "telecomProvider": "Telecom Provider",
+        "importance": "Importance",
+        "tags": "Tags",
+        "notes": "Notes",
+        "referredBy": "Referred By"
+      },
+      "placeholders": {
+        "fullName": "Enter client name",
+        "phone": "010-1234-5678",
+        "email": "example@email.com",
+        "address": "Enter address",
+        "occupation": "Enter occupation",
+        "tags": "Enter tags (comma separated)",
+        "notes": "Enter additional notes"
+      }
+    },
+    "existingClientOpportunity": {
+      "title": "Existing Client Opportunity",
+      "subtitle": "Propose new products to existing clients",
+      "fields": {
+        "clientName": "Client Name",
+        "insuranceType": "Insurance Product",
+        "productName": "Product Name",
+        "insuranceCompany": "Insurance Company",
+        "monthlyPremium": "Monthly Premium",
+        "expectedCommission": "Expected Commission",
+        "notes": "Sales Notes"
+      },
+      "placeholders": {
+        "productName": "Enter product name",
+        "insuranceCompany": "Enter insurance company name",
+        "monthlyPremium": "Monthly premium (currency)",
+        "expectedCommission": "Expected commission (currency)",
+        "notes": "Enter sales-related notes"
+      }
+    },
+    "quickEdit": {
+      "title": "Quick Edit",
+      "subtitle": "Quickly modify client information"
+    },
+    "removeClient": {
+      "title": "Exclude from Pipeline",
+      "message": "Do you want to exclude this client from the sales pipeline?",
+      "description": "Client information will be retained but excluded from the pipeline."
+    }
+  },
+  "cards": {
+    "client": {
+      "priority": "Priority",
+      "stage": "Stage",
+      "lastContact": "Last Contact",
+      "revenue": "Revenue",
+      "commission": "Commission",
+      "products": "Products",
+      "notes": "Notes",
+      "monthlyPremium": "Monthly Premium",
+      "contractCommission": "Contract Commission",
+      "pipelineStay": "Pipeline Stay",
+      "lastConsultation": "Last Consultation"
+    },
+    "deal": {
+      "value": "Deal Value",
+      "probability": "Success Probability",
+      "expectedClose": "Expected Close Date",
+      "age": "Duration"
+    }
+  },
+  "notifications": {
+    "clientAdded": "Client has been successfully added",
+    "clientMoved": "Client has been moved to {{stageName}} stage",
+    "clientRemoved": "Client has been excluded from the pipeline",
+    "opportunityCreated": "New opportunity created for {{clientName}}",
+    "saveSuccess": "Changes have been saved",
+    "saveError": "An error occurred while saving",
+    "loadError": "Failed to load data"
+  },
+  "errors": {
+    "requiredField": "This field is required",
+    "invalidPhone": "Please enter a valid phone number",
+    "invalidEmail": "Please enter a valid email address",
+    "clientNotFound": "Client not found",
+    "stageNotFound": "Sales stage not found",
+    "networkError": "A network error occurred",
+    "serverError": "A server error occurred",
+    "unknownError": "An unknown error occurred"
+  },
+  "labels": {
+    "direction": {
+      "horizontal": "Horizontal",
+      "vertical": "Vertical",
+      "free": "Free"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "pending": "Pending",
+      "completed": "Completed"
+    },
+    "clients": " clients are displayed",
+    "people": " people",
+    "notSet": "Not Set",
+    "important": "{{count}} key people",
+    "cardsHidden": "Cards hidden",
+    "dropClientHere": "Drop client here",
+    "noClients": "No clients",
+    "showCards": "Show client cards",
+    "hideCards": "Hide client cards",
+    "moveTo": "Move to {{stageName}}",
+    "days": "{{count}} days",
+    "daysAgo": "{{count}} days ago",
+    "referralBy": "Referred by {{name}}",
+    "interests": "Interests",
+    "healthGood": "Healthy",
+    "healthIssues": "Health Issues",
+    "urgentContact": "Contact Needed",
+    "longStay": "Long Term"
+  },
+  "tooltips": {
+    "addClient": "Add a new client to the pipeline",
+    "moveStage": "Move client to a different sales stage",
+    "editClient": "Edit client information",
+    "removeClient": "Exclude client from the pipeline",
+    "viewDetails": "View detailed client information"
+  },
+  "empty": {
+    "stage": "No clients in this stage yet",
+    "pipeline": "No clients in the pipeline",
+    "search": "No search results found",
+    "filter": "No clients match the filter criteria"
+  }
+}
