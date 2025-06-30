@@ -117,6 +117,8 @@
     "achievedGoals": "Achieved",
     "inProgressGoals": "In Progress",
     "unachievedGoals": "Not Achieved",
+    "achievedDescription": "100% or more achieved",
+    "inProgressDescription": "Less than 100% progress",
     "goalsCount": "{{count}} goals",
     "setGoalPrompt": "Set your goals",
     "noGoalsSet": "No goals set",
@@ -134,7 +136,7 @@
       "default": "Goal"
     },
     "units": {
-      "revenue": "K",
+      "revenue": "$",
       "clients": "",
       "referrals": "",
       "conversion_rate": "%"
@@ -163,7 +165,7 @@
     },
     "targetValue": "Target Value",
     "targetValuePlaceholder": "Enter target value",
-    "revenueDescription": "Enter in 10K units (e.g., 5000 = 50M)",
+    "revenueDescription": "Enter in dollar amount (e.g., 50000 = $50,000)",
     "goalTitle": "Goal Title (Optional)",
     "goalTitlePlaceholder": "Enter goal description",
     "autoTitleNote": "Will be auto-generated if left empty",
@@ -216,7 +218,7 @@
       "totalClients": "The total number of all clients registered in the system.\nIncludes both new and existing clients.",
       "activeContracts": "The number of insurance contracts currently in effect.\nExcludes cancelled or expired contracts.",
       "monthlyPremium": "The total sum of monthly premiums from all active contracts.",
-      "expectedCommission": "The total expected commission amount from contracts.\nAverage commission per deal: ${{average}}K"
+      "expectedCommission": "The total expected commission amount from contracts.\nAverage commission per deal: ${{average}}"
     },
     "changeLabels": {
       "new": "New",

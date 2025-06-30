@@ -258,7 +258,8 @@ export async function action({ request }: ActionArgs) {
       const goalType = formData.get('goalType') as
         | 'revenue'
         | 'clients'
-        | 'referrals';
+        | 'referrals'
+        | 'conversion_rate';
       const targetValue = Number(formData.get('targetValue'));
       const title = formData.get('title') as string;
       const goalId = formData.get('goalId') as string;
@@ -617,41 +618,47 @@ export default function DashboardPage({ loaderData }: ComponentProps) {
     }));
 
   const handleSetGoal = async (goalData: {
-    goalType: 'revenue' | 'clients' | 'referrals';
+    goalType: 'revenue' | 'clients' | 'referrals' | 'conversion_rate';
     targetValue: number;
     title?: string;
     id?: string; // 목표 수정 시 필요
     targetYear: number;
     targetMonth: number;
   }) => {
-    setIsLoading(true);
+    try {
+      setIsLoading(true);
 
-    // 🎯 극한 분석: 목표 설정 이벤트 추적
-    InsuranceAgentEvents.kpiGoalSet(
-      goalData.goalType,
-      goalData.targetValue,
-      goalData.goalType === 'revenue'
-        ? salesStats?.totalPremium || 0
-        : goalData.goalType === 'clients'
-          ? kpiData?.totalClients || 0
-          : kpiData?.totalReferrals || 0
-    );
+      // 🎯 극한 분석: 목표 설정 이벤트 추적
+      InsuranceAgentEvents.kpiGoalSet(
+        goalData.goalType,
+        goalData.targetValue,
+        goalData.goalType === 'revenue'
+          ? salesStats?.totalPremium || 0
+          : goalData.goalType === 'clients'
+            ? kpiData?.totalClients || 0
+            : kpiData?.totalReferrals || 0
+      );
 
-    const formData = new FormData();
-    formData.append('intent', 'setGoal');
-    formData.append('goalType', goalData.goalType);
-    formData.append('targetValue', goalData.targetValue.toString());
-    formData.append('targetYear', goalData.targetYear.toString());
-    formData.append('targetMonth', goalData.targetMonth.toString());
-    if (goalData.title) {
-      formData.append('title', goalData.title);
+      const formData = new FormData();
+      formData.append('intent', 'setGoal');
+      formData.append('goalType', goalData.goalType);
+      formData.append('targetValue', goalData.targetValue.toString());
+      formData.append('targetYear', goalData.targetYear.toString());
+      formData.append('targetMonth', goalData.targetMonth.toString());
+      if (goalData.title) {
+        formData.append('title', goalData.title);
+      }
+      if (goalData.id) {
+        formData.append('goalId', goalData.id);
+      }
+
+      console.log('목표 설정 제출:', goalData); // 디버깅용 로그 추가
+      fetcher.submit(formData, { method: 'post' });
+    } catch (error) {
+      console.error('목표 설정 중 오류:', error);
+    } finally {
+      setIsLoading(false);
     }
-    if (goalData.id) {
-      formData.append('goalId', goalData.id);
-    }
-
-    fetcher.submit(formData, { method: 'post' });
-    setIsLoading(false);
   };
 
   const handleDeleteGoal = async (goalId: string) => {
@@ -718,9 +725,12 @@ export default function DashboardPage({ loaderData }: ComponentProps) {
           {/* 🗓️ 오늘의 일정 - 일정 관리 기능 개발 후 활성화 예정 */}
           {/* <TodayAgenda meetings={transformedTodayMeetings} /> */}
           <MyGoals
-            currentGoals={compatibleUserGoals}
-            onSetGoal={handleSetGoal}
-            onDeleteGoal={handleDeleteGoal}
+            goals={compatibleUserGoals}
+            onGoalCreate={handleSetGoal}
+            onGoalUpdate={(goalId, goalData) =>
+              handleSetGoal({ ...goalData, id: goalId })
+            }
+            onGoalDelete={handleDeleteGoal}
           />
           <PipelineOverview
             stages={transformedPipelineStages}

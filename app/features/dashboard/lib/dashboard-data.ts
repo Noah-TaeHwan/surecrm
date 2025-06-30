@@ -944,7 +944,7 @@ export async function getReferralInsights(userId: string) {
 // 월간 목표 설정
 export async function setMonthlyGoal(
   userId: string,
-  goalType: 'revenue' | 'clients' | 'referrals',
+  goalType: 'revenue' | 'clients' | 'referrals' | 'conversion_rate',
   targetValue: number,
   title?: string,
   goalId?: string,
@@ -1188,9 +1188,15 @@ export async function getUserGoals(userId: string) {
           console.log('🎯 목표 진행률 계산 결과:', {
             goalId: goal.id,
             goalType: goal.goalType,
+            title: goal.title,
+            period: `${goal.startDate} ~ ${goal.endDate}`,
             targetValue,
             currentValue,
             progress: progress.toFixed(2) + '%',
+            progressNumber: progress,
+            // 🔍 디버깅: 카테고리 분류
+            category:
+              progress >= 100 ? '달성완료' : progress > 0 ? '진행중' : '미시작',
           });
 
           return {

@@ -88,7 +88,7 @@ export function GoalSettingModal({
   isOpen: externalIsOpen,
   onOpenChange: externalOnOpenChange,
 }: GoalSettingModalProps) {
-  const { t } = useTranslation('dashboard');
+  const { t, i18n } = useTranslation('dashboard');
   const [internalIsOpen, setInternalIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
@@ -97,6 +97,27 @@ export function GoalSettingModal({
   // 외부에서 제어되는 경우와 내부에서 제어되는 경우를 구분
   const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
   const setIsOpen = externalOnOpenChange || setInternalIsOpen;
+
+  // 언어별 기본값 설정
+  const getDefaultPlaceholder = (goalType: string) => {
+    const currentLang = i18n.language || 'ko';
+
+    if (goalType === 'revenue') {
+      // 매출 목표 기본값
+      if (currentLang === 'en') {
+        return '50000'; // $50,000 (영어: 달러 단위로 직접 입력)
+      } else if (currentLang === 'ja') {
+        return '5000000'; // 500万円 (5백만엔)
+      } else {
+        return '1000'; // 1000만원 (한국어: 만원 단위)
+      }
+    } else if (goalType === 'clients') {
+      return '10'; // 10명 (모든 언어 공통)
+    } else if (goalType === 'referrals') {
+      return '5'; // 5건 (모든 언어 공통)
+    }
+    return '';
+  };
 
   const form = useForm<GoalFormData>({
     resolver: zodResolver(goalSchema),
@@ -488,7 +509,10 @@ export function GoalSettingModal({
                       <FormControl>
                         <Input
                           type="number"
-                          placeholder={t('goalModal.targetValuePlaceholder')}
+                          placeholder={
+                            getDefaultPlaceholder(form.watch('goalType')) ||
+                            t('goalModal.targetValuePlaceholder')
+                          }
                           className="h-9 sm:h-10 text-xs sm:text-sm"
                           {...field}
                         />

@@ -115,6 +115,8 @@
     "achievedGoals": "달성 완료",
     "inProgressGoals": "진행 중",
     "unachievedGoals": "미달성",
+    "achievedDescription": "100% 이상 달성",
+    "inProgressDescription": "100% 미만 진행",
     "goalsCount": "{{count}}개",
     "setGoalPrompt": "목표를 설정하세요",
     "noGoalsSet": "설정된 목표가 없습니다",

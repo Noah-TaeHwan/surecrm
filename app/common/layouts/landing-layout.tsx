@@ -41,7 +41,7 @@ export function LandingLayout({ children }: LandingLayoutProps) {
           {/* 언어 선택기 & 로그인/회원가입 버튼 */}
           <div className="flex items-center gap-2 sm:gap-3">
             {/* 언어 선택기 */}
-            <LanguageSelector variant="dropdown" size="sm" className="w-auto" />
+            <LanguageSelector variant="button" size="sm" className="w-auto" />
 
             <Button
               variant="outline"

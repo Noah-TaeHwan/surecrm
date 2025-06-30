@@ -68,18 +68,24 @@ export function MyGoals({
   onGoalUpdate,
   onGoalDelete,
 }: MyGoalsProps) {
-  const { t, formatCurrency } = useHydrationSafeTranslation('dashboard');
+  const { t, formatCurrency, i18n } = useHydrationSafeTranslation('dashboard');
 
   const [selectedPeriod, setSelectedPeriod] = useState(currentPeriod);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // 선택된 기간의 목표들 필터링
+  // 선택된 기간의 목표들 필터링 (리포트 페이지와 동일한 로직)
   const periodGoals = goals.filter(goal => {
-    const goalDate = new Date(goal.startDate);
-    return (
-      goalDate.getFullYear() === selectedPeriod.year &&
-      goalDate.getMonth() + 1 === selectedPeriod.month
-    );
+    const goalStart = new Date(goal.startDate);
+    const goalEnd = new Date(goal.endDate);
+
+    // 🔧 수정: 선택된 연월이 목표 기간 내에 포함되는지 확인
+    const selectedDate = new Date(
+      selectedPeriod.year,
+      selectedPeriod.month - 1,
+      15
+    ); // 해당 월의 중간 날짜
+
+    return goalStart <= selectedDate && goalEnd >= selectedDate;
   });
 
   // 현재 월인지 확인
@@ -166,10 +172,21 @@ export function MyGoals({
     };
   };
 
-  // 목표값 포맷팅
+  // 목표값 포맷팅 (언어별 처리)
   const formatGoalValue = (value: number, goalType: string) => {
     if (goalType === 'revenue') {
-      return formatCurrency(value * 10000); // 만원 단위를 원 단위로 변환
+      const currentLang = i18n?.language || 'ko';
+
+      if (currentLang === 'en') {
+        // 영어: 달러로 직접 표시 (입력값 그대로)
+        return `$${value.toLocaleString()}`;
+      } else if (currentLang === 'ja') {
+        // 일본어: 엔으로 직접 표시 (입력값 그대로)
+        return `¥${value.toLocaleString()}`;
+      } else {
+        // 한국어: 만원 단위를 원 단위로 변환
+        return formatCurrency(value * 10000);
+      }
     }
     return `${value.toLocaleString()}${getGoalTypeUnit(goalType)}`;
   };
@@ -238,34 +255,38 @@ export function MyGoals({
       <CardContent className="space-y-4">
         {periodGoals.length > 0 ? (
           <>
-            {/* 목표 현황 요약 */}
-            <div className="grid grid-cols-3 gap-2 p-3 bg-muted/30 rounded-lg border border-border/30">
+            {/* 목표 현황 요약 - 2개 카테고리로 단순화 */}
+            <div className="grid grid-cols-2 gap-3 p-4 bg-muted/30 rounded-lg border border-border/30">
               <div className="text-center">
-                <div className="text-lg font-bold text-green-600">
-                  {periodGoals.filter(goal => goal.progress >= 100).length}
-                </div>
-                <div className="text-xs text-muted-foreground">
-                  {t('myGoals.achievedGoals', '달성한 목표')}
-                </div>
-              </div>
-              <div className="text-center">
-                <div className="text-lg font-bold text-blue-600">
+                <div className="text-xl font-bold text-green-600">
                   {
-                    periodGoals.filter(
-                      goal => goal.progress < 100 && goal.progress > 0
-                    ).length
+                    periodGoals.filter(goal => {
+                      const progress = goal.progress || 0;
+                      return progress >= 100;
+                    }).length
                   }
                 </div>
-                <div className="text-xs text-muted-foreground">
-                  {t('myGoals.inProgressGoals', '진행 중인 목표')}
+                <div className="text-sm text-muted-foreground">
+                  {t('myGoals.achievedGoals', '달성 완료')}
+                </div>
+                <div className="text-xs text-muted-foreground/70 mt-1">
+                  {t('myGoals.achievedDescription', '100% 이상 달성')}
                 </div>
               </div>
               <div className="text-center">
-                <div className="text-lg font-bold text-muted-foreground">
-                  {periodGoals.filter(goal => goal.progress === 0).length}
+                <div className="text-xl font-bold text-blue-600">
+                  {
+                    periodGoals.filter(goal => {
+                      const progress = goal.progress || 0;
+                      return progress < 100;
+                    }).length
+                  }
                 </div>
-                <div className="text-xs text-muted-foreground">
-                  {t('myGoals.unachievedGoals', '미시작 목표')}
+                <div className="text-sm text-muted-foreground">
+                  {t('myGoals.inProgressGoals', '진행 중')}
+                </div>
+                <div className="text-xs text-muted-foreground/70 mt-1">
+                  {t('myGoals.inProgressDescription', '100% 미만 진행')}
                 </div>
               </div>
             </div>
@@ -340,7 +361,11 @@ export function MyGoals({
                                 )}
                               </span>
                             ) : (
-                              t('myGoals.goalAchieved', '목표 달성')
+                              <span className="flex items-center gap-1">
+                                <span className="text-green-600">✓</span>
+                                {t('myGoals.goalAchieved', '목표 달성')} (
+                                {goal.progress.toFixed(1)}%)
+                              </span>
                             )
                           ) : (
                             `${goal.progress.toFixed(1)}%`

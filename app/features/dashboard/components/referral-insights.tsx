@@ -238,7 +238,7 @@ export function ReferralInsights({
                 <div className="flex items-center justify-center gap-1">
                   <span className="text-xs text-muted-foreground">
                     {isHydrated
-                      ? t('referralInsights.stats.totalConnections')
+                      ? t('referralInsights.stats.totalConnections', '총 연결')
                       : '총 연결'}
                   </span>
                   <Tooltip>
@@ -248,7 +248,10 @@ export function ReferralInsights({
                     <TooltipContent side="top" className="max-w-xs">
                       <p>
                         {isHydrated
-                          ? t('referralInsights.tooltips.totalConnections')
+                          ? t(
+                              'referralInsights.tooltips.totalConnections',
+                              '네트워크에 연결된 총 인원 수'
+                            )
                           : '네트워크에 연결된 총 인원 수'}
                       </p>
                     </TooltipContent>
@@ -264,7 +267,7 @@ export function ReferralInsights({
                 <div className="flex items-center justify-center gap-1">
                   <span className="text-xs text-muted-foreground">
                     {isHydrated
-                      ? t('referralInsights.stats.maxDepth')
+                      ? t('referralInsights.stats.maxDepth', '최대 깊이')
                       : '최대 깊이'}
                   </span>
                   <Tooltip>
@@ -274,7 +277,10 @@ export function ReferralInsights({
                     <TooltipContent side="top" className="max-w-xs">
                       <p>
                         {isHydrated
-                          ? t('referralInsights.tooltips.maxDepth')
+                          ? t(
+                              'referralInsights.tooltips.maxDepth',
+                              '소개 네트워크의 최대 단계 수'
+                            )
                           : '소개 네트워크의 최대 단계 수'}
                       </p>
                     </TooltipContent>
@@ -290,7 +296,10 @@ export function ReferralInsights({
                 <div className="flex items-center justify-center gap-1">
                   <span className="text-xs text-muted-foreground">
                     {isHydrated
-                      ? t('referralInsights.stats.activeReferrers')
+                      ? t(
+                          'referralInsights.stats.activeReferrers',
+                          '활성 소개자'
+                        )
                       : '활성 소개자'}
                   </span>
                   <Tooltip>
@@ -300,7 +309,10 @@ export function ReferralInsights({
                     <TooltipContent side="top" className="max-w-xs">
                       <p>
                         {isHydrated
-                          ? t('referralInsights.tooltips.activeReferrers')
+                          ? t(
+                              'referralInsights.tooltips.activeReferrers',
+                              '최근 30일간 활동한 소개자 수'
+                            )
                           : '최근 30일간 활동한 소개자 수'}
                       </p>
                     </TooltipContent>
@@ -316,7 +328,7 @@ export function ReferralInsights({
                 <div className="flex items-center justify-center gap-1">
                   <span className="text-xs text-muted-foreground">
                     {isHydrated
-                      ? t('referralInsights.stats.monthlyGrowth')
+                      ? t('referralInsights.stats.monthlyGrowth', '월간 성장률')
                       : '월간 성장률'}
                   </span>
                   <Tooltip>
@@ -326,7 +338,10 @@ export function ReferralInsights({
                     <TooltipContent side="top" className="max-w-xs">
                       <p>
                         {isHydrated
-                          ? t('referralInsights.tooltips.monthlyGrowth')
+                          ? t(
+                              'referralInsights.tooltips.monthlyGrowth',
+                              '지난 달 대비 네트워크 성장률'
+                            )
                           : '지난 달 대비 네트워크 성장률'}
                       </p>
                     </TooltipContent>
@@ -343,21 +358,29 @@ export function ReferralInsights({
               <div>
                 <p className="text-sm font-medium text-foreground mb-1">
                   {isHydrated
-                    ? t('referralInsights.insights.title')
+                    ? t('referralInsights.insights.title', '인사이트')
                     : '인사이트'}
                 </p>
                 <p className="text-xs text-muted-foreground leading-relaxed">
                   {isHydrated
-                    ? t('referralInsights.insights.growthMessage', {
-                        growth: networkStats.monthlyGrowth,
-                      })
+                    ? t(
+                        'referralInsights.insights.growthMessage',
+                        `이번 달 네트워크가 ${networkStats.monthlyGrowth}% 성장했습니다.`,
+                        {
+                          growth: networkStats.monthlyGrowth,
+                        }
+                      )
                     : `이번 달 네트워크가 ${networkStats.monthlyGrowth}% 성장했습니다.`}
                   {topReferrers[0] && (
                     <>
                       {isHydrated
-                        ? t('referralInsights.insights.topPerformerMessage', {
-                            name: topReferrers[0].name,
-                          })
+                        ? t(
+                            'referralInsights.insights.topPerformerMessage',
+                            ` ${topReferrers[0].name}님이 가장 활발하게 활동하고 있습니다.`,
+                            {
+                              name: topReferrers[0].name,
+                            }
+                          )
                         : ` ${topReferrers[0].name}님이 가장 활발하게 활동하고 있습니다.`}
                     </>
                   )}
