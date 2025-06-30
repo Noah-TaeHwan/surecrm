@@ -48,25 +48,18 @@ import { redirect } from 'react-router';
 import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 
 export function meta() {
+  // 다국어 지원을 위한 기본 언어 설정 (향후 확장 가능)
+  const title = '영업 파이프라인 - SureCRM';
+  const description =
+    '영업 단계별 고객 관리 파이프라인으로 효율적인 영업 프로세스를 구축하세요.';
+
   return [
-    { title: '영업 파이프라인 - SureCRM' },
-    {
-      name: 'description',
-      content:
-        '영업 단계별 고객 관리 파이프라인으로 효율적인 영업 프로세스를 구축하세요.',
-    },
-    { property: 'og:title', content: '영업 파이프라인 - SureCRM' },
-    {
-      property: 'og:description',
-      content:
-        '영업 단계별 고객 관리 파이프라인으로 효율적인 영업 프로세스를 구축하세요.',
-    },
-    { name: 'twitter:title', content: '영업 파이프라인 - SureCRM' },
-    {
-      name: 'twitter:description',
-      content:
-        '영업 단계별 고객 관리 파이프라인으로 효율적인 영업 프로세스를 구축하세요.',
-    },
+    { title },
+    { name: 'description', content: description },
+    { property: 'og:title', content: title },
+    { property: 'og:description', content: description },
+    { name: 'twitter:title', content: title },
+    { name: 'twitter:description', content: description },
   ];
 }
 
@@ -1165,7 +1158,7 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
           </svg>
-          <span>${clientData.fullName}님이 파이프라인에 추가되었습니다!</span>
+          <span>${t('notifications.clientAdded', '{{clientName}}님이 파이프라인에 추가되었습니다!', { clientName: clientData.fullName })}</span>
         `;
         document.body.appendChild(notification);
 
@@ -1190,7 +1183,7 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
           </svg>
-          <span>고객 추가에 실패했습니다. 다시 시도해주세요.</span>
+          <span>${t('errors.addClient.failure', '고객 추가에 실패했습니다. 다시 시도해주세요.')}</span>
         `;
         document.body.appendChild(errorNotification);
 

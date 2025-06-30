@@ -38,7 +38,12 @@
     "low": "関心",
     "highValue": "高",
     "mediumValue": "中",
-    "lowValue": "低"
+    "lowValue": "低",
+    "descriptions": {
+      "high": "優先的な管理が必要な重要顧客",
+      "medium": "定期的な関心とコミュニケーションが必要な顧客",
+      "low": "基本的な接触で関係を維持する顧客"
+    }
   },
   "insurance": {
     "types": {
@@ -90,11 +95,16 @@
     "search": "検索",
     "export": "エクスポート",
     "import": "インポート",
-    "click": "クリック"
+    "click": "クリック",
+    "existingClient": "既存",
+    "newClient": "新規"
+  },
+  "navigation": {
+    "salesPipeline": "営業パイプライン"
   },
   "filters": {
     "title": "フィルター",
-    "all": "すべて",
+    "all": "全て",
     "stage": "営業段階",
     "importance": "重要度フィルター",
     "importanceDesc": "顧客の重要度レベルでフィルタリングします",
@@ -150,10 +160,11 @@
       },
       "placeholders": {
         "fullName": "顧客名を入力してください",
-        "phone": "090-1234-5678",
+        "phone": "090-1234-5678 (オプション)",
         "email": "example@email.com",
         "address": "住所を入力してください",
         "occupation": "職業を入力してください",
+        "telecomProvider": "通信会社を選択してください",
         "height": "170",
         "weight": "70",
         "stage": "ステージを選択",
@@ -167,7 +178,9 @@
       "options": {
         "hasLicense": "あり",
         "noLicense": "なし",
-        "noReferrer": "紹介者なし"
+        "noReferrer": "紹介者なし",
+        "optional": "(オプション)",
+        "required": "*"
       },
       "sections": {
         "basicInfo": "基本情報",
@@ -185,6 +198,27 @@
       "messages": {
         "noInsurance": "登録された保険情報がありません",
         "addInsuranceHelp": "上記のボタンをクリックして保険情報を追加してください"
+      },
+      "telecom": {
+        "mainProviders": "主要キャリア",
+        "mvnoProviders": "格安SIM",
+        "customInput": "直接入力",
+        "customInputOption": "その他（直接入力）",
+        "customInputPlaceholder": "キャリア名を入力してください",
+        "global": {
+          "verizon": "Verizon",
+          "att": "AT&T",
+          "tmobile": "T-Mobile",
+          "vodafone": "Vodafone",
+          "docomo": "NTT Docomo",
+          "softbank": "SoftBank",
+          "other": "その他"
+        }
+      },
+      "importanceValues": {
+        "high": "キーパーソン",
+        "medium": "一般",
+        "low": "関心"
       }
     },
     "existingClientOpportunity": {
@@ -281,23 +315,22 @@
     }
   },
   "notifications": {
-    "clientAdded": "顧客が正常に追加されました",
-    "clientMoved": "顧客が{{stageName}}段階に移動されました",
-    "clientRemoved": "顧客がパイプラインから除外されました",
-    "opportunityCreated": "{{clientName}}顧客の新しい営業機会が作成されました",
-    "saveSuccess": "変更が保存されました",
-    "saveError": "保存中にエラーが発生しました",
-    "loadError": "データの読み込みに失敗しました"
+    "clientAdded": "{{clientName}}様がパイプラインに追加されました！",
+    "clientUpdated": "{{clientName}}様の情報が更新されました。",
+    "success": "成功",
+    "error": "エラー",
+    "warning": "警告",
+    "info": "お知らせ"
   },
   "errors": {
-    "requiredField": "必須入力項目です",
-    "invalidPhone": "有効な電話番号を入力してください",
-    "invalidEmail": "有効なメールアドレスを入力してください",
-    "clientNotFound": "顧客が見つかりません",
-    "stageNotFound": "営業段階が見つかりません",
+    "validationFailed": "入力内容を確認してください",
+    "submissionFailed": "送信に失敗しました。再度お試しください",
+    "loadingFailed": "データの読み込みに失敗しました",
     "networkError": "ネットワークエラーが発生しました",
-    "serverError": "サーバーエラーが発生しました",
-    "unknownError": "不明なエラーが発生しました"
+    "unknownError": "不明なエラーが発生しました",
+    "addClient": {
+      "failure": "クライアントの追加に失敗しました。再度お試しください。"
+    }
   },
   "labels": {
     "direction": {
@@ -329,7 +362,16 @@
     "healthIssues": "要注意",
     "urgentContact": "連絡必要",
     "longStay": "長期滞在",
-    "currency": "円"
+    "currency": "円",
+    "all": "全て",
+    "pipelineStats": "パイプライン統計",
+    "clientCount": "{{count}}名",
+    "totalClients_short": "総顧客",
+    "keyPerson": "キーマン",
+    "expectedCommission": "予想手数料",
+    "monthlyPremium": "月額保険料",
+    "searchByName": "顧客名で検索...",
+    "totalClients": "総{{count}}名の顧客"
   },
   "tooltips": {
     "addClient": "パイプラインに新しい顧客を追加します",

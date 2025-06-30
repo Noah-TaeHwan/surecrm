@@ -38,7 +38,12 @@
     "low": "관심",
     "highValue": "높음",
     "mediumValue": "보통",
-    "lowValue": "낮음"
+    "lowValue": "낮음",
+    "descriptions": {
+      "high": "우선 관리가 필요한 중요 고객",
+      "medium": "정기적인 관심과 소통이 필요한 고객",
+      "low": "기본 접촉으로 관계를 유지하는 고객"
+    }
   },
   "insurance": {
     "types": {
@@ -90,7 +95,12 @@
     "search": "검색",
     "export": "내보내기",
     "import": "가져오기",
-    "click": "클릭"
+    "click": "클릭",
+    "existingClient": "기존고객",
+    "newClient": "신규고객"
+  },
+  "navigation": {
+    "salesPipeline": "영업 파이프라인"
   },
   "filters": {
     "title": "필터",
@@ -128,7 +138,7 @@
       },
       "fields": {
         "fullName": "고객명",
-        "phone": "연락처",
+        "phone": "전화번호",
         "email": "이메일",
         "address": "주소",
         "occupation": "직업",
@@ -150,10 +160,11 @@
       },
       "placeholders": {
         "fullName": "고객명을 입력하세요",
-        "phone": "010-1234-5678",
+        "phone": "010-1234-5678 (선택사항)",
         "email": "example@email.com",
         "address": "주소를 입력하세요",
         "occupation": "직업을 입력하세요",
+        "telecomProvider": "통신사를 선택하세요",
         "height": "170",
         "weight": "70",
         "stage": "진행 단계를 선택하세요",
@@ -167,7 +178,9 @@
       "options": {
         "hasLicense": "있음",
         "noLicense": "없음",
-        "noReferrer": "소개자 없음"
+        "noReferrer": "소개자 없음",
+        "optional": "(선택사항)",
+        "required": "*"
       },
       "sections": {
         "basicInfo": "기본 정보",
@@ -185,6 +198,28 @@
       "messages": {
         "noInsurance": "등록된 보험 정보가 없습니다",
         "addInsuranceHelp": "위 버튼을 클릭하여 보험 정보를 추가하세요"
+      },
+      "telecom": {
+        "mainProviders": "주요 통신사",
+        "mvnoProviders": "알뜰폰",
+        "customInput": "직접 입력",
+        "customInputOption": "기타 (직접 입력)",
+        "customInputPlaceholder": "통신사명을 직접 입력하세요",
+        "global": {
+          "verizon": "Verizon",
+          "att": "AT&T",
+          "tmobile": "T-Mobile",
+          "vodafone": "Vodafone",
+          "docomo": "NTT Docomo",
+          "softbank": "SoftBank",
+          "other": "기타"
+        },
+        "exampleText": "💡 예: Verizon, AT&T, T-Mobile, Vodafone 등"
+      },
+      "importanceValues": {
+        "high": "키맨",
+        "medium": "보통",
+        "low": "낮음"
       }
     },
     "existingClientOpportunity": {
@@ -281,13 +316,12 @@
     }
   },
   "notifications": {
-    "clientAdded": "고객이 성공적으로 추가되었습니다",
-    "clientMoved": "고객이 {{stageName}} 단계로 이동되었습니다",
-    "clientRemoved": "고객이 파이프라인에서 제외되었습니다",
-    "opportunityCreated": "{{clientName}} 고객의 새 영업 기회가 생성되었습니다",
-    "saveSuccess": "변경사항이 저장되었습니다",
-    "saveError": "저장 중 오류가 발생했습니다",
-    "loadError": "데이터를 불러오는데 실패했습니다"
+    "clientAdded": "{{clientName}}님이 파이프라인에 추가되었습니다!",
+    "clientUpdated": "{{clientName}}님의 정보가 업데이트되었습니다.",
+    "success": "성공",
+    "error": "오류",
+    "warning": "경고",
+    "info": "알림"
   },
   "errors": {
     "requiredField": "필수 입력 항목입니다",
@@ -297,7 +331,10 @@
     "stageNotFound": "영업 단계를 찾을 수 없습니다",
     "networkError": "네트워크 오류가 발생했습니다",
     "serverError": "서버 오류가 발생했습니다",
-    "unknownError": "알 수 없는 오류가 발생했습니다"
+    "unknownError": "알 수 없는 오류가 발생했습니다",
+    "addClient": {
+      "failure": "고객 추가에 실패했습니다. 다시 시도해주세요."
+    }
   },
   "labels": {
     "direction": {
@@ -329,7 +366,16 @@
     "healthIssues": "주의",
     "urgentContact": "연락 필요",
     "longStay": "장기 체류",
-    "currency": "원"
+    "currency": "원",
+    "all": "전체",
+    "pipelineStats": "파이프라인 통계",
+    "clientCount": "{{count}}명",
+    "totalClients_short": "총 고객",
+    "keyPerson": "키맨",
+    "expectedCommission": "예상수수료",
+    "monthlyPremium": "월 보험료",
+    "searchByName": "고객 이름으로 검색...",
+    "totalClients": "총 {{count}}명의 고객"
   },
   "tooltips": {
     "addClient": "새 고객을 파이프라인에 추가합니다",

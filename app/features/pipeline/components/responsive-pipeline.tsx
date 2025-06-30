@@ -28,6 +28,7 @@ import { Link } from 'react-router';
 import { cn } from '~/lib/utils';
 import { Input } from '~/common/components/ui/input';
 import type { PipelineStage, Client } from '~/features/pipeline/types/types';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 
 interface ResponsivePipelineProps {
   stages: (PipelineStage & {
@@ -66,6 +67,7 @@ export function ResponsivePipeline({
   children,
   className,
 }: ResponsivePipelineProps) {
+  const { t } = useHydrationSafeTranslation('pipeline');
   const [isStatsExpanded, setIsStatsExpanded] = useState(false);
 
   // 캐러셀 스크롤 제어를 위한 ref
@@ -86,17 +88,40 @@ export function ResponsivePipeline({
         })
       : clients;
 
+  // 스테이지 이름을 번역 키로 매핑하는 헬퍼 함수
+  const getStageTranslationKey = (stageName: string) => {
+    switch (stageName) {
+      case '첫 상담':
+        return 'firstConsultation';
+      case '니즈 분석':
+        return 'needsAnalysis';
+      case '상품 설명':
+        return 'productExplanation';
+      case '계약 검토':
+        return 'contractReview';
+      case '계약 완료':
+        return 'contractCompleted';
+      default:
+        return stageName;
+    }
+  };
+
+  const getTranslatedStageName = (stageName: string) => {
+    const key = getStageTranslationKey(stageName);
+    return key === stageName ? stageName : t(`stages.${key}`, stageName);
+  };
+
   // 파이프라인 단계 탭 구성 (검색어 필터링 적용된 결과로 카운트)
   const pipelineTabs = [
     {
       id: 'all',
-      label: '전체',
+      label: t('labels.all', '전체'),
       icon: Users,
       count: searchFilteredClients.length,
     },
     ...stages.map(stage => ({
       id: stage.id,
-      label: stage.name,
+      label: getTranslatedStageName(stage.name),
       icon: getStageIcon(stage.name),
       count: searchFilteredClients.filter(client => client.stageId === stage.id)
         .length,
@@ -189,9 +214,13 @@ export function ResponsivePipeline({
         <div className="bg-background border-b border-border/50 px-4 py-3">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-lg font-semibold">영업 파이프라인</h1>
+              <h1 className="text-lg font-semibold">
+                {t('navigation.salesPipeline', '영업 파이프라인')}
+              </h1>
               <p className="text-xs text-muted-foreground">
-                총 {stats.totalClients}명의 고객
+                {t('labels.totalClients', '총 {{count}}명의 고객', {
+                  count: stats.totalClients,
+                })}
               </p>
             </div>
             <div className="flex gap-2">
@@ -202,11 +231,11 @@ export function ResponsivePipeline({
                 className="h-8 text-xs"
               >
                 <UserPlus className="h-3 w-3 mr-1" />
-                기존고객
+                {t('actions.existingClient', '기존고객')}
               </Button>
               <Button size="sm" onClick={onAddClient} className="h-8 text-xs">
                 <Plus className="h-3 w-3 mr-1" />
-                신규고객
+                {t('actions.newClient', '신규고객')}
               </Button>
             </div>
           </div>
@@ -220,10 +249,14 @@ export function ResponsivePipeline({
           >
             <div className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium">파이프라인 통계</span>
+              <span className="text-sm font-medium">
+                {t('labels.pipelineStats', '파이프라인 통계')}
+              </span>
             </div>
             <Badge variant="secondary" className="text-xs">
-              {stats.totalClients}명
+              {t('labels.clientCount', '{{count}}명', {
+                count: stats.totalClients,
+              })}
             </Badge>
           </div>
 
@@ -240,9 +273,13 @@ export function ResponsivePipeline({
                         <Users className="h-3 w-3 text-blue-600" />
                       </div>
                       <div>
-                        <p className="text-xs text-muted-foreground">총 고객</p>
+                        <p className="text-xs text-muted-foreground">
+                          {t('labels.totalClients_short', '총 고객')}
+                        </p>
                         <p className="text-sm font-semibold">
-                          {stats.totalClients}명
+                          {t('labels.clientCount', '{{count}}명', {
+                            count: stats.totalClients,
+                          })}
                         </p>
                       </div>
                     </div>
@@ -256,9 +293,13 @@ export function ResponsivePipeline({
                         <Target className="h-3 w-3 text-red-600" />
                       </div>
                       <div>
-                        <p className="text-xs text-muted-foreground">키맨</p>
+                        <p className="text-xs text-muted-foreground">
+                          {t('labels.keyPerson', '키맨')}
+                        </p>
                         <p className="text-sm font-semibold">
-                          {stats.highImportanceClients}명
+                          {t('labels.clientCount', '{{count}}명', {
+                            count: stats.highImportanceClients,
+                          })}
                         </p>
                       </div>
                     </div>
@@ -273,10 +314,11 @@ export function ResponsivePipeline({
                       </div>
                       <div>
                         <p className="text-xs text-muted-foreground">
-                          예상수수료
+                          {t('labels.expectedCommission', '예상수수료')}
                         </p>
                         <p className="text-sm font-semibold">
-                          {stats.totalRevenue.toLocaleString()}원
+                          {stats.totalRevenue.toLocaleString()}
+                          {t('labels.currency', '원')}
                         </p>
                       </div>
                     </div>
@@ -291,10 +333,11 @@ export function ResponsivePipeline({
                       </div>
                       <div>
                         <p className="text-xs text-muted-foreground">
-                          월 보험료
+                          {t('labels.monthlyPremium', '월 보험료')}
                         </p>
                         <p className="text-sm font-semibold">
-                          {stats.totalPremium.toLocaleString()}원
+                          {stats.totalPremium.toLocaleString()}
+                          {t('labels.currency', '원')}
                         </p>
                       </div>
                     </div>
@@ -306,7 +349,10 @@ export function ResponsivePipeline({
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-3 w-3 text-muted-foreground" />
                 <Input
-                  placeholder="고객 이름으로 검색..."
+                  placeholder={t(
+                    'labels.searchByName',
+                    '고객 이름으로 검색...'
+                  )}
                   value={searchQuery}
                   onChange={e => onSearchChange?.(e.target.value)}
                   className="pl-9 h-10 text-base"

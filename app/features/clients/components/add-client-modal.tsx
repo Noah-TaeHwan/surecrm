@@ -39,6 +39,7 @@ import {
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 
 // 📋 고객 생성 스키마 (Supabase 테이블 구조에 맞춤)
 const clientSchema = z.object({
@@ -80,6 +81,8 @@ export function AddClientModal({
   error,
   referrers,
 }: AddClientModalProps) {
+  const { t } = useHydrationSafeTranslation('pipeline');
+
   const form = useForm<ClientFormData>({
     resolver: zodResolver(clientSchema),
     defaultValues: {
@@ -96,9 +99,14 @@ export function AddClientModal({
     },
   });
 
+  const [isCustomTelecom, setIsCustomTelecom] = useState(false);
+  const [customTelecomProvider, setCustomTelecomProvider] = useState('');
+
   // 🔄 모달이 열릴 때마다 폼 상태 완전 초기화
   useEffect(() => {
     if (open) {
+      setIsCustomTelecom(false);
+      setCustomTelecomProvider('');
       form.reset({
         fullName: '',
         phone: '', // 🔧 빈 문자열로 변경하여 controlled input 유지
@@ -116,9 +124,15 @@ export function AddClientModal({
 
   const handleSubmit = async (data: ClientFormData) => {
     try {
+      // 🌍 직접 입력된 통신사 값 처리
+      const finalTelecomProvider = isCustomTelecom
+        ? customTelecomProvider.trim()
+        : data.telecomProvider;
+
       // referredById 값 정리
       const cleanedData = {
         ...data,
+        telecomProvider: finalTelecomProvider || undefined,
         referredById:
           data.referredById === 'none' ? undefined : data.referredById,
       };
@@ -132,6 +146,8 @@ export function AddClientModal({
 
       // 성공 시 폼 리셋 및 모달 닫기
       form.reset();
+      setIsCustomTelecom(false);
+      setCustomTelecomProvider('');
       onOpenChange(false);
     } catch (error) {
       console.error('고객 추가 실패:', error);
@@ -141,28 +157,39 @@ export function AddClientModal({
 
   const handleClose = () => {
     form.reset();
+    setIsCustomTelecom(false);
+    setCustomTelecomProvider('');
     onOpenChange(false);
   };
 
   const importanceOptions = [
     {
       id: 'high',
-      name: '키맨',
-      description: '우선 관리가 필요한 중요 고객',
+      name: t('forms.addClient.importanceValues.high', '키맨'),
+      description: t(
+        'importance.descriptions.high',
+        '우선 관리가 필요한 중요 고객'
+      ),
       color:
         'bg-orange-50/50 border-orange-200 dark:bg-orange-950/20 dark:border-orange-800/30',
     },
     {
       id: 'medium',
-      name: '일반',
-      description: '정기적인 관심과 소통이 필요한 고객',
+      name: t('forms.addClient.importanceValues.medium', '일반'),
+      description: t(
+        'importance.descriptions.medium',
+        '정기적인 관심과 소통이 필요한 고객'
+      ),
       color:
         'bg-blue-50/50 border-blue-200 dark:bg-blue-950/20 dark:border-blue-800/30',
     },
     {
       id: 'low',
-      name: '관심',
-      description: '기본 접촉으로 관계를 유지하는 고객',
+      name: t('forms.addClient.importanceValues.low', '관심'),
+      description: t(
+        'importance.descriptions.low',
+        '기본 접촉으로 관계를 유지하는 고객'
+      ),
       color:
         'bg-muted/30 border-muted-foreground/20 dark:bg-muted/10 dark:border-muted-foreground/20',
     },
@@ -191,10 +218,15 @@ export function AddClientModal({
         <DialogHeader className="flex-shrink-0 px-4 sm:px-6 py-4 sm:py-4 border-b border-border/30">
           <DialogTitle className="flex items-center gap-2 text-sm sm:text-lg">
             <PersonIcon className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
-            <span className="truncate">신규 고객 추가</span>
+            <span className="truncate">
+              {t('forms.addClient.title', '신규 고객 추가')}
+            </span>
           </DialogTitle>
           <DialogDescription className="text-xs sm:text-sm text-muted-foreground">
-            새로운 고객 정보를 입력하고 영업 파이프라인에 추가하세요.
+            {t(
+              'forms.addClient.subtitle',
+              '새로운 고객 정보를 입력하고 영업 파이프라인에 추가하세요.'
+            )}
           </DialogDescription>
         </DialogHeader>
 
@@ -220,7 +252,7 @@ export function AddClientModal({
                   <div className="flex items-center gap-2">
                     <InfoCircledIcon className="h-4 w-4 text-primary" />
                     <span className="text-xs sm:text-sm text-primary">
-                      고객 정보를 저장하고 있습니다...
+                      {t('actions.saving', '고객 정보를 저장하고 있습니다...')}
                     </span>
                   </div>
                 </div>
@@ -229,7 +261,7 @@ export function AddClientModal({
               {/* 🏷️ 기본 정보 */}
               <div className="space-y-3 sm:space-y-4">
                 <h4 className="text-sm sm:text-base font-medium text-foreground flex items-center gap-2">
-                  👤 기본 정보
+                  👤 {t('forms.addClient.sections.basicInfo', '기본 정보')}
                 </h4>
 
                 {/* 첫 번째 줄: 고객명 / 소개자 */}
@@ -240,11 +272,14 @@ export function AddClientModal({
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-xs sm:text-sm font-medium">
-                          고객명 *
+                          {t('forms.addClient.fields.fullName', '고객명')} *
                         </FormLabel>
                         <FormControl>
                           <Input
-                            placeholder="고객명을 입력하세요"
+                            placeholder={t(
+                              'forms.addClient.placeholders.fullName',
+                              '고객명을 입력하세요'
+                            )}
                             className="h-9 sm:h-10 text-xs sm:text-sm min-h-[36px] sm:min-h-[40px]"
                             {...field}
                           />
@@ -261,7 +296,7 @@ export function AddClientModal({
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-xs sm:text-sm font-medium">
-                            소개자
+                            {t('forms.addClient.fields.referrer', '소개자')}
                           </FormLabel>
                           <Select
                             onValueChange={field.onChange}
@@ -269,7 +304,12 @@ export function AddClientModal({
                           >
                             <FormControl>
                               <SelectTrigger className="h-9 sm:h-10 text-xs sm:text-sm min-h-[36px] sm:min-h-[40px]">
-                                <SelectValue placeholder="소개자를 선택하세요" />
+                                <SelectValue
+                                  placeholder={t(
+                                    'forms.addClient.placeholders.referrer',
+                                    '소개자를 선택하세요'
+                                  )}
+                                />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
@@ -277,7 +317,10 @@ export function AddClientModal({
                                 value="none"
                                 className="text-xs sm:text-sm py-2"
                               >
-                                소개자 없음
+                                {t(
+                                  'forms.addClient.options.noReferrer',
+                                  '소개자 없음'
+                                )}
                               </SelectItem>
                               {referrers.map(referrer => (
                                 <SelectItem
@@ -305,15 +348,21 @@ export function AddClientModal({
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-xs sm:text-sm font-medium">
-                          전화번호{' '}
+                          {t('forms.addClient.fields.phone', '전화번호')}{' '}
                           <span className="text-muted-foreground">
-                            (선택사항)
+                            {t(
+                              'forms.addClient.options.optional',
+                              '(선택사항)'
+                            )}
                           </span>
                         </FormLabel>
                         <FormControl>
                           <Input
                             type="tel"
-                            placeholder="010-1234-5678 (선택사항)"
+                            placeholder={t(
+                              'forms.addClient.placeholders.phone',
+                              '010-1234-5678 (선택사항)'
+                            )}
                             className="h-9 sm:h-10 text-xs sm:text-sm min-h-[36px] sm:min-h-[40px]"
                             {...field}
                           />
@@ -323,39 +372,98 @@ export function AddClientModal({
                     )}
                   />
 
-                  <FormField
-                    control={form.control}
-                    name="telecomProvider"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs sm:text-sm font-medium">
-                          통신사
-                        </FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="h-9 sm:h-10 text-xs sm:text-sm min-h-[36px] sm:min-h-[40px]">
-                              <SelectValue placeholder="통신사를 선택하세요" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {telecomProviders.map(provider => (
+                  <div className="space-y-3">
+                    <FormField
+                      control={form.control}
+                      name="telecomProvider"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-xs sm:text-sm font-medium">
+                            {t(
+                              'forms.addClient.fields.telecomProvider',
+                              '통신사'
+                            )}
+                          </FormLabel>
+                          <Select
+                            onValueChange={value => {
+                              if (value === 'custom') {
+                                setIsCustomTelecom(true);
+                                field.onChange(''); // 폼 필드는 비움
+                              } else {
+                                setIsCustomTelecom(false);
+                                setCustomTelecomProvider('');
+                                field.onChange(value);
+                              }
+                            }}
+                            value={isCustomTelecom ? 'custom' : field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger className="h-9 sm:h-10 text-xs sm:text-sm min-h-[36px] sm:min-h-[40px]">
+                                <SelectValue
+                                  placeholder={t(
+                                    'forms.addClient.placeholders.telecomProvider',
+                                    '통신사를 선택하세요'
+                                  )}
+                                />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {telecomProviders.map(provider => (
+                                <SelectItem
+                                  key={provider}
+                                  value={provider}
+                                  className="text-xs sm:text-sm py-2"
+                                >
+                                  {provider}
+                                </SelectItem>
+                              ))}
                               <SelectItem
-                                key={provider}
-                                value={provider}
-                                className="text-xs sm:text-sm py-2"
+                                value="custom"
+                                className="text-xs sm:text-sm py-2 font-medium"
                               >
-                                {provider}
+                                🌍{' '}
+                                {t(
+                                  'forms.addClient.telecom.customInputOption',
+                                  '기타 (직접 입력)'
+                                )}
                               </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage className="text-xs" />
-                      </FormItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage className="text-xs" />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* 🌍 직접 입력 필드 (조건부 표시) */}
+                    {isCustomTelecom && (
+                      <div className="space-y-2">
+                        <Label className="text-xs sm:text-sm font-medium text-muted-foreground">
+                          {t(
+                            'forms.addClient.telecom.customInput',
+                            '직접 입력'
+                          )}
+                        </Label>
+                        <Input
+                          type="text"
+                          placeholder={t(
+                            'forms.addClient.telecom.customInputPlaceholder',
+                            '통신사명을 직접 입력하세요'
+                          )}
+                          value={customTelecomProvider}
+                          onChange={e =>
+                            setCustomTelecomProvider(e.target.value)
+                          }
+                          className="h-9 sm:h-10 text-xs sm:text-sm min-h-[36px] sm:min-h-[40px]"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          {t(
+                            'forms.addClient.telecom.exampleText',
+                            '💡 예: Verizon, AT&T, T-Mobile, Vodafone 등'
+                          )}
+                        </p>
+                      </div>
                     )}
-                  />
+                  </div>
                 </div>
 
                 {/* 세 번째 줄: 이메일 (전체 너비) */}
@@ -365,12 +473,15 @@ export function AddClientModal({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-xs sm:text-sm font-medium">
-                        이메일
+                        {t('forms.addClient.fields.email', '이메일')}
                       </FormLabel>
                       <FormControl>
                         <Input
                           type="email"
-                          placeholder="example@email.com"
+                          placeholder={t(
+                            'forms.addClient.placeholders.email',
+                            'example@email.com'
+                          )}
                           className="h-9 sm:h-10 text-xs sm:text-sm min-h-[36px] sm:min-h-[40px]"
                           {...field}
                         />
@@ -387,11 +498,14 @@ export function AddClientModal({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-xs sm:text-sm font-medium">
-                        주소
+                        {t('forms.addClient.fields.address', '주소')}
                       </FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="주소를 입력하세요"
+                          placeholder={t(
+                            'forms.addClient.placeholders.address',
+                            '주소를 입력하세요'
+                          )}
                           className="h-9 sm:h-10 text-xs sm:text-sm min-h-[36px] sm:min-h-[40px]"
                           {...field}
                         />
@@ -408,11 +522,14 @@ export function AddClientModal({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-xs sm:text-sm font-medium">
-                        직업
+                        {t('forms.addClient.fields.occupation', '직업')}
                       </FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="직업을 입력하세요"
+                          placeholder={t(
+                            'forms.addClient.placeholders.occupation',
+                            '직업을 입력하세요'
+                          )}
                           className="h-9 sm:h-10 text-xs sm:text-sm min-h-[36px] sm:min-h-[40px]"
                           {...field}
                         />
@@ -426,7 +543,7 @@ export function AddClientModal({
               {/* 🎯 영업 정보 */}
               <div className="space-y-3 sm:space-y-4">
                 <h4 className="text-sm sm:text-base font-medium text-foreground flex items-center gap-2">
-                  🎯 영업 정보
+                  🎯 {t('forms.addClient.sections.salesInfo', '영업 정보')}
                 </h4>
 
                 <FormField
@@ -435,7 +552,7 @@ export function AddClientModal({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-xs sm:text-sm font-medium">
-                        중요도
+                        {t('forms.addClient.fields.importance', '중요도')}
                       </FormLabel>
                       <FormControl>
                         <RadioGroup
@@ -478,11 +595,14 @@ export function AddClientModal({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-xs sm:text-sm font-medium">
-                        태그
+                        {t('forms.addClient.fields.tags', '태그')}
                       </FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="태그를 쉼표로 구분하여 입력하세요"
+                          placeholder={t(
+                            'forms.addClient.placeholders.tags',
+                            '태그를 쉼표로 구분하여 입력하세요'
+                          )}
                           className="h-9 sm:h-10 text-xs sm:text-sm min-h-[36px] sm:min-h-[40px]"
                           {...field}
                         />
@@ -498,11 +618,14 @@ export function AddClientModal({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-xs sm:text-sm font-medium">
-                        메모
+                        {t('forms.addClient.fields.notes', '메모')}
                       </FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder="고객에 대한 메모를 입력하세요"
+                          placeholder={t(
+                            'forms.addClient.placeholders.notes',
+                            '고객에 대한 메모를 입력하세요'
+                          )}
                           className="text-xs sm:text-sm min-h-[80px] resize-none"
                           rows={3}
                           {...field}
@@ -526,7 +649,7 @@ export function AddClientModal({
               onClick={handleClose}
               className="h-10 px-4 w-full sm:w-auto text-xs sm:text-sm"
             >
-              취소
+              {t('actions.cancel', '취소')}
             </Button>
             <Button
               type="submit"
@@ -535,7 +658,9 @@ export function AddClientModal({
               className="gap-2 h-10 px-4 w-full sm:w-auto text-xs sm:text-sm bg-primary text-primary-foreground"
             >
               <PlusIcon className="h-3 w-3" />
-              {isSubmitting ? '추가 중...' : '고객 추가'}
+              {isSubmitting
+                ? t('actions.saving', '추가 중...')
+                : t('actions.addClient', '고객 추가')}
             </Button>
           </div>
         </DialogFooter>

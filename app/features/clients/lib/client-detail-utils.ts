@@ -15,6 +15,20 @@ export const TELECOM_PROVIDER_OPTIONS = [
   { value: '알뜰폰 SKT', label: '알뜰폰 SKT' },
   { value: '알뜰폰 KT', label: '알뜰폰 KT' },
   { value: '알뜰폰 LG U+', label: '알뜰폰 LG U+' },
+  { value: 'custom', label: '기타 (직접 입력)' },
+] as const;
+
+// 🌍 해외 통신사 옵션 추가 (선택적으로 사용)
+export const GLOBAL_TELECOM_PROVIDERS = [
+  // 미국
+  { value: 'Verizon', label: 'Verizon (US)', country: 'US' },
+  { value: 'AT&T', label: 'AT&T (US)', country: 'US' },
+  { value: 'T-Mobile', label: 'T-Mobile (US)', country: 'US' },
+  // 유럽
+  { value: 'Vodafone', label: 'Vodafone (EU)', country: 'EU' },
+  // 일본
+  { value: 'NTT Docomo', label: 'NTT Docomo (JP)', country: 'JP' },
+  { value: 'SoftBank', label: 'SoftBank (JP)', country: 'JP' },
 ] as const;
 
 export const RELATIONSHIP_OPTIONS = [

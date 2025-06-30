@@ -39,6 +39,8 @@ import {
   getBMIStatus,
 } from '../lib/client-detail-utils';
 import type { ClientDetailProfile } from '../types/client-detail';
+import { useState, useMemo } from 'react';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 
 interface ClientSidebarProps {
   client: ClientDetailProfile | null;
@@ -71,6 +73,8 @@ export function ClientSidebar({
   availableReferrers = [], // 소개자 후보 목록
   onDeleteClient,
 }: ClientSidebarProps) {
+  const { t } = useHydrationSafeTranslation('pipeline');
+
   const cardStyle = getClientCardStyle(client?.importance || 'medium');
 
   // BMI 계산 로직
@@ -86,6 +90,35 @@ export function ClientSidebar({
           editFormData.weight.toString()
         )
       : null;
+
+  // 🌍 직접 입력 통신사를 위한 상태
+  const [isCustomTelecom, setIsCustomTelecom] = useState(false);
+  const [customTelecomProvider, setCustomTelecomProvider] = useState('');
+
+  // 🔄 편집 모드 상태에 따른 통신사 상태 동기화
+  useMemo(() => {
+    if (isEditing) {
+      // 편집 모드 진입 시, 현재 값이 기본 옵션에 없으면 직접 입력으로 간주
+      const isInDefaultOptions = TELECOM_PROVIDER_OPTIONS.some(
+        option => option.value === editFormData.telecomProvider
+      );
+      if (
+        !isInDefaultOptions &&
+        editFormData.telecomProvider &&
+        editFormData.telecomProvider !== 'none'
+      ) {
+        setIsCustomTelecom(true);
+        setCustomTelecomProvider(editFormData.telecomProvider);
+      } else {
+        setIsCustomTelecom(false);
+        setCustomTelecomProvider('');
+      }
+    } else {
+      // 편집 모드 종료 시 상태 초기화
+      setIsCustomTelecom(false);
+      setCustomTelecomProvider('');
+    }
+  }, [isEditing, editFormData.telecomProvider]);
 
   return (
     <div className="lg:col-span-1 mb-6">
@@ -320,47 +353,99 @@ export function ClientSidebar({
               </div>
 
               {/* 통신사 정보 - 항상 표시 */}
-              <div className="flex items-center gap-3">
-                <span className="h-4 w-4 text-muted-foreground flex items-center justify-center">
-                  📱
-                </span>
-                {isEditing ? (
-                  <Select
-                    value={editFormData.telecomProvider || 'none'}
-                    onValueChange={value =>
-                      setEditFormData({
-                        ...editFormData,
-                        telecomProvider: value,
-                      })
-                    }
-                  >
-                    <SelectTrigger className="text-sm">
-                      <SelectValue placeholder="통신사 선택" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {TELECOM_PROVIDER_OPTIONS.map(option => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                ) : (
-                  <span className="text-sm">
-                    <span className="text-xs text-muted-foreground mr-2">
-                      통신사
-                    </span>
-                    {client?.telecomProvider || (
-                      <span
-                        className="text-muted-foreground italic cursor-pointer hover:text-foreground transition-colors"
-                        onClick={handleEditStart}
-                        title="클릭하여 선택"
-                      >
-                        미선택
-                      </span>
-                    )}
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-3">
+                  <span className="h-4 w-4 text-muted-foreground flex items-center justify-center">
+                    📱
                   </span>
-                )}
+                  {isEditing ? (
+                    <div className="flex-1 space-y-2">
+                      <Select
+                        value={
+                          isCustomTelecom
+                            ? 'custom'
+                            : editFormData.telecomProvider || 'none'
+                        }
+                        onValueChange={value => {
+                          if (value === 'custom') {
+                            setIsCustomTelecom(true);
+                            // 기존 값이 있으면 customTelecomProvider에 설정
+                            if (
+                              editFormData.telecomProvider &&
+                              editFormData.telecomProvider !== 'none'
+                            ) {
+                              setCustomTelecomProvider(
+                                editFormData.telecomProvider
+                              );
+                            }
+                          } else {
+                            setIsCustomTelecom(false);
+                            setCustomTelecomProvider('');
+                            setEditFormData({
+                              ...editFormData,
+                              telecomProvider: value,
+                            });
+                          }
+                        }}
+                      >
+                        <SelectTrigger className="text-sm">
+                          <SelectValue placeholder="통신사 선택" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {TELECOM_PROVIDER_OPTIONS.map(option => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                          <SelectItem value="custom" className="font-medium">
+                            🌍 기타 (직접 입력)
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+
+                      {/* 🌍 직접 입력 필드 (조건부 표시) */}
+                      {isCustomTelecom && (
+                        <div className="ml-6 space-y-1">
+                          <Input
+                            type="text"
+                            placeholder="통신사명을 직접 입력하세요"
+                            value={customTelecomProvider}
+                            onChange={e => {
+                              const value = e.target.value;
+                              setCustomTelecomProvider(value);
+                              setEditFormData({
+                                ...editFormData,
+                                telecomProvider: value,
+                              });
+                            }}
+                            className="text-sm"
+                          />
+                          <p className="text-xs text-muted-foreground">
+                            {t(
+                              'forms.addClient.telecom.exampleText',
+                              '💡 예: Verizon, AT&T, T-Mobile, Vodafone 등'
+                            )}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <span className="text-sm">
+                      <span className="text-xs text-muted-foreground mr-2">
+                        통신사
+                      </span>
+                      {client?.telecomProvider || (
+                        <span
+                          className="text-muted-foreground italic cursor-pointer hover:text-foreground transition-colors"
+                          onClick={handleEditStart}
+                          title="클릭하여 선택"
+                        >
+                          미선택
+                        </span>
+                      )}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
 

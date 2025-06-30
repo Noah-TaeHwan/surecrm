@@ -38,7 +38,12 @@
     "low": "Interest",
     "highValue": "High",
     "mediumValue": "Medium",
-    "lowValue": "Low"
+    "lowValue": "Low",
+    "descriptions": {
+      "high": "Important client requiring priority management",
+      "medium": "Client requiring regular attention and communication",
+      "low": "Client maintained through basic contact"
+    }
   },
   "insurance": {
     "types": {
@@ -90,7 +95,12 @@
     "search": "Search",
     "export": "Export",
     "import": "Import",
-    "click": "Click"
+    "click": "Click",
+    "existingClient": "Existing",
+    "newClient": "New"
+  },
+  "navigation": {
+    "salesPipeline": "Sales Pipeline"
   },
   "filters": {
     "title": "Filters",
@@ -150,10 +160,11 @@
       },
       "placeholders": {
         "fullName": "Enter client name",
-        "phone": "010-1234-5678",
+        "phone": "010-1234-5678 (optional)",
         "email": "example@email.com",
         "address": "Enter address",
         "occupation": "Enter occupation",
+        "telecomProvider": "Select telecom provider",
         "height": "170",
         "weight": "70",
         "stage": "Select stage",
@@ -167,7 +178,9 @@
       "options": {
         "hasLicense": "Yes",
         "noLicense": "No",
-        "noReferrer": "No referrer"
+        "noReferrer": "No referrer",
+        "optional": "(optional)",
+        "required": "*"
       },
       "sections": {
         "basicInfo": "Basic Information",
@@ -185,6 +198,28 @@
       "messages": {
         "noInsurance": "No insurance information registered",
         "addInsuranceHelp": "Click the buttons above to add insurance information"
+      },
+      "telecom": {
+        "mainProviders": "Major Carriers",
+        "mvnoProviders": "MVNOs",
+        "customInput": "Custom Input",
+        "customInputOption": "Other (Custom Input)",
+        "customInputPlaceholder": "Enter carrier name",
+        "global": {
+          "verizon": "Verizon",
+          "att": "AT&T",
+          "tmobile": "T-Mobile",
+          "vodafone": "Vodafone",
+          "docomo": "NTT Docomo",
+          "softbank": "SoftBank",
+          "other": "Other"
+        },
+        "exampleText": "💡 e.g., Verizon, AT&T, T-Mobile, Vodafone, etc."
+      },
+      "importanceValues": {
+        "high": "Key Person",
+        "medium": "Regular",
+        "low": "Interest"
       }
     },
     "existingClientOpportunity": {
@@ -281,7 +316,12 @@
     }
   },
   "notifications": {
-    "clientAdded": "Client has been successfully added",
+    "clientAdded": "{{clientName}} has been added to the pipeline!",
+    "clientUpdated": "{{clientName}}'s information has been updated.",
+    "success": "Success",
+    "error": "Error",
+    "warning": "Warning",
+    "info": "Info",
     "clientMoved": "Client has been moved to {{stageName}} stage",
     "clientRemoved": "Client has been excluded from the pipeline",
     "opportunityCreated": "New opportunity created for {{clientName}}",
@@ -290,14 +330,20 @@
     "loadError": "Failed to load data"
   },
   "errors": {
+    "validationFailed": "Please check your inputs",
+    "submissionFailed": "Submission failed. Please try again",
+    "loadingFailed": "Failed to load data",
+    "networkError": "A network error occurred",
+    "unknownError": "An unknown error occurred",
+    "addClient": {
+      "failure": "Failed to add client. Please try again."
+    },
     "requiredField": "This field is required",
     "invalidPhone": "Please enter a valid phone number",
     "invalidEmail": "Please enter a valid email address",
     "clientNotFound": "Client not found",
     "stageNotFound": "Sales stage not found",
-    "networkError": "A network error occurred",
-    "serverError": "A server error occurred",
-    "unknownError": "An unknown error occurred"
+    "serverError": "A server error occurred"
   },
   "labels": {
     "direction": {
@@ -329,7 +375,16 @@
     "healthIssues": "Health Issues",
     "urgentContact": "Contact Needed",
     "longStay": "Long Term",
-    "currency": ""
+    "currency": "",
+    "all": "All",
+    "pipelineStats": "Pipeline Statistics",
+    "clientCount": "{{count}} clients",
+    "totalClients_short": "Total Clients",
+    "keyPerson": "Key Person",
+    "expectedCommission": "Expected Commission",
+    "monthlyPremium": "Monthly Premium",
+    "searchByName": "Search by client name...",
+    "totalClients": "Total {{count}} clients"
   },
   "tooltips": {
     "addClient": "Add a new client to the pipeline",
