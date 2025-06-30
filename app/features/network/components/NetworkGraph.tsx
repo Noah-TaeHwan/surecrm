@@ -2,16 +2,21 @@
 
 import { Suspense, lazy, useEffect, useState } from 'react';
 import type { NetworkGraphProps } from '../types';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 
 // 로딩 컴포넌트
-const LoadingFallback = () => (
-  <div className="h-full w-full flex items-center justify-center">
-    <div className="text-center">
-      <p className="mb-2">그래프 로딩 중...</p>
-      <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full mx-auto"></div>
+const LoadingFallback = () => {
+  const { t } = useHydrationSafeTranslation('network');
+
+  return (
+    <div className="h-full w-full flex items-center justify-center">
+      <div className="text-center">
+        <p className="mb-2">{t('graph.loading', '그래프 로딩 중...')}</p>
+        <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full mx-auto"></div>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default function NetworkGraph(props: NetworkGraphProps) {
   const [isMounted, setIsMounted] = useState(false);

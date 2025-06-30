@@ -15,6 +15,7 @@ import {
   Calendar,
   User,
 } from 'lucide-react';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 import { Button } from '~/common/components/ui/button';
 import { Badge } from '~/common/components/ui/badge';
 import {
@@ -49,6 +50,9 @@ export default function NetworkDetailPanel({
   referralData = {},
   agentInfo = null,
 }: NetworkDetailPanelProps) {
+  // 🌍 다국어 번역 훅
+  const { t } = useHydrationSafeTranslation('network');
+
   // 선택된 노드 정보
   const selectedNode = useMemo(() => {
     return data.nodes.find(node => node.id === nodeId);
@@ -147,13 +151,13 @@ export default function NetworkDetailPanel({
   const getImportanceText = (importance: string | undefined) => {
     switch (importance) {
       case 'high':
-        return '키맨';
+        return t('detailPanel.importance.high', '키맨');
       case 'medium':
-        return '일반';
+        return t('detailPanel.importance.medium', '일반');
       case 'low':
-        return '관심';
+        return t('detailPanel.importance.low', '관심');
       default:
-        return '미설정';
+        return t('detailPanel.importance.unset', '미설정');
     }
   };
 
@@ -229,7 +233,9 @@ export default function NetworkDetailPanel({
       <div className="p-4 flex-shrink-0">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">
-            {isAgentNode ? '내 정보' : '고객 정보'}
+            {isAgentNode
+              ? t('detailPanel.agentTitle', '내 정보')
+              : t('detailPanel.title', '고객 정보')}
           </h2>
           <Button
             variant="ghost"
@@ -260,10 +266,14 @@ export default function NetworkDetailPanel({
                     variant="default"
                     className="bg-blue-100 text-blue-800 border-blue-200"
                   >
-                    에이전트
+                    {t('relationships.agent', '에이전트')}
                   </Badge>
                   <Badge variant="outline">
-                    총 {referredNodes.length}명 고객
+                    {t(
+                      'detailPanel.network.totalClients',
+                      '총 {{count}}명 고객',
+                      { count: referredNodes.length }
+                    )}
                   </Badge>
                 </>
               ) : (
@@ -273,7 +283,7 @@ export default function NetworkDetailPanel({
                   <Badge
                     variant={getStageBadgeColor(clientData?.stageName) as any}
                   >
-                    {clientData?.stageName || '단계 미설정'}
+                    {clientData?.stageName || t('stages.unset', '단계 미설정')}
                   </Badge>
                   {/* 중요도 배지 */}
                   <Badge
@@ -293,15 +303,17 @@ export default function NetworkDetailPanel({
           {/* 연락처 정보 */}
           <div className="space-y-3">
             <h4 className="text-sm font-medium text-muted-foreground">
-              연락처 정보
+              {t('detailPanel.contact.title', '연락처 정보')}
             </h4>
 
             <div className="flex items-center text-sm">
               <Phone className="mr-2 h-4 w-4 text-muted-foreground" />
               <span>
                 {isAgentNode
-                  ? agentInfo?.phone || '미입력'
-                  : clientData?.phone || '미입력'}
+                  ? agentInfo?.phone ||
+                    t('detailPanel.contact.notProvided', '미입력')
+                  : clientData?.phone ||
+                    t('detailPanel.contact.notProvided', '미입력')}
               </span>
               {(isAgentNode
                 ? agentInfo?.telecomProvider
@@ -329,8 +341,10 @@ export default function NetworkDetailPanel({
                 }
               >
                 {isAgentNode
-                  ? agentInfo?.email || '미입력'
-                  : clientData?.email || '미입력'}
+                  ? agentInfo?.email ||
+                    t('detailPanel.contact.notProvided', '미입력')
+                  : clientData?.email ||
+                    t('detailPanel.contact.notProvided', '미입력')}
               </span>
             </div>
 
@@ -340,7 +354,8 @@ export default function NetworkDetailPanel({
                 <span
                   className={clientData?.address ? '' : 'text-muted-foreground'}
                 >
-                  {clientData?.address || '미입력'}
+                  {clientData?.address ||
+                    t('detailPanel.contact.notProvided', '미입력')}
                 </span>
               </div>
             )}
@@ -353,7 +368,8 @@ export default function NetworkDetailPanel({
                     clientData?.occupation ? '' : 'text-muted-foreground'
                   }
                 >
-                  {clientData?.occupation || '미입력'}
+                  {clientData?.occupation ||
+                    t('detailPanel.contact.notProvided', '미입력')}
                 </span>
               </div>
             )}
@@ -364,7 +380,8 @@ export default function NetworkDetailPanel({
                 <span
                   className={agentInfo?.company ? '' : 'text-muted-foreground'}
                 >
-                  {agentInfo?.company || '미입력'}
+                  {agentInfo?.company ||
+                    t('detailPanel.contact.notProvided', '미입력')}
                 </span>
               </div>
             )}
@@ -374,24 +391,37 @@ export default function NetworkDetailPanel({
             /* 에이전트 통계 정보 */
             <div className="space-y-3">
               <h4 className="text-sm font-medium text-muted-foreground">
-                네트워크 통계
+                {t('detailPanel.network.title', '네트워크 통계')}
               </h4>
 
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div className="flex items-center">
                   <Users className="mr-2 h-4 w-4 text-muted-foreground" />
                   <div>
-                    <div className="font-medium">{referredNodes.length}명</div>
-                    <div className="text-xs text-muted-foreground">총 고객</div>
+                    <div className="font-medium">
+                      {t('detailPanel.referred.count', '{{count}}명', {
+                        count: referredNodes.length,
+                      })}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {t('detailPanel.network.totalClients', '총 고객')}
+                    </div>
                   </div>
                 </div>
 
                 <div className="flex items-center">
                   <TrendingUp className="mr-2 h-4 w-4 text-muted-foreground" />
                   <div>
-                    <div className="font-medium">{connections}건</div>
+                    <div className="font-medium">
+                      {t('detailPanel.referred.count', '{{count}}건', {
+                        count: connections,
+                      })}
+                    </div>
                     <div className="text-xs text-muted-foreground">
-                      소개 관계
+                      {t(
+                        'detailPanel.network.referralConnections',
+                        '소개 관계'
+                      )}
                     </div>
                   </div>
                 </div>
@@ -407,11 +437,13 @@ export default function NetworkDetailPanel({
                           )}
                         </div>
                         <div className="text-xs text-muted-foreground">
-                          가입일
+                          {t('detailPanel.network.joinDate', '가입일')}
                         </div>
                       </>
                     ) : (
-                      <span className="text-muted-foreground">미입력</span>
+                      <span className="text-muted-foreground">
+                        {t('detailPanel.contact.notProvided', '미입력')}
+                      </span>
                     )}
                   </div>
                 </div>
@@ -419,8 +451,12 @@ export default function NetworkDetailPanel({
                 <div className="flex items-center">
                   <Briefcase className="mr-2 h-4 w-4 text-muted-foreground" />
                   <div>
-                    <div className="font-medium text-blue-600">활성</div>
-                    <div className="text-xs text-muted-foreground">상태</div>
+                    <div className="font-medium text-blue-600">
+                      {t('detailPanel.network.active', '활성')}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {t('detailPanel.network.status', '상태')}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -429,7 +465,7 @@ export default function NetworkDetailPanel({
             /* 클라이언트 개인 정보 */
             <div className="space-y-3">
               <h4 className="text-sm font-medium text-muted-foreground">
-                개인 정보
+                {t('detailPanel.personal.title', '개인 정보')}
               </h4>
 
               <div className="grid grid-cols-2 gap-3 text-sm">
@@ -444,11 +480,15 @@ export default function NetworkDetailPanel({
                           )}
                         </div>
                         <div className="text-xs text-muted-foreground">
-                          {calculateAge(clientData.birthDate)}세
+                          {t('detailPanel.personal.age', '{{age}}세', {
+                            age: calculateAge(clientData.birthDate),
+                          })}
                         </div>
                       </>
                     ) : (
-                      <span className="text-muted-foreground">미입력</span>
+                      <span className="text-muted-foreground">
+                        {t('detailPanel.contact.notProvided', '미입력')}
+                      </span>
                     )}
                   </div>
                 </div>
@@ -461,10 +501,10 @@ export default function NetworkDetailPanel({
                     }
                   >
                     {clientData?.gender === 'male'
-                      ? '남성'
+                      ? t('detailPanel.personal.male', '남성')
                       : clientData?.gender === 'female'
-                        ? '여성'
-                        : '미입력'}
+                        ? t('detailPanel.personal.female', '여성')
+                        : t('detailPanel.contact.notProvided', '미입력')}
                   </span>
                 </div>
 
@@ -475,7 +515,11 @@ export default function NetworkDetailPanel({
                       clientData?.height ? '' : 'text-muted-foreground'
                     }
                   >
-                    {clientData?.height ? `${clientData.height}cm` : '미입력'}
+                    {clientData?.height
+                      ? t('detailPanel.personal.height', '{{height}}cm', {
+                          height: clientData.height,
+                        })
+                      : t('detailPanel.contact.notProvided', '미입력')}
                   </span>
                 </div>
 
@@ -486,7 +530,11 @@ export default function NetworkDetailPanel({
                       clientData?.weight ? '' : 'text-muted-foreground'
                     }
                   >
-                    {clientData?.weight ? `${clientData.weight}kg` : '미입력'}
+                    {clientData?.weight
+                      ? t('detailPanel.personal.weight', '{{weight}}kg', {
+                          weight: clientData.weight,
+                        })
+                      : t('detailPanel.contact.notProvided', '미입력')}
                   </span>
                 </div>
 
@@ -501,9 +549,9 @@ export default function NetworkDetailPanel({
                   >
                     {clientData && clientData.hasDrivingLicense !== null
                       ? clientData.hasDrivingLicense
-                        ? '운전가능'
-                        : '운전불가'
-                      : '미입력'}
+                        ? t('detailPanel.personal.canDrive', '운전가능')
+                        : t('detailPanel.personal.cannotDrive', '운전불가')
+                      : t('detailPanel.contact.notProvided', '미입력')}
                   </span>
                 </div>
               </div>
@@ -520,12 +568,16 @@ export default function NetworkDetailPanel({
                 <Link to="/pipeline">
                   <Button variant="outline" className="w-full mb-4">
                     <TrendingUp className="mr-2 h-4 w-4" />
-                    영업 파이프라인 보기
+                    {t(
+                      'detailPanel.actions.viewPipeline',
+                      '영업 파이프라인 보기'
+                    )}
                   </Button>
                 </Link>
                 <Link to="/settings">
                   <Button variant="outline" className="w-full">
-                    <UserRound className="mr-2 h-4 w-4" />내 설정
+                    <UserRound className="mr-2 h-4 w-4" />
+                    {t('detailPanel.actions.mySettings', '내 설정')}
                   </Button>
                 </Link>
               </>
@@ -535,13 +587,20 @@ export default function NetworkDetailPanel({
                 <Link to="/pipeline">
                   <Button variant="outline" className="w-full mb-4">
                     <TrendingUp className="mr-2 h-4 w-4" />
-                    영업 파이프라인 보기
+                    {t(
+                      'detailPanel.actions.viewPipeline',
+                      '영업 파이프라인 보기'
+                    )}
                   </Button>
                 </Link>
                 <Link to={`/clients/${selectedNode.id}`}>
                   <Button variant="outline" className="w-full">
                     <UserRound className="mr-2 h-4 w-4" />
-                    {selectedNode.name} 상세 정보
+                    {t(
+                      'detailPanel.actions.viewDetails',
+                      '{{name}} 상세 정보',
+                      { name: selectedNode.name }
+                    )}
                   </Button>
                 </Link>
               </>
@@ -555,7 +614,7 @@ export default function NetworkDetailPanel({
             <div className="space-y-3">
               <h4 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <UserRound className="h-4 w-4 text-blue-500" />
-                소개자
+                {t('detailPanel.referrer.title', '소개자')}
               </h4>
 
               {referredByNode ? (
@@ -573,7 +632,8 @@ export default function NetworkDetailPanel({
                           </div>
                           <div className="flex items-center gap-2">
                             <span className="text-xs text-muted-foreground">
-                              {referredByNode.clientInfo?.stageName || '미설정'}
+                              {referredByNode.clientInfo?.stageName ||
+                                t('stages.unset', '미설정')}
                             </span>
                             <Badge
                               className={`text-xs px-2 py-0.5 h-auto font-medium ${getImportanceBadgeColor(
@@ -597,10 +657,13 @@ export default function NetworkDetailPanel({
                     <div className="flex items-center gap-3 w-full">
                       <div className="w-2 h-2 rounded-full bg-muted-foreground/40"></div>
                       <span className="text-sm text-muted-foreground">
-                        직접 개발 고객
+                        {t(
+                          'detailPanel.referrer.directClient',
+                          '직접 개발 고객'
+                        )}
                       </span>
                       <Badge variant="secondary" className="text-xs ml-auto">
-                        신규 개발
+                        {t('detailPanel.referrer.newDevelopment', '신규 개발')}
                       </Badge>
                     </div>
                   </CardContent>
@@ -614,13 +677,17 @@ export default function NetworkDetailPanel({
             <div className="flex items-center justify-between">
               <h4 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <Users className="h-4 w-4 text-orange-500" />
-                {isAgentNode ? '직접 개발한 고객' : '소개한 고객'}
+                {isAgentNode
+                  ? t('detailPanel.referred.clientsTitle', '직접 개발한 고객')
+                  : t('detailPanel.referred.title', '소개한 고객')}
               </h4>
               <Badge
                 variant="outline"
                 className="text-xs px-2 py-0 h-5 font-normal"
               >
-                {referredNodes.length}명
+                {t('detailPanel.referred.count', '{{count}}명', {
+                  count: referredNodes.length,
+                })}
               </Badge>
             </div>
 
@@ -642,7 +709,8 @@ export default function NetworkDetailPanel({
                             </div>
                             <div className="flex items-center gap-2">
                               <span className="text-xs text-muted-foreground">
-                                {node.clientInfo?.stageName || '미설정'}
+                                {node.clientInfo?.stageName ||
+                                  t('stages.unset', '미설정')}
                               </span>
                               <Badge
                                 className={`text-xs px-2 py-0.5 h-auto font-medium ${getImportanceBadgeColor(
@@ -667,11 +735,25 @@ export default function NetworkDetailPanel({
                     <div className="w-2 h-2 rounded-full bg-muted-foreground/40"></div>
                     <span className="text-sm text-muted-foreground">
                       {isAgentNode
-                        ? '관리 중인 고객이 없습니다'
-                        : '소개한 고객이 없습니다'}
+                        ? t(
+                            'detailPanel.referred.noClients',
+                            '관리 중인 고객이 없습니다'
+                          )
+                        : t(
+                            'detailPanel.referred.noReferrals',
+                            '소개한 고객이 없습니다'
+                          )}
                     </span>
                     <Badge variant="outline" className="text-xs ml-auto">
-                      {isAgentNode ? '신규 개발' : '개발 가능'}
+                      {isAgentNode
+                        ? t(
+                            'detailPanel.referred.newDevelopmentPossible',
+                            '신규 개발'
+                          )
+                        : t(
+                            'detailPanel.referred.developmentPossible',
+                            '개발 가능'
+                          )}
                     </Badge>
                   </div>
                 </CardContent>

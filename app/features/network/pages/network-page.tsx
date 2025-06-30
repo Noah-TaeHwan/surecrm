@@ -29,6 +29,7 @@ import {
   Component,
 } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 import type {
   NetworkNode,
   NetworkLink,
@@ -53,6 +54,24 @@ import {
 
 export async function loader({ request }: Route.LoaderArgs) {
   try {
+    // 🌍 서버사이드에서 언어 감지
+    const acceptLanguage = request.headers.get('Accept-Language') || '';
+    const cookieHeader = request.headers.get('Cookie') || '';
+
+    // 쿠키에서 언어 우선 확인
+    let detectedLang = 'ko';
+    const langMatch = cookieHeader.match(/i18nextLng=([^;]+)/);
+    if (langMatch) {
+      detectedLang = langMatch[1];
+    } else {
+      // Accept-Language 헤더에서 언어 감지
+      if (acceptLanguage.includes('en')) {
+        detectedLang = 'en';
+      } else if (acceptLanguage.includes('ja')) {
+        detectedLang = 'ja';
+      }
+    }
+
     // 🔥 구독 상태 확인 (트라이얼 만료 시 billing 페이지로 리다이렉트)
     const { requireActiveSubscription } = await import(
       '~/lib/auth/subscription-middleware.server'
@@ -163,11 +182,12 @@ export async function loader({ request }: Route.LoaderArgs) {
       stages,
       clientsData: clientsWithDetails,
       referralData: Object.fromEntries(referralData),
+      detectedLang, // 🌍 감지된 언어 정보 추가
     };
   } catch (error) {
     console.error('네트워크 데이터 로딩 실패:', error);
 
-    // 에러 시 빈 데이터 반환
+    // 에러 시 빈 데이터 반환 (언어 정보도 포함)
     return {
       nodes: [],
       edges: [],
@@ -184,6 +204,7 @@ export async function loader({ request }: Route.LoaderArgs) {
       stages: [],
       clientsData: [],
       referralData: {},
+      detectedLang: 'ko', // 🌍 기본 언어
     };
   }
 }
@@ -207,12 +228,57 @@ export async function action({ request }: Route.ActionArgs) {
   }
 }
 
-export function meta({ data, params }: Route.MetaArgs) {
+export function meta({ data }: Route.MetaArgs) {
+  // loader에서 감지된 언어 정보 사용
+  const detectedLang = data?.detectedLang || 'ko';
+
+  // 언어별 메타 데이터
+  const metaData = {
+    ko: {
+      title: '소개 네트워크 - SureCRM',
+      description:
+        '고객 간 소개 관계를 시각화하여 네트워크 효과를 극대화하세요.',
+    },
+    en: {
+      title: 'Referral Network - SureCRM',
+      description:
+        'Visualize customer referral relationships to maximize network effects.',
+    },
+    ja: {
+      title: '紹介ネットワーク - SureCRM',
+      description:
+        '顧客間の紹介関係を可視化してネットワーク効果を最大化しましょう。',
+    },
+  };
+
+  const currentMeta =
+    metaData[detectedLang as keyof typeof metaData] || metaData.ko;
+
   return [
-    { title: '소개 네트워크 - SureCRM' },
+    { title: currentMeta.title },
     {
       name: 'description',
-      content: '고객 간 소개 관계를 시각화하여 네트워크 효과를 극대화하세요.',
+      content: currentMeta.description,
+    },
+    {
+      property: 'og:title',
+      content: currentMeta.title,
+    },
+    {
+      property: 'og:description',
+      content: currentMeta.description,
+    },
+    {
+      name: 'twitter:title',
+      content: currentMeta.title,
+    },
+    {
+      name: 'twitter:description',
+      content: currentMeta.description,
+    },
+    {
+      httpEquiv: 'Content-Language',
+      content: detectedLang,
     },
   ];
 }
@@ -265,6 +331,9 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
     clientsData,
     referralData,
   } = loaderData;
+
+  // 🌍 다국어 번역 훅
+  const { t } = useHydrationSafeTranslation('network');
 
   // 반응형 브레이크포인트 훅
   const { isMobile, isTablet, isDesktop, isHydrated } = useBreakpoint();
@@ -710,7 +779,7 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
       return (
         <div className="flex items-center justify-center h-full">
           <div className="text-center">
-            <p className="mb-2">그래프 로딩 중...</p>
+            <p className="mb-2">{t('graph.loading', '그래프 로딩 중...')}</p>
             <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full mx-auto"></div>
           </div>
         </div>
@@ -723,13 +792,16 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
         <div className="flex items-center justify-center h-full">
           <div className="text-center max-w-md p-4">
             <p className="text-red-500 mb-4">
-              그래프를 로드하는데 문제가 발생했습니다.
+              {t(
+                'graph.renderingError',
+                '그래프를 로드하는데 문제가 발생했습니다.'
+              )}
             </p>
             <button
               className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/90 transition-colors"
               onClick={() => window.location.reload()}
             >
-              페이지 새로고침
+              {t('graph.refreshPage', '페이지 새로고침')}
             </button>
           </div>
         </div>
@@ -741,7 +813,7 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
       return (
         <div className="flex items-center justify-center h-full">
           <div className="text-center">
-            <p className="mb-2">그래프 로딩 중...</p>
+            <p className="mb-2">{t('graph.loading', '그래프 로딩 중...')}</p>
             <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full mx-auto"></div>
           </div>
         </div>
@@ -755,13 +827,16 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
           <div className="flex items-center justify-center h-full">
             <div className="text-center max-w-md p-4">
               <p className="text-red-500 mb-4">
-                그래프 렌더링 중 오류가 발생했습니다.
+                {t(
+                  'graph.renderingErrorDetailed',
+                  '그래프 렌더링 중 오류가 발생했습니다.'
+                )}
               </p>
               <button
                 className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/90 transition-colors"
                 onClick={() => window.location.reload()}
               >
-                페이지 새로고침
+                {t('graph.refreshPage', '페이지 새로고침')}
               </button>
             </div>
           </div>
@@ -791,7 +866,7 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
   // 모바일 레이아웃
   if (isHydrated && isMobile) {
     return (
-      <MainLayout title="소개 네트워크">
+      <MainLayout title={t('page.title', '소개 네트워크')}>
         <div className="space-y-4">
           {/* 필터 버튼 */}
           <div className="flex justify-start">
@@ -812,7 +887,7 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
                   d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707v4.172a1 1 0 01-.293.707L10 20.414a1 1 0 01-.707.293H9a1 1 0 01-1-1v-3.586a1 1 0 00-.293-.707L1.293 9.707A1 1 0 011 9V4z"
                 />
               </svg>
-              필터
+              {t('filters.title', '필터')}
             </button>
           </div>
 
@@ -838,9 +913,11 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
                 {/* 헤더 */}
                 <div className="flex items-center justify-between px-4 py-3 border-b bg-background flex-shrink-0">
                   <div>
-                    <h3 className="text-lg font-semibold">필터 및 통계</h3>
+                    <h3 className="text-lg font-semibold">
+                      {t('sidebar.title', '필터 및 통계')}
+                    </h3>
                     <p className="text-sm text-muted-foreground">
-                      네트워크 데이터 필터링
+                      {t('sidebar.description', '네트워크 데이터 필터링')}
                     </p>
                   </div>
                   <button
@@ -871,10 +948,14 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
           {/* 그래프 영역 - 동적 높이 */}
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-lg">소개 네트워크</CardTitle>
+              <CardTitle className="text-lg">
+                {t('page.title', '소개 네트워크')}
+              </CardTitle>
               <CardDescription className="text-sm">
-                고객 간 소개 관계를 시각화합니다. 노드를 클릭하면 상세 정보를 볼
-                수 있습니다.
+                {t(
+                  'page.description',
+                  '고객 간 소개 관계를 시각화합니다. 노드를 클릭하면 상세 정보를 볼 수 있습니다.'
+                )}
               </CardDescription>
 
               {/* 검색 컨트롤 */}
@@ -907,9 +988,12 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle>노드 상세 정보</CardTitle>
+                    <CardTitle>{t('detail.title', '노드 상세 정보')}</CardTitle>
                     <CardDescription>
-                      선택한 노드의 상세 정보입니다.
+                      {t(
+                        'detail.description',
+                        '선택한 노드의 상세 정보입니다.'
+                      )}
                     </CardDescription>
                   </div>
                   <button
@@ -1037,15 +1121,17 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
   // 태블릿 레이아웃
   if (isHydrated && isTablet) {
     return (
-      <MainLayout title="소개 네트워크">
+      <MainLayout title={t('page.title', '소개 네트워크')}>
         <div className="space-y-6">
           {/* 그래프 영역 */}
           <Card>
             <CardHeader>
-              <CardTitle>소개 네트워크</CardTitle>
+              <CardTitle>{t('page.title', '소개 네트워크')}</CardTitle>
               <CardDescription>
-                고객 간 소개 관계를 시각화합니다. 노드를 클릭하면 상세 정보를 볼
-                수 있습니다.
+                {t(
+                  'page.description',
+                  '고객 간 소개 관계를 시각화합니다. 노드를 클릭하면 상세 정보를 볼 수 있습니다.'
+                )}
               </CardDescription>
 
               {/* 검색 컨트롤 */}
@@ -1074,9 +1160,12 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
           {/* 필터 및 통계 */}
           <Card>
             <CardHeader>
-              <CardTitle>필터 및 통계</CardTitle>
+              <CardTitle>{t('sidebar.title', '필터 및 통계')}</CardTitle>
               <CardDescription>
-                네트워크 데이터를 필터링하고 통계를 확인하세요.
+                {t(
+                  'sidebar.description',
+                  '네트워크 데이터를 필터링하고 통계를 확인하세요.'
+                )}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -1094,9 +1183,12 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle>노드 상세 정보</CardTitle>
+                    <CardTitle>{t('detail.title', '노드 상세 정보')}</CardTitle>
                     <CardDescription>
-                      선택한 노드의 상세 정보입니다.
+                      {t(
+                        'detail.description',
+                        '선택한 노드의 상세 정보입니다.'
+                      )}
                     </CardDescription>
                   </div>
                   <button
@@ -1128,7 +1220,7 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
 
   // 데스크톱 레이아웃
   return (
-    <MainLayout title="소개 네트워크">
+    <MainLayout title={t('page.title', '소개 네트워크')}>
       <div
         data-network-main
         className="flex gap-3" // CSS Grid 대신 Flexbox 사용
@@ -1179,10 +1271,14 @@ export default function NetworkPage({ loaderData }: Route.ComponentProps) {
             }}
           >
             <CardHeader className="flex-shrink-0 pb-2 px-4 pt-3 graph-card-header">
-              <CardTitle className="text-lg">소개 네트워크</CardTitle>
+              <CardTitle className="text-lg">
+                {t('page.title', '소개 네트워크')}
+              </CardTitle>
               <CardDescription className="text-sm">
-                고객 간 소개 관계를 시각화합니다. 노드를 클릭하면 상세 정보를 볼
-                수 있습니다.
+                {t(
+                  'page.description',
+                  '고객 간 소개 관계를 시각화합니다. 노드를 클릭하면 상세 정보를 볼 수 있습니다.'
+                )}
               </CardDescription>
 
               {/* 컨트롤 패널 */}

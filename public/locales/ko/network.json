@@ -1,0 +1,227 @@
+{
+  "meta": {
+    "title": "소개 네트워크 - SureCRM",
+    "description": "고객 간 소개 관계를 시각화하여 네트워크 효과를 극대화하세요."
+  },
+  "page": {
+    "title": "소개 네트워크",
+    "description": "고객 간 소개 관계를 시각화합니다. 노드를 클릭하면 상세 정보를 볼 수 있습니다.",
+    "errorLoading": "네트워크 데이터 로딩 실패",
+    "errorDescription": "네트워크 데이터를 불러오는 중 오류가 발생했습니다."
+  },
+  "graph": {
+    "loading": "그래프 로딩 중...",
+    "preparing": "그래프 준비 중...",
+    "renderingError": "그래프를 로드하는데 문제가 발생했습니다.",
+    "refreshPage": "페이지 새로고침",
+    "renderingErrorDetailed": "그래프 렌더링 중 오류가 발생했습니다.",
+    "fallbackMessage": "그래프 렌더링에 문제가 발생했습니다. 대체 UI를 표시합니다."
+  },
+  "search": {
+    "placeholder": "고객 이름으로 검색... (실시간)",
+    "noResults": "검색 결과가 없습니다",
+    "resultsFound": "{{count}}개 발견",
+    "searching": "검색 중...",
+    "clear": "검색어 지우기",
+    "connectedNodes": "연결된 노드 포함",
+    "navigation": {
+      "move": "이동",
+      "select": "선택",
+      "close": "닫기"
+    },
+    "shortcuts": {
+      "move": "↑↓ 이동",
+      "select": "Enter 선택",
+      "close": "Esc 닫기"
+    },
+    "connectedNodes": "연결된 노드 포함"
+  },
+  "controls": {
+    "search": "검색",
+    "filter": "필터",
+    "settings": "설정",
+    "refresh": "새로고침"
+  },
+  "detail": {
+    "title": "노드 상세 정보",
+    "description": "선택한 노드의 상세 정보입니다."
+  },
+  "filters": {
+    "title": "필터",
+    "applied": "적용된 필터",
+    "reset": "필터 초기화",
+    "stage": {
+      "title": "영업 단계",
+      "description": "영업 단계별로 고객을 필터링합니다.",
+      "all": "전체",
+      "firstConsultation": "첫 상담",
+      "needsAnalysis": "니즈 분석",
+      "productExplanation": "상품 설명",
+      "contractReview": "계약 검토",
+      "contractCompleted": "계약 완료"
+    },
+    "importance": {
+      "title": "고객 중요도",
+      "description": "중요도별로 고객을 필터링합니다.",
+      "all": "전체",
+      "high": "키맨",
+      "medium": "일반",
+      "low": "관심",
+      "note": "중요도가 높은 고객일수록 더 큰 노드로 표시됩니다."
+    },
+    "depth": {
+      "title": "소개 깊이",
+      "all": "전체",
+      "direct": "직접 연결",
+      "indirect": "간접 연결"
+    },
+    "influencers": {
+      "title": "핵심 소개자만 표시",
+      "description": "영향력 있는 소개자와 그들의 네트워크만 표시합니다."
+    }
+  },
+  "stats": {
+    "title": "네트워크 현황",
+    "description": "소개 네트워크 분석 결과입니다",
+    "totalNodes": "전체 고객",
+    "filteredNodes": "필터링 표시",
+    "totalConnections": "총 연결 수",
+    "networkDensity": "네트워크 밀도",
+    "maxDepth": "소개 체인 깊이",
+    "averageReferrals": "평균 소개 수",
+    "connectionCount": "총 연결 수",
+    "topReferrers": {
+      "title": "활발한 소개자 TOP 3",
+      "count": "{{count}}명"
+    },
+    "insights": {
+      "chainDepth": "최대 {{depth}}단계",
+      "avgReferrals": "{{count}}명",
+      "connections": "{{count}}개"
+    }
+  },
+  "sidebar": {
+    "title": "필터 및 통계",
+    "description": "네트워크 데이터 필터링",
+    "close": "닫기"
+  },
+  "detailPanel": {
+    "title": "고객 정보",
+    "agentTitle": "내 정보",
+    "close": "닫기",
+    "contact": {
+      "title": "연락처 정보",
+      "phone": "연락처",
+      "email": "이메일",
+      "address": "주소",
+      "occupation": "직업",
+      "company": "회사",
+      "notProvided": "미입력"
+    },
+    "personal": {
+      "title": "개인 정보",
+      "birthDate": "생년월일",
+      "age": "{{age}}세",
+      "gender": "성별",
+      "male": "남성",
+      "female": "여성",
+      "height": "{{height}}cm",
+      "weight": "{{weight}}kg",
+      "drivingLicense": "운전 가능여부",
+      "canDrive": "운전가능",
+      "cannotDrive": "운전불가"
+    },
+    "network": {
+      "title": "네트워크 통계",
+      "totalClients": "총 고객",
+      "referralConnections": "소개 관계",
+      "joinDate": "가입일",
+      "status": "상태",
+      "active": "활성"
+    },
+    "telecom": {
+      "SKT": "📱",
+      "KT": "📞",
+      "LG U+": "📲",
+      "LG유플러스": "📲",
+      "알뜰폰 SKT": "🔹",
+      "알뜰폰 KT": "🔸",
+      "알뜰폰 LG U+": "🔺"
+    },
+    "referrer": {
+      "title": "소개자",
+      "directClient": "직접 개발 고객",
+      "newDevelopment": "신규 개발"
+    },
+    "referred": {
+      "title": "소개한 고객",
+      "clientsTitle": "직접 개발한 고객",
+      "count": "{{count}}명",
+      "noReferrals": "소개한 고객이 없습니다",
+      "noClients": "관리 중인 고객이 없습니다",
+      "developmentPossible": "개발 가능",
+      "newDevelopmentPossible": "신규 개발"
+    },
+    "actions": {
+      "viewPipeline": "영업 파이프라인 보기",
+      "viewDetails": "{{name}} 상세 정보",
+      "mySettings": "내 설정"
+    },
+    "importance": {
+      "high": "키맨",
+      "medium": "일반",
+      "low": "관심",
+      "unset": "미설정"
+    }
+  },
+  "mobileTabs": {
+    "graph": "네트워크",
+    "filter": "필터",
+    "search": "검색",
+    "details": "상세정보"
+  },
+  "nodeDetails": {
+    "title": "노드 상세 정보",
+    "description": "선택한 노드의 상세 정보입니다."
+  },
+  "relationships": {
+    "referredBy": "소개받음",
+    "referred": "소개함",
+    "agent": "에이전트",
+    "client": "고객"
+  },
+  "stages": {
+    "firstConsultation": "첫 상담",
+    "needsAnalysis": "니즈 분석",
+    "productExplanation": "상품 설명",
+    "contractReview": "계약 검토",
+    "contractCompleted": "계약 완료",
+    "unset": "단계 미설정"
+  },
+  "errors": {
+    "dataLoading": "데이터를 불러오는 중 오류가 발생했습니다.",
+    "networkError": "네트워크 오류가 발생했습니다.",
+    "unknownRequest": "알 수 없는 요청입니다.",
+    "requestFailed": "요청 처리에 실패했습니다.",
+    "retry": "다시 시도"
+  },
+  "actions": {
+    "searchSuccess": "검색이 완료되었습니다.",
+    "searchError": "검색 중 오류가 발생했습니다.",
+    "filterApplied": "필터가 적용되었습니다.",
+    "filterCleared": "필터가 초기화되었습니다."
+  },
+  "loading": {
+    "data": "데이터 로딩 중...",
+    "graph": "그래프 로딩 중...",
+    "search": "검색 중...",
+    "filter": "필터링 중..."
+  },
+  "fallback": {
+    "noData": "표시할 데이터가 없습니다.",
+    "noNetwork": "네트워크 데이터가 없습니다.",
+    "noConnections": "연결된 고객이 없습니다.",
+    "nodeList": "노드 목록",
+    "nodeInfo": "중요도: {{importance}} / 단계: {{stage}}"
+  }
+}

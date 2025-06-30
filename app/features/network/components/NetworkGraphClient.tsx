@@ -8,6 +8,7 @@ import type {
   NetworkData,
   NetworkGraphProps,
 } from '../types';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 
 // 브라우저 환경인지 확인하는 변수 - 정의 위치 수정
 const isBrowser = typeof window !== 'undefined';
@@ -69,14 +70,19 @@ function calculateTouchTargetRadius(node: any, isMobile: boolean) {
 
 // 그래프 실패 시 대체 UI
 const FallbackGraph = ({ data, onNodeSelect }: any) => {
+  const { t } = useHydrationSafeTranslation('network');
+
   return (
     <div className="w-full h-full p-4 overflow-auto">
       <div className="mb-4 p-2 bg-red-100 text-red-800 rounded">
-        그래프 렌더링에 문제가 발생했습니다. 대체 UI를 표시합니다.
+        {t(
+          'graph.fallbackMessage',
+          '그래프 렌더링에 문제가 발생했습니다. 대체 UI를 표시합니다.'
+        )}
       </div>
 
       <div className="grid grid-cols-1 gap-2">
-        <h3 className="font-medium">노드 목록</h3>
+        <h3 className="font-medium">{t('fallback.nodeList', '노드 목록')}</h3>
         {data.nodes.map((node: any) => (
           <div
             key={node.id}
@@ -85,7 +91,14 @@ const FallbackGraph = ({ data, onNodeSelect }: any) => {
           >
             <div className="font-medium">{node.name}</div>
             <div className="text-sm text-gray-500">
-              중요도: {node.importance} / 단계: {node.stage}
+              {t(
+                'fallback.nodeInfo',
+                '중요도: {{importance}} / 단계: {{stage}}',
+                {
+                  importance: node.importance,
+                  stage: node.stage,
+                }
+              )}
             </div>
           </div>
         ))}
@@ -176,6 +189,9 @@ export default function NetworkGraphClient({
   graphRef: externalGraphRef,
   highlightedNodeId: externalHighlightedNodeId = null,
 }: NetworkGraphProps) {
+  // 🌍 다국어 번역 훅
+  const { t } = useHydrationSafeTranslation('network');
+
   // 🔥 임시 디버깅 로그 제거 (무한 재렌더링 방지)
   // console.log('📊 NetworkGraphClient 데이터 검증:', {
   //   노드수: data?.nodes?.length || 0,

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Filter, Info, Search, Grid } from 'lucide-react';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 
 // 햅틱 피드백 함수
 function safeVibrate(duration: number = 10) {
@@ -35,6 +36,9 @@ export function NetworkMobileTabs({
   hasSelectedNode,
   searchResultsCount = 0,
 }: NetworkMobileTabsProps) {
+  // 🌍 다국어 번역 훅
+  const { t } = useHydrationSafeTranslation('network');
+
   const [isVisible, setIsVisible] = useState(true);
 
   // 스크롤 시 탭바 숨김/표시 로직
@@ -71,23 +75,23 @@ export function NetworkMobileTabs({
     {
       id: 'graph',
       icon: Grid,
-      label: '네트워크',
+      label: t('mobileTabs.graph', '네트워크'),
     },
     {
       id: 'filter',
       icon: Filter,
-      label: '필터',
+      label: t('mobileTabs.filter', '필터'),
     },
     {
       id: 'search',
       icon: Search,
-      label: '검색',
+      label: t('mobileTabs.search', '검색'),
       badge: searchResultsCount > 0 ? searchResultsCount : undefined,
     },
     {
       id: 'details',
       icon: Info,
-      label: '상세정보',
+      label: t('mobileTabs.details', '상세정보'),
     },
   ];
 

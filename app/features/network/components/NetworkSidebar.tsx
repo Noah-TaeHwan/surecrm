@@ -44,6 +44,7 @@ import {
   AccordionTrigger,
 } from '~/common/components/ui/accordion';
 import { Input } from '~/common/components/ui/input';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 
 interface NetworkSidebarProps {
   filters: {
@@ -78,6 +79,9 @@ export default function NetworkSidebar({
     connectionCount: 0,
   },
 }: NetworkSidebarProps) {
+  // 🌍 다국어 번역 훅
+  const { t } = useHydrationSafeTranslation('network');
+
   // 모바일 화면에서 필터 패널 열림/닫힘 상태
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   // CSS 로딩 상태 추가
@@ -124,12 +128,32 @@ export default function NetworkSidebar({
 
   // 영업 단계 정보 - 테마 색상 활용
   const stages = [
-    { value: 'all', label: '전체', color: 'bg-muted' },
-    { value: '첫 상담', label: '첫 상담', color: 'bg-sky-500' },
-    { value: '니즈 분석', label: '니즈 분석', color: 'bg-emerald-500' },
-    { value: '상품 설명', label: '상품 설명', color: 'bg-amber-500' },
-    { value: '계약 검토', label: '계약 검토', color: 'bg-rose-500' },
-    { value: '계약 완료', label: '계약 완료', color: 'bg-violet-500' },
+    { value: 'all', label: t('filters.stage.all', '전체'), color: 'bg-muted' },
+    {
+      value: '첫 상담',
+      label: t('filters.stage.firstConsultation', '첫 상담'),
+      color: 'bg-sky-500',
+    },
+    {
+      value: '니즈 분석',
+      label: t('filters.stage.needsAnalysis', '니즈 분석'),
+      color: 'bg-emerald-500',
+    },
+    {
+      value: '상품 설명',
+      label: t('filters.stage.productExplanation', '상품 설명'),
+      color: 'bg-amber-500',
+    },
+    {
+      value: '계약 검토',
+      label: t('filters.stage.contractReview', '계약 검토'),
+      color: 'bg-rose-500',
+    },
+    {
+      value: '계약 완료',
+      label: t('filters.stage.contractCompleted', '계약 완료'),
+      color: 'bg-violet-500',
+    },
   ];
 
   // 화면 크기에 따라 모바일 모드 설정
@@ -182,9 +206,9 @@ export default function NetworkSidebar({
 
     if (filters.importanceFilter !== 'all') {
       const importanceLabels = {
-        high: '키맨',
-        medium: '일반',
-        low: '관심',
+        high: t('filters.importance.high', '키맨'),
+        medium: t('filters.importance.medium', '일반'),
+        low: t('filters.importance.low', '관심'),
       };
 
       activeFilters.push(
@@ -223,7 +247,9 @@ export default function NetworkSidebar({
       <div className="pb-3 flex items-center justify-between border-b">
         <div className="flex items-center gap-2">
           <Filter size={18} className="text-primary" />
-          <h2 className="text-base font-medium">필터</h2>
+          <h2 className="text-base font-medium">
+            {t('filters.title', '필터')}
+          </h2>
           {activeFilterCount > 0 && (
             <Badge
               variant="secondary"
@@ -246,7 +272,9 @@ export default function NetworkSidebar({
               <RefreshCw size={16} />
             </Button>
           </TooltipTrigger>
-          <TooltipContent side="bottom">필터 초기화</TooltipContent>
+          <TooltipContent side="bottom">
+            {t('filters.reset', '필터 초기화')}
+          </TooltipContent>
         </Tooltip>
       </div>
 
@@ -254,7 +282,7 @@ export default function NetworkSidebar({
       {activeFilterCount > 0 && (
         <div className="py-3 border-b">
           <div className="text-sm font-medium text-muted-foreground mb-2">
-            적용된 필터
+            {t('filters.applied', '적용된 필터')}
           </div>
           <div className="flex flex-wrap gap-1.5">
             {renderActiveFilterChips()}
@@ -270,10 +298,12 @@ export default function NetworkSidebar({
             <div className="p-3 border-b">
               <div className="flex items-center gap-2 mb-1">
                 <Network size={16} className="text-primary" />
-                <h3 className="text-sm font-medium">네트워크 현황</h3>
+                <h3 className="text-sm font-medium">
+                  {t('stats.title', '네트워크 현황')}
+                </h3>
               </div>
               <p className="text-sm text-muted-foreground">
-                소개 네트워크 분석 결과입니다
+                {t('stats.description', '소개 네트워크 분석 결과입니다')}
               </p>
             </div>
 
@@ -284,14 +314,16 @@ export default function NetworkSidebar({
                   {Math.max(0, (stats.filteredNodes || 0) - 1)}
                 </span>
                 <span className="text-sm text-muted-foreground">
-                  필터링 표시
+                  {t('stats.filteredNodes', '필터링 표시')}
                 </span>
               </div>
               <div className="p-3 flex flex-col items-center">
                 <span className="text-2xl font-semibold">
                   {Math.max(0, (stats.totalNodes || 0) - 1)}
                 </span>
-                <span className="text-sm text-muted-foreground">전체 고객</span>
+                <span className="text-sm text-muted-foreground">
+                  {t('stats.totalNodes', '전체 고객')}
+                </span>
               </div>
             </div>
 
@@ -299,28 +331,34 @@ export default function NetworkSidebar({
             <div className="p-3 space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">
-                  소개 체인 깊이
+                  {t('stats.maxDepth', '소개 체인 깊이')}
                 </span>
                 <span className="text-sm font-medium">
-                  최대 {stats.maxDepth || 1}단계
+                  {t('stats.insights.chainDepth', '최대 {{depth}}단계', {
+                    depth: stats.maxDepth || 1,
+                  })}
                 </span>
               </div>
 
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">
-                  평균 소개 수
+                  {t('stats.averageReferrals', '평균 소개 수')}
                 </span>
                 <span className="text-sm font-medium">
-                  {(stats.avgReferralsPerNode || 0).toFixed(1)}명
+                  {t('stats.insights.avgReferrals', '{{count}}명', {
+                    count: (stats.avgReferralsPerNode || 0).toFixed(1),
+                  })}
                 </span>
               </div>
 
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">
-                  총 연결 수
+                  {t('stats.connectionCount', '총 연결 수')}
                 </span>
                 <span className="text-sm font-medium">
-                  {stats.connectionCount || 0}개
+                  {t('stats.insights.connections', '{{count}}개', {
+                    count: stats.connectionCount || 0,
+                  })}
                 </span>
               </div>
             </div>
@@ -331,7 +369,7 @@ export default function NetworkSidebar({
                 <div className="p-3 border-b">
                   <h4 className="text-sm font-medium flex items-center gap-2">
                     <BarChart4 size={14} className="text-amber-500" />
-                    활발한 소개자 TOP 3
+                    {t('stats.topReferrers.title', '활발한 소개자 TOP 3')}
                   </h4>
                 </div>
                 <div className="p-3 space-y-2">
@@ -383,13 +421,18 @@ export default function NetworkSidebar({
               <AccordionTrigger className="px-3 py-3 text-left hover:no-underline hover:bg-muted/20 [&>svg]:h-5 [&>svg]:w-5 [&>svg]:text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <Star size={16} className="text-amber-400" />
-                  <span className="text-sm font-medium">고객 중요도</span>
+                  <span className="text-sm font-medium">
+                    {t('filters.importance.title', '고객 중요도')}
+                  </span>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="p-4 pt-2 border-t">
                 <div className="space-y-3">
                   <div className="text-sm text-muted-foreground">
-                    중요도별로 고객을 필터링합니다.
+                    {t(
+                      'filters.importance.description',
+                      '중요도별로 고객을 필터링합니다.'
+                    )}
                   </div>
 
                   <div className="grid grid-cols-1 gap-2">
@@ -408,7 +451,7 @@ export default function NetworkSidebar({
                       onClick={() => handleImportanceFilterChange('all')}
                     >
                       <span className="h-3 w-3 rounded-full mr-2 bg-muted"></span>
-                      전체
+                      {t('filters.importance.all', '전체')}
                       {filters.importanceFilter === 'all' && (
                         <CheckCircle className="ml-auto h-4 w-4" />
                       )}
@@ -429,7 +472,7 @@ export default function NetworkSidebar({
                       onClick={() => handleImportanceFilterChange('high')}
                     >
                       <span className="h-3 w-3 rounded-full mr-2 bg-orange-500"></span>
-                      키맨
+                      {t('filters.importance.high', '키맨')}
                       {filters.importanceFilter === 'high' && (
                         <CheckCircle className="ml-auto h-4 w-4" />
                       )}
@@ -450,7 +493,7 @@ export default function NetworkSidebar({
                       onClick={() => handleImportanceFilterChange('medium')}
                     >
                       <span className="h-3 w-3 rounded-full mr-2 bg-blue-500"></span>
-                      일반
+                      {t('filters.importance.medium', '일반')}
                       {filters.importanceFilter === 'medium' && (
                         <CheckCircle className="ml-auto h-4 w-4" />
                       )}
@@ -471,7 +514,7 @@ export default function NetworkSidebar({
                       onClick={() => handleImportanceFilterChange('low')}
                     >
                       <span className="h-3 w-3 rounded-full mr-2 bg-gray-400"></span>
-                      관심
+                      {t('filters.importance.low', '관심')}
                       {filters.importanceFilter === 'low' && (
                         <CheckCircle className="ml-auto h-4 w-4" />
                       )}
@@ -479,7 +522,12 @@ export default function NetworkSidebar({
                   </div>
 
                   <div className="text-sm text-muted-foreground">
-                    <p>중요도가 높은 고객일수록 더 큰 노드로 표시됩니다.</p>
+                    <p>
+                      {t(
+                        'filters.importance.note',
+                        '중요도가 높은 고객일수록 더 큰 노드로 표시됩니다.'
+                      )}
+                    </p>
                   </div>
                 </div>
               </AccordionContent>
@@ -493,13 +541,18 @@ export default function NetworkSidebar({
               <AccordionTrigger className="px-3 py-3 text-left hover:no-underline hover:bg-muted/20 [&>svg]:h-5 [&>svg]:w-5 [&>svg]:text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <BarChart4 size={16} className="text-primary" />
-                  <span className="text-sm font-medium">영업 단계</span>
+                  <span className="text-sm font-medium">
+                    {t('filters.stage.title', '영업 단계')}
+                  </span>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="p-4 pt-2 border-t">
                 <div className="space-y-3">
                   <div className="text-sm text-muted-foreground">
-                    영업 단계별로 고객을 필터링합니다.
+                    {t(
+                      'filters.stage.description',
+                      '영업 단계별로 고객을 필터링합니다.'
+                    )}
                   </div>
 
                   <div className="grid grid-cols-1 gap-2">

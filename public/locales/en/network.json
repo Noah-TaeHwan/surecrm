@@ -1,0 +1,227 @@
+{
+  "meta": {
+    "title": "Referral Network - SureCRM",
+    "description": "Visualize customer referral relationships to maximize network effects."
+  },
+  "page": {
+    "title": "Referral Network",
+    "description": "Visualize referral relationships between customers. Click on nodes to view detailed information.",
+    "errorLoading": "Failed to load network data",
+    "errorDescription": "An error occurred while loading network data."
+  },
+  "graph": {
+    "loading": "Loading graph...",
+    "preparing": "Preparing graph...",
+    "renderingError": "There was a problem loading the graph.",
+    "refreshPage": "Refresh page",
+    "renderingErrorDetailed": "An error occurred while rendering the graph.",
+    "fallbackMessage": "There was a problem with graph rendering. Showing fallback UI."
+  },
+  "search": {
+    "placeholder": "Search by customer name... (real-time)",
+    "noResults": "No search results found",
+    "resultsFound": "{{count}} found",
+    "searching": "Searching...",
+    "clear": "Clear search",
+    "connectedNodes": "Including connected nodes",
+    "navigation": {
+      "move": "Move",
+      "select": "Select",
+      "close": "Close"
+    },
+    "shortcuts": {
+      "move": "↑↓ Move",
+      "select": "Enter Select",
+      "close": "Esc Close"
+    },
+    "connectedNodes": "Including connected nodes"
+  },
+  "controls": {
+    "search": "Search",
+    "filter": "Filter",
+    "settings": "Settings",
+    "refresh": "Refresh"
+  },
+  "detail": {
+    "title": "Node Details",
+    "description": "Detailed information of the selected node."
+  },
+  "filters": {
+    "title": "Filters",
+    "applied": "Applied filters",
+    "reset": "Reset filters",
+    "stage": {
+      "title": "Sales Stage",
+      "description": "Filter customers by sales stage.",
+      "all": "All",
+      "firstConsultation": "Initial Consultation",
+      "needsAnalysis": "Needs Analysis",
+      "productExplanation": "Product Explanation",
+      "contractReview": "Contract Review",
+      "contractCompleted": "Contract Completed"
+    },
+    "importance": {
+      "title": "Customer Importance",
+      "description": "Filter customers by importance level.",
+      "all": "All",
+      "high": "Key Person",
+      "medium": "Regular",
+      "low": "Interest",
+      "note": "Higher importance customers are displayed as larger nodes."
+    },
+    "depth": {
+      "title": "Referral Depth",
+      "all": "All",
+      "direct": "Direct Connection",
+      "indirect": "Indirect Connection"
+    },
+    "influencers": {
+      "title": "Show key referrers only",
+      "description": "Display only influential referrers and their networks."
+    }
+  },
+  "stats": {
+    "title": "Network Status",
+    "description": "Referral network analysis results",
+    "totalNodes": "Total Customers",
+    "filteredNodes": "Filtered Display",
+    "totalConnections": "Total Connections",
+    "networkDensity": "Network Density",
+    "maxDepth": "Referral Chain Depth",
+    "averageReferrals": "Average Referrals",
+    "connectionCount": "Total Connections",
+    "topReferrers": {
+      "title": "Top Active Referrers",
+      "count": "{{count}} people"
+    },
+    "insights": {
+      "chainDepth": "Max {{depth}} levels",
+      "avgReferrals": "{{count}} people",
+      "connections": "{{count}} connections"
+    }
+  },
+  "sidebar": {
+    "title": "Filters & Statistics",
+    "description": "Network data filtering",
+    "close": "Close"
+  },
+  "detailPanel": {
+    "title": "Customer Information",
+    "agentTitle": "My Information",
+    "close": "Close",
+    "contact": {
+      "title": "Contact Information",
+      "phone": "Phone",
+      "email": "Email",
+      "address": "Address",
+      "occupation": "Occupation",
+      "company": "Company",
+      "notProvided": "Not provided"
+    },
+    "personal": {
+      "title": "Personal Information",
+      "birthDate": "Date of Birth",
+      "age": "{{age}} years old",
+      "gender": "Gender",
+      "male": "Male",
+      "female": "Female",
+      "height": "{{height}}cm",
+      "weight": "{{weight}}kg",
+      "drivingLicense": "Driving License",
+      "canDrive": "Can drive",
+      "cannotDrive": "Cannot drive"
+    },
+    "network": {
+      "title": "Network Statistics",
+      "totalClients": "Total Customers",
+      "referralConnections": "Referral Relationships",
+      "joinDate": "Join Date",
+      "status": "Status",
+      "active": "Active"
+    },
+    "telecom": {
+      "SKT": "📱",
+      "KT": "📞",
+      "LG U+": "📲",
+      "LG유플러스": "📲",
+      "알뜰폰 SKT": "🔹",
+      "알뜰폰 KT": "🔸",
+      "알뜰폰 LG U+": "🔺"
+    },
+    "referrer": {
+      "title": "Referrer",
+      "directClient": "Direct development customer",
+      "newDevelopment": "New development"
+    },
+    "referred": {
+      "title": "Referred Customers",
+      "clientsTitle": "Directly developed customers",
+      "count": "{{count}} people",
+      "noReferrals": "No referred customers",
+      "noClients": "No customers under management",
+      "developmentPossible": "Development possible",
+      "newDevelopmentPossible": "New development"
+    },
+    "actions": {
+      "viewPipeline": "View Sales Pipeline",
+      "viewDetails": "{{name}} Details",
+      "mySettings": "My Settings"
+    },
+    "importance": {
+      "high": "Key Person",
+      "medium": "Regular",
+      "low": "Interest",
+      "unset": "Not set"
+    }
+  },
+  "mobileTabs": {
+    "graph": "Network",
+    "filter": "Filter",
+    "search": "Search",
+    "details": "Details"
+  },
+  "nodeDetails": {
+    "title": "Node Details",
+    "description": "Detailed information of the selected node."
+  },
+  "relationships": {
+    "referredBy": "Referred by",
+    "referred": "Referred",
+    "agent": "Agent",
+    "client": "Customer"
+  },
+  "stages": {
+    "firstConsultation": "Initial Consultation",
+    "needsAnalysis": "Needs Analysis",
+    "productExplanation": "Product Explanation",
+    "contractReview": "Contract Review",
+    "contractCompleted": "Contract Completed",
+    "unset": "Stage not set"
+  },
+  "errors": {
+    "dataLoading": "An error occurred while loading data.",
+    "networkError": "A network error occurred.",
+    "unknownRequest": "Unknown request.",
+    "requestFailed": "Request processing failed.",
+    "retry": "Retry"
+  },
+  "actions": {
+    "searchSuccess": "Search completed successfully.",
+    "searchError": "An error occurred during search.",
+    "filterApplied": "Filter has been applied.",
+    "filterCleared": "Filter has been cleared."
+  },
+  "loading": {
+    "data": "Loading data...",
+    "graph": "Loading graph...",
+    "search": "Searching...",
+    "filter": "Filtering..."
+  },
+  "fallback": {
+    "noData": "No data to display.",
+    "noNetwork": "No network data available.",
+    "noConnections": "No connected customers.",
+    "nodeList": "Node List",
+    "nodeInfo": "Importance: {{importance}} / Stage: {{stage}}"
+  }
+}

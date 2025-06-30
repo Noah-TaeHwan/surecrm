@@ -20,6 +20,7 @@ export const NAMESPACES = [
   'billing', // 결제, 구독
   'settings', // 설정
   'notifications', // 알림
+  'network', // 소개 네트워크
   'errors', // 에러 메시지
 ] as const;
 

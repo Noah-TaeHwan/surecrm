@@ -5,6 +5,7 @@ import { Badge } from '~/common/components/ui/badge';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { cn } from '~/lib/utils';
 import { useBreakpoint } from '~/common/hooks/use-window-size';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 
 interface NetworkControlsProps {
   onSearch: (query: string) => void;
@@ -59,6 +60,9 @@ export default function NetworkControls({
   onNodeFocus,
   className,
 }: NetworkControlsProps) {
+  // 🌍 다국어 번역 훅
+  const { t } = useHydrationSafeTranslation('network');
+
   const [searchTerm, setSearchTerm] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
@@ -188,7 +192,10 @@ export default function NetworkControls({
             <Input
               data-search-input
               type="text"
-              placeholder="고객 이름으로 검색... (실시간)"
+              placeholder={t(
+                'search.placeholder',
+                '고객 이름으로 검색... (실시간)'
+              )}
               className={cn(
                 'pl-10 pr-10 transition-all duration-200',
                 isFocused && 'ring-2 ring-primary/20 border-primary',
@@ -223,13 +230,17 @@ export default function NetworkControls({
                 className="text-xs"
               >
                 <Search className="h-3 w-3 mr-1" />
-                {hasResults ? `${sortedResults.length}개 발견` : '검색 중...'}
+                {hasResults
+                  ? t('search.resultsFound', '{{count}}개 발견', {
+                      count: sortedResults.length,
+                    })
+                  : t('search.searching', '검색 중...')}
               </Badge>
 
               {hasResults && (
                 <Badge variant="outline" className="text-xs">
                   <LinkIcon className="h-3 w-3 mr-1" />
-                  연결된 노드 포함
+                  {t('search.connectedNodes', '연결된 노드 포함')}
                 </Badge>
               )}
             </div>
@@ -297,16 +308,19 @@ export default function NetworkControls({
           ) : (
             <div className="p-4 text-center text-muted-foreground text-sm">
               <Search className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              검색 결과가 없습니다
+              {t('search.noResults', '검색 결과가 없습니다')}
             </div>
           )}
 
           {/* 키보드 단축키 안내 */}
           {hasResults && (
             <div className="border-t p-2 text-xs text-muted-foreground bg-muted/50">
-              <span className="font-mono">↑↓</span> 이동 •
-              <span className="font-mono">Enter</span> 선택 •
-              <span className="font-mono">Esc</span> 닫기
+              <span className="font-mono">↑↓</span>{' '}
+              {t('search.navigation.move', '이동')} •
+              <span className="font-mono">Enter</span>{' '}
+              {t('search.navigation.select', '선택')} •
+              <span className="font-mono">Esc</span>{' '}
+              {t('search.navigation.close', '닫기')}
             </div>
           )}
         </div>
