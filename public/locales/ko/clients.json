@@ -432,6 +432,7 @@
   },
   "consultationTab": {
     "title": "상담내용",
+    "titleMobile": "상담내용",
     "description": "고객과의 상담내용과 메모를 관리합니다",
     "addButton": "새 상담 기록",
     "editButton": "편집",
@@ -442,7 +443,12 @@
     "emptyStateDescription": "첫 번째 상담 기록을 추가해보세요",
     "memoTitle": "고객 메모",
     "memoDescription": "중요한 메모나 특이사항을 기록하세요",
-    "viewDetails": "자세히 보기"
+    "viewDetails": "자세히 보기",
+    "addNewRecord": "새 상담 기록",
+    "consultationType": "상담",
+    "noRecords": "상담 기록이 없습니다",
+    "noRecordsDescription": "첫 상담 기록을 추가해보세요",
+    "firstRecord": "첫 상담 기록 작성"
   },
   "consultationModal": {
     "title": "상담 기록",
@@ -474,10 +480,21 @@
     "noRecords": "상담 기록이 없습니다",
     "noRecordsDescription": "첫 번째 상담 기록을 추가해보세요",
     "date": "{{date}}",
+    "dateLabel": "{{date}}",
     "contractSection": "계약 관련",
     "followUpSection": "팔로업 ({{date}})",
     "editAction": "수정",
-    "deleteAction": "삭제"
+    "deleteAction": "삭제",
+    "sections": {
+      "content": "상담 내용",
+      "contractInfo": "계약 관련",
+      "followUp": "다음 액션"
+    },
+    "followUpDate": "✅ {{date}}",
+    "actionButtons": {
+      "edit": "편집",
+      "delete": "삭제"
+    }
   },
   "consultationDeleteModal": {
     "title": "상담 기록 삭제",

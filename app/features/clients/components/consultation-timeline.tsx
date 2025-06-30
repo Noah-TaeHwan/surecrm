@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars, no-unused-vars */
 import { Button } from '~/common/components/ui/button';
 import { Plus, Edit2, Trash2 } from 'lucide-react';
 import type { ConsultationNote } from '../types/client-detail';
@@ -6,9 +7,9 @@ import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-trans
 interface ConsultationTimelineProps {
   consultationNotes: ConsultationNote[];
   onAddNote: () => void;
-  onEditNote: (note: ConsultationNote) => void;
+  onEditNote: (_note: ConsultationNote) => void;
   onDeleteNote: (_noteId: string) => void;
-  onShowDeleteModal: (note: ConsultationNote) => void;
+  onShowDeleteModal: (_note: ConsultationNote) => void;
 }
 
 export function ConsultationTimeline({
@@ -115,11 +116,41 @@ export function ConsultationTimeline({
                       </h6>
                       <div className="bg-accent/20 p-2 sm:p-3 rounded border border-border/40">
                         <p className="text-xs sm:text-sm whitespace-pre-wrap">
-                          {typeof note.contractInfo === 'string' &&
-                          note.contractInfo.startsWith('"') &&
-                          note.contractInfo.endsWith('"')
-                            ? note.contractInfo.slice(1, -1) // 양쪽 쌍따옴표 제거
-                            : note.contractInfo}
+                          {(() => {
+                            try {
+                              // JSON 객체인지 확인하고 파싱 시도
+                              if (typeof note.contractInfo === 'string') {
+                                // JSON 형태인지 확인 (중괄호로 시작하는 경우)
+                                if (note.contractInfo.trim().startsWith('{')) {
+                                  const parsed = JSON.parse(note.contractInfo);
+                                  // content 필드가 있으면 그 값을 반환
+                                  return parsed.content || note.contractInfo;
+                                }
+                                // 일반 문자열인 경우 쌍따옴표 제거
+                                if (
+                                  note.contractInfo.startsWith('"') &&
+                                  note.contractInfo.endsWith('"')
+                                ) {
+                                  return note.contractInfo.slice(1, -1);
+                                }
+                                return note.contractInfo;
+                              }
+                              // 이미 객체인 경우
+                              if (
+                                typeof note.contractInfo === 'object' &&
+                                note.contractInfo !== null
+                              ) {
+                                return (
+                                  (note.contractInfo as any).content ||
+                                  JSON.stringify(note.contractInfo)
+                                );
+                              }
+                              return note.contractInfo;
+                            } catch {
+                              // JSON 파싱 실패시 원본 반환
+                              return note.contractInfo;
+                            }
+                          })()}
                         </p>
                       </div>
                     </div>

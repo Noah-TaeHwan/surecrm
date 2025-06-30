@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars, no-unused-vars */
 import { TabsContent } from '~/common/components/ui/tabs';
 import {
   Card,
@@ -23,12 +24,12 @@ interface ConsultationNote {
 
 interface ConsultationNotesTabProps {
   notes: string;
-  onSaveMemo: (notes: string) => Promise<void>; // 메모 저장 함수
+  onSaveMemo: (_notes: string) => Promise<void>; // 메모 저장 함수
   consultationNotes: ConsultationNote[];
   onAddNote: () => void;
-  onEditNote: (note: ConsultationNote) => void;
+  onEditNote: (_note: ConsultationNote) => void;
   onDeleteNote: (_noteId: string) => void;
-  onShowDeleteModal: (note: ConsultationNote) => void;
+  onShowDeleteModal: (_note: ConsultationNote) => void;
 }
 
 export function ConsultationNotesTab({

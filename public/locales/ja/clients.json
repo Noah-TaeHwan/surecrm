@@ -419,20 +419,24 @@
     "warning": "削除された同伴者情報は復元できません。"
   },
   "consultationTab": {
-    "title": "相談内容及び契約事項メモ",
+    "title": "相談内容",
     "titleMobile": "相談内容",
-    "description": "日付別に相談内容と契約事項を記録します。",
-    "recordsTitle": "相談記録",
-    "addNewRecord": "新しい相談記録",
-    "firstRecord": "初回相談記録作成",
-    "noRecords": "相談記録がありません",
-    "noRecordsDescription": "初回相談記録を追加してください。",
-    "consultationType": "相談",
-    "contentLabel": "相談内容",
-    "contractInfoLabel": "契約関連",
-    "followUpLabel": "次のアクション",
+    "description": "顧客との相談内容とメモを管理します",
+    "addButton": "新しい相談記録",
     "editButton": "編集",
-    "deleteButton": "削除"
+    "deleteButton": "削除",
+    "recordsTitle": "相談記録",
+    "recordsCount": "{{count}}件の記録",
+    "emptyState": "相談記録がまだありません",
+    "emptyStateDescription": "最初の相談記録を追加してみてください",
+    "memoTitle": "顧客メモ",
+    "memoDescription": "重要なメモや特記事項を記録してください",
+    "viewDetails": "詳細を見る",
+    "addNewRecord": "新しい相談記録",
+    "consultationType": "相談",
+    "noRecords": "相談記録がありません",
+    "noRecordsDescription": "最初の相談記録を追加してください",
+    "firstRecord": "最初の相談記録を作成"
   },
   "consultationModal": {
     "addTitle": "相談内容追加",
@@ -461,17 +465,25 @@
     }
   },
   "consultationTimeline": {
+    "title": "相談記録",
+    "noRecords": "相談記録がありません",
+    "noRecordsDescription": "最初の相談記録を追加してください",
+    "date": "{{date}}",
     "dateLabel": "{{date}}",
+    "contractSection": "契約関連",
+    "followUpSection": "フォローアップ ({{date}})",
+    "editAction": "編集",
+    "deleteAction": "削除",
+    "sections": {
+      "content": "相談内容",
+      "contractInfo": "契約関連情報",
+      "followUp": "次のアクション"
+    },
+    "followUpDate": "✅ {{date}}",
     "actionButtons": {
       "edit": "編集",
       "delete": "削除"
-    },
-    "sections": {
-      "content": "相談内容",
-      "contractInfo": "契約関連",
-      "followUp": "次のアクション"
-    },
-    "followUpDate": "✅ {{date}}"
+    }
   },
   "consultationDeleteModal": {
     "title": "相談記録削除",

@@ -424,20 +424,24 @@
     "warning": "Deleted companion information cannot be recovered."
   },
   "consultationTab": {
-    "title": "Consultation Notes & Contract Memo",
+    "title": "Consultation Notes",
     "titleMobile": "Consultation",
-    "description": "Record consultation notes and contract details by date.",
-    "recordsTitle": "Consultation Records",
-    "addNewRecord": "New Consultation Record",
-    "firstRecord": "Create First Consultation Record",
-    "noRecords": "No consultation records",
-    "noRecordsDescription": "Add your first consultation record.",
-    "consultationType": "Consultation",
-    "contentLabel": "Consultation Content",
-    "contractInfoLabel": "Contract Related",
-    "followUpLabel": "Next Actions",
+    "description": "Manage consultation content and memos with clients",
+    "addButton": "New Consultation Record",
     "editButton": "Edit",
-    "deleteButton": "Delete"
+    "deleteButton": "Delete",
+    "recordsTitle": "Consultation Records",
+    "recordsCount": "{{count}} records",
+    "emptyState": "No consultation records yet",
+    "emptyStateDescription": "Add your first consultation record",
+    "memoTitle": "Client Memo",
+    "memoDescription": "Record important notes or special remarks",
+    "viewDetails": "View Details",
+    "addNewRecord": "New Consultation Record",
+    "consultationType": "Consultation",
+    "noRecords": "No consultation records",
+    "noRecordsDescription": "Add your first consultation record",
+    "firstRecord": "Create First Consultation Record"
   },
   "consultationModal": {
     "addTitle": "Add Consultation Note",
@@ -466,17 +470,25 @@
     }
   },
   "consultationTimeline": {
+    "title": "Consultation Records",
+    "noRecords": "No consultation records",
+    "noRecordsDescription": "Add your first consultation record",
+    "date": "{{date}}",
     "dateLabel": "{{date}}",
+    "contractSection": "Contract Related",
+    "followUpSection": "Follow-up ({{date}})",
+    "editAction": "Edit",
+    "deleteAction": "Delete",
+    "sections": {
+      "content": "Consultation Content",
+      "contractInfo": "Contract Information",
+      "followUp": "Next Actions"
+    },
+    "followUpDate": "✅ {{date}}",
     "actionButtons": {
       "edit": "Edit",
       "delete": "Delete"
-    },
-    "sections": {
-      "content": "Consultation Content",
-      "contractInfo": "Contract Related",
-      "followUp": "Next Actions"
-    },
-    "followUpDate": "✅ {{date}}"
+    }
   },
   "consultationDeleteModal": {
     "title": "Delete Consultation Record",
