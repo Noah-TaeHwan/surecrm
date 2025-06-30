@@ -19,6 +19,7 @@ import {
 } from '~/common/components/ui/select';
 import { Users } from 'lucide-react';
 import { RELATIONSHIP_OPTIONS } from '../lib/client-detail-utils';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 import type { ConsultationCompanion } from '../types/client-detail';
 
 interface CompanionModalProps {
@@ -36,6 +37,8 @@ export function CompanionModal({
   onSave,
   onCompanionChange,
 }: CompanionModalProps) {
+  const { t } = useHydrationSafeTranslation('clients');
+
   const handleClose = () => {
     onClose();
   };
@@ -96,7 +99,7 @@ export function CompanionModal({
                   <SelectItem key={option.value} value={option.value}>
                     <div className="flex items-center gap-2">
                       <span>{option.icon}</span>
-                      {option.label}
+                      {t(option.labelKey, option.value)}
                     </div>
                   </SelectItem>
                 ))}
