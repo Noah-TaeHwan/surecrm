@@ -1166,7 +1166,7 @@ export default function ClientDetailPage() {
 
     try {
       const formData = new FormData();
-      formData.append('intent', 'deleteConsultationNote');
+      formData.append('intent', 'delete-note');
       formData.append('noteId', noteId);
 
       submit(formData, { method: 'post' });
@@ -1240,11 +1240,11 @@ export default function ClientDetailPage() {
 
       if (editingNote.id) {
         // 수정
-        formData.append('intent', 'updateConsultationNote');
+        formData.append('intent', 'update-note');
         formData.append('noteId', editingNote.id);
       } else {
         // 추가
-        formData.append('intent', 'createConsultationNote');
+        formData.append('intent', 'create-note');
       }
 
       // 🎯 정확한 field 이름 사용 (action과 일치)
@@ -1259,7 +1259,15 @@ export default function ClientDetailPage() {
 
       // 성공 모달 표시
       setSuccessMessage(
-        `상담내용이 성공적으로 ${editingNote.id ? '수정' : '추가'}되었습니다.`
+        editingNote.id
+          ? t(
+              'successModal.consultationUpdated',
+              '상담내용이 성공적으로 수정되었습니다.'
+            )
+          : t(
+              'successModal.consultationAdded',
+              '상담내용이 성공적으로 추가되었습니다.'
+            )
       );
       setShowSuccessModal(true);
       setShowAddNoteModal(false);
@@ -1620,15 +1628,16 @@ export default function ClientDetailPage() {
                   onSaveMemo={async (notes: string) => {
                     // 메모 저장을 위한 별도 함수
                     const formData = new FormData();
-                    formData.append('intent', 'updateClientNotes');
+                    formData.append('intent', 'update-notes');
                     formData.append('notes', notes);
 
                     try {
+                      console.log('📝 메모 저장 시작:', { notes });
                       const result = await submit(formData, { method: 'post' });
                       // 성공 시 클라이언트 데이터 업데이트는 loader가 자동으로 처리
-                      console.log('메모 저장 완료');
+                      console.log('✅ 메모 저장 완료:', result);
                     } catch (error) {
-                      console.error('메모 저장 실패:', error);
+                      console.error('❌ 메모 저장 실패:', error);
                       throw error; // 에러를 다시 던져서 컴포넌트에서 처리할 수 있도록
                     }
                   }}
@@ -1656,14 +1665,15 @@ export default function ClientDetailPage() {
                 notes={client?.notes || ''}
                 onSaveMemo={async (notes: string) => {
                   const formData = new FormData();
-                  formData.append('intent', 'updateClientNotes');
+                  formData.append('intent', 'update-notes');
                   formData.append('notes', notes);
 
                   try {
+                    console.log('📝 메모 저장 시작 (모바일):', { notes });
                     const result = await submit(formData, { method: 'post' });
-                    console.log('메모 저장 완료');
+                    console.log('✅ 메모 저장 완료 (모바일):', result);
                   } catch (error) {
-                    console.error('메모 저장 실패:', error);
+                    console.error('❌ 메모 저장 실패 (모바일):', error);
                     throw error;
                   }
                 }}

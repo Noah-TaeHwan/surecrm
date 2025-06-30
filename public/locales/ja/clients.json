@@ -1,8 +1,8 @@
 {
   "title": "顧客管理",
   "meta": {
-    "title": "{{clientName}} - 顧客詳細 | SureCRM",
-    "description": "{{clientName}}の詳細情報をご確認ください。"
+    "title": "顧客詳細情報",
+    "description": "{{clientName}}様の詳細情報を管理します"
   },
   "errors": {
     "authRequired": "認証が必要です。",
@@ -218,13 +218,22 @@
     "other": "その他"
   },
   "labels": {
-    "client": "顧客"
+    "client": "顧客",
+    "clientInfo": "顧客情報",
+    "contacts": "連絡先",
+    "personalInfo": "個人情報",
+    "physicalInfo": "身体情報",
+    "importanceLevel": "重要度",
+    "telecom": "通信会社",
+    "introduction": "紹介情報",
+    "actions": "操作",
+    "settings": "設定"
   },
   "tabs": {
     "overview": "概要",
     "notes": "相談内容",
     "medical": "病歴",
-    "purposes": "検査目的",
+    "purposes": "検診目的",
     "interests": "関心事項",
     "companions": "相談同伴者",
     "contracts": "保険契約",
@@ -238,7 +247,9 @@
     "createOpportunity": "営業機会作成",
     "editMode": "編集モード",
     "save": "保存",
-    "cancel": "キャンセル"
+    "cancel": "キャンセル",
+    "clientDetails": "顧客詳細情報",
+    "viewingClient": "{{clientName}}様の情報"
   },
   "overview": {
     "basicInfo": "基本情報",
@@ -246,7 +257,10 @@
     "personalInfo": "個人情報",
     "referralInfo": "紹介情報",
     "notes": "メモ",
-    "familyMembers": "家族構成員"
+    "familyMembers": "家族構成員",
+    "currentStage": "現在の段階",
+    "tags": "タグ",
+    "manageTags": "タグ管理"
   },
   "modals": {
     "deleteTitle": "顧客削除",
@@ -375,9 +389,11 @@
     "previewPlaceholder": "タグ名を入力するとプレビューが表示されます。"
   },
   "successModal": {
-    "title": "タグ保存完了",
-    "description": "タグの変更が正常に保存されました。",
-    "confirm": "確認"
+    "title": "保存完了",
+    "description": "変更内容が正常に保存されました。",
+    "consultationAdded": "相談内容が正常に追加されました。",
+    "consultationUpdated": "相談内容が正常に更新されました。",
+    "button": "確認"
   },
   "deleteModal": {
     "title": "顧客削除確認",
@@ -400,5 +416,83 @@
     "description": "本当に「{{companionName}}」同伴者を削除しますか？",
     "itemType": "相談同伴者",
     "warning": "削除された同伴者情報は復元できません。"
+  },
+  "consultationTab": {
+    "title": "相談内容及び契約事項メモ",
+    "titleMobile": "相談内容",
+    "description": "日付別に相談内容と契約事項を記録します。",
+    "recordsTitle": "相談記録",
+    "addNewRecord": "新しい相談記録",
+    "firstRecord": "初回相談記録作成",
+    "noRecords": "相談記録がありません",
+    "noRecordsDescription": "初回相談記録を追加してください。",
+    "consultationType": "相談",
+    "contentLabel": "相談内容",
+    "contractInfoLabel": "契約関連",
+    "followUpLabel": "次のアクション",
+    "editButton": "編集",
+    "deleteButton": "削除"
+  },
+  "consultationModal": {
+    "addTitle": "相談内容追加",
+    "editTitle": "相談内容編集",
+    "description": "お客様との相談内容と契約事項を記録してください。",
+    "fields": {
+      "consultationDate": "相談日",
+      "title": "タイトル",
+      "content": "相談内容",
+      "contractInfo": "契約情報",
+      "followUpDate": "フォローアップ日",
+      "followUpNotes": "フォローアップメモ"
+    },
+    "placeholders": {
+      "title": "相談タイトル（例：保険相談、契約締結）",
+      "content": "相談内容を詳細に記録してください...",
+      "contractInfo": "契約関連情報（保険種類、保険料、保障内容など）",
+      "followUpNotes": "フォローアップ事項"
+    },
+    "required": "*",
+    "buttons": {
+      "cancel": "キャンセル",
+      "save": "保存",
+      "add": "追加",
+      "edit": "編集"
+    }
+  },
+  "consultationTimeline": {
+    "dateLabel": "{{date}}",
+    "actionButtons": {
+      "edit": "編集",
+      "delete": "削除"
+    },
+    "sections": {
+      "content": "相談内容",
+      "contractInfo": "契約関連",
+      "followUp": "次のアクション"
+    },
+    "followUpDate": "✅ {{date}}"
+  },
+  "consultationDeleteModal": {
+    "title": "相談記録削除",
+    "description": "この相談記録を削除しますか？",
+    "warning": "⚠️ 削除された相談記録は復元できません。",
+    "buttons": {
+      "cancel": "キャンセル",
+      "delete": "削除",
+      "deleting": "削除中..."
+    },
+    "noteInfo": {
+      "title": "{{title}}",
+      "date": "📅 {{date}}"
+    }
+  },
+  "memoSection": {
+    "title": "顧客メモ・特記事項",
+    "titleShort": "顧客メモ",
+    "placeholder": "顧客に関する重要なメモや特記事項を記録してください...",
+    "emptyState": "メモはありません",
+    "addButton": "メモ追加",
+    "saveButton": "保存",
+    "savingButton": "保存中..."
   }
 }

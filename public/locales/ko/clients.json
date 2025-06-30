@@ -1,8 +1,8 @@
 {
   "title": "고객 관리",
   "meta": {
-    "title": "{{clientName}} - 고객 상세 | SureCRM",
-    "description": "{{clientName}}의 상세 정보를 확인하세요."
+    "title": "고객 상세 정보",
+    "description": "{{clientName}} 고객의 상세 정보를 관리합니다"
   },
   "errors": {
     "authRequired": "인증이 필요합니다.",
@@ -13,7 +13,11 @@
     "unauthorized": "로그인이 필요합니다",
     "validation": "입력 정보를 확인해주세요",
     "clientDataLoad": "고객 정보를 불러올 수 없습니다",
-    "tagLoadFailed": "사용 가능한 태그 로딩 실패:"
+    "tagLoadFailed": "사용 가능한 태그 로딩 실패:",
+    "saveFailed": "저장 실패",
+    "deleteFailed": "삭제 실패",
+    "loadFailed": "로딩 실패",
+    "networkError": "네트워크 오류가 발생했습니다."
   },
   "list": {
     "allClients": "고객 목록",
@@ -100,7 +104,9 @@
     "totalPremium": "총 보험료",
     "referralHistory": "소개 내역",
     "age": "나이",
-    "bmi": "BMI"
+    "bmi": "BMI",
+    "priority": "우선순위",
+    "expectedAmount": "예상 금액"
   },
   "status": {
     "active": "활성",
@@ -108,7 +114,8 @@
     "prospect": "잠재 고객",
     "customer": "고객",
     "former": "이전 고객",
-    "active": "키맨"
+    "active": "키맨",
+    "lost": "이탈"
   },
   "stages": {
     "all": "모든 단계",
@@ -218,7 +225,18 @@
     "other": "기타"
   },
   "labels": {
-    "client": "고객"
+    "client": "고객",
+    "clientInfo": "고객 정보",
+    "contacts": "연락처",
+    "personalInfo": "개인 정보",
+    "physicalInfo": "신체 정보",
+    "importanceLevel": "중요도",
+    "telecom": "통신사",
+    "introduction": "소개 정보",
+    "actions": "작업",
+    "settings": "설정",
+    "newClient": "새 고객",
+    "editClient": "고객 수정"
   },
   "tabs": {
     "overview": "개요",
@@ -238,15 +256,22 @@
     "createOpportunity": "영업 기회 생성",
     "editMode": "수정 모드",
     "save": "저장",
-    "cancel": "취소"
+    "cancel": "취소",
+    "clientDetails": "고객 상세 정보",
+    "viewingClient": "{{clientName}} 고객 정보"
   },
   "overview": {
     "basicInfo": "기본 정보",
-    "contactInfo": "연락처",
-    "personalInfo": "개인 정보",
-    "referralInfo": "소개 정보",
-    "notes": "메모",
-    "familyMembers": "가족 구성원"
+    "contactInfo": "연락처 정보",
+    "metaInfo": "기타 정보",
+    "edit": "편집",
+    "save": "저장",
+    "cancel": "취소",
+    "status": "상태",
+    "referrer": "추천인",
+    "familyMembers": "가족 구성원",
+    "tagSection": "태그 관리",
+    "actions": "작업"
   },
   "modals": {
     "deleteTitle": "고객 삭제",
@@ -261,8 +286,8 @@
   "messages": {
     "noData": "데이터가 없습니다",
     "loading": "로딩 중...",
-    "saveSuccess": "저장되었습니다",
-    "deleteSuccess": "삭제되었습니다",
+    "saveSuccess": "성공적으로 저장되었습니다.",
+    "deleteSuccess": "성공적으로 삭제되었습니다.",
     "createSuccess": "생성되었습니다",
     "familyInfoPending": "가족 정보가 준비 중입니다.",
     "tagSaveSuccess": "태그가 성공적으로 저장되었습니다.",
@@ -376,9 +401,11 @@
     "previewPlaceholder": "태그 이름을 입력하면 미리보기가 표시됩니다."
   },
   "successModal": {
-    "title": "태그 저장 완료",
-    "description": "태그 변경사항이 성공적으로 저장되었습니다.",
-    "confirm": "확인"
+    "title": "저장 완료",
+    "description": "변경사항이 성공적으로 저장되었습니다.",
+    "consultationAdded": "상담내용이 성공적으로 추가되었습니다.",
+    "consultationUpdated": "상담내용이 성공적으로 수정되었습니다.",
+    "button": "확인"
   },
   "deleteModal": {
     "title": "고객 삭제 확인",
@@ -401,5 +428,94 @@
     "description": "정말로 \"{{companionName}}\" 동반자를 삭제하시겠습니까?",
     "itemType": "상담동반자",
     "warning": "삭제된 동반자 정보는 복구할 수 없습니다."
+  },
+  "consultationTab": {
+    "title": "상담내용",
+    "description": "고객과의 상담내용과 메모를 관리합니다",
+    "addButton": "새 상담 기록",
+    "editButton": "편집",
+    "deleteButton": "삭제",
+    "recordsTitle": "상담 기록",
+    "recordsCount": "{{count}}개의 기록",
+    "emptyState": "아직 상담 기록이 없습니다",
+    "emptyStateDescription": "첫 번째 상담 기록을 추가해보세요",
+    "memoTitle": "고객 메모",
+    "memoDescription": "중요한 메모나 특이사항을 기록하세요",
+    "viewDetails": "자세히 보기"
+  },
+  "consultationModal": {
+    "title": "상담 기록",
+    "titleAdd": "새 상담 기록 추가",
+    "titleEdit": "상담 기록 수정",
+    "description": "고객과의 상담 내용을 자세히 기록하세요",
+    "fields": {
+      "date": "상담 날짜",
+      "title": "제목",
+      "content": "상담 내용",
+      "contractInfo": "계약 관련 내용",
+      "followUpDate": "팔로업 날짜",
+      "followUpNotes": "팔로업 내용"
+    },
+    "placeholders": {
+      "title": "상담 제목을 입력하세요",
+      "content": "상담 내용을 입력하세요",
+      "contractInfo": "계약 관련 내용을 입력하세요 (선택사항)",
+      "followUpNotes": "팔로업 내용을 입력하세요 (선택사항)"
+    },
+    "buttons": {
+      "save": "저장",
+      "cancel": "취소",
+      "saving": "저장 중..."
+    }
+  },
+  "consultationTimeline": {
+    "title": "상담 기록",
+    "noRecords": "상담 기록이 없습니다",
+    "noRecordsDescription": "첫 번째 상담 기록을 추가해보세요",
+    "date": "{{date}}",
+    "contractSection": "계약 관련",
+    "followUpSection": "팔로업 ({{date}})",
+    "editAction": "수정",
+    "deleteAction": "삭제"
+  },
+  "consultationDeleteModal": {
+    "title": "상담 기록 삭제",
+    "message": "다음 상담 기록을 삭제하시겠습니까?",
+    "recordInfo": "{{title}} ({{date}})",
+    "warning": "이 작업은 되돌릴 수 없습니다.",
+    "buttons": {
+      "confirm": "삭제",
+      "cancel": "취소",
+      "deleting": "삭제 중..."
+    }
+  },
+  "memoSection": {
+    "title": "고객 메모 및 특이사항",
+    "titleShort": "고객 메모",
+    "placeholder": "고객에 대한 중요한 메모나 특이사항을 기록하세요...",
+    "emptyState": "메모가 없습니다",
+    "addButton": "메모 추가",
+    "saveButton": "저장",
+    "savingButton": "저장 중..."
+  },
+  "genders": {
+    "male": "남성",
+    "female": "여성",
+    "other": "기타",
+    "unknown": "미상"
+  },
+  "priorities": {
+    "high": "높음",
+    "medium": "보통",
+    "low": "낮음"
+  },
+  "buttons": {
+    "edit": "편집",
+    "save": "저장",
+    "cancel": "취소",
+    "delete": "삭제",
+    "add": "추가",
+    "confirm": "확인",
+    "close": "닫기"
   }
 }

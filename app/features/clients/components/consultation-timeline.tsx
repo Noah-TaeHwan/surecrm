@@ -1,12 +1,13 @@
 import { Button } from '~/common/components/ui/button';
 import { Plus, Edit2, Trash2 } from 'lucide-react';
 import type { ConsultationNote } from '../types/client-detail';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 
 interface ConsultationTimelineProps {
   consultationNotes: ConsultationNote[];
   onAddNote: () => void;
   onEditNote: (note: ConsultationNote) => void;
-  onDeleteNote: (noteId: string) => void;
+  onDeleteNote: (_noteId: string) => void;
   onShowDeleteModal: (note: ConsultationNote) => void;
 }
 
@@ -14,22 +15,25 @@ export function ConsultationTimeline({
   consultationNotes,
   onAddNote,
   onEditNote,
-  onDeleteNote,
+  onDeleteNote: _onDeleteNote,
   onShowDeleteModal,
 }: ConsultationTimelineProps) {
+  const { t } = useHydrationSafeTranslation('clients');
+
   return (
     <>
       {/* 상담 노트 추가 버튼 */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0">
         <h4 className="font-medium text-foreground text-sm sm:text-base">
-          상담 기록
+          {t('consultationTab.recordsTitle', '상담 기록')}
         </h4>
         <Button
           size="sm"
           onClick={onAddNote}
           className="bg-primary hover:bg-primary/90 text-primary-foreground w-full sm:w-auto"
         >
-          <Plus className="h-4 w-4 mr-2" />새 상담 기록
+          <Plus className="h-4 w-4 mr-2" />
+          {t('consultationTab.addNewRecord', '새 상담 기록')}
         </Button>
       </div>
 
@@ -54,10 +58,13 @@ export function ConsultationTimeline({
                     {/* 모바일: 세로 배치 */}
                     <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
                       <span className="flex items-center gap-1">
-                        📅 {note.consultationDate}
+                        📅{' '}
+                        {t('consultationTimeline.dateLabel', '{{date}}', {
+                          date: note.consultationDate,
+                        })}
                       </span>
                       <span className="bg-primary/10 text-primary px-2 py-1 rounded text-xs w-fit">
-                        상담
+                        {t('consultationTab.consultationType', '상담')}
                       </span>
                     </div>
                   </div>
@@ -70,7 +77,9 @@ export function ConsultationTimeline({
                       className="flex-1 sm:flex-none text-xs sm:text-sm"
                     >
                       <Edit2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-0" />
-                      <span className="sm:hidden">편집</span>
+                      <span className="sm:hidden">
+                        {t('consultationTimeline.actionButtons.edit', '편집')}
+                      </span>
                     </Button>
                     <Button
                       variant="ghost"
@@ -79,7 +88,9 @@ export function ConsultationTimeline({
                       className="flex-1 sm:flex-none text-red-600 hover:text-red-700 hover:bg-red-50 text-xs sm:text-sm"
                     >
                       <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-0" />
-                      <span className="sm:hidden">삭제</span>
+                      <span className="sm:hidden">
+                        {t('consultationTimeline.actionButtons.delete', '삭제')}
+                      </span>
                     </Button>
                   </div>
                 </div>
@@ -87,7 +98,7 @@ export function ConsultationTimeline({
                 <div className="space-y-3 sm:space-y-3">
                   <div>
                     <h6 className="text-xs sm:text-sm font-medium text-muted-foreground mb-2">
-                      상담 내용
+                      {t('consultationTimeline.sections.content', '상담 내용')}
                     </h6>
                     <p className="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap bg-muted/10 p-2 sm:p-3 rounded border border-border/20">
                       {note.content}
@@ -97,7 +108,10 @@ export function ConsultationTimeline({
                   {note.contractInfo && (
                     <div>
                       <h6 className="text-xs sm:text-sm font-medium text-muted-foreground mb-2">
-                        계약 관련
+                        {t(
+                          'consultationTimeline.sections.contractInfo',
+                          '계약 관련'
+                        )}
                       </h6>
                       <div className="bg-accent/20 p-2 sm:p-3 rounded border border-border/40">
                         <p className="text-xs sm:text-sm whitespace-pre-wrap">
@@ -114,13 +128,20 @@ export function ConsultationTimeline({
                   {(note.followUpDate || note.followUpNotes) && (
                     <div>
                       <h6 className="text-xs sm:text-sm font-medium text-muted-foreground mb-2">
-                        다음 액션
+                        {t(
+                          'consultationTimeline.sections.followUp',
+                          '다음 액션'
+                        )}
                       </h6>
                       {/* 모바일: 세로 배치, 데스크톱: 가로 배치 */}
                       <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-xs sm:text-sm">
                         {note.followUpDate && (
                           <span className="bg-orange-900 text-orange-100 px-2 py-1 rounded text-xs w-fit">
-                            ✅ {note.followUpDate}
+                            {t(
+                              'consultationTimeline.followUpDate',
+                              '✅ {{date}}',
+                              { date: note.followUpDate }
+                            )}
                           </span>
                         )}
                         {note.followUpNotes && (
@@ -142,16 +163,20 @@ export function ConsultationTimeline({
               <span className="text-xl sm:text-2xl">📝</span>
             </div>
             <h4 className="font-medium text-foreground mb-2 text-sm sm:text-base">
-              상담 기록이 없습니다
+              {t('consultationTab.noRecords', '상담 기록이 없습니다')}
             </h4>
             <p className="text-xs sm:text-sm text-muted-foreground mb-4">
-              첫 상담 기록을 추가해보세요.
+              {t(
+                'consultationTab.noRecordsDescription',
+                '첫 상담 기록을 추가해보세요.'
+              )}
             </p>
             <Button
               onClick={onAddNote}
               className="bg-primary hover:bg-primary/90 text-primary-foreground w-full sm:w-auto"
             >
-              <Plus className="h-4 w-4 mr-2" />첫 상담 기록 작성
+              <Plus className="h-4 w-4 mr-2" />
+              {t('consultationTab.firstRecord', '첫 상담 기록 작성')}
             </Button>
           </div>
         )}

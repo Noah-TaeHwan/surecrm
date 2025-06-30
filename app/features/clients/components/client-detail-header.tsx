@@ -54,6 +54,7 @@ import { AddDocumentModal } from './add-document-modal';
 import { ClientGratitudeModal } from './client-gratitude-modal';
 import { logDataAccess as logClientDataAccess } from '../lib/client-data';
 import { ArrowLeft, Edit2, Plus, Save, X, Trash2 } from 'lucide-react';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 
 // 🔧 BadgeVariant 타입 정의
 type BadgeVariant = 'default' | 'secondary' | 'outline' | 'destructive';
@@ -130,6 +131,7 @@ export function ClientDetailHeader({
   onDeleteClient,
   onShowOpportunityModal,
 }: ClientDetailHeaderProps) {
+  const { t } = useHydrationSafeTranslation('clients');
   const [isEditingNote, setIsEditingNote] = useState(false);
   const [noteValue, setNoteValue] = useState(client.notes || '');
   const [isAddMeetingOpen, setIsAddMeetingOpen] = useState(false);
@@ -595,7 +597,11 @@ export function ClientDetailHeader({
               </div>
             ) : (
               <div className="text-sm text-muted-foreground bg-muted/30 rounded-md p-3 min-h-[60px] flex items-center">
-                {client.notes || '메모가 없습니다. 클릭하여 추가하세요.'}
+                {client.notes ||
+                  t(
+                    'memoSection.emptyState',
+                    '메모가 없습니다. 클릭하여 추가하세요.'
+                  )}
               </div>
             )}
           </div>

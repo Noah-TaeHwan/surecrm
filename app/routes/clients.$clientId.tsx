@@ -264,7 +264,14 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 export async function action({ request, params }: Route.ActionArgs) {
   const { clientId } = params;
 
+  console.log('🚀 클라이언트 상세 페이지 Action 호출됨!', {
+    clientId,
+    url: request.url,
+    method: request.method,
+  });
+
   if (!clientId) {
+    console.error('❌ 클라이언트 ID 누락');
     throw new Response('고객 ID가 필요합니다.', { status: 400 });
   }
 
@@ -279,7 +286,17 @@ export async function action({ request, params }: Route.ActionArgs) {
     const formData = await request.formData();
     const intent = formData.get('intent') as string;
 
-    console.log('🔍 고객 상세 페이지 action:', { intent, clientId, agentId });
+    console.log('🔍 고객 상세 페이지 action 세부정보:', {
+      intent,
+      clientId,
+      agentId,
+      formDataKeys: Array.from(formData.keys()),
+    });
+
+    // FormData 내용 로그 (디버깅용)
+    for (const [key, value] of formData.entries()) {
+      console.log(`📋 FormData - ${key}:`, value);
+    }
 
     // 동적으로 action 처리 함수 import
     const { handleClientDetailActions } = await import(
@@ -293,6 +310,8 @@ export async function action({ request, params }: Route.ActionArgs) {
       agentId,
       request,
     });
+
+    console.log('🎯 Action 결과:', result);
 
     return result;
   } catch (error) {

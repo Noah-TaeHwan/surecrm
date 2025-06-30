@@ -2021,8 +2021,15 @@ export async function createConsultationNote(
   >,
   agentId: string
 ): Promise<AppClientConsultationNote> {
+  console.log('💾 createConsultationNote 데이터베이스 함수 시작:', {
+    clientId,
+    agentId,
+    noteData,
+  });
+
   try {
     // 권한 검증
+    console.log('🔒 클라이언트 권한 검증 중...');
     const clientCheck = await db
       .select({ id: clients.id })
       .from(clients)
@@ -2035,23 +2042,33 @@ export async function createConsultationNote(
       )
       .limit(1);
 
+    console.log('🔍 권한 검증 결과:', {
+      clientCheckLength: clientCheck.length,
+      hasPermission: clientCheck.length > 0,
+    });
+
     if (clientCheck.length === 0) {
       throw new Error('권한이 없습니다.');
     }
 
     // 새 상담 기록 추가
+    console.log('📝 데이터베이스에 상담 기록 삽입 중...');
+    const insertData = {
+      clientId,
+      agentId,
+      ...noteData,
+    };
+    console.log('🔍 삽입할 데이터:', insertData);
+
     const [newNote] = await db
       .insert(appClientConsultationNotes)
-      .values({
-        clientId,
-        agentId,
-        ...noteData,
-      })
+      .values(insertData)
       .returning();
 
+    console.log('✅ 상담 기록 삽입 성공:', newNote);
     return newNote;
   } catch (error) {
-    console.error('상담내용 추가 실패:', error);
+    console.error('❌ 상담내용 추가 실패:', error);
     throw error;
   }
 }

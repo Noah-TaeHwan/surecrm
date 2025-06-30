@@ -1,8 +1,8 @@
 {
   "title": "Client Management",
   "meta": {
-    "title": "{{clientName}} - Client Details | SureCRM",
-    "description": "View detailed information for {{clientName}}."
+    "title": "Client Details",
+    "description": "Manage detailed information for client {{clientName}}"
   },
   "errors": {
     "authRequired": "Authentication required.",
@@ -219,14 +219,23 @@
     "other": "Other"
   },
   "labels": {
-    "client": "Client"
+    "client": "Client",
+    "clientInfo": "Client Information",
+    "contacts": "Contacts",
+    "personalInfo": "Personal Information",
+    "physicalInfo": "Physical Information",
+    "importanceLevel": "Importance Level",
+    "telecom": "Telecom Provider",
+    "introduction": "Introduction Information",
+    "actions": "Actions",
+    "settings": "Settings"
   },
   "tabs": {
     "overview": "Overview",
     "notes": "Consultation Notes",
     "medical": "Medical History",
     "purposes": "Checkup Purposes",
-    "interests": "Interest Categories",
+    "interests": "Interests",
     "companions": "Consultation Companions",
     "contracts": "Insurance Contracts",
     "documents": "Documents",
@@ -239,7 +248,10 @@
     "createOpportunity": "Create Opportunity",
     "editMode": "Edit Mode",
     "save": "Save",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "clientDetails": "Client Details",
+    "editClient": "Edit Client Information",
+    "viewingClient": "{{clientName}} Client Information"
   },
   "overview": {
     "basicInfo": "Basic Information",
@@ -247,7 +259,10 @@
     "personalInfo": "Personal Information",
     "referralInfo": "Referral Information",
     "notes": "Notes",
-    "familyMembers": "Family Members"
+    "familyMembers": "Family Members",
+    "currentStage": "Current Stage",
+    "tags": "Tags",
+    "manageTags": "Manage Tags"
   },
   "modals": {
     "deleteTitle": "Delete Client",
@@ -267,8 +282,10 @@
     "createSuccess": "Created successfully",
     "familyInfoPending": "Family information is being prepared.",
     "tagSaveSuccess": "Tags have been saved successfully.",
-    "tagCreateSuccess": "New tag has been created successfully.",
-    "tagRemoveSuccess": "Tag has been removed successfully."
+    "tagCreateSuccess": "New tag created successfully.",
+    "tagRemoveSuccess": "Tag removed successfully.",
+    "tagCreateSuccess": "New tag created successfully.",
+    "tagRemoveSuccess": "Tag removed successfully."
   },
   "sidebar": {
     "editTooltip": "Edit client information",
@@ -377,9 +394,11 @@
     "previewPlaceholder": "Preview will be shown when you enter a tag name."
   },
   "successModal": {
-    "title": "Tag Saved Successfully",
-    "description": "Tag changes have been saved successfully.",
-    "confirm": "OK"
+    "title": "Save Complete",
+    "description": "Changes have been successfully saved.",
+    "consultationAdded": "Consultation note has been successfully added.",
+    "consultationUpdated": "Consultation note has been successfully updated.",
+    "button": "OK"
   },
   "deleteModal": {
     "title": "Confirm Client Deletion",
@@ -402,5 +421,83 @@
     "description": "Are you sure you want to delete companion \"{{companionName}}\"?",
     "itemType": "Consultation Companion",
     "warning": "Deleted companion information cannot be recovered."
+  },
+  "consultationTab": {
+    "title": "Consultation Notes & Contract Memo",
+    "titleMobile": "Consultation",
+    "description": "Record consultation notes and contract details by date.",
+    "recordsTitle": "Consultation Records",
+    "addNewRecord": "New Consultation Record",
+    "firstRecord": "Create First Consultation Record",
+    "noRecords": "No consultation records",
+    "noRecordsDescription": "Add your first consultation record.",
+    "consultationType": "Consultation",
+    "contentLabel": "Consultation Content",
+    "contractInfoLabel": "Contract Related",
+    "followUpLabel": "Next Actions",
+    "editButton": "Edit",
+    "deleteButton": "Delete"
+  },
+  "consultationModal": {
+    "addTitle": "Add Consultation Note",
+    "editTitle": "Edit Consultation Note",
+    "description": "Record consultation content and contract details with the client.",
+    "fields": {
+      "consultationDate": "Consultation Date",
+      "title": "Title",
+      "content": "Consultation Content",
+      "contractInfo": "Contract Information",
+      "followUpDate": "Follow-up Date",
+      "followUpNotes": "Follow-up Notes"
+    },
+    "placeholders": {
+      "title": "Consultation title (e.g., Insurance Consultation, Contract Signing)",
+      "content": "Record consultation details here...",
+      "contractInfo": "Contract information (insurance type, premium, coverage, etc.)",
+      "followUpNotes": "Follow-up action items"
+    },
+    "required": "*",
+    "buttons": {
+      "cancel": "Cancel",
+      "save": "Save",
+      "add": "Add",
+      "edit": "Edit"
+    }
+  },
+  "consultationTimeline": {
+    "dateLabel": "{{date}}",
+    "actionButtons": {
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "sections": {
+      "content": "Consultation Content",
+      "contractInfo": "Contract Related",
+      "followUp": "Next Actions"
+    },
+    "followUpDate": "✅ {{date}}"
+  },
+  "consultationDeleteModal": {
+    "title": "Delete Consultation Record",
+    "description": "Are you sure you want to delete this consultation record?",
+    "warning": "⚠️ Deleted consultation records cannot be recovered.",
+    "buttons": {
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "deleting": "Deleting..."
+    },
+    "noteInfo": {
+      "title": "{{title}}",
+      "date": "📅 {{date}}"
+    }
+  },
+  "memoSection": {
+    "title": "Client Notes & Special Remarks",
+    "titleShort": "Client Notes",
+    "placeholder": "Record important notes or special remarks about the client...",
+    "emptyState": "No notes available",
+    "addButton": "Add Note",
+    "saveButton": "Save",
+    "savingButton": "Saving..."
   }
 }

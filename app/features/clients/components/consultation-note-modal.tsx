@@ -12,6 +12,7 @@ import { Input } from '~/common/components/ui/input';
 import { Textarea } from '~/common/components/ui/textarea';
 import { MessageCircle } from 'lucide-react';
 import type { ConsultationNote } from '../types/client-detail';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 
 interface ConsultationNoteModalProps {
   isOpen: boolean;
@@ -28,6 +29,8 @@ export function ConsultationNoteModal({
   onSave,
   onNoteChange,
 }: ConsultationNoteModalProps) {
+  const { t } = useHydrationSafeTranslation('clients');
+
   const handleClose = () => {
     onClose();
   };
@@ -47,11 +50,16 @@ export function ConsultationNoteModal({
           <DialogTitle className="flex items-center gap-2 text-sm sm:text-lg">
             <MessageCircle className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
             <span className="truncate">
-              {note?.id ? '상담내용 수정' : '상담내용 추가'}
+              {note?.id
+                ? t('consultationModal.editTitle', '상담내용 수정')
+                : t('consultationModal.addTitle', '상담내용 추가')}
             </span>
           </DialogTitle>
           <DialogDescription className="text-xs sm:text-sm text-muted-foreground">
-            고객과의 상담 내용과 계약사항을 기록하세요.
+            {t(
+              'consultationModal.description',
+              '고객과의 상담 내용과 계약사항을 기록하세요.'
+            )}
           </DialogDescription>
         </DialogHeader>
 
@@ -64,8 +72,15 @@ export function ConsultationNoteModal({
                   htmlFor="consultationDate"
                   className="flex items-center space-x-1 text-xs sm:text-sm font-medium"
                 >
-                  <span>상담 날짜</span>
-                  <span className="text-destructive">*</span>
+                  <span>
+                    {t(
+                      'consultationModal.fields.consultationDate',
+                      '상담 날짜'
+                    )}
+                  </span>
+                  <span className="text-destructive">
+                    {t('consultationModal.required', '*')}
+                  </span>
                 </Label>
                 <Input
                   id="consultationDate"
@@ -85,13 +100,18 @@ export function ConsultationNoteModal({
                   htmlFor="title"
                   className="flex items-center space-x-1 text-xs sm:text-sm font-medium"
                 >
-                  <span>제목</span>
-                  <span className="text-destructive">*</span>
+                  <span>{t('consultationModal.fields.title', '제목')}</span>
+                  <span className="text-destructive">
+                    {t('consultationModal.required', '*')}
+                  </span>
                 </Label>
                 <Input
                   id="title"
                   type="text"
-                  placeholder="상담 제목 (예: 보험 상담, 계약 체결)"
+                  placeholder={t(
+                    'consultationModal.placeholders.title',
+                    '상담 제목 (예: 보험 상담, 계약 체결)'
+                  )}
                   value={note?.title || ''}
                   onChange={e =>
                     onNoteChange({
@@ -108,13 +128,20 @@ export function ConsultationNoteModal({
                 htmlFor="content"
                 className="flex items-center space-x-1 text-xs sm:text-sm font-medium"
               >
-                <span>상담 내용</span>
-                <span className="text-destructive">*</span>
+                <span>
+                  {t('consultationModal.fields.content', '상담 내용')}
+                </span>
+                <span className="text-destructive">
+                  {t('consultationModal.required', '*')}
+                </span>
               </Label>
               <Textarea
                 id="content"
                 rows={6}
-                placeholder="상담 내용을 자세히 기록하세요..."
+                placeholder={t(
+                  'consultationModal.placeholders.content',
+                  '상담 내용을 자세히 기록하세요...'
+                )}
                 value={note?.content || ''}
                 onChange={e =>
                   onNoteChange({
@@ -131,12 +158,15 @@ export function ConsultationNoteModal({
                 htmlFor="contractInfo"
                 className="text-xs sm:text-sm font-medium"
               >
-                계약 정보
+                {t('consultationModal.fields.contractInfo', '계약 정보')}
               </Label>
               <Textarea
                 id="contractInfo"
                 rows={3}
-                placeholder="계약 관련 정보 (보험 종류, 보험료, 보장 내용 등)"
+                placeholder={t(
+                  'consultationModal.placeholders.contractInfo',
+                  '계약 관련 정보 (보험 종류, 보험료, 보장 내용 등)'
+                )}
                 value={note?.contractInfo || ''}
                 onChange={e =>
                   onNoteChange({
@@ -154,7 +184,7 @@ export function ConsultationNoteModal({
                   htmlFor="followUpDate"
                   className="text-xs sm:text-sm font-medium"
                 >
-                  후속 일정
+                  {t('consultationModal.fields.followUpDate', '후속 일정')}
                 </Label>
                 <Input
                   id="followUpDate"
@@ -174,12 +204,15 @@ export function ConsultationNoteModal({
                   htmlFor="followUpNotes"
                   className="text-xs sm:text-sm font-medium"
                 >
-                  후속 메모
+                  {t('consultationModal.fields.followUpNotes', '후속 메모')}
                 </Label>
                 <Input
                   id="followUpNotes"
                   type="text"
-                  placeholder="후속 조치 사항"
+                  placeholder={t(
+                    'consultationModal.placeholders.followUpNotes',
+                    '후속 조치 사항'
+                  )}
                   value={note?.followUpNotes || ''}
                   onChange={e =>
                     onNoteChange({
@@ -197,9 +230,13 @@ export function ConsultationNoteModal({
         {/* 푸터 - 고정 */}
         <DialogFooter className="flex-shrink-0 flex gap-2 px-4 sm:px-6 py-4 border-t border-border/30">
           <Button variant="outline" onClick={handleClose}>
-            취소
+            {t('consultationModal.buttons.cancel', '취소')}
           </Button>
-          <Button onClick={onSave}>{note?.id ? '수정' : '추가'}</Button>
+          <Button onClick={onSave}>
+            {note?.id
+              ? t('consultationModal.buttons.edit', '수정')
+              : t('consultationModal.buttons.add', '추가')}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

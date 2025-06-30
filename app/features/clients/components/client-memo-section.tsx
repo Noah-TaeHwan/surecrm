@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button } from '~/common/components/ui/button';
 import { Textarea } from '~/common/components/ui/textarea';
 import { FileText, Plus, Edit2, Save, X } from 'lucide-react';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 
 interface ClientMemoSectionProps {
   notes: string;
@@ -9,6 +10,8 @@ interface ClientMemoSectionProps {
 }
 
 export function ClientMemoSection({ notes, onSave }: ClientMemoSectionProps) {
+  const { t } = useHydrationSafeTranslation('clients');
+
   // 메모 편집을 위한 독립적인 상태
   const [isEditingMemo, setIsEditingMemo] = useState(false);
   const [editingNotes, setEditingNotes] = useState(notes);
@@ -48,8 +51,12 @@ export function ClientMemoSection({ notes, onSave }: ClientMemoSectionProps) {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-3 sm:mb-3">
         <h4 className="font-medium text-foreground flex items-center gap-2 text-sm sm:text-base">
           <FileText className="h-4 w-4 sm:h-5 sm:w-5" />
-          <span className="hidden sm:inline">고객 메모 및 특이사항</span>
-          <span className="sm:hidden">고객 메모</span>
+          <span className="hidden sm:inline">
+            {t('memoSection.title', '고객 메모 및 특이사항')}
+          </span>
+          <span className="sm:hidden">
+            {t('memoSection.title', '고객 메모')}
+          </span>
         </h4>
 
         {/* 편집/저장/취소 버튼 */}
@@ -60,8 +67,12 @@ export function ClientMemoSection({ notes, onSave }: ClientMemoSectionProps) {
             className="bg-primary hover:bg-primary/90 text-primary-foreground w-full sm:w-auto"
           >
             <Edit2 className="h-4 w-4 mr-1" />
-            <span className="sm:hidden">메모 편집</span>
-            <span className="hidden sm:inline">편집</span>
+            <span className="sm:hidden">
+              {t('consultationTab.editButton', '편집')}
+            </span>
+            <span className="hidden sm:inline">
+              {t('consultationTab.editButton', '편집')}
+            </span>
           </Button>
         )}
 
@@ -74,7 +85,9 @@ export function ClientMemoSection({ notes, onSave }: ClientMemoSectionProps) {
               className="bg-primary hover:bg-primary/90 text-primary-foreground flex-1 sm:flex-none"
             >
               <Save className="h-4 w-4 mr-1" />
-              {isSaving ? '저장 중...' : '저장'}
+              {isSaving
+                ? t('memoSection.savingButton', '저장 중...')
+                : t('memoSection.saveButton', '저장')}
             </Button>
             <Button
               onClick={handleEditCancel}
@@ -84,7 +97,7 @@ export function ClientMemoSection({ notes, onSave }: ClientMemoSectionProps) {
               className="flex-1 sm:flex-none"
             >
               <X className="h-4 w-4 mr-1" />
-              취소
+              {t('consultationModal.buttons.cancel', '취소')}
             </Button>
           </div>
         )}
@@ -95,7 +108,10 @@ export function ClientMemoSection({ notes, onSave }: ClientMemoSectionProps) {
           <Textarea
             value={editingNotes}
             onChange={e => setEditingNotes(e.target.value)}
-            placeholder="고객에 대한 메모를 입력하세요..."
+            placeholder={t(
+              'memoSection.placeholder',
+              '고객에 대한 중요한 메모나 특이사항을 기록하세요...'
+            )}
             className="min-h-[100px] sm:min-h-[120px] resize-none border-none p-0 bg-transparent text-sm"
             disabled={isSaving}
           />
@@ -105,7 +121,7 @@ export function ClientMemoSection({ notes, onSave }: ClientMemoSectionProps) {
           <div className="text-center py-4 sm:py-6">
             <FileText className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground mx-auto mb-2" />
             <p className="text-xs sm:text-sm text-muted-foreground mb-3">
-              메모가 없습니다
+              {t('memoSection.emptyState', '메모가 없습니다')}
             </p>
             <Button
               size="sm"
@@ -113,7 +129,7 @@ export function ClientMemoSection({ notes, onSave }: ClientMemoSectionProps) {
               className="bg-primary hover:bg-primary/90 text-primary-foreground w-full sm:w-auto"
             >
               <Plus className="h-3 w-3 mr-1" />
-              메모 추가
+              {t('memoSection.addButton', '메모 추가')}
             </Button>
           </div>
         )}

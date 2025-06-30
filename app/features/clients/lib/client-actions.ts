@@ -1,4 +1,4 @@
-import type { Route } from '../pages/+types/client-detail-page';
+// import type { Route } from '../pages/+types/client-detail-page';
 import { requireAuth } from '~/lib/auth/middleware.server';
 
 export async function updateClientAction(
@@ -677,9 +677,13 @@ export async function createConsultationNoteAction(
   clientId: string,
   formData: FormData
 ) {
+  console.log('🔥 createConsultationNoteAction 시작:', { clientId });
+
   // 🎯 실제 로그인된 보험설계사 정보 가져오기
   const user = await requireAuth(request);
   const agentId = user.id;
+
+  console.log('👤 로그인된 사용자:', { agentId, userEmail: user.email });
 
   try {
     const { createConsultationNote } = await import(
@@ -690,18 +694,37 @@ export async function createConsultationNoteAction(
       consultationDate: formData.get('consultationDate')?.toString() || '',
       title: formData.get('title')?.toString() || '',
       content: formData.get('content')?.toString() || '',
-      contractInfo: formData.get('contractInfo')?.toString() || null,
+      contractDetails: (() => {
+        const contractInfoStr = formData.get('contractInfo')?.toString();
+        if (!contractInfoStr || contractInfoStr.trim() === '') return null;
+        try {
+          // 이미 JSON인 경우 파싱, 아니면 문자열로 저장
+          return contractInfoStr.startsWith('{')
+            ? JSON.parse(contractInfoStr)
+            : { content: contractInfoStr };
+        } catch {
+          return { content: contractInfoStr };
+        }
+      })(),
       followUpDate: formData.get('followUpDate')?.toString() || null,
       followUpNotes: formData.get('followUpNotes')?.toString() || null,
       noteType: 'consultation', // 기본 노트 타입 추가
-      addedBy: agentId,
     };
 
+    console.log('📝 상담내용 데이터:', noteData);
+
     if (!noteData.consultationDate || !noteData.title || !noteData.content) {
+      console.error('❌ 필수 필드 누락:', {
+        consultationDate: !!noteData.consultationDate,
+        title: !!noteData.title,
+        content: !!noteData.content,
+      });
       throw new Error('상담일시, 제목, 내용은 필수입니다.');
     }
 
-    await createConsultationNote(clientId, noteData, agentId);
+    console.log('🚀 데이터베이스에 상담내용 저장 중...');
+    const result = await createConsultationNote(clientId, noteData, agentId);
+    console.log('✅ 상담내용 저장 성공:', result);
 
     return {
       success: true,
@@ -743,7 +766,17 @@ export async function updateConsultationNoteAction(
       consultationDate: formData.get('consultationDate')?.toString() || '',
       title: formData.get('title')?.toString() || '',
       content: formData.get('content')?.toString() || '',
-      contractInfo: formData.get('contractInfo')?.toString() || null,
+      contractDetails: (() => {
+        const contractInfoStr = formData.get('contractInfo')?.toString();
+        if (!contractInfoStr || contractInfoStr.trim() === '') return null;
+        try {
+          return contractInfoStr.startsWith('{')
+            ? JSON.parse(contractInfoStr)
+            : { content: contractInfoStr };
+        } catch {
+          return { content: contractInfoStr };
+        }
+      })(),
       followUpDate: formData.get('followUpDate')?.toString() || null,
       followUpNotes: formData.get('followUpNotes')?.toString() || null,
       noteType: 'consultation', // 기본 노트 타입 추가
@@ -788,7 +821,7 @@ export async function deleteConsultationNoteAction(
     );
     const { eq, and } = await import('drizzle-orm');
 
-    const result = await db
+    await db
       .delete(appClientConsultationNotes)
       .where(
         and(
@@ -913,7 +946,7 @@ export async function handleClientDetailActions({
         formData
       );
 
-    case 'delete-companion':
+    case 'delete-companion': {
       const companionId = formData.get('companionId')?.toString();
       if (!companionId) {
         return {
@@ -922,6 +955,7 @@ export async function handleClientDetailActions({
         };
       }
       return await deleteConsultationCompanionAction(request, companionId);
+    }
 
     case 'create-note':
       return await createConsultationNoteAction(request, clientId, formData);
@@ -929,7 +963,7 @@ export async function handleClientDetailActions({
     case 'update-note':
       return await updateConsultationNoteAction(request, clientId, formData);
 
-    case 'delete-note':
+    case 'delete-note': {
       const noteId = formData.get('noteId')?.toString();
       if (!noteId) {
         return {
@@ -938,6 +972,7 @@ export async function handleClientDetailActions({
         };
       }
       return await deleteConsultationNoteAction(request, noteId);
+    }
 
     case 'update-notes':
       return await updateClientNotesAction(request, clientId, formData);
