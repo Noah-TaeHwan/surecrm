@@ -358,11 +358,7 @@ export default function ReportsPage({ loaderData }: Route.ComponentProps) {
         />
 
         {/* 🎯 모바일 최적화: 비즈니스 인사이트 탭 - 🔧 수정: userGoals 전달 */}
-        <InsightsTabs
-          performance={performance}
-          topPerformers={topPerformers}
-          userGoals={userGoals}
-        />
+        <InsightsTabs performance={performance} userGoals={userGoals} />
       </div>
     </MainLayout>
   );
