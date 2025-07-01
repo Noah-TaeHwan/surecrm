@@ -211,7 +211,8 @@ export default function PricingPage() {
                     </Button>
                     <div className="text-sm text-muted-foreground flex items-center">
                       <Star className="mr-1 h-4 w-4" />
-                      14일 무료 체험 · 신용카드 필요 없음
+                      {safeT('plan.trial_info') ||
+                        '14일 무료 체험 · 신용카드 필요 없음'}
                     </div>
                   </div>
 
@@ -262,7 +263,7 @@ export default function PricingPage() {
                     {upcomingFeatures.map((feature: any, index: number) => (
                       <div key={index} className="flex items-start gap-3">
                         <Badge variant="outline" className="text-xs">
-                          출시 예정
+                          {safeT('upcoming.coming_soon') || '출시 예정'}
                         </Badge>
                         <div className="flex-1">
                           <h4 className="font-medium text-sm">

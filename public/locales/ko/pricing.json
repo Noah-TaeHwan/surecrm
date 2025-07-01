@@ -13,7 +13,8 @@
     "description": "모든 기능이 포함된 프리미엄 CRM 솔루션",
     "badge": "프리미엄",
     "button": "무료 체험 시작",
-    "note": "언제든지 취소 가능"
+    "note": "언제든지 취소 가능",
+    "trial_info": "14일 무료 체험 · 신용카드 필요 없음"
   },
   "features": {
     "title": "핵심 기능",
@@ -64,6 +65,7 @@
   "upcoming": {
     "title": "곧 출시될 기능",
     "subtitle": "더 많은 혁신적인 기능들이 준비되고 있습니다",
+    "coming_soon": "출시 예정",
     "list": [
       {
         "title": "AI 고객 분석",

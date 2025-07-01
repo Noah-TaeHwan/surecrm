@@ -13,7 +13,8 @@
     "description": "Premium CRM solution with all features included",
     "badge": "Premium",
     "button": "Start Free Trial",
-    "note": "Cancel anytime"
+    "note": "Cancel anytime",
+    "trial_info": "14-day free trial · No credit card required"
   },
   "features": {
     "title": "Core Features",
@@ -64,6 +65,7 @@
   "upcoming": {
     "title": "Upcoming Features",
     "subtitle": "More innovative features are in development",
+    "coming_soon": "Coming Soon",
     "list": [
       {
         "title": "AI Customer Analytics",

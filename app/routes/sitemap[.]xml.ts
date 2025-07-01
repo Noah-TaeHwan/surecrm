@@ -1,4 +1,4 @@
-import type { Route } from './+types/sitemap.xml';
+import type { Route } from './+types/sitemap[.]xml';
 
 // 사이트맵에 포함할 정적 페이지들
 const staticPages = [
@@ -74,8 +74,9 @@ export async function loader({ request }: Route.LoaderArgs) {
 
   return new Response(sitemap, {
     headers: {
-      'Content-Type': 'application/xml',
+      'Content-Type': 'application/xml; charset=utf-8',
       'Cache-Control': 'public, max-age=3600', // 1시간 캐시
+      'X-Robots-Tag': 'noindex', // 사이트맵 자체는 인덱싱하지 않음
     },
   });
 }
