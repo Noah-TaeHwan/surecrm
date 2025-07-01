@@ -1,5 +1,15 @@
 {
+  "meta": {
+    "title": "설정",
+    "description": "계정 및 앱 환경설정 관리"
+  },
   "title": "설정",
+  "subtitle": "계정 정보와 환경설정을 관리하세요",
+  "header": {
+    "title": "설정",
+    "subtitle": "님의 계정 정보와 환경설정을 관리하세요",
+    "mvpBadge": "MVP 버전"
+  },
   "sections": {
     "profile": "프로필",
     "account": "계정",
@@ -11,76 +21,133 @@
     "advanced": "고급 설정"
   },
   "profile": {
-    "personalInfo": "개인 정보",
+    "title": "프로필 정보",
     "name": "이름",
+    "namePlaceholder": "이름을 입력하세요",
+    "position": "직책",
+    "positionPlaceholder": "직책을 입력하세요",
+    "positions": {
+      "insurance_agent": "보험설계사",
+      "sales_manager": "영업관리자",
+      "team_leader": "팀장",
+      "branch_manager": "지점장",
+      "regional_manager": "지역관리자",
+      "director": "이사",
+      "consultant": "컨설턴트",
+      "agent": "상담원",
+      "other": "기타"
+    },
     "email": "이메일",
     "phone": "전화번호",
+    "phonePlaceholder": "전화번호를 입력하세요 (예: +82-10-1234-5678)",
     "company": "회사",
-    "position": "직책",
-    "avatar": "프로필 사진",
-    "uploadAvatar": "사진 업로드",
-    "removeAvatar": "사진 제거"
+    "companyPlaceholder": "회사명을 입력하세요",
+    "readOnly": "읽기 전용",
+    "save": "프로필 저장"
+  },
+  "security": {
+    "title": "보안 설정",
+    "currentPassword": "현재 비밀번호",
+    "currentPasswordPlaceholder": "현재 비밀번호를 입력하세요",
+    "newPassword": "새 비밀번호",
+    "newPasswordPlaceholder": "새 비밀번호를 입력하세요 (6자 이상)",
+    "confirmPassword": "새 비밀번호 확인",
+    "confirmPasswordPlaceholder": "새 비밀번호를 다시 입력하세요",
+    "changePassword": "비밀번호 변경",
+    "guide": {
+      "title": "보안 권장사항",
+      "items": [
+        "비밀번호는 6자 이상으로 설정하세요",
+        "정기적으로 비밀번호를 변경하세요",
+        "다른 서비스와 다른 비밀번호를 사용하세요"
+      ]
+    }
+  },
+  "notifications": {
+    "title": "알림 설정",
+    "description": "이메일 및 시스템 알림 설정을 관리하세요",
+    "emailNotifications": "이메일 알림",
+    "emailDescription": "미팅 일정, 수수료 정보 등의 알림을 이메일로 받습니다",
+    "save": "알림 설정 저장",
+    "guide": {
+      "title": "알림 정보",
+      "items": [
+        "중요한 일정과 업무 소식을 놓치지 마세요",
+        "언제든지 알림 설정을 변경할 수 있습니다",
+        "스팸함도 확인해 주세요"
+      ]
+    }
+  },
+  "calendar": {
+    "title": "구글 캘린더 연동",
+    "description": "구글 캘린더와 SureCRM을 연동하여 일정을 통합 관리하세요",
+    "status": {
+      "connected": "연동됨",
+      "disconnected": "연동 안됨",
+      "error": "연동 오류"
+    },
+    "statusDescription": {
+      "connected": "마지막 동기화: {{lastSync}}",
+      "disconnected": "구글 계정을 연결하여 캘린더를 동기화하세요",
+      "error": "연동에 문제가 발생했습니다"
+    },
+    "badge": {
+      "active": "활성",
+      "inactive": "비활성"
+    },
+    "connect": "구글 계정 연결",
+    "disconnect": "구글 캘린더 연동 해제",
+    "guide": {
+      "title": "캘린더 연동 안내",
+      "items": [
+        "구글 계정 권한이 필요합니다",
+        "양방향 동기화 시 데이터 충돌이 발생할 수 있습니다",
+        "언제든지 연동을 해제할 수 있습니다"
+      ]
+    }
   },
   "account": {
-    "security": "보안",
-    "changePassword": "비밀번호 변경",
-    "currentPassword": "현재 비밀번호",
-    "newPassword": "새 비밀번호",
-    "confirmPassword": "비밀번호 확인",
-    "twoFactorAuth": "2단계 인증",
-    "enableTwoFactor": "2단계 인증 활성화",
-    "disableTwoFactor": "2단계 인증 비활성화",
-    "sessions": "활성 세션",
-    "logoutAllDevices": "모든 기기에서 로그아웃"
+    "title": "계정 정보",
+    "userId": "사용자 ID",
+    "joinDate": "가입일",
+    "plan": "플랜",
+    "planType": "MVP 베타"
   },
-  "appearance": {
-    "theme": "테마",
-    "light": "라이트",
-    "dark": "다크",
-    "auto": "자동",
-    "language": "언어",
-    "timezone": "시간대",
-    "dateFormat": "날짜 형식",
-    "timeFormat": "시간 형식",
-    "currency": "통화",
-    "numberFormat": "숫자 형식"
-  },
-  "privacy": {
-    "dataUsage": "데이터 사용",
-    "analytics": "분석 데이터 수집",
-    "marketing": "마케팅 정보 수신",
-    "thirdParty": "제3자 데이터 공유",
-    "dataExport": "데이터 내보내기",
-    "dataDelete": "계정 삭제",
-    "cookieConsent": "쿠키 동의"
-  },
-  "integrations": {
-    "available": "사용 가능한 연동",
-    "connected": "연결된 서비스",
-    "googleCalendar": "구글 캘린더",
-    "outlook": "아웃룩",
-    "slack": "슬랙",
-    "zapier": "자피어",
-    "webhook": "웹훅",
-    "api": "API 키",
-    "connect": "연결",
-    "disconnect": "연결 해제",
-    "configure": "설정"
-  },
-  "actions": {
-    "save": "저장",
-    "cancel": "취소",
-    "reset": "초기화",
-    "export": "내보내기",
-    "import": "가져오기",
-    "backup": "백업",
-    "restore": "복원"
+  "guide": {
+    "title": "설정 가이드",
+    "save": {
+      "title": "설정 저장",
+      "description": "모든 변경사항은 저장 버튼을 클릭하여 적용됩니다"
+    },
+    "security": {
+      "title": "보안 관리",
+      "description": "정기적으로 비밀번호를 변경해 계정을 안전하게 유지하세요"
+    },
+    "profile": {
+      "title": "프로필 관리",
+      "description": "정확한 정보로 업데이트하여 팀과의 협업을 원활하게 하세요"
+    },
+    "mvp": {
+      "title": "MVP 버전",
+      "description": "현재 베타 버전에서는 기본 설정만 제공됩니다. 추가 기능은 곧 업데이트될 예정입니다."
+    }
   },
   "messages": {
-    "saveSuccess": "설정이 저장되었습니다",
-    "saveError": "설정 저장에 실패했습니다",
-    "passwordChanged": "비밀번호가 변경되었습니다",
-    "invalidPassword": "현재 비밀번호가 올바르지 않습니다",
-    "confirmDelete": "정말로 계정을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다."
+    "loginRequired": "로그인이 필요합니다.",
+    "profileSaveSuccess": "프로필이 성공적으로 저장되었습니다.",
+    "profileSaveError": "프로필 저장에 실패했습니다.",
+    "notificationSaveSuccess": "알림 설정이 성공적으로 저장되었습니다.",
+    "notificationSaveError": "알림 설정 저장에 실패했습니다.",
+    "calendarSaveSuccess": "캘린더 설정이 성공적으로 저장되었습니다.",
+    "calendarSaveError": "설정 저장 중 오류가 발생했습니다.",
+    "calendarDisconnectSuccess": "구글 캘린더 연동이 해제되었습니다.",
+    "calendarDisconnectError": "연동 해제 중 오류가 발생했습니다.",
+    "passwordChangeSuccess": "비밀번호가 성공적으로 변경되었습니다. 보안을 위해 다시 로그인해주세요.",
+    "passwordChangeError": "비밀번호 변경에 실패했습니다.",
+    "passwordRequired": "모든 비밀번호 필드를 입력해주세요.",
+    "passwordMismatch": "새 비밀번호가 일치하지 않습니다.",
+    "passwordTooShort": "새 비밀번호는 최소 6자 이상이어야 합니다.",
+    "passwordSame": "새 비밀번호는 현재 비밀번호와 다르게 설정해야 합니다.",
+    "passwordIncorrect": "현재 비밀번호가 올바르지 않습니다."
   }
 }

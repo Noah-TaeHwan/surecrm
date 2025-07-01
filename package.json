@@ -122,6 +122,7 @@
     "react-force-graph-2d": "^1.27.1",
     "react-hook-form": "^7.56.4",
     "react-i18next": "^15.5.3",
+    "react-international-phone": "^4.5.0",
     "react-resizable-panels": "^3.0.2",
     "react-router": "^7.5.3",
     "recharts": "^2.15.3",

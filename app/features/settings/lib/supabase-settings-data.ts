@@ -161,7 +161,7 @@ async function createDefaultProfile(userId: string): Promise<void> {
 // 사용자 프로필 업데이트
 export async function updateUserProfile(
   userId: string,
-  updates: Partial<Pick<UserProfile, 'name' | 'phone' | 'company'>>
+  updates: Partial<Pick<UserProfile, 'name' | 'phone' | 'company' | 'position'>>
 ): Promise<boolean> {
   try {
     // 입력 검증
@@ -172,7 +172,7 @@ export async function updateUserProfile(
     if (
       updates.phone &&
       updates.phone.trim() &&
-      !isValidPhoneNumber(updates.phone)
+      !isValidInternationalPhoneNumber(updates.phone)
     ) {
       throw new Error('올바른 전화번호 형식이 아닙니다.');
     }
@@ -188,6 +188,10 @@ export async function updateUserProfile(
     if (updates.company !== undefined) {
       updateData.company =
         updates.company.trim() || INSURANCE_AGENT_DEFAULTS.company;
+    }
+    if (updates.position !== undefined) {
+      // position을 role로 변환
+      updateData.role = getRoleFromDisplayName(updates.position);
     }
 
     if (Object.keys(updateData).length === 0) {
@@ -205,11 +209,27 @@ export async function updateUserProfile(
   }
 }
 
-// 전화번호 유효성 검사
+// 전화번호 유효성 검사 (한국 전화번호)
 function isValidPhoneNumber(phone: string): boolean {
   // 한국 전화번호 패턴 (010-1234-5678, 01012345678 등)
   const phoneRegex = /^(010|011|016|017|018|019)-?\d{3,4}-?\d{4}$/;
   return phoneRegex.test(phone.replace(/\s/g, ''));
+}
+
+// 국제 전화번호 유효성 검사
+function isValidInternationalPhoneNumber(phone: string): boolean {
+  // 국제 전화번호 패턴 (+82-10-1234-5678, +1-555-123-4567 등)
+  const internationalPhoneRegex =
+    /^(\+\d{1,3}[-.\s]?)?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}$/;
+  const cleanPhone = phone.replace(/\s/g, '');
+
+  // 최소 길이 체크 (국가코드 포함 최소 8자리)
+  if (cleanPhone.length < 8) {
+    return false;
+  }
+
+  // 국제 형식이거나 한국 전화번호 형식이면 유효
+  return internationalPhoneRegex.test(cleanPhone) || isValidPhoneNumber(phone);
 }
 
 // 역할 표시명 변환 (보험업계 특화)
@@ -231,6 +251,42 @@ function getRoleDisplayName(role: string): string {
       return '시스템 관리자';
     default:
       return '보험설계사';
+  }
+}
+
+// 표시명을 역할로 변환 (보험업계 특화)
+function getRoleFromDisplayName(displayName: string): string {
+  switch (displayName) {
+    case '보험설계사':
+    case 'Insurance Agent':
+    case '保険設計士':
+      return 'agent';
+    case '수석설계사':
+    case 'Senior Agent':
+    case 'シニアエージェント':
+      return 'senior_agent';
+    case '팀장':
+    case 'Team Leader':
+    case 'チームリーダー':
+      return 'team_leader';
+    case '지점장':
+    case 'Branch Manager':
+    case '支店長':
+      return 'branch_manager';
+    case '본부장':
+    case 'Regional Manager':
+    case '地域マネージャー':
+      return 'regional_manager';
+    case '팀 관리자':
+    case 'Team Admin':
+    case 'チーム管理者':
+      return 'team_admin';
+    case '시스템 관리자':
+    case 'System Admin':
+    case 'システム管理者':
+      return 'system_admin';
+    default:
+      return 'agent'; // 기본값
   }
 }
 

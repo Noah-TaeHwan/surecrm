@@ -1,5 +1,15 @@
 {
+  "meta": {
+    "title": "Settings",
+    "description": "Manage your account and app preferences"
+  },
   "title": "Settings",
+  "subtitle": "Manage your account information and preferences",
+  "header": {
+    "title": "Settings",
+    "subtitle": "'s account information and preferences",
+    "mvpBadge": "MVP Version"
+  },
   "sections": {
     "profile": "Profile",
     "account": "Account",
@@ -11,76 +21,133 @@
     "advanced": "Advanced"
   },
   "profile": {
-    "personalInfo": "Personal Information",
+    "title": "Profile Information",
     "name": "Name",
-    "email": "Email",
-    "phone": "Phone",
-    "company": "Company",
+    "namePlaceholder": "Enter your name",
     "position": "Position",
-    "avatar": "Profile Picture",
-    "uploadAvatar": "Upload Picture",
-    "removeAvatar": "Remove Picture"
+    "positionPlaceholder": "Enter your position",
+    "positions": {
+      "insurance_agent": "Insurance Agent",
+      "sales_manager": "Sales Manager",
+      "team_leader": "Team Leader",
+      "branch_manager": "Branch Manager",
+      "regional_manager": "Regional Manager",
+      "director": "Director",
+      "consultant": "Consultant",
+      "agent": "Agent",
+      "other": "Other"
+    },
+    "email": "Email",
+    "phone": "Phone Number",
+    "phonePlaceholder": "Enter your phone number (e.g., +1-555-123-4567)",
+    "company": "Company",
+    "companyPlaceholder": "Enter your company name",
+    "readOnly": "Read Only",
+    "save": "Save Profile"
+  },
+  "security": {
+    "title": "Security Settings",
+    "currentPassword": "Current Password",
+    "currentPasswordPlaceholder": "Enter your current password",
+    "newPassword": "New Password",
+    "newPasswordPlaceholder": "Enter new password (6+ characters)",
+    "confirmPassword": "Confirm New Password",
+    "confirmPasswordPlaceholder": "Re-enter your new password",
+    "changePassword": "Change Password",
+    "guide": {
+      "title": "Security Recommendations",
+      "items": [
+        "Set password to 6+ characters",
+        "Change your password regularly",
+        "Use different passwords for different services"
+      ]
+    }
+  },
+  "notifications": {
+    "title": "Notification Settings",
+    "description": "Manage email and system notification preferences",
+    "emailNotifications": "Email Notifications",
+    "emailDescription": "Receive notifications about meetings, commission info, etc. via email",
+    "save": "Save Notification Settings",
+    "guide": {
+      "title": "Notification Info",
+      "items": [
+        "Don't miss important schedules and business news",
+        "You can change notification settings anytime",
+        "Please check your spam folder too"
+      ]
+    }
+  },
+  "calendar": {
+    "title": "Google Calendar Integration",
+    "description": "Connect Google Calendar and SureCRM for unified schedule management",
+    "status": {
+      "connected": "Connected",
+      "disconnected": "Not Connected",
+      "error": "Connection Error"
+    },
+    "statusDescription": {
+      "connected": "Last sync: {{lastSync}}",
+      "disconnected": "Connect your Google account to sync calendars",
+      "error": "There was a problem with the connection"
+    },
+    "badge": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "connect": "Connect Google Account",
+    "disconnect": "Disconnect Google Calendar",
+    "guide": {
+      "title": "Calendar Integration Guide",
+      "items": [
+        "Google account permissions required",
+        "Bidirectional sync may cause data conflicts",
+        "You can disconnect anytime"
+      ]
+    }
   },
   "account": {
-    "security": "Security",
-    "changePassword": "Change Password",
-    "currentPassword": "Current Password",
-    "newPassword": "New Password",
-    "confirmPassword": "Confirm Password",
-    "twoFactorAuth": "Two-Factor Authentication",
-    "enableTwoFactor": "Enable 2FA",
-    "disableTwoFactor": "Disable 2FA",
-    "sessions": "Active Sessions",
-    "logoutAllDevices": "Logout All Devices"
+    "title": "Account Information",
+    "userId": "User ID",
+    "joinDate": "Join Date",
+    "plan": "Plan",
+    "planType": "MVP Beta"
   },
-  "appearance": {
-    "theme": "Theme",
-    "light": "Light",
-    "dark": "Dark",
-    "auto": "Auto",
-    "language": "Language",
-    "timezone": "Timezone",
-    "dateFormat": "Date Format",
-    "timeFormat": "Time Format",
-    "currency": "Currency",
-    "numberFormat": "Number Format"
-  },
-  "privacy": {
-    "dataUsage": "Data Usage",
-    "analytics": "Analytics Data Collection",
-    "marketing": "Marketing Communications",
-    "thirdParty": "Third-party Data Sharing",
-    "dataExport": "Export Data",
-    "dataDelete": "Delete Account",
-    "cookieConsent": "Cookie Consent"
-  },
-  "integrations": {
-    "available": "Available Integrations",
-    "connected": "Connected Services",
-    "googleCalendar": "Google Calendar",
-    "outlook": "Outlook",
-    "slack": "Slack",
-    "zapier": "Zapier",
-    "webhook": "Webhooks",
-    "api": "API Keys",
-    "connect": "Connect",
-    "disconnect": "Disconnect",
-    "configure": "Configure"
-  },
-  "actions": {
-    "save": "Save",
-    "cancel": "Cancel",
-    "reset": "Reset",
-    "export": "Export",
-    "import": "Import",
-    "backup": "Backup",
-    "restore": "Restore"
+  "guide": {
+    "title": "Settings Guide",
+    "save": {
+      "title": "Save Settings",
+      "description": "All changes are applied by clicking the save button"
+    },
+    "security": {
+      "title": "Security Management",
+      "description": "Change your password regularly to keep your account secure"
+    },
+    "profile": {
+      "title": "Profile Management",
+      "description": "Update with accurate information for smooth team collaboration"
+    },
+    "mvp": {
+      "title": "MVP Version",
+      "description": "The current beta version provides basic settings only. Additional features will be updated soon."
+    }
   },
   "messages": {
-    "saveSuccess": "Settings saved successfully",
-    "saveError": "Failed to save settings",
-    "passwordChanged": "Password changed successfully",
-    "invalidPassword": "Current password is incorrect",
-    "confirmDelete": "Are you sure you want to delete your account? This action cannot be undone."
+    "loginRequired": "Login required.",
+    "profileSaveSuccess": "Profile saved successfully.",
+    "profileSaveError": "Failed to save profile.",
+    "notificationSaveSuccess": "Notification settings saved successfully.",
+    "notificationSaveError": "Failed to save notification settings.",
+    "calendarSaveSuccess": "Calendar settings saved successfully.",
+    "calendarSaveError": "An error occurred while saving settings.",
+    "calendarDisconnectSuccess": "Google Calendar has been disconnected.",
+    "calendarDisconnectError": "An error occurred while disconnecting.",
+    "passwordChangeSuccess": "Password changed successfully. Please log in again for security.",
+    "passwordChangeError": "Failed to change password.",
+    "passwordRequired": "Please fill in all password fields.",
+    "passwordMismatch": "New passwords do not match.",
+    "passwordTooShort": "New password must be at least 6 characters.",
+    "passwordSame": "New password must be different from current password.",
+    "passwordIncorrect": "Current password is incorrect."
   }
 }

@@ -12,12 +12,9 @@ import {
   getUserProfile,
   updateUserProfile,
 } from '../lib/supabase-settings-data';
-import {
-  getNotificationSettings,
-  upsertNotificationSettings,
-} from '~/features/notifications/lib/notifications-data';
+
 import { data, redirect } from 'react-router';
-import { createServerClient, createAdminClient } from '~/lib/core/supabase';
+import { createServerClient } from '~/lib/core/supabase';
 import {
   Card,
   CardContent,
@@ -26,11 +23,8 @@ import {
   CardDescription,
 } from '~/common/components/ui/card';
 import { Button } from '~/common/components/ui/button';
-import { Switch } from '~/common/components/ui/switch';
 import { Input } from '~/common/components/ui/input';
 import { Label } from '~/common/components/ui/label';
-import { Separator } from '~/common/components/ui/separator';
-import { Badge } from '~/common/components/ui/badge';
 import {
   Select,
   SelectContent,
@@ -38,10 +32,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/common/components/ui/select';
-import { RadioGroup, RadioGroupItem } from '~/common/components/ui/radio-group';
+
+import { Badge } from '~/common/components/ui/badge';
+
 import {
   User,
-  Bell,
   Shield,
   Save,
   Phone,
@@ -53,16 +48,13 @@ import {
   Calendar,
   Crown,
   LinkIcon,
-  RefreshCw,
   CheckCircle,
   XCircle,
-  Clock,
   Globe,
-  Loader,
-  Zap,
 } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Form } from 'react-router';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 
 // 설정 페이지 데이터 타입
 interface SettingsPageData {
@@ -74,9 +66,6 @@ interface SettingsPageData {
     company: string;
     position: string;
     createdAt: string;
-  };
-  notificationSettings: {
-    emailNotifications: boolean;
   };
   calendarSettings?: {
     googleCalendarSync: boolean;
@@ -93,17 +82,33 @@ interface SettingsPageData {
   } | null;
 }
 
-export function meta(): any {
+// 🌍 다국어 메타 정보 (대시보드 페이지와 동일한 패턴)
+export function meta({ data }: Route.MetaArgs) {
+  const meta = data?.meta;
+
+  if (!meta) {
+    // 기본값 fallback
+    return [
+      { title: '설정 - SureCRM' },
+      {
+        name: 'description',
+        content: '계정 및 앱 환경설정 관리',
+      },
+    ];
+  }
+
   return [
-    { title: '설정 | SureCRM' },
-    { name: 'description', content: '계정 및 앱 환경설정 관리' },
+    { title: meta.title + ' - SureCRM' },
+    { name: 'description', content: meta.description },
   ];
 }
 
 // 설정 페이지 로더 - 모든 설정 데이터를 실제 데이터베이스에서 로딩
 export async function loader({
   request,
-}: Route.LoaderArgs): Promise<SettingsPageData> {
+}: Route.LoaderArgs): Promise<
+  SettingsPageData & { meta: { title: string; description: string } }
+> {
   console.log('설정 페이지 로드 시작');
 
   try {
@@ -113,31 +118,40 @@ export async function loader({
     );
     const { user } = await requireActiveSubscription(request);
 
+    // 🌍 서버에서 다국어 번역 로드
+    const { createServerTranslator } = await import(
+      '~/lib/i18n/language-manager.server'
+    );
+    const { t } = await createServerTranslator(request, 'settings');
+
     console.log('인증 성공:', user.email);
 
     // 모든 설정 데이터를 병렬로 로딩 (구글 캘린더 설정 포함)
-    const [userProfileData, notificationSettingsData, googleCalendarSettings] =
-      await Promise.all([
-        getUserProfile(user.id),
-        getNotificationSettings(user.id),
-        // 구글 캘린더 설정 조회
-        (async () => {
-          try {
-            const { GoogleCalendarService } = await import(
-              '~/features/calendar/lib/google-calendar-service.server'
-            );
-            const googleService = new GoogleCalendarService();
-            return await googleService.getCalendarSettings(user.id);
-          } catch (error) {
-            console.error('구글 캘린더 설정 조회 실패:', error);
-            return null;
-          }
-        })(),
-      ]);
+    const [userProfileData, googleCalendarSettings] = await Promise.all([
+      getUserProfile(user.id),
+      // 구글 캘린더 설정 조회
+      (async () => {
+        try {
+          const { GoogleCalendarService } = await import(
+            '~/features/calendar/lib/google-calendar-service.server'
+          );
+          const googleService = new GoogleCalendarService();
+          return await googleService.getCalendarSettings(user.id);
+        } catch (error) {
+          console.error('구글 캘린더 설정 조회 실패:', error);
+          return null;
+        }
+      })(),
+    ]);
 
     console.log('설정 페이지 데이터 로딩 완료');
 
     return {
+      // 🌍 meta용 번역 데이터
+      meta: {
+        title: t('meta.title', '설정'),
+        description: t('meta.description', '계정 및 앱 환경설정 관리'),
+      },
       userProfile: {
         id: user.id,
         name: userProfileData?.name || user.fullName || '사용자',
@@ -146,10 +160,6 @@ export async function loader({
         company: userProfileData?.company || 'SureCRM',
         position: userProfileData?.position || '보험설계사',
         createdAt: new Date().toISOString(),
-      },
-      notificationSettings: {
-        emailNotifications:
-          notificationSettingsData?.emailNotifications ?? true,
       },
       // 🌐 구글 캘린더 설정 (실제 DB 데이터)
       calendarSettings: {
@@ -173,6 +183,11 @@ export async function loader({
 
     // 에러 시 기본값 반환
     return {
+      // 🌍 에러 시에도 안전한 기본값
+      meta: {
+        title: '설정',
+        description: '계정 및 앱 환경설정 관리',
+      },
       userProfile: {
         id: 'error',
         name: '오류',
@@ -181,9 +196,6 @@ export async function loader({
         company: '',
         position: '',
         createdAt: new Date().toISOString(),
-      },
-      notificationSettings: {
-        emailNotifications: false,
       },
       calendarSettings: {
         googleCalendarSync: false,
@@ -204,7 +216,7 @@ export async function action({ request }: Route.ActionArgs) {
     const user = await getCurrentUser(request);
     if (!user) {
       return data(
-        { success: false, error: '로그인이 필요합니다.' },
+        { success: false, error: 'settings:messages.loginRequired' },
         { status: 401 }
       );
     }
@@ -217,108 +229,24 @@ export async function action({ request }: Route.ActionArgs) {
         const name = formData.get('name') as string;
         const phone = formData.get('phone') as string;
         const company = formData.get('company') as string;
+        const position = formData.get('position') as string;
 
         const success = await updateUserProfile(user.id, {
           name,
           phone,
           company,
+          position,
         });
 
         if (success) {
           return data({
             success: true,
-            message: '프로필이 성공적으로 저장되었습니다.',
-          });
-        } else {
-          return data({ success: false, error: '프로필 저장에 실패했습니다.' });
-        }
-      }
-
-      case 'updateNotifications': {
-        const emailNotifications =
-          formData.get('emailNotifications') === 'true';
-
-        const success = await upsertNotificationSettings(user.id, {
-          emailNotifications,
-        });
-
-        if (success) {
-          return data({
-            success: true,
-            message: '알림 설정이 성공적으로 저장되었습니다.',
+            message: 'settings:messages.profileSaveSuccess',
           });
         } else {
           return data({
             success: false,
-            error: '알림 설정 저장에 실패했습니다.',
-          });
-        }
-      }
-
-      case 'updateCalendarSettings': {
-        // 🌐 구글 캘린더 설정 업데이트 (실제 DB 연동)
-        const googleCalendarSync =
-          formData.get('googleCalendarSync') === 'true';
-        const syncDirection = formData.get('syncDirection') as
-          | 'read_only'
-          | 'write_only'
-          | 'bidirectional';
-        const conflictResolution = formData.get('conflictResolution') as
-          | 'google_wins'
-          | 'local_wins'
-          | 'manual';
-        const autoSyncInterval =
-          parseInt(formData.get('autoSyncInterval') as string) || 15;
-
-        try {
-          // 기존 설정 조회
-          const { GoogleCalendarService } = await import(
-            '~/features/calendar/lib/google-calendar-service.server'
-          );
-          const googleService = new GoogleCalendarService();
-          const existingSettings = await googleService.getCalendarSettings(
-            user.id
-          );
-
-          if (!existingSettings) {
-            return data({
-              success: false,
-              message:
-                '구글 캘린더가 연동되지 않았습니다. 먼저 계정을 연결해주세요.',
-            });
-          }
-
-          // 캘린더 설정 업데이트
-          const { db } = await import('~/lib/core/db.server');
-          const { appCalendarSettings } = await import(
-            '~/features/calendar/lib/schema'
-          );
-          const { eq } = await import('drizzle-orm');
-
-          await db
-            .update(appCalendarSettings)
-            .set({
-              googleCalendarSync,
-              // syncDirection, conflictResolution, autoSyncInterval은
-              // 현재 스키마에 없으므로 추후 확장 시 추가
-              updatedAt: new Date(),
-            })
-            .where(eq(appCalendarSettings.agentId, user.id));
-
-          // 동기화 비활성화 시 관련 데이터 정리
-          if (!googleCalendarSync) {
-            console.log('구글 캘린더 동기화 비활성화:', user.id);
-          }
-
-          return data({
-            success: true,
-            message: '캘린더 설정이 성공적으로 저장되었습니다.',
-          });
-        } catch (error) {
-          console.error('❌ 캘린더 설정 업데이트 실패:', error);
-          return data({
-            success: false,
-            message: '설정 저장 중 오류가 발생했습니다.',
+            error: 'settings:messages.profileSaveError',
           });
         }
       }
@@ -347,78 +275,14 @@ export async function action({ request }: Route.ActionArgs) {
           return data({
             success,
             message: success
-              ? '구글 캘린더 연동이 해제되었습니다.'
-              : '연동 해제 중 오류가 발생했습니다.',
+              ? 'settings:messages.calendarDisconnectSuccess'
+              : 'settings:messages.calendarDisconnectError',
           });
         } catch (error) {
           console.error('❌ 구글 캘린더 연동 해제 실패:', error);
           return data({
             success: false,
-            message: '연동 해제 중 오류가 발생했습니다.',
-          });
-        }
-      }
-
-      case 'syncGoogleCalendar': {
-        // 🔄 구글 캘린더 수동 동기화
-        try {
-          const { GoogleCalendarService } = await import(
-            '~/features/calendar/lib/google-calendar-service.server'
-          );
-          const googleService = new GoogleCalendarService();
-          const success = await googleService.performFullSync(user.id);
-
-          return data({
-            success,
-            message: success
-              ? '구글 캘린더 동기화가 완료되었습니다.'
-              : '동기화 중 오류가 발생했습니다.',
-          });
-        } catch (error) {
-          console.error('❌ 수동 동기화 실패:', error);
-          return data({
-            success: false,
-            message: '동기화 중 오류가 발생했습니다.',
-          });
-        }
-      }
-
-      case 'toggleRealtimeSync': {
-        // 🔔 실시간 동기화 웹훅 설정/해제
-        const enableRealtime = formData.get('enableRealtime') === 'true';
-
-        try {
-          const { GoogleCalendarService } = await import(
-            '~/features/calendar/lib/google-calendar-service.server'
-          );
-          const googleService = new GoogleCalendarService();
-
-          if (enableRealtime) {
-            // 웹훅 채널 생성
-            const success = await googleService.createWebhookChannel(user.id);
-
-            return data({
-              success,
-              message: success
-                ? '실시간 동기화가 활성화되었습니다. 구글 캘린더 변경사항이 즉시 반영됩니다.'
-                : '실시간 동기화 설정 중 오류가 발생했습니다.',
-            });
-          } else {
-            // 웹훅 채널 삭제
-            const success = await googleService.deleteWebhookChannel(user.id);
-
-            return data({
-              success,
-              message: success
-                ? '실시간 동기화가 비활성화되었습니다.'
-                : '실시간 동기화 해제 중 오류가 발생했습니다.',
-            });
-          }
-        } catch (error) {
-          console.error('❌ 실시간 동기화 토글 실패:', error);
-          return data({
-            success: false,
-            message: '실시간 동기화 설정 중 오류가 발생했습니다.',
+            message: 'settings:messages.calendarDisconnectError',
           });
         }
       }
@@ -431,28 +295,28 @@ export async function action({ request }: Route.ActionArgs) {
         if (!currentPassword || !newPassword || !confirmPassword) {
           return data({
             success: false,
-            error: '모든 비밀번호 필드를 입력해주세요.',
+            error: 'settings:messages.passwordRequired',
           });
         }
 
         if (newPassword !== confirmPassword) {
           return data({
             success: false,
-            error: '새 비밀번호가 일치하지 않습니다.',
+            error: 'settings:messages.passwordMismatch',
           });
         }
 
         if (newPassword.length < 6) {
           return data({
             success: false,
-            error: '새 비밀번호는 최소 6자 이상이어야 합니다.',
+            error: 'settings:messages.passwordTooShort',
           });
         }
 
         if (currentPassword === newPassword) {
           return data({
             success: false,
-            error: '새 비밀번호는 현재 비밀번호와 다르게 설정해야 합니다.',
+            error: 'settings:messages.passwordSame',
           });
         }
 
@@ -468,7 +332,7 @@ export async function action({ request }: Route.ActionArgs) {
             console.error('현재 비밀번호 인증 실패:', authError);
             return data({
               success: false,
-              error: '현재 비밀번호가 올바르지 않습니다.',
+              error: 'settings:messages.passwordIncorrect',
             });
           }
 
@@ -481,20 +345,19 @@ export async function action({ request }: Route.ActionArgs) {
             console.error('비밀번호 변경 오류:', updateError);
             return data({
               success: false,
-              error: '비밀번호 변경에 실패했습니다.',
+              error: 'settings:messages.passwordChangeError',
             });
           }
 
           return data({
             success: true,
-            message:
-              '비밀번호가 성공적으로 변경되었습니다. 보안을 위해 다시 로그인해주세요.',
+            message: 'settings:messages.passwordChangeSuccess',
           });
         } catch (error) {
           console.error('비밀번호 변경 예외:', error);
           return data({
             success: false,
-            error: '비밀번호 변경 중 오류가 발생했습니다.',
+            error: 'settings:messages.passwordChangeError',
           });
         }
       }
@@ -512,8 +375,9 @@ export default function SettingsPage({
   loaderData,
   actionData,
 }: Route.ComponentProps) {
-  const { userProfile, notificationSettings, calendarSettings, user } =
-    loaderData;
+  // 🌍 다국어 번역 훅 적용
+  const { t } = useHydrationSafeTranslation('settings');
+  const { userProfile, calendarSettings, user } = loaderData;
 
   // 프로필 정보 state
   const [profileData, setProfileData] = useState({
@@ -524,38 +388,11 @@ export default function SettingsPage({
     position: userProfile.position,
   });
 
-  const [emailNotifications, setEmailNotifications] = useState(
-    notificationSettings.emailNotifications
-  );
-
-  // 🌐 구글 캘린더 설정 state
-  const [calendarData, setCalendarData] = useState({
-    googleCalendarSync: calendarSettings?.googleCalendarSync || false,
-    syncDirection: calendarSettings?.syncDirection || 'bidirectional',
-    conflictResolution: calendarSettings?.conflictResolution || 'manual',
-    autoSyncInterval: calendarSettings?.autoSyncInterval || 15,
-  });
-
-  // 동기화 상태 추적
-  const [isSyncing, setIsSyncing] = useState(false);
-
-  // 🔔 실시간 동기화 상태 추적
-  const [realtimeSync, setRealtimeSync] = useState(false);
-  const [isTogglingRealtime, setIsTogglingRealtime] = useState(false);
-
   // 🕐 시간 포맷팅 함수 (suppressHydrationWarning 사용)
   const formatDateTime = (dateString?: string) => {
     if (!dateString) return '정보 없음';
     return new Date(dateString).toLocaleString('ko-KR');
   };
-
-  // 액션 완료 후 상태 리셋
-  useEffect(() => {
-    if (actionData?.success !== undefined) {
-      setIsSyncing(false);
-      setIsTogglingRealtime(false);
-    }
-  }, [actionData]);
 
   // 비밀번호 변경 state
   const [passwordData, setPasswordData] = useState({
@@ -581,31 +418,9 @@ export default function SettingsPage({
   };
 
   // 🌐 캘린더 설정 변경 핸들러
-  const handleCalendarChange = (
-    field: string,
-    value: string | boolean | number
-  ) => {
-    setCalendarData(prev => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
-
-  // 계정 생성일 포맷팅
-  const formatJoinDate = (dateString: string) => {
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('ko-KR', {
-        year: 'numeric',
-        month: 'long',
-      });
-    } catch {
-      return '2024년 12월';
-    }
-  };
 
   return (
-    <MainLayout title="설정">
+    <MainLayout title={t('title', '설정')}>
       <div className="space-y-4 sm:space-y-6 px-2 sm:px-0">
         {/* 성공/오류 메시지 - 더 세련된 디자인 */}
         {actionData && (
@@ -631,8 +446,14 @@ export default function SettingsPage({
               <div className="flex-1">
                 <p className="font-medium text-sm sm:text-base">
                   {actionData.success
-                    ? (actionData as any).message
-                    : (actionData as any).error}
+                    ? t(
+                        String(actionData.message) || 'Success',
+                        String(actionData.message) || 'Success'
+                      )
+                    : t(
+                        String(actionData.error) || 'Error',
+                        String(actionData.error) || 'Error'
+                      )}
                 </p>
               </div>
             </div>
@@ -650,11 +471,14 @@ export default function SettingsPage({
                   </div>
                   <div>
                     <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-                      설정
+                      {t('header.title', '설정')}
                     </h1>
                     <p className="text-sm sm:text-base text-muted-foreground">
-                      {user ? `${user.fullName || user.email}님의 ` : ''}계정
-                      정보와 환경설정을 관리하세요
+                      {user ? `${user.fullName || user.email}` : ''}
+                      {t(
+                        'header.subtitle',
+                        '님의 계정 정보와 환경설정을 관리하세요'
+                      )}
                     </p>
                   </div>
                 </div>
@@ -662,7 +486,7 @@ export default function SettingsPage({
               <div className="flex items-center gap-3 justify-start sm:justify-end">
                 <Badge variant="outline" className="px-3 sm:px-4 py-2">
                   <Crown className="h-3 w-3 mr-2" />
-                  MVP 버전
+                  {t('header.mvpBadge', 'MVP 버전')}
                 </Badge>
               </div>
             </div>
@@ -678,7 +502,7 @@ export default function SettingsPage({
                 <div className="p-2 bg-muted rounded-lg">
                   <User className="h-4 w-4 sm:h-5 sm:w-5 text-foreground" />
                 </div>
-                프로필 정보
+                {t('profile.title', '프로필 정보')}
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4 sm:p-6 pt-0 space-y-5 sm:space-y-6">
@@ -691,7 +515,7 @@ export default function SettingsPage({
                       htmlFor="name"
                       className="text-sm font-medium text-foreground/80"
                     >
-                      이름
+                      {t('profile.name', '이름')}
                     </Label>
                     <div className="relative">
                       <Input
@@ -701,7 +525,10 @@ export default function SettingsPage({
                         onChange={e =>
                           handleProfileChange('name', e.target.value)
                         }
-                        placeholder="이름을 입력하세요"
+                        placeholder={t(
+                          'profile.namePlaceholder',
+                          '이름을 입력하세요'
+                        )}
                         className="bg-background border min-h-[44px]"
                       />
                     </div>
@@ -711,20 +538,86 @@ export default function SettingsPage({
                       htmlFor="position"
                       className="text-sm font-medium text-foreground/80"
                     >
-                      직책
+                      {t('profile.position', '직책')}
                     </Label>
-                    <div className="relative">
-                      <Input
-                        id="position"
-                        value={profileData.position}
-                        placeholder="직책"
-                        className="bg-muted/50 border-white/10 text-muted-foreground cursor-not-allowed min-h-[44px]"
-                        readOnly
-                      />
-                      <Badge className="absolute right-2 top-2 text-xs bg-muted text-muted-foreground">
-                        읽기 전용
-                      </Badge>
-                    </div>
+                    <Select
+                      name="position"
+                      value={profileData.position}
+                      onValueChange={value =>
+                        handleProfileChange('position', value)
+                      }
+                    >
+                      <SelectTrigger className="min-h-[44px]">
+                        <SelectValue
+                          placeholder={t(
+                            'profile.positionPlaceholder',
+                            '직책을 선택하세요'
+                          )}
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem
+                          value={t(
+                            'profile.positions.insurance_agent',
+                            '보험설계사'
+                          )}
+                        >
+                          {t('profile.positions.insurance_agent', '보험설계사')}
+                        </SelectItem>
+                        <SelectItem
+                          value={t(
+                            'profile.positions.sales_manager',
+                            '영업관리자'
+                          )}
+                        >
+                          {t('profile.positions.sales_manager', '영업관리자')}
+                        </SelectItem>
+                        <SelectItem
+                          value={t('profile.positions.team_leader', '팀장')}
+                        >
+                          {t('profile.positions.team_leader', '팀장')}
+                        </SelectItem>
+                        <SelectItem
+                          value={t(
+                            'profile.positions.branch_manager',
+                            '지점장'
+                          )}
+                        >
+                          {t('profile.positions.branch_manager', '지점장')}
+                        </SelectItem>
+                        <SelectItem
+                          value={t(
+                            'profile.positions.regional_manager',
+                            '지역관리자'
+                          )}
+                        >
+                          {t(
+                            'profile.positions.regional_manager',
+                            '지역관리자'
+                          )}
+                        </SelectItem>
+                        <SelectItem
+                          value={t('profile.positions.director', '이사')}
+                        >
+                          {t('profile.positions.director', '이사')}
+                        </SelectItem>
+                        <SelectItem
+                          value={t('profile.positions.consultant', '컨설턴트')}
+                        >
+                          {t('profile.positions.consultant', '컨설턴트')}
+                        </SelectItem>
+                        <SelectItem
+                          value={t('profile.positions.agent', '상담원')}
+                        >
+                          {t('profile.positions.agent', '상담원')}
+                        </SelectItem>
+                        <SelectItem
+                          value={t('profile.positions.other', '기타')}
+                        >
+                          {t('profile.positions.other', '기타')}
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 
@@ -734,20 +627,20 @@ export default function SettingsPage({
                     className="flex items-center gap-2 text-sm font-medium text-foreground/80"
                   >
                     <Mail className="h-4 w-4" />
-                    이메일
+                    {t('profile.email', '이메일')}
                   </Label>
                   <div className="relative">
                     <Input
                       id="email"
                       type="email"
                       value={profileData.email}
-                      placeholder="이메일"
+                      placeholder={t('profile.email', '이메일')}
                       className="bg-muted/50 border-white/10 text-muted-foreground cursor-not-allowed pl-10 min-h-[44px]"
                       readOnly
                     />
                     <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Badge className="absolute right-2 top-2 text-xs bg-muted text-muted-foreground">
-                      읽기 전용
+                      {t('profile.readOnly', '읽기 전용')}
                     </Badge>
                   </div>
                 </div>
@@ -758,7 +651,7 @@ export default function SettingsPage({
                     className="flex items-center gap-2 text-sm font-medium text-foreground/80"
                   >
                     <Phone className="h-4 w-4 text-foreground" />
-                    전화번호
+                    {t('profile.phone', '전화번호')}
                   </Label>
                   <div className="relative">
                     <Input
@@ -768,7 +661,10 @@ export default function SettingsPage({
                       onChange={e =>
                         handleProfileChange('phone', e.target.value)
                       }
-                      placeholder="전화번호를 입력하세요"
+                      placeholder={t(
+                        'profile.phonePlaceholder',
+                        '전화번호를 입력하세요'
+                      )}
                       className="bg-background border pl-10 min-h-[44px]"
                     />
                     <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -781,7 +677,7 @@ export default function SettingsPage({
                     className="flex items-center gap-2 text-sm font-medium text-foreground/80"
                   >
                     <Building className="h-4 w-4 text-foreground" />
-                    회사
+                    {t('profile.company', '회사')}
                   </Label>
                   <div className="relative">
                     <Input
@@ -791,7 +687,10 @@ export default function SettingsPage({
                       onChange={e =>
                         handleProfileChange('company', e.target.value)
                       }
-                      placeholder="회사명을 입력하세요"
+                      placeholder={t(
+                        'profile.companyPlaceholder',
+                        '회사명을 입력하세요'
+                      )}
                       className="bg-background border pl-10 min-h-[44px]"
                     />
                     <Building className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -800,7 +699,7 @@ export default function SettingsPage({
 
                 <Button type="submit" className="w-full min-h-[44px]">
                   <Save className="h-4 w-4 mr-2" />
-                  프로필 저장
+                  {t('profile.save', '프로필 저장')}
                 </Button>
               </Form>
             </CardContent>
@@ -813,7 +712,7 @@ export default function SettingsPage({
                 <div className="p-2 bg-muted rounded-lg">
                   <Shield className="h-4 w-4 sm:h-5 sm:w-5 text-foreground" />
                 </div>
-                보안 설정
+                {t('security.title', '보안 설정')}
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4 sm:p-6 pt-0 space-y-5 sm:space-y-6">
@@ -823,7 +722,7 @@ export default function SettingsPage({
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label className="text-sm font-medium text-foreground">
-                      현재 비밀번호
+                      {t('security.currentPassword', '현재 비밀번호')}
                     </Label>
                     <Input
                       type="password"
@@ -832,14 +731,17 @@ export default function SettingsPage({
                       onChange={e =>
                         handlePasswordChange('currentPassword', e.target.value)
                       }
-                      placeholder="현재 비밀번호를 입력하세요"
+                      placeholder={t(
+                        'security.currentPasswordPlaceholder',
+                        '현재 비밀번호를 입력하세요'
+                      )}
                       className="bg-background border min-h-[44px]"
                     />
                   </div>
 
                   <div className="space-y-2">
                     <Label className="text-sm font-medium text-foreground">
-                      새 비밀번호
+                      {t('security.newPassword', '새 비밀번호')}
                     </Label>
                     <Input
                       type="password"
@@ -848,14 +750,17 @@ export default function SettingsPage({
                       onChange={e =>
                         handlePasswordChange('newPassword', e.target.value)
                       }
-                      placeholder="새 비밀번호를 입력하세요 (6자 이상)"
+                      placeholder={t(
+                        'security.newPasswordPlaceholder',
+                        '새 비밀번호를 입력하세요 (6자 이상)'
+                      )}
                       className="bg-background border min-h-[44px]"
                     />
                   </div>
 
                   <div className="space-y-2">
                     <Label className="text-sm font-medium text-foreground">
-                      새 비밀번호 확인
+                      {t('security.confirmPassword', '새 비밀번호 확인')}
                     </Label>
                     <Input
                       type="password"
@@ -864,7 +769,10 @@ export default function SettingsPage({
                       onChange={e =>
                         handlePasswordChange('confirmPassword', e.target.value)
                       }
-                      placeholder="새 비밀번호를 다시 입력하세요"
+                      placeholder={t(
+                        'security.confirmPasswordPlaceholder',
+                        '새 비밀번호를 다시 입력하세요'
+                      )}
                       className="bg-background border min-h-[44px]"
                     />
                   </div>
@@ -876,7 +784,7 @@ export default function SettingsPage({
                   className="w-full min-h-[44px]"
                 >
                   <Shield className="h-4 w-4 mr-2" />
-                  비밀번호 변경
+                  {t('security.changePassword', '비밀번호 변경')}
                 </Button>
               </Form>
 
@@ -886,12 +794,30 @@ export default function SettingsPage({
                   <Shield className="h-4 w-4 text-foreground mt-0.5" />
                   <div className="space-y-1">
                     <p className="text-sm font-medium text-foreground">
-                      보안 권장사항
+                      {t('security.guide.title', '보안 권장사항')}
                     </p>
                     <ul className="text-xs text-muted-foreground space-y-1">
-                      <li>• 비밀번호는 6자 이상으로 설정하세요</li>
-                      <li>• 정기적으로 비밀번호를 변경하세요</li>
-                      <li>• 다른 서비스와 다른 비밀번호를 사용하세요</li>
+                      <li>
+                        •{' '}
+                        {t(
+                          'security.guide.items.0',
+                          '비밀번호는 6자 이상으로 설정하세요'
+                        )}
+                      </li>
+                      <li>
+                        •{' '}
+                        {t(
+                          'security.guide.items.1',
+                          '정기적으로 비밀번호를 변경하세요'
+                        )}
+                      </li>
+                      <li>
+                        •{' '}
+                        {t(
+                          'security.guide.items.2',
+                          '다른 서비스와 다른 비밀번호를 사용하세요'
+                        )}
+                      </li>
                     </ul>
                   </div>
                 </div>
@@ -900,77 +826,8 @@ export default function SettingsPage({
           </Card>
         </div>
 
-        {/* 🎯 모바일 최적화: 🌐 연동 설정 - 알림 및 구글 캘린더 */}
+        {/* 🎯 모바일 최적화: 🌐 구글 캘린더 연동 및 설정 가이드 */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
-          {/* 🎯 모바일 최적화: 알림 설정 */}
-          <Card className="border bg-card">
-            <CardHeader className="p-4 sm:p-6 pb-3 sm:pb-4">
-              <CardTitle className="flex items-center gap-3 text-base sm:text-lg font-semibold">
-                <div className="p-2 bg-muted rounded-lg">
-                  <Bell className="h-4 w-4 sm:h-5 sm:w-5 text-foreground" />
-                </div>
-                알림 설정
-              </CardTitle>
-              <CardDescription className="text-sm">
-                이메일 및 시스템 알림 설정을 관리하세요
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="p-4 sm:p-6 pt-0 space-y-5 sm:space-y-6">
-              <Form method="post" className="space-y-4 sm:space-y-5">
-                <input
-                  type="hidden"
-                  name="actionType"
-                  value="updateNotifications"
-                />
-
-                <div className="space-y-4">
-                  <div className="flex items-start justify-between min-h-[44px]">
-                    <div className="space-y-1 flex-1 mr-4">
-                      <Label
-                        htmlFor="emailNotifications"
-                        className="text-sm font-medium"
-                      >
-                        이메일 알림
-                      </Label>
-                      <p className="text-xs text-muted-foreground">
-                        미팅 일정, 수수료 정보 등의 알림을 이메일로 받습니다
-                      </p>
-                    </div>
-                    <Switch
-                      id="emailNotifications"
-                      name="emailNotifications"
-                      checked={emailNotifications}
-                      onCheckedChange={setEmailNotifications}
-                      className="flex-shrink-0 mt-1"
-                    />
-                  </div>
-                </div>
-
-                <Button type="submit" className="w-full min-h-[44px]">
-                  <Save className="h-4 w-4 mr-2" />
-                  알림 설정 저장
-                </Button>
-              </Form>
-
-              {/* 알림 가이드 */}
-              <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-muted/50 border rounded-lg">
-                <div className="flex items-start gap-3">
-                  <Bell className="h-4 w-4 text-foreground mt-0.5" />
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium text-foreground">
-                      알림 정보
-                    </p>
-                    <ul className="text-xs text-muted-foreground space-y-1">
-                      <li>• 중요한 일정과 업무 소식을 놓치지 마세요</li>
-                      <li>• 언제든지 알림 설정을 변경할 수 있습니다</li>
-                      <li>• 스팸함도 확인해 주세요</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
           {/* 🎯 모바일 최적화: 🌐 구글 캘린더 연동 설정 */}
           <Card className="border bg-card">
             <CardHeader className="p-4 sm:p-6 pb-3 sm:pb-4">
@@ -978,10 +835,13 @@ export default function SettingsPage({
                 <div className="p-2 bg-muted rounded-lg">
                   <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-foreground" />
                 </div>
-                구글 캘린더 연동
+                {t('calendar.title', '구글 캘린더 연동')}
               </CardTitle>
               <CardDescription className="text-sm">
-                구글 캘린더와 SureCRM을 연동하여 일정을 통합 관리하세요
+                {t(
+                  'calendar.description',
+                  '구글 캘린더와 SureCRM을 연동하여 일정을 통합 관리하세요'
+                )}
               </CardDescription>
             </CardHeader>
             <CardContent className="p-4 sm:p-6 pt-0 space-y-5 sm:space-y-6">
@@ -1008,21 +868,34 @@ export default function SettingsPage({
                   <div>
                     <p className="text-sm font-medium">
                       {calendarSettings?.syncStatus === 'connected'
-                        ? '연동됨'
+                        ? t('calendar.status.connected', '연동됨')
                         : calendarSettings?.syncStatus === 'error'
-                          ? '연동 오류'
-                          : '연동 안됨'}
+                          ? t('calendar.status.error', '연동 오류')
+                          : t('calendar.status.disconnected', '연동 안됨')}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {calendarSettings?.syncStatus === 'connected' ? (
                         <span suppressHydrationWarning>
-                          마지막 동기화:{' '}
-                          {formatDateTime(calendarSettings.lastSyncAt)}
+                          {t(
+                            'calendar.statusDescription.connected',
+                            '마지막 동기화: {{lastSync}}',
+                            {
+                              lastSync: formatDateTime(
+                                calendarSettings.lastSyncAt
+                              ),
+                            }
+                          )}
                         </span>
                       ) : calendarSettings?.syncStatus === 'error' ? (
-                        '연동에 문제가 발생했습니다'
+                        t(
+                          'calendar.statusDescription.error',
+                          '연동에 문제가 발생했습니다'
+                        )
                       ) : (
-                        '구글 계정을 연결하여 캘린더를 동기화하세요'
+                        t(
+                          'calendar.statusDescription.disconnected',
+                          '구글 계정을 연결하여 캘린더를 동기화하세요'
+                        )
                       )}
                     </p>
                   </div>
@@ -1036,8 +909,8 @@ export default function SettingsPage({
                   className="text-xs"
                 >
                   {calendarSettings?.syncStatus === 'connected'
-                    ? '활성'
-                    : '비활성'}
+                    ? t('calendar.badge.active', '활성')
+                    : t('calendar.badge.inactive', '비활성')}
                 </Badge>
               </div>
 
@@ -1051,235 +924,12 @@ export default function SettingsPage({
                   />
                   <Button type="submit" className="w-full">
                     <LinkIcon className="h-4 w-4 mr-2" />
-                    구글 계정 연결
+                    {t('calendar.connect', '구글 계정 연결')}
                   </Button>
                 </Form>
               ) : (
                 <div className="space-y-4">
-                  {/* 연동 설정 */}
-                  <Form method="post" className="space-y-4">
-                    <input
-                      type="hidden"
-                      name="actionType"
-                      value="updateCalendarSettings"
-                    />
-
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-1">
-                        <Label
-                          htmlFor="googleCalendarSync"
-                          className="text-sm font-medium"
-                        >
-                          캘린더 동기화 활성화
-                        </Label>
-                        <p className="text-xs text-muted-foreground">
-                          SureCRM과 구글 캘린더 간 자동 동기화
-                        </p>
-                      </div>
-                      <Switch
-                        id="googleCalendarSync"
-                        name="googleCalendarSync"
-                        checked={calendarData.googleCalendarSync}
-                        onCheckedChange={checked =>
-                          handleCalendarChange('googleCalendarSync', checked)
-                        }
-                      />
-                    </div>
-
-                    {calendarData.googleCalendarSync && (
-                      <>
-                        <div className="space-y-3">
-                          <Label className="text-sm font-medium">
-                            동기화 방향
-                          </Label>
-                          <Select
-                            name="syncDirection"
-                            value={calendarData.syncDirection}
-                            onValueChange={value =>
-                              handleCalendarChange('syncDirection', value)
-                            }
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="동기화 방향 선택" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="read_only">
-                                <div className="flex items-center gap-2">
-                                  <span>📥</span>
-                                  <span>구글 → SureCRM (읽기 전용)</span>
-                                </div>
-                              </SelectItem>
-                              <SelectItem value="write_only">
-                                <div className="flex items-center gap-2">
-                                  <span>📤</span>
-                                  <span>SureCRM → 구글 (쓰기 전용)</span>
-                                </div>
-                              </SelectItem>
-                              <SelectItem value="bidirectional">
-                                <div className="flex items-center gap-2">
-                                  <span>🔄</span>
-                                  <span>양방향 동기화</span>
-                                </div>
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        <div className="space-y-3">
-                          <Label className="text-sm font-medium">
-                            충돌 해결 방식
-                          </Label>
-                          <RadioGroup
-                            name="conflictResolution"
-                            value={calendarData.conflictResolution}
-                            onValueChange={value =>
-                              handleCalendarChange('conflictResolution', value)
-                            }
-                          >
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem
-                                value="google_wins"
-                                id="google_wins"
-                              />
-                              <Label htmlFor="google_wins" className="text-sm">
-                                구글 캘린더 우선
-                              </Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem
-                                value="local_wins"
-                                id="local_wins"
-                              />
-                              <Label htmlFor="local_wins" className="text-sm">
-                                SureCRM 우선
-                              </Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="manual" id="manual" />
-                              <Label htmlFor="manual" className="text-sm">
-                                수동 선택
-                              </Label>
-                            </div>
-                          </RadioGroup>
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label
-                            htmlFor="autoSyncInterval"
-                            className="text-sm font-medium"
-                          >
-                            자동 동기화 간격 (분)
-                          </Label>
-                          <Select
-                            name="autoSyncInterval"
-                            value={calendarData.autoSyncInterval.toString()}
-                            onValueChange={value =>
-                              handleCalendarChange(
-                                'autoSyncInterval',
-                                parseInt(value)
-                              )
-                            }
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="5">5분</SelectItem>
-                              <SelectItem value="15">15분</SelectItem>
-                              <SelectItem value="30">30분</SelectItem>
-                              <SelectItem value="60">1시간</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </>
-                    )}
-
-                    <div className="flex gap-2">
-                      <Button type="submit" className="flex-1">
-                        <Save className="h-4 w-4 mr-2" />
-                        설정 저장
-                      </Button>
-                    </div>
-                  </Form>
-
-                  {/* 수동 동기화 버튼 */}
-                  <Form method="post" onSubmit={() => setIsSyncing(true)}>
-                    <input
-                      type="hidden"
-                      name="actionType"
-                      value="syncGoogleCalendar"
-                    />
-                    <Button
-                      type="submit"
-                      variant="outline"
-                      className="w-full gap-2"
-                      disabled={isSyncing}
-                    >
-                      <RefreshCw
-                        className={`h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`}
-                      />
-                      {isSyncing ? '동기화 중...' : '지금 동기화'}
-                    </Button>
-                  </Form>
-
-                  {/* 🔔 실시간 동기화 설정 */}
-                  <div className="p-4 bg-muted/50 border rounded-lg">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="space-y-1">
-                        <h4 className="text-sm font-medium flex items-center gap-2">
-                          <Bell className="h-4 w-4 text-foreground" />
-                          실시간 동기화
-                        </h4>
-                        <p className="text-xs text-muted-foreground">
-                          구글 캘린더 변경사항을 즉시 SureCRM에 반영
-                        </p>
-                      </div>
-                      <Form
-                        method="post"
-                        onSubmit={() => setIsTogglingRealtime(true)}
-                      >
-                        <input
-                          type="hidden"
-                          name="actionType"
-                          value="toggleRealtimeSync"
-                        />
-                        <input
-                          type="hidden"
-                          name="enableRealtime"
-                          value={realtimeSync ? 'false' : 'true'}
-                        />
-                        <Button
-                          type="submit"
-                          variant={realtimeSync ? 'default' : 'outline'}
-                          size="sm"
-                          disabled={isTogglingRealtime}
-                          className="gap-2"
-                        >
-                          {isTogglingRealtime ? (
-                            <RefreshCw className="h-3 w-3 animate-spin" />
-                          ) : (
-                            <Bell className="h-3 w-3" />
-                          )}
-                          {realtimeSync ? '비활성화' : '활성화'}
-                        </Button>
-                      </Form>
-                    </div>
-
-                    {realtimeSync ? (
-                      <div className="flex items-center gap-2 text-xs text-green-700">
-                        <CheckCircle className="h-3 w-3" />
-                        실시간 동기화 활성화됨
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <Clock className="h-3 w-3" />
-                        수동 동기화만 사용 중
-                      </div>
-                    )}
-                  </div>
-
                   {/* 연동 해제 */}
-                  <Separator />
                   <Form method="post">
                     <input
                       type="hidden"
@@ -1293,7 +943,7 @@ export default function SettingsPage({
                       className="w-full"
                     >
                       <XCircle className="h-4 w-4 mr-2" />
-                      구글 캘린더 연동 해제
+                      {t('calendar.disconnect', '구글 캘린더 연동 해제')}
                     </Button>
                   </Form>
                 </div>
@@ -1305,64 +955,32 @@ export default function SettingsPage({
                   <Calendar className="h-4 w-4 text-foreground mt-0.5" />
                   <div className="space-y-1">
                     <p className="text-sm font-medium text-foreground">
-                      캘린더 연동 안내
+                      {t('calendar.guide.title', '캘린더 연동 안내')}
                     </p>
                     <ul className="text-xs text-muted-foreground space-y-1">
-                      <li>• 구글 계정 권한이 필요합니다</li>
                       <li>
-                        • 양방향 동기화 시 데이터 충돌이 발생할 수 있습니다
+                        •{' '}
+                        {t(
+                          'calendar.guide.items.0',
+                          '구글 계정 권한이 필요합니다'
+                        )}
                       </li>
-                      <li>• 언제든지 연동을 해제할 수 있습니다</li>
+                      <li>
+                        •{' '}
+                        {t(
+                          'calendar.guide.items.1',
+                          '양방향 동기화 시 데이터 충돌이 발생할 수 있습니다'
+                        )}
+                      </li>
+                      <li>
+                        •{' '}
+                        {t(
+                          'calendar.guide.items.2',
+                          '언제든지 연동을 해제할 수 있습니다'
+                        )}
+                      </li>
                     </ul>
                   </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* 🎯 모바일 최적화: 계정 정보 및 시스템 설정 */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
-          {/* 🎯 모바일 최적화: 계정 정보 */}
-          <Card className="border bg-card">
-            <CardHeader className="p-4 sm:p-6 pb-3 sm:pb-4">
-              <CardTitle className="flex items-center gap-3 text-base sm:text-lg font-semibold">
-                <div className="p-2 bg-muted rounded-lg">
-                  <User className="h-4 w-4 sm:h-5 sm:w-5 text-foreground" />
-                </div>
-                계정 정보
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-4 sm:p-6 pt-0 space-y-4">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between py-2 border-b border-border/50 min-h-[44px]">
-                  <div className="flex items-center gap-2">
-                    <User className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm font-medium">사용자 ID</span>
-                  </div>
-                  <code className="text-xs sm:text-sm bg-muted px-2 py-1 rounded font-mono">
-                    {userProfile.id.slice(0, 8)}...
-                  </code>
-                </div>
-
-                <div className="flex items-center justify-between py-2 border-b border-border/50 min-h-[44px]">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm font-medium">가입일</span>
-                  </div>
-                  <span className="text-sm text-foreground">
-                    {formatJoinDate(userProfile.createdAt)}
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between py-2 min-h-[44px]">
-                  <div className="flex items-center gap-2">
-                    <Crown className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm font-medium">플랜</span>
-                  </div>
-                  <Badge variant="outline" className="text-xs">
-                    MVP 베타
-                  </Badge>
                 </div>
               </div>
             </CardContent>
@@ -1375,7 +993,7 @@ export default function SettingsPage({
                 <div className="p-2 bg-muted rounded-lg">
                   <SettingsIcon className="h-4 w-4 sm:h-5 sm:w-5 text-foreground" />
                 </div>
-                설정 가이드
+                {t('guide.title', '설정 가이드')}
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4 sm:p-6 pt-0 space-y-4">
@@ -1386,10 +1004,13 @@ export default function SettingsPage({
                   </div>
                   <div>
                     <p className="text-sm font-medium text-foreground">
-                      설정 저장
+                      {t('guide.save.title', '설정 저장')}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      모든 변경사항은 저장 버튼을 클릭하여 적용됩니다
+                      {t(
+                        'guide.save.description',
+                        '모든 변경사항은 저장 버튼을 클릭하여 적용됩니다'
+                      )}
                     </p>
                   </div>
                 </div>
@@ -1400,10 +1021,13 @@ export default function SettingsPage({
                   </div>
                   <div>
                     <p className="text-sm font-medium text-foreground">
-                      보안 관리
+                      {t('guide.security.title', '보안 관리')}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      정기적으로 비밀번호를 변경해 계정을 안전하게 유지하세요
+                      {t(
+                        'guide.security.description',
+                        '정기적으로 비밀번호를 변경해 계정을 안전하게 유지하세요'
+                      )}
                     </p>
                   </div>
                 </div>
@@ -1414,10 +1038,13 @@ export default function SettingsPage({
                   </div>
                   <div>
                     <p className="text-sm font-medium text-foreground">
-                      프로필 관리
+                      {t('guide.profile.title', '프로필 관리')}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      정확한 정보로 업데이트하여 팀과의 협업을 원활하게 하세요
+                      {t(
+                        'guide.profile.description',
+                        '정확한 정보로 업데이트하여 팀과의 협업을 원활하게 하세요'
+                      )}
                     </p>
                   </div>
                 </div>
@@ -1428,12 +1055,14 @@ export default function SettingsPage({
                 <div className="flex items-center gap-2 mb-1">
                   <Crown className="h-3 w-3 text-primary" />
                   <span className="text-xs font-medium text-primary">
-                    MVP 버전
+                    {t('guide.mvp.title', 'MVP 버전')}
                   </span>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  현재 베타 버전에서는 기본 설정만 제공됩니다. 추가 기능은 곧
-                  업데이트될 예정입니다.
+                  {t(
+                    'guide.mvp.description',
+                    '현재 베타 버전에서는 기본 설정만 제공됩니다. 추가 기능은 곧 업데이트될 예정입니다.'
+                  )}
                 </p>
               </div>
             </CardContent>
