@@ -64,13 +64,33 @@ export function LanguageSelector({
       if (success) {
         setCurrentLanguage(language);
 
-        // 페이지 새로고침으로 서버-클라이언트 완전 동기화
-        // (hydration 에러 방지를 위해)
-        window.location.reload();
+        // 쿠키가 실제로 설정되었는지 확인한 후 새로고침
+        // (서버-클라이언트 동기화 보장을 위해)
+        let attempts = 0;
+        const maxAttempts = 20; // 최대 1초 대기 (50ms * 20)
+        
+        const checkCookieAndReload = () => {
+          attempts++;
+          const cookies = document.cookie.split(';');
+          const languageCookie = cookies.find(cookie =>
+            cookie.trim().startsWith('preferred-language=')
+          );
+          
+          if (languageCookie && languageCookie.includes(language)) {
+            window.location.reload();
+          } else if (attempts < maxAttempts) {
+            // 쿠키가 아직 설정되지 않았다면 다시 확인
+            setTimeout(checkCookieAndReload, 50);
+          } else {
+            // 타임아웃 시 강제 새로고침
+            window.location.reload();
+          }
+        };
+
+        checkCookieAndReload();
       }
     } catch (error) {
       console.error('언어 변경 실패:', error);
-    } finally {
       setIsChanging(false);
     }
   };

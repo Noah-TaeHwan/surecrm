@@ -45,15 +45,26 @@ export function detectUserLanguageFromRequest(
 }
 
 /**
- * 🍪 쿠키에서 값 추출 (React Router용)
+ * 🍪 쿠키에서 값 추출 (React Router용) - 강화된 파싱 로직
  */
 function getCookieValue(cookieHeader: string, name: string): string | null {
-  const cookies = cookieHeader.split(';');
-  for (const cookie of cookies) {
-    const [key, value] = cookie.trim().split('=');
-    if (key === name) {
-      return decodeURIComponent(value);
+  try {
+    const cookies = cookieHeader.split(';');
+    for (const cookie of cookies) {
+      const trimmedCookie = cookie.trim();
+      const equalIndex = trimmedCookie.indexOf('=');
+      
+      if (equalIndex > 0) {
+        const key = trimmedCookie.substring(0, equalIndex);
+        const value = trimmedCookie.substring(equalIndex + 1);
+        
+        if (key === name && value) {
+          return decodeURIComponent(value);
+        }
+      }
     }
+  } catch (error) {
+    console.error(`쿠키 파싱 오류 (${name}):`, error);
   }
   return null;
 }
