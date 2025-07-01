@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from '~/common/components/ui/dropdown-menu';
 import { Badge } from '~/common/components/ui/badge';
-import { Globe, Check, X } from 'lucide-react';
+import { Globe, Check } from 'lucide-react';
 import {
   changeLanguageClient,
   detectClientLanguage,
@@ -34,7 +34,6 @@ export function LanguageSelector({
   showLabel = true,
 }: LanguageSelectorProps) {
   const { t, i18n } = useHydrationSafeTranslation('common');
-  const { t: safeT } = useHydrationSafeTranslation();
   const [isHydrated, setIsHydrated] = useState(false);
   const [currentLanguage, setCurrentLanguage] =
     useState<SupportedLanguage>('ko');
@@ -62,32 +61,16 @@ export function LanguageSelector({
     try {
       const success = await changeLanguageClient(language);
       if (success) {
+        // 언어 상태를 즉시 업데이트
         setCurrentLanguage(language);
 
-        // 쿠키가 실제로 설정되었는지 확인한 후 새로고침
-        // (서버-클라이언트 동기화 보장을 위해)
-        let attempts = 0;
-        const maxAttempts = 20; // 최대 1초 대기 (50ms * 20)
-        
-        const checkCookieAndReload = () => {
-          attempts++;
-          const cookies = document.cookie.split(';');
-          const languageCookie = cookies.find(cookie =>
-            cookie.trim().startsWith('preferred-language=')
-          );
-          
-          if (languageCookie && languageCookie.includes(language)) {
-            window.location.reload();
-          } else if (attempts < maxAttempts) {
-            // 쿠키가 아직 설정되지 않았다면 다시 확인
-            setTimeout(checkCookieAndReload, 50);
-          } else {
-            // 타임아웃 시 강제 새로고침
-            window.location.reload();
-          }
-        };
-
-        checkCookieAndReload();
+        // i18next가 번역 리소스를 로드할 시간을 제공
+        // react-i18next는 자동으로 모든 useTranslation 훅을 업데이트함
+        setTimeout(() => {
+          setIsChanging(false);
+        }, 200); // UI 업데이트를 위한 충분한 시간 제공
+      } else {
+        setIsChanging(false);
       }
     } catch (error) {
       console.error('언어 변경 실패:', error);

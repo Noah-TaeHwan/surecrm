@@ -8,6 +8,9 @@ import {
 const LANGUAGE_COOKIE_NAME = 'preferred-language';
 const COOKIE_MAX_AGE = 365 * 24 * 60 * 60; // 1년
 
+// 🔄 전역 업데이트 함수들 추가
+let updateCallbacks: (() => void)[] = [];
+
 /**
  * 🍪 쿠키에서 언어 설정 조회
  */
@@ -85,19 +88,32 @@ export async function changeLanguageClient(
   language: SupportedLanguage
 ): Promise<boolean> {
   try {
-    // 1️⃣ i18next 언어 변경
-    await changeLanguage(language);
-
-    // 2️⃣ 쿠키에 저장 (서버와 동기화)
+    // 1️⃣ 쿠키에 저장 (서버와 동기화)
     setLanguageCookie(language);
 
-    // 3️⃣ localStorage에 저장 (브라우저 캐시)
+    // 2️⃣ localStorage에 저장 (브라우저 캐시)
     setLanguageToLocalStorage(language);
+
+    // 3️⃣ i18next 언어 변경 (이것이 자동으로 모든 컴포넌트를 업데이트함)
+    await changeLanguage(language);
 
     // 4️⃣ HTML 언어 속성 업데이트
     if (typeof document !== 'undefined') {
       document.documentElement.lang = language;
+      document.documentElement.dir = 'ltr'; // 모든 지원 언어가 ltr이므로
     }
+
+    // 5️⃣ 커스텀 이벤트 발생 (추가 컴포넌트 업데이트 트리거)
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('languageChanged', {
+          detail: { language },
+        })
+      );
+    }
+
+    // 6️⃣ 모든 등록된 컴포넌트 강제 업데이트
+    forceUpdateI18nComponents();
 
     return true;
   } catch (error) {
@@ -172,4 +188,29 @@ export function syncServerLanguage(serverLanguage: SupportedLanguage) {
       console.error('서버-클라이언트 언어 동기화 실패:', error);
     });
   }
+}
+
+/**
+ * 🔄 i18n 업데이트 콜백 등록
+ */
+export function registerI18nUpdateCallback(callback: () => void) {
+  updateCallbacks.push(callback);
+
+  // cleanup 함수 반환
+  return () => {
+    updateCallbacks = updateCallbacks.filter(cb => cb !== callback);
+  };
+}
+
+/**
+ * 🚀 모든 i18n 컴포넌트 강제 업데이트
+ */
+export function forceUpdateI18nComponents() {
+  updateCallbacks.forEach(callback => {
+    try {
+      callback();
+    } catch (error) {
+      console.error('i18n 업데이트 콜백 실행 실패:', error);
+    }
+  });
 }

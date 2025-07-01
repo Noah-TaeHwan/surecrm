@@ -105,6 +105,8 @@ i18n
     // 리액트 설정
     react: {
       useSuspense: false, // SSR 호환성을 위해 비활성화
+      bindI18n: 'languageChanged', // 언어 변경 시 리렌더링 트리거
+      bindI18nStore: 'added removed', // 리소스 추가/제거 시 리렌더링
     },
   });
 
