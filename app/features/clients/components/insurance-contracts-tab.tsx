@@ -62,13 +62,21 @@ import { useToast, ToastContainer } from '~/common/components/ui/toast';
 import { formatCurrency as formatCurrencyWithLocale } from '~/lib/utils/currency';
 import { cn } from '~/lib/utils';
 
-// 🆔 주민등록번호 유틸리티 import
+// 🆔 국제적 ID 유틸리티 import
 import {
   parseKoreanId,
   maskKoreanId,
   validateKoreanId,
   formatKoreanIdInput,
 } from '~/lib/utils/korean-id-utils';
+import {
+  validateInternationalId,
+  formatIdInput,
+  maskIdInput,
+  getIdConfigForLanguage,
+  type SupportedLanguage,
+  type InternationalIdResult,
+} from '~/lib/utils/international-id-utils';
 
 // 🌐 다국어 훅 import
 import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
@@ -1976,7 +1984,18 @@ function NewContractModal({
   onDownloadAttachment?: (attachmentId: string) => void;
 }) {
   // 🌐 다국어 훅 초기화
-  const { t } = useHydrationSafeTranslation('clients');
+  const { t, i18n } = useHydrationSafeTranslation('clients');
+
+  // 🌍 현재 언어에 따른 ID 시스템 설정
+  const currentLanguage = (
+    i18n.language?.startsWith('ko')
+      ? 'ko'
+      : i18n.language?.startsWith('ja')
+        ? 'ja'
+        : 'en'
+  ) as SupportedLanguage;
+  const contractorIdConfig = getIdConfigForLanguage(currentLanguage);
+  const insuredIdConfig = getIdConfigForLanguage(currentLanguage);
   // 📋 폼 상태 관리
   const [formData, setFormData] = useState(() => {
     if (initialFormData) {
@@ -2183,30 +2202,28 @@ function NewContractModal({
       );
     }
 
-    // 🆔 주민등록번호 유효성 검사
+    // 🆔 국제적 ID 유효성 검사
     if (formData.contractorSsn.trim()) {
-      const contractorSsnValidation = validateKoreanId(formData.contractorSsn);
-      if (!contractorSsnValidation) {
-        const parseResult = parseKoreanId(formData.contractorSsn);
+      const contractorSsnValidation = validateInternationalId(
+        formData.contractorSsn,
+        currentLanguage
+      );
+      if (!contractorSsnValidation.isValid) {
         newErrors.contractorSsn =
-          parseResult.errorMessage ||
-          t(
-            'newContractModal.validation.invalidSsn',
-            '유효하지 않은 주민등록번호입니다'
-          );
+          contractorSsnValidation.errorMessage ||
+          t('newContractModal.validation.invalidSsn', '유효하지 않은 ID입니다');
       }
     }
 
     if (formData.insuredSsn.trim()) {
-      const insuredSsnValidation = validateKoreanId(formData.insuredSsn);
-      if (!insuredSsnValidation) {
-        const parseResult = parseKoreanId(formData.insuredSsn);
+      const insuredSsnValidation = validateInternationalId(
+        formData.insuredSsn,
+        currentLanguage
+      );
+      if (!insuredSsnValidation.isValid) {
         newErrors.insuredSsn =
-          parseResult.errorMessage ||
-          t(
-            'newContractModal.validation.invalidSsn',
-            '유효하지 않은 주민등록번호입니다'
-          );
+          insuredSsnValidation.errorMessage ||
+          t('newContractModal.validation.invalidSsn', '유효하지 않은 ID입니다');
       }
     }
 
@@ -2463,44 +2480,57 @@ function NewContractModal({
                   <div className="space-y-1 sm:space-y-2">
                     <Label
                       htmlFor="contractorSsn"
-                      className="text-xs sm:text-sm font-medium"
+                      className="text-xs sm:text-sm font-medium flex items-center gap-2"
                     >
-                      {t('newContractModal.labels.contractorSsn')}
+                      {contractorIdConfig.label}
+                      {/* 언어 표시 배지 */}
+                      <Badge variant="outline" className="text-xs">
+                        {currentLanguage.toUpperCase()}
+                      </Badge>
                     </Label>
                     <Input
                       id="contractorSsn"
                       value={formData.contractorSsn}
                       onChange={e => {
-                        const formatted = formatKoreanIdInput(e.target.value);
+                        const formatted = formatIdInput(
+                          e.target.value,
+                          currentLanguage
+                        );
                         updateField('contractorSsn', formatted);
                       }}
                       onBlur={e => {
                         const value = e.target.value.trim();
-                        if (value && !validateKoreanId(value)) {
-                          const parseResult = parseKoreanId(value);
-                          setErrors(prev => ({
-                            ...prev,
-                            contractorSsn:
-                              parseResult.errorMessage ||
-                              t('newContractModal.validation.invalidSsn'),
-                          }));
-                        } else {
-                          setErrors(prev => {
-                            const newErrors = { ...prev };
-                            delete newErrors.contractorSsn;
-                            return newErrors;
-                          });
+                        if (value) {
+                          const validationResult = validateInternationalId(
+                            value,
+                            currentLanguage
+                          );
+                          if (!validationResult.isValid) {
+                            setErrors(prev => ({
+                              ...prev,
+                              contractorSsn:
+                                validationResult.errorMessage ||
+                                t('newContractModal.validation.invalidSsn'),
+                            }));
+                          } else {
+                            setErrors(prev => {
+                              const newErrors = { ...prev };
+                              delete newErrors.contractorSsn;
+                              return newErrors;
+                            });
+                          }
                         }
                       }}
-                      placeholder={t(
-                        'newContractModal.placeholders.contractorSsn'
-                      )}
-                      maxLength={14}
-                      className={`h-9 sm:h-10 text-xs sm:text-sm min-h-[36px] sm:min-h-[40px] ${
+                      placeholder={contractorIdConfig.placeholder}
+                      maxLength={contractorIdConfig.maxLength}
+                      className={`h-9 sm:h-10 text-xs sm:text-sm min-h-[36px] sm:min-h-[40px] font-mono ${
                         errors.contractorSsn
                           ? 'border-destructive'
                           : formData.contractorSsn &&
-                              validateKoreanId(formData.contractorSsn)
+                              validateInternationalId(
+                                formData.contractorSsn,
+                                currentLanguage
+                              ).isValid
                             ? 'border-green-500'
                             : ''
                       }`}
@@ -2514,13 +2544,20 @@ function NewContractModal({
                       )}
                       {!errors.contractorSsn &&
                         formData.contractorSsn &&
-                        validateKoreanId(formData.contractorSsn) && (
+                        validateInternationalId(
+                          formData.contractorSsn,
+                          currentLanguage
+                        ).isValid && (
                           <p className="text-xs text-green-600 flex items-center gap-1">
                             <CheckCircle className="h-3 w-3" />
                             {t('newContractModal.validation.validSsn')}
                           </p>
                         )}
                     </div>
+                    {/* 입력 안내 */}
+                    <p className="text-xs text-muted-foreground">
+                      {contractorIdConfig.description}
+                    </p>
                   </div>
 
                   <div className="space-y-2">
@@ -2583,44 +2620,57 @@ function NewContractModal({
                   <div className="space-y-1 sm:space-y-2">
                     <Label
                       htmlFor="insuredSsn"
-                      className="text-xs sm:text-sm font-medium"
+                      className="text-xs sm:text-sm font-medium flex items-center gap-2"
                     >
-                      {t('newContractModal.labels.insuredSsn')}
+                      {insuredIdConfig.label}
+                      {/* 언어 표시 배지 */}
+                      <Badge variant="outline" className="text-xs">
+                        {currentLanguage.toUpperCase()}
+                      </Badge>
                     </Label>
                     <Input
                       id="insuredSsn"
                       value={formData.insuredSsn}
                       onChange={e => {
-                        const formatted = formatKoreanIdInput(e.target.value);
+                        const formatted = formatIdInput(
+                          e.target.value,
+                          currentLanguage
+                        );
                         updateField('insuredSsn', formatted);
                       }}
                       onBlur={e => {
                         const value = e.target.value.trim();
-                        if (value && !validateKoreanId(value)) {
-                          const parseResult = parseKoreanId(value);
-                          setErrors(prev => ({
-                            ...prev,
-                            insuredSsn:
-                              parseResult.errorMessage ||
-                              t('newContractModal.validation.invalidSsn'),
-                          }));
-                        } else {
-                          setErrors(prev => {
-                            const newErrors = { ...prev };
-                            delete newErrors.insuredSsn;
-                            return newErrors;
-                          });
+                        if (value) {
+                          const validationResult = validateInternationalId(
+                            value,
+                            currentLanguage
+                          );
+                          if (!validationResult.isValid) {
+                            setErrors(prev => ({
+                              ...prev,
+                              insuredSsn:
+                                validationResult.errorMessage ||
+                                t('newContractModal.validation.invalidSsn'),
+                            }));
+                          } else {
+                            setErrors(prev => {
+                              const newErrors = { ...prev };
+                              delete newErrors.insuredSsn;
+                              return newErrors;
+                            });
+                          }
                         }
                       }}
-                      placeholder={t(
-                        'newContractModal.placeholders.insuredSsn'
-                      )}
-                      maxLength={14}
-                      className={`h-9 sm:h-10 text-xs sm:text-sm min-h-[36px] sm:min-h-[40px] ${
+                      placeholder={insuredIdConfig.placeholder}
+                      maxLength={insuredIdConfig.maxLength}
+                      className={`h-9 sm:h-10 text-xs sm:text-sm min-h-[36px] sm:min-h-[40px] font-mono ${
                         errors.insuredSsn
                           ? 'border-destructive'
                           : formData.insuredSsn &&
-                              validateKoreanId(formData.insuredSsn)
+                              validateInternationalId(
+                                formData.insuredSsn,
+                                currentLanguage
+                              ).isValid
                             ? 'border-green-500'
                             : ''
                       }`}
@@ -2634,13 +2684,20 @@ function NewContractModal({
                       )}
                       {!errors.insuredSsn &&
                         formData.insuredSsn &&
-                        validateKoreanId(formData.insuredSsn) && (
+                        validateInternationalId(
+                          formData.insuredSsn,
+                          currentLanguage
+                        ).isValid && (
                           <p className="text-xs text-green-600 flex items-center gap-1">
                             <CheckCircle className="h-3 w-3" />
                             {t('newContractModal.validation.validSsn')}
                           </p>
                         )}
                     </div>
+                    {/* 입력 안내 */}
+                    <p className="text-xs text-muted-foreground">
+                      {insuredIdConfig.description}
+                    </p>
                   </div>
 
                   <div className="space-y-1 sm:space-y-2">

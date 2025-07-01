@@ -885,5 +885,23 @@
       "registering": "Registering...",
       "updating": "Updating..."
     }
+  },
+  "idInput": {
+    "sensitiveInfo": "Sensitive Personal Information",
+    "securityWarning": "Sensitive personal information. All data is encrypted with the highest security standards.",
+    "validationError": "An error occurred during validation.",
+    "example": "Example",
+    "valid": "Valid ID number",
+    "extractedInfo": "Extracted Information",
+    "birthDate": "Date of Birth",
+    "gender": "Gender",
+    "age": "Age",
+    "ageUnit": "years old",
+    "male": "Male",
+    "female": "Female",
+    "idNumber": "ID Number",
+    "koreanId": "Korean ID Number",
+    "socialSecurityNumber": "Social Security Number",
+    "myNumber": "My Number"
   }
 }

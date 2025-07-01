@@ -931,6 +931,24 @@
     "years": "年",
     "uploaded": "アップロード済み"
   },
+  "idInput": {
+    "sensitiveInfo": "機密性の高い個人情報",
+    "securityWarning": "機密性の高い個人情報です。入力された情報は最高レベルの暗号化で保存されます。",
+    "validationError": "検証中にエラーが発生しました。",
+    "example": "例",
+    "valid": "有効なID番号です",
+    "extractedInfo": "抽出された情報",
+    "birthDate": "生年月日",
+    "gender": "性別",
+    "age": "年齢",
+    "ageUnit": "歳",
+    "male": "男性",
+    "female": "女性",
+    "idNumber": "ID番号",
+    "koreanId": "韓国ID番号",
+    "socialSecurityNumber": "ソーシャルセキュリティ番号",
+    "myNumber": "マイナンバー"
+  },
   "completion": {
     "title": "登録完了時:"
   }

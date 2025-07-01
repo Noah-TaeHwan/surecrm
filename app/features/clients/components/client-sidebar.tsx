@@ -42,6 +42,7 @@ import {
 import type { ClientDetailProfile } from '../types/client-detail';
 import { useState, useMemo } from 'react';
 import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
+import { InternationalIdInput } from './international-id-input';
 
 interface ClientSidebarProps {
   client: ClientDetailProfile | null;
@@ -849,7 +850,7 @@ export function ClientSidebar({
               </div>
             </div>
 
-            {/* 주민등록번호 입력 - 수정 모드에서만 표시 */}
+            {/* 국제적 ID 입력 - 수정 모드에서만 표시 */}
             {isEditing && (
               <>
                 <Separator />
@@ -857,80 +858,44 @@ export function ClientSidebar({
                   <h4 className="text-sm font-medium text-foreground flex items-center gap-2">
                     🔒 {t('sidebar.sensitiveDataManagement', '민감정보 관리')}
                   </h4>
-                  <div className="border border-border rounded-lg p-4 bg-muted/30">
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2 mb-3">
-                        <span className="text-xs font-medium text-foreground">
-                          {t('sidebar.ssnLabel', '주민등록번호')}
-                        </span>
-                        <span className="text-xs text-amber-800 bg-amber-100 px-2 py-1 rounded border border-amber-200 dark:text-amber-300 dark:bg-amber-900/30 dark:border-amber-800">
-                          ⚠️ {t('sidebar.sensitiveData', '민감정보')}
-                        </span>
-                      </div>
+                  <InternationalIdInput
+                    value={editFormData.ssn || ''}
+                    onChange={(value, validationResult) => {
+                      setEditFormData({
+                        ...editFormData,
+                        ssn: value,
+                      });
 
-                      {/* 주민등록번호 분리 입력 - Full Width */}
-                      <div className="grid grid-cols-5 gap-2 items-center">
-                        <Input
-                          type="text"
-                          placeholder="YYMMDD"
-                          value={editFormData.ssnFront}
-                          onChange={e => {
-                            const value = e.target.value
-                              .replace(/\D/g, '')
-                              .slice(0, 6);
-                            handleSsnChange(value, editFormData.ssnBack);
-                          }}
-                          className="col-span-2 text-center font-mono"
-                          maxLength={6}
-                        />
-                        <span className="text-muted-foreground font-bold text-center">
-                          -
-                        </span>
-                        <Input
-                          type="text"
-                          placeholder="1●●●●●●"
-                          value={editFormData.ssnBack}
-                          onChange={e => {
-                            const value = e.target.value
-                              .replace(/\D/g, '')
-                              .slice(0, 7);
-                            handleSsnChange(editFormData.ssnFront, value);
-                          }}
-                          className="col-span-2 text-center font-mono"
-                          maxLength={7}
-                        />
-                      </div>
-
-                      {/* 주민등록번호 입력 도움말 */}
-                      <div className="text-xs text-muted-foreground bg-amber-50 dark:bg-amber-900/20 p-2 rounded border border-amber-200 dark:border-amber-800">
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-1">
-                            <span>ℹ️</span>
-                            <span className="font-medium">
-                              {t(
-                                'sidebar.ssnAutoCalculate',
-                                '주민등록번호 입력 시 자동으로 생년월일이 계산됩니다.'
-                              )}
-                            </span>
-                          </div>
-                          <div className="text-xs text-amber-700 dark:text-amber-300">
-                            •{' '}
-                            {t(
-                              'sidebar.ssnFrontHelp',
-                              '앞자리: 생년월일 6자리 (YYMMDD)'
-                            )}
-                          </div>
-                          <div className="text-xs text-amber-700 dark:text-amber-300">
-                            •{' '}
-                            {t(
-                              'sidebar.ssnBackHelp',
-                              '뒷자리: 성별 및 세기 포함 7자리'
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                      // 한국어에서만 자동으로 생년월일과 성별 업데이트
+                      if (
+                        validationResult?.isValid &&
+                        validationResult.birthDate &&
+                        validationResult.gender
+                      ) {
+                        setEditFormData({
+                          ...editFormData,
+                          ssn: value,
+                          birthDate: validationResult.birthDate
+                            .toISOString()
+                            .split('T')[0],
+                          gender: validationResult.gender,
+                        });
+                      }
+                    }}
+                    onValidatedData={data => {
+                      // 추출된 정보로 폼 업데이트 (한국어에서만)
+                      if (data.birthDate && data.gender) {
+                        setEditFormData({
+                          ...editFormData,
+                          birthDate: data.birthDate.toISOString().split('T')[0],
+                          gender: data.gender,
+                        });
+                      }
+                    }}
+                    required={false}
+                    showExtractedInfo={true}
+                    className="border border-border rounded-lg p-4 bg-muted/30"
+                  />
                 </div>
               </>
             )}

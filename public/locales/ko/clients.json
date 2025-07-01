@@ -877,6 +877,24 @@
       "invalidSsn": "유효하지 않은 주민등록번호입니다",
       "validSsn": "유효한 주민등록번호입니다"
     },
+    "idInput": {
+      "sensitiveInfo": "민감한 개인정보",
+      "securityWarning": "민감한 개인정보입니다. 입력된 정보는 최고 수준으로 암호화되어 저장됩니다.",
+      "validationError": "검증 중 오류가 발생했습니다.",
+      "example": "예시",
+      "valid": "유효한 ID입니다",
+      "extractedInfo": "추출된 정보",
+      "birthDate": "생년월일",
+      "gender": "성별",
+      "age": "나이",
+      "ageUnit": "세",
+      "male": "남성",
+      "female": "여성",
+      "idNumber": "신분증 번호",
+      "koreanId": "주민등록번호",
+      "socialSecurityNumber": "Social Security Number",
+      "myNumber": "마이넘버"
+    },
     "insuranceTypes": {
       "life": "생명보험",
       "health": "건강보험",

@@ -483,10 +483,22 @@ export function ClientDetailHeader({
               )}
               {clientDetail?.ssn && (
                 <div>
-                  <div className="text-xs text-muted-foreground mb-1">
-                    주민등록번호
+                  <div className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                    {/* 언어별 ID 라벨 */}
+                    {(() => {
+                      // 현재 언어 감지
+                      const currentLang = 'ko'; // 향후 i18n.language로 대체
+                      const labels = {
+                        ko: '주민등록번호',
+                        en: 'Social Security Number',
+                        ja: 'マイナンバー',
+                      };
+                      return labels[currentLang] || labels.ko;
+                    })()}
                   </div>
-                  <div className="font-medium text-xs">{clientDetail.ssn}</div>
+                  <div className="font-medium text-xs font-mono">
+                    {clientDetail.ssn}
+                  </div>
                 </div>
               )}
               {client.height && (
