@@ -16,8 +16,10 @@ export function detectUserLanguageFromRequest(
   try {
     // 1️⃣ 쿠키에서 언어 설정 조회
     const cookieHeader = request.headers.get('Cookie');
+    
     if (cookieHeader) {
       const cookieLanguage = getCookieValue(cookieHeader, LANGUAGE_COOKIE_NAME);
+      
       if (
         cookieLanguage &&
         SUPPORTED_LANGUAGES.includes(cookieLanguage as SupportedLanguage)
@@ -29,15 +31,15 @@ export function detectUserLanguageFromRequest(
     // 2️⃣ 브라우저 Accept-Language 헤더에서 감지
     const acceptLanguageHeader = request.headers.get('Accept-Language');
     if (acceptLanguageHeader) {
-      const browserLanguage = detectFromAcceptLanguage(acceptLanguageHeader);
-      if (browserLanguage) {
-        detectedLanguage = browserLanguage;
-        return detectedLanguage;
+              const browserLanguage = detectFromAcceptLanguage(acceptLanguageHeader);
+        if (browserLanguage) {
+          detectedLanguage = browserLanguage;
+          return detectedLanguage;
+        }
       }
-    }
 
-    // 3️⃣ 기본값 사용
-    return detectedLanguage;
+      // 3️⃣ 기본값 사용
+      return detectedLanguage;
   } catch (error) {
     console.error('언어 감지 중 오류 발생:', error);
     return detectedLanguage;
@@ -48,12 +50,23 @@ export function detectUserLanguageFromRequest(
  * 🍪 쿠키에서 값 추출 (React Router용)
  */
 function getCookieValue(cookieHeader: string, name: string): string | null {
-  const cookies = cookieHeader.split(';');
-  for (const cookie of cookies) {
-    const [key, value] = cookie.trim().split('=');
-    if (key === name) {
-      return decodeURIComponent(value);
+  try {
+    const cookies = cookieHeader.split(';');
+    for (const cookie of cookies) {
+      const trimmedCookie = cookie.trim();
+      const equalIndex = trimmedCookie.indexOf('=');
+      
+      if (equalIndex > 0) {
+        const key = trimmedCookie.substring(0, equalIndex);
+        const value = trimmedCookie.substring(equalIndex + 1);
+        
+        if (key === name && value) {
+          return decodeURIComponent(value);
+        }
+      }
     }
+  } catch (error) {
+    console.error(`쿠키 파싱 오류 (${name}):`, error);
   }
   return null;
 }
