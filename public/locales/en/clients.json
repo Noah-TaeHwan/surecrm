@@ -732,6 +732,13 @@
     "otherInfo": "Other Information",
     "annualPremium": "Annual Premium",
     "downloadFile": "Download File",
+    "contractStatuses": {
+      "draft": "Draft",
+      "active": "Active",
+      "cancelled": "Cancelled",
+      "expired": "Expired",
+      "suspended": "Suspended"
+    },
     "documentTypes": {
       "contract": "Contract",
       "application": "Application",
@@ -739,6 +746,22 @@
       "medical_report": "Medical Report",
       "financial_statement": "Financial Statement",
       "other_document": "Other Document"
+    },
+    "insuranceTypes": {
+      "life": "Life Insurance",
+      "health": "Health Insurance",
+      "auto": "Auto Insurance",
+      "property": "Property Insurance",
+      "travel": "Travel Insurance",
+      "accident": "Accident Insurance",
+      "other": "Other"
+    },
+    "paymentCycles": {
+      "monthly": "Monthly",
+      "quarterly": "Quarterly",
+      "semi-annual": "Semi-Annual",
+      "annual": "Annual",
+      "lump-sum": "Lump Sum"
     }
   },
   "newContractModal": {

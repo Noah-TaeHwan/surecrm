@@ -1,5 +1,5 @@
 import React from 'react';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { Button } from '~/common/components/ui/button';
 import {
   Card,
@@ -72,6 +72,7 @@ import {
 
 // 🌐 다국어 훅 import
 import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
+import { useTranslation } from 'react-i18next';
 
 // 📋 보험계약 타입 정의
 interface InsuranceContract {
@@ -182,47 +183,6 @@ const getDocumentTypeLabel = (documentType: string, t: any) => {
 };
 
 // 🎨 보험 유형별 설정
-const getInsuranceTypeConfig = (type: string, t: any) => {
-  const configs = {
-    auto: {
-      label: t('insuranceContractsTab.insuranceTypes.auto', '자동차보험'),
-      icon: '🚗',
-      color: 'bg-blue-100 text-blue-800',
-    },
-    life: {
-      label: t('insuranceContractsTab.insuranceTypes.life', '생명보험'),
-      icon: '❤️',
-      color: 'bg-red-100 text-red-800',
-    },
-    health: {
-      label: t('insuranceContractsTab.insuranceTypes.health', '건강보험'),
-      icon: '🏥',
-      color: 'bg-green-100 text-green-800',
-    },
-    property: {
-      label: t('insuranceContractsTab.insuranceTypes.property', '재산보험'),
-      icon: '🏠',
-      color: 'bg-orange-100 text-orange-800',
-    },
-    travel: {
-      label: t('insuranceContractsTab.insuranceTypes.travel', '여행보험'),
-      icon: '✈️',
-      color: 'bg-purple-100 text-purple-800',
-    },
-    accident: {
-      label: t('insuranceContractsTab.insuranceTypes.accident', '상해보험'),
-      icon: '💼',
-      color: 'bg-yellow-100 text-yellow-800',
-    },
-  };
-  return (
-    configs[type as keyof typeof configs] || {
-      label: t('insuranceContractsTab.insuranceTypes.other', '기타'),
-      icon: '📋',
-      color: 'bg-gray-100 text-gray-800',
-    }
-  );
-};
 
 // 📊 계약 상태별 배지
 const getStatusBadge = (status: string, t: any) => {
@@ -253,24 +213,7 @@ const getStatusBadge = (status: string, t: any) => {
   return <Badge variant={config.variant}>{config.label}</Badge>;
 };
 
-// 📅 날짜 포맷팅 (다국어 지원)
-const formatDate = (dateStr?: string, locale?: string) => {
-  if (!dateStr) return '-';
-  try {
-    const localeCode =
-      locale === 'ja' ? 'ja-JP' : locale === 'en' ? 'en-US' : 'ko-KR';
-    return new Date(dateStr).toLocaleDateString(localeCode);
-  } catch {
-    return dateStr;
-  }
-};
-
-// 💰 납입주기 다국어 변환 함수
-const getPaymentCycleLabel = (cycle?: string, t?: any) => {
-  if (!cycle || !t) return '';
-  // 번역 파일에서는 하이픈을 그대로 사용하므로 언더스코어 변환 제거
-  return t(`insuranceContractsTab.paymentCycles.${cycle}`, cycle);
-};
+// formatDate 함수를 컴포넌트 내부로 이동
 
 // 🏢 보험회사 목록
 const INSURANCE_COMPANIES = [
@@ -307,16 +250,182 @@ export function InsuranceContractsTab({
   initialContracts = [],
   shouldOpenModal = false, // 🏢 파이프라인에서 계약 전환 시 모달 자동 열기
 }: InsuranceContractsTabProps) {
-  // 🌐 다국어 훅 초기화
-  const { t, i18n } = useHydrationSafeTranslation('clients');
+  // 🌐 다국어 훅 초기화 (테스트: 일반 useTranslation 사용)
+  const { t, i18n } = useTranslation('clients');
+  const { isHydrated, formatCurrency: safeFormatCurrency } =
+    useHydrationSafeTranslation('clients');
 
-  // 💰 금액 포맷팅 (다국어 지원)
+  // 💰 Hydration-safe 금액 포맷팅
   const formatCurrency = (amount?: number | string) => {
     if (!amount || amount === 0) return '-';
-    const locale =
-      i18n.language === 'ko' ? 'ko' : i18n.language === 'ja' ? 'ja' : 'en';
-    return formatCurrencyWithLocale(amount, locale as 'ko' | 'en' | 'ja');
+    const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
+    if (isNaN(numAmount)) return '-';
+
+    // hydration-safe 포맷팅 사용
+    return safeFormatCurrency(numAmount);
   };
+
+  // 📅 Hydration-safe 날짜 포맷팅 (컴포넌트 내부)
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return '-';
+    if (!isHydrated) {
+      // Hydration 전에는 한국어 기본값 사용
+      try {
+        return new Date(dateStr).toLocaleDateString('ko-KR');
+      } catch {
+        return dateStr;
+      }
+    }
+
+    try {
+      const lang = i18n.language || 'ko';
+      const locale =
+        lang === 'ko' ? 'ko-KR' : lang === 'ja' ? 'ja-JP' : 'en-US';
+      return new Date(dateStr).toLocaleDateString(locale);
+    } catch {
+      return dateStr;
+    }
+  };
+
+  // 🎨 보험 유형별 설정 (useMemo로 언어 변경 감지)
+  const getInsuranceTypeConfig = useMemo(() => {
+    console.log(
+      '🔍 [DEBUG] getInsuranceTypeConfig 재생성, 현재 언어:',
+      i18n.language
+    );
+
+    return (type: string) => {
+      const configs = {
+        auto: {
+          label: t('insuranceContractsTab.insuranceTypes.auto', '자동차보험'),
+          icon: '🚗',
+          color: 'bg-blue-100 text-blue-800',
+        },
+        life: {
+          label: t('insuranceContractsTab.insuranceTypes.life', '생명보험'),
+          icon: '❤️',
+          color: 'bg-red-100 text-red-800',
+        },
+        health: {
+          label: t('insuranceContractsTab.insuranceTypes.health', '건강보험'),
+          icon: '🏥',
+          color: 'bg-green-100 text-green-800',
+        },
+        property: {
+          label: t('insuranceContractsTab.insuranceTypes.property', '재산보험'),
+          icon: '🏠',
+          color: 'bg-orange-100 text-orange-800',
+        },
+        travel: {
+          label: t('insuranceContractsTab.insuranceTypes.travel', '여행보험'),
+          icon: '✈️',
+          color: 'bg-purple-100 text-purple-800',
+        },
+        accident: {
+          label: t('insuranceContractsTab.insuranceTypes.accident', '상해보험'),
+          icon: '💼',
+          color: 'bg-yellow-100 text-yellow-800',
+        },
+      };
+
+      const result = configs[type as keyof typeof configs] || {
+        label: t('insuranceContractsTab.insuranceTypes.other', '기타'),
+        icon: '📋',
+        color: 'bg-gray-100 text-gray-800',
+      };
+
+      // 🔍 상세 디버깅 - 여러 방법 테스트
+
+      console.log(
+        '  1. 직접 호출:',
+        t('insuranceContractsTab.insuranceTypes.life')
+      );
+      console.log(
+        '  2. 기본값 없이:',
+        t('insuranceContractsTab.insuranceTypes.life', {
+          defaultValue: undefined,
+        })
+      );
+      console.log(
+        '  3. 명시적 언어:',
+        t('insuranceContractsTab.insuranceTypes.life', { lng: 'en' })
+      );
+      console.log(
+        '  4. 네임스페이스 명시:',
+        t('clients:insuranceContractsTab.insuranceTypes.life')
+      );
+      console.log(
+        '  5. i18n 직접 호출:',
+        i18n.t('insuranceContractsTab.insuranceTypes.life', {
+          ns: 'clients',
+          lng: 'en',
+        })
+      );
+      // 🔍 리소스 상태 상세 확인
+      console.log('🔍 [DEBUG] 리소스 상태 상세:');
+      console.log('  - 현재 언어:', i18n.language);
+      console.log('  - 로드된 언어들:', Object.keys(i18n.store.data || {}));
+      console.log(
+        '  - 영어 리소스 전체:',
+        i18n.getResourceBundle('en', 'clients')
+      );
+      console.log(
+        '  - 한국어 리소스 전체:',
+        i18n.getResourceBundle('ko', 'clients')
+      );
+      console.log(
+        '  - 현재 언어 리소스:',
+        i18n.getResourceBundle(i18n.language, 'clients')
+      );
+      console.log(
+        '  - insuranceContractsTab 영어:',
+        i18n.getResourceBundle('en', 'clients')?.insuranceContractsTab
+      );
+      console.log(
+        '  - insuranceContractsTab 한국어:',
+        i18n.getResourceBundle('ko', 'clients')?.insuranceContractsTab
+      );
+
+      // 🔍 구체적으로 insuranceTypes와 paymentCycles 확인
+      const enInsuranceTab = i18n.getResourceBundle(
+        'en',
+        'clients'
+      )?.insuranceContractsTab;
+      console.log(
+        '🔍 [상세] 영어 insuranceTypes:',
+        enInsuranceTab?.insuranceTypes
+      );
+      console.log(
+        '🔍 [상세] 영어 paymentCycles:',
+        enInsuranceTab?.paymentCycles
+      );
+      console.log(
+        '🔍 [상세] 영어 life 보험:',
+        enInsuranceTab?.insuranceTypes?.life
+      );
+      console.log(
+        '🔍 [상세] 영어 monthly 납입:',
+        enInsuranceTab?.paymentCycles?.monthly
+      );
+      return result;
+    };
+  }, [t, i18n.language]);
+
+  // 💰 납입주기 다국어 변환 함수 (useMemo로 언어 변경 감지)
+  const getPaymentCycleLabel = useMemo(() => {
+    console.log(
+      '🔍 [DEBUG] getPaymentCycleLabel 재생성, 현재 언어:',
+      i18n.language
+    );
+
+    return (cycle?: string) => {
+      if (!cycle) return '';
+      const result = t(`insuranceContractsTab.paymentCycles.${cycle}`, cycle);
+      console.log(`🔍 [DEBUG] ${cycle} 납입주기 번역:`, result);
+      return result;
+    };
+  }, [t, i18n.language]);
+
   // 📊 실제 데이터 상태
   const [contracts, setContracts] =
     useState<InsuranceContract[]>(initialContracts);
@@ -1104,8 +1213,7 @@ export function InsuranceContractsTab({
                 </h4>
                 {contracts.map(contract => {
                   const typeConfig = getInsuranceTypeConfig(
-                    contract.insuranceType,
-                    t
+                    contract.insuranceType
                   );
                   return (
                     <div
@@ -1244,10 +1352,7 @@ export function InsuranceContractsTab({
                                 {t('insuranceContractsTab.contractDate')}
                               </span>
                               <span className="font-medium text-sm text-slate-900 dark:text-slate-100 text-right">
-                                {formatDate(
-                                  contract.contractDate,
-                                  i18n.language
-                                )}
+                                {formatDate(contract.contractDate)}
                               </span>
                             </div>
                             {contract.paymentDueDate && (
@@ -1256,10 +1361,7 @@ export function InsuranceContractsTab({
                                   {t('insuranceContractsTab.paymentDueDate')}
                                 </span>
                                 <span className="font-semibold text-sm text-red-600 dark:text-red-400 text-right">
-                                  {formatDate(
-                                    contract.paymentDueDate,
-                                    i18n.language
-                                  )}
+                                  {formatDate(contract.paymentDueDate)}
                                 </span>
                               </div>
                             )}
@@ -1294,10 +1396,7 @@ export function InsuranceContractsTab({
                                   variant="secondary"
                                   className="font-medium text-xs"
                                 >
-                                  {getPaymentCycleLabel(
-                                    contract.paymentCycle,
-                                    t
-                                  )}
+                                  {getPaymentCycleLabel(contract.paymentCycle)}
                                 </Badge>
                               </div>
                             )}
@@ -1483,10 +1582,7 @@ export function InsuranceContractsTab({
                                       )}
                                     </span>
                                     <span className="font-medium">
-                                      {formatDate(
-                                        contract.effectiveDate,
-                                        i18n.language
-                                      )}
+                                      {formatDate(contract.effectiveDate)}
                                     </span>
                                   </div>
                                 )}
@@ -1499,10 +1595,7 @@ export function InsuranceContractsTab({
                                       )}
                                     </span>
                                     <span className="font-medium">
-                                      {formatDate(
-                                        contract.expirationDate,
-                                        i18n.language
-                                      )}
+                                      {formatDate(contract.expirationDate)}
                                     </span>
                                   </div>
                                 )}
@@ -2228,55 +2321,55 @@ function NewContractModal({
   const insuranceTypes = [
     {
       value: 'life',
-      label: t('newContractModal.insuranceTypes.life', '생명보험'),
+      label: t('insuranceContractsTab.insuranceTypes.life', '생명보험'),
     },
     {
       value: 'health',
-      label: t('newContractModal.insuranceTypes.health', '건강보험'),
+      label: t('insuranceContractsTab.insuranceTypes.health', '건강보험'),
     },
     {
       value: 'auto',
-      label: t('newContractModal.insuranceTypes.auto', '자동차보험'),
+      label: t('insuranceContractsTab.insuranceTypes.auto', '자동차보험'),
     },
     {
       value: 'property',
-      label: t('newContractModal.insuranceTypes.property', '재산보험'),
+      label: t('insuranceContractsTab.insuranceTypes.property', '재산보험'),
     },
     {
       value: 'travel',
-      label: t('newContractModal.insuranceTypes.travel', '여행보험'),
+      label: t('insuranceContractsTab.insuranceTypes.travel', '여행보험'),
     },
     {
       value: 'accident',
-      label: t('newContractModal.insuranceTypes.accident', '상해보험'),
+      label: t('insuranceContractsTab.insuranceTypes.accident', '상해보험'),
     },
     {
       value: 'other',
-      label: t('newContractModal.insuranceTypes.other', '기타'),
+      label: t('insuranceContractsTab.insuranceTypes.other', '기타'),
     },
   ];
 
-  // 납입 방법 옵션
+  // 납입 방법 옵션 (insuranceContractsTab 키로 통일)
   const paymentMethods = [
     {
       value: 'monthly',
-      label: t('newContractModal.paymentCycles.monthly', '월납'),
+      label: t('insuranceContractsTab.paymentCycles.monthly', '월납'),
     },
     {
       value: 'quarterly',
-      label: t('newContractModal.paymentCycles.quarterly', '분기납'),
+      label: t('insuranceContractsTab.paymentCycles.quarterly', '분기납'),
     },
     {
       value: 'semi-annual',
-      label: t('newContractModal.paymentCycles.semi-annual', '반년납'),
+      label: t('insuranceContractsTab.paymentCycles.semi-annual', '반년납'),
     },
     {
       value: 'annual',
-      label: t('newContractModal.paymentCycles.annual', '연납'),
+      label: t('insuranceContractsTab.paymentCycles.annual', '연납'),
     },
     {
       value: 'lump-sum',
-      label: t('newContractModal.paymentCycles.lump-sum', '일시납'),
+      label: t('insuranceContractsTab.paymentCycles.lump-sum', '일시납'),
     },
   ];
 

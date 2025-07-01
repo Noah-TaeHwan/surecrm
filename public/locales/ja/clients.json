@@ -732,6 +732,13 @@
     "otherInfo": "その他の情報",
     "annualPremium": "年額保険料",
     "downloadFile": "ファイルダウンロード",
+    "contractStatuses": {
+      "draft": "下書き",
+      "active": "有効",
+      "cancelled": "解約",
+      "expired": "満期",
+      "suspended": "停止"
+    },
     "documentTypes": {
       "contract": "契約書",
       "application": "申込書",
@@ -739,6 +746,22 @@
       "medical_report": "医療診断書",
       "financial_statement": "財務証明書",
       "other_document": "その他の書類"
+    },
+    "insuranceTypes": {
+      "life": "生命保険",
+      "health": "健康保険",
+      "auto": "自動車保険",
+      "property": "財産保険",
+      "travel": "旅行保険",
+      "accident": "傷害保険",
+      "other": "その他"
+    },
+    "paymentCycles": {
+      "monthly": "月払",
+      "quarterly": "四半期払",
+      "semi-annual": "半年払",
+      "annual": "年払",
+      "lump-sum": "一括払"
     }
   },
   "newContractModal": {
