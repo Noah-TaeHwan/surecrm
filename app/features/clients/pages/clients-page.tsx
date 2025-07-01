@@ -331,16 +331,47 @@ export async function loader({ request }: { request: Request }) {
   }
 }
 
+// 🔐 보안 메타 정보 - 고객 개인정보 보호
 export function meta({ data }: { data: any }) {
-  const metaData = data?.meta;
+  const metaData = data?.meta || {
+    title: '고객 관리 | SureCRM',
+    description:
+      '고객 정보를 체계적으로 관리하고 영업 파이프라인을 통해 효율적인 고객 관계를 구축하세요.',
+  };
+
   return [
-    { title: metaData?.title || '고객 관리 | SureCRM' },
+    // 🎯 기본 메타태그 - 고객 관리 페이지
+    { title: metaData.title },
+    { name: 'description', content: metaData.description },
+
+    // 🔒 검색엔진 완전 차단 - 고객 개인정보 보호
     {
-      name: 'description',
-      content:
-        metaData?.description ||
-        '고객 정보를 체계적으로 관리하고 영업 파이프라인을 통해 효율적인 고객 관계를 구축하세요.',
+      name: 'robots',
+      content: 'noindex, nofollow, nosnippet, noarchive, noimageindex',
     },
+    { name: 'googlebot', content: 'noindex, nofollow' },
+    { name: 'bingbot', content: 'noindex, nofollow' },
+    { name: 'yandex', content: 'noindex, nofollow' },
+
+    // 🛡️ 강화된 보안 헤더
+    { httpEquiv: 'X-Robots-Tag', content: 'noindex, nofollow' },
+    { name: 'referrer', content: 'strict-origin-when-cross-origin' },
+    { httpEquiv: 'X-Content-Type-Options', content: 'nosniff' },
+
+    // 🚫 소셜 미디어 완전 차단
+    { property: 'og:robots', content: 'noindex' },
+    { name: 'twitter:robots', content: 'noindex' },
+    { property: 'og:type', content: 'website' },
+    { property: 'og:title', content: '인증이 필요한 페이지' },
+    { property: 'og:description', content: '로그인이 필요한 서비스입니다.' },
+
+    // 📱 모바일 최적화만 유지
+    { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+    { name: 'theme-color', content: '#0a0a0a' },
+
+    // 🏷️ 페이지 분류
+    { name: 'page-type', content: 'authenticated' },
+    { name: 'content-type', content: 'private' },
   ];
 }
 

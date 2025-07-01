@@ -47,25 +47,191 @@ export async function loader({ request }: LoaderArgs) {
   }
 }
 
-// 🌍 다국어 메타 정보
+// 🌍 전문 SEO 메타 정보 - 법적 문서 최적화
 export function meta({ data }: MetaArgs) {
-  const meta = data?.meta;
+  const meta = data?.meta || {
+    title: '이용약관 | SureCRM',
+    description:
+      'SureCRM 서비스 이용약관을 확인하세요. 서비스 이용에 관한 권리와 의무를 안내합니다.',
+  };
 
-  if (!meta) {
-    // 기본값 fallback
-    return [
-      { title: '이용약관 | SureCRM' },
-      {
-        name: 'description',
-        content:
-          'SureCRM 서비스 이용약관을 확인하세요. 서비스 이용에 관한 권리와 의무를 안내합니다.',
-      },
-    ];
-  }
+  const url = 'https://surecrm.pro/terms';
 
   return [
+    // 🎯 기본 SEO 태그들 - 법적 문서 최적화
     { title: meta.title },
     { name: 'description', content: meta.description },
+    {
+      name: 'keywords',
+      content:
+        'SureCRM 이용약관, 서비스 약관, 법적 고지, 사용자 권리, 서비스 의무, CRM 약관, 보험설계사 서비스 약관',
+    },
+    { name: 'author', content: 'SureCRM Legal Team' },
+    { name: 'robots', content: 'index, follow' },
+    { name: 'document-type', content: 'legal' },
+
+    // 🌐 Open Graph - 법적 문서용
+    { property: 'og:title', content: meta.title },
+    { property: 'og:description', content: meta.description },
+    { property: 'og:type', content: 'article' },
+    { property: 'og:url', content: url },
+    { property: 'og:site_name', content: 'SureCRM' },
+    { property: 'article:section', content: 'Legal' },
+    { property: 'article:tag', content: 'terms,legal,agreement,policy' },
+    { property: 'article:published_time', content: '2025-06-26T00:00:00Z' },
+    { property: 'article:modified_time', content: new Date().toISOString() },
+
+    // 🐦 Twitter Cards
+    { name: 'twitter:card', content: 'summary' },
+    { name: 'twitter:title', content: meta.title },
+    { name: 'twitter:description', content: meta.description },
+
+    // 🔗 Canonical URL
+    { tagName: 'link', rel: 'canonical', href: url },
+
+    // 🌍 다국어 대체 링크들
+    {
+      tagName: 'link',
+      rel: 'alternate',
+      hrefLang: 'ko',
+      href: 'https://surecrm.pro/terms',
+    },
+    {
+      tagName: 'link',
+      rel: 'alternate',
+      hrefLang: 'en',
+      href: 'https://surecrm.pro/en/terms',
+    },
+    {
+      tagName: 'link',
+      rel: 'alternate',
+      hrefLang: 'ja',
+      href: 'https://surecrm.pro/ja/terms',
+    },
+    {
+      tagName: 'link',
+      rel: 'alternate',
+      hrefLang: 'x-default',
+      href: 'https://surecrm.pro/terms',
+    },
+
+    // ⚖️ 법적 문서 구조화된 데이터
+    {
+      'script:ld+json': {
+        '@context': 'https://schema.org',
+        '@type': 'DigitalDocument',
+        name: meta.title,
+        description: meta.description,
+        url: url,
+        dateCreated: '2025-06-26T00:00:00Z',
+        dateModified: new Date().toISOString(),
+        datePublished: '2025-06-26T00:00:00Z',
+        version: '2.0',
+        inLanguage: 'ko-KR',
+        genre: 'Legal Document',
+        audience: {
+          '@type': 'BusinessAudience',
+          audienceType: 'SureCRM Users',
+        },
+        author: {
+          '@type': 'Organization',
+          name: 'SureCRM',
+          url: 'https://surecrm.pro',
+        },
+        publisher: {
+          '@type': 'Organization',
+          name: 'SureCRM',
+          url: 'https://surecrm.pro',
+          logo: {
+            '@type': 'ImageObject',
+            url: 'https://surecrm.pro/logo-192.png',
+          },
+        },
+        about: {
+          '@type': 'Service',
+          name: 'SureCRM',
+          description: '보험설계사를 위한 CRM 서비스',
+          provider: {
+            '@type': 'Organization',
+            name: 'SureCRM',
+            url: 'https://surecrm.pro',
+          },
+        },
+        // 법적 문서의 주요 내용
+        hasPart: [
+          {
+            '@type': 'DigitalDocumentSection',
+            name: '서비스 이용',
+            description: 'SureCRM 서비스 이용에 관한 일반적인 조건',
+          },
+          {
+            '@type': 'DigitalDocumentSection',
+            name: '회원가입 및 계정',
+            description: '회원가입 절차와 계정 관리에 관한 사항',
+          },
+          {
+            '@type': 'DigitalDocumentSection',
+            name: '서비스 제공 및 중단',
+            description: '서비스 제공 범위와 중단에 관한 조건',
+          },
+          {
+            '@type': 'DigitalDocumentSection',
+            name: '개인정보 보호',
+            description: '사용자 개인정보 처리 및 보호 방침',
+          },
+        ],
+      },
+    },
+
+    // 📄 웹페이지 구조화된 데이터
+    {
+      'script:ld+json': {
+        '@context': 'https://schema.org',
+        '@type': 'WebPage',
+        name: meta.title,
+        description: meta.description,
+        url: url,
+        breadcrumb: {
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            {
+              '@type': 'ListItem',
+              position: 1,
+              name: '홈',
+              item: 'https://surecrm.pro',
+            },
+            {
+              '@type': 'ListItem',
+              position: 2,
+              name: '이용약관',
+              item: url,
+            },
+          ],
+        },
+        mainEntity: {
+          '@type': 'Article',
+          headline: meta.title,
+          description: meta.description,
+          author: {
+            '@type': 'Organization',
+            name: 'SureCRM Legal Team',
+          },
+          publisher: {
+            '@type': 'Organization',
+            name: 'SureCRM',
+            logo: {
+              '@type': 'ImageObject',
+              url: 'https://surecrm.pro/logo-192.png',
+            },
+          },
+          datePublished: '2025-06-26T00:00:00Z',
+          dateModified: new Date().toISOString(),
+          inLanguage: 'ko-KR',
+          articleSection: 'Legal',
+          keywords: '이용약관, 서비스 약관, 법적 고지, 사용자 권리',
+        },
+      },
+    },
   ];
 }
 

@@ -649,15 +649,44 @@ export async function action({ request }: Route.ActionArgs) {
   }
 }
 
-// SEO 메타 정보
+// 🔐 보안 메타 정보 - 개인 일정 보호
 export function meta({ data }: Route.MetaArgs) {
   return [
+    // 🎯 기본 메타태그 - 일정 관리 페이지
     { title: '일정 관리 - SureCRM' },
     {
       name: 'description',
       content: '구글 캘린더 연동으로 고객 미팅과 일정을 효율적으로 관리합니다',
     },
-    { name: 'keywords', content: '일정관리, 미팅, 구글캘린더, 고객관리, CRM' },
+
+    // 🔒 검색엔진 완전 차단 - 개인 일정 보호
+    {
+      name: 'robots',
+      content: 'noindex, nofollow, nosnippet, noarchive, noimageindex',
+    },
+    { name: 'googlebot', content: 'noindex, nofollow' },
+    { name: 'bingbot', content: 'noindex, nofollow' },
+    { name: 'yandex', content: 'noindex, nofollow' },
+
+    // 🛡️ 강화된 보안 헤더
+    { httpEquiv: 'X-Robots-Tag', content: 'noindex, nofollow' },
+    { name: 'referrer', content: 'strict-origin-when-cross-origin' },
+    { httpEquiv: 'X-Content-Type-Options', content: 'nosniff' },
+
+    // 🚫 소셜 미디어 완전 차단
+    { property: 'og:robots', content: 'noindex' },
+    { name: 'twitter:robots', content: 'noindex' },
+    { property: 'og:type', content: 'website' },
+    { property: 'og:title', content: '인증이 필요한 페이지' },
+    { property: 'og:description', content: '로그인이 필요한 서비스입니다.' },
+
+    // 📱 모바일 최적화만 유지
+    { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+    { name: 'theme-color', content: '#0a0a0a' },
+
+    // 🏷️ 페이지 분류
+    { name: 'page-type', content: 'authenticated' },
+    { name: 'content-type', content: 'private' },
   ];
 }
 

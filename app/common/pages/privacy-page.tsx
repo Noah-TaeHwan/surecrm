@@ -47,25 +47,242 @@ export async function loader({ request }: LoaderArgs) {
   }
 }
 
-// 🌍 다국어 메타 정보
+// 🌍 전문 SEO 메타 정보 - 개인정보보호 특화 최적화
 export function meta({ data }: MetaArgs) {
-  const meta = data?.meta;
+  const meta = data?.meta || {
+    title: '개인정보처리방침 | SureCRM',
+    description:
+      'SureCRM 개인정보처리방침을 확인하세요. 개인정보 보호와 관련된 정책을 투명하게 공개합니다.',
+  };
 
-  if (!meta) {
-    // 기본값 fallback
-    return [
-      { title: '개인정보처리방침 | SureCRM' },
-      {
-        name: 'description',
-        content:
-          'SureCRM 개인정보처리방침을 확인하세요. 개인정보 보호와 관련된 정책을 투명하게 공개합니다.',
-      },
-    ];
-  }
+  const url = 'https://surecrm.pro/privacy';
 
   return [
+    // 🎯 기본 SEO 태그들 - 개인정보보호 특화
     { title: meta.title },
     { name: 'description', content: meta.description },
+    {
+      name: 'keywords',
+      content:
+        'SureCRM 개인정보처리방침, 개인정보보호, 데이터 보안, GDPR, 개인정보 정책, 데이터 처리, 보험설계사 개인정보',
+    },
+    { name: 'author', content: 'SureCRM Data Protection Officer' },
+    { name: 'robots', content: 'index, follow' },
+    { name: 'document-type', content: 'privacy-policy' },
+
+    // 🌐 Open Graph - 개인정보보호 특화
+    { property: 'og:title', content: meta.title },
+    { property: 'og:description', content: meta.description },
+    { property: 'og:type', content: 'article' },
+    { property: 'og:url', content: url },
+    { property: 'og:site_name', content: 'SureCRM' },
+    { property: 'article:section', content: 'Privacy' },
+    {
+      property: 'article:tag',
+      content: 'privacy,data-protection,gdpr,security,policy',
+    },
+    { property: 'article:published_time', content: '2025-06-26T00:00:00Z' },
+    { property: 'article:modified_time', content: new Date().toISOString() },
+
+    // 🐦 Twitter Cards
+    { name: 'twitter:card', content: 'summary' },
+    { name: 'twitter:title', content: meta.title },
+    { name: 'twitter:description', content: meta.description },
+
+    // 🔗 Canonical URL
+    { tagName: 'link', rel: 'canonical', href: url },
+
+    // 🌍 다국어 대체 링크들
+    {
+      tagName: 'link',
+      rel: 'alternate',
+      hrefLang: 'ko',
+      href: 'https://surecrm.pro/privacy',
+    },
+    {
+      tagName: 'link',
+      rel: 'alternate',
+      hrefLang: 'en',
+      href: 'https://surecrm.pro/en/privacy',
+    },
+    {
+      tagName: 'link',
+      rel: 'alternate',
+      hrefLang: 'ja',
+      href: 'https://surecrm.pro/ja/privacy',
+    },
+    {
+      tagName: 'link',
+      rel: 'alternate',
+      hrefLang: 'x-default',
+      href: 'https://surecrm.pro/privacy',
+    },
+
+    // 🔒 개인정보처리방침 구조화된 데이터
+    {
+      'script:ld+json': {
+        '@context': 'https://schema.org',
+        '@type': 'DigitalDocument',
+        name: meta.title,
+        description: meta.description,
+        url: url,
+        dateCreated: '2025-06-26T00:00:00Z',
+        dateModified: new Date().toISOString(),
+        datePublished: '2025-06-26T00:00:00Z',
+        version: '2.0',
+        inLanguage: 'ko-KR',
+        genre: 'Privacy Policy',
+        audience: {
+          '@type': 'BusinessAudience',
+          audienceType: 'SureCRM Users and Prospects',
+        },
+        author: {
+          '@type': 'Person',
+          name: '오태환',
+          jobTitle: 'Data Protection Officer (DPO)',
+          worksFor: {
+            '@type': 'Organization',
+            name: 'SureCRM',
+          },
+          email: 'noah@surecrm.pro',
+        },
+        publisher: {
+          '@type': 'Organization',
+          name: 'SureCRM',
+          url: 'https://surecrm.pro',
+          logo: {
+            '@type': 'ImageObject',
+            url: 'https://surecrm.pro/logo-192.png',
+          },
+        },
+        about: {
+          '@type': 'Service',
+          name: 'SureCRM',
+          description: '보험설계사를 위한 CRM 서비스의 개인정보 처리',
+          provider: {
+            '@type': 'Organization',
+            name: 'SureCRM',
+            url: 'https://surecrm.pro',
+          },
+        },
+        // 개인정보처리방침 주요 섹션들
+        hasPart: [
+          {
+            '@type': 'DigitalDocumentSection',
+            name: '개인정보 수집 및 이용목적',
+            description: '수집하는 개인정보의 종류와 이용목적',
+          },
+          {
+            '@type': 'DigitalDocumentSection',
+            name: '개인정보 처리 및 보유기간',
+            description: '개인정보 처리 방법과 보유기간',
+          },
+          {
+            '@type': 'DigitalDocumentSection',
+            name: '개인정보 제3자 제공',
+            description: '개인정보의 제3자 제공에 관한 사항',
+          },
+          {
+            '@type': 'DigitalDocumentSection',
+            name: '개인정보보호책임자',
+            description: '개인정보보호책임자 연락처 및 담당업무',
+          },
+        ],
+        // GDPR 관련 정보
+        mentions: [
+          {
+            '@type': 'Thing',
+            name: 'GDPR',
+            description: 'EU 일반 데이터 보호 규정 준수',
+          },
+          {
+            '@type': 'Thing',
+            name: '개인정보보호법',
+            description: '한국 개인정보보호법 준수',
+          },
+        ],
+      },
+    },
+
+    // 🏢 조직의 개인정보보호 정책
+    {
+      'script:ld+json': {
+        '@context': 'https://schema.org',
+        '@type': 'Organization',
+        name: 'SureCRM',
+        url: 'https://surecrm.pro',
+        privacyPolicy: url,
+        // 개인정보보호책임자 정보
+        contactPoint: {
+          '@type': 'ContactPoint',
+          contactType: 'Data Protection Officer',
+          name: '오태환',
+          email: 'noah@surecrm.pro',
+          telephone: '+82-10-5814-3481',
+          availableLanguage: ['Korean', 'English', 'Japanese'],
+          areaServed: ['KR', 'JP', 'US'],
+        },
+        // 데이터 보안 인증
+        hasCredential: [
+          {
+            '@type': 'EducationalOccupationalCredential',
+            name: 'ISO 27001 Information Security Management',
+            description: '정보보안 관리체계 준수',
+          },
+        ],
+      },
+    },
+
+    // 📄 웹페이지 구조화된 데이터
+    {
+      'script:ld+json': {
+        '@context': 'https://schema.org',
+        '@type': 'WebPage',
+        name: meta.title,
+        description: meta.description,
+        url: url,
+        breadcrumb: {
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            {
+              '@type': 'ListItem',
+              position: 1,
+              name: '홈',
+              item: 'https://surecrm.pro',
+            },
+            {
+              '@type': 'ListItem',
+              position: 2,
+              name: '개인정보처리방침',
+              item: url,
+            },
+          ],
+        },
+        mainEntity: {
+          '@type': 'Article',
+          headline: meta.title,
+          description: meta.description,
+          author: {
+            '@type': 'Person',
+            name: '오태환',
+            jobTitle: 'Data Protection Officer',
+          },
+          publisher: {
+            '@type': 'Organization',
+            name: 'SureCRM',
+            logo: {
+              '@type': 'ImageObject',
+              url: 'https://surecrm.pro/logo-192.png',
+            },
+          },
+          datePublished: '2025-06-26T00:00:00Z',
+          dateModified: new Date().toISOString(),
+          inLanguage: 'ko-KR',
+          articleSection: 'Privacy & Data Protection',
+          keywords: '개인정보처리방침, 개인정보보호, 데이터 보안, GDPR 준수',
+        },
+      },
+    },
   ];
 }
 

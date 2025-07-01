@@ -59,24 +59,34 @@ interface MetaArgs {
   };
 }
 
-// 🌍 다국어 메타 정보
+// 🔐 보안 메타 정보 - 인증 필요 페이지 (개인정보 보호)
 export function meta({ data }: MetaArgs) {
-  const meta = data?.meta;
-
-  if (!meta) {
-    // 기본값 fallback
-    return [
-      { title: '대시보드 - SureCRM' },
-      {
-        name: 'description',
-        content: 'SureCRM 대시보드 - 업무 현황을 한눈에 확인하세요',
-      },
-    ];
-  }
+  const meta = data?.meta || {
+    title: '대시보드 - SureCRM',
+    description: 'SureCRM 대시보드 - 업무 현황을 한눈에 확인하세요',
+  };
 
   return [
+    // 🎯 기본 메타태그 - 인증 페이지용
     { title: meta.title },
     { name: 'description', content: meta.description },
+
+    // 🔒 검색엔진 차단 - 개인정보 보호
+    { name: 'robots', content: 'noindex, nofollow, nosnippet, noarchive' },
+    { name: 'googlebot', content: 'noindex, nofollow' },
+    { name: 'bingbot', content: 'noindex, nofollow' },
+
+    // 🛡️ 보안 헤더
+    { httpEquiv: 'X-Robots-Tag', content: 'noindex, nofollow' },
+    { name: 'referrer', content: 'strict-origin-when-cross-origin' },
+
+    // 🚫 소셜 미디어 차단
+    { property: 'og:robots', content: 'noindex' },
+    { name: 'twitter:robots', content: 'noindex' },
+
+    // 📱 모바일 최적화만 유지
+    { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+    { name: 'theme-color', content: '#0a0a0a' },
   ];
 }
 

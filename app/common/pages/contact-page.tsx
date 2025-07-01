@@ -124,27 +124,190 @@ export async function action({ request }: ActionArgs) {
   }
 }
 
-// 🌍 다국어 메타 정보
+// 🌍 전문 SEO 메타 정보 - 글로벌 CRM SaaS 최적화
 export function meta({ data }: MetaArgs) {
-  const meta = data?.meta;
+  const meta = data?.meta || {
+    title: '문의하기 - SureCRM',
+    description:
+      'SureCRM에 대한 문의사항을 남겨주세요. 빠른 시일 내에 답변드리겠습니다.',
+  };
 
-  if (!meta) {
-    // 기본값 fallback
-    return [
-      { title: '문의하기 - SureCRM' },
-      {
-        name: 'description',
-        content:
-          'SureCRM에 대한 문의사항을 남겨주세요. 빠른 시일 내에 답변드리겠습니다.',
-      },
-    ];
-  }
+  const url = 'https://surecrm.pro/contact';
+  const language = data?.language || 'ko';
+
+  // 언어별 최적화된 키워드
+  const languageKeywords = {
+    ko: 'SureCRM 문의, 보험설계사 CRM, 고객관리 솔루션, 데모 요청, 기술지원, 영업관리시스템',
+    en: 'SureCRM contact, insurance agent CRM, customer management solution, demo request, technical support, sales management system',
+    ja: 'SureCRM お問い合わせ, 保険設計士 CRM, 顧客管理ソリューション, デモ依頼, 技術サポート, 営業管理システム',
+  };
 
   return [
+    // 🎯 기본 SEO 태그들 - 보험업계 최적화
     { title: meta.title },
+    { name: 'description', content: meta.description },
     {
-      name: 'description',
-      content: meta.description,
+      name: 'keywords',
+      content: languageKeywords[language as keyof typeof languageKeywords],
+    },
+    { name: 'author', content: 'SureCRM Team' },
+    { name: 'robots', content: 'index, follow' },
+
+    // 🌐 Open Graph - 소셜 미디어 최적화
+    { property: 'og:title', content: meta.title },
+    { property: 'og:description', content: meta.description },
+    { property: 'og:type', content: 'website' },
+    { property: 'og:url', content: url },
+    { property: 'og:site_name', content: 'SureCRM' },
+    {
+      property: 'og:locale',
+      content:
+        language === 'ko' ? 'ko_KR' : language === 'ja' ? 'ja_JP' : 'en_US',
+    },
+    { property: 'og:image', content: 'https://surecrm.pro/og-contact.png' },
+    { property: 'og:image:width', content: '1200' },
+    { property: 'og:image:height', content: '630' },
+
+    // 🐦 Twitter Cards
+    { name: 'twitter:card', content: 'summary_large_image' },
+    { name: 'twitter:title', content: meta.title },
+    { name: 'twitter:description', content: meta.description },
+    { name: 'twitter:image', content: 'https://surecrm.pro/og-contact.png' },
+
+    // 🔗 Canonical URL
+    { tagName: 'link', rel: 'canonical', href: url },
+
+    // 🌍 다국어 대체 링크들
+    {
+      tagName: 'link',
+      rel: 'alternate',
+      hrefLang: 'ko',
+      href: 'https://surecrm.pro/contact',
+    },
+    {
+      tagName: 'link',
+      rel: 'alternate',
+      hrefLang: 'en',
+      href: 'https://surecrm.pro/en/contact',
+    },
+    {
+      tagName: 'link',
+      rel: 'alternate',
+      hrefLang: 'ja',
+      href: 'https://surecrm.pro/ja/contact',
+    },
+    {
+      tagName: 'link',
+      rel: 'alternate',
+      hrefLang: 'x-default',
+      href: 'https://surecrm.pro/contact',
+    },
+
+    // 🏢 LocalBusiness + ContactPoint 구조화된 데이터
+    {
+      'script:ld+json': {
+        '@context': 'https://schema.org',
+        '@type': ['Organization', 'LocalBusiness'],
+        name: 'SureCRM',
+        url: 'https://surecrm.pro',
+        logo: 'https://surecrm.pro/logo-192.png',
+        description:
+          '보험설계사를 위한 전문 CRM 솔루션. 고객 관계 관리와 영업 효율성을 극대화하세요.',
+        applicationCategory: 'BusinessApplication',
+        operatingSystem: 'Web Browser',
+        // 📞 연락처 정보
+        contactPoint: [
+          {
+            '@type': 'ContactPoint',
+            contactType: 'customer service',
+            email: 'noah@surecrm.pro',
+            availableLanguage: ['Korean', 'English', 'Japanese'],
+            areaServed: ['KR', 'US', 'JP'],
+            hoursAvailable: {
+              '@type': 'OpeningHoursSpecification',
+              dayOfWeek: [
+                'Monday',
+                'Tuesday',
+                'Wednesday',
+                'Thursday',
+                'Friday',
+              ],
+              opens: '09:00',
+              closes: '18:00',
+              timeZone: 'Asia/Seoul',
+            },
+          },
+          {
+            '@type': 'ContactPoint',
+            contactType: 'technical support',
+            email: 'noah@surecrm.pro',
+            availableLanguage: ['Korean', 'English', 'Japanese'],
+            areaServed: ['KR', 'US', 'JP'],
+          },
+          {
+            '@type': 'ContactPoint',
+            contactType: 'sales',
+            email: 'noah@surecrm.pro',
+            availableLanguage: ['Korean', 'English', 'Japanese'],
+            areaServed: ['KR', 'US', 'JP'],
+          },
+        ],
+        // 🎯 대상 업계
+        audience: {
+          '@type': 'BusinessAudience',
+          audienceType: 'Insurance Agents',
+          geographicArea: ['Korea', 'Japan', 'United States'],
+        },
+        // 💰 서비스 제공
+        offers: {
+          '@type': 'Offer',
+          name: 'SureCRM Pro',
+          description: '보험설계사 전용 CRM 솔루션',
+          price: '20',
+          priceCurrency: 'USD',
+          priceSpecification: {
+            '@type': 'UnitPriceSpecification',
+            price: '20',
+            priceCurrency: 'USD',
+            billingIncrement: 'P1M',
+            eligibleQuantity: '1',
+          },
+          eligibleRegion: ['KR', 'JP', 'US'],
+          category: 'SaaS',
+        },
+        // 🏆 업체 정보
+        foundingDate: '2024',
+        industry: 'Software',
+        numberOfEmployees: '1-10',
+        sameAs: [],
+        keywords:
+          language === 'ko'
+            ? '보험설계사, CRM, 고객관리, 영업관리, SaaS, 보험업계'
+            : language === 'ja'
+              ? '保険設計士, CRM, 顧客管理, 営業管理, SaaS, 保険業界'
+              : 'insurance agent, CRM, customer management, sales management, SaaS, insurance industry',
+      },
+    },
+
+    // 📄 Contact Page 전용 구조화된 데이터
+    {
+      'script:ld+json': {
+        '@context': 'https://schema.org',
+        '@type': 'ContactPage',
+        name: meta.title,
+        description: meta.description,
+        url: url,
+        mainEntity: {
+          '@type': 'Organization',
+          name: 'SureCRM',
+          contactPoint: {
+            '@type': 'ContactPoint',
+            contactType: 'customer service',
+            email: 'noah@surecrm.pro',
+            availableLanguage: ['Korean', 'English', 'Japanese'],
+          },
+        },
+      },
     },
   ];
 }

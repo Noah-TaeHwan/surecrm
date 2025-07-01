@@ -48,25 +48,226 @@ export async function loader({ request }: LoaderArgs) {
   }
 }
 
-// 🌍 다국어 메타 정보
+// 🌍 전문 SEO 메타 정보 - FAQ + 사용법 최적화
 export function meta({ data }: MetaArgs) {
-  const meta = data?.meta;
+  const meta = data?.meta || {
+    title: '도움말 | SureCRM',
+    description:
+      'SureCRM 사용법과 자주 묻는 질문을 확인하세요. 고객 지원팀이 도움을 드립니다.',
+  };
 
-  if (!meta) {
-    // 기본값 fallback
-    return [
-      { title: '도움말 | SureCRM' },
-      {
-        name: 'description',
-        content:
-          'SureCRM 사용법과 자주 묻는 질문을 확인하세요. 고객 지원팀이 도움을 드립니다.',
-      },
-    ];
-  }
+  const url = 'https://surecrm.pro/help';
 
   return [
+    // 🎯 기본 SEO 태그들 - 지원/사용법 최적화
     { title: meta.title },
     { name: 'description', content: meta.description },
+    {
+      name: 'keywords',
+      content:
+        'SureCRM 도움말, 사용법, FAQ, 자주묻는질문, 고객지원, 보험설계사 CRM 가이드, 튜토리얼, 사용자 메뉴얼',
+    },
+    { name: 'author', content: 'SureCRM Support Team' },
+    { name: 'robots', content: 'index, follow' },
+
+    // 🌐 Open Graph
+    { property: 'og:title', content: meta.title },
+    { property: 'og:description', content: meta.description },
+    { property: 'og:type', content: 'article' },
+    { property: 'og:url', content: url },
+    { property: 'og:site_name', content: 'SureCRM' },
+    { property: 'og:image', content: 'https://surecrm.pro/og-help.png' },
+    { property: 'article:section', content: 'Support' },
+    { property: 'article:tag', content: 'help,faq,tutorial,guide' },
+
+    // 🐦 Twitter Cards
+    { name: 'twitter:card', content: 'summary_large_image' },
+    { name: 'twitter:title', content: meta.title },
+    { name: 'twitter:description', content: meta.description },
+    { name: 'twitter:image', content: 'https://surecrm.pro/og-help.png' },
+
+    // 🔗 Canonical URL
+    { tagName: 'link', rel: 'canonical', href: url },
+
+    // 🌍 다국어 대체 링크들
+    {
+      tagName: 'link',
+      rel: 'alternate',
+      hrefLang: 'ko',
+      href: 'https://surecrm.pro/help',
+    },
+    {
+      tagName: 'link',
+      rel: 'alternate',
+      hrefLang: 'en',
+      href: 'https://surecrm.pro/en/help',
+    },
+    {
+      tagName: 'link',
+      rel: 'alternate',
+      hrefLang: 'ja',
+      href: 'https://surecrm.pro/ja/help',
+    },
+    {
+      tagName: 'link',
+      rel: 'alternate',
+      hrefLang: 'x-default',
+      href: 'https://surecrm.pro/help',
+    },
+
+    // 🆘 FAQ Schema - 자주 묻는 질문
+    {
+      'script:ld+json': {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        name: meta.title,
+        description: meta.description,
+        url: url,
+        mainEntity: [
+          {
+            '@type': 'Question',
+            name: 'SureCRM은 어떤 서비스인가요?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'SureCRM은 보험설계사를 위한 전문 CRM 솔루션입니다. 고객 관계 관리, 소개 네트워크 추적, 영업 파이프라인 관리 등의 기능을 제공합니다.',
+            },
+          },
+          {
+            '@type': 'Question',
+            name: '무료 체험 기간은 얼마나 되나요?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: '14일 동안 모든 기능을 무료로 체험할 수 있습니다. 신용카드 등록 없이도 시작할 수 있습니다.',
+            },
+          },
+          {
+            '@type': 'Question',
+            name: '어떤 언어를 지원하나요?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: '한국어, 영어, 일본어를 지원합니다. 언어 설정에서 원하는 언어로 변경할 수 있습니다.',
+            },
+          },
+          {
+            '@type': 'Question',
+            name: '고객 지원은 어떻게 받을 수 있나요?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: '이메일(noah@surecrm.pro)을 통해 문의하실 수 있습니다. 평일 9시-18시에 답변드립니다.',
+            },
+          },
+          {
+            '@type': 'Question',
+            name: '데이터는 안전하게 보관되나요?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: '네, 모든 데이터는 암호화되어 안전하게 보관되며, 개인정보보호법을 준수합니다. 정기적인 백업으로 데이터 손실을 방지합니다.',
+            },
+          },
+        ],
+      },
+    },
+
+    // 📚 HowTo Schema - 시작하기 가이드
+    {
+      'script:ld+json': {
+        '@context': 'https://schema.org',
+        '@type': 'HowTo',
+        name: 'SureCRM 시작하기 가이드',
+        description: 'SureCRM을 처음 사용하는 보험설계사를 위한 단계별 가이드',
+        image: 'https://surecrm.pro/images/tutorial-guide.png',
+        totalTime: 'PT15M',
+        estimatedCost: {
+          '@type': 'MonetaryAmount',
+          currency: 'USD',
+          value: '0',
+        },
+        supply: [
+          {
+            '@type': 'HowToSupply',
+            name: '인터넷 연결',
+          },
+          {
+            '@type': 'HowToSupply',
+            name: '웹 브라우저',
+          },
+        ],
+        step: [
+          {
+            '@type': 'HowToStep',
+            name: '계정 생성',
+            text: 'SureCRM 계정을 생성하고 14일 무료 체험을 시작하세요',
+            url: 'https://surecrm.pro/auth/signup',
+            image: 'https://surecrm.pro/images/step1-signup.png',
+          },
+          {
+            '@type': 'HowToStep',
+            name: '고객 정보 등록',
+            text: '첫 번째 고객을 등록하고 CRM 시스템을 설정하세요',
+            url: 'https://surecrm.pro/clients',
+            image: 'https://surecrm.pro/images/step2-clients.png',
+          },
+          {
+            '@type': 'HowToStep',
+            name: '파이프라인 설정',
+            text: '영업 프로세스에 맞는 파이프라인을 구성하세요',
+            url: 'https://surecrm.pro/pipeline',
+            image: 'https://surecrm.pro/images/step3-pipeline.png',
+          },
+        ],
+      },
+    },
+
+    // 📄 Help Page Schema
+    {
+      'script:ld+json': {
+        '@context': 'https://schema.org',
+        '@type': 'WebPage',
+        name: meta.title,
+        description: meta.description,
+        url: url,
+        breadcrumb: {
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            {
+              '@type': 'ListItem',
+              position: 1,
+              name: '홈',
+              item: 'https://surecrm.pro',
+            },
+            {
+              '@type': 'ListItem',
+              position: 2,
+              name: '도움말',
+              item: url,
+            },
+          ],
+        },
+        mainEntity: {
+          '@type': 'TechArticle',
+          headline: meta.title,
+          description: meta.description,
+          author: {
+            '@type': 'Organization',
+            name: 'SureCRM Support Team',
+          },
+          publisher: {
+            '@type': 'Organization',
+            name: 'SureCRM',
+            logo: {
+              '@type': 'ImageObject',
+              url: 'https://surecrm.pro/logo-192.png',
+            },
+          },
+          dateModified: new Date().toISOString(),
+          inLanguage: 'ko-KR',
+          audience: {
+            '@type': 'BusinessAudience',
+            audienceType: 'Insurance Agents',
+          },
+        },
+      },
+    },
   ];
 }
 
