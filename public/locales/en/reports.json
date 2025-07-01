@@ -1,0 +1,252 @@
+{
+  "title": "Reports",
+  "subtitle": "Check your business performance and key metrics",
+  "header": {
+    "title": "Reports",
+    "description": "Check your business performance reports",
+    "dateRange": "Date Range: {{dateRange}}"
+  },
+  "periods": {
+    "week": "This Week",
+    "month": "This Month",
+    "quarter": "This Quarter",
+    "year": "This Year"
+  },
+  "buttons": {
+    "download": "Download",
+    "save": "Save",
+    "refresh": "Refresh",
+    "copy": "Copy",
+    "edit": "Edit",
+    "saveTemplate": "Save Template",
+    "resetTemplate": "Reset to Default",
+    "cancel": "Cancel"
+  },
+  "metrics": {
+    "title": "{{period}} Key Performance",
+    "subtitle": "Summary of major business metrics",
+    "totalClients": "Total Clients",
+    "newClients": "New Clients",
+    "totalReferrals": "Total Referrals",
+    "conversionRate": "Conversion Rate",
+    "revenue": "Total Commission",
+    "referrals": "Referrals",
+    "contracts": "Contracts",
+    "meetings": "Total Meetings",
+    "consultations": "Consultations",
+    "activeClients": "Active Clients",
+    "monthlyRecurringRevenue": "Contract Commission",
+    "averageClientValue": "Average Client Value",
+    "consultationStats": {
+      "title": "Consultation Efficiency",
+      "thisPeriod": "{{period}} Consultations",
+      "averagePerClient": "Average per client: {{count}}",
+      "mostFrequentType": "Main type: {{type}}",
+      "growth": "vs Previous Period"
+    },
+    "consultationTypes": {
+      "상담": "Consultation",
+      "미팅": "Meeting",
+      "전화": "Phone",
+      "방문": "Visit",
+      "기타": "Other"
+    }
+  },
+  "growth": {
+    "clients": "Client Growth",
+    "referrals": "Referral Growth",
+    "revenue": "Revenue Growth",
+    "noChange": "No Change",
+    "newData": "New Data",
+    "majorIncrease": "Major Increase",
+    "majorDecrease": "Major Decrease",
+    "comparison": "vs Previous Period"
+  },
+  "conversionStatus": {
+    "excellent": "Excellent",
+    "good": "Good",
+    "average": "Average",
+    "needsImprovement": "Needs Improvement",
+    "warning": "Warning",
+    "industryAverage": "Industry Average: 50-70%"
+  },
+  "efficiency": {
+    "meeting": "Meeting Efficiency",
+    "consultation": "Consultation Efficiency",
+    "averageConversion": "Average conversion per meeting: {{rate}}%",
+    "activeInPipeline": "Active in sales pipeline",
+    "percentageOfTotal": "Percentage of total: {{percentage}}%",
+    "contractCommission": "Contract Commission",
+    "actualSalesCommission": "Actual Sales Commission",
+    "oneTimeCommission": "One-time commission upon contract completion",
+    "averagePerContract": "Average per contract",
+    "includesActivity": "includes activity"
+  },
+  "badges": {
+    "active": "Active",
+    "inProgress": "In Progress"
+  },
+  "units": {
+    "people": "",
+    "cases": "",
+    "hours": " hours",
+    "currency": "",
+    "times": " times"
+  },
+  "kakaoReport": {
+    "title": "KakaoTalk Work Report",
+    "subtitle": "Generate work reports that can be shared via KakaoTalk",
+    "previewTitle": "Report Preview",
+    "workTimeTotal": "Total Work Hours",
+    "tabs": {
+      "daily": "Daily Report",
+      "weekly": "Weekly Report",
+      "monthly": "Monthly Report"
+    },
+    "workTime": {
+      "title": "Work Hours",
+      "start": "Start Time",
+      "end": "End Time",
+      "hours": "{{hours}} hours"
+    },
+    "activities": {
+      "title": "Work Activities",
+      "clientMeetings": "Client Meetings",
+      "phoneCalls": "Phone Consultations",
+      "quotations": "Quotations",
+      "contracts": "Contracts Closed",
+      "referrals": "New Referrals",
+      "prospects": "Prospects",
+      "followUps": "Follow-ups",
+      "adminTasks": "Administrative Tasks"
+    },
+    "performance": {
+      "excellent": "🌟 Excellent performance!",
+      "good": "👍 Good performance maintained.",
+      "needsImprovement": "📈 Continuous improvement needed.",
+      "requiresAction": "💪 More active sales activities required."
+    },
+    "suggestions": {
+      "title": "🎯 Improvement Points:",
+      "needsAnalysis": "• Strengthen customer needs analysis",
+      "expandNetwork": "• Expand referral network",
+      "diversifyPortfolio": "• Diversify product portfolio",
+      "allExcellent": "✨ All metrics are excellent!"
+    },
+    "templates": {
+      "daily": "Daily Work Report",
+      "weekly": "Weekly Performance Report",
+      "monthly": "Monthly Performance Report",
+      "customTemplate": "Using custom template",
+      "defaultTemplate": "Using default template"
+    },
+    "notifications": {
+      "copied": "Copied to clipboard!",
+      "templateSaved": "Template saved!",
+      "templateReset": "Reset to default template!"
+    },
+    "placeholders": {
+      "editTemplate": "Edit report content..."
+    },
+    "reportContent": {
+      "networking": "Networking",
+      "keyPerformance": "Key Performance",
+      "totalManagement": "Total Managed Clients",
+      "newClients": "New Clients",
+      "conversionRate": "Conversion Rate",
+      "weeklyRevenue": "Weekly Revenue",
+      "detailedActivities": "Detailed Activities",
+      "proposals": "Proposals",
+      "successfulContracts": "Successful Contracts",
+      "weeklyPeriod": "(Weekly)",
+      "weeklyHighlights": "This Week's Highlights",
+      "networkExpansion": "New referral network expansion",
+      "customerSatisfaction": "Existing customer satisfaction management",
+      "newProductConsultation": "New product proposals and consultations",
+      "nextWeekGoals": "Next Week's Goals",
+      "targetGoal": "target",
+      "achieve": "achievement",
+      "teamCollaboration": "Strengthen team collaboration",
+      "coreMetrics": "Core Performance Metrics",
+      "totalRevenue": "Total Revenue",
+      "averageClientRevenue": "Average Client Revenue",
+      "monthlyNewClients": "Monthly New Clients",
+      "referralNetwork": "Referral Network",
+      "growthMetrics": "Growth Metrics",
+      "monthlyActivitySummary": "Monthly Activity Summary",
+      "totalMeetings": "Total Meetings",
+      "proposalsQuotations": "Proposals/Quotations",
+      "contractsClosed": "Contracts Closed",
+      "specialAchievements": "Special Achievements",
+      "highValueClientSuccess": "High-value client acquisition success",
+      "consistentClientManagement": "Consistent client relationship management",
+      "revenueTargetExceeded": "Revenue target exceeded",
+      "stablePerformance": "Stable performance maintenance",
+      "nextMonthStrategy": "Next Month's Strategy",
+      "maximizeCustomerSatisfaction": "Maximize customer satisfaction",
+      "expandProductLineup": "Expand new product lineup",
+      "strengthenDigitalMarketing": "Strengthen digital marketing",
+      "thisWeekRange": "(This Week)"
+    },
+    "hashtags": {
+      "workReport": "WorkReport",
+      "insuranceAgent": "InsuranceAgent",
+      "weeklyReport": "WeeklyReport",
+      "performanceManagement": "PerformanceManagement",
+      "monthlyReport": "MonthlyReport",
+      "performanceAnalysis": "PerformanceAnalysis",
+      "goalAchievement": "GoalAchievement"
+    }
+  },
+  "insights": {
+    "title": "Business Insights",
+    "tabs": {
+      "overview": "Overview",
+      "performers": "Performance Analysis",
+      "goals": "Goal Management"
+    },
+    "overview": {
+      "title": "Comprehensive Performance Analysis",
+      "performanceAnalysis": "Performance Analysis",
+      "recommendations": "Recommendations",
+      "trends": "Trend Analysis"
+    },
+    "performers": {
+      "title": "Top Performers",
+      "topPerformers": "Top {{count}} Performers",
+      "emptyState": "No performance data available.",
+      "metrics": {
+        "clients": "{{count}} clients",
+        "revenue": "Commission {{amount}}",
+        "conversionRate": "Conversion rate {{rate}}%"
+      }
+    },
+    "goals": {
+      "title": "Goal Management",
+      "monthlyGoals": "Monthly Goals",
+      "progress": "Progress",
+      "completed": "Completed",
+      "inProgress": "In Progress",
+      "notStarted": "Not Started",
+      "emptyState": "No goals set.",
+      "manageGoals": "Manage Goals"
+    }
+  },
+  "downloadData": {
+    "period": "Period",
+    "dateRange": "Date Range",
+    "totalClients": "Total Clients",
+    "newClients": "New Clients",
+    "totalReferrals": "Total Referrals",
+    "conversionRate": "Conversion Rate",
+    "revenue": "Revenue",
+    "growth": "Growth",
+    "clientsGrowth": "Clients",
+    "referralsGrowth": "Referrals",
+    "revenueGrowth": "Revenue"
+  },
+  "errors": {
+    "loadingFailed": "Failed to load data.",
+    "copyFailed": "Failed to copy to clipboard."
+  }
+}

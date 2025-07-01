@@ -249,7 +249,7 @@ export function InsightsTabs({
       </CardHeader>
       <CardContent className="space-y-8">
         {/* 성과 트렌드 섹션 */}
-        <div className="space-y-6">
+        <div className="space-y-6 pt-4">
           <div className="flex items-center gap-2 pb-2 border-b">
             <TrendingUp className="h-5 w-5 text-primary" />
             <h3 className="text-lg font-semibold">성과 트렌드</h3>

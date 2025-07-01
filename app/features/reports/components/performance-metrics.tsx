@@ -22,35 +22,38 @@ import { cn } from '~/lib/utils';
 import { formatCurrencyByUnit } from '~/lib/utils/currency';
 import type { PerformanceData } from '../lib/supabase-reports-data';
 import type { PerformanceMetricsProps } from '../types';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 
 export function PerformanceMetrics({
   performance,
   period,
+  t: propT,
 }: PerformanceMetricsProps) {
+  const { t: hookT, i18n } = useHydrationSafeTranslation('reports');
+  const t = propT || hookT;
+
   // 🔥 기간에 맞는 텍스트 생성
   const getPeriodText = (periodType?: string) => {
-    switch (periodType) {
-      case 'week':
-        return '이번 주';
-      case 'month':
-        return '이번 달';
-      case 'quarter':
-        return '이번 분기';
-      case 'year':
-        return '올해';
-      default:
-        return '이번 달';
-    }
+    return t(`periods.${periodType}`, '이번 달');
   };
 
   const periodText = getPeriodText(period?.type);
-  // 통일된 통화 포맷팅 함수 사용
+  // 통일된 통화 포맷팅 함수 사용 (현재 언어 적용)
   const formatCurrency = (amount: number) => {
-    return formatCurrencyByUnit(amount);
+    const currentLocale = i18n?.language || 'ko';
+    const supportedLocale = ['ko', 'en', 'ja'].includes(currentLocale)
+      ? (currentLocale as 'ko' | 'en' | 'ja')
+      : 'ko';
+    return formatCurrencyByUnit(amount, supportedLocale);
   };
 
   const formatNumber = (num: number) => {
     return num.toLocaleString();
+  };
+
+  // 상담 타입 번역 함수
+  const translateConsultationType = (type: string) => {
+    return t(`consultationTypes.${type}`, type);
   };
 
   const TrendIndicator = ({
@@ -70,7 +73,7 @@ export function PerformanceMetrics({
     if (isZero) {
       return (
         <Badge variant="secondary" className="text-xs">
-          변화없음
+          {t('growth.noChange')}
         </Badge>
       );
     }
@@ -82,7 +85,7 @@ export function PerformanceMetrics({
           variant="outline"
           className="text-xs text-blue-600 dark:text-blue-400"
         >
-          신규 데이터
+          {t('growth.newData')}
         </Badge>
       );
     }
@@ -94,7 +97,7 @@ export function PerformanceMetrics({
           variant="outline"
           className="text-xs text-purple-600 dark:text-purple-400"
         >
-          {isPositive ? '대폭 증가' : '대폭 감소'}
+          {isPositive ? t('growth.majorIncrease') : t('growth.majorDecrease')}
         </Badge>
       );
     }
@@ -125,11 +128,14 @@ export function PerformanceMetrics({
 
   // 전환율에 따른 상태 표시
   const getConversionStatus = (rate: number) => {
-    if (rate >= 80) return { color: 'green', label: '매우 좋음' };
-    if (rate >= 60) return { color: 'blue', label: '좋음' };
-    if (rate >= 40) return { color: 'yellow', label: '보통' };
-    if (rate >= 20) return { color: 'orange', label: '개선 필요' };
-    return { color: 'red', label: '요주의' };
+    if (rate >= 80)
+      return { color: 'green', label: t('conversionStatus.excellent') };
+    if (rate >= 60) return { color: 'blue', label: t('conversionStatus.good') };
+    if (rate >= 40)
+      return { color: 'yellow', label: t('conversionStatus.average') };
+    if (rate >= 20)
+      return { color: 'orange', label: t('conversionStatus.needsImprovement') };
+    return { color: 'red', label: t('conversionStatus.warning') };
   };
 
   const conversionStatus = getConversionStatus(performance.conversionRate);
@@ -140,10 +146,10 @@ export function PerformanceMetrics({
       <Card className="bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800/50 dark:to-slate-900/50 border-slate-200 dark:border-slate-700">
         <CardHeader className="pb-3">
           <CardTitle className="text-lg text-slate-900 dark:text-slate-100">
-            {periodText} 핵심 성과
+            {t('metrics.title', { period: periodText })}
           </CardTitle>
           <CardDescription className="text-slate-700 dark:text-slate-300">
-            주요 비즈니스 지표 요약
+            {t('metrics.subtitle')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -153,7 +159,7 @@ export function PerformanceMetrics({
                 {formatNumber(performance.totalClients)}
               </div>
               <p className="text-sm text-slate-600 dark:text-slate-400">
-                총 고객수
+                {t('metrics.totalClients')}
               </p>
             </div>
             <div className="text-center">
@@ -161,7 +167,7 @@ export function PerformanceMetrics({
                 {formatNumber(performance.newClients)}
               </div>
               <p className="text-sm text-emerald-600 dark:text-emerald-400">
-                신규 고객
+                {t('metrics.newClients')}
               </p>
             </div>
             <div className="text-center">
@@ -169,7 +175,7 @@ export function PerformanceMetrics({
                 {performance.conversionRate}%
               </div>
               <p className="text-sm text-violet-600 dark:text-violet-400">
-                전환율
+                {t('metrics.conversionRate')}
               </p>
             </div>
             <div className="text-center">
@@ -177,7 +183,7 @@ export function PerformanceMetrics({
                 {formatCurrency(performance.revenue)}
               </div>
               <p className="text-sm text-amber-600 dark:text-amber-400">
-                총 수수료
+                {t('metrics.revenue')}
               </p>
             </div>
           </div>
@@ -189,7 +195,7 @@ export function PerformanceMetrics({
         <Card className="hover:shadow-lg dark:hover:shadow-slate-900/50 transition-shadow border-slate-200 dark:border-slate-700">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardDescription>총 고객 수</CardDescription>
+              <CardDescription>{t('metrics.totalClients')}</CardDescription>
               <Users className="h-4 w-4 text-slate-500 dark:text-slate-400" />
             </div>
             <CardTitle className="text-2xl flex items-center gap-2">
@@ -201,14 +207,16 @@ export function PerformanceMetrics({
           </CardHeader>
           <CardContent>
             <TrendIndicator value={performance.growth.clients} />
-            <p className="text-xs text-muted-foreground mt-1">지난 기간 대비</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {t('growth.comparison')}
+            </p>
           </CardContent>
         </Card>
 
         <Card className="hover:shadow-lg dark:hover:shadow-slate-900/50 transition-shadow border-slate-200 dark:border-slate-700">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardDescription>신규 고객</CardDescription>
+              <CardDescription>{t('metrics.newClients')}</CardDescription>
               <UserPlus className="h-4 w-4 text-emerald-500" />
             </div>
             <CardTitle className="text-2xl text-emerald-700 dark:text-emerald-400">
@@ -218,20 +226,24 @@ export function PerformanceMetrics({
           <CardContent>
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">
-                소개 {formatNumber(performance.totalReferrals)}건
+                {t('metrics.referrals')}{' '}
+                {formatNumber(performance.totalReferrals)}
+                {t('metrics.contracts')}
               </span>
               <Badge variant="outline" className="text-xs">
-                활발
+                {t('badges.active')}
               </Badge>
             </div>
-            <p className="text-xs text-muted-foreground mt-1">소개 활동 포함</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {t('metrics.referrals')} {t('efficiency.includesActivity')}
+            </p>
           </CardContent>
         </Card>
 
         <Card className="hover:shadow-lg dark:hover:shadow-slate-900/50 transition-shadow border-slate-200 dark:border-slate-700">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardDescription>계약 전환율</CardDescription>
+              <CardDescription>{t('metrics.conversionRate')}</CardDescription>
               <BarChart3 className="h-4 w-4 text-violet-500" />
             </div>
             <CardTitle className="text-2xl flex items-center gap-2">
@@ -248,14 +260,16 @@ export function PerformanceMetrics({
           </CardHeader>
           <CardContent>
             <Progress value={performance.conversionRate} className="h-2 mb-2" />
-            <p className="text-xs text-muted-foreground">업계 평균: 50-70%</p>
+            <p className="text-xs text-muted-foreground">
+              {t('conversionStatus.industryAverage')}
+            </p>
           </CardContent>
         </Card>
 
         <Card className="hover:shadow-lg dark:hover:shadow-slate-900/50 transition-shadow border-slate-200 dark:border-slate-700">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardDescription>총 수수료</CardDescription>
+              <CardDescription>{t('metrics.revenue')}</CardDescription>
               <DollarSign className="h-4 w-4 text-amber-500" />
             </div>
             <CardTitle className="text-2xl text-amber-700 dark:text-amber-400">
@@ -266,10 +280,12 @@ export function PerformanceMetrics({
             <TrendIndicator value={performance.growth.revenue} />
             <div className="flex items-center justify-between mt-2">
               <span className="text-xs text-muted-foreground">
-                계약당 평균: {formatCurrency(performance.averageClientValue)}
+                {t('efficiency.averagePerContract')}:{' '}
+                {formatCurrency(performance.averageClientValue)}
               </span>
               <Badge variant="secondary" className="text-xs">
-                {performance.activeClients}명 영업 중
+                {performance.activeClients}
+                {t('units.people')} {t('badges.inProgress')}
               </Badge>
             </div>
           </CardContent>
@@ -310,7 +326,7 @@ export function PerformanceMetrics({
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
               <MessageSquare className="h-4 w-4 text-blue-500" />
-              상담 효율성
+              {t('metrics.consultationStats.title')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -318,15 +334,23 @@ export function PerformanceMetrics({
               {performance.consultationStats.consultationsThisPeriod}
             </div>
             <p className="text-sm text-muted-foreground">
-              {periodText} 상담 건수
+              {t('metrics.consultationStats.thisPeriod', {
+                period: periodText,
+              })}
             </p>
             <div className="mt-2 space-y-1">
               <div className="text-xs text-muted-foreground">
-                고객당 평균:{' '}
-                {performance.consultationStats.averageConsultationsPerClient}건
+                {t('metrics.consultationStats.averagePerClient', {
+                  count:
+                    performance.consultationStats.averageConsultationsPerClient,
+                })}
               </div>
               <div className="text-xs text-muted-foreground">
-                주요 유형: {performance.consultationStats.mostFrequentNoteType}
+                {t('metrics.consultationStats.mostFrequentType', {
+                  type: translateConsultationType(
+                    performance.consultationStats.mostFrequentNoteType
+                  ),
+                })}
               </div>
               {performance.consultationStats.consultationGrowth !== 0 && (
                 <div className="text-xs">
@@ -335,7 +359,7 @@ export function PerformanceMetrics({
                     className="justify-start"
                   />
                   <span className="text-muted-foreground ml-1">
-                    전기간 대비
+                    {t('metrics.consultationStats.growth')}
                   </span>
                 </div>
               )}
@@ -347,7 +371,7 @@ export function PerformanceMetrics({
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
               <Users className="h-4 w-4 text-purple-500" />
-              활성 고객
+              {t('metrics.activeClients')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -355,17 +379,18 @@ export function PerformanceMetrics({
               {performance.activeClients}
             </div>
             <p className="text-sm text-muted-foreground">
-              영업 파이프라인 진행 중
+              {t('efficiency.activeInPipeline')}
             </p>
             <div className="mt-2 text-xs text-muted-foreground">
-              전체 대비:{' '}
-              {performance.totalClients > 0
-                ? (
-                    (performance.activeClients / performance.totalClients) *
-                    100
-                  ).toFixed(1)
-                : 0}
-              %
+              {t('efficiency.percentageOfTotal', {
+                percentage:
+                  performance.totalClients > 0
+                    ? (
+                        (performance.activeClients / performance.totalClients) *
+                        100
+                      ).toFixed(1)
+                    : 0,
+              })}
             </div>
           </CardContent>
         </Card>
@@ -374,16 +399,18 @@ export function PerformanceMetrics({
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-green-500" />
-              계약 수수료
+              {t('efficiency.contractCommission')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-700 dark:text-green-400">
               {formatCurrency(performance.monthlyRecurringRevenue)}
             </div>
-            <p className="text-sm text-muted-foreground">실제 영업 수수료</p>
+            <p className="text-sm text-muted-foreground">
+              {t('efficiency.actualSalesCommission')}
+            </p>
             <div className="mt-2 text-xs text-muted-foreground">
-              계약 완료 시 받는 1회성 수수료
+              {t('efficiency.oneTimeCommission')}
             </div>
           </CardContent>
         </Card>

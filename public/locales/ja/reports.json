@@ -1,0 +1,252 @@
+{
+  "title": "レポート",
+  "subtitle": "ビジネス成果と主要指標を確認してください",
+  "header": {
+    "title": "レポート",
+    "description": "ビジネス成果レポートを確認してください",
+    "dateRange": "期間: {{dateRange}}"
+  },
+  "periods": {
+    "week": "今週",
+    "month": "今月",
+    "quarter": "今四半期",
+    "year": "今年"
+  },
+  "buttons": {
+    "download": "ダウンロード",
+    "save": "保存",
+    "refresh": "更新",
+    "copy": "コピー",
+    "edit": "編集",
+    "saveTemplate": "テンプレート保存",
+    "resetTemplate": "デフォルトに戻す",
+    "cancel": "キャンセル"
+  },
+  "metrics": {
+    "title": "{{period}}主要成果",
+    "subtitle": "主要ビジネス指標のサマリー",
+    "totalClients": "総顧客数",
+    "newClients": "新規顧客",
+    "totalReferrals": "総紹介件数",
+    "conversionRate": "コンバージョン率",
+    "revenue": "総手数料",
+    "referrals": "紹介",
+    "contracts": "件",
+    "meetings": "総ミーティング数",
+    "consultations": "相談件数",
+    "activeClients": "アクティブ顧客",
+    "monthlyRecurringRevenue": "契約手数料",
+    "averageClientValue": "顧客あたり平均売上",
+    "consultationStats": {
+      "title": "相談効率",
+      "thisPeriod": "{{period}}相談件数",
+      "averagePerClient": "顧客あたり平均: {{count}}件",
+      "mostFrequentType": "主要タイプ: {{type}}",
+      "growth": "前期間比"
+    },
+    "consultationTypes": {
+      "상담": "相談",
+      "미팅": "ミーティング",
+      "전화": "電話",
+      "방문": "訪問",
+      "기타": "その他"
+    }
+  },
+  "growth": {
+    "clients": "顧客増加率",
+    "referrals": "紹介増加率",
+    "revenue": "売上増加率",
+    "noChange": "変化なし",
+    "newData": "新規データ",
+    "majorIncrease": "大幅増加",
+    "majorDecrease": "大幅減少",
+    "comparison": "前期間比"
+  },
+  "conversionStatus": {
+    "excellent": "非常に良い",
+    "good": "良い",
+    "average": "普通",
+    "needsImprovement": "改善が必要",
+    "warning": "要注意",
+    "industryAverage": "業界平均: 50-70%"
+  },
+  "efficiency": {
+    "meeting": "ミーティング効率",
+    "consultation": "相談効率",
+    "averageConversion": "ミーティングあたり平均コンバージョン: {{rate}}%",
+    "activeInPipeline": "営業パイプライン進行中",
+    "percentageOfTotal": "全体の: {{percentage}}%",
+    "contractCommission": "契約手数料",
+    "actualSalesCommission": "実際の営業手数料",
+    "oneTimeCommission": "契約完了時に受け取る一回性手数料",
+    "averagePerContract": "契約あたり平均",
+    "includesActivity": "活動含む"
+  },
+  "badges": {
+    "active": "アクティブ",
+    "inProgress": "営業中"
+  },
+  "units": {
+    "people": "名",
+    "cases": "件",
+    "hours": "時間",
+    "currency": "円",
+    "times": "回"
+  },
+  "kakaoReport": {
+    "title": "KakaoTalk業務報告",
+    "subtitle": "KakaoTalkで共有できる業務報告書を生成してください",
+    "previewTitle": "レポートプレビュー",
+    "workTimeTotal": "総勤務時間",
+    "tabs": {
+      "daily": "日次報告",
+      "weekly": "週次報告",
+      "monthly": "月次報告"
+    },
+    "workTime": {
+      "title": "勤務時間",
+      "start": "開始時間",
+      "end": "終了時間",
+      "hours": "{{hours}}時間"
+    },
+    "activities": {
+      "title": "業務活動",
+      "clientMeetings": "顧客ミーティング",
+      "phoneCalls": "電話相談",
+      "quotations": "見積提案",
+      "contracts": "契約成立",
+      "referrals": "新規紹介",
+      "prospects": "見込み顧客",
+      "followUps": "フォローアップ",
+      "adminTasks": "その他業務"
+    },
+    "performance": {
+      "excellent": "🌟 優秀な成果を収めています！",
+      "good": "👍 良好な実績を維持しています。",
+      "needsImprovement": "📈 継続的な改善が必要です。",
+      "requiresAction": "💪 より積極的な営業活動が必要です。"
+    },
+    "suggestions": {
+      "title": "🎯 改善ポイント:",
+      "needsAnalysis": "• 顧客ニーズ分析の強化",
+      "expandNetwork": "• 紹介ネットワークの拡大",
+      "diversifyPortfolio": "• 商品ポートフォリオの多様化",
+      "allExcellent": "✨ すべての指標が優秀です！"
+    },
+    "templates": {
+      "daily": "日次業務報告書",
+      "weekly": "週次成果報告書",
+      "monthly": "月次成果レポート",
+      "customTemplate": "カスタムテンプレート使用中",
+      "defaultTemplate": "デフォルトテンプレート使用中"
+    },
+    "notifications": {
+      "copied": "コピーされました！",
+      "templateSaved": "テンプレートが保存されました！",
+      "templateReset": "デフォルトテンプレートに初期化されました！"
+    },
+    "placeholders": {
+      "editTemplate": "レポート内容を編集してください..."
+    },
+    "reportContent": {
+      "networking": "ネットワーキング",
+      "keyPerformance": "主要成果",
+      "totalManagement": "総管理顧客",
+      "newClients": "新規顧客",
+      "conversionRate": "コンバージョン率",
+      "weeklyRevenue": "週間売上",
+      "detailedActivities": "詳細活動",
+      "proposals": "提案書",
+      "successfulContracts": "成約契約",
+      "weeklyPeriod": "(週間)",
+      "weeklyHighlights": "今週のハイライト",
+      "networkExpansion": "新規紹介ネットワーク拡大",
+      "customerSatisfaction": "既存顧客満足度管理",
+      "newProductConsultation": "新商品提案および相談",
+      "nextWeekGoals": "来週の目標",
+      "targetGoal": "目標",
+      "achieve": "達成",
+      "teamCollaboration": "チーム協力強化",
+      "coreMetrics": "核心成果指標",
+      "totalRevenue": "総売上",
+      "averageClientRevenue": "顧客あたり平均売上",
+      "monthlyNewClients": "月間新規顧客",
+      "referralNetwork": "紹介ネットワーク",
+      "growthMetrics": "成長指標",
+      "monthlyActivitySummary": "月間活動要約",
+      "totalMeetings": "総ミーティング",
+      "proposalsQuotations": "提案/見積",
+      "contractsClosed": "契約成立",
+      "specialAchievements": "特別成果",
+      "highValueClientSuccess": "高額顧客獲得成功",
+      "consistentClientManagement": "継続的顧客管理実践",
+      "revenueTargetExceeded": "手数料目標超過達成",
+      "stablePerformance": "安定的成果維持",
+      "nextMonthStrategy": "来月戦略",
+      "maximizeCustomerSatisfaction": "顧客満足度最大化",
+      "expandProductLineup": "新商品ラインナップ拡大",
+      "strengthenDigitalMarketing": "デジタルマーケティング強化",
+      "thisWeekRange": "(今週)"
+    },
+    "hashtags": {
+      "workReport": "業務報告",
+      "insuranceAgent": "保険設計士",
+      "weeklyReport": "週次報告",
+      "performanceManagement": "成果管理",
+      "monthlyReport": "月次報告",
+      "performanceAnalysis": "成果分析",
+      "goalAchievement": "目標達成"
+    }
+  },
+  "insights": {
+    "title": "ビジネスインサイト",
+    "tabs": {
+      "overview": "総合分析",
+      "performers": "成果分析",
+      "goals": "目標管理"
+    },
+    "overview": {
+      "title": "成果総合分析",
+      "performanceAnalysis": "成果分析",
+      "recommendations": "改善提案",
+      "trends": "トレンド分析"
+    },
+    "performers": {
+      "title": "優秀成果者",
+      "topPerformers": "TOP {{count}} 成果者",
+      "emptyState": "成果データがありません。",
+      "metrics": {
+        "clients": "顧客 {{count}}名",
+        "revenue": "手数料 {{amount}}",
+        "conversionRate": "コンバージョン率 {{rate}}%"
+      }
+    },
+    "goals": {
+      "title": "目標管理",
+      "monthlyGoals": "月間目標",
+      "progress": "進捗率",
+      "completed": "達成完了",
+      "inProgress": "進行中",
+      "notStarted": "開始前",
+      "emptyState": "設定された目標がありません。",
+      "manageGoals": "目標管理"
+    }
+  },
+  "downloadData": {
+    "period": "期間",
+    "dateRange": "期間",
+    "totalClients": "総顧客数",
+    "newClients": "新規顧客",
+    "totalReferrals": "総紹介件数",
+    "conversionRate": "コンバージョン率",
+    "revenue": "売上",
+    "growth": "成長率",
+    "clientsGrowth": "顧客",
+    "referralsGrowth": "紹介",
+    "revenueGrowth": "売上"
+  },
+  "errors": {
+    "loadingFailed": "データの読み込みに失敗しました。",
+    "copyFailed": "コピーに失敗しました。"
+  }
+}

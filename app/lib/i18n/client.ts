@@ -23,6 +23,7 @@ export const NAMESPACES = [
   'network', // 소개 네트워크
   'pipeline', // 영업 파이프라인
   'invitations', // 초대장 관리
+  'reports', // 보고서
   'errors', // 에러 메시지
 ] as const;
 

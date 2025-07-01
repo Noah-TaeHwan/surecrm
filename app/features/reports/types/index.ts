@@ -87,6 +87,7 @@ export interface PerformanceMetricsProps {
   performance: PerformanceData;
   period?: ReportPeriod;
   showComparison?: boolean;
+  t?: (key: string, options?: any) => string;
 }
 
 export interface KakaoReportProps {

@@ -33,6 +33,8 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import type { KakaoReportProps, KakaoReportData } from '../types';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
+import { formatCurrencyByUnit } from '~/lib/utils/currency';
 import React from 'react';
 
 export function KakaoReport({
@@ -40,31 +42,31 @@ export function KakaoReport({
   user,
   period = 'month',
 }: KakaoReportProps) {
+  const { t, i18n } = useHydrationSafeTranslation('reports');
+
   // 🔥 기간에 맞는 텍스트 생성
   const getPeriodText = (periodType: string) => {
-    switch (periodType) {
-      case 'week':
-        return '이번 주';
-      case 'month':
-        return '이번 달';
-      case 'quarter':
-        return '이번 분기';
-      case 'year':
-        return '올해';
-      default:
-        return '이번 달';
-    }
+    return t(`periods.${periodType}`, '이번 달');
   };
 
   const periodText = getPeriodText(period);
 
+  // 통일된 통화 포맷팅 함수 사용 (현재 언어 적용)
+  const formatCurrency = (amount: number) => {
+    const currentLocale = i18n?.language || 'ko';
+    const supportedLocale = ['ko', 'en', 'ja'].includes(currentLocale)
+      ? (currentLocale as 'ko' | 'en' | 'ja')
+      : 'ko';
+    return formatCurrencyByUnit(amount, supportedLocale);
+  };
+
   // 🔧 성장률 안전 표시 함수
   const formatGrowthRate = (value: number): string => {
     if (!isFinite(value) || isNaN(value)) {
-      return '신규';
+      return t('growth.newData');
     }
     if (Math.abs(value) >= 500) {
-      return value > 0 ? '대폭증가' : '대폭감소';
+      return value > 0 ? t('growth.majorIncrease') : t('growth.majorDecrease');
     }
     return `${value > 0 ? '+' : ''}${Math.round(value * 10) / 10}%`;
   };
@@ -114,27 +116,27 @@ export function KakaoReport({
       reportData.workEndTime
     );
 
-    return `📊 일일 업무 보고서 - ${userName}님
-⏰ 근무시간: ${reportData.workStartTime} ~ ${
+    return `📊 ${t('kakaoReport.templates.daily')} - ${userName}
+⏰ ${t('kakaoReport.workTime.title')}: ${reportData.workStartTime} ~ ${
       reportData.workEndTime
-    } (${workHours}시간)
+    } (${t('kakaoReport.workTime.hours', { hours: workHours })})
 
-👥 고객 업무:
-• 고객 미팅: ${reportData.clientMeetings}건
-• 전화 상담: ${reportData.phoneCalls}건  
-• 견적 제안: ${reportData.quotations}건
-• 계약 성사: ${reportData.contracts}건
+👥 ${t('kakaoReport.activities.title')}:
+• ${t('kakaoReport.activities.clientMeetings')}: ${reportData.clientMeetings}${t('units.cases')}
+• ${t('kakaoReport.activities.phoneCalls')}: ${reportData.phoneCalls}${t('units.cases')}  
+• ${t('kakaoReport.activities.quotations')}: ${reportData.quotations}${t('units.cases')}
+• ${t('kakaoReport.activities.contracts')}: ${reportData.contracts}${t('units.cases')}
 
-🔗 네트워킹:
-• 신규 소개: ${reportData.referrals}건
-• 잠재 고객: ${reportData.prospects}건
-• 후속 관리: ${reportData.followUps}건
+🔗 ${t('kakaoReport.reportContent.networking')}:
+• ${t('kakaoReport.activities.referrals')}: ${reportData.referrals}${t('units.cases')}
+• ${t('kakaoReport.activities.prospects')}: ${reportData.prospects}${t('units.cases')}
+• ${t('kakaoReport.activities.followUps')}: ${reportData.followUps}${t('units.cases')}
 
-📋 기타 업무: ${reportData.adminTasks}건
+📋 ${t('kakaoReport.activities.adminTasks')}: ${reportData.adminTasks}${t('units.cases')}
 
 ${getPerformanceGrade(performance)} ${getImprovementSuggestions(performance)}
 
-#SureCRM #업무보고 #보험설계사 #${userName}`;
+#SureCRM #${t('kakaoReport.hashtags.workReport')} #${t('kakaoReport.hashtags.insuranceAgent')} #${userName}`;
   };
 
   const generateWeeklyReport = () => {
@@ -143,74 +145,74 @@ ${getPerformanceGrade(performance)} ${getImprovementSuggestions(performance)}
     const newClients = performance.newClients || 0;
     const conversionRate = performance.conversionRate || 0;
 
-    return `📈 주간 성과 보고서 ${weekRange} - ${userName}님
+    return `📈 ${t('kakaoReport.templates.weekly')} ${weekRange} - ${userName}
 
-🎯 주요 성과:
-• 총 관리 고객: ${totalClients}명
-• 신규 고객: ${newClients}명  
-• 전환율: ${conversionRate.toFixed(1)}%
-• 주간 매출: ${(performance.revenue || 0).toLocaleString()}원
+🎯 ${t('kakaoReport.reportContent.keyPerformance')}:
+• ${t('kakaoReport.reportContent.totalManagement')}: ${totalClients}${t('units.people')}
+• ${t('kakaoReport.reportContent.newClients')}: ${newClients}${t('units.people')}  
+• ${t('kakaoReport.reportContent.conversionRate')}: ${conversionRate.toFixed(1)}%
+• ${t('kakaoReport.reportContent.weeklyRevenue')}: ${formatCurrency(performance.revenue || 0)}
 
-📊 상세 활동:
-• 고객 미팅: ${reportData.clientMeetings * 5}건 (주간)
-• 전화 상담: ${reportData.phoneCalls * 5}건
-• 제안서: ${reportData.quotations * 5}건
-• 성사 계약: ${reportData.contracts * 5}건
+📊 ${t('kakaoReport.reportContent.detailedActivities')}:
+• ${t('kakaoReport.activities.clientMeetings')}: ${reportData.clientMeetings * 5}${t('units.cases')} ${t('kakaoReport.reportContent.weeklyPeriod')}
+• ${t('kakaoReport.activities.phoneCalls')}: ${reportData.phoneCalls * 5}${t('units.cases')}
+• ${t('kakaoReport.reportContent.proposals')}: ${reportData.quotations * 5}${t('units.cases')}
+• ${t('kakaoReport.reportContent.successfulContracts')}: ${reportData.contracts * 5}${t('units.cases')}
 
-🔥 이번 주 하이라이트:
-• 신규 소개 네트워크 확장 
-• 기존 고객 만족도 관리
-• 신상품 제안 및 상담
+🔥 ${t('kakaoReport.reportContent.weeklyHighlights')}:
+• ${t('kakaoReport.reportContent.networkExpansion')}
+• ${t('kakaoReport.reportContent.customerSatisfaction')}
+• ${t('kakaoReport.reportContent.newProductConsultation')}
 
-💪 다음 주 목표:
-• 신규 고객 ${Math.ceil(newClients * 1.2)}명 목표
-• 전환율 ${(conversionRate + 5).toFixed(1)}% 달성
-• 팀 협업 강화
+💪 ${t('kakaoReport.reportContent.nextWeekGoals')}:
+• ${t('kakaoReport.reportContent.newClients')} ${Math.ceil(newClients * 1.2)}${t('units.people')} ${t('kakaoReport.reportContent.targetGoal')}
+• ${t('kakaoReport.reportContent.conversionRate')} ${(conversionRate + 5).toFixed(1)}% ${t('kakaoReport.reportContent.achieve')}
+• ${t('kakaoReport.reportContent.teamCollaboration')}
 
-#주간보고 #성과관리 #SureCRM #${userName}`;
+#${t('kakaoReport.hashtags.weeklyReport')} #${t('kakaoReport.hashtags.performanceManagement')} #SureCRM #${userName}`;
   };
 
   const generateMonthlyReport = () => {
     const totalRevenue = performance.revenue || 0;
     const averageClientValue = performance.averageClientValue || 0;
 
-    return `🏆 ${periodText} 성과 리포트 - ${userName}님
+    return `🏆 ${periodText} ${t('kakaoReport.templates.monthly')} - ${userName}
 
-💎 핵심 성과 지표:
-• 총 매출: ${totalRevenue.toLocaleString()}원
-• 고객당 평균 매출: ${averageClientValue.toLocaleString()}원
-• 월간 신규 고객: ${performance.newClients || 0}명
-• 추천 네트워크: ${performance.totalReferrals || 0}건
+💎 ${t('kakaoReport.reportContent.coreMetrics')}:
+• ${t('kakaoReport.reportContent.totalRevenue')}: ${formatCurrency(totalRevenue)}
+• ${t('kakaoReport.reportContent.averageClientRevenue')}: ${formatCurrency(averageClientValue)}
+• ${t('kakaoReport.reportContent.monthlyNewClients')}: ${performance.newClients || 0}${t('units.people')}
+• ${t('kakaoReport.reportContent.referralNetwork')}: ${performance.totalReferrals || 0}${t('units.cases')}
 
-📈 성장 지표:
-• 고객 증가율: ${formatGrowthRate(performance.growth?.clients || 0)}
-• 매출 증가율: ${formatGrowthRate(performance.growth?.revenue || 0)}
-• 추천 증가율: ${formatGrowthRate(performance.growth?.referrals || 0)}
+📈 ${t('kakaoReport.reportContent.growthMetrics')}:
+• ${t('growth.clients')}: ${formatGrowthRate(performance.growth?.clients || 0)}
+• ${t('growth.revenue')}: ${formatGrowthRate(performance.growth?.revenue || 0)}
+• ${t('growth.referrals')}: ${formatGrowthRate(performance.growth?.referrals || 0)}
 
-🎯 월간 활동 요약:
-• 총 미팅: ${reportData.clientMeetings * 20}회
-• 전화 상담: ${reportData.phoneCalls * 20}회
-• 제안/견적: ${reportData.quotations * 20}건
-• 계약 성사: ${reportData.contracts * 20}건
+🎯 ${t('kakaoReport.reportContent.monthlyActivitySummary')}:
+• ${t('kakaoReport.reportContent.totalMeetings')}: ${reportData.clientMeetings * 20}${t('units.times')}
+• ${t('kakaoReport.activities.phoneCalls')}: ${reportData.phoneCalls * 20}${t('units.times')}
+• ${t('kakaoReport.reportContent.proposalsQuotations')}: ${reportData.quotations * 20}${t('units.cases')}
+• ${t('kakaoReport.reportContent.contractsClosed')}: ${reportData.contracts * 20}${t('units.cases')}
 
-🏅 특별 성과:
+🏅 ${t('kakaoReport.reportContent.specialAchievements')}:
 ${
   averageClientValue > 1000000
-    ? '• 고액 고객 유치 성공'
-    : '• 꾸준한 고객 관리 실천'
+    ? `• ${t('kakaoReport.reportContent.highValueClientSuccess')}`
+    : `• ${t('kakaoReport.reportContent.consistentClientManagement')}`
 }
 ${
   (performance.growth?.revenue || 0) > 10
-    ? '• 수수료 목표 초과 달성'
-    : '• 안정적 성과 유지'
+    ? `• ${t('kakaoReport.reportContent.revenueTargetExceeded')}`
+    : `• ${t('kakaoReport.reportContent.stablePerformance')}`
 }
 
-👀 다음 달 전략:
-• 고객 만족도 극대화
-• 신규 상품 라인업 확대  
-• 디지털 마케팅 강화
+👀 ${t('kakaoReport.reportContent.nextMonthStrategy')}:
+• ${t('kakaoReport.reportContent.maximizeCustomerSatisfaction')}
+• ${t('kakaoReport.reportContent.expandProductLineup')}
+• ${t('kakaoReport.reportContent.strengthenDigitalMarketing')}
 
-#월간보고 #성과분석 #목표달성 #SureCRM #${userName}`;
+#${t('kakaoReport.hashtags.monthlyReport')} #${t('kakaoReport.hashtags.performanceAnalysis')} #${t('kakaoReport.hashtags.goalAchievement')} #SureCRM #${userName}`;
   };
 
   const calculateWorkHours = (start: string, end: string): number => {
@@ -222,32 +224,33 @@ ${
   };
 
   const getWeekRange = (): string => {
-    return '(이번 주)';
+    return t('kakaoReport.reportContent.thisWeekRange');
   };
 
   const getPerformanceGrade = (perf: any): string => {
     const conversionRate = perf.conversionRate || 0;
-    if (conversionRate >= 15) return '🌟 우수한 성과를 거두고 있습니다!';
-    if (conversionRate >= 10) return '👍 양호한 실적을 유지하고 있습니다.';
-    if (conversionRate >= 5) return '📈 꾸준한 개선이 필요합니다.';
-    return '💪 더 적극적인 영업 활동이 필요합니다.';
+    if (conversionRate >= 15) return t('kakaoReport.performance.excellent');
+    if (conversionRate >= 10) return t('kakaoReport.performance.good');
+    if (conversionRate >= 5)
+      return t('kakaoReport.performance.needsImprovement');
+    return t('kakaoReport.performance.requiresAction');
   };
 
   const getImprovementSuggestions = (perf: any): string => {
     const suggestions = [];
     if ((perf.conversionRate || 0) < 10) {
-      suggestions.push('• 고객 니즈 분석 강화');
+      suggestions.push(`• ${t('kakaoReport.suggestions.needsAnalysis')}`);
     }
     if ((perf.totalReferrals || 0) < 5) {
-      suggestions.push('• 추천 네트워크 확대');
+      suggestions.push(`• ${t('kakaoReport.suggestions.expandNetwork')}`);
     }
     if ((perf.averageClientValue || 0) < 500000) {
-      suggestions.push('• 상품 포트폴리오 다양화');
+      suggestions.push(`• ${t('kakaoReport.suggestions.diversifyPortfolio')}`);
     }
 
     return suggestions.length > 0
-      ? `\n🎯 개선 포인트:\n${suggestions.join('\n')}`
-      : '\n✨ 모든 지표가 우수합니다!';
+      ? `\n${t('kakaoReport.suggestions.title')}\n${suggestions.join('\n')}`
+      : `\n${t('kakaoReport.suggestions.allExcellent')}`;
   };
 
   const handleCopyReport = async (reportType: string, text: string) => {
@@ -525,42 +528,43 @@ ${
       <CardHeader>
         <CardTitle className="text-zinc-100 flex items-center gap-2">
           <MessageCircle className="h-5 w-5 text-emerald-400" />
-          카카오톡 업무 보고서
+          {t('kakaoReport.title')}
         </CardTitle>
         <CardDescription className="text-zinc-400">
-          업무 내용을 입력하고 카카오톡용 보고서를 생성하세요
+          {t('kakaoReport.subtitle')}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="space-y-6">
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between pt-4">
                 <h3 className="text-lg font-semibold text-zinc-100 flex items-center gap-2">
                   <Clock className="h-5 w-5 text-blue-400" />
-                  근무 시간 설정
+                  {t('kakaoReport.workTime.title')}
                 </h3>
                 <div className="text-sm text-zinc-400">
-                  총 근무시간:{' '}
+                  {t('kakaoReport.workTimeTotal')}:{' '}
                   <span className="font-medium text-zinc-200">
-                    {calculateWorkHours(
-                      reportData.workStartTime,
-                      reportData.workEndTime
-                    )}
-                    시간
+                    {t('kakaoReport.workTime.hours', {
+                      hours: calculateWorkHours(
+                        reportData.workStartTime,
+                        reportData.workEndTime
+                      ),
+                    })}
                   </span>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4 p-4 rounded-lg bg-zinc-800/30 border border-zinc-700/50">
                 <TimeInput
-                  label="시작 시간"
+                  label={t('kakaoReport.workTime.start')}
                   value={reportData.workStartTime}
                   onChange={value =>
                     setReportData(prev => ({ ...prev, workStartTime: value }))
                   }
                 />
                 <TimeInput
-                  label="종료 시간"
+                  label={t('kakaoReport.workTime.end')}
                   value={reportData.workEndTime}
                   onChange={value =>
                     setReportData(prev => ({ ...prev, workEndTime: value }))
@@ -572,53 +576,53 @@ ${
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-zinc-100 flex items-center gap-2">
                 <Target className="h-5 w-5 text-orange-400" />
-                활동 지표 입력
+                {t('kakaoReport.activities.title')}
               </h3>
               <div className="grid grid-cols-2 gap-4 p-4 rounded-lg bg-zinc-800/30 border border-zinc-700/50">
                 <NumberInput
-                  label="고객 미팅"
+                  label={t('kakaoReport.activities.clientMeetings')}
                   value={reportData.clientMeetings}
                   field="clientMeetings"
                   icon={Users}
                 />
                 <NumberInput
-                  label="전화 상담"
+                  label={t('kakaoReport.activities.phoneCalls')}
                   value={reportData.phoneCalls}
                   field="phoneCalls"
                   icon={Phone}
                 />
                 <NumberInput
-                  label="견적 제안"
+                  label={t('kakaoReport.activities.quotations')}
                   value={reportData.quotations}
                   field="quotations"
                   icon={CalendarDays}
                 />
                 <NumberInput
-                  label="계약 성사"
+                  label={t('kakaoReport.activities.contracts')}
                   value={reportData.contracts}
                   field="contracts"
                   icon={Award}
                 />
                 <NumberInput
-                  label="신규 소개"
+                  label={t('kakaoReport.activities.referrals')}
                   value={reportData.referrals}
                   field="referrals"
                   icon={TrendingUp}
                 />
                 <NumberInput
-                  label="잠재 고객"
+                  label={t('kakaoReport.activities.prospects')}
                   value={reportData.prospects}
                   field="prospects"
                   icon={AlertCircle}
                 />
                 <NumberInput
-                  label="후속 관리"
+                  label={t('kakaoReport.activities.followUps')}
                   value={reportData.followUps}
                   field="followUps"
                   icon={Users}
                 />
                 <NumberInput
-                  label="기타 업무"
+                  label={t('kakaoReport.activities.adminTasks')}
                   value={reportData.adminTasks}
                   field="adminTasks"
                   icon={CalendarDays}
@@ -627,10 +631,10 @@ ${
             </div>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-4 pt-4">
             <h3 className="text-lg font-semibold text-zinc-100 flex items-center gap-2">
               <MessageCircle className="h-5 w-5 text-emerald-400" />
-              보고서 미리보기
+              {t('kakaoReport.previewTitle')}
             </h3>
 
             <Tabs defaultValue="daily" className="w-full">
@@ -639,19 +643,19 @@ ${
                   value="daily"
                   className="text-xs data-[state=active]:bg-zinc-700"
                 >
-                  일일 보고서
+                  {t('kakaoReport.tabs.daily')}
                 </TabsTrigger>
                 <TabsTrigger
                   value="weekly"
                   className="text-xs data-[state=active]:bg-zinc-700"
                 >
-                  주간 보고서
+                  {t('kakaoReport.tabs.weekly')}
                 </TabsTrigger>
                 <TabsTrigger
                   value="monthly"
                   className="text-xs data-[state=active]:bg-zinc-700"
                 >
-                  월간 보고서
+                  {t('kakaoReport.tabs.monthly')}
                 </TabsTrigger>
               </TabsList>
 
@@ -670,9 +674,7 @@ ${
                     }
                     readOnly={!editMode.daily}
                     className="min-h-[320px] text-sm font-mono bg-transparent border-none resize-none focus-visible:ring-0 text-zinc-200"
-                    placeholder={
-                      editMode.daily ? '보고서 내용을 수정하세요...' : ''
-                    }
+                    placeholder={editMode.daily ? t('buttons.edit') : ''}
                   />
                 </div>
                 <div className="flex gap-2">
@@ -686,12 +688,12 @@ ${
                     {copiedStates.daily ? (
                       <>
                         <Check className="mr-2 h-4 w-4" />
-                        복사됨!
+                        {t('kakaoReport.notifications.copied')}
                       </>
                     ) : (
                       <>
                         <Copy className="mr-2 h-4 w-4" />
-                        복사
+                        {t('buttons.copy')}
                       </>
                     )}
                   </Button>
@@ -711,7 +713,7 @@ ${
                       size="default"
                       className="border-zinc-600 text-zinc-300 hover:bg-zinc-700 px-4"
                     >
-                      양식 수정
+                      {t('buttons.edit')}
                     </Button>
                   ) : (
                     <>
@@ -723,10 +725,10 @@ ${
                         {copiedStates.saved_daily ? (
                           <>
                             <Check className="mr-2 h-4 w-4" />
-                            저장됨!
+                            {t('kakaoReport.notifications.templateSaved')}
                           </>
                         ) : (
-                          '양식 저장'
+                          t('buttons.saveTemplate')
                         )}
                       </Button>
                       <Button
@@ -737,7 +739,7 @@ ${
                         size="sm"
                         className="border-zinc-600 text-zinc-300 hover:bg-zinc-700"
                       >
-                        취소
+                        {t('buttons.cancel')}
                       </Button>
                       {hasCustomTemplate.daily && (
                         <Button
@@ -745,7 +747,7 @@ ${
                           variant="destructive"
                           size="sm"
                         >
-                          초기화
+                          {t('buttons.resetTemplate')}
                         </Button>
                       )}
                     </>
@@ -769,7 +771,9 @@ ${
                     readOnly={!editMode.weekly}
                     className="min-h-[320px] text-sm font-mono bg-transparent border-none resize-none focus-visible:ring-0 text-zinc-200"
                     placeholder={
-                      editMode.weekly ? '보고서 내용을 수정하세요...' : ''
+                      editMode.weekly
+                        ? t('kakaoReport.placeholders.editTemplate')
+                        : ''
                     }
                   />
                 </div>
@@ -784,12 +788,12 @@ ${
                     {copiedStates.weekly ? (
                       <>
                         <Check className="mr-2 h-4 w-4" />
-                        복사됨!
+                        {t('kakaoReport.notifications.copied')}
                       </>
                     ) : (
                       <>
                         <Copy className="mr-2 h-4 w-4" />
-                        복사
+                        {t('buttons.copy')}
                       </>
                     )}
                   </Button>
@@ -809,7 +813,7 @@ ${
                       size="default"
                       className="border-zinc-600 text-zinc-300 hover:bg-zinc-700 px-4"
                     >
-                      양식 수정
+                      {t('buttons.edit')}
                     </Button>
                   ) : (
                     <>
@@ -821,10 +825,10 @@ ${
                         {copiedStates.saved_weekly ? (
                           <>
                             <Check className="mr-2 h-4 w-4" />
-                            저장됨!
+                            {t('kakaoReport.notifications.templateSaved')}
                           </>
                         ) : (
-                          '양식 저장'
+                          t('buttons.saveTemplate')
                         )}
                       </Button>
                       <Button
@@ -835,7 +839,7 @@ ${
                         size="sm"
                         className="border-zinc-600 text-zinc-300 hover:bg-zinc-700"
                       >
-                        취소
+                        {t('buttons.cancel')}
                       </Button>
                       {hasCustomTemplate.weekly && (
                         <Button
@@ -843,7 +847,7 @@ ${
                           variant="destructive"
                           size="sm"
                         >
-                          초기화
+                          {t('buttons.resetTemplate')}
                         </Button>
                       )}
                     </>
@@ -867,7 +871,9 @@ ${
                     readOnly={!editMode.monthly}
                     className="min-h-[320px] text-sm font-mono bg-transparent border-none resize-none focus-visible:ring-0 text-zinc-200"
                     placeholder={
-                      editMode.monthly ? '보고서 내용을 수정하세요...' : ''
+                      editMode.monthly
+                        ? t('kakaoReport.placeholders.editTemplate')
+                        : ''
                     }
                   />
                 </div>
@@ -882,12 +888,12 @@ ${
                     {copiedStates.monthly ? (
                       <>
                         <Check className="mr-2 h-4 w-4" />
-                        복사됨!
+                        {t('kakaoReport.notifications.copied')}
                       </>
                     ) : (
                       <>
                         <Copy className="mr-2 h-4 w-4" />
-                        복사
+                        {t('buttons.copy')}
                       </>
                     )}
                   </Button>
@@ -907,7 +913,7 @@ ${
                       size="default"
                       className="border-zinc-600 text-zinc-300 hover:bg-zinc-700 px-4"
                     >
-                      양식 수정
+                      {t('buttons.edit')}
                     </Button>
                   ) : (
                     <>
@@ -919,10 +925,10 @@ ${
                         {copiedStates.saved_monthly ? (
                           <>
                             <Check className="mr-2 h-4 w-4" />
-                            저장됨!
+                            {t('kakaoReport.notifications.templateSaved')}
                           </>
                         ) : (
-                          '양식 저장'
+                          t('buttons.saveTemplate')
                         )}
                       </Button>
                       <Button
@@ -933,7 +939,7 @@ ${
                         size="sm"
                         className="border-zinc-600 text-zinc-300 hover:bg-zinc-700"
                       >
-                        취소
+                        {t('buttons.cancel')}
                       </Button>
                       {hasCustomTemplate.monthly && (
                         <Button
@@ -941,7 +947,7 @@ ${
                           variant="destructive"
                           size="sm"
                         >
-                          초기화
+                          {t('buttons.resetTemplate')}
                         </Button>
                       )}
                     </>

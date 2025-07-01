@@ -10,6 +10,7 @@ import {
 } from '~/common/components/ui/select';
 import { Download, Calendar, RefreshCw } from 'lucide-react';
 import { MainLayout } from '~/common/layouts/main-layout';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 import {
   getPerformanceData,
   getTopPerformers,
@@ -70,8 +71,8 @@ function getDateRangeOnServer(period: string): {
 
 export function meta({ data, params }: Route.MetaArgs) {
   return [
-    { title: '보고서 - SureCRM' },
-    { name: 'description', content: '비즈니스 성과 보고서를 확인하세요' },
+    { title: 'SureCRM - Reports' },
+    { name: 'description', content: 'Check your business performance reports' },
   ];
 }
 
@@ -191,6 +192,8 @@ export function action({ request }: Route.ActionArgs) {
 }
 
 export default function ReportsPage({ loaderData }: Route.ComponentProps) {
+  const { t } = useHydrationSafeTranslation('reports');
+
   const defaultData = {
     performance: {
       totalClients: 0,
@@ -256,30 +259,26 @@ export default function ReportsPage({ loaderData }: Route.ComponentProps) {
       : 'unknown';
 
     const reportData = {
-      기간:
-        selectedPeriod === 'week'
-          ? '이번 주'
-          : selectedPeriod === 'month'
-            ? '이번 달'
-            : selectedPeriod === 'quarter'
-              ? '이번 분기'
-              : '올해',
-      조회기간: dateRange.formatted,
-      총고객수: performance.totalClients,
-      신규고객: performance.newClients,
-      총소개건수: performance.totalReferrals,
-      전환율: `${performance.conversionRate}%`,
-      매출: `${performance.revenue.toLocaleString()}원`,
-      성장률: {
-        고객: `${performance.growth.clients > 0 ? '+' : ''}${
-          performance.growth.clients
-        }%`,
-        소개: `${performance.growth.referrals > 0 ? '+' : ''}${
-          performance.growth.referrals
-        }%`,
-        매출: `${performance.growth.revenue > 0 ? '+' : ''}${
-          performance.growth.revenue
-        }%`,
+      [t('downloadData.period')]: t(`periods.${selectedPeriod}`),
+      [t('downloadData.dateRange')]: dateRange.formatted,
+      [t('downloadData.totalClients')]: performance.totalClients,
+      [t('downloadData.newClients')]: performance.newClients,
+      [t('downloadData.totalReferrals')]: performance.totalReferrals,
+      [t('downloadData.conversionRate')]: `${performance.conversionRate}%`,
+      [t('downloadData.revenue')]: `${performance.revenue.toLocaleString()}원`,
+      [t('downloadData.growth')]: {
+        [t('downloadData.clientsGrowth')]:
+          `${performance.growth.clients > 0 ? '+' : ''}${
+            performance.growth.clients
+          }%`,
+        [t('downloadData.referralsGrowth')]:
+          `${performance.growth.referrals > 0 ? '+' : ''}${
+            performance.growth.referrals
+          }%`,
+        [t('downloadData.revenueGrowth')]:
+          `${performance.growth.revenue > 0 ? '+' : ''}${
+            performance.growth.revenue
+          }%`,
       },
     };
 
@@ -288,19 +287,19 @@ export default function ReportsPage({ loaderData }: Route.ComponentProps) {
     const url = URL.createObjectURL(dataBlob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `보고서_${selectedPeriod}_${downloadDate}.json`;
+    link.download = `${t('title')}_${t(`periods.${selectedPeriod}`)}_${downloadDate}.json`;
     link.click();
     URL.revokeObjectURL(url);
   };
 
   return (
-    <MainLayout title="보고서">
+    <MainLayout title={t('title')}>
       <div className="space-y-4 sm:space-y-6 px-2 sm:px-0">
         {/* 🎯 모바일 최적화: 헤더 */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
           <div className="space-y-1">
             <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-              비즈니스 성과와 주요 지표를 확인하세요
+              {t('subtitle')}
             </p>
             <p className="text-xs sm:text-sm text-muted-foreground flex items-center">
               <Calendar className="inline h-3 w-3 sm:h-4 sm:w-4 mr-1" />
@@ -320,10 +319,10 @@ export default function ReportsPage({ loaderData }: Route.ComponentProps) {
                 )}
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="week">이번 주</SelectItem>
-                <SelectItem value="month">이번 달</SelectItem>
-                <SelectItem value="quarter">이번 분기</SelectItem>
-                <SelectItem value="year">올해</SelectItem>
+                <SelectItem value="week">{t('periods.week')}</SelectItem>
+                <SelectItem value="month">{t('periods.month')}</SelectItem>
+                <SelectItem value="quarter">{t('periods.quarter')}</SelectItem>
+                <SelectItem value="year">{t('periods.year')}</SelectItem>
               </SelectContent>
             </Select>
             <Button
@@ -333,8 +332,8 @@ export default function ReportsPage({ loaderData }: Route.ComponentProps) {
               className="min-h-[44px] px-3 sm:px-4 flex-shrink-0"
             >
               <Download className="mr-1 sm:mr-2 h-4 w-4" />
-              <span className="hidden sm:inline">다운로드</span>
-              <span className="sm:hidden">저장</span>
+              <span className="hidden sm:inline">{t('buttons.download')}</span>
+              <span className="sm:hidden">{t('buttons.save')}</span>
             </Button>
           </div>
         </div>
@@ -348,6 +347,7 @@ export default function ReportsPage({ loaderData }: Route.ComponentProps) {
             endDate: new Date(dateRange.end),
             label: dateRange.formatted,
           }}
+          t={t}
         />
 
         {/* 🎯 모바일 최적화: 카카오톡 업무 보고 양식 */}

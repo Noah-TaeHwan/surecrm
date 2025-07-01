@@ -1,0 +1,252 @@
+{
+  "title": "보고서",
+  "subtitle": "비즈니스 성과와 주요 지표를 확인하세요",
+  "header": {
+    "title": "보고서",
+    "description": "비즈니스 성과 보고서를 확인하세요",
+    "dateRange": "조회 기간: {{dateRange}}"
+  },
+  "periods": {
+    "week": "이번 주",
+    "month": "이번 달",
+    "quarter": "이번 분기",
+    "year": "올해"
+  },
+  "buttons": {
+    "download": "다운로드",
+    "save": "저장",
+    "refresh": "새로고침",
+    "copy": "복사",
+    "edit": "편집",
+    "saveTemplate": "템플릿 저장",
+    "resetTemplate": "기본값으로 초기화",
+    "cancel": "취소"
+  },
+  "metrics": {
+    "title": "{{period}} 핵심 성과",
+    "subtitle": "주요 비즈니스 지표 요약",
+    "totalClients": "총 고객수",
+    "newClients": "신규 고객",
+    "totalReferrals": "총소개건수",
+    "conversionRate": "전환율",
+    "revenue": "총 수수료",
+    "referrals": "소개",
+    "contracts": "건",
+    "meetings": "총 미팅 수",
+    "consultations": "상담 건수",
+    "activeClients": "활성 고객",
+    "monthlyRecurringRevenue": "계약 수수료",
+    "averageClientValue": "고객당 평균 매출",
+    "consultationStats": {
+      "title": "상담 효율성",
+      "thisPeriod": "{{period}} 상담 건수",
+      "averagePerClient": "고객당 평균: {{count}}건",
+      "mostFrequentType": "주요 유형: {{type}}",
+      "growth": "전기간 대비"
+    },
+    "consultationTypes": {
+      "상담": "상담",
+      "미팅": "미팅",
+      "전화": "전화",
+      "방문": "방문",
+      "기타": "기타"
+    }
+  },
+  "growth": {
+    "clients": "고객 증가율",
+    "referrals": "소개 증가율",
+    "revenue": "매출 증가율",
+    "noChange": "변화없음",
+    "newData": "신규 데이터",
+    "majorIncrease": "대폭 증가",
+    "majorDecrease": "대폭 감소",
+    "comparison": "지난 기간 대비"
+  },
+  "conversionStatus": {
+    "excellent": "매우 좋음",
+    "good": "좋음",
+    "average": "보통",
+    "needsImprovement": "개선 필요",
+    "warning": "요주의",
+    "industryAverage": "업계 평균: 50-70%"
+  },
+  "efficiency": {
+    "meeting": "미팅 효율성",
+    "consultation": "상담 효율성",
+    "averageConversion": "미팅당 평균 전환: {{rate}}%",
+    "activeInPipeline": "영업 파이프라인 진행 중",
+    "percentageOfTotal": "전체 대비: {{percentage}}%",
+    "contractCommission": "계약 수수료",
+    "actualSalesCommission": "실제 영업 수수료",
+    "oneTimeCommission": "계약 완료 시 받는 1회성 수수료",
+    "averagePerContract": "계약당 평균",
+    "includesActivity": "활동 포함"
+  },
+  "badges": {
+    "active": "활발",
+    "inProgress": "영업 중"
+  },
+  "units": {
+    "people": "명",
+    "cases": "건",
+    "hours": "시간",
+    "currency": "원",
+    "times": "회"
+  },
+  "kakaoReport": {
+    "title": "카카오톡 업무 보고",
+    "subtitle": "카카오톡으로 공유할 수 있는 업무 보고서를 생성하세요",
+    "previewTitle": "보고서 미리보기",
+    "workTimeTotal": "총 근무시간",
+    "tabs": {
+      "daily": "일일 보고",
+      "weekly": "주간 보고",
+      "monthly": "월간 보고"
+    },
+    "workTime": {
+      "title": "근무 시간",
+      "start": "시작 시간",
+      "end": "종료 시간",
+      "hours": "{{hours}}시간"
+    },
+    "activities": {
+      "title": "업무 활동",
+      "clientMeetings": "고객 미팅",
+      "phoneCalls": "전화 상담",
+      "quotations": "견적 제안",
+      "contracts": "계약 성사",
+      "referrals": "신규 소개",
+      "prospects": "잠재 고객",
+      "followUps": "후속 관리",
+      "adminTasks": "기타 업무"
+    },
+    "performance": {
+      "excellent": "🌟 우수한 성과를 거두고 있습니다!",
+      "good": "👍 양호한 실적을 유지하고 있습니다.",
+      "needsImprovement": "📈 꾸준한 개선이 필요합니다.",
+      "requiresAction": "💪 더 적극적인 영업 활동이 필요합니다."
+    },
+    "suggestions": {
+      "title": "🎯 개선 포인트:",
+      "needsAnalysis": "• 고객 니즈 분석 강화",
+      "expandNetwork": "• 추천 네트워크 확대",
+      "diversifyPortfolio": "• 상품 포트폴리오 다양화",
+      "allExcellent": "✨ 모든 지표가 우수합니다!"
+    },
+    "templates": {
+      "daily": "일일 업무 보고서",
+      "weekly": "주간 성과 보고서",
+      "monthly": "월간 성과 리포트",
+      "customTemplate": "사용자 정의 템플릿 사용 중",
+      "defaultTemplate": "기본 템플릿 사용 중"
+    },
+    "notifications": {
+      "copied": "복사되었습니다!",
+      "templateSaved": "템플릿이 저장되었습니다!",
+      "templateReset": "기본 템플릿으로 초기화되었습니다!"
+    },
+    "placeholders": {
+      "editTemplate": "보고서 내용을 수정하세요..."
+    },
+    "reportContent": {
+      "networking": "네트워킹",
+      "keyPerformance": "주요 성과",
+      "totalManagement": "총 관리 고객",
+      "newClients": "신규 고객",
+      "conversionRate": "전환율",
+      "weeklyRevenue": "주간 매출",
+      "detailedActivities": "상세 활동",
+      "proposals": "제안서",
+      "successfulContracts": "성사 계약",
+      "weeklyPeriod": "(주간)",
+      "weeklyHighlights": "이번 주 하이라이트",
+      "networkExpansion": "신규 소개 네트워크 확장",
+      "customerSatisfaction": "기존 고객 만족도 관리",
+      "newProductConsultation": "신상품 제안 및 상담",
+      "nextWeekGoals": "다음 주 목표",
+      "targetGoal": "목표",
+      "achieve": "달성",
+      "teamCollaboration": "팀 협업 강화",
+      "coreMetrics": "핵심 성과 지표",
+      "totalRevenue": "총 매출",
+      "averageClientRevenue": "고객당 평균 매출",
+      "monthlyNewClients": "월간 신규 고객",
+      "referralNetwork": "추천 네트워크",
+      "growthMetrics": "성장 지표",
+      "monthlyActivitySummary": "월간 활동 요약",
+      "totalMeetings": "총 미팅",
+      "proposalsQuotations": "제안/견적",
+      "contractsClosed": "계약 성사",
+      "specialAchievements": "특별 성과",
+      "highValueClientSuccess": "고액 고객 유치 성공",
+      "consistentClientManagement": "꾸준한 고객 관리 실천",
+      "revenueTargetExceeded": "수수료 목표 초과 달성",
+      "stablePerformance": "안정적 성과 유지",
+      "nextMonthStrategy": "다음 달 전략",
+      "maximizeCustomerSatisfaction": "고객 만족도 극대화",
+      "expandProductLineup": "신규 상품 라인업 확대",
+      "strengthenDigitalMarketing": "디지털 마케팅 강화",
+      "thisWeekRange": "(이번 주)"
+    },
+    "hashtags": {
+      "workReport": "업무보고",
+      "insuranceAgent": "보험설계사",
+      "weeklyReport": "주간보고",
+      "performanceManagement": "성과관리",
+      "monthlyReport": "월간보고",
+      "performanceAnalysis": "성과분석",
+      "goalAchievement": "목표달성"
+    }
+  },
+  "insights": {
+    "title": "비즈니스 인사이트",
+    "tabs": {
+      "overview": "종합 분석",
+      "performers": "성과 분석",
+      "goals": "목표 관리"
+    },
+    "overview": {
+      "title": "성과 종합 분석",
+      "performanceAnalysis": "성과 분석",
+      "recommendations": "개선 제안",
+      "trends": "트렌드 분석"
+    },
+    "performers": {
+      "title": "우수 성과자",
+      "topPerformers": "최고 성과자 TOP {{count}}",
+      "emptyState": "성과 데이터가 없습니다.",
+      "metrics": {
+        "clients": "고객 {{count}}명",
+        "revenue": "수수료 {{amount}}",
+        "conversionRate": "전환율 {{rate}}%"
+      }
+    },
+    "goals": {
+      "title": "목표 관리",
+      "monthlyGoals": "월간 목표",
+      "progress": "진행률",
+      "completed": "달성 완료",
+      "inProgress": "진행 중",
+      "notStarted": "시작 전",
+      "emptyState": "설정된 목표가 없습니다.",
+      "manageGoals": "목표 관리하기"
+    }
+  },
+  "downloadData": {
+    "period": "기간",
+    "dateRange": "조회기간",
+    "totalClients": "총고객수",
+    "newClients": "신규고객",
+    "totalReferrals": "총소개건수",
+    "conversionRate": "전환율",
+    "revenue": "매출",
+    "growth": "성장률",
+    "clientsGrowth": "고객",
+    "referralsGrowth": "소개",
+    "revenueGrowth": "매출"
+  },
+  "errors": {
+    "loadingFailed": "데이터를 불러오는데 실패했습니다.",
+    "copyFailed": "복사에 실패했습니다."
+  }
+}
