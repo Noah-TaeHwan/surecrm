@@ -1,61 +1,231 @@
 {
   "title": "알림",
-  "types": {
-    "system": "시스템",
-    "meeting": "미팅",
-    "client": "고객",
-    "task": "작업",
-    "payment": "결제",
-    "security": "보안",
-    "marketing": "마케팅"
+  "meta": {
+    "title": "알림 | SureCRM",
+    "description": "알림 관리 및 설정"
   },
-  "status": {
+  "stats": {
+    "total": "전체 알림",
     "unread": "읽지 않음",
-    "read": "읽음",
-    "archived": "보관됨",
-    "deleted": "삭제됨"
+    "completionRate": "완료율"
+  },
+  "sections": {
+    "recentNotifications": "최근 알림",
+    "unreadNotifications": "읽지 않은 알림 ({{count}}개)",
+    "readNotifications": "읽은 알림 ({{count}}개)"
   },
   "actions": {
-    "markRead": "읽음으로 표시",
-    "markUnread": "읽지 않음으로 표시",
-    "archive": "보관",
+    "markAllAsRead": "모두 읽음",
+    "markAsRead": "읽음으로 표시",
+    "markAsUnread": "읽지 않음으로 표시",
     "delete": "삭제",
-    "deleteAll": "모두 삭제",
-    "markAllRead": "모두 읽음으로 표시"
+    "clickToMarkAsRead": "클릭하여 읽음으로 표시",
+    "clickToMarkAsUnread": "클릭하여 읽지 않음으로 표시"
   },
-  "settings": {
-    "title": "알림 설정",
-    "emailNotifications": "이메일 알림",
-    "pushNotifications": "푸시 알림",
-    "smsNotifications": "SMS 알림",
-    "desktopNotifications": "데스크톱 알림",
-    "soundEnabled": "알림음 사용",
-    "doNotDisturb": "방해 금지 모드",
-    "frequency": "알림 빈도",
-    "immediately": "즉시",
-    "hourly": "매시간",
-    "daily": "매일",
-    "weekly": "매주"
-  },
-  "templates": {
-    "newClient": "새 고객이 등록되었습니다",
-    "meetingReminder": "미팅 일정이 {{time}}분 후 시작됩니다",
-    "taskDue": "작업 마감일이 임박했습니다",
-    "paymentSuccess": "결제가 완료되었습니다",
-    "paymentFailed": "결제에 실패했습니다",
-    "systemMaintenance": "시스템 점검이 예정되어 있습니다",
-    "securityAlert": "보안 경고: 비정상적인 로그인 시도가 감지되었습니다"
-  },
-  "filters": {
-    "all": "전체",
-    "today": "오늘",
-    "thisWeek": "이번 주",
-    "thisMonth": "이번 달",
-    "priority": "중요",
-    "byType": "유형별"
+  "status": {
+    "read": "읽음",
+    "unread": "읽지 않음",
+    "newNotification": "새 알림",
+    "pending": "대기중",
+    "failed": "실패",
+    "delivered": "전송됨",
+    "cancelled": "취소됨"
   },
   "empty": {
-    "noNotifications": "알림이 없습니다",
-    "allClear": "모든 알림을 확인했습니다"
+    "noNotifications": {
+      "title": "알림이 없습니다",
+      "description": "새로운 알림이 도착하면 여기에 표시됩니다"
+    },
+    "noUnread": {
+      "title": "읽지 않은 알림이 없습니다",
+      "description": "모든 알림을 확인하셨습니다! 👍"
+    },
+    "noRead": {
+      "title": "읽은 알림이 없습니다",
+      "description": "아직 읽은 알림이 없습니다"
+    },
+    "noSearchResults": {
+      "title": "검색 결과가 없습니다",
+      "descriptionWithQuery": "\"{{query}}\"와 일치하는 알림이 없습니다",
+      "descriptionWithFilters": "다른 필터 조건을 시도해보세요"
+    },
+    "welcomeMessage": {
+      "withUser": "{{name}}님, 모든 알림을 확인했습니다.",
+      "default": "새로운 알림이 있으면 여기에 표시됩니다.",
+      "description": {
+        "line1": "🎂 고객 생일, 📈 파이프라인 변화, 📅 미팅 일정 등",
+        "line2": "중요한 알림들이 자동으로 생성되어 표시됩니다."
+      }
+    }
+  },
+  "messages": {
+    "success": {
+      "markAllAsRead": "모든 알림을 읽음으로 처리했습니다.",
+      "markAsRead": "알림을 읽음으로 처리했습니다.",
+      "markAsUnread": "알림을 읽지 않음으로 처리했습니다.",
+      "delete": "알림을 삭제했습니다."
+    },
+    "error": {
+      "notificationIdRequired": "알림 ID가 필요합니다.",
+      "unknownAction": "알 수 없는 액션입니다.",
+      "processingError": "작업 처리 중 오류가 발생했습니다."
+    }
+  },
+  "types": {
+    "meeting_reminder": "미팅 알림",
+    "goal_achievement": "목표 달성",
+    "goal_deadline": "목표 마감",
+    "new_referral": "새로운 추천",
+    "client_milestone": "고객 마일스톤",
+    "team_update": "팀 업데이트",
+    "system_alert": "시스템 알림",
+    "birthday_reminder": "생일 알림",
+    "follow_up_reminder": "후속 조치 알림",
+    "contract_expiry": "계약 만료",
+    "payment_due": "결제 예정",
+    "appointment_reminder": "예약 알림",
+    "welcome": "환영",
+    "update": "업데이트",
+    "achievement": "성과",
+    "warning": "경고",
+    "info": "정보"
+  },
+  "channels": {
+    "in_app": "앱 내",
+    "email": "이메일",
+    "sms": "SMS",
+    "push": "푸시",
+    "kakao": "카카오톡"
+  },
+  "dateFormat": {
+    "justNow": "방금 전",
+    "minutesAgo": "{{minutes}}분 전",
+    "hoursAgo": "{{hours}}시간 전",
+    "daysAgo": "{{days}}일 전",
+    "weeksAgo": "{{weeks}}주 전",
+    "monthsAgo": "{{months}}개월 전",
+    "yearsAgo": "{{years}}년 전",
+    "fullDate": "{{year}}년 {{month}}월 {{day}}일",
+    "withTime": "{{month}}월 {{day}}일 {{time}}"
+  },
+  "priorities": {
+    "low": "낮음",
+    "normal": "보통",
+    "high": "높음",
+    "urgent": "긴급"
+  },
+  "testNotifications": {
+    "contractRenewal": {
+      "title": "[테스트] 계약 갱신 알림",
+      "message": "{{name}}님의 보험 계약이 {{days}}일 후 만료됩니다. 갱신 상담을 예약하세요."
+    },
+    "followUpNeeded": {
+      "title": "[테스트] 팔로우업 필요",
+      "message": "{{name}}님과의 마지막 연락 후 {{days}}일이 지났습니다. 안부 연락을 드려보세요."
+    },
+    "contractDelay": {
+      "title": "[테스트] {{name}}님 계약 지연 중!",
+      "message": "계약 임박 고객이 {{days}}일째 정체 중입니다. 즉시 연락하여 계약을 완료하세요"
+    },
+    "meetingReminder": {
+      "title": "[테스트] {{time}} 후 미팅 예정",
+      "message": "{{time}} 후 {{name}}님과 상담 미팅이 있습니다"
+    },
+    "newReferral": {
+      "title": "[테스트] 새로운 고객 추천!",
+      "message": "{{name}}님이 새로운 고객을 추천해주셨습니다."
+    },
+    "goalAchievement": {
+      "title": "[테스트] 월간 목표 달성!",
+      "message": "축하합니다! 이번 달 계약 목표를 달성했습니다 ({{count}}건 완료)"
+    },
+    "meetingCompleted": {
+      "title": "[테스트] 미팅 완료",
+      "message": "{{name}}님과의 상담 미팅이 완료되었습니다. 후속 조치를 입력해주세요."
+    },
+    "goalDeadlineWarning": {
+      "title": "[테스트] 월간 목표 마감 임박",
+      "message": "이번 달 마감까지 {{days}}일 남았습니다. 현재 목표의 {{percentage}}% 달성했습니다."
+    },
+    "teamMemberJoined": {
+      "title": "[테스트] 팀원 합류",
+      "message": "신입 팀원 \"{{name}}\"님이 팀에 합류했습니다. 환영해주세요!"
+    },
+    "contractCompleted": {
+      "title": "[테스트] 고객 계약 완료!",
+      "message": "축하합니다! {{name}}님과의 {{amount}} 계약이 완료되었습니다."
+    },
+    "weeklySummary": {
+      "title": "[테스트] 주간 성과 요약",
+      "message": "이번 주 성과: 신규 고객 {{newClients}}명, 계약 완료 {{contracts}}건, 목표 달성률 {{percentage}}%"
+    },
+    "referralSuccess": {
+      "title": "[테스트] 추천 고객 연락 성공",
+      "message": "{{referrer}}님이 추천한 {{referee}}님과 첫 연락에 성공했습니다!"
+    },
+    "appUpdate": {
+      "title": "[테스트] 앱 업데이트 안내",
+      "message": "SureCRM {{version}}이 출시되었습니다. 새로운 기능들을 확인해보세요!"
+    },
+    "clientBirthday": {
+      "title": "[테스트] 키맨 고객 생일",
+      "message": "키맨 고객 {{name}}님의 생일입니다. 특별한 축하 메시지를 준비해보세요!"
+    },
+    "contractExpiry": {
+      "title": "계약 만료 알림",
+      "message": "{{name}}님의 계약이 {{days}}일 후 만료됩니다. 갱신 절차를 진행해주세요."
+    },
+    "paymentDue": {
+      "title": "결제 예정 알림",
+      "message": "{{name}}님의 {{amount}} 결제가 {{days}}일 후 예정되어 있습니다."
+    },
+    "generalMeetingReminder": {
+      "title": "미팅 리마인더",
+      "message": "{{name}}님과의 미팅이 {{time}} 후 시작됩니다."
+    },
+    "generalGoalAchievement": {
+      "title": "목표 달성",
+      "message": "축하합니다! {{type}} 목표를 달성했습니다."
+    },
+    "generalNewReferral": {
+      "title": "새로운 추천",
+      "message": "새로운 고객 추천이 등록되었습니다."
+    },
+    "generalClientMilestone": {
+      "title": "고객 마일스톤",
+      "message": "{{name}}님이 중요한 단계에 도달했습니다."
+    },
+    "generalTeamUpdate": {
+      "title": "팀 업데이트",
+      "message": "팀에 새로운 업데이트가 있습니다."
+    },
+    "generalSystemAlert": {
+      "title": "시스템 알림",
+      "message": "시스템에서 중요한 알림이 있습니다."
+    },
+    "generalBirthdayReminder": {
+      "title": "생일 알림",
+      "message": "{{name}}님의 생일입니다."
+    },
+    "generalFollowUpReminder": {
+      "title": "후속 조치 알림",
+      "message": "{{name}}님에 대한 후속 조치가 필요합니다."
+    },
+    "generalGoalDeadline": {
+      "title": "목표 마감 알림",
+      "message": "목표 마감일이 {{days}}일 후입니다."
+    }
+  },
+  "filters": {
+    "search": "알림 검색...",
+    "all": "전체",
+    "status": "상태",
+    "type": "유형",
+    "priority": "우선순위"
+  },
+  "tabs": {
+    "all": "전체 ({{count}})",
+    "unread": "읽지 않음 ({{count}})",
+    "read": "읽음 ({{count}})"
   }
 }

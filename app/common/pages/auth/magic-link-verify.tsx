@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { type MetaFunction, redirect } from 'react-router';
-import { useTranslation } from 'react-i18next';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 import { AuthLayout } from '~/common/layouts/auth-layout';
 import {
   Card,
@@ -107,7 +107,7 @@ export default function MagicLinkVerifyPage({
   loaderData,
   actionData,
 }: ComponentProps) {
-  const { t } = useTranslation('auth');
+  const { t } = useHydrationSafeTranslation('auth');
   const [isVerifying, setIsVerifying] = useState(false);
   const [autoVerified, setAutoVerified] = useState(false);
 

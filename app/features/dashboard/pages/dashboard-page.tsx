@@ -1,6 +1,6 @@
 // React Router v7 타입 import 제거 - 직접 타입 정의 사용
 import { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 import { MainLayout } from '~/common/layouts/main-layout';
 import { WelcomeSection } from '../components/welcome-section';
 import { PerformanceKPICards } from '../components/performance-kpi-cards';
@@ -334,7 +334,7 @@ export async function action({ request }: ActionArgs) {
 }
 
 export default function DashboardPage({ loaderData }: ComponentProps) {
-  const { t } = useTranslation('dashboard');
+  const { t } = useHydrationSafeTranslation('dashboard');
   const [isHydrated, setIsHydrated] = useState(false);
 
   // 🎯 Hydration 완료 감지 (SSR/CSR mismatch 방지)

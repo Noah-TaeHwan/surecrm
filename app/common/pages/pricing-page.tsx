@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 import { LandingLayout } from '~/common/layouts/landing-layout';
 import { Button } from '~/common/components/ui/button';
 import {
@@ -94,7 +94,7 @@ export function meta({ data }: MetaArgs) {
 }
 
 export default function PricingPage() {
-  const { t, ready } = useTranslation('pricing');
+  const { t, isHydrated: ready } = useHydrationSafeTranslation('pricing');
   const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 import type { Route } from './+types/landing-page';
 import { LandingLayout } from '~/common/layouts/landing-layout';
 import { ScrollProgress } from '~/common/components/magicui/scroll-progress';
@@ -127,7 +127,7 @@ export function meta({ data }: Route.MetaArgs) {
 }
 
 export default function LandingPage({ loaderData }: Route.ComponentProps) {
-  const { t } = useTranslation('landing');
+  const { t } = useHydrationSafeTranslation('landing');
   // loaderData는 현재 사용하지 않지만 Route.ComponentProps 타입을 위해 유지
   loaderData;
   const [isHydrated, setIsHydrated] = useState(false);

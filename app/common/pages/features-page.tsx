@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 import { Link } from 'react-router';
 import { LandingLayout } from '~/common/layouts/landing-layout';
 import { Button } from '~/common/components/ui/button';
@@ -120,7 +120,7 @@ const iconMap = {
 };
 
 export default function FeaturesPage() {
-  const { t, ready } = useTranslation('features');
+  const { t, isHydrated: ready } = useHydrationSafeTranslation('features');
   const [isHydrated, setIsHydrated] = useState(false);
   const [isReady, setIsReady] = useState(false);
 

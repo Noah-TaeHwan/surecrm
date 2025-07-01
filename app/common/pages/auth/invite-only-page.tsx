@@ -3,7 +3,7 @@ import { Link, type MetaFunction, redirect, useNavigate } from 'react-router';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { useTranslation } from 'react-i18next';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 import { AuthLayout } from '~/common/layouts/auth-layout';
 import { Button } from '~/common/components/ui/button';
 import { Input } from '~/common/components/ui/input';
@@ -85,7 +85,7 @@ interface ComponentProps {
 }
 
 export default function InviteOnlyPage({ loaderData }: ComponentProps) {
-  const { t } = useTranslation('auth');
+  const { t } = useHydrationSafeTranslation('auth');
   const { inviteStats } = loaderData;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [clientError, setClientError] = useState<string | null>(null);

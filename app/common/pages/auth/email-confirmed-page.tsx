@@ -1,5 +1,5 @@
 import { Link, type MetaFunction, redirect } from 'react-router';
-import { useTranslation } from 'react-i18next';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 import { AuthLayout } from '~/common/layouts/auth-layout';
 import { Button } from '~/common/components/ui/button';
 import {
@@ -125,7 +125,7 @@ export const meta: MetaFunction = () => {
 };
 
 export default function EmailConfirmedPage({ loaderData }: ComponentProps) {
-  const { t } = useTranslation('auth');
+  const { t } = useHydrationSafeTranslation('auth');
 
   return (
     <AuthLayout>

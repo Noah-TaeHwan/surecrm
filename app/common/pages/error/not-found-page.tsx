@@ -1,5 +1,5 @@
 import { Link } from 'react-router';
-import { useTranslation } from 'react-i18next';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 import { Button } from '../../components/ui/button';
 
 export function meta() {
@@ -12,7 +12,7 @@ export function meta() {
 }
 
 export default function NotFoundPage() {
-  const { t } = useTranslation('common');
+  const { t } = useHydrationSafeTranslation('common');
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-background px-4">

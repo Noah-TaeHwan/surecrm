@@ -3,7 +3,7 @@ import { Link, type MetaFunction } from 'react-router';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { useTranslation } from 'react-i18next';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 import { AuthLayout } from '~/common/layouts/auth-layout';
 import { Button } from '~/common/components/ui/button';
 import { Input } from '~/common/components/ui/input';
@@ -177,7 +177,7 @@ export default function ForgotPasswordPage({
   loaderData,
   actionData,
 }: Route['ComponentProps']) {
-  const { t } = useTranslation('auth');
+  const { t } = useHydrationSafeTranslation('auth');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
 

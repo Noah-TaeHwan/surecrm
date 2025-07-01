@@ -1,61 +1,231 @@
 {
   "title": "Notifications",
-  "types": {
-    "system": "System",
-    "meeting": "Meeting",
-    "client": "Client",
-    "task": "Task",
-    "payment": "Payment",
-    "security": "Security",
-    "marketing": "Marketing"
+  "meta": {
+    "title": "Notifications | SureCRM",
+    "description": "Notification management and settings"
   },
-  "status": {
+  "stats": {
+    "total": "Total Notifications",
     "unread": "Unread",
-    "read": "Read",
-    "archived": "Archived",
-    "deleted": "Deleted"
+    "completionRate": "Completion Rate"
+  },
+  "sections": {
+    "recentNotifications": "Recent Notifications",
+    "unreadNotifications": "Unread Notifications ({{count}} items)",
+    "readNotifications": "Read Notifications ({{count}} items)"
   },
   "actions": {
-    "markRead": "Mark as Read",
-    "markUnread": "Mark as Unread",
-    "archive": "Archive",
+    "markAllAsRead": "Mark All as Read",
+    "markAsRead": "Mark as Read",
+    "markAsUnread": "Mark as Unread",
     "delete": "Delete",
-    "deleteAll": "Delete All",
-    "markAllRead": "Mark All as Read"
+    "clickToMarkAsRead": "Click to mark as read",
+    "clickToMarkAsUnread": "Click to mark as unread"
   },
-  "settings": {
-    "title": "Notification Settings",
-    "emailNotifications": "Email Notifications",
-    "pushNotifications": "Push Notifications",
-    "smsNotifications": "SMS Notifications",
-    "desktopNotifications": "Desktop Notifications",
-    "soundEnabled": "Enable Sound",
-    "doNotDisturb": "Do Not Disturb",
-    "frequency": "Notification Frequency",
-    "immediately": "Immediately",
-    "hourly": "Hourly",
-    "daily": "Daily",
-    "weekly": "Weekly"
-  },
-  "templates": {
-    "newClient": "New client has been registered",
-    "meetingReminder": "Meeting starts in {{time}} minutes",
-    "taskDue": "Task deadline is approaching",
-    "paymentSuccess": "Payment completed successfully",
-    "paymentFailed": "Payment failed",
-    "systemMaintenance": "System maintenance is scheduled",
-    "securityAlert": "Security Alert: Unusual login attempt detected"
-  },
-  "filters": {
-    "all": "All",
-    "today": "Today",
-    "thisWeek": "This Week",
-    "thisMonth": "This Month",
-    "priority": "Priority",
-    "byType": "By Type"
+  "status": {
+    "read": "Read",
+    "unread": "Unread",
+    "newNotification": "New",
+    "pending": "Pending",
+    "failed": "Failed",
+    "delivered": "Delivered",
+    "cancelled": "Cancelled"
   },
   "empty": {
-    "noNotifications": "No notifications",
-    "allClear": "All notifications have been checked"
+    "noNotifications": {
+      "title": "No Notifications",
+      "description": "New notifications will appear here when they arrive"
+    },
+    "noUnread": {
+      "title": "No Unread Notifications",
+      "description": "You've checked all notifications! 👍"
+    },
+    "noRead": {
+      "title": "No Read Notifications",
+      "description": "No notifications have been read yet"
+    },
+    "noSearchResults": {
+      "title": "No Search Results",
+      "descriptionWithQuery": "No notifications match \"{{query}}\"",
+      "descriptionWithFilters": "Try different filter conditions"
+    },
+    "welcomeMessage": {
+      "withUser": "{{name}}, you've checked all notifications.",
+      "default": "New notifications will appear here when available.",
+      "description": {
+        "line1": "🎂 Client birthdays, 📈 Pipeline changes, 📅 Meeting schedules, etc.",
+        "line2": "Important notifications will be automatically generated and displayed."
+      }
+    }
+  },
+  "messages": {
+    "success": {
+      "markAllAsRead": "All notifications have been marked as read.",
+      "markAsRead": "Notification has been marked as read.",
+      "markAsUnread": "Notification has been marked as unread.",
+      "delete": "Notification has been deleted."
+    },
+    "error": {
+      "notificationIdRequired": "Notification ID is required.",
+      "unknownAction": "Unknown action.",
+      "processingError": "An error occurred while processing the request."
+    }
+  },
+  "types": {
+    "meeting_reminder": "Meeting Reminder",
+    "goal_achievement": "Goal Achievement",
+    "goal_deadline": "Goal Deadline",
+    "new_referral": "New Referral",
+    "client_milestone": "Client Milestone",
+    "team_update": "Team Update",
+    "system_alert": "System Alert",
+    "birthday_reminder": "Birthday Reminder",
+    "follow_up_reminder": "Follow-up Reminder",
+    "contract_expiry": "Contract Expiry",
+    "payment_due": "Payment Due",
+    "appointment_reminder": "Appointment Reminder",
+    "welcome": "Welcome",
+    "update": "Update",
+    "achievement": "Achievement",
+    "warning": "Warning",
+    "info": "Info"
+  },
+  "channels": {
+    "in_app": "In-App",
+    "email": "Email",
+    "sms": "SMS",
+    "push": "Push",
+    "kakao": "KakaoTalk"
+  },
+  "dateFormat": {
+    "justNow": "Just now",
+    "minutesAgo": "{{minutes}} min ago",
+    "hoursAgo": "{{hours}}h ago",
+    "daysAgo": "{{days}}d ago",
+    "weeksAgo": "{{weeks}}w ago",
+    "monthsAgo": "{{months}}mo ago",
+    "yearsAgo": "{{years}}y ago",
+    "fullDate": "{{month}}/{{day}}/{{year}}",
+    "withTime": "{{month}}/{{day}} {{time}}"
+  },
+  "priorities": {
+    "low": "Low",
+    "normal": "Normal",
+    "high": "High",
+    "urgent": "Urgent"
+  },
+  "testNotifications": {
+    "contractRenewal": {
+      "title": "[Test] Contract Renewal Notice",
+      "message": "{{name}}'s insurance contract expires in {{days}} days. Please schedule a renewal consultation."
+    },
+    "followUpNeeded": {
+      "title": "[Test] Follow-up Required",
+      "message": "{{days}} days have passed since the last contact with {{name}}. Please reach out for a follow-up."
+    },
+    "contractDelay": {
+      "title": "[Test] {{name}}'s Contract Delayed!",
+      "message": "Contract-pending client has been stalled for {{days}} days. Contact immediately to complete the contract."
+    },
+    "meetingReminder": {
+      "title": "[Test] Meeting in 1 hour",
+      "message": "You have a consultation meeting with {{name}} in 1 hour"
+    },
+    "newReferral": {
+      "title": "[Test] New Client Referral!",
+      "message": "{{name}} has referred a new client to you."
+    },
+    "goalAchievement": {
+      "title": "[Test] Monthly Goal Achieved!",
+      "message": "Congratulations! You've achieved this month's contract goal ({{count}} completed)"
+    },
+    "meetingCompleted": {
+      "title": "[Test] Meeting Completed",
+      "message": "Consultation meeting with {{name}} has been completed. Please input follow-up actions."
+    },
+    "goalDeadlineWarning": {
+      "title": "[Test] Monthly Goal Deadline Approaching",
+      "message": "{{days}} days left until this month's deadline. Currently {{percentage}}% of the goal achieved."
+    },
+    "teamMemberJoined": {
+      "title": "[Test] Team Member Joined",
+      "message": "New team member \"{{name}}\" has joined the team. Please welcome them!"
+    },
+    "contractCompleted": {
+      "title": "[Test] Client Contract Completed!",
+      "message": "Congratulations! The {{amount}} contract with {{name}} has been completed."
+    },
+    "weeklySummary": {
+      "title": "[Test] Weekly Performance Summary",
+      "message": "This week's performance: {{newClients}} new clients, {{contracts}} contracts completed, {{percentage}}% goal achievement rate"
+    },
+    "referralSuccess": {
+      "title": "[Test] Referral Contact Success",
+      "message": "Successfully made first contact with {{referee}}, referred by {{referrer}}!"
+    },
+    "appUpdate": {
+      "title": "[Test] App Update Notice",
+      "message": "SureCRM {{version}} has been released. Check out the new features!"
+    },
+    "clientBirthday": {
+      "title": "[Test] Key Client Birthday",
+      "message": "Today is key client {{name}}'s birthday. Consider preparing a special birthday message!"
+    },
+    "contractExpiry": {
+      "title": "Contract Expiry Notice",
+      "message": "{{name}}'s contract expires in {{days}} days. Please proceed with renewal."
+    },
+    "paymentDue": {
+      "title": "Payment Due Notice",
+      "message": "{{name}}'s payment of {{amount}} is due in {{days}} days."
+    },
+    "generalMeetingReminder": {
+      "title": "Meeting Reminder",
+      "message": "Your meeting with {{name}} starts in {{time}}."
+    },
+    "generalGoalAchievement": {
+      "title": "Goal Achievement",
+      "message": "Congratulations! You've achieved your {{type}} goal."
+    },
+    "generalNewReferral": {
+      "title": "New Referral",
+      "message": "A new client referral has been registered."
+    },
+    "generalClientMilestone": {
+      "title": "Client Milestone",
+      "message": "{{name}} has reached an important milestone."
+    },
+    "generalTeamUpdate": {
+      "title": "Team Update",
+      "message": "There's a new update for your team."
+    },
+    "generalSystemAlert": {
+      "title": "System Alert",
+      "message": "There's an important system notification."
+    },
+    "generalBirthdayReminder": {
+      "title": "Birthday Reminder",
+      "message": "Today is {{name}}'s birthday."
+    },
+    "generalFollowUpReminder": {
+      "title": "Follow-up Reminder",
+      "message": "Follow-up action is required for {{name}}."
+    },
+    "generalGoalDeadline": {
+      "title": "Goal Deadline Notice",
+      "message": "Goal deadline is in {{days}} days."
+    }
+  },
+  "filters": {
+    "search": "Search notifications...",
+    "all": "All",
+    "status": "Status",
+    "type": "Type",
+    "priority": "Priority"
+  },
+  "tabs": {
+    "all": "All ({{count}})",
+    "unread": "Unread ({{count}})",
+    "read": "Read ({{count}})"
   }
 }

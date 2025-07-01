@@ -29,6 +29,7 @@ import {
   DropdownMenuTrigger,
 } from '~/common/components/ui/dropdown-menu';
 import { useFetcher } from 'react-router';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 
 // 타입들만 최소한으로 import
 import type { NotificationPageData } from '../types';
@@ -44,10 +45,22 @@ import {
   deleteNotification,
 } from '../lib/notifications-data';
 
+// 클라이언트 안전 유틸 함수 imports
+import {
+  formatNotificationTime,
+  getTranslatedChannel,
+  getTranslatedPriority,
+  getTranslatedType,
+  getNotificationPriorityClass,
+  getNotificationTypeIcon,
+  getTranslatedNotificationTitle,
+  getTranslatedNotificationMessage,
+} from '../lib/notifications-utils';
+
 export function meta(): any {
   return [
-    { title: '알림 | SureCRM' },
-    { name: 'description', content: '알림 관리 및 설정' },
+    { title: 'notifications:meta.title' },
+    { name: 'description', content: 'notifications:meta.description' },
   ];
 }
 
@@ -111,7 +124,7 @@ export async function action({ request }: Route.ActionArgs) {
         await markAllNotificationsAsRead(user.id);
         return {
           success: true,
-          message: '모든 알림을 읽음으로 처리했습니다.',
+          message: 'notifications:messages.success.markAllAsRead',
         };
 
       case 'markAsRead':
@@ -119,13 +132,13 @@ export async function action({ request }: Route.ActionArgs) {
         if (!notificationId) {
           return {
             success: false,
-            message: '알림 ID가 필요합니다.',
+            message: 'notifications:messages.error.notificationIdRequired',
           };
         }
         await markNotificationAsRead(notificationId, user.id);
         return {
           success: true,
-          message: '알림을 읽음으로 처리했습니다.',
+          message: 'notifications:messages.success.markAsRead',
         };
 
       case 'markAsUnread':
@@ -133,13 +146,13 @@ export async function action({ request }: Route.ActionArgs) {
         if (!unreadId) {
           return {
             success: false,
-            message: '알림 ID가 필요합니다.',
+            message: 'notifications:messages.error.notificationIdRequired',
           };
         }
         await markNotificationAsUnread(unreadId, user.id);
         return {
           success: true,
-          message: '알림을 읽지 않음으로 처리했습니다.',
+          message: 'notifications:messages.success.markAsUnread',
         };
 
       case 'delete':
@@ -147,26 +160,26 @@ export async function action({ request }: Route.ActionArgs) {
         if (!deleteId) {
           return {
             success: false,
-            message: '알림 ID가 필요합니다.',
+            message: 'notifications:messages.error.notificationIdRequired',
           };
         }
         await deleteNotification(deleteId, user.id);
         return {
           success: true,
-          message: '알림을 삭제했습니다.',
+          message: 'notifications:messages.success.delete',
         };
 
       default:
         return {
           success: false,
-          message: '알 수 없는 액션입니다.',
+          message: 'notifications:messages.error.unknownAction',
         };
     }
   } catch (error) {
     console.error('알림 액션 처리 실패:', error);
     return {
       success: false,
-      message: '작업 처리 중 오류가 발생했습니다.',
+      message: 'notifications:messages.error.processingError',
     };
   }
 }
@@ -213,11 +226,15 @@ function getPriorityColor(priority: string) {
 }
 
 // 알림 상태별 표시 반환
-function getStatusBadge(status: string, readAt: Date | null) {
+function getStatusBadge(
+  status: string,
+  readAt: Date | null,
+  t: (key: string) => string
+) {
   if (readAt) {
     return (
       <Badge variant="secondary" className="text-xs">
-        읽음
+        {t('notifications:status.read')}
       </Badge>
     );
   }
@@ -229,19 +246,19 @@ function getStatusBadge(status: string, readAt: Date | null) {
           variant="default"
           className="text-xs bg-blue-500 hover:bg-blue-600"
         >
-          새 알림
+          {t('notifications:status.newNotification')}
         </Badge>
       );
     case 'pending':
       return (
         <Badge variant="outline" className="text-xs">
-          대기중
+          {t('notifications:status.pending')}
         </Badge>
       );
     case 'failed':
       return (
         <Badge variant="destructive" className="text-xs">
-          실패
+          {t('notifications:status.failed')}
         </Badge>
       );
     default:
@@ -250,7 +267,7 @@ function getStatusBadge(status: string, readAt: Date | null) {
           variant="default"
           className="text-xs bg-blue-500 hover:bg-blue-600"
         >
-          새 알림
+          {t('notifications:status.newNotification')}
         </Badge>
       );
   }
@@ -262,6 +279,7 @@ export default function NotificationsPage({
 }: Route.ComponentProps) {
   const { notifications, unreadCount, user } = loaderData;
   const fetcher = useFetcher();
+  const { t } = useHydrationSafeTranslation('notifications');
 
   // 성공 메시지 표시를 위한 상태
   const isSubmitting = fetcher.state === 'submitting';
@@ -308,7 +326,7 @@ export default function NotificationsPage({
   };
 
   return (
-    <MainLayout title="알림">
+    <MainLayout title={t('notifications:title')}>
       <div className="space-y-4 sm:space-y-6 px-2 sm:px-0">
         {/* 🎯 모바일 최적화: 상단 요약 카드 */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
@@ -323,7 +341,7 @@ export default function NotificationsPage({
               </div>
               <div>
                 <p className="text-xs sm:text-sm font-medium text-muted-foreground">
-                  전체 알림
+                  {t('notifications:stats.total')}
                 </p>
                 <p className="text-xl sm:text-2xl font-bold">
                   {notifications.length}
@@ -341,7 +359,7 @@ export default function NotificationsPage({
               </div>
               <div>
                 <p className="text-xs sm:text-sm font-medium text-muted-foreground">
-                  읽지 않음
+                  {t('notifications:stats.unread')}
                 </p>
                 <p className="text-xl sm:text-2xl font-bold">{unreadCount}</p>
               </div>
@@ -357,7 +375,7 @@ export default function NotificationsPage({
               </div>
               <div>
                 <p className="text-xs sm:text-sm font-medium text-muted-foreground">
-                  완료율
+                  {t('notifications:stats.completionRate')}
                 </p>
                 <p className="text-xl sm:text-2xl font-bold">
                   {notifications.length > 0
@@ -379,7 +397,7 @@ export default function NotificationsPage({
           <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-2 sm:space-y-0 p-4 sm:p-6">
             <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
               <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
-              최근 알림
+              {t('notifications:sections.recentNotifications')}
             </CardTitle>
             <div className="flex gap-2 w-full sm:w-auto">
               {notifications.length > 0 && (
@@ -390,7 +408,7 @@ export default function NotificationsPage({
                   className="min-h-[44px] px-3 sm:px-4 text-sm flex-1 sm:flex-initial"
                 >
                   <CheckCircle className="h-4 w-4 mr-2" />
-                  모두 읽음
+                  {t('notifications:actions.markAllAsRead')}
                 </Button>
               )}
             </div>
@@ -412,7 +430,9 @@ export default function NotificationsPage({
                         <div className="space-y-3 sm:space-y-4">
                           <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                             <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
-                            읽지 않은 알림 ({unreadNotifications.length}개)
+                            {t('notifications:sections.unreadNotifications', {
+                              count: unreadNotifications.length,
+                            })}
                           </div>
                           {unreadNotifications.map(notification => (
                             <div
@@ -424,7 +444,9 @@ export default function NotificationsPage({
                                   notification.readAt
                                 )
                               }
-                              title="클릭하여 읽음으로 표시"
+                              title={t(
+                                'notifications:actions.clickToMarkAsRead'
+                              )}
                             >
                               {/* 🎯 모바일 최적화: 알림 아이콘 */}
                               <div
@@ -439,13 +461,17 @@ export default function NotificationsPage({
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-start justify-between gap-2">
                                   <h4 className="text-sm sm:text-base leading-tight font-semibold text-foreground pr-2">
-                                    {notification.title}
+                                    {getTranslatedNotificationTitle(
+                                      notification,
+                                      t
+                                    )}
                                     <span className="ml-2 inline-flex items-center justify-center w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
                                   </h4>
                                   <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
                                     {getStatusBadge(
                                       notification.status,
-                                      notification.readAt
+                                      notification.readAt,
+                                      t
                                     )}
                                     <Button
                                       variant="ghost"
@@ -461,26 +487,28 @@ export default function NotificationsPage({
                                   </div>
                                 </div>
                                 <p className="text-xs sm:text-sm mt-1 line-clamp-2 text-foreground leading-relaxed">
-                                  {notification.message}
+                                  {getTranslatedNotificationMessage(
+                                    notification,
+                                    t
+                                  )}
                                 </p>
                                 <div className="flex items-center gap-2 sm:gap-4 mt-2 text-xs text-muted-foreground">
                                   <span className="flex items-center gap-1">
                                     <Clock className="h-3 w-3" />
-                                    {new Date(
-                                      notification.createdAt
-                                    ).toLocaleDateString('ko-KR', {
-                                      month: 'short',
-                                      day: 'numeric',
-                                      hour: '2-digit',
-                                      minute: '2-digit',
-                                    })}
+                                    {formatNotificationTime(
+                                      new Date(notification.createdAt),
+                                      t
+                                    )}
                                   </span>
                                   {notification.channel && (
                                     <Badge
                                       variant="outline"
                                       className="text-xs hidden sm:inline-flex"
                                     >
-                                      {notification.channel}
+                                      {getTranslatedChannel(
+                                        notification.channel,
+                                        t
+                                      )}
                                     </Badge>
                                   )}
                                 </div>
@@ -496,7 +524,9 @@ export default function NotificationsPage({
                           {unreadNotifications.length > 0 && (
                             <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground pt-3 sm:pt-4 border-t">
                               <CheckCircle className="w-4 h-4" />
-                              읽은 알림 ({readNotifications.length}개)
+                              {t('notifications:sections.readNotifications', {
+                                count: readNotifications.length,
+                              })}
                             </div>
                           )}
                           {readNotifications.map(notification => (
@@ -509,7 +539,9 @@ export default function NotificationsPage({
                                   notification.readAt
                                 )
                               }
-                              title="클릭하여 읽지 않음으로 표시"
+                              title={t(
+                                'notifications:actions.clickToMarkAsUnread'
+                              )}
                             >
                               {/* 🎯 모바일 최적화: 알림 아이콘 */}
                               <div
@@ -524,12 +556,16 @@ export default function NotificationsPage({
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-start justify-between gap-2">
                                   <h4 className="text-sm sm:text-base leading-tight font-normal text-muted-foreground pr-2">
-                                    {notification.title}
+                                    {getTranslatedNotificationTitle(
+                                      notification,
+                                      t
+                                    )}
                                   </h4>
                                   <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
                                     {getStatusBadge(
                                       notification.status,
-                                      notification.readAt
+                                      notification.readAt,
+                                      t
                                     )}
                                     <Button
                                       variant="ghost"
@@ -545,26 +581,28 @@ export default function NotificationsPage({
                                   </div>
                                 </div>
                                 <p className="text-xs sm:text-sm mt-1 line-clamp-2 text-muted-foreground leading-relaxed">
-                                  {notification.message}
+                                  {getTranslatedNotificationMessage(
+                                    notification,
+                                    t
+                                  )}
                                 </p>
                                 <div className="flex items-center gap-2 sm:gap-4 mt-2 text-xs text-muted-foreground">
                                   <span className="flex items-center gap-1">
                                     <Clock className="h-3 w-3" />
-                                    {new Date(
-                                      notification.createdAt
-                                    ).toLocaleDateString('ko-KR', {
-                                      month: 'short',
-                                      day: 'numeric',
-                                      hour: '2-digit',
-                                      minute: '2-digit',
-                                    })}
+                                    {formatNotificationTime(
+                                      new Date(notification.createdAt),
+                                      t
+                                    )}
                                   </span>
                                   {notification.channel && (
                                     <Badge
                                       variant="outline"
                                       className="text-xs hidden sm:inline-flex"
                                     >
-                                      {notification.channel}
+                                      {getTranslatedChannel(
+                                        notification.channel,
+                                        t
+                                      )}
                                     </Badge>
                                   )}
                                 </div>
@@ -584,18 +622,22 @@ export default function NotificationsPage({
                   <Bell className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground" />
                 </div>
                 <h3 className="text-lg sm:text-xl font-semibold mb-2">
-                  알림이 없습니다
+                  {t('notifications:empty.noNotifications.title')}
                 </h3>
                 <p className="text-sm sm:text-base text-muted-foreground mb-4 max-w-md mx-auto leading-relaxed">
                   {user
-                    ? `${
-                        user.fullName || user.email
-                      }님, 모든 알림을 확인했습니다.`
-                    : '새로운 알림이 있으면 여기에 표시됩니다.'}
+                    ? t('notifications:empty.welcomeMessage.withUser', {
+                        name: user.fullName || user.email,
+                      })
+                    : t('notifications:empty.welcomeMessage.default')}
                 </p>
                 <div className="text-xs sm:text-sm text-muted-foreground space-y-1 max-w-sm mx-auto">
-                  <p>🎂 고객 생일, 📈 파이프라인 변화, 📅 미팅 일정 등</p>
-                  <p>중요한 알림들이 자동으로 생성되어 표시됩니다.</p>
+                  <p>
+                    {t('notifications:empty.welcomeMessage.description.line1')}
+                  </p>
+                  <p>
+                    {t('notifications:empty.welcomeMessage.description.line2')}
+                  </p>
                 </div>
               </div>
             )}

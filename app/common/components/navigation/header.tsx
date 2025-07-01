@@ -17,6 +17,10 @@ import {
 } from '~/common/components/ui/dropdown-menu';
 import { useSubscription } from '~/lib/contexts/subscription-context';
 import { LanguageSelector } from '~/common/components/i18n/language-selector';
+import {
+  getTranslatedNotificationTitle,
+  getTranslatedNotificationMessage,
+} from '~/features/notifications/lib/notifications-utils';
 
 interface HeaderProps {
   title?: string;
@@ -358,7 +362,10 @@ export function Header({
                                     : 'font-medium text-muted-foreground'
                                 )}
                               >
-                                {notification.title}
+                                {getTranslatedNotificationTitle(
+                                  notification,
+                                  t
+                                )}
                               </p>
                               {!notification.readAt && (
                                 <div className="w-2 h-2 bg-primary rounded-full mt-1 ml-2 flex-shrink-0 animate-pulse" />
@@ -372,7 +379,10 @@ export function Header({
                                   : 'text-muted-foreground/70'
                               )}
                             >
-                              {notification.message}
+                              {getTranslatedNotificationMessage(
+                                notification,
+                                t
+                              )}
                             </p>
                             <div className="flex items-center justify-between">
                               <p className="text-xs text-muted-foreground">

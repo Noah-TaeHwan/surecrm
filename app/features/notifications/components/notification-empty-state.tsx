@@ -1,5 +1,6 @@
 import { Card, CardContent } from '~/common/components/ui/card';
 import { Bell, Search, Filter } from 'lucide-react';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 import type { NotificationEmptyStateProps } from '../types';
 
 export function NotificationEmptyState({
@@ -7,6 +8,8 @@ export function NotificationEmptyState({
   searchQuery,
   hasFilters,
 }: NotificationEmptyStateProps) {
+  const { t } = useHydrationSafeTranslation('notifications');
+
   const getEmptyStateContent = () => {
     switch (type) {
       case 'no-notifications':
@@ -14,8 +17,8 @@ export function NotificationEmptyState({
           icon: (
             <Bell className="h-16 w-16 mx-auto mb-4 text-muted-foreground/30" />
           ),
-          title: '알림이 없습니다',
-          description: '새로운 알림이 도착하면 여기에 표시됩니다',
+          title: t('notifications:empty.noNotifications.title'),
+          description: t('notifications:empty.noNotifications.description'),
         };
 
       case 'no-unread':
@@ -23,8 +26,8 @@ export function NotificationEmptyState({
           icon: (
             <Bell className="h-16 w-16 mx-auto mb-4 text-muted-foreground/30" />
           ),
-          title: '읽지 않은 알림이 없습니다',
-          description: '모든 알림을 확인하셨습니다! 👍',
+          title: t('notifications:empty.noUnread.title'),
+          description: t('notifications:empty.noUnread.description'),
         };
 
       case 'no-read':
@@ -32,8 +35,8 @@ export function NotificationEmptyState({
           icon: (
             <Bell className="h-16 w-16 mx-auto mb-4 text-muted-foreground/30" />
           ),
-          title: '읽은 알림이 없습니다',
-          description: '아직 읽은 알림이 없습니다',
+          title: t('notifications:empty.noRead.title'),
+          description: t('notifications:empty.noRead.description'),
         };
 
       case 'no-search-results':
@@ -43,10 +46,12 @@ export function NotificationEmptyState({
           ) : (
             <Search className="h-16 w-16 mx-auto mb-4 text-muted-foreground/30" />
           ),
-          title: '검색 결과가 없습니다',
+          title: t('notifications:empty.noSearchResults.title'),
           description: hasFilters
-            ? '다른 필터 조건을 시도해보세요'
-            : `"${searchQuery}"와 일치하는 알림이 없습니다`,
+            ? t('notifications:empty.noSearchResults.descriptionWithFilters')
+            : t('notifications:empty.noSearchResults.descriptionWithQuery', {
+                query: searchQuery || '',
+              }),
         };
 
       default:
@@ -54,8 +59,8 @@ export function NotificationEmptyState({
           icon: (
             <Bell className="h-16 w-16 mx-auto mb-4 text-muted-foreground/30" />
           ),
-          title: '알림이 없습니다',
-          description: '새로운 알림이 도착하면 여기에 표시됩니다',
+          title: t('notifications:empty.noNotifications.title'),
+          description: t('notifications:empty.noNotifications.description'),
         };
     }
   };

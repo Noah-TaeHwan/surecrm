@@ -8,6 +8,7 @@ import {
 } from '~/common/components/ui/select';
 import { Card, CardContent } from '~/common/components/ui/card';
 import { Search } from 'lucide-react';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 import type { NotificationFiltersProps } from '../types';
 
 export function NotificationFilters({
@@ -18,6 +19,8 @@ export function NotificationFilters({
   typeFilter,
   onTypeFilterChange,
 }: NotificationFiltersProps) {
+  const { t } = useHydrationSafeTranslation('notifications');
+
   return (
     <Card className="border-border bg-card">
       <CardContent className="p-4">
@@ -27,7 +30,7 @@ export function NotificationFilters({
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="알림 검색..."
+                placeholder={t('notifications:filters.search')}
                 value={searchQuery}
                 onChange={e => onSearchChange(e.target.value)}
                 className="pl-10 bg-background border-border"
@@ -42,16 +45,30 @@ export function NotificationFilters({
               onValueChange={value => onStatusFilterChange(value as any)}
             >
               <SelectTrigger className="w-32 bg-background border-border">
-                <SelectValue placeholder="상태" />
+                <SelectValue placeholder={t('notifications:filters.status')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">모든 상태</SelectItem>
-                <SelectItem value="pending">대기중</SelectItem>
-                <SelectItem value="sent">발송됨</SelectItem>
-                <SelectItem value="delivered">전달됨</SelectItem>
-                <SelectItem value="read">읽음</SelectItem>
-                <SelectItem value="failed">실패</SelectItem>
-                <SelectItem value="cancelled">취소</SelectItem>
+                <SelectItem value="all">
+                  {t('notifications:filters.all')}
+                </SelectItem>
+                <SelectItem value="pending">
+                  {t('notifications:status.pending')}
+                </SelectItem>
+                <SelectItem value="sent">
+                  {t('notifications:status.delivered')}
+                </SelectItem>
+                <SelectItem value="delivered">
+                  {t('notifications:status.delivered')}
+                </SelectItem>
+                <SelectItem value="read">
+                  {t('notifications:status.read')}
+                </SelectItem>
+                <SelectItem value="failed">
+                  {t('notifications:status.failed')}
+                </SelectItem>
+                <SelectItem value="cancelled">
+                  {t('notifications:status.cancelled')}
+                </SelectItem>
               </SelectContent>
             </Select>
 
@@ -60,21 +77,45 @@ export function NotificationFilters({
               onValueChange={value => onTypeFilterChange(value as any)}
             >
               <SelectTrigger className="w-32 bg-background border-border">
-                <SelectValue placeholder="유형" />
+                <SelectValue placeholder={t('notifications:filters.type')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">모든 유형</SelectItem>
-                <SelectItem value="meeting_reminder">미팅 알림</SelectItem>
-                <SelectItem value="goal_achievement">목표 달성</SelectItem>
-                <SelectItem value="goal_deadline">목표 마감</SelectItem>
-                <SelectItem value="new_referral">새 추천</SelectItem>
-                <SelectItem value="client_milestone">고객 이정표</SelectItem>
-                <SelectItem value="team_update">팀 업데이트</SelectItem>
-                <SelectItem value="system_alert">시스템 알림</SelectItem>
-                <SelectItem value="birthday_reminder">생일 알림</SelectItem>
-                <SelectItem value="follow_up_reminder">팔로업 알림</SelectItem>
-                <SelectItem value="contract_expiry">계약 만료</SelectItem>
-                <SelectItem value="payment_due">결제 예정</SelectItem>
+                <SelectItem value="all">
+                  {t('notifications:filters.all')}
+                </SelectItem>
+                <SelectItem value="meeting_reminder">
+                  {t('notifications:types.meeting_reminder')}
+                </SelectItem>
+                <SelectItem value="goal_achievement">
+                  {t('notifications:types.goal_achievement')}
+                </SelectItem>
+                <SelectItem value="goal_deadline">
+                  {t('notifications:types.goal_deadline')}
+                </SelectItem>
+                <SelectItem value="new_referral">
+                  {t('notifications:types.new_referral')}
+                </SelectItem>
+                <SelectItem value="client_milestone">
+                  {t('notifications:types.client_milestone')}
+                </SelectItem>
+                <SelectItem value="team_update">
+                  {t('notifications:types.team_update')}
+                </SelectItem>
+                <SelectItem value="system_alert">
+                  {t('notifications:types.system_alert')}
+                </SelectItem>
+                <SelectItem value="birthday_reminder">
+                  {t('notifications:types.birthday_reminder')}
+                </SelectItem>
+                <SelectItem value="follow_up_reminder">
+                  {t('notifications:types.follow_up_reminder')}
+                </SelectItem>
+                <SelectItem value="contract_expiry">
+                  {t('notifications:types.contract_expiry')}
+                </SelectItem>
+                <SelectItem value="payment_due">
+                  {t('notifications:types.payment_due')}
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
