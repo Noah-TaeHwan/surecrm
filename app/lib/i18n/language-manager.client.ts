@@ -38,7 +38,9 @@ export function setLanguageCookie(language: SupportedLanguage) {
   const expires = new Date();
   expires.setTime(expires.getTime() + COOKIE_MAX_AGE * 1000);
 
-  document.cookie = `${LANGUAGE_COOKIE_NAME}=${language}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`;
+  // HttpOnly=false로 설정하여 클라이언트에서 읽을 수 있도록 하고
+  // 서버와의 동기화를 위해 즉시 적용되도록 설정
+  document.cookie = `${LANGUAGE_COOKIE_NAME}=${language}; expires=${expires.toUTCString()}; path=/; SameSite=Lax; HttpOnly=false`;
 }
 
 /**
