@@ -113,59 +113,36 @@ export async function loader({ request }: Route.LoaderArgs) {
 
 // 🌍 다국어 메타 정보 - 표준화된 SEO 시스템 사용
 export function meta({ data }: Route.MetaArgs) {
-  const {
-    generateSEOTags,
-    generateStructuredData,
-    getLocalizedSEO,
-  } = require('~/lib/utils/seo');
-
-  // loader에서 전달받은 SEO 데이터 사용
-  const seoData = data?.seoData || {
-    baseUrl: 'https://surecrm.pro',
-    detectedLang: 'ko',
-    currentUrl: 'https://surecrm.pro',
+  // 동적 import 대신 직접 구현으로 우선 처리
+  const fallbackMeta = data?.meta || {
+    title: 'SureCRM - 보험설계사를 위한 소개 네트워크 관리 솔루션',
+    description:
+      '누가 누구를 소개했는지 시각적으로 체계화하고 소개 네트워크의 힘을 극대화하세요. 보험설계사 전용 CRM 솔루션.',
+    keywords: '보험설계사, CRM, 소개 네트워크, 고객 관리, 영업 관리',
   };
 
-  // 다국어 SEO 데이터 생성
-  const localizedSEO = getLocalizedSEO(
-    'landing',
-    seoData.detectedLang as 'ko' | 'en' | 'ja',
-    seoData.baseUrl
-  );
-
-  // 기본 SEO 태그들
-  const basicTags = generateSEOTags({
-    ...localizedSEO,
-    image: `${seoData.baseUrl}/og-image.png`,
-    author: 'SureCRM Team',
-    modifiedTime: new Date().toISOString(),
-    url: seoData.currentUrl,
-  });
-
-  // 웹사이트 구조화된 데이터
-  const websiteStructuredData = generateStructuredData({
-    type: 'WebSite',
-    name: 'SureCRM',
-    description: localizedSEO.description,
-    url: seoData.baseUrl,
-  });
-
-  // SaaS 애플리케이션 구조화된 데이터
-  const appStructuredData = generateStructuredData({
-    type: 'SoftwareApplication',
-    name: 'SureCRM',
-    description: localizedSEO.description,
-    url: seoData.baseUrl,
-    applicationCategory: 'BusinessApplication',
-    operatingSystem: 'Web Browser',
-    offers: {
-      type: 'Offer',
-      price: '0',
-      priceCurrency: 'KRW',
+  // 기본 SEO 태그들 (빌드 에러 수정을 위한 단순화)
+  return [
+    { title: fallbackMeta.title },
+    { name: 'description', content: fallbackMeta.description },
+    { name: 'keywords', content: fallbackMeta.keywords },
+    { property: 'og:title', content: fallbackMeta.title },
+    { property: 'og:description', content: fallbackMeta.description },
+    { property: 'og:type', content: 'website' },
+    { property: 'og:site_name', content: 'SureCRM' },
+    { name: 'twitter:card', content: 'summary_large_image' },
+    { name: 'twitter:title', content: fallbackMeta.title },
+    { name: 'twitter:description', content: fallbackMeta.description },
+    {
+      'script:ld+json': {
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        name: 'SureCRM',
+        description: fallbackMeta.description,
+        url: 'https://surecrm.pro',
+      },
     },
-  });
-
-  return [...basicTags, websiteStructuredData, appStructuredData];
+  ];
 }
 
 export default function LandingPage({ loaderData }: Route.ComponentProps) {

@@ -108,44 +108,22 @@ export async function loader({ request }: LoaderArgs) {
 
 // 🌍 다국어 메타 정보 - 표준화된 SEO 시스템 사용
 export function meta({ data }: MetaArgs) {
-  const {
-    generateSEOTags,
-    generateStructuredData,
-    getLocalizedSEO,
-  } = require('~/lib/utils/seo');
-
-  // loader에서 전달받은 SEO 데이터 사용
-  const seoData = (data as any)?.seoData || {
-    baseUrl: 'https://surecrm.pro',
-    detectedLang: 'ko',
-    currentUrl: 'https://surecrm.pro/features',
+  const meta = (data as any)?.meta || {
+    title: '기능 소개 | SureCRM',
+    description:
+      'SureCRM의 강력한 기능들을 확인해보세요. 보험설계사를 위한 완벽한 CRM 솔루션을 제공합니다.',
   };
 
-  // 다국어 SEO 데이터 생성
-  const localizedSEO = getLocalizedSEO(
-    'features',
-    seoData.detectedLang as 'ko' | 'en' | 'ja',
-    seoData.baseUrl
-  );
-
-  // 기본 SEO 태그들
-  const basicTags = generateSEOTags({
-    ...localizedSEO,
-    image: `${seoData.baseUrl}/og-features.png`,
-    author: 'SureCRM Team',
-    modifiedTime: new Date().toISOString(),
-    url: seoData.currentUrl,
-  });
-
-  // 웹페이지 구조화된 데이터
-  const pageStructuredData = generateStructuredData({
-    type: 'WebPage',
-    name: localizedSEO.title,
-    description: localizedSEO.description,
-    url: seoData.currentUrl,
-  });
-
-  return [...basicTags, pageStructuredData];
+  return [
+    { title: meta.title },
+    { name: 'description', content: meta.description },
+    { property: 'og:title', content: meta.title },
+    { property: 'og:description', content: meta.description },
+    { property: 'og:type', content: 'website' },
+    { name: 'twitter:card', content: 'summary_large_image' },
+    { name: 'twitter:title', content: meta.title },
+    { name: 'twitter:description', content: meta.description },
+  ];
 }
 
 const iconMap = {
