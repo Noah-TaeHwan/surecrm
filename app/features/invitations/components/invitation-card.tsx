@@ -1,4 +1,4 @@
-import { useTranslation } from 'react-i18next';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 import {
   Card,
   CardContent,
@@ -19,7 +19,7 @@ export function InvitationCard({
   onCopyLink,
   copiedCode,
 }: InvitationCardProps) {
-  const { t } = useTranslation('invitations');
+  const { t } = useHydrationSafeTranslation('invitations');
 
   return (
     <Card>

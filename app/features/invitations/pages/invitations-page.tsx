@@ -1,6 +1,6 @@
 import type { Route } from './+types/invitations-page';
 import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 import { MainLayout } from '~/common/layouts/main-layout';
 import { Button } from '~/common/components/ui/button';
 import {
@@ -118,7 +118,7 @@ export function meta({ data, params }: Route.MetaArgs) {
 
 // 🎨 반응형 빈 상태 컴포넌트
 function EmptyInvitationsState() {
-  const { t } = useTranslation('invitations');
+  const { t } = useHydrationSafeTranslation('invitations');
 
   return (
     <div className="text-center py-8 px-4">
@@ -171,7 +171,7 @@ function EmptyInvitationsState() {
 
 // 🎨 반응형 에러 상태 컴포넌트
 function ErrorState({ error }: { error: string }) {
-  const { t } = useTranslation('invitations');
+  const { t } = useHydrationSafeTranslation('invitations');
 
   return (
     <div className="text-center py-8 px-4">
@@ -202,7 +202,7 @@ export default function InvitationsPage({ loaderData }: Route.ComponentProps) {
     loaderData;
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [isGuideOpen, setIsGuideOpen] = useState(false);
-  const { t } = useTranslation('invitations');
+  const { t } = useHydrationSafeTranslation('invitations');
 
   const availableInvitations = myInvitations.filter(
     (inv: Invitation) => inv.status === 'available'

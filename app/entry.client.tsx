@@ -2,7 +2,7 @@ import * as Sentry from '@sentry/react-router';
 import { startTransition, StrictMode } from 'react';
 import { hydrateRoot } from 'react-dom/client';
 import { HydratedRouter } from 'react-router/dom';
-import '~/lib/i18n';
+import '~/lib/i18n/client';
 // 클라이언트 언어 초기화
 import { initializeClientLanguage } from '~/lib/i18n/language-manager.client';
 

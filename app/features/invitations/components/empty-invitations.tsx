@@ -1,4 +1,4 @@
-import { useTranslation } from 'react-i18next';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 import { Card, CardContent } from '~/common/components/ui/card';
 import { Badge } from '~/common/components/ui/badge';
 import { CheckCircledIcon, PersonIcon } from '@radix-ui/react-icons';
@@ -8,7 +8,7 @@ interface EmptyInvitationsProps {
 }
 
 export function EmptyInvitations({ usedCount }: EmptyInvitationsProps) {
-  const { t } = useTranslation('invitations');
+  const { t } = useHydrationSafeTranslation('invitations');
 
   return (
     <Card className="border-dashed">

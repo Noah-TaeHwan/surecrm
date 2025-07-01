@@ -1,4 +1,4 @@
-import { useTranslation } from 'react-i18next';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 import {
   Card,
   CardContent,
@@ -12,7 +12,7 @@ export function InvitationStatsCards({
   availableCount,
   usedInvitations,
 }: InvitationStatsProps) {
-  const { t } = useTranslation('invitations');
+  const { t } = useHydrationSafeTranslation('invitations');
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

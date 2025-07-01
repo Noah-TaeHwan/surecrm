@@ -1,10 +1,7 @@
-// 클라이언트 전용 i18n 설정 - 서버에서는 사용하지 말 것
-// 서버에서는 'app/lib/i18n/server.ts'를 사용하세요
-
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import LanguageDetector from 'i18next-browser-languagedetector';
-import Backend from 'i18next-http-backend';
+import FsBackend from 'i18next-fs-backend';
+import path from 'path';
 
 // 🌍 지원 언어 목록
 export const SUPPORTED_LANGUAGES = ['ko', 'en', 'ja'] as const;
@@ -66,19 +63,19 @@ export const LANGUAGE_CONFIG = {
   },
 } as const;
 
-i18n
-  // 🌐 백엔드에서 번역 파일 로드
-  .use(Backend)
+// 서버용 i18n 인스턴스 생성
+const serverI18n = i18n.createInstance();
 
-  // 🕵️ 언어 자동 감지
-  .use(LanguageDetector)
+serverI18n
+  // 🗃️ 파일 시스템 백엔드 사용 (서버 전용)
+  .use(FsBackend)
 
   // ⚛️ React와 연동
   .use(initReactI18next)
 
   // ⚙️ 초기화
   .init({
-    // 기본 언어 설정
+    // 기본 언어 설정 (서버에서는 한국어 고정)
     lng: 'ko',
     fallbackLng: 'ko',
 
@@ -89,13 +86,13 @@ i18n
     // 지원 언어
     supportedLngs: SUPPORTED_LANGUAGES,
 
-    // 백엔드 설정
+    // 백엔드 설정 (파일 시스템)
     backend: {
-      loadPath: '/locales/{{lng}}/{{ns}}.json',
+      loadPath: path.join(process.cwd(), 'public/locales/{{lng}}/{{ns}}.json'),
     },
 
-    // 디버그 모드 (필요시에만 활성화)
-    debug: false, // 대량 로그 방지
+    // 디버그 모드 비활성화
+    debug: false,
 
     // 인터폴레이션 설정
     interpolation: {
@@ -104,48 +101,24 @@ i18n
 
     // 리액트 설정
     react: {
-      useSuspense: false, // SSR 호환성을 위해 비활성화
+      useSuspense: false, // SSR에서는 서스펜스 비활성화
     },
+
+    // 서버에서는 즉시 로드
+    initImmediate: false,
   });
 
-// 🔄 언어 변경 유틸리티
-export const changeLanguage = async (language: SupportedLanguage) => {
-  await i18n.changeLanguage(language);
-
-  // HTML lang 속성 업데이트
-  if (typeof document !== 'undefined') {
-    document.documentElement.lang = language;
-    document.documentElement.dir = LANGUAGE_CONFIG[language].dir;
+// 서버에서 번역 파일 미리 로드
+async function preloadTranslations() {
+  try {
+    await serverI18n.loadResources();
+    console.log('✅ Server i18n translations preloaded successfully');
+  } catch (error) {
+    console.error('❌ Failed to preload server i18n translations:', error);
   }
+}
 
-  // 로컬스토리지에 저장
-  if (typeof localStorage !== 'undefined') {
-    localStorage.setItem('i18nextLng', language);
-  }
-};
+// 서버 시작 시 번역 파일 로드
+preloadTranslations();
 
-// 🌍 현재 언어 정보 가져오기
-export const getCurrentLanguageConfig = () => {
-  const currentLang = i18n.language as SupportedLanguage;
-  return LANGUAGE_CONFIG[currentLang] || LANGUAGE_CONFIG.ko;
-};
-
-// 🔍 브라우저 언어 감지
-export const detectBrowserLanguage = (): SupportedLanguage => {
-  if (typeof navigator === 'undefined') return 'ko';
-
-  const browserLang = navigator.language.split('-')[0];
-  return SUPPORTED_LANGUAGES.includes(browserLang as SupportedLanguage)
-    ? (browserLang as SupportedLanguage)
-    : 'ko';
-};
-
-// 📱 모바일 환경 감지
-export const isMobileDevice = () => {
-  if (typeof navigator === 'undefined') return false;
-  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-    navigator.userAgent
-  );
-};
-
-export default i18n;
+export default serverI18n;

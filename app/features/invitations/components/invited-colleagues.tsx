@@ -1,11 +1,11 @@
-import { useTranslation } from 'react-i18next';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 import { Card, CardContent } from '~/common/components/ui/card';
 import { Badge } from '~/common/components/ui/badge';
 import { Avatar, AvatarFallback } from '~/common/components/ui/avatar';
 import type { InvitedColleaguesProps } from '../types';
 
 export function InvitedColleagues({ usedInvitations }: InvitedColleaguesProps) {
-  const { t } = useTranslation('invitations');
+  const { t } = useHydrationSafeTranslation('invitations');
 
   if (usedInvitations.length === 0) {
     return null;

@@ -1,6 +1,3 @@
-// 클라이언트 전용 i18n 설정 - 서버에서는 사용하지 말 것
-// 서버에서는 'app/lib/i18n/server.ts'를 사용하세요
-
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';

@@ -11,7 +11,7 @@ import { renderToPipeableStream } from 'react-dom/server';
 import * as Sentry from '@sentry/react-router';
 import { checkCriticalEnvs } from './lib/core/safe-env';
 import { PassThrough } from 'stream';
-import './lib/i18n';
+import './lib/i18n/server';
 
 export const streamTimeout = 5_000;
 
