@@ -298,21 +298,101 @@ async function handleSubscriptionCreated(
 }
 
 /**
- * 구독 업데이트 처리
+ * 구독 업데이트 처리 (구독 갱신 시 호출됨)
  */
 async function handleSubscriptionUpdated(
   event: LemonSqueezyWebhookEvent
 ): Promise<void> {
-  const { data } = event;
+  const { data, meta } = event;
+  let userId = meta.custom_data?.user_id;
+
+  // custom_data에 userId가 없으면 이메일로 사용자 조회
+  if (!userId) {
+    const userEmail = data.attributes.user_email;
+    if (userEmail) {
+      const foundUserId = await findUserByEmail(userEmail);
+      if (foundUserId) {
+        userId = foundUserId;
+      }
+    }
+  }
 
   console.log('구독 업데이트:', {
     lemonSqueezyId: data.id,
+    userId,
     status: data.attributes.status,
     renewsAt: data.attributes.renews_at,
     endsAt: data.attributes.ends_at,
   });
 
-  // TODO: 데이터베이스에서 구독 정보 업데이트
+  if (!userId) {
+    console.error('구독 업데이트 처리 중 사용자 ID를 찾을 수 없습니다.');
+    return;
+  }
+
+  try {
+    // 구독 상태 및 종료일 업데이트
+    const renewsAt = data.attributes.renews_at;
+    const endsAt = data.attributes.ends_at;
+    const status = data.attributes.status;
+
+    // 구독 종료일 계산 (갱신일 또는 종료일 기준)
+    let subscriptionEndDate: Date | null = null;
+    if (renewsAt) {
+      subscriptionEndDate = new Date(renewsAt);
+    } else if (endsAt) {
+      subscriptionEndDate = new Date(endsAt);
+    }
+
+    // 구독 상태 매핑 (enum 값만 사용)
+    let subscriptionStatus:
+      | 'trial'
+      | 'active'
+      | 'past_due'
+      | 'cancelled'
+      | 'expired';
+    switch (status) {
+      case 'active':
+        subscriptionStatus = 'active';
+        break;
+      case 'cancelled':
+        subscriptionStatus = 'cancelled';
+        break;
+      case 'expired':
+        subscriptionStatus = 'expired';
+        break;
+      case 'past_due':
+        subscriptionStatus = 'past_due';
+        break;
+      default:
+        subscriptionStatus = 'active'; // 기본값
+    }
+
+    // DB 업데이트
+    const updatedProfile = await db
+      .update(profiles)
+      .set({
+        subscriptionStatus: subscriptionStatus,
+        subscriptionEndsAt: subscriptionEndDate,
+        lemonSqueezySubscriptionId: data.id,
+        updatedAt: new Date(),
+      })
+      .where(eq(profiles.id, userId))
+      .returning();
+
+    if (updatedProfile.length === 0) {
+      throw new Error(`사용자 프로필을 찾을 수 없습니다: ${userId}`);
+    }
+
+    console.log('구독 업데이트 완료:', {
+      userId,
+      subscriptionStatus: updatedProfile[0].subscriptionStatus,
+      subscriptionEndsAt: updatedProfile[0].subscriptionEndsAt,
+    });
+  } catch (error) {
+    console.error('구독 업데이트 처리 중 오류:', error);
+    throw error;
+  }
 }
 
 /**
@@ -358,14 +438,46 @@ async function handleSubscriptionCancelled(
 async function handleSubscriptionResumed(
   event: LemonSqueezyWebhookEvent
 ): Promise<void> {
-  const { data } = event;
+  const { data, meta } = event;
+  let userId = meta.custom_data?.user_id;
+
+  // custom_data에 userId가 없으면 이메일로 사용자 조회
+  if (!userId) {
+    const userEmail = data.attributes.user_email;
+    if (userEmail) {
+      const foundUserId = await findUserByEmail(userEmail);
+      if (foundUserId) {
+        userId = foundUserId;
+      }
+    }
+  }
 
   console.log('구독 재개:', {
     lemonSqueezyId: data.id,
+    userId,
     status: data.attributes.status,
   });
 
-  // TODO: 데이터베이스에서 구독 상태 업데이트
+  if (!userId) {
+    console.error('구독 재개 처리 중 사용자 ID를 찾을 수 없습니다.');
+    return;
+  }
+
+  try {
+    // 구독 종료일 계산
+    const renewsAt = data.attributes.renews_at;
+    const subscriptionEndDate = renewsAt
+      ? new Date(renewsAt)
+      : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 기본 30일
+
+    // 구독 재활성화
+    await activateUserSubscription(userId, subscriptionEndDate, data.id);
+
+    console.log(`사용자 ${userId} 구독 재개 완료`);
+  } catch (error) {
+    console.error('구독 재개 처리 중 오류:', error);
+    throw error;
+  }
 }
 
 /**
@@ -374,14 +486,60 @@ async function handleSubscriptionResumed(
 async function handleSubscriptionExpired(
   event: LemonSqueezyWebhookEvent
 ): Promise<void> {
-  const { data } = event;
+  const { data, meta } = event;
+  let userId = meta.custom_data?.user_id;
+
+  // custom_data에 userId가 없으면 이메일로 사용자 조회
+  if (!userId) {
+    const userEmail = data.attributes.user_email;
+    if (userEmail) {
+      const foundUserId = await findUserByEmail(userEmail);
+      if (foundUserId) {
+        userId = foundUserId;
+      }
+    }
+  }
 
   console.log('구독 만료:', {
     lemonSqueezyId: data.id,
+    userId,
     endsAt: data.attributes.ends_at,
   });
 
-  // TODO: 사용자 액세스 제한, 알림 발송 등
+  if (!userId) {
+    console.error('구독 만료 처리 중 사용자 ID를 찾을 수 없습니다.');
+    return;
+  }
+
+  try {
+    // 구독 상태를 만료로 변경
+    const updatedProfile = await db
+      .update(profiles)
+      .set({
+        subscriptionStatus: 'expired',
+        subscriptionEndsAt: data.attributes.ends_at
+          ? new Date(data.attributes.ends_at)
+          : new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(profiles.id, userId))
+      .returning();
+
+    if (updatedProfile.length === 0) {
+      throw new Error(`사용자 프로필을 찾을 수 없습니다: ${userId}`);
+    }
+
+    console.log('구독 만료 처리 완료:', {
+      userId,
+      subscriptionStatus: updatedProfile[0].subscriptionStatus,
+    });
+
+    // TODO: 만료 알림 이메일 발송
+    // await sendSubscriptionExpiredNotification(userId);
+  } catch (error) {
+    console.error('구독 만료 처리 중 오류:', error);
+    throw error;
+  }
 }
 
 /**
@@ -390,14 +548,54 @@ async function handleSubscriptionExpired(
 async function handleSubscriptionPaused(
   event: LemonSqueezyWebhookEvent
 ): Promise<void> {
-  const { data } = event;
+  const { data, meta } = event;
+  let userId = meta.custom_data?.user_id;
+
+  // custom_data에 userId가 없으면 이메일로 사용자 조회
+  if (!userId) {
+    const userEmail = data.attributes.user_email;
+    if (userEmail) {
+      const foundUserId = await findUserByEmail(userEmail);
+      if (foundUserId) {
+        userId = foundUserId;
+      }
+    }
+  }
 
   console.log('구독 일시정지:', {
     lemonSqueezyId: data.id,
+    userId,
     pauseData: data.attributes.pause,
   });
 
-  // TODO: 데이터베이스에서 구독 상태 업데이트
+  if (!userId) {
+    console.error('구독 일시정지 처리 중 사용자 ID를 찾을 수 없습니다.');
+    return;
+  }
+
+  try {
+    // 구독 상태를 취소로 변경 (paused는 enum에 없음)
+    const updatedProfile = await db
+      .update(profiles)
+      .set({
+        subscriptionStatus: 'cancelled',
+        updatedAt: new Date(),
+      })
+      .where(eq(profiles.id, userId))
+      .returning();
+
+    if (updatedProfile.length === 0) {
+      throw new Error(`사용자 프로필을 찾을 수 없습니다: ${userId}`);
+    }
+
+    console.log('구독 일시정지 처리 완료:', {
+      userId,
+      subscriptionStatus: updatedProfile[0].subscriptionStatus,
+    });
+  } catch (error) {
+    console.error('구독 일시정지 처리 중 오류:', error);
+    throw error;
+  }
 }
 
 /**
@@ -406,30 +604,119 @@ async function handleSubscriptionPaused(
 async function handleSubscriptionUnpaused(
   event: LemonSqueezyWebhookEvent
 ): Promise<void> {
-  const { data } = event;
+  const { data, meta } = event;
+  let userId = meta.custom_data?.user_id;
+
+  // custom_data에 userId가 없으면 이메일로 사용자 조회
+  if (!userId) {
+    const userEmail = data.attributes.user_email;
+    if (userEmail) {
+      const foundUserId = await findUserByEmail(userEmail);
+      if (foundUserId) {
+        userId = foundUserId;
+      }
+    }
+  }
 
   console.log('구독 일시정지 해제:', {
     lemonSqueezyId: data.id,
+    userId,
     status: data.attributes.status,
   });
 
-  // TODO: 데이터베이스에서 구독 상태 업데이트
+  if (!userId) {
+    console.error('구독 일시정지 해제 처리 중 사용자 ID를 찾을 수 없습니다.');
+    return;
+  }
+
+  try {
+    // 구독 종료일 계산
+    const renewsAt = data.attributes.renews_at;
+    const subscriptionEndDate = renewsAt
+      ? new Date(renewsAt)
+      : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 기본 30일
+
+    // 구독 재활성화
+    await activateUserSubscription(userId, subscriptionEndDate, data.id);
+
+    console.log(`사용자 ${userId} 구독 일시정지 해제 완료`);
+  } catch (error) {
+    console.error('구독 일시정지 해제 처리 중 오류:', error);
+    throw error;
+  }
 }
 
 /**
- * 결제 성공 처리
+ * 결제 성공 처리 (🔥 중요: 구독 갱신 시 호출됨)
  */
 async function handlePaymentSuccess(
   event: LemonSqueezyWebhookEvent
 ): Promise<void> {
-  const { data } = event;
+  const { data, meta } = event;
+  let userId = meta.custom_data?.user_id;
 
-  console.log('결제 성공:', {
+  // custom_data에 userId가 없으면 이메일로 사용자 조회
+  if (!userId) {
+    const userEmail = data.attributes.user_email;
+    if (userEmail) {
+      const foundUserId = await findUserByEmail(userEmail);
+      if (foundUserId) {
+        userId = foundUserId;
+      }
+    }
+  }
+
+  console.log('🎉 결제 성공 (구독 갱신):', {
     lemonSqueezyId: data.id,
+    userId,
     customerEmail: data.attributes.user_email,
+    productName: data.attributes.product_name,
+    renewsAt: data.attributes.renews_at,
   });
 
-  // TODO: 결제 내역 저장, 영수증 발송 등
+  if (!userId) {
+    console.error('결제 성공 처리 중 사용자 ID를 찾을 수 없습니다.');
+    return;
+  }
+
+  try {
+    // 🔥 중요: 구독 갱신 처리
+    const renewsAt = data.attributes.renews_at;
+    if (renewsAt) {
+      // 다음 갱신일로 구독 연장
+      const nextRenewalDate = new Date(renewsAt);
+
+      const updatedProfile = await db
+        .update(profiles)
+        .set({
+          subscriptionStatus: 'active',
+          subscriptionEndsAt: nextRenewalDate,
+          lemonSqueezySubscriptionId: data.id,
+          updatedAt: new Date(),
+        })
+        .where(eq(profiles.id, userId))
+        .returning();
+
+      if (updatedProfile.length === 0) {
+        throw new Error(`사용자 프로필을 찾을 수 없습니다: ${userId}`);
+      }
+
+      console.log('🎯 구독 갱신 완료:', {
+        userId,
+        subscriptionStatus: updatedProfile[0].subscriptionStatus,
+        subscriptionEndsAt: updatedProfile[0].subscriptionEndsAt,
+        nextRenewalDate: nextRenewalDate.toLocaleDateString('ko-KR'),
+      });
+
+      // TODO: 결제 성공 알림 이메일 발송
+      // await sendPaymentSuccessNotification(userId, nextRenewalDate);
+    } else {
+      console.warn('renewsAt 정보가 없어서 구독 갱신을 처리할 수 없습니다.');
+    }
+  } catch (error) {
+    console.error('결제 성공 처리 중 오류:', error);
+    throw error;
+  }
 }
 
 /**
@@ -438,14 +725,75 @@ async function handlePaymentSuccess(
 async function handlePaymentFailed(
   event: LemonSqueezyWebhookEvent
 ): Promise<void> {
-  const { data } = event;
+  const { data, meta } = event;
+  let userId = meta.custom_data?.user_id;
 
-  console.log('결제 실패:', {
+  // custom_data에 userId가 없으면 이메일로 사용자 조회
+  if (!userId) {
+    const userEmail = data.attributes.user_email;
+    if (userEmail) {
+      const foundUserId = await findUserByEmail(userEmail);
+      if (foundUserId) {
+        userId = foundUserId;
+      }
+    }
+  }
+
+  console.log('💳 결제 실패:', {
     lemonSqueezyId: data.id,
+    userId,
     customerEmail: data.attributes.user_email,
+    productName: data.attributes.product_name,
   });
 
-  // TODO: 결제 실패 알림, 재시도 로직 등
+  if (!userId) {
+    console.error('결제 실패 처리 중 사용자 ID를 찾을 수 없습니다.');
+    return;
+  }
+
+  try {
+    // 현재 구독 정보 조회
+    const currentProfile = await db
+      .select()
+      .from(profiles)
+      .where(eq(profiles.id, userId))
+      .limit(1);
+
+    if (currentProfile.length === 0) {
+      throw new Error(`사용자 프로필을 찾을 수 없습니다: ${userId}`);
+    }
+
+    const profile = currentProfile[0];
+
+    // 구독 상태를 결제 실패로 변경 (즉시 차단하지 않고 유예 기간 제공)
+    const gracePeriodEnd = new Date();
+    gracePeriodEnd.setDate(gracePeriodEnd.getDate() + 3); // 3일 유예 기간
+
+    const updatedProfile = await db
+      .update(profiles)
+      .set({
+        subscriptionStatus: 'past_due', // 결제 연체 상태
+        subscriptionEndsAt: gracePeriodEnd, // 3일 후 만료
+        updatedAt: new Date(),
+      })
+      .where(eq(profiles.id, userId))
+      .returning();
+
+    console.log('결제 실패 처리 완료:', {
+      userId,
+      subscriptionStatus: updatedProfile[0].subscriptionStatus,
+      gracePeriodEnd: gracePeriodEnd.toLocaleDateString('ko-KR'),
+    });
+
+    // TODO: 결제 실패 알림 이메일 발송
+    // await sendPaymentFailedNotification(userId, gracePeriodEnd);
+
+    // TODO: 3일 후 재시도 스케줄링
+    // await schedulePaymentRetry(userId, data.id, gracePeriodEnd);
+  } catch (error) {
+    console.error('결제 실패 처리 중 오류:', error);
+    throw error;
+  }
 }
 
 /**
