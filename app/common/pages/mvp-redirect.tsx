@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router';
+import type { Route } from '~/common/pages/+types/mvp-redirect';
 import {
   Card,
   CardContent,
@@ -10,16 +11,23 @@ import {
 import { Button } from '~/common/components/ui/button';
 import { Construction, ArrowLeft } from 'lucide-react';
 
+// 📍 서버에서 즉시 리디렉션 - 검색 엔진이 이 페이지를 색인하지 않도록
+export async function loader({ request }: Route.LoaderArgs) {
+  const { temporaryRedirect } = await import('~/lib/utils/redirect-helper');
+
+  // 즉시 대시보드로 리디렉션 (검색 엔진이 이 페이지를 보지 않음)
+  throw temporaryRedirect('/dashboard');
+}
+
 export function meta() {
   return [
     { title: 'SureCRM - 준비 중인 기능' },
     { name: 'description', content: 'MVP 출시 이후 제공 예정인 기능입니다.' },
+    { name: 'robots', content: 'noindex, nofollow' }, // 검색 엔진 색인 방지
   ];
 }
 
-export function loader() {
-  return {};
-}
+// loader는 이미 위에 정의됨 - 리디렉션 로직 포함
 
 export function action() {
   return {};

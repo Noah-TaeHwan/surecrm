@@ -108,7 +108,58 @@ export function Layout({ children }: { children: React.ReactNode }) {
         {/* 🔐 Google 도메인 소유권 확인 - OAuth 검증 요구사항 */}
         <meta
           name="google-site-verification"
-          content="GOOGLE_VERIFICATION_CODE_PLACEHOLDER"
+          content="google-site-verification-code-here"
+        />
+
+        {/* 🌐 기본 다국어 메타 태그 */}
+        <meta httpEquiv="Content-Language" content="ko" />
+        <meta name="language" content="Korean" />
+
+        {/* 🔍 기본 SEO 메타 태그 */}
+        <meta
+          name="robots"
+          content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+        />
+        <meta name="googlebot" content="index, follow" />
+
+        {/* 📱 모바일 최적화 */}
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="mobile-web-app-capable" content="yes" />
+
+        {/* 🚀 성능 최적화 힌트 */}
+        <link rel="dns-prefetch" href="//fonts.googleapis.com" />
+        <link rel="dns-prefetch" href="//fonts.gstatic.com" />
+        <link rel="dns-prefetch" href="//www.googletagmanager.com" />
+
+        {/* 🏢 조직 구조화된 데이터 */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'Organization',
+              name: 'SureCRM',
+              url: 'https://surecrm.pro',
+              logo: 'https://surecrm.pro/logo-192.png',
+              description:
+                '보험설계사를 위한 소개 네트워크 관리 솔루션. 누가 누구를 소개했는지 시각적으로 체계화하고 소개 네트워크의 힘을 극대화하세요.',
+              applicationCategory: 'BusinessApplication',
+              operatingSystem: 'Web Browser',
+              contactPoint: {
+                '@type': 'ContactPoint',
+                contactType: 'customer service',
+                availableLanguage: ['Korean', 'English', 'Japanese'],
+                url: 'https://surecrm.pro/contact',
+              },
+              sameAs: [],
+              offers: {
+                '@type': 'Offer',
+                price: '14일 무료체험',
+                priceCurrency: 'KRW',
+                description: 'SureCRM Pro 구독 서비스',
+              },
+            }),
+          }}
         />
 
         <Meta />

@@ -30,10 +30,28 @@ export async function loader({ request }: Route.LoaderArgs) {
       getPublicTestimonials(),
     ]);
 
+    // SEO 데이터 준비
+    const url = new URL(request.url);
+    const baseUrl = `${url.protocol}//${url.host}`;
+
+    // 언어 감지 (Accept-Language 헤더 또는 기본값)
+    const acceptLanguage = request.headers.get('Accept-Language') || 'ko';
+    const detectedLang = acceptLanguage.includes('ja')
+      ? 'ja'
+      : acceptLanguage.includes('en')
+        ? 'en'
+        : 'ko';
+
     return {
       stats,
       testimonials,
-      // 🌍 meta용 번역 데이터
+      // 🌍 SEO 메타 데이터
+      seoData: {
+        baseUrl,
+        detectedLang,
+        currentUrl: url.href,
+      },
+      // 🌍 meta용 번역 데이터 (호환성을 위해 유지)
       meta: {
         title: t(
           'meta.title',
@@ -72,6 +90,12 @@ export async function loader({ request }: Route.LoaderArgs) {
         successRate: 89,
       } as PublicStats,
       testimonials: [] as Testimonial[],
+      // 🌍 SEO 메타 데이터 (에러 시 기본값)
+      seoData: {
+        baseUrl: 'https://surecrm.pro',
+        detectedLang: 'ko',
+        currentUrl: 'https://surecrm.pro',
+      },
       // 🌍 에러 시 한국어 기본값
       meta: {
         title: 'SureCRM - 보험설계사를 위한 소개 네트워크 관리 솔루션',
@@ -87,43 +111,61 @@ export async function loader({ request }: Route.LoaderArgs) {
   }
 }
 
-// 🌍 다국어 메타 정보
+// 🌍 다국어 메타 정보 - 표준화된 SEO 시스템 사용
 export function meta({ data }: Route.MetaArgs) {
-  const meta = data?.meta;
+  const {
+    generateSEOTags,
+    generateStructuredData,
+    getLocalizedSEO,
+  } = require('~/lib/utils/seo');
 
-  if (!meta) {
-    // 기본값 fallback
-    return [
-      { title: 'SureCRM - 보험설계사를 위한 소개 네트워크 관리 솔루션' },
-      {
-        name: 'description',
-        content:
-          '누가 누구를 소개했는지 시각적으로 체계화하고 소개 네트워크의 힘을 극대화하세요. 보험설계사 전용 CRM 솔루션.',
-      },
-      { property: 'og:type', content: 'website' },
-    ];
-  }
+  // loader에서 전달받은 SEO 데이터 사용
+  const seoData = data?.seoData || {
+    baseUrl: 'https://surecrm.pro',
+    detectedLang: 'ko',
+    currentUrl: 'https://surecrm.pro',
+  };
 
-  return [
-    { title: meta.title },
-    {
-      name: 'description',
-      content: meta.description,
+  // 다국어 SEO 데이터 생성
+  const localizedSEO = getLocalizedSEO(
+    'landing',
+    seoData.detectedLang as 'ko' | 'en' | 'ja',
+    seoData.baseUrl
+  );
+
+  // 기본 SEO 태그들
+  const basicTags = generateSEOTags({
+    ...localizedSEO,
+    image: `${seoData.baseUrl}/og-image.png`,
+    author: 'SureCRM Team',
+    modifiedTime: new Date().toISOString(),
+    url: seoData.currentUrl,
+  });
+
+  // 웹사이트 구조화된 데이터
+  const websiteStructuredData = generateStructuredData({
+    type: 'WebSite',
+    name: 'SureCRM',
+    description: localizedSEO.description,
+    url: seoData.baseUrl,
+  });
+
+  // SaaS 애플리케이션 구조화된 데이터
+  const appStructuredData = generateStructuredData({
+    type: 'SoftwareApplication',
+    name: 'SureCRM',
+    description: localizedSEO.description,
+    url: seoData.baseUrl,
+    applicationCategory: 'BusinessApplication',
+    operatingSystem: 'Web Browser',
+    offers: {
+      type: 'Offer',
+      price: '0',
+      priceCurrency: 'KRW',
     },
-    {
-      name: 'keywords',
-      content: meta.keywords,
-    },
-    {
-      property: 'og:title',
-      content: meta.ogTitle,
-    },
-    {
-      property: 'og:description',
-      content: meta.ogDescription,
-    },
-    { property: 'og:type', content: 'website' },
-  ];
+  });
+
+  return [...basicTags, websiteStructuredData, appStructuredData];
 }
 
 export default function LandingPage({ loaderData }: Route.ComponentProps) {

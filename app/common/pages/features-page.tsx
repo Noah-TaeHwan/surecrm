@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 import { Link } from 'react-router';
 import { LandingLayout } from '~/common/layouts/landing-layout';
@@ -34,6 +34,8 @@ import {
   Star,
 } from 'lucide-react';
 import { createServerTranslator } from '~/lib/i18n/language-manager.server';
+import type { Route } from './+types/features-page';
+import { FeaturesSection, CTASection } from '~/common/components/landing';
 
 // 직접 타입 정의
 interface LoaderArgs {
@@ -53,9 +55,27 @@ interface MetaArgs {
 export async function loader({ request }: LoaderArgs) {
   // 🌍 서버에서 다국어 번역 로드
   try {
-    const { t } = await createServerTranslator(request, 'features');
+    const { t, language } = await createServerTranslator(request, 'features');
+
+    // SEO 데이터 준비
+    const url = new URL(request.url);
+    const baseUrl = `${url.protocol}//${url.host}`;
+
+    // 언어 감지 (Accept-Language 헤더 또는 기본값)
+    const acceptLanguage = request.headers.get('Accept-Language') || 'ko';
+    const detectedLang = acceptLanguage.includes('ja')
+      ? 'ja'
+      : acceptLanguage.includes('en')
+        ? 'en'
+        : 'ko';
 
     return {
+      // 🌍 SEO 메타 데이터
+      seoData: {
+        baseUrl,
+        detectedLang,
+        currentUrl: url.href,
+      },
       // 🌍 meta용 번역 데이터
       meta: {
         title: t('meta.title', '기능 소개') + ' | SureCRM',
@@ -64,41 +84,68 @@ export async function loader({ request }: LoaderArgs) {
           'SureCRM의 강력한 기능들을 확인해보세요. 보험설계사를 위한 완벽한 CRM 솔루션을 제공합니다.'
         ),
       },
+      language,
     };
   } catch (error) {
     console.error('Features page loader 에러:', error);
 
     // 에러 시 한국어 기본값
     return {
+      seoData: {
+        baseUrl: 'https://surecrm.pro',
+        detectedLang: 'ko',
+        currentUrl: 'https://surecrm.pro/features',
+      },
       meta: {
         title: '기능 소개 | SureCRM',
         description:
           'SureCRM의 강력한 기능들을 확인해보세요. 보험설계사를 위한 완벽한 CRM 솔루션을 제공합니다.',
       },
+      language: 'ko' as const,
     };
   }
 }
 
-// 🌍 다국어 메타 정보
+// 🌍 다국어 메타 정보 - 표준화된 SEO 시스템 사용
 export function meta({ data }: MetaArgs) {
-  const meta = data?.meta;
+  const {
+    generateSEOTags,
+    generateStructuredData,
+    getLocalizedSEO,
+  } = require('~/lib/utils/seo');
 
-  if (!meta) {
-    // 기본값 fallback
-    return [
-      { title: '기능 소개 | SureCRM' },
-      {
-        name: 'description',
-        content:
-          'SureCRM의 강력한 기능들을 확인해보세요. 보험설계사를 위한 완벽한 CRM 솔루션을 제공합니다.',
-      },
-    ];
-  }
+  // loader에서 전달받은 SEO 데이터 사용
+  const seoData = (data as any)?.seoData || {
+    baseUrl: 'https://surecrm.pro',
+    detectedLang: 'ko',
+    currentUrl: 'https://surecrm.pro/features',
+  };
 
-  return [
-    { title: meta.title },
-    { name: 'description', content: meta.description },
-  ];
+  // 다국어 SEO 데이터 생성
+  const localizedSEO = getLocalizedSEO(
+    'features',
+    seoData.detectedLang as 'ko' | 'en' | 'ja',
+    seoData.baseUrl
+  );
+
+  // 기본 SEO 태그들
+  const basicTags = generateSEOTags({
+    ...localizedSEO,
+    image: `${seoData.baseUrl}/og-features.png`,
+    author: 'SureCRM Team',
+    modifiedTime: new Date().toISOString(),
+    url: seoData.currentUrl,
+  });
+
+  // 웹페이지 구조화된 데이터
+  const pageStructuredData = generateStructuredData({
+    type: 'WebPage',
+    name: localizedSEO.title,
+    description: localizedSEO.description,
+    url: seoData.currentUrl,
+  });
+
+  return [...basicTags, pageStructuredData];
 }
 
 const iconMap = {

@@ -1,0 +1,23 @@
+User-agent: *
+Allow: /
+
+# Admin 페이지는 크롤링 차단
+Disallow: /system-console/
+Disallow: /api/admin/
+
+# 인증 관련 페이지는 크롤링 차단
+Disallow: /auth/
+Disallow: /api/auth/
+
+# 임시 리디렉트 페이지들은 크롤링 차단
+Disallow: /influencers-redirect
+Disallow: /mvp-redirect
+
+# API 엔드포인트는 크롤링 차단
+Disallow: /api/
+
+# 사이트맵 위치
+Sitemap: https://surecrm.pro/sitemap.xml
+
+# 검색 엔진별 크롤링 속도 조절
+Crawl-delay: 1 

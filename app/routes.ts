@@ -85,6 +85,9 @@ export default [
   // 🌍 다국어 테스트 페이지
   route('test-i18n', 'routes/test-i18n.tsx'),
 
+  // 🔍 SEO 관련 라우트
+  route('sitemap.xml', 'routes/sitemap.xml.ts'),
+
   // 🛠️ API 라우트들
   route('api/auth/me', 'routes/api.auth.me.ts'),
   route(
