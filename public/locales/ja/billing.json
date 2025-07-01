@@ -1,5 +1,21 @@
 {
   "title": "請求・サブスクリプション",
+  "upgradeTitle": "SureCRM Proにアップグレード",
+  "loginRequired": "ログインしてプレミアム機能をご利用ください",
+  "adminAccount": "SureCRM Pro管理者アカウント",
+  "adminSubtitle": "すべてのプレミアム機能を無制限でご利用いただけます",
+  "trialActive": "14日間無料体験中",
+  "daysRemaining": "残り{{days}}",
+  "oneDay": "1日",
+  "upgradeAnytime": "いつでもアップグレード可能",
+  "subscribing": "SureCRM Pro加入者",
+  "subscribingSubtitle": "すべてのプレミアム機能をご利用いただけます（{{endDate}}まで）",
+  "unlimited": "無制限",
+  "trialExpired": "体験期間終了",
+  "trialExpiredSubtitle": "継続利用にはProサブスクリプションが必要です",
+  "startSubscription": "Proサブスクリプション開始",
+  "loginNeeded": "ログインが必要",
+  "monthlyPrice": "月額${{price}} {{currency}} · いつでもキャンセル可能",
   "subscription": {
     "current": "現在のサブスクリプション",
     "upgrade": "アップグレード",
@@ -10,6 +26,13 @@
     "active": "アクティブ",
     "trial": "試用版",
     "trialEnds": "試用版終了"
+  },
+  "status": {
+    "notLoggedIn": "未ログイン",
+    "admin": "Admin",
+    "trial": "体験中",
+    "pro": "Pro",
+    "subscriptionNeeded": "サブスクリプション必要"
   },
   "plans": {
     "free": "無料",
@@ -22,6 +45,50 @@
     "perYear": "年",
     "savings": "節約",
     "mostPopular": "最も人気"
+  },
+  "coreFeatures": {
+    "title": "核心機能",
+    "subtitle": "SureCRM Proの強力な機能をお試しください",
+    "unlimited_clients": "無制限顧客管理",
+    "unlimited_clients_desc": "顧客情報と関係を体系的に管理",
+    "advanced_analytics": "高度な分析・レポート",
+    "advanced_analytics_desc": "リアルタイム成果分析と詳細レポート",
+    "automation": "自動化ツール",
+    "automation_desc": "反復業務を自動化して効率性向上",
+    "advanced_security": "高度なセキュリティ",
+    "advanced_security_desc": "エンタープライズ級セキュリティとデータ保護",
+    "calendar_sync": "高度なスケジュール管理",
+    "calendar_sync_desc": "Google Calendar同期とスマートスケジューリング",
+    "document_management": "文書管理",
+    "document_management_desc": "契約書、規定書など全ての文書を安全に保管",
+    "smart_notifications": "スマート通知",
+    "smart_notifications_desc": "重要なスケジュールと作業を見逃さないよう通知",
+    "advanced_settings": "高度な設定",
+    "advanced_settings_desc": "ワークフローをカスタマイズして生産性最大化"
+  },
+  "pricing": {
+    "title": "Proプラン",
+    "monthly": "月額サブスクリプション（{{currency}}）",
+    "unlimited_clients": "無制限顧客管理",
+    "advanced_analytics": "高度な分析ツール",
+    "priority_support": "優先カスタマーサポート",
+    "enterprise_security": "エンタープライズセキュリティ"
+  },
+  "upcoming": {
+    "title": "近日公開予定の機能",
+    "comingSoon": "近日公開",
+    "ai_analysis": "AI顧客分析",
+    "ai_analysis_desc": "機械学習ベースの顧客行動予測",
+    "mobile_app": "モバイルアプリ",
+    "mobile_app_desc": "いつでもどこでもCRMアクセス",
+    "team_collaboration": "チーム協力ツール",
+    "team_collaboration_desc": "チームメンバーとのリアルタイム協力",
+    "api_integration": "API統合",
+    "api_integration_desc": "他のツールとの連動"
+  },
+  "alerts": {
+    "trialExpiredTitle": "体験期間が終了しました",
+    "trialExpiredDesc": "継続利用にはProサブスクリプションを開始してください。すべての機能へのアクセスが制限されました。"
   },
   "features": {
     "clients": "顧客",
@@ -72,5 +139,9 @@
     "cancellationSuccess": "サブスクリプションが解約されました",
     "paymentFailed": "支払いに失敗しました",
     "trialExpired": "試用期間が終了しました"
+  },
+  "meta": {
+    "title": "請求・サブスクリプション",
+    "description": "SureCRM Proサブスクリプションを管理し、プレミアム機能をご利用ください。プラン変更、支払い情報管理、請求書確認が可能です。"
   }
 }

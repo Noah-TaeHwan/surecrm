@@ -69,10 +69,24 @@ function getDateRangeOnServer(period: string): {
   return { startDate, endDate };
 }
 
-export function meta({ data, params }: Route.MetaArgs) {
+// 🌍 다국어 메타 정보
+export function meta({ data }: Route.MetaArgs) {
+  const meta = data?.meta;
+
+  if (!meta) {
+    // 기본값 fallback
+    return [
+      { title: '보고서 - SureCRM' },
+      {
+        name: 'description',
+        content: 'SureCRM 보고서 - 비즈니스 성과와 주요 지표를 확인하세요',
+      },
+    ];
+  }
+
   return [
-    { title: 'SureCRM - Reports' },
-    { name: 'description', content: 'Check your business performance reports' },
+    { title: meta.title + ' - SureCRM' },
+    { name: 'description', content: meta.description },
   ];
 }
 
@@ -83,6 +97,13 @@ export async function loader({ request }: Route.LoaderArgs) {
       '~/lib/auth/subscription-middleware.server'
     );
     const { user } = await requireActiveSubscription(request);
+
+    // 🌍 서버에서 다국어 번역 로드
+    const { createServerTranslator } = await import(
+      '~/lib/i18n/language-manager.server'
+    );
+    const translator = await createServerTranslator(request, 'reports');
+    const t = translator.t;
 
     // 🎯 실제 데이터 조회 (수익 리포트 강화)
     const agentId = user.id;
@@ -136,9 +157,42 @@ export async function loader({ request }: Route.LoaderArgs) {
       },
       // 🔧 추가: 서버 타임스탬프 추가 (클라이언트 동기화용)
       serverTimestamp: new Date().toISOString(),
+      // 🌍 meta용 번역 데이터
+      meta: {
+        title: t('meta.title', '보고서'),
+        description: t(
+          'meta.description',
+          'SureCRM 보고서 - 비즈니스 성과와 주요 지표를 확인하세요'
+        ),
+      },
     };
   } catch (error) {
     console.error('Error loading reports data:', error);
+
+    // 🌍 에러 발생 시에도 번역 시도
+    let meta = {
+      title: '보고서',
+      description: 'SureCRM 보고서 - 비즈니스 성과와 주요 지표를 확인하세요',
+    };
+
+    try {
+      const { createServerTranslator } = await import(
+        '~/lib/i18n/language-manager.server'
+      );
+      const translator = await createServerTranslator(request, 'reports');
+      const t = translator.t;
+
+      meta = {
+        title: t('meta.title', '보고서'),
+        description: t(
+          'meta.description',
+          'SureCRM 보고서 - 비즈니스 성과와 주요 지표를 확인하세요'
+        ),
+      };
+    } catch (translationError) {
+      // 번역 실패 시 기본값 사용
+      console.error('번역 로드 실패:', translationError);
+    }
 
     // 🔧 수정: 오류 발생 시에도 서버 타임스탬프 포함
     const now = new Date().toISOString();
@@ -183,6 +237,8 @@ export async function loader({ request }: Route.LoaderArgs) {
         email: '',
       },
       serverTimestamp: now,
+      // 🌍 meta 데이터 (번역 처리됨)
+      meta,
     };
   }
 }

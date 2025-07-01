@@ -336,5 +336,9 @@
   "errors": {
     "loadingFailed": "Failed to load data.",
     "copyFailed": "Failed to copy to clipboard."
+  },
+  "meta": {
+    "title": "Reports",
+    "description": "Check your business performance and key metrics. Make data-driven decisions with client management, referral network, and revenue analysis."
   }
 }

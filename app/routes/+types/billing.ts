@@ -1,4 +1,5 @@
 import type { LoaderFunction, MetaFunction } from 'react-router';
+import type { Route } from 'react-router';
 
 interface LoaderArgsInterface {
   request: Request;
@@ -19,13 +20,20 @@ interface LoaderDataInterface {
     needsPayment: boolean;
   };
   user?: any | null;
+  meta?: {
+    title: string;
+    description: string;
+  };
 }
 
 interface ActionDataInterface {
   error?: string;
 }
 
-interface MetaArgsInterface {}
+interface MetaArgsInterface {
+  data?: LoaderDataInterface;
+  params?: any;
+}
 
 interface ComponentPropsInterface {
   loaderData: LoaderDataInterface;

@@ -1,5 +1,6 @@
 // React Router v7 타입 import 제거 - 직접 타입 정의 사용
 import React from 'react';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 
 // 타입 정의
 interface LoaderArgs {
@@ -13,6 +14,11 @@ interface ActionArgs {
 interface ComponentProps {
   loaderData: any;
   actionData?: any;
+}
+
+interface MetaArgs {
+  data?: any;
+  params?: any;
 }
 import { MainLayout } from '~/common/layouts/main-layout';
 import {
@@ -42,13 +48,24 @@ import {
 import { Form } from 'react-router';
 import { data } from 'react-router';
 
-export function meta() {
+// 🌍 다국어 메타 정보
+export function meta({ data }: MetaArgs) {
+  const meta = data?.meta;
+
+  if (!meta) {
+    // 기본값 fallback
+    return [
+      { title: '구독 관리 - SureCRM' },
+      {
+        name: 'description',
+        content: 'SureCRM Pro 구독을 관리하고 프리미엄 기능을 이용하세요.',
+      },
+    ];
+  }
+
   return [
-    { title: '구독 관리 - SureCRM' },
-    {
-      name: 'description',
-      content: 'SureCRM Pro 구독을 관리하고 프리미엄 기능을 이용하세요.',
-    },
+    { title: meta.title + ' - SureCRM' },
+    { name: 'description', content: meta.description },
   ];
 }
 
@@ -103,6 +120,13 @@ export async function action({ request }: ActionArgs) {
 
 export async function loader({ request }: LoaderArgs) {
   try {
+    // 🌍 서버에서 다국어 번역 로드
+    const { createServerTranslator } = await import(
+      '~/lib/i18n/language-manager.server'
+    );
+    const translator = await createServerTranslator(request, 'billing');
+    const t = translator.t;
+
     const { getSubscriptionStatusForUser } = await import(
       '~/lib/auth/subscription-middleware.server'
     );
@@ -127,6 +151,14 @@ export async function loader({ request }: LoaderArgs) {
           currency: env.subscription.currency,
         },
       },
+      // 🌍 meta용 번역 데이터
+      meta: {
+        title: t('meta.title', '구독 관리'),
+        description: t(
+          'meta.description',
+          'SureCRM Pro 구독을 관리하고 프리미엄 기능을 이용하세요.'
+        ),
+      },
     };
   } catch (error) {
     console.error('구독 정보 조회 오류:', error);
@@ -136,6 +168,31 @@ export async function loader({ request }: LoaderArgs) {
       currency: 'USD',
       reason: 'env 로드 실패',
     });
+
+    // 🌍 에러 발생 시에도 번역 시도
+    let meta = {
+      title: '구독 관리',
+      description: 'SureCRM Pro 구독을 관리하고 프리미엄 기능을 이용하세요.',
+    };
+
+    try {
+      const { createServerTranslator } = await import(
+        '~/lib/i18n/language-manager.server'
+      );
+      const translator = await createServerTranslator(request, 'billing');
+      const t = translator.t;
+
+      meta = {
+        title: t('meta.title', '구독 관리'),
+        description: t(
+          'meta.description',
+          'SureCRM Pro 구독을 관리하고 프리미엄 기능을 이용하세요.'
+        ),
+      };
+    } catch (translationError) {
+      // 번역 실패 시 기본값 사용
+      console.error('번역 로드 실패:', translationError);
+    }
 
     // 로그인하지 않은 사용자도 페이지는 볼 수 있음
     return {
@@ -150,6 +207,8 @@ export async function loader({ request }: LoaderArgs) {
           currency: 'USD',
         },
       },
+      // 🌍 meta 데이터 (번역 처리됨)
+      meta,
     };
   }
 }
@@ -158,6 +217,7 @@ export default function BillingPage({
   loaderData,
   actionData,
 }: ComponentProps) {
+  const { t, formatDate } = useHydrationSafeTranslation('billing');
   const { user, subscriptionStatus, env } = loaderData;
 
   // URL 파라미터에서 리다이렉트 이유 확인
@@ -182,9 +242,9 @@ export default function BillingPage({
   const getStatusInfo = () => {
     if (!subscriptionStatus) {
       return {
-        title: 'SureCRM Pro로 업그레이드',
-        subtitle: '로그인하여 프리미엄 기능을 이용하세요',
-        badgeText: '미로그인',
+        title: t('upgradeTitle', 'SureCRM Pro로 업그레이드'),
+        subtitle: t('loginRequired', '로그인하여 프리미엄 기능을 이용하세요'),
+        badgeText: t('status.notLoggedIn', '미로그인'),
         badgeVariant: 'secondary' as const,
         showUpgrade: true,
       };
@@ -195,9 +255,12 @@ export default function BillingPage({
 
     if (isSystemAdmin) {
       return {
-        title: 'SureCRM Pro 관리자 계정',
-        subtitle: '모든 프리미엄 기능을 무제한으로 이용할 수 있습니다',
-        badgeText: 'Admin',
+        title: t('adminAccount', 'SureCRM Pro 관리자 계정'),
+        subtitle: t(
+          'adminSubtitle',
+          '모든 프리미엄 기능을 무제한으로 이용할 수 있습니다'
+        ),
+        badgeText: t('status.admin', 'Admin'),
         badgeVariant: 'default' as const,
         showUpgrade: false,
       };
@@ -206,10 +269,13 @@ export default function BillingPage({
     if (subscriptionStatus.isTrialActive) {
       const daysText =
         subscriptionStatus.daysRemaining === 1
-          ? '1일'
-          : `${subscriptionStatus.daysRemaining}일`;
+          ? t('oneDay', '1일')
+          : t('daysRemaining', '{{days}} 남음', {
+              days: subscriptionStatus.daysRemaining,
+            });
+
       const trialEndDate = subscriptionStatus.trialEndsAt
-        ? new Date(subscriptionStatus.trialEndsAt).toLocaleDateString('ko-KR', {
+        ? formatDate(new Date(subscriptionStatus.trialEndsAt), {
             year: 'numeric',
             month: 'long',
             day: 'numeric',
@@ -217,9 +283,9 @@ export default function BillingPage({
         : '';
 
       return {
-        title: '14일 무료 체험 중',
-        subtitle: `${daysText} 남음 (${trialEndDate}까지) · 언제든지 업그레이드 가능`,
-        badgeText: '체험 중',
+        title: t('trialActive', '14일 무료 체험 중'),
+        subtitle: `${daysText} (${trialEndDate}까지) · ${t('upgradeAnytime', '언제든지 업그레이드 가능')}`,
+        badgeText: t('status.trial', '체험 중'),
         badgeVariant:
           subscriptionStatus.daysRemaining <= 3
             ? ('destructive' as const)
@@ -230,29 +296,33 @@ export default function BillingPage({
 
     if (!subscriptionStatus.needsPayment) {
       const subscriptionEndDate = subscriptionStatus.subscriptionEndsAt
-        ? new Date(subscriptionStatus.subscriptionEndsAt).toLocaleDateString(
-            'ko-KR',
-            {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            }
-          )
-        : '무제한';
+        ? formatDate(new Date(subscriptionStatus.subscriptionEndsAt), {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          })
+        : t('unlimited', '무제한');
 
       return {
-        title: 'SureCRM Pro 구독 중',
-        subtitle: `모든 프리미엄 기능을 이용하고 계십니다 (${subscriptionEndDate}까지)`,
-        badgeText: 'Pro',
+        title: t('subscribing', 'SureCRM Pro 구독 중'),
+        subtitle: t(
+          'subscribingSubtitle',
+          '모든 프리미엄 기능을 이용하고 계십니다 ({{endDate}}까지)',
+          { endDate: subscriptionEndDate }
+        ),
+        badgeText: t('status.pro', 'Pro'),
         badgeVariant: 'default' as const,
         showUpgrade: false,
       };
     }
 
     return {
-      title: '체험 기간 종료',
-      subtitle: '계속 사용하려면 Pro 구독이 필요합니다',
-      badgeText: '구독 필요',
+      title: t('trialExpired', '체험 기간 종료'),
+      subtitle: t(
+        'trialExpiredSubtitle',
+        '계속 사용하려면 Pro 구독이 필요합니다'
+      ),
+      badgeText: t('status.subscriptionNeeded', '구독 필요'),
       badgeVariant: 'destructive' as const,
       showUpgrade: true,
     };
@@ -264,57 +334,99 @@ export default function BillingPage({
   const coreFeatures = [
     {
       icon: Users,
-      title: '무제한 고객 관리',
-      description: '고객 정보와 관계를 체계적으로 관리',
+      title: t('coreFeatures.unlimited_clients', '무제한 고객 관리'),
+      description: t(
+        'coreFeatures.unlimited_clients_desc',
+        '고객 정보와 관계를 체계적으로 관리'
+      ),
     },
     {
       icon: BarChart3,
-      title: '고급 분석 및 보고서',
-      description: '실시간 성과 분석과 상세 보고서',
+      title: t('coreFeatures.advanced_analytics', '고급 분석 및 보고서'),
+      description: t(
+        'coreFeatures.advanced_analytics_desc',
+        '실시간 성과 분석과 상세 보고서'
+      ),
     },
     {
       icon: Zap,
-      title: '자동화 도구',
-      description: '반복 업무를 자동화하여 효율성 향상',
+      title: t('coreFeatures.automation', '자동화 도구'),
+      description: t(
+        'coreFeatures.automation_desc',
+        '반복 업무를 자동화하여 효율성 향상'
+      ),
     },
     {
       icon: Shield,
-      title: '고급 보안',
-      description: '엔터프라이즈급 보안과 데이터 보호',
+      title: t('coreFeatures.advanced_security', '고급 보안'),
+      description: t(
+        'coreFeatures.advanced_security_desc',
+        '엔터프라이즈급 보안과 데이터 보호'
+      ),
     },
     {
       icon: PhoneCall,
-      title: '고급 일정 관리',
-      description: 'Google Calendar 동기화 및 스마트 스케줄링',
+      title: t('coreFeatures.calendar_sync', '고급 일정 관리'),
+      description: t(
+        'coreFeatures.calendar_sync_desc',
+        'Google Calendar 동기화 및 스마트 스케줄링'
+      ),
     },
     {
       icon: FileText,
-      title: '문서 관리',
-      description: '계약서, 정책서 등 모든 문서를 안전하게 보관',
+      title: t('coreFeatures.document_management', '문서 관리'),
+      description: t(
+        'coreFeatures.document_management_desc',
+        '계약서, 정책서 등 모든 문서를 안전하게 보관'
+      ),
     },
     {
       icon: Bell,
-      title: '스마트 알림',
-      description: '중요한 일정과 작업을 놓치지 않도록 알림',
+      title: t('coreFeatures.smart_notifications', '스마트 알림'),
+      description: t(
+        'coreFeatures.smart_notifications_desc',
+        '중요한 일정과 작업을 놓치지 않도록 알림'
+      ),
     },
     {
       icon: Settings2,
-      title: '고급 설정',
-      description: '워크플로우를 맞춤 설정하여 생산성 극대화',
+      title: t('coreFeatures.advanced_settings', '고급 설정'),
+      description: t(
+        'coreFeatures.advanced_settings_desc',
+        '워크플로우를 맞춤 설정하여 생산성 극대화'
+      ),
     },
   ];
 
   // 예정 기능들
   const upcomingFeatures = [
-    { title: 'AI 고객 분석', description: '머신러닝 기반 고객 행동 예측' },
-    { title: '모바일 앱', description: '언제 어디서나 CRM 접근' },
-    { title: '팀 협업 도구', description: '팀원과의 실시간 협업' },
-    { title: 'API 통합', description: '다른 도구들과의 연동' },
+    {
+      title: t('upcoming.ai_analysis', 'AI 고객 분석'),
+      description: t(
+        'upcoming.ai_analysis_desc',
+        '머신러닝 기반 고객 행동 예측'
+      ),
+    },
+    {
+      title: t('upcoming.mobile_app', '모바일 앱'),
+      description: t('upcoming.mobile_app_desc', '언제 어디서나 CRM 접근'),
+    },
+    {
+      title: t('upcoming.team_collaboration', '팀 협업 도구'),
+      description: t(
+        'upcoming.team_collaboration_desc',
+        '팀원과의 실시간 협업'
+      ),
+    },
+    {
+      title: t('upcoming.api_integration', 'API 통합'),
+      description: t('upcoming.api_integration_desc', '다른 도구들과의 연동'),
+    },
   ];
 
   return (
     <MainLayout
-      title="구독 관리"
+      title={t('title', '구독 관리')}
       initialSubscriptionStatus={
         subscriptionStatus
           ? {
@@ -337,11 +449,13 @@ export default function BillingPage({
               <Shield className="h-5 w-5 text-red-600 dark:text-red-400 mt-0.5" />
               <div>
                 <h3 className="font-semibold text-red-900 dark:text-red-100">
-                  체험 기간이 종료되었습니다
+                  {t('alerts.trialExpiredTitle', '체험 기간이 종료되었습니다')}
                 </h3>
                 <p className="text-sm text-red-700 dark:text-red-300 mt-1">
-                  계속 사용하시려면 Pro 구독을 시작해주세요. 모든 기능에 대한
-                  접근이 제한되었습니다.
+                  {t(
+                    'alerts.trialExpiredDesc',
+                    '계속 사용하시려면 Pro 구독을 시작해주세요. 모든 기능에 대한 접근이 제한되었습니다.'
+                  )}
                 </p>
               </div>
             </div>
@@ -382,13 +496,22 @@ export default function BillingPage({
                     className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                     disabled={!user} // 로그인하지 않은 경우 비활성화
                   >
-                    {!user ? '로그인 필요' : 'Pro 구독 시작하기'}
+                    {!user
+                      ? t('loginNeeded', '로그인 필요')
+                      : t('startSubscription', 'Pro 구독 시작하기')}
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Form>
                 <div className="text-sm text-muted-foreground flex items-center">
-                  <Star className="mr-1 h-4 w-4" />월 ${env.subscription.price}{' '}
-                  {env.subscription.currency} · 언제든지 취소 가능
+                  <Star className="mr-1 h-4 w-4" />
+                  {t(
+                    'monthlyPrice',
+                    '월 ${{price}} {{currency}} · 언제든지 취소 가능',
+                    {
+                      price: env.subscription.price,
+                      currency: env.subscription.currency,
+                    }
+                  )}
                 </div>
               </div>
               {actionData?.error && (
@@ -407,10 +530,13 @@ export default function BillingPage({
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Zap className="h-5 w-5 text-blue-600" />
-                  핵심 기능
+                  {t('coreFeatures.title', '핵심 기능')}
                 </CardTitle>
                 <CardDescription>
-                  SureCRM Pro의 강력한 기능들을 만나보세요
+                  {t(
+                    'coreFeatures.subtitle',
+                    'SureCRM Pro의 강력한 기능들을 만나보세요'
+                  )}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -441,7 +567,9 @@ export default function BillingPage({
             {/* 가격 정보 */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Pro 요금제</CardTitle>
+                <CardTitle className="text-lg">
+                  {t('pricing.title', 'Pro 요금제')}
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-center mb-4">
@@ -449,25 +577,35 @@ export default function BillingPage({
                     ${env.subscription.price}
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    월간 구독 ({env.subscription.currency})
+                    {t('pricing.monthly', '월간 구독 ({{currency}})', {
+                      currency: env.subscription.currency,
+                    })}
                   </div>
                 </div>
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center gap-2">
                     <Check className="h-4 w-4 text-green-600" />
-                    <span>무제한 고객 관리</span>
+                    <span>
+                      {t('pricing.unlimited_clients', '무제한 고객 관리')}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Check className="h-4 w-4 text-green-600" />
-                    <span>고급 분석 도구</span>
+                    <span>
+                      {t('pricing.advanced_analytics', '고급 분석 도구')}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Check className="h-4 w-4 text-green-600" />
-                    <span>우선 고객 지원</span>
+                    <span>
+                      {t('pricing.priority_support', '우선 고객 지원')}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Check className="h-4 w-4 text-green-600" />
-                    <span>엔터프라이즈 보안</span>
+                    <span>
+                      {t('pricing.enterprise_security', '엔터프라이즈 보안')}
+                    </span>
                   </div>
                 </div>
               </CardContent>
@@ -477,7 +615,8 @@ export default function BillingPage({
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
-                  <Calendar className="h-5 w-5" />곧 출시될 기능
+                  <Calendar className="h-5 w-5" />
+                  {t('upcoming.title', '곧 출시될 기능')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -485,7 +624,7 @@ export default function BillingPage({
                   {upcomingFeatures.map((feature, index) => (
                     <div key={index} className="flex items-start gap-3">
                       <Badge variant="outline" className="text-xs">
-                        출시 예정
+                        {t('upcoming.comingSoon', '출시 예정')}
                       </Badge>
                       <div className="flex-1">
                         <h4 className="font-medium text-sm">{feature.title}</h4>

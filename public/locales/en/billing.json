@@ -1,5 +1,21 @@
 {
   "title": "Billing & Subscription",
+  "upgradeTitle": "Upgrade to SureCRM Pro",
+  "loginRequired": "Log in to access premium features",
+  "adminAccount": "SureCRM Pro Admin Account",
+  "adminSubtitle": "You have unlimited access to all premium features",
+  "trialActive": "14-day Free Trial Active",
+  "daysRemaining": "{{days}} remaining",
+  "oneDay": "1 day",
+  "upgradeAnytime": "Upgrade anytime",
+  "subscribing": "SureCRM Pro Subscriber",
+  "subscribingSubtitle": "You have access to all premium features (until {{endDate}})",
+  "unlimited": "Unlimited",
+  "trialExpired": "Trial Period Ended",
+  "trialExpiredSubtitle": "Pro subscription required to continue using",
+  "startSubscription": "Start Pro Subscription",
+  "loginNeeded": "Login Required",
+  "monthlyPrice": "${{price}} {{currency}}/month · Cancel anytime",
   "subscription": {
     "current": "Current Subscription",
     "upgrade": "Upgrade",
@@ -10,6 +26,13 @@
     "active": "Active",
     "trial": "Trial",
     "trialEnds": "Trial Ends"
+  },
+  "status": {
+    "notLoggedIn": "Not Logged In",
+    "admin": "Admin",
+    "trial": "Trial",
+    "pro": "Pro",
+    "subscriptionNeeded": "Subscription Required"
   },
   "plans": {
     "free": "Free",
@@ -22,6 +45,50 @@
     "perYear": "year",
     "savings": "savings",
     "mostPopular": "Most Popular"
+  },
+  "coreFeatures": {
+    "title": "Core Features",
+    "subtitle": "Discover the powerful features of SureCRM Pro",
+    "unlimited_clients": "Unlimited Client Management",
+    "unlimited_clients_desc": "Systematically manage client information and relationships",
+    "advanced_analytics": "Advanced Analytics & Reports",
+    "advanced_analytics_desc": "Real-time performance analysis and detailed reports",
+    "automation": "Automation Tools",
+    "automation_desc": "Automate repetitive tasks to improve efficiency",
+    "advanced_security": "Advanced Security",
+    "advanced_security_desc": "Enterprise-grade security and data protection",
+    "calendar_sync": "Advanced Calendar Management",
+    "calendar_sync_desc": "Google Calendar sync and smart scheduling",
+    "document_management": "Document Management",
+    "document_management_desc": "Securely store contracts, policies, and all documents",
+    "smart_notifications": "Smart Notifications",
+    "smart_notifications_desc": "Never miss important schedules and tasks",
+    "advanced_settings": "Advanced Settings",
+    "advanced_settings_desc": "Customize workflows to maximize productivity"
+  },
+  "pricing": {
+    "title": "Pro Plan",
+    "monthly": "Monthly Subscription ({{currency}})",
+    "unlimited_clients": "Unlimited Client Management",
+    "advanced_analytics": "Advanced Analytics Tools",
+    "priority_support": "Priority Customer Support",
+    "enterprise_security": "Enterprise Security"
+  },
+  "upcoming": {
+    "title": "Upcoming Features",
+    "comingSoon": "Coming Soon",
+    "ai_analysis": "AI Customer Analysis",
+    "ai_analysis_desc": "Machine learning-based customer behavior prediction",
+    "mobile_app": "Mobile App",
+    "mobile_app_desc": "Access CRM anywhere, anytime",
+    "team_collaboration": "Team Collaboration Tools",
+    "team_collaboration_desc": "Real-time collaboration with team members",
+    "api_integration": "API Integration",
+    "api_integration_desc": "Integration with other tools"
+  },
+  "alerts": {
+    "trialExpiredTitle": "Trial period has ended",
+    "trialExpiredDesc": "Please start a Pro subscription to continue using. Access to all features has been restricted."
   },
   "features": {
     "clients": "Clients",
@@ -72,5 +139,9 @@
     "cancellationSuccess": "Subscription cancelled",
     "paymentFailed": "Payment failed",
     "trialExpired": "Trial period has expired"
+  },
+  "meta": {
+    "title": "Billing & Subscription",
+    "description": "Manage your SureCRM Pro subscription and access premium features. Change plans, manage payment information, and view invoices."
   }
 }
