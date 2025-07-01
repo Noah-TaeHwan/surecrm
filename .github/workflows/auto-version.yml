@@ -1,0 +1,80 @@
+name: Auto Version Bump
+
+on:
+  push:
+    branches: [master]
+    # 이미 태그가 있는 커밋은 제외 (무한 루프 방지)
+    tags-ignore:
+      - '**'
+
+# GitHub Actions에서 푸시하기 위한 권한 설정
+permissions:
+  contents: write
+
+jobs:
+  auto-version:
+    runs-on: ubuntu-latest
+
+    # 중요: 봇이 푸시한 커밋은 제외 (무한 루프 방지)
+    if: "!contains(github.event.head_commit.message, '[skip ci]') && !contains(github.event.head_commit.author.name, 'github-actions')"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Configure Git
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+      - name: Check if current commit has tag
+        id: check_tag
+        run: |
+          CURRENT_COMMIT=$(git rev-parse HEAD)
+          HAS_TAG=$(git tag --points-at $CURRENT_COMMIT | wc -l)
+          echo "has_tag=$HAS_TAG" >> $GITHUB_OUTPUT
+          echo "Current commit: $CURRENT_COMMIT"
+          echo "Tags pointing to current commit: $(git tag --points-at $CURRENT_COMMIT)"
+
+      - name: Auto bump patch version
+        if: steps.check_tag.outputs.has_tag == '0'
+        run: |
+          # 현재 package.json 버전 확인
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          echo "Current version: $CURRENT_VERSION"
+
+          # 패치 버전 증가 (태그 생성하지 않음)
+          npm version patch --no-git-tag-version
+
+          # 새 버전 확인
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          echo "New version: $NEW_VERSION"
+
+          # 변경사항 커밋
+          git add package.json package-lock.json
+          git commit -m "🏷️ Auto bump version to $NEW_VERSION [skip ci]"
+
+          # 태그 생성
+          git tag "v$NEW_VERSION"
+
+          # 푸시 (태그 포함)
+          git push origin master
+          git push origin "v$NEW_VERSION"
+
+          echo "✅ Version bumped from $CURRENT_VERSION to $NEW_VERSION"
+
+      - name: Skip version bump
+        if: steps.check_tag.outputs.has_tag != '0'
+        run: |
+          echo "⏭️ Current commit already has a tag, skipping version bump"
+          TAGS=$(git tag --points-at HEAD)
+          echo "Existing tags: $TAGS"
