@@ -7,6 +7,7 @@ import type {
 // 시간 포맷팅 유틸리티 (다국어 지원) - 클라이언트 안전
 export function formatNotificationTime(
   date: Date,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   t: (key: string, options?: any) => string
 ): string {
   const now = new Date();
@@ -43,7 +44,7 @@ export function formatNotificationTime(
 // 채널명 번역 - 클라이언트 안전
 export function getTranslatedChannel(
   channel: NotificationChannel,
-  t: (key: string, options?: any) => string
+  t: (key: string, options?: Record<string, unknown>) => string
 ): string {
   return t(`notifications:channels.${channel}`);
 }
@@ -51,7 +52,7 @@ export function getTranslatedChannel(
 // 우선순위 번역 - 클라이언트 안전
 export function getTranslatedPriority(
   priority: NotificationPriority,
-  t: (key: string, options?: any) => string
+  t: (key: string, options?: Record<string, unknown>) => string
 ): string {
   return t(`notifications:priorities.${priority}`);
 }
@@ -59,7 +60,7 @@ export function getTranslatedPriority(
 // 알림 타입 번역 - 클라이언트 안전
 export function getTranslatedType(
   type: NotificationType,
-  t: (key: string, options?: any) => string
+  t: (key: string, options?: Record<string, unknown>) => string
 ): string {
   return t(`notifications:types.${type}`);
 }
@@ -192,9 +193,11 @@ function getNotificationTranslationKey(
 /**
  * 메타데이터에서 번역용 변수 추출
  */
-function extractTranslationVariables(notification: any): Record<string, any> {
-  const variables: Record<string, any> = {};
-  const metadata = notification.metadata || {};
+function extractTranslationVariables(
+  notification: Record<string, unknown>
+): Record<string, unknown> {
+  const variables: Record<string, unknown> = {};
+  const metadata = (notification.metadata as Record<string, unknown>) || {};
 
   // 고객명 추출
   if (metadata.clientName) {
@@ -218,7 +221,10 @@ function extractTranslationVariables(notification: any): Record<string, any> {
   }
 
   // 제목/메시지에서 시간 패턴 매칭
-  if (notification.title.includes('1시간 후')) {
+  if (
+    typeof notification.title === 'string' &&
+    notification.title.includes('1시간 후')
+  ) {
     variables.time = '1시간';
   }
 
@@ -231,7 +237,10 @@ function extractTranslationVariables(notification: any): Record<string, any> {
   }
 
   // 금액 정보
-  if (notification.message.includes('2억원')) {
+  if (
+    typeof notification.message === 'string' &&
+    notification.message.includes('2억원')
+  ) {
     variables.amount = '2억원';
   }
 
@@ -241,27 +250,43 @@ function extractTranslationVariables(notification: any): Record<string, any> {
   }
 
   // 퍼센티지 정보
-  if (notification.message.includes('60%')) {
+  if (
+    typeof notification.message === 'string' &&
+    notification.message.includes('60%')
+  ) {
     variables.percentage = '60';
   }
-  if (notification.message.includes('85%')) {
+  if (
+    typeof notification.message === 'string' &&
+    notification.message.includes('85%')
+  ) {
     variables.percentage = '85';
   }
 
   // 실적 정보
-  if (notification.message.includes('신규 고객 3명')) {
+  if (
+    typeof notification.message === 'string' &&
+    notification.message.includes('신규 고객 3명')
+  ) {
     variables.newClients = '3';
     variables.contracts = '2';
     variables.percentage = '85';
   }
 
   // 추천인 정보
-  if (metadata.inviterEmail && metadata.inviterEmail.includes('hong')) {
+  if (
+    metadata.inviterEmail &&
+    typeof metadata.inviterEmail === 'string' &&
+    metadata.inviterEmail.includes('hong')
+  ) {
     variables.name = '홍길동';
   }
 
   // 버전 정보
-  if (notification.message.includes('v2.1.0')) {
+  if (
+    typeof notification.message === 'string' &&
+    notification.message.includes('v2.1.0')
+  ) {
     variables.version = 'v2.1.0';
   }
 
@@ -272,16 +297,16 @@ function extractTranslationVariables(notification: any): Record<string, any> {
  * 알림의 제목을 번역
  */
 export function getTranslatedNotificationTitle(
-  notification: any,
-  t: (key: string, options?: any) => string
+  notification: Record<string, unknown>,
+  t: (key: string, options?: Record<string, unknown>) => string
 ): string {
   const translationKey = getNotificationTranslationKey(
-    notification.title,
-    notification.type
+    notification.title as string,
+    notification.type as string
   );
 
   if (!translationKey) {
-    return notification.title; // 번역 키가 없으면 원본 반환
+    return notification.title as string; // 번역 키가 없으면 원본 반환
   }
 
   const variables = extractTranslationVariables(notification);
@@ -290,7 +315,7 @@ export function getTranslatedNotificationTitle(
     return t(`${translationKey}.title`, variables);
   } catch (error) {
     console.warn('번역 실패:', translationKey, error);
-    return notification.title;
+    return notification.title as string;
   }
 }
 
