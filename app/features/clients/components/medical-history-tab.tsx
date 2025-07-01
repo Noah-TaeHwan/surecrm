@@ -7,6 +7,7 @@ import { Textarea } from '~/common/components/ui/textarea';
 import { cn } from '~/lib/utils';
 import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 import type { SubmitFunction } from 'react-router';
+import { useMemo } from 'react';
 
 interface MedicalHistoryData {
   hasRecentDiagnosis: boolean;
@@ -46,63 +47,86 @@ export function MedicalHistoryTab({
 }: MedicalHistoryTabProps) {
   const { t } = useHydrationSafeTranslation('clients');
 
-  // 3개월 이내 의료사항 항목들
-  const recentMedicalItems = [
-    {
-      key: 'hasRecentDiagnosis',
-      label: t('medicalHistoryTab.recentDiagnosis', '질병 확정진단'),
-      icon: '🔬',
-    },
-    {
-      key: 'hasRecentSuspicion',
-      label: t('medicalHistoryTab.recentSuspicion', '질병 의심소견'),
-      icon: '🤔',
-    },
-    {
-      key: 'hasRecentMedication',
-      label: t('medicalHistoryTab.recentMedication', '투약'),
-      icon: '💊',
-    },
-    {
-      key: 'hasRecentTreatment',
-      label: t('medicalHistoryTab.recentTreatment', '치료'),
-      icon: '🩺',
-    },
-    {
-      key: 'hasRecentHospitalization',
-      label: t('medicalHistoryTab.recentHospitalization', '입원'),
-      icon: '🏥',
-    },
-    {
-      key: 'hasRecentSurgery',
-      label: t('medicalHistoryTab.recentSurgery', '수술'),
-      icon: '⚕️',
-    },
-  ];
+  // 🐛 디버깅: 번역 함수 작동 확인
+  console.log('🌍 [MedicalHistoryTab] 번역 상태:', {
+    titleTranslation: t('medicalHistoryTab.title', '병력사항'),
+    saveButtonTranslation: t(
+      'medicalHistoryTab.saveButtonFull',
+      '병력사항 저장'
+    ),
+    recentSectionTranslation: t(
+      'medicalHistoryTab.recentMedicalSection',
+      '3개월 이내 의료 관련 사항'
+    ),
+    diagnosisTranslation: t(
+      'medicalHistoryTab.recentDiagnosis',
+      '질병 확정진단'
+    ),
+  });
 
-  // 5년 이내 주요 의료 이력 항목들
-  const majorMedicalItems = [
-    {
-      key: 'hasMajorHospitalization',
-      label: t('medicalHistoryTab.majorHospitalization', '입원'),
-      icon: '🏥',
-    },
-    {
-      key: 'hasMajorSurgery',
-      label: t('medicalHistoryTab.majorSurgery', '수술'),
-      icon: '⚕️',
-    },
-    {
-      key: 'hasLongTermTreatment',
-      label: t('medicalHistoryTab.longTermTreatment', '7일 이상 치료'),
-      icon: '📅',
-    },
-    {
-      key: 'hasLongTermMedication',
-      label: t('medicalHistoryTab.longTermMedication', '30일 이상 투약'),
-      icon: '💊',
-    },
-  ];
+  // 3개월 이내 의료사항 항목들 (언어 변경 시 재계산)
+  const recentMedicalItems = useMemo(
+    () => [
+      {
+        key: 'hasRecentDiagnosis',
+        label: t('medicalHistoryTab.recentDiagnosis', '질병 확정진단'),
+        icon: '🔬',
+      },
+      {
+        key: 'hasRecentSuspicion',
+        label: t('medicalHistoryTab.recentSuspicion', '질병 의심소견'),
+        icon: '🤔',
+      },
+      {
+        key: 'hasRecentMedication',
+        label: t('medicalHistoryTab.recentMedication', '투약'),
+        icon: '💊',
+      },
+      {
+        key: 'hasRecentTreatment',
+        label: t('medicalHistoryTab.recentTreatment', '치료'),
+        icon: '🩺',
+      },
+      {
+        key: 'hasRecentHospitalization',
+        label: t('medicalHistoryTab.recentHospitalization', '입원'),
+        icon: '🏥',
+      },
+      {
+        key: 'hasRecentSurgery',
+        label: t('medicalHistoryTab.recentSurgery', '수술'),
+        icon: '⚕️',
+      },
+    ],
+    [t]
+  );
+
+  // 5년 이내 주요 의료 이력 항목들 (언어 변경 시 재계산)
+  const majorMedicalItems = useMemo(
+    () => [
+      {
+        key: 'hasMajorHospitalization',
+        label: t('medicalHistoryTab.majorHospitalization', '입원'),
+        icon: '🏥',
+      },
+      {
+        key: 'hasMajorSurgery',
+        label: t('medicalHistoryTab.majorSurgery', '수술'),
+        icon: '⚕️',
+      },
+      {
+        key: 'hasLongTermTreatment',
+        label: t('medicalHistoryTab.longTermTreatment', '7일 이상 치료'),
+        icon: '📅',
+      },
+      {
+        key: 'hasLongTermMedication',
+        label: t('medicalHistoryTab.longTermMedication', '30일 이상 투약'),
+        icon: '💊',
+      },
+    ],
+    [t]
+  );
 
   return (
     <TabsContent value="medical" className="space-y-4 md:space-y-6">

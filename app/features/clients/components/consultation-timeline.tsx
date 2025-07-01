@@ -120,12 +120,25 @@ export function ConsultationTimeline({
                             try {
                               // JSON 객체인지 확인하고 파싱 시도
                               if (typeof note.contractInfo === 'string') {
+                                // 빈 문자열이면 그대로 반환
+                                if (!note.contractInfo.trim()) {
+                                  return '';
+                                }
+
                                 // JSON 형태인지 확인 (중괄호로 시작하는 경우)
                                 if (note.contractInfo.trim().startsWith('{')) {
-                                  const parsed = JSON.parse(note.contractInfo);
-                                  // content 필드가 있으면 그 값을 반환
-                                  return parsed.content || note.contractInfo;
+                                  try {
+                                    const parsed = JSON.parse(
+                                      note.contractInfo
+                                    );
+                                    // content 필드가 있으면 그 값을 반환, 없으면 빈 문자열
+                                    return parsed.content || '';
+                                  } catch {
+                                    // JSON 파싱 실패시 빈 문자열 반환
+                                    return '';
+                                  }
                                 }
+
                                 // 일반 문자열인 경우 쌍따옴표 제거
                                 if (
                                   note.contractInfo.startsWith('"') &&
@@ -133,22 +146,22 @@ export function ConsultationTimeline({
                                 ) {
                                   return note.contractInfo.slice(1, -1);
                                 }
+
                                 return note.contractInfo;
                               }
+
                               // 이미 객체인 경우
                               if (
                                 typeof note.contractInfo === 'object' &&
                                 note.contractInfo !== null
                               ) {
-                                return (
-                                  (note.contractInfo as any).content ||
-                                  JSON.stringify(note.contractInfo)
-                                );
+                                return (note.contractInfo as any).content || '';
                               }
-                              return note.contractInfo;
+
+                              return note.contractInfo || '';
                             } catch {
-                              // JSON 파싱 실패시 원본 반환
-                              return note.contractInfo;
+                              // 모든 에러 케이스에서 빈 문자열 반환
+                              return '';
                             }
                           })()}
                         </p>

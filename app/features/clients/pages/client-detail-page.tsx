@@ -149,6 +149,29 @@ import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-trans
 
 // ✅ React Router v7 - useLoaderData 훅 사용으로 타입 import 불필요
 
+// 🌍 다국어 Meta 함수
+export function meta({ data }: any) {
+  // 다국어 지원을 위한 기본 메타 정보 (서버에서 번역된 값으로 설정)
+  const clientName = data?.client?.name || '고객';
+  const meta = data?.meta;
+
+  if (meta) {
+    return [
+      { title: meta.title },
+      { name: 'description', content: meta.description },
+    ];
+  }
+
+  // 기본 fallback
+  return [
+    { title: `${clientName} - 고객 상세 - SureCRM` },
+    {
+      name: 'description',
+      content: `${clientName} 고객의 상세 정보를 관리합니다`,
+    },
+  ];
+}
+
 export default function ClientDetailPage() {
   // 🌐 다국어 번역 훅
   const { t, i18n } = useHydrationSafeTranslation('clients');
@@ -1268,14 +1291,23 @@ export default function ClientDetailPage() {
         try {
           // JSON 문자열인지 확인하고 파싱 시도
           const parsed = JSON.parse(note.contractInfo);
+          // content 필드가 있으면 그것을 사용, 아니면 빈 문자열
           contractInfoValue =
-            typeof parsed === 'string' ? parsed : note.contractInfo;
+            typeof parsed === 'object' && parsed !== null
+              ? parsed.content || ''
+              : parsed;
         } catch {
           // JSON이 아니면 그대로 사용
           contractInfoValue = note.contractInfo;
         }
+      } else if (
+        typeof note.contractInfo === 'object' &&
+        note.contractInfo !== null
+      ) {
+        // 이미 객체인 경우 content 필드 추출
+        contractInfoValue = note.contractInfo.content || '';
       } else {
-        contractInfoValue = JSON.stringify(note.contractInfo);
+        contractInfoValue = note.contractInfo;
       }
     }
 
@@ -1595,7 +1627,7 @@ export default function ClientDetailPage() {
                     <CardHeader>
                       <CardTitle className="text-lg flex items-center gap-2">
                         <User className="h-5 w-5" />
-                        {t('overview.familyMembers', '가족 구성원')}
+                        {t('tabs.family', '가족')}
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="p-6">
@@ -1756,14 +1788,17 @@ export default function ClientDetailPage() {
                 <CardHeader className="pb-4">
                   <CardTitle className="text-base flex items-center gap-2">
                     <User className="h-4 w-4" />
-                    가족 구성원
+                    {t('tabs.family', '가족')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-0">
                   <div className="text-center py-8">
                     <User className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
                     <p className="text-sm text-muted-foreground">
-                      가족 정보가 준비 중입니다.
+                      {t(
+                        'messages.familyInfoPending',
+                        '가족 정보가 준비 중입니다.'
+                      )}
                     </p>
                   </div>
                 </CardContent>

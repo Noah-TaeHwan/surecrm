@@ -22,7 +22,7 @@ export interface UserProfile {
 // 보험설계사 특화 기본값
 const INSURANCE_AGENT_DEFAULTS = {
   company: 'SureCRM',
-  position: '보험설계사',
+  position: 'insurance_agent',
   settings: {
     language: 'ko',
     darkMode: true,
@@ -130,7 +130,7 @@ export async function getUserProfile(
       email: '', // 이메일은 auth.users에서 가져와야 함
       phone: userProfile.phone || '',
       company: userProfile.company || INSURANCE_AGENT_DEFAULTS.company,
-      position: getRoleDisplayName(userProfile.role),
+      position: getRoleKeyFromDBRole(userProfile.role),
       lastLoginAt: userProfile.lastLoginAt?.toString(),
       createdAt: userProfile.createdAt?.toString() || new Date().toISOString(),
       // TODO: 팀 정보는 추후 구현
@@ -232,19 +232,11 @@ function isValidInternationalPhoneNumber(phone: string): boolean {
   return internationalPhoneRegex.test(cleanPhone) || isValidPhoneNumber(phone);
 }
 
-// 역할 표시명 변환 (보험업계 특화)
+// 역할 표시명 변환 (Supabase enum에 맞춤)
 function getRoleDisplayName(role: string): string {
   switch (role) {
     case 'agent':
       return '보험설계사';
-    case 'senior_agent':
-      return '수석설계사';
-    case 'team_leader':
-      return '팀장';
-    case 'branch_manager':
-      return '지점장';
-    case 'regional_manager':
-      return '본부장';
     case 'team_admin':
       return '팀 관리자';
     case 'system_admin':
@@ -254,9 +246,42 @@ function getRoleDisplayName(role: string): string {
   }
 }
 
-// 표시명을 역할로 변환 (보험업계 특화)
-function getRoleFromDisplayName(displayName: string): string {
-  switch (displayName) {
+// DB 역할을 UI 키로 변환 (Supabase enum에 맞춤)
+function getRoleKeyFromDBRole(role: string): string {
+  switch (role) {
+    case 'agent':
+      return 'insurance_agent';
+    case 'team_admin':
+      return 'team_leader'; // team_admin을 팀장으로 표시
+    case 'system_admin':
+      return 'director'; // system_admin을 이사로 표시
+    default:
+      return 'insurance_agent';
+  }
+}
+
+// 키를 역할로 변환 (Supabase enum 값에 맞춤)
+function getRoleFromDisplayName(key: string): string {
+  switch (key) {
+    case 'insurance_agent':
+      return 'agent';
+    case 'sales_manager':
+      return 'agent'; // senior_agent가 없으므로 agent로 매핑
+    case 'team_leader':
+      return 'team_admin'; // team_leader가 없으므로 team_admin으로 매핑
+    case 'branch_manager':
+      return 'team_admin'; // branch_manager가 없으므로 team_admin으로 매핑
+    case 'regional_manager':
+      return 'team_admin'; // regional_manager가 없으므로 team_admin으로 매핑
+    case 'director':
+      return 'team_admin';
+    case 'consultant':
+      return 'agent';
+    case 'agent':
+      return 'agent';
+    case 'other':
+      return 'agent';
+    // 기존 번역된 값들도 지원 (하위 호환성)
     case '보험설계사':
     case 'Insurance Agent':
     case '保険設計士':
@@ -264,27 +289,34 @@ function getRoleFromDisplayName(displayName: string): string {
     case '수석설계사':
     case 'Senior Agent':
     case 'シニアエージェント':
-      return 'senior_agent';
+    case '영업관리자':
+      return 'agent'; // Supabase enum에 맞춤
     case '팀장':
     case 'Team Leader':
     case 'チームリーダー':
-      return 'team_leader';
+      return 'team_admin'; // Supabase enum에 맞춤
     case '지점장':
     case 'Branch Manager':
     case '支店長':
-      return 'branch_manager';
+      return 'team_admin'; // Supabase enum에 맞춤
     case '본부장':
     case 'Regional Manager':
     case '地域マネージャー':
-      return 'regional_manager';
+    case '지역관리자':
+      return 'team_admin'; // Supabase enum에 맞춤
     case '팀 관리자':
     case 'Team Admin':
     case 'チーム管理者':
+    case '이사':
       return 'team_admin';
     case '시스템 관리자':
     case 'System Admin':
     case 'システム管理者':
       return 'system_admin';
+    case '컨설턴트':
+    case '상담원':
+    case '기타':
+      return 'agent';
     default:
       return 'agent'; // 기본값
   }

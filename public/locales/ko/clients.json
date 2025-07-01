@@ -2,7 +2,9 @@
   "title": "고객 관리",
   "meta": {
     "title": "고객 상세 정보",
-    "description": "{{clientName}} 고객의 상세 정보를 관리합니다"
+    "description": "{{clientName}} 고객의 상세 정보를 관리합니다",
+    "clientDetail": "고객 상세",
+    "clientDetailDescription": "고객의 상세 정보를 관리합니다"
   },
   "errors": {
     "authRequired": "인증이 필요합니다.",
@@ -340,6 +342,7 @@
     "tagRemoveSuccess": "태그가 성공적으로 제거되었습니다."
   },
   "sidebar": {
+    "basicInfo": "기본정보",
     "editTooltip": "고객 정보 편집",
     "deleteTooltip": "고객 삭제",
     "noInfo": "정보 없음",
@@ -417,7 +420,24 @@
     "relationshipSibling": "형제/자매",
     "relationshipFriend": "친구",
     "relationshipColleague": "동료",
-    "relationshipOther": "기타"
+    "relationshipOther": "기타",
+    "bmiUnderweight": "저체중",
+    "bmiNormal": "정상",
+    "bmiOverweight": "과체중",
+    "bmiObese": "비만"
+  },
+  "stages": {
+    "prospect": "잠재고객",
+    "firstConsultation": "첫 상담",
+    "consultation": "상담",
+    "needsAnalysis": "니즈 분석",
+    "proposal": "상품 설명",
+    "contractReview": "계약 검토",
+    "contractCompleted": "계약 완료",
+    "lead": "리드",
+    "qualified": "검증됨",
+    "lost": "실패",
+    "excluded": "제외됨"
   },
   "tagModal": {
     "title": "태그 관리",
@@ -1130,5 +1150,8 @@
       "registering": "등록 중...",
       "updating": "수정 중..."
     }
+  },
+  "messages": {
+    "familyInfoPending": "가족 정보가 준비 중입니다."
   }
 }

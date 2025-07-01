@@ -13,10 +13,17 @@
     "notifications": "通知",
     "help": "ヘルプ",
     "open_menu": "メニューを開く",
+    "close_menu": "メニューを閉じる",
     "profile_menu": "プロフィールメニュー",
     "user": "ユーザー",
     "default_initial": "ユ",
-    "logging_out": "ログアウト中..."
+    "logging_out": "ログアウト中...",
+    "menu_closed": "メニューが閉じられました。",
+    "navigating_to": "ページに移動しています。",
+    "mobile_menu": "モバイルメニュー",
+    "skip_to_nav": "モバイルナビゲーションに移動",
+    "accessibility_escape": "このメニューはEscapeキーを押して閉じることができます。",
+    "accessibility_tab": "Tabキーを使用してメニュー項目を探索できます。"
   },
   "sidebar": {
     "main": {

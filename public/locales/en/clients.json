@@ -2,7 +2,9 @@
   "title": "Client Management",
   "meta": {
     "title": "Client Details",
-    "description": "Manage detailed information for client {{clientName}}"
+    "description": "Manage detailed information for client {{clientName}}",
+    "clientDetail": "Client Details",
+    "clientDetailDescription": "Manage detailed information for clients"
   },
   "errors": {
     "authRequired": "Authentication required.",
@@ -296,6 +298,7 @@
     "tagRemoveSuccess": "Tag removed successfully."
   },
   "sidebar": {
+    "basicInfo": "Basic Information",
     "editTooltip": "Edit client information",
     "deleteTooltip": "Delete client",
     "noInfo": "No information",
@@ -373,7 +376,24 @@
     "relationshipSibling": "Sibling",
     "relationshipFriend": "Friend",
     "relationshipColleague": "Colleague",
-    "relationshipOther": "Other"
+    "relationshipOther": "Other",
+    "bmiUnderweight": "Underweight",
+    "bmiNormal": "Normal",
+    "bmiOverweight": "Overweight",
+    "bmiObese": "Obese"
+  },
+  "stages": {
+    "prospect": "Prospect",
+    "firstConsultation": "First Consultation",
+    "consultation": "Consultation",
+    "needsAnalysis": "Needs Analysis",
+    "proposal": "Proposal",
+    "contractReview": "Contract Review",
+    "contractCompleted": "Contract Completed",
+    "lead": "Lead",
+    "qualified": "Qualified",
+    "lost": "Lost",
+    "excluded": "Excluded"
   },
   "tagModal": {
     "title": "Tag Management",
@@ -532,6 +552,29 @@
   },
   "medicalHistoryTab": {
     "title": "Medical History",
+    "saveButton": "Save",
+    "saveButtonFull": "Save Medical History",
+    "recentMedicalSection": "Medical Related Items Within 3 Months",
+    "additionalExamSection": "Re-examination Related Within 1 Year",
+    "majorMedicalSection": "Major Medical History Within 5 Years",
+    "detailsSection": "Detailed Information",
+    "recentDiagnosis": "Disease Diagnosis",
+    "recentSuspicion": "Disease Suspicion",
+    "recentMedication": "Medication",
+    "recentTreatment": "Treatment",
+    "recentHospitalization": "Hospitalization",
+    "recentSurgery": "Surgery",
+    "additionalExam": "Whether there are additional examination (re-examination) findings through examination or testing by a doctor",
+    "additionalExamDetails": "Additional examination details",
+    "majorHospitalization": "Hospitalization",
+    "majorSurgery": "Surgery",
+    "longTermTreatment": "Treatment for 7 days or more",
+    "longTermMedication": "Medication for 30 days or more",
+    "recentDetailsLabel": "Details within 3 months",
+    "majorDetailsLabel": "Major medical history details within 5 years",
+    "additionalExamPlaceholder": "Please enter detailed information about additional examinations or re-examinations...",
+    "recentDetailsPlaceholder": "Please enter detailed medical information within 3 months...",
+    "majorDetailsPlaceholder": "Please enter detailed information about major medical history within 5 years...",
     "addMedicalHistory": "Add Medical History",
     "editMedicalHistory": "Edit Medical History",
     "noMedicalHistory": "No medical history recorded",

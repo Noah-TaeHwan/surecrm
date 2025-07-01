@@ -38,6 +38,7 @@ import { Badge } from '~/common/components/ui/badge';
 import { useViewport } from '~/common/hooks/useViewport';
 import { VersionDisplay } from '~/common/components/navigation/version-display';
 import { InsuranceAgentEvents } from '~/lib/utils/analytics';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 
 // 💡 타입 정의 강화
 export interface MobileNavProps {
@@ -475,11 +476,14 @@ export function MobileNav({
   onClose,
   onOpen,
   className,
-  ariaLabel = '모바일 메뉴',
+  ariaLabel,
 }: MobileNavProps) {
   const location = useLocation();
   const { isMobile } = useViewport();
   const [isClosing, setIsClosing] = useState(false);
+
+  // 🌍 다국어 번역 훅
+  const { t } = useHydrationSafeTranslation('navigation');
 
   // 🚀 모바일 애니메이션 최적화
   const navAnimations = useMobileNavAnimation();
@@ -495,73 +499,79 @@ export function MobileNav({
   // Live Region 메시지 상태
   const [liveMessage, setLiveMessage] = useState('');
 
-  // 기본 네비게이션 항목들 (bottom navigation과 동일)
-  const mainNavItems: NavItem[] = [
-    {
-      label: '대시보드',
-      href: '/dashboard',
-      icon: <LayoutDashboard className="w-6 h-6" />,
-      ariaLabel: '대시보드 페이지로 이동',
-    },
-    {
-      label: '소개 네트워크',
-      href: '/network',
-      icon: <Network className="w-6 h-6" />,
-      ariaLabel: '소개 네트워크 페이지로 이동',
-    },
-    {
-      label: '영업 파이프라인',
-      href: '/pipeline',
-      icon: <PieChart className="w-6 h-6" />,
-      ariaLabel: '영업 파이프라인 페이지로 이동',
-    },
-    {
-      label: '고객 관리',
-      href: '/clients',
-      icon: <Users className="w-6 h-6" />,
-      ariaLabel: '고객 관리 페이지로 이동',
-    },
-    {
-      label: '일정 관리',
-      href: '/calendar',
-      icon: <Calendar className="w-6 h-6" />,
-      ariaLabel: '일정 관리 페이지로 이동',
-    },
-  ];
+  // 기본 네비게이션 항목들 (언어 변경 시 재계산)
+  const mainNavItems: NavItem[] = useMemo(
+    () => [
+      {
+        label: t('sidebar.main.dashboard', '대시보드'),
+        href: '/dashboard',
+        icon: <LayoutDashboard className="w-6 h-6" />,
+        ariaLabel: `${t('sidebar.main.dashboard', '대시보드')} 페이지로 이동`,
+      },
+      {
+        label: t('sidebar.tools.network', '소개 네트워크'),
+        href: '/network',
+        icon: <Network className="w-6 h-6" />,
+        ariaLabel: `${t('sidebar.tools.network', '소개 네트워크')} 페이지로 이동`,
+      },
+      {
+        label: t('sidebar.main.pipeline', '영업 파이프라인'),
+        href: '/pipeline',
+        icon: <PieChart className="w-6 h-6" />,
+        ariaLabel: `${t('sidebar.main.pipeline', '영업 파이프라인')} 페이지로 이동`,
+      },
+      {
+        label: t('sidebar.main.clients', '고객 관리'),
+        href: '/clients',
+        icon: <Users className="w-6 h-6" />,
+        ariaLabel: `${t('sidebar.main.clients', '고객 관리')} 페이지로 이동`,
+      },
+      {
+        label: t('sidebar.main.calendar', '일정 관리'),
+        href: '/calendar',
+        icon: <Calendar className="w-6 h-6" />,
+        ariaLabel: `${t('sidebar.main.calendar', '일정 관리')} 페이지로 이동`,
+      },
+    ],
+    [t]
+  );
 
-  // 추가 기능 메뉴들
-  const additionalNavItems: NavItem[] = [
-    {
-      label: '초대장 관리',
-      href: '/invitations',
-      icon: <Mail className="w-6 h-6" />,
-      ariaLabel: '초대장 관리 페이지로 이동',
-    },
-    {
-      label: '알림',
-      href: '/notifications',
-      icon: <Bell className="w-6 h-6" />,
-      ariaLabel: '알림 페이지로 이동',
-    },
-    {
-      label: '보고서',
-      href: '/reports',
-      icon: <FileText className="w-6 h-6" />,
-      ariaLabel: '보고서 페이지로 이동',
-    },
-    {
-      label: '구독 관리',
-      href: '/billing',
-      icon: <CreditCard className="w-6 h-6" />,
-      ariaLabel: '구독 관리 페이지로 이동',
-    },
-    {
-      label: '설정',
-      href: '/settings',
-      icon: <Settings className="w-6 h-6" />,
-      ariaLabel: '설정 페이지로 이동',
-    },
-  ];
+  // 추가 기능 메뉴들 (언어 변경 시 재계산)
+  const additionalNavItems: NavItem[] = useMemo(
+    () => [
+      {
+        label: t('sidebar.management.invitations', '초대장 관리'),
+        href: '/invitations',
+        icon: <Mail className="w-6 h-6" />,
+        ariaLabel: `${t('sidebar.management.invitations', '초대장 관리')} 페이지로 이동`,
+      },
+      {
+        label: t('sidebar.tools.notifications', '알림'),
+        href: '/notifications',
+        icon: <Bell className="w-6 h-6" />,
+        ariaLabel: `${t('sidebar.tools.notifications', '알림')} 페이지로 이동`,
+      },
+      {
+        label: t('sidebar.main.reports', '보고서'),
+        href: '/reports',
+        icon: <FileText className="w-6 h-6" />,
+        ariaLabel: `${t('sidebar.main.reports', '보고서')} 페이지로 이동`,
+      },
+      {
+        label: t('sidebar.management.billing', '구독 관리'),
+        href: '/billing',
+        icon: <CreditCard className="w-6 h-6" />,
+        ariaLabel: `${t('sidebar.management.billing', '구독 관리')} 페이지로 이동`,
+      },
+      {
+        label: t('sidebar.management.settings', '설정'),
+        href: '/settings',
+        icon: <Settings className="w-6 h-6" />,
+        ariaLabel: `${t('sidebar.management.settings', '설정')} 페이지로 이동`,
+      },
+    ],
+    [t]
+  );
 
   // 💡 메모이제이션된 활성 라우트 확인 함수
   const isActiveRoute = useCallback(
@@ -578,7 +588,7 @@ export function MobileNav({
   const handleClose = useCallback(() => {
     setIsClosing(true);
     onClose();
-    setLiveMessage('메뉴가 닫혔습니다.');
+    setLiveMessage(t('header.menu_closed', '메뉴가 닫혔습니다.'));
 
     // 메뉴를 연 버튼에 포커스 반환
     setTimeout(() => {
@@ -587,16 +597,18 @@ export function MobileNav({
       ) as HTMLElement;
       menuButton?.focus();
     }, 100);
-  }, [onClose]);
+  }, [onClose, t]);
 
   // Enhanced navigation handler with accessibility feedback
   const handleNavigation = useCallback(
     (item: NavItem) => {
       triggerHapticFeedback('selection');
-      setLiveMessage(`${item.label} 페이지로 이동합니다.`);
+      setLiveMessage(
+        `${item.label} ${t('header.navigating_to', '페이지로 이동합니다.')}`
+      );
       handleClose();
     },
-    [handleClose]
+    [handleClose, t]
   );
 
   // 💡 Scroll Lock Effect - 사이드바 열림/닫힘에 따른 스크롤 제어
@@ -673,7 +685,7 @@ export function MobileNav({
 
           {/* Skip Link for Accessibility */}
           <SkipLink targetId="mobile-nav-main">
-            모바일 네비게이션으로 이동
+            {t('header.skip_to_nav', '모바일 네비게이션으로 이동')}
           </SkipLink>
 
           {/* Backdrop */}
@@ -723,7 +735,7 @@ export function MobileNav({
             )}
             data-mobile-nav
             role="navigation"
-            aria-label={ariaLabel}
+            aria-label={ariaLabel || t('header.mobile_menu', '모바일 메뉴')}
             aria-modal="true"
             id="mobile-nav-main"
             onFocus={e => e.target.blur()}
@@ -747,7 +759,7 @@ export function MobileNav({
                     handleClose();
                   }}
                   className="text-xl font-bold text-primary hover:text-primary/80 transition-colors rounded"
-                  aria-label="SureCRM 대시보드로 이동"
+                  aria-label={`SureCRM ${t('sidebar.main.dashboard', '대시보드')}로 이동`}
                   onFocus={e => e.target.blur()}
                   tabIndex={-1}
                   style={{
@@ -765,7 +777,7 @@ export function MobileNav({
                 size="icon"
                 onClick={handleClose}
                 className="hover:bg-muted/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-                aria-label="메뉴 닫기"
+                aria-label={t('header.close_menu', '메뉴 닫기')}
               >
                 <X className="w-5 h-5" />
               </Button>
@@ -882,8 +894,18 @@ export function MobileNav({
 
             {/* 접근성 안내 (드래그 기능 제거) */}
             <div className="sr-only">
-              <p>이 메뉴는 Escape 키를 눌러 닫을 수 있습니다.</p>
-              <p>Tab 키를 사용하여 메뉴 항목들을 탐색할 수 있습니다.</p>
+              <p>
+                {t(
+                  'header.accessibility_escape',
+                  '이 메뉴는 Escape 키를 눌러 닫을 수 있습니다.'
+                )}
+              </p>
+              <p>
+                {t(
+                  'header.accessibility_tab',
+                  'Tab 키를 사용하여 메뉴 항목들을 탐색할 수 있습니다.'
+                )}
+              </p>
             </div>
           </motion.div>
         </>
@@ -908,6 +930,8 @@ export const MobileNavButton = memo(function MobileNavButton({
   ariaLabel,
   id,
 }: MobileNavButtonProps) {
+  const { t } = useHydrationSafeTranslation('navigation');
+
   const handleClick = useCallback(() => {
     triggerHapticFeedback('selection');
     onClick();
@@ -937,7 +961,12 @@ export const MobileNavButton = memo(function MobileNavButton({
         'touch-manipulation', // 터치 최적화
         className
       )}
-      aria-label={ariaLabel || (isOpen ? '메뉴 닫기' : '메뉴 열기')}
+      aria-label={
+        ariaLabel ||
+        (isOpen
+          ? t('header.close_menu', '메뉴 닫기')
+          : t('header.open_menu', '메뉴 열기'))
+      }
       aria-expanded={isOpen}
       aria-controls="mobile-nav-main"
       aria-haspopup="true"

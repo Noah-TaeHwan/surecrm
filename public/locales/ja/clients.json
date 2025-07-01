@@ -2,7 +2,9 @@
   "title": "顧客管理",
   "meta": {
     "title": "顧客詳細情報",
-    "description": "{{clientName}}様の詳細情報を管理します"
+    "description": "{{clientName}}様の詳細情報を管理します",
+    "clientDetail": "顧客詳細",
+    "clientDetailDescription": "顧客の詳細情報を管理します"
   },
   "errors": {
     "authRequired": "認証が必要です。",
@@ -284,6 +286,7 @@
     "tagRemoveSuccess": "タグが正常に削除されました。"
   },
   "sidebar": {
+    "basicInfo": "基本情報",
     "editTooltip": "顧客情報編集",
     "deleteTooltip": "顧客削除",
     "noInfo": "情報なし",
@@ -342,6 +345,7 @@
     "referralContributor": "紹介貢献者",
     "noReferralsYet": "まだ紹介した顧客がいません",
     "potentialReferrer": "潜在的紹介者",
+    "tags": "タグ",
     "noTags": "タグがありません",
     "addTag": "タグ追加",
     "importanceHigh": "キーパーソン",
@@ -360,7 +364,24 @@
     "relationshipSibling": "兄弟・姉妹",
     "relationshipFriend": "友人",
     "relationshipColleague": "同僚",
-    "relationshipOther": "その他"
+    "relationshipOther": "その他",
+    "bmiUnderweight": "低体重",
+    "bmiNormal": "正常",
+    "bmiOverweight": "過体重",
+    "bmiObese": "肥満"
+  },
+  "stages": {
+    "prospect": "見込客",
+    "firstConsultation": "初回相談",
+    "consultation": "相談",
+    "needsAnalysis": "ニーズ分析",
+    "proposal": "商品説明",
+    "contractReview": "契約審査",
+    "contractCompleted": "契約完了",
+    "lead": "リード",
+    "qualified": "資格認定済",
+    "lost": "失注",
+    "excluded": "除外"
   },
   "tagModal": {
     "title": "タグ管理",
@@ -951,5 +972,8 @@
   },
   "completion": {
     "title": "登録完了時:"
+  },
+  "messages": {
+    "familyInfoPending": "家族情報を準備中です。"
   }
 }

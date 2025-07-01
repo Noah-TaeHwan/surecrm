@@ -547,7 +547,7 @@ export default function SettingsPage({
                         handleProfileChange('position', value)
                       }
                     >
-                      <SelectTrigger className="min-h-[44px]">
+                      <SelectTrigger className="min-h-[44px] w-full">
                         <SelectValue
                           placeholder={t(
                             'profile.positionPlaceholder',
@@ -556,64 +556,34 @@ export default function SettingsPage({
                         />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem
-                          value={t(
-                            'profile.positions.insurance_agent',
-                            '보험설계사'
-                          )}
-                        >
+                        <SelectItem value="insurance_agent">
                           {t('profile.positions.insurance_agent', '보험설계사')}
                         </SelectItem>
-                        <SelectItem
-                          value={t(
-                            'profile.positions.sales_manager',
-                            '영업관리자'
-                          )}
-                        >
+                        <SelectItem value="sales_manager">
                           {t('profile.positions.sales_manager', '영업관리자')}
                         </SelectItem>
-                        <SelectItem
-                          value={t('profile.positions.team_leader', '팀장')}
-                        >
+                        <SelectItem value="team_leader">
                           {t('profile.positions.team_leader', '팀장')}
                         </SelectItem>
-                        <SelectItem
-                          value={t(
-                            'profile.positions.branch_manager',
-                            '지점장'
-                          )}
-                        >
+                        <SelectItem value="branch_manager">
                           {t('profile.positions.branch_manager', '지점장')}
                         </SelectItem>
-                        <SelectItem
-                          value={t(
-                            'profile.positions.regional_manager',
-                            '지역관리자'
-                          )}
-                        >
+                        <SelectItem value="regional_manager">
                           {t(
                             'profile.positions.regional_manager',
                             '지역관리자'
                           )}
                         </SelectItem>
-                        <SelectItem
-                          value={t('profile.positions.director', '이사')}
-                        >
+                        <SelectItem value="director">
                           {t('profile.positions.director', '이사')}
                         </SelectItem>
-                        <SelectItem
-                          value={t('profile.positions.consultant', '컨설턴트')}
-                        >
+                        <SelectItem value="consultant">
                           {t('profile.positions.consultant', '컨설턴트')}
                         </SelectItem>
-                        <SelectItem
-                          value={t('profile.positions.agent', '상담원')}
-                        >
+                        <SelectItem value="agent">
                           {t('profile.positions.agent', '상담원')}
                         </SelectItem>
-                        <SelectItem
-                          value={t('profile.positions.other', '기타')}
-                        >
+                        <SelectItem value="other">
                           {t('profile.positions.other', '기타')}
                         </SelectItem>
                       </SelectContent>

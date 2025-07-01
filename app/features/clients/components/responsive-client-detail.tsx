@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Card,
   CardContent,
@@ -65,6 +65,7 @@ import {
 } from 'lucide-react';
 import { cn } from '~/lib/utils';
 import { Link } from 'react-router';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 
 import {
   Collapsible,
@@ -132,6 +133,9 @@ export function ResponsiveClientDetail({
   const [newTag, setNewTag] = useState('');
   const [isAddingTag, setIsAddingTag] = useState(false);
 
+  // 🌍 다국어 번역 훅 추가
+  const { t } = useHydrationSafeTranslation('clients');
+
   // 🆕 개선된 디바이스 감지 훅 사용
   const deviceType = useDeviceType();
   const isTablet = useIsTablet();
@@ -150,7 +154,7 @@ export function ResponsiveClientDetail({
         <div className="text-center">
           <User className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
           <p className="text-muted-foreground text-sm">
-            고객 정보를 불러올 수 없습니다.
+            {t('errors.clientDataLoad', '고객 정보를 불러올 수 없습니다.')}
           </p>
         </div>
       </div>
@@ -165,44 +169,51 @@ export function ResponsiveClientDetail({
           color: 'text-red-600',
           bg: 'bg-red-50 border-red-200',
           icon: '🔥',
-          label: '키맨',
+          label: t('importance.high', '키맨'),
         };
       case 'medium':
         return {
           color: 'text-yellow-600',
           bg: 'bg-yellow-50 border-yellow-200',
           icon: '⭐',
-          label: '보통',
+          label: t('importance.medium', '보통'),
         };
       case 'low':
         return {
           color: 'text-gray-600',
           bg: 'bg-gray-50 border-gray-200',
           icon: '📄',
-          label: '낮음',
+          label: t('importance.low', '낮음'),
         };
       default:
         return {
           color: 'text-gray-600',
           bg: 'bg-gray-50 border-gray-200',
           icon: '📄',
-          label: '보통',
+          label: t('importance.medium', '보통'),
         };
     }
   };
 
   const importanceConfig = getImportanceConfig(client.importance);
 
-  // 모바일 탭 구성 (가로 스크롤 가능한 탭)
-  const mobileTabs = [
-    { id: 'notes', label: '상담내용', icon: MessageCircle },
-    { id: 'medical', label: '병력사항', icon: FileText },
-    { id: 'checkup', label: '점검목적', icon: Target },
-    { id: 'interests', label: '관심사항', icon: Star },
-    { id: 'companions', label: '상담동반자', icon: User },
-    { id: 'insurance', label: '보험계약', icon: Shield },
-    { id: 'family', label: '가족', icon: Network },
-  ];
+  // 모바일 탭 구성 (가로 스크롤 가능한 탭) - 다국어 지원
+  const mobileTabs = useMemo(
+    () => [
+      { id: 'notes', label: t('tabs.notes', '상담내용'), icon: MessageCircle },
+      { id: 'medical', label: t('tabs.medical', '병력사항'), icon: FileText },
+      { id: 'checkup', label: t('tabs.purposes', '점검목적'), icon: Target },
+      { id: 'interests', label: t('tabs.interests', '관심사항'), icon: Star },
+      {
+        id: 'companions',
+        label: t('tabs.companions', '상담동반자'),
+        icon: User,
+      },
+      { id: 'insurance', label: t('tabs.contracts', '보험계약'), icon: Shield },
+      { id: 'family', label: t('tabs.family', '가족'), icon: Network },
+    ],
+    [t]
+  );
 
   // 탭 변경 시 캐러셀 자동 스크롤
   useEffect(() => {
@@ -265,11 +276,55 @@ export function ResponsiveClientDetail({
 
   const getBMIStatus = (bmi: number) => {
     if (bmi < 18.5)
-      return { label: '저체중', color: 'text-blue-600 bg-blue-50' };
-    if (bmi < 23) return { label: '정상', color: 'text-green-600 bg-green-50' };
+      return {
+        label: t('sidebar.bmiUnderweight', '저체중'),
+        color: 'text-blue-600 bg-blue-50',
+      };
+    if (bmi < 23)
+      return {
+        label: t('sidebar.bmiNormal', '정상'),
+        color: 'text-green-600 bg-green-50',
+      };
     if (bmi < 25)
-      return { label: '과체중', color: 'text-yellow-600 bg-yellow-50' };
-    return { label: '비만', color: 'text-red-600 bg-red-50' };
+      return {
+        label: t('sidebar.bmiOverweight', '과체중'),
+        color: 'text-yellow-600 bg-yellow-50',
+      };
+    return {
+      label: t('sidebar.bmiObese', '비만'),
+      color: 'text-red-600 bg-red-50',
+    };
+  };
+
+  // 단계 이름 번역 함수
+  const getStageDisplayName = (stageName: string) => {
+    if (!stageName) return t('sidebar.notSet', '미설정');
+
+    // 단계 이름을 번역 키로 매핑
+    const stageKeyMap: Record<string, string> = {
+      잠재고객: 'stages.prospect',
+      '첫 상담': 'stages.firstConsultation',
+      상담: 'stages.consultation',
+      '니즈 분석': 'stages.needsAnalysis',
+      '상품 설명': 'stages.proposal',
+      상품설명: 'stages.proposal',
+      '계약 검토': 'stages.contractReview',
+      계약검토: 'stages.contractReview',
+      '계약 완료': 'stages.contractCompleted',
+      계약완료: 'stages.contractCompleted',
+      리드: 'stages.lead',
+      검증됨: 'stages.qualified',
+      실패: 'stages.lost',
+      제외됨: 'stages.excluded',
+    };
+
+    const translationKey = stageKeyMap[stageName];
+    if (translationKey) {
+      return t(translationKey, stageName);
+    }
+
+    // 매핑되지 않은 경우 원본 반환
+    return stageName;
   };
 
   // 캐러셀 네비게이션 함수들
@@ -316,7 +371,9 @@ export function ResponsiveClientDetail({
                   variant="ghost"
                   className="w-full justify-between p-4 h-auto hover:bg-muted/50"
                 >
-                  <span className="font-medium text-sm">기본정보</span>
+                  <span className="font-medium text-sm">
+                    {t('sidebar.basicInfo', '기본정보')}
+                  </span>
                   <ChevronDown
                     className={cn(
                       'h-4 w-4 transition-transform duration-200',
@@ -338,7 +395,7 @@ export function ResponsiveClientDetail({
                           className="bg-primary hover:bg-primary/90 text-primary-foreground"
                         >
                           <Save className="h-4 w-4 mr-1" />
-                          저장
+                          {t('header.save', '저장')}
                         </Button>
                         <Button
                           onClick={onEditCancel}
@@ -346,7 +403,7 @@ export function ResponsiveClientDetail({
                           variant="outline"
                         >
                           <X className="h-4 w-4 mr-1" />
-                          취소
+                          {t('header.cancel', '취소')}
                         </Button>
                       </div>
                     ) : (
@@ -356,7 +413,7 @@ export function ResponsiveClientDetail({
                           size="sm"
                           variant="outline"
                           className="hover:bg-primary/10"
-                          title="고객 정보 편집"
+                          title={t('sidebar.editTooltip', '고객 정보 편집')}
                         >
                           <Edit2 className="h-4 w-4" />
                         </Button>
@@ -365,7 +422,7 @@ export function ResponsiveClientDetail({
                           size="sm"
                           variant="outline"
                           className="hover:bg-red-50 hover:text-red-600 hover:border-red-200"
-                          title="고객 삭제"
+                          title={t('sidebar.deleteTooltip', '고객 삭제')}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -376,7 +433,7 @@ export function ResponsiveClientDetail({
                   {/* 연락처 정보 */}
                   <div className="space-y-3">
                     <h4 className="text-sm font-medium text-muted-foreground">
-                      연락처 정보
+                      {t('labels.contacts', '연락처 정보')}
                     </h4>
 
                     {/* 전화번호 */}
@@ -391,7 +448,7 @@ export function ResponsiveClientDetail({
                               phone: e.target.value,
                             })
                           }
-                          placeholder="전화번호"
+                          placeholder={t('fields.phone', '전화번호')}
                           className="text-sm"
                         />
                       ) : (
@@ -399,7 +456,7 @@ export function ResponsiveClientDetail({
                           href={client.phone ? `tel:${client.phone}` : '#'}
                           className="text-sm text-blue-600 hover:underline"
                         >
-                          {client.phone || '정보 없음'}
+                          {client.phone || t('sidebar.noInfo', '정보 없음')}
                         </a>
                       )}
                     </div>
@@ -416,7 +473,7 @@ export function ResponsiveClientDetail({
                               email: e.target.value,
                             })
                           }
-                          placeholder="email@example.com"
+                          placeholder={t('fields.email', 'email@example.com')}
                           type="email"
                           className="text-sm"
                         />
@@ -429,9 +486,9 @@ export function ResponsiveClientDetail({
                             <span
                               className="text-muted-foreground italic cursor-pointer hover:text-foreground transition-colors"
                               onClick={onEditStart}
-                              title="클릭하여 입력"
+                              title={t('sidebar.clickToInput', '클릭하여 입력')}
                             >
-                              이메일 미입력
+                              {t('sidebar.emailNotSet', '이메일 미입력')}
                             </span>
                           )}
                         </a>
@@ -450,7 +507,7 @@ export function ResponsiveClientDetail({
                               address: e.target.value,
                             })
                           }
-                          placeholder="주소"
+                          placeholder={t('fields.address', '주소')}
                           className="text-sm"
                         />
                       ) : (
@@ -459,9 +516,9 @@ export function ResponsiveClientDetail({
                             <span
                               className="text-muted-foreground italic cursor-pointer hover:text-foreground transition-colors"
                               onClick={onEditStart}
-                              title="클릭하여 입력"
+                              title={t('sidebar.clickToInput', '클릭하여 입력')}
                             >
-                              주소 미입력
+                              {t('sidebar.addressNotSet', '주소 미입력')}
                             </span>
                           )}
                         </span>
@@ -480,7 +537,7 @@ export function ResponsiveClientDetail({
                               occupation: e.target.value,
                             })
                           }
-                          placeholder="직업"
+                          placeholder={t('fields.occupation', '직업')}
                           className="text-sm"
                         />
                       ) : (
@@ -489,9 +546,9 @@ export function ResponsiveClientDetail({
                             <span
                               className="text-muted-foreground italic cursor-pointer hover:text-foreground transition-colors"
                               onClick={onEditStart}
-                              title="클릭하여 입력"
+                              title={t('sidebar.clickToInput', '클릭하여 입력')}
                             >
-                              직업 미입력
+                              {t('sidebar.occupationNotSet', '직업 미입력')}
                             </span>
                           )}
                         </span>
@@ -514,24 +571,37 @@ export function ResponsiveClientDetail({
                           }
                           className="text-sm border rounded px-2 py-1"
                         >
-                          <option value="none">통신사 선택</option>
-                          <option value="skt">SKT</option>
-                          <option value="kt">KT</option>
-                          <option value="lg">LG U+</option>
-                          <option value="mvno">알뜰폰</option>
+                          <option value="none">
+                            {t('sidebar.selectTelecom', '통신사 선택')}
+                          </option>
+                          <option value="skt">
+                            {t('sidebar.telecomSKT', 'SKT')}
+                          </option>
+                          <option value="kt">
+                            {t('sidebar.telecomKT', 'KT')}
+                          </option>
+                          <option value="lg">
+                            {t('sidebar.telecomLGU', 'LG U+')}
+                          </option>
+                          <option value="mvno">
+                            {t('sidebar.telecomBudgetSKT', '알뜰폰')}
+                          </option>
                         </select>
                       ) : (
                         <span className="text-sm">
                           <span className="text-xs text-muted-foreground mr-2">
-                            통신사
+                            {t('sidebar.telecomLabel', '통신사')}
                           </span>
                           {client.telecomProvider || (
                             <span
                               className="text-muted-foreground italic cursor-pointer hover:text-foreground transition-colors"
                               onClick={onEditStart}
-                              title="클릭하여 선택"
+                              title={t(
+                                'sidebar.clickToSelect',
+                                '클릭하여 선택'
+                              )}
                             >
-                              미선택
+                              {t('sidebar.notSelected', '미선택')}
                             </span>
                           )}
                         </span>
@@ -543,18 +613,22 @@ export function ResponsiveClientDetail({
 
                   {/* 현재 단계 */}
                   <div className="space-y-2">
-                    <h4 className="text-sm font-medium">현재 단계</h4>
+                    <h4 className="text-sm font-medium">
+                      {t('sidebar.currentStage', '현재 단계')}
+                    </h4>
                     <Badge
                       variant="outline"
                       className="w-full justify-center h-10 text-md font-semibold"
                     >
-                      {client.currentStage?.name || '미설정'}
+                      {getStageDisplayName(client.currentStage?.name)}
                     </Badge>
                     {!client.currentStage?.name && (
                       <div className="text-xs text-muted-foreground bg-muted/20 p-2 rounded border-l-2 border-muted-foreground/30">
-                        💡 <strong>미설정</strong>은 아직 영업 파이프라인에
-                        진입하지 않은 상태입니다. "새 영업 기회" 버튼을 눌러
-                        파이프라인에 추가할 수 있습니다.
+                        💡 <strong>{t('sidebar.notSet', '미설정')}</strong>
+                        {t(
+                          'sidebar.notInPipelineHelp',
+                          '은 아직 영업 파이프라인에 진입하지 않은 상태입니다. "새 영업 기회" 버튼을 눌러 파이프라인에 추가할 수 있습니다.'
+                        )}
                       </div>
                     )}
                   </div>
@@ -563,12 +637,14 @@ export function ResponsiveClientDetail({
 
                   {/* 개인 상세 정보 */}
                   <div className="space-y-3">
-                    <h4 className="text-sm font-medium">개인 정보</h4>
+                    <h4 className="text-sm font-medium">
+                      {t('sidebar.personalInfo', '개인 정보')}
+                    </h4>
 
                     {/* 생년월일 */}
                     <div className="flex items-center gap-3">
                       <span className="text-sm text-muted-foreground min-w-[50px]">
-                        생년월일
+                        {t('sidebar.birthDate', '생년월일')}
                       </span>
                       {!isEditing ? (
                         client.extendedDetails?.birthDate ? (
@@ -581,9 +657,9 @@ export function ResponsiveClientDetail({
                             {/* 3가지 나이 표시 */}
                             <div className="text-xs text-muted-foreground space-y-1">
                               <div>
-                                만 나이:{' '}
+                                {t('sidebar.standardAge', '만 나이')}:{' '}
                                 {calculateAge(client.extendedDetails.birthDate)}
-                                세
+                                {t('sidebar.ageUnit', '세')}
                               </div>
                             </div>
                           </div>
@@ -591,9 +667,9 @@ export function ResponsiveClientDetail({
                           <span
                             className="text-sm text-muted-foreground italic cursor-pointer hover:text-foreground transition-colors"
                             onClick={onEditStart}
-                            title="클릭하여 입력"
+                            title={t('sidebar.clickToInput', '클릭하여 입력')}
                           >
-                            생년월일 미입력
+                            {t('sidebar.birthDateNotSet', '생년월일 미입력')}
                           </span>
                         )
                       ) : (
@@ -613,15 +689,16 @@ export function ResponsiveClientDetail({
                           {editFormData?.birthDate && (
                             <div className="mt-2 p-2 border rounded-md bg-muted/20">
                               <div className="text-xs text-foreground font-medium mb-1">
-                                📅 나이 미리보기:
+                                📅 {t('sidebar.agePreview', '나이 미리보기')}:
                               </div>
                               <div className="text-xs space-y-1">
                                 <div>
                                   <span className="text-green-700 dark:text-green-400">
-                                    만 나이:
+                                    {t('sidebar.standardAge', '만 나이')}:
                                   </span>
                                   <span className="ml-1 font-medium text-foreground">
-                                    {calculateAge(editFormData.birthDate)}세
+                                    {calculateAge(editFormData.birthDate)}
+                                    {t('sidebar.ageUnit', '세')}
                                   </span>
                                 </div>
                               </div>
@@ -634,22 +711,22 @@ export function ResponsiveClientDetail({
                     {/* 성별 */}
                     <div className="flex items-center gap-3">
                       <span className="text-sm text-muted-foreground min-w-[50px]">
-                        성별
+                        {t('sidebar.gender', '성별')}
                       </span>
                       {!isEditing ? (
                         client.extendedDetails?.gender ? (
                           <Badge variant="outline" className="text-xs">
                             {client.extendedDetails.gender === 'male'
-                              ? '남성'
-                              : '여성'}
+                              ? t('sidebar.male', '남성')
+                              : t('sidebar.female', '여성')}
                           </Badge>
                         ) : (
                           <span
                             className="text-sm text-muted-foreground italic cursor-pointer hover:text-foreground transition-colors"
                             onClick={onEditStart}
-                            title="클릭하여 입력"
+                            title={t('sidebar.clickToInput', '클릭하여 입력')}
                           >
-                            성별 미입력
+                            {t('sidebar.genderNotSet', '성별 미입력')}
                           </span>
                         )
                       ) : (
@@ -668,7 +745,9 @@ export function ResponsiveClientDetail({
                               }
                               className="text-xs"
                             />
-                            <span className="text-xs">남성</span>
+                            <span className="text-xs">
+                              {t('sidebar.male', '남성')}
+                            </span>
                           </label>
                           <label className="flex items-center gap-1 cursor-pointer">
                             <input
@@ -684,7 +763,9 @@ export function ResponsiveClientDetail({
                               }
                               className="text-xs"
                             />
-                            <span className="text-xs">여성</span>
+                            <span className="text-xs">
+                              {t('sidebar.female', '여성')}
+                            </span>
                           </label>
                         </div>
                       )}
@@ -695,12 +776,14 @@ export function ResponsiveClientDetail({
 
                   {/* 신체 정보 */}
                   <div className="space-y-3">
-                    <h4 className="text-sm font-medium">신체 정보</h4>
+                    <h4 className="text-sm font-medium">
+                      {t('sidebar.bodyInfo', '신체 정보')}
+                    </h4>
 
                     {/* 키 */}
                     <div className="flex items-center gap-3">
                       <span className="text-sm text-muted-foreground min-w-[40px]">
-                        키
+                        {t('sidebar.height', '키')}
                       </span>
                       {isEditing ? (
                         <div className="flex items-center gap-2">
@@ -717,18 +800,21 @@ export function ResponsiveClientDetail({
                             className="text-sm"
                           />
                           <span className="text-xs text-muted-foreground">
-                            cm
+                            {t('sidebar.cmUnit', 'cm')}
                           </span>
                         </div>
                       ) : client.height ? (
-                        <span className="text-sm">{client.height}cm</span>
+                        <span className="text-sm">
+                          {client.height}
+                          {t('sidebar.cmUnit', 'cm')}
+                        </span>
                       ) : (
                         <span
                           className="text-sm text-muted-foreground italic cursor-pointer hover:text-foreground transition-colors"
                           onClick={onEditStart}
-                          title="클릭하여 입력"
+                          title={t('sidebar.clickToInput', '클릭하여 입력')}
                         >
-                          미입력
+                          {t('sidebar.notEntered', '미입력')}
                         </span>
                       )}
                     </div>
@@ -736,7 +822,7 @@ export function ResponsiveClientDetail({
                     {/* 몸무게 */}
                     <div className="flex items-center gap-3">
                       <span className="text-sm text-muted-foreground min-w-[40px]">
-                        몸무게
+                        {t('sidebar.weight', '몸무게')}
                       </span>
                       {isEditing ? (
                         <div className="flex items-center gap-2">
@@ -753,18 +839,21 @@ export function ResponsiveClientDetail({
                             className="text-sm"
                           />
                           <span className="text-xs text-muted-foreground">
-                            kg
+                            {t('sidebar.kgUnit', 'kg')}
                           </span>
                         </div>
                       ) : client.weight ? (
-                        <span className="text-sm">{client.weight}kg</span>
+                        <span className="text-sm">
+                          {client.weight}
+                          {t('sidebar.kgUnit', 'kg')}
+                        </span>
                       ) : (
                         <span
                           className="text-sm text-muted-foreground italic cursor-pointer hover:text-foreground transition-colors"
                           onClick={onEditStart}
-                          title="클릭하여 입력"
+                          title={t('sidebar.clickToInput', '클릭하여 입력')}
                         >
-                          미입력
+                          {t('sidebar.notEntered', '미입력')}
                         </span>
                       )}
                     </div>
@@ -776,7 +865,7 @@ export function ResponsiveClientDetail({
                       (!isEditing && client.height && client.weight)) && (
                       <div className="flex items-center gap-3">
                         <span className="text-sm text-muted-foreground min-w-[40px]">
-                          BMI
+                          {t('sidebar.bmi', 'BMI')}
                         </span>
                         <div className="flex flex-col gap-1">
                           <div className="flex items-center gap-2">
@@ -818,7 +907,7 @@ export function ResponsiveClientDetail({
                     {/* 운전 여부 */}
                     <div className="flex items-center gap-3">
                       <span className="text-sm text-muted-foreground min-w-[40px]">
-                        운전
+                        {t('sidebar.driving', '운전')}
                       </span>
                       {isEditing ? (
                         <label className="flex items-center gap-2 cursor-pointer">
@@ -833,7 +922,9 @@ export function ResponsiveClientDetail({
                             }
                             className="rounded"
                           />
-                          <span className="text-sm">운전 가능</span>
+                          <span className="text-sm">
+                            {t('sidebar.canDrive', '운전 가능')}
+                          </span>
                         </label>
                       ) : (
                         <Badge
@@ -844,9 +935,9 @@ export function ResponsiveClientDetail({
                         >
                           {client.hasDrivingLicense !== undefined
                             ? client.hasDrivingLicense
-                              ? '운전 가능'
-                              : '운전 불가'
-                            : '미설정'}
+                              ? t('sidebar.canDrive', '운전 가능')
+                              : t('sidebar.cannotDrive', '운전 불가')
+                            : t('sidebar.notSet', '미설정')}
                         </Badge>
                       )}
                     </div>
@@ -858,16 +949,20 @@ export function ResponsiveClientDetail({
                       <Separator />
                       <div className="space-y-4">
                         <h4 className="text-sm font-medium text-foreground flex items-center gap-2">
-                          🔒 민감정보 관리
+                          🔒{' '}
+                          {t(
+                            'sidebar.sensitiveDataManagement',
+                            '민감정보 관리'
+                          )}
                         </h4>
                         <div className="border border-border rounded-lg p-4 bg-muted/30">
                           <div className="space-y-3">
                             <div className="flex items-center gap-2 mb-3">
                               <span className="text-xs font-medium text-foreground">
-                                주민등록번호
+                                {t('sidebar.ssnLabel', '주민등록번호')}
                               </span>
                               <span className="text-xs text-amber-800 bg-amber-100 px-2 py-1 rounded border border-amber-200 dark:text-amber-300 dark:bg-amber-900/30 dark:border-amber-800">
-                                ⚠️ 민감정보
+                                ⚠️ {t('sidebar.sensitiveData', '민감정보')}
                               </span>
                             </div>
 
@@ -916,15 +1011,25 @@ export function ResponsiveClientDetail({
                                 <div className="flex items-center gap-1">
                                   <span>ℹ️</span>
                                   <span className="font-medium">
-                                    주민등록번호 입력 시 자동으로 생년월일이
-                                    계산됩니다.
+                                    {t(
+                                      'sidebar.ssnAutoCalculate',
+                                      '주민등록번호 입력 시 자동으로 생년월일이 계산됩니다.'
+                                    )}
                                   </span>
                                 </div>
                                 <div className="text-xs text-amber-700 dark:text-amber-300">
-                                  • 앞자리: 생년월일 6자리 (YYMMDD)
+                                  •{' '}
+                                  {t(
+                                    'sidebar.ssnFrontHelp',
+                                    '앞자리: 생년월일 6자리 (YYMMDD)'
+                                  )}
                                 </div>
                                 <div className="text-xs text-amber-700 dark:text-amber-300">
-                                  • 뒷자리: 성별 및 세기 포함 7자리
+                                  •{' '}
+                                  {t(
+                                    'sidebar.ssnBackHelp',
+                                    '뒷자리: 성별 및 세기 포함 7자리'
+                                  )}
                                 </div>
                               </div>
                             </div>
@@ -938,14 +1043,19 @@ export function ResponsiveClientDetail({
 
                   {/* 소개 정보 */}
                   <div className="space-y-3">
-                    <h4 className="text-sm font-medium">소개 정보</h4>
+                    <h4 className="text-sm font-medium">
+                      {t('sidebar.referralInfo', '소개 정보')}
+                    </h4>
 
                     {/* 누가 이 고객을 소개했는지 */}
                     <div className="flex items-center gap-3">
                       <Network className="h-4 w-4 text-muted-foreground" />
                       <div className="flex-1">
                         <div className="text-xs text-muted-foreground mb-1">
-                          이 고객을 소개한 사람
+                          {t(
+                            'sidebar.whoReferredClient',
+                            '이 고객을 소개한 사람'
+                          )}
                         </div>
                         {isEditing ? (
                           <div className="space-y-2">
@@ -964,7 +1074,10 @@ export function ResponsiveClientDetail({
                               className="w-full text-sm border rounded px-2 py-1"
                             >
                               <option value="none">
-                                직접 개발 (소개자 없음)
+                                {t(
+                                  'sidebar.directDevelopment',
+                                  '직접 개발 (소개자 없음)'
+                                )}
                               </option>
                               {availableReferrers?.map(referrer => (
                                 <option key={referrer.id} value={referrer.id}>
@@ -976,8 +1089,10 @@ export function ResponsiveClientDetail({
                               <div className="flex items-center gap-1">
                                 <span>💡</span>
                                 <span>
-                                  소개자를 변경하면 소개 네트워크가
-                                  업데이트됩니다.
+                                  {t(
+                                    'sidebar.referrerChangeHelp',
+                                    '소개자를 변경하면 소개 네트워크가 업데이트됩니다.'
+                                  )}
                                 </span>
                               </div>
                             </div>
@@ -991,16 +1106,16 @@ export function ResponsiveClientDetail({
                               {client.referredBy.name}
                             </Link>
                             <Badge variant="outline" className="text-xs">
-                              소개자
+                              {t('sidebar.referrerBadge', '소개자')}
                             </Badge>
                           </div>
                         ) : (
                           <div className="flex items-center gap-2">
                             <span className="text-sm text-muted-foreground">
-                              직접 개발 고객
+                              {t('sidebar.directClient', '직접 개발 고객')}
                             </span>
                             <Badge variant="secondary" className="text-xs">
-                              신규 개발
+                              {t('sidebar.newDevelopment', '신규 개발')}
                             </Badge>
                           </div>
                         )}
@@ -1012,20 +1127,30 @@ export function ResponsiveClientDetail({
                       <Network className="h-4 w-4 text-muted-foreground mt-1" />
                       <div className="flex-1">
                         <div className="text-xs text-muted-foreground mb-1">
-                          이 고객이 소개한 사람들
+                          {t(
+                            'sidebar.clientsReferredBy',
+                            '이 고객이 소개한 사람들'
+                          )}
                         </div>
                         {client.referredClients &&
                         client.referredClients.length > 0 ? (
                           <div className="space-y-2">
                             <div className="flex items-center gap-2 mb-2">
                               <span className="text-sm font-medium">
-                                총 {client.referralCount}명 소개
+                                {t(
+                                  'sidebar.totalReferrals',
+                                  '총 {{count}}명 소개',
+                                  { count: client.referralCount }
+                                )}
                               </span>
                               <Badge
                                 variant="default"
                                 className="text-xs bg-green-100 text-green-700 border-green-300"
                               >
-                                소개 기여자
+                                {t(
+                                  'sidebar.referralContributor',
+                                  '소개 기여자'
+                                )}
                               </Badge>
                             </div>
                             <div className="space-y-1">
@@ -1057,10 +1182,13 @@ export function ResponsiveClientDetail({
                         ) : (
                           <div className="flex items-center gap-2">
                             <span className="text-sm text-muted-foreground">
-                              아직 소개한 고객이 없습니다
+                              {t(
+                                'sidebar.noReferralsYet',
+                                '아직 소개한 고객이 없습니다'
+                              )}
                             </span>
                             <Badge variant="outline" className="text-xs">
-                              잠재 소개자
+                              {t('sidebar.potentialReferrer', '잠재 소개자')}
                             </Badge>
                           </div>
                         )}
@@ -1073,7 +1201,9 @@ export function ResponsiveClientDetail({
                   {/* 태그 섹션 */}
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <h4 className="text-sm font-medium">태그</h4>
+                      <h4 className="text-sm font-medium">
+                        {t('sidebar.tags', '태그')}
+                      </h4>
                       {clientTags.length > 0 && (
                         <Button
                           variant="ghost"
@@ -1082,7 +1212,7 @@ export function ResponsiveClientDetail({
                           className="h-6 text-xs"
                         >
                           <Edit2 className="h-3 w-3 mr-1" />
-                          편집
+                          {t('header.edit', '편집')}
                         </Button>
                       )}
                     </div>
@@ -1114,7 +1244,7 @@ export function ResponsiveClientDetail({
                         <div className="text-center py-3 w-full">
                           <Target className="h-5 w-5 text-muted-foreground mx-auto mb-2" />
                           <p className="text-xs text-muted-foreground mb-2">
-                            태그가 없습니다
+                            {t('sidebar.noTags', '태그가 없습니다')}
                           </p>
                           <Button
                             variant="outline"
@@ -1123,7 +1253,7 @@ export function ResponsiveClientDetail({
                             onClick={onTagModalOpen}
                           >
                             <Plus className="h-3 w-3 mr-1" />
-                            태그 추가
+                            {t('sidebar.addTag', '태그 추가')}
                           </Button>
                         </div>
                       )}
