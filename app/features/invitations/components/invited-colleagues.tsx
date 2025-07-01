@@ -1,16 +1,19 @@
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '~/common/components/ui/card';
 import { Badge } from '~/common/components/ui/badge';
 import { Avatar, AvatarFallback } from '~/common/components/ui/avatar';
 import type { InvitedColleaguesProps } from '../types';
 
 export function InvitedColleagues({ usedInvitations }: InvitedColleaguesProps) {
+  const { t } = useTranslation('invitations');
+
   if (usedInvitations.length === 0) {
     return null;
   }
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-medium">내가 추천한 동료들</h3>
+      <h3 className="text-lg font-medium">{t('invitedColleagues.title')}</h3>
       <Card>
         <CardContent className="p-6">
           <div className="space-y-4">
@@ -29,12 +32,13 @@ export function InvitedColleagues({ usedInvitations }: InvitedColleaguesProps) {
                           {invitation.invitee.name}
                         </h4>
                         <Badge variant="secondary" className="text-xs">
-                          가입됨
+                          {t('invitationCard.status.used')}
                         </Badge>
                       </div>
                       <p className="text-sm text-muted-foreground mt-1">
-                        {invitation.invitee.joinedAt} 가입 · 추천 코드 #
-                        {invitation.id}
+                        {t('invitedColleagues.joinedAt')}:{' '}
+                        {invitation.invitee.joinedAt} ·{' '}
+                        {t('invitationCard.code')} #{invitation.id}
                       </p>
                     </div>
                   </div>

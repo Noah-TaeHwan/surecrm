@@ -1,0 +1,98 @@
+{
+  "title": "동료 추천",
+  "pageTitle": "동료 추천 - SureCRM",
+  "pageDescription": "동료 추천 코드를 관리하고 전문가들을 추천하세요",
+  "description": "소중한 동료들을 SureCRM에 추천하고 함께 성장하세요. 추천 코드를 통해 전문가 네트워크를 확장하세요.",
+
+  "stats": {
+    "available": "사용 가능",
+    "used": "사용됨",
+    "expired": "만료됨",
+    "total": "총 발급",
+    "conversionRate": "전환율",
+    "availableTitle": "사용 가능한 추천 코드",
+    "successTitle": "추천 성공",
+    "availableCount": "{{count}}개",
+    "successCount": "{{count}}명",
+    "availableDescription": "동료를 추천해보세요",
+    "allUsedDescription": "모든 추천 코드를 사용했습니다",
+    "noColleaguesDescription": "아직 추천한 동료가 없습니다",
+    "recentJoined": "{{name}}님이 최근 가입"
+  },
+
+  "myInvitations": {
+    "title": "내 추천 코드",
+    "count": "{{count}}개 보유",
+    "empty": {
+      "title": "추천 코드가 없습니다",
+      "description": "관리자에게 문의하여 추천 코드를 요청하실 수 있습니다."
+    },
+    "allUsed": {
+      "title": "모든 추천 코드를 사용했습니다",
+      "description": "새로운 추천 코드가 필요하시면 관리자에게 문의해주세요.",
+      "usedCount": "{{count}}개 사용완료"
+    }
+  },
+
+  "invitationCard": {
+    "code": "추천 코드",
+    "status": {
+      "available": "사용 가능",
+      "used": "사용됨",
+      "expired": "만료됨"
+    },
+    "actions": {
+      "copyLink": "추천 링크",
+      "copied": "복사됨!",
+      "share": "공유하기"
+    },
+    "createdAt": "생성일",
+    "usedAt": "사용일",
+    "usedBy": "사용자",
+    "joinedMessage": "{{name}}님이 가입했습니다",
+    "joinedComplete": "{{date}} 가입 완료",
+    "success": "성공",
+    "guideText": "링크를 복사해서 카카오톡, 이메일, 문자로 소중한 동료에게 전송하세요. SureCRM의 CRM 기능을 함께 활용할 전문가들을 추천해보세요!"
+  },
+
+  "invitedColleagues": {
+    "title": "추천한 동료들",
+    "empty": {
+      "title": "아직 추천한 동료가 없습니다",
+      "description": "추천 코드를 공유하여 동료들을 SureCRM에 추천해보세요."
+    },
+    "joinedAt": "가입일",
+    "invitedBy": "추천자"
+  },
+
+  "guide": {
+    "title": "추천 가이드",
+    "items": {
+      "issuing": "추천 코드는 관리자를 통해 발급받을 수 있습니다",
+      "permanent": "추천 코드는 영구적으로 유효하며 만료되지 않습니다",
+      "shareCarefully": "소중한 동료들에게만 추천 코드를 공유하시기 바랍니다"
+    }
+  },
+
+  "emptyState": {
+    "title": "추천 코드가 없습니다",
+    "description": "동료 추천 코드를 통해 소중한 동료들을 추천하여 함께 성장하세요!",
+    "features": {
+      "network": {
+        "title": "전문가 네트워크",
+        "description": "동료들과 함께 성장"
+      },
+      "growth": {
+        "title": "비즈니스 성장",
+        "description": "함께 발전하는 기회"
+      }
+    },
+    "contactAdmin": "관리자에게 문의하여 추천 코드를 요청하실 수 있습니다."
+  },
+
+  "error": {
+    "title": "데이터를 불러올 수 없습니다",
+    "retry": "다시 시도",
+    "loadFailed": "초대장 데이터 로딩 실패: {{error}}"
+  }
+}

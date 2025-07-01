@@ -1,0 +1,98 @@
+{
+  "title": "Colleague Referrals",
+  "pageTitle": "Colleague Referrals - SureCRM",
+  "pageDescription": "Manage colleague referral codes and recommend professionals",
+  "description": "Recommend valuable colleagues to SureCRM and grow together. Expand your professional network through referral codes.",
+
+  "stats": {
+    "available": "Available",
+    "used": "Used",
+    "expired": "Expired",
+    "total": "Total Issued",
+    "conversionRate": "Conversion Rate",
+    "availableTitle": "Available Referral Codes",
+    "successTitle": "Referral Success",
+    "availableCount": "{{count}} codes",
+    "successCount": "{{count}} people",
+    "availableDescription": "Recommend colleagues",
+    "allUsedDescription": "All referral codes have been used",
+    "noColleaguesDescription": "No referred colleagues yet",
+    "recentJoined": "{{name}} recently joined"
+  },
+
+  "myInvitations": {
+    "title": "My Referral Codes",
+    "count": "{{count}} codes owned",
+    "empty": {
+      "title": "No referral codes available",
+      "description": "Please contact the administrator to request referral codes."
+    },
+    "allUsed": {
+      "title": "All referral codes have been used",
+      "description": "Please contact the administrator if you need new referral codes.",
+      "usedCount": "{{count}} codes used"
+    }
+  },
+
+  "invitationCard": {
+    "code": "Referral Code",
+    "status": {
+      "available": "Available",
+      "used": "Used",
+      "expired": "Expired"
+    },
+    "actions": {
+      "copyLink": "Referral Link",
+      "copied": "Copied!",
+      "share": "Share"
+    },
+    "createdAt": "Created",
+    "usedAt": "Used",
+    "usedBy": "Used by",
+    "joinedMessage": "{{name}} has joined",
+    "joinedComplete": "Joined on {{date}}",
+    "success": "Success",
+    "guideText": "Copy the link and send it to valuable colleagues via KakaoTalk, email, or text message. Recommend professionals who will utilize SureCRM's CRM features together!"
+  },
+
+  "invitedColleagues": {
+    "title": "Referred Colleagues",
+    "empty": {
+      "title": "No referred colleagues yet",
+      "description": "Share your referral codes to recommend colleagues to SureCRM."
+    },
+    "joinedAt": "Joined",
+    "invitedBy": "Referred by"
+  },
+
+  "guide": {
+    "title": "Referral Guide",
+    "items": {
+      "issuing": "Referral codes can be issued through the administrator",
+      "permanent": "Referral codes are permanently valid and never expire",
+      "shareCarefully": "Please share referral codes only with valuable colleagues"
+    }
+  },
+
+  "emptyState": {
+    "title": "No Referral Codes",
+    "description": "Recommend valuable colleagues through referral codes and grow together!",
+    "features": {
+      "network": {
+        "title": "Professional Network",
+        "description": "Grow together with colleagues"
+      },
+      "growth": {
+        "title": "Business Growth",
+        "description": "Opportunities to develop together"
+      }
+    },
+    "contactAdmin": "You can contact the administrator to request referral codes."
+  },
+
+  "error": {
+    "title": "Unable to load data",
+    "retry": "Try Again",
+    "loadFailed": "Failed to load invitation data: {{error}}"
+  }
+}

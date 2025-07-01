@@ -1,5 +1,6 @@
 import type { Route } from './+types/invitations-page';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { MainLayout } from '~/common/layouts/main-layout';
 import { Button } from '~/common/components/ui/button';
 import {
@@ -49,7 +50,7 @@ import { getInvitationLink } from '~/lib/utils/url';
 
 // 초대장 페이지 로더 - 모든 데이터를 실제 데이터베이스에서 로딩
 export async function loader({ request }: Route.LoaderArgs) {
-  console.log('초대장 페이지 로드 시작');
+  console.log('Loading invitations page');
 
   try {
     // 구독 상태 확인 (트라이얼 만료 시 billing 페이지로 리다이렉트)
@@ -67,7 +68,7 @@ export async function loader({ request }: Route.LoaderArgs) {
         getInvitedColleagues(userId),
       ]);
 
-    console.log('초대장 페이지 데이터 로딩 완료');
+    console.log('Invitations page data loaded successfully');
 
     const hasData = myInvitations.length > 0 || invitedColleagues.length > 0;
 
@@ -80,10 +81,10 @@ export async function loader({ request }: Route.LoaderArgs) {
       userId,
     };
   } catch (error) {
-    console.error('초대장 페이지 로드 실패:', error);
+    console.error('Failed to load invitations page:', error);
 
     const errorMessage =
-      error instanceof Error ? error.message : '알 수 없는 오류';
+      error instanceof Error ? error.message : 'Unknown error';
 
     // 에러 시 빈 데이터 반환
     return {
@@ -98,34 +99,37 @@ export async function loader({ request }: Route.LoaderArgs) {
       },
       invitedColleagues: [],
       hasData: false,
-      error: `초대장 데이터 로딩 실패: ${errorMessage}`,
+      error: `Failed to load invitation data: ${errorMessage}`,
       userId: null,
     };
   }
 }
 
 export function meta({ data, params }: Route.MetaArgs) {
+  // 다국어 지원을 위해 기본값 사용, 실제 다국어는 페이지 내에서 처리
   return [
-    { title: '동료 추천 - SureCRM' },
+    { title: 'Colleague Referrals - SureCRM' },
     {
       name: 'description',
-      content: '동료 추천 코드를 관리하고 전문가들을 추천하세요',
+      content: 'Manage colleague referral codes and recommend professionals',
     },
   ];
 }
 
 // 🎨 반응형 빈 상태 컴포넌트
 function EmptyInvitationsState() {
+  const { t } = useTranslation('invitations');
+
   return (
     <div className="text-center py-8 px-4">
       <div className="mx-auto w-20 h-20 sm:w-24 sm:h-24 bg-muted rounded-full flex items-center justify-center mb-4 sm:mb-6">
         <Users className="w-10 h-10 sm:w-12 sm:h-12 text-muted-foreground" />
       </div>
       <h3 className="text-lg sm:text-xl font-semibold mb-2">
-        추천 코드가 없습니다
+        {t('emptyState.title')}
       </h3>
       <p className="text-sm sm:text-base text-muted-foreground mb-6 max-w-md mx-auto leading-relaxed">
-        동료 추천 코드를 통해 소중한 동료들을 추천하여 함께 성장하세요!
+        {t('emptyState.description')}
       </p>
       <div className="space-y-4">
         {/* 🎯 모바일 최적화: 1열 → 2열 적응형 그리드 */}
@@ -134,10 +138,10 @@ function EmptyInvitationsState() {
             <div className="text-center">
               <Users className="w-6 h-6 sm:w-8 sm:h-8 text-green-500 mx-auto mb-2" />
               <h4 className="font-medium mb-1 text-sm sm:text-base">
-                전문가 네트워크
+                {t('emptyState.features.network.title')}
               </h4>
               <p className="text-xs sm:text-sm text-muted-foreground">
-                동료들과 함께 성장
+                {t('emptyState.features.network.description')}
               </p>
             </div>
           </Card>
@@ -145,10 +149,10 @@ function EmptyInvitationsState() {
             <div className="text-center">
               <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 text-blue-500 mx-auto mb-2" />
               <h4 className="font-medium mb-1 text-sm sm:text-base">
-                비즈니스 성장
+                {t('emptyState.features.growth.title')}
               </h4>
               <p className="text-xs sm:text-sm text-muted-foreground">
-                함께 발전하는 기회
+                {t('emptyState.features.growth.description')}
               </p>
             </div>
           </Card>
@@ -157,7 +161,7 @@ function EmptyInvitationsState() {
         <Alert className="max-w-lg mx-auto">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription className="text-sm">
-            관리자에게 문의하여 추천 코드를 요청하실 수 있습니다.
+            {t('emptyState.contactAdmin')}
           </AlertDescription>
         </Alert>
       </div>
@@ -167,13 +171,15 @@ function EmptyInvitationsState() {
 
 // 🎨 반응형 에러 상태 컴포넌트
 function ErrorState({ error }: { error: string }) {
+  const { t } = useTranslation('invitations');
+
   return (
     <div className="text-center py-8 px-4">
       <div className="mx-auto w-20 h-20 sm:w-24 sm:h-24 bg-red-50 rounded-full flex items-center justify-center mb-4 sm:mb-6">
         <XCircle className="w-10 h-10 sm:w-12 sm:h-12 text-red-500" />
       </div>
       <h3 className="text-lg sm:text-xl font-semibold mb-2">
-        데이터를 불러올 수 없습니다
+        {t('error.title')}
       </h3>
       <p className="text-sm sm:text-base text-muted-foreground mb-6 max-w-md mx-auto">
         {error}
@@ -185,7 +191,7 @@ function ErrorState({ error }: { error: string }) {
         size="lg"
         className="min-h-[44px]"
       >
-        다시 시도
+        {t('error.retry')}
       </Button>
     </div>
   );
@@ -196,6 +202,7 @@ export default function InvitationsPage({ loaderData }: Route.ComponentProps) {
     loaderData;
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [isGuideOpen, setIsGuideOpen] = useState(false);
+  const { t } = useTranslation('invitations');
 
   const availableInvitations = myInvitations.filter(
     (inv: Invitation) => inv.status === 'available'
@@ -215,7 +222,7 @@ export default function InvitationsPage({ loaderData }: Route.ComponentProps) {
   // 에러 상태 처리
   if (error) {
     return (
-      <MainLayout title="동료 추천">
+      <MainLayout title={t('title')}>
         <ErrorState error={error} />
       </MainLayout>
     );
@@ -224,20 +231,19 @@ export default function InvitationsPage({ loaderData }: Route.ComponentProps) {
   // 빈 데이터 상태 처리
   if (!hasData) {
     return (
-      <MainLayout title="동료 추천">
+      <MainLayout title={t('title')}>
         <EmptyInvitationsState />
       </MainLayout>
     );
   }
 
   return (
-    <MainLayout title="동료 추천">
+    <MainLayout title={t('title')}>
       <div className="space-y-4 sm:space-y-6 px-2 sm:px-0">
         {/* 🎯 모바일 최적화: 헤더 */}
         <div className="space-y-2">
           <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-            소중한 동료들을 SureCRM에 추천하고 함께 성장하세요. 추천 코드를 통해
-            전문가 네트워크를 확장하세요.
+            {t('description')}
           </p>
         </div>
 
@@ -250,9 +256,11 @@ export default function InvitationsPage({ loaderData }: Route.ComponentProps) {
         {/* 🎯 모바일 최적화: 내 추천 코드들 */}
         <div className="space-y-3 sm:space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg sm:text-xl font-medium">내 추천 코드</h3>
+            <h3 className="text-lg sm:text-xl font-medium">
+              {t('myInvitations.title')}
+            </h3>
             <Badge variant="outline" className="text-xs sm:text-sm px-2 py-1">
-              {myInvitations.length}개 보유
+              {t('myInvitations.count', { count: myInvitations.length })}
             </Badge>
           </div>
 
@@ -272,10 +280,10 @@ export default function InvitationsPage({ loaderData }: Route.ComponentProps) {
               <CardContent className="text-center py-6 sm:py-8 px-4">
                 <Users className="w-10 h-10 sm:w-12 sm:h-12 text-muted-foreground mx-auto mb-3 sm:mb-4" />
                 <h4 className="font-medium mb-2 text-sm sm:text-base">
-                  추천 코드가 없습니다
+                  {t('myInvitations.empty.title')}
                 </h4>
                 <p className="text-xs sm:text-sm text-muted-foreground mb-4">
-                  관리자에게 문의하여 추천 코드를 요청하실 수 있습니다.
+                  {t('myInvitations.empty.description')}
                 </p>
               </CardContent>
             </Card>
@@ -292,15 +300,17 @@ export default function InvitationsPage({ loaderData }: Route.ComponentProps) {
           <InvitedColleagues usedInvitations={invitedColleagues} />
         ) : (
           <div className="space-y-3 sm:space-y-4">
-            <h3 className="text-lg sm:text-xl font-medium">추천한 동료들</h3>
+            <h3 className="text-lg sm:text-xl font-medium">
+              {t('invitedColleagues.title')}
+            </h3>
             <Card>
               <CardContent className="text-center py-6 sm:py-8 px-4">
                 <CheckCircle className="w-10 h-10 sm:w-12 sm:h-12 text-muted-foreground mx-auto mb-3 sm:mb-4" />
                 <h4 className="font-medium mb-2 text-sm sm:text-base">
-                  아직 추천한 동료가 없습니다
+                  {t('invitedColleagues.empty.title')}
                 </h4>
                 <p className="text-xs sm:text-sm text-muted-foreground">
-                  추천 코드를 공유하여 동료들을 SureCRM에 추천해보세요.
+                  {t('invitedColleagues.empty.description')}
                 </p>
               </CardContent>
             </Card>
@@ -317,7 +327,9 @@ export default function InvitationsPage({ loaderData }: Route.ComponentProps) {
                     <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                       💡
                     </div>
-                    <span className="text-base sm:text-lg">추천 가이드</span>
+                    <span className="text-base sm:text-lg">
+                      {t('guide.title')}
+                    </span>
                   </div>
                   {isGuideOpen ? (
                     <ChevronUp className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -332,19 +344,19 @@ export default function InvitationsPage({ loaderData }: Route.ComponentProps) {
                 <div className="flex items-start gap-3 p-3 rounded-lg bg-card/50 border border-border/30">
                   <div className="w-2 h-2 rounded-full bg-primary/60 mt-2 flex-shrink-0" />
                   <p className="text-muted-foreground leading-relaxed">
-                    추천 코드는 관리자를 통해 발급받을 수 있습니다
+                    {t('guide.items.issuing')}
                   </p>
                 </div>
                 <div className="flex items-start gap-3 p-3 rounded-lg bg-card/50 border border-border/30">
                   <div className="w-2 h-2 rounded-full bg-primary/60 mt-2 flex-shrink-0" />
                   <p className="text-muted-foreground leading-relaxed">
-                    추천 코드는 영구적으로 유효하며 만료되지 않습니다
+                    {t('guide.items.permanent')}
                   </p>
                 </div>
                 <div className="flex items-start gap-3 p-3 rounded-lg bg-card/50 border border-border/30">
                   <div className="w-2 h-2 rounded-full bg-primary/60 mt-2 flex-shrink-0" />
                   <p className="text-muted-foreground leading-relaxed">
-                    소중한 동료들에게만 추천 코드를 공유하시기 바랍니다
+                    {t('guide.items.shareCarefully')}
                   </p>
                 </div>
               </CardContent>

@@ -1,0 +1,98 @@
+{
+  "title": "同僚紹介",
+  "pageTitle": "同僚紹介 - SureCRM",
+  "pageDescription": "同僚紹介コードを管理し、専門家を紹介してください",
+  "description": "大切な同僚をSureCRMに紹介し、一緒に成長しましょう。紹介コードを通じて専門家ネットワークを拡張してください。",
+
+  "stats": {
+    "available": "利用可能",
+    "used": "使用済み",
+    "expired": "期限切れ",
+    "total": "総発行数",
+    "conversionRate": "コンバージョン率",
+    "availableTitle": "利用可能な紹介コード",
+    "successTitle": "紹介成功",
+    "availableCount": "{{count}}個",
+    "successCount": "{{count}}人",
+    "availableDescription": "同僚を紹介してみてください",
+    "allUsedDescription": "すべての紹介コードを使用しました",
+    "noColleaguesDescription": "まだ紹介した同僚がいません",
+    "recentJoined": "{{name}}さんが最近参加しました"
+  },
+
+  "myInvitations": {
+    "title": "私の紹介コード",
+    "count": "{{count}}個保有",
+    "empty": {
+      "title": "紹介コードがありません",
+      "description": "管理者にお問い合わせして紹介コードをリクエストしてください。"
+    },
+    "allUsed": {
+      "title": "すべての紹介コードを使用しました",
+      "description": "新しい紹介コードが必要な場合は、管理者にお問い合わせください。",
+      "usedCount": "{{count}}個使用完了"
+    }
+  },
+
+  "invitationCard": {
+    "code": "紹介コード",
+    "status": {
+      "available": "利用可能",
+      "used": "使用済み",
+      "expired": "期限切れ"
+    },
+    "actions": {
+      "copyLink": "紹介リンク",
+      "copied": "コピーしました！",
+      "share": "共有"
+    },
+    "createdAt": "作成日",
+    "usedAt": "使用日",
+    "usedBy": "使用者",
+    "joinedMessage": "{{name}}さんが参加しました",
+    "joinedComplete": "{{date}} 参加完了",
+    "success": "成功",
+    "guideText": "リンクをコピーしてカカオトーク、メール、テキストメッセージで大切な同僚に送信してください。SureCRMのCRM機能を一緒に活用する専門家を紹介してみてください！"
+  },
+
+  "invitedColleagues": {
+    "title": "紹介した同僚",
+    "empty": {
+      "title": "まだ紹介した同僚がいません",
+      "description": "紹介コードを共有して同僚をSureCRMに紹介してみてください。"
+    },
+    "joinedAt": "参加日",
+    "invitedBy": "紹介者"
+  },
+
+  "guide": {
+    "title": "紹介ガイド",
+    "items": {
+      "issuing": "紹介コードは管理者を通じて発行できます",
+      "permanent": "紹介コードは永続的に有効で、期限切れになりません",
+      "shareCarefully": "大切な同僚にのみ紹介コードを共有してください"
+    }
+  },
+
+  "emptyState": {
+    "title": "紹介コードがありません",
+    "description": "同僚紹介コードを通じて大切な同僚を紹介し、一緒に成長しましょう！",
+    "features": {
+      "network": {
+        "title": "専門家ネットワーク",
+        "description": "同僚と一緒に成長"
+      },
+      "growth": {
+        "title": "ビジネス成長",
+        "description": "共に発展する機会"
+      }
+    },
+    "contactAdmin": "管理者にお問い合わせして紹介コードをリクエストできます。"
+  },
+
+  "error": {
+    "title": "データを読み込めません",
+    "retry": "再試行",
+    "loadFailed": "招待データの読み込みに失敗しました: {{error}}"
+  }
+}

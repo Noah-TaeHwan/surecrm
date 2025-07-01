@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import {
   Card,
   CardContent,
@@ -18,17 +19,20 @@ export function InvitationCard({
   onCopyLink,
   copiedCode,
 }: InvitationCardProps) {
+  const { t } = useTranslation('invitations');
+
   return (
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="text-lg">
-              추천 코드 #{invitation.id}
+              {t('invitationCard.code')} #{invitation.id}
             </CardTitle>
             <CardDescription>
-              생성일: {invitation.createdAt}
-              {invitation.usedAt && ` · 사용일: ${invitation.usedAt}`}
+              {t('invitationCard.createdAt')}: {invitation.createdAt}
+              {invitation.usedAt &&
+                ` · ${t('invitationCard.usedAt')}: ${invitation.usedAt}`}
             </CardDescription>
           </div>
           <Badge
@@ -38,12 +42,12 @@ export function InvitationCard({
             {invitation.status === 'available' ? (
               <>
                 <TimerIcon className="h-3 w-3" />
-                사용 가능
+                {t('invitationCard.status.available')}
               </>
             ) : (
               <>
                 <CheckCircledIcon className="h-3 w-3" />
-                사용됨
+                {t('invitationCard.status.used')}
               </>
             )}
           </Badge>
@@ -59,19 +63,23 @@ export function InvitationCard({
             </Avatar>
             <div className="flex-1">
               <div className="font-medium">
-                {invitation.invitee.name}님이 가입했습니다
+                {t('invitationCard.joinedMessage', {
+                  name: invitation.invitee.name,
+                })}
               </div>
               <div className="text-sm text-muted-foreground">
-                {invitation.invitee.joinedAt} 가입 완료
+                {t('invitationCard.joinedComplete', {
+                  date: invitation.invitee.joinedAt,
+                })}
               </div>
             </div>
-            <Badge variant="secondary">성공</Badge>
+            <Badge variant="secondary">{t('invitationCard.success')}</Badge>
           </div>
         ) : (
           <div className="space-y-3">
             <div>
               <label className="text-sm font-medium text-muted-foreground">
-                추천 링크
+                {t('invitationCard.actions.copyLink')}
               </label>
               <div className="flex items-center gap-2 mt-1">
                 <Input
@@ -93,9 +101,8 @@ export function InvitationCard({
               </div>
             </div>
             <div className="text-sm text-muted-foreground bg-muted/30 p-3 rounded-lg border border-border">
-              💡 <strong>추천 가이드:</strong> 링크를 복사해서 카카오톡, 이메일,
-              문자로 소중한 동료에게 전송하세요. SureCRM의 CRM 기능을 함께
-              활용할 전문가들을 추천해보세요!
+              💡 <strong>{t('guide.title')}:</strong>{' '}
+              {t('invitationCard.guideText')}
             </div>
           </div>
         )}
