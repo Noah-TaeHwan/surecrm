@@ -1,21 +1,106 @@
 import crypto from 'crypto';
 import { lemonSqueezyConfig } from './config';
-import {
-  activateUserSubscription,
-  cancelUserSubscription,
-} from '~/lib/auth/subscription';
-import { createClient } from '~/lib/core/supabase';
+import { db } from '~/lib/core/db.server';
+import { profiles } from '~/lib/schema/core';
+import { eq } from 'drizzle-orm';
+import { createAdminClient } from '~/lib/core/supabase';
 
 /**
- * 이메일로 사용자 ID 찾기
+ * 이메일로 사용자 ID 찾기 (서버사이드 버전)
  */
 async function findUserByEmail(email: string): Promise<string | null> {
-  const supabase = createClient();
+  try {
+    // Supabase Admin API를 사용해서 사용자 찾기
+    const supabase = createAdminClient();
 
-  const { data: users } = await supabase.auth.admin.listUsers();
+    const { data: users, error } = await supabase.auth.admin.listUsers();
 
-  const user = users.users.find(u => u.email === email);
-  return user?.id || null;
+    if (error) {
+      console.error('사용자 목록 조회 실패:', error);
+      return null;
+    }
+
+    const user = users.users.find((u: any) => u.email === email);
+    return user?.id || null;
+  } catch (error) {
+    console.error('이메일로 사용자 찾기 실패:', error);
+    return null;
+  }
+}
+
+/**
+ * 사용자의 구독을 활성화합니다 (서버사이드 버전)
+ */
+async function activateUserSubscription(
+  userId: string,
+  subscriptionEndDate: Date,
+  lemonSqueezySubscriptionId?: string
+): Promise<void> {
+  try {
+    console.log('구독 활성화 시작:', {
+      userId,
+      subscriptionEndDate: subscriptionEndDate.toISOString(),
+      lemonSqueezySubscriptionId,
+    });
+
+    // Drizzle ORM을 사용해서 직접 업데이트
+    const updatedProfile = await db
+      .update(profiles)
+      .set({
+        subscriptionStatus: 'active',
+        subscriptionEndsAt: subscriptionEndDate,
+        lemonSqueezySubscriptionId: lemonSqueezySubscriptionId,
+        updatedAt: new Date(),
+      })
+      .where(eq(profiles.id, userId))
+      .returning();
+
+    if (updatedProfile.length === 0) {
+      throw new Error(`사용자 프로필을 찾을 수 없습니다: ${userId}`);
+    }
+
+    console.log('구독 활성화 완료:', {
+      userId,
+      subscriptionStatus: updatedProfile[0].subscriptionStatus,
+      subscriptionEndsAt: updatedProfile[0].subscriptionEndsAt,
+    });
+  } catch (error) {
+    console.error('구독 활성화 실패:', error);
+    throw new Error('구독 활성화에 실패했습니다.');
+  }
+}
+
+/**
+ * 사용자의 구독을 취소합니다 (서버사이드 버전)
+ */
+async function cancelUserSubscription(userId: string): Promise<void> {
+  try {
+    console.log('구독 취소 시작:', { userId });
+
+    // Drizzle ORM을 사용해서 직접 업데이트
+    const updatedProfile = await db
+      .update(profiles)
+      .set({
+        subscriptionStatus: 'cancelled',
+        subscriptionEndsAt: null,
+        lemonSqueezySubscriptionId: null,
+        updatedAt: new Date(),
+      })
+      .where(eq(profiles.id, userId))
+      .returning();
+
+    if (updatedProfile.length === 0) {
+      throw new Error(`사용자 프로필을 찾을 수 없습니다: ${userId}`);
+    }
+
+    console.log('구독 취소 완료:', {
+      userId,
+      subscriptionStatus: updatedProfile[0].subscriptionStatus,
+    });
+  } catch (error) {
+    console.error('구독 취소 실패:', error);
+    throw new Error('구독 취소에 실패했습니다.');
+  }
 }
 
 // Lemon Squeezy 웹훅 이벤트 타입
