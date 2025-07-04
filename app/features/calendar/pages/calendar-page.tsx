@@ -481,8 +481,12 @@ export default function CalendarPage({
         {isMobile && meetings && meetings.length > 0 && (
           <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-4">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
-              <HydrationSafeMonthDay date={selectedDate} />{' '}
-              {t('views.agenda', '일정표')}
+              {t('mobile.agendaTitle', {
+                date: formatDate(selectedDate, {
+                  month: 'long',
+                  day: 'numeric',
+                }),
+              })}
             </h3>
 
             {filteredMeetings

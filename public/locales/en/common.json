@@ -197,5 +197,29 @@
       "delete": "Delete",
       "deleting": "Deleting..."
     }
+  },
+  "pageTitle": "{{title}} | SureCRM",
+  "theme": "Theme",
+  "feedback": {
+    "title": "Send Feedback",
+    "description": "Please send us your valuable feedback for service improvement.",
+    "fields": {
+      "title": "Title",
+      "category": "Category",
+      "message": "Message",
+      "attachment": "Attach Screenshot"
+    },
+    "placeholders": {
+      "title": "Enter the title of your feedback",
+      "category": "Select a category",
+      "message": "Please enter the details...",
+      "attachment": "Choose a file..."
+    },
+    "categories": {
+      "bug": "Bug Report",
+      "feature": "Feature Suggestion",
+      "general": "General Feedback",
+      "other": "Other"
+    }
   }
 }

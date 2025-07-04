@@ -197,5 +197,29 @@
       "delete": "削除",
       "deleting": "削除中..."
     }
+  },
+  "pageTitle": "{{title}} | SureCRM",
+  "theme": "テーマ",
+  "feedback": {
+    "title": "フィードバックを送信",
+    "description": "サービス改善のための貴重なご意見をお聞かせください。",
+    "fields": {
+      "title": "件名",
+      "category": "カテゴリー",
+      "message": "内容",
+      "attachment": "スクリーンショットを添付"
+    },
+    "placeholders": {
+      "title": "フィードバックの件名を入力してください",
+      "category": "カテゴリーを選択してください",
+      "message": "詳細を入力してください...",
+      "attachment": "ファイルを選択..."
+    },
+    "categories": {
+      "bug": "バグレポート",
+      "feature": "機能提案",
+      "general": "一般的なフィード백",
+      "other": "その他"
+    }
   }
 }

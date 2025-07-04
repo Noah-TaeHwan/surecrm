@@ -13,6 +13,7 @@ import {
   FileText,
   Bell,
   CreditCard, // 구독 관리 기능 활성화
+  MessageSquareHeart,
 } from 'lucide-react';
 import { cn } from '~/lib/utils';
 import { Separator } from '~/common/components/ui/separator';
@@ -21,6 +22,8 @@ import { InsuranceAgentEvents } from '~/lib/utils/analytics';
 import { useTranslation } from 'react-i18next';
 import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 import { useState, useEffect } from 'react';
+import { Button } from '~/common/components/ui/button';
+import { FeedbackModal } from '~/common/components/feedback/feedback-modal';
 
 interface SidebarProps {
   className?: string;
@@ -28,6 +31,7 @@ interface SidebarProps {
   id?: string;
   role?: string;
   'aria-label'?: string;
+  onOpenFeedbackModal?: () => void;
 }
 
 interface NavItem {
@@ -42,6 +46,7 @@ export function Sidebar({
   id,
   role,
   'aria-label': ariaLabel,
+  onOpenFeedbackModal,
 }: SidebarProps) {
   const location = useLocation();
   const { t } = useHydrationSafeTranslation('navigation');
@@ -130,90 +135,102 @@ export function Sidebar({
   };
 
   return (
-    <div
-      id={id}
-      role={role}
-      aria-label={ariaLabel}
-      className={cn(
-        'flex flex-col h-screen bg-sidebar border-r border-sidebar-border w-64',
-        className
-      )}
-    >
-      <div className="p-4 border-b border-sidebar-border">
-        <Link
-          to="/dashboard"
-          onClick={() => handleNavigation('/dashboard', 'SureCRM 로고')}
-          className="text-xl font-bold text-sidebar-foreground flex justify-center cursor-pointer hover:text-sidebar-primary transition-colors"
-        >
-          SureCRM
-        </Link>
+    <>
+      <div
+        id={id}
+        role={role}
+        aria-label={ariaLabel}
+        className={cn(
+          'flex flex-col h-screen bg-sidebar border-r border-sidebar-border w-64',
+          className
+        )}
+      >
+        <div className="p-4 border-b border-sidebar-border">
+          <Link
+            to="/dashboard"
+            onClick={() => handleNavigation('/dashboard', 'SureCRM 로고')}
+            className="text-xl font-bold text-sidebar-foreground flex justify-center cursor-pointer hover:text-sidebar-primary transition-colors"
+          >
+            SureCRM
+          </Link>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-4">
+          <nav>
+            {/* 메인 네비게이션 */}
+            <ul className="space-y-2 mb-6">
+              {mainNavItems.map(item => {
+                const isActive = isActiveRoute(item.href);
+                return (
+                  <li key={item.href}>
+                    <Link
+                      to={item.href}
+                      onClick={() => handleNavigation(item.href, item.label)}
+                      className={cn(
+                        // Button 스타일을 직접 적용
+                        'inline-flex items-center justify-start gap-3 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+                        'w-full h-12 px-4 py-2',
+                        // 활성/비활성 상태 스타일
+                        isActive
+                          ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                          : 'text-sidebar-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/50'
+                      )}
+                    >
+                      {item.icon}
+                      <span className="font-medium">{item.label}</span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+
+            <Separator className="bg-sidebar-border mb-4" />
+
+            {/* 추가 기능 */}
+            <ul className="space-y-2">
+              {additionalNavItems.map(item => {
+                const isActive = isActiveRoute(item.href);
+                return (
+                  <li key={item.href}>
+                    <Link
+                      to={item.href}
+                      onClick={() => handleNavigation(item.href, item.label)}
+                      className={cn(
+                        // Button 스타일을 직접 적용
+                        'inline-flex items-center justify-start gap-3 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+                        'w-full h-12 px-4 py-2',
+                        // 활성/비활성 상태 스타일
+                        isActive
+                          ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                          : 'text-sidebar-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/50'
+                      )}
+                    >
+                      {item.icon}
+                      <span className="font-medium">{item.label}</span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+        </div>
+
+        <Separator className="bg-sidebar-border" />
+
+        <div className="p-4 space-y-2 text-center">
+          <Button
+            variant="ghost"
+            className="w-full justify-start gap-3 px-4 py-2 h-12 text-sm text-sidebar-foreground bg-primary/10 hover:bg-primary/20 hover:text-sidebar-foreground"
+            onClick={onOpenFeedbackModal}
+          >
+            <MessageSquareHeart className="h-5 w-5 text-primary" />
+            <span className="font-medium">
+              {t('sidebar.send_feedback', '피드백 보내기')}
+            </span>
+          </Button>
+          <VersionDisplay />
+        </div>
       </div>
-
-      <div className="flex-1 overflow-y-auto p-4">
-        <nav>
-          {/* 메인 네비게이션 */}
-          <ul className="space-y-2 mb-6">
-            {mainNavItems.map(item => {
-              const isActive = isActiveRoute(item.href);
-              return (
-                <li key={item.href}>
-                  <Link
-                    to={item.href}
-                    onClick={() => handleNavigation(item.href, item.label)}
-                    className={cn(
-                      // Button 스타일을 직접 적용
-                      'inline-flex items-center justify-start gap-3 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
-                      'w-full h-12 px-4 py-2',
-                      // 활성/비활성 상태 스타일
-                      isActive
-                        ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                        : 'text-sidebar-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/50'
-                    )}
-                  >
-                    {item.icon}
-                    <span className="font-medium">{item.label}</span>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-
-          <Separator className="bg-sidebar-border mb-4" />
-
-          {/* 추가 기능 */}
-          <ul className="space-y-2">
-            {additionalNavItems.map(item => {
-              const isActive = isActiveRoute(item.href);
-              return (
-                <li key={item.href}>
-                  <Link
-                    to={item.href}
-                    onClick={() => handleNavigation(item.href, item.label)}
-                    className={cn(
-                      // Button 스타일을 직접 적용
-                      'inline-flex items-center justify-start gap-3 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
-                      'w-full h-12 px-4 py-2',
-                      // 활성/비활성 상태 스타일
-                      isActive
-                        ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                        : 'text-sidebar-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/50'
-                    )}
-                  >
-                    {item.icon}
-                    <span className="font-medium">{item.label}</span>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
-      </div>
-
-      <Separator className="bg-sidebar-border" />
-
-      <div className="p-4 text-center">
-        <VersionDisplay />
-      </div>
-    </div>
+    </>
   );
 }

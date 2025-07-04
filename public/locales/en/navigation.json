@@ -44,7 +44,8 @@
       "team": "Team Management",
       "invitations": "Invitation Management",
       "settings": "Settings",
-      "billing": "Billing Management"
+      "billing": "Billing Management",
+      "send_feedback": "Send Feedback"
     },
     "tools": {
       "title": "Tools",

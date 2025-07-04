@@ -38,6 +38,13 @@ interface ResponsivePipelineProps {
   onSearchChange?: (query: string) => void;
   children?: React.ReactNode;
   className?: string;
+  onRemoveFromPipeline?: (clientId: string, clientName: string) => void;
+  onCreateContract?: (
+    clientId: string,
+    clientName: string,
+    products: any[]
+  ) => void;
+  onEditOpportunity?: (clientId: string, clientName: string) => void;
 }
 
 /**
@@ -60,6 +67,9 @@ export function ResponsivePipeline({
   onSearchChange,
   children,
   className,
+  onRemoveFromPipeline,
+  onCreateContract,
+  onEditOpportunity,
 }: ResponsivePipelineProps) {
   const [isStatsExpanded, setIsStatsExpanded] = useState(false);
   const carouselRef = useRef<HTMLDivElement>(null);
@@ -558,6 +568,9 @@ export function ResponsivePipeline({
                       products={client.products}
                       totalMonthlyPremium={client.totalMonthlyPremium}
                       totalExpectedCommission={client.totalExpectedCommission}
+                      onRemoveFromPipeline={onRemoveFromPipeline}
+                      onCreateContract={onCreateContract}
+                      onEditOpportunity={onEditOpportunity}
                     />
                   </div>
                 );

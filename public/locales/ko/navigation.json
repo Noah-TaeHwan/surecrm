@@ -28,7 +28,8 @@
       "light": "라이트 모드",
       "dark": "다크 모드",
       "system": "시스템 설정"
-    }
+    },
+    "search_placeholder": "고객, 연락처, 메모 검색..."
   },
   "sidebar": {
     "main": {
@@ -42,9 +43,10 @@
     "management": {
       "title": "관리",
       "team": "팀 관리",
-      "invitations": "초대 관리",
+      "invitations": "초대장 관리",
       "settings": "설정",
-      "billing": "결제 관리"
+      "billing": "구독 관리",
+      "send_feedback": "피드백 보내기"
     },
     "tools": {
       "title": "도구",
@@ -57,7 +59,8 @@
       "help": "도움말",
       "contact": "문의하기",
       "feedback": "피드백"
-    }
+    },
+    "send_feedback": "피드백 보내기"
   },
   "breadcrumb": {
     "home": "홈",

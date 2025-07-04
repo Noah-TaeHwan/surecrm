@@ -29,6 +29,7 @@ import {
   Search,
   Menu,
   TrendingUp,
+  MessageSquareHeart,
 } from 'lucide-react';
 import { cn } from '~/lib/utils';
 import { Button } from '~/common/components/ui/button';
@@ -39,6 +40,7 @@ import { useViewport } from '~/common/hooks/useViewport';
 import { VersionDisplay } from '~/common/components/navigation/version-display';
 import { InsuranceAgentEvents } from '~/lib/utils/analytics';
 import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
+import { FeedbackModal } from '~/common/components/feedback/feedback-modal';
 
 // 💡 타입 정의 강화
 export interface MobileNavProps {
@@ -47,6 +49,7 @@ export interface MobileNavProps {
   onOpen?: () => void; // Edge swipe를 위한 열기 함수 (선택사항)
   className?: string;
   ariaLabel?: string;
+  onOpenFeedbackModal?: () => void;
 }
 
 interface NavItem {
@@ -477,6 +480,7 @@ export function MobileNav({
   onOpen,
   className,
   ariaLabel,
+  onOpenFeedbackModal,
 }: MobileNavProps) {
   const location = useLocation();
   const { isMobile } = useViewport();
@@ -883,8 +887,20 @@ export function MobileNav({
                   delay: isOpen ? 0.3 : 0,
                   duration: 0.3,
                 }}
-                className="text-center"
+                className="text-center space-y-2"
               >
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start gap-2.5 px-3 py-2.5 h-auto text-sm bg-primary/10 hover:bg-primary/20"
+                  onClick={onOpenFeedbackModal}
+                >
+                  <div className="flex items-center justify-center w-6 h-6 rounded-md bg-muted/60 text-muted-foreground">
+                    <MessageSquareHeart className="h-3.5 w-3.5 text-primary" />
+                  </div>
+                  <span className="font-medium text-foreground">
+                    {t('sidebar.send_feedback', '피드백 보내기')}
+                  </span>
+                </Button>
                 <VersionDisplay />
                 <p className="text-xs text-muted-foreground mt-1">
                   © {new Date().getFullYear()} SureCRM. All rights reserved.

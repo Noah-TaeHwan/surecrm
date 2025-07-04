@@ -269,8 +269,8 @@ export default function BillingPage({
     if (subscriptionStatus.isTrialActive) {
       const daysText =
         subscriptionStatus.daysRemaining === 1
-          ? t('oneDay', '1일')
-          : t('daysRemaining', '{{days}} 남음', {
+          ? t('oneDay', '1일 남음')
+          : t('daysRemaining', '{{days}}일 남음', {
               days: subscriptionStatus.daysRemaining,
             });
 
@@ -282,9 +282,15 @@ export default function BillingPage({
           })
         : '';
 
+      const upgradeText = t('upgradeAnytime', '언제든지 업그레이드 가능');
+
       return {
         title: t('trialActive', '14일 무료 체험 중'),
-        subtitle: `${daysText} (${trialEndDate}까지) · ${t('upgradeAnytime', '언제든지 업그레이드 가능')}`,
+        subtitle: t('trialSubtitle', {
+          daysText: daysText,
+          trialEndDate: trialEndDate,
+          upgradeText: upgradeText,
+        }),
         badgeText: t('status.trial', '체험 중'),
         badgeVariant:
           subscriptionStatus.daysRemaining <= 3

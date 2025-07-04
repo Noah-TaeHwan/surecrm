@@ -282,5 +282,8 @@
   },
   "calendarGrid": {
     "moreEvents": "+{{count}} more"
+  },
+  "mobile": {
+    "agendaTitle": "{{date}} Agenda"
   }
 }

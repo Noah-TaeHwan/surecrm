@@ -1,5 +1,5 @@
 import React from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
@@ -14,6 +14,7 @@ import { useViewport } from '~/common/hooks/useViewport';
 import { useFullScreenMode } from '~/common/hooks/use-viewport-height';
 import { BottomNavVisualizer } from '~/common/components/debug/bottom-nav-visualizer';
 import { useSubscription } from '~/lib/contexts/subscription-context';
+import { FeedbackModal } from '~/common/components/feedback/feedback-modal';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -38,6 +39,7 @@ export function MainLayout({
   initialSubscriptionStatus,
 }: MainLayoutProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const { isMobile } = useViewport();
 
   // 🚀 iPhone Safari 전체 화면 모드
@@ -224,15 +226,24 @@ export function MainLayout({
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { t } = useHydrationSafeTranslation('common');
 
+  const handleOpenFeedbackModal = useCallback(() => {
+    setShowFeedbackModal(true);
+  }, []);
+
   return (
     <div
       className={`fixed inset-0 bg-background flex overflow-hidden ${fullScreen.className}`}
       style={fullScreen.style}
     >
+      <FeedbackModal
+        open={showFeedbackModal}
+        onOpenChange={setShowFeedbackModal}
+      />
+
       {/* 🎯 데스크톱 사이드바 - Hydration 완료 후 표시 (플래시 방지) + 구독 상태 체크 */}
       {isHydrated && !isInitialRender && !isMobile && shouldShowSidebar && (
         <div className="w-64 border-r border-border bg-muted/30 flex-shrink-0">
-          <Sidebar />
+          <Sidebar onOpenFeedbackModal={handleOpenFeedbackModal} />
         </div>
       )}
 
@@ -287,7 +298,11 @@ export function MainLayout({
       {isHydrated && !isInitialRender && shouldShowSidebar && (
         <AnimatePresence mode="wait">
           {isMobileMenuOpen && (
-            <MobileNav isOpen={isMobileMenuOpen} onClose={closeMobileMenu} />
+            <MobileNav
+              isOpen={isMobileMenuOpen}
+              onClose={closeMobileMenu}
+              onOpenFeedbackModal={handleOpenFeedbackModal}
+            />
           )}
         </AnimatePresence>
       )}

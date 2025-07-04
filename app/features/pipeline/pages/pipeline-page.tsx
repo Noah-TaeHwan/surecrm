@@ -1458,6 +1458,9 @@ export default function PipelinePage({ loaderData }: Route.ComponentProps) {
           activeStageFilter={activeStageFilter}
           searchQuery={searchQuery}
           onSearchChange={handleSearchChange}
+          onRemoveFromPipeline={handleRemoveFromPipeline}
+          onCreateContract={handleCreateContract}
+          onEditOpportunity={handleEditOpportunity}
         />
       </div>
 

@@ -282,5 +282,8 @@
   },
   "calendarGrid": {
     "moreEvents": "他{{count}}件"
+  },
+  "mobile": {
+    "agendaTitle": "{{date}}の予定"
   }
 }

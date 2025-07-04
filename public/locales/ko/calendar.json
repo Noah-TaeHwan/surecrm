@@ -284,5 +284,8 @@
   },
   "calendarGrid": {
     "moreEvents": "+{{count}}개 더"
+  },
+  "mobile": {
+    "agendaTitle": "{{date}} 일정표"
   }
 }
