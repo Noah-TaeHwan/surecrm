@@ -90,8 +90,8 @@ export function DayView({
     return timeA.localeCompare(timeB);
   });
 
-  // 시간 슬롯 생성 (6시부터 22시까지)
-  const timeSlots = Array.from({ length: 17 }, (_, i) => i + 6);
+  // 시간 슬롯 생성 (5시부터 23시까지 - 더 넓은 범위)
+  const timeSlots = Array.from({ length: 19 }, (_, i) => i + 5);
 
   // 미팅 타입에 따른 아이콘
   const getMeetingIcon = (type: string) => {
@@ -111,12 +111,60 @@ export function DayView({
   const getMeetingPosition = (time: string) => {
     const [hours, minutes] = time.split(':').map(Number);
     const totalMinutes = hours * 60 + minutes;
-    return (totalMinutes / 60) * 80; // 80px per hour
+    const startMinutes = 5 * 60; // 5AM start
+    return Math.max(0, ((totalMinutes - startMinutes) / 60) * 80); // 80px per hour
   };
 
   // 미팅 지속시간에 따른 높이 계산
   const getMeetingHeight = (duration: number) => {
     return Math.max(60, (duration / 60) * 80); // 최소 60px, 시간당 80px
+  };
+
+  // 겹치는 미팅들의 위치 계산
+  const calculateMeetingPositions = (meetings: Meeting[]) => {
+    const positions: Array<{
+      meeting: Meeting;
+      left: number;
+      width: number;
+      zIndex: number;
+    }> = [];
+
+    // 시간순으로 정렬
+    const sortedMeetings = [...meetings].sort((a, b) => {
+      const timeA = a.time || '00:00';
+      const timeB = b.time || '00:00';
+      return timeA.localeCompare(timeB);
+    });
+
+    sortedMeetings.forEach((meeting, index) => {
+      // 기본 위치와 너비
+      let left = 8; // 기본 left margin
+      let width = 90; // 기본 width %
+      let zIndex = 10 + index;
+
+      // 현재 미팅과 겹치는 이전 미팅들 찾기
+      const overlapping = positions.filter(pos => {
+        const currentStart = getMeetingPosition(meeting.time);
+        const currentEnd = currentStart + getMeetingHeight(meeting.duration);
+        const existingStart = getMeetingPosition(pos.meeting.time);
+        const existingEnd =
+          existingStart + getMeetingHeight(pos.meeting.duration);
+
+        return !(currentEnd <= existingStart || currentStart >= existingEnd);
+      });
+
+      // 겹치는 미팅이 있으면 위치 조정
+      if (overlapping.length > 0) {
+        const columns = overlapping.length + 1;
+        width = 90 / columns;
+        left = 8 + overlapping.length * width;
+        zIndex += overlapping.length;
+      }
+
+      positions.push({ meeting, left, width, zIndex });
+    });
+
+    return positions;
   };
 
   // useSyncExternalStore용 빈 구독 함수
@@ -144,21 +192,22 @@ export function DayView({
   );
 
   // 현재 시간 (hydration-safe)
-  const currentHour = useSyncExternalStore(
+  const currentTime = useSyncExternalStore(
     emptySubscribe,
-    () => new Date().getHours(),
-    () => 0 // 서버에서는 0시
-  );
-
-  const currentMinute = useSyncExternalStore(
-    emptySubscribe,
-    () => new Date().getMinutes(),
-    () => 0 // 서버에서는 0분
+    () => {
+      const now = new Date();
+      return {
+        hour: now.getHours(),
+        minute: now.getMinutes(),
+        isVisible: now.getHours() >= 5 && now.getHours() <= 23,
+      };
+    },
+    () => ({ hour: 0, minute: 0, isVisible: false })
   );
 
   // Hydration-safe 현재 시간 표시 컴포넌트
   function HydrationSafeCurrentTime() {
-    const currentTime = useSyncExternalStore(
+    const currentTimeStr = useSyncExternalStore(
       emptySubscribe,
       () =>
         new Date().toLocaleTimeString('ko-KR', {
@@ -168,8 +217,11 @@ export function DayView({
       () => format(new Date(), 'HH:mm', { locale: ko }) // 서버 스냅샷 (고정된 형식)
     );
 
-    return <span>{currentTime}</span>;
+    return <span>{currentTimeStr}</span>;
   }
+
+  // 미팅 위치 계산
+  const meetingPositions = calculateMeetingPositions(sortedMeetings);
 
   return (
     <div className="h-full flex flex-col bg-background">
@@ -205,114 +257,28 @@ export function DayView({
                 <div
                   className={cn(
                     'flex-1 min-h-20 relative p-2 hover:bg-accent/10 transition-colors duration-200',
-                    isToday && hour === currentHour && 'bg-sky-500/5',
+                    isToday && hour === currentTime.hour && 'bg-sky-500/5',
                     hour % 2 === 0 ? 'bg-card/10' : 'bg-transparent'
                   )}
                 >
-                  {/* 현재 시간 표시선 */}
-                  {isToday && hour === currentHour && (
-                    <div
-                      className="absolute left-0 right-0 h-0.5 bg-red-500 z-20 shadow-lg"
-                      style={{
-                        top: `${(currentMinute / 60) * 80}px`,
-                      }}
-                    >
-                      <div className="absolute left-2 top-0 w-3 h-3 bg-red-500 rounded-full -translate-y-1 shadow-sm flex items-center justify-center">
-                        <div className="w-1 h-1 bg-white rounded-full"></div>
-                      </div>
-                      <div className="absolute left-6 top-0 text-xs text-red-600 font-mono -translate-y-2">
-                        <HydrationSafeCurrentTime />
-                      </div>
-                    </div>
-                  )}
-
-                  {/* 해당 시간의 미팅들 */}
-                  {sortedMeetings
-                    .filter(meeting => {
-                      const meetingHour = parseInt(meeting.time.split(':')[0]);
-                      return meetingHour === hour;
-                    })
-                    .map((meeting, index) => (
+                  {/* 현재 시간 표시선 (개선된 버전) */}
+                  {isToday &&
+                    hour === currentTime.hour &&
+                    currentTime.isVisible && (
                       <div
-                        key={meeting.id}
-                        className={cn(
-                          'absolute left-2 right-2 p-4 rounded-xl cursor-pointer transition-all duration-200 shadow-lg backdrop-blur-sm font-medium transform group',
-                          'hover:scale-105 hover:shadow-xl hover:z-10',
-                          // 🍎 SureCRM 색상 시스템 적용
-                          getEventColors(meeting).bg,
-                          getEventColors(meeting).border,
-                          getEventColors(meeting).text
-                        )}
+                        className="absolute left-0 right-0 h-0.5 bg-red-500 z-20 shadow-lg"
                         style={{
-                          top: `${getMeetingPosition(meeting.time) - hour * 80}px`,
-                          height: `${getMeetingHeight(meeting.duration)}px`,
-                          left: `${8 + index * 4}px`, // 겹치는 미팅들을 살짝 오프셋
-                          right: `${8 + index * 4}px`,
-                          zIndex: 10 + index,
+                          top: `${(currentTime.minute / 60) * 80}px`,
                         }}
-                        onClick={() => onMeetingClick(meeting)}
                       >
-                        {/* 미팅 헤더 */}
-                        <div className="flex items-start justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            {getMeetingIcon(meeting.type)}
-                            <span className="text-sm font-semibold">
-                              {meeting.time}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            {meeting.syncInfo?.syncStatus === 'conflict' && (
-                              <div className="w-2 h-2 rounded-full bg-red-400 border border-white/70 animate-pulse"></div>
-                            )}
-                            {meeting.syncInfo?.syncStatus === 'synced' &&
-                              meeting.syncInfo?.externalSource !==
-                                'surecrm' && (
-                                <div className="w-2 h-2 rounded-full bg-green-400 border border-white/50"></div>
-                              )}
-                          </div>
+                        <div className="absolute left-2 top-0 w-3 h-3 bg-red-500 rounded-full -translate-y-1 shadow-sm border-2 border-white flex items-center justify-center">
+                          <div className="w-1 h-1 bg-white rounded-full"></div>
                         </div>
-
-                        {/* 고객 정보 */}
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2">
-                            <User className="w-4 h-4 opacity-90" />
-                            <span className="font-semibold text-base truncate">
-                              {meeting.client.name}
-                            </span>
-                          </div>
-
-                          {/* 미팅 상세 정보 */}
-                          <div className="space-y-1 text-sm opacity-90">
-                            <div className="flex items-center gap-2">
-                              <Clock className="w-3 h-3" />
-                              <span>{meeting.duration}분</span>
-                            </div>
-
-                            {meeting.location && (
-                              <div className="flex items-center gap-2">
-                                <MapPin className="w-3 h-3" />
-                                <span className="truncate">
-                                  {meeting.location}
-                                </span>
-                              </div>
-                            )}
-                          </div>
+                        <div className="absolute left-7 top-0 text-xs text-red-600 font-mono font-semibold -translate-y-2 bg-white px-1.5 py-0.5 rounded shadow-sm border">
+                          <HydrationSafeCurrentTime />
                         </div>
-
-                        {/* 미팅 타입 배지 */}
-                        <div className="absolute bottom-2 right-2">
-                          <Badge
-                            variant="secondary"
-                            className="text-xs bg-white/20 text-white border-white/30"
-                          >
-                            {meeting.type}
-                          </Badge>
-                        </div>
-
-                        {/* 호버 효과 */}
-                        <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-xl pointer-events-none"></div>
                       </div>
-                    ))}
+                    )}
 
                   {/* 30분 구분선 */}
                   <div className="absolute left-0 right-0 top-10 h-px bg-border/20"></div>
@@ -320,6 +286,93 @@ export function DayView({
               </div>
             </div>
           ))}
+
+          {/* 미팅들을 절대 위치로 배치 */}
+          <div className="absolute top-0 left-20 right-0 bottom-0 pointer-events-none">
+            {meetingPositions.map(({ meeting, left, width, zIndex }) => {
+              const top = getMeetingPosition(meeting.time);
+              const height = getMeetingHeight(meeting.duration);
+
+              return (
+                <div
+                  key={meeting.id}
+                  className={cn(
+                    'absolute p-4 rounded-xl cursor-pointer transition-all duration-200 shadow-lg backdrop-blur-sm font-medium transform group pointer-events-auto',
+                    'hover:scale-105 hover:shadow-xl hover:z-50',
+                    // 🍎 SureCRM 색상 시스템 적용
+                    getEventColors(meeting).bg,
+                    getEventColors(meeting).border,
+                    getEventColors(meeting).text
+                  )}
+                  style={{
+                    top: `${top}px`,
+                    left: `${left}%`,
+                    width: `${width}%`,
+                    height: `${height}px`,
+                    zIndex: zIndex,
+                  }}
+                  onClick={() => onMeetingClick(meeting)}
+                >
+                  {/* 미팅 헤더 */}
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      {getMeetingIcon(meeting.type)}
+                      <span className="text-sm font-semibold">
+                        {meeting.time}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      {meeting.syncInfo?.syncStatus === 'conflict' && (
+                        <div className="w-2 h-2 rounded-full bg-red-400 border border-white/70 animate-pulse"></div>
+                      )}
+                      {meeting.syncInfo?.syncStatus === 'synced' &&
+                        meeting.syncInfo?.externalSource !== 'surecrm' && (
+                          <div className="w-2 h-2 rounded-full bg-green-400 border border-white/50"></div>
+                        )}
+                    </div>
+                  </div>
+
+                  {/* 고객 정보 */}
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <User className="w-4 h-4 opacity-90" />
+                      <span className="font-semibold text-base truncate">
+                        {meeting.client.name}
+                      </span>
+                    </div>
+
+                    {/* 미팅 상세 정보 */}
+                    <div className="space-y-1 text-sm opacity-90">
+                      <div className="flex items-center gap-2">
+                        <Clock className="w-3 h-3" />
+                        <span>{meeting.duration}분</span>
+                      </div>
+
+                      {meeting.location && (
+                        <div className="flex items-center gap-2">
+                          <MapPin className="w-3 h-3" />
+                          <span className="truncate">{meeting.location}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* 미팅 타입 배지 */}
+                  <div className="absolute bottom-2 right-2">
+                    <Badge
+                      variant="secondary"
+                      className="text-xs bg-white/20 text-white border-white/30"
+                    >
+                      {t(`meeting.types.${meeting.type}`, meeting.type)}
+                    </Badge>
+                  </div>
+
+                  {/* 호버 효과 */}
+                  <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-xl pointer-events-none"></div>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         {/* 빈 상태 */}
@@ -332,12 +385,18 @@ export function DayView({
               <div className="space-y-2">
                 <h3 className="text-lg font-semibold text-foreground">
                   {isToday
-                    ? '오늘'
-                    : format(selectedDate, 'MM월 dd일', { locale: ko })}{' '}
-                  예정된 미팅이 없습니다
+                    ? t('dayView.todayNoMeetings', '오늘')
+                    : formatDate(selectedDate, {
+                        month: 'long',
+                        day: 'numeric',
+                      })}{' '}
+                  {t('dayView.noMeetingsScheduled', '예정된 미팅이 없습니다')}
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  새로운 미팅을 예약하여 일정을 관리해보세요.
+                  {t(
+                    'dayView.scheduleNewMeeting',
+                    '새로운 미팅을 예약하여 일정을 관리해보세요.'
+                  )}
                 </p>
               </div>
             </div>

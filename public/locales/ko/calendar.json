@@ -124,17 +124,12 @@
   "dayView": {
     "eventsCount": "{{count}}개의 일정",
     "noEvents": "일정이 없습니다",
-    "today": "오늘",
-    "eventTime": "시간",
-    "eventLocation": "장소",
-    "eventAttendees": "참석자",
-    "allDayEvent": "종일 이벤트"
+    "todayNoMeetings": "오늘",
+    "noMeetingsScheduled": "예정된 미팅이 없습니다",
+    "scheduleNewMeeting": "새로운 미팅을 예약하여 일정을 관리해보세요."
   },
   "weekView": {
-    "timeColumn": "시간",
-    "currentTime": "현재 시간",
-    "weekOf": "{{date}} 주",
-    "noEventsThisWeek": "이번 주에 일정이 없습니다"
+    "timeColumn": "시간"
   },
   "modals": {
     "addMeeting": {

@@ -124,17 +124,12 @@
   "dayView": {
     "eventsCount": "{{count}}件の予定",
     "noEvents": "予定がありません",
-    "today": "今日",
-    "eventTime": "時間",
-    "eventLocation": "場所",
-    "eventAttendees": "参加者",
-    "allDayEvent": "終日イベント"
+    "todayNoMeetings": "今日",
+    "noMeetingsScheduled": "予定されているミーティングがありません",
+    "scheduleNewMeeting": "新しいミーティングを予約してスケジュールを管理しましょう。"
   },
   "weekView": {
-    "timeColumn": "時間",
-    "currentTime": "現在時刻",
-    "weekOf": "{{date}}の週",
-    "noEventsThisWeek": "今週は予定がありません"
+    "timeColumn": "時間"
   },
   "modals": {
     "addMeeting": {

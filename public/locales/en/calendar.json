@@ -123,18 +123,13 @@
   },
   "dayView": {
     "eventsCount": "{{count}} events",
-    "noEvents": "No events scheduled",
-    "today": "Today",
-    "eventTime": "Time",
-    "eventLocation": "Location",
-    "eventAttendees": "Attendees",
-    "allDayEvent": "All Day Event"
+    "noEvents": "No events",
+    "todayNoMeetings": "Today",
+    "noMeetingsScheduled": "no meetings scheduled",
+    "scheduleNewMeeting": "Schedule new meetings to manage your calendar."
   },
   "weekView": {
-    "timeColumn": "Time",
-    "currentTime": "Current Time",
-    "weekOf": "Week of {{date}}",
-    "noEventsThisWeek": "No events this week"
+    "timeColumn": "Time"
   },
   "modals": {
     "addMeeting": {

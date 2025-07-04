@@ -111,8 +111,8 @@ export function WeekView({
 
   const weekdays = getWeekdays();
 
-  // 시간 슬롯 생성 (6시부터 22시까지)
-  const timeSlots = Array.from({ length: 17 }, (_, i) => i + 6);
+  // 시간 슬롯 생성 (5시부터 23시까지 - 더 넓은 범위)
+  const timeSlots = Array.from({ length: 19 }, (_, i) => i + 5);
 
   // 모든 미팅 표시 (필터링 제거)
   const filteredMeetings = meetings;
@@ -133,13 +133,32 @@ export function WeekView({
     return day === 0 || day === 6;
   };
 
-  // 미팅의 시간 위치 계산
+  // 현재 시간 정보 (hydration-safe)
+  const currentTime = useSyncExternalStore(
+    emptySubscribe,
+    () => {
+      const now = new Date();
+      return {
+        hour: now.getHours(),
+        minute: now.getMinutes(),
+        isVisible: now.getHours() >= 5 && now.getHours() <= 23,
+      };
+    },
+    () => ({ hour: -1, minute: 0, isVisible: false })
+  );
+
+  // 미팅의 시간 위치 계산 (개선된 버전)
   const getMeetingPosition = (time: string) => {
     const [hours, minutes] = time.split(':').map(Number);
     const totalMinutes = hours * 60 + minutes;
-    const startMinutes = 6 * 60; // 6AM start
+    const startMinutes = 5 * 60; // 5AM start
     const position = ((totalMinutes - startMinutes) / 60) * 64; // 64px per hour
     return Math.max(0, position);
+  };
+
+  // 미팅 높이 계산 (기간별)
+  const getMeetingHeight = (duration: number) => {
+    return Math.max(32, (duration / 60) * 64); // 최소 32px, 시간당 64px
   };
 
   return (
@@ -192,8 +211,8 @@ export function WeekView({
       <div className="relative bg-gradient-to-br from-background/60 to-background/40 overflow-x-auto">
         <div
           className={cn(
-            'grid grid-cols-8',
-            isMobile ? 'min-w-[600px]' : 'min-w-[800px]'
+            'grid grid-cols-8 relative',
+            isMobile ? 'min-w-[700px]' : 'min-w-[900px]'
           )}
         >
           {timeSlots.map(hour => (
@@ -202,7 +221,8 @@ export function WeekView({
               <div
                 className={cn(
                   'border-r border-b border-border/20 bg-card/20 sticky left-0 z-10',
-                  isMobile ? 'p-2' : 'p-3'
+                  isMobile ? 'p-2' : 'p-3',
+                  'min-h-16'
                 )}
               >
                 <div
@@ -228,44 +248,51 @@ export function WeekView({
                   return meetingHour === hour;
                 });
 
+                const isTodayCell = isToday(date);
+                const isCurrentHour = isTodayCell && currentTime.hour === hour;
+
                 return (
                   <div
                     key={`${dateStr}-${hour}`}
                     className={cn(
                       'relative min-h-16 p-2 border-r border-b border-border/20 last:border-r-0 group hover:bg-accent/20 transition-all duration-200',
-                      isToday(date) && 'bg-sky-500/5 hover:bg-sky-500/10',
+                      isTodayCell && 'bg-sky-500/5 hover:bg-sky-500/10',
                       isWeekend(date) && 'bg-muted/10',
+                      isCurrentHour && 'bg-sky-500/10',
                       'cursor-pointer'
                     )}
                   >
-                    {/* 현재 시간 표시선 (오늘이고 현재 시간인 경우) */}
-                    {isToday(date) && useCurrentHour() === hour && (
-                      <div className="absolute left-0 right-0 top-0 h-0.5 bg-red-500 z-20">
-                        <div className="absolute left-0 top-0 w-2 h-2 bg-red-500 rounded-full -translate-y-1"></div>
-                      </div>
-                    )}
-
                     {/* 미팅 카드들 */}
-                    <div className="space-y-1">
-                      {hourMeetings.map(meeting => (
+                    <div className="space-y-1 relative z-10">
+                      {hourMeetings.map((meeting, meetingIndex) => (
                         <div
                           key={meeting.id}
                           className={cn(
                             'relative p-2 rounded-lg cursor-pointer transition-all duration-200 shadow-sm backdrop-blur-sm font-medium transform',
-                            'hover:scale-105 hover:shadow-lg hover:z-10',
+                            'hover:scale-105 hover:shadow-lg hover:z-20',
                             // 🍎 SureCRM 색상 시스템 적용
                             getEventColors(meeting).bg,
                             getEventColors(meeting).border,
-                            getEventColors(meeting).text
+                            getEventColors(meeting).text,
+                            // 겹치는 미팅들을 위한 스타일
+                            meetingIndex > 0 && 'mt-1'
                           )}
+                          style={{
+                            minHeight: `${getMeetingHeight(meeting.duration)}px`,
+                            maxHeight: '120px', // 최대 높이 제한
+                            zIndex: 10 + meetingIndex,
+                          }}
                           onClick={() => onMeetingClick(meeting)}
-                          title={`${meeting.time} - ${meeting.client.name}`}
+                          title={`${meeting.time} - ${meeting.client.name} (${meeting.duration}분)`}
                         >
                           {/* 미팅 시간 */}
                           <div className="flex items-center gap-1 mb-1">
                             <Clock className="w-3 h-3 opacity-90" />
                             <span className="text-xs font-semibold">
                               {meeting.time}
+                            </span>
+                            <span className="text-xs opacity-75">
+                              ({meeting.duration}분)
                             </span>
                           </div>
 
@@ -279,7 +306,7 @@ export function WeekView({
 
                           {/* 미팅 타입 */}
                           <div className="text-xs opacity-90 truncate">
-                            {meeting.type}
+                            {t(`meeting.types.${meeting.type}`, meeting.type)}
                           </div>
 
                           {/* 위치 정보 (있는 경우) */}
@@ -306,7 +333,7 @@ export function WeekView({
                     </div>
 
                     {/* 호버 시 시간 표시 */}
-                    <div className="absolute top-2 left-2 opacity-0 group-hover:opacity-50 transition-opacity duration-200">
+                    <div className="absolute top-2 left-2 opacity-0 group-hover:opacity-50 transition-opacity duration-200 z-0">
                       <span className="text-xs text-muted-foreground font-mono">
                         {hour.toString().padStart(2, '0')}:00
                       </span>
@@ -318,30 +345,33 @@ export function WeekView({
           ))}
         </div>
 
-        {/* 현재 시간 전체 가로선 (오늘인 경우) */}
-        {weekDates.some(date => isToday(date)) && (
-          <div className="absolute left-0 right-0 pointer-events-none z-10">
+        {/* 현재 시간 전체 가로선 (개선된 버전) */}
+        {weekDates.some(date => isToday(date)) && currentTime.isVisible && (
+          <div className="absolute left-0 right-0 pointer-events-none z-30">
             {(() => {
-              const currentHour = useCurrentHour();
-              const currentMinute = useSyncExternalStore(
-                emptySubscribe,
-                () => new Date().getMinutes(),
-                () => 0
-              );
+              // 현재 시간의 정확한 위치 계산
+              const hoursSinceStart = currentTime.hour - 5; // 5시부터 시작
+              const minuteOffset = (currentTime.minute / 60) * 64;
+              const headerHeight = 80; // 헤더 높이 추정값
+              const position =
+                headerHeight + hoursSinceStart * 64 + minuteOffset;
 
-              if (currentHour >= 6 && currentHour <= 22) {
-                const position =
-                  (currentHour - 6) * 64 + (currentMinute * 64) / 60 + 64; // +64 for header
-                return (
-                  <div
-                    className="absolute left-0 right-0 h-0.5 bg-red-500 shadow-lg"
-                    style={{ top: `${position}px` }}
-                  >
-                    <div className="absolute left-2 top-0 w-2 h-2 bg-red-500 rounded-full -translate-y-1 shadow-sm"></div>
+              return (
+                <div
+                  className="absolute left-0 right-0 h-0.5 bg-red-500 shadow-lg"
+                  style={{ top: `${position}px` }}
+                >
+                  {/* 현재 시간 점 */}
+                  <div className="absolute left-2 top-0 w-3 h-3 bg-red-500 rounded-full -translate-y-1 shadow-sm border-2 border-white">
+                    <div className="absolute inset-1 bg-white rounded-full"></div>
                   </div>
-                );
-              }
-              return null;
+                  {/* 현재 시간 텍스트 */}
+                  <div className="absolute left-6 top-0 text-xs text-red-600 font-mono font-semibold -translate-y-2 bg-white px-1 rounded shadow-sm">
+                    {currentTime.hour.toString().padStart(2, '0')}:
+                    {currentTime.minute.toString().padStart(2, '0')}
+                  </div>
+                </div>
+              );
             })()}
           </div>
         )}

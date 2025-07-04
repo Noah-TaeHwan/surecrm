@@ -307,10 +307,10 @@ export function CalendarSidebar({
   const filteredMeetings = filterMeetings(meetings);
 
   return (
-    <div className="space-y-5 p-4 border-sidebar-border h-full">
-      {/* 📅 캘린더 컨트롤 카드 (헤더에서 이동) */}
+    <div className="space-y-4 p-4 border-sidebar-border h-full">
+      {/* 1. 📅 캘린더 컨트롤 카드 (최상단 - 가장 중요한 네비게이션) */}
       <Card className="border border-border/50 shadow-sm">
-        <CardHeader className="pb-4">
+        <CardHeader className="pb-3">
           <CardTitle className="text-lg flex items-center gap-2">
             <CalendarIcon className="h-5 w-5 text-primary" />
             {getDisplayTitle()}
@@ -398,7 +398,7 @@ export function CalendarSidebar({
         </CardContent>
       </Card>
 
-      {/* 🔍 1. 고급 검색 (새로 추가) */}
+      {/* 2. 🔍 검색 (검색 중일 때 결과가 바로 아래 표시되도록) */}
       <Card className="border border-border/50 shadow-sm">
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
@@ -428,271 +428,49 @@ export function CalendarSidebar({
               </Button>
             )}
           </div>
+
+          {/* 검색 결과 (검색어가 있을 때만 표시) */}
+          {searchQuery && (
+            <div className="space-y-2 max-h-48 overflow-y-auto border-t pt-3">
+              <h4 className="text-sm font-medium text-muted-foreground">
+                검색 결과
+              </h4>
+              {filterMeetings(meetings)
+                .filter(
+                  meeting =>
+                    meeting.client.name
+                      .toLowerCase()
+                      .includes(searchQuery.toLowerCase()) ||
+                    meeting.title
+                      .toLowerCase()
+                      .includes(searchQuery.toLowerCase())
+                )
+                .slice(0, 5)
+                .map(meeting => (
+                  <div
+                    key={meeting.id}
+                    onClick={() => onMeetingClick(meeting)}
+                    className="p-2 rounded-md hover:bg-muted/30 cursor-pointer transition-colors"
+                  >
+                    <div className="text-sm font-medium truncate">
+                      {meeting.client.name}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {formatDate(new Date(meeting.date), {
+                        month: 'short',
+                        day: 'numeric',
+                      })}{' '}
+                      {meeting.time}
+                    </div>
+                  </div>
+                ))}
+            </div>
+          )}
         </CardContent>
       </Card>
 
-      {/* 🎯 2. 미팅 타입별 필터 */}
-      <Card className="border border-border/50 shadow-sm">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <MixerHorizontalIcon className="h-4 w-4 text-primary" />
-            {t('sidebar.filterByType', '타입별 필터')}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-3">
-            {/* 필터 리스트 */}
-            <div className="space-y-2 max-h-48 overflow-y-auto">
-              {availableTypes.map(type => {
-                const isChecked = filteredTypes.includes(type);
-                const typeInfo =
-                  meetingTypeDetails[type as keyof typeof meetingTypeDetails];
-
-                return (
-                  <div
-                    key={type}
-                    className="flex items-center space-x-3 cursor-pointer hover:bg-muted/30 rounded-md p-2 transition-colors"
-                    onClick={() => toggleFilter(type)}
-                  >
-                    <Checkbox
-                      id={`filter-${type}`}
-                      checked={isChecked}
-                      onCheckedChange={() => {}} // 빈 함수 - 실제 토글은 부모 div에서 처리
-                      className="pointer-events-none" // 체크박스 자체 클릭 비활성화
-                    />
-                    <div className="flex items-center gap-2 text-sm font-medium flex-1 cursor-pointer">
-                      <span className="text-base">
-                        {typeInfo?.icon || '📅'}
-                      </span>
-                      <span>
-                        {t(
-                          `meeting.types.${type}`,
-                          meetingTypeKoreanMap[
-                            type as keyof typeof meetingTypeKoreanMap
-                          ] || type
-                        )}
-                      </span>
-                    </div>
-                    <Badge
-                      variant="secondary"
-                      className="text-xs pointer-events-none"
-                    >
-                      {meetings.filter(m => m.type === type).length}
-                    </Badge>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* 필터 제어 버튼들 */}
-            <Separator className="my-3" />
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onFilterChange(availableTypes)}
-                className="flex-1 text-xs"
-              >
-                <CheckCircledIcon className="h-3 w-3 mr-1" />
-                {t('sidebar.selectAll', '전체 선택')}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onFilterChange([])}
-                className="flex-1 text-xs"
-              >
-                <Cross2Icon className="h-3 w-3 mr-1" />
-                {t('sidebar.clearAll', '전체 해제')}
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* 2. 구글 캘린더 연동 상태 - 검색 중이 아닐 때만 표시 */}
-      {!searchTerm && (
-        <Card className="border border-sidebar-border shadow-sm">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <CalendarIcon className="h-5 w-5 text-emerald-600" />
-              {t('google.title', '구글 캘린더')}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {googleCalendarSettings?.isConnected ? (
-              <div className="space-y-3">
-                {/* 연결 상태 */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                    <span className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
-                      {t('google.connected', '연결됨')}
-                    </span>
-                  </div>
-                  <Badge variant="secondary" className="text-xs">
-                    {t('google.syncCount', '{{count}}개 동기화', {
-                      count: googleCalendarSettings.googleEventsCount || 0,
-                    })}
-                  </Badge>
-                </div>
-
-                {/* 마지막 동기화 */}
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">
-                    {t('google.lastSync', '마지막 동기화')}
-                  </span>
-                  <span className="font-medium">
-                    <HydrationSafeTimeDisplay
-                      dateStr={googleCalendarSettings.lastSyncAt}
-                    />
-                  </span>
-                </div>
-
-                {/* 수동 동기화 버튼 */}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full gap-2"
-                  onClick={handleManualSync}
-                  disabled={isSyncing}
-                >
-                  <UpdateIcon
-                    className={cn('h-4 w-4', isSyncing && 'animate-spin')}
-                  />
-                  {isSyncing
-                    ? t('google.syncing', '동기화 중...')
-                    : t('google.syncNow', '지금 동기화')}
-                </Button>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
-                  <span className="text-sm text-yellow-700 dark:text-yellow-400">
-                    {t('google.needConnection', '연결 필요')}
-                  </span>
-                </div>
-
-                <p className="text-xs text-muted-foreground">
-                  {t(
-                    'google.connectionDescription',
-                    '구글 캘린더와 연동하여 양방향 동기화를 활성화하세요.'
-                  )}
-                </p>
-
-                <Button variant="default" size="sm" className="w-full gap-2">
-                  <CalendarIcon className="h-4 w-4" />
-                  {t('google.connectAccount', '구글 계정 연결')}
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* 3. 고급 미팅 필터 - 검색 중이 아닐 때만 표시 */}
-      {!searchTerm && availableTypes.length > 0 && (
-        <Card className="border border-sidebar-border shadow-sm">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <MixerHorizontalIcon className="h-5 w-5 text-violet-600" />
-              {t('filter.title', '미팅 필터')}
-              {filteredTypes.length > 0 &&
-                filteredTypes.length < availableTypes.length && (
-                  <Badge variant="secondary" className="text-xs">
-                    {t('filter.selected', '{{count}}개 선택', {
-                      count: filteredTypes.length,
-                    })}
-                  </Badge>
-                )}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="space-y-2">
-              {availableTypes.map(type => {
-                const isChecked = filteredTypes.includes(type);
-                const typeInfo =
-                  meetingTypeDetails[type as keyof typeof meetingTypeDetails];
-
-                return (
-                  <div
-                    key={type}
-                    className="flex items-center space-x-3 cursor-pointer hover:bg-muted/30 rounded-md p-2 transition-colors"
-                    onClick={() => toggleFilter(type)}
-                  >
-                    <Checkbox
-                      id={`filter-${type}`}
-                      checked={isChecked}
-                      onCheckedChange={() => {}} // 빈 함수 - 실제 토글은 부모 div에서 처리
-                      className="pointer-events-none" // 체크박스 자체 클릭 비활성화
-                    />
-                    <div className="flex items-center gap-2 text-sm font-medium flex-1 cursor-pointer">
-                      <span className="text-base">
-                        {typeInfo?.icon || '📅'}
-                      </span>
-                      <span>
-                        {t(
-                          `meeting.types.${type}`,
-                          meetingTypeKoreanMap[
-                            type as keyof typeof meetingTypeKoreanMap
-                          ] || type
-                        )}
-                      </span>
-                    </div>
-                    <Badge
-                      variant="secondary"
-                      className="text-xs pointer-events-none"
-                    >
-                      {meetings.filter(m => m.type === type).length}
-                    </Badge>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* 필터 제어 버튼들 */}
-            <Separator className="my-3" />
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex-1 text-xs"
-                onClick={() => onFilterChange(availableTypes)}
-                disabled={
-                  isClient
-                    ? filteredTypes.length === availableTypes.length
-                    : false
-                }
-              >
-                {t('sidebar.selectAll', '전체 선택')}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex-1 text-xs"
-                onClick={() => onFilterChange([])}
-                disabled={isClient ? filteredTypes.length === 0 : false}
-              >
-                {t('sidebar.clearAll', '전체 해제')}
-              </Button>
-            </div>
-
-            {/* 필터 상태 요약 */}
-            {filteredTypes.length > 0 &&
-              filteredTypes.length < availableTypes.length && (
-                <div className="text-xs text-muted-foreground bg-muted/20 p-2 rounded-md">
-                  {t('filter.typesSelected', '{{count}}개 타입이 선택됨', {
-                    count: filteredTypes.length,
-                  })}
-                </div>
-              )}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* 4. 이번 주 성과 요약 (고도화) - 검색 중이 아닐 때만 표시 */}
-      {!searchTerm && (
+      {/* 3. 📊 이번 주 성과 요약 (사용자가 가장 관심 있는 정보) */}
+      {!searchQuery && (
         <Card className="border border-sidebar-border bg-gradient-to-br from-sky-500/5 to-sky-500/10 shadow-sm">
           <CardHeader className="pb-4">
             <CardTitle className="text-lg flex items-center gap-2 text-sky-600 dark:text-sky-400">
@@ -812,8 +590,8 @@ export function CalendarSidebar({
         </Card>
       )}
 
-      {/* 5. 다음 예정 미팅 - 검색 중이 아닐 때만 표시 */}
-      {!searchTerm && upcomingMeetings.length > 0 && (
+      {/* 4. ⏰ 다음 예정 미팅 (바로 확인할 수 있는 유용한 정보) */}
+      {!searchQuery && upcomingMeetings.length > 0 && (
         <Card className="border border-sidebar-border shadow-sm">
           <CardHeader className="pb-4">
             <CardTitle className="text-lg flex items-center gap-2">
@@ -854,8 +632,10 @@ export function CalendarSidebar({
                   <div className="flex items-center gap-4 text-xs text-muted-foreground">
                     <div className="flex items-center gap-1">
                       <CalendarIcon className="h-3 w-3" />
-                      {format(new Date(meeting.date), 'MM/dd (E)', {
-                        locale: ko,
+                      {formatDate(new Date(meeting.date), {
+                        month: 'numeric',
+                        day: 'numeric',
+                        weekday: 'short',
                       })}
                     </div>
                     {meeting.time && (
@@ -875,6 +655,190 @@ export function CalendarSidebar({
                 </div>
               </div>
             ))}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* 5. 🎯 미팅 타입별 필터 (고급 사용자용) */}
+      {!searchQuery && (
+        <Card className="border border-border/50 shadow-sm">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <MixerHorizontalIcon className="h-4 w-4 text-primary" />
+              {t('filter.title', '미팅 필터')}
+              {filteredTypes.length > 0 &&
+                filteredTypes.length < availableTypes.length && (
+                  <Badge variant="secondary" className="text-xs">
+                    {t('filter.selected', '{{count}}개 선택', {
+                      count: filteredTypes.length,
+                    })}
+                  </Badge>
+                )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-3">
+              {/* 필터 리스트 */}
+              <div className="space-y-2 max-h-48 overflow-y-auto">
+                {availableTypes.map(type => {
+                  const isChecked = filteredTypes.includes(type);
+                  const typeInfo =
+                    meetingTypeDetails[type as keyof typeof meetingTypeDetails];
+
+                  return (
+                    <div
+                      key={type}
+                      className="flex items-center space-x-3 cursor-pointer hover:bg-muted/30 rounded-md p-2 transition-colors"
+                      onClick={() => toggleFilter(type)}
+                    >
+                      <Checkbox
+                        id={`filter-${type}`}
+                        checked={isChecked}
+                        onCheckedChange={() => {}} // 빈 함수 - 실제 토글은 부모 div에서 처리
+                        className="pointer-events-none" // 체크박스 자체 클릭 비활성화
+                      />
+                      <div className="flex items-center gap-2 text-sm font-medium flex-1 cursor-pointer">
+                        <span className="text-base">
+                          {typeInfo?.icon || '📅'}
+                        </span>
+                        <span>
+                          {t(
+                            `meeting.types.${type}`,
+                            meetingTypeKoreanMap[
+                              type as keyof typeof meetingTypeKoreanMap
+                            ] || type
+                          )}
+                        </span>
+                      </div>
+                      <Badge
+                        variant="secondary"
+                        className="text-xs pointer-events-none"
+                      >
+                        {meetings.filter(m => m.type === type).length}
+                      </Badge>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* 필터 제어 버튼들 */}
+              <Separator className="my-3" />
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 text-xs"
+                  onClick={() => onFilterChange(availableTypes)}
+                  disabled={
+                    isClient
+                      ? filteredTypes.length === availableTypes.length
+                      : false
+                  }
+                >
+                  {t('sidebar.selectAll', '전체 선택')}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 text-xs"
+                  onClick={() => onFilterChange([])}
+                  disabled={isClient ? filteredTypes.length === 0 : false}
+                >
+                  {t('sidebar.clearAll', '전체 해제')}
+                </Button>
+              </div>
+
+              {/* 필터 상태 요약 */}
+              {filteredTypes.length > 0 &&
+                filteredTypes.length < availableTypes.length && (
+                  <div className="text-xs text-muted-foreground bg-muted/20 p-2 rounded-md">
+                    {t('filter.typesSelected', '{{count}}개 타입이 선택됨', {
+                      count: filteredTypes.length,
+                    })}
+                  </div>
+                )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* 6. ☁️ 구글 캘린더 연동 상태 (가장 하단 - 설정 성격) */}
+      {!searchQuery && (
+        <Card className="border border-sidebar-border shadow-sm">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <CalendarIcon className="h-5 w-5 text-emerald-600" />
+              {t('google.title', '구글 캘린더')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {googleCalendarSettings?.isConnected ? (
+              <div className="space-y-3">
+                {/* 연결 상태 */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                    <span className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
+                      {t('google.connected', '연결됨')}
+                    </span>
+                  </div>
+                  <Badge variant="secondary" className="text-xs">
+                    {t('google.syncCount', '{{count}}개 동기화', {
+                      count: googleCalendarSettings.googleEventsCount || 0,
+                    })}
+                  </Badge>
+                </div>
+
+                {/* 마지막 동기화 */}
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">
+                    {t('google.lastSync', '마지막 동기화')}
+                  </span>
+                  <span className="font-medium">
+                    <HydrationSafeTimeDisplay
+                      dateStr={googleCalendarSettings.lastSyncAt}
+                    />
+                  </span>
+                </div>
+
+                {/* 수동 동기화 버튼 */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full gap-2"
+                  onClick={handleManualSync}
+                  disabled={isSyncing}
+                >
+                  <UpdateIcon
+                    className={cn('h-4 w-4', isSyncing && 'animate-spin')}
+                  />
+                  {isSyncing
+                    ? t('google.syncing', '동기화 중...')
+                    : t('google.syncNow', '지금 동기화')}
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
+                  <span className="text-sm text-yellow-700 dark:text-yellow-400">
+                    {t('google.needConnection', '연결 필요')}
+                  </span>
+                </div>
+
+                <p className="text-xs text-muted-foreground">
+                  {t(
+                    'google.connectionDescription',
+                    '구글 캘린더와 연동하여 양방향 동기화를 활성화하세요.'
+                  )}
+                </p>
+
+                <Button variant="default" size="sm" className="w-full gap-2">
+                  <CalendarIcon className="h-4 w-4" />
+                  {t('google.connectAccount', '구글 계정 연결')}
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
