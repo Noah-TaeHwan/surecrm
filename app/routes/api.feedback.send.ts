@@ -94,6 +94,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
     const attachments = [];
     if (attachmentData && attachmentName && attachmentType) {
+      // data:image/png;base64,iVBORw0KGgo... 에서 'iVBORw0KGgo...' 부분만 추출
       const base64Data = attachmentData.split(';base64,').pop();
       if (base64Data) {
         attachments.push({
