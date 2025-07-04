@@ -253,6 +253,7 @@ function MoreEventsButton({
   onClick: (e: React.MouseEvent) => void;
 }) {
   const { isMobile } = useViewport();
+  const { t } = useHydrationSafeTranslation('calendar');
   const previewTimes = meetings
     .slice(0, 2)
     .map(m => m.time)
@@ -275,7 +276,7 @@ function MoreEventsButton({
         <div className="flex items-center gap-1.5">
           <MoreHorizontal className={cn(isMobile ? 'h-4 w-4' : 'h-3 w-3')} />
           <span className={cn('font-medium', isMobile ? 'text-sm' : 'text-xs')}>
-            +{count}개 더
+            {t('calendarGrid.moreEvents', `+${count}개 더`, { count })}
           </span>
         </div>
         <div className="w-2 h-2 bg-muted-foreground rounded-full group-hover:bg-foreground group-hover:scale-110 transition-all duration-200" />

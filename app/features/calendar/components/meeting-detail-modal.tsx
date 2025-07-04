@@ -28,7 +28,6 @@ import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-trans
 import { AddMeetingModal } from './add-meeting-modal';
 import { DeleteMeetingModal } from './confirmation-modals';
 import type { Meeting } from '../types/types';
-import { meetingTypeKoreanMap } from '../types/types';
 
 interface MeetingDetailModalProps {
   meeting: Meeting | null;
@@ -112,7 +111,7 @@ export function MeetingDetailModal({
     return (
       <div className="space-y-3 sm:space-y-4">
         <h4 className="text-sm sm:text-base font-medium text-foreground flex items-center gap-2">
-          📞 연락처 정보
+          📞 {t('modals.meetingDetail.sections.contactInfo', '연락처 정보')}
         </h4>
         <div className="space-y-2">
           {client.phone && (
@@ -156,7 +155,10 @@ export function MeetingDetailModal({
                 <>
                   <span>•</span>
                   <ClockIcon className="h-3 w-3 sm:h-4 sm:w-4" />
-                  <span>{meeting.duration}분</span>
+                  <span>
+                    {meeting.duration}
+                    {t('modals.meetingDetail.durationUnit', '분')}
+                  </span>
                 </>
               )}
             </div>
@@ -168,7 +170,7 @@ export function MeetingDetailModal({
               {/* 기본 정보 */}
               <div className="space-y-3 sm:space-y-4">
                 <h4 className="text-sm sm:text-base font-medium text-foreground flex items-center gap-2">
-                  👤 기본 정보
+                  👤 {t('modals.meetingDetail.sections.basicInfo', '기본 정보')}
                 </h4>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
@@ -176,7 +178,7 @@ export function MeetingDetailModal({
                     <div className="flex items-center gap-2">
                       <UserIcon className="h-4 w-4 text-muted-foreground" />
                       <span className="text-xs sm:text-sm font-medium">
-                        고객
+                        {t('modals.meetingDetail.fields.client', '고객')}
                       </span>
                     </div>
                     <div className="text-xs sm:text-sm text-foreground">
@@ -189,7 +191,7 @@ export function MeetingDetailModal({
                       <div className="flex items-center gap-2">
                         <MapPinIcon className="h-4 w-4 text-muted-foreground" />
                         <span className="text-xs sm:text-sm font-medium">
-                          장소
+                          {t('modals.meetingDetail.fields.location', '장소')}
                         </span>
                       </div>
                       <div className="text-xs sm:text-sm text-foreground">
@@ -201,12 +203,13 @@ export function MeetingDetailModal({
                   {meeting.type && (
                     <div className="space-y-2">
                       <span className="text-xs sm:text-sm font-medium">
-                        미팅 타입
+                        {t(
+                          'modals.meetingDetail.fields.meetingType',
+                          '미팅 타입'
+                        )}
                       </span>
                       <Badge variant="secondary" className="w-fit text-xs">
-                        {meetingTypeKoreanMap[
-                          meeting.type as keyof typeof meetingTypeKoreanMap
-                        ] || meeting.type}
+                        {t(`meeting.types.${meeting.type}`, meeting.type)}
                       </Badge>
                     </div>
                   )}
@@ -214,7 +217,7 @@ export function MeetingDetailModal({
                   {meeting.priority && (
                     <div className="space-y-2">
                       <span className="text-xs sm:text-sm font-medium">
-                        중요도
+                        {t('modals.meetingDetail.fields.priority', '중요도')}
                       </span>
                       <Badge
                         variant={
@@ -234,7 +237,11 @@ export function MeetingDetailModal({
               {meeting.description && (
                 <div className="space-y-3 sm:space-y-4">
                   <h4 className="text-sm sm:text-base font-medium text-foreground flex items-center gap-2">
-                    📝 미팅 설명
+                    📝{' '}
+                    {t(
+                      'modals.meetingDetail.sections.description',
+                      '미팅 설명'
+                    )}
                   </h4>
                   <p className="text-xs sm:text-sm text-muted-foreground whitespace-pre-wrap bg-muted/30 rounded-lg p-3 sm:p-4">
                     {meeting.description}
@@ -253,7 +260,11 @@ export function MeetingDetailModal({
                   <Separator />
                   <div className="space-y-3 sm:space-y-4">
                     <h4 className="text-sm sm:text-base font-medium text-foreground flex items-center gap-2">
-                      ✅ 체크리스트
+                      ✅{' '}
+                      {t(
+                        'modals.meetingDetail.sections.checklist',
+                        '체크리스트'
+                      )}
                     </h4>
                     <div className="space-y-2 bg-muted/30 rounded-lg p-3 sm:p-4">
                       {meeting.checklist.map(item => (
@@ -291,7 +302,7 @@ export function MeetingDetailModal({
                 onClick={onClose}
                 className="h-10 px-4 w-full sm:w-auto text-xs sm:text-sm"
               >
-                닫기
+                {t('actions.close', '닫기')}
               </Button>
               <Button
                 variant="outline"
@@ -299,7 +310,7 @@ export function MeetingDetailModal({
                 className="h-10 px-4 w-full sm:w-auto text-xs sm:text-sm"
               >
                 <EditIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
-                수정
+                {t('actions.editMeeting', '수정')}
               </Button>
               <Button
                 variant="destructive"
@@ -308,7 +319,7 @@ export function MeetingDetailModal({
                 className="h-10 px-4 w-full sm:w-auto text-xs sm:text-sm"
               >
                 <TrashIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
-                삭제
+                {t('actions.deleteMeeting', '삭제')}
               </Button>
             </div>
           </DialogFooter>

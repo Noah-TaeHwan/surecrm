@@ -146,6 +146,12 @@ export default function CalendarPage({
     'filter' | 'view-selector' | null
   >(null);
 
+  // ⭐️ 미팅 클릭 핸들러 (상세 모달 열기)
+  const handleMeetingClick = (meeting: Meeting) => {
+    setSelectedMeeting(meeting);
+    setIsAddMeetingOpen(false); // 버그 방지: 상세 모달 열 때 추가 모달은 항상 닫도록 명시
+  };
+
   // 날짜 클릭 핸들러 (새 미팅 예약 모달 띄우기)
   const handleDateClick = (date: Date) => {
     setSelectedDateForModal(date);
@@ -422,7 +428,7 @@ export default function CalendarPage({
                   <CalendarGrid
                     selectedDate={selectedDate}
                     meetings={filteredMeetings}
-                    onMeetingClick={setSelectedMeeting}
+                    onMeetingClick={handleMeetingClick}
                     onDateClick={handleDateClick}
                     onMoreEventsClick={handleMoreEventsClick}
                     onMonthChange={date => setSelectedDate(date)}
@@ -432,7 +438,7 @@ export default function CalendarPage({
                   <WeekView
                     selectedDate={selectedDate}
                     meetings={filteredMeetings}
-                    onMeetingClick={setSelectedMeeting}
+                    onMeetingClick={handleMeetingClick}
                     onDateClick={handleDateClick}
                     onWeekChange={date => setSelectedDate(date)}
                   />
@@ -441,7 +447,7 @@ export default function CalendarPage({
                   <DayView
                     selectedDate={selectedDate}
                     meetings={filteredMeetings}
-                    onMeetingClick={setSelectedMeeting}
+                    onMeetingClick={handleMeetingClick}
                     onDateClick={handleDateClick}
                     onDayChange={date => setSelectedDate(date)}
                   />
@@ -453,7 +459,7 @@ export default function CalendarPage({
             {!isMobile && (
               <CalendarSidebar
                 meetings={meetings}
-                onMeetingClick={setSelectedMeeting}
+                onMeetingClick={handleMeetingClick}
                 filteredTypes={filteredTypes}
                 onFilterChange={setFilteredTypes}
                 googleCalendarSettings={googleCalendarSettings}
@@ -491,7 +497,7 @@ export default function CalendarPage({
                   key={meeting.id}
                   onClick={() => {
                     triggerHapticFeedback();
-                    setSelectedMeeting(meeting);
+                    handleMeetingClick(meeting);
                   }}
                   className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800 mb-2 active:bg-gray-100 dark:active:bg-gray-700 transition-colors cursor-pointer"
                 >

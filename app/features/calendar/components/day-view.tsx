@@ -278,7 +278,10 @@ function MeetingCard({
         >
           <div className="flex items-center gap-2">
             <Clock className={cn(isMobile ? 'w-2.5 h-2.5' : 'w-3 h-3')} />
-            <span>{meeting.duration}분</span>
+            <span>
+              {meeting.duration}
+              {t('modals.addMeeting.durationUnit', '분')}
+            </span>
           </div>
 
           {meeting.location && !isMobile && (
@@ -372,47 +375,93 @@ export function DayView({
     return Math.max(60, (duration / 60) * 80); // 최소 60px, 시간당 80px
   };
 
-  // 겹치는 미팅들의 위치 계산
-  const calculateMeetingPositions = (meetings: Meeting[]) => {
-    const positions: Array<{
+  // 겹치는 미팅들의 위치 계산 (개선된 알고리즘)
+  const calculateMeetingLayouts = (meetings: Meeting[]) => {
+    if (meetings.length === 0) return [];
+
+    const sortedMeetings = [...meetings].sort((a, b) => {
+      const timeA = a.time || '00:00';
+      const timeB = b.time || '00:00';
+      if (timeA !== timeB) return timeA.localeCompare(timeB);
+      return b.duration - a.duration; // 긴 미팅을 먼저 배치
+    });
+
+    const layouts: Array<{
       meeting: Meeting;
+      top: number;
+      height: number;
       left: number;
       width: number;
       zIndex: number;
     }> = [];
 
-    const sortedMeetings = [...meetings].sort((a, b) => {
-      const timeA = a.time || '00:00';
-      const timeB = b.time || '00:00';
-      return timeA.localeCompare(timeB);
-    });
+    const groups: Meeting[][] = [];
 
-    sortedMeetings.forEach((meeting, index) => {
-      let left = 8;
-      let width = 90;
-      let zIndex = 10 + index;
+    // 1. 겹치는 미팅 그룹화
+    sortedMeetings.forEach(meeting => {
+      let placed = false;
+      const start = getMeetingPosition(meeting.time);
+      const end = start + getMeetingHeight(meeting.duration);
 
-      const overlapping = positions.filter(pos => {
-        const currentStart = getMeetingPosition(meeting.time);
-        const currentEnd = currentStart + getMeetingHeight(meeting.duration);
-        const existingStart = getMeetingPosition(pos.meeting.time);
-        const existingEnd =
-          existingStart + getMeetingHeight(pos.meeting.duration);
+      for (const group of groups) {
+        const lastMeetingInGroup = group[group.length - 1];
+        const lastEnd =
+          getMeetingPosition(lastMeetingInGroup.time) +
+          getMeetingHeight(lastMeetingInGroup.duration);
 
-        return !(currentEnd <= existingStart || currentStart >= existingEnd);
-      });
-
-      if (overlapping.length > 0) {
-        const columns = overlapping.length + 1;
-        width = 90 / columns;
-        left = 8 + overlapping.length * width;
-        zIndex += overlapping.length;
+        if (start < lastEnd) {
+          group.push(meeting);
+          placed = true;
+          break;
+        }
       }
 
-      positions.push({ meeting, left, width, zIndex });
+      if (!placed) {
+        groups.push([meeting]);
+      }
     });
 
-    return positions;
+    // 2. 각 그룹에 대해 레이아웃 계산
+    groups.forEach(group => {
+      const columns: Meeting[][] = [];
+      group.forEach(meeting => {
+        let placed = false;
+        const start = getMeetingPosition(meeting.time);
+        for (let i = 0; i < columns.length; i++) {
+          const column = columns[i];
+          const lastMeetingInColumn = column[column.length - 1];
+          const lastEnd =
+            getMeetingPosition(lastMeetingInColumn.time) +
+            getMeetingHeight(lastMeetingInColumn.duration);
+
+          if (start >= lastEnd) {
+            column.push(meeting);
+            placed = true;
+            break;
+          }
+        }
+        if (!placed) {
+          columns.push([meeting]);
+        }
+      });
+
+      const groupWidth = 100 / columns.length;
+
+      columns.forEach((column, colIndex) => {
+        column.forEach(meeting => {
+          layouts.push({
+            meeting,
+            top: getMeetingPosition(meeting.time),
+            height: getMeetingHeight(meeting.duration),
+            left: colIndex * groupWidth,
+            width: groupWidth,
+            zIndex: 10 + colIndex,
+          });
+        });
+      });
+    });
+
+    return layouts;
   };
 
   // useSyncExternalStore용 빈 구독 함수
@@ -453,7 +502,7 @@ export function DayView({
   );
 
   // 미팅 위치 계산
-  const meetingPositions = calculateMeetingPositions(sortedMeetings);
+  const meetingLayouts = calculateMeetingLayouts(sortedMeetings);
 
   return (
     <div className="bg-card/30 rounded-2xl overflow-hidden border border-border/30 shadow-2xl backdrop-blur-md">
@@ -472,7 +521,7 @@ export function DayView({
             <Calendar className="w-4 h-4 text-muted-foreground" />
             <span className="text-sm font-medium text-muted-foreground">
               {sortedMeetings.length > 0
-                ? t('dayView.eventsCount', '{{count}}개의 일정', {
+                ? t('dayView.eventsCount', {
                     count: sortedMeetings.length,
                   })
                 : t('dayView.noEvents', '일정이 없습니다')}
@@ -480,7 +529,7 @@ export function DayView({
           </div>
           {isToday && (
             <Badge variant="outline" className="text-xs">
-              {t('dayView.today', '오늘')}
+              {t('actions.today', '오늘')}
             </Badge>
           )}
         </div>
@@ -557,42 +606,30 @@ export function DayView({
             </div>
           ))}
 
-          {/* 미팅들을 절대 위치로 배치 */}
-          <div
-            className={cn(
-              'absolute top-0 right-0 bottom-0 pointer-events-none',
-              isMobile ? 'left-16' : 'left-20'
-            )}
-          >
-            {meetingPositions.map(({ meeting, left, width, zIndex }) => {
-              const top = getMeetingPosition(meeting.time);
-              const height = getMeetingHeight(meeting.duration);
-
-              return (
+          {/* 미팅 카드들 */}
+          <div className="absolute top-0 left-0 right-0 bottom-0">
+            {meetingLayouts.map(
+              ({ meeting, top, height, left, width, zIndex }) => (
                 <div
                   key={meeting.id}
-                  className="absolute pointer-events-auto"
+                  className="absolute overflow-hidden"
                   style={{
                     top: `${top}px`,
-                    left: `${left}%`,
-                    width: `${width}%`,
                     height: `${height}px`,
-                    zIndex: zIndex,
+                    left: `calc(8.333% + ${left}% * 0.91667)`, // 시간 컬럼(12.5%) 제외 후 계산
+                    width: `calc(${width}% * 0.91667)`,
+                    zIndex,
+                    padding: '0.25rem', // 카드 간 간격
                   }}
                 >
                   <MeetingCard
                     meeting={meeting}
                     onClick={() => onMeetingClick(meeting)}
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      minHeight: `${height}px`,
-                      maxHeight: `${height}px`,
-                    }}
+                    style={{ height: '100%', width: '100%' }}
                   />
                 </div>
-              );
-            })}
+              )
+            )}
           </div>
         </div>
 

@@ -212,6 +212,21 @@
       "successMessage": "Meeting has been successfully deleted.",
       "errorMessage": "An error occurred while deleting the meeting."
     },
+    "meetingDetail": {
+      "durationUnit": "min",
+      "sections": {
+        "basicInfo": "Basic Information",
+        "description": "Meeting Description",
+        "contactInfo": "Contact Information",
+        "checklist": "Checklist"
+      },
+      "fields": {
+        "client": "Client",
+        "location": "Location",
+        "meetingType": "Meeting Type",
+        "priority": "Priority"
+      }
+    },
     "googleSync": {
       "confirmSync": {
         "title": "Sync with Google Calendar?",
@@ -264,5 +279,8 @@
     "medium": "Medium",
     "high": "High",
     "urgent": "Urgent"
+  },
+  "calendarGrid": {
+    "moreEvents": "+{{count}} more"
   }
 }

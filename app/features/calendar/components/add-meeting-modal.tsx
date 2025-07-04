@@ -290,7 +290,7 @@ export function AddMeetingModal({
               {/* 🏷️ 기본 정보 */}
               <div className="space-y-3 sm:space-y-4">
                 <h4 className="text-sm sm:text-base font-medium text-foreground flex items-center gap-2">
-                  👤 {t('forms.addMeeting.sections.basicInfo', '기본 정보')}
+                  👤 {t('modals.addMeeting.sections.basicInfo', '기본 정보')}
                 </h4>
 
                 {/* 고객 선택 */}
@@ -370,7 +370,7 @@ export function AddMeetingModal({
               {/* 📅 일정 정보 */}
               <div className="space-y-3 sm:space-y-4">
                 <h4 className="text-sm sm:text-base font-medium text-foreground flex items-center gap-2">
-                  📅 {t('forms.addMeeting.sections.scheduleInfo', '일정 정보')}
+                  📅 {t('modals.addMeeting.sections.scheduleInfo', '일정 정보')}
                 </h4>
 
                 {/* 날짜와 하루 종일 옵션 */}
@@ -470,8 +470,14 @@ export function AddMeetingModal({
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
+                              <SelectItem value="15">
+                                15{t('modals.addMeeting.durationUnit', '분')}
+                              </SelectItem>
                               <SelectItem value="30">
                                 30{t('modals.addMeeting.durationUnit', '분')}
+                              </SelectItem>
+                              <SelectItem value="45">
+                                45{t('modals.addMeeting.durationUnit', '분')}
                               </SelectItem>
                               <SelectItem value="60">
                                 1{t('modals.addMeeting.hourUnit', '시간')}
@@ -482,6 +488,16 @@ export function AddMeetingModal({
                               </SelectItem>
                               <SelectItem value="120">
                                 2{t('modals.addMeeting.hourUnit', '시간')}
+                              </SelectItem>
+                              <SelectItem value="150">
+                                2{t('modals.addMeeting.hourUnit', '시간')} 30
+                                {t('modals.addMeeting.durationUnit', '분')}
+                              </SelectItem>
+                              <SelectItem value="180">
+                                3{t('modals.addMeeting.hourUnit', '시간')}
+                              </SelectItem>
+                              <SelectItem value="240">
+                                4{t('modals.addMeeting.hourUnit', '시간')}
                               </SelectItem>
                             </SelectContent>
                           </Select>
@@ -496,7 +512,7 @@ export function AddMeetingModal({
               {/* 📋 상세 정보 */}
               <div className="space-y-3 sm:space-y-4">
                 <h4 className="text-sm sm:text-base font-medium text-foreground flex items-center gap-2">
-                  📋 {t('forms.addMeeting.sections.detailInfo', '상세 정보')}
+                  📋 {t('modals.addMeeting.sections.detailInfo', '상세 정보')}
                 </h4>
 
                 <FormField

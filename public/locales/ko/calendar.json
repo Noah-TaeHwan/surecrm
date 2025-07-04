@@ -214,6 +214,21 @@
       "successMessage": "미팅이 성공적으로 삭제되었습니다.",
       "errorMessage": "미팅 삭제 중 오류가 발생했습니다."
     },
+    "meetingDetail": {
+      "durationUnit": "분",
+      "sections": {
+        "basicInfo": "기본 정보",
+        "description": "미팅 설명",
+        "contactInfo": "연락처 정보",
+        "checklist": "체크리스트"
+      },
+      "fields": {
+        "client": "고객",
+        "location": "장소",
+        "meetingType": "미팅 타입",
+        "priority": "중요도"
+      }
+    },
     "googleSync": {
       "confirmSync": {
         "title": "구글 캘린더와 동기화하시겠습니까?",
@@ -266,5 +281,8 @@
     "medium": "보통",
     "high": "높음",
     "urgent": "긴급"
+  },
+  "calendarGrid": {
+    "moreEvents": "+{{count}}개 더"
   }
 }

@@ -217,7 +217,7 @@ function WeekdayHeader({ weekDates }: { weekDates: Date[] }) {
           isMobile ? 'text-xs py-2' : 'text-sm py-2'
         )}
       >
-        {t('weekView.time', '시간')}
+        {t('weekView.timeColumn', '시간')}
       </div>
 
       {/* 요일 헤더들 */}
@@ -443,6 +443,11 @@ export function WeekView({
     date.toDateString() === new Date().toDateString();
   const isWeekend = (date: Date) => date.getDay() === 0 || date.getDay() === 6;
 
+  // 시간 슬롯 높이 (모바일/데스크탑)
+  const rowHeight = isMobile ? 60 : 80;
+  // 시간 라벨 컬럼 너비 (CSS 클래스 기반)
+  const timeColumnWidth = isMobile ? 'calc(100% / 8)' : 'calc(100% / 8)';
+
   return (
     <div className="bg-card/30 rounded-2xl overflow-hidden border border-border/30 shadow-2xl backdrop-blur-md">
       {/* 헤더 */}
@@ -456,8 +461,9 @@ export function WeekView({
       {/* 요일 헤더 */}
       <WeekdayHeader weekDates={weekDates} />
 
-      {/* 시간 그리드 */}
+      {/* 시간 그리드 컨테이너 */}
       <div className="relative bg-gradient-to-br from-background/60 to-background/40 overflow-x-auto">
+        {/* 그리드 */}
         <div
           className={cn(
             'grid grid-cols-8 relative',
@@ -472,7 +478,7 @@ export function WeekView({
                 className={cn(
                   'border-r border-b border-border/20 bg-card/20 sticky left-0 z-10',
                   'flex items-center justify-center',
-                  isMobile ? 'min-h-[60px]' : 'min-h-[80px]' // 모바일에서 더 조밀한 높이
+                  isMobile ? `min-h-[${rowHeight}px]` : `min-h-[${rowHeight}px]`
                 )}
               >
                 <div
@@ -511,7 +517,9 @@ export function WeekView({
                       isWeekend(date) && 'bg-muted/10',
                       isCurrentHour && 'bg-primary/10',
                       'cursor-pointer',
-                      isMobile ? 'min-h-[60px] p-1' : 'min-h-[80px] p-2'
+                      isMobile
+                        ? `min-h-[${rowHeight}px] p-1`
+                        : `min-h-[${rowHeight}px] p-2`
                     )}
                     onClick={() => onDateClick?.(date)}
                   >
@@ -553,38 +561,23 @@ export function WeekView({
         </div>
 
         {/* 현재 시간 표시선 */}
-        {weekDates.some(date => isToday(date)) && currentTime.isVisible && (
-          <div className="absolute left-0 right-0 pointer-events-none z-30">
-            {(() => {
-              const hoursSinceStart = currentTime.hour - 8;
-              const minuteOffset =
-                (currentTime.minute / 60) * (isMobile ? 60 : 80);
-              const headerHeight = isMobile ? 120 : 160; // 모바일 헤더 높이 조정
-              const position =
-                headerHeight +
-                hoursSinceStart * (isMobile ? 60 : 80) +
-                minuteOffset;
-
-              return (
-                <div
-                  className="absolute left-0 right-0 h-0.5 bg-red-500 shadow-lg"
-                  style={{ top: `${position}px` }}
-                >
-                  <div className="absolute left-2 top-0 w-3 h-3 bg-red-500 rounded-full -translate-y-1 shadow-sm border-2 border-white">
-                    <div className="absolute inset-1 bg-white rounded-full"></div>
-                  </div>
-                  <div
-                    className={cn(
-                      'absolute left-6 top-0 text-red-600 font-mono font-semibold -translate-y-2 bg-white px-1 rounded shadow-sm',
-                      isMobile ? 'text-xs' : 'text-xs'
-                    )}
-                  >
-                    {currentTime.hour.toString().padStart(2, '0')}:
-                    {currentTime.minute.toString().padStart(2, '0')}
-                  </div>
-                </div>
-              );
-            })()}
+        {weekDates.some(isToday) && currentTime.isVisible && (
+          <div
+            className="absolute top-0 right-0 h-0.5 bg-red-500 shadow-lg pointer-events-none z-20"
+            style={{
+              left: timeColumnWidth, // 시간 컬럼 너비만큼 왼쪽에서 띄움
+              top: `${(currentTime.hour - 8 + currentTime.minute / 60) * rowHeight}px`,
+            }}
+          >
+            <div className="absolute left-0 w-2.5 h-2.5 bg-red-500 rounded-full -translate-x-1/2 -translate-y-1/2 shadow-sm border-2 border-white"></div>
+            <div
+              className={cn(
+                'absolute left-4 top-0 text-red-600 font-mono font-semibold -translate-y-1/2 bg-white/80 backdrop-blur-sm px-1.5 py-0.5 rounded-full shadow-sm text-xs'
+              )}
+            >
+              {currentTime.hour.toString().padStart(2, '0')}:
+              {currentTime.minute.toString().padStart(2, '0')}
+            </div>
           </div>
         )}
       </div>
