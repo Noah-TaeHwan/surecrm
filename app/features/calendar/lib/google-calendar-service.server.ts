@@ -1,8 +1,10 @@
 import { google, calendar_v3 } from 'googleapis';
 import { db } from '~/lib/core/db.server';
-import { appCalendarSettings, appCalendarSyncLogs, meetings } from './schema';
+import { appCalendarSettings, appCalendarSyncLogs } from './schema';
 import { eq, desc, and } from 'drizzle-orm';
 import type { Meeting } from '~/lib/schema/core';
+import type { Priority } from '../types/types';
+import { meetings } from '~/lib/schema/core';
 
 export interface GoogleCalendarEvent {
   id: string;
@@ -20,6 +22,18 @@ export interface GoogleCalendarEvent {
 
 export class GoogleCalendarService {
   private oauth2Client: any;
+
+  // 🎯 Priority를 구글 캘린더 colorId로 매핑
+  private getPriorityColorId(priority?: Priority | string): string {
+    const priorityMap: Record<string, string> = {
+      low: '2', // 연한 초록
+      medium: '1', // 기본 파랑
+      high: '5', // 노랑
+      urgent: '11', // 빨강
+    };
+
+    return priorityMap[priority || 'medium'] || '1'; // 기본값: 파랑
+  }
 
   constructor() {
     // 환경변수에서 redirect URI 가져오기
@@ -424,20 +438,43 @@ export class GoogleCalendarService {
 
       const formattedDescription = this.formatMeetingForGoogleCalendar(meeting);
 
+      // 🎯 Priority를 colorId로 매핑하여 구글 캘린더에서 시각적으로 구분
+      const colorId = this.getPriorityColorId((meeting as any).priority);
+
+      // 🔍 하루 종일 이벤트 확인 (24시간 = 1440분)
+      const isAllDay =
+        (meeting as any).isAllDay ||
+        (meeting.duration && meeting.duration >= 1440);
+
       const event: calendar_v3.Schema$Event = {
         summary: meeting.title,
         description: formattedDescription,
         location: meeting.location || '',
-        start: {
-          dateTime: meeting.scheduledAt.toISOString(),
-          timeZone: 'Asia/Seoul',
-        },
-        end: {
-          dateTime: new Date(
-            meeting.scheduledAt.getTime() + (meeting.duration || 60) * 60000
-          ).toISOString(),
-          timeZone: 'Asia/Seoul',
-        },
+        colorId: colorId, // 🎨 중요도에 따른 색상 설정
+        start: isAllDay
+          ? {
+              date: meeting.scheduledAt.toISOString().split('T')[0], // YYYY-MM-DD 형식
+              timeZone: 'Asia/Seoul',
+            }
+          : {
+              dateTime: meeting.scheduledAt.toISOString(),
+              timeZone: 'Asia/Seoul',
+            },
+        end: isAllDay
+          ? {
+              date: new Date(
+                meeting.scheduledAt.getTime() + 24 * 60 * 60 * 1000
+              )
+                .toISOString()
+                .split('T')[0], // 다음 날
+              timeZone: 'Asia/Seoul',
+            }
+          : {
+              dateTime: new Date(
+                meeting.scheduledAt.getTime() + (meeting.duration || 60) * 60000
+              ).toISOString(),
+              timeZone: 'Asia/Seoul',
+            },
       };
 
       const response = await calendar.events.insert({
@@ -474,20 +511,43 @@ export class GoogleCalendarService {
 
       const formattedDescription = this.formatMeetingForGoogleCalendar(meeting);
 
+      // 🎯 Priority를 colorId로 매핑하여 구글 캘린더에서 시각적으로 구분
+      const colorId = this.getPriorityColorId((meeting as any).priority);
+
+      // 🔍 하루 종일 이벤트 확인 (24시간 = 1440분)
+      const isAllDay =
+        (meeting as any).isAllDay ||
+        (meeting.duration && meeting.duration >= 1440);
+
       const event: calendar_v3.Schema$Event = {
         summary: meeting.title,
         description: formattedDescription,
         location: meeting.location || '',
-        start: {
-          dateTime: meeting.scheduledAt.toISOString(),
-          timeZone: 'Asia/Seoul',
-        },
-        end: {
-          dateTime: new Date(
-            meeting.scheduledAt.getTime() + (meeting.duration || 60) * 60000
-          ).toISOString(),
-          timeZone: 'Asia/Seoul',
-        },
+        colorId: colorId, // 🎨 중요도에 따른 색상 설정
+        start: isAllDay
+          ? {
+              date: meeting.scheduledAt.toISOString().split('T')[0], // YYYY-MM-DD 형식
+              timeZone: 'Asia/Seoul',
+            }
+          : {
+              dateTime: meeting.scheduledAt.toISOString(),
+              timeZone: 'Asia/Seoul',
+            },
+        end: isAllDay
+          ? {
+              date: new Date(
+                meeting.scheduledAt.getTime() + 24 * 60 * 60 * 1000
+              )
+                .toISOString()
+                .split('T')[0], // 다음 날
+              timeZone: 'Asia/Seoul',
+            }
+          : {
+              dateTime: new Date(
+                meeting.scheduledAt.getTime() + (meeting.duration || 60) * 60000
+              ).toISOString(),
+              timeZone: 'Asia/Seoul',
+            },
       };
 
       await calendar.events.update({
@@ -598,7 +658,25 @@ export class GoogleCalendarService {
     }
   }
 
-  // 9. 동기화 성공 로그
+  // 🔍 meetingId 유효성 검증 헬퍼 함수
+  private async validateMeetingId(meetingId: string | null): Promise<boolean> {
+    if (!meetingId) return true; // null인 경우는 유효함
+
+    try {
+      const meetingExists = await db
+        .select({ id: meetings.id })
+        .from(meetings)
+        .where(eq(meetings.id, meetingId))
+        .limit(1);
+
+      return meetingExists.length > 0;
+    } catch (error) {
+      console.error('❌ meetingId 유효성 검증 실패:', error);
+      return false;
+    }
+  }
+
+  // 9. 동기화 성공 로그 (개선된 버전)
   private async logSyncSuccess(
     agentId: string,
     meetingId: string | null,
@@ -606,21 +684,34 @@ export class GoogleCalendarService {
     externalEventId?: string
   ) {
     try {
+      // meetingId 유효성 검증
+      const isValidMeetingId = await this.validateMeetingId(meetingId);
+      if (!isValidMeetingId) {
+        console.warn(
+          `⚠️ 유효하지 않은 meetingId로 동기화 로그 저장: ${meetingId}. null로 변경합니다.`
+        );
+        meetingId = null;
+      }
+
       await db.insert(appCalendarSyncLogs).values({
         agentId,
-        meetingId: meetingId || null,
+        meetingId,
         syncDirection: direction,
         syncStatus: 'synced',
         externalSource: 'google_calendar',
         externalEventId,
         syncResult: { success: true, timestamp: new Date() },
       });
+
+      console.log(
+        `✅ 동기화 성공 로그 저장: ${direction} (meetingId: ${meetingId})`
+      );
     } catch (error) {
       console.error('❌ 동기화 로그 저장 실패:', error);
     }
   }
 
-  // 10. 동기화 실패 로그
+  // 10. 동기화 실패 로그 (개선된 버전)
   private async logSyncError(
     agentId: string,
     direction: string,
@@ -628,6 +719,15 @@ export class GoogleCalendarService {
     meetingId?: string
   ) {
     try {
+      // meetingId 유효성 검증
+      const isValidMeetingId = await this.validateMeetingId(meetingId || null);
+      if (!isValidMeetingId && meetingId) {
+        console.warn(
+          `⚠️ 유효하지 않은 meetingId로 에러 로그 저장: ${meetingId}. null로 변경합니다.`
+        );
+        meetingId = undefined;
+      }
+
       await db.insert(appCalendarSyncLogs).values({
         agentId,
         meetingId: meetingId || null,
@@ -637,6 +737,10 @@ export class GoogleCalendarService {
         errorMessage: error instanceof Error ? error.message : String(error),
         syncResult: { error: true, details: error, timestamp: new Date() },
       });
+
+      console.log(
+        `📝 동기화 실패 로그 저장: ${direction} (meetingId: ${meetingId})`
+      );
     } catch (logError) {
       console.error('❌ 에러 로그 저장 실패:', logError);
     }
@@ -760,6 +864,15 @@ export class GoogleCalendarService {
       for (const meeting of meetings) {
         if (!meeting.syncInfo?.externalEventId) {
           try {
+            // 미팅 ID 유효성 검증 (안전장치)
+            const isValidMeetingId = await this.validateMeetingId(meeting.id);
+            if (!isValidMeetingId) {
+              console.warn(
+                `⚠️ 유효하지 않은 meetingId로 동기화 시도: ${meeting.id}. 건너뜁니다.`
+              );
+              continue;
+            }
+
             // CalendarMeeting을 Meeting 형식으로 변환
             const meetingData = {
               id: meeting.id,
@@ -774,22 +887,40 @@ export class GoogleCalendarService {
               status: meeting.status,
             };
 
+            console.log(
+              `📤 구글 캘린더에 미팅 생성 중: ${meeting.title} (${meeting.id})`
+            );
+
             const googleEventId = await this.createEventFromMeeting(
               agentId,
-              meetingData as any
+              meetingData as Meeting
             );
 
             if (googleEventId) {
-              // 동기화 로그 생성 (실제 Meeting 테이블 업데이트는 나중에 구현)
+              // 동기화 로그 생성
               await this.logSyncSuccess(
                 agentId,
                 meeting.id,
                 'to_google',
                 googleEventId
               );
+              console.log(
+                `✅ 미팅 동기화 성공: ${meeting.title} -> ${googleEventId}`
+              );
+            } else {
+              console.warn(
+                `⚠️ 구글 이벤트 생성 실패: ${meeting.title} (${meeting.id})`
+              );
+              await this.logSyncError(
+                agentId,
+                'to_google',
+                new Error('구글 이벤트 생성 실패'),
+                meeting.id
+              );
             }
           } catch (error) {
-            console.error('미팅 동기화 실패:', meeting.id, error);
+            console.error(`❌ 미팅 동기화 실패: ${meeting.id}`, error);
+            await this.logSyncError(agentId, 'to_google', error, meeting.id);
           }
         }
       }
@@ -898,10 +1029,19 @@ export class GoogleCalendarService {
         await this.syncSpecificEventToGoogle(agentId, eventId);
       }
 
-      // 충돌 해결 완료 로그
+      // 충돌 해결 완료 로그 - meetingId 유효성 검증 적용
+      const potentialMeetingId = eventId.startsWith('google_') ? null : eventId;
+      const isValidMeetingId = await this.validateMeetingId(potentialMeetingId);
+
+      if (!isValidMeetingId && potentialMeetingId) {
+        console.warn(
+          `⚠️ 충돌 해결 로그에서 유효하지 않은 meetingId: ${potentialMeetingId}. null로 변경합니다.`
+        );
+      }
+
       await db.insert(appCalendarSyncLogs).values({
         agentId,
-        meetingId: eventId.startsWith('google_') ? null : eventId,
+        meetingId: isValidMeetingId ? potentialMeetingId : null,
         externalEventId: eventId.startsWith('google_') ? eventId : null,
         syncDirection: resolution === 'google' ? 'from_google' : 'to_google',
         syncStatus: 'synced',
@@ -1009,7 +1149,7 @@ export class GoogleCalendarService {
         status: meeting.status,
       };
 
-      await this.updateEvent(agentId, meetingId, meetingData as any);
+      await this.updateEvent(agentId, meetingId, meetingData as Meeting);
       console.log('SureCRM 미팅으로 구글 업데이트:', meeting.title);
     } catch (error) {
       console.error('특정 이벤트 SureCRM→구글 동기화 실패:', error);

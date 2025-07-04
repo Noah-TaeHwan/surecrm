@@ -39,6 +39,8 @@ import {
   type ConflictData,
 } from '../components/conflict-resolution-modal';
 import { GoogleConnectRequired } from '../components/google-connect-required';
+import { MobileFAB } from '../components/mobile-fab';
+import { MobileBottomSheet } from '../components/mobile-bottom-sheet';
 import {
   type Meeting,
   type Client,
@@ -98,6 +100,9 @@ export default function CalendarPage({
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isAddMeetingOpen, setIsAddMeetingOpen] = useState(false);
   const [selectedMeeting, setSelectedMeeting] = useState<Meeting | null>(null);
+  const [selectedDateForModal, setSelectedDateForModal] = useState<Date | null>(
+    null
+  ); // 모달용 선택된 날짜
 
   // 필터 상태 (기본값: 모든 타입 선택)
   const [filteredTypes, setFilteredTypes] = useState<string[]>([]);
@@ -135,16 +140,28 @@ export default function CalendarPage({
   const [conflicts, setConflicts] = useState<ConflictData[]>([]);
   const [isConflictModalOpen, setIsConflictModalOpen] = useState(false);
 
-  // 날짜 클릭 핸들러 (월 뷰에서 일 뷰로 전환)
+  // 모바일 필터 상태
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+  const [bottomSheetType, setBottomSheetType] = useState<
+    'filter' | 'view-selector' | null
+  >(null);
+
+  // 날짜 클릭 핸들러 (새 미팅 예약 모달 띄우기)
   const handleDateClick = (date: Date) => {
+    setSelectedDateForModal(date);
+    setIsAddMeetingOpen(true);
+  };
+
+  // 더보기 버튼 클릭 핸들러 (일 뷰로 전환)
+  const handleMoreEventsClick = (date: Date) => {
     setSelectedDate(date);
     setViewMode('day');
   };
 
-  // 미팅 추가 제출
-  const onSubmitMeeting = (data: any) => {
-    // 미팅 저장은 AddMeetingModal에서 직접 form 제출로 처리됨
+  // 미팅 추가 제출 후 모달 닫기
+  const handleMeetingModalClose = () => {
     setIsAddMeetingOpen(false);
+    setSelectedDateForModal(null);
   };
 
   // 충돌 해결 핸들러 - Form 제출로 처리
@@ -407,6 +424,7 @@ export default function CalendarPage({
                     meetings={filteredMeetings}
                     onMeetingClick={setSelectedMeeting}
                     onDateClick={handleDateClick}
+                    onMoreEventsClick={handleMoreEventsClick}
                     onMonthChange={date => setSelectedDate(date)}
                   />
                 )}
@@ -415,6 +433,8 @@ export default function CalendarPage({
                     selectedDate={selectedDate}
                     meetings={filteredMeetings}
                     onMeetingClick={setSelectedMeeting}
+                    onDateClick={handleDateClick}
+                    onWeekChange={date => setSelectedDate(date)}
                   />
                 )}
                 {viewMode === 'day' && (
@@ -422,6 +442,8 @@ export default function CalendarPage({
                     selectedDate={selectedDate}
                     meetings={filteredMeetings}
                     onMeetingClick={setSelectedMeeting}
+                    onDateClick={handleDateClick}
+                    onDayChange={date => setSelectedDate(date)}
                   />
                 )}
               </div>
@@ -479,46 +501,63 @@ export default function CalendarPage({
                       {meeting.title}
                     </div>
                     <div className="text-sm text-gray-600 dark:text-gray-400">
-                      {meeting.time} ·{' '}
-                      {t(
-                        `meeting.types.${meeting.type}`,
-                        meetingTypeKoreanMap[
-                          meeting.type as keyof typeof meetingTypeKoreanMap
-                        ] || meeting.type
-                      )}
+                      {meeting.time} · {meeting.client.name}
                     </div>
                   </div>
                 </div>
               ))}
-
-            {filteredMeetings.filter((meeting: Meeting) => {
-              const meetingDate = new Date(meeting.date);
-              return meetingDate.toDateString() === selectedDate.toDateString();
-            }).length === 0 && (
-              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                <CalendarIcon className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                <p>
-                  {t(
-                    'emptyState.noEventsToday',
-                    '이 날에는 예정된 일정이 없습니다.'
-                  )}
-                </p>
-              </div>
-            )}
           </div>
+        )}
+
+        {/* 📱 모바일 FAB */}
+        {isMobile && (
+          <MobileFAB
+            onAddMeeting={() => setIsAddMeetingOpen(true)}
+            onFilterToggle={() => {
+              setBottomSheetType('filter');
+              setIsMobileFilterOpen(true);
+            }}
+            onViewSelectorOpen={() => {
+              setBottomSheetType('view-selector');
+              setIsMobileFilterOpen(true);
+            }}
+            onSettingsOpen={() => {
+              // 설정 처리 - 추후 구현
+            }}
+            triggerHapticFeedback={triggerHapticFeedback}
+          />
+        )}
+
+        {/* 📱 모바일 바텀시트 */}
+        {isMobile && (
+          <MobileBottomSheet
+            isOpen={isMobileFilterOpen}
+            onClose={() => {
+              setIsMobileFilterOpen(false);
+              setBottomSheetType(null);
+            }}
+            type={bottomSheetType || 'filter'}
+            filteredTypes={filteredTypes}
+            onFilterChange={setFilteredTypes}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            triggerHapticFeedback={triggerHapticFeedback}
+          />
         )}
 
         {/* 모달들 */}
         <AddMeetingModal
           isOpen={isAddMeetingOpen}
-          onClose={() => setIsAddMeetingOpen(false)}
+          onClose={handleMeetingModalClose}
           clients={clients}
+          defaultDate={selectedDateForModal || undefined}
         />
 
         <MeetingDetailModal
           meeting={selectedMeeting}
           onClose={() => setSelectedMeeting(null)}
           onToggleChecklist={toggleChecklist}
+          clients={clients}
         />
 
         <ConflictResolutionModal

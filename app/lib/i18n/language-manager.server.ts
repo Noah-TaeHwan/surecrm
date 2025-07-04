@@ -53,11 +53,11 @@ function getCookieValue(cookieHeader: string, name: string): string | null {
     for (const cookie of cookies) {
       const trimmedCookie = cookie.trim();
       const equalIndex = trimmedCookie.indexOf('=');
-      
+
       if (equalIndex > 0) {
         const key = trimmedCookie.substring(0, equalIndex);
         const value = trimmedCookie.substring(equalIndex + 1);
-        
+
         if (key === name && value) {
           return decodeURIComponent(value);
         }

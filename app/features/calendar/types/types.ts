@@ -29,79 +29,43 @@ export const meetingTypeKoreanMap = {
   google_imported: '구글에서 가져온 일정',
 } as const;
 
-// 🎯 미팅 유형별 상세 정보 (새 미팅 예약 모달과 동일)
+// 🎯 미팅 유형별 기본 정보 (단순화)
 export const meetingTypeDetails = {
   first_consultation: {
     label: '초회 상담',
-    description: '신규 고객과의 첫 상담',
     icon: '🤝',
-    googleCategory: 'consultation',
-    expectedDuration: 60,
-    priority: 'high' as const,
   },
   follow_up: {
     label: '후속 상담',
-    description: '기존 고객 후속 미팅',
     icon: '📞',
-    googleCategory: 'follow-up',
-    expectedDuration: 45,
-    priority: 'medium' as const,
   },
   product_explanation: {
     label: '상품 설명',
-    description: '보험 상품 상세 설명',
     icon: '📋',
-    googleCategory: 'presentation',
-    expectedDuration: 90,
-    priority: 'high' as const,
   },
   contract_review: {
     label: '계약 검토',
-    description: '계약서 검토 및 서명 준비',
     icon: '📄',
-    googleCategory: 'contract',
-    expectedDuration: 60,
-    priority: 'high' as const,
   },
   contract_signing: {
     label: '계약 체결',
-    description: '최종 계약 체결 미팅',
     icon: '✍️',
-    googleCategory: 'contract',
-    expectedDuration: 90,
-    priority: 'urgent' as const,
   },
   claim_support: {
     label: '보험금 청구 지원',
-    description: '보험금 청구 관련 상담',
     icon: '🆘',
-    googleCategory: 'support',
-    expectedDuration: 75,
-    priority: 'urgent' as const,
   },
   other: {
     label: '기타',
-    description: '기타 미팅',
     icon: '📝',
-    googleCategory: 'other',
-    expectedDuration: 60,
-    priority: 'medium' as const,
   },
   google: {
     label: '구글 일정',
-    description: '구글 캘린더에서 가져온 이벤트',
     icon: '📅',
-    googleCategory: 'imported',
-    expectedDuration: 60,
-    priority: 'medium' as const,
   },
   google_imported: {
     label: '구글에서 가져온 일정',
-    description: '구글 캘린더에서 동기화된 이벤트',
     icon: '📅',
-    googleCategory: 'imported',
-    expectedDuration: 60,
-    priority: 'medium' as const,
   },
 } as const;
 
@@ -286,6 +250,41 @@ export interface ConflictData {
   autoResolvable: boolean; // 자동 해결 가능 여부
 }
 
+// 🎯 중요도 타입 정의
+export type Priority = 'low' | 'medium' | 'high' | 'urgent';
+
+// 🎨 중요도별 색상 및 스타일 매핑
+export const priorityStyles = {
+  low: {
+    color: 'text-gray-600',
+    bgColor: 'bg-gray-100',
+    borderColor: 'border-gray-300',
+    icon: '⚪',
+    googleColorId: '2', // 연한 초록
+  },
+  medium: {
+    color: 'text-blue-600',
+    bgColor: 'bg-blue-100',
+    borderColor: 'border-blue-300',
+    icon: '🔵',
+    googleColorId: '1', // 기본 파랑
+  },
+  high: {
+    color: 'text-orange-600',
+    bgColor: 'bg-orange-100',
+    borderColor: 'border-orange-300',
+    icon: '🟠',
+    googleColorId: '5', // 노랑
+  },
+  urgent: {
+    color: 'text-red-600',
+    bgColor: 'bg-red-100',
+    borderColor: 'border-red-300',
+    icon: '🔴',
+    googleColorId: '11', // 빨강
+  },
+} as const;
+
 // 기존 Meeting 인터페이스 확장
 export interface Meeting {
   id: string;
@@ -297,6 +296,7 @@ export interface Meeting {
   type: string;
   location: string;
   description?: string;
+  priority: Priority; // 🎯 중요도 필드 추가
   status: 'scheduled' | 'completed' | 'cancelled' | 'rescheduled';
   checklist: ChecklistItem[];
   notes?: MeetingNote[];

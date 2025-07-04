@@ -1,5 +1,9 @@
 {
   "title": "일정 관리",
+  "meta": {
+    "title": "일정 관리",
+    "description": "SureCRM 캘린더로 고객 미팅과 일정을 효율적으로 관리하세요."
+  },
   "views": {
     "month": "월간",
     "week": "주간",
@@ -17,7 +21,14 @@
     "scheduleFirstMeeting": "첫 미팅 예약하기",
     "registerClient": "고객 등록하기",
     "swipeToNavigate": "스와이프하여 월 이동",
-    "scheduleMeeting": "새 미팅 예약"
+    "scheduleMeeting": "새 미팅 예약",
+    "addMeeting": "미팅 추가",
+    "editMeeting": "미팅 수정",
+    "deleteMeeting": "미팅 삭제",
+    "save": "저장",
+    "cancel": "취소",
+    "confirm": "확인",
+    "close": "닫기"
   },
   "event": {
     "title": "제목",
@@ -126,7 +137,9 @@
     "noEvents": "일정이 없습니다",
     "todayNoMeetings": "오늘",
     "noMeetingsScheduled": "예정된 미팅이 없습니다",
-    "scheduleNewMeeting": "새로운 미팅을 예약하여 일정을 관리해보세요."
+    "scheduleNewMeeting": "새로운 미팅을 예약하여 일정을 관리해보세요.",
+    "eventsCount": "{{count}}개의 일정",
+    "noEvents": "일정이 없습니다"
   },
   "weekView": {
     "timeColumn": "시간"
@@ -142,12 +155,17 @@
         "time": "시간",
         "duration": "소요 시간",
         "type": "미팅 타입",
+        "priority": "중요도",
         "location": "장소",
-        "description": "미팅 설명"
+        "description": "미팅 설명",
+        "allDay": "하루 종일"
       },
       "placeholders": {
         "selectClient": "고객을 선택하세요",
         "title": "예: 보험 상담",
+        "type": "미팅 타입을 선택하세요",
+        "priority": "중요도를 선택하세요",
+        "duration": "소요 시간을 선택하세요",
         "location": "예: 카페, 사무실, 온라인",
         "description": "미팅 목적이나 안건을 입력하세요"
       },
@@ -156,6 +174,66 @@
       "submit": "미팅 예약하기",
       "successMessage": "미팅이 성공적으로 예약되었습니다.",
       "errorMessage": "미팅 생성 중 오류가 발생했습니다."
+    },
+    "editMeeting": {
+      "title": "미팅 수정",
+      "description": "미팅 정보를 수정하고 구글 캘린더와 동기화합니다.",
+      "successMessage": "미팅이 성공적으로 수정되었습니다.",
+      "errorMessage": "미팅 수정 중 오류가 발생했습니다.",
+      "confirmSave": {
+        "title": "변경사항을 저장하시겠습니까?",
+        "description": "수정된 내용이 SureCRM과 구글 캘린더에 모두 반영됩니다.",
+        "googleSync": "구글 캘린더와 자동 동기화됩니다.",
+        "save": "저장",
+        "cancel": "취소"
+      },
+      "confirmCancel": {
+        "title": "수정을 취소하시겠습니까?",
+        "description": "변경된 내용이 저장되지 않습니다.",
+        "discard": "변경사항 취소",
+        "continue": "계속 수정"
+      }
+    },
+    "deleteMeeting": {
+      "title": "미팅을 삭제하시겠습니까?",
+      "description": "이 작업은 되돌릴 수 없습니다.",
+      "warning": {
+        "title": "주의사항",
+        "irreversible": "이 작업은 되돌릴 수 없습니다.",
+        "recordsDeleted": "미팅 기록과 체크리스트가 함께 삭제됩니다.",
+        "googleCalendarSync": "구글 캘린더 이벤트도 동시에 삭제됩니다."
+      },
+      "googleCalendar": {
+        "title": "구글 캘린더에서도 삭제됩니다",
+        "description": "연동된 구글 캘린더 이벤트도 함께 삭제됩니다."
+      },
+      "actions": {
+        "delete": "삭제",
+        "cancel": "취소"
+      },
+      "successMessage": "미팅이 성공적으로 삭제되었습니다.",
+      "errorMessage": "미팅 삭제 중 오류가 발생했습니다."
+    },
+    "googleSync": {
+      "confirmSync": {
+        "title": "구글 캘린더와 동기화하시겠습니까?",
+        "description": "이 일정이 구글 캘린더에 추가됩니다.",
+        "sync": "동기화",
+        "cancel": "취소"
+      },
+      "confirmDisconnect": {
+        "title": "구글 캘린더 연동을 해제하시겠습니까?",
+        "description": "구글 캘린더에서 이 이벤트가 삭제됩니다.",
+        "disconnect": "연동 해제",
+        "cancel": "취소"
+      },
+      "conflictResolution": {
+        "title": "동기화 충돌이 발생했습니다",
+        "description": "어떤 버전을 우선할지 선택해주세요.",
+        "localPriority": "SureCRM 우선",
+        "googlePriority": "구글 캘린더 우선",
+        "cancel": "취소"
+      }
     }
   },
   "sync": {
@@ -182,5 +260,11 @@
   "upcomingMeetings": {
     "title": "다음 미팅",
     "count": "{{count}}개"
+  },
+  "priority": {
+    "low": "낮음",
+    "medium": "보통",
+    "high": "높음",
+    "urgent": "긴급"
   }
 }

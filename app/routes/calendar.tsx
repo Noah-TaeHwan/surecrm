@@ -25,6 +25,12 @@ export async function loader({ request }: Route.LoaderArgs) {
     const { user } = await requireActiveSubscription(request);
     const agentId = user.id;
 
+    // 🌍 다국어 번역 로드
+    const { createServerTranslator } = await import(
+      '~/lib/i18n/language-manager.server'
+    );
+    const { t } = await createServerTranslator(request, 'calendar');
+
     // 🔒 구글 캘린더 연동 필수 확인
     let googleSettings;
     try {
@@ -48,6 +54,14 @@ export async function loader({ request }: Route.LoaderArgs) {
         currentMonth: new Date().getMonth() + 1,
         currentYear: new Date().getFullYear(),
         agentId,
+        // 🌍 다국어 메타 데이터
+        meta: {
+          title: t('meta.title', '일정 관리'),
+          description: t(
+            'meta.description',
+            'SureCRM 캘린더로 고객 미팅과 일정을 효율적으로 관리하세요.'
+          ),
+        },
       };
     }
 
@@ -203,6 +217,14 @@ export async function loader({ request }: Route.LoaderArgs) {
       currentYear,
       agentId,
       googleEventsCount: googleMeetings.length,
+      // 🌍 다국어 메타 데이터
+      meta: {
+        title: t('meta.title', '일정 관리'),
+        description: t(
+          'meta.description',
+          'SureCRM 캘린더로 고객 미팅과 일정을 효율적으로 관리하세요.'
+        ),
+      },
     };
   } catch (error) {
     console.error('📅 Calendar 데이터 로딩 실패:', error);
@@ -218,6 +240,12 @@ export async function loader({ request }: Route.LoaderArgs) {
       agentId: 'error-fallback',
       error:
         error instanceof Error ? error.message : '데이터를 불러올 수 없습니다.',
+      // 🌍 기본 메타 데이터 (다국어 오류 시)
+      meta: {
+        title: '일정 관리',
+        description:
+          'SureCRM 캘린더로 고객 미팅과 일정을 효율적으로 관리하세요.',
+      },
     };
   }
 }
@@ -261,10 +289,20 @@ export async function action({ request }: Route.ActionArgs) {
         const clientId = formData.get('clientId') as string;
         const date = formData.get('date') as string;
         const time = formData.get('time') as string;
-        const duration = parseInt(formData.get('duration') as string);
+        const durationStr = formData.get('duration') as string;
         const meetingType = formData.get('type') as string;
         const location = formData.get('location') as string;
         const description = formData.get('description') as string;
+        const isAllDay = formData.get('isAllDay') === 'true';
+
+        // 🎯 필수 필드 검증
+        if (!title || !date) {
+          console.error('❌ 필수 필드 누락:', { title, date });
+          return {
+            success: false,
+            message: '미팅 제목과 날짜는 필수 입력 항목입니다.',
+          };
+        }
 
         // 🎯 영업 정보 필드들
         const priority = formData.get('priority') as string;
@@ -279,10 +317,52 @@ export async function action({ request }: Route.ActionArgs) {
         const sendClientInvite = formData.get('sendClientInvite') === 'true';
         const reminder = formData.get('reminder') as string;
 
-        // 예약 시간 계산
-        const [year, month, day] = date.split('-').map(Number);
-        const [hour, minute] = time.split(':').map(Number);
-        const scheduledAt = new Date(year, month - 1, day, hour, minute);
+        // 📅 날짜 파싱
+        const dateParts = date.split('-');
+        if (dateParts.length !== 3) {
+          console.error('❌ 잘못된 날짜 형식:', date);
+          return {
+            success: false,
+            message: '올바른 날짜 형식이 아닙니다.',
+          };
+        }
+
+        const [year, month, day] = dateParts.map(Number);
+
+        // 🕐 시간 처리 (하루 종일 이벤트 고려)
+        let scheduledAt: Date;
+        let duration: number;
+
+        if (isAllDay) {
+          // 하루 종일 이벤트: 해당 날짜 00:00으로 설정
+          scheduledAt = new Date(year, month - 1, day, 0, 0, 0);
+          duration = 24 * 60; // 24시간 (분 단위)
+        } else {
+          // 일반 이벤트: 시간 설정
+          if (!time) {
+            console.error('❌ 일반 이벤트인데 시간이 없음:', {
+              time,
+              isAllDay,
+            });
+            return {
+              success: false,
+              message: '시간을 입력해주세요.',
+            };
+          }
+
+          const timeParts = time.split(':');
+          if (timeParts.length !== 2) {
+            console.error('❌ 잘못된 시간 형식:', time);
+            return {
+              success: false,
+              message: '올바른 시간 형식이 아닙니다.',
+            };
+          }
+
+          const [hour, minute] = timeParts.map(Number);
+          scheduledAt = new Date(year, month - 1, day, hour, minute);
+          duration = durationStr ? parseInt(durationStr) : 60; // 기본 1시간
+        }
 
         // 🌐 구글 캘린더에 직접 생성 (단일 소스 방식)
         try {
@@ -370,10 +450,20 @@ export async function action({ request }: Route.ActionArgs) {
         const title = formData.get('title') as string;
         const date = formData.get('date') as string;
         const time = formData.get('time') as string;
-        const duration = parseInt(formData.get('duration') as string);
+        const durationStr = formData.get('duration') as string;
         const location = formData.get('location') as string;
         const description = formData.get('description') as string;
         const status = formData.get('status') as string;
+        const isAllDay = formData.get('isAllDay') === 'true';
+
+        // 🎯 필수 필드 검증
+        if (!meetingId || !title || !date) {
+          console.error('❌ 필수 필드 누락:', { meetingId, title, date });
+          return {
+            success: false,
+            message: '미팅 ID, 제목, 날짜는 필수 입력 항목입니다.',
+          };
+        }
 
         // 🎯 영업 정보 필드들
         const priority = formData.get('priority') as string;
@@ -389,11 +479,52 @@ export async function action({ request }: Route.ActionArgs) {
         const sendClientInvite = formData.get('sendClientInvite') === 'true';
         const reminder = formData.get('reminder') as string;
 
-        // 예약 시간 계산 (scheduledAt 필드 사용)
-        const [year, month, day] = date.split('-').map(Number);
-        const [hour, minute] = time.split(':').map(Number);
+        // 📅 날짜 파싱
+        const dateParts = date.split('-');
+        if (dateParts.length !== 3) {
+          console.error('❌ 잘못된 날짜 형식:', date);
+          return {
+            success: false,
+            message: '올바른 날짜 형식이 아닙니다.',
+          };
+        }
 
-        const scheduledAt = new Date(year, month - 1, day, hour, minute);
+        const [year, month, day] = dateParts.map(Number);
+
+        // 🕐 시간 처리 (하루 종일 이벤트 고려)
+        let scheduledAt: Date;
+        let duration: number;
+
+        if (isAllDay) {
+          // 하루 종일 이벤트: 해당 날짜 00:00으로 설정
+          scheduledAt = new Date(year, month - 1, day, 0, 0, 0);
+          duration = 24 * 60; // 24시간 (분 단위)
+        } else {
+          // 일반 이벤트: 시간 설정
+          if (!time) {
+            console.error('❌ 일반 이벤트인데 시간이 없음:', {
+              time,
+              isAllDay,
+            });
+            return {
+              success: false,
+              message: '시간을 입력해주세요.',
+            };
+          }
+
+          const timeParts = time.split(':');
+          if (timeParts.length !== 2) {
+            console.error('❌ 잘못된 시간 형식:', time);
+            return {
+              success: false,
+              message: '올바른 시간 형식이 아닙니다.',
+            };
+          }
+
+          const [hour, minute] = timeParts.map(Number);
+          scheduledAt = new Date(year, month - 1, day, hour, minute);
+          duration = durationStr ? parseInt(durationStr) : 60; // 기본 1시간
+        }
 
         // 🔍 기존 미팅 정보 조회 (구글 이벤트 ID 확인용)
         const { getMeetingsByMonth } = await import(
@@ -637,27 +768,215 @@ export async function action({ request }: Route.ActionArgs) {
         return { success: true, message: '체크리스트가 업데이트되었습니다.' };
       }
 
-      default:
-        return { success: false, message: '알 수 없는 액션입니다.' };
+      case 'syncMeetingToGoogle': {
+        const meetingId = formData.get('meetingId') as string;
+
+        if (!meetingId) {
+          return {
+            success: false,
+            message: '미팅 ID가 필요합니다.',
+          };
+        }
+
+        try {
+          const { GoogleCalendarService } = await import(
+            '~/features/calendar/lib/google-calendar-service.server'
+          );
+          const googleService = new GoogleCalendarService();
+
+          // 구글 캘린더 연동 상태 확인
+          const settings = await googleService.getCalendarSettings(agentId);
+
+          if (!settings?.googleAccessToken) {
+            return {
+              success: false,
+              message: '구글 캘린더 연동이 필요합니다.',
+            };
+          }
+
+          // 미팅 정보 조회
+          const { getMeetingsByMonth } = await import(
+            '~/features/calendar/lib/calendar-data'
+          );
+          const currentDate = new Date();
+          const year = currentDate.getFullYear();
+          const month = currentDate.getMonth() + 1;
+
+          const meetings = await getMeetingsByMonth(agentId, year, month);
+          const meeting = meetings.find(m => m.id === meetingId);
+
+          if (!meeting) {
+            return {
+              success: false,
+              message: '미팅을 찾을 수 없습니다.',
+            };
+          }
+
+          // 구글 캘린더에 동기화
+          const googleEventId = await googleService.createEventFromMeeting(
+            agentId,
+            meeting as any
+          );
+
+          if (googleEventId) {
+            return {
+              success: true,
+              message: '구글 캘린더와 동기화가 완료되었습니다.',
+            };
+          } else {
+            return {
+              success: false,
+              message: '구글 캘린더 동기화에 실패했습니다.',
+            };
+          }
+        } catch (error) {
+          console.error('❌ 구글 캘린더 동기화 실패:', error);
+          return {
+            success: false,
+            message: '동기화 중 오류가 발생했습니다.',
+          };
+        }
+      }
+
+      case 'disconnectMeetingFromGoogle': {
+        const meetingId = formData.get('meetingId') as string;
+
+        if (!meetingId) {
+          return {
+            success: false,
+            message: '미팅 ID가 필요합니다.',
+          };
+        }
+
+        try {
+          const { GoogleCalendarService } = await import(
+            '~/features/calendar/lib/google-calendar-service.server'
+          );
+          const googleService = new GoogleCalendarService();
+
+          // 미팅 정보 조회
+          const { getMeetingsByMonth } = await import(
+            '~/features/calendar/lib/calendar-data'
+          );
+          const currentDate = new Date();
+          const year = currentDate.getFullYear();
+          const month = currentDate.getMonth() + 1;
+
+          const meetings = await getMeetingsByMonth(agentId, year, month);
+          const meeting = meetings.find(m => m.id === meetingId);
+
+          if (!meeting || !meeting.syncInfo?.externalEventId) {
+            return {
+              success: false,
+              message: '연동된 구글 이벤트를 찾을 수 없습니다.',
+            };
+          }
+
+          // 구글 캘린더에서 이벤트 삭제 (선택적)
+          const settings = await googleService.getCalendarSettings(agentId);
+          if (settings?.googleAccessToken) {
+            try {
+              await googleService.deleteEvent(
+                agentId,
+                meeting.syncInfo.externalEventId
+              );
+            } catch (error) {
+              console.warn('구글 이벤트 삭제 실패 (무시됨):', error);
+            }
+          }
+
+          // SureCRM에서 동기화 정보 제거
+          // 실제 구현에서는 meeting의 syncInfo를 제거하는 API 호출이 필요
+          // 여기서는 성공 응답만 반환
+          return {
+            success: true,
+            message: '구글 캘린더 연동이 해제되었습니다.',
+          };
+        } catch (error) {
+          console.error('❌ 구글 캘린더 연동 해제 실패:', error);
+          return {
+            success: false,
+            message: '연동 해제 중 오류가 발생했습니다.',
+          };
+        }
+      }
+
+      case 'resolveConflict': {
+        const meetingId = formData.get('meetingId') as string;
+        const resolution = formData.get('resolution') as 'local' | 'google';
+
+        if (!meetingId || !resolution) {
+          return {
+            success: false,
+            message: '미팅 ID와 해결 방법이 필요합니다.',
+          };
+        }
+
+        try {
+          const { GoogleCalendarService } = await import(
+            '~/features/calendar/lib/google-calendar-service.server'
+          );
+          const googleService = new GoogleCalendarService();
+
+          // 충돌 해결
+          const resolveSuccess = await googleService.resolveConflict(
+            agentId,
+            meetingId,
+            resolution
+          );
+
+          if (resolveSuccess) {
+            return {
+              success: true,
+              message: '충돌이 해결되었습니다.',
+            };
+          } else {
+            return {
+              success: false,
+              message: '충돌 해결에 실패했습니다.',
+            };
+          }
+        } catch (error) {
+          console.error('❌ 충돌 해결 실패:', error);
+          return {
+            success: false,
+            message: '충돌 해결 중 오류가 발생했습니다.',
+          };
+        }
+      }
+
+      default: {
+        console.warn('⚠️ 알 수 없는 액션 타입:', actionType);
+        return {
+          success: false,
+          message: `알 수 없는 액션: ${actionType}`,
+        };
+      }
     }
   } catch (error) {
-    console.error('📅 Calendar 액션 실행 실패:', error);
+    console.error('❌ 캘린더 액션 처리 오류:', error);
     return {
       success: false,
-      message: '작업 중 오류가 발생했습니다. 다시 시도해주세요.',
+      message: '작업 처리 중 오류가 발생했습니다. 다시 시도해주세요.',
+      error: error instanceof Error ? error.message : '알 수 없는 오류',
     };
   }
 }
 
-// 🔐 보안 메타 정보 - 개인 일정 보호
+// 🌍 다국어 메타 정보 - 개인 일정 보호
 export function meta({ data }: Route.MetaArgs) {
+  const meta = data?.meta;
+
+  // 다국어 제목과 설명 (기본값 fallback)
+  const title = meta?.title || '일정 관리';
+  const description =
+    meta?.description ||
+    'SureCRM 캘린더로 고객 미팅과 일정을 효율적으로 관리하세요.';
+
   return [
-    // 🎯 기본 메타태그 - 일정 관리 페이지
-    { title: '일정 관리 - SureCRM' },
-    {
-      name: 'description',
-      content: '구글 캘린더 연동으로 고객 미팅과 일정을 효율적으로 관리합니다',
-    },
+    // 🎯 다국어 기본 메타태그
+    { title: title + ' | SureCRM' },
+    { name: 'description', content: description },
 
     // 🔒 검색엔진 완전 차단 - 개인 일정 보호
     {

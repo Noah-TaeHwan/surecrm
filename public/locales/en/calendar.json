@@ -1,9 +1,13 @@
 {
-  "title": "Calendar",
+  "title": "Calendar Management",
+  "meta": {
+    "title": "Calendar Management",
+    "description": "Efficiently manage customer meetings and schedules with SureCRM Calendar"
+  },
   "views": {
-    "month": "Month",
-    "week": "Week",
-    "day": "Day",
+    "month": "Monthly",
+    "week": "Weekly",
+    "day": "Daily",
     "agenda": "Agenda"
   },
   "actions": {
@@ -17,7 +21,14 @@
     "scheduleFirstMeeting": "Schedule First Meeting",
     "registerClient": "Register Client",
     "swipeToNavigate": "Swipe to navigate months",
-    "scheduleMeeting": "Schedule New Meeting"
+    "scheduleMeeting": "Schedule New Meeting",
+    "addMeeting": "Add Meeting",
+    "editMeeting": "Edit Meeting",
+    "deleteMeeting": "Delete Meeting",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "close": "Close"
   },
   "event": {
     "title": "Title",
@@ -42,18 +53,18 @@
     "meetingRoom": "Meeting Room",
     "duration": "Duration",
     "agenda": "Agenda",
-    "minutes": "Meeting Minutes",
+    "minutes": "Minutes",
     "types": {
       "consultation": "Consultation",
       "followUp": "Follow-up Meeting",
       "contractSigning": "Contract Signing",
       "review": "Review",
       "first_consultation": "Initial Consultation",
-      "follow_up": "Follow-up",
+      "follow_up": "Follow-up Consultation",
       "product_explanation": "Product Explanation",
       "contract_review": "Contract Review",
       "contract_signing": "Contract Signing",
-      "claim_support": "Claim Support",
+      "claim_support": "Insurance Claim Support",
       "other": "Other",
       "needs_analysis": "Needs Analysis"
     }
@@ -87,26 +98,26 @@
     "disconnect": "Disconnect",
     "sync": "Sync",
     "lastSync": "Last Sync",
-    "connectionRequired": "Google Calendar Integration Required",
-    "connectionDescription": "To use SureCRM's calendar management features, you need to connect with Google Calendar. All events will be automatically synchronized after connection.",
-    "refreshNote": "After connecting, refresh the page to use the calendar management features.",
+    "connectionRequired": "Google Calendar integration is required",
+    "connectionDescription": "To use SureCRM's calendar management features, you need to integrate with Google Calendar. All events will be automatically synchronized after integration.",
+    "refreshNote": "You can use the calendar management features after refreshing following integration.",
     "title": "Google Calendar",
     "connected": "Connected",
-    "syncCount": "{{count}} synced",
+    "syncCount": "{{count}} synchronized",
     "syncNow": "Sync Now",
-    "syncing": "Syncing...",
+    "syncing": "Synchronizing...",
     "needConnection": "Connection Required",
     "connectAccount": "Connect Google Account"
   },
   "emptyState": {
-    "title": "Get Started with Calendar Management",
-    "description": "No customers or meetings registered yet. Schedule your first meeting to get started.",
+    "title": "Start managing your schedule",
+    "description": "No clients or meetings registered yet. Schedule your first meeting to get started.",
     "noEventsToday": "No events scheduled for this day."
   },
   "sidebar": {
     "viewMode": "View Mode",
     "thisWeek": "This Week",
-    "countUnit": " events",
+    "countUnit": "",
     "search": "Search",
     "searchPlaceholder": "Search meetings...",
     "clearSearch": "Clear search",
@@ -125,8 +136,8 @@
     "eventsCount": "{{count}} events",
     "noEvents": "No events",
     "todayNoMeetings": "Today",
-    "noMeetingsScheduled": "no meetings scheduled",
-    "scheduleNewMeeting": "Schedule new meetings to manage your calendar."
+    "noMeetingsScheduled": "No meetings scheduled",
+    "scheduleNewMeeting": "Schedule a new meeting to manage your calendar."
   },
   "weekView": {
     "timeColumn": "Time"
@@ -134,7 +145,7 @@
   "modals": {
     "addMeeting": {
       "title": "Schedule New Meeting",
-      "description": "Schedule a meeting with your client and automatically sync with Google Calendar.",
+      "description": "Schedule a meeting with customers and automatically sync with Google Calendar.",
       "fields": {
         "client": "Select Client",
         "title": "Meeting Title",
@@ -142,28 +153,93 @@
         "time": "Time",
         "duration": "Duration",
         "type": "Meeting Type",
+        "priority": "Priority",
         "location": "Location",
-        "description": "Meeting Description"
+        "description": "Meeting Description",
+        "allDay": "All Day"
       },
       "placeholders": {
-        "selectClient": "Select a client",
-        "title": "e.g. Insurance Consultation",
-        "location": "e.g. Cafe, Office, Online",
+        "selectClient": "Please select a client",
+        "title": "e.g., Insurance consultation",
+        "type": "Please select meeting type",
+        "priority": "Please select priority",
+        "duration": "Please select duration",
+        "location": "e.g., Cafe, Office, Online",
         "description": "Enter meeting purpose or agenda"
       },
-      "durationUnit": " min",
-      "hourUnit": " hour",
+      "durationUnit": "minutes",
+      "hourUnit": "hour",
       "submit": "Schedule Meeting",
-      "successMessage": "Meeting scheduled successfully.",
+      "successMessage": "Meeting has been successfully scheduled.",
       "errorMessage": "An error occurred while creating the meeting."
+    },
+    "editMeeting": {
+      "title": "Edit Meeting",
+      "description": "Edit meeting information and sync with Google Calendar.",
+      "successMessage": "Meeting has been successfully updated.",
+      "errorMessage": "An error occurred while updating the meeting.",
+      "confirmSave": {
+        "title": "Save changes?",
+        "description": "The modified content will be reflected in both SureCRM and Google Calendar.",
+        "googleSync": "Will automatically sync with Google Calendar.",
+        "save": "Save",
+        "cancel": "Cancel"
+      },
+      "confirmCancel": {
+        "title": "Cancel editing?",
+        "description": "Changes will not be saved.",
+        "discard": "Discard Changes",
+        "continue": "Continue Editing"
+      }
+    },
+    "deleteMeeting": {
+      "title": "Delete this meeting?",
+      "description": "This action cannot be undone.",
+      "warning": {
+        "title": "Warning",
+        "irreversible": "This action cannot be undone.",
+        "recordsDeleted": "Meeting records and checklists will be deleted together.",
+        "googleCalendarSync": "Google Calendar events will also be deleted simultaneously."
+      },
+      "googleCalendar": {
+        "title": "Will also be deleted from Google Calendar",
+        "description": "The linked Google Calendar event will also be deleted."
+      },
+      "actions": {
+        "delete": "Delete",
+        "cancel": "Cancel"
+      },
+      "successMessage": "Meeting has been successfully deleted.",
+      "errorMessage": "An error occurred while deleting the meeting."
+    },
+    "googleSync": {
+      "confirmSync": {
+        "title": "Sync with Google Calendar?",
+        "description": "This event will be added to Google Calendar.",
+        "sync": "Sync",
+        "cancel": "Cancel"
+      },
+      "confirmDisconnect": {
+        "title": "Disconnect Google Calendar integration?",
+        "description": "This event will be deleted from Google Calendar.",
+        "disconnect": "Disconnect",
+        "cancel": "Cancel"
+      },
+      "conflictResolution": {
+        "title": "Sync conflict occurred",
+        "description": "Please choose which version to prioritize.",
+        "localPriority": "SureCRM Priority",
+        "googlePriority": "Google Calendar Priority",
+        "cancel": "Cancel"
+      }
     }
   },
   "sync": {
     "noRecord": "No sync record",
     "justNow": "Just now",
-    "minutesAgo": "{{minutes}} min ago",
+    "minutesAgo": "{{minutes}} minutes ago",
     "hoursAgo": "{{hours}} hours ago",
-    "syncInfo": "Sync info"
+    "syncInfo": "Sync Information"
   },
   "filter": {
     "title": "Meeting Filter",
@@ -176,11 +252,17 @@
     "today": "Today",
     "goalAchieved": "Goal Achieved!",
     "moreNeeded": "{{count}} more needed",
-    "summaryStart": "With {{count}} meetings this week",
-    "summaryAchieved": " you've achieved your goal! 🎉"
+    "summaryStart": "With {{count}} meetings this week,",
+    "summaryAchieved": " goal achieved! 🎉"
   },
   "upcomingMeetings": {
-    "title": "Next Meetings",
-    "count": "{{count}} meetings"
+    "title": "Next Meeting",
+    "count": "{{count}}"
+  },
+  "priority": {
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High",
+    "urgent": "Urgent"
   }
 }

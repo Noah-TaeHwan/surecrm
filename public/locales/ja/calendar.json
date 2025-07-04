@@ -1,10 +1,14 @@
 {
-  "title": "カレンダー",
+  "title": "スケジュール管理",
+  "meta": {
+    "title": "スケジュール管理",
+    "description": "SureCRMカレンダーで顧客との会議とスケジュールを効率的に管理できます"
+  },
   "views": {
-    "month": "月表示",
-    "week": "週表示",
-    "day": "日表示",
-    "agenda": "予定表"
+    "month": "月間",
+    "week": "週間",
+    "day": "日間",
+    "agenda": "アジェンダ"
   },
   "actions": {
     "addEvent": "イベント追加",
@@ -14,42 +18,49 @@
     "prev": "前",
     "next": "次",
     "sync": "同期",
-    "scheduleFirstMeeting": "初回会議をスケジュール",
+    "scheduleFirstMeeting": "最初の会議をスケジュール",
     "registerClient": "顧客登録",
-    "swipeToNavigate": "スワイプして月を移動",
-    "scheduleMeeting": "新しい会議をスケジュール"
+    "swipeToNavigate": "スワイプで月移動",
+    "scheduleMeeting": "新しい会議をスケジュール",
+    "addMeeting": "会議追加",
+    "editMeeting": "会議編集",
+    "deleteMeeting": "会議削除",
+    "save": "保存",
+    "cancel": "キャンセル",
+    "confirm": "確認",
+    "close": "閉じる"
   },
   "event": {
     "title": "タイトル",
     "description": "説明",
     "startDate": "開始日",
     "endDate": "終了日",
-    "startTime": "開始時間",
-    "endTime": "終了時間",
+    "startTime": "開始時刻",
+    "endTime": "終了時刻",
     "allDay": "終日",
     "location": "場所",
     "attendees": "参加者",
     "reminder": "リマインダー",
     "repeat": "繰り返し",
-    "category": "カテゴリ"
+    "category": "カテゴリー"
   },
   "meeting": {
-    "scheduleMeeting": "会議のスケジュール",
+    "scheduleMeeting": "会議をスケジュール",
     "clientMeeting": "顧客との会議",
     "teamMeeting": "チーム会議",
     "onlineMeeting": "オンライン会議",
     "officeMeeting": "オフィス会議",
     "meetingRoom": "会議室",
     "duration": "所要時間",
-    "agenda": "議題",
+    "agenda": "アジェンダ",
     "minutes": "議事録",
     "types": {
       "consultation": "相談",
       "followUp": "フォローアップ会議",
-      "contractSigning": "契約署名",
+      "contractSigning": "契約締結",
       "review": "レビュー",
       "first_consultation": "初回相談",
-      "follow_up": "フォローアップ",
+      "follow_up": "フォローアップ相談",
       "product_explanation": "商品説明",
       "contract_review": "契約レビュー",
       "contract_signing": "契約締結",
@@ -78,7 +89,7 @@
   },
   "status": {
     "confirmed": "確定",
-    "tentative": "未定",
+    "tentative": "仮",
     "cancelled": "キャンセル",
     "completed": "完了"
   },
@@ -87,21 +98,21 @@
     "disconnect": "連携解除",
     "sync": "同期",
     "lastSync": "最終同期",
-    "connectionRequired": "Googleカレンダーとの連携が必要です",
+    "connectionRequired": "Googleカレンダー連携が必要です",
     "connectionDescription": "SureCRMのカレンダー管理機能を使用するには、Googleカレンダーとの連携が必要です。連携後、すべてのイベントが自動的に同期されます。",
     "refreshNote": "連携後、ページを更新するとカレンダー管理機能を使用できます。",
     "title": "Googleカレンダー",
-    "connected": "接続済み",
-    "syncCount": "{{count}}件同期済み",
+    "connected": "連携済み",
+    "syncCount": "{{count}}件同期",
     "syncNow": "今すぐ同期",
     "syncing": "同期中...",
-    "needConnection": "接続が必要",
-    "connectAccount": "Googleアカウントに接続"
+    "needConnection": "連携が必要",
+    "connectAccount": "Googleアカウント連携"
   },
   "emptyState": {
-    "title": "カレンダー管理を開始しましょう",
-    "description": "まだ顧客や会議が登録されていません。最初の会議をスケジュールして開始しましょう。",
-    "noEventsToday": "この日には予定されているイベントがありません。"
+    "title": "スケジュール管理を始めましょう",
+    "description": "まだ顧客や会議が登録されていません。最初の会議をスケジュールして始めましょう。",
+    "noEventsToday": "この日にはイベントが予定されていません。"
   },
   "sidebar": {
     "viewMode": "表示モード",
@@ -122,11 +133,11 @@
     "achievement": "達成率"
   },
   "dayView": {
-    "eventsCount": "{{count}}件の予定",
-    "noEvents": "予定がありません",
+    "eventsCount": "{{count}}件のイベント",
+    "noEvents": "イベントなし",
     "todayNoMeetings": "今日",
-    "noMeetingsScheduled": "予定されているミーティングがありません",
-    "scheduleNewMeeting": "新しいミーティングを予約してスケジュールを管理しましょう。"
+    "noMeetingsScheduled": "会議の予定なし",
+    "scheduleNewMeeting": "新しい会議をスケジュールしてカレンダーを管理しましょう。"
   },
   "weekView": {
     "timeColumn": "時間"
@@ -134,28 +145,93 @@
   "modals": {
     "addMeeting": {
       "title": "新しい会議をスケジュール",
-      "description": "クライアントとの会議をスケジュールし、Googleカレンダーと自動同期します。",
+      "description": "顧客との会議をスケジュールし、Googleカレンダーと自動同期します。",
       "fields": {
-        "client": "クライアント選択",
+        "client": "顧客選択",
         "title": "会議タイトル",
         "date": "日付",
         "time": "時間",
         "duration": "所要時間",
         "type": "会議タイプ",
+        "priority": "優先度",
         "location": "場所",
-        "description": "会議説明"
+        "description": "会議説明",
+        "allDay": "終日"
       },
       "placeholders": {
-        "selectClient": "クライアントを選択してください",
+        "selectClient": "顧客を選択してください",
         "title": "例：保険相談",
+        "type": "会議タイプを選択してください",
+        "priority": "優先度を選択してください",
+        "duration": "所要時間を選択してください",
         "location": "例：カフェ、オフィス、オンライン",
-        "description": "会議の目的や議題を入力してください"
+        "description": "会議の目的やアジェンダを入力してください"
       },
       "durationUnit": "分",
       "hourUnit": "時間",
       "submit": "会議をスケジュール",
       "successMessage": "会議が正常にスケジュールされました。",
       "errorMessage": "会議の作成中にエラーが発生しました。"
+    },
+    "editMeeting": {
+      "title": "会議編集",
+      "description": "会議情報を編集し、Googleカレンダーと同期します。",
+      "successMessage": "会議が正常に更新されました。",
+      "errorMessage": "会議の更新中にエラーが発生しました。",
+      "confirmSave": {
+        "title": "変更を保存しますか？",
+        "description": "修正された内容がSureCRMとGoogleカレンダーの両方に反映されます。",
+        "googleSync": "Googleカレンダーと自動同期されます。",
+        "save": "保存",
+        "cancel": "キャンセル"
+      },
+      "confirmCancel": {
+        "title": "編集をキャンセルしますか？",
+        "description": "変更された内容は保存されません。",
+        "discard": "変更を破棄",
+        "continue": "編集を続行"
+      }
+    },
+    "deleteMeeting": {
+      "title": "この会議を削除しますか？",
+      "description": "この操作は元に戻すことができません。",
+      "warning": {
+        "title": "注意事項",
+        "irreversible": "この操作は元に戻すことができません。",
+        "recordsDeleted": "会議記録とチェックリストも一緒に削除されます。",
+        "googleCalendarSync": "Googleカレンダーのイベントも同時に削除されます。"
+      },
+      "googleCalendar": {
+        "title": "Googleカレンダーからも削除されます",
+        "description": "連携されたGoogleカレンダーイベントも一緒に削除されます。"
+      },
+      "actions": {
+        "delete": "削除",
+        "cancel": "キャンセル"
+      },
+      "successMessage": "会議が正常に削除されました。",
+      "errorMessage": "会議の削除中にエラーが発生しました。"
+    },
+    "googleSync": {
+      "confirmSync": {
+        "title": "Googleカレンダーと同期しますか？",
+        "description": "このイベントがGoogleカレンダーに追加されます。",
+        "sync": "同期",
+        "cancel": "キャンセル"
+      },
+      "confirmDisconnect": {
+        "title": "Googleカレンダー連携を解除しますか？",
+        "description": "Googleカレンダーからこのイベントが削除されます。",
+        "disconnect": "連携解除",
+        "cancel": "キャンセル"
+      },
+      "conflictResolution": {
+        "title": "同期の競合が発生しました",
+        "description": "どちらのバージョンを優先するか選択してください。",
+        "localPriority": "SureCRM優先",
+        "googlePriority": "Googleカレンダー優先",
+        "cancel": "キャンセル"
+      }
     }
   },
   "sync": {
@@ -166,21 +242,27 @@
     "syncInfo": "同期情報"
   },
   "filter": {
-    "title": "ミーティングフィルター",
+    "title": "会議フィルター",
     "selected": "{{count}}件選択",
-    "typesSelected": "{{count}}タイプ選択済み"
+    "typesSelected": "{{count}}タイプが選択されました"
   },
   "performance": {
-    "title": "今週の成果",
-    "totalMeetings": "総ミーティング",
+    "title": "今週のパフォーマンス",
+    "totalMeetings": "総会議数",
     "today": "今日",
     "goalAchieved": "目標達成！",
     "moreNeeded": "あと{{count}}件必要",
-    "summaryStart": "今週{{count}}件のミーティングで",
-    "summaryAchieved": " 目標を達成しました！🎉"
+    "summaryStart": "今週{{count}}件の会議で",
+    "summaryAchieved": "目標を達成しました！🎉"
   },
   "upcomingMeetings": {
-    "title": "次のミーティング",
+    "title": "次の会議",
     "count": "{{count}}件"
+  },
+  "priority": {
+    "low": "低",
+    "medium": "中",
+    "high": "高",
+    "urgent": "緊急"
   }
 }
