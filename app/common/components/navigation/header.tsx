@@ -45,6 +45,7 @@ interface BasicNotification {
   type: string;
   createdAt: string;
   readAt?: string | null;
+  [key: string]: unknown;
 }
 
 export function Header({

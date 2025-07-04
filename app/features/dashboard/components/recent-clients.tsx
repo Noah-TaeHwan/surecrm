@@ -86,7 +86,10 @@ export function RecentClients({
 
   // hydration-safe 날짜 포맷 - 내장 함수 사용
   const formatDate = (dateStr: string) => {
-    return formatDateHydrationSafe(new Date(dateStr), 'short');
+    return formatDateHydrationSafe(new Date(dateStr), {
+      month: 'short',
+      day: 'numeric',
+    });
   };
 
   return (

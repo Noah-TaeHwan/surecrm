@@ -6,6 +6,7 @@ import { Clock, MapPin, User, Phone, Video, Coffee } from 'lucide-react';
 import { Badge } from '~/common/components/ui/badge';
 import { useDeviceType } from '~/common/hooks/use-viewport';
 import { useSyncExternalStore } from 'react';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 
 // 🍎 SureCRM 색상 시스템 통합 (iOS 네이티브 스타일)
 const getEventColors = (meeting: Meeting) => {
@@ -69,15 +70,24 @@ export function DayView({
   meetings,
   onMeetingClick,
 }: DayViewProps) {
-  const { isMobile } = useDeviceType();
+  const deviceType = useDeviceType();
+  const { t, formatDate } = useHydrationSafeTranslation('calendar');
 
-  // 선택된 날짜의 미팅들만 필터링
-  const dateStr = selectedDate.toISOString().split('T')[0];
-  const filteredMeetings = meetings.filter(meeting => meeting.date === dateStr);
+  // 해당 날짜의 미팅들만 필터링
+  const dayMeetings = meetings.filter((meeting: Meeting) => {
+    const meetingDate = new Date(meeting.date);
+    return (
+      meetingDate.getDate() === selectedDate.getDate() &&
+      meetingDate.getMonth() === selectedDate.getMonth() &&
+      meetingDate.getFullYear() === selectedDate.getFullYear()
+    );
+  });
 
-  // 시간순으로 정렬된 미팅 목록
-  const sortedMeetings = filteredMeetings.sort((a, b) => {
-    return a.time.localeCompare(b.time);
+  // 시간대별로 정렬
+  const sortedMeetings = dayMeetings.sort((a, b) => {
+    const timeA = a.time || '00:00';
+    const timeB = b.time || '00:00';
+    return timeA.localeCompare(timeB);
   });
 
   // 시간 슬롯 생성 (6시부터 22시까지)
@@ -111,6 +121,20 @@ export function DayView({
 
   // useSyncExternalStore용 빈 구독 함수
   const emptySubscribe = () => () => {};
+
+  // Hydration-safe 날짜 표시
+  const formatDateSafe = useSyncExternalStore(
+    emptySubscribe,
+    () =>
+      formatDate(selectedDate, {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      }),
+    () =>
+      `${selectedDate.getFullYear()}년 ${selectedDate.getMonth() + 1}월 ${selectedDate.getDate()}일`
+  );
 
   // 오늘인지 확인 (hydration-safe)
   const isToday = useSyncExternalStore(
@@ -148,57 +172,19 @@ export function DayView({
   }
 
   return (
-    <div className="bg-card/30 rounded-2xl overflow-hidden border border-border/30 shadow-2xl backdrop-blur-md">
-      {/* 헤더 */}
-      <div className="border-b border-border/30 bg-gradient-to-r from-muted/40 to-muted/20 backdrop-blur-sm p-6">
-        <div className="flex items-center justify-between">
-          <div className="space-y-1">
-            <h2 className="text-2xl font-bold text-foreground">
-              {format(selectedDate, 'MM월 dd일', { locale: ko })}
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              {format(selectedDate, 'EEEE', { locale: ko })}
-              {isToday && (
-                <Badge variant="secondary" className="ml-2 text-xs">
-                  오늘
-                </Badge>
-              )}
-            </p>
-          </div>
-
-          <div className="text-right space-y-1">
-            <div className="text-2xl font-bold text-sky-600 dark:text-sky-400">
-              {sortedMeetings.length}
-            </div>
-            <div className="text-xs text-muted-foreground">개의 미팅</div>
-          </div>
-        </div>
-
-        {/* 미팅 요약 */}
-        {sortedMeetings.length > 0 && (
-          <div className="mt-4 flex items-center gap-4">
-            <div className="flex items-center gap-2 text-sm">
-              <Clock className="w-4 h-4 text-muted-foreground" />
-              <span className="text-muted-foreground">
-                {sortedMeetings[0].time} -{' '}
-                {sortedMeetings[sortedMeetings.length - 1].time}
-              </span>
-            </div>
-            <div className="flex items-center gap-1">
-              {Array.from(new Set(sortedMeetings.map(m => m.type))).map(
-                type => (
-                  <div
-                    key={type}
-                    className={cn(
-                      'w-3 h-3 rounded-full',
-                      getEventColors({ type } as Meeting).dot
-                    )}
-                  />
-                )
-              )}
-            </div>
-          </div>
-        )}
+    <div className="h-full flex flex-col bg-background">
+      {/* 📅 날짜 헤더 */}
+      <div className="flex-shrink-0 p-4 bg-card border-b border-border">
+        <h2 className="text-xl font-bold text-foreground mb-1">
+          {formatDateSafe}
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          {sortedMeetings.length > 0
+            ? t('dayView.eventsCount', '{{count}}개의 일정', {
+                count: sortedMeetings.length,
+              })
+            : t('dayView.noEvents', '일정이 없습니다')}
+        </p>
       </div>
 
       {/* 시간 타임라인 */}

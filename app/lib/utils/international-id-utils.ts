@@ -298,8 +298,11 @@ function getErrorMessage(
     },
   };
 
+  const languageMessages = messages[language];
+  const messageKey = type as keyof typeof languageMessages;
+
   return (
-    messages[language][type] || messages[language].format || 'Invalid input'
+    languageMessages[messageKey] || languageMessages.format || 'Invalid input'
   );
 }
 

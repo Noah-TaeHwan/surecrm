@@ -13,7 +13,11 @@
     "today": "오늘",
     "prev": "이전",
     "next": "다음",
-    "sync": "동기화"
+    "sync": "동기화",
+    "scheduleFirstMeeting": "첫 미팅 예약하기",
+    "registerClient": "고객 등록하기",
+    "swipeToNavigate": "스와이프하여 월 이동",
+    "scheduleMeeting": "새 미팅 예약"
   },
   "event": {
     "title": "제목",
@@ -38,7 +42,21 @@
     "meetingRoom": "회의실",
     "duration": "소요 시간",
     "agenda": "안건",
-    "minutes": "회의록"
+    "minutes": "회의록",
+    "types": {
+      "consultation": "상담",
+      "followUp": "후속 미팅",
+      "contractSigning": "계약 체결",
+      "review": "리뷰",
+      "first_consultation": "초회 상담",
+      "follow_up": "후속 상담",
+      "product_explanation": "상품 설명",
+      "contract_review": "계약 검토",
+      "contract_signing": "계약 체결",
+      "claim_support": "보험금 청구 지원",
+      "other": "기타",
+      "needs_analysis": "니즈 분석"
+    }
   },
   "reminder": {
     "none": "없음",
@@ -68,6 +86,106 @@
     "connect": "구글 캘린더 연결",
     "disconnect": "연결 해제",
     "sync": "동기화",
-    "lastSync": "마지막 동기화"
+    "lastSync": "마지막 동기화",
+    "connectionRequired": "구글 캘린더 연동이 필요합니다",
+    "connectionDescription": "SureCRM의 일정 관리 기능을 사용하려면 구글 캘린더와의 연동이 필요합니다. 연동 후 모든 일정이 자동으로 동기화됩니다.",
+    "refreshNote": "연동 후 새로고침하면 일정 관리 기능을 사용할 수 있습니다.",
+    "title": "구글 캘린더",
+    "connected": "연결됨",
+    "syncCount": "{{count}}개 동기화",
+    "syncNow": "지금 동기화",
+    "syncing": "동기화 중...",
+    "needConnection": "연결 필요",
+    "connectAccount": "구글 계정 연결"
+  },
+  "emptyState": {
+    "title": "일정 관리를 시작해보세요",
+    "description": "아직 등록된 고객이나 미팅이 없습니다. 첫 번째 미팅을 예약하여 시작해보세요.",
+    "noEventsToday": "이 날에는 예정된 일정이 없습니다."
+  },
+  "sidebar": {
+    "viewMode": "보기 방식",
+    "thisWeek": "이번 주",
+    "countUnit": "건",
+    "search": "검색",
+    "searchPlaceholder": "미팅 검색...",
+    "clearSearch": "검색 지우기",
+    "filterByType": "타입별 필터",
+    "selectAll": "전체 선택",
+    "clearAll": "전체 해제",
+    "typeAnalysis": "타입별 분석",
+    "goalAchievement": "목표 달성률",
+    "upcomingMeetings": "다가오는 미팅",
+    "noFilteredMeetings": "필터 조건에 맞는 미팅이 없습니다",
+    "adjustFilters": "필터를 조정하거나 새 미팅을 추가해보세요",
+    "weeklyGoal": "주간 목표",
+    "achievement": "달성률"
+  },
+  "dayView": {
+    "eventsCount": "{{count}}개의 일정",
+    "noEvents": "일정이 없습니다",
+    "today": "오늘",
+    "eventTime": "시간",
+    "eventLocation": "장소",
+    "eventAttendees": "참석자",
+    "allDayEvent": "종일 이벤트"
+  },
+  "weekView": {
+    "timeColumn": "시간",
+    "currentTime": "현재 시간",
+    "weekOf": "{{date}} 주",
+    "noEventsThisWeek": "이번 주에 일정이 없습니다"
+  },
+  "modals": {
+    "addMeeting": {
+      "title": "새 미팅 예약",
+      "description": "고객과의 미팅을 예약하고 구글 캘린더와 자동 동기화합니다.",
+      "fields": {
+        "client": "고객 선택",
+        "title": "미팅 제목",
+        "date": "날짜",
+        "time": "시간",
+        "duration": "소요 시간",
+        "type": "미팅 타입",
+        "location": "장소",
+        "description": "미팅 설명"
+      },
+      "placeholders": {
+        "selectClient": "고객을 선택하세요",
+        "title": "예: 보험 상담",
+        "location": "예: 카페, 사무실, 온라인",
+        "description": "미팅 목적이나 안건을 입력하세요"
+      },
+      "durationUnit": "분",
+      "hourUnit": "시간",
+      "submit": "미팅 예약하기",
+      "successMessage": "미팅이 성공적으로 예약되었습니다.",
+      "errorMessage": "미팅 생성 중 오류가 발생했습니다."
+    }
+  },
+  "sync": {
+    "noRecord": "동기화 기록 없음",
+    "justNow": "방금 전",
+    "minutesAgo": "{{minutes}}분 전",
+    "hoursAgo": "{{hours}}시간 전",
+    "syncInfo": "동기화 정보"
+  },
+  "filter": {
+    "title": "미팅 필터",
+    "selected": "{{count}}개 선택",
+    "typesSelected": "{{count}}개 타입이 선택됨"
+  },
+  "performance": {
+    "title": "이번 주 성과",
+    "totalMeetings": "총 미팅",
+    "today": "오늘",
+    "goalAchieved": "목표 달성!",
+    "moreNeeded": "{{count}}건 더 필요합니다",
+    "summaryStart": "이번 주 {{count}}건의 미팅으로",
+    "summaryAchieved": " 목표를 달성했습니다! 🎉"
+  },
+  "upcomingMeetings": {
+    "title": "다음 미팅",
+    "count": "{{count}}개"
   }
 }

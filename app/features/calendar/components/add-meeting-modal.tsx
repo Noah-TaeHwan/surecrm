@@ -3,7 +3,7 @@
  * Dialog를 사용하여 미팅 추가 기능 구현
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -37,6 +37,10 @@ import {
 import { Textarea } from '~/common/components/ui/textarea';
 import { CalendarIcon, ClockIcon, MapPin } from 'lucide-react';
 import { toast } from 'sonner';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
+import { UserIcon } from 'lucide-react';
+import { Badge } from '~/common/components/ui/badge';
+import { MapPinIcon } from 'lucide-react';
 
 // 🎯 폼 스키마
 const meetingSchema = z.object({
@@ -44,7 +48,7 @@ const meetingSchema = z.object({
   clientId: z.string().min(1, '고객을 선택하세요'),
   date: z.string().min(1, '날짜를 선택하세요'),
   time: z.string().min(1, '시간을 선택하세요'),
-  duration: z.number().min(15).max(480),
+  duration: z.string().min(1, '소요 시간을 선택하세요'),
   type: z.string().min(1, '미팅 유형을 선택하세요'),
   location: z.string().optional(),
   description: z.string().optional(),
@@ -82,6 +86,8 @@ export function AddMeetingModal({
   clients,
 }: AddMeetingModalProps) {
   const navigate = useNavigate();
+  const { t } = useHydrationSafeTranslation('calendar');
+
   const form = useForm<MeetingFormData>({
     resolver: zodResolver(meetingSchema),
     defaultValues: {
@@ -89,7 +95,7 @@ export function AddMeetingModal({
       clientId: '',
       date: new Date().toISOString().split('T')[0],
       time: '09:00',
-      duration: 60,
+      duration: '60',
       type: '',
       location: '',
       description: '',
@@ -116,16 +122,23 @@ export function AddMeetingModal({
       });
 
       if (response.ok) {
-        toast.success('미팅이 성공적으로 예약되었습니다.');
+        toast.success(
+          t(
+            'modals.addMeeting.successMessage',
+            '미팅이 성공적으로 예약되었습니다.'
+          )
+        );
         form.reset();
         onClose();
         navigate('.', { replace: true }); // 페이지 새로고침
       } else {
-        throw new Error('미팅 생성 실패');
+        throw new Error(t('modals.addMeeting.errorMessage', '미팅 생성 실패'));
       }
     } catch (error) {
       console.error('미팅 생성 중 오류:', error);
-      toast.error('미팅 생성 중 오류가 발생했습니다.');
+      toast.error(
+        t('modals.addMeeting.errorMessage', '미팅 생성 중 오류가 발생했습니다.')
+      );
     }
   };
 
@@ -133,9 +146,14 @@ export function AddMeetingModal({
     <Dialog open={isOpen} onOpenChange={open => !open && onClose()}>
       <DialogContent className="sm:max-w-xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>새 미팅 예약</DialogTitle>
+          <DialogTitle>
+            {t('modals.addMeeting.title', '새 미팅 예약')}
+          </DialogTitle>
           <DialogDescription>
-            고객과의 미팅을 예약하고 구글 캘린더와 자동 동기화합니다.
+            {t(
+              'modals.addMeeting.description',
+              '고객과의 미팅을 예약하고 구글 캘린더와 자동 동기화합니다.'
+            )}
           </DialogDescription>
         </DialogHeader>
 
@@ -150,48 +168,37 @@ export function AddMeetingModal({
               name="clientId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>고객 선택 *</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+                  <FormLabel>
+                    {t('modals.addMeeting.fields.client', '고객 선택')} *
+                  </FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="고객을 선택하세요" />
+                        <div className="flex items-center gap-2">
+                          <UserIcon className="h-4 w-4 text-muted-foreground" />
+                          <SelectValue
+                            placeholder={t(
+                              'modals.addMeeting.placeholders.selectClient',
+                              '고객을 선택하세요'
+                            )}
+                          />
+                        </div>
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       {clients.map(client => (
                         <SelectItem key={client.id} value={client.id}>
-                          {(client as any).fullName ||
-                            (client as any).name ||
-                            '고객'}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* 미팅 유형 */}
-            <FormField
-              control={form.control}
-              name="type"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>미팅 유형 *</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="유형을 선택하세요" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {meetingTypes.map(type => (
-                        <SelectItem key={type.value} value={type.value}>
-                          <span className="flex items-center gap-2">
-                            <span>{type.icon}</span>
-                            <span>{type.label}</span>
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span>{client.name}</span>
+                            {client.importance === 'high' && (
+                              <Badge variant="secondary" className="text-xs">
+                                VIP
+                              </Badge>
+                            )}
+                          </div>
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -207,9 +214,17 @@ export function AddMeetingModal({
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>미팅 제목 *</FormLabel>
+                  <FormLabel>
+                    {t('modals.addMeeting.fields.title', '미팅 제목')} *
+                  </FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="예: 김영희님 초회 상담" />
+                    <Input
+                      placeholder={t(
+                        'modals.addMeeting.placeholders.title',
+                        '예: 보험 상담'
+                      )}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -223,7 +238,9 @@ export function AddMeetingModal({
                 name="date"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>날짜 *</FormLabel>
+                    <FormLabel>
+                      {t('modals.addMeeting.fields.date', '날짜')} *
+                    </FormLabel>
                     <FormControl>
                       <div className="relative">
                         <CalendarIcon className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -240,7 +257,9 @@ export function AddMeetingModal({
                 name="time"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>시간 *</FormLabel>
+                    <FormLabel>
+                      {t('modals.addMeeting.fields.time', '시간')} *
+                    </FormLabel>
                     <FormControl>
                       <div className="relative">
                         <ClockIcon className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -253,62 +272,76 @@ export function AddMeetingModal({
               />
             </div>
 
-            {/* 소요 시간 */}
-            <FormField
-              control={form.control}
-              name="duration"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>소요 시간 (분)</FormLabel>
-                  <Select
-                    onValueChange={value => field.onChange(Number(value))}
-                    value={field.value?.toString()}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="30">30분</SelectItem>
-                      <SelectItem value="60">1시간</SelectItem>
-                      <SelectItem value="90">1시간 30분</SelectItem>
-                      <SelectItem value="120">2시간</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* 우선순위 */}
-            <FormField
-              control={form.control}
-              name="priority"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>우선순위</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {priorityOptions.map(option => (
-                        <SelectItem key={option.value} value={option.value}>
-                          <span className="flex items-center gap-2">
-                            <span>{option.icon}</span>
-                            <span>{option.label}</span>
-                          </span>
+            {/* 소요 시간과 미팅 타입 */}
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="duration"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      {t('modals.addMeeting.fields.duration', '소요 시간')} *
+                    </FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="30">
+                          30{t('modals.addMeeting.durationUnit', '분')}
                         </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                        <SelectItem value="60">
+                          1{t('modals.addMeeting.hourUnit', '시간')}
+                        </SelectItem>
+                        <SelectItem value="90">
+                          1{t('modals.addMeeting.hourUnit', '시간')} 30
+                          {t('modals.addMeeting.durationUnit', '분')}
+                        </SelectItem>
+                        <SelectItem value="120">
+                          2{t('modals.addMeeting.hourUnit', '시간')}
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      {t('modals.addMeeting.fields.type', '미팅 타입')}
+                    </FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {meetingTypes.map(type => (
+                          <SelectItem key={type.value} value={type.value}>
+                            <span className="flex items-center gap-2">
+                              <span>{type.icon}</span>
+                              <span>{type.label}</span>
+                            </span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             {/* 장소 */}
             <FormField
@@ -316,13 +349,18 @@ export function AddMeetingModal({
               name="location"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>장소</FormLabel>
+                  <FormLabel>
+                    {t('modals.addMeeting.fields.location', '장소')}
+                  </FormLabel>
                   <FormControl>
                     <div className="relative">
-                      <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <MapPinIcon className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                       <Input
+                        placeholder={t(
+                          'modals.addMeeting.placeholders.location',
+                          '예: 카페, 사무실, 온라인'
+                        )}
                         className="pl-10"
-                        placeholder="미팅 장소"
                         {...field}
                       />
                     </div>
@@ -332,34 +370,45 @@ export function AddMeetingModal({
               )}
             />
 
-            {/* 설명 */}
+            {/* 미팅 설명 */}
             <FormField
               control={form.control}
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>미팅 메모</FormLabel>
+                  <FormLabel>
+                    {t('modals.addMeeting.fields.description', '미팅 설명')}
+                  </FormLabel>
                   <FormControl>
                     <Textarea
-                      {...field}
-                      placeholder="준비사항, 논의 주제 등을 입력하세요"
+                      placeholder={t(
+                        'modals.addMeeting.placeholders.description',
+                        '미팅 목적이나 안건을 입력하세요'
+                      )}
+                      className="resize-none"
                       rows={3}
+                      {...field}
                     />
                   </FormControl>
-                  <FormDescription>
-                    구글 캘린더 일정 설명에 자동으로 동기화됩니다
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            <DialogFooter className="gap-2 sm:gap-0">
-              <Button type="button" variant="outline" onClick={onClose}>
-                취소
+            {/* 버튼 */}
+            <div className="flex gap-3 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                className="flex-1"
+                onClick={onClose}
+              >
+                {t('actions.cancel', '취소')}
               </Button>
-              <Button type="submit">미팅 예약</Button>
-            </DialogFooter>
+              <Button type="submit" className="flex-1">
+                {t('modals.addMeeting.submit', '미팅 예약하기')}
+              </Button>
+            </div>
           </form>
         </Form>
       </DialogContent>

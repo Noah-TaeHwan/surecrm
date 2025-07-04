@@ -27,6 +27,7 @@ import { useState, useRef, useEffect, useSyncExternalStore } from 'react';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { subMonths, addMonths } from 'date-fns';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 
 interface CalendarGridProps {
   selectedDate: Date;
@@ -276,13 +277,31 @@ function MonthHeader({
   onTitleClick?: () => void;
 }) {
   const { isMobile } = useViewport();
+  const { t, formatDate, getCurrentLanguage } =
+    useHydrationSafeTranslation('calendar');
+
   const monthName = useSyncExternalStore(
     emptySubscribe,
-    () =>
-      currentDate.toLocaleDateString('ko-KR', {
-        year: 'numeric',
-        month: 'long',
-      }),
+    () => {
+      const lang = getCurrentLanguage();
+      switch (lang) {
+        case 'en':
+          return currentDate.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+          });
+        case 'ja':
+          return currentDate.toLocaleDateString('ja-JP', {
+            year: 'numeric',
+            month: 'long',
+          });
+        default: // ko
+          return currentDate.toLocaleDateString('ko-KR', {
+            year: 'numeric',
+            month: 'long',
+          });
+      }
+    },
     () => `${currentDate.getFullYear()}년 ${currentDate.getMonth() + 1}월` // 서버에서는 기본 형식
   );
 
@@ -341,30 +360,41 @@ function MonthHeader({
   );
 }
 
-// 📱 요일 헤더 (iOS 스타일, SureCRM 색상 시스템 적용)
+// 🧱 요일 헤더 컴포넌트 (SureCRM 색상 시스템 적용)
 function WeekdayHeader() {
   const { isMobile } = useViewport();
-  const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
+  const { t, getCurrentLanguage } = useHydrationSafeTranslation('calendar');
+
+  // 언어별 요일 배열
+  const getWeekdays = () => {
+    const lang = getCurrentLanguage();
+    switch (lang) {
+      case 'en':
+        return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      case 'ja':
+        return ['日', '月', '火', '水', '木', '金', '土'];
+      default: // ko
+        return ['일', '월', '화', '수', '목', '금', '토'];
+    }
+  };
+
+  const weekdays = getWeekdays();
 
   return (
     <div
       className={cn(
-        'grid grid-cols-7',
-        'bg-muted/50 backdrop-blur-sm',
-        'border-b border-border/50'
+        'grid grid-cols-7 gap-1 bg-muted/20 border-b border-border/30',
+        isMobile ? 'py-2 px-2' : 'py-3 px-3'
       )}
     >
       {weekdays.map((day, index) => (
         <div
-          key={day}
+          key={index}
           className={cn(
-            'text-center font-semibold transition-colors',
-            isMobile ? 'py-3 text-sm' : 'py-2.5 text-xs',
-            index === 0
-              ? 'text-destructive' // 일요일
-              : index === 6
-                ? 'text-primary' // 토요일
-                : 'text-muted-foreground' // 평일
+            'text-center font-medium text-muted-foreground',
+            isMobile ? 'text-xs py-2' : 'text-sm py-2',
+            index === 0 && 'text-red-500', // 일요일
+            index === 6 && 'text-blue-500' // 토요일
           )}
         >
           {day}
@@ -498,6 +528,7 @@ export function CalendarGrid({
     null
   );
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const { t } = useHydrationSafeTranslation('calendar');
 
   // 햅틱 피드백 함수
   const triggerHapticFeedback = () => {
@@ -850,7 +881,7 @@ export function CalendarGrid({
         <div className="flex justify-center py-2 border-t border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-1 text-xs text-gray-400 dark:text-gray-600">
             <ChevronLeft className="h-3 w-3" />
-            <span>스와이프하여 월 이동</span>
+            <span>{t('actions.swipeToNavigate', '스와이프하여 월 이동')}</span>
             <ChevronRight className="h-3 w-3" />
           </div>
         </div>

@@ -13,7 +13,11 @@
     "today": "Today",
     "prev": "Previous",
     "next": "Next",
-    "sync": "Sync"
+    "sync": "Sync",
+    "scheduleFirstMeeting": "Schedule First Meeting",
+    "registerClient": "Register Client",
+    "swipeToNavigate": "Swipe to navigate months",
+    "scheduleMeeting": "Schedule New Meeting"
   },
   "event": {
     "title": "Title",
@@ -38,7 +42,21 @@
     "meetingRoom": "Meeting Room",
     "duration": "Duration",
     "agenda": "Agenda",
-    "minutes": "Meeting Minutes"
+    "minutes": "Meeting Minutes",
+    "types": {
+      "consultation": "Consultation",
+      "followUp": "Follow-up Meeting",
+      "contractSigning": "Contract Signing",
+      "review": "Review",
+      "first_consultation": "Initial Consultation",
+      "follow_up": "Follow-up",
+      "product_explanation": "Product Explanation",
+      "contract_review": "Contract Review",
+      "contract_signing": "Contract Signing",
+      "claim_support": "Claim Support",
+      "other": "Other",
+      "needs_analysis": "Needs Analysis"
+    }
   },
   "reminder": {
     "none": "None",
@@ -68,6 +86,106 @@
     "connect": "Connect Google Calendar",
     "disconnect": "Disconnect",
     "sync": "Sync",
-    "lastSync": "Last Sync"
+    "lastSync": "Last Sync",
+    "connectionRequired": "Google Calendar Integration Required",
+    "connectionDescription": "To use SureCRM's calendar management features, you need to connect with Google Calendar. All events will be automatically synchronized after connection.",
+    "refreshNote": "After connecting, refresh the page to use the calendar management features.",
+    "title": "Google Calendar",
+    "connected": "Connected",
+    "syncCount": "{{count}} synced",
+    "syncNow": "Sync Now",
+    "syncing": "Syncing...",
+    "needConnection": "Connection Required",
+    "connectAccount": "Connect Google Account"
+  },
+  "emptyState": {
+    "title": "Get Started with Calendar Management",
+    "description": "No customers or meetings registered yet. Schedule your first meeting to get started.",
+    "noEventsToday": "No events scheduled for this day."
+  },
+  "sidebar": {
+    "viewMode": "View Mode",
+    "thisWeek": "This Week",
+    "countUnit": " events",
+    "search": "Search",
+    "searchPlaceholder": "Search meetings...",
+    "clearSearch": "Clear search",
+    "filterByType": "Filter by Type",
+    "selectAll": "Select All",
+    "clearAll": "Clear All",
+    "typeAnalysis": "Type Analysis",
+    "goalAchievement": "Goal Achievement",
+    "upcomingMeetings": "Upcoming Meetings",
+    "noFilteredMeetings": "No meetings match the filter criteria",
+    "adjustFilters": "Adjust filters or add a new meeting",
+    "weeklyGoal": "Weekly Goal",
+    "achievement": "Achievement"
+  },
+  "dayView": {
+    "eventsCount": "{{count}} events",
+    "noEvents": "No events scheduled",
+    "today": "Today",
+    "eventTime": "Time",
+    "eventLocation": "Location",
+    "eventAttendees": "Attendees",
+    "allDayEvent": "All Day Event"
+  },
+  "weekView": {
+    "timeColumn": "Time",
+    "currentTime": "Current Time",
+    "weekOf": "Week of {{date}}",
+    "noEventsThisWeek": "No events this week"
+  },
+  "modals": {
+    "addMeeting": {
+      "title": "Schedule New Meeting",
+      "description": "Schedule a meeting with your client and automatically sync with Google Calendar.",
+      "fields": {
+        "client": "Select Client",
+        "title": "Meeting Title",
+        "date": "Date",
+        "time": "Time",
+        "duration": "Duration",
+        "type": "Meeting Type",
+        "location": "Location",
+        "description": "Meeting Description"
+      },
+      "placeholders": {
+        "selectClient": "Select a client",
+        "title": "e.g. Insurance Consultation",
+        "location": "e.g. Cafe, Office, Online",
+        "description": "Enter meeting purpose or agenda"
+      },
+      "durationUnit": " min",
+      "hourUnit": " hour",
+      "submit": "Schedule Meeting",
+      "successMessage": "Meeting scheduled successfully.",
+      "errorMessage": "An error occurred while creating the meeting."
+    }
+  },
+  "sync": {
+    "noRecord": "No sync record",
+    "justNow": "Just now",
+    "minutesAgo": "{{minutes}} min ago",
+    "hoursAgo": "{{hours}} hours ago",
+    "syncInfo": "Sync info"
+  },
+  "filter": {
+    "title": "Meeting Filter",
+    "selected": "{{count}} selected",
+    "typesSelected": "{{count}} types selected"
+  },
+  "performance": {
+    "title": "This Week's Performance",
+    "totalMeetings": "Total Meetings",
+    "today": "Today",
+    "goalAchieved": "Goal Achieved!",
+    "moreNeeded": "{{count}} more needed",
+    "summaryStart": "With {{count}} meetings this week",
+    "summaryAchieved": " you've achieved your goal! 🎉"
+  },
+  "upcomingMeetings": {
+    "title": "Next Meetings",
+    "count": "{{count}} meetings"
   }
 }

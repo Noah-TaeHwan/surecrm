@@ -5,6 +5,7 @@ import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { Clock, MapPin, User } from 'lucide-react';
 import { useDeviceType } from '~/common/hooks/use-viewport';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 
 // 🍎 SureCRM 색상 시스템 통합 (iOS 네이티브 스타일)
 const getEventColors = (meeting: Meeting) => {
@@ -81,6 +82,9 @@ export function WeekView({
   onMeetingClick,
 }: WeekViewProps) {
   const { isMobile } = useDeviceType();
+  const { t, getCurrentLanguage, formatDate } =
+    useHydrationSafeTranslation('calendar');
+
   // 주의 시작일 계산 (일요일)
   const weekStart = new Date(selectedDate);
   weekStart.setDate(selectedDate.getDate() - selectedDate.getDay());
@@ -91,6 +95,21 @@ export function WeekView({
     date.setDate(weekStart.getDate() + i);
     return date;
   });
+
+  // 언어별 요일 배열
+  const getWeekdays = () => {
+    const lang = getCurrentLanguage();
+    switch (lang) {
+      case 'en':
+        return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      case 'ja':
+        return ['日', '月', '火', '水', '木', '金', '土'];
+      default: // ko
+        return ['일', '월', '화', '수', '목', '금', '토'];
+    }
+  };
+
+  const weekdays = getWeekdays();
 
   // 시간 슬롯 생성 (6시부터 22시까지)
   const timeSlots = Array.from({ length: 17 }, (_, i) => i + 6);
@@ -129,7 +148,9 @@ export function WeekView({
       <div className="grid grid-cols-8 border-b border-border/30 bg-gradient-to-r from-muted/40 to-muted/20 backdrop-blur-sm">
         {/* 시간 컬럼 헤더 */}
         <div className="p-4 border-r border-border/20 bg-gradient-to-b from-card/60 to-card/40">
-          <div className="text-xs text-muted-foreground font-medium">시간</div>
+          <div className="text-xs text-muted-foreground font-medium">
+            {t('weekView.timeColumn', '시간')}
+          </div>
         </div>
 
         {weekDates.map((date, index) => (
@@ -145,7 +166,7 @@ export function WeekView({
           >
             <div className="space-y-1">
               <div className="text-xs font-medium text-muted-foreground">
-                {format(date, 'EEE', { locale: ko })}
+                {weekdays[index]}
               </div>
               <div
                 className={cn(

@@ -33,6 +33,7 @@ import {
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { useState, useEffect, useSyncExternalStore } from 'react';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 
 // getEventColors 함수를 calendar-grid에서 가져옴
 const getEventColors = (event: Meeting) => {
@@ -144,6 +145,7 @@ export function CalendarSidebar({
   const [isClient, setIsClient] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const { t, formatDate } = useHydrationSafeTranslation('calendar');
 
   useEffect(() => {
     setIsClient(true);
@@ -227,7 +229,7 @@ export function CalendarSidebar({
 
   const formatLastSync = (dateStr?: string | Date) => {
     if (!dateStr) {
-      return '동기화 기록 없음';
+      return t('sync.noRecord', '동기화 기록 없음');
     }
 
     let date: Date;
@@ -236,7 +238,7 @@ export function CalendarSidebar({
     } else if (typeof dateStr === 'string') {
       date = new Date(dateStr);
     } else {
-      return '동기화 기록 없음';
+      return t('sync.noRecord', '동기화 기록 없음');
     }
 
     const now = new Date();
@@ -244,15 +246,22 @@ export function CalendarSidebar({
     const diffInMinutes = Math.floor(diffInMilliseconds / (1000 * 60));
 
     if (diffInMinutes < 1) {
-      return '방금 전';
+      return t('sync.justNow', '방금 전');
     } else if (diffInMinutes < 60) {
-      return `${diffInMinutes}분 전`;
+      return t('sync.minutesAgo', '{{minutes}}분 전', {
+        minutes: diffInMinutes,
+      });
     } else if (diffInMinutes < 24 * 60) {
       const hours = Math.floor(diffInMinutes / 60);
-      return `${hours}시간 전`;
+      return t('sync.hoursAgo', '{{hours}}시간 전', { hours });
     } else {
       // 하루 이상된 경우 날짜 형식으로 표시
-      return format(date, 'MM/dd HH:mm', { locale: ko });
+      return formatDate(date, {
+        month: 'numeric',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+      });
     }
   };
 
@@ -264,7 +273,7 @@ export function CalendarSidebar({
     const formattedTime = useSyncExternalStore(
       emptySubscribe,
       () => formatLastSync(dateStr), // 클라이언트: 실제 시간 계산
-      () => '동기화 정보' // 서버: 고정된 텍스트 (hydration 안전)
+      () => t('sync.syncInfo', '동기화 정보') // 서버: 고정된 텍스트 (hydration 안전)
     );
 
     return <span>{formattedTime}</span>;
@@ -311,7 +320,7 @@ export function CalendarSidebar({
           {/* 뷰 선택 탭 */}
           <div>
             <label className="text-sm font-medium text-muted-foreground mb-2 block">
-              보기 방식
+              {t('sidebar.viewMode', '보기 방식')}
             </label>
             <Tabs
               value={viewMode}
@@ -322,7 +331,11 @@ export function CalendarSidebar({
             >
               <TabsList className="grid grid-cols-3 w-full rounded-md p-0.5 bg-muted border border-border/30">
                 {['month', 'week', 'day'].map((mode, index) => {
-                  const labels = ['월별', '주별', '일별'];
+                  const labels = [
+                    t('views.month', '월별'),
+                    t('views.week', '주별'),
+                    t('views.day', '일별'),
+                  ];
 
                   return (
                     <TabsTrigger
@@ -352,13 +365,16 @@ export function CalendarSidebar({
             }}
             className="w-full gap-2"
           >
-            <PlusIcon className="h-4 w-4" />새 미팅 예약
+            <PlusIcon className="h-4 w-4" />
+            {t('actions.scheduleMeeting', '새 미팅 예약')}
           </Button>
 
           {/* 이번 주 통계 */}
           <div className="pt-2 border-t border-border/30">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">이번 주</span>
+              <span className="text-muted-foreground">
+                {t('sidebar.thisWeek', '이번 주')}
+              </span>
               <div className="flex items-center gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-primary" />
                 <span className="font-medium">
@@ -374,7 +390,7 @@ export function CalendarSidebar({
                       return meetingDate >= weekStart && meetingDate <= weekEnd;
                     }).length
                   }
-                  건
+                  {t('sidebar.countUnit', '건')}
                 </span>
               </div>
             </div>
@@ -383,118 +399,114 @@ export function CalendarSidebar({
       </Card>
 
       {/* 🔍 1. 고급 검색 (새로 추가) */}
-      <Card className="border border-sidebar-border shadow-sm">
-        <CardHeader className="pb-4">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <MagnifyingGlassIcon className="h-5 w-5 text-sky-600" />
-            미팅 검색
+      <Card className="border border-border/50 shadow-sm">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <MagnifyingGlassIcon className="h-4 w-4 text-primary" />
+            {t('sidebar.search', '검색')}
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-3">
           <div className="relative">
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="고객명, 미팅 제목, 타입으로 검색..."
+              placeholder={t('sidebar.searchPlaceholder', '미팅 검색...')}
               value={searchQuery}
-              onChange={e => {
-                setSearchQuery(e.target.value);
-                setSearchTerm(e.target.value);
-              }}
-              className="pl-10 pr-10"
+              onChange={e => setSearchQuery(e.target.value)}
+              className="pr-8"
             />
             {searchQuery && (
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => {
-                  setSearchQuery('');
-                  setSearchTerm('');
-                }}
-                className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 hover:bg-muted/50"
+                className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 p-0"
+                onClick={() => setSearchQuery('')}
               >
-                <Cross2Icon className="h-4 w-4" />
+                <Cross2Icon className="h-3 w-3" />
+                <span className="sr-only">
+                  {t('sidebar.clearSearch', '검색 지우기')}
+                </span>
               </Button>
             )}
           </div>
+        </CardContent>
+      </Card>
 
-          {/* 검색 결과 요약 */}
-          {searchQuery && (
-            <div className="mt-3 text-xs text-muted-foreground">
-              <span className="font-medium">{filteredMeetings.length}개</span>의
-              미팅이 검색됨
-            </div>
-          )}
+      {/* 🎯 2. 미팅 타입별 필터 */}
+      <Card className="border border-border/50 shadow-sm">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <MixerHorizontalIcon className="h-4 w-4 text-primary" />
+            {t('sidebar.filterByType', '타입별 필터')}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-3">
+            {/* 필터 리스트 */}
+            <div className="space-y-2 max-h-48 overflow-y-auto">
+              {availableTypes.map(type => {
+                const isChecked = filteredTypes.includes(type);
+                const typeInfo =
+                  meetingTypeDetails[type as keyof typeof meetingTypeDetails];
 
-          {/* 검색 결과 표시 */}
-          {searchTerm && (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                  검색 결과
-                </h3>
-                <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-full">
-                  {filteredMeetings.length}개 발견
-                </span>
-              </div>
-
-              {filteredMeetings.length > 0 ? (
-                <div className="space-y-2 max-h-64 overflow-y-auto">
-                  {filteredMeetings.map(meeting => {
-                    const colors = getEventColors(meeting);
-                    return (
-                      <div
-                        key={meeting.id}
-                        className="p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:shadow-sm transition-shadow cursor-pointer"
-                        onClick={() => onMeetingClick?.(meeting)}
-                      >
-                        <div className="flex items-start space-x-3">
-                          <div
-                            className={`w-3 h-3 rounded-full mt-1 ${colors.dot} ring-1 ring-white/50 shadow-sm`}
-                          />
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between">
-                              <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-                                {meeting.title}
-                              </h4>
-                              <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">
-                                {meeting.time}
-                              </span>
-                            </div>
-                            {meeting.client?.name && (
-                              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                                {meeting.client.name}
-                              </p>
-                            )}
-                            <div className="flex items-center justify-between mt-2">
-                              <span
-                                className={`text-xs px-2 py-1 rounded-full ${colors.badge}`}
-                              >
-                                {meetingTypeKoreanMap[
-                                  meeting.type as keyof typeof meetingTypeKoreanMap
-                                ] || meeting.type}
-                              </span>
-                              <span className="text-xs text-gray-500 dark:text-gray-400">
-                                {format(new Date(meeting.date), 'M월 d일')}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                    <MagnifyingGlassIcon className="w-5 h-5 text-gray-400" />
+                return (
+                  <div
+                    key={type}
+                    className="flex items-center space-x-3 cursor-pointer hover:bg-muted/30 rounded-md p-2 transition-colors"
+                    onClick={() => toggleFilter(type)}
+                  >
+                    <Checkbox
+                      id={`filter-${type}`}
+                      checked={isChecked}
+                      onCheckedChange={() => {}} // 빈 함수 - 실제 토글은 부모 div에서 처리
+                      className="pointer-events-none" // 체크박스 자체 클릭 비활성화
+                    />
+                    <div className="flex items-center gap-2 text-sm font-medium flex-1 cursor-pointer">
+                      <span className="text-base">
+                        {typeInfo?.icon || '📅'}
+                      </span>
+                      <span>
+                        {t(
+                          `meeting.types.${type}`,
+                          meetingTypeKoreanMap[
+                            type as keyof typeof meetingTypeKoreanMap
+                          ] || type
+                        )}
+                      </span>
+                    </div>
+                    <Badge
+                      variant="secondary"
+                      className="text-xs pointer-events-none"
+                    >
+                      {meetings.filter(m => m.type === type).length}
+                    </Badge>
                   </div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    "{searchTerm}"에 대한 검색 결과가 없습니다
-                  </p>
-                </div>
-              )}
+                );
+              })}
             </div>
-          )}
+
+            {/* 필터 제어 버튼들 */}
+            <Separator className="my-3" />
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onFilterChange(availableTypes)}
+                className="flex-1 text-xs"
+              >
+                <CheckCircledIcon className="h-3 w-3 mr-1" />
+                {t('sidebar.selectAll', '전체 선택')}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onFilterChange([])}
+                className="flex-1 text-xs"
+              >
+                <Cross2Icon className="h-3 w-3 mr-1" />
+                {t('sidebar.clearAll', '전체 해제')}
+              </Button>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
@@ -504,7 +516,7 @@ export function CalendarSidebar({
           <CardHeader className="pb-4">
             <CardTitle className="text-lg flex items-center gap-2">
               <CalendarIcon className="h-5 w-5 text-emerald-600" />
-              구글 캘린더
+              {t('google.title', '구글 캘린더')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -515,17 +527,21 @@ export function CalendarSidebar({
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
                     <span className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
-                      연결됨
+                      {t('google.connected', '연결됨')}
                     </span>
                   </div>
                   <Badge variant="secondary" className="text-xs">
-                    {googleCalendarSettings.googleEventsCount || 0}개 동기화
+                    {t('google.syncCount', '{{count}}개 동기화', {
+                      count: googleCalendarSettings.googleEventsCount || 0,
+                    })}
                   </Badge>
                 </div>
 
                 {/* 마지막 동기화 */}
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">마지막 동기화</span>
+                  <span className="text-muted-foreground">
+                    {t('google.lastSync', '마지막 동기화')}
+                  </span>
                   <span className="font-medium">
                     <HydrationSafeTimeDisplay
                       dateStr={googleCalendarSettings.lastSyncAt}
@@ -544,7 +560,9 @@ export function CalendarSidebar({
                   <UpdateIcon
                     className={cn('h-4 w-4', isSyncing && 'animate-spin')}
                   />
-                  {isSyncing ? '동기화 중...' : '지금 동기화'}
+                  {isSyncing
+                    ? t('google.syncing', '동기화 중...')
+                    : t('google.syncNow', '지금 동기화')}
                 </Button>
               </div>
             ) : (
@@ -552,17 +570,20 @@ export function CalendarSidebar({
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
                   <span className="text-sm text-yellow-700 dark:text-yellow-400">
-                    연결 필요
+                    {t('google.needConnection', '연결 필요')}
                   </span>
                 </div>
 
                 <p className="text-xs text-muted-foreground">
-                  구글 캘린더와 연동하여 양방향 동기화를 활성화하세요.
+                  {t(
+                    'google.connectionDescription',
+                    '구글 캘린더와 연동하여 양방향 동기화를 활성화하세요.'
+                  )}
                 </p>
 
                 <Button variant="default" size="sm" className="w-full gap-2">
                   <CalendarIcon className="h-4 w-4" />
-                  구글 계정 연결
+                  {t('google.connectAccount', '구글 계정 연결')}
                 </Button>
               </div>
             )}
@@ -576,11 +597,13 @@ export function CalendarSidebar({
           <CardHeader className="pb-4">
             <CardTitle className="text-lg flex items-center gap-2">
               <MixerHorizontalIcon className="h-5 w-5 text-violet-600" />
-              미팅 필터
+              {t('filter.title', '미팅 필터')}
               {filteredTypes.length > 0 &&
                 filteredTypes.length < availableTypes.length && (
                   <Badge variant="secondary" className="text-xs">
-                    {filteredTypes.length}개 선택
+                    {t('filter.selected', '{{count}}개 선택', {
+                      count: filteredTypes.length,
+                    })}
                   </Badge>
                 )}
             </CardTitle>
@@ -609,9 +632,12 @@ export function CalendarSidebar({
                         {typeInfo?.icon || '📅'}
                       </span>
                       <span>
-                        {meetingTypeKoreanMap[
-                          type as keyof typeof meetingTypeKoreanMap
-                        ] || type}
+                        {t(
+                          `meeting.types.${type}`,
+                          meetingTypeKoreanMap[
+                            type as keyof typeof meetingTypeKoreanMap
+                          ] || type
+                        )}
                       </span>
                     </div>
                     <Badge
@@ -639,7 +665,7 @@ export function CalendarSidebar({
                     : false
                 }
               >
-                전체 선택
+                {t('sidebar.selectAll', '전체 선택')}
               </Button>
               <Button
                 variant="outline"
@@ -648,7 +674,7 @@ export function CalendarSidebar({
                 onClick={() => onFilterChange([])}
                 disabled={isClient ? filteredTypes.length === 0 : false}
               >
-                전체 해제
+                {t('sidebar.clearAll', '전체 해제')}
               </Button>
             </div>
 
@@ -656,8 +682,9 @@ export function CalendarSidebar({
             {filteredTypes.length > 0 &&
               filteredTypes.length < availableTypes.length && (
                 <div className="text-xs text-muted-foreground bg-muted/20 p-2 rounded-md">
-                  <span className="font-medium">{filteredTypes.length}개</span>{' '}
-                  타입이 선택됨
+                  {t('filter.typesSelected', '{{count}}개 타입이 선택됨', {
+                    count: filteredTypes.length,
+                  })}
                 </div>
               )}
           </CardContent>
@@ -670,7 +697,7 @@ export function CalendarSidebar({
           <CardHeader className="pb-4">
             <CardTitle className="text-lg flex items-center gap-2 text-sky-600 dark:text-sky-400">
               <TargetIcon className="h-5 w-5" />
-              이번 주 성과
+              {t('performance.title', '이번 주 성과')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -680,13 +707,17 @@ export function CalendarSidebar({
                 <div className="text-3xl font-bold text-sky-600 dark:text-sky-400">
                   {thisWeekMeetings.length}
                 </div>
-                <div className="text-xs text-muted-foreground">총 미팅</div>
+                <div className="text-xs text-muted-foreground">
+                  {t('performance.totalMeetings', '총 미팅')}
+                </div>
               </div>
               <div className="text-center space-y-1">
                 <div className="text-3xl font-bold text-emerald-600">
                   {todayMeetings.length}
                 </div>
-                <div className="text-xs text-muted-foreground">오늘</div>
+                <div className="text-xs text-muted-foreground">
+                  {t('performance.today', '오늘')}
+                </div>
               </div>
             </div>
 
@@ -694,7 +725,7 @@ export function CalendarSidebar({
             {Object.keys(thisWeekByType).length > 0 && (
               <div className="space-y-2">
                 <h4 className="text-sm font-medium text-muted-foreground">
-                  타입별 분석
+                  {t('sidebar.typeAnalysis', '타입별 분석')}
                 </h4>
                 <div className="space-y-1">
                   {Object.entries(thisWeekByType).map(([type, count]) => (
@@ -709,9 +740,12 @@ export function CalendarSidebar({
                           ]?.icon || '📅'}
                         </span>
                         <span className="text-xs">
-                          {meetingTypeKoreanMap[
-                            type as keyof typeof meetingTypeKoreanMap
-                          ] || type}
+                          {t(
+                            `meeting.types.${type}`,
+                            meetingTypeKoreanMap[
+                              type as keyof typeof meetingTypeKoreanMap
+                            ] || type
+                          )}
                         </span>
                       </div>
                       <span className="font-medium">{count}</span>
@@ -724,7 +758,10 @@ export function CalendarSidebar({
             {/* 목표 달성률 */}
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">주간 목표 (10건)</span>
+                <span className="text-muted-foreground">
+                  {t('sidebar.weeklyGoal', '주간 목표')} (10
+                  {t('sidebar.countUnit', '건')})
+                </span>
                 <span className="font-semibold">
                   {Math.min(
                     100,
@@ -740,7 +777,7 @@ export function CalendarSidebar({
               {thisWeekMeetings.length >= 10 && (
                 <div className="flex items-center gap-1 text-xs text-emerald-600">
                   <CheckCircledIcon className="h-3 w-3" />
-                  <span>목표 달성!</span>
+                  <span>{t('performance.goalAchieved', '목표 달성!')}</span>
                 </div>
               )}
             </div>
@@ -749,10 +786,25 @@ export function CalendarSidebar({
             {thisWeekMeetings.length > 0 && (
               <div className="pt-2 border-t border-border/50">
                 <div className="text-xs text-muted-foreground">
-                  이번 주 {thisWeekMeetings.length}건의 미팅으로
+                  {t(
+                    'performance.summaryStart',
+                    '이번 주 {{count}}건의 미팅으로',
+                    {
+                      count: thisWeekMeetings.length,
+                    }
+                  )}
                   {thisWeekMeetings.length >= 10
-                    ? ' 목표를 달성했습니다! 🎉'
-                    : ` ${10 - thisWeekMeetings.length}건 더 필요합니다.`}
+                    ? t(
+                        'performance.summaryAchieved',
+                        ' 목표를 달성했습니다! 🎉'
+                      )
+                    : ` ${t(
+                        'performance.moreNeeded',
+                        '{{count}}건 더 필요합니다',
+                        {
+                          count: 10 - thisWeekMeetings.length,
+                        }
+                      )}.`}
                 </div>
               </div>
             )}
@@ -766,9 +818,11 @@ export function CalendarSidebar({
           <CardHeader className="pb-4">
             <CardTitle className="text-lg flex items-center gap-2">
               <ClockIcon className="h-5 w-5 text-amber-600" />
-              다음 미팅
+              {t('upcomingMeetings.title', '다음 미팅')}
               <Badge variant="secondary" className="text-xs">
-                {upcomingMeetings.length}개
+                {t('upcomingMeetings.count', '{{count}}개', {
+                  count: upcomingMeetings.length,
+                })}
               </Badge>
             </CardTitle>
           </CardHeader>
@@ -788,9 +842,12 @@ export function CalendarSidebar({
                       variant="outline"
                       className="text-xs flex-shrink-0 ml-2"
                     >
-                      {meetingTypeKoreanMap[
-                        meeting.type as keyof typeof meetingTypeKoreanMap
-                      ] || meeting.type}
+                      {t(
+                        `meeting.types.${meeting.type}`,
+                        meetingTypeKoreanMap[
+                          meeting.type as keyof typeof meetingTypeKoreanMap
+                        ] || meeting.type
+                      )}
                     </Badge>
                   </div>
 

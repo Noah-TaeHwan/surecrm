@@ -7,7 +7,8 @@ import { cn } from '~/lib/utils';
 import {
   formatNotificationTime,
   getNotificationTypeIcon,
-} from '../lib/notifications-data';
+} from '../lib/notifications-utils';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 import type { NotificationCardProps, NotificationPriority } from '../types';
 
 export function NotificationCard({
@@ -15,6 +16,8 @@ export function NotificationCard({
   showActions = true,
   className,
 }: NotificationCardProps) {
+  const { t } = useHydrationSafeTranslation('notifications');
+
   // 알림 우선순위별 아이콘
   const getPriorityIcon = (priority: NotificationPriority) => {
     switch (priority) {
@@ -85,7 +88,7 @@ export function NotificationCard({
               <div className="flex items-center gap-4 text-xs text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <Clock className="h-3 w-3" />
-                  {formatNotificationTime(new Date(notification.createdAt))}
+                  {formatNotificationTime(new Date(notification.createdAt), t)}
                 </span>
                 <span>
                   {notification.channel === 'in_app'

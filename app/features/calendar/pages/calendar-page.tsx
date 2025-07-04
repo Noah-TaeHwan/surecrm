@@ -48,12 +48,15 @@ import {
 } from '../types/types';
 import { Badge } from '~/common/components/ui/badge';
 import { useViewport } from '~/common/hooks/useViewport';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 
 // useSyncExternalStore용 빈 구독 함수
 const emptySubscribe = () => () => {};
 
 // Hydration-safe 요일 표시 컴포넌트
 function HydrationSafeWeekday({ date }: { date: Date }) {
+  const { formatDate } = useHydrationSafeTranslation('calendar');
+
   const weekday = useSyncExternalStore(
     emptySubscribe,
     () => date.toLocaleDateString('ko-KR', { weekday: 'long' }),
@@ -65,6 +68,8 @@ function HydrationSafeWeekday({ date }: { date: Date }) {
 
 // Hydration-safe 월/일 표시 컴포넌트
 function HydrationSafeMonthDay({ date }: { date: Date }) {
+  const { formatDate } = useHydrationSafeTranslation('calendar');
+
   const monthDay = useSyncExternalStore(
     emptySubscribe,
     () => date.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' }),
@@ -87,6 +92,7 @@ export default function CalendarPage({
 
   const { isMobile, isTablet } = useViewport();
   const { success, error } = useToast();
+  const { t } = useHydrationSafeTranslation('calendar');
 
   const [viewMode, setViewMode] = useState<ViewMode>('month');
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -219,12 +225,15 @@ export default function CalendarPage({
     document.body.removeChild(form);
   };
 
-  // 현재 표시 날짜 포맷 (iOS 스타일)
+  // 현재 표시 날짜 포맷 (다국어 지원)
+  const { formatDate } = useHydrationSafeTranslation('calendar');
+
   const getDisplayTitle = () => {
     if (viewMode === 'month') {
-      return isMobile
-        ? `${selectedDate.getFullYear()}년 ${selectedDate.getMonth() + 1}월`
-        : `${selectedDate.getFullYear()}년 ${selectedDate.getMonth() + 1}월`;
+      return formatDate(selectedDate, {
+        year: 'numeric',
+        month: 'long',
+      });
     } else if (viewMode === 'week') {
       const weekStart = new Date(selectedDate);
       weekStart.setDate(selectedDate.getDate() - selectedDate.getDay());
@@ -232,16 +241,20 @@ export default function CalendarPage({
       weekEnd.setDate(weekStart.getDate() + 6);
 
       if (isMobile) {
-        return `${weekStart.getMonth() + 1}월 ${weekStart.getDate()}일 - ${weekEnd.getMonth() + 1}월 ${weekEnd.getDate()}일`;
+        return `${formatDate(weekStart, { month: 'long', day: 'numeric' })} - ${formatDate(weekEnd, { month: 'long', day: 'numeric' })}`;
       } else {
         return weekStart.getMonth() === weekEnd.getMonth()
-          ? `${weekStart.getFullYear()}년 ${weekStart.getMonth() + 1}월 ${weekStart.getDate()}일 - ${weekEnd.getDate()}일`
-          : `${weekStart.getFullYear()}년 ${weekStart.getMonth() + 1}월 ${weekStart.getDate()}일 - ${weekEnd.getMonth() + 1}월 ${weekEnd.getDate()}일`;
+          ? `${formatDate(weekStart, { year: 'numeric', month: 'long', day: 'numeric' })} - ${formatDate(weekEnd, { day: 'numeric' })}`
+          : `${formatDate(weekStart, { year: 'numeric', month: 'long', day: 'numeric' })} - ${formatDate(weekEnd, { year: 'numeric', month: 'long', day: 'numeric' })}`;
       }
     } else {
       return isMobile
-        ? `${selectedDate.getMonth() + 1}월 ${selectedDate.getDate()}일`
-        : `${selectedDate.getFullYear()}년 ${selectedDate.getMonth() + 1}월 ${selectedDate.getDate()}일`;
+        ? formatDate(selectedDate, { month: 'long', day: 'numeric' })
+        : formatDate(selectedDate, {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          });
     }
   };
 
@@ -301,7 +314,7 @@ export default function CalendarPage({
   }
 
   return (
-    <MainLayout title="일정 관리">
+    <MainLayout title={t('title', '일정 관리')}>
       <div className="flex-1 space-y-4 md:space-y-6">
         {/* 🔒 구글 캘린더 연동이 필요한 경우 */}
         {loaderData.requiresGoogleConnection ? (
@@ -312,14 +325,16 @@ export default function CalendarPage({
                   <CalendarIcon className="w-16 h-16" />
                 </div>
                 <h3 className="text-2xl font-bold text-foreground mb-3">
-                  구글 캘린더 연동이 필요합니다
+                  {t(
+                    'google.connectionRequired',
+                    '구글 캘린더 연동이 필요합니다'
+                  )}
                 </h3>
                 <p className="700 mb-6 leading-relaxed">
-                  SureCRM의 일정 관리 기능을 사용하려면
-                  <br />
-                  구글 캘린더와의 연동이 필요합니다.
-                  <br />
-                  연동 후 모든 일정이 자동으로 동기화됩니다.
+                  {t(
+                    'google.connectionDescription',
+                    'SureCRM의 일정 관리 기능을 사용하려면 구글 캘린더와의 연동이 필요합니다. 연동 후 모든 일정이 자동으로 동기화됩니다.'
+                  )}
                 </p>
                 <div className="space-y-3">
                   <form method="POST">
@@ -330,17 +345,20 @@ export default function CalendarPage({
                     />
                     <Button type="submit" className="w-full " size="lg">
                       <CalendarIcon className="mr-2 h-5 w-5" />
-                      구글 캘린더 연동하기
+                      {t('google.connect', '구글 캘린더 연결')}
                     </Button>
                   </form>
                   <p className="text-xs text-amber-600">
-                    연동 후 새로고침하면 일정 관리 기능을 사용할 수 있습니다.
+                    {t(
+                      'google.refreshNote',
+                      '연동 후 새로고침하면 일정 관리 기능을 사용할 수 있습니다.'
+                    )}
                   </p>
                 </div>
               </CardContent>
             </Card>
           </div>
-        ) : meetings.length === 0 && clients.length === 0 ? (
+        ) : !meetings || meetings.length === 0 ? (
           <div className="text-center py-16">
             <Card className="max-w-md mx-auto shadow-lg border border-border/50 bg-gradient-to-br from-card/90 to-card/70 backdrop-blur-sm">
               <CardContent className="pt-8 pb-8">
@@ -348,11 +366,13 @@ export default function CalendarPage({
                   <CalendarIcon className="w-16 h-16 text-muted-foreground/50" />
                 </div>
                 <h3 className="text-2xl font-bold text-foreground mb-3">
-                  일정 관리를 시작해보세요
+                  {t('emptyState.title', '일정 관리를 시작해보세요')}
                 </h3>
                 <p className="text-muted-foreground mb-6 leading-relaxed">
-                  아직 등록된 고객이나 미팅이 없습니다.
-                  <br />첫 번째 미팅을 예약하여 시작해보세요.
+                  {t(
+                    'emptyState.description',
+                    '아직 등록된 고객이나 미팅이 없습니다. 첫 번째 미팅을 예약하여 시작해보세요.'
+                  )}
                 </p>
                 <div className="space-y-3">
                   <Button
@@ -360,10 +380,11 @@ export default function CalendarPage({
                     className="w-full"
                     size="lg"
                   >
-                    <PlusIcon className="mr-2 h-5 w-5" />첫 미팅 예약하기
+                    <PlusIcon className="mr-2 h-5 w-5" />
+                    {t('actions.scheduleFirstMeeting', '첫 미팅 예약하기')}
                   </Button>
                   <Button variant="outline" className="w-full">
-                    고객 등록하기
+                    {t('actions.registerClient', '고객 등록하기')}
                   </Button>
                 </div>
               </CardContent>
@@ -429,10 +450,11 @@ export default function CalendarPage({
         )}
 
         {/* 📱 모바일 전용: 선택된 날짜의 미팅 리스트 */}
-        {isMobile && (
+        {isMobile && meetings && meetings.length > 0 && (
           <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-4">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
-              <HydrationSafeMonthDay date={selectedDate} /> 일정
+              <HydrationSafeMonthDay date={selectedDate} />{' '}
+              {t('views.agenda', '일정표')}
             </h3>
 
             {filteredMeetings
@@ -458,9 +480,12 @@ export default function CalendarPage({
                     </div>
                     <div className="text-sm text-gray-600 dark:text-gray-400">
                       {meeting.time} ·{' '}
-                      {meetingTypeKoreanMap[
-                        meeting.type as keyof typeof meetingTypeKoreanMap
-                      ] || meeting.type}
+                      {t(
+                        `meeting.types.${meeting.type}`,
+                        meetingTypeKoreanMap[
+                          meeting.type as keyof typeof meetingTypeKoreanMap
+                        ] || meeting.type
+                      )}
                     </div>
                   </div>
                 </div>
@@ -472,7 +497,12 @@ export default function CalendarPage({
             }).length === 0 && (
               <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                 <CalendarIcon className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                <p>이 날에는 예정된 일정이 없습니다.</p>
+                <p>
+                  {t(
+                    'emptyState.noEventsToday',
+                    '이 날에는 예정된 일정이 없습니다.'
+                  )}
+                </p>
               </div>
             )}
           </div>

@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
+import { type NotificationQueue } from '~/features/notifications/lib/notifications-data';
 import {
   formatNotificationTime,
   getNotificationTypeIcon,
-  type NotificationQueue,
-} from '~/features/notifications/lib/notifications-data';
+} from '~/features/notifications/lib/notifications-utils';
 
 interface UseNotificationsOptions {
   limit?: number;
