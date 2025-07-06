@@ -18,6 +18,73 @@ import {
   type Testimonial,
 } from '~/lib/data/public';
 import { createServerTranslator } from '~/lib/i18n/language-manager.server';
+import { z } from 'zod';
+import { createServerClient } from '~/lib/core/supabase';
+
+// Zod 스키마: 오류 메시지 대신 오류 키를 반환하도록 수정
+const WaitlistSchema = z.object({
+  email: z
+    .string()
+    .min(1, { message: 'error_required' })
+    .email({ message: 'error_invalid' }),
+  companyName: z.string().optional(),
+});
+
+export type ActionResponse = {
+  success: boolean;
+  error?: string;
+};
+
+function json(data: ActionResponse, init?: ResponseInit) {
+  return new Response(JSON.stringify(data), {
+    ...init,
+    headers: {
+      ...init?.headers,
+      'Content-Type': 'application/json',
+    },
+  });
+}
+
+// Action 함수 - 초대장 신청 처리
+export async function action({ request }: Route.ActionArgs) {
+  const { t } = await createServerTranslator(request, 'landing');
+  const formData = await request.formData();
+  const submission = WaitlistSchema.safeParse({
+    email: formData.get('email'),
+    companyName: formData.get('companyName'),
+  });
+
+  // 유효성 검사 실패
+  if (!submission.success) {
+    const errorKey =
+      submission.error.flatten().fieldErrors.email?.[0] || 'error_generic';
+    const errorMessage = t(`hero.invitation_form.${errorKey}`);
+    return json({ success: false, error: errorMessage }, { status: 400 });
+  }
+
+  const { email, companyName } = submission.data;
+  const supabase = createServerClient(request);
+
+  // 바로 INSERT 시도하고, 에러 코드로 중복 처리
+  const { error: insertError } = await supabase
+    .from('public_site_waitlist')
+    .insert({ email, company_name: companyName });
+
+  if (insertError) {
+    // 23505: unique_violation (중복 키)
+    if (insertError.code === '23505') {
+      const errorMessage = t('hero.invitation_form.error_duplicate');
+      return json({ success: false, error: errorMessage }, { status: 409 });
+    }
+
+    // 그 외 서버 오류
+    console.error('Error inserting into waitlist:', insertError);
+    const errorMessage = t('hero.invitation_form.error_server');
+    return json({ success: false, error: errorMessage }, { status: 500 });
+  }
+
+  return json({ success: true });
+}
 
 // Loader 함수 - 실제 데이터베이스에서 데이터 가져오기
 export async function loader({ request }: Route.LoaderArgs) {
@@ -145,10 +212,14 @@ export function meta({ data }: Route.MetaArgs) {
   ];
 }
 
-export default function LandingPage({ loaderData }: Route.ComponentProps) {
+export default function LandingPage({
+  loaderData,
+  actionData,
+}: Route.ComponentProps) {
   const { t } = useHydrationSafeTranslation('landing');
-  // loaderData는 현재 사용하지 않지만 Route.ComponentProps 타입을 위해 유지
+  // loaderData, actionData는 현재 사용하지 않지만 Route.ComponentProps 타입을 위해 유지
   loaderData;
+  actionData;
   const [isHydrated, setIsHydrated] = useState(false);
 
   // 🎯 Hydration 완료 감지 (SSR/CSR mismatch 방지)

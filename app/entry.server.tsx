@@ -1,5 +1,4 @@
 /* eslint-env node */
-/* eslint-disable no-unused-vars */
 
 import { createReadableStreamFromReadable } from '@react-router/node';
 import {

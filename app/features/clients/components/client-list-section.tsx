@@ -56,14 +56,12 @@ interface ClientProfile {
   createdAt: Date;
 }
 
-/* eslint-disable no-unused-vars */
 interface ClientListProps {
   filteredClients: ClientProfile[];
   viewMode: 'grid' | 'table';
   onClientRowClick: (clientId: string) => void;
   onAddClient: () => void;
 }
-/* eslint-enable no-unused-vars */
 
 export function ClientListSection({
   filteredClients,

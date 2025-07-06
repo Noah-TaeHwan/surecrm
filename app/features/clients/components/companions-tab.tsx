@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import React from 'react';
 import { TabsContent } from '~/common/components/ui/tabs';
 import { Card, CardContent, CardHeader } from '~/common/components/ui/card';

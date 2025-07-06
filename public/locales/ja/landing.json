@@ -32,7 +32,22 @@
     "title_part3": "管理ソリューション",
     "subtitle_short": "誰が誰を紹介したかを視覚的に体系化し紹介ネットワークの力を最大化しましょう",
     "cta_invite": "招待コードで始める",
-    "cta_login": "アカウントをお持ちの方はログイン",
+    "cta_login": "アカウントをお持ちですか？ログイン",
+    "invitation_form": {
+      "title": "招待状をいち早く受け取る",
+      "email_label": "メールアドレス",
+      "email_placeholder": "your@email.com",
+      "company_label": "会社名（任意）",
+      "company_placeholder": "例：サムスン生命",
+      "submit_button": "招待状をリクエスト",
+      "success_title": "申請完了！",
+      "success_message": "ご申請ありがとうございます。近日中に招待状をお送りします。",
+      "error_required": "メールアドレスを入力してください。",
+      "error_invalid": "有効なメールアドレスを入力してください。",
+      "error_duplicate": "このメールアドレスは既に追加されています。",
+      "error_server": "サーバーエラーが発生しました。後ほどもう一度お試しください。",
+      "error_generic": "入力内容が正しくありません。確認してからもう一度お試しください。"
+    },
     "features": {
       "google_calendar": {
         "title": "Googleカレンダー",
@@ -165,7 +180,8 @@
     "badge": "今すぐ始める",
     "headline": "成功的な紹介ネットワーク管理の始まり",
     "cta_description": "紹介ネットワークの力を最大化し、営業成果を向上させる準備はできていますか？SureCRMと一緒により体系的な顧客管理を始めましょう。",
-    "cta_button": "招待コードで始める"
+    "cta_button": "招待コードで始める",
+    "cta_support": "お困りですか？"
   },
   "footer": {
     "company": "会社",

@@ -54,11 +54,11 @@ interface ClientSidebarProps {
   handleEditStart: () => void;
   handleEditSave: () => void;
   handleEditCancel: () => void;
-  // eslint-disable-next-line no-unused-vars
+
   handleSsnChange: (_ssnFront: string, _ssnBack: string) => void;
   clientTags: Array<{ id: string; name: string; color: string }>;
   handleOpenTagModal: () => void;
-  // eslint-disable-next-line no-unused-vars
+
   removeClientTag: (_tagId: string) => void;
   availableReferrers?: Array<{ id: string; name: string }>; // 소개자 후보 목록
   onDeleteClient: () => void; // 고객 삭제 콜백

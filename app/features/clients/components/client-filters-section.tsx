@@ -35,7 +35,6 @@ import MobileFilterModal, {
   type MobileFilterOptions,
 } from './mobile-filter-modal';
 
-/* eslint-disable no-unused-vars */
 interface ClientFiltersProps {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
@@ -54,7 +53,6 @@ interface ClientFiltersProps {
   advancedFilters?: MobileFilterOptions;
   onAdvancedFiltersChange?: (filters: MobileFilterOptions) => void;
 }
-/* eslint-enable no-unused-vars */
 
 export function ClientFiltersSection({
   searchQuery,

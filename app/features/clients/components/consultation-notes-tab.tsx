@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { TabsContent } from '~/common/components/ui/tabs';
 import {
   Card,

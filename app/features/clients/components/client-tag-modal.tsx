@@ -28,23 +28,23 @@ interface Tag {
 
 interface ClientTagModalProps {
   showTagModal: boolean;
-  // eslint-disable-next-line no-unused-vars
+
   setShowTagModal: (_show: boolean) => void;
   availableTags: Tag[];
   selectedTagIds: string[];
-  // eslint-disable-next-line no-unused-vars
+
   setSelectedTagIds: (_ids: string[] | ((_prev: string[]) => string[])) => void;
   isLoadingTags: boolean;
   onSaveTags: () => void;
   onCreateTag: () => void;
   tagForm: TagForm;
-  // eslint-disable-next-line no-unused-vars
+
   setTagForm: (_form: TagForm | ((_prev: TagForm) => TagForm)) => void;
   showCreateTagModal: boolean;
-  // eslint-disable-next-line no-unused-vars
+
   setShowCreateTagModal: (_show: boolean) => void;
   showTagSuccessModal: boolean;
-  // eslint-disable-next-line no-unused-vars
+
   setShowTagSuccessModal: (_show: boolean) => void;
   tagSuccessMessage: string;
 }

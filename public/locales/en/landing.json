@@ -33,6 +33,21 @@
     "subtitle_short": "Systematically organize who referred whom and maximize the power of your referral network",
     "cta_invite": "Start with Invite Code",
     "cta_login": "Login if you have an account",
+    "invitation_form": {
+      "title": "Get Your Invitation First",
+      "email_label": "Email Address",
+      "email_placeholder": "your@email.com",
+      "company_label": "Company Name (Optional)",
+      "company_placeholder": "e.g., Samsung Life Insurance",
+      "submit_button": "Request Invitation",
+      "success_title": "Request Complete!",
+      "success_message": "Thank you for your request. We will send you an invitation soon.",
+      "error_required": "Email is required.",
+      "error_invalid": "Please enter a valid email address.",
+      "error_duplicate": "This email is already on the waitlist.",
+      "error_server": "A server error occurred. Please try again later.",
+      "error_generic": "Invalid input. Please check and try again."
+    },
     "features": {
       "google_calendar": {
         "title": "Google Calendar",
@@ -170,7 +185,9 @@
     "badge": "Start Now",
     "headline": "The Beginning of Successful Referral Network Management",
     "cta_description": "Ready to maximize the power of your referral network and improve sales performance? Start more systematic customer management with SureCRM.",
-    "cta_button": "Start with Invite Code"
+    "cta_button": "Start with Invite Code",
+    "cta_login": "Have an account? Log In",
+    "cta_support": "Need help?"
   },
   "footer": {
     "company": "Company",

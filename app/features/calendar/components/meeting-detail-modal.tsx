@@ -32,7 +32,7 @@ import type { Meeting } from '../types/types';
 interface MeetingDetailModalProps {
   meeting: Meeting | null;
   onClose: () => void;
-  // eslint-disable-next-line no-unused-vars
+
   onToggleChecklist: (_meetingId: string, _itemId: string) => void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   clients: any[];

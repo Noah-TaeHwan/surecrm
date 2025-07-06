@@ -33,6 +33,21 @@
     "subtitle_short": "누가 누구를 소개했는지 시각적으로 체계화하고 소개 네트워크의 힘을 극대화하세요",
     "cta_invite": "초대 코드로 시작하기",
     "cta_login": "계정이 있다면 로그인",
+    "invitation_form": {
+      "title": "초대장을 먼저 받아보세요",
+      "email_label": "이메일 주소",
+      "email_placeholder": "your@email.com",
+      "company_label": "회사명 (선택)",
+      "company_placeholder": "회사명 (예: 삼성생명)",
+      "submit_button": "초대장 신청하기",
+      "success_title": "신청 완료!",
+      "success_message": "신청해주셔서 감사합니다. 빠른 시일 내에 초대장을 보내드리겠습니다.",
+      "error_required": "이메일을 입력해주세요.",
+      "error_invalid": "유효한 이메일 주소를 입력해주세요.",
+      "error_duplicate": "이미 대기 목록에 등록된 이메일입니다.",
+      "error_server": "서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
+      "error_generic": "입력값이 올바르지 않습니다. 확인 후 다시 시도해주세요."
+    },
     "features": {
       "google_calendar": {
         "title": "구글 캘린더",
@@ -170,7 +185,8 @@
     "badge": "지금 시작하세요",
     "headline": "성공적인 소개 네트워크 관리의 시작",
     "cta_description": "소개 네트워크의 힘을 극대화하고 영업 성과를 높일 준비가 되셨나요? SureCRM과 함께 더 체계적인 고객 관리를 시작하세요.",
-    "cta_button": "초대 코드로 시작하기"
+    "cta_button": "초대 코드로 시작하기",
+    "cta_support": "도움이 필요하신가요?"
   },
   "footer": {
     "company": "회사",
