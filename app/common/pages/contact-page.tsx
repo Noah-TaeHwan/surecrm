@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Form, useActionData, useNavigation } from 'react-router';
+import React, { useEffect, useState, useRef } from 'react';
+import { useFetcher } from 'react-router';
 import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 import type { Route } from './+types/contact-page';
 import { LandingLayout } from '~/common/layouts/landing-layout';
@@ -26,7 +26,6 @@ import {
 import { CheckCircle2, XCircle, Loader2, Shield } from 'lucide-react';
 import { Turnstile } from '@marsidev/react-turnstile';
 import { createServerTranslator } from '~/lib/i18n/language-manager.server';
-import nodemailer from 'nodemailer';
 
 // 직접 타입 정의
 interface LoaderArgs {
@@ -85,131 +84,6 @@ export async function loader({ request }: LoaderArgs) {
       },
       language: 'ko' as const,
     };
-  }
-}
-
-// Action function to handle form submission
-export async function action({ request }: ActionArgs) {
-  const formData = await request.formData();
-
-  const name = formData.get('name') as string;
-  const email = formData.get('email') as string;
-  const company = formData.get('company') as string;
-  const inquiryType = formData.get('inquiryType') as string;
-  const message = formData.get('message') as string;
-  const turnstileToken = formData.get('turnstileToken') as string;
-
-  const clientIP =
-    request.headers.get('CF-Connecting-IP') ||
-    request.headers.get('X-Forwarded-For') ||
-    request.headers.get('X-Real-IP') ||
-    'unknown';
-
-  // 1. Turnstile 토큰 검증
-  if (!turnstileToken) {
-    return {
-      success: false,
-      error: '보안 인증에 실패했습니다. 다시 시도해주세요.',
-    };
-  }
-
-  try {
-    const turnstileResponse = await fetch(
-      'https://challenges.cloudflare.com/turnstile/v0/siteverify',
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          secret: process.env.TURNSTILE_SECRET_KEY,
-          response: turnstileToken,
-          remoteip: clientIP,
-        }),
-      }
-    );
-
-    const turnstileData = await turnstileResponse.json();
-
-    if (!turnstileData.success) {
-      console.error('❌ Turnstile verification failed:', turnstileData);
-      return {
-        success: false,
-        error: '보안 인증에 실패했습니다. 봇 활동이 감지되었습니다.',
-      };
-    }
-
-    // 2. 기본 필드 유효성 검사
-    if (!name || !email || !message) {
-      return {
-        success: false,
-        error: '이름, 이메일, 메시지는 필수 입력 항목입니다.',
-      };
-    }
-
-    // 3. 이메일 전송 로직
-    const emailUser = process.env.EMAIL_USER || process.env.GMAIL_USER;
-    const emailPass = process.env.EMAIL_PASSWORD || process.env.GMAIL_PASS;
-
-    if (!emailUser || !emailPass) {
-      console.error('Email environment variables are not set.');
-      return {
-        success: false,
-        error: '메일 서비스 설정 오류입니다. 관리자에게 문의해주세요.',
-      };
-    }
-
-    const transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 587,
-      secure: false,
-      auth: {
-        user: emailUser,
-        pass: emailPass,
-      },
-    });
-
-    const inquiryTypeMap: Record<string, string> = {
-      demo: '데모 요청',
-      pricing: '요금 문의',
-      support: '기술 지원',
-      partnership: '파트너십',
-      other: '기타',
-    };
-
-    const htmlContent = `
-      <h1>새로운 문의 도착 (surecrm.pro/contact)</h1>
-      <p><strong>보낸 사람:</strong> ${name}</p>
-      <p><strong>이메일:</strong> ${email}</p>
-      <p><strong>회사명:</strong> ${company || 'N/A'}</p>
-      <p><strong>문의 유형:</strong> ${
-        inquiryTypeMap[inquiryType] || inquiryType || '미지정'
-      }</p>
-      <hr />
-      <h2>메시지 내용:</h2>
-      <pre>${message}</pre>
-      <hr />
-      <p><strong>보낸 IP:</strong> ${clientIP}</p>
-      <p><strong>보낸 시간:</strong> ${new Date().toLocaleString('ko-KR', {
-        timeZone: 'Asia/Seoul',
-      })}</p>
-    `;
-
-    const recipientEmail =
-      process.env.FEEDBACK_RECIPIENT_EMAIL || 'noah@surecrm.pro';
-
-    await transporter.sendMail({
-      from: `"[공식 문의] ${name}" <${emailUser}>`,
-      to: recipientEmail,
-      replyTo: email,
-      subject: `[SureCRM 문의] ${
-        inquiryTypeMap[inquiryType] || '기타 문의'
-      } - ${name}`,
-      html: htmlContent,
-    });
-
-    return { success: true, message: '문의가 성공적으로 전송되었습니다.' };
-  } catch (error) {
-    console.error('❌ Contact form action error:', error);
-    return { success: false, error: '문의 전송 중 오류가 발생했습니다.' };
   }
 }
 
@@ -401,14 +275,16 @@ export function meta({ data }: MetaArgs) {
   ];
 }
 
-export default function ContactPage({ actionData }: Route.ComponentProps) {
+export default function ContactPage() {
   const { t } = useHydrationSafeTranslation('contact');
+  const fetcher = useFetcher<Route.ActionData>();
+  const formRef = useRef<HTMLFormElement>(null);
   const [selectedType, setSelectedType] = useState('');
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
-  const navigation = useNavigation();
 
-  const isSubmitting = navigation.state === 'submitting';
+  const isSubmitting = fetcher.state === 'submitting';
+  const actionData = fetcher.data;
 
   // Cloudflare Turnstile 사이트 키 (개발용 - 실제 배포시 환경변수로 설정)
   const TURNSTILE_SITE_KEY =
@@ -426,12 +302,7 @@ export default function ContactPage({ actionData }: Route.ComponentProps) {
     setShowSuccessModal(false);
     setSelectedType('');
     setTurnstileToken(null);
-
-    // 폼 요소들을 리셋
-    const form = document.querySelector('form') as HTMLFormElement;
-    if (form) {
-      form.reset();
-    }
+    formRef.current?.reset();
   };
 
   return (
@@ -544,9 +415,10 @@ export default function ContactPage({ actionData }: Route.ComponentProps) {
                 </Alert>
               )}
 
-              <Form
+              <fetcher.Form
+                ref={formRef}
                 method="post"
-                action="/contact"
+                action="/api/contact"
                 className="space-y-4 sm:space-y-6"
               >
                 <div className="space-y-2">
@@ -723,7 +595,7 @@ export default function ContactPage({ actionData }: Route.ComponentProps) {
                     {t('form.security_required', '보안 인증을 완료해주세요')}
                   </p>
                 )}
-              </Form>
+              </fetcher.Form>
             </div>
           </div>
         </div>
@@ -763,8 +635,13 @@ export default function ContactPage({ actionData }: Route.ComponentProps) {
 
       {/* 에러 모달 */}
       <Dialog
-        open={!!actionData?.error}
-        onOpenChange={() => window.location.reload()}
+        open={!!actionData?.error && !actionData.success}
+        onOpenChange={
+          isSubmitting
+            ? undefined
+            : () =>
+                fetcher.submit(null, { method: 'post', action: '/api/contact' })
+        }
       >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -788,7 +665,9 @@ export default function ContactPage({ actionData }: Route.ComponentProps) {
           </DialogHeader>
           <DialogFooter>
             <Button
-              onClick={() => window.location.reload()}
+              onClick={() =>
+                fetcher.submit(null, { method: 'post', action: '/api/contact' })
+              }
               variant="outline"
               className="w-full border-red-200 text-red-700 hover:bg-red-50 dark:border-red-800 dark:text-red-300 dark:hover:bg-red-900/30"
             >
