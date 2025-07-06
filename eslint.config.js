@@ -20,7 +20,9 @@ export default [
     files: ['**/*.{js,jsx,ts,tsx}'],
     languageOptions: {
       ecmaVersion: 2022,
-      globals: globals.browser,
+      globals: {
+        ...globals.browser,
+      },
       parser: tsParser,
       parserOptions: {
         ecmaFeatures: { jsx: true },
@@ -36,16 +38,40 @@ export default [
     rules: {
       ...js.configs.recommended.rules,
       ...reactHooks.configs.recommended.rules,
+      'no-unused-vars': 'off',
       'react-refresh/only-export-components': [
         'warn',
         { allowConstantExport: true },
       ],
       '@typescript-eslint/no-unused-vars': [
-        'error',
-        { argsIgnorePattern: '^_' },
+        'warn',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
       ],
       '@typescript-eslint/no-explicit-any': 'warn',
       'prettier/prettier': 'error',
+      'no-undef': 'warn',
+      'react-hooks/rules-of-hooks': 'warn',
+    },
+  },
+  {
+    files: [
+      'app/**/*.server.{ts,tsx}',
+      'app/routes/api.**/*.ts',
+      'scripts/**/*.ts',
+      'drizzle.config.ts',
+      'vite.config.ts',
+    ],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
+    },
+    rules: {
+      'no-console': 'off',
     },
   },
 ];

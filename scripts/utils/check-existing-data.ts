@@ -125,26 +125,29 @@ async function checkDatabaseStatus() {
 
     summary.recentItems?.slice(0, 3).forEach((item, index) => {
       switch (summary.tableName) {
-        case 'profiles':
+        case 'profiles': {
           console.log(
             `   ${index + 1}. ${item.full_name} (${item.role}) - ${
               item.is_active ? '활성' : '비활성'
             }`
           );
           break;
-        case 'teams':
+        }
+        case 'teams': {
           console.log(
             `   ${index + 1}. ${item.name} - ${
               item.is_active ? '활성' : '비활성'
             }`
           );
           break;
-        case 'clients':
+        }
+        case 'clients': {
           console.log(
             `   ${index + 1}. ${item.full_name} (${item.importance})`
           );
           break;
-        case 'meetings':
+        }
+        case 'meetings': {
           const meetingDate = new Date(item.start_time).toLocaleDateString(
             'ko-KR'
           );
@@ -152,7 +155,8 @@ async function checkDatabaseStatus() {
             `   ${index + 1}. ${item.title} - ${item.status} (${meetingDate})`
           );
           break;
-        case 'invitations':
+        }
+        case 'invitations': {
           const expiryDate = item.expires_at
             ? new Date(item.expires_at).toLocaleDateString('ko-KR')
             : '무제한';
@@ -162,12 +166,14 @@ async function checkDatabaseStatus() {
             } (만료: ${expiryDate})`
           );
           break;
-        case 'referrals':
+        }
+        case 'referrals': {
           const referralDate = new Date(item.referral_date).toLocaleDateString(
             'ko-KR'
           );
           console.log(`   ${index + 1}. ${item.status} (${referralDate})`);
           break;
+        }
         default:
           console.log(`   ${index + 1}. ${JSON.stringify(item)}`);
       }

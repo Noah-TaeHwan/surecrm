@@ -217,7 +217,7 @@ export default function LoginPage({ loaderData, actionData }: ComponentProps) {
           <Form {...form}>
             <form
               method="post"
-              action="/login"
+              action="/auth/login"
               className="space-y-4 sm:space-y-6"
             >
               <FormField

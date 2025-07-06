@@ -1,5 +1,4 @@
 import type { LoaderFunction, MetaFunction } from 'react-router';
-import type { Route } from 'react-router';
 
 interface LoaderArgsInterface {
   request: Request;

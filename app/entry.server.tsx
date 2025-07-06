@@ -1,6 +1,6 @@
 /* eslint-env node */
 /* eslint-disable no-unused-vars */
-/* eslint-disable no-undef */
+
 import { createReadableStreamFromReadable } from '@react-router/node';
 import {
   ServerRouter,
