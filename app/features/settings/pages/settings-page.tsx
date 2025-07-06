@@ -506,7 +506,11 @@ export default function SettingsPage({
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4 sm:p-6 pt-0 space-y-5 sm:space-y-6">
-              <Form method="post" className="space-y-4 sm:space-y-5">
+              <Form
+                method="post"
+                action="/settings"
+                className="space-y-4 sm:space-y-5"
+              >
                 <input type="hidden" name="actionType" value="updateProfile" />
 
                 <div className="grid grid-cols-1 gap-4">
@@ -686,7 +690,11 @@ export default function SettingsPage({
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4 sm:p-6 pt-0 space-y-5 sm:space-y-6">
-              <Form method="post" className="space-y-4 sm:space-y-5">
+              <Form
+                method="post"
+                action="/settings"
+                className="space-y-4 sm:space-y-5"
+              >
                 <input type="hidden" name="actionType" value="changePassword" />
 
                 <div className="space-y-4">
@@ -886,7 +894,7 @@ export default function SettingsPage({
 
               {/* 연동 제어 버튼 */}
               {calendarSettings?.syncStatus !== 'connected' ? (
-                <Form method="post">
+                <Form method="post" action="/settings">
                   <input
                     type="hidden"
                     name="actionType"
@@ -900,7 +908,7 @@ export default function SettingsPage({
               ) : (
                 <div className="space-y-4">
                   {/* 연동 해제 */}
-                  <Form method="post">
+                  <Form method="post" action="/settings">
                     <input
                       type="hidden"
                       name="actionType"

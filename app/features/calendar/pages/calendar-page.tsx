@@ -360,7 +360,7 @@ export default function CalendarPage({
                   )}
                 </p>
                 <div className="space-y-3">
-                  <form method="POST">
+                  <form method="POST" action="/calendar">
                     <input
                       type="hidden"
                       name="actionType"

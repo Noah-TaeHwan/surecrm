@@ -215,7 +215,11 @@ export default function LoginPage({ loaderData, actionData }: ComponentProps) {
           )}
 
           <Form {...form}>
-            <form method="post" className="space-y-4 sm:space-y-6">
+            <form
+              method="post"
+              action="/login"
+              className="space-y-4 sm:space-y-6"
+            >
               <FormField
                 control={form.control}
                 name="email"

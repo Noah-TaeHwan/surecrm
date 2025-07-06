@@ -100,7 +100,11 @@ export function NotificationCard({
               {showActions && (
                 <div className="flex items-center gap-2">
                   {!notification.readAt && (
-                    <Form method="post" className="inline">
+                    <Form
+                      method="post"
+                      action="/notifications"
+                      className="inline"
+                    >
                       <input type="hidden" name="intent" value="markAsRead" />
                       <input
                         type="hidden"
@@ -112,7 +116,11 @@ export function NotificationCard({
                       </Button>
                     </Form>
                   )}
-                  <Form method="post" className="inline">
+                  <Form
+                    method="post"
+                    action="/notifications"
+                    className="inline"
+                  >
                     <input type="hidden" name="intent" value="delete" />
                     <input
                       type="hidden"

@@ -491,7 +491,7 @@ export default function BillingPage({
           {statusInfo.showUpgrade && (
             <CardContent className="pt-0">
               <div className="flex flex-col sm:flex-row gap-3">
-                <Form method="post">
+                <Form method="post" action="/billing">
                   <input
                     type="hidden"
                     name="action"

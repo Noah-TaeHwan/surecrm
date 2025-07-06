@@ -280,7 +280,11 @@ export default function OTPVerificationPage({
           </div>
 
           <Form {...form}>
-            <form method="post" className="space-y-6">
+            <form
+              method="post"
+              action="/auth/otp-verification"
+              className="space-y-6"
+            >
               <input type="hidden" name="actionType" value="verify" />
               <input type="hidden" name="email" value={loaderData.email} />
               <input

@@ -455,7 +455,11 @@ export default function ContactPage({ actionData }: Route.ComponentProps) {
                 </Alert>
               )}
 
-              <Form method="post" className="space-y-4 sm:space-y-6">
+              <Form
+                method="post"
+                action="/contact"
+                className="space-y-4 sm:space-y-6"
+              >
                 <div className="space-y-2">
                   <Label htmlFor="name" className="text-sm sm:text-base">
                     {t('form.fields.name.label', '이름')} *

@@ -380,7 +380,7 @@ export default function AdminSettingsPage({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Form method="post" className="space-y-4">
+          <Form method="post" action="/admin/settings" className="space-y-4">
             <input type="hidden" name="action" value="create_setting" />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
