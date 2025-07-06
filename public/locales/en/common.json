@@ -220,6 +220,22 @@
       "feature": "Feature Suggestion",
       "general": "General Feedback",
       "other": "Other"
+    },
+    "errors": {
+      "titleRequired": "Please enter a title.",
+      "titleMin": "Title must be at least 2 characters.",
+      "categoryRequired": "Please select a category.",
+      "messageRequired": "Please enter a message.",
+      "messageMin": "Message must be at least 10 characters.",
+      "fileSize": "File size cannot exceed 5MB.",
+      "fileType": "Only PNG, JPEG, and GIF images are allowed."
+    },
+    "success": "Feedback sent successfully.",
+    "error": "An error occurred while sending feedback.",
+    "buttons": {
+      "cancel": "Cancel",
+      "send": "Send",
+      "sending": "Sending..."
     }
   }
 }

@@ -218,8 +218,24 @@
     "categories": {
       "bug": "バグレポート",
       "feature": "機能提案",
-      "general": "一般的なフィード백",
+      "general": "一般的なフィードバック",
       "other": "その他"
+    },
+    "errors": {
+      "titleRequired": "件名を入力してください。",
+      "titleMin": "件名は2文字以上である必要があります。",
+      "categoryRequired": "カテゴリーを選択してください。",
+      "messageRequired": "内容を入力してください。",
+      "messageMin": "内容は10文字以上である必要があります。",
+      "fileSize": "ファイルサイズは5MBを超えることはできません。",
+      "fileType": "PNG、JPEG、GIF画像のみアップロード可能です。"
+    },
+    "success": "フィードバックが正常に送信されました。",
+    "error": "フィードバックの送信中にエラーが発生しました。",
+    "buttons": {
+      "cancel": "キャンセル",
+      "send": "送信",
+      "sending": "送信中..."
     }
   }
 }

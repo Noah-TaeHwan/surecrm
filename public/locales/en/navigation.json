@@ -58,7 +58,8 @@
       "help": "Help",
       "contact": "Contact Us",
       "feedback": "Feedback"
-    }
+    },
+    "send_feedback": "Send Feedback"
   },
   "breadcrumb": {
     "home": "Home",

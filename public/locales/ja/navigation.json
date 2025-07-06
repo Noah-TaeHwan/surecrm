@@ -52,7 +52,8 @@
       "help": "ヘルプ",
       "contact": "お問い合わせ",
       "feedback": "フィードバック"
-    }
+    },
+    "send_feedback": "フィードバックを送信"
   },
   "breadcrumb": {
     "home": "ホーム",

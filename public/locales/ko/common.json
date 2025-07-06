@@ -199,6 +199,22 @@
       "feature": "기능 제안",
       "general": "일반 피드백",
       "other": "기타"
+    },
+    "errors": {
+      "titleRequired": "제목을 입력해주세요.",
+      "titleMin": "제목은 최소 2자 이상이어야 합니다.",
+      "categoryRequired": "카테고리를 선택해주세요.",
+      "messageRequired": "내용을 입력해주세요.",
+      "messageMin": "내용은 최소 10자 이상이어야 합니다.",
+      "fileSize": "파일 크기는 5MB를 초과할 수 없습니다.",
+      "fileType": "PNG, JPEG, GIF 이미지만 업로드 가능합니다."
+    },
+    "success": "피드백이 성공적으로 전송되었습니다.",
+    "error": "피드백 전송 중 오류가 발생했습니다.",
+    "buttons": {
+      "cancel": "취소",
+      "send": "보내기",
+      "sending": "전송 중..."
     }
   }
 }

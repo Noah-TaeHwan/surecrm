@@ -1,8 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import { useFetcher } from 'react-router';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
 import {
   Dialog,
   DialogContent,
@@ -22,30 +19,9 @@ import {
   SelectValue,
 } from '~/common/components/ui/select';
 import { Label } from '~/common/components/ui/label';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '~/common/components/ui/form';
 import { Alert, AlertDescription } from '~/common/components/ui/alert';
 import { Send, XCircle, Info, CheckCircle, Upload } from 'lucide-react';
 import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
-import { cn } from '~/lib/utils';
-
-const getFeedbackSchema = (t: (key: string) => string) =>
-  z.object({
-    title: z.string().min(1, t('feedback.validation.title_required')),
-    category: z.enum(['bug', 'feature', 'general', 'other']),
-    message: z.string().min(10, t('feedback.validation.message_min_length')),
-    attachmentName: z.string().optional(),
-    attachmentData: z.string().optional(),
-    attachmentType: z.string().optional(),
-  });
-
-type FeedbackFormData = z.infer<ReturnType<typeof getFeedbackSchema>>;
 
 interface FeedbackModalProps {
   open: boolean;
@@ -57,64 +33,84 @@ export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
   const fetcher = useFetcher();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [fileName, setFileName] = useState<string | null>(null);
+  const [title, setTitle] = useState('');
+  const [category, setCategory] = useState('general');
+  const [message, setMessage] = useState('');
 
   const isSubmitting = fetcher.state === 'submitting';
   const actionData = fetcher.data as
     | { success: boolean; error?: string; message?: string }
     | undefined;
 
-  const feedbackSchema = getFeedbackSchema(t);
-
-  const form = useForm<FeedbackFormData>({
-    resolver: zodResolver(feedbackSchema),
-    defaultValues: {
-      title: '',
-      category: 'general',
-      message: '',
-    },
-  });
-
   useEffect(() => {
     if (actionData?.success && !isSubmitting) {
       onOpenChange(false);
-    }
-  }, [actionData, isSubmitting, onOpenChange]);
-
-  useEffect(() => {
-    if (!open) {
-      form.reset();
+      // 폼 리셋
+      setTitle('');
+      setCategory('general');
+      setMessage('');
       setFileName(null);
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
     }
-  }, [open, form]);
+  }, [actionData, isSubmitting, onOpenChange]);
+
+  useEffect(() => {
+    if (!open) {
+      setTitle('');
+      setCategory('general');
+      setMessage('');
+      setFileName(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  }, [open]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      // Check file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        alert(t('feedback.errors.fileSize'));
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+        return;
+      }
+
+      // Check file type
+      const allowedTypes = ['image/png', 'image/jpeg', 'image/gif'];
+      if (!allowedTypes.includes(file.type)) {
+        alert(t('feedback.errors.fileType'));
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+        return;
+      }
+
       setFileName(file.name);
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => {
-        const result = reader.result as string;
-        form.setValue('attachmentData', result);
-        form.setValue('attachmentName', file.name);
-        form.setValue('attachmentType', file.type);
-      };
-      reader.onerror = error => {
-        console.error('File reading error:', error);
-        setFileName(null);
-        form.resetField('attachmentData');
-        form.resetField('attachmentName');
-        form.resetField('attachmentType');
-      };
     } else {
       setFileName(null);
-      form.resetField('attachmentData');
-      form.resetField('attachmentName');
-      form.resetField('attachmentType');
     }
+  };
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const formData = new FormData(event.currentTarget);
+
+    // 기본 검증
+    if (!title || !category || !message) {
+      return;
+    }
+
+    fetcher.submit(formData, {
+      method: 'post',
+      action: '/api/feedback/send',
+      encType: 'multipart/form-data',
+    });
   };
 
   const categories = [
@@ -127,14 +123,6 @@ export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
     { value: 'other', label: t('feedback.categories.other') },
   ];
 
-  const onSubmit = (values: FeedbackFormData) => {
-    fetcher.submit(values, {
-      method: 'post',
-      action: '/api/feedback/send',
-      encType: 'application/x-www-form-urlencoded', // Base64 is text
-    });
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
@@ -145,140 +133,125 @@ export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
           </DialogTitle>
           <DialogDescription>{t('feedback.description')}</DialogDescription>
         </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div>
-              {actionData && !actionData.success && (
-                <Alert variant="destructive" className="mb-4">
-                  <XCircle className="h-4 w-4" />
-                  <AlertDescription>{actionData.error}</AlertDescription>
-                </Alert>
-              )}
-              {actionData?.success && (
-                <Alert
-                  variant="default"
-                  className="mb-4 bg-green-100 dark:bg-green-900"
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {actionData && !actionData.success && (
+            <Alert variant="destructive" className="mb-4">
+              <XCircle className="h-4 w-4" />
+              <AlertDescription>{actionData.error}</AlertDescription>
+            </Alert>
+          )}
+          {actionData?.success && (
+            <Alert
+              variant="default"
+              className="mb-4 bg-green-100 dark:bg-green-900"
+            >
+              <CheckCircle className="h-4 w-4" />
+              <AlertDescription>{actionData.message}</AlertDescription>
+            </Alert>
+          )}
+          <div className="grid gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="title">{t('feedback.fields.title')}</Label>
+              <Input
+                id="title"
+                name="title"
+                type="text"
+                required
+                value={title}
+                onChange={e => setTitle(e.target.value)}
+                placeholder={t('feedback.placeholders.title')}
+                disabled={isSubmitting}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="category">{t('feedback.fields.category')}</Label>
+              <Select
+                name="category"
+                value={category}
+                onValueChange={setCategory}
+                disabled={isSubmitting}
+              >
+                <SelectTrigger>
+                  <SelectValue
+                    placeholder={t('feedback.placeholders.category')}
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map(cat => (
+                    <SelectItem key={cat.value} value={cat.value}>
+                      {cat.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <input type="hidden" name="category" value={category} />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="message">{t('feedback.fields.message')}</Label>
+              <Textarea
+                id="message"
+                name="message"
+                required
+                rows={6}
+                value={message}
+                onChange={e => setMessage(e.target.value)}
+                placeholder={t('feedback.placeholders.message')}
+                disabled={isSubmitting}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="attachment">
+                {t('feedback.fields.attachment')}
+              </Label>
+              <div className="relative">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full justify-start text-muted-foreground"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isSubmitting}
                 >
-                  <CheckCircle className="h-4 w-4" />
-                  <AlertDescription>{actionData.message}</AlertDescription>
-                </Alert>
-              )}
-              <div className="grid gap-4">
-                <FormField
-                  control={form.control}
-                  name="title"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t('feedback.fields.title')}</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder={t('feedback.placeholders.title')}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="category"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t('feedback.fields.category')}</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue
-                              placeholder={t('feedback.placeholders.category')}
-                            />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {categories.map(cat => (
-                            <SelectItem key={cat.value} value={cat.value}>
-                              {cat.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="message"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t('feedback.fields.message')}</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder={t('feedback.placeholders.message')}
-                          rows={6}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="attachmentData"
-                  render={() => (
-                    <FormItem>
-                      <FormLabel>{t('feedback.fields.attachment')}</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Button
-                            type="button"
-                            variant="outline"
-                            className="w-full justify-start text-muted-foreground"
-                            onClick={() => fileInputRef.current?.click()}
-                          >
-                            <Upload className="mr-2 h-4 w-4" />
-                            {fileName || t('feedback.placeholders.attachment')}
-                          </Button>
-                          <Input
-                            ref={fileInputRef}
-                            type="file"
-                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                            accept="image/png, image/jpeg, image/gif"
-                            onChange={handleFileChange}
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  <Upload className="mr-2 h-4 w-4" />
+                  {fileName || t('feedback.placeholders.attachment')}
+                </Button>
+                <Input
+                  ref={fileInputRef}
+                  type="file"
+                  name="attachment"
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  accept="image/png, image/jpeg, image/gif"
+                  onChange={handleFileChange}
+                  disabled={isSubmitting}
                 />
               </div>
             </div>
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-              >
-                {t('actions.cancel')}
-              </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? (
-                  <>
-                    <Info className="mr-2 h-4 w-4 animate-spin" />
-                    {t('actions.submitting')}
-                  </>
-                ) : (
-                  t('actions.submit')
-                )}
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
+          </div>
+
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={isSubmitting}
+            >
+              {t('feedback.buttons.cancel')}
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? (
+                <>
+                  <Info className="mr-2 h-4 w-4 animate-spin" />
+                  {t('feedback.buttons.sending')}
+                </>
+              ) : (
+                t('feedback.buttons.send')
+              )}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

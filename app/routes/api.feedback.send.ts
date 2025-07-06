@@ -39,9 +39,7 @@ export async function action({ request }: ActionFunctionArgs) {
     const title = formData.get('title') as string;
     const category = formData.get('category') as string;
     const message = formData.get('message') as string;
-    const attachmentName = formData.get('attachmentName') as string | null;
-    const attachmentData = formData.get('attachmentData') as string | null;
-    const attachmentType = formData.get('attachmentType') as string | null;
+    const attachment = formData.get('attachment') as File | null;
 
     // Basic validation
     if (!title || !category || !message) {
@@ -93,17 +91,34 @@ export async function action({ request }: ActionFunctionArgs) {
     `;
 
     const attachments = [];
-    if (attachmentData && attachmentName && attachmentType) {
-      // data:image/png;base64,iVBORw0KGgo... 에서 'iVBORw0KGgo...' 부분만 추출
-      const base64Data = attachmentData.split(';base64,').pop();
-      if (base64Data) {
-        attachments.push({
-          filename: attachmentName,
-          content: Buffer.from(base64Data, 'base64'),
-          contentType: attachmentType,
-        });
-        htmlContent += `<p><strong>첨부파일:</strong> ${attachmentName}</p>`;
+    if (attachment && attachment.size > 0) {
+      // Check file size (5MB limit)
+      if (attachment.size > 5 * 1024 * 1024) {
+        return json(
+          { success: false, error: '파일 크기는 5MB를 초과할 수 없습니다.' },
+          { status: 400 }
+        );
       }
+
+      // Check file type
+      const allowedTypes = ['image/png', 'image/jpeg', 'image/gif'];
+      if (!allowedTypes.includes(attachment.type)) {
+        return json(
+          {
+            success: false,
+            error: 'PNG, JPEG, GIF 이미지만 업로드 가능합니다.',
+          },
+          { status: 400 }
+        );
+      }
+
+      const arrayBuffer = await attachment.arrayBuffer();
+      attachments.push({
+        filename: attachment.name,
+        content: Buffer.from(arrayBuffer),
+        contentType: attachment.type,
+      });
+      htmlContent += `<p><strong>첨부파일:</strong> ${attachment.name}</p>`;
     }
 
     const recipientEmail =

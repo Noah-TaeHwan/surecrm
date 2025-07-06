@@ -100,6 +100,7 @@ export default [
   route('api/email/send-test', 'routes/api.email.send-test.ts'),
   route('api/email/welcome-preview', 'routes/api.email.welcome-preview.ts'),
   route('api/contact/send-email', 'routes/api.contact.send-email.ts'),
+  route('api/feedback/send', 'routes/api.feedback.send.ts'),
   route('api/notifications', 'routes/api.notifications.ts'),
   route('api/auth/check-email', 'routes/api.auth.check-email.ts'),
   route(
