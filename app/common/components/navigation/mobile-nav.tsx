@@ -792,8 +792,11 @@ export function MobileNav({
               <ScrollArea
                 className="h-full w-full"
                 style={{
-                  height: 'calc(100vh - 140px)', // 헤더와 푸터 높이 제외
+                  height: 'auto', // 자동 높이로 변경
                   minHeight: '200px',
+                  maxHeight: 'calc(100vh - 200px)', // 헤더(80px) + 푸터(120px) = 200px
+                  pointerEvents: 'auto',
+                  touchAction: 'pan-y', // 세로 스크롤만 허용
                 }}
               >
                 <div
@@ -878,7 +881,13 @@ export function MobileNav({
             </div>
 
             {/* 🎯 고정된 푸터 */}
-            <div className="p-3 border-t border-border bg-muted/30 flex-shrink-0">
+            <div
+              className="p-3 border-t border-border bg-muted/30 flex-shrink-0"
+              style={{
+                pointerEvents: 'auto',
+                zIndex: 20, // ScrollArea보다 높은 z-index
+              }}
+            >
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -891,14 +900,36 @@ export function MobileNav({
               >
                 <Button
                   variant="ghost"
-                  className="w-full justify-start gap-2.5 px-3 py-2.5 h-auto text-sm bg-primary/10 hover:bg-primary/20"
-                  onClick={onOpenFeedbackModal}
+                  className="w-full justify-start gap-2.5 px-3 py-2.5 h-auto text-sm bg-primary/10 hover:bg-primary/20 touch-manipulation"
+                  style={{
+                    pointerEvents: 'auto',
+                    WebkitTapHighlightColor: 'transparent',
+                    minHeight: '48px', // 터치 친화적 크기
+                    zIndex: 10, // 다른 요소 위에 표시
+                  }}
+                  onClick={() => {
+                    console.log('🔥 [모바일네비] 피드백 버튼 클릭됨!');
+                    if (onOpenFeedbackModal) {
+                      console.log(
+                        '✅ [모바일네비] 피드백 모달 열기 함수 호출!'
+                      );
+                      onOpenFeedbackModal();
+                      // 모바일 메뉴 닫기
+                      setTimeout(() => {
+                        onClose();
+                      }, 100);
+                    } else {
+                      console.error(
+                        '❌ [모바일네비] onOpenFeedbackModal 함수가 없습니다!'
+                      );
+                    }
+                  }}
                 >
                   <div className="flex items-center justify-center w-6 h-6 rounded-md bg-muted/60 text-muted-foreground">
                     <MessageSquareHeart className="h-3.5 w-3.5 text-primary" />
                   </div>
                   <span className="font-medium text-foreground">
-                    {t('sidebar.send_feedback', '피드백 보내기')}
+                    {t('sidebar.management.send_feedback', '피드백 보내기')}
                   </span>
                 </Button>
                 <VersionDisplay />
