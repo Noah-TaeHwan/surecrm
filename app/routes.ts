@@ -84,6 +84,9 @@ export default [
     route('faqs', 'routes/admin/faqs.tsx'),
     route('waitlist', 'routes/admin/waitlist.tsx'),
     route('settings', 'routes/admin/settings.tsx'),
+    route('testimonials', 'routes/admin/testimonials.tsx'),
+    route('billing', 'routes/admin/billing.tsx'),
+    route('activity', 'routes/admin/activity.tsx'),
     route('posts', 'routes/admin/posts.tsx', [
       index('routes/admin/posts/index.tsx'),
       route('new', 'routes/admin/posts/new.tsx'),
