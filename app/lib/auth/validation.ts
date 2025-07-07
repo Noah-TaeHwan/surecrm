@@ -1,6 +1,6 @@
-import { createServerClient } from '../core/supabase';
-import { db } from '../core/db.server';
-import { invitations } from '../schema';
+import { createServerClient } from '~/lib/core/supabase';
+import { db } from '~/lib/core/db.server';
+import schema from '~/lib/schema/all';
 import { eq } from 'drizzle-orm';
 import type { InvitationValidationResult } from './types';
 
@@ -13,8 +13,8 @@ export async function validateInvitationCode(
   try {
     const invitation = await db
       .select()
-      .from(invitations)
-      .where(eq(invitations.code, code))
+      .from(schema.invitations)
+      .where(eq(schema.invitations.code, code))
       .limit(1);
 
     if (invitation.length === 0) {
