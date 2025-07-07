@@ -1,5 +1,5 @@
-import { db } from '../../core/db.server';
-import { faqs } from '../../schema';
+import { db } from '~/lib/core/db.server';
+import schema from '~/lib/schema/all';
 import { eq, and } from 'drizzle-orm';
 
 // FAQ 데이터 타입
@@ -30,16 +30,18 @@ export async function getFAQs(): Promise<FAQCategory[]> {
   try {
     const faqData = await db
       .select({
-        id: faqs.id,
-        question: faqs.question,
-        answer: faqs.answer,
-        category: faqs.category,
-        order: faqs.order,
-        viewCount: faqs.viewCount,
+        id: schema.faqs.id,
+        question: schema.faqs.question,
+        answer: schema.faqs.answer,
+        category: schema.faqs.category,
+        order: schema.faqs.order,
+        viewCount: schema.faqs.viewCount,
       })
-      .from(faqs)
-      .where(and(eq(faqs.isPublished, true), eq(faqs.language, 'ko')))
-      .orderBy(faqs.category, faqs.order, faqs.question);
+      .from(schema.faqs)
+      .where(
+        and(eq(schema.faqs.isPublished, true), eq(schema.faqs.language, 'ko'))
+      )
+      .orderBy(schema.faqs.category, schema.faqs.order, schema.faqs.question);
 
     // 카테고리별로 그룹화
     const groupedFAQs = faqData.reduce((acc, faq) => {
