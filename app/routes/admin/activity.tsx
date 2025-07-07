@@ -25,37 +25,8 @@ import {
 import { Badge } from '~/common/components/ui/badge';
 import { Search, Filter, Clock, User, LogIn, Edit, Trash2 } from 'lucide-react';
 
-// TODO: 서버 로직 구현
-export async function loader() {
-  const logs = [
-    {
-      id: 'log_1',
-      user: 'admin@surecrm.pro',
-      action: '로그인',
-      ip: '127.0.0.1',
-      timestamp: '2023-10-27T12:00:00Z',
-      details: '성공적인 로그인',
-    },
-    {
-      id: 'log_2',
-      user: 'agent1@surecrm.pro',
-      action: '고객 정보 수정',
-      ip: '192.168.1.10',
-      timestamp: '2023-10-27T11:30:00Z',
-      details: '고객 ID: c_123, 필드: phone',
-    },
-    {
-      id: 'log_3',
-      user: 'system',
-      action: '결제 실패',
-      ip: 'N/A',
-      timestamp: '2023-10-27T11:00:00Z',
-      details: '사용자 ID: u_456, 금액: 50,000원',
-    },
-  ];
-  const totalLogs = 3;
-  return { logs, totalLogs };
-}
+export { loader } from './activity.server';
+import type { loader } from './activity.server';
 
 export default function AdminActivityLogPage() {
   const { logs, totalLogs } = useLoaderData<typeof loader>();
@@ -65,6 +36,12 @@ export default function AdminActivityLogPage() {
     if (action.includes('수정')) return <Edit className="h-4 w-4" />;
     if (action.includes('삭제')) return <Trash2 className="h-4 w-4" />;
     return <User className="h-4 w-4" />;
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleString('ko-KR', {
+      timeZone: 'Asia/Seoul',
+    });
   };
 
   return (
@@ -110,7 +87,7 @@ export default function AdminActivityLogPage() {
               {logs.map(log => (
                 <TableRow key={log.id}>
                   <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
-                    {new Date(log.timestamp).toLocaleString('ko-KR')}
+                    {formatDate(log.timestamp)}
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">

@@ -1,6 +1,7 @@
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import dotenv from 'dotenv';
+import schema from '~/lib/schema/all';
 
 // .env 파일 로드 (Node.js 환경에서만)
 if (typeof window === 'undefined') {
@@ -62,7 +63,7 @@ if (!connectionString) {
 const client = postgres(connectionString);
 
 // Drizzle 인스턴스 생성
-export const db = drizzle(client);
+export const db = drizzle(client, { schema });
 
 // 타입 추론을 위한 데이터베이스 타입
 export type Database = typeof db;

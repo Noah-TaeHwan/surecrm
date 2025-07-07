@@ -7,6 +7,7 @@ import {
   boolean,
   integer,
   jsonb,
+  index,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import { profiles } from './core';
@@ -101,26 +102,34 @@ export const announcements = pgTable('public_site_announcements', {
 });
 
 // 사용자 후기 테이블
-export const testimonials = pgTable('public_site_testimonials', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  name: text('name').notNull(),
-  role: text('role').notNull(),
-  company: text('company').notNull(),
-  quote: text('quote').notNull(),
-  rating: integer('rating').notNull().default(5),
-  initial: text('initial').notNull(),
-  isVerified: boolean('is_verified').notNull().default(false),
-  isPublished: boolean('is_published').notNull().default(false),
-  order: integer('order').notNull().default(0),
-  language: publicLanguageEnum('language').notNull().default('ko'),
-  authorId: uuid('author_id').references(() => profiles.id),
-  createdAt: timestamp('created_at', { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-  updatedAt: timestamp('updated_at', { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-});
+export const testimonials = pgTable(
+  'public_site_testimonials',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    name: text('name').notNull(),
+    role: text('role').notNull(),
+    company: text('company').notNull(),
+    quote: text('quote').notNull(),
+    rating: integer('rating').notNull().default(5),
+    initial: text('initial').notNull(),
+    isVerified: boolean('is_verified').notNull().default(false),
+    isPublished: boolean('is_published').notNull().default(false),
+    order: integer('order').notNull().default(0),
+    language: publicLanguageEnum('language').notNull().default('ko'),
+    authorId: uuid('author_id').references(() => profiles.id),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  table => {
+    return {
+      authorIdIdx: index('testimonials_author_id_idx').on(table.authorId),
+    };
+  }
+);
 
 // 사이트 설정 테이블
 export const siteSettings = pgTable('public_site_settings', {
