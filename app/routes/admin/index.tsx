@@ -38,47 +38,40 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export default function AdminDashboardPage() {
-  const { totalUsers, totalPosts, error } = useLoaderData<typeof loader>();
+  const { totalUsers, error } = useLoaderData<typeof loader>();
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <p className="text-red-500">{error}</p>
+      </div>
+    );
+  }
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-gray-700 mb-6">
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
         관리자 대시보드
       </h1>
-      {error ? (
-        <p className="text-red-500">{error}</p>
-      ) : (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">총 회원 수</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{totalUsers}</div>
-              <p className="text-xs text-muted-foreground">
-                전체 가입한 회원 수
-              </p>
-            </CardContent>
-          </Card>
-          {/* posts 테이블이 확인될 때까지 주석 처리
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                총 게시물 수
-              </CardTitle>
-              <FileText className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{totalPosts}</div>
-              <p className="text-xs text-muted-foreground">
-                작성된 전체 블로그 게시물
-              </p>
-            </CardContent>
-          </Card>
-          */}
-        </div>
-      )}
+      <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <Card className="bg-white dark:bg-zinc-900 hover:shadow-lg transition-shadow duration-300">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
+              총 회원 수
+            </CardTitle>
+            <Users className="h-4 w-4 text-zinc-500 dark:text-zinc-400" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-zinc-900 dark:text-white">
+              {totalUsers}
+            </div>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">
+              시스템에 등록된 전체 사용자
+            </p>
+          </CardContent>
+        </Card>
+        {/* '총 게시물 수' 카드는 나중에 추가 예정 */}
+      </div>
     </div>
   );
 }

@@ -13,6 +13,8 @@ import { useLoaderData } from 'react-router';
 import { db } from '~/lib/core/db.server';
 import schema from '~/lib/schema/all';
 import { desc, eq } from 'drizzle-orm';
+import { DataTable } from '~/common/components/ui/data-table';
+import { columns } from './users.columns';
 
 // Supabase 클라이언트 직접 생성
 const supabaseUrl = process.env.SUPABASE_URL!;
@@ -31,17 +33,22 @@ const ROLES = ['agent', 'editor', 'admin'];
 
 export async function loader({ request }: LoaderFunctionArgs) {
   try {
-    const users = await db
+    const usersData = await db
       .select({
         id: schema.profiles.id,
         fullName: schema.profiles.fullName,
-        email: schema.authUsers.email, // auth.users 테이블에서 이메일 가져오기
+        email: schema.authUsers.email,
         role: schema.profiles.role,
         createdAt: schema.profiles.createdAt,
       })
       .from(schema.profiles)
       .leftJoin(schema.authUsers, eq(schema.profiles.id, schema.authUsers.id))
       .orderBy(desc(schema.profiles.createdAt));
+
+    const users = usersData.map(user => ({
+      ...user,
+      createdAt: user.createdAt.toISOString(),
+    }));
 
     return { users };
   } catch (error) {
@@ -58,14 +65,17 @@ export default function AdminUsersPage() {
   }
 
   return (
-    <div>
-      <h1 className="text-2xl font-semibold text-gray-800 dark:text-white mb-6">
-        사용자 관리
-      </h1>
-      <div className="p-4 bg-white rounded-lg shadow-md dark:bg-gray-900">
-        <p>{users.length}명의 사용자가 있습니다.</p>
-        {/* 여기에 DataTable 컴포넌트가 위치할 것입니다. */}
-        <pre>{JSON.stringify(users, null, 2)}</pre>
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-semibold leading-tight text-gray-900 dark:text-white">
+          사용자 관리
+        </h2>
+        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+          시스템의 모든 사용자를 관리합니다.
+        </p>
+      </div>
+      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md">
+        <DataTable columns={columns} data={users} />
       </div>
     </div>
   );
