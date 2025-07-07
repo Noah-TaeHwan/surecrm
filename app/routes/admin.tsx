@@ -1,33 +1,55 @@
-import { Outlet } from 'react-router';
+import { Outlet, NavLink } from 'react-router';
 import type { LoaderFunctionArgs } from 'react-router';
-import { redirect } from 'react-router';
-import { requireAdmin } from '../lib/auth/guards.server';
+import { requireAdmin } from '~/lib/auth/guards.server';
+import { Home, Users, Settings } from 'lucide-react';
+import { cn } from '~/lib/utils';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   try {
-    console.log('🔑 /admin loader: 어드민 권한 확인 시작');
     const { user } = await requireAdmin(request);
-    console.log('✅ /admin loader: 어드민 권한 확인 완료', { userId: user.id });
-    return { user };
+    return new Response(JSON.stringify({ user }), {
+      headers: { 'Content-Type': 'application/json' },
+    });
   } catch (error) {
-    console.error('🚫 /admin loader: 어드민 권한 확인 실패', error);
-    // requireAdmin에서 던진 Response를 그대로 반환합니다.
-    // 보통 로그인 페이지로의 리디렉션입니다.
+    // requireAdmin에서 던진 리디렉션 응답을 그대로 반환
     throw error;
   }
 }
 
-// 여기서부터 실제 레이아웃 컴포넌트를 만듭니다.
-// 예: import Header from '~/common/components/Header';
-// 예: import AdminSidebar from '~/features/admin/components/AdminSidebar';
-
 export default function AdminLayout() {
+  const navLinkClasses = ({ isActive }: { isActive: boolean }) =>
+    cn(
+      'flex items-center px-4 py-2 text-gray-700 rounded-md hover:bg-gray-200 dark:text-gray-200 dark:hover:bg-gray-700',
+      isActive && 'bg-gray-200 dark:bg-gray-700'
+    );
+
   return (
-    <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
-      {/* <AdminSidebar /> */}
+    <div className="flex h-screen bg-gray-100 dark:bg-gray-800 font-sans">
+      <div className="hidden md:flex flex-col w-64 bg-white dark:bg-gray-900 border-r dark:border-gray-700">
+        <div className="flex items-center justify-center h-16 border-b dark:border-gray-700">
+          <h1 className="text-xl font-bold text-gray-800 dark:text-white">
+            Admin Panel
+          </h1>
+        </div>
+        <div className="flex-1 overflow-y-auto">
+          <nav className="flex-1 px-2 py-4 space-y-2">
+            <NavLink to="/admin" className={navLinkClasses} end>
+              <Home className="h-5 w-5 mr-3" />
+              대시보드
+            </NavLink>
+            <NavLink to="/admin/users" className={navLinkClasses}>
+              <Users className="h-5 w-5 mr-3" />
+              사용자 관리
+            </NavLink>
+            <NavLink to="/admin/settings" className={navLinkClasses}>
+              <Settings className="h-5 w-5 mr-3" />
+              시스템 설정
+            </NavLink>
+          </nav>
+        </div>
+      </div>
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* <Header /> */}
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-200 dark:bg-gray-800">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto">
           <div className="container mx-auto px-6 py-8">
             <Outlet />
           </div>

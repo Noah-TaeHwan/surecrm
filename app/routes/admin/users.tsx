@@ -8,6 +8,11 @@ import {
 } from '~/common/components/ui/dropdown-menu';
 import { Button } from '~/common/components/ui/button';
 import { toast } from 'sonner';
+import type { LoaderFunctionArgs } from 'react-router';
+import { useLoaderData } from 'react-router';
+import { db } from '~/lib/core/db.server';
+import schema from '~/lib/schema/all';
+import { desc, eq } from 'drizzle-orm';
 
 // Supabase 클라이언트 직접 생성
 const supabaseUrl = process.env.SUPABASE_URL!;
@@ -24,123 +29,43 @@ interface Profile {
 
 const ROLES = ['agent', 'editor', 'admin'];
 
-export default function AdminUsersPage() {
-  const [profiles, setProfiles] = useState<Profile[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export async function loader({ request }: LoaderFunctionArgs) {
+  try {
+    const users = await db
+      .select({
+        id: schema.profiles.id,
+        fullName: schema.profiles.fullName,
+        email: schema.authUsers.email, // auth.users 테이블에서 이메일 가져오기
+        role: schema.profiles.role,
+        createdAt: schema.profiles.createdAt,
+      })
+      .from(schema.profiles)
+      .leftJoin(schema.authUsers, eq(schema.profiles.id, schema.authUsers.id))
+      .orderBy(desc(schema.profiles.createdAt));
 
-  const fetchProfiles = async () => {
-    setLoading(true);
-    const { data: profilesData, error: fetchError } = await supabase
-      .from('app_user_profiles')
-      .select(
-        `
-        id,
-        full_name,
-        role,
-        created_at,
-        user:auth_users(email)
-      `
-      )
-      .order('created_at', { ascending: false });
-
-    if (fetchError) {
-      console.error('사용자 목록 조회 실패:', fetchError);
-      setError('사용자 목록을 불러오는 중 오류가 발생했습니다.');
-    } else {
-      const formattedProfiles = profilesData.map((p: any) => ({
-        id: p.id,
-        full_name: p.full_name,
-        email: p.user?.email || 'N/A',
-        role: p.role,
-        created_at: p.created_at,
-      }));
-      setProfiles(formattedProfiles);
-    }
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    fetchProfiles();
-  }, []);
-
-  const handleRoleChange = async (userId: string, newRole: string) => {
-    const { error: updateError } = await supabase
-      .from('app_user_profiles')
-      .update({ role: newRole })
-      .eq('id', userId);
-
-    if (updateError) {
-      toast.error(`역할 변경 실패: ${updateError.message}`);
-    } else {
-      toast.success('사용자 역할이 성공적으로 변경되었습니다.');
-      // 목록을 다시 불러와서 변경사항을 반영합니다.
-      fetchProfiles();
-    }
-  };
-
-  if (loading) {
-    return <div>사용자 목록을 불러오는 중...</div>;
+    return { users };
+  } catch (error) {
+    console.error('사용자 목록 조회 실패:', error);
+    return { users: [], error: '사용자 목록을 불러오지 못했습니다.' };
   }
+}
+
+export default function AdminUsersPage() {
+  const { users, error } = useLoaderData<typeof loader>();
 
   if (error) {
-    return <div>오류: {error}</div>;
+    return <p className="text-red-500">{error}</p>;
   }
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-gray-700">회원 관리</h1>
-      <div className="mt-4">
-        <div className="bg-white shadow-md rounded my-6">
-          <table className="min-w-max w-full table-auto">
-            <thead>
-              <tr className="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
-                <th className="py-3 px-6 text-left">이름</th>
-                <th className="py-3 px-6 text-left">이메일</th>
-                <th className="py-3 px-6 text-center">역할</th>
-                <th className="py-3 px-6 text-center">가입일</th>
-                <th className="py-3 px-6 text-center">작업</th>
-              </tr>
-            </thead>
-            <tbody className="text-gray-600 text-sm font-light">
-              {profiles.map(profile => (
-                <tr
-                  key={profile.id}
-                  className="border-b border-gray-200 hover:bg-gray-100"
-                >
-                  <td className="py-3 px-6 text-left whitespace-nowrap">
-                    {profile.full_name}
-                  </td>
-                  <td className="py-3 px-6 text-left">{profile.email}</td>
-                  <td className="py-3 px-6 text-center">{profile.role}</td>
-                  <td className="py-3 px-6 text-center">
-                    {new Date(profile.created_at).toLocaleDateString()}
-                  </td>
-                  <td className="py-3 px-6 text-center">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
-                          역할 변경
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-                        {ROLES.map(role => (
-                          <DropdownMenuItem
-                            key={role}
-                            onSelect={() => handleRoleChange(profile.id, role)}
-                            disabled={profile.role === role}
-                          >
-                            {role}
-                          </DropdownMenuItem>
-                        ))}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      <h1 className="text-2xl font-semibold text-gray-800 dark:text-white mb-6">
+        사용자 관리
+      </h1>
+      <div className="p-4 bg-white rounded-lg shadow-md dark:bg-gray-900">
+        <p>{users.length}명의 사용자가 있습니다.</p>
+        {/* 여기에 DataTable 컴포넌트가 위치할 것입니다. */}
+        <pre>{JSON.stringify(users, null, 2)}</pre>
       </div>
     </div>
   );

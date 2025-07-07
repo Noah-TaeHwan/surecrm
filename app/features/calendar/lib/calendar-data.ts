@@ -1,4 +1,4 @@
-import { meetings, clients, profiles } from '~/lib/schema';
+import schema from '~/lib/schema/all';
 import { createServerClient } from '~/lib/core/supabase';
 import { db } from '~/lib/core/db.server';
 import {
@@ -13,7 +13,7 @@ import {
   type CalendarExternalSource,
 } from './schema';
 import { eq, and, gte, lte, desc, asc } from 'drizzle-orm';
-import type { Meeting, Client, MeetingStatus } from '~/lib/schema';
+import type { Meeting, Client, MeetingStatus } from '~/lib/schema/core';
 
 // Calendar 페이지용 Meeting 타입 (컴포넌트와 호환) - Google Calendar 연동 필드 추가
 export interface CalendarMeeting {
@@ -82,23 +82,26 @@ export async function getMeetingsByMonth(
 
     const dbMeetings = await db
       .select({
-        meeting: meetings,
+        meeting: schema.meetings,
         client: {
-          id: clients.id,
-          name: clients.fullName,
-          phone: clients.phone,
+          id: schema.clients.id,
+          name: schema.clients.fullName,
+          phone: schema.clients.phone,
         },
       })
-      .from(meetings)
-      .innerJoin(clients, eq(meetings.clientId, clients.id))
+      .from(schema.meetings)
+      .innerJoin(
+        schema.clients,
+        eq(schema.meetings.clientId, schema.clients.id)
+      )
       .where(
         and(
-          eq(meetings.agentId, agentId),
-          gte(meetings.scheduledAt, startDate),
-          lte(meetings.scheduledAt, endDate)
+          eq(schema.meetings.agentId, agentId),
+          gte(schema.meetings.scheduledAt, startDate),
+          lte(schema.meetings.scheduledAt, endDate)
         )
       )
-      .orderBy(asc(meetings.scheduledAt));
+      .orderBy(asc(schema.meetings.scheduledAt));
 
     // 각 미팅의 체크리스트, 노트, 동기화 정보를 병렬로 조회
     const meetingsWithDetails = await Promise.all(
@@ -199,23 +202,26 @@ export async function getMeetingsByDateRange(
   try {
     const dbMeetings = await db
       .select({
-        meeting: meetings,
+        meeting: schema.meetings,
         client: {
-          id: clients.id,
-          name: clients.fullName,
-          phone: clients.phone,
+          id: schema.clients.id,
+          name: schema.clients.fullName,
+          phone: schema.clients.phone,
         },
       })
-      .from(meetings)
-      .innerJoin(clients, eq(meetings.clientId, clients.id))
+      .from(schema.meetings)
+      .innerJoin(
+        schema.clients,
+        eq(schema.meetings.clientId, schema.clients.id)
+      )
       .where(
         and(
-          eq(meetings.agentId, agentId),
-          gte(meetings.scheduledAt, startDate),
-          lte(meetings.scheduledAt, endDate)
+          eq(schema.meetings.agentId, agentId),
+          gte(schema.meetings.scheduledAt, startDate),
+          lte(schema.meetings.scheduledAt, endDate)
         )
       )
-      .orderBy(asc(meetings.scheduledAt));
+      .orderBy(asc(schema.meetings.scheduledAt));
 
     // 각 미팅의 체크리스트, 노트, 동기화 정보를 병렬로 조회
     const meetingsWithDetails = await Promise.all(
@@ -314,13 +320,13 @@ export async function getClientsByAgent(
   try {
     const dbClients = await db
       .select({
-        id: clients.id,
-        name: clients.fullName,
-        phone: clients.phone,
+        id: schema.clients.id,
+        name: schema.clients.fullName,
+        phone: schema.clients.phone,
       })
-      .from(clients)
-      .where(eq(clients.agentId, agentId))
-      .orderBy(asc(clients.fullName));
+      .from(schema.clients)
+      .where(eq(schema.clients.agentId, agentId))
+      .orderBy(asc(schema.clients.fullName));
 
     return dbClients.map(client => ({
       id: client.id,
@@ -360,7 +366,7 @@ export async function createMeeting(
 ) {
   try {
     const newMeeting = await db
-      .insert(meetings)
+      .insert(schema.meetings)
       .values({
         agentId,
         title: meetingData.title,
@@ -437,7 +443,7 @@ export async function updateMeeting(
 ) {
   try {
     const updatedMeeting = await db
-      .update(meetings)
+      .update(schema.meetings)
       .set({
         ...updateData,
         // estimatedCommission은 decimal 타입이므로 문자열로 변환
@@ -446,7 +452,12 @@ export async function updateMeeting(
           : null,
         updatedAt: new Date(),
       })
-      .where(and(eq(meetings.id, meetingId), eq(meetings.agentId, agentId)))
+      .where(
+        and(
+          eq(schema.meetings.id, meetingId),
+          eq(schema.meetings.agentId, agentId)
+        )
+      )
       .returning();
 
     return updatedMeeting[0];
@@ -464,8 +475,13 @@ export async function deleteMeeting(meetingId: string, agentId: string) {
     // 먼저 미팅 정보를 조회하여 구글 캘린더 연동 여부 확인
     const meetingToDelete = await db
       .select()
-      .from(meetings)
-      .where(and(eq(meetings.id, meetingId), eq(meetings.agentId, agentId)))
+      .from(schema.meetings)
+      .where(
+        and(
+          eq(schema.meetings.id, meetingId),
+          eq(schema.meetings.agentId, agentId)
+        )
+      )
       .limit(1);
 
     if (meetingToDelete.length === 0) {
@@ -491,8 +507,13 @@ export async function deleteMeeting(meetingId: string, agentId: string) {
 
     // 관련된 체크리스트와 노트도 함께 삭제 (CASCADE)
     await db
-      .delete(meetings)
-      .where(and(eq(meetings.id, meetingId), eq(meetings.agentId, agentId)));
+      .delete(schema.meetings)
+      .where(
+        and(
+          eq(schema.meetings.id, meetingId),
+          eq(schema.meetings.agentId, agentId)
+        )
+      );
 
     console.log('✅ 미팅 삭제 완료:', meetingId);
     return true;
@@ -514,8 +535,13 @@ export async function toggleChecklistItem(
     // 먼저 해당 미팅이 에이전트의 것인지 확인
     const meeting = await db
       .select()
-      .from(meetings)
-      .where(and(eq(meetings.id, meetingId), eq(meetings.agentId, agentId)))
+      .from(schema.meetings)
+      .where(
+        and(
+          eq(schema.meetings.id, meetingId),
+          eq(schema.meetings.agentId, agentId)
+        )
+      )
       .limit(1);
 
     if (meeting.length === 0) {
