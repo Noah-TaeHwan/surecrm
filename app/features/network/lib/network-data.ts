@@ -1,6 +1,6 @@
 import { db } from '~/lib/core/db.server';
 import { eq, desc, asc, count, sql, and, or, gte, lte } from 'drizzle-orm';
-import { clients, referrals, profiles } from '~/lib/schema';
+import schema from '~/lib/schema/all';
 
 // 네트워크 노드 인터페이스
 export interface NetworkNode {
@@ -70,8 +70,8 @@ export async function getNetworkData(agentId: string): Promise<{
     // 에이전트 노드 생성
     const agentProfile = await db
       .select()
-      .from(profiles)
-      .where(eq(profiles.id, agentId))
+      .from(schema.profiles)
+      .where(eq(schema.profiles.id, agentId))
       .limit(1);
 
     const agent = agentProfile[0];
@@ -98,16 +98,16 @@ export async function getNetworkData(agentId: string): Promise<{
     // 직접 고객들 조회 (🔥 활성 고객만)
     const directClients = await db
       .select({
-        client: clients,
+        client: schema.clients,
         referralCount: sql<number>`
-          (SELECT COUNT(*) FROM ${referrals} WHERE ${referrals.referrerId} = ${clients.id})
+          (SELECT COUNT(*) FROM ${schema.referrals} WHERE ${schema.referrals.referrerId} = ${schema.clients.id})
         `,
       })
-      .from(clients)
+      .from(schema.clients)
       .where(
         and(
-          eq(clients.agentId, agentId),
-          eq(clients.isActive, true) // 🔥 추가: 활성 고객만
+          eq(schema.clients.agentId, agentId),
+          eq(schema.clients.isActive, true) // 🔥 추가: 활성 고객만
         )
       );
 
@@ -294,12 +294,12 @@ async function expandNetworkDepth(
         // 🔥 수정: clients.referredById를 사용한 더 직접적인 조회
         const referredClients = await db
           .select()
-          .from(clients)
+          .from(schema.clients)
           .where(
             and(
-              eq(clients.referredById, node.id),
-              eq(clients.agentId, agentId),
-              eq(clients.isActive, true) // 🔥 활성 고객만
+              eq(schema.clients.referredById, node.id),
+              eq(schema.clients.agentId, agentId),
+              eq(schema.clients.isActive, true) // 🔥 활성 고객만
             )
           );
 
@@ -374,23 +374,28 @@ async function calculateNetworkStats(
     // 🔥 수정: clients.referredById를 사용한 상위 추천자들 계산 (활성 고객만)
     const topReferrersData = await db
       .select({
-        id: clients.id,
-        name: clients.fullName,
+        id: schema.clients.id,
+        name: schema.clients.fullName,
         referralCount: sql<number>`(
           SELECT COUNT(*) 
-          FROM ${clients} as referred_clients 
-          WHERE referred_clients.referred_by_id = ${clients.id} 
+          FROM ${schema.clients} as referred_clients 
+          WHERE referred_clients.referred_by_id = ${schema.clients.id} 
           AND referred_clients.is_active = true
           AND referred_clients.agent_id = ${agentId}
         )`,
       })
-      .from(clients)
-      .where(and(eq(clients.agentId, agentId), eq(clients.isActive, true)))
+      .from(schema.clients)
+      .where(
+        and(
+          eq(schema.clients.agentId, agentId),
+          eq(schema.clients.isActive, true)
+        )
+      )
       .orderBy(
         desc(sql`(
           SELECT COUNT(*) 
-          FROM ${clients} as referred_clients 
-          WHERE referred_clients.referred_by_id = ${clients.id} 
+          FROM ${schema.clients} as referred_clients 
+          WHERE referred_clients.referred_by_id = ${schema.clients.id} 
           AND referred_clients.is_active = true
           AND referred_clients.agent_id = ${agentId}
         )`)
@@ -411,19 +416,19 @@ async function calculateNetworkStats(
 
     const monthlyGrowth = await db
       .select({
-        month: sql<string>`TO_CHAR(${clients.createdAt}, 'YYYY-MM')`,
-        newNodes: count(clients.id),
+        month: sql<string>`TO_CHAR(${schema.clients.createdAt}, 'YYYY-MM')`,
+        newNodes: count(schema.clients.id),
       })
-      .from(clients)
+      .from(schema.clients)
       .where(
         and(
-          eq(clients.agentId, agentId),
-          eq(clients.isActive, true), // 🔥 추가: 활성 고객만
-          gte(clients.createdAt, sixMonthsAgo)
+          eq(schema.clients.agentId, agentId),
+          eq(schema.clients.isActive, true), // 🔥 추가: 활성 고객만
+          gte(schema.clients.createdAt, sixMonthsAgo)
         )
       )
-      .groupBy(sql`TO_CHAR(${clients.createdAt}, 'YYYY-MM')`)
-      .orderBy(sql`TO_CHAR(${clients.createdAt}, 'YYYY-MM')`);
+      .groupBy(sql`TO_CHAR(${schema.clients.createdAt}, 'YYYY-MM')`)
+      .orderBy(sql`TO_CHAR(${schema.clients.createdAt}, 'YYYY-MM')`);
 
     const maxDepth = Math.max(...nodes.map(n => n.level), 0);
     const totalReferrals = nodes.reduce((sum, n) => sum + n.referralCount, 0);
@@ -465,12 +470,12 @@ export async function getNodeDetails(
   try {
     const client = await db
       .select()
-      .from(clients)
+      .from(schema.clients)
       .where(
         and(
-          eq(clients.id, nodeId),
-          eq(clients.agentId, agentId),
-          eq(clients.isActive, true) // 🔥 추가: 활성 고객만
+          eq(schema.clients.id, nodeId),
+          eq(schema.clients.agentId, agentId),
+          eq(schema.clients.isActive, true) // 🔥 추가: 활성 고객만
         )
       )
       .limit(1);
@@ -482,11 +487,11 @@ export async function getNodeDetails(
     // 🔥 수정: clients.referredById를 사용한 추천 관계 조회 (활성 고객만)
     const clientReferrals = await db
       .select()
-      .from(clients)
+      .from(schema.clients)
       .where(
         and(
-          eq(clients.referredById, nodeId),
-          eq(clients.isActive, true) // 🔥 활성 고객만
+          eq(schema.clients.referredById, nodeId),
+          eq(schema.clients.isActive, true) // 🔥 활성 고객만
         )
       );
 
@@ -510,15 +515,15 @@ export async function searchNetwork(
   try {
     const searchResults = await db
       .select()
-      .from(clients)
+      .from(schema.clients)
       .where(
         and(
-          eq(clients.agentId, agentId),
-          eq(clients.isActive, true), // 🔥 추가: 활성 고객만
+          eq(schema.clients.agentId, agentId),
+          eq(schema.clients.isActive, true), // 🔥 추가: 활성 고객만
           or(
-            sql`${clients.fullName} ILIKE ${`%${query}%`}`,
-            sql`${clients.phone} ILIKE ${`%${query}%`}`,
-            sql`${clients.email} ILIKE ${`%${query}%`}`
+            sql`${schema.clients.fullName} ILIKE ${`%${query}%`}`,
+            sql`${schema.clients.phone} ILIKE ${`%${query}%`}`,
+            sql`${schema.clients.email} ILIKE ${`%${query}%`}`
           )
         )
       )
