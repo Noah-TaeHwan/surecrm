@@ -1,5 +1,5 @@
-import { db } from '../../core/db.server';
-import { publicContents } from '../../schema';
+import { db } from '~/lib/core/db.server';
+import schema from '~/lib/schema/all';
 import { eq, and, desc } from 'drizzle-orm';
 
 // 이용약관 데이터 타입
@@ -29,22 +29,22 @@ export async function getTermsOfService(): Promise<TermsData> {
   try {
     const terms = await db
       .select({
-        id: publicContents.id,
-        title: publicContents.title,
-        content: publicContents.content,
-        version: publicContents.version,
-        effectiveDate: publicContents.effectiveDate,
-        updatedAt: publicContents.updatedAt,
+        id: schema.publicContents.id,
+        title: schema.publicContents.title,
+        content: schema.publicContents.content,
+        version: schema.publicContents.version,
+        effectiveDate: schema.publicContents.effectiveDate,
+        updatedAt: schema.publicContents.updatedAt,
       })
-      .from(publicContents)
+      .from(schema.publicContents)
       .where(
         and(
-          eq(publicContents.type, 'terms_of_service'),
-          eq(publicContents.status, 'published'),
-          eq(publicContents.language, 'ko')
+          eq(schema.publicContents.type, 'terms_of_service'),
+          eq(schema.publicContents.status, 'published'),
+          eq(schema.publicContents.language, 'ko')
         )
       )
-      .orderBy(desc(publicContents.effectiveDate))
+      .orderBy(desc(schema.publicContents.effectiveDate))
       .limit(1);
 
     if (terms.length > 0) {
@@ -90,22 +90,22 @@ export async function getPrivacyPolicy(): Promise<PrivacyPolicyData> {
   try {
     const privacy = await db
       .select({
-        id: publicContents.id,
-        title: publicContents.title,
-        content: publicContents.content,
-        version: publicContents.version,
-        effectiveDate: publicContents.effectiveDate,
-        updatedAt: publicContents.updatedAt,
+        id: schema.publicContents.id,
+        title: schema.publicContents.title,
+        content: schema.publicContents.content,
+        version: schema.publicContents.version,
+        effectiveDate: schema.publicContents.effectiveDate,
+        updatedAt: schema.publicContents.updatedAt,
       })
-      .from(publicContents)
+      .from(schema.publicContents)
       .where(
         and(
-          eq(publicContents.type, 'privacy_policy'),
-          eq(publicContents.status, 'published'),
-          eq(publicContents.language, 'ko')
+          eq(schema.publicContents.type, 'privacy_policy'),
+          eq(schema.publicContents.status, 'published'),
+          eq(schema.publicContents.language, 'ko')
         )
       )
-      .orderBy(desc(publicContents.effectiveDate))
+      .orderBy(desc(schema.publicContents.effectiveDate))
       .limit(1);
 
     if (privacy.length > 0) {
