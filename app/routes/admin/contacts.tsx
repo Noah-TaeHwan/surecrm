@@ -1,22 +1,6 @@
 import { useState } from 'react';
 import type { LoaderFunctionArgs, ActionFunctionArgs } from 'react-router';
 import { useLoaderData, Form } from 'react-router';
-import { db } from '~/lib/core/db.server';
-import schema from '~/lib/schema/all';
-import { desc, eq, like, or, and } from 'drizzle-orm';
-import { DataTable } from '~/common/components/ui/data-table';
-import { Button } from '~/common/components/ui/button';
-import { Input } from '~/common/components/ui/input';
-import { Badge } from '~/common/components/ui/badge';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '~/common/components/ui/dialog';
-import { Textarea } from '~/common/components/ui/textarea';
 import {
   Search,
   Mail,
@@ -29,7 +13,6 @@ import {
   Edit,
   Archive,
   Trash2,
-  MessageCircle,
   Phone,
   Reply,
   Calendar,
@@ -37,19 +20,14 @@ import {
   Plus,
   Filter,
   MoreHorizontal,
+  MessageCircle,
 } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
-import { ko } from 'date-fns/locale';
-import type { ColumnDef } from '@tanstack/react-table';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '~/common/components/ui/dropdown-menu';
-import { requireAdmin } from '~/lib/auth/guards.server';
-import { contacts } from '~/lib/schema/public';
-import { count } from 'drizzle-orm';
 import type { Route } from './+types/contacts';
 import {
   Card,
@@ -72,8 +50,35 @@ import {
   TableHeader,
   TableRow,
 } from '~/common/components/ui/table';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '~/common/components/ui/dialog';
+import { Textarea } from '~/common/components/ui/textarea';
+import { Button } from '~/common/components/ui/button';
+import { Badge } from '~/common/components/ui/badge';
+import { Input } from '~/common/components/ui/input';
+import { formatDistanceToNow } from 'date-fns';
+import { ko } from 'date-fns/locale';
+import type { ColumnDef } from '@tanstack/react-table';
+import { count } from 'drizzle-orm';
+import { DataTable } from '~/common/components/ui/data-table';
+import { desc, eq, like, or, and } from 'drizzle-orm';
+import { requireAdmin } from '~/lib/auth/guards.server';
+import schema from '~/lib/schema/all';
 
 export async function loader({ request }: Route.LoaderArgs) {
+  console.log('🚀 [Vercel Log] /admin/contacts loader: 함수 실행 시작');
+  const { db } = await import('~/lib/core/db.server');
+  const { contacts } = await import('~/lib/schema/public');
+  const { requireAdmin } = await import('~/lib/auth/guards.server');
+  const { eq, desc, and, or, like, count } = await import('drizzle-orm');
+  console.log('✅ [Vercel Log] /admin/contacts loader: 서버 모듈 import 완료');
+
   await requireAdmin(request);
 
   const url = new URL(request.url);
@@ -159,6 +164,13 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export async function action({ request }: Route.ActionArgs) {
+  console.log('🚀 [Vercel Log] /admin/contacts action: 함수 실행 시작');
+  const { db } = await import('~/lib/core/db.server');
+  const { contacts } = await import('~/lib/schema/public');
+  const { requireAdmin } = await import('~/lib/auth/guards.server');
+  const { eq } = await import('drizzle-orm');
+  console.log('✅ [Vercel Log] /admin/contacts action: 서버 모듈 import 완료');
+
   await requireAdmin(request);
 
   const formData = await request.formData();

@@ -1,8 +1,5 @@
 import { useLoaderData } from 'react-router';
 import type { LoaderFunctionArgs } from 'react-router';
-import { db } from '~/lib/core/db.server';
-import schema from '~/lib/schema/all';
-import { desc, eq, ilike, or, count } from 'drizzle-orm';
 import {
   Card,
   CardContent,
@@ -64,6 +61,14 @@ import {
 import { useState } from 'react';
 
 export async function loader({ request }: LoaderFunctionArgs) {
+  console.log('🚀 [Vercel Log] /admin/announcements loader: 함수 실행 시작');
+  const { db } = await import('~/lib/core/db.server');
+  const schema = (await import('~/lib/schema/all')).default;
+  const { desc, eq, ilike, or, count } = await import('drizzle-orm');
+  console.log(
+    '✅ [Vercel Log] /admin/announcements loader: 서버 모듈 import 완료'
+  );
+
   const url = new URL(request.url);
   const page = parseInt(url.searchParams.get('page') || '1');
   const limit = parseInt(url.searchParams.get('limit') || '20');

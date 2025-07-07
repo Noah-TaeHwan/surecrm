@@ -1,8 +1,5 @@
 import { useLoaderData } from 'react-router';
 import type { LoaderFunctionArgs } from 'react-router';
-import { db } from '~/lib/core/db.server';
-import schema from '~/lib/schema/all';
-import { count, desc, eq, gte, and } from 'drizzle-orm';
 import {
   Card,
   CardContent,
@@ -30,6 +27,12 @@ import {
 import { Badge } from '~/common/components/ui/badge';
 
 export async function loader({ request }: LoaderFunctionArgs) {
+  console.log('🚀 [Vercel Log] /admin/index loader: 함수 실행 시작');
+  const { db } = await import('~/lib/core/db.server');
+  const schema = (await import('~/lib/schema/all')).default;
+  const { count, desc, eq, gte } = await import('drizzle-orm');
+  console.log('✅ [Vercel Log] /admin/index loader: 서버 모듈 import 완료');
+
   console.log('📊 /admin/index loader: 대시보드 통계 데이터 로딩 시작');
   try {
     // 오늘 날짜 계산
@@ -100,14 +103,19 @@ export async function loader({ request }: LoaderFunctionArgs) {
     const todayWaitlist = todayWaitlistResult[0]?.value ?? 0;
     const pendingContacts = pendingContactsResult[0]?.value ?? 0;
 
-    console.log('✅ /admin/index loader: 데이터 로딩 완료', {
-      totalUsers,
-      totalWaitlist,
-      totalContacts,
-      activeSubscriptions,
-      todayWaitlist,
-      pendingContacts,
-    });
+    console.log('✅ /admin/index loader: 데이터 로딩 완료');
+
+    // ISO 문자열로 변환
+    const toISO = (data: any[]) =>
+      data.map(item => ({
+        ...item,
+        createdAt: item.createdAt
+          ? new Date(item.createdAt).toISOString()
+          : null,
+        updatedAt: item.updatedAt
+          ? new Date(item.updatedAt).toISOString()
+          : null,
+      }));
 
     return {
       stats: {
@@ -118,8 +126,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
         todayWaitlist,
         pendingContacts,
       },
-      recentWaitlist,
-      recentContacts,
+      recentWaitlist: toISO(recentWaitlist),
+      recentContacts: toISO(recentContacts),
     };
   } catch (error) {
     console.error('❌ /admin/index loader: 데이터 로딩 실패', error);
