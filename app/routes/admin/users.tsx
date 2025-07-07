@@ -222,6 +222,7 @@ export default function AdminUsersPage() {
       day: '2-digit',
       hour: '2-digit',
       minute: '2-digit',
+      timeZone: 'Asia/Seoul',
     }).format(dateObj);
   };
 
@@ -232,6 +233,7 @@ export default function AdminUsersPage() {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',
+      timeZone: 'Asia/Seoul',
     }).format(dateObj);
   };
 
