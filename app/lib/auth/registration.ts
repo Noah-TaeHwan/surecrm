@@ -1,6 +1,6 @@
-import { createServerClient } from '../core/supabase';
-import { db } from '../core/db.server';
-import { profiles, invitations } from '../schema';
+import { createServerClient } from '~/lib/core/supabase';
+import { db } from '~/lib/core/db.server';
+import schema from '~/lib/schema/all';
 import { eq } from 'drizzle-orm';
 import { createInvitationsForUser } from '../data/business/invitations';
 import { validateInvitationCode } from './validation';
@@ -269,8 +269,8 @@ export async function completeUserRegistration(
     // 1. 프로필 업데이트 또는 생성
     const existingProfile = await db
       .select()
-      .from(profiles)
-      .where(eq(profiles.id, userId))
+      .from(schema.profiles)
+      .where(eq(schema.profiles.id, userId))
       .limit(1);
 
     let profile;
@@ -280,7 +280,7 @@ export async function completeUserRegistration(
       const trialEndDate = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000); // 14일 후
 
       const updatedProfile = await db
-        .update(profiles)
+        .update(schema.profiles)
         .set({
           fullName: signUpData.fullName,
           phone: signUpData.phone,
@@ -290,7 +290,7 @@ export async function completeUserRegistration(
           subscriptionStatus: 'trial',
           trialEndsAt: trialEndDate,
         })
-        .where(eq(profiles.id, userId))
+        .where(eq(schema.profiles.id, userId))
         .returning();
 
       if (updatedProfile.length === 0) {
@@ -303,7 +303,7 @@ export async function completeUserRegistration(
       const trialEndDate = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000); // 14일 후
 
       const newProfile = await db
-        .insert(profiles)
+        .insert(schema.profiles)
         .values({
           id: userId,
           fullName: signUpData.fullName,
@@ -327,13 +327,13 @@ export async function completeUserRegistration(
 
     // 2. 초대장 상태 업데이트
     await db
-      .update(invitations)
+      .update(schema.invitations)
       .set({
         status: 'used',
         usedById: userId,
         usedAt: new Date(),
       })
-      .where(eq(invitations.id, invitation.id));
+      .where(eq(schema.invitations.id, invitation.id));
 
     console.log('초대장 사용 처리 완료');
 
