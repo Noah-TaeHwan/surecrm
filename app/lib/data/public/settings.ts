@@ -1,5 +1,5 @@
-import { db } from '../../core/db.server';
-import { siteSettings } from '../../schema';
+import { db } from '~/lib/core/db.server';
+import schema from '~/lib/schema/all';
 import { eq } from 'drizzle-orm';
 
 /**
@@ -9,10 +9,10 @@ export async function getSiteSetting(key: string): Promise<string | null> {
   try {
     const setting = await db
       .select({
-        value: siteSettings.value,
+        value: schema.siteSettings.value,
       })
-      .from(siteSettings)
-      .where(eq(siteSettings.key, key))
+      .from(schema.siteSettings)
+      .where(eq(schema.siteSettings.key, key))
       .limit(1);
 
     return setting.length > 0 ? setting[0].value : null;
