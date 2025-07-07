@@ -58,11 +58,19 @@ test-upload-*.cjs
 test-storage-*.cjs
 test-attachment-*.cjs
 
-# Task files
-tasks.json
-tasks/
-
 # 이메일 템플릿은 포함하되, 그 안의 node_modules는 제외
 react-email-starter/node_modules/ 
 
 
+
+logs
+# Dependency directories
+node_modules/
+# Editor directories and files
+.idea
+.vscode
+# OS specific
+
+# Task files
+# tasks.json
+# tasks/ 
