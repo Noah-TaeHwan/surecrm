@@ -139,6 +139,47 @@ export const siteSettings = pgTable('public_site_settings', {
     .notNull(),
 });
 
+// 대기자 명단 테이블 (Waitlist)
+export const waitlist = pgTable('public_site_waitlist', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  email: text('email').notNull().unique(),
+  name: text('name'),
+  company: text('company'),
+  role: text('role'),
+  message: text('message'),
+  source: text('source'), // 'landing', 'direct', 'referral', etc.
+  isContacted: boolean('is_contacted').notNull().default(false),
+  contactedAt: timestamp('contacted_at', { withTimezone: true }),
+  contactedBy: uuid('contacted_by').references(() => profiles.id),
+  notes: text('notes'), // 관리자 메모
+  createdAt: timestamp('created_at', { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+// 문의사항 테이블 (Contact Form)
+export const contacts = pgTable('public_site_contacts', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  name: text('name').notNull(),
+  email: text('email').notNull(),
+  phone: text('phone'),
+  subject: text('subject').notNull(),
+  message: text('message').notNull(),
+  status: text('status').notNull().default('pending'), // pending, in-progress, resolved
+  respondedAt: timestamp('responded_at', { withTimezone: true }),
+  respondedBy: uuid('responded_by').references(() => profiles.id),
+  responseMessage: text('response_message'),
+  createdAt: timestamp('created_at', { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
 // 페이지 조회수 추적 테이블
 export const pageViews = pgTable('public_site_analytics', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -190,6 +231,20 @@ export const siteSettingsRelations = relations(siteSettings, ({ one }) => ({
   }),
 }));
 
+export const waitlistRelations = relations(waitlist, ({ one }) => ({
+  contactedBy: one(profiles, {
+    fields: [waitlist.contactedBy],
+    references: [profiles.id],
+  }),
+}));
+
+export const contactsRelations = relations(contacts, ({ one }) => ({
+  respondedBy: one(profiles, {
+    fields: [contacts.respondedBy],
+    references: [profiles.id],
+  }),
+}));
+
 export const pageViewsRelations = relations(pageViews, ({ one }) => ({
   user: one(profiles, {
     fields: [pageViews.userId],
@@ -209,6 +264,10 @@ export type Testimonial = typeof testimonials.$inferSelect;
 export type NewTestimonial = typeof testimonials.$inferInsert;
 export type SiteSetting = typeof siteSettings.$inferSelect;
 export type NewSiteSetting = typeof siteSettings.$inferInsert;
+export type Waitlist = typeof waitlist.$inferSelect;
+export type NewWaitlist = typeof waitlist.$inferInsert;
+export type Contact = typeof contacts.$inferSelect;
+export type NewContact = typeof contacts.$inferInsert;
 export type PageView = typeof pageViews.$inferSelect;
 export type NewPageView = typeof pageViews.$inferInsert;
 

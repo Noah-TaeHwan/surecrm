@@ -214,6 +214,7 @@ export const clients: any = pgTable('app_client_profiles', {
   notes: text('notes'),
   customFields: jsonb('custom_fields'),
   isActive: boolean('is_active').default(true).notNull(),
+  stageOrder: integer('stage_order').default(0).notNull(), // 파이프라인 내 클라이언트 순서
   createdAt: timestamp('created_at', { withTimezone: true })
     .defaultNow()
     .notNull(),

@@ -1,0 +1,38 @@
+CREATE TABLE "public_site_contacts" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"name" text NOT NULL,
+	"email" text NOT NULL,
+	"phone" text,
+	"subject" text NOT NULL,
+	"message" text NOT NULL,
+	"status" text DEFAULT 'pending' NOT NULL,
+	"responded_at" timestamp with time zone,
+	"responded_by" uuid,
+	"response_message" text,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "public_site_waitlist" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"email" text NOT NULL,
+	"name" text,
+	"company" text,
+	"role" text,
+	"message" text,
+	"source" text,
+	"is_contacted" boolean DEFAULT false NOT NULL,
+	"contacted_at" timestamp with time zone,
+	"contacted_by" uuid,
+	"notes" text,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "public_site_waitlist_email_unique" UNIQUE("email")
+);
+--> statement-breakpoint
+DROP TABLE "app_admin_dashboard_widgets" CASCADE;--> statement-breakpoint
+DROP TABLE "app_admin_security_alerts" CASCADE;--> statement-breakpoint
+DROP TABLE "app_admin_sessions" CASCADE;--> statement-breakpoint
+ALTER TABLE "app_client_profiles" ADD COLUMN "stage_order" integer DEFAULT 0 NOT NULL;--> statement-breakpoint
+ALTER TABLE "public_site_contacts" ADD CONSTRAINT "public_site_contacts_responded_by_app_user_profiles_id_fk" FOREIGN KEY ("responded_by") REFERENCES "public"."app_user_profiles"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "public_site_waitlist" ADD CONSTRAINT "public_site_waitlist_contacted_by_app_user_profiles_id_fk" FOREIGN KEY ("contacted_by") REFERENCES "public"."app_user_profiles"("id") ON DELETE no action ON UPDATE no action;

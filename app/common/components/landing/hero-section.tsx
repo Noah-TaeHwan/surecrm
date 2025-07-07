@@ -8,10 +8,9 @@ import { MagicCard } from '~/common/components/magicui/magic-card';
 import { TextReveal } from '~/common/components/magicui/text-reveal';
 import { AnimatedShinyText } from '~/common/components/magicui/animated-shiny-text';
 import { InvitationRequestForm } from '~/features/invitations/components/invitation-request-form';
-import type { action as invitationAction } from '~/routes/api.request-invitation';
 
 interface HeroSectionProps {
-  actionData?: Awaited<ReturnType<typeof invitationAction>>;
+  actionData?: any; // 임시로 any 타입 사용
 }
 
 export function HeroSection({ actionData }: HeroSectionProps) {
