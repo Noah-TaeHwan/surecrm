@@ -1,6 +1,6 @@
 import { getClientSideClient } from '~/lib/core/supabase';
 import { db } from '~/lib/core/db.server';
-import { profiles } from '~/lib/schema';
+import schema from '~/lib/schema/all';
 import { eq } from 'drizzle-orm';
 
 export interface SubscriptionStatus {
@@ -27,14 +27,14 @@ export async function getUserSubscriptionStatus(
   try {
     const userProfile = await db
       .select({
-        createdAt: profiles.createdAt,
-        subscriptionStatus: profiles.subscriptionStatus,
-        trialEndsAt: profiles.trialEndsAt,
-        subscriptionEndsAt: profiles.subscriptionEndsAt,
-        role: profiles.role,
+        createdAt: schema.profiles.createdAt,
+        subscriptionStatus: schema.profiles.subscriptionStatus,
+        trialEndsAt: schema.profiles.trialEndsAt,
+        subscriptionEndsAt: schema.profiles.subscriptionEndsAt,
+        role: schema.profiles.role,
       })
-      .from(profiles)
-      .where(eq(profiles.id, userId))
+      .from(schema.profiles)
+      .where(eq(schema.profiles.id, userId))
       .limit(1);
 
     if (userProfile.length === 0) {

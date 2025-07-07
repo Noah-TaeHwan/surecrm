@@ -13,6 +13,8 @@ const sessionStorage = createCookieSessionStorage({
   },
 });
 
+export { sessionStorage };
+
 export async function getSession(request: Request) {
   return sessionStorage.getSession(request.headers.get('Cookie'));
 }

@@ -13,20 +13,7 @@ import {
   ne,
   inArray,
 } from 'drizzle-orm';
-import {
-  clients,
-  teams,
-  referrals,
-  pipelineStages,
-  insuranceInfo,
-  opportunityProducts,
-} from '~/lib/schema';
-import { insuranceContracts } from '~/lib/schema/core';
-import { profiles } from '~/lib/schema';
-import {
-  meetings,
-  appCalendarMeetingChecklists,
-} from '~/features/calendar/lib/schema';
+import schema from '~/lib/schema/all';
 import { appDashboardGoals } from './schema';
 
 // 새로운 타입 시스템 import
@@ -46,15 +33,15 @@ export async function getUserInfo(userId: string): Promise<DashboardUserInfo> {
   try {
     const profile = await db
       .select({
-        id: profiles.id,
-        fullName: profiles.fullName,
-        role: profiles.role,
-        profileImageUrl: profiles.profileImageUrl,
-        lastLoginAt: profiles.lastLoginAt,
-        theme: profiles.theme,
+        id: schema.profiles.id,
+        fullName: schema.profiles.fullName,
+        role: schema.profiles.role,
+        profileImageUrl: schema.profiles.profileImageUrl,
+        lastLoginAt: schema.profiles.lastLoginAt,
+        theme: schema.profiles.theme,
       })
-      .from(profiles)
-      .where(eq(profiles.id, userId))
+      .from(schema.profiles)
+      .where(eq(schema.profiles.id, userId))
       .limit(1);
 
     const userProfile = profile[0];
@@ -109,16 +96,16 @@ export async function getTodayStats(
     // 오늘 예정된 미팅 수 (시간대별 분석)
     const meetingsToday = await db
       .select({
-        id: meetings.id,
-        scheduledAt: meetings.scheduledAt,
-        status: meetings.status,
+        id: schema.meetings.id,
+        scheduledAt: schema.meetings.scheduledAt,
+        status: schema.meetings.status,
       })
-      .from(meetings)
+      .from(schema.meetings)
       .where(
         and(
-          eq(meetings.agentId, userId),
-          gte(meetings.scheduledAt, todayStart),
-          lte(meetings.scheduledAt, todayEnd)
+          eq(schema.meetings.agentId, userId),
+          gte(schema.meetings.scheduledAt, todayStart),
+          lte(schema.meetings.scheduledAt, todayEnd)
         )
       );
 
@@ -152,15 +139,15 @@ export async function getTodayStats(
     // 미완료 체크리스트 항목 수 (대기 중인 작업)
     const pendingTasksResult = await db
       .select({ count: count() })
-      .from(appCalendarMeetingChecklists)
+      .from(schema.appCalendarMeetingChecklists)
       .innerJoin(
-        meetings,
-        eq(appCalendarMeetingChecklists.meetingId, meetings.id)
+        schema.meetings,
+        eq(schema.appCalendarMeetingChecklists.meetingId, schema.meetings.id)
       )
       .where(
         and(
-          eq(meetings.agentId, userId),
-          eq(appCalendarMeetingChecklists.completed, false)
+          eq(schema.meetings.agentId, userId),
+          eq(schema.appCalendarMeetingChecklists.completed, false)
         )
       );
 
@@ -170,13 +157,13 @@ export async function getTodayStats(
     const weekStart = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
     const newReferralsResult = await db
       .select({ count: count() })
-      .from(clients)
+      .from(schema.clients)
       .where(
         and(
-          eq(clients.agentId, userId),
-          eq(clients.isActive, true), // 🔥 추가: 활성 고객만
-          sql`${clients.referredById} IS NOT NULL`,
-          gte(clients.createdAt, weekStart)
+          eq(schema.clients.agentId, userId),
+          eq(schema.clients.isActive, true), // 🔥 추가: 활성 고객만
+          sql`${schema.clients.referredById} IS NOT NULL`,
+          gte(schema.clients.createdAt, weekStart)
         )
       );
 
@@ -229,73 +216,73 @@ export async function getKPIData(userId: string): Promise<DashboardKPIData> {
       // 총 고객 수 (🔥 활성 고객만)
       db
         .select({ count: count() })
-        .from(clients)
+        .from(schema.clients)
         .where(
           and(
-            eq(clients.agentId, userId),
-            eq(clients.isActive, true) // 🔥 추가: 활성 고객만
+            eq(schema.clients.agentId, userId),
+            eq(schema.clients.isActive, true) // 🔥 추가: 활성 고객만
           )
         ),
 
       // 이번 달 신규 고객 수 (🔥 활성 고객만)
       db
         .select({ count: count() })
-        .from(clients)
+        .from(schema.clients)
         .where(
           and(
-            eq(clients.agentId, userId),
-            eq(clients.isActive, true), // 🔥 추가: 활성 고객만
-            gte(clients.createdAt, thisMonth)
+            eq(schema.clients.agentId, userId),
+            eq(schema.clients.isActive, true), // 🔥 추가: 활성 고객만
+            gte(schema.clients.createdAt, thisMonth)
           )
         ),
 
       // 총 소개 건수 (🔥 활성 고객만)
       db
         .select({ count: count() })
-        .from(clients)
+        .from(schema.clients)
         .where(
           and(
-            eq(clients.agentId, userId),
-            eq(clients.isActive, true), // 🔥 추가: 활성 고객만
-            sql`${clients.referredById} IS NOT NULL`
+            eq(schema.clients.agentId, userId),
+            eq(schema.clients.isActive, true), // 🔥 추가: 활성 고객만
+            sql`${schema.clients.referredById} IS NOT NULL`
           )
         ),
 
       // 계약 완료 고객 (전환율 계산용) - 실제 "계약 완료" 단계 고객 수 사용 (🔥 활성 고객만)
       db
         .select({ count: count() })
-        .from(clients)
+        .from(schema.clients)
         .where(
           and(
-            eq(clients.agentId, userId),
-            eq(clients.isActive, true) // 🔥 추가: 활성 고객만
+            eq(schema.clients.agentId, userId),
+            eq(schema.clients.isActive, true) // 🔥 추가: 활성 고객만
           )
         ),
 
       // 지난 달 신규 고객 수 (🔥 활성 고객만)
       db
         .select({ count: count() })
-        .from(clients)
+        .from(schema.clients)
         .where(
           and(
-            eq(clients.agentId, userId),
-            eq(clients.isActive, true), // 🔥 추가: 활성 고객만
-            gte(clients.createdAt, lastMonth),
-            lte(clients.createdAt, thisMonth)
+            eq(schema.clients.agentId, userId),
+            eq(schema.clients.isActive, true), // 🔥 추가: 활성 고객만
+            gte(schema.clients.createdAt, lastMonth),
+            lte(schema.clients.createdAt, thisMonth)
           )
         ),
 
       // 지난 달 소개 건수 (🔥 활성 고객만)
       db
         .select({ count: count() })
-        .from(clients)
+        .from(schema.clients)
         .where(
           and(
-            eq(clients.agentId, userId),
-            eq(clients.isActive, true), // 🔥 추가: 활성 고객만
-            sql`${clients.referredById} IS NOT NULL`,
-            gte(clients.createdAt, lastMonth),
-            lte(clients.createdAt, thisMonth)
+            eq(schema.clients.agentId, userId),
+            eq(schema.clients.isActive, true), // 🔥 추가: 활성 고객만
+            sql`${schema.clients.referredById} IS NOT NULL`,
+            gte(schema.clients.createdAt, lastMonth),
+            lte(schema.clients.createdAt, thisMonth)
           )
         ),
     ]);
@@ -307,12 +294,12 @@ export async function getKPIData(userId: string): Promise<DashboardKPIData> {
 
     // "계약 완료" 단계 조회
     const contractCompletedStage = await db
-      .select({ id: pipelineStages.id })
-      .from(pipelineStages)
+      .select({ id: schema.pipelineStages.id })
+      .from(schema.pipelineStages)
       .where(
         and(
-          eq(pipelineStages.agentId, userId),
-          eq(pipelineStages.name, '계약 완료')
+          eq(schema.pipelineStages.agentId, userId),
+          eq(schema.pipelineStages.name, '계약 완료')
         )
       )
       .limit(1);
@@ -321,12 +308,12 @@ export async function getKPIData(userId: string): Promise<DashboardKPIData> {
       // 실제 "계약 완료" 단계에 있는 고객 수 (🔥 활성 고객만)
       const contractedResult = await db
         .select({ count: count() })
-        .from(clients)
+        .from(schema.clients)
         .where(
           and(
-            eq(clients.agentId, userId),
-            eq(clients.isActive, true), // 🔥 추가: 활성 고객만
-            eq(clients.currentStageId, contractCompletedStage[0].id)
+            eq(schema.clients.agentId, userId),
+            eq(schema.clients.isActive, true), // 🔥 추가: 활성 고객만
+            eq(schema.clients.currentStageId, contractCompletedStage[0].id)
           )
         );
 
@@ -358,21 +345,24 @@ export async function getKPIData(userId: string): Promise<DashboardKPIData> {
           : 0;
 
     // 🏢 수정: 실제 보험계약 수수료 기반 평균 고객 가치 계산
-    const { insuranceContracts } = await import('~/lib/schema/core'); // 동적 import로 보험계약 테이블 가져오기
+    const { insuranceContracts } = schema; // 이제 all.ts에서 직접 가져옵니다.
 
     const averageClientValueResult = await db
       .select({
-        totalCommission: sql<number>`COALESCE(SUM(CAST(${insuranceContracts.agentCommission} AS NUMERIC)), 0)`,
-        clientCount: sql<number>`COUNT(DISTINCT ${insuranceContracts.clientId})`,
+        totalCommission: sql<number>`COALESCE(SUM(CAST(${schema.insuranceContracts.agentCommission} AS NUMERIC)), 0)`,
+        clientCount: sql<number>`COUNT(DISTINCT ${schema.insuranceContracts.clientId})`,
       })
-      .from(insuranceContracts)
-      .innerJoin(clients, eq(insuranceContracts.clientId, clients.id))
+      .from(schema.insuranceContracts)
+      .innerJoin(
+        schema.clients,
+        eq(schema.insuranceContracts.clientId, schema.clients.id)
+      )
       .where(
         and(
-          eq(insuranceContracts.agentId, userId),
-          eq(clients.isActive, true),
-          eq(insuranceContracts.status, 'active'),
-          sql`${insuranceContracts.agentCommission} IS NOT NULL`
+          eq(schema.insuranceContracts.agentId, userId),
+          eq(schema.clients.isActive, true),
+          eq(schema.insuranceContracts.status, 'active'),
+          sql`${schema.insuranceContracts.agentCommission} IS NOT NULL`
         )
       );
 
@@ -390,14 +380,14 @@ export async function getKPIData(userId: string): Promise<DashboardKPIData> {
 
       const lastMonthContractedResult = await db
         .select({ count: count() })
-        .from(clients)
+        .from(schema.clients)
         .where(
           and(
-            eq(clients.agentId, userId),
-            eq(clients.isActive, true), // 🔥 추가: 활성 고객만
-            eq(clients.currentStageId, contractCompletedStage[0].id),
-            gte(clients.updatedAt, lastMonthStart),
-            lte(clients.updatedAt, lastMonthEnd)
+            eq(schema.clients.agentId, userId),
+            eq(schema.clients.isActive, true), // 🔥 추가: 활성 고객만
+            eq(schema.clients.currentStageId, contractCompletedStage[0].id),
+            gte(schema.clients.updatedAt, lastMonthStart),
+            lte(schema.clients.updatedAt, lastMonthEnd)
           )
         );
 
@@ -417,16 +407,19 @@ export async function getKPIData(userId: string): Promise<DashboardKPIData> {
     const contractsStatsResult = await db
       .select({
         totalContracts: sql<number>`COUNT(*)`,
-        totalMonthlyPremium: sql<number>`COALESCE(SUM(CAST(${insuranceContracts.monthlyPremium} AS NUMERIC)), 0)`,
-        totalCommission: sql<number>`COALESCE(SUM(CAST(${insuranceContracts.agentCommission} AS NUMERIC)), 0)`,
+        totalMonthlyPremium: sql<number>`COALESCE(SUM(CAST(${schema.insuranceContracts.monthlyPremium} AS NUMERIC)), 0)`,
+        totalCommission: sql<number>`COALESCE(SUM(CAST(${schema.insuranceContracts.agentCommission} AS NUMERIC)), 0)`,
       })
-      .from(insuranceContracts)
-      .innerJoin(clients, eq(insuranceContracts.clientId, clients.id))
+      .from(schema.insuranceContracts)
+      .innerJoin(
+        schema.clients,
+        eq(schema.insuranceContracts.clientId, schema.clients.id)
+      )
       .where(
         and(
-          eq(insuranceContracts.agentId, userId),
-          eq(clients.isActive, true),
-          eq(insuranceContracts.status, 'active')
+          eq(schema.insuranceContracts.agentId, userId),
+          eq(schema.clients.isActive, true),
+          eq(schema.insuranceContracts.status, 'active')
         )
       );
 
@@ -501,25 +494,25 @@ export async function getTodayMeetings(
     // 오늘의 미팅 조회 (간소화된 버전)
     const todayMeetings = await db
       .select({
-        id: meetings.id,
-        clientId: meetings.clientId,
-        title: meetings.title,
-        scheduledAt: meetings.scheduledAt,
-        duration: meetings.duration,
-        location: meetings.location,
-        status: meetings.status,
-        meetingType: meetings.meetingType,
+        id: schema.meetings.id,
+        clientId: schema.meetings.clientId,
+        title: schema.meetings.title,
+        scheduledAt: schema.meetings.scheduledAt,
+        duration: schema.meetings.duration,
+        location: schema.meetings.location,
+        status: schema.meetings.status,
+        meetingType: schema.meetings.meetingType,
       })
-      .from(meetings)
-      .leftJoin(clients, eq(meetings.clientId, clients.id))
+      .from(schema.meetings)
+      .leftJoin(schema.clients, eq(schema.meetings.clientId, schema.clients.id))
       .where(
         and(
-          eq(meetings.agentId, userId),
-          gte(meetings.scheduledAt, todayStart),
-          lte(meetings.scheduledAt, todayEnd)
+          eq(schema.meetings.agentId, userId),
+          gte(schema.meetings.scheduledAt, todayStart),
+          lte(schema.meetings.scheduledAt, todayEnd)
         )
       )
-      .orderBy(asc(meetings.scheduledAt));
+      .orderBy(asc(schema.meetings.scheduledAt));
 
     // TODO: 향후 미팅과 고객 정보 조인 및 체크리스트 추가 로직 구현
     return todayMeetings.map(meeting => ({
@@ -560,18 +553,18 @@ export async function getPipelineData(userId: string) {
     // 사용자의 파이프라인 단계들을 먼저 조회 (제외됨 단계는 필터링)
     const userStages = await db
       .select({
-        id: pipelineStages.id,
-        name: pipelineStages.name,
-        order: pipelineStages.order,
+        id: schema.pipelineStages.id,
+        name: schema.pipelineStages.name,
+        order: schema.pipelineStages.order,
       })
-      .from(pipelineStages)
+      .from(schema.pipelineStages)
       .where(
         and(
-          eq(pipelineStages.agentId, userId),
-          ne(pipelineStages.name, '제외됨') // "제외됨" 단계 제외
+          eq(schema.pipelineStages.agentId, userId),
+          ne(schema.pipelineStages.name, '제외됨') // "제외됨" 단계 제외
         )
       )
-      .orderBy(asc(pipelineStages.order));
+      .orderBy(asc(schema.pipelineStages.order));
 
     // 사용자 단계가 없으면 기본 단계 사용
     const stages = userStages.length > 0 ? userStages : defaultStages;
@@ -587,12 +580,12 @@ export async function getPipelineData(userId: string) {
             .select({
               count: count(),
             })
-            .from(clients)
+            .from(schema.clients)
             .where(
               and(
-                eq(clients.agentId, userId),
-                eq(clients.isActive, true), // 🔥 추가: 활성 고객만
-                eq(clients.currentStageId, stage.id)
+                eq(schema.clients.agentId, userId),
+                eq(schema.clients.isActive, true), // 🔥 추가: 활성 고객만
+                eq(schema.clients.currentStageId, stage.id)
               )
             );
 
@@ -601,17 +594,20 @@ export async function getPipelineData(userId: string) {
           // 🆕 실제 영업 기회 상품의 수수료 합계 계산
           const stageOpportunityProducts = await db
             .select({
-              expectedCommission: opportunityProducts.expectedCommission,
+              expectedCommission: schema.opportunityProducts.expectedCommission,
             })
-            .from(opportunityProducts)
-            .innerJoin(clients, eq(opportunityProducts.clientId, clients.id))
+            .from(schema.opportunityProducts)
+            .innerJoin(
+              schema.clients,
+              eq(schema.opportunityProducts.clientId, schema.clients.id)
+            )
             .where(
               and(
-                eq(opportunityProducts.agentId, userId),
-                eq(clients.currentStageId, stage.id),
-                eq(clients.isActive, true),
-                eq(opportunityProducts.status, 'active'),
-                sql`${opportunityProducts.expectedCommission} IS NOT NULL`
+                eq(schema.opportunityProducts.agentId, userId),
+                eq(schema.clients.currentStageId, stage.id),
+                eq(schema.clients.isActive, true),
+                eq(schema.opportunityProducts.status, 'active'),
+                sql`${schema.opportunityProducts.expectedCommission} IS NOT NULL`
               )
             );
 
@@ -647,12 +643,12 @@ export async function getPipelineData(userId: string) {
           if ('id' in nextStage) {
             const nextStageResult = await db
               .select({ count: count() })
-              .from(clients)
+              .from(schema.clients)
               .where(
                 and(
-                  eq(clients.agentId, userId),
-                  eq(clients.isActive, true), // 🔥 추가: 활성 고객만
-                  eq(clients.currentStageId, nextStage.id)
+                  eq(schema.clients.agentId, userId),
+                  eq(schema.clients.isActive, true), // 🔥 추가: 활성 고객만
+                  eq(schema.clients.currentStageId, nextStage.id)
                 )
               );
 
@@ -758,17 +754,17 @@ export async function getReferralInsights(userId: string) {
     // 소개자별 통계 조회 - 간단한 방법으로 구현 (subquery 사용)
     const referralData = await db
       .select({
-        referrerId: clients.referredById,
-        clientId: clients.id,
-        clientName: clients.fullName,
-        createdAt: clients.createdAt,
+        referrerId: schema.clients.referredById,
+        clientId: schema.clients.id,
+        clientName: schema.clients.fullName,
+        createdAt: schema.clients.createdAt,
       })
-      .from(clients)
+      .from(schema.clients)
       .where(
         and(
-          eq(clients.agentId, userId),
-          eq(clients.isActive, true), // 활성 고객만
-          sql`${clients.referredById} IS NOT NULL` // 소개받은 고객만
+          eq(schema.clients.agentId, userId),
+          eq(schema.clients.isActive, true), // 활성 고객만
+          sql`${schema.clients.referredById} IS NOT NULL` // 소개받은 고객만
         )
       );
 
@@ -809,11 +805,11 @@ export async function getReferralInsights(userId: string) {
     if (referrerIds.length > 0) {
       referrerNames = await db
         .select({
-          id: clients.id,
-          fullName: clients.fullName,
+          id: schema.clients.id,
+          fullName: schema.clients.fullName,
         })
-        .from(clients)
-        .where(inArray(clients.id, referrerIds));
+        .from(schema.clients)
+        .where(inArray(schema.clients.id, referrerIds));
     }
 
     const referrerNameMap = new Map(referrerNames.map(r => [r.id, r.fullName]));
@@ -853,12 +849,12 @@ export async function getReferralInsights(userId: string) {
     // 총 소개 연결 수 (소개받은 고객 수)
     const totalConnectionsResult = await db
       .select({ count: count() })
-      .from(clients)
+      .from(schema.clients)
       .where(
         and(
-          eq(clients.agentId, userId),
-          eq(clients.isActive, true),
-          sql`${clients.referredById} IS NOT NULL`
+          eq(schema.clients.agentId, userId),
+          eq(schema.clients.isActive, true),
+          sql`${schema.clients.referredById} IS NOT NULL`
         )
       );
 
@@ -870,15 +866,15 @@ export async function getReferralInsights(userId: string) {
 
     const activeReferrersResult = await db
       .select({
-        count: sql<number>`COUNT(DISTINCT ${clients.referredById})`,
+        count: sql<number>`COUNT(DISTINCT ${schema.clients.referredById})`,
       })
-      .from(clients)
+      .from(schema.clients)
       .where(
         and(
-          eq(clients.agentId, userId),
-          eq(clients.isActive, true),
-          sql`${clients.referredById} IS NOT NULL`,
-          gte(clients.createdAt, threeMonthsAgo)
+          eq(schema.clients.agentId, userId),
+          eq(schema.clients.isActive, true),
+          sql`${schema.clients.referredById} IS NOT NULL`,
+          gte(schema.clients.createdAt, threeMonthsAgo)
         )
       );
 
@@ -893,13 +889,13 @@ export async function getReferralInsights(userId: string) {
 
     const recentConnectionsResult = await db
       .select({ count: count() })
-      .from(clients)
+      .from(schema.clients)
       .where(
         and(
-          eq(clients.agentId, userId),
-          eq(clients.isActive, true),
-          sql`${clients.referredById} IS NOT NULL`,
-          gte(clients.createdAt, lastMonth)
+          eq(schema.clients.agentId, userId),
+          eq(schema.clients.isActive, true),
+          sql`${schema.clients.referredById} IS NOT NULL`,
+          gte(schema.clients.createdAt, lastMonth)
         )
       );
 
@@ -1086,18 +1082,18 @@ export async function getUserGoals(userId: string) {
                 const actualContractsInPeriod = await db
                   .select({
                     count: count(),
-                    totalCommission: sql<number>`COALESCE(SUM(CAST(${insuranceContracts.agentCommission} AS NUMERIC)), 0)`,
+                    totalCommission: sql<number>`COALESCE(SUM(CAST(${schema.insuranceContracts.agentCommission} AS NUMERIC)), 0)`,
                   })
-                  .from(insuranceContracts)
+                  .from(schema.insuranceContracts)
                   .where(
                     and(
-                      eq(insuranceContracts.agentId, userId),
-                      eq(insuranceContracts.status, 'active'),
-                      sql`${insuranceContracts.agentCommission} IS NOT NULL`,
-                      sql`DATE(${insuranceContracts.contractDate}) >= ${
+                      eq(schema.insuranceContracts.agentId, userId),
+                      eq(schema.insuranceContracts.status, 'active'),
+                      sql`${schema.insuranceContracts.agentCommission} IS NOT NULL`,
+                      sql`DATE(${schema.insuranceContracts.contractDate}) >= ${
                         goalStartDate.toISOString().split('T')[0]
                       }`,
-                      sql`DATE(${insuranceContracts.contractDate}) <= ${
+                      sql`DATE(${schema.insuranceContracts.contractDate}) <= ${
                         goalEndDate.toISOString().split('T')[0]
                       }`
                     )
@@ -1133,13 +1129,13 @@ export async function getUserGoals(userId: string) {
 
               const newClientsResult = await db
                 .select({ count: count() })
-                .from(clients)
+                .from(schema.clients)
                 .where(
                   and(
-                    eq(clients.agentId, userId),
-                    eq(clients.isActive, true), // 🔥 추가: 활성 고객만
-                    gte(clients.createdAt, clientsStartDate),
-                    lte(clients.createdAt, clientsEndDate)
+                    eq(schema.clients.agentId, userId),
+                    eq(schema.clients.isActive, true), // 🔥 추가: 활성 고객만
+                    gte(schema.clients.createdAt, clientsStartDate),
+                    lte(schema.clients.createdAt, clientsEndDate)
                   )
                 );
 
@@ -1154,14 +1150,14 @@ export async function getUserGoals(userId: string) {
               // 소개받은 고객 수 계산 (clients 테이블에서 referredById가 있는 고객들)
               const referralsResult = await db
                 .select({ count: count() })
-                .from(clients)
+                .from(schema.clients)
                 .where(
                   and(
-                    eq(clients.agentId, userId),
-                    eq(clients.isActive, true), // 활성 고객만
-                    sql`${clients.referredById} IS NOT NULL`, // 소개받은 고객만
-                    gte(clients.createdAt, referralsStartDate),
-                    lte(clients.createdAt, referralsEndDate)
+                    eq(schema.clients.agentId, userId),
+                    eq(schema.clients.isActive, true), // 활성 고객만
+                    sql`${schema.clients.referredById} IS NOT NULL`, // 소개받은 고객만
+                    gte(schema.clients.createdAt, referralsStartDate),
+                    lte(schema.clients.createdAt, referralsEndDate)
                   )
                 );
 
@@ -1220,31 +1216,31 @@ export async function getRecentClientsData(userId: string) {
   try {
     const recentClients = await db
       .select({
-        id: clients.id,
-        fullName: clients.fullName,
-        currentStageId: clients.currentStageId,
-        referredById: clients.referredById,
-        createdAt: clients.createdAt,
-        updatedAt: clients.updatedAt,
+        id: schema.clients.id,
+        fullName: schema.clients.fullName,
+        currentStageId: schema.clients.currentStageId,
+        referredById: schema.clients.referredById,
+        createdAt: schema.clients.createdAt,
+        updatedAt: schema.clients.updatedAt,
       })
-      .from(clients)
+      .from(schema.clients)
       .where(
         and(
-          eq(clients.agentId, userId),
-          eq(clients.isActive, true) // 🔥 추가: 활성 고객만
+          eq(schema.clients.agentId, userId),
+          eq(schema.clients.isActive, true) // 🔥 추가: 활성 고객만
         )
       )
-      .orderBy(desc(clients.createdAt))
+      .orderBy(desc(schema.clients.createdAt))
       .limit(5);
 
     // 총 고객 수 (🔥 활성 고객만)
     const totalClientsResult = await db
       .select({ count: count() })
-      .from(clients)
+      .from(schema.clients)
       .where(
         and(
-          eq(clients.agentId, userId),
-          eq(clients.isActive, true) // 🔥 추가: 활성 고객만
+          eq(schema.clients.agentId, userId),
+          eq(schema.clients.isActive, true) // 🔥 추가: 활성 고객만
         )
       );
 

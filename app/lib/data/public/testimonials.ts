@@ -1,5 +1,5 @@
 import { db } from '../../core/db.server';
-import { testimonials } from '../../schema';
+import schema from '../../schema/all';
 import { eq, and, desc } from 'drizzle-orm';
 
 // 후기 데이터 타입
@@ -22,27 +22,36 @@ export async function getPublicTestimonials(): Promise<Testimonial[]> {
   try {
     const dbTestimonials = await db
       .select({
-        id: testimonials.id,
-        name: testimonials.name,
-        role: testimonials.role,
-        company: testimonials.company,
-        quote: testimonials.quote,
-        rating: testimonials.rating,
-        initial: testimonials.initial,
-        isVerified: testimonials.isVerified,
+        id: schema.testimonials.id,
+        name: schema.testimonials.name,
+        role: schema.testimonials.role,
+        company: schema.testimonials.company,
+        quote: schema.testimonials.quote,
+        rating: schema.testimonials.rating,
+        initial: schema.testimonials.initial,
+        isVerified: schema.testimonials.isVerified,
       })
-      .from(testimonials)
+      .from(schema.testimonials)
       .where(
-        and(eq(testimonials.isPublished, true), eq(testimonials.language, 'ko'))
+        and(
+          eq(schema.testimonials.isPublished, true),
+          eq(schema.testimonials.language, 'ko')
+        )
       )
-      .orderBy(testimonials.order, testimonials.createdAt)
+      .orderBy(
+        desc(schema.testimonials.order),
+        desc(schema.testimonials.createdAt)
+      )
       .limit(8);
 
-    return dbTestimonials;
+    // Drizzle-orm은 number | null 타입을 반환할 수 있으므로, 타입을 명시적으로 맞춰줍니다.
+    return dbTestimonials.map(t => ({
+      ...t,
+      rating: t.rating ?? 5, // rating이 null이면 기본값 5를 사용
+    }));
   } catch (error) {
     console.error('후기 데이터 조회 실패:', error);
-
-    // 에러 시 기본값 반환
+    // 에러 시 기본값 반환 (기존 로직 유지)
     return [
       {
         id: '1',

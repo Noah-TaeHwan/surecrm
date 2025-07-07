@@ -4,7 +4,7 @@ import {
   createClientSideClient,
 } from '../core/supabase';
 import { db } from '../core/db.server';
-import { profiles } from '../schema';
+import schema from '../schema/all';
 import { eq } from 'drizzle-orm';
 import { getUserId } from './session';
 import type {
@@ -30,8 +30,8 @@ export async function getCurrentUser(request: Request): Promise<User | null> {
     // 프로필 정보 조회
     const userProfile = await db
       .select()
-      .from(profiles)
-      .where(eq(profiles.id, userId))
+      .from(schema.profiles)
+      .where(eq(schema.profiles.id, userId))
       .limit(1);
 
     if (userProfile.length === 0) {
@@ -113,8 +113,8 @@ export async function sendMagicLink(
     // 2. 프로필 상태 확인
     const userProfile = await db
       .select()
-      .from(profiles)
-      .where(eq(profiles.id, existingUser.id))
+      .from(schema.profiles)
+      .where(eq(schema.profiles.id, existingUser.id))
       .limit(1);
 
     if (userProfile.length === 0) {
@@ -172,12 +172,12 @@ export async function sendMagicLink(
 async function updateLastLoginTime(userId: string): Promise<void> {
   try {
     await db
-      .update(profiles)
+      .update(schema.profiles)
       .set({
         lastLoginAt: new Date(),
         updatedAt: new Date(),
       })
-      .where(eq(profiles.id, userId));
+      .where(eq(schema.profiles.id, userId));
 
     console.log('마지막 로그인 시간 업데이트 완료:', userId);
   } catch (error) {
@@ -192,12 +192,12 @@ async function updateLastLoginTime(userId: string): Promise<void> {
 export async function updateUserActivity(userId: string): Promise<void> {
   try {
     await db
-      .update(profiles)
+      .update(schema.profiles)
       .set({
         lastLoginAt: new Date(),
         updatedAt: new Date(),
       })
-      .where(eq(profiles.id, userId));
+      .where(eq(schema.profiles.id, userId));
 
     console.log('사용자 활동 시간 업데이트 완료:', userId);
   } catch (error) {
@@ -244,8 +244,8 @@ export async function verifyMagicLink(
     // 2. 프로필 정보 조회
     const userProfile = await db
       .select()
-      .from(profiles)
-      .where(eq(profiles.id, data.user.id))
+      .from(schema.profiles)
+      .where(eq(schema.profiles.id, data.user.id))
       .limit(1);
 
     if (userProfile.length === 0) {
@@ -364,8 +364,8 @@ export async function authenticateUser(
     try {
       const userProfile = await db
         .select()
-        .from(profiles)
-        .where(eq(profiles.id, authData.user.id))
+        .from(schema.profiles)
+        .where(eq(schema.profiles.id, authData.user.id))
         .limit(1);
 
       console.log('📊 [2단계] DB 쿼리 결과:', {
@@ -489,11 +489,11 @@ export async function diagnoseAuthDB(email: string): Promise<any> {
     try {
       const userProfile = await db
         .select()
-        .from(profiles)
-        .where(eq(profiles.id, authUser.id))
+        .from(schema.profiles)
+        .where(eq(schema.profiles.id, authUser.id))
         .limit(1);
 
-      console.log('📊 [프로필 테이블 상태]:', {
+      console.log('�� [프로필 테이블 상태]:', {
         profilesFound: userProfile.length,
         profile:
           userProfile.length > 0

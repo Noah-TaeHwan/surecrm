@@ -3,12 +3,7 @@
 // 🏢 보험계약 관리 API
 import { eq, and, desc, count, sql, not } from 'drizzle-orm';
 import { db } from '~/lib/core/db.server';
-import {
-  insuranceContracts,
-  contractAttachments,
-  opportunityProducts,
-  clients,
-} from '~/lib/schema/core';
+import schema from '~/lib/schema/all';
 import type {
   NewInsuranceContract,
   InsuranceContract,
@@ -101,7 +96,7 @@ export async function createInsuranceContract(
     };
 
     const [createdContract] = await db
-      .insert(insuranceContracts)
+      .insert(schema.insuranceContracts)
       .values(newContract)
       .returning();
 
@@ -183,7 +178,7 @@ export async function createInsuranceContract(
             };
 
             const [savedAttachment] = await db
-              .insert(contractAttachments)
+              .insert(schema.contractAttachments)
               .values(attachmentRecord)
               .returning();
 
@@ -248,48 +243,48 @@ export async function getClientInsuranceContracts(
 
     const contracts = await db
       .select({
-        id: insuranceContracts.id,
-        productName: insuranceContracts.productName,
-        insuranceCompany: insuranceContracts.insuranceCompany,
-        insuranceType: insuranceContracts.insuranceType,
-        insuranceCode: insuranceContracts.insuranceCode,
-        contractNumber: insuranceContracts.contractNumber,
-        policyNumber: insuranceContracts.policyNumber,
-        contractDate: insuranceContracts.contractDate,
-        effectiveDate: insuranceContracts.effectiveDate,
-        expirationDate: insuranceContracts.expirationDate,
-        paymentDueDate: insuranceContracts.paymentDueDate,
-        contractorName: insuranceContracts.contractorName,
-        contractorSsn: insuranceContracts.contractorSsn,
-        contractorPhone: insuranceContracts.contractorPhone,
-        insuredName: insuranceContracts.insuredName,
-        insuredSsn: insuranceContracts.insuredSsn,
-        insuredPhone: insuranceContracts.insuredPhone,
-        beneficiaryName: insuranceContracts.beneficiaryName,
-        premiumAmount: insuranceContracts.premiumAmount,
-        monthlyPremium: insuranceContracts.monthlyPremium,
-        annualPremium: insuranceContracts.annualPremium,
-        coverageAmount: insuranceContracts.coverageAmount,
-        agentCommission: insuranceContracts.agentCommission,
-        status: insuranceContracts.status,
-        paymentMethod: insuranceContracts.paymentMethod,
-        paymentCycle: insuranceContracts.paymentCycle,
-        paymentPeriod: insuranceContracts.paymentPeriod,
-        specialClauses: insuranceContracts.specialClauses,
-        notes: insuranceContracts.notes,
-        createdAt: insuranceContracts.createdAt,
-        updatedAt: insuranceContracts.updatedAt,
+        id: schema.insuranceContracts.id,
+        productName: schema.insuranceContracts.productName,
+        insuranceCompany: schema.insuranceContracts.insuranceCompany,
+        insuranceType: schema.insuranceContracts.insuranceType,
+        insuranceCode: schema.insuranceContracts.insuranceCode,
+        contractNumber: schema.insuranceContracts.contractNumber,
+        policyNumber: schema.insuranceContracts.policyNumber,
+        contractDate: schema.insuranceContracts.contractDate,
+        effectiveDate: schema.insuranceContracts.effectiveDate,
+        expirationDate: schema.insuranceContracts.expirationDate,
+        paymentDueDate: schema.insuranceContracts.paymentDueDate,
+        contractorName: schema.insuranceContracts.contractorName,
+        contractorSsn: schema.insuranceContracts.contractorSsn,
+        contractorPhone: schema.insuranceContracts.contractorPhone,
+        insuredName: schema.insuranceContracts.insuredName,
+        insuredSsn: schema.insuranceContracts.insuredSsn,
+        insuredPhone: schema.insuranceContracts.insuredPhone,
+        beneficiaryName: schema.insuranceContracts.beneficiaryName,
+        premiumAmount: schema.insuranceContracts.premiumAmount,
+        monthlyPremium: schema.insuranceContracts.monthlyPremium,
+        annualPremium: schema.insuranceContracts.annualPremium,
+        coverageAmount: schema.insuranceContracts.coverageAmount,
+        agentCommission: schema.insuranceContracts.agentCommission,
+        status: schema.insuranceContracts.status,
+        paymentMethod: schema.insuranceContracts.paymentMethod,
+        paymentCycle: schema.insuranceContracts.paymentCycle,
+        paymentPeriod: schema.insuranceContracts.paymentPeriod,
+        specialClauses: schema.insuranceContracts.specialClauses,
+        notes: schema.insuranceContracts.notes,
+        createdAt: schema.insuranceContracts.createdAt,
+        updatedAt: schema.insuranceContracts.updatedAt,
       })
-      .from(insuranceContracts)
+      .from(schema.insuranceContracts)
       .where(
         and(
-          eq(insuranceContracts.clientId, clientId),
-          eq(insuranceContracts.agentId, agentId),
+          eq(schema.insuranceContracts.clientId, clientId),
+          eq(schema.insuranceContracts.agentId, agentId),
           // 🔍 삭제되지 않은 (cancelled 상태가 아닌) 계약만 조회
-          not(eq(insuranceContracts.status, 'cancelled'))
+          not(eq(schema.insuranceContracts.status, 'cancelled'))
         )
       )
-      .orderBy(desc(insuranceContracts.createdAt));
+      .orderBy(desc(schema.insuranceContracts.createdAt));
 
     // 📎 각 계약의 첨부파일도 함께 조회
     const contractsWithAttachments = await Promise.all(
@@ -297,24 +292,24 @@ export async function getClientInsuranceContracts(
         try {
           const attachments = await db
             .select({
-              id: contractAttachments.id,
-              fileName: contractAttachments.fileName,
-              fileDisplayName: contractAttachments.fileDisplayName,
-              documentType: contractAttachments.documentType,
-              filePath: contractAttachments.filePath,
-              fileSize: contractAttachments.fileSize,
-              mimeType: contractAttachments.mimeType,
-              description: contractAttachments.description,
-              uploadedAt: contractAttachments.uploadedAt,
+              id: schema.contractAttachments.id,
+              fileName: schema.contractAttachments.fileName,
+              fileDisplayName: schema.contractAttachments.fileDisplayName,
+              documentType: schema.contractAttachments.documentType,
+              filePath: schema.contractAttachments.filePath,
+              fileSize: schema.contractAttachments.fileSize,
+              mimeType: schema.contractAttachments.mimeType,
+              description: schema.contractAttachments.description,
+              uploadedAt: schema.contractAttachments.uploadedAt,
             })
-            .from(contractAttachments)
+            .from(schema.contractAttachments)
             .where(
               and(
-                eq(contractAttachments.contractId, contract.id),
-                eq(contractAttachments.isActive, true)
+                eq(schema.contractAttachments.contractId, contract.id),
+                eq(schema.contractAttachments.isActive, true)
               )
             )
-            .orderBy(desc(contractAttachments.uploadedAt));
+            .orderBy(desc(schema.contractAttachments.uploadedAt));
 
           return {
             ...contract,
@@ -357,11 +352,11 @@ export async function getInsuranceContractDetail(
 
     const [contract] = await db
       .select()
-      .from(insuranceContracts)
+      .from(schema.insuranceContracts)
       .where(
         and(
-          eq(insuranceContracts.id, contractId),
-          eq(insuranceContracts.agentId, agentId)
+          eq(schema.insuranceContracts.id, contractId),
+          eq(schema.insuranceContracts.agentId, agentId)
         )
       )
       .limit(1);
@@ -377,14 +372,14 @@ export async function getInsuranceContractDetail(
     // 첨부파일도 함께 조회
     const attachments = await db
       .select()
-      .from(contractAttachments)
+      .from(schema.contractAttachments)
       .where(
         and(
-          eq(contractAttachments.contractId, contractId),
-          eq(contractAttachments.isActive, true)
+          eq(schema.contractAttachments.contractId, contractId),
+          eq(schema.contractAttachments.isActive, true)
         )
       )
-      .orderBy(desc(contractAttachments.uploadedAt));
+      .orderBy(desc(schema.contractAttachments.uploadedAt));
 
     console.log('✅ 보험계약 상세 조회 완료');
     return {
@@ -444,7 +439,7 @@ export async function updateInsuranceContract(
     console.log('🏢 보험계약 수정:', { contractId, agentId, updateData });
 
     const [updatedContract] = await db
-      .update(insuranceContracts)
+      .update(schema.insuranceContracts)
       .set({
         ...updateData,
         premiumAmount: updateData.premiumAmount?.toString(),
@@ -457,8 +452,8 @@ export async function updateInsuranceContract(
       })
       .where(
         and(
-          eq(insuranceContracts.id, contractId),
-          eq(insuranceContracts.agentId, agentId)
+          eq(schema.insuranceContracts.id, contractId),
+          eq(schema.insuranceContracts.agentId, agentId)
         )
       )
       .returning();
@@ -580,7 +575,7 @@ export async function updateInsuranceContractWithAttachments(
             };
 
             const [savedAttachment] = await db
-              .insert(contractAttachments)
+              .insert(schema.contractAttachments)
               .values(attachmentRecord)
               .returning();
 
@@ -637,11 +632,11 @@ export async function deleteInsuranceContract(
     // 1. 삭제할 계약 존재 여부 확인
     const [existingContract] = await db
       .select()
-      .from(insuranceContracts)
+      .from(schema.insuranceContracts)
       .where(
         and(
-          eq(insuranceContracts.id, contractId),
-          eq(insuranceContracts.agentId, agentId)
+          eq(schema.insuranceContracts.id, contractId),
+          eq(schema.insuranceContracts.agentId, agentId)
         )
       )
       .limit(1);
@@ -656,8 +651,8 @@ export async function deleteInsuranceContract(
     // 2. 관련 첨부파일들 조회
     const attachments = await db
       .select()
-      .from(contractAttachments)
-      .where(eq(contractAttachments.contractId, contractId));
+      .from(schema.contractAttachments)
+      .where(eq(schema.contractAttachments.contractId, contractId));
 
     console.log(`📎 삭제할 첨부파일: ${attachments.length}개`);
 
@@ -666,18 +661,18 @@ export async function deleteInsuranceContract(
       // 3.1. 첨부파일 레코드 삭제
       if (attachments.length > 0) {
         await tx
-          .delete(contractAttachments)
-          .where(eq(contractAttachments.contractId, contractId));
+          .delete(schema.contractAttachments)
+          .where(eq(schema.contractAttachments.contractId, contractId));
         console.log('✅ 첨부파일 레코드 삭제 완료');
       }
 
       // 3.2. 보험계약 삭제
       const [deletedContract] = await tx
-        .delete(insuranceContracts)
+        .delete(schema.insuranceContracts)
         .where(
           and(
-            eq(insuranceContracts.id, contractId),
-            eq(insuranceContracts.agentId, agentId)
+            eq(schema.insuranceContracts.id, contractId),
+            eq(schema.insuranceContracts.agentId, agentId)
           )
         )
         .returning();
@@ -787,7 +782,7 @@ export async function addContractAttachment(
     };
 
     const [createdAttachment] = await db
-      .insert(contractAttachments)
+      .insert(schema.contractAttachments)
       .values(newAttachment)
       .returning();
 
@@ -820,12 +815,12 @@ export async function deleteContractAttachment(
     // 1. 삭제할 첨부파일 조회
     const [existingAttachment] = await db
       .select()
-      .from(contractAttachments)
+      .from(schema.contractAttachments)
       .where(
         and(
-          eq(contractAttachments.id, attachmentId),
-          eq(contractAttachments.agentId, agentId),
-          eq(contractAttachments.isActive, true)
+          eq(schema.contractAttachments.id, attachmentId),
+          eq(schema.contractAttachments.agentId, agentId),
+          eq(schema.contractAttachments.isActive, true)
         )
       )
       .limit(1);
@@ -844,11 +839,11 @@ export async function deleteContractAttachment(
 
     // 2. 데이터베이스에서 첨부파일 레코드 삭제
     const [deletedAttachment] = await db
-      .delete(contractAttachments)
+      .delete(schema.contractAttachments)
       .where(
         and(
-          eq(contractAttachments.id, attachmentId),
-          eq(contractAttachments.agentId, agentId)
+          eq(schema.contractAttachments.id, attachmentId),
+          eq(schema.contractAttachments.agentId, agentId)
         )
       )
       .returning();
@@ -920,7 +915,7 @@ export async function updateContractAttachmentMetadata(
     });
 
     const [updatedAttachment] = await db
-      .update(contractAttachments)
+      .update(schema.contractAttachments)
       .set({
         ...(updateData.documentType && {
           documentType: updateData.documentType as any,
@@ -934,9 +929,9 @@ export async function updateContractAttachmentMetadata(
       })
       .where(
         and(
-          eq(contractAttachments.id, attachmentId),
-          eq(contractAttachments.agentId, agentId),
-          eq(contractAttachments.isActive, true)
+          eq(schema.contractAttachments.id, attachmentId),
+          eq(schema.contractAttachments.agentId, agentId),
+          eq(schema.contractAttachments.isActive, true)
         )
       )
       .returning();
@@ -988,14 +983,14 @@ export async function createContractFromOpportunity(
     // 영업 기회 정보 조회
     const [opportunity] = await db
       .select({
-        clientId: opportunityProducts.clientId,
-        productName: opportunityProducts.productName,
-        insuranceType: opportunityProducts.insuranceType,
-        monthlyPremium: opportunityProducts.monthlyPremium,
-        expectedCommission: opportunityProducts.expectedCommission,
+        clientId: schema.opportunityProducts.clientId,
+        productName: schema.opportunityProducts.productName,
+        insuranceType: schema.opportunityProducts.insuranceType,
+        monthlyPremium: schema.opportunityProducts.monthlyPremium,
+        expectedCommission: schema.opportunityProducts.expectedCommission,
       })
-      .from(opportunityProducts)
-      .where(eq(opportunityProducts.id, opportunityProductId))
+      .from(schema.opportunityProducts)
+      .where(eq(schema.opportunityProducts.id, opportunityProductId))
       .limit(1);
 
     if (!opportunity) {
@@ -1008,10 +1003,10 @@ export async function createContractFromOpportunity(
     // 고객 정보 조회
     const [client] = await db
       .select({
-        fullName: clients.fullName,
+        fullName: schema.clients.fullName,
       })
-      .from(clients)
-      .where(eq(clients.id, opportunity.clientId))
+      .from(schema.clients)
+      .where(eq(schema.clients.id, opportunity.clientId))
       .limit(1);
 
     if (!client) {
@@ -1068,14 +1063,14 @@ export async function getInsuranceContractStats(agentId: string) {
 
     const stats = await db
       .select({
-        id: insuranceContracts.id,
-        status: insuranceContracts.status,
-        monthlyPremium: insuranceContracts.monthlyPremium,
-        agentCommission: insuranceContracts.agentCommission,
-        contractDate: insuranceContracts.contractDate,
+        id: schema.insuranceContracts.id,
+        status: schema.insuranceContracts.status,
+        monthlyPremium: schema.insuranceContracts.monthlyPremium,
+        agentCommission: schema.insuranceContracts.agentCommission,
+        contractDate: schema.insuranceContracts.contractDate,
       })
-      .from(insuranceContracts)
-      .where(eq(insuranceContracts.agentId, agentId));
+      .from(schema.insuranceContracts)
+      .where(eq(schema.insuranceContracts.agentId, agentId));
 
     // 통계 계산
     const totalContracts = stats.length;
@@ -1160,32 +1155,31 @@ export async function getUnifiedCommissionStats(agentId: string) {
     const actualContracts = await db
       .select({
         count: count(),
-        totalCommission: sql<number>`COALESCE(SUM(CAST(${insuranceContracts.agentCommission} AS NUMERIC)), 0)`,
-        totalMonthlyPremium: sql<number>`COALESCE(SUM(CAST(${insuranceContracts.monthlyPremium} AS NUMERIC)), 0)`,
+        totalCommission: sql<number>`COALESCE(SUM(CAST(${schema.insuranceContracts.agentCommission} AS NUMERIC)), 0)`,
+        totalMonthlyPremium: sql<number>`COALESCE(SUM(CAST(${schema.insuranceContracts.monthlyPremium} AS NUMERIC)), 0)`,
       })
-      .from(insuranceContracts)
+      .from(schema.insuranceContracts)
       .where(
         and(
-          eq(insuranceContracts.agentId, agentId),
-          eq(insuranceContracts.status, 'active'),
-          sql`${insuranceContracts.agentCommission} IS NOT NULL`
+          eq(schema.insuranceContracts.agentId, agentId),
+          eq(schema.insuranceContracts.status, 'active'),
+          sql`${schema.insuranceContracts.agentCommission} IS NOT NULL`
         )
       );
 
     // 2. 예상 계약 수수료 (진행 중인 수익)
-    const { opportunityProducts } = await import('~/lib/schema');
     const expectedContracts = await db
       .select({
         count: count(),
-        totalExpectedCommission: sql<number>`COALESCE(SUM(CAST(${opportunityProducts.expectedCommission} AS NUMERIC)), 0)`,
-        totalExpectedPremium: sql<number>`COALESCE(SUM(CAST(${opportunityProducts.monthlyPremium} AS NUMERIC)), 0)`,
+        totalExpectedCommission: sql<number>`COALESCE(SUM(CAST(${schema.opportunityProducts.expectedCommission} AS NUMERIC)), 0)`,
+        totalExpectedPremium: sql<number>`COALESCE(SUM(CAST(${schema.opportunityProducts.monthlyPremium} AS NUMERIC)), 0)`,
       })
-      .from(opportunityProducts)
+      .from(schema.opportunityProducts)
       .where(
         and(
-          eq(opportunityProducts.agentId, agentId),
-          eq(opportunityProducts.status, 'active'),
-          sql`${opportunityProducts.expectedCommission} IS NOT NULL`
+          eq(schema.opportunityProducts.agentId, agentId),
+          eq(schema.opportunityProducts.status, 'active'),
+          sql`${schema.opportunityProducts.expectedCommission} IS NOT NULL`
         )
       );
 

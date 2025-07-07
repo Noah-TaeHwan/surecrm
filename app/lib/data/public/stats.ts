@@ -1,5 +1,5 @@
 import { db } from '../../core/db.server';
-import { profiles, teams, clients, invitations } from '../../schema';
+import schema from '../../schema/all';
 import { count, eq, gte, lt, and, sql } from 'drizzle-orm';
 
 // 공개 통계 데이터 타입
@@ -35,20 +35,23 @@ export async function getPublicStats(): Promise<PublicStats> {
       // 활성 사용자 수
       db
         .select({ count: count() })
-        .from(profiles)
-        .where(eq(profiles.isActive, true)),
+        .from(schema.profiles)
+        .where(eq(schema.profiles.isActive, true)),
 
       // 활성 팀 수
-      db.select({ count: count() }).from(teams).where(eq(teams.isActive, true)),
+      db
+        .select({ count: count() })
+        .from(schema.teams)
+        .where(eq(schema.teams.isActive, true)),
 
       // 총 고객 수
       db
         .select({ count: count() })
-        .from(clients)
-        .where(eq(clients.isActive, true)),
+        .from(schema.clients)
+        .where(eq(schema.clients.isActive, true)),
 
       // 총 초대 수
-      db.select({ count: count() }).from(invitations),
+      db.select({ count: count() }).from(schema.invitations),
     ]);
 
     const totalUsers = totalUsersResult[0]?.count || 0;
@@ -93,19 +96,19 @@ export async function getInviteStats(): Promise<InviteStats> {
   try {
     const [totalResult, usedResult, pendingResult] = await Promise.all([
       // 총 초대장 수
-      db.select({ count: count() }).from(invitations),
+      db.select({ count: count() }).from(schema.invitations),
 
       // 사용된 초대장 수
       db
         .select({ count: count() })
-        .from(invitations)
-        .where(eq(invitations.status, 'used')),
+        .from(schema.invitations)
+        .where(eq(schema.invitations.status, 'used')),
 
       // 대기 중인 초대장 수
       db
         .select({ count: count() })
-        .from(invitations)
-        .where(eq(invitations.status, 'pending')),
+        .from(schema.invitations)
+        .where(eq(schema.invitations.status, 'pending')),
     ]);
 
     const totalInvitations = totalResult[0]?.count || 0;
@@ -167,8 +170,8 @@ export async function getRecentSignups(): Promise<number> {
 
     const result = await db
       .select({ count: count() })
-      .from(profiles)
-      .where(gte(profiles.createdAt, thirtyDaysAgo));
+      .from(schema.profiles)
+      .where(gte(schema.profiles.createdAt, thirtyDaysAgo));
 
     return result[0]?.count || 0;
   } catch (error) {
@@ -189,16 +192,16 @@ export async function getGrowthRate(): Promise<number> {
     const [thisMonthResult, lastMonthResult] = await Promise.all([
       db
         .select({ count: count() })
-        .from(profiles)
-        .where(gte(profiles.createdAt, thisMonth)),
+        .from(schema.profiles)
+        .where(gte(schema.profiles.createdAt, thisMonth)),
 
       db
         .select({ count: count() })
-        .from(profiles)
+        .from(schema.profiles)
         .where(
           and(
-            gte(profiles.createdAt, lastMonth),
-            lt(profiles.createdAt, thisMonth)
+            gte(schema.profiles.createdAt, lastMonth),
+            lt(schema.profiles.createdAt, thisMonth)
           )
         ),
     ]);
@@ -224,17 +227,20 @@ export async function validateInviteCode(code: string) {
   try {
     const invitation = await db
       .select({
-        id: invitations.id,
-        code: invitations.code,
-        status: invitations.status,
-        inviterName: profiles.fullName,
+        id: schema.invitations.id,
+        code: schema.invitations.code,
+        status: schema.invitations.status,
+        inviterName: schema.profiles.fullName,
         inviterEmail: sql<string>`auth.users.email`,
-        expiresAt: invitations.expiresAt,
-        message: invitations.message,
+        expiresAt: schema.invitations.expiresAt,
+        message: schema.invitations.message,
       })
-      .from(invitations)
-      .leftJoin(profiles, eq(invitations.inviterId, profiles.id))
-      .where(eq(invitations.code, code))
+      .from(schema.invitations)
+      .leftJoin(
+        schema.profiles,
+        eq(schema.invitations.inviterId, schema.profiles.id)
+      )
+      .where(eq(schema.invitations.code, code))
       .limit(1);
 
     if (!invitation.length) {

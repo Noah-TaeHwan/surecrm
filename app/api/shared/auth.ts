@@ -5,7 +5,7 @@
 
 import { getCurrentUser } from '~/lib/auth/core.server';
 import { db } from '~/lib/core/db.server';
-import { profiles } from '~/lib/schema';
+import schema from '~/lib/schema/all';
 import { eq } from 'drizzle-orm';
 import {
   unauthorized,
@@ -61,8 +61,8 @@ export async function requireAuth(
     // 사용자 프로필 정보 조회
     const profileData = await db
       .select()
-      .from(profiles)
-      .where(eq(profiles.id, user.id))
+      .from(schema.profiles)
+      .where(eq(schema.profiles.id, user.id))
       .limit(1);
 
     if (profileData.length === 0) {

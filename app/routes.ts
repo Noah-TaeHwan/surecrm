@@ -56,23 +56,35 @@ export default [
   route('notifications', 'features/notifications/pages/notifications-page.tsx'),
 
   // 🔑 관리자 기능
-  route('system-console', 'features/admin/pages/admin-dashboard-page.tsx'),
-  route(
-    'system-console/invitations-mgmt',
-    'features/admin/pages/admin-invitations-page.tsx'
-  ),
-  route(
-    'system-console/users-mgmt',
-    'features/admin/pages/admin-users-page.tsx'
-  ),
-  route(
-    'system-console/audit-logs',
-    'features/admin/pages/admin-audit-logs-page.tsx'
-  ),
-  route(
-    'system-console/settings',
-    'features/admin/pages/admin-settings-page.tsx'
-  ),
+  // 💬 NOTE: 옛날 어드민 라우트는 삭제합니다. 새로운 /admin 라우트를 사용합니다.
+  // route('system-console', 'features/admin/pages/admin-dashboard-page.tsx'),
+  // route(
+  //   'system-console/invitations-mgmt',
+  //   'features/admin/pages/admin-invitations-page.tsx'
+  // ),
+  // route(
+  //   'system-console/audit-logs',
+  //   'features/admin/pages/admin-audit-logs-page.tsx'
+  // ),
+  // route(
+  //   'system-console/settings',
+  //   'features/admin/pages/admin-settings-page.tsx'
+  // ),
+  // route(
+  //   'system-console/users-mgmt',
+  //   'features/admin/pages/admin-users-page.tsx'
+  // ),
+
+  // 🔑 새로운 관리자 기능
+  route('admin', 'routes/admin.tsx', [
+    index('routes/admin/index.tsx'),
+    route('users', 'routes/admin/users.tsx'),
+    route('posts', 'routes/admin/posts.tsx', [
+      index('routes/admin/posts/index.tsx'),
+      route('new', 'routes/admin/posts/new.tsx'),
+      route(':postId/edit', 'routes/admin/posts/$postId.edit.tsx'),
+    ]),
+  ]),
 
   // 🔧 시스템 페이지
   route('.well-known/*', 'common/pages/well-known-fallback.tsx'),

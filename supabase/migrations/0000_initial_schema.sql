@@ -1,0 +1,3 @@
+-- This file represents the state of the production database.
+-- It is intentionally left blank to avoid conflicts with existing objects during migration.
+-- New changes should be added in subsequent migration files.
