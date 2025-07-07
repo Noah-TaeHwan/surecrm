@@ -2,7 +2,7 @@ import { createServerClient } from '~/lib/core/supabase';
 import { db } from '~/lib/core/db.server';
 import schema from '~/lib/schema/all';
 import { eq } from 'drizzle-orm';
-import { createInvitationsForUser } from '../data/business/invitations';
+import { createInvitationsForUser } from '~/lib/data/business/invitations';
 import { validateInvitationCode } from './validation';
 import type {
   SignUpData,
