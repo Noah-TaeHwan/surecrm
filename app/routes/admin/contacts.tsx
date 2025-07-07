@@ -125,7 +125,7 @@ export default function AdminContacts() {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">문의사항 관리</h1>
