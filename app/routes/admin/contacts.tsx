@@ -1,40 +1,14 @@
 import { useState } from 'react';
-import type { LoaderFunctionArgs, ActionFunctionArgs } from 'react-router';
-import { useLoaderData, Form } from 'react-router';
-import {
-  Search,
-  Mail,
-  Check,
-  Clock,
-  AlertCircle,
-  MessageSquare,
-  Send,
-  Eye,
-  Edit,
-  Archive,
-  Trash2,
-  Phone,
-  Reply,
-  Calendar,
-  User,
-  Plus,
-  Filter,
-  MoreHorizontal,
-  MessageCircle,
-} from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '~/common/components/ui/dropdown-menu';
-import type { Route } from './+types/contacts';
+import { useLoaderData } from 'react-router';
+import { Button } from '~/common/components/ui/button';
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from '~/common/components/ui/card';
+import { Input } from '~/common/components/ui/input';
+import { Badge } from '~/common/components/ui/badge';
 import {
   Select,
   SelectContent,
@@ -51,6 +25,30 @@ import {
   TableRow,
 } from '~/common/components/ui/table';
 import {
+  Search,
+  Mail,
+  Check,
+  Clock,
+  AlertCircle,
+  MessageSquare,
+  Send,
+  Eye,
+  Edit,
+  Phone,
+  Reply,
+  Calendar,
+  User,
+  Filter,
+  MoreHorizontal,
+  MessageCircle,
+} from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '~/common/components/ui/dropdown-menu';
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -59,153 +57,12 @@ import {
   DialogTitle,
 } from '~/common/components/ui/dialog';
 import { Textarea } from '~/common/components/ui/textarea';
-import { Button } from '~/common/components/ui/button';
-import { Badge } from '~/common/components/ui/badge';
-import { Input } from '~/common/components/ui/input';
-import { formatDistanceToNow } from 'date-fns';
-import { ko } from 'date-fns/locale';
-import type { ColumnDef } from '@tanstack/react-table';
-import { count } from 'drizzle-orm';
-import { DataTable } from '~/common/components/ui/data-table';
-import { desc, eq, like, or, and } from 'drizzle-orm';
-import { requireAdmin } from '~/lib/auth/guards.server';
-import schema from '~/lib/schema/all';
 
-export async function loader({ request }: Route.LoaderArgs) {
-  console.log('🚀 [Vercel Log] /admin/contacts loader: 함수 실행 시작');
-  const { db } = await import('~/lib/core/db.server');
-  const { contacts } = await import('~/lib/schema/public');
-  const { requireAdmin } = await import('~/lib/auth/guards.server');
-  const { eq, desc, and, or, like, count } = await import('drizzle-orm');
-  console.log('✅ [Vercel Log] /admin/contacts loader: 서버 모듈 import 완료');
+// 서버 로직을 import하여 export
+export { loader, action } from './contacts.server';
+import type { loader } from './contacts.server';
 
-  await requireAdmin(request);
-
-  const url = new URL(request.url);
-  const searchQuery = url.searchParams.get('search') || '';
-  const statusFilter = url.searchParams.get('status') || 'all';
-  const page = parseInt(url.searchParams.get('page') || '1');
-  const limit = 20;
-  const offset = (page - 1) * limit;
-
-  // 필터 조건 설정
-  const filters = [];
-  if (searchQuery) {
-    filters.push(
-      or(
-        like(contacts.name, `%${searchQuery}%`),
-        like(contacts.email, `%${searchQuery}%`),
-        like(contacts.subject, `%${searchQuery}%`)
-      )
-    );
-  }
-  if (statusFilter !== 'all') {
-    filters.push(eq(contacts.status, statusFilter));
-  }
-
-  // 문의사항 목록 조회
-  const contactsQuery = db
-    .select()
-    .from(contacts)
-    .where(filters.length > 0 ? and(...filters) : undefined)
-    .orderBy(desc(contacts.createdAt))
-    .limit(limit)
-    .offset(offset);
-
-  const contactsList = await contactsQuery;
-
-  // 총 개수 조회
-  const [{ count: totalCount }] = await db
-    .select({ count: count() })
-    .from(contacts)
-    .where(filters.length > 0 ? and(...filters) : undefined);
-
-  // 통계 데이터 조회
-  const [totalStats] = await db.select({ count: count() }).from(contacts);
-
-  const [pendingStats] = await db
-    .select({ count: count() })
-    .from(contacts)
-    .where(eq(contacts.status, 'pending'));
-
-  const [inProgressStats] = await db
-    .select({ count: count() })
-    .from(contacts)
-    .where(eq(contacts.status, 'in-progress'));
-
-  const [resolvedStats] = await db
-    .select({ count: count() })
-    .from(contacts)
-    .where(eq(contacts.status, 'resolved'));
-
-  const contactsWithISOStrings = contactsList.map(contact => ({
-    ...contact,
-    createdAt: new Date(contact.createdAt).toISOString(),
-    updatedAt: new Date(contact.updatedAt).toISOString(),
-    respondedAt: contact.respondedAt
-      ? new Date(contact.respondedAt).toISOString()
-      : null,
-  }));
-
-  return {
-    contacts: contactsWithISOStrings,
-    totalCount,
-    currentPage: page,
-    totalPages: Math.ceil(totalCount / limit),
-    searchQuery,
-    statusFilter,
-    stats: {
-      total: totalStats.count,
-      pending: pendingStats.count,
-      inProgress: inProgressStats.count,
-      resolved: resolvedStats.count,
-    },
-  };
-}
-
-export async function action({ request }: Route.ActionArgs) {
-  console.log('🚀 [Vercel Log] /admin/contacts action: 함수 실행 시작');
-  const { db } = await import('~/lib/core/db.server');
-  const { contacts } = await import('~/lib/schema/public');
-  const { requireAdmin } = await import('~/lib/auth/guards.server');
-  const { eq } = await import('drizzle-orm');
-  console.log('✅ [Vercel Log] /admin/contacts action: 서버 모듈 import 완료');
-
-  await requireAdmin(request);
-
-  const formData = await request.formData();
-  const intent = formData.get('intent') as string;
-  const contactId = formData.get('contactId') as string;
-
-  if (intent === 'updateStatus') {
-    const status = formData.get('status') as string;
-    await db
-      .update(contacts)
-      .set({
-        status,
-        updatedAt: new Date(),
-        ...(status === 'resolved' && { respondedAt: new Date() }),
-      })
-      .where(eq(contacts.id, contactId));
-  }
-
-  if (intent === 'respond') {
-    const responseMessage = formData.get('responseMessage') as string;
-    await db
-      .update(contacts)
-      .set({
-        status: 'resolved',
-        responseMessage,
-        respondedAt: new Date(),
-        updatedAt: new Date(),
-      })
-      .where(eq(contacts.id, contactId));
-  }
-
-  return null;
-}
-
-export default function AdminContacts({ loaderData }: Route.ComponentProps) {
+export default function AdminContacts() {
   const {
     contacts: contactsList,
     totalCount,
@@ -214,7 +71,7 @@ export default function AdminContacts({ loaderData }: Route.ComponentProps) {
     searchQuery,
     statusFilter,
     stats,
-  } = loaderData;
+  } = useLoaderData<typeof loader>();
   const [selectedContact, setSelectedContact] = useState<any>(null);
   const [responseMessage, setResponseMessage] = useState('');
 
