@@ -159,8 +159,22 @@ export async function loader({ request }: LoaderFunctionArgs) {
       inactive: statsResults[4][0]?.count || 0,
     };
 
+    const usersWithISOStrings = users.map(user => ({
+      ...user,
+      trialEndsAt: user.trialEndsAt
+        ? new Date(user.trialEndsAt).toISOString()
+        : null,
+      subscriptionEndsAt: user.subscriptionEndsAt
+        ? new Date(user.subscriptionEndsAt).toISOString()
+        : null,
+      createdAt: user.createdAt ? new Date(user.createdAt).toISOString() : null,
+      lastLoginAt: user.lastLoginAt
+        ? new Date(user.lastLoginAt).toISOString()
+        : null,
+    }));
+
     return {
-      users,
+      users: usersWithISOStrings,
       totalCount,
       totalPages,
       currentPage: page,

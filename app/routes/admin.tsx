@@ -43,8 +43,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export default function AdminLayout() {
-  const [isContentOpen, setIsContentOpen] = useState(false);
-  const [isSystemOpen, setIsSystemOpen] = useState(false);
+  const [isContentOpen, setIsContentOpen] = useState(true);
+  const [isSystemOpen, setIsSystemOpen] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const navLinkClasses = ({ isActive }: { isActive: boolean }) =>

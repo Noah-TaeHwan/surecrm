@@ -133,8 +133,17 @@ export async function loader({ request }: Route.LoaderArgs) {
     .from(contacts)
     .where(eq(contacts.status, 'resolved'));
 
+  const contactsWithISOStrings = contactsList.map(contact => ({
+    ...contact,
+    createdAt: new Date(contact.createdAt).toISOString(),
+    updatedAt: new Date(contact.updatedAt).toISOString(),
+    respondedAt: contact.respondedAt
+      ? new Date(contact.respondedAt).toISOString()
+      : null,
+  }));
+
   return {
-    contacts: contactsList,
+    contacts: contactsWithISOStrings,
     totalCount,
     currentPage: page,
     totalPages: Math.ceil(totalCount / limit),

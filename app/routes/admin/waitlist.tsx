@@ -128,8 +128,17 @@ export async function loader({ request }: Route.LoaderArgs) {
     .from(waitlist)
     .where(eq(waitlist.isContacted, false));
 
+  const waitlistWithISOStrings = waitlistData.map(item => ({
+    ...item,
+    createdAt: new Date(item.createdAt).toISOString(),
+    updatedAt: new Date(item.updatedAt).toISOString(),
+    contactedAt: item.contactedAt
+      ? new Date(item.contactedAt).toISOString()
+      : null,
+  }));
+
   return {
-    waitlist: waitlistData,
+    waitlist: waitlistWithISOStrings,
     totalCount,
     currentPage: page,
     totalPages: Math.ceil(totalCount / limit),

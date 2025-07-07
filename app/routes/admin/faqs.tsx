@@ -174,8 +174,14 @@ export async function loader({ request }: LoaderFunctionArgs) {
       korean: statsResults[3][0]?.count || 0,
     };
 
+    const faqsWithISOStrings = faqs.map(faq => ({
+      ...faq,
+      createdAt: faq.createdAt ? new Date(faq.createdAt).toISOString() : null,
+      updatedAt: faq.updatedAt ? new Date(faq.updatedAt).toISOString() : null,
+    }));
+
     return {
-      faqs,
+      faqs: faqsWithISOStrings,
       totalCount,
       totalPages,
       currentPage: page,

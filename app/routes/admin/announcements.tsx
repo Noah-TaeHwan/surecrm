@@ -174,8 +174,24 @@ export async function loader({ request }: LoaderFunctionArgs) {
       pinned: statsResults[3][0]?.count || 0,
     };
 
+    const announcementsWithISOStrings = announcements.map(announcement => ({
+      ...announcement,
+      publishedAt: announcement.publishedAt
+        ? new Date(announcement.publishedAt).toISOString()
+        : null,
+      expiresAt: announcement.expiresAt
+        ? new Date(announcement.expiresAt).toISOString()
+        : null,
+      createdAt: announcement.createdAt
+        ? new Date(announcement.createdAt).toISOString()
+        : null,
+      updatedAt: announcement.updatedAt
+        ? new Date(announcement.updatedAt).toISOString()
+        : null,
+    }));
+
     return {
-      announcements,
+      announcements: announcementsWithISOStrings,
       totalCount,
       totalPages,
       currentPage: page,
