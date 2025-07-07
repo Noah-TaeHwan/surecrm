@@ -8,10 +8,17 @@
 import { useEffect } from 'react';
 import { getClientSideClient } from '~/lib/core/supabase';
 
-export function useUserRoleTracker() {
+interface UserRoleTrackerOptions {
+  enabled?: boolean;
+}
+
+export function useUserRoleTracker(options: UserRoleTrackerOptions = {}) {
+  const { enabled = true } = options;
   const supabase = getClientSideClient();
 
   useEffect(() => {
+    if (!enabled) return;
+
     async function updateUserRole() {
       try {
         // 현재 로그인된 사용자 가져오기
@@ -81,7 +88,7 @@ export function useUserRoleTracker() {
     return () => {
       subscription.unsubscribe();
     };
-  }, [supabase]);
+  }, [supabase, enabled]);
 
   return null;
 }

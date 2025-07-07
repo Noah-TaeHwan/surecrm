@@ -13,6 +13,7 @@ import {
 } from '~/lib/utils/business-intelligence';
 
 interface BusinessConfig {
+  enabled?: boolean; // 훅 활성화 여부 제어
   enableAdvancedAnalytics: boolean;
   enableBehavioralTracking: boolean;
   enablePerformanceMonitoring: boolean;
@@ -32,19 +33,21 @@ interface UserInsights {
 }
 
 export function useBusinessIntelligence(config: Partial<BusinessConfig> = {}) {
+  const { enabled = true } = config; // 기본값은 true
   const [isActive, setIsActive] = useState(false);
   const [userInsights, setUserInsights] = useState<UserInsights | null>(null);
   const [analyticsData, setAnalyticsData] = useState<any[]>([]);
 
   // 비즈니스 인텔리전스 시스템 초기화
   useEffect(() => {
+    if (!enabled) return;
     initializeBusinessIntelligence(config);
     setIsActive(true);
-  }, []);
+  }, [enabled, config]);
 
   // 실시간 사용자 인사이트 업데이트
   useEffect(() => {
-    if (!isActive) return;
+    if (!isActive || !enabled) return;
 
     const updateInsights = () => {
       const profile = getCurrentUserProfile();
@@ -72,10 +75,11 @@ export function useBusinessIntelligence(config: Partial<BusinessConfig> = {}) {
     updateInsights(); // 즉시 실행
 
     return () => clearInterval(interval);
-  }, [isActive]);
+  }, [isActive, enabled]);
 
   // 고급 분석 모드 토글
   const toggleAdvancedMode = useCallback(() => {
+    if (!enabled) return;
     const system = getBusinessIntelligence();
     if (system) {
       if (isActive) {
@@ -86,10 +90,20 @@ export function useBusinessIntelligence(config: Partial<BusinessConfig> = {}) {
         setIsActive(true);
       }
     }
-  }, [isActive]);
+  }, [isActive, enabled]);
 
   // 실시간 분석 데이터 스트림
   const getAnalyticsStream = useCallback(() => {
+    if (!enabled) {
+      return {
+        mouseMovements: [],
+        clickHeatmap: [],
+        scrollPattern: [],
+        keystrokes: [],
+        userProfile: null,
+        sessionIntelligence: null,
+      };
+    }
     const system = getBusinessIntelligence();
     if (system) {
       const metrics = system.getBehaviorMetrics();
@@ -113,10 +127,11 @@ export function useBusinessIntelligence(config: Partial<BusinessConfig> = {}) {
       userProfile: null,
       sessionIntelligence: null,
     };
-  }, []);
+  }, [enabled]);
 
   // 사용자 행동 예측
   const predictUserBehavior = useCallback(() => {
+    if (!enabled) return null;
     const insights = getSessionIntelligence();
     if (!insights) return null;
 
@@ -127,10 +142,11 @@ export function useBusinessIntelligence(config: Partial<BusinessConfig> = {}) {
       isEngaged: insights.engagementDepth > 5,
       nextAction: insights.nextBestAction,
     };
-  }, []);
+  }, [enabled]);
 
   // 개인화 추천 생성
   const getPersonalizedRecommendations = useCallback(() => {
+    if (!enabled) return [];
     const intelligence = getSessionIntelligence();
     const profile = getCurrentUserProfile();
 
@@ -150,7 +166,7 @@ export function useBusinessIntelligence(config: Partial<BusinessConfig> = {}) {
         frustration: intelligence.frustrationLevel,
       },
     }));
-  }, []);
+  }, [enabled]);
 
   return {
     // 상태
@@ -165,7 +181,7 @@ export function useBusinessIntelligence(config: Partial<BusinessConfig> = {}) {
     getPersonalizedRecommendations,
 
     // 유틸리티
-    isTrackingEnabled: isActive,
+    isTrackingEnabled: isActive && enabled,
     getCurrentProfile: getCurrentUserProfile,
     getSessionData: getSessionIntelligence,
   };

@@ -16,6 +16,7 @@ import { initEnhancedMeasurement } from '~/lib/utils/ga4-enhanced-measurement';
 import { usePageTracking } from '~/hooks/use-analytics';
 import { useBusinessIntelligence } from '~/hooks/use-business-intelligence';
 import { useUserRoleTracker } from '~/hooks/use-user-role-tracker';
+import { useHydrated } from '~/hooks/use-hydrated';
 import {
   initDynamicViewportHeight,
   enableFullScreenMode,
@@ -907,11 +908,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  // 🔒 사용자 역할 추적 (system_admin 사용자 제외용)
-  useUserRoleTracker();
+  const isHydrated = useHydrated();
 
-  // 📊 비즈니스 인텔리전스 시스템 활성화 (프로덕션에서만)
+  // 🔒 사용자 역할 추적 (system_admin 사용자 제외용) - 하이드레이션 후 실행
+  useUserRoleTracker({ enabled: isHydrated });
+
+  // 📊 비즈니스 인텔리전스 시스템 활성화 (프로덕션에서만) - 하이드레이션 후 실행
   const { getAnalyticsStream, getCurrentProfile } = useBusinessIntelligence({
+    enabled: isHydrated,
     enableAdvancedAnalytics: !import.meta.env.DEV, // 개발 환경에서는 비활성화
     enableBehavioralTracking: !import.meta.env.DEV, // 개발 환경에서는 비활성화
     enablePerformanceMonitoring: !import.meta.env.DEV, // 개발 환경에서는 비활성화
