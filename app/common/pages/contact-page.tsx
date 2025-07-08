@@ -95,8 +95,11 @@ export function meta({ data }: MetaArgs) {
       'SureCRM에 대한 문의사항을 남겨주세요. 빠른 시일 내에 답변드리겠습니다.',
   };
 
-  const url = 'https://surecrm.pro/contact';
   const language = data?.language || 'ko';
+  const baseUrl = 'https://surecrm.pro';
+  const path = '/contact';
+  const url =
+    language === 'ko' ? `${baseUrl}${path}` : `${baseUrl}/${language}${path}`;
 
   // 언어별 최적화된 키워드
   const languageKeywords = {

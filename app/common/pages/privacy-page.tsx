@@ -14,6 +14,7 @@ interface MetaArgs {
       title: string;
       description: string;
     };
+    language?: string;
   };
 }
 
@@ -21,7 +22,7 @@ interface MetaArgs {
 export async function loader({ request }: LoaderArgs) {
   // 🌍 서버에서 다국어 번역 로드
   try {
-    const { t } = await createServerTranslator(request, 'privacy');
+    const { t, language } = await createServerTranslator(request, 'privacy');
 
     return {
       // 🌍 meta용 번역 데이터
@@ -32,6 +33,7 @@ export async function loader({ request }: LoaderArgs) {
           'SureCRM 개인정보처리방침을 확인하세요. 개인정보 보호와 관련된 정책을 투명하게 공개합니다.'
         ),
       },
+      language,
     };
   } catch (error) {
     console.error('Privacy page loader 에러:', error);
@@ -43,6 +45,7 @@ export async function loader({ request }: LoaderArgs) {
         description:
           'SureCRM 개인정보처리방침을 확인하세요. 개인정보 보호와 관련된 정책을 투명하게 공개합니다.',
       },
+      language: 'ko',
     };
   }
 }
@@ -55,7 +58,11 @@ export function meta({ data }: MetaArgs) {
       'SureCRM 개인정보처리방침을 확인하세요. 개인정보 보호와 관련된 정책을 투명하게 공개합니다.',
   };
 
-  const url = 'https://surecrm.pro/privacy';
+  const language = data?.language || 'ko';
+  const baseUrl = 'https://surecrm.pro';
+  const path = '/privacy';
+  const url =
+    language === 'ko' ? `${baseUrl}${path}` : `${baseUrl}/${language}${path}`;
 
   return [
     // 🎯 기본 SEO 태그들 - 개인정보보호 특화

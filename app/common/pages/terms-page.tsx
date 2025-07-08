@@ -14,6 +14,7 @@ interface MetaArgs {
       title: string;
       description: string;
     };
+    language?: string;
   };
 }
 
@@ -21,7 +22,7 @@ interface MetaArgs {
 export async function loader({ request }: LoaderArgs) {
   // 🌍 서버에서 다국어 번역 로드
   try {
-    const { t } = await createServerTranslator(request, 'terms');
+    const { t, language } = await createServerTranslator(request, 'terms');
 
     return {
       // 🌍 meta용 번역 데이터
@@ -32,6 +33,7 @@ export async function loader({ request }: LoaderArgs) {
           'SureCRM 서비스 이용약관을 확인하세요. 서비스 이용에 관한 권리와 의무를 안내합니다.'
         ),
       },
+      language,
     };
   } catch (error) {
     console.error('Terms page loader 에러:', error);
@@ -43,6 +45,7 @@ export async function loader({ request }: LoaderArgs) {
         description:
           'SureCRM 서비스 이용약관을 확인하세요. 서비스 이용에 관한 권리와 의무를 안내합니다.',
       },
+      language: 'ko',
     };
   }
 }
@@ -55,7 +58,11 @@ export function meta({ data }: MetaArgs) {
       'SureCRM 서비스 이용약관을 확인하세요. 서비스 이용에 관한 권리와 의무를 안내합니다.',
   };
 
-  const url = 'https://surecrm.pro/terms';
+  const language = data?.language || 'ko';
+  const baseUrl = 'https://surecrm.pro';
+  const path = '/terms';
+  const url =
+    language === 'ko' ? `${baseUrl}${path}` : `${baseUrl}/${language}${path}`;
 
   return [
     // 🎯 기본 SEO 태그들 - 법적 문서 최적화

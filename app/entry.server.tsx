@@ -10,7 +10,20 @@ import { renderToPipeableStream } from 'react-dom/server';
 import * as Sentry from '@sentry/react-router';
 import { checkCriticalEnvs } from './lib/core/safe-env';
 import { PassThrough } from 'stream';
-import './lib/i18n/server';
+import serverI18n from './lib/i18n/server';
+import type { SupportedLanguage } from './lib/i18n/server';
+
+const SUPPORTED_LANGUAGES = ['ko', 'en', 'ja'] as const;
+
+function getLangFromUrl(url: URL): SupportedLanguage {
+  const pathname = url.pathname;
+  const firstPart = pathname.split('/')[1];
+
+  if (SUPPORTED_LANGUAGES.includes(firstPart as SupportedLanguage)) {
+    return firstPart as SupportedLanguage;
+  }
+  return 'ko';
+}
 
 export const streamTimeout = 5_000;
 
@@ -34,7 +47,7 @@ function isProductionEnvironment(): boolean {
 }
 
 // React 19 호환성을 위한 기본 핸들러 사용
-let handleRequest: (
+let originalHandleRequest: (
   request: Request,
   responseStatusCode: number,
   responseHeaders: Headers,
@@ -45,19 +58,19 @@ let handleRequest: (
 if (isProductionEnvironment()) {
   try {
     // Sentry 핸들러 시도
-    handleRequest = Sentry.createSentryHandleRequest({
+    originalHandleRequest = Sentry.createSentryHandleRequest({
       ServerRouter,
       renderToPipeableStream,
       createReadableStreamFromReadable,
-    }) as typeof handleRequest;
+    }) as typeof originalHandleRequest;
     console.log('🔒 Sentry 서버 핸들러 활성화됨 (프로덕션)');
   } catch (error) {
     console.warn('⚠️ Sentry 핸들러 생성 실패, 기본 핸들러 사용:', error);
-    handleRequest = createFallbackHandler();
+    originalHandleRequest = createFallbackHandler();
   }
 } else {
   console.log('🔧 개발환경: Sentry 서버 핸들러 비활성화됨');
-  handleRequest = createFallbackHandler();
+  originalHandleRequest = createFallbackHandler();
 }
 
 // 기본 핸들러 생성 함수
@@ -99,7 +112,22 @@ function createFallbackHandler() {
   };
 }
 
-export default handleRequest;
+export default async function handleRequest(
+  request: Request,
+  responseStatusCode: number,
+  responseHeaders: Headers,
+  routerContext: EntryContext
+): Promise<Response> {
+  const lang = getLangFromUrl(new URL(request.url));
+  await serverI18n.changeLanguage(lang);
+
+  return originalHandleRequest(
+    request,
+    responseStatusCode,
+    responseHeaders,
+    routerContext
+  );
+}
 
 export const handleError: HandleErrorFunction = (error, { request }) => {
   // React Router may abort some interrupted requests, don't log those

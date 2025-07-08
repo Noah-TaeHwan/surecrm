@@ -15,6 +15,7 @@ interface MetaArgs {
       title: string;
       description: string;
     };
+    language?: string;
   };
 }
 
@@ -22,7 +23,7 @@ interface MetaArgs {
 export async function loader({ request }: LoaderArgs) {
   // 🌍 서버에서 다국어 번역 로드
   try {
-    const { t } = await createServerTranslator(request, 'help');
+    const { t, language } = await createServerTranslator(request, 'help');
 
     return {
       // 🌍 meta용 번역 데이터
@@ -33,6 +34,7 @@ export async function loader({ request }: LoaderArgs) {
           'SureCRM 사용법과 자주 묻는 질문을 확인하세요. 고객 지원팀이 도움을 드립니다.'
         ),
       },
+      language,
     };
   } catch (error) {
     console.error('Help page loader 에러:', error);
@@ -44,6 +46,7 @@ export async function loader({ request }: LoaderArgs) {
         description:
           'SureCRM 사용법과 자주 묻는 질문을 확인하세요. 고객 지원팀이 도움을 드립니다.',
       },
+      language: 'ko',
     };
   }
 }
@@ -56,7 +59,11 @@ export function meta({ data }: MetaArgs) {
       'SureCRM 사용법과 자주 묻는 질문을 확인하세요. 고객 지원팀이 도움을 드립니다.',
   };
 
-  const url = 'https://surecrm.pro/help';
+  const language = data?.language || 'ko';
+  const baseUrl = 'https://surecrm.pro';
+  const path = '/help';
+  const url =
+    language === 'ko' ? `${baseUrl}${path}` : `${baseUrl}/${language}${path}`;
 
   return [
     // 🎯 기본 SEO 태그들 - 지원/사용법 최적화

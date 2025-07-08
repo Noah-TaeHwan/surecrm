@@ -7,6 +7,18 @@ import path from 'path';
 export const SUPPORTED_LANGUAGES = ['ko', 'en', 'ja'] as const;
 export type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number];
 
+// URL에서 언어 코드 추출
+export function getLangFromUrl(url: URL): SupportedLanguage {
+  const pathname = url.pathname;
+  const firstPart = pathname.split('/')[1];
+
+  if (SUPPORTED_LANGUAGES.includes(firstPart as SupportedLanguage)) {
+    return firstPart as SupportedLanguage;
+  }
+
+  return 'ko'; // Default language
+}
+
 // 🗂 네임스페이스 목록
 export const NAMESPACES = [
   'common', // 공통 UI 요소 (버튼, 라벨 등)
