@@ -319,7 +319,10 @@ export function AddMeetingModal({
                             </div>
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent>
+                        <SelectContent
+                          position="popper"
+                          className="max-h-60 overflow-y-auto"
+                        >
                           {clients.map(client => (
                             <SelectItem key={client.id} value={client.id}>
                               <div className="flex items-center gap-2">

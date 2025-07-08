@@ -520,12 +520,33 @@ export async function createClient(
       message: '고객이 성공적으로 생성되었습니다.',
     };
   } catch (error) {
-    // console.error('❌ API: createClient 오류:', error);
+    console.error('❌ API: createClient 오류:', error);
+
+    // 💥 상세 에러 로깅
+    let errorMessage = '알 수 없는 오류';
+    if (error instanceof Error) {
+      errorMessage = error.message;
+      // Postgres 에러 코드 확인
+      if ('code' in error && typeof error.code === 'string') {
+        console.error('🔥 Postgres 에러 코드:', error.code);
+        if (error.code === 'P2002') {
+          errorMessage = '이미 존재하는 전화번호 또는 이메일입니다.';
+        }
+        if (error.code.startsWith('23')) {
+          // Integrity Constraint Violation
+          errorMessage =
+            '데이터베이스 제약 조건 위반입니다. 소개 관계가 순환되는지 확인해주세요.';
+          console.error(
+            '🔥 데이터베이스 제약 조건 위반 가능성:',
+            (error as any).detail
+          );
+        }
+      }
+    }
+
     return {
       success: false,
-      message: `고객 생성 중 오류가 발생했습니다: ${
-        error instanceof Error ? error.message : '알 수 없는 오류'
-      }`,
+      message: `고객 생성 중 오류가 발생했습니다: ${errorMessage}`,
     };
   }
 }
@@ -623,7 +644,7 @@ export async function deleteClient(
         )
       );
 
-    console.log('📋 [deleteClient] 기존 고객 조회 결과:', {
+    console.log('🔍 [deleteClient] 기존 고객 조회 결과:', {
       found: !!existingClient,
       clientName: existingClient?.fullName,
       isActive: existingClient?.isActive,
@@ -843,7 +864,7 @@ export async function getClientStats(
 
 // 🎯 고객 일괄 가져오기 (Excel/CSV)
 export async function importClients(
-  fileData: any[],
+  fileData: Record<string, any>[],
   agentId: string
 ): Promise<{
   success: boolean;
@@ -1033,7 +1054,7 @@ export async function updateClientStage(
       data: updatedClient,
       message: `${updatedClient.fullName} 고객이 "${targetStage.name}" 단계로 이동되었습니다.`,
     };
-  } catch (error) {
+  } catch (_error) {
     return {
       success: false,
       data: null,

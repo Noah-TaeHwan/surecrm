@@ -245,12 +245,30 @@ export async function updateClientAction(
     };
   } catch (error) {
     console.error('❌ 고객 정보 업데이트 실패:', error);
+
+    // 💥 상세 에러 로깅
+    let errorMessage = '알 수 없는 오류';
+    if (error instanceof Error) {
+      errorMessage = error.message;
+      // Postgres 에러 코드 확인
+      if ('code' in error && typeof (error as any).code === 'string') {
+        console.error('🔥 Postgres 에러 코드:', (error as any).code);
+        if ((error as any).code.startsWith('23')) {
+          // Integrity Constraint Violation
+          errorMessage =
+            '데이터베이스 제약 조건 위반입니다. 소개 관계가 순환되는지 확인해주세요.';
+          console.error(
+            '🔥 데이터베이스 제약 조건 위반 가능성:',
+            (error as any).detail
+          );
+        }
+      }
+    }
+
     return {
       success: false,
-      message: `고객 정보 업데이트에 실패했습니다: ${
-        error instanceof Error ? error.message : '알 수 없는 오류'
-      }`,
-      error: error instanceof Error ? error.message : '알 수 없는 오류',
+      message: `고객 정보 업데이트에 실패했습니다: ${errorMessage}`,
+      error: errorMessage,
     };
   }
 }

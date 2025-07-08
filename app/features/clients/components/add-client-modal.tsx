@@ -18,7 +18,6 @@ import {
   SelectValue,
 } from '~/common/components/ui/select';
 import { Label } from '~/common/components/ui/label';
-import { Badge } from '~/common/components/ui/badge';
 import {
   Form,
   FormControl,
@@ -33,7 +32,6 @@ import {
   PlusIcon,
   PersonIcon,
   InfoCircledIcon,
-  CheckCircledIcon,
   CrossCircledIcon,
 } from '@radix-ui/react-icons';
 import { useForm } from 'react-hook-form';
@@ -312,7 +310,10 @@ export function AddClientModal({
                                 />
                               </SelectTrigger>
                             </FormControl>
-                            <SelectContent>
+                            <SelectContent
+                              position="popper"
+                              className="max-h-60 overflow-y-auto"
+                            >
                               <SelectItem
                                 value="none"
                                 className="text-xs sm:text-sm py-2"

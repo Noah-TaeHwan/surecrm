@@ -310,11 +310,12 @@ export function getTranslatedNotificationTitle(
   }
 
   const variables = extractTranslationVariables(notification);
+  const fullKey = `notifications:${translationKey}.title`;
 
   try {
-    return t(`${translationKey}.title`, variables);
+    return t(fullKey, variables);
   } catch (error) {
-    console.warn('번역 실패:', translationKey, error);
+    console.warn('번역 실패:', fullKey, error);
     return notification.title as string;
   }
 }
@@ -336,11 +337,12 @@ export function getTranslatedNotificationMessage(
   }
 
   const variables = extractTranslationVariables(notification);
+  const fullKey = `notifications:${translationKey}.message`;
 
   try {
-    return t(`${translationKey}.message`, variables);
+    return t(fullKey, variables);
   } catch (error) {
-    console.warn('번역 실패:', translationKey, error);
+    console.warn('번역 실패:', fullKey, error);
     return notification.message;
   }
 }

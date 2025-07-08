@@ -825,6 +825,23 @@
     "emptyStateTitle": "등록된 보험계약이 없습니다",
     "emptyStateDescription": "첫 번째 보험계약을 등록해보세요.",
     "addFirstContract": "첫 계약 등록",
+    "insuranceTypes": {
+      "life": "생명보험",
+      "health": "건강보험",
+      "auto": "자동차보험",
+      "prenatal": "태아보험",
+      "property": "재산보험",
+      "travel": "여행보험",
+      "accident": "상해보험",
+      "other": "기타"
+    },
+    "paymentCycles": {
+      "monthly": "월납",
+      "quarterly": "분기납",
+      "semi-annual": "반년납",
+      "annual": "연납",
+      "lump-sum": "일시납"
+    },
     "contractInfo": "계약 정보",
     "contractDetails": "계약 상세 정보",
     "basicInfo": "기본 정보",
@@ -931,22 +948,6 @@
       "schedule": "계약 일정",
       "amount": "금액 정보",
       "additional": "추가 정보"
-    },
-    "insuranceTypes": {
-      "life": "생명보험",
-      "health": "건강보험",
-      "auto": "자동차보험",
-      "property": "재산보험",
-      "travel": "여행보험",
-      "accident": "상해보험",
-      "other": "기타"
-    },
-    "paymentCycles": {
-      "monthly": "월납",
-      "quarterly": "분기납",
-      "semi-annual": "반년납",
-      "annual": "연납",
-      "lump-sum": "일시납"
     },
     "labels": {
       "contractorInfo": "계약자 정보",

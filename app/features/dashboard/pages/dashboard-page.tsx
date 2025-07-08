@@ -25,6 +25,7 @@ import {
 import { useFetcher, useRevalidator } from 'react-router';
 import { InsuranceAgentEvents } from '~/lib/utils/analytics';
 import { createServerTranslator } from '~/lib/i18n/language-manager.server';
+import { getClientSideClient } from '~/lib/core/supabase';
 
 // 새로운 타입 시스템 import
 import type {
@@ -47,7 +48,19 @@ interface ActionArgs {
 }
 
 interface ComponentProps {
-  loaderData: any;
+  loaderData: {
+    user: DashboardUserInfo;
+    todayStats: DashboardTodayStats;
+    kpiData: DashboardKPIData;
+    todayMeetings: DashboardMeeting[];
+    pipelineData: DashboardPipelineData;
+    recentClientsData: DashboardClientData;
+    topReferrers: DashboardReferralInsights['topReferrers'];
+    networkStats: DashboardReferralInsights['networkStats'];
+    userGoals: any[]; // UserGoal 타입 정의 필요
+    salesStats: any; // salesStats 타입 정의 필요
+    error?: string;
+  };
 }
 
 interface MetaArgs {
@@ -346,11 +359,37 @@ export async function action({ request }: ActionArgs) {
 export default function DashboardPage({ loaderData }: ComponentProps) {
   const { t } = useHydrationSafeTranslation('dashboard');
   const [isHydrated, setIsHydrated] = useState(false);
+  const revalidator = useRevalidator();
 
   // 🎯 Hydration 완료 감지 (SSR/CSR mismatch 방지)
   useEffect(() => {
     setIsHydrated(true);
   }, []);
+
+  // 🔄 Supabase 실시간 구독으로 데이터 자동 갱신
+  useEffect(() => {
+    // Hydration이 완료된 후에만 구독 설정
+    if (!isHydrated) return;
+
+    const supabase = getClientSideClient();
+    const channel = supabase
+      .channel('insurance_contracts_changes')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'insurance_contracts' },
+        payload => {
+          console.log('🏢 새로운 보험 계약 추가 감지:', payload.new);
+          // 데이터가 변경되었으므로 대시보드 데이터를 새로고침합니다.
+          revalidator.revalidate();
+        }
+      )
+      .subscribe();
+
+    // 컴포넌트 언마운트 시 구독 해제
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [isHydrated, revalidator]);
 
   const {
     user,
@@ -485,7 +524,6 @@ export default function DashboardPage({ loaderData }: ComponentProps) {
   ]);
 
   const fetcher = useFetcher();
-  const revalidator = useRevalidator();
   const [isLoading, setIsLoading] = useState(false);
 
   // ✅ 목표 설정/삭제 성공 시 자동 새로고침 (버그 수정)
@@ -499,31 +537,6 @@ export default function DashboardPage({ loaderData }: ComponentProps) {
       return () => clearTimeout(timer);
     }
   }, [fetcher.data?.success, revalidator]);
-
-  // 기존 컴포넌트와의 호환성을 위한 데이터 변환
-  const transformedTodayMeetings = todayMeetings.map(
-    (meeting: DashboardMeeting) => ({
-      id: meeting.id,
-      clientName: meeting.clientName,
-      time: new Date(meeting.startTime).toTimeString().slice(0, 5), // HH:MM 형식
-      duration: Math.round(
-        (new Date(meeting.endTime).getTime() -
-          new Date(meeting.startTime).getTime()) /
-          (1000 * 60)
-      ),
-      type: meeting.type,
-      location: meeting.location,
-      status:
-        meeting.status === 'scheduled'
-          ? ('upcoming' as const)
-          : meeting.status === 'in_progress'
-            ? ('in-progress' as const)
-            : meeting.status === 'completed'
-              ? ('completed' as const)
-              : ('cancelled' as const),
-      reminderSent: false, // TODO: 실제 알림 상태로 대체
-    })
-  );
 
   // PipelineOverview 컴포넌트용 데이터 변환 (완전한 타입 호환성 확보)
   const transformedPipelineStages = pipelineData.stages.map((stage: any) => ({

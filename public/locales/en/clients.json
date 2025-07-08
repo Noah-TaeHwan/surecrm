@@ -794,6 +794,7 @@
       "life": "Life Insurance",
       "health": "Health Insurance",
       "auto": "Auto Insurance",
+      "prenatal": "Prenatal Insurance",
       "property": "Property Insurance",
       "travel": "Travel Insurance",
       "accident": "Accident Insurance",
@@ -822,22 +823,6 @@
       "schedule": "Contract Schedule",
       "amount": "Amount Information",
       "additional": "Additional Information"
-    },
-    "insuranceTypes": {
-      "life": "Life Insurance",
-      "health": "Health Insurance",
-      "auto": "Auto Insurance",
-      "property": "Property Insurance",
-      "travel": "Travel Insurance",
-      "accident": "Accident Insurance",
-      "other": "Other"
-    },
-    "paymentCycles": {
-      "monthly": "Monthly",
-      "quarterly": "Quarterly",
-      "semi-annual": "Semi-Annual",
-      "annual": "Annual",
-      "lump-sum": "Lump Sum"
     },
     "labels": {
       "contractorInfo": "Contractor Information",

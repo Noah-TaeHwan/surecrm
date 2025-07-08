@@ -364,61 +364,44 @@ export async function getClientOverview(
   try {
     console.log('🔍 getClientOverview 함수 시작:', { clientId, agentId });
 
-    // 🔒 접근 권한 확인
-    console.log('🔍 클라이언트 접근 권한 확인 중...');
-    const clientAccess = await db
-      .select({ agentId: clients.agentId })
-      .from(clients)
-      .where(eq(clients.id, clientId))
-      .limit(1);
-
-    console.log('🔍 클라이언트 접근 권한 결과:', {
-      foundClients: clientAccess.length,
-      clientId,
-    });
-
-    if (clientAccess.length === 0) {
-      console.error('❌ 고객을 찾을 수 없습니다:', { clientId, agentId });
-      throw new Error('고객을 찾을 수 없습니다.');
-    }
-
-    if (clientAccess[0].agentId !== agentId) {
-      console.error('❌ 무단 접근 시도:', {
-        clientId,
-        requestedAgentId: agentId,
-        actualAgentId: clientAccess[0].agentId,
-      });
-      // 🔒 무단 접근 시도 로그
-      await logDataAccess(
-        clientId,
-        agentId,
-        'view',
-        ['unauthorized_access'],
-        ipAddress,
-        userAgent,
-        '무단 접근 시도'
-      );
-      throw new Error('해당 고객 정보에 접근할 권한이 없습니다.');
-    }
-
-    console.log('✅ 접근 권한 확인 완료');
-
-    // 🎯 고객 기본 정보 조회 (단순화로 안전성 확보)
-    console.log('🔍 고객 기본 정보 조회 중...');
+    // 🔒 접근 권한 확인 및 고객 기본 정보, 소개자 정보 동시 조회
+    console.log('🔍 클라이언트 및 소개자 정보 동시 조회 중...');
     const [client] = await db
-      .select()
+      .select({
+        ...clients, // clients 테이블의 모든 필드 선택
+      })
       .from(clients)
       .where(and(eq(clients.id, clientId), eq(clients.agentId, agentId)))
       .limit(1);
 
-    console.log('🔍 고객 기본 정보 조회 결과:', {
-      found: !!client,
-      clientName: client?.fullName || 'N/A',
+    if (!client) {
+      console.error('❌ 고객을 찾을 수 없습니다:', { clientId, agentId });
+      throw new Error('고객을 찾을 수 없습니다.');
+    }
+
+    console.log('✅ 고객 기본 정보 및 소개자 조회 완료', {
+      clientName: client.fullName,
     });
 
-    if (!client) {
-      console.error('❌ 고객 정보를 찾을 수 없습니다:', { clientId, agentId });
-      throw new Error('고객 정보를 찾을 수 없습니다.');
+    // 🎯 소개자 정보 별도 조회
+    let referredBy = null;
+    if (client.referredById) {
+      try {
+        const [referrer] = await db
+          .select({
+            id: clients.id,
+            fullName: clients.fullName,
+          })
+          .from(clients)
+          .where(eq(clients.id, client.referredById))
+          .limit(1);
+
+        if (referrer) {
+          referredBy = { id: referrer.id, name: referrer.fullName };
+        }
+      } catch (error) {
+        console.error('❌ 소개자 정보 조회 오류:', error);
+      }
     }
 
     // 🎯 현재 단계 정보 별도 조회 (안전함)
@@ -631,6 +614,7 @@ export async function getClientOverview(
       interestCategoriesExists: interestCategories.length > 0,
       companionsCount: consultationCompanions.length,
       notesCount: consultationNotes.length,
+      hasData: !!clientWithCurrentStage,
     });
 
     // 🔒 데이터 접근 로그 기록
@@ -647,7 +631,10 @@ export async function getClientOverview(
     }
 
     const result = {
-      client: clientWithCurrentStage,
+      client: {
+        ...clientWithCurrentStage,
+        referredBy,
+      },
       tags: tags.filter(tag => tag.id), // null 값 필터링
       preferences: preferences[0] || null,
       analytics: analytics[0] || null,
@@ -1357,7 +1344,6 @@ export async function getClientById(
             .select({
               id: clients.id,
               fullName: clients.fullName,
-              phone: clients.phone,
             })
             .from(clients)
             .where(eq(clients.id, client.referredById))

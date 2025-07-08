@@ -30,7 +30,6 @@ import { Input } from '~/common/components/ui/input';
 import { Textarea } from '~/common/components/ui/textarea';
 import { Button } from '~/common/components/ui/button';
 import { Badge } from '~/common/components/ui/badge';
-import { Checkbox } from '~/common/components/ui/checkbox';
 import { Alert, AlertDescription } from '~/common/components/ui/alert';
 import { Separator } from '~/common/components/ui/separator';
 import {
@@ -39,17 +38,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '~/common/components/ui/tooltip';
-import {
-  CheckIcon,
-  Cross2Icon,
-  CalendarIcon,
-  TrashIcon,
-  UploadIcon,
-  LockClosedIcon,
-  EyeClosedIcon,
-  ExclamationTriangleIcon,
-  PersonIcon,
-} from '@radix-ui/react-icons';
+import { CheckIcon, Cross2Icon, CalendarIcon } from '@radix-ui/react-icons';
 import {
   secureInsuranceTypeConfig,
   getInsuranceSecurityLevel,
@@ -60,6 +49,7 @@ import {
 } from './insurance-config';
 import type { ClientPrivacyLevel } from '../types';
 import { Shield } from 'lucide-react';
+import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 
 // 🔒 **보안 강화된 보험 추가 스키마**
 const secureInsuranceSchema = z.object({
@@ -141,6 +131,7 @@ export function AddInsuranceModal({
   const [healthConditionInput, setHealthConditionInput] = useState('');
   const [medications, setMedications] = useState<string[]>([]);
   const [medicationInput, setMedicationInput] = useState('');
+  const { t } = useHydrationSafeTranslation('clients');
 
   // 🔒 **보안 강화된 상태들**
   const [showPrivacyWarning, setShowPrivacyWarning] = useState(false);
@@ -401,7 +392,7 @@ export function AddInsuranceModal({
                               <SelectItem key={key} value={key}>
                                 <div className="flex items-center gap-2">
                                   {config.icon}
-                                  {config.label}
+                                  {t(config.label)}
                                 </div>
                               </SelectItem>
                             )
@@ -500,7 +491,8 @@ export function AddInsuranceModal({
                   <Separator />
                   <div>
                     <h4 className="text-sm font-medium mb-4">
-                      {secureInsuranceTypeConfig[watchedType]?.label} 상세 정보
+                      {t(secureInsuranceTypeConfig[watchedType]?.label)} 상세
+                      정보
                     </h4>
 
                     {/* 자동차보험 상세 정보 */}

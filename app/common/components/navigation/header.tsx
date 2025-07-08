@@ -56,7 +56,7 @@ export function Header({
   isLoadingUser = false,
   onMobileMenuToggle,
 }: HeaderProps) {
-  const { t } = useHydrationSafeTranslation('navigation');
+  const { t, i18n } = useHydrationSafeTranslation('navigation');
   const { subscriptionStatus, isLoading: isSubscriptionLoading } =
     useSubscription();
   const [isLoggingOut, setIsLoggingOut] = React.useState(false);
@@ -365,7 +365,8 @@ export function Header({
                               >
                                 {getTranslatedNotificationTitle(
                                   notification,
-                                  t
+                                  t,
+                                  i18n
                                 )}
                               </p>
                               {!notification.readAt && (
@@ -382,7 +383,8 @@ export function Header({
                             >
                               {getTranslatedNotificationMessage(
                                 notification,
-                                t
+                                t,
+                                i18n
                               )}
                             </p>
                             <div className="flex items-center justify-between">
