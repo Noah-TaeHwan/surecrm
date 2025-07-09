@@ -12,3 +12,5 @@ CREATE TABLE public.posts (
     author_id UUID REFERENCES public.app_user_profiles(id),
     status TEXT DEFAULT 'draft'
 );
+
+ALTER TABLE public.posts ENABLE ROW LEVEL SECURITY;
