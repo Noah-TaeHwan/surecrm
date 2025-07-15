@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>SureCRM 매직링크 로그인</title>
+    <title>SureCRM 인증코드</title>
     <style>
       body {
         font-family:
@@ -75,44 +75,39 @@
   <body>
     <div class="container">
       <div class="header">
-        <h1 style="margin: 0; font-size: 24px">🔐 SureCRM 매직링크</h1>
-        <p style="margin: 10px 0 0 0; opacity: 0.9">간편하고 안전한 로그인</p>
+        <h1 style="margin: 0; font-size: 24px">🔐 SureCRM 인증코드</h1>
+        <p style="margin: 10px 0 0 0; opacity: 0.9">회원가입/로그인 인증</p>
       </div>
 
       <div class="content">
         <p style="font-size: 16px; margin-bottom: 24px">
           안녕하세요! <br />
-          SureCRM에 로그인하기 위해 아래 버튼을 클릭해주세요.
+          SureCRM 인증을 위한 6자리 코드입니다.
         </p>
 
-        <div style="text-align: center">
-          <a
-            href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email"
-            class="login-button"
-          >
-            🔐 SureCRM 로그인하기
-          </a>
+        <div style="text-align: center; margin: 30px 0;">
+          <div style="background: #f3f4f6; border: 2px solid #e5e7eb; border-radius: 12px; padding: 30px 40px; display: inline-block;">
+            <h2 style="margin: 0 0 10px 0; font-size: 14px; color: #6b7280; font-weight: 500;">인증 코드</h2>
+            <div style="font-size: 36px; font-weight: bold; letter-spacing: 8px; color: #dc2626; font-family: 'Courier New', monospace;">
+              {{ .Token }}
+            </div>
+          </div>
         </div>
 
         <div class="warning">
           <strong>⚠️ 보안 안내</strong><br />
-          • 이 링크는 <strong>1시간 후 만료</strong>됩니다<br />
+          • 이 코드는 <strong>1시간 후 만료</strong>됩니다<br />
           • 한 번 사용하면 재사용할 수 없습니다<br />
           • 본인이 요청하지 않았다면 이 이메일을 무시하세요
         </div>
 
-        <p>
-          버튼이 작동하지 않는 경우, 아래 링크를 복사하여 브라우저 주소창에
-          붙여넣어 주세요:
+        <p style="margin-top: 30px; font-size: 14px; color: #6b7280;">
+          위 인증 코드를 회원가입 또는 로그인 페이지의 인증 코드 입력란에 입력해주세요.
         </p>
-
-        <div class="backup-url">
-          {{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email
-        </div>
       </div>
 
       <div class="footer">
-        이 이메일은 SureCRM 매직링크 로그인 요청에 의해 발송되었습니다.<br />
+        이 이메일은 SureCRM 인증 코드 요청에 의해 발송되었습니다.<br />
         문의사항이 있으시면 고객지원팀에 연락해주세요.
       </div>
     </div>

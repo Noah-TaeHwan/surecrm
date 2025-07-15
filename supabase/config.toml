@@ -1,0 +1,29 @@
+# Supabase Configuration for SureCRM
+
+[auth.external]
+enabled = true
+
+# Email Templates
+[auth.email.template.magic_link]
+subject = "SureCRM 인증코드"
+content_path = "./templates/magic-link.html"
+
+[auth.email.template.confirmation] 
+subject = "SureCRM 회원가입 인증"
+content_path = "./templates/confirm-signup.html"
+
+[auth.email.template.recovery]
+subject = "SureCRM 비밀번호 재설정"
+content_path = "./templates/reset-password.html"
+
+[auth.email.template.invite]
+subject = "SureCRM 초대장"
+content_path = "./templates/invite-user.html"
+
+[auth.email.template.email_change]
+subject = "SureCRM 이메일 변경 확인"
+content_path = "./templates/change-email.html"
+
+[auth.email.template.reauthentication]
+subject = "SureCRM 재인증 필요"
+content_path = "./templates/reauthentication.html"
