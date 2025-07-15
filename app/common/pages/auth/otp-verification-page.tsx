@@ -51,8 +51,6 @@ interface ComponentProps {
   } | null;
 }
 
-const supabase = createServerClient();
-
 export async function loader({ request }: LoaderArgs) {
   const url = new URL(request.url);
   const email = url.searchParams.get('email') || '';
@@ -120,10 +118,19 @@ export async function action({ request }: ActionArgs) {
 
     const result = await completeOTPVerification(email, otp, signUpData);
 
-    if (result.success) {
-      // OTP 인증 성공 시 세션 생성하고 대시보드로 리다이렉트
-      const { createUserSession } = await import('~/lib/auth/session');
-      return createUserSession(result.user!.id, '/dashboard');
+    if (result.success && result.user) {
+      // OTP 인증 성공 시 Supabase 세션 확인
+      const supabase = createServerClient(request);
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session) {
+        // Supabase 세션이 있으면 바로 대시보드로 리다이렉트
+        return redirect('/dashboard');
+      } else {
+        // 세션이 없으면 React Router 세션 생성
+        const { createUserSession } = await import('~/lib/auth/session');
+        return createUserSession(result.user.id, '/dashboard');
+      }
     }
 
     return {
@@ -141,6 +148,7 @@ export async function action({ request }: ActionArgs) {
       };
     }
 
+    const supabase = createServerClient(request);
     const { error } = await supabase.auth.signInWithOtp({
       email: email,
       options: {
