@@ -61,7 +61,7 @@ import { useToast, ToastContainer } from '~/common/components/ui/toast';
 // 📁 공통 포맷팅 함수 import
 import { formatCurrency as formatCurrencyWithLocale } from '~/lib/utils/currency';
 import { cn } from '~/lib/utils';
-import { apiClient, downloadFile } from '~/lib/utils/api-client';
+import { InsuranceService } from '../services/insurance.service';
 
 // 🆔 국제적 ID 유틸리티 import
 import {
@@ -208,10 +208,6 @@ export function InsuranceContractsTab({
 
   // 🎨 보험 유형별 설정 (useMemo로 언어 변경 감지)
   const getInsuranceTypeConfig = useMemo(() => {
-    console.log(
-      '🔍 [DEBUG] getInsuranceTypeConfig 재생성, 현재 언어:',
-      i18n.language
-    );
 
     return (type: string) => {
       const configs = {
@@ -255,92 +251,20 @@ export function InsuranceContractsTab({
 
       // 🔍 상세 디버깅 - 여러 방법 테스트
 
-      console.log(
-        '  1. 직접 호출:',
-        t('insuranceContractsTab.insuranceTypes.life')
-      );
-      console.log(
-        '  2. 기본값 없이:',
-        t('insuranceContractsTab.insuranceTypes.life', {
-          defaultValue: undefined,
-        })
-      );
-      console.log(
-        '  3. 명시적 언어:',
-        t('insuranceContractsTab.insuranceTypes.life', { lng: 'en' })
-      );
-      console.log(
-        '  4. 네임스페이스 명시:',
-        t('clients:insuranceContractsTab.insuranceTypes.life')
-      );
-      console.log(
-        '  5. i18n 직접 호출:',
-        i18n.t('insuranceContractsTab.insuranceTypes.life', {
-          ns: 'clients',
-          lng: 'en',
-        })
-      );
-      // 🔍 리소스 상태 상세 확인
-      console.log('🔍 [DEBUG] 리소스 상태 상세:');
-      console.log('  - 현재 언어:', i18n.language);
-      console.log('  - 로드된 언어들:', Object.keys(i18n.store.data || {}));
-      console.log(
-        '  - 영어 리소스 전체:',
-        i18n.getResourceBundle('en', 'clients')
-      );
-      console.log(
-        '  - 한국어 리소스 전체:',
-        i18n.getResourceBundle('ko', 'clients')
-      );
-      console.log(
-        '  - 현재 언어 리소스:',
-        i18n.getResourceBundle(i18n.language, 'clients')
-      );
-      console.log(
-        '  - insuranceContractsTab 영어:',
-        i18n.getResourceBundle('en', 'clients')?.insuranceContractsTab
-      );
-      console.log(
-        '  - insuranceContractsTab 한국어:',
-        i18n.getResourceBundle('ko', 'clients')?.insuranceContractsTab
-      );
-
       // 🔍 구체적으로 insuranceTypes와 paymentCycles 확인
       const enInsuranceTab = i18n.getResourceBundle(
         'en',
         'clients'
       )?.insuranceContractsTab;
-      console.log(
-        '🔍 [상세] 영어 insuranceTypes:',
-        enInsuranceTab?.insuranceTypes
-      );
-      console.log(
-        '🔍 [상세] 영어 paymentCycles:',
-        enInsuranceTab?.paymentCycles
-      );
-      console.log(
-        '🔍 [상세] 영어 life 보험:',
-        enInsuranceTab?.insuranceTypes?.life
-      );
-      console.log(
-        '🔍 [상세] 영어 monthly 납입:',
-        enInsuranceTab?.paymentCycles?.monthly
-      );
       return result;
     };
   }, [t, i18n.language]);
 
   // 💰 납입주기 다국어 변환 함수 (useMemo로 언어 변경 감지)
   const getPaymentCycleLabel = useMemo(() => {
-    console.log(
-      '🔍 [DEBUG] getPaymentCycleLabel 재생성, 현재 언어:',
-      i18n.language
-    );
-
     return (cycle?: string) => {
       if (!cycle) return '';
       const result = t(`insuranceContractsTab.paymentCycles.${cycle}`, cycle);
-      console.log(`🔍 [DEBUG] ${cycle} 납입주기 번역:`, result);
       return result;
     };
   }, [t, i18n.language]);
@@ -681,50 +605,20 @@ export function InsuranceContractsTab({
   // 📥 첨부파일 다운로드 함수
   const handleDownloadAttachment = async (attachmentId: string) => {
     try {
-      // 파일명을 가져오기 위한 API 호출
-      const response = await fetch(
-        `/api/download-attachment?id=${attachmentId}`,
-        {
-          method: 'GET',
-          headers: {
-            Accept: 'application/octet-stream',
-          },
-        }
-      );
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || '파일 다운로드에 실패했습니다.');
+      // InsuranceService를 사용하여 첨부파일 다운로드
+      const contractId = contracts.find((c) => 
+        c.attachments?.some((a) => a.id === attachmentId)
+      )?.id;
+      
+      if (!contractId) {
+        throw new Error('계약 정보를 찾을 수 없습니다.');
       }
 
-      // 파일 다운로드 처리
-      const blob = await response.blob();
-
-      // Content-Disposition 헤더에서 파일명 추출
-      const contentDisposition = response.headers.get('Content-Disposition');
-      let fileName = 'attachment';
-
-      if (contentDisposition) {
-        const matches = contentDisposition.match(
-          /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/
-        );
-        if (matches && matches[1]) {
-          fileName = decodeURIComponent(matches[1].replace(/['"]/g, ''));
-        }
+      const success = await InsuranceService.downloadAttachment(contractId, attachmentId);
+      
+      if (success) {
+        toast.success('다운로드 완료', '파일이 다운로드되었습니다.');
       }
-
-      // 브라우저에서 파일 다운로드 실행
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = fileName;
-      link.style.display = 'none';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-
-      toast.success('다운로드 완료', `${fileName} 파일이 다운로드되었습니다.`);
     } catch (error) {
       toast.error(
         '다운로드 실패',
@@ -736,179 +630,50 @@ export function InsuranceContractsTab({
   const handleSubmit = async (formData: any) => {
     setIsSubmitting(true);
 
+    // 🔧 수정 모드인지 생성 모드인지 판단
+    const isEditMode = selectedContract !== null;
+    const actionText = isEditMode ? '수정' : '등록';
+
     try {
-      // 🎯 Fetcher를 사용한 API 호출
-      const submitData = new FormData();
-
-      // 🔧 수정 모드인지 생성 모드인지 판단
-      const isEditMode = selectedContract !== null;
-      const intent = isEditMode
-        ? 'updateInsuranceContract'
-        : 'createInsuranceContract';
-
-      submitData.append('intent', intent);
-      submitData.append('clientId', clientId);
-      submitData.append('agentId', agentId);
-
-      // 수정 모드일 때는 contractId도 추가
+      // InsuranceService를 사용하여 계약 생성 또는 수정
+      let result;
       if (isEditMode && selectedContract) {
-        submitData.append('contractId', selectedContract.id);
-      }
-
-      // 첨부파일을 제외한 계약 데이터 추가
-      const contractData = { ...formData };
-      if (contractData.attachments) {
-        delete contractData.attachments; // 첨부파일은 별도 처리
-      }
-
-      Object.entries(contractData).forEach(([key, value]) => {
-        if (value !== undefined && value !== null && value !== '') {
-          submitData.append(key, value.toString());
-        }
-      });
-
-      // 📁 첨부파일 디버깅 로그 추가
-      console.log('🔍 첨부파일 디버깅:', {
-        'formData 전체': formData,
-        'attachments 존재여부': !!formData.attachments,
-        'attachments 길이': formData.attachments?.length || 0,
-        'attachments 내용': formData.attachments,
-      });
-
-      // 📁 첨부파일을 FormData에 추가 (NewContractModal에서 전달받은 데이터 사용)
-      if (formData.attachments?.length > 0) {
-        console.log(
-          `📁 [다수파일처리] 첨부파일 ${formData.attachments.length}개 처리 중:`,
-          formData.attachments.map((att: any, idx: number) => ({
-            index: idx,
-            fileName: att.fileName,
-            displayName: att.fileDisplayName,
-            type: att.documentType,
-            size: att.file?.size || 'File 객체 없음',
-            hasFile: !!att.file,
-            fileType: typeof att.file,
-            isExisting: att.isExisting,
-          }))
-        );
-
-        // 새로운 파일만 FormData에 추가하기 위한 인덱스 카운터
-        let newFileIndex = 0;
-
-        // 각 첨부파일을 FormData에 추가
-        formData.attachments.forEach((att: any, originalIndex: number) => {
-          console.log(`📎 [다수파일처리] 첨부파일 ${originalIndex} 처리:`, {
-            fileName: att.fileName,
-            fileObject: att.file,
-            isFile: att.file instanceof File,
-            isExisting: att.isExisting,
-            willUseIndex: newFileIndex,
-          });
-
-          if (att.file instanceof File && !att.isExisting) {
-            // 새로 추가된 파일인 경우
-            submitData.append(`attachment_file_${newFileIndex}`, att.file);
-            submitData.append(
-              `attachment_fileName_${newFileIndex}`,
-              att.fileName
-            );
-            submitData.append(
-              `attachment_displayName_${newFileIndex}`,
-              att.fileDisplayName
-            );
-            submitData.append(
-              `attachment_documentType_${newFileIndex}`,
-              att.documentType
-            );
-            if (att.description) {
-              submitData.append(
-                `attachment_description_${newFileIndex}`,
-                att.description
-              );
-            }
-            console.log(
-              `✅ [다수파일처리] 새 첨부파일 ${originalIndex} → FormData 인덱스 ${newFileIndex} 추가 완료`
-            );
-            newFileIndex++; // 다음 새 파일을 위해 인덱스 증가
-          } else if (att.isExisting) {
-            // 기존 첨부파일인 경우 - 메타데이터 업데이트를 FormData에 추가
-            submitData.append(
-              `existing_attachment_documentType_${att.id}`,
-              att.documentType
-            );
-            if (att.description) {
-              submitData.append(
-                `existing_attachment_description_${att.id}`,
-                att.description
-              );
-            }
-            if (att.fileDisplayName) {
-              submitData.append(
-                `existing_attachment_displayName_${att.id}`,
-                att.fileDisplayName
-              );
-            }
-            console.log(
-              `📎 [다수파일처리] 기존 첨부파일 ${originalIndex}: ${att.fileName} (메타데이터 업데이트)`
-            );
-          } else {
-            console.error(
-              `❌ [다수파일처리] 첨부파일 ${originalIndex}: File 객체가 아님`,
-              att.file
-            );
-          }
-        });
-
-        console.log(
-          `📋 [다수파일처리] 최종 결과: 총 ${formData.attachments.length}개 중 ${newFileIndex}개 새 파일을 FormData에 추가`
+        result = await InsuranceService.updateContract(
+          selectedContract.id,
+          formData,
+          formData.attachments || [],
+          clientId,
+          agentId
         );
       } else {
-        console.log('📎 [다수파일처리] 첨부파일이 없음 또는 빈 배열');
+        result = await InsuranceService.createContract(
+          formData,
+          formData.attachments || [],
+          clientId,
+          agentId
+        );
       }
-
-      console.log('📋 보험계약 저장 중...', contractData);
-
-      // 🔧 수정/등록에 따른 API 엔드포인트 선택
-      const apiEndpoint = selectedContract
-        ? '/api/update-insurance-contract' // 수정
-        : '/api/insurance-contracts'; // 신규 등록
-
-      // contractId를 FormData에 추가 (수정인 경우)
-      if (selectedContract) {
-        submitData.append('contractId', selectedContract.id);
-      }
-
-      const isUpdate = !!selectedContract;
-      const actionText = isUpdate ? '수정' : '등록';
-
-      // API 클라이언트를 사용한 간소화된 호출
-      const result = await apiClient(apiEndpoint, {
-        method: 'POST',
-        body: submitData,
-        toast: {
-          error: (options) => toast.error(options.title, options.message),
-          success: (options) => toast.success(options.title, options.message),
-        },
-        successMessage: `계약이 성공적으로 ${actionText}되었습니다`,
-        errorMessage: `계약 ${actionText}에 실패했습니다`,
-      });
 
       // 결과 처리
       if (result.success) {
+        toast.success(
+          `계약 ${actionText} 완료`,
+          `계약이 성공적으로 ${actionText}되었습니다`
+        );
         setShowAddModal(false);
         setSelectedContract(null);
         setIsSubmitting(false);
         // 페이지 새로고침으로 최신 데이터 로드
         window.location.reload();
       } else {
+        toast.error(
+          `계약 ${actionText} 실패`,
+          result.error || `계약 ${actionText}에 실패했습니다`
+        );
         setIsSubmitting(false);
       }
     } catch (error) {
-      const isUpdate = !!selectedContract;
-      const actionText = isUpdate ? '수정' : '등록';
-      console.error(`❌ 보험계약 ${actionText} 실패:`, error);
       setIsSubmitting(false);
-
-      // 에러 토스트 알림 (즉시 표시할 수 있는 클라이언트 에러)
       toast.error(
         `계약 ${actionText} 실패`,
         error instanceof Error
@@ -948,16 +713,8 @@ export function InsuranceContractsTab({
     setIsDeleting(true);
 
     try {
-      const formData = new FormData();
-      formData.append('actionType', 'delete');
-      formData.append('contractId', contractToDelete.id);
-
-      const response = await fetch('/api/insurance-contracts', {
-        method: 'POST',
-        body: formData,
-      });
-
-      const result = await response.json();
+      // InsuranceService를 사용하여 계약 삭제
+      const result = await InsuranceService.deleteContract(contractToDelete.id);
 
       if (result.success) {
         // 성공 시 로컬 상태에서 계약 제거
@@ -974,10 +731,9 @@ export function InsuranceContractsTab({
         // 페이지 데이터 새로고침
         revalidator.revalidate();
       } else {
-        throw new Error(result.message || '계약 삭제에 실패했습니다.');
+        throw new Error(result.error || '계약 삭제에 실패했습니다.');
       }
     } catch (error) {
-      console.error('❌ 보험계약 삭제 실패:', error);
       toast.error(
         '계약 삭제 실패',
         error instanceof Error
@@ -1543,10 +1299,6 @@ export function InsuranceContractsTab({
                                               e.preventDefault();
                                               e.stopPropagation();
                                               const contractorKey = `contractor-${contract.id}`;
-                                              console.log(
-                                                '🖱️ 계약자 토글 클릭:',
-                                                contractorKey
-                                              );
                                               toggleSsnVisibility(
                                                 contractorKey
                                               );
@@ -1598,10 +1350,6 @@ export function InsuranceContractsTab({
                                               e.preventDefault();
                                               e.stopPropagation();
                                               const insuredKey = `insured-${contract.id}`;
-                                              console.log(
-                                                '🖱️ 피보험자 토글 클릭:',
-                                                insuredKey
-                                              );
                                               toggleSsnVisibility(insuredKey);
                                             }}
                                             title={`피보험자 주민등록번호 ${
