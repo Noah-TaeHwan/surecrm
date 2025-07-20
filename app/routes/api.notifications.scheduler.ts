@@ -13,7 +13,21 @@ import {
 export async function action({ request }: { request: Request }) {
   // 헤더에서 인증 토큰 확인 (보안)
   const authHeader = request.headers.get('Authorization');
-  const schedulerSecret = process.env.SCHEDULER_SECRET || 'dev-secret-key';
+  const schedulerSecret = process.env.SCHEDULER_SECRET;
+  
+  if (!schedulerSecret) {
+    console.error('❌ SCHEDULER_SECRET 환경 변수가 설정되지 않았습니다');
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: '서버 구성 오류가 발생했습니다.',
+      }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
+  }
 
   if (authHeader !== `Bearer ${schedulerSecret}`) {
     return new Response(

@@ -133,9 +133,16 @@ export async function loader({ request }: { request: Request }) {
   if (mode === 'subscribe' && challenge && token) {
     console.log('🔐 구글 웹훅 검증 요청 수신');
 
-    // 토큰 검증 (실제 환경에서는 저장된 토큰과 비교)
-    const expectedToken =
-      process.env.GOOGLE_WEBHOOK_VERIFY_TOKEN || 'surecrm_calendar_webhook';
+    // 토큰 검증
+    const expectedToken = process.env.GOOGLE_WEBHOOK_VERIFY_TOKEN;
+    
+    if (!expectedToken) {
+      console.error('❌ GOOGLE_WEBHOOK_VERIFY_TOKEN 환경 변수가 설정되지 않았습니다');
+      return data(
+        { error: 'Server configuration error' },
+        { status: 500 }
+      );
+    }
 
     if (token === expectedToken) {
       console.log('✅ 웹훅 검증 성공');

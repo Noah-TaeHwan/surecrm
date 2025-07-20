@@ -4,6 +4,16 @@
 import { type ActionFunctionArgs } from 'react-router';
 import nodemailer from 'nodemailer';
 
+// HTML 이스케이프 함수 - XSS 방지
+function escapeHtml(unsafe: string): string {
+  return unsafe
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 // Response utility function
 function json(object: unknown, init?: ResponseInit): Response {
   return new Response(JSON.stringify(object), {
@@ -82,12 +92,12 @@ export async function action({ request }: ActionFunctionArgs) {
 
     let htmlContent = `
       <h1>새로운 피드백 도착</h1>
-      <p><strong>제목:</strong> ${title}</p>
-      <p><strong>카테고리:</strong> ${categoryMap[category] || category}</p>
+      <p><strong>제목:</strong> ${escapeHtml(title)}</p>
+      <p><strong>카테고리:</strong> ${escapeHtml(categoryMap[category] || category)}</p>
       <p><strong>내용:</strong></p>
-      <pre>${message}</pre>
+      <pre>${escapeHtml(message)}</pre>
       <hr />
-      <p><strong>보낸 IP:</strong> ${clientIP}</p>
+      <p><strong>보낸 IP:</strong> ${escapeHtml(clientIP)}</p>
     `;
 
     const attachments = [];
@@ -118,7 +128,7 @@ export async function action({ request }: ActionFunctionArgs) {
         content: Buffer.from(arrayBuffer),
         contentType: attachment.type,
       });
-      htmlContent += `<p><strong>첨부파일:</strong> ${attachment.name}</p>`;
+      htmlContent += `<p><strong>첨부파일:</strong> ${escapeHtml(attachment.name)}</p>`;
     }
 
     const recipientEmail =
@@ -127,7 +137,7 @@ export async function action({ request }: ActionFunctionArgs) {
     await transporter.sendMail({
       from: `"SureCRM 피드백" <${emailUser}>`,
       to: recipientEmail,
-      subject: `[SureCRM 피드백] ${title}`,
+      subject: `[SureCRM 피드백] ${title.replace(/[\n\r]/g, ' ')}`,
       html: htmlContent,
       attachments,
     });

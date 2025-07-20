@@ -1174,6 +1174,12 @@ export class GoogleCalendarService {
       }/api/google/calendar/webhook`;
 
       console.log('🔔 웹훅 채널 생성 시작:', { channelId, webhookUrl });
+      
+      const webhookToken = process.env.GOOGLE_WEBHOOK_VERIFY_TOKEN;
+      if (!webhookToken) {
+        console.error('❌ GOOGLE_WEBHOOK_VERIFY_TOKEN 환경 변수가 설정되지 않았습니다');
+        throw new Error('Webhook token configuration is missing');
+      }
 
       const response = await calendar.events.watch({
         calendarId: 'primary',
@@ -1181,9 +1187,7 @@ export class GoogleCalendarService {
           id: channelId,
           type: 'web_hook',
           address: webhookUrl,
-          token:
-            process.env.GOOGLE_WEBHOOK_VERIFY_TOKEN ||
-            'surecrm_calendar_webhook',
+          token: webhookToken,
           params: {
             ttl: '86400', // 24시간
           },
