@@ -57,8 +57,21 @@ interface ComponentProps {
     recentClientsData: DashboardClientData;
     topReferrers: DashboardReferralInsights['topReferrers'];
     networkStats: DashboardReferralInsights['networkStats'];
-    userGoals: any[]; // UserGoal 타입 정의 필요
-    salesStats: any; // salesStats 타입 정의 필요
+    userGoals: Array<{
+      id: string;
+      goalType: 'revenue' | 'clients' | 'referrals' | 'conversion_rate' | 'meetings';
+      targetValue: number;
+      currentValue: number;
+      progress: number;
+      period: string;
+      createdAt: string;
+    }>;
+    salesStats: {
+      monthlyRevenue: number;
+      monthlyContractCount: number;
+      conversionRate: number;
+      averagePremium: number;
+    };
     error?: string;
   };
 }
@@ -539,7 +552,7 @@ export default function DashboardPage({ loaderData }: ComponentProps) {
   }, [fetcher.data?.success, revalidator]);
 
   // PipelineOverview 컴포넌트용 데이터 변환 (완전한 타입 호환성 확보)
-  const transformedPipelineStages = pipelineData.stages.map((stage: any) => ({
+  const transformedPipelineStages = pipelineData.stages.map((stage) => ({
     id: stage.id,
     name: stage.name,
     count: stage.clientCount || stage.count || 0, // clientCount를 count로 변환
@@ -549,7 +562,7 @@ export default function DashboardPage({ loaderData }: ComponentProps) {
 
   // RecentClients 컴포넌트용 데이터 변환 (완전한 타입 호환성 확보)
   const transformedRecentClients = recentClientsData.recentClients.map(
-    (client: any) => ({
+    (client) => ({
       id: client.id,
       name:
         client.fullName ||
@@ -599,7 +612,7 @@ export default function DashboardPage({ loaderData }: ComponentProps) {
 
   // ReferralInsights 컴포넌트용 데이터 변환 (완전한 타입 호환성 확보)
   const transformedTopReferrers = topReferrers.map(
-    (referrer: any, index: number) => ({
+    (referrer, index: number) => ({
       id: referrer.id,
       name:
         referrer.fullName ||
@@ -637,8 +650,8 @@ export default function DashboardPage({ loaderData }: ComponentProps) {
 
   // MyGoals 컴포넌트와의 호환성을 위한 데이터 변환
   const compatibleUserGoals = userGoals
-    .filter((goal: any) => goal.goalType !== 'meetings') // meetings 타입 제외
-    .map((goal: any) => ({
+    .filter((goal) => goal.goalType !== 'meetings') // meetings 타입 제외
+    .map((goal) => ({
       ...goal,
       targetValue: Number(goal.targetValue),
       currentValue: Number(goal.currentValue),

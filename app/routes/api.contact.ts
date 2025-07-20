@@ -13,13 +13,13 @@ function json(object: any, init?: ResponseInit): Response {
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-  console.log('📬 [API /api/contact] action-이메일 전송 요청 수신');
+  // 📬 [API /api/contact] action-이메일 전송 요청 수신
   if (request.method !== 'POST') {
     return json({ error: 'Method not allowed' }, { status: 405 });
   }
 
   const formData = await request.formData();
-  console.log('📋 [API /api/contact] 1. 폼 데이터 파싱 완료');
+  // 📋 [API /api/contact] 1. 폼 데이터 파싱 완료
 
   const name = formData.get('name') as string;
   const email = formData.get('email') as string;
@@ -35,9 +35,9 @@ export async function action({ request }: ActionFunctionArgs) {
     'unknown';
 
   // 1. Turnstile 토큰 검증
-  console.log('🛡️ [API /api/contact] 2. Turnstile 토큰 검증 시작...');
+  // 🛡️ [API /api/contact] 2. Turnstile 토큰 검증 시작...
   if (!turnstileToken) {
-    console.error('❌ [API /api/contact] Turnstile 토큰이 없습니다.');
+    // ❌ [API /api/contact] Turnstile 토큰이 없습니다.
     return json(
       {
         success: false,

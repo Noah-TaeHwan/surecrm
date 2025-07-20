@@ -135,10 +135,10 @@ export function useCustomerInsights(
     useState<PersonalizationSuggestions | null>(null);
   const [serviceOptimization, setServiceOptimization] =
     useState<CustomerServiceOptimization | null>(null);
-  const [realTimeInsights, setRealTimeInsights] = useState<any[]>([]);
+  const [realTimeInsights, setRealTimeInsights] = useState<CustomerAnalytics[]>([]);
 
   const updateIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const insightHistoryRef = useRef<any[]>([]);
+  const insightHistoryRef = useRef<CustomerAnalytics[]>([]);
 
   // === 🚀 시스템 초기화 ===
   useEffect(() => {
@@ -526,7 +526,7 @@ export function useCustomerInsights(
 
 // === 🧠 분석 유틸리티 함수들 ===
 
-function generatePersonalizedMessage(emotions: any): string {
+function generatePersonalizedMessage(emotions: CustomerAnalytics['emotion']): string {
   if (emotions.confusion > 60) {
     return '더 자세한 안내가 필요하시면 언제든 문의해 주세요.';
   }
@@ -539,7 +539,7 @@ function generatePersonalizedMessage(emotions: any): string {
   return '천천히 둘러보시고 궁금한 점이 있으시면 언제든 연락주세요.';
 }
 
-function predictNextStage(currentStage: string, emotion: any): string {
+function predictNextStage(currentStage: string, emotion: CustomerAnalytics['emotion']): string {
   if (currentStage === 'awareness' && emotion.interest > 70)
     return 'consideration';
   if (currentStage === 'consideration' && emotion.confidence > 70)
@@ -563,7 +563,7 @@ function estimateTimeToNextStage(
   );
 }
 
-function generateOptimalInterventions(journey: any, emotion: any): string[] {
+function generateOptimalInterventions(journey: CustomerAnalytics['journey'], emotion: CustomerAnalytics['emotion']): string[] {
   const interventions = [];
 
   if (journey.stage === 'awareness' && emotion.interest > 60) {
@@ -579,7 +579,11 @@ function generateOptimalInterventions(journey: any, emotion: any): string[] {
   return interventions;
 }
 
-function analyzeEmotionalTrends(insights: any[]): any {
+function analyzeEmotionalTrends(insights: CustomerAnalytics[]): {
+  trend: 'improving' | 'stable' | 'declining';
+  volatility: number;
+  primaryEmotions: string[];
+} {
   if (insights.length < 5) return { trend: 'insufficient_data' };
 
   const recent = insights.slice(-10);
@@ -598,7 +602,7 @@ function identifyEmotionalTriggers(insights: any[]): string[] {
   return ['page_transition', 'form_interaction', 'content_consumption'];
 }
 
-function generateEmotionalRecommendations(emotion: any): string[] {
+function generateEmotionalRecommendations(emotion: CustomerAnalytics['emotion']): string[] {
   const recommendations = [];
 
   if (emotion.confusion > 50) recommendations.push('provide_clearer_guidance');
@@ -610,7 +614,11 @@ function generateEmotionalRecommendations(emotion: any): string[] {
   return recommendations;
 }
 
-function calculatePersonalizationImpact(analytics: any): any {
+function calculatePersonalizationImpact(analytics: CustomerAnalytics): {
+  overallImpact: number;
+  conversionLift: number;
+  engagementBoost: number;
+} {
   return {
     engagement: '+25%',
     conversion: '+15%',
@@ -619,7 +627,7 @@ function calculatePersonalizationImpact(analytics: any): any {
   };
 }
 
-function projectSatisfaction(analytics: any, days: number): number {
+function projectSatisfaction(analytics: CustomerAnalytics, days: number): number {
   const current = analytics.emotion.satisfaction;
   const trend = analytics.engagement.trend;
 
@@ -628,7 +636,7 @@ function projectSatisfaction(analytics: any, days: number): number {
   return current;
 }
 
-function identifyRiskFactors(analytics: any): string[] {
+function identifyRiskFactors(analytics: CustomerAnalytics): string[] {
   const factors = [];
 
   if (analytics.emotion.confusion > 50) factors.push('confusion');
@@ -638,7 +646,7 @@ function identifyRiskFactors(analytics: any): string[] {
   return factors;
 }
 
-function calculateSuccessProbability(analytics: any): number {
+function calculateSuccessProbability(analytics: CustomerAnalytics): number {
   const engagement = analytics.engagement.score;
   const satisfaction = analytics.emotion.satisfaction;
   const confidence = analytics.emotion.confidence;
@@ -653,7 +661,7 @@ function getTier(score: number): string {
   return 'bronze';
 }
 
-function calculateRecommendedInvestment(analytics: any): string {
+function calculateRecommendedInvestment(analytics: CustomerAnalytics): string {
   const value = analytics.value.currentSession;
 
   if (value > 800) return 'premium_support';

@@ -903,6 +903,7 @@ export function CalendarGrid({
   const { isMobile } = useViewport();
   const [currentDate, setCurrentDate] = useState(selectedDate);
   const containerRef = useRef<HTMLDivElement>(null);
+  const transitionTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(
     null
   );
@@ -991,13 +992,31 @@ export function CalendarGrid({
         handleNextMonth();
       }
 
-      setTimeout(() => setIsTransitioning(false), 350);
+      // 이전 타이머가 있으면 정리
+      if (transitionTimerRef.current) {
+        clearTimeout(transitionTimerRef.current);
+      }
+      
+      // 새 타이머 설정
+      transitionTimerRef.current = setTimeout(() => {
+        setIsTransitioning(false);
+        transitionTimerRef.current = null;
+      }, 350);
     }
 
     setTouchStart(null);
     setIsSwipeGesture(false);
     setSwipeDistance(0);
   };
+
+  // 컴포넌트 unmount 시 타이머 정리
+  useEffect(() => {
+    return () => {
+      if (transitionTimerRef.current) {
+        clearTimeout(transitionTimerRef.current);
+      }
+    };
+  }, []);
 
   // 🎯 성능 최적화된 이벤트 정렬 (useMemo)
   const sortedMeetings = useMemo(() => {
