@@ -1,7 +1,12 @@
 'use client';
 
 import { useRef, useEffect, useMemo, useState, useCallback } from 'react';
-import * as d3 from 'd3';
+// d3의 easeCubicInOut 함수만 import
+const easeCubicInOut = (t: number) => {
+  return t < 0.5
+    ? 4 * t * t * t
+    : 1 - Math.pow(-2 * t + 2, 3) / 2;
+};
 import type {
   NetworkNode,
   NetworkLink,
@@ -176,7 +181,7 @@ const OBSIDIAN_CONFIG = {
     MIN: 0.1,
     MAX: 8,
     DURATION: 750,
-    EASE: d3.easeCubicInOut,
+    EASE: easeCubicInOut,
   },
 };
 

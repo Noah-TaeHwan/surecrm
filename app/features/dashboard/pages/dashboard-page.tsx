@@ -1,5 +1,5 @@
 // React Router v7 타입 import 제거 - 직접 타입 정의 사용
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useHydrationSafeTranslation } from '~/lib/i18n/use-hydration-safe-translation';
 import { MainLayout } from '~/common/layouts/main-layout';
 import { WelcomeSection } from '../components/welcome-section';
@@ -552,171 +552,192 @@ export default function DashboardPage({ loaderData }: ComponentProps) {
   }, [fetcher.data?.success, revalidator]);
 
   // PipelineOverview 컴포넌트용 데이터 변환 (완전한 타입 호환성 확보)
-  const transformedPipelineStages = pipelineData.stages.map((stage) => ({
-    id: stage.id,
-    name: stage.name,
-    count: stage.clientCount || stage.count || 0, // clientCount를 count로 변환
-    value: stage.value || 0,
-    conversionRate: stage.conversionRate || 0,
-  }));
+  const transformedPipelineStages = useMemo(
+    () =>
+      pipelineData.stages.map((stage) => ({
+        id: stage.id,
+        name: stage.name,
+        count: stage.clientCount || stage.count || 0, // clientCount를 count로 변환
+        value: stage.value || 0,
+        conversionRate: stage.conversionRate || 0,
+      })),
+    [pipelineData.stages]
+  );
 
   // RecentClients 컴포넌트용 데이터 변환 (완전한 타입 호환성 확보)
-  const transformedRecentClients = recentClientsData.recentClients.map(
-    (client) => ({
-      id: client.id,
-      name:
-        client.fullName ||
-        client.name ||
-        (isHydrated ? t('fallback.no_name') : '이름 없음'),
-      status: (() => {
-        if (!client.currentStage) return 'prospect';
+  const transformedRecentClients = useMemo(
+    () =>
+      recentClientsData.recentClients.map((client) => ({
+        id: client.id,
+        name:
+          client.fullName ||
+          client.name ||
+          (isHydrated ? t('fallback.no_name') : '이름 없음'),
+        status: (() => {
+          if (!client.currentStage) return 'prospect';
 
-        // Hydration 전후에 관계없이 한국어로 매칭 (서버에서 한국어로 저장됨)
-        const stageMapping: Record<
-          string,
-          'prospect' | 'contacted' | 'proposal' | 'contracted' | 'completed'
-        > = {
-          잠재고객: 'prospect',
-          '첫 상담': 'contacted',
-          '니즈 분석': 'proposal',
-          '상품 설명': 'proposal',
-          '계약 검토': 'contracted',
-          '계약 완료': 'completed',
-          접촉완료: 'contacted',
-          제안중: 'proposal',
-          계약체결: 'contracted',
-          완료: 'completed',
-        };
+          // Hydration 전후에 관계없이 한국어로 매칭 (서버에서 한국어로 저장됨)
+          const stageMapping: Record<
+            string,
+            'prospect' | 'contacted' | 'proposal' | 'contracted' | 'completed'
+          > = {
+            잠재고객: 'prospect',
+            '첫 상담': 'contacted',
+            '니즈 분석': 'proposal',
+            '상품 설명': 'proposal',
+            '계약 검토': 'contracted',
+            '계약 완료': 'completed',
+            접촉완료: 'contacted',
+            제안중: 'proposal',
+            계약체결: 'contracted',
+            완료: 'completed',
+          };
 
-        return stageMapping[client.currentStage] || 'prospect';
-      })() as
-        | 'prospect'
-        | 'contacted'
-        | 'proposal'
-        | 'contracted'
-        | 'completed',
-      lastContactDate: client.lastContactDate || new Date().toISOString(),
-      potentialValue: (client.contractAmount || 0) / 10000, // 원을 만원으로 변환
-      referredBy:
-        client.referralDepth > 0
-          ? isHydrated
-            ? t('referral.client')
-            : '소개 고객'
-          : undefined,
-      stage:
-        client.currentStage ||
-        client.stage ||
-        (isHydrated ? t('stages.prospect') : '잠재고객'),
-    })
+          return stageMapping[client.currentStage] || 'prospect';
+        })() as
+          | 'prospect'
+          | 'contacted'
+          | 'proposal'
+          | 'contracted'
+          | 'completed',
+        lastContactDate: client.lastContactDate || new Date().toISOString(),
+        potentialValue: (client.contractAmount || 0) / 10000, // 원을 만원으로 변환
+        referredBy:
+          client.referralDepth > 0
+            ? isHydrated
+              ? t('referral.client')
+              : '소개 고객'
+            : undefined,
+        stage:
+          client.currentStage ||
+          client.stage ||
+          (isHydrated ? t('stages.prospect') : '잠재고객'),
+      })),
+    [recentClientsData.recentClients, isHydrated, t]
   );
 
   // ReferralInsights 컴포넌트용 데이터 변환 (완전한 타입 호환성 확보)
-  const transformedTopReferrers = topReferrers.map(
-    (referrer, index: number) => ({
-      id: referrer.id,
-      name:
-        referrer.fullName ||
-        referrer.name ||
-        (isHydrated ? t('fallback.no_name') : '이름 없음'),
-      totalReferrals: referrer.referralCount || referrer.totalReferrals || 0,
-      successfulConversions: Math.round(
-        ((referrer.conversionRate || 0) / 100) *
-          (referrer.referralCount || referrer.totalReferrals || 0)
-      ),
-      conversionRate: referrer.conversionRate || 0,
-      lastReferralDate: referrer.lastReferralDate || new Date().toISOString(),
-      rank: index + 1,
-      recentActivity: isHydrated
-        ? t('referral.recent_activity', {
-            count: referrer.referralCount || referrer.totalReferrals || 0,
-            rate: (referrer.conversionRate || 0).toFixed(1),
-          })
-        : `최근 ${referrer.referralCount || referrer.totalReferrals || 0}건의 소개를 진행했습니다. 평균 전환율 ${(referrer.conversionRate || 0).toFixed(1)}%를 기록하고 있습니다.`,
-    })
+  const transformedTopReferrers = useMemo(
+    () =>
+      topReferrers.map((referrer, index: number) => ({
+        id: referrer.id,
+        name:
+          referrer.fullName ||
+          referrer.name ||
+          (isHydrated ? t('fallback.no_name') : '이름 없음'),
+        totalReferrals: referrer.referralCount || referrer.totalReferrals || 0,
+        successfulConversions: Math.round(
+          ((referrer.conversionRate || 0) / 100) *
+            (referrer.referralCount || referrer.totalReferrals || 0)
+        ),
+        conversionRate: referrer.conversionRate || 0,
+        lastReferralDate: referrer.lastReferralDate || new Date().toISOString(),
+        rank: index + 1,
+        recentActivity: isHydrated
+          ? t('referral.recent_activity', {
+              count: referrer.referralCount || referrer.totalReferrals || 0,
+              rate: (referrer.conversionRate || 0).toFixed(1),
+            })
+          : `최근 ${referrer.referralCount || referrer.totalReferrals || 0}건의 소개를 진행했습니다. 평균 전환율 ${(referrer.conversionRate || 0).toFixed(1)}%를 기록하고 있습니다.`,
+      })),
+    [topReferrers, isHydrated, t]
   );
 
   // KPI 데이터 호환성 확보
-  const compatibleKPIData = {
-    ...kpiData,
-    // 기존 필드가 없는 경우 기본값 제공
-    clientGrowthPercentage:
-      kpiData.clientGrowthPercentage ?? kpiData.monthlyGrowth?.clients ?? 0,
-    referralGrowthPercentage:
-      kpiData.referralGrowthPercentage ?? kpiData.monthlyGrowth?.referrals ?? 0,
-    revenueGrowthPercentage:
-      kpiData.revenueGrowthPercentage ?? kpiData.monthlyGrowth?.revenue ?? 0,
-    averageClientValue: kpiData.averageClientValue ?? 0,
-  };
+  const compatibleKPIData = useMemo(
+    () => ({
+      ...kpiData,
+      // 기존 필드가 없는 경우 기본값 제공
+      clientGrowthPercentage:
+        kpiData.clientGrowthPercentage ?? kpiData.monthlyGrowth?.clients ?? 0,
+      referralGrowthPercentage:
+        kpiData.referralGrowthPercentage ?? kpiData.monthlyGrowth?.referrals ?? 0,
+      revenueGrowthPercentage:
+        kpiData.revenueGrowthPercentage ?? kpiData.monthlyGrowth?.revenue ?? 0,
+      averageClientValue: kpiData.averageClientValue ?? 0,
+    }),
+    [kpiData]
+  );
 
   // MyGoals 컴포넌트와의 호환성을 위한 데이터 변환
-  const compatibleUserGoals = userGoals
-    .filter((goal) => goal.goalType !== 'meetings') // meetings 타입 제외
-    .map((goal) => ({
-      ...goal,
-      targetValue: Number(goal.targetValue),
-      currentValue: Number(goal.currentValue),
-      progress: goal.progress || 0, // 🎯 초과 달성률도 표시하도록 제한 제거
-    }));
+  const compatibleUserGoals = useMemo(
+    () =>
+      userGoals
+        .filter((goal) => goal.goalType !== 'meetings') // meetings 타입 제외
+        .map((goal) => ({
+          ...goal,
+          targetValue: Number(goal.targetValue),
+          currentValue: Number(goal.currentValue),
+          progress: goal.progress || 0, // 🎯 초과 달성률도 표시하도록 제한 제거
+        })),
+    [userGoals]
+  );
 
-  const handleSetGoal = async (goalData: {
-    goalType: 'revenue' | 'clients' | 'referrals' | 'conversion_rate';
-    targetValue: number;
-    title?: string;
-    id?: string; // 목표 수정 시 필요
-    targetYear: number;
-    targetMonth: number;
-  }) => {
-    try {
+  const handleSetGoal = useCallback(
+    async (goalData: {
+      goalType: 'revenue' | 'clients' | 'referrals' | 'conversion_rate';
+      targetValue: number;
+      title?: string;
+      id?: string; // 목표 수정 시 필요
+      targetYear: number;
+      targetMonth: number;
+    }) => {
+      try {
+        setIsLoading(true);
+
+        // 🎯 극한 분석: 목표 설정 이벤트 추적
+        InsuranceAgentEvents.kpiGoalSet(
+          goalData.goalType,
+          goalData.targetValue,
+          goalData.goalType === 'revenue'
+            ? salesStats?.totalPremium || 0
+            : goalData.goalType === 'clients'
+              ? kpiData?.totalClients || 0
+              : kpiData?.totalReferrals || 0
+        );
+
+        const formData = new FormData();
+        formData.append('intent', 'setGoal');
+        formData.append('goalType', goalData.goalType);
+        formData.append('targetValue', goalData.targetValue.toString());
+        formData.append('targetYear', goalData.targetYear.toString());
+        formData.append('targetMonth', goalData.targetMonth.toString());
+        if (goalData.title) {
+          formData.append('title', goalData.title);
+        }
+        if (goalData.id) {
+          formData.append('goalId', goalData.id);
+        }
+
+        console.log('목표 설정 제출:', goalData); // 디버깅용 로그 추가
+        fetcher.submit(formData, { method: 'post' });
+      } catch (error) {
+        console.error('목표 설정 중 오류:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [fetcher, salesStats?.totalPremium, kpiData?.totalClients, kpiData?.totalReferrals]
+  );
+
+  const handleDeleteGoal = useCallback(
+    async (goalId: string) => {
+      if (!goalId) return;
+
       setIsLoading(true);
 
-      // 🎯 극한 분석: 목표 설정 이벤트 추적
-      InsuranceAgentEvents.kpiGoalSet(
-        goalData.goalType,
-        goalData.targetValue,
-        goalData.goalType === 'revenue'
-          ? salesStats?.totalPremium || 0
-          : goalData.goalType === 'clients'
-            ? kpiData?.totalClients || 0
-            : kpiData?.totalReferrals || 0
-      );
+      // 🎯 극한 분석: 목표 삭제 이벤트 추적
+      InsuranceAgentEvents.kpiGoalDelete(goalId);
 
       const formData = new FormData();
-      formData.append('intent', 'setGoal');
-      formData.append('goalType', goalData.goalType);
-      formData.append('targetValue', goalData.targetValue.toString());
-      formData.append('targetYear', goalData.targetYear.toString());
-      formData.append('targetMonth', goalData.targetMonth.toString());
-      if (goalData.title) {
-        formData.append('title', goalData.title);
-      }
-      if (goalData.id) {
-        formData.append('goalId', goalData.id);
-      }
+      formData.append('intent', 'deleteGoal');
+      formData.append('goalId', goalId);
 
-      console.log('목표 설정 제출:', goalData); // 디버깅용 로그 추가
       fetcher.submit(formData, { method: 'post' });
-    } catch (error) {
-      console.error('목표 설정 중 오류:', error);
-    } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleDeleteGoal = async (goalId: string) => {
-    if (!goalId) return;
-
-    setIsLoading(true);
-
-    // 🎯 극한 분석: 목표 삭제 이벤트 추적
-    InsuranceAgentEvents.kpiGoalDelete(goalId);
-
-    const formData = new FormData();
-    formData.append('intent', 'deleteGoal');
-    formData.append('goalId', goalId);
-
-    fetcher.submit(formData, { method: 'post' });
-    setIsLoading(false);
-  };
+    },
+    [fetcher]
+  );
 
   // 에러 상태 표시
   if (error) {

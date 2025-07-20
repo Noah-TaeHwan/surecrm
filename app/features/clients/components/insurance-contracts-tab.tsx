@@ -553,13 +553,13 @@ export function InsuranceContractsTab({
     setShowAddModal(true);
   };
 
-  const handleFormChange = (field: keyof ContractFormData, value: string) => {
+  const handleFormChange = useCallback((field: keyof ContractFormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     // 실시간 검증
     validateField(field, value);
-  };
+  }, [validateField]);
 
-  const handleFileUpload = (files: FileList | null) => {
+  const handleFileUpload = useCallback((files: FileList | null) => {
     if (!files) return;
 
     const newAttachments = Array.from(files).map(file => ({
@@ -570,14 +570,14 @@ export function InsuranceContractsTab({
     }));
 
     setAttachments(prev => [...prev, ...newAttachments]);
-  };
+  }, []);
 
-  const handleRemoveAttachment = (attachmentId: string) => {
+  const handleRemoveAttachment = useCallback((attachmentId: string) => {
     setAttachments(prev => prev.filter(att => att.id !== attachmentId));
-  };
+  }, []);
 
   // 🔍 상세보기 토글 함수
-  const toggleContractDetails = (contractId: string) => {
+  const toggleContractDetails = useCallback((contractId: string) => {
     setExpandedContracts(prev => {
       const newSet = new Set(prev);
       if (newSet.has(contractId)) {
@@ -587,10 +587,10 @@ export function InsuranceContractsTab({
       }
       return newSet;
     });
-  };
+  }, []);
 
   // 👁️ 주민등록번호 마스킹 토글 - 간단한 버전
-  const toggleSsnVisibility = (ssnKey: string) => {
+  const toggleSsnVisibility = useCallback((ssnKey: string) => {
     setVisibleSsns(prev => {
       const newSet = new Set(prev);
       if (newSet.has(ssnKey)) {
@@ -600,7 +600,7 @@ export function InsuranceContractsTab({
       }
       return newSet;
     });
-  };
+  }, []);
 
   // 📥 첨부파일 다운로드 함수
   const handleDownloadAttachment = async (attachmentId: string) => {
@@ -691,15 +691,22 @@ export function InsuranceContractsTab({
     formData.contractorName &&
     formData.insuredName;
 
-  // 📊 계약 통계 계산
-  const totalContracts = contracts.length;
-  const activeContracts = contracts.filter(c => c.status === 'active').length;
-  const totalMonthlyPremium = contracts
-    .filter(c => c.status === 'active' && c.monthlyPremium)
-    .reduce((sum, c) => sum + Number(c.monthlyPremium || 0), 0);
-  const totalCommission = contracts
-    .filter(c => c.status === 'active' && c.agentCommission)
-    .reduce((sum, c) => sum + Number(c.agentCommission || 0), 0);
+  // 📊 계약 통계 계산 - useMemo로 최적화
+  const contractStats = useMemo(() => {
+    const activeContractsList = contracts.filter(c => c.status === 'active');
+    return {
+      totalContracts: contracts.length,
+      activeContracts: activeContractsList.length,
+      totalMonthlyPremium: activeContractsList
+        .filter(c => c.monthlyPremium)
+        .reduce((sum, c) => sum + Number(c.monthlyPremium || 0), 0),
+      totalCommission: activeContractsList
+        .filter(c => c.agentCommission)
+        .reduce((sum, c) => sum + Number(c.agentCommission || 0), 0),
+    };
+  }, [contracts]);
+
+  const { totalContracts, activeContracts, totalMonthlyPremium, totalCommission } = contractStats;
 
   // 🗑️ 보험계약 삭제 관련 함수들
   const handleDeleteContract = (contract: InsuranceContract) => {
