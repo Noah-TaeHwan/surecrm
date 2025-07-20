@@ -365,7 +365,7 @@ export function NewContractModal({
     // 🆔 ID 유효성 검사 (국제적)
     if (formData.contractorSsn) {
       if (currentLanguage === 'ko') {
-        const contractorIdValidation = validateKoreanId(formData.contractorSsn);
+        const contractorIdValidation = parseKoreanId(formData.contractorSsn);
         if (!contractorIdValidation.isValid) {
           newErrors.contractorSsn = contractorIdValidation.errorMessage || t('newContractModal.validation.id.invalid');
         }
@@ -382,7 +382,7 @@ export function NewContractModal({
 
     if (formData.insuredSsn) {
       if (currentLanguage === 'ko') {
-        const insuredIdValidation = validateKoreanId(formData.insuredSsn);
+        const insuredIdValidation = parseKoreanId(formData.insuredSsn);
         if (!insuredIdValidation.isValid) {
           newErrors.insuredSsn = insuredIdValidation.errorMessage || t('newContractModal.validation.id.invalid');
         }

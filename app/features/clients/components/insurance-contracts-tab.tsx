@@ -885,9 +885,8 @@ export function InsuranceContractsTab({
         method: 'POST',
         body: submitData,
         toast: {
-          show: toast.success,
-          error: toast.error,
-          success: toast.success,
+          error: (options) => toast.error(options.title, options.message),
+          success: (options) => toast.success(options.title, options.message),
         },
         successMessage: `계약이 성공적으로 ${actionText}되었습니다`,
         errorMessage: `계약 ${actionText}에 실패했습니다`,
@@ -1756,7 +1755,6 @@ export function InsuranceContractsTab({
             }}
             onSubmit={handleSubmit}
             clientName={clientName}
-            isLoading={isSubmitting}
             initialData={selectedContract}
             isSubmitting={isSubmitting}
           />

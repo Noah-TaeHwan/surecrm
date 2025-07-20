@@ -4,16 +4,13 @@
  * 통합된 API 호출, 에러 처리, 로딩 상태 관리를 제공합니다.
  */
 
-import { ToastFunction } from '~/common/components/ui/toast';
-
 interface ApiClientOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   headers?: Record<string, string>;
   body?: any;
   toast?: {
-    show: ToastFunction['show'];
-    error: ToastFunction['error'];
-    success: ToastFunction['success'];
+    error: (options: { title: string; message?: string }) => void;
+    success: (options: { title: string; message?: string }) => void;
   };
   successMessage?: string;
   errorMessage?: string;
@@ -112,7 +109,7 @@ export async function apiClient<T = any>(
                       `요청 실패 (${response.status})`;
 
       if (toast?.error) {
-        toast.error('오류 발생', errorMsg);
+        toast.error({ title: '오류 발생', message: errorMsg });
       }
 
       if (throwOnError) {
@@ -128,7 +125,7 @@ export async function apiClient<T = any>(
 
     // 성공 응답 처리
     if (successMessage && toast?.success) {
-      toast.success('성공', successMessage);
+      toast.success({ title: '성공', message: successMessage });
     }
 
     return {
@@ -142,7 +139,7 @@ export async function apiClient<T = any>(
       : '알 수 없는 오류가 발생했습니다';
 
     if (toast?.error) {
-      toast.error('오류 발생', errorMsg);
+      toast.error({ title: '오류 발생', message: errorMsg });
     }
 
     if (throwOnError) {
