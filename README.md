@@ -1,308 +1,208 @@
-# Welcome to React Router!
-
-A modern, production-ready template for building full-stack React applications using React Router.
-
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/remix-run/react-router-templates/tree/main/default)
-
-## Features
-
-- 🚀 Server-side rendering
-- ⚡️ Hot Module Replacement(HMR)
-- 📦 Asset bundling and optimization
-- 🔄 Data loading and mutations
-- 🔒 TypeScript by default
-- 🎉 TailwindCSS for styling
-- 📖 [React Router docs](https://reactrouter.com/)
-
-## Getting Started
-
-### Installation
-
-Install the dependencies:
-
-```bash
-npm install
-```
-
-### Development
-
-Start the development server with HMR:
-
-```bash
-npm run dev
-```
-
-Your application will be available at `http://localhost:5173`.
-
-## Building for Production
-
-Create a production build:
-
-```bash
-npm run build
-```
-
-## Deployment
-
-### Docker Deployment
-
-To build and run using Docker:
-
-```bash
-docker build -t my-app .
-
-# Run the container
-docker run -p 3000:3000 my-app
-```
-
-The containerized application can be deployed to any platform that supports Docker, including:
-
-- AWS ECS
-- Google Cloud Run
-- Azure Container Apps
-- Digital Ocean App Platform
-- Fly.io
-- Railway
-
-### DIY Deployment
-
-If you're familiar with deploying Node applications, the built-in app server is production-ready.
-
-Make sure to deploy the output of `npm run build`
-
-```
-├── package.json
-├── package-lock.json (or pnpm-lock.yaml, or bun.lockb)
-├── build/
-│   ├── client/    # Static assets
-│   └── server/    # Server-side code
-```
-
-## Styling
-
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
-
----
-
-Built with ❤️ using React Router.
-
 # SureCRM
 
-보험설계사를 위한 현대적인 고객관계관리(CRM) 시스템
+### A referral-first CRM for independent insurance agents
 
-## ✨ 주요 기능
+SureCRM brings referral context, pipeline movement, and operating signals into
+one workspace. The codebase centers each client record on two practical facts:
+who introduced the client and where the opportunity currently sits.
 
-- 📊 **대시보드**: 실시간 KPI 및 성과 지표 관리
-- 👥 **고객 관리**: 고객 정보, 미팅, 계약 통합 관리
-- 🚀 **영업 파이프라인**: 고객 단계별 영업 프로세스 관리
-- 📅 **일정 관리**: Google Calendar 연동 미팅 스케줄링
-- 📋 **보험 계약 관리**: 계약서 및 첨부 파일 관리
-- 🌐 **네트워크 관리**: 고객 소개 네트워크 시각화
-- 📊 **리포트**: 영업 성과 및 분석 보고서
-- 👨‍💼 **팀 관리**: 팀원 초대 및 협업 시스템
-- 🔔 **알림 시스템**: 자동 알림 및 일정 관리
+**Public surface:** [surecrm-sigma.vercel.app](https://surecrm-sigma.vercel.app)
 
-## 🛠️ 기술 스택
+> **Portfolio scope:** this page describes repository evidence. It does not
+> claim live customer adoption, verified authenticated flows, or operational
+> reliability. The public URL was reachable on July 29, 2026; reachability alone
+> does not verify the application behind authentication.
 
-- **Frontend**: React 19, TypeScript, Tailwind CSS
-- **Backend**: React Router v7, Node.js
-- **Database**: Supabase (PostgreSQL)
-- **ORM**: Drizzle ORM
-- **UI Components**: Shadcn UI, Radix UI
-- **Internationalization**: react-i18next
-- **Analytics**: Google Analytics 4
-- **Deployment**: Vercel
+## The problem
 
-## 🌍 다국어 지원 (v0.5.0+)
+Referral-led sales create context that a flat contact list can hide: who made
+the introduction, how deep the relationship chain runs, and which opportunity
+needs attention next. SureCRM is designed to keep that relationship context
+beside the sales stage, so network analysis and day-to-day pipeline work use the
+same client record.
 
-SureCRM은 글로벌 SaaS 서비스로 확장하기 위해 다국어 지원을 제공합니다.
+## Core workflow
 
-### 지원 언어
+1. **Capture the client.** Store the client, the responsible agent, a current
+   pipeline stage, and an optional referring client.
+2. **Map the relationship.** Derive graph nodes, referral edges, chain depth,
+   and referrer summaries from active client records.
+3. **Progress the opportunity.** Work from a stage-based pipeline with client
+   search, filtering, editing, stage movement, and exclusion flows represented
+   in the route and feature modules.
+4. **Review the book of business.** Bring client, pipeline, referral, goal, and
+   recent-activity queries into a dashboard view.
 
-- 🇰🇷 **한국어** (ko) - 기본 언어
-- 🇺🇸 **영어** (en) - 글로벌 시장 대상
-- 🇯🇵 **일본어** (ja) - 일본 시장 진출
+## What makes it different
 
-### 기능
+Referral context is part of the CRM data model rather than a separate note. The
+same client profile supports three connected views:
 
-- ⚡ **실시간 언어 변경**: 페이지 새로고침 없이 즉시 언어 전환
-- 🗂️ **네임스페이스 기반**: 기능별로 분리된 번역 파일 관리
-- 🔄 **폴백 시스템**: 번역 누락 시 자동 폴백 언어 제공
-- 🎯 **타입 안전성**: TypeScript 기반 번역 키 타입 체크
-- 💾 **설정 저장**: 사용자 언어 설정 자동 저장
+| Shared field or scope    | Product view     | Repository behavior                                                   |
+| ------------------------ | ---------------- | --------------------------------------------------------------------- |
+| `referredById`           | Referral network | Builds client-to-client edges, referral depth, and referrer summaries |
+| `currentStageId`         | Sales pipeline   | Places active clients in agent-defined stages                         |
+| Agent-scoped client data | Dashboard        | Aggregates clients, referrals, stages, recent clients, and goals      |
 
-### 번역 파일 구조
+## Synthetic product previews
 
+All media below is **synthetic portfolio artwork**. Names, values, accounts, and
+relationships are fictional; these images are not captures of a live tenant and
+do not prove runtime behavior.
+
+### Referral network
+
+See who introduced whom and how referral chains connect across a book of
+business.
+
+![Synthetic SureCRM referral-network preview](docs/assets/portfolio/referral-network.svg)
+
+_Synthetic preview — illustrative data only._
+
+### Sales pipeline
+
+Keep relationship context visible while opportunities move through
+agent-defined stages.
+
+![Synthetic SureCRM sales-pipeline preview](docs/assets/portfolio/pipeline.svg)
+
+_Synthetic preview — illustrative data only._
+
+### Dashboard
+
+Review client, referral, pipeline, and goal summaries from a single operating
+view.
+
+![Synthetic SureCRM dashboard preview](docs/assets/portfolio/dashboard.svg)
+
+_Synthetic preview — illustrative data only._
+
+## Architecture
+
+```mermaid
+flowchart LR
+  UI["React 19 UI<br/>Tailwind CSS + shadcn/ui"]
+  RR["React Router v7<br/>SSR routes, loaders, actions"]
+  FM["Feature modules<br/>Clients · Network · Pipeline · Dashboard"]
+  DL["Server data layer<br/>Drizzle ORM"]
+  DB["PostgreSQL<br/>Supabase project configuration"]
+  SA["Supabase adapters<br/>Auth · Storage"]
+
+  UI --> RR
+  RR --> FM
+  FM --> DL
+  DL --> DB
+  RR --> SA
 ```
-public/locales/
-├── ko/                 # 한국어
-│   ├── common.json     # 공통 UI 요소
-│   ├── navigation.json # 메뉴, 네비게이션
-│   ├── forms.json      # 폼, 에러 메시지
-│   ├── clients.json    # 고객 관리
-│   └── calendar.json   # 일정 관리
-├── en/                 # 영어 (동일한 구조)
-└── ja/                 # 일본어 (동일한 구조)
-```
 
-### 개발자 도구
+- Routes are registered in [`app/routes.ts`](app/routes.ts), with product code
+  organized by feature.
+- PostgreSQL schemas are defined with Drizzle, including agent/team ownership,
+  pipeline stages, clients, and the self-referencing referral field.
+- Supabase database, authentication, and storage clients are present in the
+  repository. Their live configuration and behavior are environment-dependent.
+- Korean, English, and Japanese resource trees are present, with Korean
+  configured as the fallback language.
+- The React Router configuration uses the Vercel preset. This records a
+  deployment target, not a verified deployment.
+
+## Verification status
+
+`Source-inspected` means the relevant route, schema, and implementation were
+reviewed in this repository. It does not mean the behavior passed a browser,
+database, provider, security, or end-to-end test.
+
+| Area                                 | Evidence                                                                                                                                                         | Status and boundary                                                                                             |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Product positioning                  | Landing metadata and feature copy describe a CRM for insurance agents centered on referral-network management                                                    | **Source-inspected**                                                                                            |
+| Referral data model                  | [`app/lib/schema/core.ts`](app/lib/schema/core.ts) defines `referredById`; [`network-data.ts`](app/features/network/lib/network-data.ts) derives nodes and edges | **Source-inspected**; live data not tested                                                                      |
+| Pipeline workflow                    | `/pipeline` route, pipeline page, stage queries, and responsive board components are present                                                                     | **Source-inspected**; browser interactions not tested                                                           |
+| Dashboard workflow                   | Dashboard loader/data modules query client, referral, stage, goal, and recent-client data                                                                        | **Source-inspected**; live aggregates not tested                                                                |
+| Authentication and account isolation | Auth middleware and protected route calls are present                                                                                                            | **Not end-to-end verified**; no secure-multitenancy claim                                                       |
+| Provider integrations and webhooks   | Supabase, calendar, billing, email, analytics, and monitoring modules or dependencies are present                                                                | **Not operationally verified**; no webhook-reliability claim                                                    |
+| Deployment                           | Vercel preset and build configuration are present; the public URL returned HTTP 200 on July 29, 2026                                                             | **Reachability only**; authenticated behavior and uptime not verified                                           |
+| Portfolio media                      | Three SVGs under `docs/assets/portfolio/` passed XML, local render, accessibility-metadata, and active-content scans                                             | **Synthetic**; not customer or adoption evidence                                                                |
+| This portfolio change                | `npm ci`, targeted formatting, a provider-isolated CI build, artifact secret scan, and `git diff --check`                                                        | **Passed locally**                                                                                              |
+| Repository quality baseline          | Full `format:check`, `lint`, `typecheck`, and `test:run` scripts                                                                                                 | **Pre-existing failures**: 41 files; 249 errors and 2,816 warnings; 54 TypeScript errors; 4 of 143 tests failed |
+
+## Local development
+
+This repository uses npm and requires environment-backed services.
 
 ```bash
-# 번역 키 추출
-npm run i18n:extract
-
-# 번역 완성도 검증
-npm run i18n:validate
-
-# 누락된 번역 키 찾기
-npm run i18n:missing
-
-# 번역 통계 확인
-npm run i18n:stats
-```
-
-### 테스트 페이지
-
-개발 서버 실행 후 `/test-i18n`에서 다국어 지원 기능을 테스트할 수 있습니다.
-
-## 🚀 빠른 시작
-
-### 1. 설치
-
-```bash
-npm install
-```
-
-### 2. 환경 변수 설정
-
-`.env` 파일을 생성하고 다음 내용을 추가하세요:
-
-```bash
-# Supabase 설정
-SUPABASE_URL=your_supabase_url
-SUPABASE_ANON_KEY=your_supabase_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-
-# 클라이언트 환경 변수
-VITE_SUPABASE_URL=your_supabase_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-
-# Google Analytics (선택사항)
-VITE_GA_MEASUREMENT_ID=your_ga_measurement_id
-```
-
-### 3. 데이터베이스 설정
-
-```bash
-# 마이그레이션 실행
-npm run db:migrate
-
-# 시드 데이터 생성
-npm run db:seed
-```
-
-### 4. 개발 서버 실행
-
-```bash
+npm ci
 npm run dev
 ```
 
-애플리케이션이 `http://localhost:5173`에서 실행됩니다.
+Before starting, create a local `.env` that is excluded from version control.
+The core paths reference at least:
 
-## 📁 프로젝트 구조
+```dotenv
+DATABASE_URL=
+SESSION_SECRET=
+NODE_ENV=development
 
-```
-surecrm/
-├── app/
-│   ├── common/                   # 공통 컴포넌트 및 유틸리티
-│   ├── features/                 # 기능별 모듈
-│   │   ├── dashboard/            # 대시보드
-│   │   ├── clients/              # 고객 관리
-│   │   ├── pipeline/             # 영업 파이프라인
-│   │   ├── calendar/             # 일정 관리
-│   │   ├── team/                 # 팀 관리
-│   │   ├── reports/              # 리포트
-│   │   └── settings/             # 설정
-│   ├── lib/                      # 라이브러리 및 설정
-│   └── routes/                   # 라우트 정의
-├── supabase/                     # 데이터베이스 스키마 및 마이그레이션
-└── scripts/                      # 개발 스크립트
+SUPABASE_URL=
+SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+VITE_SUPABASE_URL=
+VITE_SUPABASE_ANON_KEY=
 ```
 
-## 🗄️ 데이터베이스 관리
+Keep the service-role key server-only. Calendar, billing, email, analytics,
+monitoring, and bot-protection paths require additional provider-specific
+variables when those paths are exercised. The current `.env.example` is not a
+complete application environment manifest; inspect the relevant module and
+[`scripts/test-env-setup.ts`](scripts/test-env-setup.ts) before enabling an
+integration.
+
+The development server prints its local URL and runs with React Router's
+development server and HMR.
+
+## Quality checks
+
+The repository exposes these application-level checks:
 
 ```bash
-# 스키마 변경 후 마이그레이션 생성
-npm run db:generate
-
-# 마이그레이션 실행
-npm run db:migrate
-
-# 시드 데이터 생성
-npm run db:seed
-
-# 데이터베이스 초기화
-npm run db:reset:clean
-```
-
-## 🔧 버전 관리
-
-SureCRM은 자동 버전 관리 시스템을 사용합니다:
-
-```bash
-# 자동 패치 버전 증가 (git push 시)
-git push origin master
-
-# 수동 버전 업데이트
-npm run version:patch  # 0.1.0 → 0.1.1
-npm run version:minor  # 0.1.0 → 0.2.0
-npm run version:major  # 0.1.0 → 1.0.0
-
-# 버전 정보 확인
-npm run version:info
-```
-
-## 🚀 배포
-
-### 프로덕션 빌드
-
-```bash
+npm run format:check
+npm run lint
+npm run typecheck
+npm run test:run
 npm run build
 ```
 
-### 타입 체크
+Local validation for this change passed dependency installation, targeted
+formatting for supported changed files, a provider-isolated build, SVG render
+and safety checks, the artifact secret scan, and `git diff --check`. The full
+repository checks also surfaced existing baseline debt: 41 files fail the
+format check, lint reports 249 errors and 2,816 warnings, typecheck reports 54
+errors, and four `useViewport` tests fail while 139 tests pass.
 
-```bash
-npm run typecheck
-```
+## Deployment boundary
 
-### 배포 체크리스트
+The repository targets Vercel through `@vercel/react-router` and a checked-in
+build configuration. The public URL returned HTTP 200 during this portfolio
+review, but authenticated product journeys, provider integrations, and uptime
+were not inspected. A build artifact, deployment configuration, reachable URL,
+and verified application are separate evidence states.
 
-- [ ] 환경 변수 설정 완료
-- [ ] Supabase RLS 정책 활성화
-- [ ] 프로덕션 도메인 CORS 설정
-- [ ] 이메일 템플릿 커스터마이징
-- [ ] 성능 최적화 확인
+## Known limits
 
-## 📚 문서
+- The preview media is synthetic and contains no real customer or tenant data.
+- Auth routes and middleware exist, but authenticated journeys, authorization
+  isolation, and team/tenant boundaries have not been independently verified
+  end to end.
+- No claim is made for production readiness, enterprise readiness, encryption
+  level, secure multitenancy, PIPA/GDPR compliance, live adoption, uptime, or
+  webhook reliability.
+- External services require credentials and provider-side configuration that
+  are not validated by repository inspection.
+- The current environment example is incomplete for running the application.
+- Full repository formatting, lint, typecheck, and tests are not green at this
+  baseline; the exact local counts are recorded above.
+- Browser flows, live provider calls, and deployment behavior remain
+  unverified.
 
-- [React Router v7](https://reactrouter.com/)
-- [Supabase](https://supabase.com/docs)
-- [Drizzle ORM](https://orm.drizzle.team/)
-- [Shadcn UI](https://ui.shadcn.com/)
+## License
 
-## 🤝 기여하기
-
-1. 이 저장소를 Fork하세요
-2. 새로운 기능 브랜치를 생성하세요 (`git checkout -b feature/amazing-feature`)
-3. 변경사항을 커밋하세요 (`git commit -m 'Add amazing feature'`)
-4. 브랜치에 Push하세요 (`git push origin feature/amazing-feature`)
-5. Pull Request를 생성하세요
-
-## 📄 라이선스
-
-이 프로젝트는 MIT 라이선스 하에 배포됩니다. 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세요.
-
----
-
-Built with ❤️ for Insurance Agents
+Licensed under the [MIT License](LICENSE).
