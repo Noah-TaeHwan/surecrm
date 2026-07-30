@@ -1,42 +1,54 @@
 # SureCRM
 
-### A referral-first CRM for independent insurance agents
+### An archived CRM prototype built from one insurance agent's workflow
 
-SureCRM brings referral context, pipeline movement, and operating signals into
-one workspace. The codebase centers each client record on two practical facts:
-who introduced the client and where the opportunity currently sits.
+SureCRM began with conversations with an insurance-agent friend about
+managing referral relationships, sales stages, and follow-ups in one place. I
+was the sole human product owner, designer, and builder, and I used AI
+extensively throughout development.
 
-**Public surface:** [surecrm-sigma.vercel.app](https://surecrm-sigma.vercel.app)
+One practitioner—the friend who informed the original requirements—logged in,
+tested the product, and gave qualitative feedback. The project did not progress to sustained operational use.
 
-> **Portfolio scope:** this page describes repository evidence. It does not
-> claim live customer adoption, verified authenticated flows, or operational
-> reliability. The public URL was reachable on July 29, 2026; reachability alone
-> does not verify the application behind authentication.
+> **Status:** Archived portfolio project · Solo human build · Heavily
+> AI-assisted · Practitioner test (n=1)
 
-## The problem
+## Origin and scope
 
-Referral-led sales create context that a flat contact list can hide: who made
-the introduction, how deep the relationship chain runs, and which opportunity
-needs attention next. SureCRM is designed to keep that relationship context
-beside the sales stage, so network analysis and day-to-day pipeline work use the
-same client record.
+The first brief came from one person, not a market study. My friend described
+three needs from insurance sales work:
 
-## Core workflow
+1. see who introduced each prospective client;
+2. connect follow-up work with Google Calendar;
+3. manage the sales process on a Kanban board.
 
-1. **Capture the client.** Store the client, the responsible agent, a current
-   pipeline stage, and an optional referring client.
-2. **Map the relationship.** Derive graph nodes, referral edges, chain depth,
-   and referrer summaries from active client records.
-3. **Progress the opportunity.** Work from a stage-based pipeline with client
-   search, filtering, editing, stage movement, and exclusion flows represented
-   in the route and feature modules.
-4. **Review the book of business.** Bring client, pipeline, referral, goal, and
-   recent-activity queries into a dashboard view.
+I treated those conversations as a concrete product brief. They informed the
+prototype, but they do not establish that the same needs, priorities, or
+workflow apply across the insurance industry.
 
-## What makes it different
+## My role and AI assistance
 
-Referral context is part of the CRM data model rather than a separate note. The
-same client profile supports three connected views:
+I owned product framing, interaction design, implementation, integration, and
+deployment as the only human builder. The practitioner supplied the initial
+requirements and later tested the result; he did not co-build the product.
+
+I used AI coding tools extensively. I remained responsible for choosing the
+scope, translating the workflow into a data model, combining the generated
+work, and deciding what to ship. “Solo build” describes human ownership, not hand-written code.
+
+The historical project post described that dependence openly. This case study
+keeps the same disclosure because the useful evidence is not unaided coding; it
+is the ability to frame a real problem, direct an AI-assisted build, inspect the
+result, and remain accountable for the claims attached to it.
+
+## The product thesis
+
+The central product decision was to keep referral context beside the sales
+stage on each client record. A flat contact list can show who a client is; this
+model also records who introduced that client and where the opportunity sits.
+That choice connected network exploration and day-to-day pipeline work through
+the same record instead of treating the referral graph as a separate
+visualization.
 
 | Shared field or scope    | Product view     | Repository behavior                                                   |
 | ------------------------ | ---------------- | --------------------------------------------------------------------- |
@@ -44,16 +56,49 @@ same client profile supports three connected views:
 | `currentStageId`         | Sales pipeline   | Places active clients in agent-defined stages                         |
 | Agent-scoped client data | Dashboard        | Aggregates clients, referrals, stages, recent clients, and goals      |
 
-## Synthetic product previews
+## What I built
 
-All media below is **synthetic portfolio artwork**. Names, values, accounts, and
-relationships are fictional; these images are not captures of a live tenant and
-do not prove runtime behavior.
+1. **Client records.** Store a client, responsible agent, pipeline stage, and
+   optional referring client.
+2. **Referral network.** Derive graph nodes, referral edges, chain depth, and
+   referrer summaries from client records.
+3. **Sales pipeline.** Search, filter, edit, and move opportunities through
+   agent-defined stages.
+4. **Dashboard.** Combine client, pipeline, referral, goal, and recent-activity
+   queries into one operating view.
+
+These workflows are present in the repository. Their presence proves
+implementation, not repeated practitioner use.
+
+Google Calendar was part of the original brief and integration code exists,
+but this case study focuses on the referral, pipeline, and dashboard paths that
+are easiest to trace directly. Provider integration code does not prove that a
+live provider-backed flow remains operational.
+
+## Practitioner test
+
+The practitioner who informed the brief logged in, tested the prototype, and
+gave qualitative feedback. The project stopped at that level of validation.
+There is no approved testimonial, measured productivity outcome, retention
+record, or evidence of repeated operational use.
+
+## Why I archived it
+
+After deployment and initial testing, the product did not become part of a
+repeated working routine. Continued operation was not justified by the evidence
+for repeat need, business value, or maintenance value, and my priorities moved
+elsewhere.
+
+I keep the repository as a case study of the product decisions, data model, and
+implementation—not as an active-service or adoption claim.
+
+## Product previews
+
+All media below is **synthetic portfolio artwork**. Names, values, accounts,
+and relationships are fictional. These images are not captures of a live
+tenant and do not prove runtime behavior.
 
 ### Referral network
-
-See who introduced whom and how referral chains connect across a book of
-business.
 
 ![Synthetic SureCRM referral-network preview](docs/assets/portfolio/referral-network.svg)
 
@@ -61,17 +106,11 @@ _Synthetic preview — illustrative data only._
 
 ### Sales pipeline
 
-Keep relationship context visible while opportunities move through
-agent-defined stages.
-
 ![Synthetic SureCRM sales-pipeline preview](docs/assets/portfolio/pipeline.svg)
 
 _Synthetic preview — illustrative data only._
 
 ### Dashboard
-
-Review client, referral, pipeline, and goal summaries from a single operating
-view.
 
 ![Synthetic SureCRM dashboard preview](docs/assets/portfolio/dashboard.svg)
 
@@ -99,69 +138,51 @@ flowchart LR
   organized by feature.
 - PostgreSQL schemas are defined with Drizzle, including agent/team ownership,
   pipeline stages, clients, and the self-referencing referral field.
-- Supabase database, authentication, and storage clients are present in the
-  repository. Their live configuration and behavior are environment-dependent.
+- Supabase database, authentication, and storage adapters are present. Their
+  live configuration and behavior are environment-dependent.
 - Korean, English, and Japanese resource trees are present, with Korean
   configured as the fallback language.
-- The React Router configuration uses the Vercel preset. This records a
-  deployment target, not a verified deployment.
 
-## Verification status
+## Evidence and limits
 
-`Source-inspected` means the relevant route, schema, and implementation were
-reviewed in this repository. It does not mean the behavior passed a browser,
-database, provider, security, or end-to-end test.
+`Source-inspected` means that the relevant route, schema, and implementation
+were reviewed in this repository. It does not mean that the behavior passed a
+browser, database, provider, security, or end-to-end test.
 
-| Area                                 | Evidence                                                                                                                                                         | Status and boundary                                                                                             |
-| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| Product positioning                  | Landing metadata and feature copy describe a CRM for insurance agents centered on referral-network management                                                    | **Source-inspected**                                                                                            |
-| Referral data model                  | [`app/lib/schema/core.ts`](app/lib/schema/core.ts) defines `referredById`; [`network-data.ts`](app/features/network/lib/network-data.ts) derives nodes and edges | **Source-inspected**; live data not tested                                                                      |
-| Pipeline workflow                    | `/pipeline` route, pipeline page, stage queries, and responsive board components are present                                                                     | **Source-inspected**; browser interactions not tested                                                           |
-| Dashboard workflow                   | Dashboard loader/data modules query client, referral, stage, goal, and recent-client data                                                                        | **Source-inspected**; live aggregates not tested                                                                |
-| Authentication and account isolation | Auth middleware and protected route calls are present                                                                                                            | **Not end-to-end verified**; no secure-multitenancy claim                                                       |
-| Provider integrations and webhooks   | Supabase, calendar, billing, email, analytics, and monitoring modules or dependencies are present                                                                | **Not operationally verified**; no webhook-reliability claim                                                    |
-| Deployment                           | Vercel preset and build configuration are present; the public URL returned HTTP 200 on July 29, 2026                                                             | **Reachability only**; authenticated behavior and uptime not verified                                           |
-| Portfolio media                      | Three SVGs under `docs/assets/portfolio/` passed XML, local render, accessibility-metadata, and active-content scans                                             | **Synthetic**; not customer or adoption evidence                                                                |
-| This portfolio change                | `npm ci`, targeted formatting, a provider-isolated CI build, artifact secret scan, and `git diff --check`                                                        | **Passed locally**                                                                                              |
-| Repository quality baseline          | Full `format:check`, `lint`, `typecheck`, and `test:run` scripts                                                                                                 | **Pre-existing failures**: 41 files; 249 errors and 2,816 warnings; 54 TypeScript errors; 4 of 143 tests failed |
+| Area                   | Evidence                                          | Boundary                                               |
+| ---------------------- | ------------------------------------------------- | ------------------------------------------------------ |
+| Origin and role        | Noah's account and the historical project post    | One practitioner; heavily AI-assisted solo human build |
+| Referral model         | `referredById` schema and network derivation code | **Source-inspected**; live data not tested             |
+| Pipeline and dashboard | Routes, feature modules, and data queries         | **Source-inspected**; browser behavior not tested      |
+| Practitioner test      | One login-based test and qualitative feedback     | Test n=1; no sustained use or quantitative outcome     |
+| Deployment             | A historical deployment existed                   | No active-service, uptime, security, or adoption claim |
+| Portfolio previews     | Three SVG files with fictional data               | Synthetic illustration; not runtime evidence           |
+
+The project is archived and unsupported. Authenticated journeys, authorization
+isolation, provider integrations, privacy-law compliance, and operational
+reliability have not been independently verified. Do not enter real personal,
+insurance, payment, or credential data into any historical deployment.
+
+See
+[`docs/portfolio/verification-2026-07-30.md`](docs/portfolio/verification-2026-07-30.md)
+for the dated source and quality review.
 
 ## Local development
 
-This repository uses npm and requires environment-backed services.
+This repository uses npm and environment-backed services.
 
 ```bash
 npm ci
 npm run dev
 ```
 
-Before starting, create a local `.env` that is excluded from version control.
-The core paths reference at least:
+Create a local `.env` that remains excluded from version control. The
+application references database, session, Supabase, calendar, billing, email,
+analytics, monitoring, and bot-protection configuration. The checked-in
+`.env.example` is not a guarantee that every historical integration is
+operational.
 
-```dotenv
-DATABASE_URL=
-SESSION_SECRET=
-NODE_ENV=development
-
-SUPABASE_URL=
-SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
-VITE_SUPABASE_URL=
-VITE_SUPABASE_ANON_KEY=
-```
-
-Keep the service-role key server-only. Calendar, billing, email, analytics,
-monitoring, and bot-protection paths require additional provider-specific
-variables when those paths are exercised. The current `.env.example` is not a
-complete application environment manifest; inspect the relevant module and
-[`scripts/test-env-setup.ts`](scripts/test-env-setup.ts) before enabling an
-integration.
-
-The development server prints its local URL and runs with React Router's
-development server and HMR.
-
-## Quality checks
-
-The repository exposes these application-level checks:
+Available checks include:
 
 ```bash
 npm run format:check
@@ -171,37 +192,9 @@ npm run test:run
 npm run build
 ```
 
-Local validation for this change passed dependency installation, targeted
-formatting for supported changed files, a provider-isolated build, SVG render
-and safety checks, the artifact secret scan, and `git diff --check`. The full
-repository checks also surfaced existing baseline debt: 41 files fail the
-format check, lint reports 249 errors and 2,816 warnings, typecheck reports 54
-errors, and four `useViewport` tests fail while 139 tests pass.
-
-## Deployment boundary
-
-The repository targets Vercel through `@vercel/react-router` and a checked-in
-build configuration. The public URL returned HTTP 200 during this portfolio
-review, but authenticated product journeys, provider integrations, and uptime
-were not inspected. A build artifact, deployment configuration, reachable URL,
-and verified application are separate evidence states.
-
-## Known limits
-
-- The preview media is synthetic and contains no real customer or tenant data.
-- Auth routes and middleware exist, but authenticated journeys, authorization
-  isolation, and team/tenant boundaries have not been independently verified
-  end to end.
-- No claim is made for production readiness, enterprise readiness, encryption
-  level, secure multitenancy, PIPA/GDPR compliance, live adoption, uptime, or
-  webhook reliability.
-- External services require credentials and provider-side configuration that
-  are not validated by repository inspection.
-- The current environment example is incomplete for running the application.
-- Full repository formatting, lint, typecheck, and tests are not green at this
-  baseline; the exact local counts are recorded above.
-- Browser flows, live provider calls, and deployment behavior remain
-  unverified.
+The repository did not have a green full-quality baseline at the dated
+portfolio review. Consult the verification note before interpreting a newer
+result.
 
 ## License
 
