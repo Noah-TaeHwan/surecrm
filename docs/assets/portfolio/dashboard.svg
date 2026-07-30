@@ -1,0 +1,272 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="1200"
+  height="720"
+  viewBox="0 0 1200 720"
+  preserveAspectRatio="xMidYMid meet"
+  role="img"
+  aria-labelledby="dashboard-title dashboard-description"
+  style="width:100%;height:auto;background:#111016"
+>
+  <title id="dashboard-title">Synthetic SureCRM dashboard preview</title>
+  <desc id="dashboard-description">
+    An illustrative CRM dashboard with four KPI cards, a goals panel, a five-stage pipeline overview, recent fictional contacts, and referral-network statistics. Every displayed value is synthetic and no live tenant or customer information is shown.
+  </desc>
+
+  <defs>
+    <linearGradient id="dashboard-welcome" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff4ee" />
+      <stop offset="0.58" stop-color="#fbf7f6" />
+      <stop offset="1" stop-color="#f3f5fb" />
+    </linearGradient>
+    <linearGradient id="dashboard-primary" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff7846" />
+      <stop offset="1" stop-color="#e54a22" />
+    </linearGradient>
+    <filter id="dashboard-shadow" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#17121b" flood-opacity="0.14" />
+    </filter>
+    <filter id="dashboard-card-shadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#241c28" flood-opacity="0.08" />
+    </filter>
+  </defs>
+
+  <rect width="1200" height="720" fill="#111016" />
+  <rect x="24" y="24" width="1152" height="672" rx="24" fill="#f7f6f8" filter="url(#dashboard-shadow)" />
+
+  <!-- Window chrome -->
+  <path d="M48 24h1104a24 24 0 0 1 24 24v28H24V48a24 24 0 0 1 24-24Z" fill="#211e27" />
+  <circle cx="52" cy="50" r="5" fill="#ff725e" />
+  <circle cx="70" cy="50" r="5" fill="#f5bb42" />
+  <circle cx="88" cy="50" r="5" fill="#4fc978" />
+  <text x="600" y="55" text-anchor="middle" fill="#a9a4b2" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="12" font-weight="600" letter-spacing="1.6">
+    SURECRM · PRODUCT PREVIEW
+  </text>
+  <rect x="1001" y="38" width="151" height="24" rx="12" fill="#352f3d" />
+  <circle cx="1016" cy="50" r="4" fill="#ff6b35" />
+  <text x="1027" y="54" fill="#eeeaf1" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="10" font-weight="700" letter-spacing="0.8">
+    SYNTHETIC DATA
+  </text>
+
+  <!-- Navigation -->
+  <path d="M24 76h190v596a24 24 0 0 1-24 24H48a24 24 0 0 1-24-24Z" fill="#1b1820" />
+  <text x="48" y="117" fill="#ffffff" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="20" font-weight="750">SureCRM</text>
+  <text x="48" y="140" fill="#8e8996" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="10" font-weight="650" letter-spacing="1.4">DEMO WORKSPACE</text>
+
+  <rect x="38" y="160" width="162" height="44" rx="10" fill="#f15a2b" fill-opacity="0.14" />
+  <rect x="38" y="160" width="3" height="44" rx="1.5" fill="#ff6b35" />
+  <g fill="none" stroke="#ff8051" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="48" y="171" width="6" height="6" rx="1" />
+    <rect x="58" y="171" width="6" height="6" rx="1" />
+    <rect x="48" y="181" width="6" height="6" rx="1" />
+    <rect x="58" y="181" width="6" height="6" rx="1" />
+  </g>
+  <text x="78" y="184" fill="#ffffff" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="13" font-weight="700">Dashboard</text>
+
+  <g fill="none" stroke="#8e8996" stroke-width="1.8">
+    <line x1="52" y1="224" x2="61" y2="216" />
+    <line x1="52" y1="224" x2="63" y2="232" />
+    <circle cx="50" cy="225" r="3" />
+    <circle cx="63" cy="214" r="3" />
+    <circle cx="65" cy="233" r="3" />
+  </g>
+  <text x="78" y="229" fill="#bdb8c5" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="13" font-weight="600">Referral network</text>
+
+  <g fill="none" stroke="#8e8996" stroke-width="1.7" stroke-linecap="round">
+    <rect x="48" y="267" width="5" height="17" rx="1.5" />
+    <rect x="57" y="263" width="5" height="21" rx="1.5" />
+    <rect x="66" y="272" width="5" height="12" rx="1.5" />
+  </g>
+  <text x="78" y="279" fill="#bdb8c5" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="13" font-weight="600">Sales pipeline</text>
+
+  <g fill="none" stroke="#8e8996" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="55" cy="318" r="5" />
+    <path d="M46 332c1-6 5-9 9-9s8 3 9 9" />
+    <circle cx="67" cy="319" r="3.5" />
+  </g>
+  <text x="78" y="326" fill="#bdb8c5" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="13" font-weight="600">Clients</text>
+
+  <g fill="none" stroke="#8e8996" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="47" y="361" width="22" height="20" rx="3" />
+    <line x1="47" y1="368" x2="69" y2="368" />
+    <line x1="53" y1="358" x2="53" y2="364" />
+    <line x1="63" y1="358" x2="63" y2="364" />
+  </g>
+  <text x="78" y="376" fill="#bdb8c5" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="13" font-weight="600">Calendar</text>
+
+  <line x1="43" y1="418" x2="195" y2="418" stroke="#302c36" />
+  <text x="48" y="448" fill="#716c79" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="10" font-weight="650" letter-spacing="1.2">PREVIEW SCOPE</text>
+  <text x="48" y="474" fill="#aaa5b2" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11">Synthetic metrics</text>
+  <text x="48" y="494" fill="#aaa5b2" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11">Fictional contacts</text>
+  <text x="48" y="514" fill="#aaa5b2" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="11">No live account data</text>
+
+  <!-- Page header -->
+  <text x="242" y="112" fill="#1e1a22" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="25" font-weight="760">Dashboard</text>
+  <text x="242" y="135" fill="#716b76" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="12">Illustrative workspace overview</text>
+  <rect x="1008" y="99" width="144" height="36" rx="10" fill="#ffffff" stroke="#ded9e2" />
+  <circle cx="1030" cy="117" r="11" fill="#fff0e9" />
+  <text x="1030" y="121" text-anchor="middle" fill="#af3c1c" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="8" font-weight="750">DA</text>
+  <text x="1048" y="114" fill="#302a32" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="9" font-weight="700">Demo advisor</text>
+  <text x="1048" y="126" fill="#8a8490" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="7">Illustrative profile</text>
+
+  <!-- Welcome strip -->
+  <rect x="240" y="152" width="912" height="70" rx="14" fill="url(#dashboard-welcome)" stroke="#eaded9" />
+  <text x="260" y="181" fill="#28232b" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="15" font-weight="750">A clear view of today's relationships and opportunities</text>
+  <text x="260" y="201" fill="#716b76" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="10">All names, counts, and amounts in this preview are synthetic.</text>
+  <rect x="994" y="170" width="138" height="34" rx="9" fill="#f15a2b" />
+  <text x="1063" y="192" text-anchor="middle" fill="#ffffff" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="10" font-weight="700">Add demo client</text>
+
+  <!-- KPI cards -->
+  <g filter="url(#dashboard-card-shadow)">
+    <rect x="240" y="236" width="216" height="92" rx="13" fill="#ffffff" stroke="#e2dee5" />
+    <rect x="470" y="236" width="216" height="92" rx="13" fill="#ffffff" stroke="#e2dee5" />
+    <rect x="700" y="236" width="216" height="92" rx="13" fill="#ffffff" stroke="#e2dee5" />
+    <rect x="930" y="236" width="222" height="92" rx="13" fill="#ffffff" stroke="#e2dee5" />
+  </g>
+
+  <text x="258" y="258" fill="#77717c" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="9" font-weight="650">TOTAL CLIENTS · DEMO</text>
+  <text x="258" y="291" fill="#211d24" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="26" font-weight="780">48</text>
+  <rect x="316" y="274" width="45" height="19" rx="9.5" fill="#e7f7ef" />
+  <path d="m324 285 4-4 4 4" fill="none" stroke="#247a55" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" />
+  <text x="337" y="287" fill="#247a55" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="8" font-weight="750">8%</text>
+  <circle cx="421" cy="264" r="17" fill="#fff0e9" />
+  <circle cx="421" cy="260" r="5" fill="none" stroke="#b63d1d" stroke-width="1.5" />
+  <path d="M413 273c1-5 4-8 8-8s7 3 8 8" fill="none" stroke="#b63d1d" stroke-width="1.5" stroke-linecap="round" />
+  <text x="258" y="314" fill="#8a8490" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="8">Illustrative registered profiles</text>
+
+  <text x="488" y="258" fill="#77717c" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="9" font-weight="650">ACTIVE CONTRACTS · DEMO</text>
+  <text x="488" y="291" fill="#211d24" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="26" font-weight="780">19</text>
+  <rect x="546" y="274" width="49" height="19" rx="9.5" fill="#e7f7ef" />
+  <text x="570.5" y="287" text-anchor="middle" fill="#247a55" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="8" font-weight="750">+2 new</text>
+  <circle cx="651" cy="264" r="17" fill="#e8f7ef" />
+  <path d="M645 264h12M651 258v12" stroke="#247a55" stroke-width="1.5" stroke-linecap="round" />
+  <text x="488" y="314" fill="#8a8490" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="8">Synthetic active count</text>
+
+  <text x="718" y="258" fill="#77717c" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="9" font-weight="650">MONTHLY PREMIUM · DEMO</text>
+  <text x="718" y="291" fill="#211d24" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="23" font-weight="780">$3.8k</text>
+  <rect x="789" y="274" width="38" height="19" rx="9.5" fill="#e7f1ff" />
+  <text x="808" y="287" text-anchor="middle" fill="#285caa" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="8" font-weight="750">+5%</text>
+  <circle cx="881" cy="264" r="17" fill="#e8f1ff" />
+  <path d="M872 271V258M878 271v-8M884 271v-15M890 271v-5" fill="none" stroke="#285caa" stroke-width="1.7" stroke-linecap="round" />
+  <text x="718" y="314" fill="#8a8490" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="8">Illustrative monthly amount</text>
+
+  <text x="948" y="258" fill="#77717c" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="9" font-weight="650">PROJECTED COMMISSION · DEMO</text>
+  <text x="948" y="291" fill="#211d24" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="23" font-weight="780">$12.6k</text>
+  <rect x="1035" y="274" width="38" height="19" rx="9.5" fill="#fff0e9" />
+  <text x="1054" y="287" text-anchor="middle" fill="#b63d1d" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="8" font-weight="750">+7%</text>
+  <circle cx="1117" cy="264" r="17" fill="#fff0e9" />
+  <path d="M1110 267c2 4 12 4 14 0 2-5-3-6-7-7-4-1-7-2-6-5 1-4 10-4 12 0M1117 250v22" fill="none" stroke="#b63d1d" stroke-width="1.5" stroke-linecap="round" />
+  <text x="948" y="314" fill="#8a8490" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="8">Illustrative projected amount</text>
+
+  <!-- Lower cards -->
+  <g filter="url(#dashboard-card-shadow)">
+    <rect x="240" y="342" width="276" height="306" rx="14" fill="#ffffff" stroke="#e2dee5" />
+    <rect x="530" y="342" width="360" height="306" rx="14" fill="#ffffff" stroke="#e2dee5" />
+    <rect x="904" y="342" width="248" height="306" rx="14" fill="#ffffff" stroke="#e2dee5" />
+  </g>
+
+  <!-- Goals card -->
+  <circle cx="262" cy="366" r="12" fill="#fff0e9" />
+  <path d="M256 366h12M262 360v12" stroke="#b63d1d" stroke-width="1.5" stroke-linecap="round" />
+  <text x="282" y="370" fill="#29242c" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="12" font-weight="750">My goals</text>
+  <rect x="457" y="356" width="43" height="20" rx="10" fill="#f3f0f4" />
+  <text x="478.5" y="370" text-anchor="middle" fill="#716b76" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="8" font-weight="700">DEMO</text>
+  <line x1="258" y1="390" x2="498" y2="390" stroke="#ece8ee" />
+
+  <text x="258" y="416" fill="#373139" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="10" font-weight="700">New introductions</text>
+  <text x="498" y="416" text-anchor="end" fill="#6f6873" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="9">7 / 10</text>
+  <rect x="258" y="426" width="240" height="7" rx="3.5" fill="#eeeaf0" />
+  <rect x="258" y="426" width="168" height="7" rx="3.5" fill="url(#dashboard-primary)" />
+
+  <text x="258" y="466" fill="#373139" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="10" font-weight="700">Follow-up completion</text>
+  <text x="498" y="466" text-anchor="end" fill="#6f6873" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="9">16 / 20</text>
+  <rect x="258" y="476" width="240" height="7" rx="3.5" fill="#eeeaf0" />
+  <rect x="258" y="476" width="192" height="7" rx="3.5" fill="#3978cf" />
+
+  <text x="258" y="516" fill="#373139" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="10" font-weight="700">Monthly reviews</text>
+  <text x="498" y="516" text-anchor="end" fill="#6f6873" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="9">5 / 8</text>
+  <rect x="258" y="526" width="240" height="7" rx="3.5" fill="#eeeaf0" />
+  <rect x="258" y="526" width="150" height="7" rx="3.5" fill="#74707a" />
+
+  <rect x="258" y="560" width="240" height="66" rx="11" fill="#f6f3f7" stroke="#e6e1e8" />
+  <text x="274" y="583" fill="#77717c" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="9">Overall demo progress</text>
+  <text x="274" y="611" fill="#211d24" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="21" font-weight="780">71%</text>
+  <text x="482" y="606" text-anchor="end" fill="#b63d1d" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="9" font-weight="700">On track</text>
+
+  <!-- Pipeline overview card -->
+  <circle cx="552" cy="366" r="12" fill="#fff0e9" />
+  <path d="M546 371v-7M552 371v-12M558 371v-5" fill="none" stroke="#b63d1d" stroke-width="1.5" stroke-linecap="round" />
+  <text x="572" y="370" fill="#29242c" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="12" font-weight="750">Sales pipeline</text>
+  <text x="872" y="370" text-anchor="end" fill="#b63d1d" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="9" font-weight="700">View details →</text>
+  <line x1="548" y1="390" x2="872" y2="390" stroke="#ece8ee" />
+
+  <g font-family="system-ui, -apple-system, 'Segoe UI', sans-serif">
+    <rect x="548" y="406" width="324" height="36" rx="9" fill="#faf9fb" stroke="#ebe7ed" />
+    <circle cx="564" cy="424" r="5" fill="#f15a2b" />
+    <text x="578" y="427" fill="#39333b" font-size="9" font-weight="700">Initial consult</text>
+    <text x="810" y="421" text-anchor="end" fill="#262129" font-size="9" font-weight="750">3</text>
+    <text x="858" y="429" text-anchor="end" fill="#85808a" font-size="7">$21.4k</text>
+
+    <rect x="548" y="450" width="324" height="36" rx="9" fill="#faf9fb" stroke="#ebe7ed" />
+    <circle cx="564" cy="468" r="5" fill="#c8c3cc" />
+    <text x="578" y="471" fill="#39333b" font-size="9" font-weight="700">Needs review</text>
+    <text x="810" y="465" text-anchor="end" fill="#262129" font-size="9" font-weight="750">3</text>
+    <text x="858" y="473" text-anchor="end" fill="#85808a" font-size="7">$18.8k</text>
+
+    <rect x="548" y="494" width="324" height="36" rx="9" fill="#faf9fb" stroke="#ebe7ed" />
+    <circle cx="564" cy="512" r="5" fill="#8f8994" />
+    <text x="578" y="515" fill="#39333b" font-size="9" font-weight="700">Solution brief</text>
+    <text x="810" y="509" text-anchor="end" fill="#262129" font-size="9" font-weight="750">2</text>
+    <text x="858" y="517" text-anchor="end" fill="#85808a" font-size="7">$13.4k</text>
+
+    <rect x="548" y="538" width="324" height="36" rx="9" fill="#faf9fb" stroke="#ebe7ed" />
+    <circle cx="564" cy="556" r="5" fill="#f58058" />
+    <text x="578" y="559" fill="#39333b" font-size="9" font-weight="700">Contract review</text>
+    <text x="810" y="553" text-anchor="end" fill="#262129" font-size="9" font-weight="750">2</text>
+    <text x="858" y="561" text-anchor="end" fill="#85808a" font-size="7">$23.0k</text>
+
+    <rect x="548" y="582" width="324" height="36" rx="9" fill="#faf9fb" stroke="#ebe7ed" />
+    <circle cx="564" cy="600" r="5" fill="#6f6873" />
+    <text x="578" y="603" fill="#39333b" font-size="9" font-weight="700">Closed</text>
+    <text x="810" y="597" text-anchor="end" fill="#262129" font-size="9" font-weight="750">2</text>
+    <text x="858" y="605" text-anchor="end" fill="#85808a" font-size="7">$7.4k</text>
+  </g>
+  <text x="548" y="637" fill="#85808a" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="8">12 synthetic opportunities</text>
+  <text x="872" y="637" text-anchor="end" fill="#b63d1d" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="9" font-weight="750">$84.0k illustrative</text>
+
+  <!-- Network and recent client card -->
+  <circle cx="926" cy="366" r="12" fill="#fff0e9" />
+  <path d="M921 366h10M926 361v10" stroke="#b63d1d" stroke-width="1.5" stroke-linecap="round" />
+  <text x="946" y="370" fill="#29242c" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="12" font-weight="750">Network status</text>
+  <line x1="922" y1="390" x2="1134" y2="390" stroke="#ece8ee" />
+
+  <rect x="922" y="406" width="99" height="66" rx="10" fill="#fff6f1" stroke="#f2d9ce" />
+  <text x="971.5" y="433" text-anchor="middle" fill="#b63d1d" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="19" font-weight="780">73</text>
+  <text x="971.5" y="453" text-anchor="middle" fill="#77717c" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="8">Demo links</text>
+  <rect x="1035" y="406" width="99" height="66" rx="10" fill="#f4f6fb" stroke="#dfe5f0" />
+  <text x="1084.5" y="433" text-anchor="middle" fill="#285caa" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="19" font-weight="780">3</text>
+  <text x="1084.5" y="453" text-anchor="middle" fill="#77717c" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="8">Depth levels</text>
+
+  <text x="922" y="501" fill="#6f6873" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="9" font-weight="750" letter-spacing="0.6">RECENT FICTIONAL CONTACTS</text>
+  <circle cx="938" cy="529" r="12" fill="#ffe7dc" />
+  <text x="938" y="533" text-anchor="middle" fill="#a63b1b" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="7" font-weight="750">NV</text>
+  <text x="958" y="527" fill="#342f36" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="9" font-weight="700">Nora Vale</text>
+  <text x="958" y="540" fill="#85808a" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="7">Initial consult · demo</text>
+  <rect x="1095" y="520" width="39" height="17" rx="8.5" fill="#fff0e9" />
+  <text x="1114.5" y="532" text-anchor="middle" fill="#a63b1b" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="7" font-weight="750">NEW</text>
+
+  <circle cx="938" cy="570" r="12" fill="#e5f0ff" />
+  <text x="938" y="574" text-anchor="middle" fill="#285caa" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="7" font-weight="750">CF</text>
+  <text x="958" y="568" fill="#342f36" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="9" font-weight="700">Clara Finch</text>
+  <text x="958" y="581" fill="#85808a" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="7">Needs review · demo</text>
+  <rect x="1076" y="561" width="58" height="17" rx="8.5" fill="#edf2fb" />
+  <text x="1105" y="573" text-anchor="middle" fill="#285caa" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="7" font-weight="750">FOLLOW-UP</text>
+
+  <circle cx="938" cy="611" r="12" fill="#eff0f2" />
+  <text x="938" y="615" text-anchor="middle" fill="#625c67" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="7" font-weight="750">AD</text>
+  <text x="958" y="609" fill="#342f36" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="9" font-weight="700">Arlo Dean</text>
+  <text x="958" y="622" fill="#85808a" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="7">Contract review · demo</text>
+
+  <rect x="922" y="632" width="212" height="10" rx="5" fill="#eeeaf0" />
+  <rect x="922" y="632" width="142" height="10" rx="5" fill="url(#dashboard-primary)" />
+</svg>
