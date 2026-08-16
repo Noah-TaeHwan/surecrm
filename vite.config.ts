@@ -14,10 +14,18 @@ export default defineConfig(config => {
   // 환경 변수 로드
   const env = loadEnv(mode, process.cwd(), '');
 
+  /**
+   * 인증 토큰이 없는 빌드에서는 Sentry 업로드와 빌드 텔레메트리를 모두 비활성화합니다.
+   */
   const sentryConfig: SentryReactRouterBuildOptions = {
     org: 'oh-taehwan',
     project: 'surecrm',
     authToken: env.SENTRY_AUTH_TOKEN,
+    telemetry: Boolean(env.SENTRY_AUTH_TOKEN),
+    sourceMapsUploadOptions: {
+      enabled: Boolean(env.SENTRY_AUTH_TOKEN),
+      filesToDeleteAfterUpload: env.SENTRY_AUTH_TOKEN ? undefined : [],
+    },
   };
 
   // Sentry 인증 토큰이 없으면 경고 메시지 출력

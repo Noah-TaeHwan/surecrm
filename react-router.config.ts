@@ -21,8 +21,19 @@ export default {
   // 서버 빌드 설정
   serverBuildFile: 'index.js',
 
-  // 🚀 정적 페이지 미리 렌더링 (SEO 최적화)
+  /**
+   * 공개 페이지의 사전 렌더링 경로를 반환합니다.
+   *
+   * @returns CI에서는 외부 데이터 공급자를 호출하지 않도록 빈 배열을, 일반 빌드에서는 공개 경로 목록을 반환합니다.
+   */
   async prerender() {
+    if (process.env.CI === 'true') {
+      console.log(
+        '🔒 CI 환경: 외부 데이터 호출을 피하기 위해 사전 렌더링을 건너뜁니다.'
+      );
+      return [];
+    }
+
     // 검색 엔진에 노출할 주요 공개 페이지들
     const publicPages = [
       '/', // 랜딩페이지
